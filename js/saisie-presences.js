@@ -613,8 +613,37 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     const presences = JSON.parse(localStorage.getItem('presences') || '[]');
 
     let etudiantsFiltres = etudiants;
+
+    // ÉTAPE 1 : Filtrer par groupe (si un groupe est sélectionné)
     if (groupeFiltre) {
         etudiantsFiltres = etudiants.filter(e => e.groupe === groupeFiltre);
+    }
+
+    // ÉTAPE 2 : Trier selon le critère choisi
+    const selectTri = document.getElementById('selectTriPresences');
+    const criterieTri = selectTri ? selectTri.value : 'nom';
+
+    if (criterieTri === 'nom') {
+        // Tri alphabétique par nom de famille
+        etudiantsFiltres.sort((a, b) => {
+            const nomA = `${a.nom} ${a.prenom}`.toLowerCase();
+            const nomB = `${b.nom} ${b.prenom}`.toLowerCase();
+            return nomA.localeCompare(nomB);
+        });
+    } else if (criterieTri === 'assiduite-croissant') {
+        // Tri par assiduité croissante (plus faible d'abord)
+        etudiantsFiltres.sort((a, b) => {
+            const tauxA = calculerTauxAssiduite(a.da, dateStr, 0);
+            const tauxB = calculerTauxAssiduite(b.da, dateStr, 0);
+            return tauxA - tauxB;
+        });
+    } else if (criterieTri === 'assiduite-decroissant') {
+        // Tri par assiduité décroissante (plus élevé d'abord)
+        etudiantsFiltres.sort((a, b) => {
+            const tauxA = calculerTauxAssiduite(a.da, dateStr, 0);
+            const tauxB = calculerTauxAssiduite(b.da, dateStr, 0);
+            return tauxB - tauxA;
+        });
     }
 
     const dureeSeance = obtenirHeuresSeance(dateStr);
