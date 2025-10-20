@@ -161,23 +161,40 @@ function changerMode(nouveauMode) {
  * SANS recharger toute la page
  */
 function rafraichirContenuSelonMode() {
-    // Sauvegarder la sous-section active AVANT le rafraîchissement
+    console.log('🔄 Rafraîchissement du contenu selon le nouveau mode...');
+    
+    // Sauvegarder la sous-section active
     const sousSectionSauvegardee = sousSectionActive;
 
-    // Rafraîchir seulement la sous-navigation (pas toute la section)
-    if (typeof afficherSousNavigation === 'function' && sectionActive) {
-        afficherSousNavigation(sectionActive);
-    }
-
-    // Réafficher la sous-section qui était active
-    if (typeof afficherSousSection === 'function' && sousSectionSauvegardee) {
-        afficherSousSection(sousSectionSauvegardee);
-    }
-
-    // Déclencher les événements de rafraîchissement pour les modules
+    // Déclencher l'événement AVANT le rafraîchissement
     window.dispatchEvent(new CustomEvent('modeChanged', {
         detail: { mode: modeActuel }
     }));
+
+    // Forcer le rafraîchissement des modules actifs
+    // selon la sous-section affichée
+    if (sousSectionSauvegardee) {
+        // Identifier quel module doit se rafraîchir
+        const mappingModules = {
+            'reglages-groupe': 'afficherListeEtudiants',
+            'etudiants-liste': 'afficherListeEtudiantsConsultation',
+            'evaluations-liste-evaluations': 'chargerListeEvaluationsRefonte'
+        };
+
+        const fonctionAAppeler = mappingModules[sousSectionSauvegardee];
+        
+        if (fonctionAAppeler && typeof window[fonctionAAppeler] === 'function') {
+            console.log(`   → Rafraîchissement: ${fonctionAAppeler}()`);
+            window[fonctionAAppeler]();
+        } else {
+            // Fallback : réafficher la sous-section
+            if (typeof afficherSousSection === 'function') {
+                afficherSousSection(sousSectionSauvegardee);
+            }
+        }
+    }
+
+    console.log('✅ Contenu rafraîchi');
 }
 
 /**
@@ -403,6 +420,43 @@ function obtenirDonneesSelonMode(cle) {
 }
 
 /**
+ * Sauvegarde des données selon le mode actif
+ * FONCTION CENTRALE - À utiliser partout où on fait localStorage.setItem()
+ * 
+ * @param {string} cle - Clé de base (ex: 'groupeEtudiants')
+ * @param {*} donnees - Données à sauvegarder
+ * @returns {boolean} - true si sauvegarde réussie, false si bloquée
+ */
+function sauvegarderDonneesSelonMode(cle, donnees) {
+    const mode = modeActuel;
+    
+    // MODE ANONYMISATION : Bloquer toute écriture
+    if (mode === MODES.ANONYMISATION) {
+        console.warn('⚠️ Écriture bloquée en mode anonymisation');
+        return false;
+    }
+    
+    // MODE SIMULATION : Rediriger vers les clés de simulation
+    if (mode === MODES.SIMULATION) {
+        const mappingCles = {
+            'groupeEtudiants': 'simulation_etudiants',
+            'evaluationsSauvegardees': 'simulation_evaluations',
+            'presences': 'simulation_presences'
+        };
+        
+        const cleSimulation = mappingCles[cle] || `simulation_${cle}`;
+        localStorage.setItem(cleSimulation, JSON.stringify(donnees));
+        console.log(`💾 [Simulation] Sauvegarde dans ${cleSimulation}`);
+        return true;
+    }
+    
+    // MODE NORMAL : Sauvegarder normalement
+    localStorage.setItem(cle, JSON.stringify(donnees));
+    console.log(`💾 [Normal] Sauvegarde dans ${cle}`);
+    return true;
+}
+
+/**
  * Anonymise les données selon leur type
  * @param {string} cle - Type de données (groupeEtudiants, evaluationsSauvegardees, etc.)
  * @param {Array|Object} donnees - Données à anonymiser
@@ -510,5 +564,41 @@ window.changerMode = changerMode;
 window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
 window.anonymiserNom = anonymiserNom;
 window.estModeeLectureSeule = estModeeLectureSeule;
+
+/**
+ * Sauvegarde des données selon le mode actif
+ * @param {string} cle - Clé localStorage (ex: 'groupeEtudiants')
+ * @param {*} donnees - Données à sauvegarder
+ * @returns {boolean} - true si réussi, false si bloqué
+ */
+function sauvegarderDonneesSelonMode(cle, donnees) {
+    const mode = modeActuel;
+    
+    // MODE ANONYMISATION : Bloquer toute écriture
+    if (mode === MODES.ANONYMISATION) {
+        console.warn('⚠️ Écriture bloquée en mode anonymisation');
+        return false;
+    }
+    
+    // MODE SIMULATION : Rediriger vers clés simulation
+    if (mode === MODES.SIMULATION) {
+        const mappingCles = {
+            'groupeEtudiants': 'simulation_etudiants',
+            'evaluationsSauvegardees': 'simulation_evaluations',
+            'presences': 'simulation_presences'
+        };
+        
+        const cleSimulation = mappingCles[cle] || `simulation_${cle}`;
+        localStorage.setItem(cleSimulation, JSON.stringify(donnees));
+        console.log(`💾 [Simulation] Sauvegarde dans ${cleSimulation}`);
+        return true;
+    }
+    
+    // MODE NORMAL : Sauvegarder normalement
+    localStorage.setItem(cle, JSON.stringify(donnees));
+    console.log(`💾 [Normal] Sauvegarde dans ${cle}`);
+    return true;
+}
+window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
 window.modeActuel = () => modeActuel;
 

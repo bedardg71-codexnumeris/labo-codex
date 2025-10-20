@@ -786,7 +786,21 @@ function sauvegarderEvaluation() {
     // Sauvegarder
     let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     evaluations.push(evaluation);
-    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+
+    // Protection : bloquer en mode anonymisation, rediriger en mode simulation
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        return;
+    }
+
+    // Protection : bloquer en mode anonymisation, rediriger en mode simulation
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur(
+            'Modification impossible',
+            'Les modifications sont impossibles en mode anonymisation.'
+        );
+        return;
+    }
 
     afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
 }

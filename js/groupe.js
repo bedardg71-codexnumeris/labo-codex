@@ -361,7 +361,10 @@ function confirmImport() {
         }
 
         students = students.concat(tempImportData);
-        localStorage.setItem('groupeEtudiants', JSON.stringify(students));
+        if (!sauvegarderDonneesSelonMode('groupeEtudiants', students)) {
+            afficherNotificationErreur('Modification impossible', 'Impossible d\'importer en mode anonymisation');
+            return;
+        }
 
         const details = `Groupe : ${ancienTotal} → ${students.length} étudiant·es (+ ${tempImportData.length})`;
         afficherNotificationSucces('Importation réussie !', details);
@@ -848,7 +851,10 @@ function supprimerEtudiant(id) {
     if (confirm(`Êtes-vous sûr de vouloir supprimer ${etudiantASupprimer.nom}, ${etudiantASupprimer.prenom} ?`)) {
         try {
             students = students.filter(s => !(s.id == id || s.da == id));
-            localStorage.setItem('groupeEtudiants', JSON.stringify(students));
+            if (!sauvegarderDonneesSelonMode('groupeEtudiants', students)) {
+                afficherNotificationErreur('Modification impossible', 'Impossible de supprimer en mode anonymisation');
+                return;
+            }
             afficherListeEtudiants();
 
             console.log(`Étudiant·e supprimé·e: ${etudiantASupprimer.nom}, ${etudiantASupprimer.prenom} (DA: ${etudiantASupprimer.da})`);
