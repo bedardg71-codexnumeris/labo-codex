@@ -1,0 +1,23 @@
+038-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet «Évaluations individuelles» de la sous-nav «Évaluations»
+
+OBJECTIF : Nous allons apporter quelques modifications dans la présentation visuelle.
+
+- Je vous avoir chaque critère (structure, rigueur...) sur la même ligne que l'évaluation qui lui correspond.
+- la couleur de l'encadré dans lequel apparait la note finale devrait être celle de la surveillance du texte et non pas bleu foncé.
+- Nous allons créer 2 blocs de texte à droite de l'évaluation.
+- Dans le premier apparait la rétroaction correspondant à l'évaluation. Nous allons y ajouter le bouton «Générer la rétroaction», 
+- Dans le second bloc à droite apparaît la rétroaction finale constituée de tous les critères dans un seul texte. Je veux que ce texte final soit modifiable manuellement par l'enseignant.
+- à côté ou en-dessous du bloc de texte final nous allons ajouter «mettre à jour», «réinitialiser», «copier»
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : sections critères et échelle de performance :
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

@@ -1,0 +1,557 @@
+/* ===============================
+   FONCTIONS UTILITAIRES RÉUTILISABLES
+   Version 2.0 - Refonte propre
+   Convention : Français uniquement
+   =============================== */
+
+// ===============================
+// GESTION DE LA NAVIGATION
+// ===============================
+
+/**
+ * Configuration des sous-menus pour chaque onglet
+ * Structure cohérente et extensible
+ */
+const configurationsOnglets = {
+    'tableau-bord': null,  // Pas de sous-menu
+    
+    'etudiants': [
+        { id: 'apercu', label: 'Aperçu du groupe' },
+        { id: 'creation', label: 'Ajouter/Importer' },
+        { id: 'liste', label: 'Liste détaillée' }
+    ],
+    
+    'presences': [
+        { id: 'apercu', label: 'Aperçu des présences' },
+        { id: 'saisie', label: 'Saisie' },
+        { id: 'rapports', label: 'Rapports' }
+    ],
+    
+    'evaluations': [
+        { id: 'apercu', label: 'Aperçu des évaluations' },
+        { id: 'creation', label: 'Créer un artefact' },
+        { id: 'resultats', label: 'Résultats' },
+        { id: 'retroaction', label: 'Rétroaction' }
+    ],
+    
+    'portfolio': [
+        { id: 'apercu', label: 'Aperçu du portfolio' },
+        { id: 'artefacts', label: 'Artefacts' },
+        { id: 'progression', label: 'Progression' }
+    ],
+    
+    'reglages': [
+        { id: 'apercu', label: 'Aperçu du trimestre' },
+        { id: 'informations', label: 'Informations générales' },
+        { id: 'calendrier', label: 'Configuration du calendrier' },
+        { id: 'donnees', label: 'Gestion des données' }
+    ]
+};
+
+/**
+ * Affiche la section principale demandée
+ * @param {string} nomSection - Identifiant de la section
+ */
+function afficherSection(nomSection) {
+    // Masquer toutes les sections
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Désactiver tous les boutons de navigation
+    document.querySelectorAll('.navigation-principale button').forEach(bouton => {
+        bouton.classList.remove('actif');
+    });
+    
+    // Afficher la section demandée
+    const sectionCible = document.getElementById(`section-${nomSection}`);
+    if (sectionCible) {
+        sectionCible.classList.add('active');
+    }
+    
+    // Activer le bouton correspondant
+    const boutonActif = document.querySelector(`button[data-onglet="${nomSection}"]`);
+    if (boutonActif) {
+        boutonActif.classList.add('actif');
+    }
+    
+    // Gérer la sous-navigation
+    afficherSousNavigation(nomSection);
+    
+    // Appeler la fonction d'initialisation spécifique si elle existe
+    const fonctionInit = `initialiser${capitaliserPremiereLetter(nomSection)}`;
+    if (typeof window[fonctionInit] === 'function') {
+        window[fonctionInit]();
+    }
+}
+
+/**
+ * Affiche la sous-navigation pour un onglet
+ * @param {string} nomOnglet - Identifiant de l'onglet
+ */
+function afficherSousNavigation(nomOnglet) {
+    const conteneurSousNav = document.getElementById('sous-navigation');
+    if (!conteneurSousNav) return;
+    
+    const configuration = configurationsOnglets[nomOnglet];
+    
+    if (!configuration || configuration.length === 0) {
+        // Pas de sous-menu pour cet onglet
+        conteneurSousNav.innerHTML = '<div class="vide">Pas de sous-sections pour cette page</div>';
+        conteneurSousNav.className = 'sous-navigation vide';
+    } else {
+        // Créer les boutons de sous-navigation
+        const boutonsHtml = configuration.map((item, index) => {
+            const classeActive = index === 0 ? 'actif' : '';
+            return `<button data-sous-section="${item.id}" class="${classeActive}">${item.label}</button>`;
+        }).join('');
+        
+        conteneurSousNav.innerHTML = boutonsHtml;
+        conteneurSousNav.className = 'sous-navigation';
+        
+        // Ajouter les écouteurs d'événements
+        conteneurSousNav.querySelectorAll('button').forEach(bouton => {
+            bouton.addEventListener('click', function() {
+                const sousSection = this.dataset.sousSection;
+                afficherSousSection(nomOnglet, sousSection);
+            });
+        });
+        
+        // Afficher la première sous-section par défaut
+        if (configuration[0]) {
+            afficherSousSection(nomOnglet, configuration[0].id);
+        }
+    }
+}
+
+/**
+ * Affiche une sous-section spécifique
+ * @param {string} onglet - Identifiant de l'onglet parent
+ * @param {string} sousSection - Identifiant de la sous-section
+ */
+function afficherSousSection(onglet, sousSection) {
+    // Masquer toutes les sous-sections de l'onglet
+    document.querySelectorAll(`#section-${onglet} .sous-section`).forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Afficher la sous-section demandée
+    const sousSectionCible = document.getElementById(`${onglet}-${sousSection}`);
+    if (sousSectionCible) {
+        sousSectionCible.style.display = 'block';
+    }
+    
+    // Mettre à jour les boutons de sous-navigation
+    document.querySelectorAll('#sous-navigation button').forEach(bouton => {
+        bouton.classList.remove('actif');
+        if (bouton.dataset.sousSection === sousSection) {
+            bouton.classList.add('actif');
+        }
+    });
+}
+
+// ===============================
+// GESTION DES DONNÉES
+// ===============================
+
+/**
+ * Structure de données pour un étudiant
+ * @typedef {Object} Etudiant
+ * @property {number} id - Identifiant unique
+ * @property {string} nom - Nom de famille
+ * @property {string} prenom - Prénom
+ * @property {string} numeroDA - Numéro de dossier
+ * @property {string} programme - Code du programme
+ * @property {string} dateNaissance - Date de naissance (YYYY-MM-DD)
+ * @property {string} servicesAdaptes - "Oui" ou "Non"
+ * @property {string} cai - Centre d'aide individuel
+ * @property {string} caf - Centre d'aide français
+ * @property {Object} presence - Données de présence
+ * @property {Object} evaluations - Résultats d'évaluation
+ */
+
+/**
+ * Sauvegarde les données dans le stockage local (version mémoire)
+ * Note : À remplacer par une API backend en production
+ */
+let donneesApplication = {
+    etudiants: [],
+    presences: {},
+    evaluations: {},
+    configuration: {
+        debutTrimestre: '2025-08-21',
+        finCours: '2025-12-12',
+        finTrimestre: '2025-12-22',
+        remiseNotes: '2025-12-28'
+    }
+};
+
+/**
+ * Sauvegarde les données en mémoire
+ * @param {string} cle - Clé de stockage
+ * @param {any} donnees - Données à sauvegarder
+ */
+function sauvegarderDonnees(cle, donnees) {
+    donneesApplication[cle] = donnees;
+    afficherNotification('Données sauvegardées', 'succes');
+}
+
+/**
+ * Récupère les données depuis la mémoire
+ * @param {string} cle - Clé de stockage
+ * @returns {any} Les données récupérées
+ */
+function recupererDonnees(cle) {
+    return donneesApplication[cle] || null;
+}
+
+// ===============================
+// CALCULS ET INDICATEURS
+// ===============================
+
+/**
+ * Calcule le taux d'assiduité d'un étudiant
+ * @param {Object} etudiant - Objet étudiant
+ * @returns {number} Pourcentage d'assiduité (0-100)
+ */
+function calculerAssiduite(etudiant) {
+    if (!etudiant.presences) return 100;
+    
+    const totalCours = Object.keys(etudiant.presences).length;
+    if (totalCours === 0) return 100;
+    
+    const coursPresents = Object.values(etudiant.presences)
+        .filter(p => p === 'present').length;
+    
+    return Math.round((coursPresents / totalCours) * 100);
+}
+
+/**
+ * Calcule le taux de complétion des travaux
+ * @param {Object} etudiant - Objet étudiant
+ * @returns {number} Pourcentage de complétion (0-100)
+ */
+function calculerCompletion(etudiant) {
+    if (!etudiant.evaluations) return 0;
+    
+    const totalEvaluations = Object.keys(etudiant.evaluations).length;
+    if (totalEvaluations === 0) return 0;
+    
+    const evaluationsCompletes = Object.values(etudiant.evaluations)
+        .filter(e => e && e.remis === true).length;
+    
+    return Math.round((evaluationsCompletes / totalEvaluations) * 100);
+}
+
+/**
+ * Calcule la performance moyenne
+ * @param {Object} etudiant - Objet étudiant
+ * @returns {number} Performance moyenne (0-100)
+ */
+function calculerPerformance(etudiant) {
+    if (!etudiant.evaluations) return 0;
+    
+    const notes = Object.values(etudiant.evaluations)
+        .filter(e => e && e.note !== undefined)
+        .map(e => e.note);
+    
+    if (notes.length === 0) return 0;
+    
+    const moyenne = notes.reduce((sum, note) => sum + note, 0) / notes.length;
+    return Math.round(moyenne);
+}
+
+/**
+ * Calcule le niveau de risque global
+ * @param {Object} etudiant - Objet étudiant
+ * @returns {string} Niveau de risque ('faible', 'modere', 'eleve', 'critique')
+ */
+function calculerNiveauRisque(etudiant) {
+    const assiduite = calculerAssiduite(etudiant);
+    const completion = calculerCompletion(etudiant);
+    const performance = calculerPerformance(etudiant);
+    
+    // Score de risque pondéré
+    const scoreRisque = (
+        (100 - assiduite) * 0.3 +
+        (100 - completion) * 0.3 +
+        (100 - performance) * 0.4
+    );
+    
+    if (scoreRisque < 20) return 'faible';
+    if (scoreRisque < 40) return 'modere';
+    if (scoreRisque < 60) return 'eleve';
+    return 'critique';
+}
+
+// ===============================
+// FONCTIONS UTILITAIRES
+// ===============================
+
+/**
+ * Capitalise la première lettre d'une chaîne
+ * @param {string} chaine - Chaîne à transformer
+ * @returns {string} Chaîne avec première lettre en majuscule
+ */
+function capitaliserPremiereLetter(chaine) {
+    return chaine.charAt(0).toUpperCase() + chaine.slice(1);
+}
+
+/**
+ * Formate une date en français
+ * @param {string|Date} date - Date à formater
+ * @returns {string} Date formatée (JJ/MM/AAAA)
+ */
+function formaterDate(date) {
+    const d = new Date(date);
+    const jour = String(d.getDate()).padStart(2, '0');
+    const mois = String(d.getMonth() + 1).padStart(2, '0');
+    const annee = d.getFullYear();
+    return `${jour}/${mois}/${annee}`;
+}
+
+/**
+ * Affiche une notification temporaire
+ * @param {string} message - Message à afficher
+ * @param {string} type - Type de notification ('succes', 'erreur', 'info')
+ */
+function afficherNotification(message, type = 'info') {
+    // Supprimer toute notification existante
+    const ancienneNotif = document.querySelector('.notification');
+    if (ancienneNotif) {
+        ancienneNotif.remove();
+    }
+    
+    // Créer la nouvelle notification
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    // Styles de base (à adapter selon le CSS)
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        z-index: 1000;
+        animation: glisserEntree 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Supprimer après 3 secondes
+    setTimeout(() => {
+        notification.style.animation = 'glisserSortie 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+/**
+ * Valide un formulaire
+ * @param {HTMLFormElement} formulaire - Élément formulaire
+ * @returns {boolean} True si valide
+ */
+function validerFormulaire(formulaire) {
+    let valide = true;
+    
+    // Réinitialiser les erreurs
+    formulaire.querySelectorAll('.erreur').forEach(el => {
+        el.classList.remove('erreur');
+    });
+    
+    // Vérifier les champs requis
+    formulaire.querySelectorAll('[required]').forEach(champ => {
+        if (!champ.value.trim()) {
+            champ.classList.add('erreur');
+            valide = false;
+        }
+    });
+    
+    // Vérifier les emails
+    formulaire.querySelectorAll('[type="email"]').forEach(champ => {
+        const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (champ.value && !regexEmail.test(champ.value)) {
+            champ.classList.add('erreur');
+            valide = false;
+        }
+    });
+    
+    return valide;
+}
+
+/**
+ * Génère un identifiant unique
+ * @returns {string} Identifiant unique
+ */
+function genererIdUnique() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+/**
+ * Debounce pour limiter les appels de fonction
+ * @param {Function} fonction - Fonction à exécuter
+ * @param {number} delai - Délai en millisecondes
+ * @returns {Function} Fonction avec debounce
+ */
+function debounce(fonction, delai = 300) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fonction.apply(this, args), delai);
+    };
+}
+
+/**
+ * Formate le nom complet d'un étudiant
+ * @param {Object} etudiant - Objet étudiant
+ * @returns {string} Nom formaté
+ */
+function formaterNomEtudiant(etudiant) {
+    if (!etudiant) return '';
+    const nom = etudiant.nom || '';
+    const prenom = etudiant.prenom || '';
+    return `${nom.toUpperCase()}, ${prenom}`;
+}
+
+/**
+ * Trie un tableau d'étudiants
+ * @param {Array} etudiants - Liste d'étudiants
+ * @param {string} critere - Critère de tri ('nom', 'prenom', 'risque')
+ * @param {string} ordre - Ordre de tri ('asc', 'desc')
+ * @returns {Array} Tableau trié
+ */
+function trierEtudiants(etudiants, critere = 'nom', ordre = 'asc') {
+    const copie = [...etudiants];
+    
+    copie.sort((a, b) => {
+        let valeurA, valeurB;
+        
+        switch (critere) {
+            case 'nom':
+                valeurA = a.nom?.toLowerCase() || '';
+                valeurB = b.nom?.toLowerCase() || '';
+                break;
+            case 'prenom':
+                valeurA = a.prenom?.toLowerCase() || '';
+                valeurB = b.prenom?.toLowerCase() || '';
+                break;
+            case 'risque':
+                valeurA = calculerNiveauRisque(a);
+                valeurB = calculerNiveauRisque(b);
+                break;
+            default:
+                valeurA = a[critere];
+                valeurB = b[critere];
+        }
+        
+        if (valeurA < valeurB) return ordre === 'asc' ? -1 : 1;
+        if (valeurA > valeurB) return ordre === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    return copie;
+}
+
+/**
+ * Filtre les étudiants selon des critères
+ * @param {Array} etudiants - Liste d'étudiants
+ * @param {Object} criteres - Critères de filtrage
+ * @returns {Array} Tableau filtré
+ */
+function filtrerEtudiants(etudiants, criteres = {}) {
+    return etudiants.filter(etudiant => {
+        // Filtre par recherche textuelle
+        if (criteres.recherche) {
+            const recherche = criteres.recherche.toLowerCase();
+            const nomComplet = formaterNomEtudiant(etudiant).toLowerCase();
+            if (!nomComplet.includes(recherche)) return false;
+        }
+        
+        // Filtre par niveau de risque
+        if (criteres.risque) {
+            if (calculerNiveauRisque(etudiant) !== criteres.risque) return false;
+        }
+        
+        // Filtre par services adaptés
+        if (criteres.servicesAdaptes !== undefined) {
+            if (etudiant.servicesAdaptes !== criteres.servicesAdaptes) return false;
+        }
+        
+        return true;
+    });
+}
+
+// ===============================
+// EXPORT DES DONNÉES
+// ===============================
+
+/**
+ * Exporte les données en format CSV
+ * @param {Array} donnees - Données à exporter
+ * @param {string} nomFichier - Nom du fichier de sortie
+ */
+function exporterCSV(donnees, nomFichier = 'export.csv') {
+    if (!donnees || donnees.length === 0) {
+        afficherNotification('Aucune donnée à exporter', 'erreur');
+        return;
+    }
+    
+    // Créer l'en-tête CSV
+    const colonnes = Object.keys(donnees[0]);
+    let csv = colonnes.join(',') + '\n';
+    
+    // Ajouter les lignes de données
+    donnees.forEach(ligne => {
+        const valeurs = colonnes.map(col => {
+            const valeur = ligne[col];
+            // Échapper les virgules et guillemets
+            if (typeof valeur === 'string' && valeur.includes(',')) {
+                return `"${valeur.replace(/"/g, '""')}"`;
+            }
+            return valeur;
+        });
+        csv += valeurs.join(',') + '\n';
+    });
+    
+    // Créer et télécharger le fichier
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const lien = document.createElement('a');
+    lien.href = URL.createObjectURL(blob);
+    lien.download = nomFichier;
+    lien.click();
+    
+    afficherNotification('Export CSV réussi', 'succes');
+}
+
+// ===============================
+// INITIALISATION
+// ===============================
+
+/**
+ * Initialise l'application au chargement
+ */
+function initialiserApplication() {
+    console.log('Initialisation de l\'application...');
+    
+    // Attacher les écouteurs d'événements
+    document.addEventListener('DOMContentLoaded', () => {
+        // Navigation principale
+        document.querySelectorAll('.navigation-principale button').forEach(bouton => {
+            bouton.addEventListener('click', function() {
+                const onglet = this.dataset.onglet;
+                if (onglet) {
+                    afficherSection(onglet);
+                }
+            });
+        });
+        
+        // Afficher l'onglet par défaut
+        afficherSection('tableau-bord');
+    });
+    
+    console.log('Application initialisée');
+}
+
+// Lancer l'initialisation
+initialiserApplication();

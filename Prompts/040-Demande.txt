@@ -1,0 +1,161 @@
+040-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Évaluations individuelles» de la nav «Évaluations». Quand je sélectionne une option dans le menu select, j'ai un message qui semble référer à une autre section (probablement  «Planification des évaluations», où je viens d'ajouter 3 champs qui ne sont pas visible dans la sous-nav «Évaluations individuelles». Voir captures.
+
+OBJECTIF : Je voudrais que l'ajout de ces champs soit optionnelle pour l'enseignant. Le choix peut être offert sous la forme de cases à cocher dans la section «Prévisualisation».
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+<!-- REMPLACER tout le contenu de la carte Artefact 1 -->
+                    <div class="carte" style="margin-bottom: 20px;">
+                        <div class="carte-header">
+                            <h4 id="titreArtefact1">Artefact 1</h4>
+                            <select id="remiseArtefact1" onchange="changerStatutRemise(1)">
+                                <option value="non-remis">Non remis</option>
+                                <option value="remis">Remis</option>
+                            </select>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 300px 1fr 1fr; gap: 20px;">
+                            <!-- Colonne 1: Critères -->
+                            <div>
+                                <div class="groupe-form"
+                                    style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <label style="flex: 1;">Structure (15%)</label>
+                                    <select class="controle-form" id="structure1" style="width: 100px;"
+                                        onchange="calculerNote(1); colorerSelects(1)" disabled>
+                                        <option value="">--</option>
+                                        <option value="I">I</option>
+                                        <option value="D">D</option>
+                                        <option value="M">M</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                </div>
+
+                                <div class="groupe-form"
+                                    style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <label style="flex: 1;">Rigueur (20%)</label>
+                                    <select class="controle-form" id="rigueur1" style="width: 100px;"
+                                        onchange="calculerNote(1); colorerSelects(1)" disabled>
+                                        <option value="">--</option>
+                                        <option value="I">I</option>
+                                        <option value="D">D</option>
+                                        <option value="M">M</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                </div>
+
+                                <div class="groupe-form"
+                                    style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <label style="flex: 1;">Plausibilité (10%)</label>
+                                    <select class="controle-form" id="plausibilite1" style="width: 100px;"
+                                        onchange="calculerNote(1); colorerSelects(1)" disabled>
+                                        <option value="">--</option>
+                                        <option value="I">I</option>
+                                        <option value="D">D</option>
+                                        <option value="M">M</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                </div>
+
+                                <div class="groupe-form"
+                                    style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <label style="flex: 1;">Nuance (25%)</label>
+                                    <select class="controle-form" id="nuance1" style="width: 100px;"
+                                        onchange="calculerNote(1); colorerSelects(1)" disabled>
+                                        <option value="">--</option>
+                                        <option value="I">I</option>
+                                        <option value="D">D</option>
+                                        <option value="M">M</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                </div>
+
+                                <div class="groupe-form"
+                                    style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                    <label style="flex: 1;">
+                                        Français (30%)
+                                        <select id="typeFrancais1"
+                                            style="font-size: 0.8rem; border: none; background: transparent;"
+                                            onchange="changerTypeFrancais(1)">
+                                            <option value="holistique">H</option>
+                                            <option value="algorithmique">A</option>
+                                        </select>
+                                    </label>
+                                    <select class="controle-form" id="francais1" style="width: 100px;"
+                                        onchange="calculerNote(1); colorerSelects(1)" disabled>
+                                        <option value="">--</option>
+                                        <option value="I">I</option>
+                                        <option value="D">D</option>
+                                        <option value="M">M</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                </div>
+
+                                <!-- Note finale -->
+                                <div id="noteFinale1" style="padding: 10px; border-radius: 5px; text-align: center; 
+                 background: var(--gris-clair); margin-top: 10px;">
+                                    <div>Note: <span id="noteArtefact1">0.0</span>/4</div>
+                                    <div>Niveau: <span id="niveauArtefact1">I</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Colonne 2: Prévisualisation des rétroactions-->
+                            <div>
+                                <h5 style="margin: 0 0 10px 0;">Prévisualisation des rétroactions</h5>
+                                <div id="retroactionsCriteres1" style="background: #f9f9f9; padding: 10px; 
+                 border-radius: 5px; min-height: 200px; margin-bottom: 10px;">
+                                    <p style="color: #999; font-style: italic;">Aucune rétroaction générée</p>
+                                </div>
+                                <button id="btnRetro1" class="btn btn-principal" onclick="genererRetroaction(1)"
+                                    disabled style="width: 100%;">
+                                    Générer la rétroaction
+                                </button>
+                            </div>
+
+                            <!-- Colonne 3: Rétroaction finale -->
+                            <div>
+                                <h5 style="margin: 0 0 10px 0;">Rétroaction finale</h5>
+                                <textarea id="retroactionFinale1" style="width: 100%; min-height: 200px; 
+                      padding: 10px; border-radius: 5px; border: 1px solid #ddd; 
+                      font-family: inherit; resize: vertical; margin-bottom: 10px;"
+                                    placeholder="Rétroaction finale combinée..."
+                                    onchange="sauvegarderRetroactionFinale(1)"></textarea>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-confirmer" onclick="mettreAJourRetroaction(1)">
+                                        Mettre à jour
+                                    </button>
+                                    <button class="btn btn-annuler" onclick="reinitialiserRetroaction(1)">
+                                        Réinitialiser
+                                    </button>
+                                    <button class="btn btn-principal" onclick="copierRetroaction(1)">
+                                        Copier
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bouton de rétroaction -->
+                    <button class="btn btn-principal mt-2" onclick="genererRetroaction(1)" style="width: 100%;" disabled
+                        id="btnRetro1">
+                        💬 Générer la rétroaction
+                    </button>
+                </div>
+
+                    <!-- Message si aucun étudiant sélectionné -->
+                    <div id="aucunEtudiantEval" style="padding: 30px; background: var(--bleu-tres-pale); 
+         border-radius: 6px; text-align: center; color: var(--bleu-leger);">
+                        <p style="font-size: 1.1rem;">Sélectionnez un·e étudiant·e pour commencer l'évaluation</p>
+                    </div>
+
+
+
+ATTENDU : voir capture
+
+FORMAT : Patch minimal uniquement

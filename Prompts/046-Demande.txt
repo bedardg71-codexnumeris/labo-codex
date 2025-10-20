@@ -1,0 +1,254 @@
+046-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Évaluations individuelles» de la nav principale «Évaluation». La disposition visuelle est un peu chaotique et a besoin d'être réorganisée. Voir capture
+
+OBJECTIF :
+Je veux trois sections dans la page.
+
+SECTION 1 (À GAUCHE) - Les outils d'évaluation
+- Je veux un menu select qui permet de sélectionner un étudiant dans la «Liste des individus» inscrits (dans le groupe créé par l'enseignant)
+- Je veux un menu select qui permet de sélectionner une production étudiante (parmi celles construites par l'enseignant)
+- Je veux un menu sélect qui permet de sélectionner une grille d'évaluation (parmi celles construites par l'enseignant).
+- Je veux un menu sélect qui permet de sélectionner une échelle de performance (parmi celles construites par l'enseignant).
+- Je veux que les critères de la grille (et leur pondération) apparaissent avec l'échelle de performance (ici IDME) et permette à l'enseignant d'évaluer le travail et de construire la note.
+
+SECTION 2 (AU CENTRE) - la prévisualisation de la rétroaction
+- Je veux avoir les informations qui on été élaborées par l'enseignant pour chaque production dans la «Planification des évaluations». Ce sont des cases à cocher pour faire apparaitre le contenu dans la Prévisualisation :· Description de l'évaluation · Objectif pédagogique · Tâche à réaliser.
+- En dessous des informations, je veux voir les rétroactions pour chaque élément d'évaluation qui ont été élaborées dans les cartouches de rétroactions par l'enseignant dans la section «rétroactions».
+- je veux que les rétroactions apparaissent en temps réel en fonction des choix de l'enseignant dans la section de gauche.
+
+SECTION 3 (À DROITE) - La rétroaction différenciée finale
+- en haut de la zone de rétroaction finale je veux un bouton «générer la rétroaction» qui permet d'assembler les informations choisie sur la production et les rétroactions de la zone centrale en un texte suivi.
+- Ce texte doit être éditable par l'enseignant.
+- Je veux un bouton «copier» qui permet de transférer ce texte dans le presse-papier.
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+            <!-- ==========================================
+                 SECTION : ÉVALUATIONS
+                 ========================================== -->
+            <div id="section-evaluations" class="section">
+
+                <!-- Sous-section : Aperçu -->
+                <div id="evaluations-apercu" class="sous-section active">
+                    <h2>Aperçu des évaluations</h2>
+                    <p class="text-muted">Performance globale du groupe</p>
+
+                    <div class="carte">
+                        <table class="tableau">
+                            <thead>
+                                <tr>
+                                    <th>Nom complet</th>
+                                    <th>Moyenne</th>
+                                    <th>Complétées</th>
+                                    <th>En retard</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-evaluations-apercu">
+                                <!-- Sera rempli dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sous-section : Évaluations individuelles -->
+                <div id="evaluations-individuelles" class="sous-section">
+                    <h2>Évaluation des artefacts</h2>
+                    <p class="text-muted">Évaluation détaillée selon les critères configurés</p>
+
+                    <!-- Sélecteur d'étudiant -->
+                    <div class="carte" style="margin-bottom: 20px;">
+                        <div class="groupe-form">
+                            <label>Sélectionner un·e étudiant·e :</label>
+                            <select id="selectEtudiantEval" class="controle-form"
+                                onchange="chargerEvaluationsEtudiant()">
+                                <option value="">-- Choisir un·e étudiant·e --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- REMPLACER tout le contenu de la carte Artefact 1 -->
+                    <div class="carte" style="margin-bottom: 20px;">
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Évaluation à noter
+                                :</label>
+                            <select id="selectArtefact1" class="controle-form" onchange="chargerArtefact(1)"
+                                style="max-width: 400px;">
+                                <option value="">-- Choisir une évaluation --</option>
+                            </select>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 300px 1fr 1fr; gap: 20px;">
+                            <!-- Colonne 1: Critères et options -->
+                            <div>
+                                <!-- Statut de remise -->
+                                <div class="groupe-form"
+                                    style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <label style="flex: 1;">Statut</label>
+                                    <select id="remiseArtefact1" class="controle-form" style="width: 100px;"
+                                        onchange="changerStatutRemise(1)">
+                                        <option value="non-remis">Non remis</option>
+                                        <option value="remis">Remis</option>
+                                    </select>
+                                </div>
+
+                                <div class="groupe-form"
+                                    style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <label style="flex: 1;">Structure (15%)</label>
+                                    <select class="controle-form" id="structure1" style="width: 100px;"
+                                        onchange="calculerNote(1); colorerSelects(1)" disabled>
+                                        <option value="">--</option>
+                                        <option value="I">I</option>
+                                        <option value="D">D</option>
+                                        <option value="M">M</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                </div>
+
+                                <div class="groupe-form"
+                                    style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <label style="flex: 1;">Rigueur (20%)</label>
+                                    <select class="controle-form" id="rigueur1" style="width: 100px;"
+                                        onchange="calculerNote(1); colorerSelects(1)" disabled>
+                                        <option value="">--</option>
+                                        <option value="I">I</option>
+                                        <option value="D">D</option>
+                                        <option value="M">M</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                </div>
+
+                                <div class="groupe-form"
+                                    style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <label style="flex: 1;">Plausibilité (10%)</label>
+                                    <select class="controle-form" id="plausibilite1" style="width: 100px;"
+                                        onchange="calculerNote(1); colorerSelects(1)" disabled>
+                                        <option value="">--</option>
+                                        <option value="I">I</option>
+                                        <option value="D">D</option>
+                                        <option value="M">M</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                </div>
+
+                                <div class="groupe-form"
+                                    style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <label style="flex: 1;">Nuance (25%)</label>
+                                    <select class="controle-form" id="nuance1" style="width: 100px;"
+                                        onchange="calculerNote(1); colorerSelects(1)" disabled>
+                                        <option value="">--</option>
+                                        <option value="I">I</option>
+                                        <option value="D">D</option>
+                                        <option value="M">M</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                </div>
+
+                                <div class="groupe-form"
+                                    style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                    <label style="flex: 1;">
+                                        Français (30%)
+                                        <select id="typeFrancais1"
+                                            style="font-size: 0.8rem; border: none; background: transparent;"
+                                            onchange="changerTypeFrancais(1)">
+                                            <option value="holistique">H</option>
+                                            <option value="algorithmique">A</option>
+                                        </select>
+                                    </label>
+                                    <select class="controle-form" id="francais1" style="width: 100px;"
+                                        onchange="calculerNote(1); colorerSelects(1)" disabled>
+                                        <option value="">--</option>
+                                        <option value="I">I</option>
+                                        <option value="D">D</option>
+                                        <option value="M">M</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                </div>
+
+                                <!-- Note finale -->
+                                <div id="noteFinale1" style="padding: 10px; border-radius: 5px; text-align: center; 
+                 background: var(--gris-clair); margin-bottom: 15px;">
+                                    <div>Note: <span id="noteArtefact1">0.0</span>/4</div>
+                                    <div>Niveau: <span id="niveauArtefact1">I</span></div>
+                                </div>
+
+                                <!-- Options d'affichage -->
+                                <div style="padding: 10px; background: var(--bleu-tres-pale); border-radius: 5px;">
+                                    <strong style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Options
+                                        d'affichage</strong>
+                                    <div>
+                                        <label
+                                            style="display: flex; align-items: center; gap: 5px; margin-bottom: 5px; font-size: 0.85rem;">
+                                            <input type="checkbox" id="afficherDescription1"
+                                                onchange="genererRetroaction(1)">
+                                            Description de l'évaluation
+                                        </label>
+                                        <label
+                                            style="display: flex; align-items: center; gap: 5px; margin-bottom: 5px; font-size: 0.85rem;">
+                                            <input type="checkbox" id="afficherObjectif1"
+                                                onchange="genererRetroaction(1)">
+                                            Objectif pédagogique
+                                        </label>
+                                        <label
+                                            style="display: flex; align-items: center; gap: 5px; font-size: 0.85rem;">
+                                            <input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)">
+                                            Tâche à réaliser
+                                        </label>
+                                    </div>
+                                    <button id="btnRetro1" class="btn btn-principal" onclick="genererRetroaction(1)"
+                                        disabled style="width: 100%; margin-top: 10px;">
+                                        Générer la rétroaction
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Colonne 2: Prévisualisation -->
+                            <div>
+                                <h5 style="margin: 0 0 10px 0;">Rétroaction générée automatiquement :</h5>
+                                <div id="retroactionsCriteres1" style="background: #f9f9f9; padding: 10px; 
+                 border-radius: 5px; min-height: 400px;">
+                                    <p style="color: #999; font-style: italic;">Aucune rétroaction générée</p>
+                                </div>
+                            </div>
+
+                            <!-- Colonne 3: Rétroaction finale -->
+                            <div>
+                                <h5 style="margin: 0 0 10px 0;">Rétroaction finale</h5>
+                                <textarea id="retroactionFinale1" style="width: 100%; min-height: 400px; 
+                      padding: 10px; border-radius: 5px; border: 1px solid #ddd; 
+                      font-family: inherit; resize: vertical; margin-bottom: 10px;"
+                                    placeholder="Rétroaction finale combinée..."
+                                    onchange="sauvegarderRetroactionFinale(1)"></textarea>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-confirmer" onclick="mettreAJourRetroaction(1)">
+                                        Mettre à jour
+                                    </button>
+                                    <button class="btn btn-annuler" onclick="reinitialiserRetroaction(1)">
+                                        Réinitialiser
+                                    </button>
+                                    <button class="btn btn-principal" onclick="copierRetroaction(1)">
+                                        Copier
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message si aucun étudiant sélectionné -->
+                    <div id="aucunEtudiantEval" style="padding: 30px; background: var(--bleu-tres-pale); 
+         border-radius: 6px; text-align: center; color: var(--bleu-leger);">
+                        <p style="font-size: 1.1rem;">Sélectionnez un·e étudiant·e pour commencer l'évaluation</p>
+                    </div>
+
+                </div><!--fin évaluations-individuelles-->
+            </div><!--fin évaluations-->
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

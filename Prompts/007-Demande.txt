@@ -1,0 +1,134 @@
+007-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). La navigation principale et la sous-navigation sont fonctionnelles. Nous développons l'onglet «calendrier» dans «Réglages».
+
+OBJECTIF : Je veux compacter un peu le formulaire pour faciliter sa lecture. Je veux que les 2 champs de «Semaine de planification et de mise à jour» et les 2 champs de «Semaine d'examens» soient sur la même ligne. Les champs actuels sont trop longs.
+
+ZONES AUTORISÉES : 
+- NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : INTOUCHABLES
+
+CODE ACTUEL :
+<!-- 2. CONFIGURATION DU CALENDRIER -->
+        <div class="settings-section">
+            <p class="section-description">
+                Décrivez ici le cadre général du calendrier : le début et la fin des cours et du trimestre, les
+                congés prévus par la direction des études, ajoutez les congés imprévus qui surviennent au cours
+                du trimestre, etc.
+            </p>
+            <div id="configurationCalendrier" style="padding: 20px;">
+
+                <!-- Sous-section: Cadre régulier du trimestre -->
+                <div class="calendrier-subsection">
+                    <h4>Cadre régulier</h4>
+
+                    <!-- Bornes du trimestre -->
+                    <h5>Bornes du trimestre</h5>
+                    <div
+                        style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: var(--form-gap); margin-bottom: 25px;">
+                        <div class="form-group">
+                            <label>Début du trimestre :</label>
+                            <input type="date" class="form-control" id="debutTrimestre" value="2025-08-21"
+                                onchange="calculerDureeTrimestre()">
+                        </div>
+                        <div class="form-group">
+                            <label>Fin des cours réguliers :</label>
+                            <input type="date" class="form-control" id="finCours" value="2025-12-12"
+                                onchange="calculerDureeTrimestre()">
+                        </div>
+                        <div class="form-group">
+                            <label>Fin du trimestre :</label>
+                            <input type="date" class="form-control" id="finTrimestre" value="2025-12-22"
+                                onchange="calculerDureeTrimestre()">
+                        </div>
+                        <div class="form-group">
+                            <label>Remise des notes :</label>
+                            <input type="date" class="form-control" id="remiseNotes" value="2025-12-22"
+                                onchange="calculerDureeTrimestre()">
+                        </div>
+                    </div>
+
+                    <!-- Semaine de Planification -->
+                    <h5>Semaine de planification et de mise à jour</h5>
+                    <div
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--form-gap); margin-bottom: 25px;">
+                        <div class="form-group">
+                            <label>du :</label>
+                            <input type="date" class="form-control" id="semainePlanificationDebut" value="2025-10-13"
+                                onchange="calculerDureeTrimestre()">
+                        </div>
+                        <div class="form-group">
+                            <label>au :</label>
+                            <input type="date" class="form-control" id="semainePlanificationFin" value="2025-10-17"
+                                onchange="calculerDureeTrimestre()">
+                        </div>
+                    </div>
+
+                    <!-- Semaine d'examens -->
+                    <h5>Semaine d'examens</h5>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--form-gap);">
+                        <div class="form-group">
+                            <label>du :</label>
+                            <input type="date" class="form-control" id="semaineExamensDebut" value="2025-12-15"
+                                onchange="calculerDureeTrimestre()">
+                        </div>
+                        <div class="form-group">
+                            <label>au :</label>
+                            <input type="date" class="form-control" id="semaineExamensFin" value="2025-12-22"
+                                onchange="calculerDureeTrimestre()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sous-section: Aménagement du cadre régulier -->
+                <div class="calendrier-subsection">
+                    <h4>Aménagements</h4>
+
+                    <!-- Congés fériés et activités institutionnelles -->
+                    <h5>Congés fériés et activités institutionnelles</h5>
+                    <p style="color: #666; font-size: 0.8rem; margin-bottom: 15px;">
+                        Congés fériés, journées pédagogiques, journée Carrière, etc. avec leurs reprises
+                        éventuelles
+                    </p>
+                    <div id="congesFeriesContainer">
+                        <!-- Les événements prévus seront affichés ici dynamiquement -->
+                    </div>
+
+                    <button type="button" class="btn-settings btn-secondary" onclick="ajouterCongeFerie()">
+                        + Ajouter un événement prévu
+                    </button>
+
+                    <!-- Événements imprévus -->
+                    <h5 style="margin-top: 25px;">Événements imprévus</h5>
+                    <p style="color: #666; font-size: 0.8rem; margin-bottom: 15px;">
+                        Maladie, conditions météorologiques, urgence, autre, etc.
+                    </p>
+
+                    <div id="evenementsImprevusContainer">
+                        <!-- Les événements imprévus seront affichés ici dynamiquement -->
+                    </div>
+
+                    <button type="button" class="btn-settings btn-secondary" onclick="ajouterEvenementImprevu()">
+                        + Ajouter un événement imprévu
+                    </button>
+
+
+
+
+
+                </div>
+
+                <button class="btn-settings" onclick="saveCalendrierReglages()">
+                    Sauvegarder le cadre général du calendrier
+                </button>
+            </div>
+        </div>
+
+
+
+ATTENDU : Information sur une ligne :
+· «Semaine de planification et de mise à jour» à gauche
+· «Semaine d'examens» à droite
+
+FORMAT : Patch minimal uniquement

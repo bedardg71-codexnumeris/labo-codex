@@ -1,0 +1,37 @@
+002-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). La navigation principale est actuellement blanc sur fond gris pâle. Je veux des onglets bleus comme dans index2.
+
+OBJECTIF : Modifier les couleurs de la navigation principale (onglets bleus, hover plus pâle, bordure orange pour l'actif). Voir capture d'écran comme référence.
+
+ZONES AUTORISÉES : 
+- Lignes navigation principale uniquement
+- NE PAS toucher à la sous-navigation
+
+NOMS STABLES : navigation-principale, actif (INTOUCHABLES)
+
+CODE ACTUEL  :
+```css
+.navigation-principale {
+    background: var(--nav-bg);
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    border-bottom: 2px solid var(--bleu-pale);
+}
+
+.navigation-principale button {
+    background: transparent;
+    border: none;
+    color: var(--nav-normal);
+    padding: 15px 25px;
+    /* ... reste du code ... */
+}
+
+
+ATTENDU :
+Boutons avec fond bleu (pas transparent)
+Hover plus pâle
+Actif avec bordure orange en bas
+
+FORMAT : Patch minimal CSS uniquement

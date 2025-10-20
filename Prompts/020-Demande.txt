@@ -1,0 +1,23 @@
+020-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous développons l'onglet «Groupe» dans «Étudiant·es». Cette section permet de créer le groupe d'élèves inscrits au cours.
+
+OBJECTIF : Nous allons ajouter un bouton «Groupe» dans la sous-navigation, entre «Aperçu» et «Liste détaillée». 
+
+ZONES AUTORISÉES : 
+- NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : INTOUCHABLES
+
+CODE ACTUEL :
+
+            'etudiants': [
+                { id: 'apercu', label: 'Aperçu' },
+                { id: 'groupe', label: 'Groupe' }
+                { id: 'liste', label: 'Liste des individus' }
+            ],
+
+
+ATTENDU : Le bouton «Groupe».
+
+FORMAT : Patch minimal uniquement

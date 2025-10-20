@@ -1,0 +1,22 @@
+061-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Aperçu» de la nav principale «Réglages». Nous allons créer de vrai cartes statistiques qui vont remplacer les simulations actuelle.
+
+OBJECTIF : 
+- Je veux une carte portant sur le cours : code cours, trimestre, Calendrier, Horaire, nombre de Groupe, nombre d'élèves
+- Je veux une carte portant sur le matériel configuré : Pratique de notation, nombre de Productions, nombre de Grilles de critères, nombre d'Échelle de performance, nombre de cartouches de rétroaction.
+- Je veux une carte portant sur le système comme tel : Beta/Version, dernière mise à jour (date et heure), poids (Ko/Mb)
+- Je veux un bouton d'exportation des données du localStorage : quand on clique, on ouvre un modal qui affiche toutes les clés du localStorage ; on peut sélectionner manuellement les clés ou cocher une case «Toutes les clés» pour tout sélectionner. Le bouton «exporter» exporte ce qui a été déterminé par l'utilisateur.
+- Je veux un bouton d'importation qui permet de faire la même chose à partir d'un autre ordinateur
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+Le code complet est dans index35.
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

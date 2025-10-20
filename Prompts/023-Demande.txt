@@ -1,0 +1,17 @@
+023-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous développons l'onglet «Groupe» dans «Étudiant·es». Cette section permet de créer le groupe d'élèves inscrits au cours.
+
+OBJECTIF : Lors de l'importation d'une liste d'élèves inscrits, les caractères = et "" encadrent chaque entrée. Il faudrait les éliminer. Voir capture.
+
+ZONES AUTORISÉES : 
+- NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : INTOUCHABLES
+
+CODE : 
+
+
+ATTENDU : Voir capture d'écran.
+
+FORMAT : Patch minimal uniquement

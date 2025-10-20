@@ -1,0 +1,22 @@
+057-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Saisie» de la nav principale «Présences».
+
+OBJECTIF : 
+- Je veux avoir en haut de la page la possibilité de choisir une date dans un menu calendrier.
+- À côté du menu calendrier je voudrais avoir le même menu que dans la section «Liste des individus» Groupe affiché : tous les groupes, groupe 00001, groupe 00002. Ces informations sont dans la «liste des individus» (Étudiants).
+- Je voudrais avoir la liste des élèves actifs sous cette date. Cette liste est créée dans la section «Étudiants» > «liste des individus». On ne retient cici omme information que le numéro de DA, le prénom et le nom de l'élève.
+- Je voudrais avoir une colonne qui me permet d'indiquer le nombre d'heures de présence par séance (max. 2h). Cette information sur la durée de la séance est livrée par l'enseignant dans le formulaire «horaire» (séance de 4h ou 2 x 2h)
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+Le code complet est dans index35.
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

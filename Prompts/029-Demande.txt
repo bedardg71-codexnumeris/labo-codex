@@ -1,0 +1,27 @@
+029-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous développons un nouvel onglet dans la sous-navigation «Modalités d'évaluation» dans la navigation principale «Réglages». Le bouton est déjà créé. Cette section permettra d'établir les paramètres de chaque évaluation. Les évaluations seront faites par l'enseignant dans la navigation principale «Évaluations». Dans les réglages, il y aura 5 cartes à produire.
+
+OBJECTIF : Nous allons ajouter la carte 3
+
+3. Grille de critères
+Carte 3: Critères d'évaluation
+├── Sélecteur : [select: liste des évaluations créées]
+├── Tableau des critères pour l'évaluation sélectionnée:
+│   ├── Nom du critère : [champ texte]
+│   ├── Description : [champ textarea]
+│   ├── Pondération relative : [champ %]
+│   └── Type : [select: Holistique (jugement global) / Analytique (Points par élément) / Algorithmique Calcul automatique (ex. français écrit : erreur / mots)]
+│       └── Si Algorithmique fournir la formule : [champ texte]
+└── [+ Ajouter un critère]
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

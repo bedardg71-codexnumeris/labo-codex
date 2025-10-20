@@ -1,0 +1,26 @@
+040-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Évaluations individuelles» de la nav «Évaluations». Voir capture. Nous allons redisposer un peu la présentation.
+
+OBJECTIF : 
+- Aligner le menu sélect «Remis» vis-à-vis les autres menu select à droite.
+- Aligner les mots Description, Objectif et Tâche sur une seule ligne avec leur case respective
+- La rétroaction générée (au fut et à mesure qu'on indique les notes) apparaît dans le même format utilisé dans la sous-nav «Rétroaction» (voir code ci-dessous.
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+html += `
+            <div style="margin-bottom: 15px; padding: 10px; background: var(--bleu-tres-pale); 
+                 border-left: 3px solid var(--bleu-moyen); border-radius: 4px;">
+                <strong>${critere.nom}</strong> - Niveau : ${niveau.nom} (${niveau.code})
+                <p style="margin-top: 5px; margin-bottom: 0;">${commentaire}</p>
+            </div>
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

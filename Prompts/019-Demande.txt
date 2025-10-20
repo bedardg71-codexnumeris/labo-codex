@@ -1,0 +1,17 @@
+019-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous développons l'onglet «Horaire» dans «Réglages». Cette section permet de créer l'horaire hebdomadaire des cours.
+
+OBJECTIF : Nous allons intégrer un formulaire pour indiquer la disponibilité de l'enseignant. Un bouton «Ajouter une période de disponibilité» permet d'offrir un formulaire avec les options suivantes : menu sélect (Choisir... lundi, mardi, etc), heure de début, heure de fin, local. Les options de verrouillage et de modification sont les mêmes que dans les séances de cours.
+
+ZONES AUTORISÉES : 
+- NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : INTOUCHABLES
+
+CODE ACTUEL :
+
+
+ATTENDU : Le choix de l'utilisateur détermine les formulaires qui lui sont présentés.
+
+FORMAT : Patch minimal uniquement

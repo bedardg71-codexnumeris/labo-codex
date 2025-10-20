@@ -1,0 +1,543 @@
+044-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Groupe» de la sous-nav «Réglages». Les fonctions d'importation par lot et de création manuelle ne sont pas actives. Au clic, il ne se produit rien. Les fonctions semblent avoir disparu ou son désactivées.
+
+OBJECTIF :
+- rendre les fonctions opérationnelles
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+                <!-- Sous-section : Groupe -->
+                <div id="reglages-groupe" class="sous-section">
+                    <h2>Configuration du groupe</h2>
+                    <p class="text-muted">Créer et gérer le groupe d'étudiant·es inscrit·es au cours</p>
+
+                    <!-- IMPORTATION PAR LOTS -->
+                    <div class="carte">
+                        <h3>📁 Importation par lots (liste d'étudiant·es)</h3>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <button onclick="importFromFile()" class="btn btn-principal" style="padding: 15px;">
+                                📄 Fichier CSV/TSV
+                            </button>
+                            <button onclick="importFromPaste()" class="btn btn-principal" style="padding: 15px;">
+                                📋 Copier-coller
+                            </button>
+                        </div>
+
+                        <!-- Zone d'upload de fichier -->
+                        <div id="fileUploadZone" style="display: none; margin-bottom: 20px;">
+                            <p style="margin-bottom: 10px; color: #666; font-size: 0.9rem;">
+                                Glissez votre fichier CSV/TSV ici ou cliquez pour le sélectionner
+                            </p>
+                            <div style="border: 2px dashed var(--bleu-leger); border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: var(--bleu-tres-pale);"
+                                id="dropZone" onclick="document.getElementById('fichierCsvEntree').click()">
+                                <div style="font-size: 3rem; margin-bottom: 10px; color: var(--bleu-leger);">📁
+                                </div>
+                                <p style="color: var(--bleu-moyen);">Cliquez ici pour choisir un fichier</p>
+                                <p style="font-size: 0.8rem; color: var(--bleu-leger); margin-top: 5px;">Formats
+                                    acceptés: .csv, .tsv</p>
+                            </div>
+                            <input type="file" id="fichierCsvEntree" accept=".csv,.tsv,.txt" style="display: none;"
+                                onchange="handleFileSelect(event)">
+                        </div>
+
+                        <!-- Zone de copier-coller -->
+                        <div id="pasteZone" style="display: none; margin-bottom: 20px;">
+                            <div class="groupe-form">
+                                <label>Collez vos données ici (format CSV/TSV) :</label>
+                                <textarea id="donneesCollees" class="controle-form" rows="8"
+                                    placeholder="No de DA&#9;Groupe&#9;Nom de l'étudiant&#9;Prénom de l'étudiant&#9;Prog.&#9;Services adaptés&#10;1234567&#9;1&#9;Beaulieu&#9;Emma&#9;180.B0&#9;&#10;1234570&#9;1&#9;Bélanger&#9;Jacob&#9;300.M0&#9;"
+                                    style="font-family: monospace; font-size: 0.9rem;"></textarea>
+                            </div>
+                            <button onclick="parseDataFromTextarea()" class="btn btn-principal">
+                                🔍 Analyser les données
+                            </button>
+
+
+                            <!-- Zone de prévisualisation -->
+                            <div id="previewZone" style="display: none; margin-bottom: 20px;">
+                                <h4>Prévisualisation des données à importer :</h4>
+                                <div id="previewTable"
+                                    style="background: var(--bleu-pale); padding: 15px; border-radius: 8px; overflow-x: auto; margin-bottom: 15px;">
+                                </div>
+                                <div class="btn-groupe" style="justify-content: flex-end;">
+                                    <button onclick="cancelImport()" class="btn btn-annuler">
+                                        Annuler
+                                    </button>
+                                    <button onclick="confirmImport()" class="btn btn-confirmer">
+                                        Importer (<span id="importCount">0</span> étudiant·es)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Format attendu -->
+                            <div
+                                style="background: var(--bleu-pale); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                                <h5>Format attendu :</h5>
+                                <p style="font-family: monospace; font-size: 0.85rem; margin-bottom: 10px;">
+                                    DA | Groupe | Nom, Prénom | Programme | Services adaptés
+                                </p>
+                                <details style="margin-top: 10px;">
+                                    <summary style="cursor: pointer; color: var(--bleu-principal); font-weight: 600;">
+                                        💡 Voir le guide d'exportation depuis votre LMS
+                                    </summary>
+                                    <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                                        <ol>
+                                            <li>Connectez-vous à Léa (LMS)</li>
+                                            <li>Allez dans votre cours → Participants</li>
+                                            <li>Cliquez sur "Télécharger" ou "Exporter"</li>
+                                            <li>Choisissez le format CSV ou Excel</li>
+                                            <li>Importez le fichier ici</li>
+                                        </ol>
+                                    </div>
+                                </details>
+                            </div><!--fin format attendu-->
+
+                        </div><!--fin carte-->
+                    </div><!--fin par lots-->
+
+                    <!-- AJOUT MANUEL -->
+                    <div class="carte">
+                        <h3>➕ Ajout manuel des étudiant·es</h3>
+
+                        <div
+                            style="display: grid; grid-template-columns: 140px 80px 1fr 1fr 140px; gap: 15px; margin-bottom: 20px;">
+                            <div class="groupe-form">
+                                <label>Numéro de DA :</label>
+                                <input type="text" id="etudiantDA" class="controle-form" placeholder="Ex: 1234567">
+                            </div>
+                            <div class="groupe-form">
+                                <label>Groupe :</label>
+                                <input type="text" id="etudiantGroupe" class="controle-form" placeholder="Ex: 1">
+                            </div>
+                            <div class="groupe-form">
+                                <label>Nom de famille :</label>
+                                <input type="text" id="etudiantNom" class="controle-form" placeholder="Nom de famille"
+                                    required>
+                            </div>
+                            <div class="groupe-form">
+                                <label>Prénom :</label>
+                                <input type="text" id="etudiantPrenom" class="controle-form" placeholder="Prénom"
+                                    required>
+                            </div>
+                            <div class="groupe-form">
+                                <label>Programme :</label>
+                                <input type="text" id="etudiantProgramme" class="controle-form"
+                                    placeholder="Ex: 200.B0">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 200px 200px; gap: 15px; margin-bottom: 20px;">
+                            <div class="groupe-form">
+                                <label>Services adaptés :</label>
+                                <select id="etudiantSA" class="controle-form">
+                                    <option value="">Non</option>
+                                    <option value="Oui">Oui</option>
+                                </select>
+                            </div>
+                            <div class="groupe-form">
+                                <label>Centre d'aide en français :</label>
+                                <select id="etudiantCAF" class="controle-form">
+                                    <option value="">Non</option>
+                                    <option value="Oui">Oui</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                            💡 Seuls le nom et prénom sont obligatoires - les autres champs seront générés
+                            automatiquement si laissés vides.
+                        </div>
+
+                        <button onclick="addStudent()" class="btn btn-ajouter">+ Ajouter l'étudiant·e</button>
+
+                    </div><!--fin carte ajout manuel-->
+
+                    <!-- LISTE DES ÉTUDIANTS - DOIT ÊTRE ICI, DANS LA SOUS-SECTION -->
+                    <div class="carte">
+                        <h3>Les paramètres généraux sont dans la section Réglages
+                            <label style="float: right; font-size: 0.85rem; font-weight: normal;">
+                                <input type="checkbox" id="verrouillerGroupe" onchange="basculerVerrouillageGroupe()">
+                                Verrouillé
+                            </label>
+                        </h3>
+                        <div id="students-list-container">
+                            <p class="text-muted" id="no-students-msg">Aucun·e étudiant·e dans le groupe.</p>
+                            <table class="tableau" id="students-table" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>DA</th>
+                                        <th>Groupe</th>
+                                        <th>Nom</th>
+                                        <th>Prénom</th>
+                                        <th>Programme</th>
+                                        <th>SA</th>
+                                        <th>CAF</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="students-tbody">
+                                    <!-- Les étudiants seront ajoutés ici -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div><!--fin carte liste étudiants-->
+
+                    <!--début gestion données étudiants-->
+                    <div class="btn-groupe mt-3">
+                        <button onclick="exportStudentsData()" class="btn btn-principal">
+                            📥 Exporter la liste
+                        </button>
+                        <button onclick="resetStudentsData()" class="btn btn-supprimer">
+                            🗑️ Réinitialiser tout le groupe
+                        </button>
+                    </div><!--fin gestion des données étudiants-->
+
+                </div><!--fin sous-section reglages-groupe-->
+
+
+----
+
+
+
+
+        // === GESTION DU GROUPE D'ÉTUDIANTS ===
+
+        let tempImportData = [];
+
+        // Fonctions d'importation
+        function importFromFile() {
+            document.getElementById('pasteZone').style.display = 'none';
+            document.getElementById('fileUploadZone').style.display = 'block';
+            document.getElementById('previewZone').style.display = 'none';
+        }
+
+        function importFromPaste() {
+            document.getElementById('fileUploadZone').style.display = 'none';
+            document.getElementById('pasteZone').style.display = 'block';
+            document.getElementById('previewZone').style.display = 'none';
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    parseCSVData(e.target.result);
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function parseDataFromTextarea() {
+            const data = document.getElementById('donneesCollees').value;
+            if (!data || data.trim() === '') {
+                alert('Veuillez coller des données dans le champ');
+                return;
+            }
+
+            console.log('Données à analyser:', data); // Pour debug
+            parseCSVData(data);
+        }
+
+        // REMPLACER la fonction parseCSVData()
+        function parseCSVData(csvText) {
+            const lines = csvText.trim().split('\n');
+            const students = [];
+
+            // Fonction pour nettoyer les valeurs
+            function cleanValue(value) {
+                if (!value) return '';
+                // Enlever les = et les guillemets en début et fin
+                return value.toString()
+                    .replace(/^="?/, '')  // Enlever = et " au début
+                    .replace(/"?$/, '')   // Enlever " à la fin
+                    .replace(/^"/, '')    // Enlever " restant au début
+                    .replace(/"$/, '')    // Enlever " restant à la fin
+                    .trim();
+            }
+
+            // Déterminer le séparateur (tab, virgule, point-virgule)
+            let separator = '\t';
+            if (lines[0].includes('\t')) {
+                separator = '\t';
+            } else if (lines[0].includes(';')) {
+                separator = ';';
+            } else if (lines[0].includes(',')) {
+                separator = ',';
+            } else {
+                separator = /\s{2,}/;
+            }
+
+            // Ignorer l'en-tête si présent
+            let startIndex = 0;
+            const firstLine = lines[0].toLowerCase();
+            if (firstLine.includes('da') || firstLine.includes('nom') || firstLine.includes('étudiant')) {
+                startIndex = 1;
+            }
+
+            for (let i = startIndex; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const parts = line.split(separator).map(p => cleanValue(p)); // Nettoyer chaque valeur
+
+                if (parts.length >= 2) {
+                    let da = '', groupe = '', nom = '', prenom = '', programme = '', sa = '';
+
+                    // Format avec toutes les colonnes
+                    if (parts.length >= 4) {
+                        da = parts[0] || '';
+                        groupe = parts[1] || '1';
+                        nom = parts[2] || '';
+                        prenom = parts[3] || '';
+                        programme = parts[4] || '';
+                        sa = parts[5] || '';
+                    }
+                    // Format nom complet dans une colonne
+                    else if (parts.length === 3) {
+                        da = parts[0] || '';
+                        groupe = '1';
+                        const nomComplet = parts[1].split(',');
+                        if (nomComplet.length === 2) {
+                            nom = nomComplet[0].trim();
+                            prenom = nomComplet[1].trim();
+                        } else {
+                            const espaces = parts[1].split(' ');
+                            nom = espaces[0] || '';
+                            prenom = espaces.slice(1).join(' ') || '';
+                        }
+                        programme = parts[2] || '';
+                    }
+                    else {
+                        da = parts[0] || '';
+                        nom = parts[1] || '';
+                        groupe = '1';
+                        prenom = '';
+                        programme = '';
+                    }
+
+                    // Ajouter seulement si on a au moins un DA ou un nom
+                    if (da || nom) {
+                        students.push({
+                            id: Date.now() + i,
+                            da: da,
+                            groupe: groupe,
+                            nom: nom,
+                            prenom: prenom,
+                            programme: programme,
+                            sa: sa,
+                            caf: ''
+                        });
+                    }
+                }
+            }
+
+            if (students.length > 0) {
+                tempImportData = students;
+                showPreview(students);
+                document.getElementById('pasteZone').style.display = 'none';
+            } else {
+                alert('Aucune donnée valide trouvée. Vérifiez le format des données.');
+            }
+        }
+
+        function showPreview(students) {
+            const previewDiv = document.getElementById('previewTable');
+
+            if (!students || students.length === 0) {
+                previewDiv.innerHTML = '<p style="color: red;">Aucune donnée à afficher</p>';
+                return;
+            }
+
+            const html = `
+        <p style="margin-bottom: 10px; font-weight: bold;">Vérifiez les données avant l'importation :</p>
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table class="tableau" style="font-size: 0.85rem;">
+                <thead>
+                    <tr style="background: var(--bleu-principal); color: white;">
+                        <th style="padding: 8px;">DA</th>
+                        <th style="padding: 8px;">Groupe</th>
+                        <th style="padding: 8px;">Nom</th>
+                        <th style="padding: 8px;">Prénom</th>
+                        <th style="padding: 8px;">Programme</th>
+                        <th style="padding: 8px;">Services adaptés</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${students.map((s, index) => `
+                        <tr style="background: ${index % 2 === 0 ? 'white' : 'var(--bleu-tres-pale)'};">
+                            <td style="padding: 6px;">${s.da || '—'}</td>
+                            <td style="padding: 6px;">${s.groupe || '1'}</td>
+                            <td style="padding: 6px;">${s.nom || '—'}</td>
+                            <td style="padding: 6px;">${s.prenom || '—'}</td>
+                            <td style="padding: 6px;">${s.programme || '—'}</td>
+                            <td style="padding: 6px;">${s.sa || '—'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+
+            previewDiv.innerHTML = html;
+            document.getElementById('importCount').textContent = students.length;
+            document.getElementById('previewZone').style.display = 'block';
+        }
+
+        function cancelImport() {
+            tempImportData = [];
+            document.getElementById('previewZone').style.display = 'none';
+            document.getElementById('donneesCollees').value = '';
+            document.getElementById('fichierCsvEntree').value = '';
+        }
+
+        function confirmImport() {
+            let students = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+            students = students.concat(tempImportData);
+            localStorage.setItem('groupeEtudiants', JSON.stringify(students));
+
+            afficherNotificationSucces(`${tempImportData.length} étudiant·es importé·es avec succès !`);
+            cancelImport();
+            afficherListeEtudiants();
+        }
+
+        // Ajout manuel
+        function addStudent() {
+            const nom = document.getElementById('etudiantNom').value.trim();
+            const prenom = document.getElementById('etudiantPrenom').value.trim();
+
+            if (!nom || !prenom) {
+                alert('Le nom et le prénom sont obligatoires');
+                return;
+            }
+
+            const student = {
+                id: Date.now(),
+                da: document.getElementById('etudiantDA').value || `AUTO-${Date.now()}`,
+                groupe: document.getElementById('etudiantGroupe').value || '1',
+                nom: nom,
+                prenom: prenom,
+                programme: document.getElementById('etudiantProgramme').value || '---',
+                sa: document.getElementById('etudiantSA').value || '',
+                caf: document.getElementById('etudiantCAF').value || ''
+            };
+
+            let students = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+            students.push(student);
+            localStorage.setItem('groupeEtudiants', JSON.stringify(students));
+
+            // Réinitialiser le formulaire
+            document.getElementById('etudiantDA').value = '';
+            document.getElementById('etudiantGroupe').value = '';
+            document.getElementById('etudiantNom').value = '';
+            document.getElementById('etudiantPrenom').value = '';
+            document.getElementById('etudiantProgramme').value = '';
+            document.getElementById('etudiantSA').value = '';
+            document.getElementById('etudiantCAF').value = '';
+
+            afficherNotificationSucces('Étudiant·e ajouté·e avec succès !');
+            afficherListeEtudiants();
+        }
+
+        // Affichage de la liste
+        function afficherListeEtudiants() {
+            const students = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+            const verrouille = JSON.parse(localStorage.getItem('groupeVerrouille') || 'false');
+            const tbody = document.getElementById('students-tbody');
+            const table = document.getElementById('students-table');
+            const noMsg = document.getElementById('no-students-msg');
+
+            if (students.length === 0) {
+                table.style.display = 'none';
+                noMsg.style.display = 'block';
+                return;
+            }
+
+            table.style.display = 'table';
+            noMsg.style.display = 'none';
+
+            tbody.innerHTML = students.map(s => `
+        <tr>
+            <td>${s.da}</td>
+            <td>${s.groupe}</td>
+            <td>${s.nom}</td>
+            <td>${s.prenom}</td>
+            <td>${s.programme}</td>
+            <td style="text-align: center;">${s.sa === 'Oui' ? '✓' : ''}</td>
+            <td style="text-align: center;">${s.caf === 'Oui' ? '✓' : ''}</td>
+            <td>
+                <button class="btn btn-modifier" onclick="modifierEtudiant('${s.id || s.da}')" 
+                    style="padding: 5px 10px; font-size: 0.85rem; opacity: ${verrouille ? '0.5' : '1'};">Modifier</button>
+                <button class="btn btn-supprimer" onclick="supprimerEtudiant('${s.id || s.da}')" 
+                    style="padding: 5px 10px; font-size: 0.85rem; margin-left: 5px; opacity: ${verrouille ? '0.5' : '1'};">Supprimer</button>
+            </td>
+        </tr>
+    `).join('');
+        }
+
+        // REMPLACER la fonction supprimerEtudiant()
+        function supprimerEtudiant(id) {
+            const verrouille = JSON.parse(localStorage.getItem('groupeVerrouille') || 'false');
+            if (verrouille) {
+                alert('Décochez "Verrouillé" avant de supprimer');
+                return;
+            }
+
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet·te étudiant·e ?')) {
+                let students = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+                // Correction : utiliser OU au lieu de ET
+                students = students.filter(s => !(s.id == id || s.da == id));
+                localStorage.setItem('groupeEtudiants', JSON.stringify(students));
+                afficherListeEtudiants();
+                afficherNotificationSucces('Étudiant·e supprimé·e');
+            }
+        }
+
+        // Export et réinitialisation
+        function exportStudentsData() {
+            const students = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+            const csv = 'DA,Groupe,Nom,Prénom,Programme,Services adaptés\n' +
+                students.map(s => `${s.da},${s.groupe},${s.nom},${s.prenom},${s.programme},${s.sa || ''}`).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `groupe_etudiants_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        function resetStudentsData() {
+            const verrouille = JSON.parse(localStorage.getItem('groupeVerrouille') || 'false');
+            if (verrouille) {
+                alert('Décochez "Verrouillé" avant de réinitialiser le groupe');
+                return;
+            }
+
+            const students = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+            if (students.length === 0) {
+                alert('Le groupe est déjà vide');
+                return;
+            }
+
+            const confirmation = prompt(`Cette action supprimera TOUS les ${students.length} étudiant·es du groupe.\n\nTapez "SUPPRIMER" pour confirmer :`);
+
+            if (confirmation === 'SUPPRIMER') {
+                localStorage.setItem('groupeEtudiants', '[]');
+                afficherListeEtudiants();
+                afficherNotificationSucces('Groupe réinitialisé - Tous les étudiant·es ont été supprimé·es');
+            } else {
+                afficherNotificationSucces('Réinitialisation annulée');
+            }
+        }
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

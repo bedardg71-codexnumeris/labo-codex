@@ -1,0 +1,156 @@
+042-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Grille de critères d'évaluation» de la nav «Réglages». 
+
+OBJECTIF : 
+- Le bouton «Ajouter» ne fonctionne pas.
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+                    <!-- Sous-section : Grilles de critères -->
+                    <div id="reglages-grille-criteres" class="sous-section">
+                        <h2>Critères d'évaluation et grilles</h2>
+                        <p class="text-muted">Définir les critères d'évaluation pour chaque travail. Un ensemble de critères constitue une grille.</p>
+
+                        <!-- CARTE 3 : GRILLES DE CRITÈRES -->
+                        <div class="carte">
+                            <h3>📊 Configuration des critères d'évaluation et des grilles</h3>
+
+                            <!-- Sélecteur d'évaluation -->
+                            <div class="groupe-form" style="max-width: 400px; margin-bottom: 20px;">
+                                <label>Sélectionner une production à évaluer :</label>
+                                <select id="selectEvalCriteres" class="controle-form" onchange="chargerCriteres()">
+                                    <option value="">-- Choisir une production --</option>
+                                </select>
+                            </div>
+
+                            <!-- Message si aucune évaluation sélectionnée -->
+                            <div id="aucuneEvalSelectionnee" style="padding: 20px; background: var(--bleu-tres-pale); 
+             border-radius: 6px; text-align: center; color: var(--bleu-leger);">
+                                <p>Sélectionnez une production pour configurer ses critères d'évaluation</p>
+                            </div>
+
+                            <!-- Conteneur des critères (caché par défaut) -->
+                            <div id="criteresContainer" style="display: none;">
+                                <!-- Liste des critères existants -->
+                                <div id="listeCriteres" style="margin-bottom: 20px;">
+                                    <!-- Les critères seront affichés ici -->
+                                </div>
+
+                                <!-- Formulaire d'ajout de critère (caché par défaut) -->
+                                <div id="formAjoutCritere" style="display: none; padding: 15px; background: var(--bleu-pale); 
+                 border: 1px solid var(--bleu-leger); border-radius: 6px; margin-bottom: 20px;">
+
+                                    <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">Nouveau critère</h4>
+
+                                    <div
+                                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                        <div class="groupe-form">
+                                            <label>Nom du critère *</label>
+                                            <input type="text" id="critereNom" class="controle-form"
+                                                placeholder="Ex: Qualité de l'argumentation">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label>Pondération relative (%)</label>
+                                            <input type="number" id="criterePonderation" class="controle-form" min="0"
+                                                max="100" placeholder="Ex: 25">
+                                        </div>
+                                    </div>
+
+                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <label>Description</label>
+                                        <textarea id="critereDescription" class="controle-form" rows="3"
+                                            placeholder="Description détaillée du critère..."></textarea>
+                                    </div>
+
+                                    <div class="groupe-form" style="margin-bottom: 15px;">
+                                        <label>Type de critère</label>
+                                        <select id="critereType" class="controle-form"
+                                            onchange="afficherChampFormule()">
+                                            <option value="holistique">Holistique (jugement global)</option>
+                                            <option value="analytique">Analytique (points par élément)</option>
+                                            <option value="algorithmique">Algorithmique (calcul automatique)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Champ formule (caché par défaut) -->
+                                    <div id="champFormule" class="groupe-form"
+                                        style="display: none; margin-bottom: 15px;">
+                                        <label>Formule de calcul</label>
+                                        <input type="text" id="critereFormule" class="controle-form"
+                                            placeholder="Ex: (nb_erreurs / nb_mots) * 100">
+                                        <small style="color: var(--bleu-leger);">
+                                            Pour le français écrit : nombre d'erreurs / nombre de mots
+                                        </small>
+                                    </div>
+
+                                    <div class="btn-groupe" style="justify-content: flex-end;">
+                                        <button class="btn btn-annuler" onclick="annulerAjoutCritere()">Annuler</button>
+                                        <button class="btn btn-confirmer" onclick="sauvegarderCritere()">
+                                            <span id="btnTexteCritere">Ajouter</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Boutons d'actions -->
+                                <div class="btn-groupe" style="justify-content: space-between; margin-bottom: 20px;">
+                                    <div>
+                                        <button id="btnAjouterCritere" class="btn btn-ajouter"
+                                            onclick="afficherFormCritere()">
+                                            + Ajouter un critère
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-principal" onclick="afficherGrillesCriteres()"
+                                            style="margin-right: 10px;">
+                                            📋 Appliquer une grille existante
+                                        </button>
+                                        <button class="btn btn-confirmer" onclick="enregistrerCommeGrille()">
+                                            💾 Enregistrer comme grille
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Modal pour les modèles (caché par défaut) -->
+                                <div id="modalGrilles" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                 background: rgba(0,0,0,0.5); z-index: 1000;">
+                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                     background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; 
+                     max-height: 80vh; overflow-y: auto;">
+                                        <h3 style="margin-bottom: 20px; color: var(--bleu-principal);">Modèles de
+                                            critères
+                                            disponibles</h3>
+
+                                        <div id="listeGrilles" style="margin-bottom: 20px;">
+                                            <!-- Les modèles seront affichés ici -->
+                                        </div>
+
+                                        <div class="btn-groupe" style="justify-content: flex-end;">
+                                            <button class="btn btn-annuler"
+                                                onclick="fermerModalGrilles()">Fermer</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Résumé de la pondération -->
+                                <div style="margin-top: 20px; padding: 10px; background: var(--bleu-tres-pale); 
+                 border-radius: 6px; text-align: right;">
+                                    <strong>Total des pondérations : </strong>
+                                    <span id="totalPonderationCriteres"
+                                        style="font-size: 1.2rem; font-weight: bold;">0%</span>
+                                    <small id="statutPonderationCriteres"
+                                        style="display: block; margin-top: 5px;"></small>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!--fin sous-section grille-criteres-->
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

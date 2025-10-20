@@ -1,0 +1,217 @@
+{
+  "version": "50 10-10-2025a",
+  "date_mise_a_jour": "2025-10-10",
+  "ids_html": {
+    "navigation": [
+      "navigation-principale",
+      "sous-navigation",
+      "contenu-principal"
+    ],
+    "sections": [
+      "section-tableau-bord",
+      "section-etudiants",
+      "section-presences",
+      "section-evaluations",
+      "section-reglages"
+    ],
+    "sous_sections": [
+      "tableau-bord-apercu-groupe",
+      "tableau-bord-liste-groupe",
+      "tableau-bord-detail-individuel",
+      "tableau-bord-tendances-patterns",
+      "etudiants-apercu",
+      "etudiants-liste",
+      "etudiants-profil",
+      "presences-apercu",
+      "presences-saisie",
+      "presences-calendrier",
+      "evaluations-apercu",
+      "evaluations-individuelles",
+      "reglages-apercu",
+      "reglages-cours",
+      "reglages-calendrier",
+      "reglages-horaire",
+      "reglages-groupe",
+      "reglages-pratique-notation",
+      "reglages-productions",
+      "reglages-grille-criteres",
+      "reglages-echelle-performance",
+      "reglages-retroactions"
+    ],
+    "elements_specifiques": [
+      "horodatage-sauvegarde",
+      "select-etudiant",
+      "detail-etudiant-contenu",
+      "tbody-liste-complete",
+      "tbody-etudiants",
+      "tbody-presences-apercu",
+      "tbody-saisie-presences",
+      "tbody-evaluations-apercu",
+      "tbody-liste-evaluations",
+      "contenuProfilEtudiant",
+      "portfolioEleveDetail",
+      "nombreEvaluations",
+      "typesEvaluations",
+      "champsPortfolio",
+      "portfolioNombreRetenir",
+      "portfolioMinimumCompleter",
+      "typeEchelle",
+      "divPonderation",
+      "divGrille",
+      "msgPonderationArtefact"
+    ],
+    "elements_statistiques": [
+      "stat-version",
+      "stat-derniere-maj",
+      "stat-poids",
+      "stat-nb-etudiants",
+      "stat-nb-groupes",
+      "stat-nb-eleves",
+      "stat-trimestre",
+      "stat-horaire",
+      "stat-pratique",
+      "stat-productions",
+      "stat-grilles",
+      "stat-echelles",
+      "stat-cartouches"
+    ]
+  },
+  "classes_css": {
+    "structure": [
+      "conteneur",
+      "entete",
+      "contenu",
+      "section",
+      "sous-section",
+      "active",
+      "actif"
+    ],
+    "composants": [
+      "carte",
+      "carte-statistique",
+      "tableau",
+      "grille-statistiques",
+      "badge-risque",
+      "statut-sauvegarde",
+      "horodatage",
+      "text-muted"
+    ],
+    "navigation": [
+      "navigation-principale",
+      "sous-navigation",
+      "vide"
+    ],
+    "risques": [
+      "risque-minimal",
+      "risque-faible",
+      "risque-modere",
+      "risque-eleve",
+      "risque-tres-eleve",
+      "risque-critique"
+    ],
+    "boutons": [
+      "btn",
+      "btn-principal",
+      "btn-ajouter",
+      "btn-modifier",
+      "btn-confirmer",
+      "btn-annuler",
+      "btn-supprimer",
+      "btn-groupe"
+    ],
+    "formulaires": [
+      "groupe-form",
+      "controle-form"
+    ]
+  },
+  "attributs_data": [
+    "data-onglet",
+    "data-sous-onglet"
+  ],
+  "fonctions_javascript": {
+    "navigation": [
+      "afficherSection",
+      "afficherSousNavigation",
+      "afficherSousSection",
+      "afficherDetailEtudiant"
+    ],
+    "etudiants_portfolio": [
+      "afficherProfilEtudiant",
+      "chargerPortfolioEleveDetail",
+      "toggleArtefactPortfolio",
+      "afficherListeEtudiants"
+    ],
+    "productions_evaluations": [
+      "gererChangementTypeProduction",
+      "afficherTableauProductions",
+      "mettreAJourPonderationTotale",
+      "mettreAJourResumeTypes",
+      "modifierEvaluation",
+      "supprimerProduction",
+      "verrouillerEvaluation",
+      "basculerVerrouillageEval",
+      "gererPortfolio",
+      "getTypeLabel"
+    ],
+    "echelles": [
+      "initialiserEchelle",
+      "changerTypeEchelle",
+      "chargerEchellesTemplates"
+    ],
+    "calendrier": [
+      "creerDateLocale",
+      "genererOptionsHeureDebut",
+      "genererOptionsHeureFin"
+    ],
+    "utilitaires": [
+      "mettreAJourHorodatage",
+      "sauvegarderDonnees",
+      "initialiserDonneesDemonstration",
+      "chargerDetailEtudiant",
+      "afficherNotification",
+      "exporterCSV",
+      "imprimerSection",
+      "echapperHtml",
+      "chargerStatistiquesApercu",
+      "ouvrirModalExport",
+      "ouvrirModalImport",
+      "fermerModalExport",
+      "fermerModalImport"
+    ]
+  },
+  "variables_globales": [
+    "configurationsOnglets",
+    "sectionActive",
+    "sousSectionActive",
+    "listeEtudiants"
+  ],
+  "localstorage_keys": [
+    "listeGrilles",
+    "grillesTemplates",
+    "groupeEtudiants",
+    "evaluationsSauvegardees",
+    "echellesTemplates",
+    "portfoliosEleves",
+    "echelles",
+    "echellesPerformance",
+    "configEchelles",
+    "configEchelle"
+  ],
+  "types_productions": [
+    "examen",
+    "travail",
+    "quiz",
+    "presentation",
+    "portfolio",
+    "artefact-portfolio",
+    "autre"
+  ],
+  "notes_importantes": [
+    "Les sous-sections reglages-* ont été ajoutées pour gérer les configurations",
+    "La sous-section etudiants-profil permet la gestion du portfolio individuel",
+    "Les fonctions portfolio gèrent la sélection des artefacts pour la note finale",
+    "Les fonctions échelles gèrent les templates et la configuration des performances",
+    "Le localStorage portfoliosEleves stocke la sélection des 3 artefacts par élève",
+    "Nouvelle fonction echapperHtml pour la sécurité contre les injections XSS"
+  ]
+}

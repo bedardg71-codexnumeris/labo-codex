@@ -1,0 +1,109 @@
+005-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). La navigation principale et la sous-navigation sont fonctionnelles. Nous développons l'onglet «cours» dans «Réglages».
+
+OBJECTIF : Je veux créer un formulaire qui contient les informations principales sur le cours. 
+
+ZONES AUTORISÉES : 
+- NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : INTOUCHABLES
+
+CODE ACTUEL  :
+004-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). La navigation principale et la sous-navigation sont fonctionnelles. Nous développons le contenu «Cours» dans la section «Réglages».
+
+OBJECTIF : Je créer un formulaire qui recueille les informations principales sur le cours. Ce code existait dans la version antérieure.
+
+ZONES AUTORISÉES : 
+- NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : INTOUCHABLES
+
+CODE :
+<!-- Sous-section : Cours -->
+                <div id="reglages-cours" class="sous-section active">
+                    <h2>Configuration du cours</h2>
+
+                    <div class="carte">
+                        <h3>Informations générales</h3>
+
+                        <div class="grille-statistiques">
+                            <div class="groupe-form">
+                                <label>Code du cours</label>
+                                <input type="text" value="601-101-MQ" class="controle-form" readonly>
+                            </div>
+                            <div class="groupe-form">
+                                <label>Nom du cours</label>
+                                <input type="text" value="Écriture et littérature" class="controle-form">
+                            </div>
+                            <div class="groupe-form">
+                                <label>N° de la compétence</label>
+                                <input type="text" value="4EF0" class="controle-form">
+                            </div>
+                            <div class="groupe-form">
+                                <label>Compétence</label>
+                                <input type="text" value="Analyser des textes littéraires" class="controle-form">
+                            </div>
+                        </div>
+
+                        <h4 style="margin-top: 20px;">Enseignant·e</h4>
+                        <div class="grille-statistiques">
+                            <div class="groupe-form">
+                                <label>Prénom</label>
+                                <input type="text" value="Grégoire" class="controle-form">
+                            </div>
+                            <div class="groupe-form">
+                                <label>Nom</label>
+                                <input type="text" value="Bédard" class="controle-form">
+                            </div>
+                            <div class="groupe-form">
+                                <label>Département</label>
+                                <input type="text" value="Littérature et communication" class="controle-form">
+                            </div>
+                            <div class="groupe-form">
+                                <label>Local</label>
+                                <input type="text" value="A-234" class="controle-form">
+                            </div>
+                        </div>
+
+                        <h4 style="margin-top: 20px;">Trimestre</h4>
+                        <div class="grille-statistiques">
+                            <div class="groupe-form">
+                                <label>Session</label>
+                                <select class="controle-form">
+                                    <option value="A">Automne (août-déc)</option>
+                                    <option value="H">Hiver (janv-mai)</option>
+                                </select>
+                            </div>
+                            <div class="groupe-form">
+                                <label>Année</label>
+                                <input type="number" value="2025" class="controle-form">
+                            </div>
+                            <div class="groupe-form">
+                                <label>Heures/semaine</label>
+                                <input type="number" value="4" class="controle-form">
+                            </div>
+                            <div class="groupe-form">
+                                <label>Format horaire</label>
+                                <select class="controle-form">
+                                    <option value="2x2">2 × 2h</option>
+                                    <option value="1x4">1 × 4h</option>
+                                    <option value="1x3">1 × 3h + 1h</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="btn-groupe">
+                            <button class="btn btn-confirmer">Sauvegarder</button>
+                        </div>
+                    </div>
+                </div>
+
+
+
+ATTENDU :
+Déplacement de contenu
+
+FORMAT : Patch minimal uniquement

@@ -1,0 +1,55 @@
+### CRITÈRE 1 : STRUCTURE
+
+**Niveau I - Incomplet :**
+Les stratégies de lecture ne sont pas clairement identifiées et le système d'annotation manque de cohérence. L'absence de traces systématiques (couleurs, symboles, annotations) rend difficile le repérage des éléments importants pour la future carte mentale. Pour progresser, identifie explicitement les stratégies utilisées et développe un système d'annotation cohérent pour marquer les passages significatifs.
+
+**Niveau D - En Développement :**
+Les stratégies de lecture sont partiellement identifiées et le système d'annotation commence à se développer, mais manque encore de constance. Les traces présentes faciliteront la création d'une carte mentale, mais celle-ci risque d'être incomplète. Pour t'améliorer, applique plus systématiquement les stratégies choisies et enrichis tes annotations pour mieux préparer l'étape suivante.
+
+**Niveau M - Maîtrisé :**
+Les stratégies de lecture sont clairement identifiées et le système d'annotation est cohérent, utilisant efficacement couleurs, symboles et notes marginales. Cette organisation méthodique permet de repérer facilement les éléments importants et facilitera grandement la création d'une carte mentale riche et structurée. Les traces laissées témoignent d'une lecture active et réfléchie.
+
+**Niveau E - Étendu :**
+Les stratégies de lecture sont parfaitement identifiées et le système d'annotation est sophistiqué, combinant avec finesse couleurs, symboles et annotations. Cette organisation exemplaire révèle une compréhension approfondie du texte et permettra une carte mentale particulièrement riche et nuancée. Les traces démontrent une lecture analytique mature et perspicace.
+
+### CRITÈRE 2 : RIGUEUR
+
+**Niveau I - Incomplet :**
+L'application des stratégies de lecture est insuffisante en nombre et en profondeur. Les annotations ne couvrent pas assez d'aspects du texte pour permettre une analyse complète. Pour progresser, veille à utiliser au moins trois stratégies différentes et à développer davantage tes observations pour chacune d'entre elles, selon ce que le texte permet d'explorer.
+
+**Niveau D - En Développement :**
+Les stratégies de lecture sont appliquées, mais certains aspects importants du texte restent peu explorés. Bien que certaines annotations soient pertinentes, d'autres occasions d'analyse sont manquées. Pour t'améliorer, exploite plus à fond les possibilités offertes par chaque stratégie choisie, en fonction des particularités du texte.
+
+**Niveau M - Maîtrisé :**
+Les stratégies de lecture sont bien appliquées, permettant d'explorer différents aspects significatifs du texte. Les annotations sont développées là où le texte le permet, offrant une base solide pour l'analyse. L'attention portée aux éléments importants montre une bonne compréhension des possibilités offertes par chaque stratégie.
+
+**Niveau E - Étendu :**
+Les stratégies de lecture sont appliquées de manière approfondie, explorant finement tous les aspects significatifs du texte. Les annotations sont particulièrement développées aux endroits stratégiques, démontrant une excellente compréhension des possibilités offertes par chaque stratégie. Cette application judicieuse enrichira considérablement l'analyse.
+
+### CRITÈRE 3 : PLAUSIBILITÉ
+
+**Niveau I - Incomplet :**
+Le lien entre les stratégies choisies et l'hypothèse d'objectif de communication n'est pas clairement établi. Les éléments annotés semblent choisis au hasard plutôt que pour leur pertinence. Pour progresser, sélectionne des extraits qui soutiennent directement ton hypothèse et explique leur contribution dans tes annotations.
+
+**Niveau D - En Développement :**
+Les stratégies choisies sont partiellement reliées à l'hypothèse d'objectif de communication. Certaines annotations sont pertinentes, d'autres moins ciblées. Pour t'améliorer, renforce le lien entre tes annotations et ton hypothèse en expliquant plus clairement comment chaque élément relevé contribue à la démonstration.
+
+**Niveau M - Maîtrisé :**
+Les stratégies choisies servent efficacement l'hypothèse d'objectif de communication. Les annotations sont pertinentes et bien expliquées, montrant clairement comment chaque élément contribue à la démonstration. Cette cohérence entre observations et hypothèse permettra une carte mentale convaincante et bien articulée.
+
+**Niveau E - Étendu :**
+Les stratégies choisies soutiennent remarquablement l'hypothèse d'objectif de communication. Les annotations sont particulièrement pertinentes et finement expliquées, révélant une compréhension approfondie des liens entre les éléments observés et l'hypothèse. Cette cohérence exceptionnelle permettra une carte mentale particulièrement convaincante.
+
+### CRITÈRE 4 : NUANCE
+
+**Niveau I - Incomplet :**
+L'approche reste principalement descriptive, se limitant aux éléments les plus évidents. Les stratégies sont utilisées de façon isolée, sans explorer leurs complémentarités possibles. Pour progresser, cherche à croiser les observations issues de différentes stratégies pour enrichir ta compréhension des subtilités du texte.
+
+**Niveau D - En Développement :**
+L'approche commence à dépasser le niveau descriptif. Quelques liens sont établis entre les observations issues de différentes stratégies, mais plusieurs connexions potentielles restent inexploitées. Pour t'améliorer, exploite davantage la complémentarité des stratégies pour révéler les nuances du texte.
+
+**Niveau M - Maîtrisé :**
+L'approche combine efficacement description et analyse. La complémentarité des stratégies est bien exploitée, permettant de révéler des nuances significatives. Les liens établis entre les différentes observations enrichissent la compréhension du texte et ouvrent des perspectives interprétatives intéressantes.
+
+**Niveau E - Étendu :**
+L'approche développe une analyse particulièrement fine grâce à l'exploitation judicieuse de la complémentarité des stratégies. Les connexions établies entre les différentes observations révèlent des nuances subtiles et ouvrent des perspectives interprétatives riches et originales. Cette lecture croisée démontre une excellente maîtrise analytique.

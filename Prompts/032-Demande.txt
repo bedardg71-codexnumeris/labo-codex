@@ -1,0 +1,23 @@
+032-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous développons un nouvel onglet dans la sous-navigation «Modalités d'évaluation» dans la navigation principale «Réglages». Le bouton est déjà créé. Cette section permettra d'établir les paramètres de chaque évaluation. Les évaluations seront faites par l'enseignant dans la navigation principale «Évaluations». Dans les réglages, il y a 4 cartes à produire.
+
+OBJECTIF : Nous avons besoin de faire du ménage dans cette section «Modalités» qui est trop chargée. Nous allons séparer les sections de la page en différentes sections de sous-navigation de «Réglages». Voici les boutons de sous-navigation  et les sections qu'il faut modifier/déplacer :
+
+- Pratique de notation
+- Liste des évaluations
+- Grille de critères d'évaluation
+- Échelle de performance
+
+Une fois les boutons créés, nous allons déplacer le contenu. Attends que je t'indique quand le faire.
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

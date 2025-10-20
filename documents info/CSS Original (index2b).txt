@@ -1,0 +1,657 @@
+/* ===============================
+   SYSTÈME DE DESIGN - Variables CSS
+   Version 2.0 - Refonte propre
+   Convention : Français uniquement
+   =============================== */
+
+:root {
+    /* === PALETTE DE COULEURS === */
+    
+    /* Bleus - Couleurs principales */
+    --bleu-principal: #032e5c;      /* Header et titres */
+    --bleu-fonce: #0f1e3a;          /* Backgrounds sombres */
+    --bleu-moyen: #2a4a8a;          /* Éléments secondaires */
+    --bleu-clair: #065dbb;          /* Liens et accents */
+    --bleu-leger: #6b85b3;          /* Bordures douces */
+    --bleu-carte: #9fc5e8;          /* Fonds de cartes */
+    --bleu-pale: #e8f2fd;           /* Backgrounds légers */
+    --bleu-tres-pale: #f0f8ff;      /* Fonds très légers */
+    
+    /* Couleurs d'accent */
+    --orange-accent: #ff6b35;       /* Indicateur actif */
+    --vert-pale: #f8fef8;           /* Succès léger */
+    --vert-doux: #b8d4b8;           /* Succès moyen */
+    --vert-leger: #2a8a6a;          /* Succès fort */
+    
+    /* === NAVIGATION === */
+    --nav-bg: #f8f9fa;
+    --nav-normal: #04376f;
+    --nav-hover: #3e98f9;
+    --nav-actif: #054a95;
+    --nav-bordure-actif: var(--orange-accent);
+    
+    /* === SOUS-NAVIGATION === */
+    --sous-nav-bg: #e8f2fd;
+    --sous-nav-normal: #054a95;
+    --sous-nav-hover: #3e98f9;
+    --sous-nav-actif: #065dbb;
+    
+    /* === BOUTONS D'ACTION === */
+    --btn-ajouter: #2a8a6a;         /* Vert */
+    --btn-ajouter-hover: #228758;
+    --btn-modifier: #6a2a8a;        /* Mauve */
+    --btn-modifier-hover: #5a1a7a;
+    --btn-confirmer: #2d8f52;       /* Vert confirmé */
+    --btn-confirmer-hover: #238742;
+    --btn-annuler: #d4a50d;         /* Jaune doré */
+    --btn-annuler-hover: #c49505;
+    --btn-supprimer: #dc3545;       /* Rouge */
+    --btn-supprimer-hover: #c82333;
+    
+    /* === ESPACEMENTS === */
+    --espacement-section: 30px;
+    --espacement-carte: 20px;
+    --espacement-form: 20px;
+    --marge-section: 20px;
+    --rayon-bordure: 8px;
+    --rayon-bordure-large: 20px;
+    
+    /* === TYPOGRAPHIE === */
+    --police-principale: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ===============================
+   RÉINITIALISATION DE BASE
+   =============================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ===============================
+   STRUCTURE PRINCIPALE
+   =============================== */
+
+body {
+    font-family: var(--police-principale);
+    background: linear-gradient(135deg, #000000 0%, var(--bleu-fonce) 100%);
+    min-height: 100vh;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+.conteneur {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: var(--rayon-bordure-large);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* ===============================
+   EN-TÊTE
+   =============================== */
+
+.entete {
+    background: var(--bleu-principal);
+    color: white;
+    padding: var(--espacement-section);
+    text-align: center;
+    position: relative;
+}
+
+.entete h1 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.entete h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: white;
+    font-weight: 400;
+}
+
+.statut-sauvegarde {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 15px;
+    border-radius: var(--rayon-bordure);
+    font-size: 0.9rem;
+}
+
+/* ===============================
+   NAVIGATION PRINCIPALE
+   =============================== */
+
+.navigation-principale {
+    display: flex;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--orange-accent);
+    overflow-x: auto;
+}
+
+.navigation-principale button {
+    flex: 1;
+    background: var(--nav-normal);
+    border: none;
+    padding: 15px 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.navigation-principale button:hover {
+    background: var(--nav-hover);
+}
+
+.navigation-principale button.actif {
+    background: var(--nav-actif);
+    border-bottom: 2px solid var(--nav-bordure-actif);
+    font-weight: 600;
+}
+
+/* ===============================
+   SOUS-NAVIGATION
+   =============================== */
+
+.sous-navigation {
+    display: flex;
+    min-height: 40px;
+    align-items: center;
+    background: var(--sous-nav-bg);
+    overflow-x: auto;
+}
+
+.sous-navigation button {
+    flex: 1;
+    background: var(--sous-nav-normal);
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-top: 2px solid transparent;
+    white-space: nowrap;
+}
+
+.sous-navigation button:hover {
+    background: var(--sous-nav-hover);
+}
+
+.sous-navigation button.actif {
+    background: var(--sous-nav-actif);
+    border-top-color: var(--orange-accent);
+}
+
+.sous-navigation.vide {
+    justify-content: center;
+    color: #6c757d;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+/* ===============================
+   CONTENU PRINCIPAL
+   =============================== */
+
+.contenu {
+    padding: var(--espacement-section);
+    background: white;
+    min-height: 400px;
+}
+
+.section {
+    display: none;
+    animation: fonduEntree 0.3s ease;
+}
+
+.section.active {
+    display: block;
+}
+
+@keyframes fonduEntree {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===============================
+   CARTES ET CONTENEURS
+   =============================== */
+
+.carte {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: var(--rayon-bordure);
+    padding: var(--espacement-carte);
+    margin-bottom: var(--marge-section);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.carte:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.carte-apercu {
+    background: var(--bleu-pale);
+    border: 1px solid var(--bleu-leger);
+    text-align: center;
+}
+
+.carte-apercu-nombre {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--bleu-principal);
+    margin-bottom: 5px;
+}
+
+.carte-apercu-label {
+    font-size: 0.9rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ===============================
+   GRILLES
+   =============================== */
+
+.grille-apercu {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--espacement-carte);
+    margin: var(--marge-section) 0;
+}
+
+.grille-donnees {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--espacement-form);
+}
+
+/* ===============================
+   FORMULAIRES
+   =============================== */
+
+.groupe-form {
+    margin-bottom: var(--espacement-form);
+}
+
+.groupe-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.controle-form {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #495057;
+    border-radius: var(--rayon-bordure);
+    font-size: 0.9rem;
+    font-family: var(--police-principale);
+    transition: all 0.3s ease;
+}
+
+.controle-form:focus {
+    outline: none;
+    border-color: var(--bleu-clair);
+    box-shadow: 0 0 0 3px rgba(6, 93, 187, 0.1);
+}
+
+.controle-form[readonly] {
+    background: #f8f9fa;
+    cursor: not-allowed;
+}
+
+select.controle-form {
+    cursor: pointer;
+}
+
+textarea.controle-form {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* ===============================
+   BOUTONS
+   =============================== */
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--rayon-bordure);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-align: center;
+    font-family: var(--police-principale);
+}
+
+.btn-principal {
+    background: var(--bleu-principal);
+    color: white;
+}
+
+.btn-principal:hover {
+    background: var(--bleu-moyen);
+}
+
+/* Boutons d'action spécifiques */
+.btn-ajouter {
+    background: var(--btn-ajouter);
+    color: white;
+}
+
+.btn-ajouter:hover {
+    background: var(--btn-ajouter-hover);
+}
+
+.btn-modifier {
+    background: var(--btn-modifier);
+    color: white;
+}
+
+.btn-modifier:hover {
+    background: var(--btn-modifier-hover);
+}
+
+.btn-confirmer {
+    background: var(--btn-confirmer);
+    color: white;
+}
+
+.btn-confirmer:hover {
+    background: var(--btn-confirmer-hover);
+}
+
+.btn-annuler {
+    background: var(--btn-annuler);
+    color: white;
+}
+
+.btn-annuler:hover {
+    background: var(--btn-annuler-hover);
+}
+
+.btn-supprimer {
+    background: var(--btn-supprimer);
+    color: white;
+}
+
+.btn-supprimer:hover {
+    background: var(--btn-supprimer-hover);
+}
+
+/* ===============================
+   TYPOGRAPHIE
+   =============================== */
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--bleu-principal);
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.1rem; }
+h5 { font-size: 0.95rem; }
+h6 { font-size: 0.85rem; }
+
+p {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* ===============================
+   TABLEAUX
+   =============================== */
+
+.tableau {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--marge-section) 0;
+}
+
+.tableau thead {
+    background: var(--bleu-pale);
+}
+
+.tableau th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--bleu-principal);
+    border-bottom: 2px solid var(--bleu-leger);
+}
+
+.tableau td {
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.tableau tbody tr:hover {
+    background: var(--bleu-tres-pale);
+}
+
+/* ===============================
+   ÉTATS ET INDICATEURS
+   =============================== */
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.badge-succes {
+    background: var(--vert-doux);
+    color: #155724;
+}
+
+.badge-danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.badge-avertissement {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-info {
+    background: var(--bleu-pale);
+    color: var(--bleu-principal);
+}
+
+/* ===============================
+   ALERTES
+   =============================== */
+
+.alerte {
+    padding: 15px 20px;
+    border-radius: var(--rayon-bordure);
+    margin-bottom: var(--marge-section);
+    border: 1px solid transparent;
+}
+
+.alerte-succes {
+    background: var(--vert-pale);
+    border-color: var(--vert-doux);
+    color: #155724;
+}
+
+.alerte-danger {
+    background: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alerte-info {
+    background: var(--bleu-pale);
+    border-color: var(--bleu-leger);
+    color: var(--bleu-principal);
+}
+
+/* ===============================
+   UTILITAIRES
+   =============================== */
+
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-1 { margin-top: 10px; }
+.mt-2 { margin-top: 20px; }
+.mt-3 { margin-top: 30px; }
+
+.mb-1 { margin-bottom: 10px; }
+.mb-2 { margin-bottom: 20px; }
+.mb-3 { margin-bottom: 30px; }
+
+.p-1 { padding: 10px; }
+.p-2 { padding: 20px; }
+.p-3 { padding: 30px; }
+
+.masque { display: none; }
+.visible { display: block; }
+
+/* ===============================
+   RESPONSIVE DESIGN
+   =============================== */
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .conteneur {
+        border-radius: 10px;
+    }
+    
+    .navigation-principale {
+        flex-direction: column;
+    }
+    
+    .navigation-principale button {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .grille-apercu,
+    .grille-donnees {
+        grid-template-columns: 1fr;
+    }
+    
+    .contenu {
+        padding: 15px;
+    }
+    
+    .entete h1 {
+        font-size: 1.5rem;
+    }
+    
+    .entete h2 {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .carte-apercu-nombre {
+        font-size: 1.5rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .tableau {
+        font-size: 0.85rem;
+    }
+    
+    .statut-sauvegarde {
+        position: static;
+        margin-top: 10px;
+    }
+}
+
+/* ===============================
+   ANIMATIONS
+   =============================== */
+
+@keyframes rotation {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulsation {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.chargement {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--bleu-pale);
+    border-top-color: var(--bleu-principal);
+    border-radius: 50%;
+    animation: rotation 1s linear infinite;
+}
+
+/* ===============================
+   IMPRESSION
+   =============================== */
+
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+    
+    .navigation-principale,
+    .sous-navigation,
+    .btn,
+    .statut-sauvegarde {
+        display: none !important;
+    }
+    
+    .conteneur {
+        box-shadow: none;
+        border-radius: 0;
+    }
+    
+    .carte {
+        break-inside: avoid;
+    }
+}

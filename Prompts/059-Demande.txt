@@ -1,0 +1,19 @@
+059-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Évaluations individuelles» de la nav principale «Évaluations».
+
+OBJECTIF : 
+- Dans le menu sélect «Étudiant·e», plutôt que le numéro de groupe qui apparait entre parenthèses à côté des prénom et nom de l'élève, ce devrait être son numéro de DA.
+- Le numéro de DA est dans un champ rempli dans la «liste des individus»
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+Le code complet est dans index35.
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

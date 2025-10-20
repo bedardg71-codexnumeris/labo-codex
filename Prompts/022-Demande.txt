@@ -1,0 +1,17 @@
+022-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous développons l'onglet «Groupe» dans «Étudiant·es». Cette section permet de créer le groupe d'élèves inscrits au cours.
+
+OBJECTIF : Il faut rendre les boutons «modifier» et «supprimer» fonctionnels. Je veux aussi avoir une option de verrouillage de la liste, comme dans les autres sections (calendrier, horaire). Il faut ajouter la colonne «CAF» pour les élèves inscrits au Centre d'aide en français.
+
+ZONES AUTORISÉES : 
+- NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : INTOUCHABLES
+
+CODE : 
+
+
+ATTENDU : Voir capture d'écran.
+
+FORMAT : Patch minimal uniquement

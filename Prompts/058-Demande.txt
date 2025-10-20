@@ -1,0 +1,19 @@
+058-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Saisie» de la nav principale «Présences».
+
+OBJECTIF : 
+- Il faudrait empêcher la saisie et la sauvegarde des données quand la date n'est pas encore arrivée ou si elle est erronée. Voir capture. La vue calendaire n'offre pas de lien vers une date erronée, mais la saisie d'une date erronée dans l'autre onglet est encore possible.
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+Le code complet est dans index35.
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

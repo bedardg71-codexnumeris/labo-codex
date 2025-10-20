@@ -1,0 +1,23 @@
+TERMINOLOGIE CORRECTE DU PROJET
+================================
+
+CE QUE FAIT L'ÉLÈVE :
+- Production = Le travail/devoir que l'élève remet (un texte, un projet, etc.)
+- Productions = L'ensemble des travaux de l'élève
+
+CE QUE FAIT L'ENSEIGNANT :
+- Grille = Le modèle avec critères et pondérations pour évaluer
+- Évaluation = L'action d'évaluer une production avec une grille  
+- Note/Résultat = Le score obtenu après évaluation
+- Rétroaction = Les commentaires donnés à l'élève
+
+EXEMPLES CONCRETS :
+- L'élève remet sa PRODUCTION #1 (son travail)
+- L'enseignant applique la GRILLE "Analyse critique" 
+- L'enseignant fait l'ÉVALUATION (attribue les notes)
+- L'élève reçoit ses RÉSULTATS et la RÉTROACTION
+
+ATTENTION - NE PAS CONFONDRE :
+❌ "L'évaluation de l'élève" (ambigu)
+✅ "La production de l'élève" (le travail remis)
+✅ "L'évaluation de la production" (l'acte de noter)

@@ -1,0 +1,98 @@
+054-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Groupe» de la nav principale «Réglages».
+
+OBJECTIF : Je voudrais pouvoir afficher les différents groupes que j'ai, pas seulement les individus d'un groupe. Je veux distinguer/séparer l'affichage de mes groupes.
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+            <!-- ==========================================
+                 SECTION : ÉTUDIANT·ES
+                 ========================================== -->
+            <div id="section-etudiants" class="section">
+
+                <!-- Sous-section : Aperçu étudiants -->
+                <div id="etudiants-apercu" class="sous-section active">
+                    <h2>Aperçu individuel</h2>
+                    <p class="text-muted">Vue d'ensemble rapide</p>
+
+                    <div class="grille-statistiques">
+                        <div class="carte-statistique">
+                            <div class="valeur">24</div>
+                            <div class="label">Inscrits</div>
+                        </div>
+                        <div class="carte-statistique">
+                            <div class="valeur">22</div>
+                            <div class="label">Actifs</div>
+                        </div>
+                        <div class="carte-statistique">
+                            <div class="valeur">2</div>
+                            <div class="label">Abandons</div>
+                        </div>
+                    </div>
+                </div><!-- Fin sous-section aperçu -->
+
+                <!-- Sous-section : Liste -->
+                <div id="etudiants-liste" class="sous-section">
+                    <h2>Liste des individus</h2>
+                    <p class="text-muted">Gestion complète des étudiant·es</p>
+
+                    <!-- LISTE DES ÉTUDIANTS - DANS RÉGLAGES > GROUPE -->
+                    <div class="carte">
+                        <h3>📋 Les paramètres de la création du groupe sont dans l'onglet Réglages
+                            <label style="float: right; font-size: 0.85rem; font-weight: normal;">
+                                <input type="checkbox" id="verrouillerGroupe" onchange="basculerVerrouillageGroupe()">
+                                🔒
+                            </label>
+                        </h3>
+
+                        <!-- Afficher uniquement si le groupe n'est pas vide -->
+                        <div id="students-list-container" style="display: none;">
+                            <table class="tableau" id="students-table">
+                                <thead>
+                                    <tr>
+                                        <th>DA</th>
+                                        <th>Groupe</th>
+                                        <th>Nom</th>
+                                        <th>Prénom</th>
+                                        <th>Programme</th>
+                                        <th>SA</th>
+                                        <th>CAF</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="students-tbody">
+                                    <!-- Les étudiants seront ajoutés ici -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Message si le groupe est vide (plus discret) -->
+                        <p class="text-muted" id="no-students-msg"
+                            style="display: none; text-align: center; margin: 20px 0;">
+                            Le groupe est vide. Ajoutez des étudiant·es ci-dessus.
+                        </p>
+                    </div><!--fin carte liste étudiants-->
+
+                    <!--début gestion données étudiants-->
+                    <div class="btn-groupe mt-3">
+                        <button onclick="exportStudentsData()" class="btn btn-principal">
+                            📥 Exporter la liste
+                        </button>
+                        <button onclick="resetStudentsData()" class="btn btn-supprimer">
+                            🗑️ Réinitialiser tout le groupe
+                        </button>
+                    </div><!--fin gestion des données étudiants-->
+
+                </div><!-- Fin sous-section liste -->
+
+            </div> <!-- Fermeture de section etudiants -->
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

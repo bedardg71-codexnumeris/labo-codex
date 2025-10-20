@@ -1,0 +1,21 @@
+026-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous développons un nouvel onglet dans la sous-navigation «Modalités d'évaluation» dans la navigation principale «Réglages». Le bouton est déjà créé. Cette section permettra d'établir les paramètres de chaque évaluation. Les évaluations seront faites par l'enseignant dans la navigation principale «Évaluations». Dans les réglages, il y aura 5 cartes à produire.
+
+OBJECTIF : Nous allons modifier la carte 1
+- Déplacer le Statut de configuration en haut de la carte 1.
+- déplacer la note RREC et les formulaires dans le haut de la carte 1, en dessous du statut de configuration.
+- Disposer le formulaire Pratique de notation à gauche et le formulaire Type de pratique alternative à droite sur une même ligne
+- déplacer la vue d'ensemble au début de la carte 2
+- Le Nombre total d'évaluations, la Pondération totale et la Répartition des types sont générés dynamiquement par la carte 2.
+- offrir la possibilité de déplacer l'ordre des évaluations
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+
+ATTENDU : [Description visuelle/fonctionnelle du résultat] ou captures d'écran.
+
+FORMAT : Patch minimal uniquement

@@ -1,0 +1,62 @@
+Section Modalités v1 (25-09-25)
+
+1. Vue d'ensemble des évaluations
+
+Carte 1: Résumé global
+├── Nombre total d'évaluations champ : [champ numérique]
+├── Pondération totale champ : [100%]
+├── Types (information dynamique) : [4 artefacts d'un portfolio, 1 analyse littéraire finale]
+	info ici : Le Règlement sur le régime des études collégiales (RREC) exige une note finale chiffrée en %. Pendant l'apprentissage, vous pouvez cependant mettre en place une pratique alternative de notation. Pour être conforme au RREC, celle-ci devra cependant être convertie en note chiffrée à la fin du trimestre.
+--- Pratique de notation menu select : sommative (traditionnelle), alternative (PAN)
+>si PAN, préciser : Notation basée sur la maîtrise ou les standards, Notation par spécifications (ou par contrat), Dénotation (Ungrading)
+> info importante :
+Notation basée sur la maîtrise ou les standards (Standard based Grade) : La notation est basée directement sur l’évaluation du degré d’atteinte des cibles d’apprentissages du cours (ex. : En développement, Acquis, Avancé, Pas encore évalué).
+
+Notation par spécifications une note finale donnée correspond à un ensemble de productions ou de performances prédéfini qui respecte les critères (ex. 
+
+Dénotation : Le moins possible d’évaluations sont notées. Quand elles le sont, il s'agit de rétroaction qualitative, d’autoévaluation, d’évaluation par les pairs.
+
+└── Statut (information dynamique) : ✓ Configuration complète / partielle / aucune
+
+2. Définition des évaluations
+
+Carte 2: Liste des évaluations
+├── Tableau dynamique avec:
+│   ├── Code (Artefact 1, artefact 2, etc.)
+│   ├── Titre
+│   ├── Type (menu select: Examen, Travail écrit, Quiz/Test, Présentation, Portfolio, Autre champ qui s'ajoute au menu)
+│   ├── Pondération (%)
+│   └── Actions (modifier/supprimer/verrouiller)
+└── [+ Ajouter une évaluation]
+
+3. Grille de critères
+
+Carte 3: Critères d'évaluation
+├── Sélecteur: [Choisir une évaluation]
+├── Tableau des critères:
+│   ├── Nom du critère champ
+│   ├── Description champ
+│   ├── Pondération relative champ
+│   └── Type champ : holistique, calcul (ex. Nombre d'erreurs / nombre de mots), ou variable selon le travail (case à cocher)
+	> si calcul : précisez l'algorithme
+└── [+ Ajouter un critère]
+
+4. Niveaux de maîtrise
+
+Carte 4: Échelle de performance PAN SBG SOLO
+├── Configuration globale:
+│   ├── Type d'échelle: select [Lettres / Pourcentage / Autre code champ qui s'ajoute au menu]
+│   ├── Seuil institutionnel de réussite : [60%] (la note finale doit être rendu en % (RREC)
+│   └── Note de passage: [Lettres / Pourcentage / Autre champ qui s'ajoute au menu]
+├── Tableau des niveaux : code, nom complet, poids: (champs)
+│   ├── I - Incomplet ou insuffisant (préstructuruel, unistructurel) (0-64%) :
+│   ├── D - en Développement Multistructurel)(65-74%) :
+│   ├── M - Maitrisé (Relationnel acquis) (75-84% :
+│   └── E - Étendu (abstrait étendu) ≥85% :
+
+5. Modèles réutilisables (optionnel)
+
+Carte 5: Gabarits
+├── Sauvegarder configuration actuelle comme modèle
+├── Charger un modèle existant
+└── Modèles disponibles: [Liste déroulante]

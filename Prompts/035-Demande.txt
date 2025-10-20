@@ -1,0 +1,23 @@
+035-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. 
+
+OBJECTIF : Nous allons créer la structure de la section «Évaluations individuelle» qui est dans la sous-nav de «Évaluations». 
+
+- Je veux un menu select qui permet de choisir les étudiants (dans la liste déjà créée).
+- Je veux identifier le travail dans la liste des travaux planifiés
+- Je veux avoir une présentation semblable à celle de la capture d'écran.
+- Ne crée pour l'instant que l'évaluation d'un seul artefact. Attends mes consignes pour la suite.
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : sections critères et échelle de performance :
+
+
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

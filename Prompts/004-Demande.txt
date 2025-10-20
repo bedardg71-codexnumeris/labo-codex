@@ -1,0 +1,47 @@
+004-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). La navigation principale et la sous-navigation sont fonctionnelles. L'onglet «aperçu» actuel contient toutes les informations dans un page. Je veux répartir le contenu dans les sous-sections appropriées. On dirait que les boutons actuels de la sous-navigation n'ont aucun effet.
+
+OBJECTIF : Je veux déplacer la Liste complète du groupe dans l'onglet de sous-navigation «Liste du groupe». 
+
+ZONES AUTORISÉES : 
+- section Liste complète du groupe uniquement
+- NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : INTOUCHABLES
+
+CODE ACTUEL  :
+<!-- Sous-section : Liste du groupe -->
+                <div id="tableau-bord-liste-groupe" class="sous-section">
+                    <h2>Liste complète du groupe</h2>
+                    <p class="text-muted">Tous les étudiant·es avec leurs indicateurs</p>
+
+                    <div class="carte">
+                        <table class="tableau">
+                            <thead>
+                                <tr>
+                                    <th>Nom complet</th>
+                                    <th>Assiduité</th>
+                                    <th>Complétion</th>
+                                    <th>Performance</th>
+                                    <th>Risque global</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-liste-complete">
+                                <!-- Sera rempli dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="btn-groupe">
+                        <button class="btn btn-principal">Imprimer la liste</button>
+                        <button class="btn btn-principal">Exporter en CSV</button>
+                    </div>
+                </div>
+
+
+ATTENDU :
+Déplacement de contenu
+
+FORMAT : Patch minimal CSS uniquement

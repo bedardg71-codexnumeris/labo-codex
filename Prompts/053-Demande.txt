@@ -1,0 +1,40 @@
+053-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Groupe» de la nav principale «Réglages».
+
+OBJECTIF : Le bouton «👥 Voir la liste complète du groupe» en bas de la page devrait nous mener à la liste des individus qui est dans la sous-nav «Liste des individus» dans «Étudiant·es»
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+        // Fonction pour naviguer vers la liste des étudiants
+        function allerVersListeEtudiants() {
+            // Activer l'onglet Étudiant·es
+            document.querySelectorAll('.nav-principale .nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector('.nav-principale .nav-item:nth-child(2)').classList.add('active');
+
+            // Afficher la section Étudiant·es
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('section-etudiants').classList.add('active');
+
+            // Afficher la sous-section Liste des individus
+            afficherSousSection('etudiants', 'liste');
+
+            // Scroll vers le haut
+            window.scrollTo(0, 0);
+
+            // Notification
+            afficherNotificationSucces('Navigation vers la liste des individus');
+        }
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

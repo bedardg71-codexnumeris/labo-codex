@@ -1,0 +1,27 @@
+js/
+├── config.js                    # Configuration et variables globales
+├── navigation.js                # Gestion sections/sous-sections
+├── etudiants.js                 # Étudiants et portfolios
+├── productions.js               # Productions et évaluations
+├── grilles.js                   # Grilles de critères
+├── echelles.js                  # Échelles de performance
+├── cartouches.js                # Cartouches de rétroaction
+├── cours.js                     # Gestion des cours
+├── calendrier.js                # Calendrier scolaire (module principal)
+├── calendrier-vue.js            # Sous-module : vue calendaire
+├── calendrier-saisie.js         # Sous-module : saisie des présences
+├── horaire.js                   # Horaire des cours
+├── groupe.js                    # Listes des étudiants inscrits
+├── pratiques.js                 # Pratiques de notation
+├── import-export.js             # Import/export de données
+├── statistiques.js              # Calculs statistiques
+├── profil-etudiant.js           # Profil individuel d'étudiant
+├── liste-evaluations.js         # Liste et gestion des évaluations
+├── modes.js                     # Système de modes (affichage/saisie)
+├── evaluation.js                # Utilitaire : logique d'évaluation
+├── portfolio.js                 # Utilitaire : gestion portfolios
+└── main.js                      # Point d'entrée et initialisation
+
+DOCUMENTATION
+├── structure-modulaire.txt      # Ce fichier
+└── ordre-chargement.txt         # Ordre de chargement dans index.html

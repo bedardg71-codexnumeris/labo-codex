@@ -1,0 +1,63 @@
+010-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous développons l'onglet «calendrier» dans «Réglages».
+
+OBJECTIF : Un encadré jaune apparait quand on clique sur le bouton «+ Ajouter un événement imprévu». Le code existait dans une version antérieure. Voir capture d'écran.
+
+ZONES AUTORISÉES : 
+- NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : INTOUCHABLES
+
+CODE ACTUEL :
+                        <!-- REMPLACER le div id="congesFeriesContainer" et le bouton par: -->
+
+                        <div id="congesFeriesContainer" style="margin-bottom: 20px;">
+                            <!-- Les événements existants seront affichés ici -->
+                        </div>
+
+                        <!-- FORMULAIRE D'AJOUT (caché par défaut) -->
+                        <div id="formAjoutCongeFerie" style="display: none; padding: 15px; background: var(--vert-pale); border: 1px solid var(--vert-leger); border-radius: 6px; margin-bottom: 20px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <strong style="color: var(--vert-leger);">Événement prévu</strong>
+                                    <div class="groupe-form mt-2">
+                                        <label>Date (AAA-MM-JJ) :</label>
+                                        <input type="date" class="controle-form" id="nouvelleDateCongeFerie">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Description :</label>
+                                        <input type="text" class="controle-form" id="nouvelleDescriptionCongeFerie"
+                                            placeholder="Ex: Fête du travail, Journée Carrière...">
+                                    </div>
+                                </div>
+                                <div>
+                                    <strong style="color: var(--vert-leger);">Reprise prévue</strong>
+                                    <div class="groupe-form mt-2">
+                                        <label>Date (AAA-MM-JJ) :</label>
+                                        <input type="date" class="controle-form" id="nouvelleDateReprise">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Horaire :</label>
+                                        <select class="controle-form" id="nouvelHoraireReprise">
+                                            <option>Choisir l'horaire de reprise...</option>
+                                            <option>Même horaire</option>
+                                            <option>Horaire modifié</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="btn-groupe mt-2" style="justify-content: flex-end;">
+                                <button class="btn btn-annuler" onclick="annulerAjoutCongeFerie()">Annuler</button>
+                                <button class="btn btn-confirmer" onclick="confirmerAjoutCongeFerie()">Ajouter l'événement</button>
+                            </div>
+                        </div>
+
+                        <button id="btnAjouterCongeFerie" class="btn btn-ajouter" onclick="afficherFormulaireAjoutCongeFerie()">+ Ajouter un événement prévu</button>
+
+
+
+ATTENDU : Information sur une ligne :
+· la section apparaît au clic
+
+FORMAT : Patch minimal uniquement

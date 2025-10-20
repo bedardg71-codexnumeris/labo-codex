@@ -1,0 +1,246 @@
+052-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Calendrier» de la nav principale «Réglages».
+
+OBJECTIF :
+Je voudrais avoir un bouton de sauvegarde et une confirmation notifiée de la sauvegarde. Le design est décrit dans CSS (index35).js
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+                <!-- Sous-section : Calendrier -->
+                <div id="reglages-calendrier" class="sous-section">
+                    <h2>Configuration du calendrier</h2>
+                    <p class="text-muted">Afin de construire le calendrier du trimestre, indiquez ici le début
+                        et la
+                        fin
+                        des cours et du trimestre, les congés prévus par la direction des études, ajoutez les
+                        congés
+                        imprévus qui
+                        surviennent au cours du trimestre, etc.</p>
+
+                    <!-- CADRE RÉGULIER -->
+                    <div class="carte">
+                        <h3>📆 Cadre régulier</h3>
+
+                        <!-- Petites métriques simples -->
+                        <div class="grille-statistiques" style="margin-bottom: 20px;">
+                            <div class="carte-metrique">
+                                <strong id="nombreSemaines">15</strong>
+                                <span>Semaines</span>
+                            </div>
+                            <div class="carte-metrique">
+                                <strong id="totalConges">0</strong>
+                                <span>Congés</span>
+                            </div>
+                        </div>
+
+                        <h4 class="mt-2">Bornes du trimestre</h4>
+                        <div class="grille-statistiques">
+                            <div class="groupe-form">
+                                <label>Début du trimestre :</label>
+                                <input type="date" class="controle-form" id="debutTrimestre" value="2025-08-21">
+                            </div>
+                            <div class="groupe-form">
+                                <label>Fin des cours réguliers :</label>
+                                <input type="date" class="controle-form" id="finCours" value="2025-12-12">
+                            </div>
+                            <div class="groupe-form">
+                                <label>Fin du trimestre :</label>
+                                <input type="date" class="controle-form" id="finTrimestre" value="2025-12-22">
+                            </div>
+                            <div class="groupe-form">
+                                <label>Remise des notes :</label>
+                                <input type="date" class="controle-form" id="remiseNotes" value="2025-12-22">
+                            </div>
+                        </div>
+
+                        <!-- Semaine de Planification - RESTE IDENTIQUE -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
+                            <!-- COLONNE GAUCHE: Semaine de planification -->
+                            <div>
+                                <h4>Semaine de planification et de mise à jour</h4>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <div class="groupe-form" style="flex: 1;">
+                                        <label>Du :</label>
+                                        <input type="date" class="controle-form" id="semainePlanificationDebut"
+                                            value="2025-10-13">
+                                    </div>
+                                    <span style="padding-top: 20px;">au</span>
+                                    <div class="groupe-form" style="flex: 1;">
+                                        <label>&nbsp;</label>
+                                        <input type="date" class="controle-form" id="semainePlanificationFin"
+                                            value="2025-10-17">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- COLONNE DROITE: Semaine d'examens -->
+                            <div>
+                                <h4>Semaine d'examens</h4>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <div class="groupe-form" style="flex: 1;">
+                                        <label>Du :</label>
+                                        <input type="date" class="controle-form" id="semaineExamensDebut"
+                                            value="2025-12-15">
+                                    </div>
+                                    <span style="padding-top: 20px;">au</span>
+                                    <div class="groupe-form" style="flex: 1;">
+                                        <label>&nbsp;</label>
+                                        <input type="date" class="controle-form" id="semaineExamensFin"
+                                            value="2025-12-22">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bouton de sauvegarde pour cette carte -->
+                        <div class="btn-groupe mt-3">
+                            <button class="btn btn-confirmer" onclick="sauvegarderBornesTrimestre()">
+                                💾 Sauvegarder les bornes
+                            </button>
+                        </div>
+                    </div><!-- FIN de la carte "Cadre régulier" -->
+
+                    <!-- AMÉNAGEMENTS -->
+                    <div class="carte mt-3">
+                        <h3>📅 Aménagements</h3>
+
+                        <h4 class="mt-2">Congés fériés et activités institutionnelles</h4>
+                        <p class="text-muted" style="font-size: 0.85rem;">Congés fériés, journées pédagogiques,
+                            journée Carrière, etc. avec leurs reprises éventuelles</p>
+
+                        <!-- Tableau des événements prévus avec les boutons standards -->
+                        <div id="congesPrevusContainer" style="margin-bottom: 20px;">
+                            <!-- Le tableau sera généré ici dynamiquement -->
+                        </div>
+
+                        <!-- FORMULAIRE D'AJOUT RESTE IDENTIQUE -->
+                        <div id="formAjoutPrevu"
+                            style="display: none; padding: 15px; background: var(--vert-pale); border: 1px solid var(--vert-leger); border-radius: 6px; margin-bottom: 20px;">
+                            <strong style="color: var(--vert-leger);">Nouvel événement prévu</strong>
+
+                            <div
+                                style="display: grid; grid-template-columns: 1fr 2fr 1.5fr 1fr; gap: 10px; margin-top: 15px; align-items: end;">
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.85rem;">Date événement</label>
+                                    <input type="date" class="controle-form" id="nouvelleDatePrevu">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Description :</label>
+                                    <select class="controle-form" id="nouvelleDescriptionPrevu">
+                                        <option>Choisir...</option>
+                                        <option>Fête du travail (férié)</option>
+                                        <option>Action de grâce (férié)</option>
+                                        <option>Journée carrière</option>
+                                        <option>Vendredi saint (férié)</option>
+                                        <option>Lundi de Pâques (férié)</option>
+                                        <option>Fête de la Saint-Patrick (férié)</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.85rem;">Reprise prévue</label>
+                                    <select class="controle-form" id="nouvelHoraireReprisePrevu">
+                                        <option>Choisir...</option>
+                                        <option>Horaire du lundi</option>
+                                        <option>Horaire du mardi</option>
+                                        <option>Horaire du mercredi</option>
+                                        <option>Horaire du jeudi</option>
+                                        <option>Horaire du vendredi</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.85rem;">Date reprise</label>
+                                    <input type="date" class="controle-form" id="nouvelleDateReprisePrevu">
+                                </div>
+                            </div>
+
+                            <div class="btn-groupe mt-2" style="justify-content: flex-end;">
+                                <button class="btn btn-annuler" onclick="annulerAjoutPrevu()">Annuler</button>
+                                <button class="btn btn-confirmer" onclick="confirmerAjoutPrevu()">Ajouter
+                                    l'événement</button>
+                            </div>
+                        </div>
+
+                        <button id="btnAjouterPrevu" class="btn btn-ajouter" onclick="afficherFormulaireAjoutPrevu()">
+                            + Ajouter un événement prévu
+                        </button>
+
+                        <h4 class="mt-3">Événements imprévus</h4>
+                        <p class="text-muted" style="font-size: 0.85rem;">Maladie, conditions météorologiques,
+                            urgence,
+                            autre, etc.</p>
+
+                        <!-- Tableau des événements imprévus avec les boutons standards -->
+                        <div id="evenementsImprevusContainer" style="margin-bottom: 20px;">
+                            <!-- Le tableau sera généré ici dynamiquement -->
+                        </div>
+
+                        <!-- FORMULAIRE ÉVÉNEMENT IMPRÉVU RESTE IDENTIQUE -->
+                        <div id="formAjoutEvenementImprevu"
+                            style="display: none; padding: 15px; background: #fff4e6; border: 2px solid var(--orange-accent); border-radius: 6px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                <span
+                                    style="color: var(--orange-accent); font-weight: bold; margin-right: 10px;">⚠</span>
+                                <strong style="color: var(--orange-accent);">Nouvel événement imprévu</strong>
+                            </div>
+
+                            <p style="font-size: 0.75rem; color: #666; margin-bottom: 10px;">
+                                Pour les événements imprévus, la reprise peut être planifiée après coup selon
+                                les
+                                circonstances.
+                            </p>
+
+                            <div
+                                style="display: grid; grid-template-columns: 1fr 1.5fr 1.5fr 1fr; gap: 10px; align-items: end;">
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.85rem;">Date événement</label>
+                                    <input type="date" class="controle-form" id="nouvelleDateImprevu">
+                                </div>
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.85rem;">Description</label>
+                                    <select class="controle-form" id="nouvelleDescriptionImprevu">
+                                        <option>Choisir...</option>
+                                        <option>Maladie</option>
+                                        <option>Météo</option>
+                                        <option>Urgence</option>
+                                        <option>Autre</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.85rem;">Reprise (optionnelle)</label>
+                                    <select class="controle-form" id="nouvelHoraireRepriseImprevu">
+                                        <option>Choisir...</option>
+                                        <option>Le cours n'est pas repris</option>
+                                        <option>Le cours est repris</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.85rem;">Date reprise</label>
+                                    <input type="date" class="controle-form" id="nouvelleDateRepriseImprevu">
+                                </div>
+                            </div>
+
+                            <div class="btn-groupe mt-2" style="justify-content: flex-end;">
+                                <button class="btn btn-annuler"
+                                    onclick="annulerAjoutEvenementImprevu()">Annuler</button>
+                                <button class="btn btn-confirmer" onclick="confirmerAjoutEvenementImprevu()">Ajouter
+                                    l'événement</button>
+                            </div>
+                        </div>
+
+                        <button id="btnAjouterEvenementImprevu" class="btn btn-ajouter"
+                            onclick="afficherFormulaireAjoutEvenementImprevu()">
+                            + Ajouter un événement imprévu
+                        </button>
+
+                    </div><!--fin aménagement-->
+
+                </div><!--fin calendrier-->
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

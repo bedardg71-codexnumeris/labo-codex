@@ -1,0 +1,150 @@
+049-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous avons développé plusieurs onglets dans la sous-navigation des Réglages. Ces sections servent à définir des paramètres qui serviront dans les sections Étudiant·es, Présences, Évaluations. Nous sommes présentement dans l'onglet sous-nav «Cours» de la nav principale «Réglages». Quand on ouvre cette section, elle n'affiche aucune information, même si des cours ont déjà été configurés.
+
+OBJECTIF :
+Afficher à l'ouverture de la section les cours préalablement configurés et sauvegardés dans le localStorage.
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+CODE : 
+
+            <!-- Sous-section : Cours -->
+                <div id="reglages-cours" class="sous-section">
+                    <h2>Configuration du cours</h2>
+                    <p class="text-muted">Informations techniques du cours : code, nom, compétences, enseignant·e,
+                        trimestre, format horaire</p>
+
+                    <div class="carte">
+                        <h3>📚 Cours configurés</h3>
+
+                        <!-- VUE D'ENSEMBLE -->
+                        <div class="grille-statistiques" style="margin-bottom: 20px;">
+                            <div class="carte-metrique">
+                                <strong id="nombreCours">0</strong>
+                                <span>Configurations</span>
+                            </div>
+                            <div class="carte-metrique">
+                                <strong id="sessionActive">H2025</strong>
+                                <span>Session active</span>
+                            </div>
+                            <div class="carte-metrique" style="grid-column: span 2;">
+                                <span id="resumeCours" style="font-size: 0.9rem;">
+                                    Aucune configuration de cours
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- TABLEAU/CONTENEUR DES COURS -->
+                        <div id="tableauCoursContainer" style="margin-bottom: 20px;">
+                            <p class="text-muted" id="aucunCours" style="font-style: italic;">
+                                Aucun cours configuré.
+                            </p>
+                        </div>
+
+                        <!-- FORMULAIRE D'AJOUT/MODIFICATION (caché par défaut) -->
+                        <div id="formulaireCours" style="display: none; margin-top: 20px; padding: 15px; 
+             background: var(--bleu-pale); border-radius: 6px;">
+
+                            <h4 id="titreFormCours" style="color: var(--bleu-principal); margin-bottom: 15px;">
+                                Nouvelle configuration de cours
+                            </h4>
+
+                            <h5>Informations générales</h5>
+                            <div class="grille-statistiques">
+                                <div class="groupe-form">
+                                    <label>Code du cours</label>
+                                    <input type="text" id="codeCours" value="601-101-MQ" class="controle-form">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Nom du cours</label>
+                                    <input type="text" id="nomCours" value="Écriture et littérature"
+                                        class="controle-form">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>N° de la compétence</label>
+                                    <input type="text" id="numeroCompetence" value="4EF0" class="controle-form">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Compétence</label>
+                                    <input type="text" id="competence" value="Analyser des textes littéraires"
+                                        class="controle-form">
+                                </div>
+                            </div>
+
+                            <div class="groupe-form mt-2">
+                                <label>Éléments de compétence</label>
+                                <textarea id="elementsCompetence" class="controle-form"
+                                    rows="4">• Reconnaître le propos du texte</textarea>
+                            </div>
+
+                            <h5 class="mt-3">Enseignant·e</h5>
+                            <div class="grille-statistiques">
+                                <div class="groupe-form">
+                                    <label>Prénom</label>
+                                    <input type="text" id="prenomEnseignant" value="Grégoire" class="controle-form">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Nom</label>
+                                    <input type="text" id="nomEnseignant" value="Bédard" class="controle-form">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Département</label>
+                                    <input type="text" id="departement" value="Littérature et communication"
+                                        class="controle-form">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Local</label>
+                                    <input type="text" id="local" value="2314" class="controle-form">
+                                </div>
+                            </div>
+
+                            <h5 class="mt-3">Trimestre</h5>
+                            <div class="grille-statistiques">
+                                <div class="groupe-form">
+                                    <label>Session</label>
+                                    <select id="session" class="controle-form">
+                                        <option value="H" selected>Hiver (janvier à mai)</option>
+                                        <option value="A">Automne (août à décembre)</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Année</label>
+                                    <input type="number" id="annee" value="2025" class="controle-form">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Heures/semaine</label>
+                                    <input type="number" id="heuresParSemaine" value="4" class="controle-form">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Format horaire</label>
+                                    <select id="formatHoraire" class="controle-form">
+                                        <option value="2x2" selected>2 x 2h</option>
+                                        <option value="1x4">1 x 4h</option>
+                                        <option value="3x1.33">3 x 1h20</option>
+                                        <option value="autre">Autre</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="btn-groupe mt-3" style="justify-content: flex-end;">
+                                <button class="btn btn-annuler" onclick="annulerFormCours()">Annuler</button>
+                                <button class="btn btn-confirmer" onclick="sauvegarderCours()">
+                                    <span id="btnTexteCours">Ajouter</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button id="btnAjouterCours" class="btn btn-ajouter mt-2" onclick="afficherFormCours()">
+                            + Ajouter un cours
+                        </button>
+
+                    </div><!-- Fin de la carte -->
+                </div><!-- fin cours-->
+
+ATTENDU : 
+
+FORMAT : Patch minimal uniquement

@@ -1,0 +1,123 @@
+017-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous développons l'onglet «Horaire» dans «Réglages». Cette section permet de créer l'horaire hebdomadaire des cours.
+
+OBJECTIF : Créer le bouton «Horaire» dans la sous-navigation. Créer un formulaire permettant de décrire les séances de cours : jour de la semaine, plage horaire (début, fin). Si l'utilisateur a choisi que le «Format horaire» est «2 séances séparées», il doit pouvoir compléter deux séances à la fois (séance A et séance B) ; s'il a choisi «1 séance continue» il doit décrire une seule (pas d'identification de séances A-B). Chaque séance est composée de son identification (A ou B sauf si séance continue), Jour de la semaine, heure début, heure fin, local.
+
+Le bouton «ajouter les séances» ou «ajouter la séance» doit permette l'enregistrement et être suivi d'une notification de confirmation. Les données sont enregistrées et disponibles en lecture seule (verrouillé), avec une case à cocher pour permettre la modification. Un bouton «Modifier» doit permettent de revenir au formulaire.
+
+Le code était existant dans une version antérieure. On s'assure de toujours respecter les normes css et de design qui sont appliquées ici. On peut s'inspirer de la capture d'écran.
+
+On optimise l'espace du formulaire autant que possible (par exemple 1 ligne plutôt que 2) afin de rendre lisible les informations.
+
+ZONES AUTORISÉES : 
+- NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : INTOUCHABLES
+
+CODE ACTUEL :
+<!-- 1. INFORMATIONS GÉNÉRALES -->
+        <div class="settings-section">
+            <p class="section-description">
+                Indiquez ici les données techniques du cours : son code, son nom, les compétences et éléments de
+                compétence, le nom de l'enseignant·e, le trimestre, le format horaire du cours, etc.
+            </p>
+
+            <div style="padding: 20px;">
+                <!-- Ligne 1: Code cours, Nom cours, N° compétence, Compétence -->
+                <div
+                    style="display: grid; grid-template-columns: 0.8fr 1.2fr 0.6fr 1.4fr; gap: var(--form-gap); margin-bottom: var(--form-margin-bottom);">
+                    <div class="form-group">
+                        <label>Code du cours :</label>
+                        <input type="text" id="codeCours" class="form-control" placeholder="601-101-MQ"
+                            value="601-101-MQ">
+                    </div>
+                    <div class="form-group">
+                        <label>Nom du cours :</label>
+                        <input type="text" id="nomCours" class="form-control" placeholder="Écriture et littérature"
+                            value="Écriture et littérature">
+                    </div>
+                    <div class="form-group">
+                        <label>N° de la compétence :</label>
+                        <input type="text" id="numeroCompetence" class="form-control" placeholder="4EF0" value="4EF0">
+                    </div>
+                    <div class="form-group">
+                        <label>Compétence :</label>
+                        <input type="text" id="competencePrincipale" class="form-control"
+                            placeholder="Analyser des textes littéraires" value="Analyser des textes littéraires">
+                    </div>
+                </div>
+
+                <!-- Ligne 2: Éléments de compétences (champ élargi avec liste à puces) -->
+                <div style="margin-bottom: var(--form-margin-bottom);">
+                    <div class="form-group">
+                        <label>Éléments de compétences :</label>
+                        <textarea id="elementsCompetences" class="form-control"
+                            placeholder="• Reconnaître le propos du texte&#10;• Repérer et classer des thèmes&#10;• Choisir les éléments d'analyse"
+                            style="height: 80px; resize: vertical;" rows="4">• Reconnaître le propos du texte
+• Repérer et classer des thèmes
+• Choisir les éléments d'analyse</textarea>
+                    </div>
+                </div>
+
+                <!-- Ligne 3: Prénom enseignant, Nom enseignant, Département, Local dép. -->
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: var(--form-gap); margin-bottom: var(--form-margin-bottom);">
+                    <div class="form-group">
+                        <label>Prénom de l'enseignant·e :</label>
+                        <input type="text" id="prenomEnseignant" class="form-control" placeholder="Grégoire"
+                            value="Arthur">
+                    </div>
+                    <div class="form-group">
+                        <label>Nom de l'enseignant·e :</label>
+                        <input type="text" id="nomEnseignant" class="form-control" placeholder="Bédard" value="Rimbaud">
+                    </div>
+                    <div class="form-group">
+                        <label>Département :</label>
+                        <input type="text" id="departement" class="form-control"
+                            placeholder="Ex. : Littérature et communication">
+                    </div>
+                    <div class="form-group">
+                        <label>Local départemental :</label>
+                        <input type="text" id="localDepartement" class="form-control" placeholder="Ex. : 2314">
+                    </div>
+                </div>
+
+                <!-- Ligne 4: Trimestre, Année, Heures/semaine, Format horaire -->
+                <div
+                    style="display: grid; grid-template-columns: 1fr 0.8fr 0.8fr 1.4fr; gap: var(--form-gap); margin-bottom: var(--form-margin-bottom);">
+                    <div class="form-group">
+                        <label>Trimestre :</label>
+                        <select id="trimestre" class="form-control">
+                            <option value="">Sélectionnez...</option>
+                            <option value="automne">Automne (août à décembre)</option>
+                            <option value="hiver" selected>Hiver (janvier à mai)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Année :</label>
+                        <input type="number" id="annee" class="form-control" placeholder="2025" value="2025" min="2020"
+                            max="2030">
+                    </div>
+                    <div class="form-group">
+                        <label>Heures par semaine :</label>
+                        <input type="number" class="form-control" id="heuresParSemaine" min="1" max="10" placeholder="4"
+                            value="4">
+                    </div>
+                    <div class="groupe-form">
+                                <label>Format horaire</label>
+                                <select class="controle-form">
+                                    <option value="2x2" selected>2 séances séparées</option>
+                                    <option value="1x4">1 séance continue</option>
+                                </select>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+ATTENDU : Les informations entrées par l'utilisateur peuvent être sauvegardées, verrouillées, déverrouillées, modifiées, enregistrées à nouveau.
+
+FORMAT : Patch minimal uniquement

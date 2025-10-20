@@ -1,0 +1,25 @@
+025-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous développons un nouvel onglet dans la sous-navigation «Modalités d'évaluation» dans la navigation principale «Réglages». Le bouton est déjà créé. Cette section permettra d'établir les paramètres de chaque évaluation. Les évaluations seront faites par l'enseignant dans la navigation principale «Évaluations». Dans les réglages, il y aura 5 cartes à produire.
+
+OBJECTIF : Créer la carte 2 :
+
+2. Définition des évaluations
+Carte 2: Liste des évaluations
+├── Tableau dynamique:
+│   ├── Code : [généré auto: EV1, EV2...]
+│   ├── Titre : [champ texte]
+│   ├── Type : [select: Examen / Travail écrit / Quiz / Présentation / Portfolio / Autre]
+│   ├── Pondération : [champ %]
+│   └── Actions : [Modifier | Supprimer | Verrouiller]
+└── [+ Ajouter une évaluation]
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+
+ATTENDU : [Description visuelle/fonctionnelle du résultat] ou captures d'écran.
+
+FORMAT : Patch minimal uniquement

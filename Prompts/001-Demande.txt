@@ -1,0 +1,106 @@
+001-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). La classe .carte existe pour les conteneurs. Besoin d'ajouter deux nouvelles classes pour les cartes statistiques comme dans l'interface visuelle.
+
+OBJECTIF : CRÉER deux nouvelles classes CSS (.carte-apercu et .carte-metrique) pour afficher les statistiques comme dans la capture d'écran.
+
+ZONES AUTORISÉES : 
+- Ajouter après la ligne 269 (après la définition de .carte)
+- Créer de NOUVELLES classes
+- NE PAS modifier .carte existante
+
+NOMS STABLES : Les éléments dans NOMS_STABLES.json sont INTOUCHABLES
+
+CODE ACTUEL (index3.html, lignes 257-269) :
+```css
+.carte {
+    background: white;
+    border: 1px solid var(--bleu-pale);
+    border-radius: 8px;
+    padding: var(--espacement-moyen);
+    margin-bottom: var(--espacement-moyen);
+    box-shadow: 0 2px 8px rgba(3, 46, 92, 0.05);
+}
+
+EXTRAIT RÉFÉRENCE : 
+
+       /* ===============================
+           CARTES D'APERÇU - Style du 19 septembre
+           =============================== */
+
+        /* Cartes d'aperçu principales (grandes, bleues) */
+        .carte-apercu {
+            background: var(--bleu-pale);
+            border: 1px solid var(--bleu-carte);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .carte-apercu:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            background-color: white);
+        }
+
+        .carte-apercu-nombre {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--bleu-moyen);
+        }
+
+        .carte-apercu-label {
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===============================
+           CARTES DE MÉTRIQUES (petites, compactes)
+           =============================== */
+
+        .repartition-metriques {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .carte-metrique {
+            padding: 10px 10px;
+            border-radius: 6px;
+            text-align: center;
+            min-width: 120px;
+            font-size: 0.85em;
+            background-color: var(--bleu-carte);
+            color: var(--bleu-principal);
+            border: 1px solid var(--bleu-moyen);
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            /* Texte en gras */
+        }
+
+        .carte-metrique:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .carte-metrique strong {
+            display: block;
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+
+ATTENDU :
+.carte reste inchangée (conteneur principal)
+.carte-apercu pour les grandes cartes avec chiffres
+.carte-metrique pour les petites cartes de répartition
+Effets hover subtils sur les deux nouvelles classes
+
+FORMAT : Patch minimal - montrer SEULEMENT les lignes à ajouter ou modifier avec leur repères (visuels) dans le code actuel

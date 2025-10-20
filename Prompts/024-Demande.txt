@@ -1,0 +1,33 @@
+024-Demande
+
+CONTEXTE : Application de monitorage pédagogique (index3.html). Nous développons un nouvel onglet dans la sous-navigation «Modalités d'évaluation» dans la navigation principale «Réglages». Le bouton est déjà créé. Cette section permettra d'établir les paramètres de chaque évaluation. Les évaluations seront faites par l'enseignant dans la navigation principale «Évaluations». Dans les réglages, il y aura 5 cartes à produire.
+
+OBJECTIF : Créer la carte 1 :
+
+1. Vue d'ensemble des évaluations
+
+Carte 1: Résumé global
+├── Nombre total d'évaluations champ : [champ numérique]
+├── Pondération totale champ : [100%]
+├── Types (information dynamique) : [4 artefacts d'un portfolio, 1 analyse littéraire finale]
+	info ici : Le Règlement sur le régime des études collégiales (RREC) exige une note finale chiffrée en %. Pendant l'apprentissage, vous pouvez cependant mettre en place une pratique alternative de notation. Pour être conforme au RREC, celle-ci devra cependant être convertie en note chiffrée à la fin du trimestre.
+--- Pratique de notation menu select : sommative (traditionnelle), alternative (PAN)
+>si PAN, préciser : Notation basée sur la maîtrise ou les standards, Notation par spécifications (ou par contrat), Dénotation (Ungrading)
+> info importante :
+Notation basée sur la maîtrise ou les standards (Standard based Grade) : La notation est basée directement sur l’évaluation du degré d’atteinte des cibles d’apprentissages du cours (ex. : En développement, Acquis, Avancé, Pas encore évalué).
+
+Notation par spécifications une note finale donnée correspond à un ensemble de productions ou de performances prédéfini qui respecte les critères (ex. 
+
+Dénotation : Le moins possible d’évaluations sont notées. Quand elles le sont, il s'agit de rétroaction qualitative, d’autoévaluation, d’évaluation par les pairs.
+
+└── Statut (information dynamique) : ✓ Configuration complète / partielle / aucune
+
+
+ZONES AUTORISÉES : NE PAS toucher aux autres éléments de contenu
+
+NOMS STABLES : Respecter et conserver tous les noms dans NOMS_STABLES.json - AUCUN renommage
+
+
+ATTENDU : [Description visuelle/fonctionnelle du résultat] ou captures d'écran.
+
+FORMAT : Patch minimal uniquement
