@@ -803,6 +803,11 @@ function sauvegarderEvaluation() {
     }
 
     afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
+
+    // 🆕 AJOUTER ICI : Recalculer l'indice C après sauvegarde
+    if (typeof calculerEtSauvegarderIndiceCompletion === 'function') {
+        calculerEtSauvegarderIndiceCompletion();
+    }
 }
 
 /* ===============================
@@ -1133,8 +1138,8 @@ function obtenirClasseNote(note, echelleId) {
 function chargerListeEvaluationsRefonte() {
     console.log('📋 Chargement de la liste des évaluations...');
 
-    // Calculer les indices d'abord
-    calculerEtSauvegarderIndicesEvaluation();
+    // 🆕 NOUVEAU : Les indices sont maintenant calculés par liste-evaluations.js
+    // L'ancien calcul est désactivé pour éviter les conflits de structure
 
     // Récupérer toutes les données
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
@@ -1155,23 +1160,25 @@ function chargerListeEvaluationsRefonte() {
     donneesEvaluationsFiltrees = etudiants.map(etudiant => {
         const evalsEtudiant = evaluationsParEtudiant[etudiant.da] || [];
 
-        // CORRECTION : S'assurer que l'indice A est bien lu
-        const indiceA = indicesA[etudiant.da] !== undefined ? indicesA[etudiant.da] : 1;
-        const indiceC = indicesCP[etudiant.da]?.completion || 0;
-        const indiceP = indicesCP[etudiant.da]?.performance || 0;
+        // Lire l'indice C - Compatible avec les deux structures
+        let indiceC = 0;
+        if (indicesCP.completion?.sommatif) {
+            // Nouvelle structure
+            indiceC = indicesCP.completion.sommatif[etudiant.da] || 0;
+        } else if (indicesCP[etudiant.da]?.completion !== undefined) {
+            // Ancienne structure (compatibilité)
+            indiceC = indicesCP[etudiant.da].completion || 0;
+        }
 
-        console.log(`Étudiant ${etudiant.da}: A=${indiceA}, C=${indiceC}, P=${indiceP}`);
+        console.log(`Étudiant ${etudiant.da}: C=${(indiceC * 100).toFixed(1)}%`);
 
-        const risque = calculerRisqueEchec(indiceA, indiceC, indiceP);
+        console.log(`Étudiant ${etudiant.da}: C=${indiceC}`);
 
         return {
             ...etudiant,
             evaluations: evalsEtudiant,
             indices: {
-                assiduite: indiceA,
-                completion: indiceC,
-                performance: indiceP,
-                risque: risque
+                completion: indiceC
             }
         };
     });
@@ -1195,6 +1202,80 @@ function chargerListeEvaluationsRefonte() {
         document.getElementById('tri-evaluations').value = 'nom-asc';
         trierListeEvaluations();
     }
+}
+
+/**
+ * Génère le badge de complétion selon les réglages d'affichage
+ * @param {Object} etudiant - Données de l'étudiant avec indices
+ * @returns {string} HTML du badge
+ */
+function genererBadgeCompletion(etudiant) {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
+    const afficherAlternatif = config.affichageTableauBord?.afficherAlternatif || false;
+
+    // Récupérer les indices depuis localStorage
+    const indicesEval = JSON.parse(localStorage.getItem('indicesEvaluation') || '{}');
+
+    let completionSommatif = 0;
+    let completionAlternatif = 0;
+
+    // Lire les indices (compatible avec les deux structures)
+    if (indicesEval.completion?.sommatif) {
+        completionSommatif = indicesEval.completion.sommatif[etudiant.da] || 0;
+        completionAlternatif = indicesEval.completion.alternatif[etudiant.da] || 0;
+    } else if (indicesEval[etudiant.da]?.completion !== undefined) {
+        completionSommatif = indicesEval[etudiant.da].completion || 0;
+        completionAlternatif = completionSommatif; // Fallback
+    }
+
+    const nbArtefacts = etudiant.evaluations.length;
+
+    // Déterminer la couleur selon le taux (utiliser le sommatif par défaut)
+    const tauxPrincipal = afficherSommatif ? completionSommatif : completionAlternatif;
+    let couleurFond = '#e8f5e9'; // Vert clair par défaut
+    if (tauxPrincipal < 0.5) {
+        couleurFond = '#ffebee'; // Rouge clair
+    } else if (tauxPrincipal < 0.75) {
+        couleurFond = '#fff3e0'; // Orange clair
+    }
+
+    // CAS 1 : Afficher LES DEUX (sommatif / alternatif)
+    if (afficherSommatif && afficherAlternatif) {
+        return `
+            <span class="carte-metrique" style="padding:8px 15px; background: ${couleurFond}; border-radius: 6px;">
+                <strong style="font-size: 1.1rem;">C</strong>
+                <span style="font-size: 1.1rem; font-weight: 600; margin-left: 8px;">
+                    ${Math.round(completionSommatif * 100)}% / ${Math.round(completionAlternatif * 100)}%
+                </span>
+                <span style="font-size: 0.75rem; color: #666; margin-left: 5px;">(${nbArtefacts} artefacts)</span>
+            </span>
+        `;
+    }
+
+    // CAS 2 : Afficher SEULEMENT alternatif
+    if (afficherAlternatif) {
+        return `
+            <span class="carte-metrique" style="padding:8px 15px; background: ${couleurFond}; border-radius: 6px;">
+                <strong style="font-size: 1.1rem;">C (PAN)</strong>
+                <span style="font-size: 1.1rem; font-weight: 600; margin-left: 8px;">
+                    ${Math.round(completionAlternatif * 100)}%
+                </span>
+                <span style="font-size: 0.75rem; color: #666; margin-left: 5px;">(${nbArtefacts} artefacts)</span>
+            </span>
+        `;
+    }
+
+    // CAS 3 : Afficher SEULEMENT sommatif (par défaut)
+    return `
+        <span class="carte-metrique" style="padding:8px 15px; background: ${couleurFond}; border-radius: 6px;">
+            <strong style="font-size: 1.1rem;">C</strong>
+            <span style="font-size: 1.1rem; font-weight: 600; margin-left: 8px;">
+                ${Math.round(completionSommatif * 100)}%
+            </span>
+            <span style="font-size: 0.75rem; color: #666; margin-left: 5px;">(${nbArtefacts} artefacts)</span>
+        </span>
+    `;
 }
 
 /**
@@ -1236,22 +1317,9 @@ function afficherListeEvaluations(donneesEtudiants) {
                             <span class="badge-info">${etudiant.groupe || 'Sans groupe'}</span>
                         </div>
                         <div style="display:flex; gap:15px; align-items:center;">
-                            <span class="carte-metrique" style="padding:5px 10px;">
-                                <strong>A</strong>
-                                <span>${Math.round(etudiant.indices.assiduite * 100)}%</span>
-                            </span>
-                            <span class="carte-metrique" style="padding:5px 10px;">
-                                <strong>C</strong>
-                                <span>${Math.round(etudiant.indices.completion * 100)}%</span>
-                            </span>
-                            <span class="carte-metrique" style="padding:5px 10px;">
-                                <strong>P</strong>
-                                <span>${Math.round(etudiant.indices.performance * 100)}%</span>
-                            </span>
-                            <span class="badge-risque ${classeRisque}">
-                                Risque: ${Math.round(etudiant.indices.risque * 100)}%
-                            </span>
-                        </div>
+${genererBadgeCompletion(etudiant)}
+
+</div>
                     </div>
                 </div>
                 
@@ -1292,7 +1360,8 @@ function genererDetailsEtudiant(etudiant) {
                     <th>Production</th>
                     <th>Grille</th>
                     <th>Cartouche</th>
-                    <th>Note</th>
+                    <th>Note (lettre)</th>
+                    <th>Note (%)</th>
                     <th>Statut</th>
                     <th>Date</th>
                     <th>Actions</th>
@@ -1319,7 +1388,8 @@ function genererDetailsEtudiant(etudiant) {
                                         Évalué
                                     </span>
                                 </td>
-                                <td>${formaterDate(item.evaluation.dateEvaluation)}</td>
+<td>${eval.niveauFinal || '—'}</td>
+<td>${eval.noteFinale ? Math.round(eval.noteFinale) + '%' : '—'}</td>
                                 <td>
                                     <button class="btn btn-modifier" onclick="modifierEvaluation('${item.evaluation.id}')" style="padding:5px 10px;">
                                         Modifier
@@ -1358,7 +1428,7 @@ function genererDetailsEtudiant(etudiant) {
     `;
 
     // Ajouter le résumé
-    const nbAttendus = productions.length;
+    const nbAttendus = productions.filter(p => p.type !== 'portfolio').length;
     const nbRemis = evaluations.length;
     const resumeHTML = `
         <div class="carte" style="margin-top: 15px; background: var(--bleu-pale);">
@@ -1370,9 +1440,6 @@ function genererDetailsEtudiant(etudiant) {
                 </div>
                 <div>
                     <strong>Performance moyenne:</strong> ${Math.round(etudiant.indices.performance * 100)}%
-                </div>
-                <div>
-                    <strong>Assiduité:</strong> ${Math.round(etudiant.indices.assiduite * 100)}%
                 </div>
                 <div>
                     <strong>Tendance:</strong> ${obtenirTendance(evaluations)}
@@ -1504,37 +1571,12 @@ function trierListeEvaluations() {
             });
             break;
 
-        case 'assiduite-asc':
-            donneesTries.sort((a, b) => a.indices.assiduite - b.indices.assiduite);
-            break;
-
-        case 'assiduite-desc':
-            donneesTries.sort((a, b) => b.indices.assiduite - a.indices.assiduite);
-            break;
-
         case 'completion-asc':
             donneesTries.sort((a, b) => a.indices.completion - b.indices.completion);
             break;
 
         case 'completion-desc':
             donneesTries.sort((a, b) => b.indices.completion - a.indices.completion);
-            break;
-
-        case 'performance-asc':
-            donneesTries.sort((a, b) => a.indices.performance - b.indices.performance);
-            break;
-
-        case 'performance-desc':
-            donneesTries.sort((a, b) => b.indices.performance - a.indices.performance);
-            break;
-
-        case 'risque-asc':
-            donneesTries.sort((a, b) => a.indices.risque - b.indices.risque);
-            break;
-
-        case 'risque-desc':
-        default:
-            donneesTries.sort((a, b) => b.indices.risque - a.indices.risque);
             break;
     }
 
@@ -1616,7 +1658,7 @@ function mettreAJourStatistiquesEvaluations() {
 
     const statMoyenne = document.getElementById('stat-moyenne-groupe');
     if (statMoyenne) {
-        statMoyenne.innerHTML = `C: ${Math.round(moyenneC * 100)}% | P: ${Math.round(moyenneP * 100)}%`;
+        statMoyenne.innerHTML = `<strong>C:</strong> ${Math.round(moyenneC * 100)}%`;
     }
 }
 

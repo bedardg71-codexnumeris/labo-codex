@@ -25,11 +25,128 @@ function echapperHtml(texte) {
 // INITIALISATION
 // ============================================
 
+
+// ============================================
+// 🆕 CALCUL DE L'INDICE C (COMPLÉTION)
+// ============================================
+
+/**
+ * Fonction orchestratrice : Calcule et sauvegarde les deux indices de complétion
+ * Appelée après chaque modification d'évaluation
+ * 
+ * ARCHITECTURE: Identique à calculerEtSauvegarderIndicesAssiduite() dans saisie-presences.js
+ */
+function calculerEtSauvegarderIndiceCompletion() {
+    console.log('📊 Calcul des indices de complétion...');
+    
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    
+    // Structure de sortie
+    const indices = {
+        sommatif: {},
+        alternatif: {},
+        dateCalcul: new Date().toISOString()
+    };
+    
+    // Filtrer les étudiants actifs
+    const etudiantsActifs = etudiants.filter(e =>
+        e.statut !== 'décrochage' && e.statut !== 'abandon'
+    );
+    
+    // Calculer pour chaque étudiant
+    etudiantsActifs.forEach(etudiant => {
+        indices.sommatif[etudiant.da] = calculerCompletionSommative(etudiant.da);
+        indices.alternatif[etudiant.da] = calculerCompletionAlternative(etudiant.da);
+    });
+    
+    // Récupérer ou créer la structure indicesEvaluation
+    let indicesEvaluation = JSON.parse(localStorage.getItem('indicesEvaluation') || '{}');
+    indicesEvaluation.completion = indices;
+    localStorage.setItem('indicesEvaluation', JSON.stringify(indicesEvaluation));
+    
+    console.log('✅ Indices de complétion sauvegardés');
+    console.log('   Sommatif:', Object.keys(indices.sommatif).length, 'étudiants');
+    console.log('   Alternatif:', Object.keys(indices.alternatif).length, 'étudiants');
+    
+    return indices;
+}
+
+/**
+ * Calcule la complétion SOMMATIVE (depuis le début du trimestre)
+ * Formule : Artefacts remis ÷ Total artefacts attendus
+ * 
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {number} - Indice entre 0 et 1
+ */
+function calculerCompletionSommative(da) {
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    
+    // Productions à évaluer (exclure portfolio)
+    const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
+    const totalAttendus = productionsAEvaluer.length;
+    
+    if (totalAttendus === 0) {
+        console.warn('⚠️ Aucune production configurée');
+        return 0;
+    }
+    
+    // Compter les artefacts remis par cet étudiant
+    const evalsEtudiant = evaluations.filter(e => e.etudiantDA === da);
+    const nbRemis = evalsEtudiant.length;
+    
+    const indice = nbRemis / totalAttendus;
+    
+    console.log(`   Sommatif ${da}: ${nbRemis} / ${totalAttendus} artefacts = ${(indice * 100).toFixed(1)}%`);
+    
+    return Math.min(indice, 1);
+}
+
+/**
+ * Calcule la complétion ALTERNATIVE (sur les N meilleurs artefacts)
+ * Formule : Nombre de meilleurs artefacts remis ÷ N
+ * 
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {number} - Indice entre 0 et 1
+ */
+function calculerCompletionAlternative(da) {
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    
+    // Obtenir le nombre d'artefacts depuis les réglages
+    const nombreArtefacts = config.configPAN?.nombreArtefacts || 3;
+    
+    console.log(`   Calcul alternatif : ${nombreArtefacts} meilleurs artefacts`);
+    
+    // Récupérer les évaluations de cet étudiant
+    const evalsEtudiant = evaluations.filter(e => e.etudiantDA === da);
+    
+    if (evalsEtudiant.length === 0) {
+        console.log(`   Alternatif ${da}: Aucune évaluation, retour 0%`);
+        return 0;
+    }
+    
+    // Trier par note décroissante et prendre les N meilleurs
+    const meilleurs = evalsEtudiant
+        .filter(e => e.noteFinale !== null && e.noteFinale !== undefined)
+        .sort((a, b) => (b.noteFinale || 0) - (a.noteFinale || 0))
+        .slice(0, nombreArtefacts);
+    
+    const indice = meilleurs.length / nombreArtefacts;
+    
+    console.log(`   Alternatif ${da}: ${meilleurs.length} / ${nombreArtefacts} meilleurs = ${(indice * 100).toFixed(1)}%`);
+    
+    return Math.min(indice, 1);
+}
+
 /**
  * Initialise la page Liste des évaluations
  */
 function initialiserListeEvaluations() {
     console.log('🔄 Initialisation de la liste des évaluations...');
+
+        // 🆕 AJOUTER CETTE LIGNE
+    calculerEtSauvegarderIndiceCompletion();
 
     // Charger et afficher les données
     chargerDonneesEvaluations();
@@ -511,3 +628,4 @@ window.modifierEvaluation = modifierEvaluation;
 window.dupliquerEvaluation = dupliquerEvaluation;
 window.supprimerEvaluation = supprimerEvaluation;
 window.toggleVerrouillerEvaluation = toggleVerrouillerEvaluation;
+window.calculerEtSauvegarderIndiceCompletion = calculerEtSauvegarderIndiceCompletion;
