@@ -18,29 +18,140 @@
  * Initialise le module de saisie des présences
  * Appelée par main.js au chargement
  */
+/* ===============================
+   📊 CALCUL DES INDICES D'ASSIDUITÉ
+   =============================== */
+
+/**
+ * Fonction orchestratrice : Calcule et sauvegarde les deux indices
+ * Appelée après chaque enregistrement de présences
+ */
 function calculerEtSauvegarderIndicesAssiduite() {
+    console.log('📊 Calcul des indices d\'assiduité...');
+
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
-    const indicesAssiduite = {};
 
-    etudiants.filter(e => e.statut !== 'décrochage' && e.statut !== 'abandon')
-        .forEach(etudiant => {
-            // Chercher l'élément dans le DOM qui contient le taux
-            const elementTaux = document.getElementById(`taux_${etudiant.da}`);
+    // Structure de sortie
+    const indices = {
+        sommatif: {},
+        alternatif: {},
+        dateCalcul: new Date().toISOString()
+    };
 
-            if (elementTaux) {
-                // Lire le taux directement depuis le DOM (ex: "73%")
-                const tauxTexte = elementTaux.textContent.replace('%', '');
-                const taux = parseFloat(tauxTexte) || 0;
-                indicesAssiduite[etudiant.da] = taux / 100;
-            } else {
-                // Si l'élément n'existe pas, mettre 1 par défaut
-                indicesAssiduite[etudiant.da] = 1;
-            }
-        });
+    // Filtrer les étudiants actifs
+    const etudiantsActifs = etudiants.filter(e =>
+        e.statut !== 'décrochage' && e.statut !== 'abandon'
+    );
 
-    localStorage.setItem('indicesAssiduite', JSON.stringify(indicesAssiduite));
-    console.log('📊 Indices d\'assiduité sauvegardés:', indicesAssiduite);
-    return indicesAssiduite;
+    // Calculer pour chaque étudiant
+    etudiantsActifs.forEach(etudiant => {
+        indices.sommatif[etudiant.da] = calculerAssiduiteSommative(etudiant.da);
+        indices.alternatif[etudiant.da] = calculerAssiduiteAlternative(etudiant.da);
+    });
+
+    // Sauvegarder
+    localStorage.setItem('indicesAssiduite', JSON.stringify(indices));
+
+    console.log('✅ Indices d\'assiduité sauvegardés');
+    console.log('   Sommatif:', Object.keys(indices.sommatif).length, 'étudiants');
+    console.log('   Alternatif:', Object.keys(indices.alternatif).length, 'étudiants');
+
+    return indices;
+}
+
+/**
+ * Calcule l'assiduité SOMMATIVE (depuis le début du trimestre)
+ * Formule : Total heures présentes ÷ Total heures DONNÉES (pas théoriques)
+ * 
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {number} - Indice entre 0 et 1
+ */
+function calculerAssiduiteSommative(da) {
+    const presences = JSON.parse(localStorage.getItem('presences') || '[]');
+    
+    // Obtenir toutes les DATES où des présences ont été saisies
+    const datesSaisies = [...new Set(presences.map(p => p.date))].sort();
+    
+    if (datesSaisies.length === 0) {
+        console.warn('⚠️ Aucune présence saisie');
+        return 1; // Par défaut 100%
+    }
+    
+    // Calculer le total d'heures DONNÉES (pas théoriques)
+    // = nombre de séances saisies × 2h
+    const totalHeuresDonnees = datesSaisies.length * 2;
+    
+    // Calculer le total d'heures de présence de cet étudiant
+    const presencesEtudiant = presences.filter(p => p.da === da);
+    const totalHeuresPresentes = presencesEtudiant.reduce((sum, p) => sum + (p.heures || 0), 0);
+    
+    const indice = totalHeuresPresentes / totalHeuresDonnees;
+    
+    console.log(`   Sommatif ${da}: ${totalHeuresPresentes}h / ${totalHeuresDonnees}h = ${(indice * 100).toFixed(1)}%`);
+    
+    // Retourner l'indice (entre 0 et 1, plafonné à 1)
+    return Math.min(indice, 1);
+}
+
+/**
+ * Calcule l'assiduité ALTERNATIVE (sur les N dernières séances)
+ * Formule : Heures présentes sur N dernières séances ÷ (N × 2h)
+ * 
+ * Le nombre de séances est paramétrable via les réglages de notation.
+ * Par défaut : 6 séances (= 3 cours = 12h)
+ * 
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {number} - Indice entre 0 et 1
+ */
+function calculerAssiduiteAlternative(da) {
+    const presences = JSON.parse(localStorage.getItem('presences') || '[]');
+
+    // Obtenir le nombre de séances depuis les réglages
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const nombreCours = config.configPAN?.nombreCours || 3; // Par défaut 3 cours
+    const nombreSeances = nombreCours * 2; // 3 cours = 6 séances
+
+    console.log(`   Calcul alternatif : ${nombreCours} derniers cours = ${nombreSeances} séances`);
+
+    // Obtenir toutes les dates où des présences ont été saisies (ordre chronologique)
+    const datesSaisies = [...new Set(presences.map(p => p.date))].sort();
+
+    if (datesSaisies.length === 0) {
+        console.log(`   Alternatif ${da}: Aucune saisie, retour 100%`);
+        return 1; // Pas encore de saisie
+    }
+
+    // Prendre les N dernières dates de saisie
+    const dernieresDates = datesSaisies.slice(-nombreSeances);
+
+    console.log(`   Dernières dates pour ${da}:`, dernieresDates);
+
+    // Calculer les heures théoriques sur ces séances
+    const heuresTheoriques = nombreSeances * 2; // N séances × 2h
+
+    // Calculer les heures de présence de cet étudiant sur ces dates
+    const presencesEtudiant = presences.filter(p =>
+        p.da === da && dernieresDates.includes(p.date)
+    );
+
+    const heuresPresentes = presencesEtudiant.reduce((sum, p) => sum + (p.heures || 0), 0);
+
+    const indice = heuresPresentes / heuresTheoriques;
+
+    console.log(`   Alternatif ${da}: ${heuresPresentes}h / ${heuresTheoriques}h = ${(indice * 100).toFixed(1)}%`);
+
+    // Retourner l'indice (entre 0 et 1, plafonné à 1)
+    return Math.min(indice, 1);
+}
+
+/**
+ * Fonction utilitaire : Obtenir la configuration de notation
+ * Utilisée par d'autres modules pour lire les paramètres PAN
+ * 
+ * @returns {Object} Configuration complète de notation
+ */
+function obtenirConfigurationNotation() {
+    return JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
 }
 
 function initialiserModuleSaisiePresences() {
@@ -890,6 +1001,23 @@ function enregistrerPresences() {
 
     console.log(`✅ Présences enregistrées pour le ${dateStr}`);
     calculerEtSauvegarderIndicesAssiduite();
+
+    // ========== NOUVEAU : Recharger le tableau de bord ==========
+    // Si le tableau de bord est visible, le rafraîchir
+    const sectionTableauBord = document.getElementById('tableau-bord');
+    if (sectionTableauBord && sectionTableauBord.classList.contains('active')) {
+        console.log('🔄 Rafraîchissement du tableau de bord après saisie...');
+
+        // Recharger l'aperçu si c'est la sous-section active
+        const apercu = document.getElementById('tableau-bord-apercu');
+        if (apercu && apercu.classList.contains('active')) {
+            if (typeof chargerTableauBordApercu === 'function') {
+                setTimeout(() => chargerTableauBordApercu(), 300);
+            }
+        }
+    }
+
+    console.log(`✅ Présences enregistrées pour le ${dateStr}`);
 }
 
 /* ===============================

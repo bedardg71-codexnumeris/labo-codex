@@ -25,3 +25,27 @@ js/
 DOCUMENTATION
 ├── structure-modulaire.txt      # Ce fichier
 └── ordre-chargement.txt         # Ordre de chargement dans index.html
+
+
+MODULES CALCULATEURS (écrivent les indices)
+├─ saisie-presences.js 
+│   └─ Calcule et stocke les indices A
+│       ├─ assiduité sommative → localStorage.indiceAssiduité
+│       └─ assiduité alternative → localStorage.indiceAssiduitéPAN
+│
+├─ portfolio.js (ou productions.js)
+│   └─ Calcule et stocke les indices C et P
+│       ├─ complétion sommative → localStorage.indiceComplétion
+│       ├─ complétion alternative → localStorage.indiceComplétionPAN
+│       ├─ performance sommative → localStorage.indicePerformance
+│       └─ performance alternative → localStorage.indicePerformancePAN
+│
+MODULE LECTEUR (lit et combine)
+└─ tableau-bord.js
+    ├─ Lit tous les indices du localStorage
+    ├─ Calcule les indices composites :
+    │   ├─ Mobilisation = A × C
+    │   ├─ Rendement = C × P
+    │   ├─ Engagement = A × C × P
+    │   └─ Risque d'échec = 1 - (A × C × P)
+    └─ Affiche selon les réglages (sommatif et/ou PAN)

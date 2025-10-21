@@ -1,14 +1,17 @@
 /* ===============================
    MODULE 12: PRATIQUES DE NOTATION
    Index: 50 10-10-2025a → Modularisation
+   Étendu le 20 octobre 2025 pour supporter les options d'affichage
    
    ⚠️ AVERTISSEMENT ⚠️
    Ce module gère la configuration du système de notation
-   du cours (traditionnelle ou alternative).
+   du cours (traditionnelle ou alternative) ET les options
+   d'affichage des indices au tableau de bord.
    
    Contenu de ce module:
    - Configuration pratique de notation (sommative/alternative)
    - Gestion des types de PAN (maîtrise/spécifications/dénotation)
+   - Options d'affichage des indices (sommatif/alternatif/les deux)
    - Affichage des informations contextuelles
    - Sauvegarde et chargement des modalités
    - Mise à jour du statut de configuration
@@ -20,18 +23,19 @@
    Modules requis (doivent être chargés AVANT):
    - 01-config.js : Variables globales
    
-   Fonctions utilisées:
-   - echapperHtml() (depuis 01-config.js)
-   
    Éléments HTML requis:
    - #pratiqueNotation : Select pour choisir la pratique
    - #colonnePAN : Conteneur pour le type de PAN
    - #typePAN : Select pour choisir le type de PAN
    - #infoPAN : Zone d'information sur le PAN choisi
+   - #optionsAffichageIndices : Conteneur des options d'affichage
+   - #afficherSommatif : Checkbox pour afficher indices sommatifs
+   - #afficherAlternatif : Checkbox pour afficher indices alternatifs
    - #statutModalites : Zone d'affichage du statut
+   - #btnSauvegarderPratiqueNotation : Bouton de sauvegarde
    
    LocalStorage utilisé:
-   - 'modalitesEvaluation' : Object contenant la configuration
+   - 'modalitesEvaluation' : Object contenant la configuration complète
    =============================== */
 
 /* ===============================
@@ -44,8 +48,9 @@
  * 
  * FONCTIONNEMENT:
  * 1. Vérifie que les éléments DOM existent (section active)
- * 2. Charge les modalités sauvegardées
- * 3. Met à jour le statut d'affichage
+ * 2. Attache les événements aux éléments
+ * 3. Charge les modalités sauvegardées
+ * 4. Met à jour le statut d'affichage
  * 
  * RETOUR:
  * - Sortie silencieuse si les éléments n'existent pas
@@ -60,10 +65,48 @@ function initialiserModulePratiques() {
         return;
     }
     
+    // Attacher les événements
+    attacherEvenementsPratiques();
+    
     // Charger les modalités sauvegardées
     chargerModalites();
     
     console.log('   ✅ Module Pratiques initialisé');
+}
+
+/**
+ * Attache les événements aux éléments HTML
+ * Appelée par initialiserModulePratiques()
+ */
+function attacherEvenementsPratiques() {
+    // Sélecteur pratique de notation
+    const selectPratique = document.getElementById('pratiqueNotation');
+    if (selectPratique) {
+        selectPratique.addEventListener('change', changerPratiqueNotation);
+    }
+
+    // Sélecteur type PAN
+    const selectTypePAN = document.getElementById('typePAN');
+    if (selectTypePAN) {
+        selectTypePAN.addEventListener('change', afficherInfoPAN);
+    }
+
+    // Checkboxes d'affichage
+    const checkSommatif = document.getElementById('afficherSommatif');
+    if (checkSommatif) {
+        checkSommatif.addEventListener('change', sauvegarderOptionsAffichage);
+    }
+
+    const checkAlternatif = document.getElementById('afficherAlternatif');
+    if (checkAlternatif) {
+        checkAlternatif.addEventListener('change', sauvegarderOptionsAffichage);
+    }
+
+    // Bouton sauvegarder
+    const btnSauvegarder = document.getElementById('btnSauvegarderPratiqueNotation');
+    if (btnSauvegarder) {
+        btnSauvegarder.addEventListener('click', sauvegarderPratiqueNotation);
+    }
 }
 
 /* ===============================
@@ -78,11 +121,9 @@ function initialiserModulePratiques() {
  * 1. Récupère la pratique sélectionnée
  * 2. Affiche/masque la colonne PAN selon la pratique
  * 3. Réinitialise le type PAN si nécessaire
- * 4. Sauvegarde dans localStorage
- * 5. Met à jour le statut
- * 
- * UTILISÉ PAR:
- * - onchange="#pratiqueNotation" dans le HTML
+ * 4. Affiche les options d'affichage
+ * 5. Sauvegarde dans localStorage
+ * 6. Met à jour le statut
  */
 function changerPratiqueNotation() {
     const pratique = document.getElementById('pratiqueNotation').value;
@@ -106,6 +147,9 @@ function changerPratiqueNotation() {
     modalites.typePAN = pratique === 'alternative' ? modalites.typePAN : null;
     localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
 
+    // Gérer l'affichage des options d'affichage
+    afficherOptionsAffichage();
+
     mettreAJourStatutModalites();
 }
 
@@ -122,21 +166,13 @@ function changerPratiqueNotation() {
  * 2. Affiche la description correspondante
  * 3. Sauvegarde dans localStorage
  * 4. Met à jour le statut
- * 
- * UTILISÉ PAR:
- * - onchange="#typePAN" dans le HTML
- * 
- * DESCRIPTIONS:
- * - maitrise: Notation basée sur la maîtrise (SBG)
- * - specifications: Notation par spécifications
- * - denotation: Dénotation (Ungrading)
  */
 function afficherInfoPAN() {
     const typePAN = document.getElementById('typePAN').value;
     const infoPAN = document.getElementById('infoPAN');
 
     const descriptions = {
-        'maitrise': 'L\'étudiant·e est évalué·e selon son niveau de maîtrise des compétences (Ex: En développement, Acquis, Avancé...). En anglais on l\'appelle <em>Standard Based Grading</em>.',
+        'maitrise': 'L\'étudiant·e progresse à travers des niveaux de maîtrise (Ex: En développement, Acquis, Avancé...). En anglais on l\'appelle <em>Standard Based Grading</em>.',
         'specifications': 'L\'étudiant·e doit satisfaire à des critères précis et binaires (réussi/non réussi) pour chaque compétence. En anglais on l\'appelle <em>Specifications Grading</em>.',
         'denotation': 'Approche sans notes chiffrées pendant le trimestre. L\'accent est mis sur la rétroaction descriptive et l\'autoévaluation. En anglais on l\'appelle <em>Ungrading</em>.'
     };
@@ -157,11 +193,86 @@ function afficherInfoPAN() {
 }
 
 /* ===============================
+   📊 GESTION DES OPTIONS D'AFFICHAGE (NOUVEAU)
+   =============================== */
+
+/**
+ * Gère l'affichage de la section des options d'affichage
+ * Appelée après le changement de pratique de notation
+ * 
+ * FONCTIONNEMENT:
+ * 1. Affiche/masque la section selon la pratique choisie
+ * 2. Pré-coche les bonnes options par défaut
+ * 3. Sauvegarde automatiquement
+ */
+function afficherOptionsAffichage() {
+    const pratique = document.getElementById('pratiqueNotation').value;
+    const optionsAffichage = document.getElementById('optionsAffichageIndices');
+    
+    if (!optionsAffichage) return;
+    
+    if (pratique === 'alternative') {
+        optionsAffichage.style.display = 'block';
+        // Par défaut : cocher les deux pour recherche
+        document.getElementById('afficherSommatif').checked = true;
+        document.getElementById('afficherAlternatif').checked = true;
+    } else if (pratique === 'sommative') {
+        optionsAffichage.style.display = 'block';
+        // Seul le sommatif coché
+        document.getElementById('afficherSommatif').checked = true;
+        document.getElementById('afficherAlternatif').checked = false;
+    } else {
+        optionsAffichage.style.display = 'none';
+    }
+    
+    sauvegarderOptionsAffichage();
+}
+
+/**
+ * Sauvegarde les options d'affichage des indices
+ * Appelée par les événements change des checkboxes
+ * 
+ * FONCTIONNEMENT:
+ * 1. Récupère l'état des checkboxes
+ * 2. Valide qu'au moins une option est cochée
+ * 3. Sauvegarde dans localStorage
+ */
+function sauvegarderOptionsAffichage() {
+    const checkSommatif = document.getElementById('afficherSommatif');
+    const checkAlternatif = document.getElementById('afficherAlternatif');
+    
+    if (!checkSommatif || !checkAlternatif) return;
+    
+    const afficherSommatif = checkSommatif.checked;
+    const afficherAlternatif = checkAlternatif.checked;
+    
+    // Validation : au moins un doit être coché
+    if (!afficherSommatif && !afficherAlternatif) {
+        alert('Au moins un type d\'affichage doit être activé !');
+        checkSommatif.checked = true;
+        return;
+    }
+    
+    // Récupérer la config existante
+    let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    
+    // Ajouter les options d'affichage
+    modalites.affichageTableauBord = {
+        afficherSommatif: afficherSommatif,
+        afficherAlternatif: afficherAlternatif
+    };
+    
+    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    
+    console.log('Options d\'affichage sauvegardées:', modalites.affichageTableauBord);
+}
+
+/* ===============================
    💾 SAUVEGARDE ET CHARGEMENT
    =============================== */
 
 /**
- * Sauvegarde la configuration de la pratique de notation
+ * Sauvegarde la configuration complète de la pratique de notation
  * Appelée par le bouton «Sauvegarder la configuration»
  * 
  * FONCTIONNEMENT:
@@ -169,16 +280,7 @@ function afficherInfoPAN() {
  * 2. Valide les champs obligatoires
  * 3. Sauvegarde dans localStorage avec timestamp
  * 4. Affiche notification de succès
- * 
- * UTILISÉ PAR:
- * - onclick="sauvegarderPratiqueNotation()" dans le HTML
- * 
- * VALIDATION:
- * - Pratique obligatoire
- * - Type PAN obligatoire si pratique alternative
- * 
- * CLÉ LOCALSTORAGE:
- * - 'modalitesEvaluation' : Object des modalités
+ * 5. Met à jour le statut
  */
 function sauvegarderPratiqueNotation() {
     const pratique = document.getElementById('pratiqueNotation').value;
@@ -194,15 +296,29 @@ function sauvegarderPratiqueNotation() {
         return;
     }
 
-    // Sauvegarder avec timestamp
+    // Construire la configuration complète
     let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
     modalites.pratique = pratique;
     modalites.typePAN = pratique === 'alternative' ? typePAN : null;
     modalites.dateConfiguration = new Date().toISOString();
+    
+    // S'assurer que les options d'affichage sont incluses
+    if (!modalites.affichageTableauBord) {
+        const checkSommatif = document.getElementById('afficherSommatif');
+        const checkAlternatif = document.getElementById('afficherAlternatif');
+        
+        modalites.affichageTableauBord = {
+            afficherSommatif: checkSommatif ? checkSommatif.checked : true,
+            afficherAlternatif: checkAlternatif ? checkAlternatif.checked : false
+        };
+    }
+    
     localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
 
     afficherNotificationSucces('Configuration de la pratique de notation sauvegardée !');
     mettreAJourStatutModalites();
+    
+    console.log('Configuration complète sauvegardée:', modalites);
 }
 
 /**
@@ -213,13 +329,8 @@ function sauvegarderPratiqueNotation() {
  * 2. Si vide: réinitialise tous les champs
  * 3. Sinon: remplit les champs avec les valeurs
  * 4. Affiche/masque la colonne PAN selon la pratique
- * 5. Met à jour le statut
- * 
- * UTILISÉ PAR:
- * - initialiserModulePratiques()
- * 
- * CLÉ LOCALSTORAGE:
- * - 'modalitesEvaluation' : Object des modalités
+ * 5. Charge les options d'affichage
+ * 6. Met à jour le statut
  */
 function chargerModalites() {
     const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
@@ -227,6 +338,7 @@ function chargerModalites() {
     const selectPratique = document.getElementById('pratiqueNotation');
     const colonnePAN = document.getElementById('colonnePAN');
     const selectPAN = document.getElementById('typePAN');
+    const optionsAffichage = document.getElementById('optionsAffichageIndices');
 
     // S'assurer que les éléments existent avant de continuer
     if (!selectPratique || !colonnePAN || !selectPAN) {
@@ -239,6 +351,9 @@ function chargerModalites() {
         selectPratique.value = '';
         colonnePAN.style.display = 'none';
         selectPAN.value = '';
+        if (optionsAffichage) {
+            optionsAffichage.style.display = 'none';
+        }
         mettreAJourStatutModalites();
         return;
     }
@@ -255,13 +370,28 @@ function chargerModalites() {
             selectPAN.value = modalites.typePAN;
             afficherInfoPAN();
         } else {
-            // Alternative choisie mais pas de type : forcer "Choisir..."
             selectPAN.value = '';
         }
     } else {
         colonnePAN.style.display = 'none';
         selectPAN.value = '';
     }
+
+    // Charger les options d'affichage
+    if (modalites.affichageTableauBord) {
+        const checkSommatif = document.getElementById('afficherSommatif');
+        const checkAlternatif = document.getElementById('afficherAlternatif');
+        
+        if (checkSommatif) {
+            checkSommatif.checked = modalites.affichageTableauBord.afficherSommatif !== false;
+        }
+        if (checkAlternatif) {
+            checkAlternatif.checked = modalites.affichageTableauBord.afficherAlternatif || false;
+        }
+    }
+    
+    // Afficher la section options si nécessaire
+    afficherOptionsAffichage();
 
     // Mettre à jour le statut
     mettreAJourStatutModalites();
@@ -278,18 +408,6 @@ function chargerModalites() {
  * 1. Récupère les modalités depuis localStorage
  * 2. Détermine le statut selon les valeurs
  * 3. Met à jour #statutModalites avec HTML formaté
- * 
- * UTILISÉ PAR:
- * - changerPratiqueNotation()
- * - afficherInfoPAN()
- * - sauvegarderPratiqueNotation()
- * - chargerModalites()
- * 
- * STATUTS POSSIBLES:
- * - ✗ À configurer (rouge) : Aucune pratique choisie
- * - ✓ Sommative traditionnelle (vert) : Pratique sommative
- * - ✓ Alternative (Type) (vert) : PAN avec type défini
- * - ⚠ Choisir un type de PAN (orange) : PAN sans type
  */
 function mettreAJourStatutModalites() {
     const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
@@ -304,16 +422,16 @@ function mettreAJourStatutModalites() {
     if (!modalites.pratique) {
         statutDiv.innerHTML = '<span style="color: var(--risque-critique);">✗ À configurer</span>';
     } else if (modalites.pratique === 'sommative') {
-        statutDiv.innerHTML = '<span style="color: var(--risque-minimal);">✓ Sommative traditionnelle (en %)</span>';
+        statutDiv.innerHTML = '<span style="color: var(--vert-moyen);">✓ Sommative traditionnelle (en %)</span>';
     } else if (modalites.pratique === 'alternative' && modalites.typePAN) {
         const types = {
             'maitrise': 'Maîtrise',
             'specifications': 'Spécifications',
             'denotation': 'Dénotation'
         };
-        statutDiv.innerHTML = `<span style="color: var(--risque-minimal);">✓ Alternative (${types[modalites.typePAN]})</span>`;
+        statutDiv.innerHTML = `<span style="color: var(--vert-moyen);">✓ Alternative (${types[modalites.typePAN]})</span>`;
     } else if (modalites.pratique === 'alternative' && !modalites.typePAN) {
-        statutDiv.innerHTML = '<span style="color: var(--risque-modere);">⚠ Choisir un type de PAN</span>';
+        statutDiv.innerHTML = '<span style="color: var(--orange-accent);">⚠ Choisir un type de PAN</span>';
     }
 }
 
@@ -328,18 +446,6 @@ function mettreAJourStatutModalites() {
  * 1. Crée un div avec le message
  * 2. Ajoute au body avec animation
  * 3. Supprime après 3 secondes
- * 
- * PARAMÈTRES:
- * @param {string} message - Message à afficher
- * 
- * UTILISÉ PAR:
- * - sauvegarderPratiqueNotation()
- * 
- * STYLE:
- * - Position fixe en haut à droite
- * - Fond vert (succès)
- * - Animation slideIn
- * - Disparaît après 3s
  */
 function afficherNotificationSucces(message) {
     const notification = document.createElement('div');
@@ -353,36 +459,44 @@ function afficherNotificationSucces(message) {
 }
 
 /* ===============================
+   🔧 UTILITAIRES PUBLICS
+   =============================== */
+
+/**
+ * Récupère la configuration de notation complète
+ * Fonction utilitaire pour les autres modules
+ * 
+ * @returns {Object} Configuration complète de notation
+ * 
+ * UTILISÉ PAR:
+ * - Module tableau-bord pour savoir quels indices afficher
+ * - Module évaluations pour adapter le comportement
+ * - Module statistiques pour les calculs
+ */
+function obtenirConfigurationNotation() {
+    return JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+}
+
+/* ===============================
    📌 NOTES D'UTILISATION
    =============================== */
 
 /*
+ * STRUCTURE LOCALSTORAGE:
+ * {
+ *   pratique: "sommative" | "alternative",
+ *   typePAN: "maitrise" | "specifications" | "denotation" | null,
+ *   affichageTableauBord: {
+ *     afficherSommatif: boolean,
+ *     afficherAlternatif: boolean
+ *   },
+ *   dateConfiguration: "2025-10-20T..."
+ * }
+ * 
  * ORDRE D'INITIALISATION:
  * 1. Charger le module 01-config.js (variables globales)
  * 2. Charger ce module 12-pratiques.js
  * 3. Appeler initialiserModulePratiques() depuis 99-main.js
- * 
- * DÉPENDANCES:
- * - echapperHtml() depuis 01-config.js (non utilisée ici mais disponible)
- * - Classes CSS depuis styles.css
- * 
- * LOCALSTORAGE:
- * - 'modalitesEvaluation' : Object des modalités configurées
- * 
- * MODULES DÉPENDANTS:
- * - Statistiques : Affichera la pratique configurée
- * - Autres modules pouvant référencer la pratique de notation
- * 
- * STRUCTURE DONNÉES:
- * Modalites = {
- *   pratique: string ('sommative' | 'alternative'),
- *   typePAN: string | null ('maitrise' | 'specifications' | 'denotation'),
- *   dateConfiguration: string ISO
- * }
- * 
- * ÉVÉNEMENTS:
- * Tous les événements sont gérés via attributs HTML (onchange, onclick)
- * Pas d'addEventListener requis dans 99-main.js
  * 
  * COMPATIBILITÉ:
  * - Nécessite ES6+ pour les arrow functions et template literals

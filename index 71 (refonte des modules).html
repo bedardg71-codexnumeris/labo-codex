@@ -2328,6 +2328,8 @@ Exemple :
                 </div><!-- FIN sous-section reglages-groupe -->
 
                 <!-- Sous-section : Pratique de notation -->
+                <!-- Sous-section : Pratique de notation -->
+                <!-- Sous-section : Pratique de notation -->
                 <div id="reglages-pratique-notation" class="sous-section">
                     <h2>Pratique de notation</h2>
                     <p class="text-muted">Configuration du système de notation du cours</p>
@@ -2339,11 +2341,9 @@ Exemple :
                         <!-- NOTE RREC -->
                         <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
              background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--orange-accent);">
-                            <strong>Note :</strong> Le Règlement sur le régime des études collégiales (RREC) exige
-                            une
+                            <strong>Note :</strong> Le Règlement sur le régime des études collégiales (RREC) exige une
                             note finale chiffrée en %.
-                            Pendant l'apprentissage, vous pouvez mettre en place une pratique alternative de
-                            notation
+                            Pendant l'apprentissage, vous pouvez mettre en place une pratique alternative de notation
                             (PAN),
                             mais celle-ci doit être convertie en note chiffrée (%) à la fin du trimestre.
                         </div>
@@ -2353,8 +2353,7 @@ Exemple :
                             <!-- Colonne gauche -->
                             <div class="groupe-form">
                                 <label>Pratique de notation</label>
-                                <select id="pratiqueNotation" class="controle-form"
-                                    onchange="changerPratiqueNotation()">
+                                <select id="pratiqueNotation" class="controle-form">
                                     <option value="">Choisir une pratique de notation</option>
                                     <option value="sommative">Sommative traditionnelle (en %)</option>
                                     <option value="alternative">Alternative (PAN)</option>
@@ -2364,7 +2363,7 @@ Exemple :
                             <!-- Colonne droite -->
                             <div class="groupe-form" id="colonnePAN" style="display: none;">
                                 <label>Type de pratique alternative</label>
-                                <select id="typePAN" class="controle-form" onchange="afficherInfoPAN()">
+                                <select id="typePAN" class="controle-form">
                                     <option value="">Choisir un type de PAN...</option>
                                     <option value="maitrise">Notation basée sur la maîtrise</option>
                                     <option value="specifications">Notation par spécifications</option>
@@ -2377,6 +2376,64 @@ Exemple :
                         <div id="infoPAN" style="display: none; margin-top: 15px; padding: 10px; 
              background: white; border-radius: 4px; font-size: 0.85rem; color: #666;">
                         </div>
+
+                        <!-- ==========================================
+             SECTION : OPTIONS D'AFFICHAGE DES INDICES
+             ========================================== -->
+                        <div id="optionsAffichageIndices" style="display: none; margin-top: 25px; padding: 15px; 
+             background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-moyen);">
+
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
+                                📊 Affichage des indices au tableau de bord
+                            </h4>
+
+                            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                                Choisir quels types d'indices afficher dans le tableau de bord.
+                                Pour fins de recherche ou d'expérimentation, tu peux afficher les deux systèmes
+                                simultanément
+                                pour comparer les approches sommative et alternative.
+                            </p>
+
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+
+                                <!-- Option 1 : Indices sommatifs -->
+                                <label style="display: flex; align-items: start; gap: 10px; cursor: pointer; 
+                       padding: 10px; background: white; border-radius: 4px;">
+                                    <input type="checkbox" id="afficherSommatif" checked style="margin-top: 3px;">
+                                    <div>
+                                        <strong>Afficher les indices sommatifs</strong>
+                                        <div style="font-size: 0.8rem; color: #666; margin-top: 3px;">
+                                            Calcul sur toute la session (A, C, P globaux)
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <!-- Option 2 : Indices alternatifs PAN -->
+                                <label style="display: flex; align-items: start; gap: 10px; cursor: pointer; 
+                       padding: 10px; background: white; border-radius: 4px;">
+                                    <input type="checkbox" id="afficherAlternatif" style="margin-top: 3px;">
+                                    <div>
+                                        <strong>Afficher les indices alternatifs (PAN)</strong>
+                                        <div style="font-size: 0.8rem; color: #666; margin-top: 3px;">
+                                            Calcul sur 3 derniers cours (12h) et meilleurs artefacts
+                                        </div>
+                                    </div>
+                                </label>
+
+                            </div>
+
+                            <!-- Conseil recherche -->
+                            <div style="margin-top: 12px; padding: 10px; background: var(--vert-pale); 
+                 border-radius: 4px; font-size: 0.85rem; color: #555; border-left: 3px solid var(--vert-moyen);">
+                                💡 <strong>Mode recherche/expérimentation :</strong> Active les deux options pour
+                                comparer
+                                côte à côte les indices sommatifs traditionnels et les indices PAN. Cela permet
+                                d'évaluer
+                                l'écart entre les deux approches et d'ajuster tes interventions.
+                            </div>
+
+                        </div>
+                        <!-- FIN SECTION OPTIONS AFFICHAGE -->
 
                         <!-- STATUT + BOUTON GROUPÉS EN BAS -->
                         <div style="margin-top: 30px; padding: 15px; background: var(--bleu-tres-pale); 
@@ -2391,7 +2448,7 @@ Exemple :
                                 </div>
 
                                 <!-- Bouton à droite -->
-                                <button class="btn btn-confirmer" onclick="sauvegarderPratiqueNotation()">
+                                <button class="btn btn-confirmer" id="btnSauvegarderPratiqueNotation">
                                     💾 Sauvegarder la configuration
                                 </button>
                             </div>

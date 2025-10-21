@@ -46,53 +46,31 @@ function initialiserModuleTableauBordApercu() {
    📈 FONCTION PRINCIPALE
    =============================== */
 
-/**
- * Charge et affiche toutes les statistiques du tableau de bord
- * 
- * APPELÉE PAR:
- * - initialiserModuleTableauBordApercu()
- * - Changement vers sous-section aperçu
- * - Bouton de rafraîchissement (si ajouté)
- * 
- * FONCTIONNEMENT:
- * 1. Récupère les données (étudiants, présences, évaluations)
- * 2. Calcule les indices pour chaque étudiant
- * 3. Agrège les statistiques du groupe
- * 4. Affiche les métriques, distribution, alertes
- */
 function chargerTableauBordApercu() {
     console.log('📊 Chargement du tableau de bord - aperçu');
     
     try {
-        // Récupérer les données
         const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
-        const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-        const presences = JSON.parse(localStorage.getItem('presences') || '[]');
         
-        // Filtrer les étudiants actifs
         const etudiantsActifs = etudiants.filter(e => 
             e.statut !== 'décrochage' && e.statut !== 'abandon'
         );
         
-        // Calculer les indices pour chaque étudiant
+        // Ajouter les indices (structure : {sommatif: {...}, alternatif: {...}})
         const etudiantsAvecIndices = etudiantsActifs.map(etudiant => {
-            const indices = calculerIndicesEtudiant(etudiant.da, presences, evaluations);
+            const indices = calculerIndicesEtudiant(etudiant.da);
             return {
                 ...etudiant,
-                ...indices
+                ...indices  // Ajoute sommatif et alternatif
             };
         });
         
-        // Afficher les métriques globales
+        // Afficher tout
         afficherMetriquesGlobales(etudiantsAvecIndices);
-        
-        // Afficher la distribution des risques
         afficherDistributionRisques(etudiantsAvecIndices);
-        
-        // Afficher les alertes prioritaires
         afficherAlertesPrioritaires(etudiantsAvecIndices);
         
-        console.log('   ✅ Tableau de bord chargé');
+        console.log('✅ Tableau de bord chargé');
         
     } catch (error) {
         console.error('❌ Erreur chargement tableau de bord:', error);
@@ -104,149 +82,50 @@ function chargerTableauBordApercu() {
    =============================== */
 
 /**
- * Calcule tous les indices pour un étudiant
+ * Récupère les indices calculés pour un étudiant
+ * Retourne TOUJOURS sommatif ET alternatif
+ * C'est l'affichage qui décide quoi montrer
  * 
  * @param {string} da - DA de l'étudiant
- * @param {Array} presences - Toutes les présences
- * @param {Array} evaluations - Toutes les évaluations
- * @returns {Object} Indices calculés {assiduite, completion, performance, risque}
+ * @returns {Object} Indices complets
  */
-function calculerIndicesEtudiant(da, presences, evaluations) {
-    // Calculer l'assiduité (sommative - toutes séances)
-    const assiduite = calculerAssiduiteSommative(da, presences);
+function calculerIndicesEtudiant(da) {
+    // Récupérer les indices A depuis saisie-presences.js
+    const indicesA = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
     
-    // Calculer la complétion (sommative - tous artefacts)
-    const completion = calculerCompletionSommative(da, evaluations);
+    // Récupérer les indices C et P (à implémenter plus tard)
+    const indicesCP = JSON.parse(localStorage.getItem('indicesEvaluation') || '{}');
     
-    // Calculer la performance (alternative - 3 derniers artefacts)
-    const performance = calculerPerformanceAlternative(da, evaluations);
-    
-    // Calculer le risque (formule: 1 - A×C×P)
-    const risque = calculerRisque(assiduite, completion, performance);
-    
-    // Déterminer le niveau de risque
-    const niveauRisque = determinerNiveauRisque(risque);
-    
-    return {
-        assiduite,
-        completion,
-        performance,
-        risque,
-        niveauRisque
+    // Structure complète avec sommatif ET alternatif
+    const indices = {
+        sommatif: {
+            assiduite: indicesA.sommatif?.[da] || 0,
+            completion: indicesCP.sommatif?.[da]?.completion || 0,
+            performance: indicesCP.sommatif?.[da]?.performance || 0
+        },
+        alternatif: {
+            assiduite: indicesA.alternatif?.[da] || 0,
+            completion: indicesCP.alternatif?.[da]?.completion || 0,
+            performance: indicesCP.alternatif?.[da]?.performance || 0
+        }
     };
-}
-
-/**
- * Calcule l'assiduité sommative (toutes les séances)
- * Formule du Guide: SOMME(heures présent) / TOTAL(heures cours)
- * 
- * @param {string} da - DA de l'étudiant
- * @param {Array} presences - Toutes les présences
- * @returns {number} Proportion entre 0 et 1
- */
-function calculerAssiduiteSommative(da, presences) {
-    try {
-        // Filtrer les présences de cet étudiant
-        const presencesEtudiant = presences.filter(p => p.da === da);
-        
-        if (presencesEtudiant.length === 0) return 0;
-        
-        // Calculer le total des heures de présence
-        const heuresPresent = presencesEtudiant.reduce((total, p) => {
-            return total + (p.heuresPresent || 0);
-        }, 0);
-        
-        // Calculer le total d'heures de cours données
-        // Utiliser la fonction du module saisie-presences si disponible
-        const totalHeuresCours = typeof calculerNombreSeances === 'function'
-            ? calculerNombreSeances() * 2  // 2h par séance
-            : presences.length * 2;  // Fallback
-        
-        if (totalHeuresCours === 0) return 0;
-        
-        return heuresPresent / totalHeuresCours;
-        
-    } catch (error) {
-        console.error('Erreur calcul assiduité:', error);
-        return 0;
-    }
-}
-
-/**
- * Calcule la complétion sommative (tous les artefacts)
- * Formule du Guide: NOMBRE(artefacts remis) / NOMBRE(artefacts attendus)
- * 
- * @param {string} da - DA de l'étudiant
- * @param {Array} evaluations - Toutes les évaluations
- * @returns {number} Proportion entre 0 et 1
- */
-function calculerCompletionSommative(da, evaluations) {
-    try {
-        // Récupérer les productions configurées
-        const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
-        const artefacts = productions.filter(p => 
-            p.type === 'artefact-portfolio' || p.type === 'production'
-        );
-        
-        if (artefacts.length === 0) return 0;
-        
-        // Compter les artefacts remis par cet étudiant
-        const evaluationsEtudiant = evaluations.filter(e => e.etudiantDA === da);
-        const nbRemis = evaluationsEtudiant.length;
-        
-        return nbRemis / artefacts.length;
-        
-    } catch (error) {
-        console.error('Erreur calcul complétion:', error);
-        return 0;
-    }
-}
-
-/**
- * Calcule la performance alternative (3 derniers artefacts)
- * Formule du Guide: MOYENNE(notes IDME des 3 derniers) / 4
- * Note: En pratique alternative, on ne fait pas de moyenne arithmétique
- * mais on regarde la tendance récente
- * 
- * @param {string} da - DA de l'étudiant
- * @param {Array} evaluations - Toutes les évaluations
- * @returns {number} Proportion entre 0 et 1
- */
-function calculerPerformanceAlternative(da, evaluations) {
-    try {
-        // Récupérer les évaluations de cet étudiant
-        const evaluationsEtudiant = evaluations.filter(e => e.etudiantDA === da);
-        
-        if (evaluationsEtudiant.length === 0) return 0;
-        
-        // Trier par date décroissante et prendre les 3 derniers
-        const derniers3 = evaluationsEtudiant
-            .sort((a, b) => new Date(b.dateEvaluation || 0) - new Date(a.dateEvaluation || 0))
-            .slice(0, 3);
-        
-        if (derniers3.length === 0) return 0;
-        
-        // Convertir les niveaux IDME en valeurs numériques
-        // I=1, D=2, M=3, E=4
-        const valeurs = derniers3.map(e => {
-            const niveau = e.niveauFinal || '';
-            switch(niveau.toUpperCase()) {
-                case 'E': return 4;
-                case 'M': return 3;
-                case 'D': return 2;
-                case 'I': return 1;
-                default: return 0;
-            }
-        });
-        
-        // Calculer la moyenne et normaliser sur 1
-        const moyenne = valeurs.reduce((sum, v) => sum + v, 0) / valeurs.length;
-        return moyenne / 4;
-        
-    } catch (error) {
-        console.error('Erreur calcul performance:', error);
-        return 0;
-    }
+    
+    // Calculer les risques pour les deux
+    indices.sommatif.risque = calculerRisque(
+        indices.sommatif.assiduite,
+        indices.sommatif.completion,
+        indices.sommatif.performance
+    );
+    indices.sommatif.niveauRisque = determinerNiveauRisque(indices.sommatif.risque);
+    
+    indices.alternatif.risque = calculerRisque(
+        indices.alternatif.assiduite,
+        indices.alternatif.completion,
+        indices.alternatif.performance
+    );
+    indices.alternatif.niveauRisque = determinerNiveauRisque(indices.alternatif.risque);
+    
+    return indices;
 }
 
 /**
@@ -296,34 +175,96 @@ function determinerNiveauRisque(risque) {
 
 /**
  * Affiche les métriques globales du groupe
+ * Respecte les réglages d'affichage sommatif/alternatif
  * 
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherMetriquesGlobales(etudiants) {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false; // true par défaut
+    const afficherAlternatif = config.affichageTableauBord?.afficherAlternatif || false;
+    
     const nbTotal = etudiants.length;
     
-    // Calculer les moyennes
-    const assiduiteMoyenne = nbTotal > 0
-        ? etudiants.reduce((sum, e) => sum + e.assiduite, 0) / nbTotal
-        : 0;
-    
-    const completionMoyenne = nbTotal > 0
-        ? etudiants.reduce((sum, e) => sum + e.completion, 0) / nbTotal
-        : 0;
-    
-    const performanceMoyenne = nbTotal > 0
-        ? etudiants.reduce((sum, e) => sum + e.performance, 0) / nbTotal
-        : 0;
-    
-    // Compter les interventions requises (risque ≥ élevé = seuil 0.4)
-    const interventionsRequises = etudiants.filter(e => e.risque >= 0.4).length;
-    
-    // Afficher les valeurs
+    // Affichage du nombre total (toujours affiché)
     setStatText('tb-total-etudiants', nbTotal);
-    setStatText('tb-assiduite-moyenne', formatPourcentage(assiduiteMoyenne));
-    setStatText('tb-completion-moyenne', formatPourcentage(completionMoyenne));
-    setStatText('tb-performance-moyenne', formatPourcentage(performanceMoyenne));
-    setStatText('tb-interventions-requises', interventionsRequises);
+    
+    // AFFICHAGE CONDITIONNEL
+    if (afficherSommatif && afficherAlternatif) {
+        // CAS 1 : Afficher les DEUX (format : "85% / 90%")
+        const assiduiteSommatif = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.sommatif.assiduite, 0) / nbTotal
+            : 0;
+        const assiduiteAlternatif = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.alternatif.assiduite, 0) / nbTotal
+            : 0;
+        
+        setStatText('tb-assiduite-moyenne', 
+            `${formatPourcentage(assiduiteSommatif)} / ${formatPourcentage(assiduiteAlternatif)}`);
+        
+        // Même chose pour completion et performance
+        const completionSommatif = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.sommatif.completion, 0) / nbTotal
+            : 0;
+        const completionAlternatif = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.alternatif.completion, 0) / nbTotal
+            : 0;
+        
+        setStatText('tb-completion-moyenne',
+            `${formatPourcentage(completionSommatif)} / ${formatPourcentage(completionAlternatif)}`);
+        
+        const performanceSommatif = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.sommatif.performance, 0) / nbTotal
+            : 0;
+        const performanceAlternatif = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.alternatif.performance, 0) / nbTotal
+            : 0;
+        
+        setStatText('tb-performance-moyenne',
+            `${formatPourcentage(performanceSommatif)} / ${formatPourcentage(performanceAlternatif)}`);
+        
+        // Interventions : utiliser le risque sommatif par défaut
+        const interventionsRequises = etudiants.filter(e => e.sommatif.risque >= 0.4).length;
+        setStatText('tb-interventions-requises', interventionsRequises);
+        
+    } else if (afficherAlternatif) {
+        // CAS 2 : Afficher SEULEMENT alternatif
+        const assiduite = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.alternatif.assiduite, 0) / nbTotal
+            : 0;
+        const completion = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.alternatif.completion, 0) / nbTotal
+            : 0;
+        const performance = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.alternatif.performance, 0) / nbTotal
+            : 0;
+        
+        setStatText('tb-assiduite-moyenne', formatPourcentage(assiduite));
+        setStatText('tb-completion-moyenne', formatPourcentage(completion));
+        setStatText('tb-performance-moyenne', formatPourcentage(performance));
+        
+        const interventionsRequises = etudiants.filter(e => e.alternatif.risque >= 0.4).length;
+        setStatText('tb-interventions-requises', interventionsRequises);
+        
+    } else {
+        // CAS 3 : Afficher SEULEMENT sommatif (par défaut)
+        const assiduite = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.sommatif.assiduite, 0) / nbTotal
+            : 0;
+        const completion = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.sommatif.completion, 0) / nbTotal
+            : 0;
+        const performance = nbTotal > 0
+            ? etudiants.reduce((sum, e) => sum + e.sommatif.performance, 0) / nbTotal
+            : 0;
+        
+        setStatText('tb-assiduite-moyenne', formatPourcentage(assiduite));
+        setStatText('tb-completion-moyenne', formatPourcentage(completion));
+        setStatText('tb-performance-moyenne', formatPourcentage(performance));
+        
+        const interventionsRequises = etudiants.filter(e => e.sommatif.risque >= 0.4).length;
+        setStatText('tb-interventions-requises', interventionsRequises);
+    }
 }
 
 /**

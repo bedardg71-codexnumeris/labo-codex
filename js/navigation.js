@@ -309,6 +309,30 @@ function afficherSousSection(idSousSection) {
             }
             break;
     }
+
+        // Recharger le tableau de bord selon la sous-section
+    if (idSousSection === 'tableau-bord-apercu') {
+        console.log('🔄 Rechargement automatique de l\'aperçu...');
+        if (typeof chargerTableauBordApercu === 'function') {
+            setTimeout(() => chargerTableauBordApercu(), 150);
+        }
+    } else if (idSousSection === 'tableau-bord-liste') {
+        // Recharger la liste des étudiants
+        if (typeof chargerListeEtudiants === 'function') {
+            setTimeout(() => chargerListeEtudiants(), 100);
+        }
+    } else if (idSousSection === 'tableau-bord-profil') {
+        // Le profil se charge quand on clique sur un étudiant
+        // Pas besoin de recharger automatiquement
+    }
+
+        // Recharger le tableau de bord selon la sous-section
+    if (idSousSection === 'tableau-bord-apercu') {
+        console.log('🔄 Rechargement automatique de l\'aperçu...');
+        if (typeof chargerTableauBordApercu === 'function') {
+            setTimeout(() => chargerTableauBordApercu(), 150);
+        }
+    }
 }
 
 /* ===============================
