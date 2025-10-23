@@ -553,73 +553,37 @@ function resetFiltresListe() {
 function afficherPortfolio(da) {
     console.log('📂 Affichage du profil pour DA:', da);
 
-    // Charger les données de l'étudiant
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const etudiant = etudiants.find(e => e.da === da);
-
-    if (!etudiant) {
-        alert('Étudiant·e introuvable');
-        console.error('❌ Aucun étudiant trouvé avec le DA:', da);
-        return;
-    }
-
-    // Naviguer vers la sous-section profil
-    afficherSousSection('tableau-bord-profil');
-
-    // Afficher les informations de l'étudiant
-    const container = document.getElementById('contenuProfilEtudiant');
-    if (!container) {
-        console.error('❌ Conteneur #contenuProfilEtudiant introuvable');
-        return;
-    }
-
-    // Générer le HTML du profil
-    container.innerHTML = `
-        <div class="carte" style="margin-bottom: 20px;">
-            <h2>${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}</h2>
-            <p class="text-muted">
-                DA: ${echapperHtml(etudiant.da)} · 
-                Groupe: ${echapperHtml(etudiant.groupe || 'N/A')} · 
-                ${echapperHtml(obtenirNomProgramme(etudiant.programme) || etudiant.programme || 'Programme non spécifié')}
-            </p>
-        </div>
-
-        <div class="carte">
-            <h3>📊 Indicateurs de performance</h3>
-            <div class="grille-statistiques" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
-                <div class="carte-metrique">
-                    <strong id="profil-assiduite">${calculerAssiduitéGlobale(da)}%</strong>
-                    <span>Assiduité (Indice A)</span>
-                </div>
-                <div class="carte-metrique">
-                    <strong id="profil-completion">${calculerTauxCompletion(da)}%</strong>
-                    <span>Complétion (Indice C)</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="carte">
-            <h3>📁 Portfolio d'apprentissage</h3>
-            <div id="portfolioEleveDetail">
-                <p class="text-muted">Chargement du portfolio...</p>
-            </div>
-        </div>
-    `;
-
-    // Si vous avez un module de portfolio détaillé, l'appeler ici
+    // Déléguer au module profil-etudiant.js pour l'affichage complet
     if (typeof afficherProfilComplet === 'function') {
         afficherProfilComplet(da);
-    } else if (typeof chargerPortfolioEleveDetail === 'function') {
-        chargerPortfolioEleveDetail(da);
     } else {
-        // Affichage basique si pas de module détaillé
-        document.getElementById('portfolioEleveDetail').innerHTML = `
-            <p class="text-muted">Le module de portfolio détaillé n'est pas encore chargé.</p>
-            <p class="text-muted">Les évaluations seront affichées ici prochainement.</p>
-        `;
+        // Fallback basique si le module n'est pas chargé
+        console.warn('⚠️ Module profil-etudiant.js non chargé, affichage basique');
+
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const etudiant = etudiants.find(e => e.da === da);
+
+        if (!etudiant) {
+            alert('Étudiant·e introuvable');
+            console.error('❌ Aucun étudiant trouvé avec le DA:', da);
+            return;
+        }
+
+        afficherSousSection('tableau-bord-profil');
+
+        const container = document.getElementById('contenuProfilEtudiant');
+        if (container) {
+            container.innerHTML = `
+                <div class="carte">
+                    <h2>${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}</h2>
+                    <p class="text-muted">DA: ${echapperHtml(etudiant.da)}</p>
+                    <p class="text-muted">⚠️ Module profil complet non disponible</p>
+                </div>
+            `;
+        }
     }
 
-    console.log('✅ Profil affiché pour:', etudiant.prenom, etudiant.nom);
+    console.log('✅ Profil chargé pour DA:', da);
 }
 
 /* ===============================

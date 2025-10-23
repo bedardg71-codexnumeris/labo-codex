@@ -270,7 +270,7 @@ function afficherProfilComplet(da) {
     }
 
     if (typeof afficherSousSection === 'function') {
-        afficherSousSection('etudiants-profil');
+        afficherSousSection('tableau-bord-profil');
     }
 
     const container = document.getElementById('contenuProfilEtudiant');
@@ -427,210 +427,18 @@ function afficherProfilComplet(da) {
    📁 GESTION DU PORTFOLIO
    =============================== */
 
-/**
- * Charge et affiche le détail du portfolio d'un étudiant
- * 
- * @param {string} da - Numéro de DA de l'étudiant
+/* ⚠️ CODE SUPPRIMÉ - 23 octobre 2025
+ *
+ * Les fonctions chargerPortfolioDetail() et toggleArtefactPortfolio()
+ * étaient dupliquées dans ce fichier.
+ *
+ * UTILISER DÉSORMAIS les fonctions de portfolio.js:
+ * - chargerPortfolioEleveDetail(da)
+ * - toggleArtefactPortfolio(da, portfolioId, nombreARetenir)
+ *
+ * Ces fonctions sont globalement accessibles et gèrent le portfolio étudiant.
+ * Les appels HTML (onchange) utilisent automatiquement les fonctions de portfolio.js.
  */
-function chargerPortfolioDetail(da) {
-    const container = document.getElementById('portfolioEleveDetail');
-    if (!container) {
-        console.error('❌ Élément #portfolioEleveDetail introuvable');
-        return;
-    }
-
-    // Récupérer le portfolio
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
-    const portfolio = productions.find(p => p.type === 'portfolio');
-
-    if (!portfolio) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 30px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                <p style="color: #666; margin-bottom: 10px;">📋 Aucun portfolio configuré</p>
-                <p style="color: #999; font-size: 0.9rem;">
-                    Allez dans <strong>Réglages › Productions</strong> pour créer un portfolio
-                </p>
-            </div>
-        `;
-        return;
-    }
-
-    // Détecter AUTOMATIQUEMENT tous les artefacts-portfolio existants
-    const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
-
-    if (artefactsPortfolio.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 30px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                <p style="color: #666; margin-bottom: 10px;">📝 Aucun artefact de portfolio créé</p>
-                <p style="color: #999; font-size: 0.9rem;">
-                    Crée des artefacts au fil de la session dans <strong>Réglages › Productions</strong>
-                </p>
-            </div>
-        `;
-        return;
-    }
-
-    // Récupérer les évaluations de cet élève
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
-
-    // Récupérer la sélection actuelle
-    const selectionsPortfolios = JSON.parse(localStorage.getItem('portfoliosEleves') || '{}');
-    const selectionEleve = selectionsPortfolios[da]?.[portfolio.id] || { artefactsRetenus: [] };
-
-    // Construire la liste des artefacts
-    const artefacts = artefactsPortfolio.map(art => {
-        const evaluation = evaluationsEleve.find(e => e.productionId === art.id);
-
-        return {
-            id: art.id,
-            titre: art.titre,
-            description: art.description || '',
-            remis: !!evaluation,
-            note: evaluation?.noteFinale || null,
-            niveau: evaluation?.niveauFinal || null,
-            retenu: selectionEleve.artefactsRetenus.includes(art.id)
-        };
-    });
-
-    // Trier : artefacts remis en premier
-    artefacts.sort((a, b) => {
-        if (a.remis && !b.remis) return -1;
-        if (!a.remis && b.remis) return 1;
-        return 0;
-    });
-
-    const nbRemis = artefacts.filter(a => a.remis).length;
-    const nbRetenus = selectionEleve.artefactsRetenus.length;
-    const nbTotal = artefacts.length;
-
-    // Calculer les notes
-    const artefactsRemisAvecNote = artefacts.filter(a => a.remis && a.note !== null);
-    const noteProvisoire = artefactsRemisAvecNote.length > 0
-        ? artefactsRemisAvecNote.reduce((sum, a) => sum + a.note, 0) / artefactsRemisAvecNote.length
-        : null;
-
-    const artefactsRetenusAvecNote = artefacts.filter(a => a.retenu && a.note !== null);
-    const noteFinale = nbRetenus === portfolio.regles.nombreARetenir && artefactsRetenusAvecNote.length > 0
-        ? artefactsRetenusAvecNote.reduce((sum, a) => sum + a.note, 0) / portfolio.regles.nombreARetenir
-        : null;
-
-    // Afficher
-    container.innerHTML = `
-        <!-- BARRE DE PROGRESSION -->
-        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <strong>Progression</strong>
-                <span>${nbRemis}/${nbTotal} artefacts remis</span>
-            </div>
-            <div style="background: white; height: 20px; border-radius: 10px; overflow: hidden;">
-                <div style="background: var(--bleu-principal); height: 100%; width: ${(nbRemis / nbTotal) * 100}%; transition: width 0.3s;"></div>
-            </div>
-            <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
-                Minimum requis : ${portfolio.regles.minimumCompletion} · 
-                À retenir pour note finale : ${portfolio.regles.nombreARetenir}
-            </p>
-        </div>
-        
-        <!-- LISTE DES ARTEFACTS -->
-        <div style="margin: 20px 0;">
-            ${artefacts.map(art => `
-                <div style="padding: 15px; margin-bottom: 10px; background: ${art.remis ? 'white' : 'var(--bleu-tres-pale)'}; 
-                            border: 1px solid ${art.remis ? 'var(--bleu-pale)' : '#e0e0e0'}; border-radius: 6px; 
-                            ${!art.remis ? 'opacity: 0.6;' : ''}">
-                    <label style="display: flex; align-items: flex-start; cursor: ${art.remis ? 'pointer' : 'not-allowed'};">
-                        <input type="checkbox" 
-                               name="artefactRetenu" 
-                               value="${art.id}"
-                               ${art.retenu ? 'checked' : ''}
-                               ${!art.remis ? 'disabled' : ''}
-                               onchange="toggleArtefactPortfolio('${da}', '${portfolio.id}', ${portfolio.regles.nombreARetenir})"
-                               style="margin-right: 15px; margin-top: 3px; transform: scale(1.4);">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; margin-bottom: 5px;">
-                                ${echapperHtml(art.titre)}
-                            </div>
-                            ${art.description ? `<div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">${echapperHtml(art.description)}</div>` : ''}
-                            <div style="font-size: 0.85rem; color: ${art.remis ? 'var(--bleu-moyen)' : '#999'};">
-                                ${art.remis
-            ? `✓ Remis · <strong>Note: ${art.note}/100</strong> (${art.niveau})`
-            : '— Non remis'}
-                            </div>
-                        </div>
-                    </label>
-                </div>
-            `).join('')}
-        </div>
-        
-        <!-- CALCUL DES NOTES -->
-        <div style="padding: 20px; background: ${nbRetenus === portfolio.regles.nombreARetenir ? 'var(--vert-pale)' : 'var(--jaune-pale)'}; 
-                    border-radius: 6px; border-left: 4px solid ${nbRetenus === portfolio.regles.nombreARetenir ? 'var(--risque-minimal)' : 'var(--risque-modere)'};">
-            <p style="font-size: 1.1rem; margin-bottom: 10px;">
-                <strong>MODE ACTUEL :</strong> 
-                <span style="color: ${nbRetenus === portfolio.regles.nombreARetenir ? 'green' : 'orange'};">
-                    ${nbRetenus === portfolio.regles.nombreARetenir ? '✓ FINAL' : '⚠️ PROVISOIRE'}
-                </span>
-            </p>
-            
-            ${noteProvisoire !== null ? `
-                <p style="margin: 8px 0;">
-                    Note provisoire : <strong>${noteProvisoire.toFixed(1)}/100</strong> 
-                    <span style="font-size: 0.9rem; color: #666;">(moyenne de ${nbRemis} artefacts remis)</span>
-                </p>
-            ` : ''}
-            
-            ${noteFinale !== null ? `
-                <p style="margin: 8px 0; font-size: 1.1rem;">
-                    <strong style="color: green;">Note finale : ${noteFinale.toFixed(1)}/100</strong>
-                    <span style="font-size: 0.9rem; color: #666;">(moyenne des ${portfolio.regles.nombreARetenir} retenus)</span>
-                </p>
-            ` : ''}
-            
-            <p style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.1); font-size: 0.9rem;">
-                ${nbRetenus === portfolio.regles.nombreARetenir
-            ? `<span style="color: green;">✓ ${portfolio.regles.nombreARetenir} artefacts sélectionnés - Mode final actif</span>`
-            : `<span style="color: orange;">⚠️ Sélectionner ${portfolio.regles.nombreARetenir - nbRetenus} artefact(s) supplémentaire(s) pour activer le mode FINAL</span>`}
-            </p>
-        </div>
-    `;
-}
-
-/**
- * Gère la sélection/désélection d'un artefact dans le portfolio
- * 
- * @param {string} da - Numéro de DA de l'étudiant
- * @param {string} portfolioId - ID du portfolio
- * @param {number} nombreARetenir - Nombre max d'artefacts à retenir
- */
-function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
-    const checkboxes = document.querySelectorAll('input[name="artefactRetenu"]:checked');
-    const artefactsRetenus = Array.from(checkboxes).map(cb => cb.value);
-
-    // Limiter au nombre défini dans les règles
-    if (artefactsRetenus.length > nombreARetenir) {
-        alert(`Tu ne peux sélectionner que ${nombreARetenir} artefacts maximum.`);
-        event.target.checked = false;
-        return;
-    }
-
-    // Sauvegarder
-    let selectionsPortfolios = JSON.parse(localStorage.getItem('portfoliosEleves') || '{}');
-    if (!selectionsPortfolios[da]) {
-        selectionsPortfolios[da] = {};
-    }
-
-    selectionsPortfolios[da][portfolioId] = {
-        artefactsRetenus: artefactsRetenus,
-        dateSelection: new Date().toISOString()
-    };
-
-    localStorage.setItem('portfoliosEleves', JSON.stringify(selectionsPortfolios));
-
-    console.log('✅ Sélection sauvegardée:', artefactsRetenus.length, 'artefact(s)');
-
-    // Recharger le portfolio pour mettre à jour les calculs
-    chargerPortfolioDetail(da);
-}
 
 /**
 * Génère le HTML de la section assiduité
