@@ -93,13 +93,525 @@ function calculerTousLesIndices(da) {
     const R = 1 - E;       // Risque
 
     return {
-        A: Math.round(A * 100), // Retour en pourcentage pour affichage
+        // Indices primaires (en pourcentage pour compatibilité affichage)
+        A: Math.round(A * 100),
         C: Math.round(C * 100),
         P: Math.round(P * 100),
-        M: Math.round(M * 100),
-        E: E.toFixed(2),
-        R: R.toFixed(2)
+
+        // Indices composites (valeurs normalisées 0-1 avec 3 décimales)
+        M: parseFloat(M.toFixed(3)),
+        E: parseFloat(E.toFixed(3)),
+        R: parseFloat(R.toFixed(3))
     };
+}
+
+/**
+ * Interprète l'indice M (Mobilisation) selon les seuils IDME adaptés
+ * @param {number} valeur - Valeur normalisée entre 0 et 1
+ * @returns {Object} - { niveau, emoji, couleur }
+ */
+function interpreterMobilisation(valeur) {
+    if (valeur >= 0.85) {
+        return {
+            niveau: 'Excellente mobilisation',
+            emoji: '🔵',
+            couleur: '#2196F3' // Bleu
+        };
+    }
+    if (valeur >= 0.75) {
+        return {
+            niveau: 'Bonne mobilisation',
+            emoji: '🟢',
+            couleur: '#28a745' // Vert
+        };
+    }
+    if (valeur >= 0.65) {
+        return {
+            niveau: 'En développement',
+            emoji: '🟡',
+            couleur: '#ffc107' // Jaune
+        };
+    }
+    return {
+        niveau: 'Mobilisation insuffisante',
+        emoji: '🔴',
+        couleur: '#dc3545' // Rouge
+    };
+}
+
+/**
+ * Interprète l'indice E (Engagement) selon les seuils IDME adaptés
+ * @param {number} valeur - Valeur normalisée entre 0 et 1
+ * @returns {Object} - { niveau, emoji, couleur }
+ */
+function interpreterEngagement(valeur) {
+    if (valeur >= 0.85) {
+        return {
+            niveau: 'Excellent engagement',
+            emoji: '🔵',
+            couleur: '#2196F3' // Bleu
+        };
+    }
+    if (valeur >= 0.75) {
+        return {
+            niveau: 'Bon engagement',
+            emoji: '🟢',
+            couleur: '#28a745' // Vert
+        };
+    }
+    if (valeur >= 0.65) {
+        return {
+            niveau: 'En développement',
+            emoji: '🟡',
+            couleur: '#ffc107' // Jaune
+        };
+    }
+    if (valeur >= 0.40) {
+        return {
+            niveau: 'Engagement insuffisant',
+            emoji: '🟠',
+            couleur: '#ff9800' // Orange
+        };
+    }
+    return {
+        niveau: 'Engagement très faible',
+        emoji: '🔴',
+        couleur: '#dc3545' // Rouge
+    };
+}
+
+/**
+ * Interprète l'indice R (Risque) selon les seuils du guide de monitorage
+ * @param {number} valeur - Valeur normalisée entre 0 et 1
+ * @returns {Object} - { niveau, emoji, couleur }
+ */
+function interpreterRisque(valeur) {
+    if (valeur < 0.15) {
+        return {
+            niveau: 'Risque minimal',
+            emoji: '🔵',
+            couleur: '#2196F3' // Bleu
+        };
+    }
+    if (valeur < 0.25) {
+        return {
+            niveau: 'Risque faible',
+            emoji: '🟢',
+            couleur: '#28a745' // Vert
+        };
+    }
+    if (valeur < 0.35) {
+        return {
+            niveau: 'Risque modéré',
+            emoji: '🟡',
+            couleur: '#ffc107' // Jaune
+        };
+    }
+    if (valeur <= 0.60) {
+        return {
+            niveau: 'Risque élevé',
+            emoji: '🟠',
+            couleur: '#ff9800' // Orange
+        };
+    }
+    return {
+        niveau: 'Risque très élevé',
+        emoji: '🔴',
+        couleur: '#dc3545' // Rouge
+    };
+}
+
+/**
+ * Génère le HTML de la section Mobilisation (M) détaillée
+ * @param {string} da - Numéro de DA
+ * @returns {string} - HTML de la section
+ */
+function genererSectionMobilisation(da) {
+    const indices = calculerTousLesIndices(da);
+    const interpM = interpreterMobilisation(indices.M);
+
+    // Récupérer A et C séparément
+    const A = indices.A / 100; // Convertir en proportion
+    const C = indices.C / 100;
+
+    return `
+        <!-- STATISTIQUES -->
+        <div class="grille-statistiques mb-2">
+            <div class="carte-metrique">
+                <strong>${indices.A}%</strong>
+                <span>Assiduité (A)</span>
+            </div>
+            <div class="carte-metrique">
+                <strong>${indices.C}%</strong>
+                <span>Complétion (C)</span>
+            </div>
+            <div class="carte-metrique" style="border-left: 3px solid ${interpM.couleur};">
+                <strong>${indices.M}</strong>
+                <span>Mobilisation (M)</span>
+            </div>
+        </div>
+
+        <!-- INTERPRÉTATION QUALITATIVE -->
+        <div style="padding: 15px; background: linear-gradient(to right, ${interpM.couleur}22, ${interpM.couleur}11);
+                    border-left: 4px solid ${interpM.couleur}; border-radius: 6px; margin-bottom: 15px;">
+            <div style="font-size: 1.1rem; font-weight: bold; color: ${interpM.couleur}; margin-bottom: 8px;">
+                ${interpM.emoji} ${interpM.niveau}
+            </div>
+            <div style="color: #666; line-height: 1.5;">
+                ${interpM.niveau === 'Excellente mobilisation' ?
+                    "Cet étudiant démontre un engagement comportemental exemplaire, avec une présence constante et une complétion régulière des travaux." :
+                  interpM.niveau === 'Bonne mobilisation' ?
+                    "Cet étudiant montre un bon engagement comportemental. La mobilisation est satisfaisante." :
+                  interpM.niveau === 'En développement' ?
+                    "La mobilisation nécessite une attention. Un soutien proactif pourrait améliorer l'engagement comportemental." :
+                    "⚠️ Mobilisation insuffisante. Une intervention immédiate est nécessaire pour identifier les obstacles à l'engagement."}
+            </div>
+        </div>
+
+        <!-- DÉCOMPOSITION VISUELLE -->
+        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
+            📊 Décomposition de l'indice M
+        </h4>
+        <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+            <div style="font-family: monospace; font-size: 1.1rem; text-align: center; color: var(--bleu-principal);">
+                M = (A + C) / 2 = (${indices.A}% + ${indices.C}%) / 2 = ${indices.M}
+            </div>
+        </div>
+
+        <!-- RECOMMANDATIONS SI FAIBLE -->
+        ${indices.M < 0.75 ? `
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 6px;">
+                <h4 style="color: #856404; margin-bottom: 10px;">💡 Recommandations d'intervention</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #856404; line-height: 1.6;">
+                    ${indices.A < 70 ? '<li><strong>Assiduité critique :</strong> Rencontre immédiate pour identifier les causes d\'absence</li>' : ''}
+                    ${indices.C < 70 ? '<li><strong>Complétion critique :</strong> Investigation des obstacles à la remise des travaux</li>' : ''}
+                    ${indices.M < 0.65 ? '<li><strong>Plan d\'intervention RàI niveau 2-3 requis</strong></li>' : ''}
+                    <li>Focus sur l'engagement comportemental et la motivation intrinsèque</li>
+                    <li>Identifier et lever les obstacles organisationnels</li>
+                </ul>
+            </div>
+        ` : ''}
+    `;
+}
+
+/**
+ * Génère le HTML de la section Engagement (E) détaillée
+ * @param {string} da - Numéro de DA
+ * @returns {string} - HTML de la section
+ */
+function genererSectionEngagement(da) {
+    const indices = calculerTousLesIndices(da);
+    const interpE = interpreterEngagement(indices.E);
+
+    // Récupérer A, C, P séparément (en proportions 0-1)
+    const A = indices.A / 100;
+    const C = indices.C / 100;
+    const P = indices.P / 100;
+
+    // Identifier le composant le plus faible (facteur limitant)
+    const composants = [
+        { nom: 'Assiduité (A)', valeur: A, pourcentage: indices.A },
+        { nom: 'Complétion (C)', valeur: C, pourcentage: indices.C },
+        { nom: 'Performance (P)', valeur: P, pourcentage: indices.P }
+    ];
+    const facteurLimitant = composants.reduce((min, comp) => comp.valeur < min.valeur ? comp : min);
+
+    // Calculer le prochain seuil
+    let prochainSeuil = '';
+    let distanceSeuil = 0;
+    if (indices.E < 0.65) {
+        prochainSeuil = '0.65 (En développement)';
+        distanceSeuil = 0.65 - indices.E;
+    } else if (indices.E < 0.75) {
+        prochainSeuil = '0.75 (Bon engagement)';
+        distanceSeuil = 0.75 - indices.E;
+    } else if (indices.E < 0.85) {
+        prochainSeuil = '0.85 (Excellent engagement)';
+        distanceSeuil = 0.85 - indices.E;
+    }
+
+    return `
+        <!-- STATISTIQUES -->
+        <div class="grille-statistiques mb-2">
+            <div class="carte-metrique">
+                <strong>${indices.A}%</strong>
+                <span>Assiduité (A)</span>
+            </div>
+            <div class="carte-metrique">
+                <strong>${indices.C}%</strong>
+                <span>Complétion (C)</span>
+            </div>
+            <div class="carte-metrique">
+                <strong>${indices.P}%</strong>
+                <span>Performance (P)</span>
+            </div>
+            <div class="carte-metrique" style="border-left: 3px solid ${interpE.couleur};">
+                <strong>${indices.E}</strong>
+                <span>Engagement (E)</span>
+            </div>
+        </div>
+
+        <!-- INTERPRÉTATION QUALITATIVE -->
+        <div style="padding: 15px; background: linear-gradient(to right, ${interpE.couleur}22, ${interpE.couleur}11);
+                    border-left: 4px solid ${interpE.couleur}; border-radius: 6px; margin-bottom: 15px;">
+            <div style="font-size: 1.1rem; font-weight: bold; color: ${interpE.couleur}; margin-bottom: 8px;">
+                ${interpE.emoji} ${interpE.niveau}
+            </div>
+            <div style="color: #666; line-height: 1.5;">
+                ${interpE.niveau === 'Excellent engagement' ?
+                    "Cet étudiant démontre un engagement global exemplaire, combinant présence, complétion et performance de haut niveau." :
+                  interpE.niveau === 'Bon engagement' ?
+                    "Cet étudiant montre un bon engagement global. La combinaison présence-complétion-performance est satisfaisante." :
+                  interpE.niveau === 'En développement' ?
+                    "L'engagement global nécessite une attention. Un soutien ciblé sur le facteur limitant pourrait améliorer significativement l'engagement." :
+                  interpE.niveau === 'Engagement insuffisant' ?
+                    "⚠️ Engagement insuffisant. Les composantes A-C-P révèlent des faiblesses qui nécessitent une intervention de niveau 2." :
+                    "🚨 Engagement très faible. Intervention immédiate de niveau 3 requise pour éviter l'échec."}
+            </div>
+        </div>
+
+        <!-- DÉCOMPOSITION VISUELLE -->
+        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
+            📊 Décomposition de l'indice E (effet multiplicatif)
+        </h4>
+        <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+            <div style="font-family: monospace; font-size: 1rem; text-align: center; color: var(--bleu-principal); margin-bottom: 10px;">
+                E = A × C × P
+            </div>
+            <div style="font-family: monospace; font-size: 1rem; text-align: center; color: var(--bleu-principal); margin-bottom: 10px;">
+                E = ${A.toFixed(2)} × ${C.toFixed(2)} × ${P.toFixed(2)} = ${indices.E}
+            </div>
+            <div style="background: #f0f7ff; padding: 12px; border-radius: 4px; font-size: 0.9rem; color: #555; line-height: 1.6;">
+                <strong>⚠️ Nature multiplicative :</strong> Si un seul composant est faible, l'engagement global chute drastiquement.
+                ${indices.E < 0.50 ? `<br><strong>Facteur limitant identifié :</strong> ${facteurLimitant.nom} (${facteurLimitant.pourcentage}%)` : ''}
+            </div>
+        </div>
+
+        <!-- PROCHAIN SEUIL -->
+        ${prochainSeuil ? `
+            <div style="background: #e7f3ff; border: 1px solid #2196F3; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                <h4 style="color: #1976d2; margin-bottom: 10px;">🎯 Prochain objectif</h4>
+                <div style="color: #1976d2; line-height: 1.6;">
+                    <strong>Seuil à atteindre :</strong> ${prochainSeuil}<br>
+                    <strong>Distance :</strong> ${(distanceSeuil * 100).toFixed(1)} points<br>
+                    ${facteurLimitant.valeur < 0.70 ?
+                        `<strong>💡 Levier principal :</strong> Améliorer ${facteurLimitant.nom} pour un effet multiplicatif maximum` : ''}
+                </div>
+            </div>
+        ` : `
+            <div style="background: linear-gradient(to right, #2196F322, #2196F311); border-left: 4px solid #2196F3; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                <div style="color: #1976d2; font-weight: bold;">
+                    🏆 Seuil maximum atteint ! Maintenir cet excellent engagement.
+                </div>
+            </div>
+        `}
+
+        <!-- RECOMMANDATIONS -->
+        ${indices.E < 0.75 ? `
+            <div style="background: ${indices.E < 0.40 ? '#f8d7da' : '#fff3cd'};
+                        border-left: 4px solid ${indices.E < 0.40 ? '#dc3545' : '#ffc107'};
+                        padding: 15px; border-radius: 6px;">
+                <h4 style="color: ${indices.E < 0.40 ? '#721c24' : '#856404'}; margin-bottom: 10px;">
+                    💡 Recommandations d'intervention
+                </h4>
+                <ul style="margin: 0; padding-left: 20px; color: ${indices.E < 0.40 ? '#721c24' : '#856404'}; line-height: 1.6;">
+                    ${facteurLimitant.valeur < 0.65 ?
+                        `<li><strong>Priorité absolue :</strong> ${facteurLimitant.nom} est le facteur limitant critique (${facteurLimitant.pourcentage}%)</li>` : ''}
+                    ${indices.E < 0.40 ?
+                        '<li><strong>Intervention RàI niveau 3 immédiate</strong> - Risque d\'échec très élevé</li>' : ''}
+                    ${indices.E >= 0.40 && indices.E < 0.65 ?
+                        '<li><strong>Intervention RàI niveau 2 recommandée</strong> - Soutien ciblé requis</li>' : ''}
+                    <li>Cibler le composant le plus faible pour maximiser l'effet multiplicatif</li>
+                    ${A < 0.70 || C < 0.70 ?
+                        '<li>Focus sur l\'engagement comportemental (A et C) avant la performance</li>' : ''}
+                    ${P < 0.70 && A >= 0.70 && C >= 0.70 ?
+                        '<li>Présence et remise satisfaisantes : concentrer le soutien sur la qualité des productions</li>' : ''}
+                </ul>
+            </div>
+        ` : ''}
+    `;
+}
+
+/**
+ * Génère le HTML de la section Risque (R) détaillée
+ * @param {string} da - Numéro de DA
+ * @returns {string} - HTML de la section
+ */
+function genererSectionRisque(da) {
+    const indices = calculerTousLesIndices(da);
+    const interpR = interpreterRisque(indices.R);
+    const interpE = interpreterEngagement(indices.E);
+
+    // Déterminer le niveau RàI (Réponse à l'Intervention)
+    let niveauRaI = 1;
+    let descriptionRaI = 'Niveau 1 - Surveillance universelle';
+    let urgence = 'Aucune action immédiate requise';
+    let couleurUrgence = '#28a745';
+
+    if (indices.R >= 0.60) {
+        niveauRaI = 3;
+        descriptionRaI = 'Niveau 3 - Intervention intensive individuelle';
+        urgence = '🚨 URGENCE MAXIMALE - Intervention immédiate requise';
+        couleurUrgence = '#dc3545';
+    } else if (indices.R >= 0.35) {
+        niveauRaI = 2;
+        descriptionRaI = 'Niveau 2 - Intervention ciblée en petit groupe';
+        urgence = '⚠️ Intervention prioritaire dans les prochains jours';
+        couleurUrgence = '#ff9800';
+    } else if (indices.R >= 0.25) {
+        niveauRaI = 2;
+        descriptionRaI = 'Niveau 2 - Surveillance accrue';
+        urgence = '⚡ Attention requise - Surveillance renforcée';
+        couleurUrgence = '#ffc107';
+    }
+
+    // Calculer la "marge de sécurité" (distance avant zone rouge)
+    const margeSécurité = Math.max(0, 0.60 - indices.R);
+    const pourcentageSécurité = ((1 - indices.R) * 100).toFixed(0);
+
+    return `
+        <!-- ALERTE NIVEAU RISQUE -->
+        <div style="background: ${interpR.couleur}22; border: 2px solid ${interpR.couleur};
+                    padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="text-align: center; margin-bottom: 12px;">
+                <div style="font-size: 3rem; margin-bottom: 8px;">${interpR.emoji}</div>
+                <div style="font-size: 1.3rem; font-weight: bold; color: ${interpR.couleur}; margin-bottom: 8px;">
+                    ${interpR.niveau}
+                </div>
+                <div style="font-size: 2rem; font-weight: bold; color: ${interpR.couleur};">
+                    R = ${indices.R}
+                </div>
+            </div>
+            <div style="background: white; padding: 12px; border-radius: 6px; margin-top: 12px;">
+                <div style="font-weight: bold; color: ${couleurUrgence}; margin-bottom: 8px;">
+                    ${urgence}
+                </div>
+                <div style="color: #666; font-size: 0.95rem;">
+                    ${descriptionRaI}
+                </div>
+            </div>
+        </div>
+
+        <!-- RELATION R ↔ E -->
+        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
+            🔄 Relation Risque ↔ Engagement
+        </h4>
+        <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+            <div style="font-family: monospace; font-size: 1rem; text-align: center; color: var(--bleu-principal); margin-bottom: 10px;">
+                R = 1 - E = 1 - ${indices.E} = ${indices.R}
+            </div>
+            <div style="background: #f0f7ff; padding: 12px; border-radius: 4px; font-size: 0.9rem; color: #555; line-height: 1.6;">
+                Le risque d'échec est <strong>inversement proportionnel</strong> à l'engagement global.
+                <br>Engagement actuel : <strong style="color: ${interpE.couleur};">${interpE.niveau}</strong>
+            </div>
+        </div>
+
+        <!-- VISUALISATION ZONES DE RISQUE -->
+        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
+            📊 Zones de risque (modèle RàI)
+        </h4>
+        <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+            <!-- Barre de progression du risque -->
+            <div style="position: relative; height: 40px; background: linear-gradient(to right,
+                        #2196F3 0%, #2196F3 15%,
+                        #28a745 15%, #28a745 25%,
+                        #ffc107 25%, #ffc107 35%,
+                        #ff9800 35%, #ff9800 60%,
+                        #dc3545 60%, #dc3545 100%);
+                        border-radius: 6px; margin-bottom: 15px;">
+                <!-- Marqueur position actuelle -->
+                <div style="position: absolute; left: ${indices.R * 100}%; transform: translateX(-50%);
+                            top: -5px; width: 3px; height: 50px; background: black;"></div>
+                <div style="position: absolute; left: ${indices.R * 100}%; transform: translateX(-50%);
+                            top: -25px; background: black; color: white; padding: 2px 8px;
+                            border-radius: 4px; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">
+                    ${indices.R}
+                </div>
+            </div>
+
+            <!-- Légende des zones -->
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; font-size: 0.75rem; text-align: center;">
+                <div style="color: #2196F3;">
+                    <strong>0-0.15</strong><br>Minimal
+                </div>
+                <div style="color: #28a745;">
+                    <strong>0.15-0.25</strong><br>Faible
+                </div>
+                <div style="color: #ffc107;">
+                    <strong>0.25-0.35</strong><br>Modéré
+                </div>
+                <div style="color: #ff9800;">
+                    <strong>0.35-0.60</strong><br>Élevé
+                </div>
+                <div style="color: #dc3545;">
+                    <strong>0.60+</strong><br>Très élevé
+                </div>
+            </div>
+        </div>
+
+        <!-- STATISTIQUES CLÉS -->
+        <div class="grille-statistiques mb-2">
+            <div class="carte-metrique">
+                <strong>${indices.E}</strong>
+                <span>Engagement (E)</span>
+            </div>
+            <div class="carte-metrique" style="border-left: 3px solid ${interpR.couleur};">
+                <strong>${indices.R}</strong>
+                <span>Risque (R)</span>
+            </div>
+            <div class="carte-metrique">
+                <strong>Niveau ${niveauRaI}</strong>
+                <span>RàI</span>
+            </div>
+            <div class="carte-metrique" style="border-left: 3px solid ${margeSécurité > 0.25 ? '#28a745' : '#ff9800'};">
+                <strong>${pourcentageSécurité}%</strong>
+                <span>Marge de sécurité</span>
+            </div>
+        </div>
+
+        <!-- PLAN D'ACTION -->
+        ${indices.R >= 0.25 ? `
+            <div style="background: ${indices.R >= 0.60 ? '#f8d7da' : indices.R >= 0.35 ? '#fff3cd' : '#e7f3ff'};
+                        border-left: 4px solid ${indices.R >= 0.60 ? '#dc3545' : indices.R >= 0.35 ? '#ff9800' : '#2196F3'};
+                        padding: 15px; border-radius: 6px; margin-top: 15px;">
+                <h4 style="color: ${indices.R >= 0.60 ? '#721c24' : indices.R >= 0.35 ? '#856404' : '#1976d2'}; margin-bottom: 12px;">
+                    🎯 Plan d'action immédiat
+                </h4>
+                <ol style="margin: 0; padding-left: 20px; color: ${indices.R >= 0.60 ? '#721c24' : indices.R >= 0.35 ? '#856404' : '#1976d2'};
+                           line-height: 1.8; font-weight: 500;">
+                    ${indices.R >= 0.60 ? `
+                        <li><strong>JOUR 1 :</strong> Rencontre individuelle urgente avec l'étudiant et conseiller pédagogique</li>
+                        <li><strong>JOUR 2-3 :</strong> Établir un plan d'intervention personnalisé (PIP) avec objectifs mesurables</li>
+                        <li><strong>SEMAINE 1 :</strong> Suivi quotidien de la présence et remise des travaux en retard</li>
+                        <li><strong>Mobiliser :</strong> Parents, aide pédagogique individuelle (API), services étudiants</li>
+                        <li><strong>Réévaluation :</strong> Rencontre de suivi hebdomadaire jusqu'à amélioration significative</li>
+                    ` : indices.R >= 0.35 ? `
+                        <li><strong>Cette semaine :</strong> Rencontre individuelle pour identifier les obstacles</li>
+                        <li><strong>Mise en place :</strong> Soutien ciblé sur le(s) composant(s) faible(s) (A, C ou P)</li>
+                        <li><strong>Suivi :</strong> Vérification bihebdomadaire des progrès</li>
+                        <li><strong>Prévention :</strong> Stratégies d'autorégulation et planification</li>
+                        <li><strong>Réévaluation :</strong> Dans 2 semaines pour ajuster l'intervention</li>
+                    ` : `
+                        <li><strong>Surveillance renforcée :</strong> Monitorer hebdomadairement les indices A-C-P</li>
+                        <li><strong>Dialogue proactif :</strong> Discussion informelle pour détecter signaux faibles</li>
+                        <li><strong>Ressources préventives :</strong> Partager outils d'organisation et de planification</li>
+                        <li><strong>Valorisation :</strong> Renforcer la motivation par rétroaction positive</li>
+                    `}
+                </ol>
+            </div>
+        ` : `
+            <div style="background: linear-gradient(to right, #28a74522, #28a74511);
+                        border-left: 4px solid #28a745; padding: 15px; border-radius: 6px; margin-top: 15px;">
+                <h4 style="color: #155724; margin-bottom: 10px;">✅ Maintien de l'engagement</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #155724; line-height: 1.6;">
+                    <li>Continuer la surveillance universelle (Niveau RàI 1)</li>
+                    <li>Fournir rétroaction positive régulière</li>
+                    <li>Encourager l'autonomie et l'autorégulation</li>
+                    <li>Offrir défis stimulants pour maintenir la motivation</li>
+                </ul>
+            </div>
+        `}
+    `;
 }
 
 /**
@@ -305,6 +817,11 @@ function afficherProfilComplet(da) {
     // Calculer tous les indices
     const indices = calculerTousLesIndices(da);
 
+    // Calculer les interprétations pour M, E, R
+    const interpM = interpreterMobilisation(indices.M);
+    const interpE = interpreterEngagement(indices.E);
+    const interpR = interpreterRisque(indices.R);
+
     // Générer le HTML du profil avec dashboard simplifié
     container.innerHTML = `
         <!-- EN-TÊTE -->
@@ -390,54 +907,75 @@ function afficherProfilComplet(da) {
                     </div>
                 </div>
                 
-                <!-- CARTE M -->
-                <div id="carte-indice-M" style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center; 
-                            border: 2px solid ${obtenirCouleurIndice(indices.M)};">
+                <!-- CARTE M (Mobilisation) -->
+                <div id="carte-indice-M" onclick="toggleDetailIndice('M', '${da}')"
+                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
+                            border: 2px solid ${interpM.couleur}; cursor: pointer;
+                            transition: all 0.2s;"
+                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
+                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
                     <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">
                         Mobilisation
                     </div>
-                    <div style="font-size: 2.2rem; font-weight: bold; color: ${obtenirCouleurIndice(indices.M)}; margin: 8px 0;">
-                        ${indices.M}%
+                    <div style="font-size: 2.2rem; font-weight: bold; color: ${interpM.couleur}; margin: 8px 0;">
+                        ${indices.M}
+                    </div>
+                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">
+                        ${interpM.niveau}
                     </div>
                     <div style="font-weight: bold; color: var(--bleu-principal); font-size: 0.85rem; margin-bottom: 8px;">
                         Indice M
                     </div>
-                    <div style="font-size: 0.7rem; color: var(--bleu-leger);">
-                        (A+C)/2
+                    <div style="font-size: 0.75rem; color: var(--bleu-moyen);">
+                        Voir détails →
                     </div>
                 </div>
                 
-                <!-- CARTE E -->
-                <div id="carte-indice-E" style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center; 
-                            border: 2px solid var(--bleu-moyen);">
+                <!-- CARTE E (Engagement) -->
+                <div id="carte-indice-E" onclick="toggleDetailIndice('E', '${da}')"
+                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
+                            border: 2px solid ${interpE.couleur}; cursor: pointer;
+                            transition: all 0.2s;"
+                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
+                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
                     <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">
                         Engagement
                     </div>
-                    <div style="font-size: 2.2rem; font-weight: bold; color: var(--bleu-moyen); margin: 8px 0;">
+                    <div style="font-size: 2.2rem; font-weight: bold; color: ${interpE.couleur}; margin: 8px 0;">
                         ${indices.E}
+                    </div>
+                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">
+                        ${interpE.niveau}
                     </div>
                     <div style="font-weight: bold; color: var(--bleu-principal); font-size: 0.85rem; margin-bottom: 8px;">
                         Indice E
                     </div>
-                    <div style="font-size: 0.7rem; color: var(--bleu-leger);">
-                        A×C×P
+                    <div style="font-size: 0.75rem; color: var(--bleu-moyen);">
+                        Voir détails →
                     </div>
                 </div>
                 
-                <!-- CARTE R -->
-                <div id="carte-indice-R" style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center; 
-                            border: 2px solid ${indices.R > 0.7 ? 'var(--risque-tres-eleve)' : indices.R > 0.4 ? 'var(--risque-modere)' : 'var(--risque-minimal)'};">
+                <!-- CARTE R (Risque) -->
+                <div id="carte-indice-R" onclick="toggleDetailIndice('R', '${da}')"
+                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
+                            border: 2px solid ${interpR.couleur}; cursor: pointer;
+                            transition: all 0.2s;"
+                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
+                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
                     <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">
                         Risque d'échec
                     </div>
-                    <div style="font-size: 2.2rem; font-weight: bold; color: ${indices.R > 0.7 ? 'var(--risque-tres-eleve)' : indices.R > 0.4 ? 'var(--risque-modere)' : 'var(--risque-minimal)'}; margin: 8px 0;">
+                    <div style="font-size: 2.2rem; font-weight: bold; color: ${interpR.couleur}; margin: 8px 0;">
                         ${indices.R}
+                    </div>
+                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">
+                        ${interpR.niveau}
                     </div>
                     <div style="font-weight: bold; color: var(--bleu-principal); font-size: 0.85rem; margin-bottom: 8px;">
                         Indice R
                     </div>
-                    <div style="font-size: 0.7rem; color: var(--bleu-leger);">
-                        1-E
+                    <div style="font-size: 0.75rem; color: var(--bleu-moyen);">
+                        Voir détails →
                     </div>
                 </div>
             </div>
@@ -720,6 +1258,30 @@ function toggleDetailIndice(indice, da) {
                     📊 Performance détaillée
                 </h3>
                 ${genererSectionPerformance(da)}
+            `;
+            break;
+        case 'M':
+            html = `
+                <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
+                    🎯 Mobilisation détaillée
+                </h3>
+                ${genererSectionMobilisation(da)}
+            `;
+            break;
+        case 'E':
+            html = `
+                <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
+                    ⚡ Engagement détaillé
+                </h3>
+                ${genererSectionEngagement(da)}
+            `;
+            break;
+        case 'R':
+            html = `
+                <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
+                    ⚠️ Risque d'échec détaillé
+                </h3>
+                ${genererSectionRisque(da)}
             `;
             break;
     }
