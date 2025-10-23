@@ -106,36 +106,91 @@ function calculerTousLesIndices(da) {
 }
 
 /**
- * Interprète l'indice M (Mobilisation) selon les seuils IDME adaptés
- * @param {number} valeur - Valeur normalisée entre 0 et 1
+ * Interprète l'indice M (Mobilisation) selon la logique pédagogique avancée
+ * Implémente la formule Excel avec diagnostic précis des composantes A et C
+ * @param {number} A - Assiduité en proportion 0-1
+ * @param {number} C - Complétion en proportion 0-1
+ * @param {boolean} statutDecrochage - Indicateur de décrochage (défaut: false)
  * @returns {Object} - { niveau, emoji, couleur }
  */
-function interpreterMobilisation(valeur) {
-    if (valeur >= 0.85) {
+function interpreterMobilisation(A, C, statutDecrochage = false) {
+    // 1. Décrochage (priorité absolue - interventions impossibles)
+    if (statutDecrochage) {
         return {
-            niveau: 'Excellente mobilisation',
-            emoji: '🔵',
-            couleur: '#2196F3' // Bleu
+            niveau: 'Décrochage',
+            emoji: '⚫',
+            couleur: '#9e9e9e' // Gris
         };
     }
-    if (valeur >= 0.75) {
+
+    // 2. Assiduité ET complétion critiques (A<0.7 ET C<0.7)
+    if (A < 0.7 && C < 0.7) {
         return {
-            niveau: 'Bonne mobilisation',
-            emoji: '🟢',
-            couleur: '#28a745' // Vert
+            niveau: 'Assiduité ET complétion critiques',
+            emoji: '🔴',
+            couleur: '#dc3545' // Rouge
         };
     }
-    if (valeur >= 0.65) {
+
+    // 3. Assiduité critique seule (A<0.7)
+    if (A < 0.7) {
         return {
-            niveau: 'En développement',
+            niveau: 'Assiduité critique',
+            emoji: '🟠',
+            couleur: '#ff9800' // Orange
+        };
+    }
+
+    // 4. Complétion critique seule (C<0.7)
+    if (C < 0.7) {
+        return {
+            niveau: 'Complétion critique',
+            emoji: '🟠',
+            couleur: '#ff9800' // Orange
+        };
+    }
+
+    // 5. Mobilisation fragile (A<0.8 ET C<0.8)
+    if (A < 0.8 && C < 0.8) {
+        return {
+            niveau: 'Mobilisation fragile',
             emoji: '🟡',
             couleur: '#ffc107' // Jaune
         };
     }
+
+    // 6. Assiduité fragile (A<0.8 ET C≥0.8)
+    if (A < 0.8 && C >= 0.8) {
+        return {
+            niveau: 'Assiduité fragile',
+            emoji: '🟡',
+            couleur: '#ffc107' // Jaune
+        };
+    }
+
+    // 7. Complétion fragile (A≥0.8 ET C<0.8)
+    if (A >= 0.8 && C < 0.8) {
+        return {
+            niveau: 'Complétion fragile',
+            emoji: '🟡',
+            couleur: '#ffc107' // Jaune
+        };
+    }
+
+    // 8. Favorable (A≥0.9 ET C≥0.9)
+    if (A >= 0.9 && C >= 0.9) {
+        return {
+            niveau: 'Favorable',
+            emoji: '🔵',
+            couleur: '#2196F3' // Bleu
+        };
+    }
+
+    // 9. Acceptable (sinon: A≥0.8 ET C≥0.8, mais pas tous deux ≥0.9)
     return {
-        niveau: 'Mobilisation insuffisante',
-        emoji: '🔴',
-        couleur: '#dc3545' // Rouge
+        niveau: 'Acceptable',
+        emoji: '🟢',
+        couleur: '#28a745' // Vert
     };
 }
 
@@ -228,11 +283,13 @@ function interpreterRisque(valeur) {
  */
 function genererSectionMobilisation(da) {
     const indices = calculerTousLesIndices(da);
-    const interpM = interpreterMobilisation(indices.M);
 
-    // Récupérer A et C séparément
-    const A = indices.A / 100; // Convertir en proportion
+    // Récupérer A et C séparément (en proportions 0-1)
+    const A = indices.A / 100;
     const C = indices.C / 100;
+
+    // Interpréter selon A et C (pas la moyenne M)
+    const interpM = interpreterMobilisation(A, C);
 
     return `
         <!-- STATISTIQUES -->
@@ -258,13 +315,23 @@ function genererSectionMobilisation(da) {
                 ${interpM.emoji} ${interpM.niveau}
             </div>
             <div style="color: #666; line-height: 1.5;">
-                ${interpM.niveau === 'Excellente mobilisation' ?
-                    "Cet étudiant démontre un engagement comportemental exemplaire, avec une présence constante et une complétion régulière des travaux." :
-                  interpM.niveau === 'Bonne mobilisation' ?
-                    "Cet étudiant montre un bon engagement comportemental. La mobilisation est satisfaisante." :
-                  interpM.niveau === 'En développement' ?
-                    "La mobilisation nécessite une attention. Un soutien proactif pourrait améliorer l'engagement comportemental." :
-                    "⚠️ Mobilisation insuffisante. Une intervention immédiate est nécessaire pour identifier les obstacles à l'engagement."}
+                ${interpM.niveau === 'Décrochage' ?
+                    "⚫ L'étudiant ne se présente plus au cours. Les interventions pédagogiques ne sont plus possibles. Référer aux services d'aide et à l'API." :
+                  interpM.niveau === 'Assiduité ET complétion critiques' ?
+                    "🔴 Situation critique : présence ET remise des travaux sous 70%. Intervention RàI niveau 3 immédiate requise." :
+                  interpM.niveau === 'Assiduité critique' ?
+                    "🟠 Assiduité critique (< 70%). La présence irrégulière compromet l'apprentissage. Intervention prioritaire sur l'engagement comportemental." :
+                  interpM.niveau === 'Complétion critique' ?
+                    "🟠 Complétion critique (< 70%). Les travaux ne sont pas remis. Investigation des obstacles organisationnels ou motivationnels nécessaire." :
+                  interpM.niveau === 'Mobilisation fragile' ?
+                    "🟡 Les deux composantes (A et C) sont entre 70-80%. Soutien proactif recommandé pour stabiliser l'engagement." :
+                  interpM.niveau === 'Assiduité fragile' ?
+                    "🟡 L'assiduité est entre 70-80% alors que la complétion est satisfaisante. Renforcer la présence en classe." :
+                  interpM.niveau === 'Complétion fragile' ?
+                    "🟡 La complétion est entre 70-80% alors que l'assiduité est satisfaisante. Soutenir l'organisation et la planification." :
+                  interpM.niveau === 'Favorable' ?
+                    "🔵 Excellent engagement comportemental ! Assiduité et complétion ≥ 90%. Maintenir cette dynamique positive." :
+                    "🟢 Engagement comportemental satisfaisant. Assiduité et complétion ≥ 80%. Continuer la surveillance de niveau 1."}
             </div>
         </div>
 
@@ -278,16 +345,48 @@ function genererSectionMobilisation(da) {
             </div>
         </div>
 
-        <!-- RECOMMANDATIONS SI FAIBLE -->
-        ${indices.M < 0.75 ? `
+        <!-- RECOMMANDATIONS SELON LE NIVEAU -->
+        ${interpM.niveau === 'Décrochage' ? `
+            <div style="background: #f5f5f5; border-left: 4px solid #9e9e9e; padding: 15px; border-radius: 6px;">
+                <h4 style="color: #616161; margin-bottom: 10px;">⚫ Actions requises</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #616161; line-height: 1.6;">
+                    <li>Contact immédiat avec l'aide pédagogique individuelle (API)</li>
+                    <li>Tentative de contact direct (téléphone, courriel)</li>
+                    <li>Référence aux services d'aide psychosociale si pertinent</li>
+                    <li>Documentation du dossier étudiant</li>
+                </ul>
+            </div>
+        ` : (A < 0.7 || C < 0.7) ? `
+            <div style="background: ${A < 0.7 && C < 0.7 ? '#f8d7da' : '#fff3cd'};
+                        border-left: 4px solid ${A < 0.7 && C < 0.7 ? '#dc3545' : '#ff9800'};
+                        padding: 15px; border-radius: 6px;">
+                <h4 style="color: ${A < 0.7 && C < 0.7 ? '#721c24' : '#856404'}; margin-bottom: 10px;">
+                    💡 Recommandations d'intervention (niveau critique)
+                </h4>
+                <ul style="margin: 0; padding-left: 20px; color: ${A < 0.7 && C < 0.7 ? '#721c24' : '#856404'}; line-height: 1.6;">
+                    ${A < 0.7 && C < 0.7 ?
+                        '<li><strong>Intervention RàI niveau 3 immédiate</strong> - Les deux composantes sont critiques</li>' : ''}
+                    ${A < 0.7 ?
+                        '<li><strong>Assiduité critique :</strong> Rencontre immédiate pour identifier les causes d\'absence</li>' : ''}
+                    ${C < 0.7 ?
+                        '<li><strong>Complétion critique :</strong> Investigation des obstacles à la remise des travaux</li>' : ''}
+                    <li>Établir un plan d'intervention personnalisé (PIP) avec objectifs mesurables</li>
+                    <li>Suivi hebdomadaire jusqu'à amélioration significative</li>
+                    <li>Mobiliser les ressources d'aide (tutorat, aide technologique, etc.)</li>
+                </ul>
+            </div>
+        ` : (A < 0.8 || C < 0.8) ? `
             <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 6px;">
-                <h4 style="color: #856404; margin-bottom: 10px;">💡 Recommandations d'intervention</h4>
+                <h4 style="color: #856404; margin-bottom: 10px;">💡 Recommandations préventives (niveau fragile)</h4>
                 <ul style="margin: 0; padding-left: 20px; color: #856404; line-height: 1.6;">
-                    ${indices.A < 70 ? '<li><strong>Assiduité critique :</strong> Rencontre immédiate pour identifier les causes d\'absence</li>' : ''}
-                    ${indices.C < 70 ? '<li><strong>Complétion critique :</strong> Investigation des obstacles à la remise des travaux</li>' : ''}
-                    ${indices.M < 0.65 ? '<li><strong>Plan d\'intervention RàI niveau 2-3 requis</strong></li>' : ''}
-                    <li>Focus sur l'engagement comportemental et la motivation intrinsèque</li>
-                    <li>Identifier et lever les obstacles organisationnels</li>
+                    ${A < 0.8 && C < 0.8 ?
+                        '<li><strong>Mobilisation fragile :</strong> Soutien sur les deux composantes (présence ET remise)</li>' :
+                      A < 0.8 ?
+                        '<li><strong>Assiduité fragile :</strong> Renforcer la motivation à assister aux séances</li>' :
+                        '<li><strong>Complétion fragile :</strong> Soutenir l\'organisation et la gestion du temps</li>'}
+                    <li>Discussion informelle pour identifier les obstacles émergents</li>
+                    <li>Offrir stratégies d'autorégulation et de planification</li>
+                    <li>Réévaluation dans 2 semaines</li>
                 </ul>
             </div>
         ` : ''}
@@ -817,8 +916,12 @@ function afficherProfilComplet(da) {
     // Calculer tous les indices
     const indices = calculerTousLesIndices(da);
 
+    // Récupérer A et C en proportions 0-1 pour interprétation M
+    const A = indices.A / 100;
+    const C = indices.C / 100;
+
     // Calculer les interprétations pour M, E, R
-    const interpM = interpreterMobilisation(indices.M);
+    const interpM = interpreterMobilisation(A, C);
     const interpE = interpreterEngagement(indices.E);
     const interpR = interpreterRisque(indices.R);
 
