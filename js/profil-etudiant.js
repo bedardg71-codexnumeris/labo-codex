@@ -1529,6 +1529,235 @@ function genererSectionCompletion(da) {
 }
 
 /**
+ * Convertit un niveau IDME en score numérique 0-1
+ * @param {string} niveau - I, D, M ou E
+ * @returns {number} - Score 0-1 (milieu de l'intervalle)
+ */
+function convertirNiveauIDMEEnScore(niveau) {
+    niveau = niveau.trim().toUpperCase();
+    switch(niveau) {
+        case 'I': return 0.50;  // Insuffisant < 0.64 → milieu = 0.50
+        case 'D': return 0.695; // Développement 0.65-0.74 → milieu = 0.695
+        case 'M': return 0.795; // Maîtrisé 0.75-0.84 → milieu = 0.795
+        case 'E': return 0.90;  // Étendu >= 0.85 → milieu = 0.90
+        default: return null;
+    }
+}
+
+/**
+ * Calcule les moyennes par critère SRPNF pour un étudiant
+ * Parse les rétroactions finales pour extraire les niveaux IDME
+ * @param {string} da - Numéro de DA
+ * @returns {Object} - { structure, rigueur, plausibilite, nuance, francais } (scores 0-1)
+ */
+function calculerMoyennesCriteres(da) {
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.retroactionFinale);
+
+    console.log('📊 calculerMoyennesCriteres pour DA:', da);
+    console.log('  Total évaluations dans système:', evaluations.length);
+    console.log('  Évaluations pour cet élève avec rétroaction:', evaluationsEleve.length);
+
+    if (evaluationsEleve.length === 0) {
+        return null;
+    }
+
+    // Accumuler les scores par critère
+    const scoresCriteres = {
+        structure: [],
+        rigueur: [],
+        plausibilite: [],
+        nuance: [],
+        francais: []
+    };
+
+    // Regex pour extraire: NOM_CRITERE (NIVEAU)
+    const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILITÉ|NUANCE|FRANÇAIS)\s*\(([IDME])\)/gi;
+
+    evaluationsEleve.forEach(evaluation => {
+        const retroaction = evaluation.retroactionFinale || '';
+
+        // Extraire tous les critères avec leur niveau
+        let match;
+        while ((match = regexCritere.exec(retroaction)) !== null) {
+            const nomCritere = match[1].toUpperCase();
+            const niveauIDME = match[2].toUpperCase();
+            const score = convertirNiveauIDMEEnScore(niveauIDME);
+
+            if (score !== null) {
+                if (nomCritere === 'STRUCTURE') {
+                    scoresCriteres.structure.push(score);
+                } else if (nomCritere === 'RIGUEUR') {
+                    scoresCriteres.rigueur.push(score);
+                } else if (nomCritere === 'PLAUSIBILITÉ') {
+                    scoresCriteres.plausibilite.push(score);
+                } else if (nomCritere === 'NUANCE') {
+                    scoresCriteres.nuance.push(score);
+                } else if (nomCritere === 'FRANÇAIS') {
+                    scoresCriteres.francais.push(score);
+                }
+            }
+        }
+    });
+
+    console.log('  Scores extraits:', scoresCriteres);
+
+    // Calculer les moyennes
+    const moyennes = {};
+    let aucuneDonnee = true;
+
+    Object.keys(scoresCriteres).forEach(critere => {
+        const scores = scoresCriteres[critere];
+        if (scores.length > 0) {
+            moyennes[critere] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+            aucuneDonnee = false;
+        } else {
+            moyennes[critere] = null;
+        }
+    });
+
+    return aucuneDonnee ? null : moyennes;
+}
+
+/**
+ * Diagnostique les forces et défis selon le seuil pédagogique
+ * @param {Object} moyennes - Moyennes par critère
+ * @param {number} seuil - Seuil pour identifier une force (défaut: 0.7125)
+ * @returns {Object} - { forces: [], defis: [], principaleForce: '', principalDefi: '' }
+ */
+function diagnostiquerForcesChallenges(moyennes, seuil = 0.7125) {
+    if (!moyennes) {
+        return { forces: [], defis: [], principaleForce: null, principalDefi: null };
+    }
+
+    const criteres = [
+        { nom: 'Structure', cle: 'structure', score: moyennes.structure },
+        { nom: 'Rigueur', cle: 'rigueur', score: moyennes.rigueur },
+        { nom: 'Plausibilité', cle: 'plausibilite', score: moyennes.plausibilite },
+        { nom: 'Nuance', cle: 'nuance', score: moyennes.nuance },
+        { nom: 'Français', cle: 'francais', score: moyennes.francais }
+    ].filter(c => c.score !== null);
+
+    const forces = criteres.filter(c => c.score >= seuil).sort((a, b) => b.score - a.score);
+    const defis = criteres.filter(c => c.score < seuil).sort((a, b) => a.score - b.score);
+
+    return {
+        forces: forces,
+        defis: defis,
+        principaleForce: forces.length > 0 ? forces[0] : null,
+        principalDefi: defis.length > 0 ? defis[0] : null
+    };
+}
+
+/**
+ * Génère le HTML du diagnostic des forces et défis par critère SRPNF
+ * @param {string} da - Numéro de DA
+ * @returns {string} - HTML du diagnostic
+ */
+function genererDiagnosticCriteres(da) {
+    const moyennes = calculerMoyennesCriteres(da);
+
+    console.log('🎯 Diagnostic critères pour DA:', da);
+    console.log('  Moyennes calculées:', moyennes);
+
+    if (!moyennes) {
+        console.log('  ⚠️ Pas de moyennes disponibles - diagnostic non affiché');
+        return ''; // Pas de données, pas de diagnostic
+    }
+
+    const diagnostic = diagnostiquerForcesChallenges(moyennes, 0.7125);
+    console.log('  Forces:', diagnostic.forces.length);
+    console.log('  Défis:', diagnostic.defis.length);
+
+    // Fonction helper pour obtenir la couleur selon le score
+    const obtenirCouleurScore = (score) => {
+        if (score >= 0.85) return '#2196F3'; // Bleu
+        if (score >= 0.75) return '#28a745'; // Vert
+        if (score >= 0.7125) return '#28a745'; // Vert (force)
+        if (score >= 0.65) return '#ffc107'; // Jaune
+        return '#ff9800'; // Orange
+    };
+
+    return `
+        <!-- DIAGNOSTIC CRITÈRES SRPNF -->
+        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem; margin-top: 20px;">
+            🎯 Diagnostic par critère (seuil force: 0.7125)
+        </h4>
+
+        <!-- Tableau des scores par critère -->
+        <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+            <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 10px; font-size: 0.9rem;">
+                ${['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
+                    const nomCritere = cle === 'structure' ? 'Structure' :
+                                     cle === 'rigueur' ? 'Rigueur' :
+                                     cle === 'plausibilite' ? 'Plausibilité' :
+                                     cle === 'nuance' ? 'Nuance' : 'Français';
+                    const score = moyennes[cle];
+
+                    if (score === null) return '';
+
+                    const pourcentage = Math.round(score * 100);
+                    const couleur = obtenirCouleurScore(score);
+                    const estForce = score >= 0.7125;
+                    const estDefi = score < 0.7125;
+
+                    return `
+                        <div style="font-weight: 500; color: #555;">${nomCritere}</div>
+                        <div style="text-align: center;">
+                            <span style="display: inline-block; min-width: 50px; padding: 4px 10px;
+                                         background: ${couleur}22; color: ${couleur};
+                                         border-radius: 4px; font-weight: bold;">
+                                ${pourcentage}%
+                            </span>
+                        </div>
+                        <div style="text-align: right; font-size: 0.85rem; color: ${estForce ? '#28a745' : estDefi ? '#ff9800' : '#666'};">
+                            ${estForce ? '✓ Force' : estDefi ? '⚠ Défi' : '—'}
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+
+        <!-- Résumé forces -->
+        ${diagnostic.forces.length > 0 ? `
+            <div style="background: linear-gradient(to right, #28a74522, #28a74511);
+                        border-left: 4px solid #28a745; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #155724; margin-bottom: 6px;">
+                    ✓ ${diagnostic.forces.length > 1 ? 'Forces identifiées' : 'Force identifiée'}
+                    ${diagnostic.forces.length > 1 ? ` (${diagnostic.forces.length})` : ''}
+                </div>
+                <div style="color: #155724; font-size: 0.9rem;">
+                    ${diagnostic.forces.map(f => `<strong>${f.nom}</strong> (${Math.round(f.score * 100)}%)`).join(', ')}
+                </div>
+            </div>
+        ` : `
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #856404;">
+                    ⚠️ Aucune force identifiée (aucun critère ≥ 71.25%)
+                </div>
+            </div>
+        `}
+
+        <!-- Résumé défis -->
+        ${diagnostic.defis.length > 0 ? `
+            <div style="background: #fff3cd; border-left: 4px solid #ff9800; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+                <div style="font-weight: bold; color: #856404; margin-bottom: 6px;">
+                    🎯 ${diagnostic.defis.length > 1 ? 'Défis identifiés' : 'Défi identifié'}
+                    ${diagnostic.defis.length > 1 ? ` (${diagnostic.defis.length})` : ''}
+                </div>
+                <div style="color: #856404; font-size: 0.9rem;">
+                    ${diagnostic.defis.map(d => `<strong>${d.nom}</strong> (${Math.round(d.score * 100)}%)`).join(', ')}
+                </div>
+                <div style="margin-top: 8px; font-size: 0.85rem; color: #856404;">
+                    💡 Cibler les efforts sur ${diagnostic.principalDefi ? `<strong>${diagnostic.principalDefi.nom}</strong>` : 'ces critères'}
+                    pour maximiser l'impact des interventions.
+                </div>
+            </div>
+        ` : ''}
+    `;
+}
+
+/**
  * Génère le HTML de la section Performance (Portfolio) - VERSION CORRIGÉE
  *
  * CORRECTION : Ne compte QUE les artefacts réellement évalués
@@ -1660,7 +1889,9 @@ function genererSectionPerformance(da) {
                 <span>Note (top 3)</span>
             </div>
         </div>
-        
+
+        ${genererDiagnosticCriteres(da)}
+
         <!-- TITRE AVEC INSTRUCTION INTÉGRÉE -->
         <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
             📝 Artefacts (${nbTotal})
