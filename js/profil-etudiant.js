@@ -103,7 +103,7 @@ function calculerTousLesIndices(da) {
 }
 
 /**
- * Calcule la performance PAN (3 meilleurs artefacts)
+ * Calcule la performance PAN basée sur les artefacts SÉLECTIONNÉS dans le portfolio
  * @param {string} da - Numéro de DA
  * @returns {number} - Performance en proportion 0-1
  */
@@ -115,15 +115,38 @@ function calculerPerformancePAN(da) {
         return 0;
     }
 
-    // Trier par note décroissante et prendre les 3 meilleures
+    // 🆕 PRIORITÉ 1 : Utiliser les artefacts SÉLECTIONNÉS dans le portfolio
+    const selectionsPortfolios = JSON.parse(localStorage.getItem('portfoliosEleves') || '{}');
+    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const portfolio = productions.find(p => p.type === 'portfolio');
+
+    if (portfolio && selectionsPortfolios[da]?.[portfolio.id]) {
+        const selectionEleve = selectionsPortfolios[da][portfolio.id];
+        const artefactsRetenus = selectionEleve.artefactsRetenus;
+
+        if (artefactsRetenus.length > 0) {
+            // Filtrer les évaluations pour ne garder que les artefacts sélectionnés
+            const evaluationsRetenues = evaluationsEleve.filter(e =>
+                artefactsRetenus.includes(e.productionId)
+            );
+
+            if (evaluationsRetenues.length > 0) {
+                // Calculer la moyenne des artefacts sélectionnés
+                const moyenne = evaluationsRetenues.reduce((sum, e) => sum + e.noteFinale, 0) / evaluationsRetenues.length;
+                console.log(`📊 Indice P calculé depuis ${evaluationsRetenues.length} artefact(s) sélectionné(s): ${moyenne.toFixed(1)}%`);
+                return moyenne / 100; // Retourner en proportion 0-1
+            }
+        }
+    }
+
+    // FALLBACK : Si pas de sélection, prendre les 3 meilleures notes (comportement par défaut)
     const meilleuresNotes = evaluationsEleve
         .map(e => e.noteFinale)
         .sort((a, b) => b - a)
         .slice(0, 3);
 
-    // Calculer la moyenne des 3 meilleures (ou moins si pas assez d'évaluations)
     const moyenne = meilleuresNotes.reduce((sum, note) => sum + note, 0) / meilleuresNotes.length;
-
+    console.log(`📊 Indice P calculé depuis les ${meilleuresNotes.length} meilleure(s) note(s): ${moyenne.toFixed(1)}%`);
     return moyenne / 100; // Retourner en proportion 0-1
 }
 
@@ -298,16 +321,16 @@ function afficherProfilComplet(da) {
             </div>
         </div>
         
-        <!-- DASHBOARD DES INDICES - 5 COLONNES -->
+        <!-- DASHBOARD DES INDICES - 6 COLONNES -->
         <div class="carte" style="background: var(--bleu-tres-pale); border: 2px solid var(--bleu-principal); padding: 15px;">
             <h3 style="margin-bottom: 15px;">📊 Indices de suivi</h3>
-            
-            <!-- GRILLE : 5 COLONNES (A-P-M-E-R) -->
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
-                <!-- CARTE A -->
-                <div id="carte-indice-A" onclick="toggleDetailIndice('A', '${da}')" 
-                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center; 
-                            border: 2px solid ${obtenirCouleurIndice(indices.A)}; cursor: pointer; 
+
+            <!-- GRILLE : 6 COLONNES (A-C-P-M-E-R) -->
+            <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
+                <!-- CARTE A (Assiduité) -->
+                <div id="carte-indice-A" onclick="toggleDetailIndice('A', '${da}')"
+                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
+                            border: 2px solid ${obtenirCouleurIndice(indices.A)}; cursor: pointer;
                             transition: all 0.2s;"
                      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
                      onmouseout="this.style.transform=''; this.style.boxShadow='';">
@@ -324,16 +347,37 @@ function afficherProfilComplet(da) {
                         Voir détails →
                     </div>
                 </div>
-                
-                <!-- CARTE P (Portfolio) -->
-                <div id="carte-indice-P" onclick="toggleDetailIndice('P', '${da}')" 
-                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center; 
-                            border: 2px solid ${obtenirCouleurIndice(indices.P)}; cursor: pointer; 
+
+                <!-- CARTE C (Complétion) -->
+                <div id="carte-indice-C" onclick="toggleDetailIndice('C', '${da}')"
+                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
+                            border: 2px solid ${obtenirCouleurIndice(indices.C)}; cursor: pointer;
                             transition: all 0.2s;"
                      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
                      onmouseout="this.style.transform=''; this.style.boxShadow='';">
                     <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">
-                        Portfolio
+                        Complétion
+                    </div>
+                    <div style="font-size: 2.2rem; font-weight: bold; color: ${obtenirCouleurIndice(indices.C)}; margin: 8px 0;">
+                        ${indices.C}%
+                    </div>
+                    <div style="font-weight: bold; color: var(--bleu-principal); font-size: 0.85rem; margin-bottom: 8px;">
+                        Indice C
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--bleu-moyen);">
+                        Voir détails →
+                    </div>
+                </div>
+
+                <!-- CARTE P (Performance) -->
+                <div id="carte-indice-P" onclick="toggleDetailIndice('P', '${da}')"
+                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
+                            border: 2px solid ${obtenirCouleurIndice(indices.P)}; cursor: pointer;
+                            transition: all 0.2s;"
+                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
+                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">
+                        Performance
                     </div>
                     <div style="font-size: 2.2rem; font-weight: bold; color: ${obtenirCouleurIndice(indices.P)}; margin: 8px 0;">
                         ${indices.P}%
@@ -624,8 +668,8 @@ function toggleDetailIndice(indice, da) {
     // Mettre à jour l'indice actif
     indiceActif = indice;
 
-    // GRISER toutes les cartes sauf celle active (liste mise à jour sans C)
-    const toutesLesCartes = ['A', 'P', 'M', 'E', 'R'];
+    // GRISER toutes les cartes sauf celle active
+    const toutesLesCartes = ['A', 'C', 'P', 'M', 'E', 'R'];
     toutesLesCartes.forEach(ind => {
         const carte = document.getElementById(`carte-indice-${ind}`);
         if (carte) {
@@ -662,13 +706,21 @@ function toggleDetailIndice(indice, da) {
                 ${genererSectionAssiduite(da)}
             `;
             break;
+        case 'C':
+            html = `
+                <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
+                    ✅ Complétion détaillée
+                </h3>
+                ${genererSectionCompletion(da)}
+            `;
+            break;
         case 'P':
             html = `
-        <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
-            📁 Portfolio d'apprentissage
-        </h3>
-        ${genererSectionPortfolio(da)}
-    `;
+                <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
+                    📊 Performance détaillée
+                </h3>
+                ${genererSectionPerformance(da)}
+            `;
             break;
     }
 
@@ -705,19 +757,126 @@ function fermerDetailIndice() {
 
 
 /**
- * Génère le HTML de la section portfolio - VERSION CORRIGÉE
- * 
- * CORRECTION : Ne compte QUE les artefacts réellement évalués
- * (au moins une évaluation existe pour cet artefact)
- * 
- * COHÉRENCE avec calculerTauxCompletion() :
- * - Les deux fonctions utilisent maintenant la même logique
- * - Un artefact créé mais jamais évalué ne compte pas
- * 
+ * Génère le HTML de la section Complétion détaillée
+ *
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */
-function genererSectionPortfolio(da) {
+function genererSectionCompletion(da) {
+    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
+
+    // Identifier les artefacts-portfolio réellement donnés
+    const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
+    const artefactsDonnes = [];
+
+    evaluations.forEach(evaluation => {
+        if (artefactsPortfolioIds.has(evaluation.productionId)) {
+            if (!artefactsDonnes.find(a => a.id === evaluation.productionId)) {
+                const production = artefactsPortfolio.find(p => p.id === evaluation.productionId);
+                if (production) {
+                    artefactsDonnes.push(production);
+                }
+            }
+        }
+    });
+
+    if (artefactsDonnes.length === 0) {
+        return `
+            <div class="text-muted" style="text-align: center; padding: 30px;">
+                <p>📝 Aucun artefact de portfolio évalué pour le moment</p>
+            </div>
+        `;
+    }
+
+    // Récupérer les évaluations de l'élève
+    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
+
+    // Construire la liste des artefacts avec leur statut
+    const artefacts = artefactsDonnes.map(art => {
+        const evaluation = evaluationsEleve.find(e => e.productionId === art.id);
+        return {
+            id: art.id,
+            titre: art.titre,
+            remis: !!evaluation,
+            note: evaluation?.noteFinale || null,
+            niveau: evaluation?.niveauFinal || null
+        };
+    }).sort((a, b) => {
+        if (a.remis && !b.remis) return -1;
+        if (!a.remis && b.remis) return 1;
+        return a.titre.localeCompare(b.titre);
+    });
+
+    const nbTotal = artefacts.length;
+    const nbRemis = artefacts.filter(a => a.remis).length;
+    const tauxCompletion = Math.round((nbRemis / nbTotal) * 100);
+    const indices = calculerTousLesIndices(da);
+
+    return `
+        <!-- STATISTIQUES -->
+        <div class="grille-statistiques mb-2">
+            <div class="carte-metrique">
+                <strong>${nbRemis}/${nbTotal}</strong>
+                <span>Artefacts remis</span>
+            </div>
+            <div class="carte-metrique">
+                <strong>${tauxCompletion}%</strong>
+                <span>Taux de complétion</span>
+            </div>
+            <div class="carte-metrique">
+                <strong>${indices.C}%</strong>
+                <span>Indice C</span>
+            </div>
+        </div>
+
+        <!-- LISTE DES ARTEFACTS -->
+        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
+            📝 Artefacts du portfolio (${nbTotal})
+        </h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            ${artefacts.map(art => {
+                const icone = art.remis ? '✅' : '⏳';
+                const bordure = art.remis ? 'var(--risque-minimal)' : '#ddd';
+                const fond = art.remis ? '#d4edda' : '#f5f5f5';
+
+                return `
+                    <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
+                                background: ${fond};
+                                border-left: 3px solid ${bordure}; border-radius: 4px;
+                                ${!art.remis ? 'opacity: 0.6;' : ''}">
+                        <div style="color: ${art.remis ? '#155724' : '#666'}; font-weight: 500; margin-bottom: 5px;">
+                            ${icone} ${echapperHtml(art.titre)}
+                        </div>
+                        ${art.remis ? `
+                            <div style="font-size: 0.9rem; color: #666;">
+                                <strong>${art.note}/100</strong>${art.niveau ? ` · ${art.niveau}` : ''}
+                            </div>
+                        ` : `
+                            <div class="text-muted" style="font-size: 0.9rem;">Non remis</div>
+                        `}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+/**
+ * Génère le HTML de la section Performance (Portfolio) - VERSION CORRIGÉE
+ *
+ * CORRECTION : Ne compte QUE les artefacts réellement évalués
+ * (au moins une évaluation existe pour cet artefact)
+ *
+ * COHÉRENCE avec calculerTauxCompletion() :
+ * - Les deux fonctions utilisent maintenant la même logique
+ * - Un artefact créé mais jamais évalué ne compte pas
+ *
+ * @param {string} da - Numéro de DA
+ * @returns {string} - HTML de la section
+ */
+function genererSectionPerformance(da) {
     const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
     const portfolio = productions.find(p => p.type === 'portfolio');
 
@@ -774,6 +933,35 @@ function genererSectionPortfolio(da) {
         return a.titre.localeCompare(b.titre);
     });
 
+    // ✨ SÉLECTION AUTOMATIQUE des meilleurs artefacts si aucune sélection manuelle
+    const nombreARetenir = portfolio.regles.nombreARetenir || 3;
+    if (selectionEleve.artefactsRetenus.length === 0) {
+        const artefactsRemisAvecNote = artefacts
+            .filter(a => a.remis && a.note !== null)
+            .sort((a, b) => b.note - a.note);
+
+        const meilleurs = artefactsRemisAvecNote.slice(0, nombreARetenir);
+
+        if (meilleurs.length > 0) {
+            selectionEleve.artefactsRetenus = meilleurs.map(a => a.id);
+
+            if (!selectionsPortfolios[da]) {
+                selectionsPortfolios[da] = {};
+            }
+            selectionsPortfolios[da][portfolio.id] = {
+                artefactsRetenus: selectionEleve.artefactsRetenus,
+                dateSelection: new Date().toISOString(),
+                auto: true
+            };
+            localStorage.setItem('portfoliosEleves', JSON.stringify(selectionsPortfolios));
+
+            // Mettre à jour le flag retenu
+            artefacts.forEach(art => {
+                art.retenu = selectionEleve.artefactsRetenus.includes(art.id);
+            });
+        }
+    }
+
     const nbTotal = artefacts.length;  // ✅ Maintenant basé sur les artefacts ÉVALUÉS
     const nbRemis = artefacts.filter(a => a.remis).length;
     const nbRetenus = selectionEleve.artefactsRetenus.length;
@@ -823,27 +1011,35 @@ function genererSectionPortfolio(da) {
         </h4>
         <div style="display: flex; flex-wrap: wrap; gap: 10px;">
             ${artefacts.map(art => {
-                const icone = art.remis ? (art.retenu ? '✅' : '📄') : '⏳';
-                const bordure = art.remis ? (art.retenu ? 'var(--risque-minimal)' : 'var(--bleu-moyen)') : '#ddd';
-                
+                const iconeStatut = !art.remis ? '⏳' : '📄';
+                const fondCouleur = art.retenu
+                    ? 'linear-gradient(to right, #d4edda, #e8f5e9)'
+                    : (art.remis ? 'var(--bleu-tres-pale)' : '#f5f5f5');
+                const bordure = art.retenu ? '#28a745' : (art.remis ? 'var(--bleu-moyen)' : '#ddd');
+                const couleurTitre = art.retenu ? '#155724' : 'var(--bleu-principal)';
+                const fondHover = art.retenu ? '#c3e6cb' : '#e0e8f0';
+
                 return `
-                    <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px; 
-                                background: ${art.remis ? 'var(--bleu-tres-pale)' : '#f5f5f5'}; 
-                                border-left: 3px solid ${bordure}; border-radius: 4px;
-                                ${!art.remis ? 'opacity: 0.6;' : ''}"
-                         onmouseover="this.style.background='#e0e8f0'"
-                         onmouseout="this.style.background='${art.remis ? 'var(--bleu-tres-pale)' : '#f5f5f5'}'">
+                    <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
+                                background: ${fondCouleur};
+                                border-left: ${art.retenu ? '4px' : '3px'} solid ${bordure};
+                                border-radius: 4px;
+                                ${!art.remis ? 'opacity: 0.6;' : ''}
+                                ${art.retenu ? 'box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);' : ''}
+                                transition: all 0.3s ease;"
+                         onmouseover="this.style.background='${fondHover}'"
+                         onmouseout="this.style.background='${fondCouleur}'">
                         <label style="display: flex; gap: 8px; cursor: ${art.remis ? 'pointer' : 'not-allowed'};">
-                            <input type="checkbox" 
-                                   name="artefactRetenu" 
+                            <input type="checkbox"
+                                   name="artefactRetenu"
                                    value="${art.id}"
                                    ${art.retenu ? 'checked' : ''}
                                    ${!art.remis ? 'disabled' : ''}
                                    onchange="toggleArtefactPortfolio('${da}', '${portfolio.id}', ${portfolio.regles.nombreARetenir})"
-                                   style="margin-top: 2px;">
+                                   style="margin-top: 2px; accent-color: #28a745;">
                             <div style="flex: 1;">
-                                <div style="color: var(--bleu-principal); font-weight: 500; margin-bottom: 5px;">
-                                    ${icone} ${echapperHtml(art.titre)}
+                                <div style="color: ${couleurTitre}; font-weight: 500; margin-bottom: 5px;">
+                                    ${iconeStatut} ${echapperHtml(art.titre)}
                                 </div>
                                 ${art.remis ? `
                                     <div style="font-size: 0.9rem; color: #666;">

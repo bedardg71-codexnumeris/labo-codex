@@ -236,19 +236,26 @@ function calculerTauxCompletion(da) {
     const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
 
-    // ✅ ÉTAPE 1 : Identifier les artefacts RÉELLEMENT DONNÉS
+    // ✅ CORRECTION : Ne compter QUE les artefacts-portfolio pour l'indice C
+    const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
+
+    // ✅ ÉTAPE 1 : Identifier les artefacts-portfolio RÉELLEMENT DONNÉS
     // (ceux pour lesquels au moins un étudiant a été évalué)
-    const productionsEvaluees = new Set();
+    const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
+    const artefactsDonnes = new Set();
+
     evaluations.forEach(evaluation => {
-        productionsEvaluees.add(evaluation.productionId);
+        if (artefactsPortfolioIds.has(evaluation.productionId)) {
+            artefactsDonnes.add(evaluation.productionId);
+        }
     });
 
-    const nombreArtefactsDonnes = productionsEvaluees.size;
+    const nombreArtefactsDonnes = artefactsDonnes.size;
 
-    // ✅ ÉTAPE 2 : Compter combien l'étudiant a remis parmi les artefacts donnés
+    // ✅ ÉTAPE 2 : Compter combien l'étudiant a remis parmi les artefacts-portfolio donnés
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
-        productionsEvaluees.has(e.productionId)
+        artefactsDonnes.has(e.productionId)
     );
 
     // Si aucun artefact n'a encore été donné, retourner 0
