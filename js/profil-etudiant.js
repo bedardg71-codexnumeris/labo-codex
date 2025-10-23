@@ -1529,19 +1529,53 @@ function genererSectionCompletion(da) {
 }
 
 /**
- * Convertit un niveau IDME en score numérique 0-1
- * @param {string} niveau - I, D, M ou E
- * @returns {number} - Score 0-1 (milieu de l'intervalle)
+ * Récupère la table de conversion IDME depuis l'échelle configurée
+ * @param {string} echelleId - ID de l'échelle (optionnel, prend la première IDME si non spécifié)
+ * @returns {Object} - { I: 0.40, D: 0.65, M: 0.75, E: 1.00 }
  */
-function convertirNiveauIDMEEnScore(niveau) {
-    niveau = niveau.trim().toUpperCase();
-    switch(niveau) {
-        case 'I': return 0.50;  // Insuffisant < 0.64 → milieu = 0.50
-        case 'D': return 0.695; // Développement 0.65-0.74 → milieu = 0.695
-        case 'M': return 0.795; // Maîtrisé 0.75-0.84 → milieu = 0.795
-        case 'E': return 0.90;  // Étendu >= 0.85 → milieu = 0.90
-        default: return null;
+function obtenirTableConversionIDME(echelleId = null) {
+    const echelles = JSON.parse(localStorage.getItem('echelles') || '[]');
+
+    // Trouver l'échelle IDME (soit par ID, soit la première trouvée)
+    let echelle;
+    if (echelleId) {
+        echelle = echelles.find(e => e.id === echelleId);
+    } else {
+        // Chercher une échelle avec les codes I, D, M, E
+        echelle = echelles.find(e =>
+            e.niveaux &&
+            e.niveaux.some(n => ['I', 'D', 'M', 'E'].includes(n.code))
+        );
     }
+
+    if (!echelle || !echelle.niveaux) {
+        // Fallback: valeurs par défaut si échelle non trouvée
+        console.warn('⚠️ Échelle IDME non trouvée, utilisation des valeurs par défaut');
+        return { I: 0.40, D: 0.65, M: 0.75, E: 1.00 };
+    }
+
+    // Construire la table de conversion depuis les valeurs ponctuelles
+    const table = {};
+    echelle.niveaux.forEach(niveau => {
+        const code = niveau.code.toUpperCase();
+        if (['I', 'D', 'M', 'E'].includes(code)) {
+            table[code] = (niveau.valeurPonctuelle || 0) / 100; // Convertir en 0-1
+        }
+    });
+
+    console.log('📊 Table conversion IDME:', table);
+    return table;
+}
+
+/**
+ * Convertit un niveau IDME en score numérique 0-1 selon l'échelle configurée
+ * @param {string} niveau - I, D, M ou E
+ * @param {Object} tableConversion - Table de conversion IDME
+ * @returns {number} - Score 0-1
+ */
+function convertirNiveauIDMEEnScore(niveau, tableConversion) {
+    niveau = niveau.trim().toUpperCase();
+    return tableConversion[niveau] || null;
 }
 
 /**
@@ -1562,6 +1596,9 @@ function calculerMoyennesCriteres(da) {
         return null;
     }
 
+    // Obtenir la table de conversion IDME depuis l'échelle configurée
+    const tableConversion = obtenirTableConversionIDME();
+
     // Accumuler les scores par critère
     const scoresCriteres = {
         structure: [],
@@ -1572,7 +1609,8 @@ function calculerMoyennesCriteres(da) {
     };
 
     // Regex pour extraire: NOM_CRITERE (NIVEAU)
-    const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILITÉ|NUANCE|FRANÇAIS)\s*\(([IDME])\)/gi;
+    // Accepte les variantes avec/sans accents et casse mixte
+    const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi;
 
     evaluationsEleve.forEach(evaluation => {
         const retroaction = evaluation.retroactionFinale || '';
@@ -1582,18 +1620,18 @@ function calculerMoyennesCriteres(da) {
         while ((match = regexCritere.exec(retroaction)) !== null) {
             const nomCritere = match[1].toUpperCase();
             const niveauIDME = match[2].toUpperCase();
-            const score = convertirNiveauIDMEEnScore(niveauIDME);
+            const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
 
             if (score !== null) {
                 if (nomCritere === 'STRUCTURE') {
                     scoresCriteres.structure.push(score);
                 } else if (nomCritere === 'RIGUEUR') {
                     scoresCriteres.rigueur.push(score);
-                } else if (nomCritere === 'PLAUSIBILITÉ') {
+                } else if (nomCritere.startsWith('PLAUSIBILIT')) {
                     scoresCriteres.plausibilite.push(score);
                 } else if (nomCritere === 'NUANCE') {
                     scoresCriteres.nuance.push(score);
-                } else if (nomCritere === 'FRANÇAIS') {
+                } else if (nomCritere.startsWith('FRAN')) {
                     scoresCriteres.francais.push(score);
                 }
             }
@@ -1617,6 +1655,106 @@ function calculerMoyennesCriteres(da) {
     });
 
     return aucuneDonnee ? null : moyennes;
+}
+
+/**
+ * Calcule l'indice de Blocage (compétences transversales critiques)
+ * Blocage = 0.35 × Structure + 0.35 × Français + 0.30 × Rigueur
+ * @param {Object} moyennes - Moyennes par critère
+ * @returns {Object|null} - { score, partiel, criteresManquants } ou null si données insuffisantes
+ */
+function calculerIndiceBlocage(moyennes) {
+    if (!moyennes) {
+        return null;
+    }
+
+    const criteresDisponibles = {
+        structure: moyennes.structure !== null,
+        francais: moyennes.francais !== null,
+        rigueur: moyennes.rigueur !== null
+    };
+
+    const nbCriteresDisponibles = Object.values(criteresDisponibles).filter(Boolean).length;
+
+    // Si moins de 2 critères disponibles, impossible de calculer
+    if (nbCriteresDisponibles < 2) {
+        return null;
+    }
+
+    // Calcul avec pondération ajustée si certains critères manquent
+    let score = 0;
+    let ponderationTotale = 0;
+    const criteresManquants = [];
+
+    if (criteresDisponibles.structure) {
+        score += 0.35 * moyennes.structure;
+        ponderationTotale += 0.35;
+    } else {
+        criteresManquants.push('Structure');
+    }
+
+    if (criteresDisponibles.francais) {
+        score += 0.35 * moyennes.francais;
+        ponderationTotale += 0.35;
+    } else {
+        criteresManquants.push('Français');
+    }
+
+    if (criteresDisponibles.rigueur) {
+        score += 0.30 * moyennes.rigueur;
+        ponderationTotale += 0.30;
+    } else {
+        criteresManquants.push('Rigueur');
+    }
+
+    // Normaliser si pondération partielle
+    if (ponderationTotale > 0 && ponderationTotale < 1.0) {
+        score = score / ponderationTotale;
+    }
+
+    return {
+        score: score,
+        partiel: criteresManquants.length > 0,
+        criteresManquants: criteresManquants
+    };
+}
+
+/**
+ * Interprète l'indice de Blocage selon les seuils pédagogiques
+ * @param {number} blocage - Indice de blocage (0-1)
+ * @returns {Object} - { niveau, couleur, description }
+ */
+function interpreterIndiceBlocage(blocage) {
+    if (blocage === null) {
+        return null;
+    }
+
+    if (blocage < 0.375) {
+        return {
+            niveau: 'Blocage critique',
+            couleur: '#dc3545', // Rouge
+            description: 'Les compétences de base (Structure, Français, Rigueur) sont insuffisantes et bloquent la progression. Intervention immédiate requise.'
+        };
+    }
+    if (blocage < 0.5) {
+        return {
+            niveau: 'Risque de blocage',
+            couleur: '#ff9800', // Orange
+            description: 'Les compétences de base sont fragiles. Un soutien ciblé sur ces fondamentaux est nécessaire pour éviter un blocage.'
+        };
+    }
+    if (blocage < 0.625) {
+        return {
+            niveau: 'Progression possible',
+            couleur: '#ffc107', // Jaune
+            description: 'Les compétences de base permettent la progression, mais nécessitent un renforcement pour assurer la réussite.'
+        };
+    }
+    return {
+        niveau: 'Progression normale',
+        couleur: '#28a745', // Vert
+        description: 'Les compétences de base sont maîtrisées. La progression dans les apprentissages peut se faire normalement.'
+    };
 }
 
 /**
@@ -1646,6 +1784,407 @@ function diagnostiquerForcesChallenges(moyennes, seuil = 0.7125) {
         defis: defis,
         principaleForce: forces.length > 0 ? forces[0] : null,
         principalDefi: defis.length > 0 ? defis[0] : null
+    };
+}
+
+/* ===============================
+   🎯 SYSTÈME DE CIBLES D'INTERVENTION
+   Calcul du Pattern actuel et détermination des cibles d'intervention
+   basé sur les indices A-C-P et les critères SRPNF
+   =============================== */
+
+/**
+ * Calcule les indices sur les 3 DERNIERS artefacts (chronologiquement)
+ * Utilisé pour identifier le pattern actuel et les cibles d'intervention
+ *
+ * @param {string} da - Numéro de DA
+ * @returns {Object} - { performance, idmeMoyen, francaisMoyen, nbArtefacts }
+ */
+function calculerIndicesTroisDerniersArtefacts(da) {
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+
+    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
+    const artefactsPortfolio = productions
+        .filter(p => p.type === 'artefact-portfolio')
+        .map(p => p.id);
+
+    const evaluationsEleve = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        artefactsPortfolio.includes(e.productionId) &&
+        e.noteFinale !== null &&
+        e.noteFinale !== undefined
+    );
+
+    if (evaluationsEleve.length === 0) {
+        return { performance: 0, idmeMoyen: 0, francaisMoyen: 0, nbArtefacts: 0 };
+    }
+
+    // Trier par date de création (la plus récente d'abord)
+    // Si pas de date, utiliser l'ordre inverse d'ajout (derniers ajoutés = plus récents)
+    evaluationsEleve.sort((a, b) => {
+        const dateA = a.dateEvaluation || a.dateCreation || 0;
+        const dateB = b.dateEvaluation || b.dateCreation || 0;
+        return new Date(dateB) - new Date(dateA);
+    });
+
+    // Prendre les 3 derniers (ou moins si pas assez d'artefacts)
+    const troisDerniers = evaluationsEleve.slice(0, 3);
+
+    // Calculer la performance moyenne (notes)
+    const performance = troisDerniers.reduce((sum, e) => sum + e.noteFinale, 0) / troisDerniers.length / 100;
+
+    // Calculer IDME moyen (si disponible)
+    const tableConversion = obtenirTableConversionIDME();
+    const niveauxIDME = troisDerniers
+        .map(e => e.niveauFinal)
+        .filter(n => n && ['I', 'D', 'M', 'E'].includes(n))
+        .map(n => convertirNiveauIDMEEnScore(n, tableConversion))
+        .filter(s => s !== null);
+
+    const idmeMoyen = niveauxIDME.length > 0
+        ? niveauxIDME.reduce((sum, s) => sum + s, 0) / niveauxIDME.length
+        : 0;
+
+    // Calculer moyenne du critère Français (si disponible)
+    const scoresFrancais = [];
+    const regexFrancais = /FRAN[ÇC]AIS\s+[ÉE]CRIT\s*\(([IDME])\)/gi;
+
+    troisDerniers.forEach(evaluation => {
+        const retroaction = evaluation.retroactionFinale || '';
+        let match;
+        while ((match = regexFrancais.exec(retroaction)) !== null) {
+            const niveauIDME = match[1].toUpperCase();
+            const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
+            if (score !== null) {
+                scoresFrancais.push(score * 100); // Convertir en pourcentage
+            }
+        }
+    });
+
+    const francaisMoyen = scoresFrancais.length > 0
+        ? scoresFrancais.reduce((sum, s) => sum + s, 0) / scoresFrancais.length
+        : 0;
+
+    console.log(`📊 Indices 3 derniers artefacts pour DA ${da}:`, {
+        nbArtefacts: troisDerniers.length,
+        performance: (performance * 100).toFixed(1) + '%',
+        idmeMoyen: (idmeMoyen * 100).toFixed(1) + '%',
+        francaisMoyen: francaisMoyen.toFixed(1) + '%'
+    });
+
+    return {
+        performance: performance,
+        idmeMoyen: idmeMoyen,
+        francaisMoyen: francaisMoyen,
+        nbArtefacts: troisDerniers.length
+    };
+}
+
+/**
+ * Identifie le Pattern actuel selon la formule pédagogique
+ *
+ * Formule: SI(AH≤0,4;"Blocage critique";
+ *             SI(ET(AH≤0,5;N≠"Aucun");"Blocage émergent";
+ *                SI(ET(AH≤0,75;N≠"Aucun");"Défi spécifique";"Stable")))
+ *
+ * @param {number} performancePAN3 - Performance sur 3 derniers artefacts (0-1)
+ * @param {boolean} aUnDefi - True si un défi est identifié
+ * @returns {string} - Pattern: 'Blocage critique', 'Blocage émergent', 'Défi spécifique', 'Stable'
+ */
+function identifierPatternActuel(performancePAN3, aUnDefi) {
+    if (performancePAN3 <= 0.4) {
+        return 'Blocage critique';
+    }
+    if (performancePAN3 <= 0.5 && aUnDefi) {
+        return 'Blocage émergent';
+    }
+    if (performancePAN3 <= 0.75 && aUnDefi) {
+        return 'Défi spécifique';
+    }
+    return 'Stable';
+}
+
+/**
+ * Détermine la cible d'intervention selon la formule pédagogique complète
+ *
+ * @param {string} da - Numéro de DA
+ * @returns {Object} - { cible, pattern, niveau, couleur, emoji }
+ */
+function determinerCibleIntervention(da) {
+    // Récupérer tous les indices nécessaires
+    const indices = calculerTousLesIndices(da);
+    const moyennes = calculerMoyennesCriteres(da);
+    const diagnostic = diagnostiquerForcesChallenges(moyennes, 0.7125);
+    const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
+    const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100);
+    const interpRisque = interpreterRisque(indices.R);
+
+    // Variables pour la formule (correspondance avec Excel)
+    const E = interpMobilisation.niveau; // Mobilisation
+    const F = interpRisque.niveau; // Risque sommatif (1-ACP)
+    const G = interpRisque.niveau; // Risque PAN (simplifié pour l'instant)
+    const I = indices3Derniers.francaisMoyen; // Moyenne français 3 derniers
+    const M = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null); // Pattern actuel
+    const N = diagnostic.principalDefi ? diagnostic.principalDefi.nom : 'Aucun'; // Défi principal
+    const performancePAN3 = indices3Derniers.performance;
+
+    console.log('🎯 Détermination cible pour DA', da, {
+        mobilisation: E,
+        risque: F,
+        pattern: M,
+        defi: N,
+        francais: I.toFixed(1) + '%',
+        perfPAN3: (performancePAN3 * 100).toFixed(1) + '%'
+    });
+
+    // LOGIQUE DE DÉCISION (formule Excel traduite en JavaScript)
+
+    // 1. Vérifier décrochage (priorité absolue)
+    if (E === 'Décrochage' || F.includes('très élevé') || G.includes('très élevé')) {
+        return {
+            cible: 'Décrochage',
+            pattern: M,
+            niveau: 3,
+            couleur: '#9e9e9e',
+            emoji: '⚫'
+        };
+    }
+
+    // 2. Blocage critique
+    if (M === 'Blocage critique') {
+        if (N === 'Français' && I <= 17) {
+            return {
+                cible: 'Rencontre individuelle | CAF | Dépistage',
+                pattern: M,
+                niveau: 3,
+                couleur: '#dc3545',
+                emoji: '🔴'
+            };
+        }
+        if (N === 'Structure' && I <= 17) {
+            return {
+                cible: 'Remédiation en Structure | Exercice supplémentaire | CAF',
+                pattern: M,
+                niveau: 3,
+                couleur: '#dc3545',
+                emoji: '🔴'
+            };
+        }
+        if (N === 'Rigueur' && I <= 17) {
+            return {
+                cible: 'Remédiation en Rigueur | CAF',
+                pattern: M,
+                niveau: 3,
+                couleur: '#dc3545',
+                emoji: '🔴'
+            };
+        }
+        if (N === 'Aucun') {
+            return {
+                cible: 'Rencontre individuelle | CAF | Dépistage',
+                pattern: M,
+                niveau: 3,
+                couleur: '#dc3545',
+                emoji: '🔴'
+            };
+        }
+    }
+
+    // 3. Blocage émergent
+    if (M === 'Blocage émergent') {
+        if (N === 'Français' && I >= 18 && I <= 20) {
+            return {
+                cible: 'Remédiation en stratégie de révision ciblée | CAF recommandé',
+                pattern: M,
+                niveau: 2,
+                couleur: '#ff9800',
+                emoji: '🟠'
+            };
+        }
+        if (N === 'Structure' && I >= 18 && I <= 27) {
+            return {
+                cible: 'Remédiation en Structure',
+                pattern: M,
+                niveau: 2,
+                couleur: '#ff9800',
+                emoji: '🟠'
+            };
+        }
+        if (N === 'Rigueur' && I >= 18 && I <= 27) {
+            return {
+                cible: 'Remédiation en Rigueur',
+                pattern: M,
+                niveau: 2,
+                couleur: '#ff9800',
+                emoji: '🟠'
+            };
+        }
+        if (N === 'Aucun') {
+            return {
+                cible: 'Remédiation en rigueur',
+                pattern: M,
+                niveau: 2,
+                couleur: '#ff9800',
+                emoji: '🟠'
+            };
+        }
+    }
+
+    // 4. Défi spécifique
+    if (M === 'Défi spécifique') {
+        if (N === 'Français') {
+            if (I <= 17) {
+                return {
+                    cible: 'Rencontre individuelle | CAF | Dépistage SA',
+                    pattern: M,
+                    niveau: 2,
+                    couleur: '#ffc107',
+                    emoji: '🟡'
+                };
+            }
+            if (I >= 18 && I <= 20) {
+                return {
+                    cible: 'Remédiation en révision linguistique | CAF recommandé',
+                    pattern: M,
+                    niveau: 2,
+                    couleur: '#ffc107',
+                    emoji: '🟡'
+                };
+            }
+            if (I >= 21 && I <= 27) {
+                return {
+                    cible: 'Remédiation en révision linguistique',
+                    pattern: M,
+                    niveau: 2,
+                    couleur: '#ffc107',
+                    emoji: '🟡'
+                };
+            }
+        }
+        if (N === 'Structure' && I >= 18) {
+            return {
+                cible: 'Pratique guidée en Structure',
+                pattern: M,
+                niveau: 2,
+                couleur: '#ffc107',
+                emoji: '🟡'
+            };
+        }
+        if (N === 'Rigueur' && I >= 18) {
+            return {
+                cible: 'Pratique guidée en Rigueur',
+                pattern: M,
+                niveau: 2,
+                couleur: '#ffc107',
+                emoji: '🟡'
+            };
+        }
+        if (N === 'Plausibilité' && I >= 18) {
+            return {
+                cible: 'Pratique guidée en Plausibilité',
+                pattern: M,
+                niveau: 2,
+                couleur: '#ffc107',
+                emoji: '🟡'
+            };
+        }
+        if (N === 'Nuance' && I >= 18) {
+            return {
+                cible: 'Pratique guidée en Nuance',
+                pattern: M,
+                niveau: 2,
+                couleur: '#ffc107',
+                emoji: '🟡'
+            };
+        }
+    }
+
+    // 5. Stable (performance satisfaisante)
+    if (M === 'Stable') {
+        if (N === 'Aucun' && I >= 25) {
+            return {
+                cible: 'Pratique autonome → Explorer jumelage',
+                pattern: M,
+                niveau: 1,
+                couleur: '#28a745',
+                emoji: '🟢'
+            };
+        }
+        if (N === 'Aucun' && I < 25) {
+            return {
+                cible: 'Suivi régulier | Performance stable',
+                pattern: M,
+                niveau: 1,
+                couleur: '#28a745',
+                emoji: '🟢'
+            };
+        }
+        if (N === 'Structure' && I >= 21) {
+            return {
+                cible: 'Pratique autonome → Explorer structures originales',
+                pattern: M,
+                niveau: 1,
+                couleur: '#28a745',
+                emoji: '🟢'
+            };
+        }
+        if (N === 'Rigueur' && I >= 21) {
+            return {
+                cible: 'Pratique autonome → Explorer pistes originales',
+                pattern: M,
+                niveau: 1,
+                couleur: '#28a745',
+                emoji: '🟢'
+            };
+        }
+        if (N === 'Plausibilité' && I >= 21) {
+            return {
+                cible: 'Pratique autonome → Explorer hypothèses originales',
+                pattern: M,
+                niveau: 1,
+                couleur: '#28a745',
+                emoji: '🟢'
+            };
+        }
+        if (N === 'Nuance' && I >= 21) {
+            return {
+                cible: 'Pratique autonome → Explorer interprétations originales',
+                pattern: M,
+                niveau: 1,
+                couleur: '#28a745',
+                emoji: '🟢'
+            };
+        }
+        if (N === 'Français' && I >= 21) {
+            return {
+                cible: 'Pratique autonome → Explorer style',
+                pattern: M,
+                niveau: 1,
+                couleur: '#28a745',
+                emoji: '🟢'
+            };
+        }
+    }
+
+    // 6. Cas de risque de démotivation (mobilisation fragile ou défavorable)
+    if (E.includes('fragile') || E.includes('critique')) {
+        return {
+            cible: 'Risque de démotivation',
+            pattern: M,
+            niveau: 2,
+            couleur: '#ff9800',
+            emoji: '⚠️'
+        };
+    }
+
+    // Défaut : à clarifier
+    return {
+        cible: 'À clarifier en rencontre individuelle',
+        pattern: M,
+        niveau: 1,
+        couleur: '#666',
+        emoji: '💬'
     };
 }
 
@@ -1718,6 +2257,72 @@ function genererDiagnosticCriteres(da) {
             </div>
         </div>
 
+        <!-- INDICE DE BLOCAGE -->
+        ${(() => {
+            const resultBlocage = calculerIndiceBlocage(moyennes);
+            if (resultBlocage === null) return '';
+
+            const interpBlocage = interpreterIndiceBlocage(resultBlocage.score);
+            const pourcentageBlocage = Math.round(resultBlocage.score * 100);
+
+            // Construire l'affichage de la formule selon les critères disponibles
+            let formuleDetail = '';
+            let formuleTexte = '';
+            const parts = [];
+
+            if (moyennes.structure !== null) {
+                parts.push(`0.35 × ${Math.round(moyennes.structure * 100)}%`);
+            }
+            if (moyennes.francais !== null) {
+                parts.push(`0.35 × ${Math.round(moyennes.francais * 100)}%`);
+            }
+            if (moyennes.rigueur !== null) {
+                parts.push(`0.30 × ${Math.round(moyennes.rigueur * 100)}%`);
+            }
+
+            formuleDetail = parts.join(' + ');
+            formuleTexte = resultBlocage.partiel
+                ? '0.35 × Structure + 0.35 × Français + 0.30 × Rigueur (pondération ajustée)'
+                : '0.35 × Structure + 0.35 × Français + 0.30 × Rigueur';
+
+            return `
+                <div style="background: linear-gradient(to right, ${interpBlocage.couleur}22, ${interpBlocage.couleur}11);
+                            border-left: 4px solid ${interpBlocage.couleur};
+                            padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="color: ${interpBlocage.couleur}; margin: 0; font-size: 1rem;">
+                            🔒 Indice de Blocage ${resultBlocage.partiel ? '(partiel)' : ''}
+                        </h4>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${interpBlocage.couleur};">
+                            ${pourcentageBlocage}%
+                        </div>
+                    </div>
+                    ${resultBlocage.partiel ? `
+                        <div style="background: #fff3cd; padding: 8px; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid #ffc107;">
+                            <div style="font-size: 0.85rem; color: #856404;">
+                                ⚠️ <strong>Calcul partiel :</strong> ${resultBlocage.criteresManquants.join(', ')} non évalué(s).
+                                La pondération a été ajustée automatiquement.
+                            </div>
+                        </div>
+                    ` : ''}
+                    <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">
+                            <strong>Formule :</strong> ${formuleTexte}
+                        </div>
+                        <div style="font-size: 0.85rem; color: #666;">
+                            = ${formuleDetail} = <strong>${pourcentageBlocage}%</strong>
+                        </div>
+                    </div>
+                    <div style="font-weight: bold; color: ${interpBlocage.couleur}; margin-bottom: 8px;">
+                        ${interpBlocage.niveau}
+                    </div>
+                    <div style="color: #555; font-size: 0.9rem; line-height: 1.5;">
+                        ${interpBlocage.description}
+                    </div>
+                </div>
+            `;
+        })()}
+
         <!-- Résumé forces -->
         ${diagnostic.forces.length > 0 ? `
             <div style="background: linear-gradient(to right, #28a74522, #28a74511);
@@ -1754,6 +2359,64 @@ function genererDiagnosticCriteres(da) {
                 </div>
             </div>
         ` : ''}
+
+        <!-- CIBLE D'INTERVENTION (basée sur Pattern actuel) -->
+        ${(() => {
+            const cibleInfo = determinerCibleIntervention(da);
+            const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
+
+            // Ne pas afficher si pas assez de données
+            if (indices3Derniers.nbArtefacts === 0) {
+                return '';
+            }
+
+            const niveauTexte = cibleInfo.niveau === 3 ? 'Niveau 3 - Intervention intensive' :
+                               cibleInfo.niveau === 2 ? 'Niveau 2 - Intervention ciblée' :
+                               'Niveau 1 - Suivi régulier';
+
+            return `
+                <div style="background: linear-gradient(to right, ${cibleInfo.couleur}22, ${cibleInfo.couleur}11);
+                            border-left: 4px solid ${cibleInfo.couleur};
+                            padding: 15px; border-radius: 6px; margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <h4 style="color: ${cibleInfo.couleur}; margin: 0 0 6px 0; font-size: 1rem;">
+                                ${cibleInfo.emoji} Cible d'intervention recommandée
+                            </h4>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">
+                                <strong>Pattern actuel :</strong> ${cibleInfo.pattern} ·
+                                <strong>Basé sur :</strong> ${indices3Derniers.nbArtefacts} dernier${indices3Derniers.nbArtefacts > 1 ? 's' : ''} artefact${indices3Derniers.nbArtefacts > 1 ? 's' : ''}
+                            </div>
+                        </div>
+                        <div style="text-align: right; min-width: 150px;">
+                            <div style="display: inline-block; padding: 6px 12px; background: ${cibleInfo.couleur};
+                                        color: white; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">
+                                ${niveauTexte}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 4px; margin-top: 10px;">
+                        <div style="font-size: 1rem; font-weight: bold; color: ${cibleInfo.couleur}; margin-bottom: 8px;">
+                            ${cibleInfo.cible}
+                        </div>
+                        <div style="font-size: 0.85rem; color: #666; line-height: 1.5;">
+                            ${(() => {
+                                // Description selon le niveau
+                                if (cibleInfo.niveau === 3) {
+                                    return '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).';
+                                } else if (cibleInfo.niveau === 2) {
+                                    return '📋 <strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages et prévenir l\'aggravation des difficultés.';
+                                } else if (cibleInfo.cible.includes('Pratique autonome')) {
+                                    return '✨ <strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.';
+                                } else {
+                                    return '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
+                                }
+                            })()}
+                        </div>
+                    </div>
+                </div>
+            `;
+        })()}
     `;
 }
 
