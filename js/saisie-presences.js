@@ -1031,7 +1031,7 @@ function calculerTotalHeuresPresence(da, dateActuelle) {
     const presences = JSON.parse(localStorage.getItem('presences') || '[]');
 
     return presences
-        .filter(p => p.da === da && p.date < dateActuelle)
+        .filter(p => p.da === da && (dateActuelle === null || p.date < dateActuelle))
         .reduce((total, p) => total + (p.heures || 0), 0);
 }
 
