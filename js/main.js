@@ -38,11 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
     console.log('⚙️  Vérification des modules additionnels...');
 
-    // Initialiser le module Notation
-    if (typeof initialiserModuleNotation === 'function') {
-        initialiserModuleNotation();
-    }
-
     console.log('✅ Application initialisée');
 
     // ===============================
@@ -100,12 +95,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initialiserModuleCours === 'function') {
         console.log('   → Module 08-cours détecté');
         initialiserModuleCours();
-    }
-
-        // *** NOUVEAU : Module Notation ***
-    if (typeof initialiserModuleNotation === 'function') {
-        console.log('   → Module Notation détecté');
-        initialiserModuleNotation();
     }
 
     // MODULE 11: Gestion du groupe
