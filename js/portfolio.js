@@ -92,6 +92,40 @@ function chargerPortfolioEleveDetail(da) {
             return 0;
         });
 
+        // ✨ SÉLECTION AUTOMATIQUE des meilleurs artefacts si aucune sélection manuelle
+        if (selectionEleve.artefactsRetenus.length === 0) {
+            // Récupérer les artefacts remis avec note, triés par note décroissante
+            const artefactsRemisAvecNote = artefacts
+                .filter(a => a.remis && a.note !== null)
+                .sort((a, b) => b.note - a.note);
+
+            // Sélectionner automatiquement les N meilleurs (N = nombreARetenir)
+            const meilleurs = artefactsRemisAvecNote.slice(0, nombreARetenir);
+
+            if (meilleurs.length > 0) {
+                // Mettre à jour la sélection
+                selectionEleve.artefactsRetenus = meilleurs.map(a => a.id);
+
+                // Sauvegarder dans localStorage
+                if (!selectionsPortfolios[da]) {
+                    selectionsPortfolios[da] = {};
+                }
+                selectionsPortfolios[da][portfolio.id] = {
+                    artefactsRetenus: selectionEleve.artefactsRetenus,
+                    dateSelection: new Date().toISOString(),
+                    auto: true // Flag pour indiquer sélection automatique
+                };
+                localStorage.setItem('portfoliosEleves', JSON.stringify(selectionsPortfolios));
+
+                // Mettre à jour le flag retenu dans les artefacts
+                artefacts.forEach(art => {
+                    art.retenu = selectionEleve.artefactsRetenus.includes(art.id);
+                });
+
+                console.log(`✨ Sélection automatique : ${meilleurs.length} meilleur(s) artefact(s) sélectionné(s)`);
+            }
+        }
+
         // Statistiques
         const nbRemis = artefacts.filter(a => a.remis).length;
         const nbRetenus = selectionEleve.artefactsRetenus.length;
@@ -131,20 +165,23 @@ function chargerPortfolioEleveDetail(da) {
             <div style="margin-bottom: 20px;">
                 <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">📑 Artefacts du portfolio (${artefacts.length})</h4>
                 ${artefacts.map((art, index) => `
-                    <div style="padding: 15px; margin-bottom: 10px; background: ${!art.existe ? '#f8f9fa' : 'white'}; 
-                                border: 2px solid ${art.retenu ? 'var(--bleu-principal)' : (art.existe ? '#ddd' : '#e0e0e0')}; 
-                                border-radius: 8px; ${!art.remis ? 'opacity: 0.7;' : ''}">
+                    <div style="padding: 15px; margin-bottom: 10px;
+                                background: ${art.retenu ? 'linear-gradient(to right, #d4edda, #e8f5e9)' : (!art.existe ? '#f8f9fa' : 'white')};
+                                border: ${art.retenu ? '3px' : '2px'} solid ${art.retenu ? '#28a745' : (art.existe ? '#ddd' : '#e0e0e0')};
+                                border-radius: 8px; ${!art.remis ? 'opacity: 0.7;' : ''}
+                                ${art.retenu ? 'box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);' : ''}
+                                transition: all 0.3s ease;">
                         ${art.existe ? `
                         <label style="display: flex; align-items: start; cursor: ${art.remis ? 'pointer' : 'not-allowed'};">
-                            <input type="checkbox" 
-                                   name="artefactRetenu" 
+                            <input type="checkbox"
+                                   name="artefactRetenu"
                                    value="${art.id}"
                                    ${art.retenu ? 'checked' : ''}
                                    ${!art.remis ? 'disabled' : ''}
                                    onchange="toggleArtefactPortfolio('${da}', '${portfolio.id}', ${nombreARetenir})"
-                                   style="margin-right: 15px; margin-top: 3px; transform: scale(1.4);">
+                                   style="margin-right: 15px; margin-top: 3px; transform: scale(1.4); accent-color: #28a745;">
                             <div style="flex: 1;">
-                                <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 5px;">
+                                <div style="font-weight: 600; color: ${art.retenu ? '#155724' : 'var(--bleu-principal)'}; margin-bottom: 5px;">
                                     ${echapperHtml(art.titre)}
                                 </div>
                                 ${art.description ? `<div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">${echapperHtml(art.description)}</div>` : ''}
@@ -239,8 +276,19 @@ function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
 
         localStorage.setItem('portfoliosEleves', JSON.stringify(selectionsPortfolios));
 
-        // Recharger l'affichage
-        chargerPortfolioEleveDetail(da);
+        // Recharger TOUT le profil pour mettre à jour les indices A-C-P-M-E-R
+        if (typeof afficherProfilComplet === 'function') {
+            afficherProfilComplet(da);
+
+            // Rouvrir automatiquement le panneau Portfolio après rechargement
+            if (typeof toggleDetailIndice === 'function') {
+                toggleDetailIndice('P', da);
+                console.log('✅ Panneau Portfolio rouvert automatiquement');
+            }
+        } else {
+            // Fallback : recharger uniquement le portfolio
+            chargerPortfolioEleveDetail(da);
+        }
 
     } catch (error) {
         console.error('Erreur toggle artefact:', error);
