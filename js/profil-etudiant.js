@@ -277,6 +277,236 @@ function interpreterRisque(valeur) {
 }
 
 /**
+ * Interprète l'indice P (Performance)
+ * @param {number} valeur - Valeur en pourcentage (0-100)
+ * @returns {Object} - { niveau, emoji, couleur, description }
+ */
+function interpreterPerformance(valeur) {
+    const p = valeur / 100; // Normaliser en 0-1
+    if (p >= 0.85) {
+        return {
+            niveau: 'Performance excellente',
+            emoji: '🔵',
+            couleur: '#2196F3', // Bleu
+            description: 'Maîtrise étendue des compétences avec transfert à d\'autres contextes'
+        };
+    }
+    if (p >= 0.75) {
+        return {
+            niveau: 'Performance satisfaisante',
+            emoji: '🟢',
+            couleur: '#28a745', // Vert
+            description: 'Maîtrise globale avec liens établis entre les concepts'
+        };
+    }
+    if (p >= 0.65) {
+        return {
+            niveau: 'En développement',
+            emoji: '🟡',
+            couleur: '#ffc107', // Jaune
+            description: 'Points pertinents identifiés, liens à consolider'
+        };
+    }
+    if (p >= 0.40) {
+        return {
+            niveau: 'Performance insuffisante',
+            emoji: '🟠',
+            couleur: '#ff9800', // Orange
+            description: 'Compréhension superficielle, renforcement nécessaire'
+        };
+    }
+    return {
+        niveau: 'Performance très faible',
+        emoji: '🔴',
+        couleur: '#dc3545', // Rouge
+        description: 'Incompréhension majeure, intervention urgente requise'
+    };
+}
+
+/**
+ * Interprète l'indice C (Complétion)
+ * @param {number} valeur - Valeur en pourcentage (0-100)
+ * @returns {Object} - { niveau, emoji, couleur, description }
+ */
+function interpreterCompletion(valeur) {
+    const c = valeur / 100; // Normaliser en 0-1
+    if (c >= 0.85) {
+        return {
+            niveau: 'Taux de complétion excellent',
+            emoji: '🔵',
+            couleur: '#2196F3', // Bleu
+            description: 'Remise régulière et complète des travaux'
+        };
+    }
+    if (c >= 0.75) {
+        return {
+            niveau: 'Bon taux de complétion',
+            emoji: '🟢',
+            couleur: '#28a745', // Vert
+            description: 'Majorité des travaux remis'
+        };
+    }
+    if (c >= 0.65) {
+        return {
+            niveau: 'Complétion partielle',
+            emoji: '🟡',
+            couleur: '#ffc107', // Jaune
+            description: 'Quelques travaux manquants, suivi recommandé'
+        };
+    }
+    if (c >= 0.40) {
+        return {
+            niveau: 'Complétion insuffisante',
+            emoji: '🟠',
+            couleur: '#ff9800', // Orange
+            description: 'Nombreux travaux manquants, intervention nécessaire'
+        };
+    }
+    return {
+        niveau: 'Complétion très faible',
+        emoji: '🔴',
+        couleur: '#dc3545', // Rouge
+        description: 'Travaux non remis, situation critique'
+    };
+}
+
+/**
+ * Interprète l'indice A (Assiduité)
+ * @param {number} valeur - Valeur en pourcentage (0-100)
+ * @returns {Object} - { niveau, emoji, couleur, description }
+ */
+function interpreterAssiduite(valeur) {
+    const a = valeur / 100; // Normaliser en 0-1
+    if (a >= 0.95) {
+        return {
+            niveau: 'Assiduité exemplaire',
+            emoji: '🔵',
+            couleur: '#2196F3', // Bleu
+            description: 'Présence constante et engagement soutenu'
+        };
+    }
+    if (a >= 0.85) {
+        return {
+            niveau: 'Bonne assiduité',
+            emoji: '🟢',
+            couleur: '#28a745', // Vert
+            description: 'Présence régulière avec absences rares et justifiées'
+        };
+    }
+    if (a >= 0.75) {
+        return {
+            niveau: 'Assiduité acceptable',
+            emoji: '🟡',
+            couleur: '#ffc107', // Jaune
+            description: 'Quelques absences, suivi recommandé'
+        };
+    }
+    if (a >= 0.60) {
+        return {
+            niveau: 'Assiduité problématique',
+            emoji: '🟠',
+            couleur: '#ff9800', // Orange
+            description: 'Absences fréquentes, intervention nécessaire'
+        };
+    }
+    return {
+        niveau: 'Assiduité critique',
+        emoji: '🔴',
+        couleur: '#dc3545', // Rouge
+        description: 'Absences excessives, situation d\'urgence'
+    };
+}
+
+/**
+ * Génère le HTML de la section Mobilisation & Engagement fusionnée
+ * @param {string} da - Numéro de DA
+ * @returns {string} - HTML de la section
+ */
+function genererSectionMobilisationEngagement(da) {
+    const indices = calculerTousLesIndices(da);
+    const A = indices.A / 100;
+    const C = indices.C / 100;
+    const interpM = interpreterMobilisation(A, C);
+    const interpE = interpreterEngagement(indices.E);
+
+    return `
+        <!-- Badge interprétatif Mobilisation -->
+        <div class="interpretation-badge" style="border-left-color: ${interpM.couleur}; background: ${interpM.couleur}15;">
+            <span style="font-size: 1.5rem;">${interpM.emoji}</span>
+            <div>
+                <div style="color: ${interpM.couleur};">Mobilisation : ${interpM.niveau}</div>
+                <div style="font-size: 0.9rem; color: #666;">M = ${indices.M} (moyenne A+C)</div>
+            </div>
+        </div>
+
+        <!-- Explication Mobilisation -->
+        <div style="background: white; padding: 15px; border-radius: 6px; border-left: 3px solid ${interpM.couleur}; margin-bottom: 20px;">
+            <p style="margin: 0; line-height: 1.6; color: #333;">
+                ${interpM.niveau === 'Décrochage' ?
+                    "⚫ L'étudiant ne se présente plus au cours. Les interventions pédagogiques ne sont plus possibles. Référer aux services d'aide et à l'API." :
+                  interpM.niveau === 'Assiduité ET complétion critiques' ?
+                    "🔴 Situation critique : présence ET remise des travaux sous 70%. Intervention RàI niveau 3 immédiate requise." :
+                  interpM.niveau === 'Assiduité critique' ?
+                    "🟠 Assiduité critique (< 70%). La présence irrégulière compromet l'apprentissage. Intervention prioritaire sur l'engagement comportemental." :
+                  interpM.niveau === 'Complétion critique' ?
+                    "🟠 Complétion critique (< 70%). Les travaux ne sont pas remis. Intervention prioritaire sur la mobilisation de l'étudiant." :
+                  interpM.niveau === 'Mobilisation fragile' ?
+                    "🟡 Mobilisation fragile : assiduité ET complétion entre 70-80%. Suivi renforcé recommandé pour prévenir la détérioration." :
+                  interpM.niveau === 'Assiduité fragile' ?
+                    "🟡 Assiduité fragile (70-80%) malgré bonne complétion. Encourager la présence régulière." :
+                  interpM.niveau === 'Complétion fragile' ?
+                    "🟡 Complétion fragile (70-80%) malgré bonne assiduité. Soutien organisationnel recommandé." :
+                  interpM.niveau === 'Mobilisation favorable' ?
+                    "🟢 Mobilisation favorable : assiduité et complétion satisfaisantes (> 80%). Encourager la constance." :
+                  interpM.niveau === 'Mobilisation optimale' ?
+                    "✅ Mobilisation optimale : assiduité et complétion excellentes (> 90%). Modèle d'engagement." :
+                    "Interprétation non disponible."}
+            </p>
+        </div>
+
+        <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--bleu-pale);">
+
+        <!-- Badge interprétatif Engagement -->
+        <div class="interpretation-badge" style="border-left-color: ${interpE.couleur}; background: ${interpE.couleur}15;">
+            <span style="font-size: 1.5rem;">${interpE.emoji}</span>
+            <div>
+                <div style="color: ${interpE.couleur};">Engagement : ${interpE.niveau}</div>
+                <div style="font-size: 0.9rem; color: #666;">E = ${indices.E} (produit A×C×P)</div>
+            </div>
+        </div>
+
+        <!-- Explication Engagement -->
+        <div style="background: white; padding: 15px; border-radius: 6px; border-left: 3px solid ${interpE.couleur}; margin-bottom: 20px;">
+            <p style="margin: 0; line-height: 1.6; color: #333;">
+                L'engagement combine <strong>assiduité (${indices.A}%)</strong>,
+                <strong>complétion (${indices.C}%)</strong> et
+                <strong>performance (${indices.P}%)</strong>.
+                ${interpE.niveau === 'Engagement critique' ?
+                    "🔴 L'engagement est critique (< 40%). Action immédiate requise pour prévenir l'échec." :
+                  interpE.niveau === 'Engagement faible' ?
+                    "🟠 L'engagement est faible (40-60%). Intervention ciblée recommandée." :
+                  interpE.niveau === 'Engagement modéré' ?
+                    "🟡 L'engagement est modéré (60-75%). Encourager l'amélioration continue." :
+                  interpE.niveau === 'Engagement satisfaisant' ?
+                    "🟢 L'engagement est satisfaisant (75-85%). Continuer le suivi régulier." :
+                  interpE.niveau === 'Engagement élevé' ?
+                    "✅ L'engagement est élevé (> 85%). Excellente mobilisation globale." :
+                    "L'étudiant montre un engagement dans son parcours."}
+            </p>
+        </div>
+
+        <!-- Placeholder graphique évolution -->
+        <div class="placeholder-graphique">
+            <div class="placeholder-graphique-icone">📈</div>
+            <div><strong>Évolution temporelle A-C-M-E</strong></div>
+            <div style="font-size: 0.9rem; margin-top: 8px;">
+                Graphique de suivi longitudinal (à venir)
+            </div>
+        </div>
+    `;
+}
+
+/**
  * Génère le HTML de la section Mobilisation (M) détaillée
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
@@ -889,11 +1119,302 @@ function formaterDate(dateISO) {
  * - Détails du portfolio incluent C et P
  * - Grille de 5 colonnes au lieu de 6
  */
+/* ===============================
+   🎨 FONCTIONS HELPER - REDESIGN UI
+   =============================== */
+
 /**
- * Version simplifiée de afficherProfilComplet - SANS LA LÉGENDE
+ * Génère la carte premium de cible d'intervention
+ * @param {string} da - Numéro de DA
+ * @returns {string} - HTML de la carte
+ */
+function genererCarteCibleIntervention(da) {
+    const cibleInfo = determinerCibleIntervention(da);
+    const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
+
+    // Ne pas afficher si pas assez de données
+    if (indices3Derniers.nbArtefacts === 0) {
+        return '';
+    }
+
+    const niveauTexte = cibleInfo.niveau === 3 ? 'Niveau 3 - Intervention intensive' :
+                       cibleInfo.niveau === 2 ? 'Niveau 2 - Intervention ciblée' :
+                       'Niveau 1 - Suivi régulier';
+
+    const descriptionNiveau = cibleInfo.niveau === 3
+        ? '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).'
+        : cibleInfo.niveau === 2
+        ? '📋 <strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages et prévenir l\'aggravation des difficultés.'
+        : cibleInfo.cible.includes('Pratique autonome')
+        ? '✨ <strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.'
+        : '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
+
+    return `
+        <!-- CARTE CIBLE D'INTERVENTION PREMIUM -->
+        <div class="carte-cible-intervention" style="border-color: ${cibleInfo.couleur};">
+            <div class="carte-cible-header">
+                <div class="carte-cible-titre" style="color: ${cibleInfo.couleur};">
+                    ${cibleInfo.emoji} Cible d'intervention recommandée
+                </div>
+                <div class="carte-cible-badge-niveau" style="background: ${cibleInfo.couleur};">
+                    ${niveauTexte}
+                </div>
+            </div>
+
+            <div class="carte-cible-texte-principal" style="color: ${cibleInfo.couleur};">
+                ${cibleInfo.cible}
+            </div>
+
+            <div class="carte-cible-meta">
+                <strong>Pattern actuel :</strong> ${cibleInfo.pattern} ·
+                <strong>Basé sur :</strong> ${indices3Derniers.nbArtefacts} dernier${indices3Derniers.nbArtefacts > 1 ? 's' : ''} artefact${indices3Derniers.nbArtefacts > 1 ? 's' : ''}
+            </div>
+
+            <div class="carte-cible-description">
+                ${descriptionNiveau}
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Génère une section collapsible avec header cliquable
+ * @param {string} id - ID unique de la section (sans préfixe 'section-')
+ * @param {string} titre - Titre affiché dans le header
+ * @param {string} contenu - HTML du contenu de la section
+ * @param {boolean} ouvert - Si true, section ouverte par défaut
+ * @returns {string} - HTML de la section collapsible
+ */
+function genererSectionCollapsible(id, titre, contenu, ouvert = false) {
+    const sectionId = `section-${id}`;
+    const contentId = `content-${id}`;
+    const chevronId = `chevron-${id}`;
+
+    return `
+        <div class="section-collapsible" id="${sectionId}">
+            <div class="section-collapsible-header" onclick="toggleSectionCollapsible('${sectionId}')">
+                <div class="section-collapsible-titre">
+                    ${titre}
+                </div>
+                <div class="section-collapsible-toggle">
+                    <span>Voir</span>
+                    <span class="chevron${ouvert ? ' expanded' : ''}" id="${chevronId}">▼</span>
+                </div>
+            </div>
+            <div class="section-collapsible-content${ouvert ? ' expanded' : ''}" id="${contentId}">
+                ${contenu}
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Toggle une section collapsible
+ * @param {string} sectionId - ID de la section (avec préfixe 'section-')
+ */
+function toggleSectionCollapsible(sectionId) {
+    const contentId = sectionId.replace('section-', 'content-');
+    const chevronId = sectionId.replace('section-', 'chevron-');
+
+    const content = document.getElementById(contentId);
+    const chevron = document.getElementById(chevronId);
+
+    if (!content || !chevron) {
+        console.warn(`Éléments de section non trouvés: ${sectionId}`);
+        return;
+    }
+
+    content.classList.toggle('expanded');
+    chevron.classList.toggle('expanded');
+}
+
+/**
+ * Toggle l'affichage des détails techniques (formules, calculs)
+ * @param {string} detailsId - ID de l'élément détails
+ */
+function toggleDetailsTechniques(detailsId) {
+    const details = document.getElementById(detailsId);
+    if (!details) {
+        console.warn(`Élément détails non trouvé: ${detailsId}`);
+        return;
+    }
+    details.classList.toggle('visible');
+}
+
+/**
+ * Variable globale pour stocker le DA actuel (utilisée pour navigation)
+ */
+let profilActuelDA = null;
+
+/**
+ * Change la section affichée dans la colonne droite du profil
+ * @param {string} section - Nom de la section (cible, performance, assiduite, etc.)
+ */
+function changerSectionProfil(section) {
+    if (!profilActuelDA) {
+        console.error('❌ Aucun profil actuel');
+        return;
+    }
+
+    const da = profilActuelDA;
+
+    // Mettre à jour la navigation active
+    document.querySelectorAll('.profil-nav-item').forEach(item => {
+        item.classList.remove('actif');
+    });
+    event.target.classList.add('actif');
+
+    // Générer le contenu selon la section
+    const contenuContainer = document.getElementById('profil-contenu-dynamique');
+    if (!contenuContainer) {
+        console.error('❌ Conteneur de contenu introuvable');
+        return;
+    }
+
+    let contenu = '';
+    let titre = '';
+
+    switch (section) {
+        case 'cible':
+            titre = '🎯 Cible d\'intervention & Risque';
+            contenu = genererContenuCibleIntervention(da);
+            break;
+        case 'performance':
+            titre = '📝 Performance & Portfolio';
+            contenu = genererSectionPerformance(da);
+            break;
+        case 'assiduite':
+            titre = '📅 Assiduité';
+            contenu = genererSectionAssiduite(da);
+            break;
+        case 'mobilisation':
+            titre = '💪 Mobilisation & Engagement';
+            contenu = genererSectionMobilisationEngagement(da);
+            break;
+        default:
+            titre = 'Section inconnue';
+            contenu = '<p>Section non trouvée</p>';
+    }
+
+    contenuContainer.innerHTML = `
+        <div class="profil-contenu-header">
+            <div class="profil-contenu-titre">${titre}</div>
+        </div>
+        <div class="profil-contenu-body">
+            ${contenu}
+        </div>
+    `;
+
+    console.log(`📄 Section "${section}" chargée pour DA ${da}`);
+}
+
+/**
+ * Génère le contenu de la cible d'intervention pour la colonne droite
+ * Inclut profil de risque (E, R) et cible d'intervention
+ * @param {string} da - Numéro de DA
+ * @returns {string} - HTML du contenu
+ */
+function genererContenuCibleIntervention(da) {
+    const cibleInfo = determinerCibleIntervention(da);
+    const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
+    const indices = calculerTousLesIndices(da);
+    const interpE = interpreterEngagement(indices.E);
+    const interpR = interpreterRisque(indices.R);
+
+    // Ne pas afficher si pas assez de données
+    if (indices3Derniers.nbArtefacts === 0) {
+        return `
+            <div style="text-align: center; padding: 60px 20px;">
+                <div style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;">📊</div>
+                <h3 style="color: #666; margin-bottom: 10px;">Données insuffisantes</h3>
+                <p style="color: #999;">
+                    Pas encore d'artefacts évalués pour cet étudiant.<br>
+                    La cible d'intervention sera disponible après l'évaluation d'au moins un artefact.
+                </p>
+            </div>
+        `;
+    }
+
+    const niveauTexte = cibleInfo.niveau === 3 ? 'Niveau 3 - Intervention intensive' :
+                       cibleInfo.niveau === 2 ? 'Niveau 2 - Intervention ciblée' :
+                       'Niveau 1 - Suivi régulier';
+
+    const descriptionNiveau = cibleInfo.niveau === 3
+        ? '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).'
+        : cibleInfo.niveau === 2
+        ? '📋 <strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages et prévenir l\'aggravation des difficultés.'
+        : cibleInfo.cible.includes('Pratique autonome')
+        ? '✨ <strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.'
+        : '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
+
+    return `
+        <!-- Profil de risque (E, R, Pattern) -->
+        <div style="background: linear-gradient(to right, ${interpR.couleur}11, ${interpR.couleur}05);
+                    border: 1px solid ${interpR.couleur}33;
+                    border-radius: 8px;
+                    padding: 20px;
+                    margin-bottom: 25px;">
+            <h4 style="color: var(--bleu-principal); margin-bottom: 15px; font-size: 1rem;">
+                📊 Profil de risque
+            </h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <!-- Risque -->
+                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid ${interpR.couleur};">
+                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Risque d'échec</div>
+                    <div style="font-size: 1.3rem; font-weight: bold; color: ${interpR.couleur}; margin-bottom: 3px;">
+                        ${interpR.emoji} ${interpR.niveau}
+                    </div>
+                    <div style="font-size: 0.85rem; color: #666;">R = ${indices.R}</div>
+                </div>
+                <!-- Engagement -->
+                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid ${interpE.couleur};">
+                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Engagement</div>
+                    <div style="font-size: 1.3rem; font-weight: bold; color: ${interpE.couleur}; margin-bottom: 3px;">
+                        ${interpE.emoji} ${interpE.niveau}
+                    </div>
+                    <div style="font-size: 0.85rem; color: #666;">E = ${indices.E}</div>
+                </div>
+            </div>
+            <div style="background: white; padding: 12px; border-radius: 6px; font-size: 0.9rem; color: #666;">
+                <strong style="color: var(--bleu-principal);">Pattern actuel :</strong> ${cibleInfo.pattern}
+                <span style="margin-left: 10px;">·</span>
+                <span style="margin-left: 10px;">Basé sur ${indices3Derniers.nbArtefacts} dernier${indices3Derniers.nbArtefacts > 1 ? 's' : ''} artefact${indices3Derniers.nbArtefacts > 1 ? 's' : ''}</span>
+            </div>
+        </div>
+
+        <!-- Carte cible d'intervention premium -->
+        <div class="carte-cible-intervention" style="border-color: ${cibleInfo.couleur}; margin-bottom: 25px;">
+            <div class="carte-cible-header">
+                <div style="flex: 1;">
+                    <div class="carte-cible-badge-niveau" style="background: ${cibleInfo.couleur}; display: inline-block; margin-bottom: 15px;">
+                        ${cibleInfo.emoji} ${niveauTexte}
+                    </div>
+                </div>
+            </div>
+
+            <div class="carte-cible-texte-principal" style="color: ${cibleInfo.couleur};">
+                ${cibleInfo.cible}
+            </div>
+
+            <div class="carte-cible-description" style="margin-top: 15px;">
+                ${descriptionNiveau}
+            </div>
+        </div>
+
+        <!-- Diagnostic critères SRPNF -->
+        ${genererDiagnosticCriteres(profilActuelDA)}
+    `;
+}
+
+/**
+ * Affiche le profil complet avec layout 2 colonnes
+ * Inspiré de la page d'évaluation
  */
 function afficherProfilComplet(da) {
     console.log('👤 Affichage du profil pour DA:', da);
+
+    // Sauvegarder le DA pour navigation
+    profilActuelDA = da;
 
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const eleve = etudiants.find(e => e.da === da);
@@ -915,197 +1436,105 @@ function afficherProfilComplet(da) {
 
     // Calculer tous les indices
     const indices = calculerTousLesIndices(da);
-
-    // Récupérer A et C en proportions 0-1 pour interprétation M
     const A = indices.A / 100;
     const C = indices.C / 100;
-
-    // Calculer les interprétations pour M, E, R
     const interpM = interpreterMobilisation(A, C);
     const interpE = interpreterEngagement(indices.E);
     const interpR = interpreterRisque(indices.R);
 
-    // Générer le HTML du profil avec dashboard simplifié
+    // Générer le HTML avec layout 2 colonnes
     container.innerHTML = `
-        <!-- EN-TÊTE -->
-        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--bleu-pale);">
-            <h2 style="color: var(--bleu-principal); margin-bottom: 10px;">
-                ${echapperHtml(eleve.prenom)} ${echapperHtml(eleve.nom)}
-            </h2>
-            <div style="display: flex; gap: 20px; flex-wrap: wrap; color: #666; font-size: 0.95rem;">
-                <span><strong>DA:</strong> ${echapperHtml(eleve.da)}</span>
-                <span><strong>Groupe:</strong> ${echapperHtml(eleve.groupe || 'Non défini')}</span>
-                <span><strong>Programme:</strong> ${echapperHtml(eleve.programme || 'Non défini')}</span>
-                ${eleve.sa === 'Oui' ? '<span style="color: var(--bleu-principal);">✓ SA</span>' : ''}
-                ${eleve.caf === 'Oui' ? '<span style="color: var(--bleu-principal);">✓ CAF</span>' : ''}
-            </div>
-        </div>
-        
-        <!-- DASHBOARD DES INDICES - 6 COLONNES -->
-        <div class="carte" style="background: var(--bleu-tres-pale); border: 2px solid var(--bleu-principal); padding: 15px;">
-            <h3 style="margin-bottom: 15px;">📊 Indices de suivi</h3>
-
-            <!-- GRILLE : 6 COLONNES (A-C-P-M-E-R) -->
-            <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
-                <!-- CARTE A (Assiduité) -->
-                <div id="carte-indice-A" onclick="toggleDetailIndice('A', '${da}')"
-                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
-                            border: 2px solid ${obtenirCouleurIndice(indices.A)}; cursor: pointer;
-                            transition: all 0.2s;"
-                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
-                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
-                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">
-                        Assiduité
+        <div class="profil-layout-2col">
+            <!-- COLONNE GAUCHE (SIDEBAR) -->
+            <div class="profil-sidebar">
+                <!-- En-tête étudiant -->
+                <div class="profil-sidebar-header">
+                    <div class="profil-sidebar-nom">
+                        ${echapperHtml(eleve.prenom)} ${echapperHtml(eleve.nom)}
                     </div>
-                    <div style="font-size: 2.2rem; font-weight: bold; color: ${obtenirCouleurIndice(indices.A)}; margin: 8px 0;">
-                        ${indices.A}%
-                    </div>
-                    <div style="font-weight: bold; color: var(--bleu-principal); font-size: 0.85rem; margin-bottom: 8px;">
-                        Indice A
-                    </div>
-                    <div style="font-size: 0.75rem; color: var(--bleu-moyen);">
-                        Voir détails →
+                    <div class="profil-sidebar-meta">
+                        <span><strong>DA:</strong> ${echapperHtml(eleve.da)}</span>
+                        ${eleve.groupe ? `<span><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</span>` : ''}
+                        ${eleve.sa === 'Oui' ? '<span style="color: var(--bleu-principal);">✓ SA</span>' : ''}
+                        ${eleve.caf === 'Oui' ? '<span style="color: var(--bleu-principal);">✓ CAF</span>' : ''}
                     </div>
                 </div>
 
-                <!-- CARTE C (Complétion) -->
-                <div id="carte-indice-C" onclick="toggleDetailIndice('C', '${da}')"
-                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
-                            border: 2px solid ${obtenirCouleurIndice(indices.C)}; cursor: pointer;
-                            transition: all 0.2s;"
-                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
-                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
-                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">
-                        Complétion
-                    </div>
-                    <div style="font-size: 2.2rem; font-weight: bold; color: ${obtenirCouleurIndice(indices.C)}; margin: 8px 0;">
-                        ${indices.C}%
-                    </div>
-                    <div style="font-weight: bold; color: var(--bleu-principal); font-size: 0.85rem; margin-bottom: 8px;">
-                        Indice C
-                    </div>
-                    <div style="font-size: 0.75rem; color: var(--bleu-moyen);">
-                        Voir détails →
-                    </div>
-                </div>
+                <!-- Navigation sections avec indices intégrés -->
+                <div class="profil-sidebar-nav">
+                    <div class="profil-sidebar-nav-titre">Sections</div>
 
-                <!-- CARTE P (Performance) -->
-                <div id="carte-indice-P" onclick="toggleDetailIndice('P', '${da}')"
-                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
-                            border: 2px solid ${obtenirCouleurIndice(indices.P)}; cursor: pointer;
-                            transition: all 0.2s;"
-                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
-                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
-                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">
-                        Performance
+                    <!-- 1. Cible & Risque -->
+                    <div class="profil-nav-item actif" onclick="changerSectionProfil('cible')">
+                        <div class="profil-nav-item-ligne">
+                            <div class="profil-nav-item-titre">
+                                🎯 Cible & Risque
+                            </div>
+                        </div>
+                        <div class="profil-nav-item-sous-ligne">
+                            <span>R: ${indices.R}</span>
+                            <span>·</span>
+                            <span>${interpR.niveau}</span>
+                        </div>
                     </div>
-                    <div style="font-size: 2.2rem; font-weight: bold; color: ${obtenirCouleurIndice(indices.P)}; margin: 8px 0;">
-                        ${indices.P}%
+
+                    <!-- 2. Performance (C + P) -->
+                    <div class="profil-nav-item" onclick="changerSectionProfil('performance')">
+                        <div class="profil-nav-item-ligne">
+                            <div class="profil-nav-item-titre">
+                                📝 Performance
+                            </div>
+                            <div class="profil-nav-item-valeur" style="color: ${obtenirCouleurIndice(indices.P)};">
+                                ${indices.P}%
+                            </div>
+                        </div>
+                        <div class="profil-nav-item-sous-ligne">
+                            <span>Complétion: ${indices.C}%</span>
+                        </div>
                     </div>
-                    <div style="font-weight: bold; color: var(--bleu-principal); font-size: 0.85rem; margin-bottom: 8px;">
-                        Indice P
+
+                    <!-- 3. Assiduité (A) -->
+                    <div class="profil-nav-item" onclick="changerSectionProfil('assiduite')">
+                        <div class="profil-nav-item-ligne">
+                            <div class="profil-nav-item-titre">
+                                📅 Assiduité
+                            </div>
+                            <div class="profil-nav-item-valeur" style="color: ${obtenirCouleurIndice(indices.A)};">
+                                ${indices.A}%
+                            </div>
+                        </div>
                     </div>
-                    <div style="font-size: 0.75rem; color: var(--bleu-moyen);">
-                        Voir détails →
-                    </div>
-                </div>
-                
-                <!-- CARTE M (Mobilisation) -->
-                <div id="carte-indice-M" onclick="toggleDetailIndice('M', '${da}')"
-                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
-                            border: 2px solid ${interpM.couleur}; cursor: pointer;
-                            transition: all 0.2s;"
-                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
-                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
-                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">
-                        Mobilisation
-                    </div>
-                    <div style="font-size: 2.2rem; font-weight: bold; color: ${interpM.couleur}; margin: 8px 0;">
-                        ${indices.M}
-                    </div>
-                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">
-                        ${interpM.niveau}
-                    </div>
-                    <div style="font-weight: bold; color: var(--bleu-principal); font-size: 0.85rem; margin-bottom: 8px;">
-                        Indice M
-                    </div>
-                    <div style="font-size: 0.75rem; color: var(--bleu-moyen);">
-                        Voir détails →
-                    </div>
-                </div>
-                
-                <!-- CARTE E (Engagement) -->
-                <div id="carte-indice-E" onclick="toggleDetailIndice('E', '${da}')"
-                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
-                            border: 2px solid ${interpE.couleur}; cursor: pointer;
-                            transition: all 0.2s;"
-                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
-                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
-                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">
-                        Engagement
-                    </div>
-                    <div style="font-size: 2.2rem; font-weight: bold; color: ${interpE.couleur}; margin: 8px 0;">
-                        ${indices.E}
-                    </div>
-                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">
-                        ${interpE.niveau}
-                    </div>
-                    <div style="font-weight: bold; color: var(--bleu-principal); font-size: 0.85rem; margin-bottom: 8px;">
-                        Indice E
-                    </div>
-                    <div style="font-size: 0.75rem; color: var(--bleu-moyen);">
-                        Voir détails →
-                    </div>
-                </div>
-                
-                <!-- CARTE R (Risque) -->
-                <div id="carte-indice-R" onclick="toggleDetailIndice('R', '${da}')"
-                     style="background: white; padding: 12px 8px; border-radius: 6px; text-align: center;
-                            border: 2px solid ${interpR.couleur}; cursor: pointer;
-                            transition: all 0.2s;"
-                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
-                     onmouseout="this.style.transform=''; this.style.boxShadow='';">
-                    <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">
-                        Risque d'échec
-                    </div>
-                    <div style="font-size: 2.2rem; font-weight: bold; color: ${interpR.couleur}; margin: 8px 0;">
-                        ${indices.R}
-                    </div>
-                    <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">
-                        ${interpR.niveau}
-                    </div>
-                    <div style="font-weight: bold; color: var(--bleu-principal); font-size: 0.85rem; margin-bottom: 8px;">
-                        Indice R
-                    </div>
-                    <div style="font-size: 0.75rem; color: var(--bleu-moyen);">
-                        Voir détails →
+
+                    <!-- 4. Mobilisation & Engagement (M + E) -->
+                    <div class="profil-nav-item" onclick="changerSectionProfil('mobilisation')">
+                        <div class="profil-nav-item-ligne">
+                            <div class="profil-nav-item-titre">
+                                💪 Mobilisation & Engagement
+                            </div>
+                        </div>
+                        <div class="profil-nav-item-sous-ligne">
+                            <span style="color: ${interpM.couleur};">M: ${indices.M}</span>
+                            <span>·</span>
+                            <span style="color: ${interpE.couleur};">E: ${indices.E}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- PANNEAU DE DÉTAILS -->
-            <div id="panneau-details-indice" style="display: none; margin: 15px 0 0 0; padding: 15px; 
-                 background: white; border-radius: 6px; border: 2px solid var(--bleu-principal); 
-                 border-top-width: 4px; position: relative; animation: slideDown 0.3s ease;">
-                <button onclick="fermerDetailIndice()" 
-                        style="position: absolute; top: 10px; right: 10px; background: none; 
-                               border: none; font-size: 1.5rem; cursor: pointer; color: #666; 
-                               width: 30px; height: 30px; border-radius: 50%; 
-                               transition: background 0.2s;"
-                        onmouseover="this.style.background='#f0f0f0'"
-                        onmouseout="this.style.background='none'">
-                    ×
-                </button>
-                <div id="contenu-detail-indice">
-                    <!-- Contenu dynamique -->
+
+            <!-- COLONNE DROITE (CONTENU) -->
+            <div class="profil-contenu" id="profil-contenu-dynamique">
+                <!-- Contenu dynamique chargé par changerSectionProfil() -->
+                <div class="profil-contenu-header">
+                    <div class="profil-contenu-titre">🎯 Cible d'intervention & Risque</div>
+                </div>
+                <div class="profil-contenu-body">
+                    ${genererContenuCibleIntervention(da)}
                 </div>
             </div>
-            
-            <!-- 🆕 LÉGENDE SUPPRIMÉE -->
         </div>
     `;
 
-    console.log('✅ Profil affiché pour:', eleve.prenom, eleve.nom);
+    console.log('✅ Profil affiché (layout 2 colonnes) pour:', eleve.prenom, eleve.nom);
 }
 
 /* ===============================
@@ -2359,64 +2788,6 @@ function genererDiagnosticCriteres(da) {
                 </div>
             </div>
         ` : ''}
-
-        <!-- CIBLE D'INTERVENTION (basée sur Pattern actuel) -->
-        ${(() => {
-            const cibleInfo = determinerCibleIntervention(da);
-            const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
-
-            // Ne pas afficher si pas assez de données
-            if (indices3Derniers.nbArtefacts === 0) {
-                return '';
-            }
-
-            const niveauTexte = cibleInfo.niveau === 3 ? 'Niveau 3 - Intervention intensive' :
-                               cibleInfo.niveau === 2 ? 'Niveau 2 - Intervention ciblée' :
-                               'Niveau 1 - Suivi régulier';
-
-            return `
-                <div style="background: linear-gradient(to right, ${cibleInfo.couleur}22, ${cibleInfo.couleur}11);
-                            border-left: 4px solid ${cibleInfo.couleur};
-                            padding: 15px; border-radius: 6px; margin-top: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <h4 style="color: ${cibleInfo.couleur}; margin: 0 0 6px 0; font-size: 1rem;">
-                                ${cibleInfo.emoji} Cible d'intervention recommandée
-                            </h4>
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">
-                                <strong>Pattern actuel :</strong> ${cibleInfo.pattern} ·
-                                <strong>Basé sur :</strong> ${indices3Derniers.nbArtefacts} dernier${indices3Derniers.nbArtefacts > 1 ? 's' : ''} artefact${indices3Derniers.nbArtefacts > 1 ? 's' : ''}
-                            </div>
-                        </div>
-                        <div style="text-align: right; min-width: 150px;">
-                            <div style="display: inline-block; padding: 6px 12px; background: ${cibleInfo.couleur};
-                                        color: white; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">
-                                ${niveauTexte}
-                            </div>
-                        </div>
-                    </div>
-                    <div style="background: white; padding: 12px; border-radius: 4px; margin-top: 10px;">
-                        <div style="font-size: 1rem; font-weight: bold; color: ${cibleInfo.couleur}; margin-bottom: 8px;">
-                            ${cibleInfo.cible}
-                        </div>
-                        <div style="font-size: 0.85rem; color: #666; line-height: 1.5;">
-                            ${(() => {
-                                // Description selon le niveau
-                                if (cibleInfo.niveau === 3) {
-                                    return '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).';
-                                } else if (cibleInfo.niveau === 2) {
-                                    return '📋 <strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages et prévenir l\'aggravation des difficultés.';
-                                } else if (cibleInfo.cible.includes('Pratique autonome')) {
-                                    return '✨ <strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.';
-                                } else {
-                                    return '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
-                                }
-                            })()}
-                        </div>
-                    </div>
-                </div>
-            `;
-        })()}
     `;
 }
 
@@ -2532,25 +2903,56 @@ function genererSectionPerformance(da) {
         : null;
     const selectionComplete = nbRetenus === portfolio.regles.nombreARetenir;
 
+    // Interprétations pour C et P
+    const interpC = interpreterCompletion(indices.C);
+    const interpP = interpreterPerformance(indices.P);
+
     return `
-        <!-- STATISTIQUES avec classes CSS natives -->
-        <div class="grille-statistiques mb-2">
-            <div class="carte-metrique">
-                <strong>${nbRemis}/${nbTotal}</strong>
-                <span>Artefacts remis</span>
+        <!-- Badge interprétatif Complétion -->
+        <div class="interpretation-badge" style="border-left-color: ${interpC.couleur}; background: linear-gradient(to right, ${interpC.couleur}22, ${interpC.couleur}11);">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    ${interpC.emoji} Complétion : ${interpC.niveau}
+                </div>
+                <div style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur};">
+                    ${indices.C}%
+                </div>
             </div>
-            <div class="carte-metrique">
-                <strong>${indices.C}%</strong>
-                <span>Complétion (C)</span>
+            <div style="font-size: 0.9rem; color: #555; margin-top: 8px; font-weight: normal;">
+                ${interpC.description}
             </div>
-            <div class="carte-metrique">
-                <strong>${indices.P}%</strong>
-                <span>Performance (P)</span>
+        </div>
+
+        <!-- Badge interprétatif Performance -->
+        <div class="interpretation-badge" style="border-left-color: ${interpP.couleur}; background: linear-gradient(to right, ${interpP.couleur}22, ${interpP.couleur}11);">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    ${interpP.emoji} Performance : ${interpP.niveau}
+                </div>
+                <div style="font-size: 1.3rem; font-weight: bold; color: ${interpP.couleur};">
+                    ${indices.P}%
+                </div>
             </div>
-            <div class="carte-metrique">
-                <strong>${noteTop3 || '--'}${noteTop3 ? '/100' : ''}</strong>
-                <span>Note (top 3)</span>
+            <div style="font-size: 0.9rem; color: #555; margin-top: 8px; font-weight: normal;">
+                ${interpP.description}
             </div>
+        </div>
+
+        <!-- Statistiques portfolio simples -->
+        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 20px; justify-content: space-around; font-size: 0.95rem; color: #555;">
+                <div>
+                    <strong style="color: var(--bleu-principal);">${nbRemis}/${nbTotal}</strong> artefacts remis
+                </div>
+                <div>
+                    Note (top 3) : <strong style="color: var(--bleu-principal);">${noteTop3 || '--'}${noteTop3 ? '/100' : ''}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Placeholder graphique évolution C-P -->
+        <div class="placeholder-graphique">
+            📈 Évolution temporelle de la complétion (C) et de la performance (P) (à venir)
         </div>
 
         ${genererDiagnosticCriteres(da)}
@@ -2621,31 +3023,47 @@ function genererSectionPerformance(da) {
  */
 function genererSectionAssiduite(da) {
     const details = obtenirDetailsAssiduite(da);
-    const taux = details.heuresOffertes > 0 
+    const taux = details.heuresOffertes > 0
         ? (details.heuresPresentes / details.heuresOffertes * 100).toFixed(1)
         : 0;
 
+    // Interprétation de l'assiduité
+    const interpA = interpreterAssiduite(parseFloat(taux));
+
     return `
-        <!-- STATISTIQUES avec classes CSS natives -->
-        <div class="grille-statistiques mb-2">
-            <div class="carte-metrique">
-                <strong>${details.heuresPresentes}h</strong>
-                <span>Présentes</span>
+        <!-- Badge interprétatif Assiduité -->
+        <div class="interpretation-badge" style="border-left-color: ${interpA.couleur}; background: linear-gradient(to right, ${interpA.couleur}22, ${interpA.couleur}11);">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    ${interpA.emoji} ${interpA.niveau}
+                </div>
+                <div style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur};">
+                    ${taux}%
+                </div>
             </div>
-            <div class="carte-metrique">
-                <strong>${details.heuresOffertes}h</strong>
-                <span>Offertes</span>
-            </div>
-            <div class="carte-metrique">
-                <strong>${taux}%</strong>
-                <span>Taux d'assiduité</span>
-            </div>
-            <div class="carte-metrique">
-                <strong>${details.nombreSeances}</strong>
-                <span>Séances</span>
+            <div style="font-size: 0.9rem; color: #555; margin-top: 8px; font-weight: normal;">
+                ${interpA.description}
             </div>
         </div>
-        
+
+        <!-- Statistiques présences simples -->
+        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 20px; justify-content: space-around; font-size: 0.95rem; color: #555;">
+                <div>
+                    <strong style="color: var(--bleu-principal);">${details.heuresPresentes}h</strong> présentes /
+                    <strong style="color: var(--bleu-principal);">${details.heuresOffertes}h</strong> offertes
+                </div>
+                <div>
+                    <strong style="color: var(--bleu-principal);">${details.nombreSeances}</strong> séances
+                </div>
+            </div>
+        </div>
+
+        <!-- Placeholder graphique évolution A -->
+        <div class="placeholder-graphique">
+            📈 Évolution temporelle de l'assiduité (A) (à venir)
+        </div>
+
         <!-- LISTE DES ABSENCES -->
         ${details.absences.length > 0 ? `
             <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
@@ -2659,10 +3077,10 @@ function genererSectionAssiduite(da) {
                     const estAbsenceComplete = abs.heuresPresence === 0;
                     const icone = estAbsenceComplete ? '🔴' : '🟡';
                     const bordure = estAbsenceComplete ? '#dc3545' : '#ffc107';
-                    
+
                     return `
-                        <div style="flex: 0 0 auto; min-width: 180px; padding: 10px 12px; 
-                                    background: var(--bleu-tres-pale); border-left: 3px solid ${bordure}; 
+                        <div style="flex: 0 0 auto; min-width: 180px; padding: 10px 12px;
+                                    background: var(--bleu-tres-pale); border-left: 3px solid ${bordure};
                                     border-radius: 4px; cursor: pointer;"
                              onclick="naviguerVersPresenceAvecDate('${abs.date}')"
                              onmouseover="this.style.background='#e0e8f0'"
@@ -2671,8 +3089,8 @@ function genererSectionAssiduite(da) {
                                 ${icone} ${dateFormatee}
                             </div>
                             <div style="font-size: 0.9rem; color: #666;">
-                                ${estAbsenceComplete 
-                                    ? `${abs.heuresManquees}h manquées` 
+                                ${estAbsenceComplete
+                                    ? `${abs.heuresManquees}h manquées`
                                     : `${abs.heuresPresence}h / ${abs.heuresPresence + abs.heuresManquees}h`
                                 }
                             </div>
