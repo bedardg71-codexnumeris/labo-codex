@@ -357,7 +357,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     niveauFinal: evaluation.niveauFinal || '-',
                     statut: 'evalue',
                     evaluationId: evaluation.id,
-                    verrouille: evaluation.verrouille || false
+                    verrouille: evaluation.verrouillee || false // ✅ Lire "verrouillee" (cohérence)
                 });
             } else {
                 // Évaluation manquante
@@ -608,10 +608,19 @@ function toggleVerrouillerEvaluation(evaluationId) {
         return;
     }
 
-    evaluation.verrouille = !evaluation.verrouille;
+    // ✅ CORRECTION : Utiliser "verrouillee" (avec "e") pour cohérence avec evaluation.js
+    evaluation.verrouillee = !evaluation.verrouillee;
+
+    // Ajouter/supprimer la date de verrouillage
+    if (evaluation.verrouillee) {
+        evaluation.dateVerrouillage = new Date().toISOString();
+    } else {
+        delete evaluation.dateVerrouillage;
+    }
+
     localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
 
-    console.log(`🔒 Évaluation ${evaluationId} ${evaluation.verrouille ? 'verrouillée' : 'déverrouillée'}`);
+    console.log(`🔒 Évaluation ${evaluationId} ${evaluation.verrouillee ? 'verrouillée' : 'déverrouillée'}`);
 
     // Recharger le tableau
     chargerDonneesEvaluations();
