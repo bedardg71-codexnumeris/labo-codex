@@ -241,38 +241,45 @@ function interpreterEngagement(valeur) {
  * @returns {Object} - { niveau, emoji, couleur }
  */
 function interpreterRisque(valeur) {
-    if (valeur < 0.15) {
+    if (valeur > 0.7) {
         return {
-            niveau: 'Risque minimal',
-            emoji: '🔵',
-            couleur: '#2196F3' // Bleu
+            niveau: 'Risque critique',
+            emoji: '⚫',
+            couleur: '#721c24' // Rouge foncé
         };
     }
-    if (valeur < 0.25) {
+    if (valeur > 0.5) {
         return {
-            niveau: 'Risque faible',
-            emoji: '🟢',
-            couleur: '#28a745' // Vert
+            niveau: 'Risque très élevé',
+            emoji: '🔴',
+            couleur: '#dc3545' // Rouge
         };
     }
-    if (valeur < 0.35) {
+    if (valeur > 0.4) {
+        return {
+            niveau: 'Risque élevé',
+            emoji: '🟠',
+            couleur: '#fd7e14' // Orange
+        };
+    }
+    if (valeur > 0.3) {
         return {
             niveau: 'Risque modéré',
             emoji: '🟡',
             couleur: '#ffc107' // Jaune
         };
     }
-    if (valeur <= 0.60) {
+    if (valeur > 0.2) {
         return {
-            niveau: 'Risque élevé',
-            emoji: '🟠',
-            couleur: '#ff9800' // Orange
+            niveau: 'Risque faible',
+            emoji: '🟢',
+            couleur: '#90EE90' // Vert clair
         };
     }
     return {
-        niveau: 'Risque très élevé',
-        emoji: '🔴',
-        couleur: '#dc3545' // Rouge
+        niveau: 'Risque minimal',
+        emoji: '🔵',
+        couleur: '#2196F3' // Bleu
     };
 }
 
@@ -418,7 +425,7 @@ function interpreterAssiduite(valeur) {
 }
 
 /**
- * Génère le HTML de la section Mobilisation & Engagement fusionnée
+ * Génère le HTML de la section Mobilisation (fusion A + C, retrait E)
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */
@@ -427,81 +434,258 @@ function genererSectionMobilisationEngagement(da) {
     const A = indices.A / 100;
     const C = indices.C / 100;
     const interpM = interpreterMobilisation(A, C);
-    const interpE = interpreterEngagement(indices.E);
+
+    // Récupérer les données pour les deux sections
+    const detailsA = obtenirDetailsAssiduite(da);
+    const tauxA = detailsA.heuresOffertes > 0
+        ? (detailsA.heuresPresentes / detailsA.heuresOffertes * 100).toFixed(1)
+        : 0;
+    const interpA = interpreterAssiduite(parseFloat(tauxA));
+
+    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
+    const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
+    const artefactsDonnes = [];
+    evaluations.forEach(evaluation => {
+        if (artefactsPortfolioIds.has(evaluation.productionId)) {
+            if (!artefactsDonnes.find(a => a.id === evaluation.productionId)) {
+                const production = artefactsPortfolio.find(p => p.id === evaluation.productionId);
+                if (production) {
+                    artefactsDonnes.push(production);
+                }
+            }
+        }
+    });
+    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
+    const artefacts = artefactsDonnes.map(art => {
+        const evaluation = evaluationsEleve.find(e => e.productionId === art.id);
+        return {
+            id: art.id,
+            titre: art.titre,
+            remis: !!evaluation,
+            note: evaluation?.noteFinale || null,
+            niveau: evaluation?.niveauFinal || null
+        };
+    }).sort((a, b) => {
+        if (a.remis && !b.remis) return -1;
+        if (!a.remis && b.remis) return 1;
+        return a.titre.localeCompare(b.titre);
+    });
+    const nbTotal = artefacts.length;
+    const nbRemis = artefacts.filter(a => a.remis).length;
+    const tauxCompletion = nbTotal > 0 ? Math.round((nbRemis / nbTotal) * 100) : 0;
+    const interpC = interpreterCompletion(indices.C);
+    const artefactsRemis = artefacts.filter(a => a.remis);
+    const artefactsNonRemis = artefacts.filter(a => !a.remis);
 
     return `
-        <!-- Badge interprétatif Mobilisation -->
-        <div class="interpretation-badge" style="border-left-color: ${interpM.couleur}; background: ${interpM.couleur}15;">
-            <span style="font-size: 1.5rem;">${interpM.emoji}</span>
-            <div>
-                <div style="color: ${interpM.couleur};">Mobilisation : ${interpM.niveau}</div>
-                <div style="font-size: 0.9rem; color: #666;">M = ${indices.M} (moyenne A+C)</div>
+        <!-- Badge interprétatif Mobilisation globale -->
+        <div class="interpretation-badge" style="border-left-color: ${interpM.couleur}; background: linear-gradient(to right, ${interpM.couleur}22, ${interpM.couleur}11); margin-bottom: 30px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    ${interpM.emoji} Mobilisation : ${interpM.niveau}
+                </div>
+                <div style="font-size: 1.3rem; font-weight: bold; color: ${interpM.couleur};">
+                    ${indices.M}
+                </div>
             </div>
-        </div>
-
-        <!-- Explication Mobilisation -->
-        <div style="background: white; padding: 15px; border-radius: 6px; border-left: 3px solid ${interpM.couleur}; margin-bottom: 20px;">
-            <p style="margin: 0; line-height: 1.6; color: #333;">
+            <div style="font-size: 0.9rem; color: #555; margin-top: 8px; font-weight: normal;">
                 ${interpM.niveau === 'Décrochage' ?
-                    "⚫ L'étudiant ne se présente plus au cours. Les interventions pédagogiques ne sont plus possibles. Référer aux services d'aide et à l'API." :
-                  interpM.niveau === 'Assiduité ET complétion critiques' ?
-                    "🔴 Situation critique : présence ET remise des travaux sous 70%. Intervention RàI niveau 3 immédiate requise." :
-                  interpM.niveau === 'Assiduité critique' ?
-                    "🟠 Assiduité critique (< 70%). La présence irrégulière compromet l'apprentissage. Intervention prioritaire sur l'engagement comportemental." :
-                  interpM.niveau === 'Complétion critique' ?
-                    "🟠 Complétion critique (< 70%). Les travaux ne sont pas remis. Intervention prioritaire sur la mobilisation de l'étudiant." :
-                  interpM.niveau === 'Mobilisation fragile' ?
-                    "🟡 Mobilisation fragile : assiduité ET complétion entre 70-80%. Suivi renforcé recommandé pour prévenir la détérioration." :
-                  interpM.niveau === 'Assiduité fragile' ?
-                    "🟡 Assiduité fragile (70-80%) malgré bonne complétion. Encourager la présence régulière." :
-                  interpM.niveau === 'Complétion fragile' ?
-                    "🟡 Complétion fragile (70-80%) malgré bonne assiduité. Soutien organisationnel recommandé." :
-                  interpM.niveau === 'Mobilisation favorable' ?
-                    "🟢 Mobilisation favorable : assiduité et complétion satisfaisantes (> 80%). Encourager la constance." :
-                  interpM.niveau === 'Mobilisation optimale' ?
-                    "✅ Mobilisation optimale : assiduité et complétion excellentes (> 90%). Modèle d'engagement." :
-                    "Interprétation non disponible."}
-            </p>
-        </div>
-
-        <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--bleu-pale);">
-
-        <!-- Badge interprétatif Engagement -->
-        <div class="interpretation-badge" style="border-left-color: ${interpE.couleur}; background: ${interpE.couleur}15;">
-            <span style="font-size: 1.5rem;">${interpE.emoji}</span>
-            <div>
-                <div style="color: ${interpE.couleur};">Engagement : ${interpE.niveau}</div>
-                <div style="font-size: 0.9rem; color: #666;">E = ${indices.E} (produit A×C×P)</div>
+                    "L'étudiant ne se présente plus au cours. Référer aux services d'aide." :
+                  interpM.niveau.includes('critique') ?
+                    "Situation critique nécessitant une intervention RàI niveau 3 immédiate." :
+                  interpM.niveau.includes('fragile') ?
+                    "Suivi renforcé recommandé pour prévenir la détérioration." :
+                  interpM.niveau.includes('favorable') ?
+                    "Assiduité et complétion satisfaisantes. Encourager la constance." :
+                  interpM.niveau.includes('optimale') ?
+                    "Mobilisation excellente. Modèle d'engagement." :
+                    "Mobilisation en cours d'évaluation."}
             </div>
         </div>
 
-        <!-- Explication Engagement -->
-        <div style="background: white; padding: 15px; border-radius: 6px; border-left: 3px solid ${interpE.couleur}; margin-bottom: 20px;">
-            <p style="margin: 0; line-height: 1.6; color: #333;">
-                L'engagement combine <strong>assiduité (${indices.A}%)</strong>,
-                <strong>complétion (${indices.C}%)</strong> et
-                <strong>performance (${indices.P}%)</strong>.
-                ${interpE.niveau === 'Engagement critique' ?
-                    "🔴 L'engagement est critique (< 40%). Action immédiate requise pour prévenir l'échec." :
-                  interpE.niveau === 'Engagement faible' ?
-                    "🟠 L'engagement est faible (40-60%). Intervention ciblée recommandée." :
-                  interpE.niveau === 'Engagement modéré' ?
-                    "🟡 L'engagement est modéré (60-75%). Encourager l'amélioration continue." :
-                  interpE.niveau === 'Engagement satisfaisant' ?
-                    "🟢 L'engagement est satisfaisant (75-85%). Continuer le suivi régulier." :
-                  interpE.niveau === 'Engagement élevé' ?
-                    "✅ L'engagement est élevé (> 85%). Excellente mobilisation globale." :
-                    "L'étudiant montre un engagement dans son parcours."}
-            </p>
+        <!-- GRILLE 2 COLONNES : ASSIDUITÉ ET COMPLÉTION -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+
+            <!-- FICHE ASSIDUITÉ -->
+            <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px;">
+                <h3 style="color: var(--bleu-principal); margin: 0 0 20px 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                    👥 ASSIDUITÉ
+                </h3>
+
+                <!-- Badge avec interprétation -->
+                <div style="margin-bottom: 15px;">
+                    <span style="font-size: 1.5rem;">${interpA.emoji}</span>
+                    <strong style="font-size: 1.1rem; color: ${interpA.couleur};">${interpA.niveau}</strong>
+                    <span style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur}; margin-left: 10px;">(${tauxA}%)</span>
+                </div>
+
+                <!-- Statistiques -->
+                <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
+                    <li><strong>• Heures présentes :</strong> ${detailsA.heuresPresentes}h / ${detailsA.heuresOffertes}h</li>
+                    <li><strong>• Nombre de séances :</strong> ${detailsA.nombreSeances}</li>
+                    <li><strong>• Indice A :</strong> ${indices.A}%</li>
+                </ul>
+
+                <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+                <!-- Liste des absences et retards -->
+                <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                    📅 ABSENCES ET RETARDS
+                </h4>
+                ${detailsA.absences.length > 0 ? `
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        ${detailsA.absences.map(abs => {
+                            const date = new Date(abs.date + 'T12:00:00');
+                            const options = { weekday: 'short', day: 'numeric', month: 'short' };
+                            const dateFormatee = date.toLocaleDateString('fr-CA', options);
+                            const estAbsenceComplete = abs.heuresPresence === 0;
+                            const icone = estAbsenceComplete ? '🔴' : '🟡';
+                            const bordure = estAbsenceComplete ? '#dc3545' : '#ffc107';
+
+                            return `
+                                <div style="flex: 0 0 auto; min-width: 140px; padding: 8px 10px;
+                                            background: var(--bleu-tres-pale); border-left: 3px solid ${bordure};
+                                            border-radius: 4px; cursor: pointer; font-size: 0.85rem;"
+                                     onclick="naviguerVersPresenceAvecDate('${abs.date}')"
+                                     onmouseover="this.style.background='#e0e8f0'"
+                                     onmouseout="this.style.background='var(--bleu-tres-pale)'">
+                                    <div style="color: var(--bleu-principal); font-weight: 500;">
+                                        ${icone} ${dateFormatee}
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: #666;">
+                                        ${estAbsenceComplete
+                                            ? `${abs.heuresManquees}h manquées`
+                                            : `${abs.heuresPresence}h / ${abs.heuresPresence + abs.heuresManquees}h`
+                                        }
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                ` : `
+                    <div style="text-align: center; padding: 15px; background: #d4edda; border-radius: 6px; color: #155724;">
+                        <div style="font-size: 1.5rem;">✅</div>
+                        <div style="font-weight: 500;">Assiduité parfaite !</div>
+                    </div>
+                `}
+            </div>
+
+            <!-- FICHE COMPLÉTION -->
+            <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px;">
+                <h3 style="color: var(--bleu-principal); margin: 0 0 20px 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                    📝 COMPLÉTION
+                </h3>
+
+                <!-- Badge avec interprétation -->
+                <div style="margin-bottom: 15px;">
+                    <span style="font-size: 1.5rem;">${interpC.emoji}</span>
+                    <strong style="font-size: 1.1rem; color: ${interpC.couleur};">${interpC.niveau}</strong>
+                    <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(${indices.C}%)</span>
+                </div>
+
+                <!-- Statistiques -->
+                <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
+                    <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
+                    <li><strong>• Taux de complétion :</strong> ${tauxCompletion}%</li>
+                    <li><strong>• Indice C :</strong> ${indices.C}%</li>
+                </ul>
+
+                <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+                <!-- Gestion des jetons (placeholder) -->
+                <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                    🎫 GESTION DES JETONS
+                </h4>
+                <div style="background: #fff3cd; border: 2px dashed #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center;">
+                    <div style="font-size: 1rem; color: #856404;">
+                        <strong>Jetons disponibles :</strong> 2 / 2
+                    </div>
+                    <div style="font-size: 0.85rem; color: #666; font-style: italic; margin-top: 5px;">
+                        Système à implémenter
+                    </div>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+                <!-- Artefacts remis -->
+                <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                    ✅ REMIS (${artefactsRemis.length})
+                </h4>
+                ${artefactsRemis.length > 0 ? `
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                        ${artefactsRemis.map(art => `
+                            <div style="padding: 8px 10px; background: #d4edda; border-left: 3px solid #28a745;
+                                        border-radius: 4px; font-size: 0.85rem;">
+                                <div style="color: #155724; font-weight: 500;">
+                                    ✅ ${echapperHtml(art.titre)}
+                                </div>
+                                <div style="font-size: 0.8rem; color: #666;">
+                                    <strong>${art.note}/100</strong>${art.niveau ? ` · ${art.niveau}` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : `
+                    <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 6px;
+                                color: #666; margin-bottom: 15px; font-size: 0.85rem;">
+                        Aucun artefact remis
+                    </div>
+                `}
+
+                <!-- Artefacts non remis -->
+                <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                    ⏳ NON REMIS (${artefactsNonRemis.length})
+                </h4>
+                ${artefactsNonRemis.length > 0 ? `
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        ${artefactsNonRemis.map(art => `
+                            <div style="padding: 8px 10px; background: #f5f5f5; border-left: 3px solid #ddd;
+                                        border-radius: 4px; opacity: 0.7; font-size: 0.85rem;">
+                                <div style="color: #666; font-weight: 500;">
+                                    ⏳ ${echapperHtml(art.titre)}
+                                </div>
+                                <div style="font-size: 0.8rem; color: #999;">Non remis</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : `
+                    <div style="text-align: center; padding: 10px; background: #d4edda; border-radius: 6px;
+                                color: #155724; font-size: 0.85rem;">
+                        ✅ Tous les artefacts remis !
+                    </div>
+                `}
+            </div>
         </div>
 
-        <!-- Placeholder graphique évolution -->
-        <div class="placeholder-graphique">
-            <div class="placeholder-graphique-icone">📈</div>
-            <div><strong>Évolution temporelle A-C-M-E</strong></div>
-            <div style="font-size: 0.9rem; margin-top: 8px;">
-                Graphique de suivi longitudinal (à venir)
-            </div>
+        <!-- Placeholder graphique unique (en bas des deux fiches) -->
+        <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
+                    padding: 30px 20px; text-align: center; color: var(--bleu-moyen); font-style: italic; margin-bottom: 20px;">
+            📈 Évolution temporelle A-C (à venir)
+        </div>
+
+        <!-- TOGGLE CALCULS UNIQUE (EXTÉRIEUR) -->
+        <button class="btn-secondary" style="margin: 20px 0; padding: 8px 16px; border-radius: 6px;"
+                onclick="this.nextElementSibling.classList.toggle('hidden')">
+            🔍 Voir les calculs
+        </button>
+        <div class="hidden" style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📐 Détails des calculs</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
+                <li><strong>Indice A (Assiduité) :</strong> ${indices.A}%</li>
+                <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
+                    → ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
+                </li>
+                <li style="margin-top: 10px;"><strong>Indice C (Complétion) :</strong> ${indices.C}%</li>
+                <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
+                    → ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
+                </li>
+                <li style="margin-top: 10px;"><strong>Indice M (Mobilisation) :</strong> ${indices.M}</li>
+                <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
+                    → M = (A + C) / 2 = (${indices.A} + ${indices.C}) / 2
+                </li>
+            </ul>
         </div>
     `;
 }
@@ -1276,19 +1460,15 @@ function changerSectionProfil(section) {
 
     switch (section) {
         case 'cible':
-            titre = '🎯 Cible d\'intervention & Risque';
+            titre = '📚 Suivi de l\'apprentissage';
             contenu = genererContenuCibleIntervention(da);
             break;
         case 'performance':
-            titre = '📝 Performance & Portfolio';
+            titre = '📝 Développement des habiletés et compétences';
             contenu = genererSectionPerformance(da);
             break;
-        case 'assiduite':
-            titre = '📅 Assiduité';
-            contenu = genererSectionAssiduite(da);
-            break;
         case 'mobilisation':
-            titre = '💪 Mobilisation & Engagement';
+            titre = '💪 Mobilisation';
             contenu = genererSectionMobilisationEngagement(da);
             break;
         default:
@@ -1309,8 +1489,8 @@ function changerSectionProfil(section) {
 }
 
 /**
- * Génère le contenu de la cible d'intervention pour la colonne droite
- * Inclut profil de risque (E, R) et cible d'intervention
+ * Génère le contenu de la section Suivi de l'apprentissage
+ * Structure épurée: 1 encadré blanc avec badge RàI, infos, message, graphique
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML du contenu
  */
@@ -1318,8 +1498,11 @@ function genererContenuCibleIntervention(da) {
     const cibleInfo = determinerCibleIntervention(da);
     const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
     const indices = calculerTousLesIndices(da);
-    const interpE = interpreterEngagement(indices.E);
     const interpR = interpreterRisque(indices.R);
+
+    // Récupérer infos élève pour CAF/SA
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const eleve = etudiants.find(e => e.da === da);
 
     // Ne pas afficher si pas assez de données
     if (indices3Derniers.nbArtefacts === 0) {
@@ -1329,7 +1512,7 @@ function genererContenuCibleIntervention(da) {
                 <h3 style="color: #666; margin-bottom: 10px;">Données insuffisantes</h3>
                 <p style="color: #999;">
                     Pas encore d'artefacts évalués pour cet étudiant.<br>
-                    La cible d'intervention sera disponible après l'évaluation d'au moins un artefact.
+                    Le suivi de l'apprentissage sera disponible après l'évaluation d'au moins un artefact.
                 </p>
             </div>
         `;
@@ -1347,62 +1530,120 @@ function genererContenuCibleIntervention(da) {
         ? '✨ <strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.'
         : '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
 
+    // Calculer le blocage pour progression
+    const moyennes = calculerMoyennesCriteres(da);
+    const resultBlocage = calculerIndiceBlocage(moyennes);
+    const interpBlocage = resultBlocage ? interpreterIndiceBlocage(resultBlocage.score) : null;
+
+    // Couleurs badge selon niveau RàI
+    let badgeStyle = '';
+    if (cibleInfo.niveau === 3) {
+        badgeStyle = 'background: #ffe5d0; border: 2px solid #fd7e14; color: #bd4f00;';
+    } else if (cibleInfo.niveau === 2) {
+        badgeStyle = 'background: #fff3cd; border: 2px solid #ffc107; color: #856404;';
+    } else {
+        badgeStyle = 'background: white; border: 2px solid #6c757d; color: #495057;';
+    }
+
     return `
-        <!-- Profil de risque (E, R, Pattern) -->
-        <div style="background: linear-gradient(to right, ${interpR.couleur}11, ${interpR.couleur}05);
-                    border: 1px solid ${interpR.couleur}33;
-                    border-radius: 8px;
-                    padding: 20px;
-                    margin-bottom: 25px;">
-            <h4 style="color: var(--bleu-principal); margin-bottom: 15px; font-size: 1rem;">
-                📊 Profil de risque
-            </h4>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                <!-- Risque -->
-                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid ${interpR.couleur};">
-                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Risque d'échec</div>
-                    <div style="font-size: 1.3rem; font-weight: bold; color: ${interpR.couleur}; margin-bottom: 3px;">
-                        ${interpR.emoji} ${interpR.niveau}
-                    </div>
-                    <div style="font-size: 0.85rem; color: #666;">R = ${indices.R}</div>
-                </div>
-                <!-- Engagement -->
-                <div style="background: white; padding: 12px; border-radius: 6px; border-left: 3px solid ${interpE.couleur};">
-                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Engagement</div>
-                    <div style="font-size: 1.3rem; font-weight: bold; color: ${interpE.couleur}; margin-bottom: 3px;">
-                        ${interpE.emoji} ${interpE.niveau}
-                    </div>
-                    <div style="font-size: 0.85rem; color: #666;">E = ${indices.E}</div>
-                </div>
-            </div>
-            <div style="background: white; padding: 12px; border-radius: 6px; font-size: 0.9rem; color: #666;">
-                <strong style="color: var(--bleu-principal);">Pattern actuel :</strong> ${cibleInfo.pattern}
-                <span style="margin-left: 10px;">·</span>
-                <span style="margin-left: 10px;">Basé sur ${indices3Derniers.nbArtefacts} dernier${indices3Derniers.nbArtefacts > 1 ? 's' : ''} artefact${indices3Derniers.nbArtefacts > 1 ? 's' : ''}</span>
-            </div>
-        </div>
+        <!-- ENCADRÉ UNIQUE: SUIVI DE L'APPRENTISSAGE -->
+        <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
 
-        <!-- Carte cible d'intervention premium -->
-        <div class="carte-cible-intervention" style="border-color: ${cibleInfo.couleur}; margin-bottom: 25px;">
-            <div class="carte-cible-header">
-                <div style="flex: 1;">
-                    <div class="carte-cible-badge-niveau" style="background: ${cibleInfo.couleur}; display: inline-block; margin-bottom: 15px;">
-                        ${cibleInfo.emoji} ${niveauTexte}
-                    </div>
-                </div>
+            <!-- Badge RàI avec couleur selon niveau -->
+            <div style="${badgeStyle} display: inline-block; padding: 8px 16px; border-radius: 6px; font-weight: 600; margin-bottom: 15px;">
+                ${cibleInfo.emoji} ${niveauTexte}
             </div>
 
-            <div class="carte-cible-texte-principal" style="color: ${cibleInfo.couleur};">
-                ${cibleInfo.cible}
-            </div>
+            <!-- Liste des informations -->
+            <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
+                <li><strong>• Risque :</strong> ${interpR.emoji} ${interpR.niveau} (${indices.R})</li>
+                <li><strong>• Pattern :</strong> ${cibleInfo.pattern}</li>
+                <li><strong>• Progression :</strong> ${interpBlocage ? `${interpBlocage.emoji} ${interpBlocage.niveau} (${Math.round(resultBlocage.score * 100)}%)` : 'Non évaluée'}</li>
+                <li><strong>• Services :</strong> ${eleve.caf === 'Oui' ? '✓ CAF' : ''} ${eleve.sa === 'Oui' ? '✓ SA' : ''} ${eleve.caf !== 'Oui' && eleve.sa !== 'Oui' ? 'Aucun' : ''}</li>
+            </ul>
 
-            <div class="carte-cible-description" style="margin-top: 15px;">
+            <!-- Séparateur -->
+            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+            <!-- Message d'intervention -->
+            <div style="line-height: 1.6; color: #333;">
                 ${descriptionNiveau}
             </div>
+
+            <!-- Séparateur -->
+            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+            <!-- Placeholder graphique (en conclusion) -->
+            <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
+                        padding: 30px 20px; text-align: center; color: var(--bleu-moyen); font-style: italic;">
+                📈 Évolution temporelle du risque (à venir)
+            </div>
         </div>
 
-        <!-- Diagnostic critères SRPNF -->
-        ${genererDiagnosticCriteres(profilActuelDA)}
+        <!-- TOGGLE CALCULS (EXTÉRIEUR) -->
+        <div style="margin-top: 25px;">
+            <button onclick="toggleDetailsTechniques('details-calculs-risque-${da}')"
+                    style="background: var(--bleu-pale); border: 1px solid var(--bleu-moyen);
+                           color: var(--bleu-principal); padding: 8px 16px; border-radius: 6px;
+                           cursor: pointer; font-size: 0.9rem; width: 100%; text-align: left;
+                           display: flex; align-items: center; justify-content: space-between;">
+                <span>🔽 Voir les calculs et formules</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">▼</span>
+            </button>
+
+            <div id="details-calculs-risque-${da}" class="details-techniques">
+
+                <!-- Calcul Risque -->
+                <div style="margin-bottom: 20px;">
+                    <h5 style="color: var(--bleu-principal); margin: 0 0 10px 0; font-size: 0.95rem;">
+                        📊 CALCUL DU RISQUE (R)
+                    </h5>
+                    <div style="background: white; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+                        <div style="margin-bottom: 8px;"><strong>Formule:</strong></div>
+                        <div style="color: #666; margin-bottom: 12px;">R = (1 - A) × 0.50 + (1 - C) × 0.25 + (1 - P) × 0.25</div>
+
+                        <div style="margin-bottom: 8px;"><strong>Calcul détaillé:</strong></div>
+                        <div style="color: #666;">
+                            R = (1 - ${(indices.A / 100).toFixed(2)}) × 0.50 + (1 - ${(indices.C / 100).toFixed(2)}) × 0.25 + (1 - ${(indices.P / 100).toFixed(2)}) × 0.25<br>
+                            R = ${((1 - indices.A / 100) * 0.50).toFixed(3)} + ${((1 - indices.C / 100) * 0.25).toFixed(3)} + ${((1 - indices.P / 100) * 0.25).toFixed(3)}<br>
+                            R = <strong>${indices.R}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                ${interpBlocage ? `
+                    <!-- Calcul Blocage -->
+                    <div>
+                        <h5 style="color: var(--bleu-principal); margin: 0 0 10px 0; font-size: 0.95rem;">
+                            🔒 CALCUL DU BLOCAGE
+                        </h5>
+                        <div style="background: white; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+                            <div style="margin-bottom: 8px;"><strong>Formule${resultBlocage.partiel ? ' (ajustée)' : ''}:</strong></div>
+                            <div style="color: #666; margin-bottom: 12px;">
+                                ${resultBlocage.partiel
+                                    ? `Blocage = (critères disponibles pondérés) / total pondération`
+                                    : `Blocage = 0.35 × Structure + 0.35 × Français + 0.30 × Rigueur`
+                                }
+                            </div>
+
+                            ${resultBlocage.partiel ? `
+                                <div style="background: #fff3cd; padding: 8px; border-radius: 4px; margin-bottom: 10px; font-family: sans-serif;">
+                                    <strong style="color: #856404;">⚠️ Calcul partiel:</strong> ${resultBlocage.criteresManquants.join(', ')} non évalué(s)
+                                </div>
+                            ` : ''}
+
+                            <div style="margin-bottom: 8px;"><strong>Calcul détaillé:</strong></div>
+                            <div style="color: #666;">
+                                ${moyennes.structure !== null ? `0.35 × ${Math.round(moyennes.structure * 100)}%<br>` : ''}
+                                ${moyennes.francais !== null ? `0.35 × ${Math.round(moyennes.francais * 100)}%<br>` : ''}
+                                ${moyennes.rigueur !== null ? `0.30 × ${Math.round(moyennes.rigueur * 100)}%<br>` : ''}
+                                Blocage = <strong>${Math.round(resultBlocage.score * 100)}%</strong>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
     `;
 }
 
@@ -1464,11 +1705,11 @@ function afficherProfilComplet(da) {
                 <div class="profil-sidebar-nav">
                     <div class="profil-sidebar-nav-titre">Sections</div>
 
-                    <!-- 1. Cible & Risque -->
+                    <!-- 1. Suivi de l'apprentissage -->
                     <div class="profil-nav-item actif" onclick="changerSectionProfil('cible')">
                         <div class="profil-nav-item-ligne">
                             <div class="profil-nav-item-titre">
-                                🎯 Cible & Risque
+                                📚 Suivi de l'apprentissage
                             </div>
                         </div>
                         <div class="profil-nav-item-sous-ligne">
@@ -1478,44 +1719,29 @@ function afficherProfilComplet(da) {
                         </div>
                     </div>
 
-                    <!-- 2. Performance (C + P) -->
+                    <!-- 2. Développement des habiletés -->
                     <div class="profil-nav-item" onclick="changerSectionProfil('performance')">
                         <div class="profil-nav-item-ligne">
                             <div class="profil-nav-item-titre">
-                                📝 Performance
+                                📝 Développement des habiletés
                             </div>
                             <div class="profil-nav-item-valeur" style="color: ${obtenirCouleurIndice(indices.P)};">
                                 ${indices.P}%
                             </div>
                         </div>
-                        <div class="profil-nav-item-sous-ligne">
-                            <span>Complétion: ${indices.C}%</span>
-                        </div>
                     </div>
 
-                    <!-- 3. Assiduité (A) -->
-                    <div class="profil-nav-item" onclick="changerSectionProfil('assiduite')">
-                        <div class="profil-nav-item-ligne">
-                            <div class="profil-nav-item-titre">
-                                📅 Assiduité
-                            </div>
-                            <div class="profil-nav-item-valeur" style="color: ${obtenirCouleurIndice(indices.A)};">
-                                ${indices.A}%
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 4. Mobilisation & Engagement (M + E) -->
+                    <!-- 3. Mobilisation (A + C + M) -->
                     <div class="profil-nav-item" onclick="changerSectionProfil('mobilisation')">
                         <div class="profil-nav-item-ligne">
                             <div class="profil-nav-item-titre">
-                                💪 Mobilisation & Engagement
+                                💪 Mobilisation
                             </div>
                         </div>
                         <div class="profil-nav-item-sous-ligne">
-                            <span style="color: ${interpM.couleur};">M: ${indices.M}</span>
+                            <span>A: ${indices.A}%</span>
                             <span>·</span>
-                            <span style="color: ${interpE.couleur};">E: ${indices.E}</span>
+                            <span>C: ${indices.C}%</span>
                         </div>
                     </div>
                 </div>
@@ -1525,7 +1751,7 @@ function afficherProfilComplet(da) {
             <div class="profil-contenu" id="profil-contenu-dynamique">
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
-                    <div class="profil-contenu-titre">🎯 Cible d'intervention & Risque</div>
+                    <div class="profil-contenu-titre">📚 Suivi de l'apprentissage</div>
                 </div>
                 <div class="profil-contenu-body">
                     ${genererContenuCibleIntervention(da)}
@@ -1787,7 +2013,7 @@ function toggleDetailIndice(indice, da) {
         case 'P':
             html = `
                 <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
-                    📊 Performance détaillée
+                    📝 Développement des habiletés et compétences
                 </h3>
                 ${genererSectionPerformance(da)}
             `;
@@ -1876,14 +2102,6 @@ function genererSectionCompletion(da) {
         }
     });
 
-    if (artefactsDonnes.length === 0) {
-        return `
-            <div class="text-muted" style="text-align: center; padding: 30px;">
-                <p>📝 Aucun artefact de portfolio évalué pour le moment</p>
-            </div>
-        `;
-    }
-
     // Récupérer les évaluations de l'élève
     const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
 
@@ -1905,54 +2123,125 @@ function genererSectionCompletion(da) {
 
     const nbTotal = artefacts.length;
     const nbRemis = artefacts.filter(a => a.remis).length;
-    const tauxCompletion = Math.round((nbRemis / nbTotal) * 100);
+    const tauxCompletion = nbTotal > 0 ? Math.round((nbRemis / nbTotal) * 100) : 0;
     const indices = calculerTousLesIndices(da);
 
+    // Interprétation de la complétion
+    const interpC = interpreterCompletion(indices.C);
+
+    // Séparer artefacts remis et non remis
+    const artefactsRemis = artefacts.filter(a => a.remis);
+    const artefactsNonRemis = artefacts.filter(a => !a.remis);
+
     return `
-        <!-- STATISTIQUES -->
-        <div class="grille-statistiques mb-2">
-            <div class="carte-metrique">
-                <strong>${nbRemis}/${nbTotal}</strong>
-                <span>Artefacts remis</span>
-            </div>
-            <div class="carte-metrique">
-                <strong>${tauxCompletion}%</strong>
-                <span>Taux de complétion</span>
-            </div>
-            <div class="carte-metrique">
-                <strong>${indices.C}%</strong>
-                <span>Indice C</span>
-            </div>
-        </div>
+        <!-- ENCADRÉ UNIQUE: COMPLÉTION -->
+        <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
 
-        <!-- LISTE DES ARTEFACTS -->
-        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
-            📝 Artefacts du portfolio (${nbTotal})
-        </h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-            ${artefacts.map(art => {
-                const icone = art.remis ? '✅' : '⏳';
-                const bordure = art.remis ? 'var(--risque-minimal)' : '#ddd';
-                const fond = art.remis ? '#d4edda' : '#f5f5f5';
+            <h3 style="color: var(--bleu-principal); margin: 0 0 20px 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                📝 COMPLÉTION
+            </h3>
 
-                return `
-                    <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
-                                background: ${fond};
-                                border-left: 3px solid ${bordure}; border-radius: 4px;
-                                ${!art.remis ? 'opacity: 0.6;' : ''}">
-                        <div style="color: ${art.remis ? '#155724' : '#666'}; font-weight: 500; margin-bottom: 5px;">
-                            ${icone} ${echapperHtml(art.titre)}
-                        </div>
-                        ${art.remis ? `
+            <!-- Badge avec interprétation -->
+            <div style="margin-bottom: 15px;">
+                <span style="font-size: 1.5rem;">${interpC.emoji}</span>
+                <strong style="font-size: 1.1rem; color: ${interpC.couleur};">${interpC.niveau}</strong>
+                <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(${indices.C}%)</span>
+            </div>
+
+            <!-- Statistiques -->
+            <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
+                <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
+                <li><strong>• Taux de complétion :</strong> ${tauxCompletion}%</li>
+                <li><strong>• Indice C :</strong> ${indices.C}%</li>
+            </ul>
+
+            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+            <!-- Gestion des jetons (placeholder) -->
+            <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                🎫 GESTION DES JETONS
+            </h4>
+            <div style="background: #fff3cd; border: 2px dashed #ffc107; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
+                <div style="font-size: 1.2rem; color: #856404; margin-bottom: 10px;">
+                    <strong>Jetons disponibles :</strong> 2 / 2
+                </div>
+                <div style="font-size: 0.9rem; color: #666; font-style: italic;">
+                    Système de jetons (reprise/délai) à implémenter
+                </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+            <!-- Artefacts remis -->
+            <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                ✅ ARTEFACTS REMIS (${artefactsRemis.length})
+            </h4>
+            ${artefactsRemis.length > 0 ? `
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                    ${artefactsRemis.map(art => `
+                        <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
+                                    background: #d4edda; border-left: 3px solid #28a745; border-radius: 4px;">
+                            <div style="color: #155724; font-weight: 500; margin-bottom: 5px;">
+                                ✅ ${echapperHtml(art.titre)}
+                            </div>
                             <div style="font-size: 0.9rem; color: #666;">
                                 <strong>${art.note}/100</strong>${art.niveau ? ` · ${art.niveau}` : ''}
                             </div>
-                        ` : `
+                        </div>
+                    `).join('')}
+                </div>
+            ` : `
+                <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px; color: #666; margin-bottom: 20px;">
+                    Aucun artefact remis
+                </div>
+            `}
+
+            <!-- Artefacts non remis -->
+            <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                ⏳ ARTEFACTS NON REMIS (${artefactsNonRemis.length})
+            </h4>
+            ${artefactsNonRemis.length > 0 ? `
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                    ${artefactsNonRemis.map(art => `
+                        <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
+                                    background: #f5f5f5; border-left: 3px solid #ddd; border-radius: 4px; opacity: 0.6;">
+                            <div style="color: #666; font-weight: 500; margin-bottom: 5px;">
+                                ⏳ ${echapperHtml(art.titre)}
+                            </div>
                             <div class="text-muted" style="font-size: 0.9rem;">Non remis</div>
-                        `}
-                    </div>
-                `;
-            }).join('')}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : `
+                <div style="text-align: center; padding: 15px; background: #d4edda; border-radius: 6px; color: #155724; margin-bottom: 20px;">
+                    ✅ Tous les artefacts ont été remis !
+                </div>
+            `}
+
+            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+            <!-- Placeholder graphique (en conclusion) -->
+            <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
+                        padding: 30px 20px; text-align: center; color: var(--bleu-moyen); font-style: italic;">
+                📈 Évolution temporelle de la complétion (à venir)
+            </div>
+
+        </div>
+
+        <!-- TOGGLE CALCULS (EXTÉRIEUR) -->
+        <button class="btn-secondary" style="margin: 20px 0; padding: 8px 16px; border-radius: 6px;"
+                onclick="this.nextElementSibling.classList.toggle('hidden')">
+            🔍 Voir les calculs
+        </button>
+        <div class="hidden" style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📐 Détails des calculs</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
+                <li><strong>Indice C :</strong> ${indices.C}%</li>
+                <li><strong>Taux complétion :</strong> ${tauxCompletion}%</li>
+                <li><strong>Artefacts remis :</strong> ${nbRemis}</li>
+                <li><strong>Artefacts totaux :</strong> ${nbTotal}</li>
+                <li><strong>Artefacts non remis :</strong> ${artefactsNonRemis.length}</li>
+            </ul>
         </div>
     `;
 }
@@ -2903,61 +3192,74 @@ function genererSectionPerformance(da) {
         : null;
     const selectionComplete = nbRetenus === portfolio.regles.nombreARetenir;
 
-    // Interprétations pour C et P
-    const interpC = interpreterCompletion(indices.C);
+    // Interprétation Performance uniquement (C va dans Mobilisation)
     const interpP = interpreterPerformance(indices.P);
 
+    // Calculer moyennes des critères pour badges
+    const moyennes = calculerMoyennesCriteres(da);
+    const diagnostic = diagnostiquerForcesChallenges(moyennes);
+
+    // Fonction helper pour couleur du badge
+    const obtenirCouleurBadge = (score) => {
+        if (score >= 0.7125) return '#28a745'; // Vert - Force
+        if (score >= 0.60) return '#ffc107'; // Jaune - Défi modéré
+        if (score >= 0.50) return '#ff9800'; // Orange - Défi important
+        return '#dc3545'; // Rouge - Défi critique
+    };
+
     return `
-        <!-- Badge interprétatif Complétion -->
-        <div class="interpretation-badge" style="border-left-color: ${interpC.couleur}; background: linear-gradient(to right, ${interpC.couleur}22, ${interpC.couleur}11);">
-            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    ${interpC.emoji} Complétion : ${interpC.niveau}
-                </div>
-                <div style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur};">
-                    ${indices.C}%
-                </div>
-            </div>
-            <div style="font-size: 0.9rem; color: #555; margin-top: 8px; font-weight: normal;">
-                ${interpC.description}
-            </div>
-        </div>
+        <!-- ENCADRÉ UNIQUE: DÉVELOPPEMENT DES HABILETÉS ET COMPÉTENCES -->
+        <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
 
-        <!-- Badge interprétatif Performance -->
-        <div class="interpretation-badge" style="border-left-color: ${interpP.couleur}; background: linear-gradient(to right, ${interpP.couleur}22, ${interpP.couleur}11);">
-            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    ${interpP.emoji} Performance : ${interpP.niveau}
-                </div>
-                <div style="font-size: 1.3rem; font-weight: bold; color: ${interpP.couleur};">
-                    ${indices.P}%
-                </div>
+            <!-- Badge performance avec interprétation -->
+            <div style="margin-bottom: 15px;">
+                <span style="font-size: 1.5rem;">${interpP.emoji}</span>
+                <strong style="font-size: 1.1rem; color: ${interpP.couleur};">${interpP.niveau}</strong>
+                <span style="font-size: 1.3rem; font-weight: bold; color: ${interpP.couleur}; margin-left: 10px;">(${indices.P}%)</span>
             </div>
-            <div style="font-size: 0.9rem; color: #555; margin-top: 8px; font-weight: normal;">
-                ${interpP.description}
+
+            <!-- Statistiques -->
+            <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
+                <li><strong>• Note PAN :</strong> ${noteTop3 || '--'}${noteTop3 ? '/100' : ''}</li>
+                <li><strong>• Note sommative :</strong> À implémenter</li>
+                <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
+            </ul>
+
+            <!-- Séparateur -->
+            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+            <!-- Diagnostic SRPNF -->
+            <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                📊 DIAGNOSTIC SRPNF
+            </h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+                ${['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
+                    const nomCritere = cle === 'structure' ? 'STRUCTURE' :
+                                     cle === 'rigueur' ? 'RIGUEUR' :
+                                     cle === 'plausibilite' ? 'PLAUSIBILITÉ' :
+                                     cle === 'nuance' ? 'NUANCE' : 'FRANÇAIS';
+                    const score = moyennes[cle];
+
+                    if (score === null) return '';
+
+                    const pourcentage = Math.round(score * 100);
+                    const couleur = obtenirCouleurBadge(score);
+
+                    return `
+                        <div style="display: inline-flex; align-items: center; gap: 6px;
+                                    padding: 6px 12px; border-radius: 12px; font-weight: 600;
+                                    font-size: 0.9rem; background: ${couleur}22; color: ${couleur};
+                                    border: 2px solid ${couleur};">
+                            ${nomCritere} ${pourcentage}%
+                        </div>
+                    `;
+                }).join('')}
             </div>
-        </div>
 
-        <!-- Statistiques portfolio simples -->
-        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 6px; margin-bottom: 20px;">
-            <div style="display: flex; gap: 20px; justify-content: space-around; font-size: 0.95rem; color: #555;">
-                <div>
-                    <strong style="color: var(--bleu-principal);">${nbRemis}/${nbTotal}</strong> artefacts remis
-                </div>
-                <div>
-                    Note (top 3) : <strong style="color: var(--bleu-principal);">${noteTop3 || '--'}${noteTop3 ? '/100' : ''}</strong>
-                </div>
-            </div>
-        </div>
+            <!-- Séparateur -->
+            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
 
-        <!-- Placeholder graphique évolution C-P -->
-        <div class="placeholder-graphique">
-            📈 Évolution temporelle de la complétion (C) et de la performance (P) (à venir)
-        </div>
-
-        ${genererDiagnosticCriteres(da)}
-
-        <!-- TITRE AVEC INSTRUCTION INTÉGRÉE -->
+            <!-- TITRE ARTEFACTS -->
         <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
             📝 Artefacts (${nbTotal})
             ${!selectionComplete ? `
@@ -3003,8 +3305,9 @@ function genererSectionPerformance(da) {
                                     ${iconeStatut} ${echapperHtml(art.titre)}
                                 </div>
                                 ${art.remis ? `
-                                    <div style="font-size: 0.9rem; color: #666;">
-                                        <strong>${art.note}/100</strong>${art.niveau ? ` · ${art.niveau}` : ''}
+                                    <div style="font-size: 1rem; color: var(--bleu-principal);">
+                                        <strong style="font-size: 1.2rem;">${art.niveau || '--'}</strong>
+                                        <span style="font-size: 0.85rem; color: #888; margin-left: 4px;">(${art.note}/100)</span>
                                     </div>
                                 ` : `
                                     <div class="text-muted">Non remis</div>
@@ -3015,6 +3318,39 @@ function genererSectionPerformance(da) {
                 `;
             }).join('')}
         </div>
+
+        <!-- Séparateur avant conclusion -->
+        <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+        <!-- Placeholder graphique (en conclusion) -->
+        <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
+                    padding: 30px 20px; text-align: center; color: var(--bleu-moyen); font-style: italic;">
+            📈 Évolution temporelle de la performance (à venir)
+        </div>
+
+    </div>
+
+    <!-- TOGGLE CALCULS (EXTÉRIEUR) -->
+    <button class="btn-secondary" style="margin: 20px 0; padding: 8px 16px; border-radius: 6px;"
+            onclick="this.nextElementSibling.classList.toggle('hidden')">
+        🔍 Voir les calculs
+    </button>
+    <div class="hidden" style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+        <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📐 Détails des calculs</h4>
+        <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
+            <li><strong>Indice P :</strong> ${indices.P}%</li>
+            <li><strong>Note PAN (top 3) :</strong> ${noteTop3 || '--'}/100</li>
+            <li><strong>Artefacts retenus :</strong> ${nbRetenus}/${portfolio.regles.nombreARetenir}</li>
+            <li><strong>Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
+            ${Object.entries(moyennes).map(([cle, val]) => {
+                const nom = cle === 'structure' ? 'Structure' :
+                           cle === 'rigueur' ? 'Rigueur' :
+                           cle === 'plausibilite' ? 'Plausibilité' :
+                           cle === 'nuance' ? 'Nuance' : 'Français';
+                return val !== null ? `<li><strong>${nom} :</strong> ${Math.round(val * 100)}%</li>` : '';
+            }).join('')}
+        </ul>
+    </div>
     `;
 }
 
@@ -3029,81 +3365,98 @@ function genererSectionAssiduite(da) {
 
     // Interprétation de l'assiduité
     const interpA = interpreterAssiduite(parseFloat(taux));
+    const indices = calculerTousLesIndices(da);
 
     return `
-        <!-- Badge interprétatif Assiduité -->
-        <div class="interpretation-badge" style="border-left-color: ${interpA.couleur}; background: linear-gradient(to right, ${interpA.couleur}22, ${interpA.couleur}11);">
-            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    ${interpA.emoji} ${interpA.niveau}
-                </div>
-                <div style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur};">
-                    ${taux}%
-                </div>
-            </div>
-            <div style="font-size: 0.9rem; color: #555; margin-top: 8px; font-weight: normal;">
-                ${interpA.description}
-            </div>
-        </div>
+        <!-- ENCADRÉ UNIQUE: ASSIDUITÉ -->
+        <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
 
-        <!-- Statistiques présences simples -->
-        <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 6px; margin-bottom: 20px;">
-            <div style="display: flex; gap: 20px; justify-content: space-around; font-size: 0.95rem; color: #555;">
-                <div>
-                    <strong style="color: var(--bleu-principal);">${details.heuresPresentes}h</strong> présentes /
-                    <strong style="color: var(--bleu-principal);">${details.heuresOffertes}h</strong> offertes
-                </div>
-                <div>
-                    <strong style="color: var(--bleu-principal);">${details.nombreSeances}</strong> séances
-                </div>
+            <h3 style="color: var(--bleu-principal); margin: 0 0 20px 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                👥 ASSIDUITÉ
+            </h3>
+
+            <!-- Badge avec interprétation -->
+            <div style="margin-bottom: 15px;">
+                <span style="font-size: 1.5rem;">${interpA.emoji}</span>
+                <strong style="font-size: 1.1rem; color: ${interpA.couleur};">${interpA.niveau}</strong>
+                <span style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur}; margin-left: 10px;">(${taux}%)</span>
             </div>
-        </div>
 
-        <!-- Placeholder graphique évolution A -->
-        <div class="placeholder-graphique">
-            📈 Évolution temporelle de l'assiduité (A) (à venir)
-        </div>
+            <!-- Statistiques -->
+            <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
+                <li><strong>• Heures présentes :</strong> ${details.heuresPresentes}h / ${details.heuresOffertes}h</li>
+                <li><strong>• Nombre de séances :</strong> ${details.nombreSeances}</li>
+                <li><strong>• Indice A :</strong> ${indices.A}%</li>
+            </ul>
 
-        <!-- LISTE DES ABSENCES -->
-        ${details.absences.length > 0 ? `
-            <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
-                📅 Absences et retards
+            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+            <!-- Liste des absences et retards -->
+            <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                📅 ABSENCES ET RETARDS
             </h4>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                ${details.absences.map(abs => {
-                    const date = new Date(abs.date + 'T12:00:00');
-                    const options = { weekday: 'short', day: 'numeric', month: 'short' };
-                    const dateFormatee = date.toLocaleDateString('fr-CA', options);
-                    const estAbsenceComplete = abs.heuresPresence === 0;
-                    const icone = estAbsenceComplete ? '🔴' : '🟡';
-                    const bordure = estAbsenceComplete ? '#dc3545' : '#ffc107';
+            ${details.absences.length > 0 ? `
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                    ${details.absences.map(abs => {
+                        const date = new Date(abs.date + 'T12:00:00');
+                        const options = { weekday: 'short', day: 'numeric', month: 'short' };
+                        const dateFormatee = date.toLocaleDateString('fr-CA', options);
+                        const estAbsenceComplete = abs.heuresPresence === 0;
+                        const icone = estAbsenceComplete ? '🔴' : '🟡';
+                        const bordure = estAbsenceComplete ? '#dc3545' : '#ffc107';
 
-                    return `
-                        <div style="flex: 0 0 auto; min-width: 180px; padding: 10px 12px;
-                                    background: var(--bleu-tres-pale); border-left: 3px solid ${bordure};
-                                    border-radius: 4px; cursor: pointer;"
-                             onclick="naviguerVersPresenceAvecDate('${abs.date}')"
-                             onmouseover="this.style.background='#e0e8f0'"
-                             onmouseout="this.style.background='var(--bleu-tres-pale)'">
-                            <div style="color: var(--bleu-principal); font-weight: 500; margin-bottom: 3px;">
-                                ${icone} ${dateFormatee}
+                        return `
+                            <div style="flex: 0 0 auto; min-width: 180px; padding: 10px 12px;
+                                        background: var(--bleu-tres-pale); border-left: 3px solid ${bordure};
+                                        border-radius: 4px; cursor: pointer;"
+                                 onclick="naviguerVersPresenceAvecDate('${abs.date}')"
+                                 onmouseover="this.style.background='#e0e8f0'"
+                                 onmouseout="this.style.background='var(--bleu-tres-pale)'">
+                                <div style="color: var(--bleu-principal); font-weight: 500; margin-bottom: 3px;">
+                                    ${icone} ${dateFormatee}
+                                </div>
+                                <div style="font-size: 0.9rem; color: #666;">
+                                    ${estAbsenceComplete
+                                        ? `${abs.heuresManquees}h manquées`
+                                        : `${abs.heuresPresence}h / ${abs.heuresPresence + abs.heuresManquees}h`
+                                    }
+                                </div>
                             </div>
-                            <div style="font-size: 0.9rem; color: #666;">
-                                ${estAbsenceComplete
-                                    ? `${abs.heuresManquees}h manquées`
-                                    : `${abs.heuresPresence}h / ${abs.heuresPresence + abs.heuresManquees}h`
-                                }
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
+                        `;
+                    }).join('')}
+                </div>
+            ` : `
+                <div style="text-align: center; padding: 20px; background: #d4edda; border-radius: 6px; color: #155724; margin-bottom: 20px;">
+                    <div style="font-size: 2rem;">✅</div>
+                    <div style="font-weight: 500;">Assiduité parfaite !</div>
+                </div>
+            `}
+
+            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+            <!-- Placeholder graphique (en conclusion) -->
+            <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
+                        padding: 30px 20px; text-align: center; color: var(--bleu-moyen); font-style: italic;">
+                📈 Évolution temporelle de l'assiduité (à venir)
             </div>
-        ` : `
-            <div style="text-align: center; padding: 20px; background: #d4edda; border-radius: 6px; color: #155724;">
-                <div style="font-size: 2rem;">✅</div>
-                <div style="font-weight: 500;">Assiduité parfaite !</div>
-            </div>
-        `}
+
+        </div>
+
+        <!-- TOGGLE CALCULS (EXTÉRIEUR) -->
+        <button class="btn-secondary" style="margin: 20px 0; padding: 8px 16px; border-radius: 6px;"
+                onclick="this.nextElementSibling.classList.toggle('hidden')">
+            🔍 Voir les calculs
+        </button>
+        <div class="hidden" style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📐 Détails des calculs</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
+                <li><strong>Indice A :</strong> ${indices.A}%</li>
+                <li><strong>Taux présence :</strong> ${taux}%</li>
+                <li><strong>Heures présentes :</strong> ${details.heuresPresentes}h</li>
+                <li><strong>Heures offertes :</strong> ${details.heuresOffertes}h</li>
+                <li><strong>Absences totales :</strong> ${details.absences.length}</li>
+            </ul>
+        </div>
     `;
 }
 
