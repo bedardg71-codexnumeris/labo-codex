@@ -4,9 +4,9 @@ Voici la documentation complète du fichier styles.css :
   # Documentation technique - styles.css
 
   **Date de création** : Octobre 2025
-  **Dernière modification** : 16 octobre 2025
-  **Version** : Beta 0.50
-  **Lignes de code** : 1472 lignes
+  **Dernière modification** : 24 octobre 2025
+  **Version** : Beta 0.55
+  **Lignes de code** : 1977 lignes
   **Convention** : 100% français
 
   ---
@@ -303,6 +303,15 @@ Voici la documentation complète du fichier styles.css :
   .btn-annuler        /* Brun - Annuler */
   .btn-supprimer      /* Rouge - Supprimer */
 
+  État désactivé :
+  .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+  }
+
+  Remarque : Les styles :hover utilisent :hover:not(:disabled) pour éviter les effets
+  visuels sur les boutons désactivés.
+
   Groupe de boutons :
   .btn-groupe {
       display: flex;
@@ -315,6 +324,11 @@ Voici la documentation complète du fichier styles.css :
       <button class="btn btn-confirmer">Sauvegarder</button>
       <button class="btn btn-annuler">Annuler</button>
   </div>
+
+  Exemple avec bouton désactivé :
+  <button class="btn btn-principal" disabled>
+      ← Précédent·e
+  </button>
 
   4.3 Badges de risque (.badge-risque)
 
@@ -930,6 +944,12 @@ Voici la documentation complète du fichier styles.css :
   - ✅ Convention 100% français
 
   Améliorations récentes
+
+  24 octobre 2025 :
+  - Ajout du style `.btn:disabled` pour gérer l'état désactivé des boutons
+  - Modification des `:hover` en `:hover:not(:disabled)` pour tous les types de boutons
+  - Amélioration de l'accessibilité : `opacity: 0.5` et `cursor: not-allowed` pour boutons désactivés
+  - Correction de l'interaction hover sur boutons désactivés (Précédent/Suivant dans profil étudiant)
 
   16 octobre 2025 :
   - Ajout des styles pour encadré de date avec états (erreur, valide, verrouillé)

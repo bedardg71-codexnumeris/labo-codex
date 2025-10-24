@@ -92,21 +92,22 @@ function chargerTableauBordApercu() {
 function calculerIndicesEtudiant(da) {
     // Récupérer les indices A depuis saisie-presences.js
     const indicesA = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
-    
-    // Récupérer les indices C et P (à implémenter plus tard)
-    const indicesCP = JSON.parse(localStorage.getItem('indicesEvaluation') || '{}');
-    
+
+    // Récupérer les indices C et P depuis portfolio.js (Single Source of Truth)
+    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    const indicesCPEtudiant = indicesCP[da]?.actuel || null;
+
     // Structure complète avec sommatif ET alternatif
     const indices = {
         sommatif: {
             assiduite: indicesA.sommatif?.[da] || 0,
-            completion: indicesCP.sommatif?.[da]?.completion || 0,
-            performance: indicesCP.sommatif?.[da]?.performance || 0
+            completion: indicesCPEtudiant ? indicesCPEtudiant.C / 100 : 0,
+            performance: indicesCPEtudiant ? indicesCPEtudiant.P / 100 : 0
         },
         alternatif: {
             assiduite: indicesA.alternatif?.[da] || 0,
-            completion: indicesCP.alternatif?.[da]?.completion || 0,
-            performance: indicesCP.alternatif?.[da]?.performance || 0
+            completion: indicesCPEtudiant ? indicesCPEtudiant.C / 100 : 0,
+            performance: indicesCPEtudiant ? indicesCPEtudiant.P / 100 : 0
         }
     };
     
