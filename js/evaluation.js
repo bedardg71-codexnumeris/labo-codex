@@ -805,7 +805,8 @@ function sauvegarderEvaluation() {
             tache: document.getElementById('afficherTache1').checked,
             adresse: document.getElementById('afficherAdresse1').checked,
             contexte: document.getElementById('afficherContexte1').checked
-        }
+        },
+        verrouillee: true // Verrouiller par défaut toutes les nouvelles évaluations
     };
 
     // Sauvegarder
@@ -922,6 +923,10 @@ function nouvelleEvaluation() {
     // Masquer l'indicateur de modification
     const indicateurModif = document.getElementById('indicateurModeModification');
     if (indicateurModif) indicateurModif.style.display = 'none';
+
+    // Masquer le bouton de verrouillage et réactiver le formulaire
+    afficherOuMasquerBoutonVerrouillage(false);
+    desactiverFormulaireEvaluation(false);
 
     afficherNotificationSucces('Paramètres réinitialisés - Prêt pour une nouvelle série d\'évaluations');
 }
@@ -1889,9 +1894,11 @@ function restaurerSelectionsEvaluation() {
                 }
                 if (selectCartouche && selections.cartouche) {
                     selectCartouche.value = selections.cartouche;
+                    selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
                 }
                 if (selectRemise && selections.remise) {
                     selectRemise.value = selections.remise;
+                    selectRemise.dispatchEvent(new Event('change', { bubbles: true }));
                 }
 
                 // Restaurer les options d'affichage
@@ -1909,11 +1916,106 @@ function restaurerSelectionsEvaluation() {
                 });
 
                 console.log('✅ Sélections restaurées');
+
+                // Après restauration, vérifier s'il existe une évaluation sauvegardée pour cet étudiant
+                setTimeout(() => {
+                    verifierEtChargerEvaluationExistante();
+                }, 200);
             }, 100);
         }, 100);
     } catch (error) {
         console.error('Erreur lors de la restauration des sélections:', error);
     }
+}
+
+/**
+ * Vérifie s'il existe une évaluation sauvegardée pour l'étudiant et la production actuels
+ * et charge les niveaux de maîtrise si elle existe
+ */
+function verifierEtChargerEvaluationExistante() {
+    const etudiantDA = document.getElementById('selectEtudiantEval')?.value;
+    const productionId = document.getElementById('selectProduction1')?.value;
+
+    if (!etudiantDA || !productionId) {
+        console.log('⏭️ Pas d\'étudiant ou de production sélectionné, skip');
+        return;
+    }
+
+    // Chercher une évaluation existante
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluationExistante = evaluations.find(e =>
+        e.etudiantDA === etudiantDA &&
+        e.productionId === productionId &&
+        !e.remplaceeParId // Exclure les évaluations remplacées par un jeton
+    );
+
+    if (!evaluationExistante) {
+        console.log('ℹ️ Aucune évaluation existante pour cet étudiant et cette production');
+
+        // Masquer l'indicateur de verrouillage et réactiver le formulaire
+        afficherOuMasquerBoutonVerrouillage(false);
+        desactiverFormulaireEvaluation(false);
+
+        // Réinitialiser l'ID de modification si présent
+        if (window.evaluationEnCours?.idModification) {
+            delete window.evaluationEnCours.idModification;
+        }
+
+        return;
+    }
+
+    console.log('📂 Évaluation existante trouvée, chargement des niveaux...', evaluationExistante);
+
+    // Charger les niveaux de maîtrise dans les selects de critères
+    // Attendre que les selects soient générés
+    setTimeout(() => {
+        let criteresCharges = 0;
+
+        evaluationExistante.criteres.forEach(critere => {
+            const selectId = `eval_${critere.critereId}`;
+            const selectCritere = document.getElementById(selectId);
+
+            if (selectCritere) {
+                selectCritere.value = critere.niveauSelectionne;
+                selectCritere.dispatchEvent(new Event('change', { bubbles: true }));
+                criteresCharges++;
+            }
+        });
+
+        console.log(`✅ ${criteresCharges}/${evaluationExistante.criteres.length} niveaux de maîtrise chargés`);
+
+        // Charger la rétroaction finale
+        const retroaction = document.getElementById('retroactionFinale1');
+        if (retroaction && evaluationExistante.retroactionFinale) {
+            retroaction.value = evaluationExistante.retroactionFinale;
+        }
+
+        // Mettre à jour evaluationEnCours pour indiquer qu'on modifie cette évaluation
+        if (window.evaluationEnCours) {
+            window.evaluationEnCours.idModification = evaluationExistante.id;
+            window.evaluationEnCours.criteres = {};
+            evaluationExistante.criteres.forEach(c => {
+                window.evaluationEnCours.criteres[c.critereId] = c.niveauSelectionne;
+            });
+
+            // Afficher l'indicateur de verrouillage si l'évaluation existe
+            afficherOuMasquerBoutonVerrouillage(true, evaluationExistante.verrouillee || false);
+
+            // Désactiver le formulaire si l'évaluation est verrouillée
+            if (evaluationExistante.verrouillee) {
+                desactiverFormulaireEvaluation(true);
+            } else {
+                desactiverFormulaireEvaluation(false);
+            }
+        }
+
+        // Recalculer la note
+        setTimeout(() => {
+            if (typeof calculerNoteTotale === 'function') {
+                calculerNoteTotale();
+            }
+        }, 100);
+    }, 300);
 }
 
 /**
@@ -2147,14 +2249,9 @@ function modifierEvaluation(evaluationId) {
         criteres: evaluation.criteres
     });
 
-    // Vérifier si l'évaluation est verrouillée
-    if (evaluation.verrouillee) {
-        afficherNotificationErreur(
-            'Évaluation verrouillée',
-            'Cette évaluation est verrouillée. Déverrouillez-la d\'abord pour la modifier.'
-        );
-        return;
-    }
+    // Note: On permet le chargement même si l'évaluation est verrouillée
+    // Le formulaire sera simplement désactivé en mode lecture seule
+    const estVerrouillee = evaluation.verrouillee || false;
 
     // Naviguer vers la section d'évaluation
     afficherSousSection('evaluations-individuelles');
@@ -2319,7 +2416,14 @@ function modifierEvaluation(evaluationId) {
                     // Lancer le chargement des critères avec vérification active
                     attendreEtChargerCriteres();
 
-                    afficherNotificationSucces('Évaluation chargée - Vous pouvez maintenant la modifier');
+                    // Afficher le bouton de verrouillage et désactiver le formulaire si nécessaire
+                    afficherOuMasquerBoutonVerrouillage(true, estVerrouillee);
+                    if (estVerrouillee) {
+                        desactiverFormulaireEvaluation(true);
+                        afficherNotificationSucces('Évaluation chargée en lecture seule (verrouillée)');
+                    } else {
+                        afficherNotificationSucces('Évaluation chargée - Vous pouvez maintenant la modifier');
+                    }
                 }, 300);
             }, 300);
         }, 300);
@@ -2412,7 +2516,8 @@ function sauvegarderEvaluationModifiee() {
             tache: document.getElementById('afficherTache1').checked,
             adresse: document.getElementById('afficherAdresse1').checked,
             contexte: document.getElementById('afficherContexte1').checked
-        }
+        },
+        verrouillee: true // Verrouiller automatiquement après la sauvegarde
     };
 
     // Sauvegarder
@@ -2429,6 +2534,9 @@ function sauvegarderEvaluationModifiee() {
     // Masquer l'indicateur de modification
     const indicateurModif = document.getElementById('indicateurModeModification');
     if (indicateurModif) indicateurModif.style.display = 'none';
+
+    // Masquer le bouton de verrouillage
+    afficherOuMasquerBoutonVerrouillage(false);
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -2663,6 +2771,20 @@ function chargerFiltresBanqueEvaluations() {
             }
         });
     }
+
+    // Filtre groupes
+    const selectGroupe = document.getElementById('filtreBanqueGroupe');
+    if (selectGroupe) {
+        const groupesAvecEval = [...new Set(evaluations.map(e => e.groupe).filter(g => g))].sort();
+        selectGroupe.innerHTML = '<option value="">Tous les groupes</option>';
+
+        groupesAvecEval.forEach(groupe => {
+            const option = document.createElement('option');
+            option.value = groupe;
+            option.textContent = groupe;
+            selectGroupe.appendChild(option);
+        });
+    }
 }
 
 /**
@@ -2672,12 +2794,14 @@ function filtrerBanqueEvaluations() {
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
 
     // Récupérer les filtres
+    const filtreGroupe = document.getElementById('filtreBanqueGroupe')?.value || '';
     const filtreEtudiant = document.getElementById('filtreBanqueEtudiant')?.value || '';
     const filtreProduction = document.getElementById('filtreBanqueProduction')?.value || '';
     const tri = document.getElementById('triBanqueEvaluation')?.value || 'date-desc';
 
     // Filtrer
     let evaluationsFiltrees = evaluations.filter(eval => {
+        if (filtreGroupe && eval.groupe !== filtreGroupe) return false;
         if (filtreEtudiant && eval.etudiantDA !== filtreEtudiant) return false;
         if (filtreProduction && eval.productionId !== filtreProduction) return false;
         return true;
@@ -2690,8 +2814,13 @@ function filtrerBanqueEvaluations() {
                 return new Date(b.dateEvaluation) - new Date(a.dateEvaluation);
             case 'date-asc':
                 return new Date(a.dateEvaluation) - new Date(b.dateEvaluation);
+            case 'groupe-asc':
+                return (a.groupe || '').localeCompare(b.groupe || '');
             case 'etudiant-asc':
-                return a.etudiantNom.localeCompare(b.etudiantNom);
+                // Trier par nom de famille (dernier mot)
+                const nomA = a.etudiantNom.split(' ').pop();
+                const nomB = b.etudiantNom.split(' ').pop();
+                return nomA.localeCompare(nomB);
             case 'production-asc':
                 return a.productionNom.localeCompare(b.productionNom);
             case 'note-desc':
@@ -2752,9 +2881,15 @@ function afficherListeBanqueEvaluations(evaluations) {
                             </div>
                         ` : ''}
                     </div>
-                    <div style="margin-left: 20px;">
-                        <button class="btn btn-principal" onclick="chargerEvaluationDepuisBanque('${eval.id}')" style="padding: 8px 16px; white-space: nowrap;">
-                            📥 Charger
+                    <div style="margin-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+                        <button class="btn btn-modifier" onclick="chargerEvaluationDepuisBanque('${eval.id}')" style="padding: 6px 10px; font-size: 0.8rem; white-space: nowrap;">
+                            Charger
+                        </button>
+                        <button class="btn btn-principal" onclick="basculerVerrouillageEvaluation('${eval.id}')" style="padding: 6px 10px; font-size: 0.8rem; white-space: nowrap;">
+                            ${eval.verrouillee ? 'Déverrouiller' : 'Verrouiller'}
+                        </button>
+                        <button class="btn btn-supprimer" onclick="supprimerEvaluationBanque('${eval.id}')" style="padding: 6px 10px; font-size: 0.8rem; white-space: nowrap;">
+                            Supprimer
                         </button>
                     </div>
                 </div>
@@ -2775,6 +2910,119 @@ function chargerEvaluationDepuisBanque(evaluationId) {
     modifierEvaluation(evaluationId);
 }
 
+/**
+ * Bascule le verrouillage d'une évaluation depuis la banque
+ * @param {string} evaluationId - ID de l'évaluation
+ */
+function basculerVerrouillageEvaluation(evaluationId) {
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const index = evaluations.findIndex(e => e.id === evaluationId);
+
+    if (index === -1) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    // Basculer le statut
+    evaluations[index].verrouillee = !evaluations[index].verrouillee;
+    const estVerrouillee = evaluations[index].verrouillee;
+
+    // Sauvegarder
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        return;
+    }
+
+    const message = estVerrouillee ? 'Évaluation verrouillée' : 'Évaluation déverrouillée';
+    afficherNotificationSucces(message);
+
+    // Rafraîchir la liste
+    filtrerBanqueEvaluations();
+}
+
+/**
+ * Supprime une évaluation depuis la banque
+ * @param {string} evaluationId - ID de l'évaluation
+ */
+function supprimerEvaluationBanque(evaluationId) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette évaluation ? Cette action est irréversible.')) {
+        return;
+    }
+
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluation = evaluations.find(e => e.id === evaluationId);
+
+    if (!evaluation) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    // Vérifier si l'évaluation est verrouillée
+    if (evaluation.verrouillee) {
+        afficherNotificationErreur('Suppression impossible', 'Déverrouillez l\'évaluation avant de la supprimer');
+        return;
+    }
+
+    // Supprimer
+    evaluations = evaluations.filter(e => e.id !== evaluationId);
+
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Suppression impossible', 'Impossible de supprimer en mode anonymisation');
+        return;
+    }
+
+    afficherNotificationSucces('Évaluation supprimée');
+
+    // Recalculer les indices
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+
+    // Rafraîchir la liste
+    filtrerBanqueEvaluations();
+}
+
+/**
+ * Verrouille ou déverrouille toutes les évaluations
+ * @param {boolean} verrouiller - true pour verrouiller, false pour déverrouiller
+ */
+function verrouillerToutesEvaluations(verrouiller) {
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+
+    if (evaluations.length === 0) {
+        afficherNotificationErreur('Aucune évaluation', 'Aucune évaluation à modifier');
+        return;
+    }
+
+    const message = verrouiller
+        ? 'Êtes-vous sûr de vouloir verrouiller TOUTES les évaluations ?'
+        : 'Êtes-vous sûr de vouloir déverrouiller TOUTES les évaluations ?';
+
+    if (!confirm(message)) {
+        return;
+    }
+
+    // Modifier toutes les évaluations
+    evaluations = evaluations.map(e => ({
+        ...e,
+        verrouillee: verrouiller
+    }));
+
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Modification impossible', 'Impossible de modifier en mode anonymisation');
+        return;
+    }
+
+    const resultat = verrouiller
+        ? `${evaluations.length} évaluations verrouillées`
+        : `${evaluations.length} évaluations déverrouillées`;
+
+    afficherNotificationSucces(resultat);
+
+    // Rafraîchir la liste
+    filtrerBanqueEvaluations();
+}
+
 /* ===============================
    🎫 SYSTÈME DE JETONS DE REPRISE
    =============================== */
@@ -2786,8 +3034,11 @@ function ouvrirModalJetonReprise() {
     const modal = document.getElementById('modalJetonReprise');
     if (!modal) return;
 
+    // Récupérer l'ID de l'évaluation courante si elle existe
+    const evaluationCouranteId = window.evaluationEnCours?.idModification;
+
     // Charger la liste des évaluations pouvant bénéficier d'un jeton
-    chargerListeEvaluationsJeton();
+    chargerListeEvaluationsJeton(evaluationCouranteId);
 
     modal.style.display = 'block';
 }
@@ -2798,31 +3049,157 @@ function ouvrirModalJetonReprise() {
 function fermerModalJetonReprise() {
     const modal = document.getElementById('modalJetonReprise');
     if (modal) modal.style.display = 'none';
+
+    // Réinitialiser les variables de sélection
+    window.evaluationJetonPreselection = null;
+    window.evaluationJetonSelectionnee = null;
 }
 
 /**
  * Charge la liste des évaluations éligibles pour un jeton de reprise
+ * @param {string} evaluationIdAPreselectionner - ID de l'évaluation à pré-sélectionner (optionnel)
  */
-function chargerListeEvaluationsJeton() {
+function chargerListeEvaluationsJeton(evaluationIdAPreselectionner = null) {
+    // Stocker l'ID de l'évaluation à pré-sélectionner
+    window.evaluationJetonPreselection = evaluationIdAPreselectionner;
+
+    // Charger les filtres
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const select = document.getElementById('selectEvaluationJeton');
+    const evaluationsEligibles = evaluations.filter(e => !e.remplaceeParId);
 
-    if (!select) return;
-
-    // Filtrer les évaluations non remplacées et non verrouillées
-    const evaluationsEligibles = evaluations
-        .filter(e => !e.remplaceeParId) // Pas déjà remplacée
-        .sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
-
-    select.innerHTML = '<option value="">-- Sélectionnez une évaluation --</option>';
-
-    evaluationsEligibles.forEach(eval => {
-        const dateEval = new Date(eval.dateEvaluation).toLocaleDateString('fr-CA');
-        const option = document.createElement('option');
-        option.value = eval.id;
-        option.textContent = `${eval.etudiantNom} - ${eval.productionNom} - ${eval.niveauFinal} (${dateEval})`;
-        select.appendChild(option);
+    // Peupler les filtres
+    // Trier les étudiants par nom de famille (dernier mot)
+    const etudiants = [...new Set(evaluationsEligibles.map(e => e.etudiantNom))].sort((a, b) => {
+        const nomA = a.split(' ').pop(); // Dernier mot = nom de famille
+        const nomB = b.split(' ').pop();
+        return nomA.localeCompare(nomB);
     });
+    const productions = [...new Set(evaluationsEligibles.map(e => e.productionNom))].sort();
+
+    const filtreEtudiant = document.getElementById('filtreJetonEtudiant');
+    const filtreProduction = document.getElementById('filtreJetonProduction');
+
+    if (filtreEtudiant) {
+        filtreEtudiant.innerHTML = '<option value="">Tous les étudiants</option>';
+        etudiants.forEach(nom => {
+            const option = document.createElement('option');
+            option.value = nom;
+            option.textContent = nom;
+            filtreEtudiant.appendChild(option);
+        });
+    }
+
+    if (filtreProduction) {
+        filtreProduction.innerHTML = '<option value="">Toutes les productions</option>';
+        productions.forEach(nom => {
+            const option = document.createElement('option');
+            option.value = nom;
+            option.textContent = nom;
+            filtreProduction.appendChild(option);
+        });
+    }
+
+    // Afficher la liste filtrée
+    filtrerListeJetons();
+}
+
+/**
+ * Filtre et trie la liste des évaluations pour les jetons
+ */
+function filtrerListeJetons() {
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const conteneur = document.getElementById('listeJetonsEvaluations');
+
+    if (!conteneur) return;
+
+    // Récupérer les filtres
+    const filtreEtudiant = document.getElementById('filtreJetonEtudiant')?.value || '';
+    const filtreProduction = document.getElementById('filtreJetonProduction')?.value || '';
+    const tri = document.getElementById('triJetonEvaluation')?.value || 'date-desc';
+
+    // Filtrer les évaluations non remplacées
+    let evaluationsFiltrees = evaluations.filter(e => !e.remplaceeParId);
+
+    // Appliquer les filtres
+    if (filtreEtudiant) {
+        evaluationsFiltrees = evaluationsFiltrees.filter(e => e.etudiantNom === filtreEtudiant);
+    }
+    if (filtreProduction) {
+        evaluationsFiltrees = evaluationsFiltrees.filter(e => e.productionNom === filtreProduction);
+    }
+
+    // Appliquer le tri
+    evaluationsFiltrees.sort((a, b) => {
+        switch(tri) {
+            case 'date-desc':
+                return new Date(b.dateEvaluation) - new Date(a.dateEvaluation);
+            case 'date-asc':
+                return new Date(a.dateEvaluation) - new Date(b.dateEvaluation);
+            case 'etudiant-asc':
+                // Trier par nom de famille (dernier mot)
+                const nomA = a.etudiantNom.split(' ').pop();
+                const nomB = b.etudiantNom.split(' ').pop();
+                return nomA.localeCompare(nomB);
+            case 'production-asc':
+                return a.productionNom.localeCompare(b.productionNom);
+            case 'note-desc':
+                return b.noteFinale - a.noteFinale;
+            case 'note-asc':
+                return a.noteFinale - b.noteFinale;
+            default:
+                return 0;
+        }
+    });
+
+    // Générer le HTML
+    if (evaluationsFiltrees.length === 0) {
+        conteneur.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Aucune évaluation trouvée</p>';
+        return;
+    }
+
+    const html = evaluationsFiltrees.map(eval => {
+        const dateEval = new Date(eval.dateEvaluation).toLocaleDateString('fr-CA');
+        const heureEval = eval.heureEvaluation || new Date(eval.dateEvaluation).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+        const estPreselection = eval.id === window.evaluationJetonPreselection;
+        const estSelectionne = eval.id === window.evaluationJetonSelectionnee;
+
+        return `
+            <div class="item-carte" style="margin-bottom: 10px; padding: 15px; border: 2px solid ${estSelectionne ? 'var(--bleu-principal)' : estPreselection ? 'var(--bleu-moyen)' : '#ddd'}; border-radius: 8px; cursor: pointer; transition: all 0.2s; ${estSelectionne ? 'background: var(--bleu-tres-pale);' : ''}"
+                onclick="selectionnerEvaluationJeton('${eval.id}')">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0 0 8px 0; color: var(--gris-fonce);">
+                            ${echapperHtml(eval.etudiantNom)}
+                            ${estPreselection && !estSelectionne ? '<span style="color: var(--bleu-moyen); margin-left: 8px;" title="Évaluation courante">📌</span>' : ''}
+                            ${estSelectionne ? '<span style="color: var(--bleu-principal); margin-left: 8px;" title="Sélectionnée">✓</span>' : ''}
+                        </h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: #666; font-size: 0.9rem;">
+                            <div><strong>Production:</strong> ${echapperHtml(eval.productionNom)}</div>
+                            <div><strong>Grille:</strong> ${echapperHtml(eval.grilleNom)}</div>
+                            <div><strong>Note:</strong> ${eval.niveauFinal} (${Math.round(eval.noteFinale)}%)</div>
+                            <div><strong>Date:</strong> ${dateEval} à ${heureEval}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    conteneur.innerHTML = html;
+
+    // Pré-sélectionner automatiquement si une évaluation était spécifiée
+    if (window.evaluationJetonPreselection && !window.evaluationJetonSelectionnee) {
+        selectionnerEvaluationJeton(window.evaluationJetonPreselection);
+    }
+}
+
+/**
+ * Sélectionne une évaluation pour le jeton de reprise
+ */
+function selectionnerEvaluationJeton(evaluationId) {
+    window.evaluationJetonSelectionnee = evaluationId;
+    // Rafraîchir l'affichage pour mettre à jour la sélection
+    filtrerListeJetons();
 }
 
 /**
@@ -2870,8 +3247,7 @@ function afficherDetailsEvaluationJeton() {
  * Crée un duplicata, marque l'originale comme remplacée, et charge la nouvelle dans le formulaire
  */
 function appliquerJetonReprise() {
-    const select = document.getElementById('selectEvaluationJeton');
-    const evaluationId = select?.value;
+    const evaluationId = window.evaluationJetonSelectionnee;
 
     if (!evaluationId) {
         afficherNotificationErreur('Erreur', 'Veuillez sélectionner une évaluation');
@@ -2895,7 +3271,8 @@ function appliquerJetonReprise() {
         dateEvaluation: new Date().toISOString(),
         repriseDeId: evaluationOriginale.id, // Lien vers l'originale
         jetonRepriseApplique: true,
-        dateApplicationJeton: new Date().toISOString()
+        dateApplicationJeton: new Date().toISOString(),
+        verrouillee: false // Déverrouiller pour permettre la modification immédiate
     };
 
     // Marquer l'originale comme remplacée
@@ -2925,4 +3302,152 @@ function appliquerJetonReprise() {
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
     }
+}
+
+/**
+ * Bascule le verrouillage de l'évaluation courante
+ */
+function basculerVerrouillageEvaluationCourante() {
+    const evaluationId = window.evaluationEnCours?.idModification;
+
+    if (!evaluationId) {
+        afficherNotificationErreur('Erreur', 'Aucune évaluation en cours de modification');
+        return;
+    }
+
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const index = evaluations.findIndex(e => e.id === evaluationId);
+
+    if (index === -1) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    // Basculer le statut de verrouillage
+    evaluations[index].verrouillee = !evaluations[index].verrouillee;
+    const estVerrouillee = evaluations[index].verrouillee;
+
+    // Sauvegarder
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        return;
+    }
+
+    // Mettre à jour le bouton
+    mettreAJourBoutonVerrouillage(estVerrouillee);
+
+    // Notification
+    const message = estVerrouillee
+        ? `Évaluation verrouillée - Modification impossible`
+        : `Évaluation déverrouillée - Modification autorisée`;
+    afficherNotificationSucces(message);
+
+    // Si l'évaluation est verrouillée, désactiver tous les champs du formulaire
+    desactiverFormulaireEvaluation(estVerrouillee);
+}
+
+/**
+ * Met à jour l'icône de verrouillage (style productions)
+ */
+function mettreAJourBoutonVerrouillage(estVerrouillee) {
+    const iconeStatut = document.getElementById('iconeStatutVerrouillageEval');
+    const iconeVerrou = document.getElementById('iconeVerrouEval');
+
+    if (!iconeStatut || !iconeVerrou) return;
+
+    if (estVerrouillee) {
+        // Verrouillée : coche grisée, cadenas actif
+        iconeStatut.textContent = '☑️';
+        iconeStatut.style.color = '#999';
+        iconeVerrou.style.color = '#f44336'; // Rouge
+        iconeStatut.title = 'Évaluation verrouillée - Cliquez pour déverrouiller';
+        iconeVerrou.title = 'Évaluation verrouillée - Cliquez pour déverrouiller';
+    } else {
+        // Déverrouillée : coche bleue, cadenas grisé
+        iconeStatut.textContent = '✅';
+        iconeStatut.style.color = '';
+        iconeVerrou.style.color = '#999';
+        iconeStatut.title = 'Évaluation active - Cliquez pour verrouiller';
+        iconeVerrou.title = 'Évaluation active - Cliquez pour verrouiller';
+    }
+}
+
+/**
+ * Affiche ou masque l'indicateur de verrouillage selon le contexte
+ */
+function afficherOuMasquerBoutonVerrouillage(afficher, estVerrouillee = false) {
+    const indicateur = document.getElementById('indicateurVerrouillageEval');
+    if (!indicateur) return;
+
+    if (afficher) {
+        indicateur.style.display = 'flex';
+        mettreAJourBoutonVerrouillage(estVerrouillee);
+    } else {
+        indicateur.style.display = 'none';
+    }
+}
+
+/**
+ * Désactive ou active les champs du formulaire d'évaluation
+ */
+function desactiverFormulaireEvaluation(desactiver) {
+    console.log(`${desactiver ? '🔒' : '🔓'} ${desactiver ? 'Désactivation' : 'Activation'} du formulaire d'évaluation...`);
+
+    // Désactiver les selects de paramètres principaux
+    const selects = [
+        'selectGroupeEval',
+        'selectEtudiantEval',
+        'selectProduction1',
+        'selectGrille1',
+        'selectCartoucheEval',
+        'selectEchelle1',
+        'remiseProduction1'
+    ];
+
+    selects.forEach(id => {
+        const elem = document.getElementById(id);
+        if (elem) {
+            elem.disabled = desactiver;
+            console.log(`  ${id}: ${elem.disabled ? 'DÉSACTIVÉ' : 'ACTIVÉ'}`);
+        }
+    });
+
+    // Désactiver tous les selects de critères dans listeCriteresGrille1
+    const selectsCriteres = document.querySelectorAll('#listeCriteresGrille1 select');
+    console.log(`  Trouvé ${selectsCriteres.length} selects de critères`);
+    selectsCriteres.forEach(select => {
+        select.disabled = desactiver;
+    });
+
+    // Désactiver la zone de rétroaction finale
+    const retroaction = document.getElementById('retroactionFinale1');
+    if (retroaction) {
+        retroaction.disabled = desactiver;
+        console.log(`  retroactionFinale1: ${retroaction.disabled ? 'DÉSACTIVÉ' : 'ACTIVÉ'}`);
+    }
+
+    // Désactiver les checkboxes d'options d'affichage
+    const checkboxes = [
+        'afficherDescription1',
+        'afficherObjectif1',
+        'afficherTache1',
+        'afficherAdresse1',
+        'afficherContexte1'
+    ];
+
+    checkboxes.forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) checkbox.disabled = desactiver;
+    });
+
+    // Désactiver le bouton de sauvegarde
+    const boutonsSauvegarde = document.querySelectorAll('#evaluations-individuelles button');
+    boutonsSauvegarde.forEach(btn => {
+        if (btn.textContent.includes('Sauvegarder')) {
+            btn.disabled = desactiver;
+            console.log(`  Bouton sauvegarde: ${btn.disabled ? 'DÉSACTIVÉ' : 'ACTIVÉ'}`);
+        }
+    });
+
+    console.log(`✅ Formulaire ${desactiver ? 'verrouillé' : 'déverrouillé'}`);
 }
