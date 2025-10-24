@@ -28,9 +28,9 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 │  └─ calendrierComplet          │  └─ lit calendrierComplet
 │                                │
 ├─ saisie-presences.js           ├─ tableau-bord-apercu.js
-│  └─ indicesAssiduiteDetailles  │  └─ lit les indices A
+│  └─ indicesAssiduite           │  └─ lit les indices A
 │                                │
-└─ [à créer] portfolio.js        └─ tableau-bord-apercu.js
+└─ portfolio.js                  └─ tableau-bord-apercu.js
    └─ indicesCP                     └─ lit les indices C et P
 ```
 
@@ -54,6 +54,7 @@ projet/
 │   ├── calendrier-vue.js                 # ✅ LECTEUR - Affichage calendrier
 │   ├── saisie-presences.js               # ✅ SOURCE - Indices assiduité (A)
 │   ├── tableau-bord-apercu.js            # ✅ LECTEUR - Affichage tableau de bord
+│   ├── profil-etudiant.js                # ✅ LECTEUR - Profil individuel complet
 │   │
 │   ├── etudiants.js                      # Gestion étudiants
 │   ├── productions.js                    # À créer - Productions/évaluations
@@ -87,11 +88,11 @@ projet/
 
 **Complétion (C)** : Remise des travaux
 - Mesure la mobilisation
-- Source : `portfolio.js` (à créer) → `localStorage.indicesCP`
+- Source : `portfolio.js` → `localStorage.indicesCP`
 
 **Performance (P)** : Qualité des productions
 - Mesure la maîtrise
-- Source : `portfolio.js` (à créer) → `localStorage.indicesCP`
+- Source : `portfolio.js` → `localStorage.indicesCP`
 
 ### Critères d'évaluation SRPNF
 
@@ -207,20 +208,48 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - Lecture depuis `indicesAssiduiteDetailles`
 - Rechargement automatique
 
+**MODULE profil-etudiant.js** (Session 24 octobre - refonte complète)
+- Layout 2 colonnes : sidebar de navigation + zone de contenu principale
+- Navigation Précédent/Suivant entre étudiants (boutons centrés)
+- 3 sections structurées :
+  1. Suivi de l'apprentissage (indices R, RàI, échelle de risque visuelle)
+  2. Développement des habiletés et compétences (performance SRPNF)
+  3. Mobilisation (assiduité, complétion, artefacts)
+- Système d'interprétation harmonisé (seuils A/C/M : 70%, 80%, 85%)
+- Échelle de risque avec gradient 6 niveaux et indicateur de position
+- Toggles uniformes pour détails techniques et formules
+- Badges épurés sans icônes redondantes
+- Recommandations RàI selon niveau de risque
+- Diagnostic SRPNF avec forces et défis identifiés
+
+**MODULE styles.css** (Session 24 octobre - améliorations accessibilité)
+- État `.btn:disabled` avec opacité et curseur appropriés
+- Pseudo-classe `:hover:not(:disabled)` sur tous les boutons
+- Amélioration accessibilité navigation (boutons désactivés visuellement distincts)
+
+**MODULE portfolio.js** (Session 24 octobre - implémentation Single Source of Truth)
+- Calcul et stockage des indices C (Complétion) et P (Performance)
+- Structure `localStorage.indicesCP` avec historique longitudinal
+- API : `calculerEtStockerIndicesCP()`, `obtenirIndicesCP(da)`, `obtenirHistoriqueIndicesCP(da)`
+- Déclencheurs automatiques lors des évaluations et sélections d'artefacts
+- Sélection automatique des N meilleurs artefacts (PAN)
+- Adaptation des lecteurs (profil-etudiant.js, tableau-bord-apercu.js)
+
+**CORRECTIONS IMPORTANTES** (Session 24 octobre)
+- ✅ Harmonisation des seuils d'interprétation A/C/M (incohérence "75% = bon vs fragile" corrigée)
+- ✅ Réduction redondance affichage indice C (3 occurrences → 1)
+- ✅ Suppression bouton "Retour à la liste" dupliqué dans index 71
+- ✅ Mise à jour Documentation profil-etudiant.md (1218 → 3696 lignes)
+- ✅ Mise à jour Documentation Style CSS.md (Beta 0.50 → 0.55)
+
 ### 🔴 Prochaines priorités
 
-1. **MODULE portfolio.js** - À créer
-   - Calcul indices C (Complétion) et P (Performance)
-   - Formules selon Guide de monitorage
-   - Stockage dans `localStorage.indicesCP`
-   - Gestion système de jetons
-
-2. **MODULE horaire.js** - À refondre
+1. **MODULE horaire.js** - À refondre
    - Générer `seancesCompletes` comme source unique
    - Gestion des reprises (ex: "Horaire du lundi" le jeudi)
    - API : `obtenirSeancesCompletes()`
 
-3. **MODULE productions.js** - À créer
+2. **MODULE productions.js** - À créer
    - Gestion des artefacts/productions
    - Évaluations selon critères SRPNF
    - Lien avec grilles.js et echelles.js

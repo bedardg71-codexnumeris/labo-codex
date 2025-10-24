@@ -117,6 +117,11 @@ function chargerPortfolioEleveDetail(da) {
                 };
                 localStorage.setItem('portfoliosEleves', JSON.stringify(selectionsPortfolios));
 
+                // 🔄 Recalculer les indices C et P après sélection automatique
+                if (typeof calculerEtStockerIndicesCP === 'function') {
+                    calculerEtStockerIndicesCP();
+                }
+
                 // Mettre à jour le flag retenu dans les artefacts
                 artefacts.forEach(art => {
                     art.retenu = selectionEleve.artefactsRetenus.includes(art.id);
@@ -276,6 +281,11 @@ function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
 
         localStorage.setItem('portfoliosEleves', JSON.stringify(selectionsPortfolios));
 
+        // 🔄 Recalculer les indices C et P après modification de sélection
+        if (typeof calculerEtStockerIndicesCP === 'function') {
+            calculerEtStockerIndicesCP();
+        }
+
         // Recharger TOUT le profil pour mettre à jour les indices A-C-P-M-E-R
         if (typeof afficherProfilComplet === 'function') {
             afficherProfilComplet(da);
@@ -325,4 +335,191 @@ function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
  *     }
  *   }
  * }
+ *
+ * indicesCP (généré par ce module - Single Source of Truth):
+ * {
+ *   "DA123": {
+ *     historique: [
+ *       {
+ *         date: "2025-10-15T...",
+ *         C: 75,
+ *         P: 82,
+ *         details: {
+ *           nbArtefactsRemis: 6,
+ *           nbArtefactsDonnes: 8,
+ *           artefactsRetenus: ["PROD1", "PROD2", "PROD3"],
+ *           notesMeilleursArtefacts: [85, 82, 80]
+ *         }
+ *       }
+ *     ],
+ *     actuel: {
+ *       date: "2025-10-20T...",
+ *       C: 87.5,
+ *       P: 85,
+ *       details: { ... }
+ *     }
+ *   },
+ *   dateCalcul: "2025-10-24T..."
+ * }
  */
+
+/* ===============================
+   🔄 CALCUL ET STOCKAGE DES INDICES C et P
+
+   SOURCE UNIQUE (Single Source of Truth):
+   - Calcule l'indice C (Complétion) pour tous les étudiants
+   - Calcule l'indice P (Performance) pour tous les étudiants
+   - Stocke dans localStorage.indicesCP avec historique
+   - À appeler après chaque évaluation ou modification de sélection
+   =============================== */
+
+/**
+ * Calcule et stocke les indices C (Complétion) et P (Performance) pour tous les étudiants
+ * Maintient un historique pour analyse longitudinale
+ *
+ * INDICE C : (artefacts remis) / (artefacts donnés) × 100
+ * INDICE P : Moyenne des N meilleurs artefacts (PAN)
+ *
+ * @returns {Object} - Structure complète des indices
+ */
+function calculerEtStockerIndicesCP() {
+    console.log('📊 Calcul des indices C et P...');
+
+    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const selectionsPortfolios = JSON.parse(localStorage.getItem('portfoliosEleves') || '{}');
+
+    // Récupérer l'historique existant ou initialiser
+    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+
+    // Portfolio et artefacts
+    const portfolio = productions.find(p => p.type === 'portfolio');
+    const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
+    const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
+
+    // Identifier les artefacts réellement donnés (avec au moins une évaluation)
+    const artefactsDonnes = new Set();
+    evaluations.forEach(evaluation => {
+        if (artefactsPortfolioIds.has(evaluation.productionId)) {
+            artefactsDonnes.add(evaluation.productionId);
+        }
+    });
+
+    const nombreArtefactsDonnes = artefactsDonnes.size;
+
+    // Filtrer les étudiants actifs
+    const etudiantsActifs = etudiants.filter(e =>
+        e.statut !== 'décrochage' && e.statut !== 'abandon'
+    );
+
+    const dateCalcul = new Date().toISOString();
+
+    // Calculer pour chaque étudiant
+    etudiantsActifs.forEach(etudiant => {
+        const da = etudiant.da;
+
+        // === CALCUL INDICE C (Complétion) ===
+        const evaluationsEleve = evaluations.filter(e =>
+            e.etudiantDA === da &&
+            artefactsDonnes.has(e.productionId)
+        );
+        const nbArtefactsRemis = evaluationsEleve.length;
+        const C = nombreArtefactsDonnes === 0 ? 0 : Math.round((nbArtefactsRemis / nombreArtefactsDonnes) * 100);
+
+        // === CALCUL INDICE P (Performance) ===
+        let P = 0;
+        let notesMeilleursArtefacts = [];
+        let artefactsRetenus = [];
+
+        if (portfolio && selectionsPortfolios[da]?.[portfolio.id]) {
+            // Utiliser les artefacts sélectionnés manuellement
+            artefactsRetenus = selectionsPortfolios[da][portfolio.id].artefactsRetenus || [];
+            const evaluationsRetenues = evaluationsEleve.filter(e =>
+                artefactsRetenus.includes(e.productionId) && e.noteFinale !== null
+            );
+
+            if (evaluationsRetenues.length > 0) {
+                notesMeilleursArtefacts = evaluationsRetenues.map(e => e.noteFinale);
+                const somme = notesMeilleursArtefacts.reduce((sum, note) => sum + note, 0);
+                P = Math.round(somme / evaluationsRetenues.length);
+            }
+        } else {
+            // Sélection automatique des N meilleurs (PAN)
+            const nombreARetenir = portfolio?.regles?.nombreARetenir || 3;
+            const evaluationsAvecNote = evaluationsEleve
+                .filter(e => e.noteFinale !== null)
+                .sort((a, b) => b.noteFinale - a.noteFinale)
+                .slice(0, nombreARetenir);
+
+            if (evaluationsAvecNote.length > 0) {
+                artefactsRetenus = evaluationsAvecNote.map(e => e.productionId);
+                notesMeilleursArtefacts = evaluationsAvecNote.map(e => e.noteFinale);
+                const somme = notesMeilleursArtefacts.reduce((sum, note) => sum + note, 0);
+                P = Math.round(somme / evaluationsAvecNote.length);
+            }
+        }
+
+        // Créer l'entrée actuelle
+        const entreeActuelle = {
+            date: dateCalcul,
+            C: C,
+            P: P,
+            details: {
+                nbArtefactsRemis: nbArtefactsRemis,
+                nbArtefactsDonnes: nombreArtefactsDonnes,
+                artefactsRetenus: artefactsRetenus,
+                notesMeilleursArtefacts: notesMeilleursArtefacts
+            }
+        };
+
+        // Initialiser ou mettre à jour l'historique
+        if (!indicesCP[da]) {
+            indicesCP[da] = {
+                historique: [],
+                actuel: null
+            };
+        }
+
+        // Ajouter à l'historique (seulement si différent du dernier)
+        const dernierHistorique = indicesCP[da].historique[indicesCP[da].historique.length - 1];
+        if (!dernierHistorique || dernierHistorique.C !== C || dernierHistorique.P !== P) {
+            indicesCP[da].historique.push(entreeActuelle);
+        }
+
+        // Mettre à jour l'actuel
+        indicesCP[da].actuel = entreeActuelle;
+    });
+
+    // Ajouter la date de calcul globale
+    indicesCP.dateCalcul = dateCalcul;
+
+    // Sauvegarder
+    localStorage.setItem('indicesCP', JSON.stringify(indicesCP));
+
+    console.log('✅ Indices C et P sauvegardés');
+    console.log('   Étudiants:', etudiantsActifs.length);
+    console.log('   Artefacts donnés:', nombreArtefactsDonnes);
+
+    return indicesCP;
+}
+
+/**
+ * Récupère les indices C et P actuels pour un étudiant
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {Object} - {C: number, P: number, details: Object} ou null
+ */
+function obtenirIndicesCP(da) {
+    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    return indicesCP[da]?.actuel || null;
+}
+
+/**
+ * Récupère l'historique complet des indices C et P pour un étudiant
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {Array} - Historique des indices ou []
+ */
+function obtenirHistoriqueIndicesCP(da) {
+    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    return indicesCP[da]?.historique || [];
+}

@@ -89,6 +89,9 @@ function initialiserModuleEvaluation() {
         chargerListeEvaluationsRefonte();
     }
 
+    // 🔄 Initialiser le mode évaluation en série
+    initialiserModeEvaluationSerie();
+
     console.log('   ✅ Module Évaluation initialisé');
 }
 
@@ -233,14 +236,26 @@ function chargerGrillesDansSelect() {
  */
 function chargerEchellePerformance() {
     const niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
+    const select = document.getElementById('selectEchelle1');
+
+    if (!select) return;
 
     // SÉCURITÉ: Vérifier que l'échelle existe
     if (!niveaux || niveaux.length === 0) {
         console.error('❌ Aucune échelle de performance configurée');
+        select.innerHTML = '<option value="">⚠️ Aucune échelle configurée - Aller dans Réglages › Échelle</option>';
         document.getElementById('noteProduction1').textContent = '--';
         document.getElementById('niveauProduction1').textContent = '--';
         return;
     }
+
+    // Remplir le select avec l'échelle configurée
+    select.innerHTML = `
+        <option value="echelle-idme">Échelle IDME (${niveaux.length} niveaux)</option>
+    `;
+
+    // Sélectionner automatiquement l'échelle
+    select.value = 'echelle-idme';
 
     // Utiliser les valeurs de calcul configurées par l'utilisateur
     const valeurs = {};
@@ -248,6 +263,8 @@ function chargerEchellePerformance() {
         // Si valeurCalcul existe, l'utiliser, sinon calculer le milieu de la plage
         valeurs[niveau.code] = niveau.valeurCalcul || (niveau.min + niveau.max) / 2;
     });
+
+    console.log('✅ Échelle de performance chargée:', niveaux.length, 'niveaux');
 }
 
 /* ===============================
@@ -719,6 +736,12 @@ function genererRetroaction(num) {
  * }
  */
 function sauvegarderEvaluation() {
+    // 🔄 Détecter si on est en mode modification d'une évaluation existante
+    if (window.evaluationEnCours?.idModification) {
+        sauvegarderEvaluationModifiee();
+        return;
+    }
+
     const etudiantDA = document.getElementById('selectEtudiantEval').value;
     const productionId = document.getElementById('selectProduction1').value;
     const grilleId = document.getElementById('selectGrille1').value;
@@ -804,9 +827,9 @@ function sauvegarderEvaluation() {
 
     afficherNotificationSucces(`Évaluation sauvegardée : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
 
-    // 🆕 AJOUTER ICI : Recalculer l'indice C après sauvegarde
-    if (typeof calculerEtSauvegarderIndiceCompletion === 'function') {
-        calculerEtSauvegarderIndiceCompletion();
+    // 🔄 Recalculer les indices C et P après sauvegarde
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
     }
 }
 
@@ -859,9 +882,10 @@ function cocherOptionsParDefaut() {
 }
 
 /**
- * Prépare une nouvelle évaluation (réinitialise le formulaire)
+ * Prépare une nouvelle évaluation (réinitialise le formulaire ET les sélections mémorisées)
  */
 function nouvelleEvaluation() {
+    // Réinitialiser tous les selects
     document.getElementById('selectGroupeEval').value = '';
     document.getElementById('selectEtudiantEval').value = '';
     document.getElementById('selectProduction1').value = '';
@@ -879,14 +903,32 @@ function nouvelleEvaluation() {
     evaluationEnCours = null;
     filtrerEtudiantsParGroupe();
 
-    afficherNotificationSucces('Formulaire réinitialisé - Prêt pour une nouvelle évaluation');
+    // 🔄 Effacer les sélections mémorisées du mode évaluation en série
+    localStorage.removeItem('dernieresSelectionsEvaluation');
+    console.log('✅ Sélections mémorisées effacées');
+
+    // 🔄 Réinitialiser le mode modification
+    if (window.evaluationEnCours?.idModification) {
+        delete window.evaluationEnCours.idModification;
+        console.log('✅ Mode modification réinitialisé');
+    }
+
+    // Masquer l'indicateur de progression
+    const indicateur = document.getElementById('indicateurProgressionEval');
+    if (indicateur) indicateur.style.display = 'none';
+
+    // Masquer l'indicateur de modification
+    const indicateurModif = document.getElementById('indicateurModeModification');
+    if (indicateurModif) indicateurModif.style.display = 'none';
+
+    afficherNotificationSucces('Paramètres réinitialisés - Prêt pour une nouvelle série d\'évaluations');
 }
 
 /**
  * Navigation vers la liste des évaluations
  */
 function naviguerVersListeEvaluations() {
-    afficherSousSection('evaluations-liste-evaluations');
+    afficherSousSection('evaluations-liste');
 }
 
 /**
@@ -1383,20 +1425,32 @@ function genererDetailsEtudiant(etudiant) {
                                         ${item.evaluation.niveauFinal || '—'}
                                     </span>
                                 </td>
+                                <td>${Math.round(item.evaluation.noteFinale) || '—'}%</td>
                                 <td>
                                     <span class="badge-statut badge-succes">
-                                        Évalué
+                                        ${item.evaluation.verrouillee ? '🔒 Verrouillé' : 'Évalué'}
                                     </span>
                                 </td>
-<td>${eval.niveauFinal || '—'}</td>
-<td>${eval.noteFinale ? Math.round(eval.noteFinale) + '%' : '—'}</td>
+                                <td>${item.evaluation.dateEvaluation ? new Date(item.evaluation.dateEvaluation).toLocaleDateString('fr-CA') : '—'}</td>
                                 <td>
-                                    <button class="btn btn-modifier" onclick="modifierEvaluation('${item.evaluation.id}')" style="padding:5px 10px;">
-                                        Modifier
-                                    </button>
-                                    <button class="btn btn-supprimer" onclick="supprimerEvaluation('${item.evaluation.id}')" style="padding:5px 10px;">
-                                        Supprimer
-                                    </button>
+                                    ${item.evaluation.verrouillee ? `
+                                        <button class="btn btn-modifier" onclick="deverrouillerEvaluation('${item.evaluation.id}')" style="padding:5px 10px; background: var(--orange-accent);">
+                                            🔓 Déverrouiller
+                                        </button>
+                                        <button class="btn" disabled style="padding:5px 10px; opacity: 0.5; cursor: not-allowed;" title="Déverrouillez d'abord pour supprimer">
+                                            Supprimer
+                                        </button>
+                                    ` : `
+                                        <button class="btn btn-modifier" onclick="modifierEvaluation('${item.evaluation.id}')" style="padding:5px 10px;">
+                                            📝 Modifier
+                                        </button>
+                                        <button class="btn" onclick="verrouillerEvaluation('${item.evaluation.id}')" style="padding:5px 10px; background: #ffc107; color: #000;">
+                                            🔒 Verrouiller
+                                        </button>
+                                        <button class="btn btn-supprimer" onclick="supprimerEvaluation('${item.evaluation.id}')" style="padding:5px 10px;">
+                                            Supprimer
+                                        </button>
+                                    `}
                                 </td>
                             </tr>
                         `;
@@ -1747,3 +1801,683 @@ function initialiserListeEvaluations() {
 
 // Appeler lors du changement vers cette sous-section
 // Ou ajouter dans le module existant
+
+/* ===============================
+   🔄 MODE ÉVALUATION EN SÉRIE
+   Mémorisation et navigation fluide pour évaluer plusieurs étudiants
+   =============================== */
+
+/**
+ * Mémorise les sélections actuelles pour réutilisation
+ * Appelée automatiquement lors des changements de select
+ */
+function memoriserSelectionsEvaluation() {
+    const selections = {
+        production: document.getElementById('selectProduction1')?.value || '',
+        grille: document.getElementById('selectGrille1')?.value || '',
+        echelle: document.getElementById('selectEchelle1')?.value || '',
+        cartouche: document.getElementById('selectCartoucheEval')?.value || '',
+        remise: document.getElementById('remiseProduction1')?.value || 'remis',
+        // Options d'affichage
+        afficherDescription: document.getElementById('afficherDescription1')?.checked ?? true,
+        afficherObjectif: document.getElementById('afficherObjectif1')?.checked ?? true,
+        afficherTache: document.getElementById('afficherTache1')?.checked ?? true,
+        afficherAdresse: document.getElementById('afficherAdresse1')?.checked ?? true,
+        afficherContexte: document.getElementById('afficherContexte1')?.checked ?? true
+    };
+
+    localStorage.setItem('dernieresSelectionsEvaluation', JSON.stringify(selections));
+    console.log('✅ Sélections mémorisées');
+}
+
+/**
+ * Restaure les dernières sélections utilisées
+ * Appelée lors du passage à un nouvel étudiant
+ */
+function restaurerSelectionsEvaluation() {
+    const selectionsJson = localStorage.getItem('dernieresSelectionsEvaluation');
+    if (!selectionsJson) return;
+
+    try {
+        const selections = JSON.parse(selectionsJson);
+
+        // Restaurer les selects
+        const selectProduction = document.getElementById('selectProduction1');
+        const selectGrille = document.getElementById('selectGrille1');
+        const selectEchelle = document.getElementById('selectEchelle1');
+        const selectCartouche = document.getElementById('selectCartoucheEval');
+        const selectRemise = document.getElementById('remiseProduction1');
+
+        if (selectProduction && selections.production) {
+            selectProduction.value = selections.production;
+            // Déclencher le changement pour charger les dépendances
+            const event = new Event('change', { bubbles: true });
+            selectProduction.dispatchEvent(event);
+        }
+
+        // Attendre un court instant pour que les selects dépendants se remplissent
+        setTimeout(() => {
+            if (selectGrille && selections.grille) {
+                selectGrille.value = selections.grille;
+                selectGrille.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            setTimeout(() => {
+                if (selectEchelle && selections.echelle) {
+                    selectEchelle.value = selections.echelle;
+                }
+                if (selectCartouche && selections.cartouche) {
+                    selectCartouche.value = selections.cartouche;
+                }
+                if (selectRemise && selections.remise) {
+                    selectRemise.value = selections.remise;
+                }
+
+                // Restaurer les options d'affichage
+                const checkboxes = {
+                    'afficherDescription1': selections.afficherDescription,
+                    'afficherObjectif1': selections.afficherObjectif,
+                    'afficherTache1': selections.afficherTache,
+                    'afficherAdresse1': selections.afficherAdresse,
+                    'afficherContexte1': selections.afficherContexte
+                };
+
+                Object.entries(checkboxes).forEach(([id, value]) => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) checkbox.checked = value ?? true;
+                });
+
+                console.log('✅ Sélections restaurées');
+            }, 100);
+        }, 100);
+    } catch (error) {
+        console.error('Erreur lors de la restauration des sélections:', error);
+    }
+}
+
+/**
+ * Navigue vers l'étudiant précédent dans la liste
+ */
+function naviguerEtudiantPrecedent() {
+    const selectEtudiant = document.getElementById('selectEtudiantEval');
+    if (!selectEtudiant || !selectEtudiant.value) return;
+
+    const options = Array.from(selectEtudiant.options).filter(opt => opt.value !== '');
+    const indexActuel = options.findIndex(opt => opt.value === selectEtudiant.value);
+
+    if (indexActuel > 0) {
+        selectEtudiant.value = options[indexActuel - 1].value;
+        selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // Restaurer les sélections
+        setTimeout(() => restaurerSelectionsEvaluation(), 300);
+
+        mettreAJourIndicateurProgression();
+    }
+}
+
+/**
+ * Navigue vers l'étudiant suivant dans la liste
+ */
+function naviguerEtudiantSuivant() {
+    const selectEtudiant = document.getElementById('selectEtudiantEval');
+    if (!selectEtudiant || !selectEtudiant.value) return;
+
+    const options = Array.from(selectEtudiant.options).filter(opt => opt.value !== '');
+    const indexActuel = options.findIndex(opt => opt.value === selectEtudiant.value);
+
+    if (indexActuel >= 0 && indexActuel < options.length - 1) {
+        selectEtudiant.value = options[indexActuel + 1].value;
+        selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // Restaurer les sélections
+        setTimeout(() => restaurerSelectionsEvaluation(), 300);
+
+        mettreAJourIndicateurProgression();
+    }
+}
+
+/**
+ * Met à jour l'indicateur de progression (X/Y évaluations réalisées)
+ */
+function mettreAJourIndicateurProgression() {
+    const selectProduction = document.getElementById('selectProduction1');
+    const indicateur = document.getElementById('indicateurProgressionEval');
+
+    if (!selectProduction || !indicateur) return;
+
+    const productionId = selectProduction.value;
+
+    // Si aucune production sélectionnée, masquer l'indicateur
+    if (!productionId) {
+        indicateur.style.display = 'none';
+        return;
+    }
+
+    // Compter le nombre total d'étudiants actifs
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiantsActifs = etudiants.filter(e =>
+        e.statut !== 'décrochage' && e.statut !== 'abandon'
+    );
+    const totalEtudiants = etudiantsActifs.length;
+
+    // Compter les évaluations déjà réalisées pour cette production
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluationsProduction = evaluations.filter(e => e.productionId === productionId);
+
+    // Compter les étudiants uniques évalués (au cas où il y aurait plusieurs évaluations par étudiant)
+    const etudiantsEvalues = new Set(evaluationsProduction.map(e => e.etudiantDA));
+    const nbEvaluations = etudiantsEvalues.size;
+
+    // Afficher le compteur
+    indicateur.textContent = `${nbEvaluations}/${totalEtudiants} évaluations`;
+    indicateur.style.display = 'inline-block';
+
+    // Changer la couleur selon la progression
+    if (nbEvaluations === totalEtudiants) {
+        indicateur.style.color = '#28a745'; // Vert - Terminé
+    } else if (nbEvaluations > totalEtudiants / 2) {
+        indicateur.style.color = '#ffc107'; // Jaune - En cours
+    } else {
+        indicateur.style.color = 'var(--bleu-principal)'; // Bleu - Début
+    }
+}
+
+/**
+ * Attache les événements de mémorisation aux selects
+ * Appelée lors de l'initialisation du module
+ */
+function attacherEvenementsMemorisation() {
+    const selectsAMemoriser = [
+        'selectProduction1',
+        'selectGrille1',
+        'selectEchelle1',
+        'selectCartoucheEval',
+        'remiseProduction1'
+    ];
+
+    selectsAMemoriser.forEach(id => {
+        const select = document.getElementById(id);
+        if (select) {
+            select.addEventListener('change', memoriserSelectionsEvaluation);
+        }
+    });
+
+    // Mémoriser aussi les checkboxes
+    const checkboxesAMemoriser = [
+        'afficherDescription1',
+        'afficherObjectif1',
+        'afficherTache1',
+        'afficherAdresse1',
+        'afficherContexte1'
+    ];
+
+    checkboxesAMemoriser.forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.addEventListener('change', memoriserSelectionsEvaluation);
+        }
+    });
+
+    console.log('✅ Événements de mémorisation attachés');
+}
+
+/**
+ * Insère les boutons de navigation et l'indicateur dans l'interface
+ */
+function insererNavigationEvaluationSerie() {
+    const selectEtudiant = document.getElementById('selectEtudiantEval');
+    if (!selectEtudiant) return;
+
+    // Vérifier si déjà inséré
+    if (document.getElementById('navigationEvaluationSerie')) return;
+
+    // Créer le conteneur de navigation
+    const nav = document.createElement('div');
+    nav.id = 'navigationEvaluationSerie';
+    nav.style.cssText = 'display: flex; gap: 10px; align-items: center; margin: 15px 0; justify-content: center;';
+
+    nav.innerHTML = `
+        <button class="btn btn-principal" onclick="naviguerEtudiantPrecedent()"
+                title="Évaluer l'étudiant·e précédent·e"
+                style="padding: 8px 12px; min-width: auto;">
+            ←
+        </button>
+
+        <span id="indicateurProgressionEval"
+              style="font-weight: 600; color: var(--bleu-principal); padding: 0 15px; display: none;">
+            Étudiant·e 1/25
+        </span>
+
+        <button class="btn btn-principal" onclick="naviguerEtudiantSuivant()"
+                title="Évaluer l'étudiant·e suivant·e"
+                style="padding: 8px 12px; min-width: auto;">
+            →
+        </button>
+    `;
+
+    // Insérer après le select étudiant
+    const parentContainer = selectEtudiant.closest('.form-group') || selectEtudiant.parentElement;
+    if (parentContainer && parentContainer.nextSibling) {
+        parentContainer.parentNode.insertBefore(nav, parentContainer.nextSibling);
+    } else {
+        selectEtudiant.parentElement?.appendChild(nav);
+    }
+
+    console.log('✅ Navigation évaluation en série insérée');
+}
+
+/**
+ * Initialise le mode évaluation en série
+ * À appeler depuis initialiserModuleEvaluation()
+ */
+function initialiserModeEvaluationSerie() {
+    // Insérer l'interface de navigation
+    insererNavigationEvaluationSerie();
+
+    // Attacher les événements de mémorisation
+    attacherEvenementsMemorisation();
+
+    // Restaurer les dernières sélections si elles existent
+    const selectEtudiant = document.getElementById('selectEtudiantEval');
+    if (selectEtudiant && selectEtudiant.value) {
+        restaurerSelectionsEvaluation();
+    }
+
+    // Mettre à jour l'indicateur lors des changements
+    selectEtudiant?.addEventListener('change', mettreAJourIndicateurProgression);
+
+    // Mettre à jour aussi lors du changement de production
+    const selectProduction = document.getElementById('selectProduction1');
+    selectProduction?.addEventListener('change', mettreAJourIndicateurProgression);
+
+    mettreAJourIndicateurProgression();
+
+    console.log('✅ Mode évaluation en série initialisé');
+}
+
+/* ===============================
+   🔄 REPRISE ET VERROUILLAGE D'ÉVALUATIONS
+   =============================== */
+
+/**
+ * Charge une évaluation existante dans le formulaire pour modification
+ * Utilisé notamment lors de l'application de jetons de reprise
+ * @param {string} evaluationId - ID de l'évaluation à charger
+ */
+function modifierEvaluation(evaluationId) {
+    console.log('📝 Chargement de l\'évaluation:', evaluationId);
+
+    // Récupérer l'évaluation
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluation = evaluations.find(e => e.id === evaluationId);
+
+    if (!evaluation) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    // Vérifier si l'évaluation est verrouillée
+    if (evaluation.verrouillee) {
+        afficherNotificationErreur(
+            'Évaluation verrouillée',
+            'Cette évaluation est verrouillée. Déverrouillez-la d\'abord pour la modifier.'
+        );
+        return;
+    }
+
+    // Naviguer vers la section d'évaluation
+    afficherSousSection('evaluations-saisie');
+
+    // Attendre que la section soit chargée
+    setTimeout(() => {
+        // Charger l'étudiant
+        const selectEtudiant = document.getElementById('selectEtudiantEval');
+        if (selectEtudiant) {
+            selectEtudiant.value = evaluation.etudiantDA;
+            selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        // Charger les sélections avec délais pour respecter les dépendances
+        setTimeout(() => {
+            // Production
+            const selectProduction = document.getElementById('selectProduction1');
+            if (selectProduction) {
+                selectProduction.value = evaluation.productionId;
+                selectProduction.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            setTimeout(() => {
+                // Grille
+                const selectGrille = document.getElementById('selectGrille1');
+                if (selectGrille) {
+                    selectGrille.value = evaluation.grilleId;
+                    selectGrille.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+
+                setTimeout(() => {
+                    // Échelle
+                    const selectEchelle = document.getElementById('selectEchelle1');
+                    if (selectEchelle) {
+                        selectEchelle.value = evaluation.echelleId;
+                    }
+
+                    // Cartouche
+                    const selectCartouche = document.getElementById('selectCartoucheEval');
+                    if (selectCartouche) {
+                        selectCartouche.value = evaluation.cartoucheId;
+                        selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+
+                    // Statut de remise
+                    const selectRemise = document.getElementById('remiseProduction1');
+                    if (selectRemise) {
+                        selectRemise.value = evaluation.statutRemise;
+                    }
+
+                    setTimeout(() => {
+                        // Charger les niveaux des critères
+                        evaluation.criteres.forEach(critere => {
+                            const selectCritere = document.getElementById(`niveau_${critere.critereId}`);
+                            if (selectCritere) {
+                                selectCritere.value = critere.niveauSelectionne;
+                                selectCritere.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        });
+
+                        // Charger les options d'affichage
+                        if (evaluation.optionsAffichage) {
+                            document.getElementById('afficherDescription1').checked = evaluation.optionsAffichage.description;
+                            document.getElementById('afficherObjectif1').checked = evaluation.optionsAffichage.objectif;
+                            document.getElementById('afficherTache1').checked = evaluation.optionsAffichage.tache;
+                            document.getElementById('afficherAdresse1').checked = evaluation.optionsAffichage.adresse;
+                            document.getElementById('afficherContexte1').checked = evaluation.optionsAffichage.contexte;
+                        }
+
+                        // Charger la rétroaction finale
+                        const retroaction = document.getElementById('retroactionFinale1');
+                        if (retroaction) {
+                            retroaction.value = evaluation.retroactionFinale || '';
+                        }
+
+                        // Stocker l'ID de l'évaluation en cours de modification
+                        if (!window.evaluationEnCours) {
+                            window.evaluationEnCours = {};
+                        }
+                        window.evaluationEnCours.idModification = evaluationId;
+
+                        // Afficher l'indicateur de mode modification
+                        afficherIndicateurModeModification(evaluation);
+
+                        afficherNotificationSucces('Évaluation chargée - Vous pouvez maintenant la modifier');
+                    }, 500);
+                }, 300);
+            }, 300);
+        }, 300);
+    }, 200);
+}
+
+/**
+ * Sauvegarde une évaluation modifiée (écrase l'ancienne)
+ * Appelée à la place de sauvegarderEvaluation() si on modifie une évaluation existante
+ */
+function sauvegarderEvaluationModifiee() {
+    const evaluationId = window.evaluationEnCours?.idModification;
+
+    if (!evaluationId) {
+        // Pas en mode modification, utiliser la sauvegarde normale
+        sauvegarderEvaluation();
+        return;
+    }
+
+    // Récupérer les évaluations
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const indexEval = evaluations.findIndex(e => e.id === evaluationId);
+
+    if (indexEval === -1) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    // Vérifier que l'évaluation n'est pas verrouillée
+    if (evaluations[indexEval].verrouillee) {
+        afficherNotificationErreur('Évaluation verrouillée', 'Impossible de modifier une évaluation verrouillée');
+        return;
+    }
+
+    // Créer la nouvelle version de l'évaluation (reprendre le code de sauvegarderEvaluation)
+    const etudiantDA = document.getElementById('selectEtudiantEval').value;
+    const productionId = document.getElementById('selectProduction1').value;
+    const grilleId = document.getElementById('selectGrille1').value;
+
+    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    const etudiant = etudiants.find(e => e.da === etudiantDA);
+
+    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const production = productions.find(p => p.id === productionId);
+
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grille = grilles.find(g => g.id === grilleId);
+
+    // Collecter les évaluations des critères
+    const criteres = [];
+    if (grille && grille.criteres) {
+        grille.criteres.forEach(critere => {
+            const niveau = evaluationEnCours.criteres[critere.id];
+            if (niveau) {
+                const commDiv = document.getElementById(`comm_${critere.id}`);
+                criteres.push({
+                    critereId: critere.id,
+                    critereNom: critere.nom,
+                    niveauSelectionne: niveau,
+                    retroaction: commDiv ? commDiv.textContent : '',
+                    ponderation: critere.ponderation || 0
+                });
+            }
+        });
+    }
+
+    // Mettre à jour l'évaluation existante
+    evaluations[indexEval] = {
+        ...evaluations[indexEval], // Garder l'ID et la date originale
+        etudiantDA: etudiantDA,
+        etudiantNom: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : '',
+        groupe: etudiant ? etudiant.groupe : '',
+        productionId: productionId,
+        productionNom: production ? (production.titre || production.nom) : '',
+        grilleId: grilleId,
+        grilleNom: grille ? grille.nom : '',
+        echelleId: document.getElementById('selectEchelle1').value,
+        cartoucheId: document.getElementById('selectCartoucheEval').value,
+        dateModification: new Date().toISOString(),
+        statutRemise: document.getElementById('remiseProduction1').value,
+        criteres: criteres,
+        noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
+        niveauFinal: document.getElementById('niveauProduction1').textContent,
+        retroactionFinale: document.getElementById('retroactionFinale1').value,
+        optionsAffichage: {
+            description: document.getElementById('afficherDescription1').checked,
+            objectif: document.getElementById('afficherObjectif1').checked,
+            tache: document.getElementById('afficherTache1').checked,
+            adresse: document.getElementById('afficherAdresse1').checked,
+            contexte: document.getElementById('afficherContexte1').checked
+        }
+    };
+
+    // Sauvegarder
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        return;
+    }
+
+    afficherNotificationSucces(`Évaluation modifiée : ${evaluations[indexEval].etudiantNom} - ${evaluations[indexEval].productionNom}`);
+
+    // Réinitialiser le mode modification
+    delete window.evaluationEnCours.idModification;
+
+    // Masquer l'indicateur de modification
+    const indicateurModif = document.getElementById('indicateurModeModification');
+    if (indicateurModif) indicateurModif.style.display = 'none';
+
+    // Recalculer les indices
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+}
+
+/**
+ * Verrouille une évaluation pour empêcher sa modification
+ * @param {string} evaluationId - ID de l'évaluation à verrouiller
+ */
+function verrouillerEvaluation(evaluationId) {
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const index = evaluations.findIndex(e => e.id === evaluationId);
+
+    if (index === -1) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    evaluations[index].verrouillee = true;
+    evaluations[index].dateVerrouillage = new Date().toISOString();
+
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Modification impossible', 'Impossible de verrouiller en mode anonymisation');
+        return;
+    }
+
+    afficherNotificationSucces('Évaluation verrouillée');
+
+    // Recharger la liste
+    if (typeof chargerListeEvaluationsRefonte === 'function') {
+        chargerListeEvaluationsRefonte();
+    }
+}
+
+/**
+ * Déverrouille une évaluation pour permettre sa modification
+ * @param {string} evaluationId - ID de l'évaluation à déverrouiller
+ */
+function deverrouillerEvaluation(evaluationId) {
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const index = evaluations.findIndex(e => e.id === evaluationId);
+
+    if (index === -1) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    evaluations[index].verrouillee = false;
+    delete evaluations[index].dateVerrouillage;
+
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Modification impossible', 'Impossible de déverrouiller en mode anonymisation');
+        return;
+    }
+
+    afficherNotificationSucces('Évaluation déverrouillée');
+
+    // Recharger la liste
+    if (typeof chargerListeEvaluationsRefonte === 'function') {
+        chargerListeEvaluationsRefonte();
+    }
+}
+
+/**
+ * Affiche un indicateur visuel indiquant qu'on est en mode modification d'une évaluation
+ * @param {Object} evaluation - L'évaluation en cours de modification
+ */
+function afficherIndicateurModeModification(evaluation) {
+    // Chercher si l'indicateur existe déjà
+    let indicateur = document.getElementById('indicateurModeModification');
+
+    if (!indicateur) {
+        // Créer l'indicateur
+        indicateur = document.createElement('div');
+        indicateur.id = 'indicateurModeModification';
+        indicateur.style.cssText = `
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 5px solid #e65100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        `;
+
+        // Insérer l'indicateur au début du formulaire d'évaluation
+        const conteneurForm = document.querySelector('#evaluations-saisie .contenu');
+        if (conteneurForm) {
+            conteneurForm.insertBefore(indicateur, conteneurForm.firstChild);
+        }
+    }
+
+    // Mettre à jour le contenu
+    const dateEval = evaluation.dateEvaluation ? new Date(evaluation.dateEvaluation).toLocaleString('fr-CA') : 'Inconnue';
+    indicateur.innerHTML = `
+        <span style="font-size: 1.5rem;">📝</span>
+        <div style="flex: 1;">
+            <strong>MODE MODIFICATION</strong><br>
+            <span style="font-size: 0.9rem; opacity: 0.95;">
+                Vous modifiez l'évaluation de <strong>${evaluation.etudiantNom}</strong>
+                pour <strong>${evaluation.productionNom}</strong><br>
+                Évaluation initiale : ${dateEval}
+            </span>
+        </div>
+    `;
+
+    indicateur.style.display = 'flex';
+}
+
+/**
+ * Supprime une évaluation après confirmation
+ * Les évaluations verrouillées ne peuvent pas être supprimées
+ * @param {string} evaluationId - ID de l'évaluation à supprimer
+ */
+function supprimerEvaluation(evaluationId) {
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluation = evaluations.find(e => e.id === evaluationId);
+
+    if (!evaluation) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    // Vérifier si l'évaluation est verrouillée
+    if (evaluation.verrouillee) {
+        afficherNotificationErreur(
+            'Suppression impossible',
+            'Cette évaluation est verrouillée. Déverrouillez-la d\'abord pour la supprimer.'
+        );
+        return;
+    }
+
+    // Demander confirmation
+    if (!confirm(`Voulez-vous vraiment supprimer l'évaluation de ${evaluation.etudiantNom} pour ${evaluation.productionNom} ?\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    // Supprimer l'évaluation
+    evaluations = evaluations.filter(e => e.id !== evaluationId);
+
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Suppression impossible', 'Impossible de supprimer en mode anonymisation');
+        return;
+    }
+
+    afficherNotificationSucces('Évaluation supprimée');
+
+    // Recalculer les indices
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+
+    // Recharger la liste
+    if (typeof chargerListeEvaluationsRefonte === 'function') {
+        chargerListeEvaluationsRefonte();
+    }
+}

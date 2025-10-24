@@ -81,11 +81,27 @@ function calculerTousLesIndices(da) {
     // INDICE A : Assiduité
     const A = calculerAssiduitéGlobale(da) / 100; // Convertir en proportion 0-1
 
-    // INDICE C : Complétion
-    const C = calculerTauxCompletion(da) / 100; // Convertir en proportion 0-1
+    // INDICES C et P : Lire depuis localStorage.indicesCP (Single Source of Truth)
+    let C = 0;
+    let P = 0;
 
-    // INDICE P : Performance (3 meilleurs artefacts - PAN)
-    const P = calculerPerformancePAN(da);
+    if (typeof obtenirIndicesCP === 'function') {
+        const indicesCP = obtenirIndicesCP(da);
+        if (indicesCP) {
+            C = indicesCP.C / 100; // Convertir en proportion 0-1
+            P = indicesCP.P / 100;
+        } else {
+            // Fallback : calculer à la volée si pas encore généré
+            console.warn('⚠️ indicesCP non trouvé pour', da, '- Calcul à la volée');
+            C = calculerTauxCompletion(da) / 100;
+            P = calculerPerformancePAN(da);
+        }
+    } else {
+        // Fallback : fonctions anciennes si module portfolio.js pas chargé
+        console.warn('⚠️ obtenirIndicesCP non disponible - Calcul à la volée');
+        C = calculerTauxCompletion(da) / 100;
+        P = calculerPerformancePAN(da);
+    }
 
     // INDICES COMPOSITES
     const M = (A + C) / 2; // Mobilisation

@@ -4,9 +4,10 @@ Voici la documentation complète du module portfolio.js :
   # Documentation technique - MODULE portfolio.js
 
   **Date de création** : Octobre 2025
-  **Dernière modification** : 23 octobre 2025
-  **Lignes de code** : 280 lignes
+  **Dernière modification** : 24 octobre 2025
+  **Lignes de code** : 515 lignes
   **Responsable pédagogique** : Grégoire Bédard
+  **Statut** : ✅ FONCTIONNEL - Single Source of Truth implémenté
 
   ---
 
@@ -20,10 +21,10 @@ Voici la documentation complète du module portfolio.js :
   - Calculer la note finale (moyenne des N artefacts retenus)
   - Suivre la progression vers le minimum de complétion requis
 
-  **⚠️ NOTE IMPORTANTE** : Selon CLAUDE.md, ce module est destiné à calculer
-  l'**indice P (Performance)** pour le système de monitorage A-C-P dans une
-  version future. Actuellement, le module se concentre sur la gestion de
-  l'affichage et de la sélection des artefacts.
+  **✅ MISE À JOUR 24 OCTOBRE 2025** : Ce module implémente maintenant le principe
+  **Single Source of Truth** pour les indices C et P. Il calcule et stocke ces indices
+  dans `localStorage.indicesCP` avec un historique longitudinal complet, permettant
+  l'analyse de l'évolution des étudiants dans le temps.
 
   **Contexte pédagogique** : Le portfolio est un type de production qui applique
   la règle "garde les N meilleurs artefacts parmi M". L'étudiant peut avoir
@@ -38,18 +39,22 @@ Voici la documentation complète du module portfolio.js :
 
   ### Module SOURCE pour :
   - **portfoliosEleves** : Sélections d'artefacts retenus par étudiant
+  - **indicesCP** : ✅ Indices C (Complétion) et P (Performance) avec historique
 
   ### Module LECTEUR pour :
   - **listeGrilles** : Liste des productions (portfolio + artefacts-portfolio)
   - **evaluationsSauvegardees** : Évaluations des artefacts par étudiant
+  - **groupeEtudiants** : Liste des étudiants actifs
 
   ### Module AFFICHAGE pour :
   - Interface de sélection des artefacts retenus
   - Barre de progression de complétion
   - Calcul et affichage des notes provisoires/finales
 
-  **Responsabilité unique** : Gérer l'affichage du portfolio étudiant, la
-  sélection des artefacts retenus et le calcul des notes provisoires/finales.
+  **Responsabilités** :
+  1. Gérer l'affichage du portfolio étudiant et la sélection d'artefacts
+  2. **SOURCE UNIQUE** pour les indices C et P (Single Source of Truth)
+  3. Maintenir l'historique longitudinal des indices pour analyse temporelle
 
   ---
 
@@ -89,6 +94,60 @@ Voici la documentation complète du module portfolio.js :
   - Le nombre d'artefacts retenus ne peut dépasser portfolio.regles.nombreARetenir
   - Seuls les artefacts remis (avec évaluation) peuvent être retenus
   - La sélection est libre tant que le maximum n'est pas atteint
+
+  #### `indicesCP` ✅ NOUVEAU (24 octobre 2025)
+  **Format** : Object avec historique par étudiant
+  **Rôle** : Single Source of Truth pour les indices C et P
+
+  ```javascript
+  {
+    "1234567": {
+      "historique": [
+        {
+          "date": "2025-10-15T10:30:00.000Z",
+          "C": 75,                              // % complétion
+          "P": 82,                              // % performance
+          "details": {
+            "nbArtefactsRemis": 6,
+            "nbArtefactsDonnes": 8,
+            "artefactsRetenus": ["PROD1", "PROD2", "PROD3"],
+            "notesMeilleursArtefacts": [85, 82, 80]
+          }
+        },
+        {
+          "date": "2025-10-20T14:00:00.000Z",
+          "C": 87,
+          "P": 85,
+          "details": { ... }
+        }
+      ],
+      "actuel": {
+        "date": "2025-10-20T14:00:00.000Z",
+        "C": 87,
+        "P": 85,
+        "details": { ... }
+      }
+    },
+    "dateCalcul": "2025-10-24T16:45:00.000Z"
+  }
+  ```
+
+  Champs :
+  - DA étudiant (clé) : Code permanent
+  - historique : Array des calculs successifs (pour analyse longitudinale)
+  - actuel : Dernière valeur calculée (accès rapide)
+  - C : Indice de complétion en % (0-100)
+  - P : Indice de performance en % (0-100)
+  - details : Données brutes du calcul
+  - dateCalcul : Date du dernier recalcul global
+
+  Formules :
+  - **C (Complétion)** : (artefacts remis) / (artefacts donnés) × 100
+  - **P (Performance)** : Moyenne des N meilleurs artefacts (PAN)
+
+  Mise à jour automatique :
+  - Après chaque sauvegarde d'évaluation (evaluation.js)
+  - Après chaque modification de sélection d'artefacts (portfolio.js)
 
   3.2 LocalStorage - Clés lues par ce module
 

@@ -4,10 +4,10 @@ Voici la documentation complète du module profil-etudiant.js :
   # Documentation technique - MODULE profil-etudiant.js
 
   **Date de création** : Octobre 2025
-  **Dernière modification** : 23 octobre 2025
-  **Lignes de code** : 1218 lignes
+  **Dernière modification** : 24 octobre 2025
+  **Lignes de code** : 3696 lignes
   **Responsable pédagogique** : Grégoire Bédard
-  **Statut** : ⚠️ EN CONSTRUCTION
+  **Statut** : ✅ FONCTIONNEL - Design refondé
 
   ---
 
@@ -31,6 +31,48 @@ Voici la documentation complète du module profil-etudiant.js :
   M = (A + C) / 2     // Mobilisation
   E = A × C × P       // Engagement
   R = 1 - E           // Risque d'échec
+
+  ---
+
+  ## 1.1 Refonte majeure (24 octobre 2025)
+
+  Le module a été entièrement refondu avec un nouveau design et de nouvelles fonctionnalités :
+
+  ### Design et UX
+  - **Layout 2 colonnes** : Sidebar de navigation + zone de contenu principale
+  - **Navigation entre étudiants** : Boutons Précédent/Suivant centrés en haut
+  - **Navigation par sections** : Sidebar cliquable avec état actif visuel
+  - **3 sections principales** :
+    1. Suivi de l'apprentissage (indices R, RàI, échelle de risque)
+    2. Développement des habiletés et compétences (performance, SRPNF)
+    3. Mobilisation (assiduité, complétion, artefacts)
+
+  ### Système d'interprétation harmonisé
+  - **Seuils unifiés** pour A, C et M :
+    - ≥ 85% : Exemplaire/Excellent (bleu 🔵)
+    - 80-84% : Bon/Bonne (vert 🟢)
+    - 70-79% : Acceptable (jaune 🟡)
+    - 60-69% : Insuffisant/Insuffisante (orange 🟠)
+    - < 60% : Critique (rouge 🔴)
+  - **Cohérence Mobilisation** : Le terme "fragile" décrit la mobilisation (70-79%), pas les indices individuels
+
+  ### Visualisation du risque
+  - **Échelle visuelle** : Gradient de 6 niveaux (Minimal → Critique)
+  - **Indicateur de position** : Flèche noire montrant la position de l'étudiant
+  - **Label descriptif** : Niveau de risque affiché au-dessus de l'indicateur
+
+  ### Fonctions d'interprétation
+  - `interpreterAssiduite(valeur)` : Interprète l'indice A avec seuils harmonisés
+  - `interpreterCompletion(valeur)` : Interprète l'indice C avec seuils harmonisés
+  - `interpreterMobilisation(A, C, statutDecrochage)` : 7 niveaux de diagnostic
+  - `interpreterEngagement(E)` : 5 niveaux selon échelle IDME
+  - `interpreterRisque(R)` : 6 niveaux de risque d'échec
+  - `interpreterPerformance(P)` : 4 niveaux selon échelle SOLO
+
+  ### Détails techniques et formules
+  - **Toggles uniformes** : Boutons "🔽 Voir les calculs et formules" dans chaque section
+  - **Formules détaillées** : Calculs étape par étape pour chaque indice
+  - **Recommandations RàI** : Suggestions d'intervention selon le niveau de risque
 
   ---
 
@@ -844,30 +886,44 @@ Voici la documentation complète du module profil-etudiant.js :
   ---
   10. Historique et évolution
 
-  Version actuelle (octobre 2025) ⚠️ EN CONSTRUCTION
+  Version actuelle (24 octobre 2025) ✅ FONCTIONNEL
 
   Fonctionnalités implémentées :
-  - ✅ Affichage du profil avec en-tête
-  - ✅ Dashboard des 5 indices (A-P-M-E-R)
-  - ✅ Calcul des indices composites (M, E, R)
-  - ✅ Détails d'assiduité cliquables
-  - ✅ Détails du portfolio cliquables
-  - ✅ Navigation contextuelle vers Présences
-  - ✅ Grisage des cartes non actives
-  - ✅ Scroll automatique vers panneau de détails
+  - ✅ Layout 2 colonnes avec sidebar de navigation
+  - ✅ Navigation Précédent/Suivant entre étudiants
+  - ✅ 3 sections principales structurées (Apprentissage, Développement, Mobilisation)
+  - ✅ Système d'interprétation harmonisé (seuils A, C, M cohérents)
+  - ✅ Échelle de risque visuelle avec indicateur positionné
+  - ✅ Badges uniformisés sans icônes redondantes
+  - ✅ Toggles pour détails techniques et formules
+  - ✅ Diagnostic SRPNF avec forces et défis
+  - ✅ Recommandations RàI selon niveau de risque
+  - ✅ Gestion des jetons (placeholder)
+  - ✅ Liste des artefacts remis et non remis
 
-  État du module : ⚠️ Fonctionnel mais avec duplications de code
+  État du module : ✅ Fonctionnel et refondé
 
-  Évolution récente (selon commentaires du code)
+  Évolution récente - Refonte complète (24 octobre 2025)
 
-  Version 5 (lignes 258-260) :
+  ### Changements majeurs apportés
+  1. **Architecture UI** : Passage d'un dashboard de cartes à un layout 2 colonnes
+  2. **Navigation** : Ajout boutons Précédent/Suivant et sidebar de sections
+  3. **Harmonisation** : Seuils A/C/M unifiés (70%, 80%, 85%)
+  4. **Visualisation** : Échelle de risque avec gradient et indicateur de position
+  5. **Épuration** : Suppression icônes redondantes, titres dupliqués
+  6. **Formules** : Détails techniques accessibles via toggles uniformes
+
+  ### Corrections importantes
+  - Incohérence interprétation complétion (75% = "bon" vs "fragile") → CORRIGÉ
+  - Redondance affichage indice C (3 fois) → RÉDUIT à 1
+  - Seuils différents entre fonctions d'interprétation → HARMONISÉS
+  - Bouton "Retour à la liste" dupliqué → CORRIGÉ
+
+  Version 5 (avant refonte) :
   - Suppression de la carte C (Complétion)
   - Carte P renommée "Portfolio" (affiche Performance)
   - Grille passée de 6 à 5 colonnes
   - Détails du portfolio incluent maintenant C et P
-
-  Version 4 (ligne 245) :
-  - Fusion des cartes Performance et Portfolio
 
   Améliorations techniques urgentes ⚠️
 
@@ -1057,5 +1113,5 @@ Voici la documentation complète du module profil-etudiant.js :
   ---
   FIN DE LA DOCUMENTATION - MODULE profil-etudiant.js
 
-  Dernière mise à jour : 23 octobre 2025
-  Statut : ⚠️ EN CONSTRUCTION - Duplication de code à nettoyer
+  Dernière mise à jour : 24 octobre 2025
+  Statut : ✅ FONCTIONNEL - Refonte complète du design et harmonisation des seuils
