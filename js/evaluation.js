@@ -1719,14 +1719,8 @@ function mettreAJourStatistiquesEvaluations() {
    🔧 FONCTIONS UTILITAIRES
    =============================== */
 
-/**
- * Obtient le nom d'une cartouche par son ID
- */
-function obtenirNomCartouche(cartoucheId) {
-    if (!cartoucheId) return '—';
-    // Simplification - normalement on devrait chercher dans localStorage
-    return cartoucheId.replace(/-/g, ' ');
-}
+// ✅ Fonction obtenirNomCartouche() supprimée (doublon incorrect)
+// La version correcte est définie ligne 1107
 
 /**
  * Obtient la classe CSS pour une note
@@ -2201,6 +2195,175 @@ function initialiserModeEvaluationSerie() {
  * Utilisé notamment lors de l'application de jetons de reprise
  * @param {string} evaluationId - ID de l'évaluation à charger
  */
+
+/**
+ * ✨ FALLBACK: Extrait les niveaux des critères depuis la rétroaction
+ * Utilisé quand evaluation.criteres est vide mais que la rétroaction contient les niveaux
+ * Format attendu : "STRUCTURE (I) : commentaire..."
+ */
+function extraireNiveauxDepuisRetroaction(retroaction, grille) {
+    if (!retroaction || !grille) return {};
+
+    const niveauxExtrait = {};
+
+    // Regex pour capturer : NOM_CRITERE (NIVEAU)
+    // Ex: "STRUCTURE (I)" ou "PLAUSIBILITÉ (M)"
+    const regex = /([A-ZÀÂÇÉÈÊËÎÏÔÛÙÜŸŒÆ\s]+)\s*\(([IDMBE])\)/gi;
+    let match;
+
+    while ((match = regex.exec(retroaction)) !== null) {
+        const nomCritere = match[1].trim();
+        const niveau = match[2].toUpperCase();
+
+        // Trouver le critère correspondant dans la grille
+        const critere = grille.criteres.find(c =>
+            c.nom.toUpperCase() === nomCritere.toUpperCase()
+        );
+
+        if (critere) {
+            niveauxExtrait[critere.id] = niveau;
+            console.log(`  ✅ Extrait : ${nomCritere} → ${niveau}`);
+        } else {
+            console.warn(`  ⚠️ Critère non trouvé dans la grille : ${nomCritere}`);
+        }
+    }
+
+    return niveauxExtrait;
+}
+
+/**
+ * Affiche le modal d'explication pour la réparation des évaluations
+ */
+function afficherModalReparationEvaluations() {
+    document.getElementById('modalReparationEvaluations').style.display = 'block';
+}
+
+/**
+ * Ferme le modal de réparation
+ */
+function fermerModalReparationEvaluations() {
+    document.getElementById('modalReparationEvaluations').style.display = 'none';
+}
+
+/**
+ * Lance la réparation après confirmation via le modal
+ */
+function lancerReparationEvaluations() {
+    // Fermer le modal
+    fermerModalReparationEvaluations();
+
+    // Lancer la réparation
+    reparer_evaluations_criteres_manquants();
+}
+
+/**
+ * 🔧 FONCTION DE RÉPARATION : Migre les évaluations avec critères manquants
+ * Parcourt toutes les évaluations et extrait les critères depuis la rétroaction si absents
+ * ⚠️ À utiliser manuellement en cas de pépin (ne s'active PAS automatiquement)
+ */
+function reparer_evaluations_criteres_manquants() {
+    console.log('🔧 Début de la réparation des évaluations...');
+
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+
+    let nbEvaluationsReparees = 0;
+    let nbEvaluationsIgnorees = 0;
+    let nbEchoues = 0;
+
+    const rapport = [];
+
+    evaluations.forEach(evaluation => {
+        // Vérifier si les critères sont absents ou vides
+        const criteresMissing = !evaluation.criteres ||
+                               !Array.isArray(evaluation.criteres) ||
+                               evaluation.criteres.length === 0;
+
+        if (criteresMissing) {
+            console.log(`\n📋 Évaluation à réparer : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
+
+            // Récupérer la grille
+            const grille = grilles.find(g => g.id === evaluation.grilleId);
+
+            if (!grille) {
+                console.warn(`  ❌ Grille introuvable (ID: ${evaluation.grilleId})`);
+                nbEchoues++;
+                rapport.push(`❌ ${evaluation.etudiantNom} - ${evaluation.productionNom} : Grille introuvable`);
+                return;
+            }
+
+            if (!evaluation.retroactionFinale) {
+                console.warn(`  ❌ Aucune rétroaction disponible`);
+                nbEchoues++;
+                rapport.push(`❌ ${evaluation.etudiantNom} - ${evaluation.productionNom} : Pas de rétroaction`);
+                return;
+            }
+
+            // Extraire les niveaux
+            const niveauxExtrait = extraireNiveauxDepuisRetroaction(evaluation.retroactionFinale, grille);
+            const nbExtrait = Object.keys(niveauxExtrait).length;
+
+            if (nbExtrait > 0) {
+                // Créer le tableau criteres
+                evaluation.criteres = Object.keys(niveauxExtrait).map(critereId => {
+                    const critere = grille.criteres.find(c => c.id === critereId);
+                    return {
+                        critereId: critereId,
+                        critereNom: critere ? critere.nom : critereId,
+                        niveauSelectionne: niveauxExtrait[critereId],
+                        retroaction: '', // Pas de rétroaction individuelle disponible
+                        ponderation: critere ? critere.ponderation : 0
+                    };
+                });
+
+                console.log(`  ✅ ${nbExtrait} critère(s) restauré(s)`);
+                nbEvaluationsReparees++;
+                rapport.push(`✅ ${evaluation.etudiantNom} - ${evaluation.productionNom} : ${nbExtrait} critère(s) restauré(s)`);
+            } else {
+                console.warn(`  ⚠️ Aucun critère extrait de la rétroaction`);
+                nbEchoues++;
+                rapport.push(`⚠️ ${evaluation.etudiantNom} - ${evaluation.productionNom} : Extraction échouée`);
+            }
+        } else {
+            nbEvaluationsIgnorees++;
+        }
+    });
+
+    // Sauvegarder les modifications
+    if (nbEvaluationsReparees > 0) {
+        localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+        console.log(`\n💾 ${nbEvaluationsReparees} évaluation(s) sauvegardée(s)`);
+    }
+
+    // Rapport final
+    console.log('\n📊 RAPPORT DE RÉPARATION :');
+    console.log(`  ✅ Réparées : ${nbEvaluationsReparees}`);
+    console.log(`  ⏭️ Ignorées (déjà OK) : ${nbEvaluationsIgnorees}`);
+    console.log(`  ❌ Échecs : ${nbEchoues}`);
+    console.log('\n📋 Détails :');
+    rapport.forEach(ligne => console.log(`  ${ligne}`));
+
+    // Notification utilisateur
+    if (nbEvaluationsReparees > 0) {
+        alert(`✅ Réparation terminée !\n\n` +
+              `• ${nbEvaluationsReparees} évaluation(s) réparée(s)\n` +
+              `• ${nbEvaluationsIgnorees} évaluation(s) déjà OK\n` +
+              `• ${nbEchoues} échec(s)\n\n` +
+              `Consultez la console (F12) pour les détails.`);
+    } else {
+        alert(`ℹ️ Aucune évaluation à réparer.\n\n` +
+              `• ${nbEvaluationsIgnorees} évaluation(s) ont déjà leurs critères.\n` +
+              `• ${nbEchoues} échec(s)`);
+    }
+
+    return {
+        reparees: nbEvaluationsReparees,
+        ignorees: nbEvaluationsIgnorees,
+        echouees: nbEchoues,
+        rapport: rapport
+    };
+}
+
 function modifierEvaluation(evaluationId) {
     console.log('📝 Chargement de l\'évaluation:', evaluationId);
 
@@ -2271,9 +2434,40 @@ function modifierEvaluation(evaluationId) {
                     };
 
                     // Pré-remplir les critères depuis l'évaluation chargée
-                    evaluation.criteres.forEach(critere => {
-                        window.evaluationEnCours.criteres[critere.critereId] = critere.niveauSelectionne;
-                    });
+                    if (evaluation.criteres && Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0) {
+                        evaluation.criteres.forEach(critere => {
+                            window.evaluationEnCours.criteres[critere.critereId] = critere.niveauSelectionne;
+                        });
+                        console.log(`✅ ${evaluation.criteres.length} critères chargés depuis evaluation.criteres`);
+                    } else {
+                        // ✨ FALLBACK : Extraire les niveaux depuis la rétroaction
+                        console.warn('⚠️ Aucun critère dans evaluation.criteres, tentative d\'extraction depuis la rétroaction...');
+
+                        const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+                        const grille = grilles.find(g => g.id === evaluation.grilleId);
+
+                        if (grille && evaluation.retroactionFinale) {
+                            const niveauxExtrait = extraireNiveauxDepuisRetroaction(evaluation.retroactionFinale, grille);
+                            const nbExtrait = Object.keys(niveauxExtrait).length;
+
+                            if (nbExtrait > 0) {
+                                window.evaluationEnCours.criteres = niveauxExtrait;
+                                console.log(`✅ ${nbExtrait} niveau(x) extrait(s) depuis la rétroaction`);
+
+                                // Créer un tableau evaluation.criteres temporaire pour le chargement
+                                evaluation.criteres = Object.keys(niveauxExtrait).map(critereId => {
+                                    const critere = grille.criteres.find(c => c.id === critereId);
+                                    return {
+                                        critereId: critereId,
+                                        critereNom: critere ? critere.nom : critereId,
+                                        niveauSelectionne: niveauxExtrait[critereId]
+                                    };
+                                });
+                            } else {
+                                console.warn('❌ Aucun niveau trouvé dans la rétroaction');
+                            }
+                        }
+                    }
 
                     console.log('✅ evaluationEnCours initialisé:', window.evaluationEnCours);
 
@@ -2281,6 +2475,8 @@ function modifierEvaluation(evaluationId) {
                     const selectEchelle = document.getElementById('selectEchelle1');
                     if (selectEchelle) {
                         selectEchelle.value = evaluation.echelleId;
+                        console.log('🔧 Déclenchement de l\'événement change sur selectEchelle...');
+                        selectEchelle.dispatchEvent(new Event('change', { bubbles: true }));
                     }
 
                     // Cartouche - maintenant evaluationEnCours existe, cartoucheSelectionnee() va fonctionner
@@ -2303,6 +2499,14 @@ function modifierEvaluation(evaluationId) {
                     // Utiliser une vérification active au lieu d'un délai fixe
                     const attendreEtChargerCriteres = () => {
                         console.log('🔄 Démarrage de l\'attente des selects de critères...');
+
+                        // ✅ Vérifier si l'évaluation a des critères à charger
+                        if (!evaluation.criteres || !Array.isArray(evaluation.criteres) || evaluation.criteres.length === 0) {
+                            console.warn('⚠️ Aucun critère à charger (tableau vide ou undefined). Le formulaire sera affiché vide.');
+                            console.log('💡 Vous pouvez maintenant remplir les critères manuellement.');
+                            return;
+                        }
+
                         console.log('📋 Critères à charger:', evaluation.criteres.map(c => ({
                             id: c.critereId,
                             nom: c.critereNom,
@@ -2336,25 +2540,29 @@ function modifierEvaluation(evaluationId) {
                                 console.log(`📝 Chargement des critères (trouvé après ${tentatives} tentatives)...`);
                                 let criteresCharges = 0;
 
-                                evaluation.criteres.forEach(critere => {
-                                    // ⚠️ Utiliser "eval_" comme préfixe, pas "niveau_"
-                                    const selectId = `eval_${critere.critereId}`;
-                                    const selectCritere = document.getElementById(selectId);
-                                    console.log(`  → Critère ${critere.critereNom} (ID: ${selectId}):`, selectCritere ? 'EXISTS' : 'MISSING');
+                                if (evaluation.criteres && Array.isArray(evaluation.criteres)) {
+                                    evaluation.criteres.forEach(critere => {
+                                        // ⚠️ Utiliser "eval_" comme préfixe, pas "niveau_"
+                                        const selectId = `eval_${critere.critereId}`;
+                                        const selectCritere = document.getElementById(selectId);
+                                        console.log(`  → Critère ${critere.critereNom} (ID: ${selectId}):`, selectCritere ? 'EXISTS' : 'MISSING');
 
-                                    if (selectCritere) {
-                                        const valeurAvant = selectCritere.value;
-                                        selectCritere.value = critere.niveauSelectionne;
-                                        const valeurApres = selectCritere.value;
-                                        console.log(`    Valeur: "${valeurAvant}" → "${valeurApres}"`);
-                                        selectCritere.dispatchEvent(new Event('change', { bubbles: true }));
-                                        criteresCharges++;
-                                    } else {
-                                        console.warn(`⚠️ Select non trouvé pour critère ${critere.critereId}`);
-                                    }
-                                });
+                                        if (selectCritere) {
+                                            const valeurAvant = selectCritere.value;
+                                            selectCritere.value = critere.niveauSelectionne;
+                                            const valeurApres = selectCritere.value;
+                                            console.log(`    Valeur: "${valeurAvant}" → "${valeurApres}"`);
+                                            selectCritere.dispatchEvent(new Event('change', { bubbles: true }));
+                                            criteresCharges++;
+                                        } else {
+                                            console.warn(`⚠️ Select non trouvé pour critère ${critere.critereId}`);
+                                        }
+                                    });
 
-                                console.log(`✅ ${criteresCharges}/${evaluation.criteres.length} critères chargés`);
+                                    console.log(`✅ ${criteresCharges}/${evaluation.criteres.length} critères chargés`);
+                                } else {
+                                    console.error('❌ evaluation.criteres est undefined ou n\'est pas un tableau');
+                                }
 
                                 // Forcer le recalcul de la note après avoir chargé tous les critères
                                 setTimeout(() => {
