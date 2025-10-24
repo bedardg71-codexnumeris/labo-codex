@@ -345,7 +345,7 @@ function interpreterCompletion(valeur) {
             description: 'Remise régulière et complète des travaux'
         };
     }
-    if (c >= 0.75) {
+    if (c >= 0.80) {
         return {
             niveau: 'Bon taux de complétion',
             emoji: '🟢',
@@ -353,15 +353,15 @@ function interpreterCompletion(valeur) {
             description: 'Majorité des travaux remis'
         };
     }
-    if (c >= 0.65) {
+    if (c >= 0.70) {
         return {
-            niveau: 'Complétion partielle',
+            niveau: 'Complétion acceptable',
             emoji: '🟡',
             couleur: '#ffc107', // Jaune
             description: 'Quelques travaux manquants, suivi recommandé'
         };
     }
-    if (c >= 0.40) {
+    if (c >= 0.60) {
         return {
             niveau: 'Complétion insuffisante',
             emoji: '🟠',
@@ -370,7 +370,7 @@ function interpreterCompletion(valeur) {
         };
     }
     return {
-        niveau: 'Complétion très faible',
+        niveau: 'Complétion critique',
         emoji: '🔴',
         couleur: '#dc3545', // Rouge
         description: 'Travaux non remis, situation critique'
@@ -384,7 +384,7 @@ function interpreterCompletion(valeur) {
  */
 function interpreterAssiduite(valeur) {
     const a = valeur / 100; // Normaliser en 0-1
-    if (a >= 0.95) {
+    if (a >= 0.85) {
         return {
             niveau: 'Assiduité exemplaire',
             emoji: '🔵',
@@ -392,7 +392,7 @@ function interpreterAssiduite(valeur) {
             description: 'Présence constante et engagement soutenu'
         };
     }
-    if (a >= 0.85) {
+    if (a >= 0.80) {
         return {
             niveau: 'Bonne assiduité',
             emoji: '🟢',
@@ -400,7 +400,7 @@ function interpreterAssiduite(valeur) {
             description: 'Présence régulière avec absences rares et justifiées'
         };
     }
-    if (a >= 0.75) {
+    if (a >= 0.70) {
         return {
             niveau: 'Assiduité acceptable',
             emoji: '🟡',
@@ -410,7 +410,7 @@ function interpreterAssiduite(valeur) {
     }
     if (a >= 0.60) {
         return {
-            niveau: 'Assiduité problématique',
+            niveau: 'Assiduité insuffisante',
             emoji: '🟠',
             couleur: '#ff9800', // Orange
             description: 'Absences fréquentes, intervention nécessaire'
@@ -481,16 +481,12 @@ function genererSectionMobilisationEngagement(da) {
 
     return `
         <!-- Badge interprétatif Mobilisation globale -->
-        <div class="interpretation-badge" style="border-left-color: ${interpM.couleur}; background: linear-gradient(to right, ${interpM.couleur}22, ${interpM.couleur}11); margin-bottom: 30px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    ${interpM.emoji} Mobilisation : ${interpM.niveau}
-                </div>
-                <div style="font-size: 1.3rem; font-weight: bold; color: ${interpM.couleur};">
-                    ${indices.M}
-                </div>
+        <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+            <div style="margin-bottom: 15px;">
+                <strong style="font-size: 1.1rem; color: ${interpM.couleur};">${interpM.niveau}</strong>
+                <span style="font-size: 1.3rem; font-weight: bold; color: ${interpM.couleur}; margin-left: 10px;">(${indices.M})</span>
             </div>
-            <div style="font-size: 0.9rem; color: #555; margin-top: 8px; font-weight: normal;">
+            <div style="font-size: 0.95rem; color: #555; line-height: 1.6;">
                 ${interpM.niveau === 'Décrochage' ?
                     "L'étudiant ne se présente plus au cours. Référer aux services d'aide." :
                   interpM.niveau.includes('critique') ?
@@ -510,15 +506,10 @@ function genererSectionMobilisationEngagement(da) {
 
             <!-- FICHE ASSIDUITÉ -->
             <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px;">
-                <h3 style="color: var(--bleu-principal); margin: 0 0 20px 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                    👥 ASSIDUITÉ
-                </h3>
-
                 <!-- Badge avec interprétation -->
                 <div style="margin-bottom: 15px;">
-                    <span style="font-size: 1.5rem;">${interpA.emoji}</span>
                     <strong style="font-size: 1.1rem; color: ${interpA.couleur};">${interpA.niveau}</strong>
-                    <span style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur}; margin-left: 10px;">(${tauxA}%)</span>
+                    <span style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur}; margin-left: 10px;">(A = ${indices.A}%)</span>
                 </div>
 
                 <!-- Statistiques -->
@@ -574,29 +565,22 @@ function genererSectionMobilisationEngagement(da) {
 
             <!-- FICHE COMPLÉTION -->
             <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px;">
-                <h3 style="color: var(--bleu-principal); margin: 0 0 20px 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                    📝 COMPLÉTION
-                </h3>
-
                 <!-- Badge avec interprétation -->
                 <div style="margin-bottom: 15px;">
-                    <span style="font-size: 1.5rem;">${interpC.emoji}</span>
                     <strong style="font-size: 1.1rem; color: ${interpC.couleur};">${interpC.niveau}</strong>
-                    <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(${indices.C}%)</span>
+                    <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(C = ${indices.C}%)</span>
                 </div>
 
                 <!-- Statistiques -->
                 <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
                     <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
-                    <li><strong>• Taux de complétion :</strong> ${tauxCompletion}%</li>
-                    <li><strong>• Indice C :</strong> ${indices.C}%</li>
                 </ul>
 
                 <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
 
                 <!-- Gestion des jetons (placeholder) -->
                 <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
-                    🎫 GESTION DES JETONS
+                    GESTION DES JETONS
                 </h4>
                 <div style="background: #fff3cd; border: 2px dashed #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center;">
                     <div style="font-size: 1rem; color: #856404;">
@@ -636,7 +620,7 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Artefacts non remis -->
                 <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
-                    ⏳ NON REMIS (${artefactsNonRemis.length})
+                    NON REMIS (${artefactsNonRemis.length})
                 </h4>
                 ${artefactsNonRemis.length > 0 ? `
                     <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -666,26 +650,35 @@ function genererSectionMobilisationEngagement(da) {
         </div>
 
         <!-- TOGGLE CALCULS UNIQUE (EXTÉRIEUR) -->
-        <button class="btn-secondary" style="margin: 20px 0; padding: 8px 16px; border-radius: 6px;"
-                onclick="this.nextElementSibling.classList.toggle('hidden')">
-            🔍 Voir les calculs
-        </button>
-        <div class="hidden" style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📐 Détails des calculs</h4>
-            <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
-                <li><strong>Indice A (Assiduité) :</strong> ${indices.A}%</li>
-                <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
-                    → ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
-                </li>
-                <li style="margin-top: 10px;"><strong>Indice C (Complétion) :</strong> ${indices.C}%</li>
-                <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
-                    → ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
-                </li>
-                <li style="margin-top: 10px;"><strong>Indice M (Mobilisation) :</strong> ${indices.M}</li>
-                <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
-                    → M = (A + C) / 2 = (${indices.A} + ${indices.C}) / 2
-                </li>
-            </ul>
+        <div style="margin-top: 25px;">
+            <button onclick="toggleDetailsTechniques('details-calculs-mobilisation-${da}')"
+                    style="background: var(--bleu-pale); border: 1px solid var(--bleu-moyen);
+                           color: var(--bleu-principal); padding: 8px 16px; border-radius: 6px;
+                           cursor: pointer; font-size: 0.9rem; width: 100%; text-align: left;
+                           display: flex; align-items: center; justify-content: space-between;">
+                <span>🔽 Voir les calculs et formules</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">▼</span>
+            </button>
+
+            <div id="details-calculs-mobilisation-${da}" class="details-techniques">
+                <div style="background: white; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+                    <h5 style="color: var(--bleu-principal); margin: 0 0 10px 0; font-size: 0.95rem;">📐 DÉTAILS DES CALCULS</h5>
+                    <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
+                        <li><strong>Indice A (Assiduité) :</strong> ${indices.A}%</li>
+                        <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
+                            → ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
+                        </li>
+                        <li style="margin-top: 10px;"><strong>Indice C (Complétion) :</strong> ${indices.C}%</li>
+                        <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
+                            → ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
+                        </li>
+                        <li style="margin-top: 10px;"><strong>Indice M (Mobilisation) :</strong> ${indices.M}</li>
+                        <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
+                            → M = (A + C) / 2 = (${indices.A} + ${indices.C}) / 2
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     `;
 }
@@ -1442,11 +1435,28 @@ function changerSectionProfil(section) {
 
     const da = profilActuelDA;
 
-    // Mettre à jour la navigation active
+    // Mettre à jour la navigation active avec style visuel
     document.querySelectorAll('.profil-nav-item').forEach(item => {
         item.classList.remove('actif');
+        item.style.background = '';
+        item.style.borderLeft = '';
+        item.style.color = '';
+        // Retirer le font-weight des titres
+        const titre = item.querySelector('.profil-nav-item-titre');
+        if (titre) titre.style.fontWeight = '';
     });
-    event.target.classList.add('actif');
+
+    // Trouver l'élément cliqué et le marquer comme actif
+    const clickedItem = event.target.closest('.profil-nav-item');
+    if (clickedItem) {
+        clickedItem.classList.add('actif');
+        clickedItem.style.background = 'var(--bleu-pale)';
+        clickedItem.style.borderLeft = '4px solid var(--bleu-principal)';
+        clickedItem.style.color = '#000';
+        // Ajouter font-weight au titre
+        const titre = clickedItem.querySelector('.profil-nav-item-titre');
+        if (titre) titre.style.fontWeight = '600';
+    }
 
     // Générer le contenu selon la section
     const contenuContainer = document.getElementById('profil-contenu-dynamique');
@@ -1460,16 +1470,31 @@ function changerSectionProfil(section) {
 
     switch (section) {
         case 'cible':
-            titre = '📚 Suivi de l\'apprentissage';
+            titre = 'Suivi de l\'apprentissage';
             contenu = genererContenuCibleIntervention(da);
             break;
         case 'performance':
-            titre = '📝 Développement des habiletés et compétences';
+            titre = 'Développement des habiletés et compétences';
             contenu = genererSectionPerformance(da);
             break;
         case 'mobilisation':
-            titre = '💪 Mobilisation';
+            titre = 'Mobilisation';
             contenu = genererSectionMobilisationEngagement(da);
+            break;
+        case 'rapport':
+            titre = 'Rapport';
+            contenu = `
+                <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
+                            padding: 40px 20px; text-align: center; color: var(--bleu-moyen);">
+                    <div style="font-size: 2rem; margin-bottom: 15px;">📋</div>
+                    <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
+                        Rapport pour l'API
+                    </div>
+                    <div style="font-style: italic; font-size: 0.95rem;">
+                        Outil de composition de rapport destiné à l'aide pédagogique individuel (à venir)
+                    </div>
+                </div>
+            `;
             break;
         default:
             titre = 'Section inconnue';
@@ -1518,9 +1543,9 @@ function genererContenuCibleIntervention(da) {
         `;
     }
 
-    const niveauTexte = cibleInfo.niveau === 3 ? 'Niveau 3 - Intervention intensive' :
-                       cibleInfo.niveau === 2 ? 'Niveau 2 - Intervention ciblée' :
-                       'Niveau 1 - Suivi régulier';
+    const niveauTexte = cibleInfo.niveau === 3 ? 'Réponse à l\'intervention : niveau 3 (intervention intensive)' :
+                       cibleInfo.niveau === 2 ? 'Réponse à l\'intervention : niveau 2 (intervention ciblée)' :
+                       'Réponse à l\'intervention : niveau 1 (suivi régulier)';
 
     const descriptionNiveau = cibleInfo.niveau === 3
         ? '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).'
@@ -1551,16 +1576,91 @@ function genererContenuCibleIntervention(da) {
 
             <!-- Badge RàI avec couleur selon niveau -->
             <div style="${badgeStyle} display: inline-block; padding: 8px 16px; border-radius: 6px; font-weight: 600; margin-bottom: 15px;">
-                ${cibleInfo.emoji} ${niveauTexte}
+                ${niveauTexte}
             </div>
 
             <!-- Liste des informations -->
             <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
-                <li><strong>• Risque :</strong> ${interpR.emoji} ${interpR.niveau} (${indices.R})</li>
+                <li><strong>• Risque :</strong> ${interpR.niveau} (${indices.R})</li>
                 <li><strong>• Pattern :</strong> ${cibleInfo.pattern}</li>
                 <li><strong>• Progression :</strong> ${interpBlocage ? `${interpBlocage.emoji} ${interpBlocage.niveau} (${Math.round(resultBlocage.score * 100)}%)` : 'Non évaluée'}</li>
                 <li><strong>• Services :</strong> ${eleve.caf === 'Oui' ? '✓ CAF' : ''} ${eleve.sa === 'Oui' ? '✓ SA' : ''} ${eleve.caf !== 'Oui' && eleve.sa !== 'Oui' ? 'Aucun' : ''}</li>
             </ul>
+
+            <!-- Séparateur -->
+            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+
+            <!-- ÉCHELLE VISUELLE DU RISQUE -->
+            <div style="margin: 20px 0;">
+                <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                    POSITION SUR L'ÉCHELLE DE RISQUE
+                </h4>
+
+                <!-- Barre de risque avec gradient -->
+                <div style="position: relative; height: 60px; border-radius: 8px; overflow: hidden; margin-bottom: 10px;">
+                    <!-- Segments colorés -->
+                    <div style="display: flex; height: 40px;">
+                        <!-- Minimal (0-0.2) -->
+                        <div style="flex: 20; background: #2196F3; display: flex; align-items: center; justify-content: center;
+                                    font-size: 0.75rem; color: white; font-weight: 500; border-right: 1px solid white;">
+                            Minimal
+                        </div>
+                        <!-- Faible (0.2-0.3) -->
+                        <div style="flex: 10; background: #90EE90; display: flex; align-items: center; justify-content: center;
+                                    font-size: 0.75rem; color: #155724; font-weight: 500; border-right: 1px solid white;">
+                            Faible
+                        </div>
+                        <!-- Modéré (0.3-0.4) -->
+                        <div style="flex: 10; background: #ffc107; display: flex; align-items: center; justify-content: center;
+                                    font-size: 0.75rem; color: #856404; font-weight: 500; border-right: 1px solid white;">
+                            Modéré
+                        </div>
+                        <!-- Élevé (0.4-0.5) -->
+                        <div style="flex: 10; background: #fd7e14; display: flex; align-items: center; justify-content: center;
+                                    font-size: 0.75rem; color: white; font-weight: 500; border-right: 1px solid white;">
+                            Élevé
+                        </div>
+                        <!-- Très élevé (0.5-0.7) -->
+                        <div style="flex: 20; background: #dc3545; display: flex; align-items: center; justify-content: center;
+                                    font-size: 0.75rem; color: white; font-weight: 500; border-right: 1px solid white;">
+                            Très élevé
+                        </div>
+                        <!-- Critique (0.7-1.0) -->
+                        <div style="flex: 30; background: #721c24; display: flex; align-items: center; justify-content: center;
+                                    font-size: 0.75rem; color: white; font-weight: 500;">
+                            Critique
+                        </div>
+                    </div>
+
+                    <!-- Label au-dessus de la flèche -->
+                    <div style="position: absolute; top: -25px; left: ${Math.min(indices.R * 100, 100)}%;
+                                transform: translateX(-50%); white-space: nowrap;
+                                background: #fff; padding: 2px 8px; border-radius: 4px;
+                                font-size: 0.85rem; font-weight: 600; color: ${interpR.couleur};
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        ${interpR.niveau}
+                    </div>
+
+                    <!-- Indicateur de position (ligne noire) -->
+                    <div style="position: absolute; top: 0; left: ${Math.min(indices.R * 100, 100)}%;
+                                width: 3px; height: 40px; background: #000; transform: translateX(-50%);
+                                box-shadow: 0 0 8px rgba(0,0,0,0.5);">
+                    </div>
+
+                    <!-- Triangle pointeur en bas de la ligne -->
+                    <div style="position: absolute; top: 40px; left: ${Math.min(indices.R * 100, 100)}%;
+                                width: 0; height: 0; transform: translateX(-50%);
+                                border-left: 8px solid transparent;
+                                border-right: 8px solid transparent;
+                                border-top: 12px solid #000;">
+                    </div>
+                </div>
+
+                <!-- Valeur numérique -->
+                <div style="text-align: center; font-size: 0.9rem; color: #666;">
+                    <strong>R = ${indices.R}</strong>
+                </div>
+            </div>
 
             <!-- Séparateur -->
             <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
@@ -1683,8 +1783,34 @@ function afficherProfilComplet(da) {
     const interpE = interpreterEngagement(indices.E);
     const interpR = interpreterRisque(indices.R);
 
+    // Trouver l'index de l'élève dans la liste pour navigation
+    const indexActuel = etudiants.findIndex(e => e.da === da);
+    const etudiantPrecedent = indexActuel > 0 ? etudiants[indexActuel - 1] : null;
+    const etudiantSuivant = indexActuel < etudiants.length - 1 ? etudiants[indexActuel + 1] : null;
+
     // Générer le HTML avec layout 2 colonnes
     container.innerHTML = `
+        <!-- Boutons de navigation -->
+        <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; justify-content: center;">
+            <button class="btn btn-principal"
+                    onclick="afficherProfilComplet('${etudiantPrecedent?.da}')"
+                    ${!etudiantPrecedent ? 'disabled' : ''}
+                    title="Étudiant·e précédent·e">
+                ← Précédent·e
+            </button>
+
+            <button class="btn btn-principal" onclick="afficherSousSection('tableau-bord-apercu')">
+                ← Retour à la liste
+            </button>
+
+            <button class="btn btn-principal"
+                    onclick="afficherProfilComplet('${etudiantSuivant?.da}')"
+                    ${!etudiantSuivant ? 'disabled' : ''}
+                    title="Étudiant·e suivant·e">
+                Suivant·e →
+            </button>
+        </div>
+
         <div class="profil-layout-2col">
             <!-- COLONNE GAUCHE (SIDEBAR) -->
             <div class="profil-sidebar">
@@ -1696,6 +1822,7 @@ function afficherProfilComplet(da) {
                     <div class="profil-sidebar-meta">
                         <span><strong>DA:</strong> ${echapperHtml(eleve.da)}</span>
                         ${eleve.groupe ? `<span><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</span>` : ''}
+                        ${eleve.programme ? `<span><strong>Programme:</strong> ${echapperHtml(eleve.programme)}</span>` : ''}
                         ${eleve.sa === 'Oui' ? '<span style="color: var(--bleu-principal);">✓ SA</span>' : ''}
                         ${eleve.caf === 'Oui' ? '<span style="color: var(--bleu-principal);">✓ CAF</span>' : ''}
                     </div>
@@ -1703,13 +1830,14 @@ function afficherProfilComplet(da) {
 
                 <!-- Navigation sections avec indices intégrés -->
                 <div class="profil-sidebar-nav">
-                    <div class="profil-sidebar-nav-titre">Sections</div>
+                    <div class="profil-sidebar-nav-titre">Observations</div>
 
                     <!-- 1. Suivi de l'apprentissage -->
-                    <div class="profil-nav-item actif" onclick="changerSectionProfil('cible')">
+                    <div class="profil-nav-item actif" onclick="changerSectionProfil('cible')"
+                         style="background: var(--bleu-pale); border-left: 4px solid var(--bleu-principal); color: #000;">
                         <div class="profil-nav-item-ligne">
-                            <div class="profil-nav-item-titre">
-                                📚 Suivi de l'apprentissage
+                            <div class="profil-nav-item-titre" style="font-weight: 600;">
+                                Suivi de l'apprentissage
                             </div>
                         </div>
                         <div class="profil-nav-item-sous-ligne">
@@ -1723,7 +1851,7 @@ function afficherProfilComplet(da) {
                     <div class="profil-nav-item" onclick="changerSectionProfil('performance')">
                         <div class="profil-nav-item-ligne">
                             <div class="profil-nav-item-titre">
-                                📝 Développement des habiletés
+                                Développement des habiletés
                             </div>
                             <div class="profil-nav-item-valeur" style="color: ${obtenirCouleurIndice(indices.P)};">
                                 ${indices.P}%
@@ -1735,13 +1863,22 @@ function afficherProfilComplet(da) {
                     <div class="profil-nav-item" onclick="changerSectionProfil('mobilisation')">
                         <div class="profil-nav-item-ligne">
                             <div class="profil-nav-item-titre">
-                                💪 Mobilisation
+                                Mobilisation
                             </div>
                         </div>
                         <div class="profil-nav-item-sous-ligne">
                             <span>A: ${indices.A}%</span>
                             <span>·</span>
                             <span>C: ${indices.C}%</span>
+                        </div>
+                    </div>
+
+                    <!-- 4. Rapport -->
+                    <div class="profil-nav-item" onclick="changerSectionProfil('rapport')">
+                        <div class="profil-nav-item-ligne">
+                            <div class="profil-nav-item-titre">
+                                Rapport
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1751,7 +1888,7 @@ function afficherProfilComplet(da) {
             <div class="profil-contenu" id="profil-contenu-dynamique">
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
-                    <div class="profil-contenu-titre">📚 Suivi de l'apprentissage</div>
+                    <div class="profil-contenu-titre">Suivi de l'apprentissage</div>
                 </div>
                 <div class="profil-contenu-body">
                     ${genererContenuCibleIntervention(da)}
@@ -3213,7 +3350,6 @@ function genererSectionPerformance(da) {
 
             <!-- Badge performance avec interprétation -->
             <div style="margin-bottom: 15px;">
-                <span style="font-size: 1.5rem;">${interpP.emoji}</span>
                 <strong style="font-size: 1.1rem; color: ${interpP.couleur};">${interpP.niveau}</strong>
                 <span style="font-size: 1.3rem; font-weight: bold; color: ${interpP.couleur}; margin-left: 10px;">(${indices.P}%)</span>
             </div>
@@ -3230,7 +3366,7 @@ function genererSectionPerformance(da) {
 
             <!-- Diagnostic SRPNF -->
             <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
-                📊 DIAGNOSTIC SRPNF
+                FORCES ET DÉFIS PARMI LES CRITÈRES
             </h4>
             <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
                 ${['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
@@ -3331,12 +3467,19 @@ function genererSectionPerformance(da) {
     </div>
 
     <!-- TOGGLE CALCULS (EXTÉRIEUR) -->
-    <button class="btn-secondary" style="margin: 20px 0; padding: 8px 16px; border-radius: 6px;"
-            onclick="this.nextElementSibling.classList.toggle('hidden')">
-        🔍 Voir les calculs
-    </button>
-    <div class="hidden" style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-        <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📐 Détails des calculs</h4>
+    <div style="margin-top: 25px;">
+        <button onclick="toggleDetailsTechniques('details-calculs-performance-${da}')"
+                style="background: var(--bleu-pale); border: 1px solid var(--bleu-moyen);
+                       color: var(--bleu-principal); padding: 8px 16px; border-radius: 6px;
+                       cursor: pointer; font-size: 0.9rem; width: 100%; text-align: left;
+                       display: flex; align-items: center; justify-content: space-between;">
+            <span>🔽 Voir les calculs et formules</span>
+            <span style="font-size: 0.8rem; opacity: 0.7;">▼</span>
+        </button>
+
+        <div id="details-calculs-performance-${da}" class="details-techniques">
+            <div style="background: white; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+                <h5 style="color: var(--bleu-principal); margin: 0 0 10px 0; font-size: 0.95rem;">📐 DÉTAILS DES CALCULS</h5>
         <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
             <li><strong>Indice P :</strong> ${indices.P}%</li>
             <li><strong>Note PAN (top 3) :</strong> ${noteTop3 || '--'}/100</li>
@@ -3350,6 +3493,8 @@ function genererSectionPerformance(da) {
                 return val !== null ? `<li><strong>${nom} :</strong> ${Math.round(val * 100)}%</li>` : '';
             }).join('')}
         </ul>
+            </div>
+        </div>
     </div>
     `;
 }
