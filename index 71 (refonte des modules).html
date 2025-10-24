@@ -1166,6 +1166,30 @@
 
                         <!-- COLONNE GAUCHE : PARAMÈTRES DE L'ÉVALUATION -->
                         <div style="padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
+                            <!-- Boutons de gestion des évaluations -->
+                            <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
+                                <button class="btn btn-modifier" onclick="ouvrirBanqueEvaluations()"
+                                    style="padding: 8px 12px; font-size: 0.85rem; width: 100%;"
+                                    title="Parcourir les évaluations sauvegardées et en charger une">
+                                    📚 Charger une évaluation réalisée
+                                </button>
+
+                                <button class="btn" onclick="ouvrirModalJetonReprise()"
+                                    style="padding: 8px 12px; font-size: 0.85rem; background: #9c27b0; color: white; width: 100%;"
+                                    title="Appliquer un jeton de reprise pour créer une nouvelle version d'une évaluation">
+                                    ♻️ Appliquer un jeton de reprise
+                                </button>
+
+                                <button class="btn" onclick="basculerVerrouillageEvaluationCourante()"
+                                    id="btnVerrouillerEval"
+                                    style="padding: 8px 12px; font-size: 0.85rem; background: #ffc107; color: #000; width: 100%; display: none;"
+                                    title="Verrouiller/déverrouiller l'évaluation courante">
+                                    🔒 Verrouiller
+                                </button>
+                            </div>
+
+                            <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
+
                             <h4 style="margin: 0 0 15px 0; color: var(--gris-fonce);">Paramètres de l'évaluation
                             </h4>
 
@@ -1338,6 +1362,93 @@
                 </div><!-- fin carte du layout évaluation -->
 
             </div><!-- fin sous-section evaluations-individuelles -->
+
+            <!-- MODAL: Banque d'évaluations (Charger une évaluation) -->
+            <div id="modalBanqueEvaluations" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; overflow-y: auto;">
+                <div style="max-width: 1200px; margin: 50px auto; background: white; border-radius: 12px; padding: 30px; position: relative;">
+                    <button onclick="fermerBanqueEvaluations()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">✕</button>
+
+                    <h2 style="margin-bottom: 20px;">📚 Banque d'évaluations</h2>
+                    <p style="color: #666; margin-bottom: 20px;">Parcourez toutes les évaluations sauvegardées et sélectionnez-en une pour la charger dans le formulaire.</p>
+
+                    <!-- Filtres -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
+                        <div>
+                            <label style="font-weight: 600; margin-bottom: 5px; display: block;">Étudiant</label>
+                            <select id="filtreBanqueEtudiant" onchange="filtrerBanqueEvaluations()" class="controle-form">
+                                <option value="">Tous les étudiants</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; margin-bottom: 5px; display: block;">Production</label>
+                            <select id="filtreBanqueProduction" onchange="filtrerBanqueEvaluations()" class="controle-form">
+                                <option value="">Toutes les productions</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; margin-bottom: 5px; display: block;">Trier par</label>
+                            <select id="triBanqueEvaluation" onchange="filtrerBanqueEvaluations()" class="controle-form">
+                                <option value="date-desc">Date (plus récent)</option>
+                                <option value="date-asc">Date (plus ancien)</option>
+                                <option value="etudiant-asc">Étudiant (A-Z)</option>
+                                <option value="production-asc">Production (A-Z)</option>
+                                <option value="note-desc">Note (plus haute)</option>
+                                <option value="note-asc">Note (plus basse)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Liste des évaluations -->
+                    <div id="listeBanqueEvaluations" style="max-height: 500px; overflow-y: auto;">
+                        <!-- Généré par JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL: Appliquer un jeton de reprise -->
+            <div id="modalJetonReprise" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; overflow-y: auto;">
+                <div style="max-width: 800px; margin: 100px auto; background: white; border-radius: 12px; padding: 30px; position: relative;">
+                    <button onclick="fermerModalJetonReprise()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">✕</button>
+
+                    <h2 style="margin-bottom: 20px;">🎫 Appliquer un jeton de reprise</h2>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Un jeton de reprise permet à un étudiant de refaire une évaluation. Le système créera un duplicata de l'évaluation sélectionnée,
+                        conservera l'ancienne version pour référence, et comptabilisera uniquement la nouvelle évaluation dans les indices.
+                    </p>
+
+                    <!-- Sélection de l'évaluation -->
+                    <div style="margin-bottom: 20px; padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
+                        <label style="font-weight: 600; margin-bottom: 10px; display: block;">Sélectionner l'évaluation à reprendre</label>
+                        <select id="selectEvaluationJeton" onchange="afficherDetailsEvaluationJeton()" class="controle-form" style="margin-bottom: 15px;">
+                            <option value="">-- Sélectionnez une évaluation --</option>
+                        </select>
+
+                        <div id="detailsEvaluationJeton" style="display: none; margin-top: 15px; padding: 15px; background: white; border-radius: 6px; border: 1px solid #ddd;">
+                            <!-- Détails générés par JS -->
+                        </div>
+                    </div>
+
+                    <!-- Options du jeton -->
+                    <div style="margin-bottom: 20px; padding: 15px; background: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;">
+                        <h4 style="margin-top: 0; color: #e65100;">⚠️ Important</h4>
+                        <ul style="margin: 10px 0; padding-left: 20px; color: #666;">
+                            <li>L'évaluation originale sera marquée comme "remplacée" et ne comptera plus dans les indices</li>
+                            <li>Une nouvelle évaluation sera créée avec les mêmes paramètres</li>
+                            <li>Vous pourrez modifier la nouvelle évaluation avant de la sauvegarder</li>
+                            <li>Les deux versions resteront visibles dans la liste avec un lien de traçabilité</li>
+                        </ul>
+                    </div>
+
+                    <div style="text-align: right;">
+                        <button class="btn" onclick="fermerModalJetonReprise()" style="padding: 10px 20px; margin-right: 10px;">
+                            Annuler
+                        </button>
+                        <button class="btn btn-principal" onclick="appliquerJetonReprise()" style="padding: 10px 20px; background: #9c27b0;">
+                            🎫 Appliquer le jeton de reprise
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             </section><!-- fin section-evaluations -->
 

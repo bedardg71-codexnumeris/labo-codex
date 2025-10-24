@@ -779,7 +779,8 @@ function sauvegarderEvaluation() {
         });
     }
 
-    // Créer l'objet évaluation
+    // Créer l'objet évaluation avec horodatage
+    const maintenant = new Date();
     const evaluation = {
         id: 'EVAL_' + Date.now(),
         etudiantDA: etudiantDA,
@@ -791,7 +792,8 @@ function sauvegarderEvaluation() {
         grilleNom: grille ? grille.nom : '',
         echelleId: document.getElementById('selectEchelle1').value,
         cartoucheId: document.getElementById('selectCartoucheEval').value,
-        dateEvaluation: new Date().toISOString(),
+        dateEvaluation: maintenant.toISOString(),
+        heureEvaluation: maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }),
         statutRemise: document.getElementById('remiseProduction1').value,
         criteres: criteres,
         noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
@@ -1010,8 +1012,9 @@ function calculerEtSauvegarderIndicesEvaluation() {
         );
 
         // Compter les artefacts remis par cet étudiant
+        // ⚠️ IMPORTANT: Exclure les évaluations remplacées par un jeton de reprise
         const evaluationsEtudiant = evaluations.filter(e =>
-            e.etudiantDA === etudiant.da
+            e.etudiantDA === etudiant.da && !e.remplaceeParId
         );
 
         // Calculer le taux de complétion
@@ -1413,8 +1416,11 @@ function genererDetailsEtudiant(etudiant) {
                 ${tableauComplet.map(item => {
         if (item.evaluation) {
             // Production évaluée
+            const estRemplacee = item.evaluation.remplaceeParId ? true : false;
+            const estReprise = item.evaluation.repriseDeId ? true : false;
+
             return `
-                            <tr>
+                            <tr ${estRemplacee ? 'style="opacity: 0.6; background: #f5f5f5;"' : ''}>
                                 <td>${echapperHtml(item.production.titre || item.production.nom || '—')}</td>
                                 <td>${echapperHtml(item.evaluation.grilleNom || '—')}</td>
                                 <td>${echapperHtml(obtenirNomCartouche(item.evaluation.cartoucheId, item.evaluation.grilleId) || '—')}</td>
@@ -1428,12 +1434,16 @@ function genererDetailsEtudiant(etudiant) {
                                 <td>${Math.round(item.evaluation.noteFinale) || '—'}%</td>
                                 <td>
                                     <span class="badge-statut badge-succes">
-                                        ${item.evaluation.verrouillee ? '🔒 Verrouillé' : 'Évalué'}
+                                        ${item.evaluation.verrouillee ? '🔒 ' : ''}${estReprise ? '🎫 ' : ''}${estRemplacee ? '⏸️ Remplacée' : 'Évalué'}
                                     </span>
                                 </td>
                                 <td>${item.evaluation.dateEvaluation ? new Date(item.evaluation.dateEvaluation).toLocaleDateString('fr-CA') : '—'}</td>
                                 <td>
-                                    ${item.evaluation.verrouillee ? `
+                                    ${estRemplacee ? `
+                                        <span style="color: #999; font-size: 0.85rem; font-style: italic;">
+                                            Évaluation archivée
+                                        </span>
+                                    ` : item.evaluation.verrouillee ? `
                                         <button class="btn btn-modifier" onclick="deverrouillerEvaluation('${item.evaluation.id}')" style="padding:5px 10px; background: var(--orange-accent);">
                                             🔓 Déverrouiller
                                         </button>
@@ -1483,22 +1493,33 @@ function genererDetailsEtudiant(etudiant) {
 
     // Ajouter le résumé
     const nbAttendus = productions.filter(p => p.type !== 'portfolio').length;
-    const nbRemis = evaluations.length;
+    const nbRemis = evaluations.filter(e => !e.remplaceeParId).length; // Ne compter que les évaluations actives
+    const nbRemplacees = evaluations.filter(e => e.remplaceeParId).length;
+    const nbReprises = evaluations.filter(e => e.repriseDeId).length;
+
     const resumeHTML = `
         <div class="carte" style="margin-top: 15px; background: var(--bleu-pale);">
             <h4 style="margin-bottom: 10px;">📊 Résumé de l'étudiant</h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                 <div>
-                    <strong>Artefacts remis:</strong> ${nbRemis} / ${nbAttendus} 
+                    <strong>Artefacts remis:</strong> ${nbRemis} / ${nbAttendus}
                     (${Math.round(etudiant.indices.completion * 100)}%)
                 </div>
                 <div>
                     <strong>Performance moyenne:</strong> ${Math.round(etudiant.indices.performance * 100)}%
                 </div>
                 <div>
-                    <strong>Tendance:</strong> ${obtenirTendance(evaluations)}
+                    <strong>Tendance:</strong> ${obtenirTendance(evaluations.filter(e => !e.remplaceeParId))}
                 </div>
             </div>
+            ${nbReprises > 0 ? `
+                <div style="margin-top: 15px; padding: 10px; background: #f3e5f5; border-radius: 6px; border-left: 4px solid #9c27b0;">
+                    <strong>🎫 Jetons de reprise appliqués:</strong> ${nbReprises}<br>
+                    <span style="font-size: 0.85rem; color: #666;">
+                        ${nbRemplacees} évaluation${nbRemplacees > 1 ? 's' : ''} remplacée${nbRemplacees > 1 ? 's' : ''} (archivée${nbRemplacees > 1 ? 's' : ''}, ne compte${nbRemplacees > 1 ? 'nt' : ''} plus dans les indices)
+                    </span>
+                </div>
+            ` : ''}
         </div>
     `;
 
@@ -2117,6 +2138,15 @@ function modifierEvaluation(evaluationId) {
         return;
     }
 
+    // DEBUG: Afficher la structure de l'évaluation
+    console.log('🔍 Évaluation trouvée:', {
+        id: evaluation.id,
+        etudiant: evaluation.etudiantNom,
+        production: evaluation.productionNom,
+        nbCriteres: evaluation.criteres?.length || 0,
+        criteres: evaluation.criteres
+    });
+
     // Vérifier si l'évaluation est verrouillée
     if (evaluation.verrouillee) {
         afficherNotificationErreur(
@@ -2127,7 +2157,7 @@ function modifierEvaluation(evaluationId) {
     }
 
     // Naviguer vers la section d'évaluation
-    afficherSousSection('evaluations-saisie');
+    afficherSousSection('evaluations-individuelles');
 
     // Attendre que la section soit chargée
     setTimeout(() => {
@@ -2156,16 +2186,38 @@ function modifierEvaluation(evaluationId) {
                 }
 
                 setTimeout(() => {
+                    // ⚠️ IMPORTANT : Initialiser evaluationEnCours AVANT de déclencher les événements
+                    // Sinon cartoucheSelectionnee() retourne immédiatement car evaluationEnCours n'existe pas
+                    console.log('🔧 Initialisation de evaluationEnCours AVANT les événements...');
+                    window.evaluationEnCours = {
+                        etudiantDA: evaluation.etudiantDA,
+                        productionId: evaluation.productionId,
+                        grilleId: evaluation.grilleId,
+                        echelleId: evaluation.echelleId,
+                        cartoucheId: evaluation.cartoucheId,
+                        statutRemise: evaluation.statutRemise,
+                        criteres: {},
+                        idModification: evaluationId
+                    };
+
+                    // Pré-remplir les critères depuis l'évaluation chargée
+                    evaluation.criteres.forEach(critere => {
+                        window.evaluationEnCours.criteres[critere.critereId] = critere.niveauSelectionne;
+                    });
+
+                    console.log('✅ evaluationEnCours initialisé:', window.evaluationEnCours);
+
                     // Échelle
                     const selectEchelle = document.getElementById('selectEchelle1');
                     if (selectEchelle) {
                         selectEchelle.value = evaluation.echelleId;
                     }
 
-                    // Cartouche
+                    // Cartouche - maintenant evaluationEnCours existe, cartoucheSelectionnee() va fonctionner
                     const selectCartouche = document.getElementById('selectCartoucheEval');
                     if (selectCartouche) {
                         selectCartouche.value = evaluation.cartoucheId;
+                        console.log('🔧 Déclenchement de l\'événement change sur selectCartouche...');
                         selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
                     }
 
@@ -2173,44 +2225,101 @@ function modifierEvaluation(evaluationId) {
                     const selectRemise = document.getElementById('remiseProduction1');
                     if (selectRemise) {
                         selectRemise.value = evaluation.statutRemise;
+                        console.log('🔧 Déclenchement de l\'événement change sur selectRemise...');
+                        selectRemise.dispatchEvent(new Event('change', { bubbles: true }));
                     }
 
-                    setTimeout(() => {
-                        // Charger les niveaux des critères
-                        evaluation.criteres.forEach(critere => {
-                            const selectCritere = document.getElementById(`niveau_${critere.critereId}`);
-                            if (selectCritere) {
-                                selectCritere.value = critere.niveauSelectionne;
-                                selectCritere.dispatchEvent(new Event('change', { bubbles: true }));
+                    // Attendre que la cartouche et le statut de remise génèrent les critères
+                    // Utiliser une vérification active au lieu d'un délai fixe
+                    const attendreEtChargerCriteres = () => {
+                        console.log('🔄 Démarrage de l\'attente des selects de critères...');
+                        console.log('📋 Critères à charger:', evaluation.criteres.map(c => ({
+                            id: c.critereId,
+                            nom: c.critereNom,
+                            niveau: c.niveauSelectionne
+                        })));
+
+                        let tentatives = 0;
+                        const maxTentatives = 20; // Max 2 secondes (20 x 100ms)
+
+                        const intervalle = setInterval(() => {
+                            tentatives++;
+
+                            // Vérifier si au moins un select de critère existe
+                            // ⚠️ Les selects sont générés avec l'ID "eval_" et non "niveau_"
+                            const premierCritere = evaluation.criteres[0];
+                            const premierSelectId = premierCritere ? `eval_${premierCritere.critereId}` : null;
+                            const premierSelect = premierSelectId ? document.getElementById(premierSelectId) : null;
+
+                            console.log(`🔍 Tentative ${tentatives}/${maxTentatives} - Recherche de #${premierSelectId}:`, premierSelect ? 'TROUVÉ ✅' : 'NON TROUVÉ ❌');
+
+                            if (premierSelect || tentatives >= maxTentatives) {
+                                clearInterval(intervalle);
+
+                                if (!premierSelect && tentatives >= maxTentatives) {
+                                    console.error('❌ Timeout: Les selects de critères n\'ont pas été générés après 2 secondes');
+                                    console.error('🔍 Contenu de listeCriteresGrille1:', document.getElementById('listeCriteresGrille1')?.innerHTML.substring(0, 200));
+                                    return;
+                                }
+
+                                // Les selects existent, les remplir maintenant
+                                console.log(`📝 Chargement des critères (trouvé après ${tentatives} tentatives)...`);
+                                let criteresCharges = 0;
+
+                                evaluation.criteres.forEach(critere => {
+                                    // ⚠️ Utiliser "eval_" comme préfixe, pas "niveau_"
+                                    const selectId = `eval_${critere.critereId}`;
+                                    const selectCritere = document.getElementById(selectId);
+                                    console.log(`  → Critère ${critere.critereNom} (ID: ${selectId}):`, selectCritere ? 'EXISTS' : 'MISSING');
+
+                                    if (selectCritere) {
+                                        const valeurAvant = selectCritere.value;
+                                        selectCritere.value = critere.niveauSelectionne;
+                                        const valeurApres = selectCritere.value;
+                                        console.log(`    Valeur: "${valeurAvant}" → "${valeurApres}"`);
+                                        selectCritere.dispatchEvent(new Event('change', { bubbles: true }));
+                                        criteresCharges++;
+                                    } else {
+                                        console.warn(`⚠️ Select non trouvé pour critère ${critere.critereId}`);
+                                    }
+                                });
+
+                                console.log(`✅ ${criteresCharges}/${evaluation.criteres.length} critères chargés`);
+
+                                // Forcer le recalcul de la note après avoir chargé tous les critères
+                                setTimeout(() => {
+                                    if (typeof calculerNoteTotale === 'function') {
+                                        calculerNoteTotale();
+                                        console.log('✅ Note finale recalculée');
+                                    }
+                                }, 200);
                             }
-                        });
+                        }, 100); // Vérifier toutes les 100ms
+                    };
 
-                        // Charger les options d'affichage
-                        if (evaluation.optionsAffichage) {
-                            document.getElementById('afficherDescription1').checked = evaluation.optionsAffichage.description;
-                            document.getElementById('afficherObjectif1').checked = evaluation.optionsAffichage.objectif;
-                            document.getElementById('afficherTache1').checked = evaluation.optionsAffichage.tache;
-                            document.getElementById('afficherAdresse1').checked = evaluation.optionsAffichage.adresse;
-                            document.getElementById('afficherContexte1').checked = evaluation.optionsAffichage.contexte;
-                        }
+                    // Charger les options d'affichage
+                    if (evaluation.optionsAffichage) {
+                        document.getElementById('afficherDescription1').checked = evaluation.optionsAffichage.description;
+                        document.getElementById('afficherObjectif1').checked = evaluation.optionsAffichage.objectif;
+                        document.getElementById('afficherTache1').checked = evaluation.optionsAffichage.tache;
+                        document.getElementById('afficherAdresse1').checked = evaluation.optionsAffichage.adresse;
+                        document.getElementById('afficherContexte1').checked = evaluation.optionsAffichage.contexte;
+                    }
 
-                        // Charger la rétroaction finale
-                        const retroaction = document.getElementById('retroactionFinale1');
-                        if (retroaction) {
-                            retroaction.value = evaluation.retroactionFinale || '';
-                        }
+                    // Charger la rétroaction finale
+                    const retroaction = document.getElementById('retroactionFinale1');
+                    if (retroaction) {
+                        retroaction.value = evaluation.retroactionFinale || '';
+                    }
 
-                        // Stocker l'ID de l'évaluation en cours de modification
-                        if (!window.evaluationEnCours) {
-                            window.evaluationEnCours = {};
-                        }
-                        window.evaluationEnCours.idModification = evaluationId;
+                    // evaluationEnCours a déjà été initialisé plus haut (avant les événements)
+                    // Afficher l'indicateur de mode modification
+                    afficherIndicateurModeModification(evaluation);
 
-                        // Afficher l'indicateur de mode modification
-                        afficherIndicateurModeModification(evaluation);
+                    // Lancer le chargement des critères avec vérification active
+                    attendreEtChargerCriteres();
 
-                        afficherNotificationSucces('Évaluation chargée - Vous pouvez maintenant la modifier');
-                    }, 500);
+                    afficherNotificationSucces('Évaluation chargée - Vous pouvez maintenant la modifier');
                 }, 300);
             }, 300);
         }, 300);
@@ -2277,7 +2386,8 @@ function sauvegarderEvaluationModifiee() {
         });
     }
 
-    // Mettre à jour l'évaluation existante
+    // Mettre à jour l'évaluation existante avec horodatage
+    const maintenant = new Date();
     evaluations[indexEval] = {
         ...evaluations[indexEval], // Garder l'ID et la date originale
         etudiantDA: etudiantDA,
@@ -2289,7 +2399,8 @@ function sauvegarderEvaluationModifiee() {
         grilleNom: grille ? grille.nom : '',
         echelleId: document.getElementById('selectEchelle1').value,
         cartoucheId: document.getElementById('selectCartoucheEval').value,
-        dateModification: new Date().toISOString(),
+        dateModification: maintenant.toISOString(),
+        heureModification: maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }),
         statutRemise: document.getElementById('remiseProduction1').value,
         criteres: criteres,
         noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
@@ -2479,5 +2590,339 @@ function supprimerEvaluation(evaluationId) {
     // Recharger la liste
     if (typeof chargerListeEvaluationsRefonte === 'function') {
         chargerListeEvaluationsRefonte();
+    }
+}
+
+/* ===============================
+   📚 BANQUE D'ÉVALUATIONS
+   Système de recherche et chargement d'évaluations
+   =============================== */
+
+/**
+ * Ouvre le modal de la banque d'évaluations
+ */
+function ouvrirBanqueEvaluations() {
+    const modal = document.getElementById('modalBanqueEvaluations');
+    if (!modal) return;
+
+    // Charger les filtres
+    chargerFiltresBanqueEvaluations();
+
+    // Afficher les évaluations
+    filtrerBanqueEvaluations();
+
+    modal.style.display = 'block';
+}
+
+/**
+ * Ferme le modal de la banque d'évaluations
+ */
+function fermerBanqueEvaluations() {
+    const modal = document.getElementById('modalBanqueEvaluations');
+    if (modal) modal.style.display = 'none';
+}
+
+/**
+ * Charge les options de filtres
+ */
+function chargerFiltresBanqueEvaluations() {
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+
+    // Filtre étudiants
+    const selectEtudiant = document.getElementById('filtreBanqueEtudiant');
+    if (selectEtudiant) {
+        const etudiantsAvecEval = [...new Set(evaluations.map(e => e.etudiantDA))];
+        selectEtudiant.innerHTML = '<option value="">Tous les étudiants</option>';
+
+        etudiantsAvecEval.forEach(da => {
+            const etudiant = etudiants.find(e => e.da === da);
+            if (etudiant) {
+                const option = document.createElement('option');
+                option.value = da;
+                option.textContent = `${etudiant.nom}, ${etudiant.prenom}`;
+                selectEtudiant.appendChild(option);
+            }
+        });
+    }
+
+    // Filtre productions
+    const selectProduction = document.getElementById('filtreBanqueProduction');
+    if (selectProduction) {
+        const productionsAvecEval = [...new Set(evaluations.map(e => e.productionId))];
+        selectProduction.innerHTML = '<option value="">Toutes les productions</option>';
+
+        productionsAvecEval.forEach(id => {
+            const production = productions.find(p => p.id === id);
+            if (production) {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = production.titre || production.nom;
+                selectProduction.appendChild(option);
+            }
+        });
+    }
+}
+
+/**
+ * Filtre et affiche les évaluations selon les critères sélectionnés
+ */
+function filtrerBanqueEvaluations() {
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+
+    // Récupérer les filtres
+    const filtreEtudiant = document.getElementById('filtreBanqueEtudiant')?.value || '';
+    const filtreProduction = document.getElementById('filtreBanqueProduction')?.value || '';
+    const tri = document.getElementById('triBanqueEvaluation')?.value || 'date-desc';
+
+    // Filtrer
+    let evaluationsFiltrees = evaluations.filter(eval => {
+        if (filtreEtudiant && eval.etudiantDA !== filtreEtudiant) return false;
+        if (filtreProduction && eval.productionId !== filtreProduction) return false;
+        return true;
+    });
+
+    // Trier
+    evaluationsFiltrees.sort((a, b) => {
+        switch (tri) {
+            case 'date-desc':
+                return new Date(b.dateEvaluation) - new Date(a.dateEvaluation);
+            case 'date-asc':
+                return new Date(a.dateEvaluation) - new Date(b.dateEvaluation);
+            case 'etudiant-asc':
+                return a.etudiantNom.localeCompare(b.etudiantNom);
+            case 'production-asc':
+                return a.productionNom.localeCompare(b.productionNom);
+            case 'note-desc':
+                return b.noteFinale - a.noteFinale;
+            case 'note-asc':
+                return a.noteFinale - b.noteFinale;
+            default:
+                return 0;
+        }
+    });
+
+    // Afficher
+    afficherListeBanqueEvaluations(evaluationsFiltrees);
+}
+
+/**
+ * Affiche la liste filtrée des évaluations
+ */
+function afficherListeBanqueEvaluations(evaluations) {
+    const conteneur = document.getElementById('listeBanqueEvaluations');
+    if (!conteneur) return;
+
+    if (evaluations.length === 0) {
+        conteneur.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune évaluation trouvée avec ces critères.</p>';
+        return;
+    }
+
+    const html = evaluations.map(eval => {
+        const dateEval = new Date(eval.dateEvaluation).toLocaleDateString('fr-CA');
+        const heureEval = eval.heureEvaluation || new Date(eval.dateEvaluation).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+        const estRemplacee = eval.remplaceeParId ? true : false;
+        const estReprise = eval.repriseDeId ? true : false;
+
+        return `
+            <div class="carte" style="margin-bottom: 15px; ${estRemplacee ? 'opacity: 0.6; border-left: 3px solid #999;' : ''}">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0 0 10px 0;">
+                            ${echapperHtml(eval.etudiantNom)}
+                            ${eval.verrouillee ? '<span style="color: #ff9800; margin-left: 8px;">🔒</span>' : ''}
+                            ${estReprise ? '<span style="color: #9c27b0; margin-left: 8px;" title="Jeton de reprise appliqué">♻️</span>' : ''}
+                            ${estRemplacee ? '<span style="color: #999; margin-left: 8px;" title="Évaluation remplacée">⏸️</span>' : ''}
+                        </h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: #666; font-size: 0.9rem;">
+                            <div><strong>Production:</strong> ${echapperHtml(eval.productionNom)}</div>
+                            <div><strong>Grille:</strong> ${echapperHtml(eval.grilleNom)}</div>
+                            <div><strong>Note:</strong> ${eval.niveauFinal} (${Math.round(eval.noteFinale)}%)</div>
+                            <div><strong>Date:</strong> ${dateEval} à ${heureEval}</div>
+                        </div>
+                        ${estRemplacee ? `
+                            <div style="margin-top: 10px; padding: 8px; background: #f5f5f5; border-radius: 4px; font-size: 0.85rem; color: #666;">
+                                ⏸️ Cette évaluation a été remplacée par un jeton de reprise et ne compte plus dans les indices
+                            </div>
+                        ` : ''}
+                        ${estReprise ? `
+                            <div style="margin-top: 10px; padding: 8px; background: #f3e5f5; border-radius: 4px; font-size: 0.85rem; color: #7b1fa2;">
+                                🎫 Jeton de reprise appliqué - Remplace l'évaluation précédente
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div style="margin-left: 20px;">
+                        <button class="btn btn-principal" onclick="chargerEvaluationDepuisBanque('${eval.id}')" style="padding: 8px 16px; white-space: nowrap;">
+                            📥 Charger
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    conteneur.innerHTML = html;
+}
+
+/**
+ * Charge une évaluation depuis la banque dans le formulaire
+ * @param {string} evaluationId - ID de l'évaluation à charger
+ */
+function chargerEvaluationDepuisBanque(evaluationId) {
+    // Utiliser la fonction existante modifierEvaluation
+    fermerBanqueEvaluations();
+    modifierEvaluation(evaluationId);
+}
+
+/* ===============================
+   🎫 SYSTÈME DE JETONS DE REPRISE
+   =============================== */
+
+/**
+ * Ouvre le modal pour appliquer un jeton de reprise
+ */
+function ouvrirModalJetonReprise() {
+    const modal = document.getElementById('modalJetonReprise');
+    if (!modal) return;
+
+    // Charger la liste des évaluations pouvant bénéficier d'un jeton
+    chargerListeEvaluationsJeton();
+
+    modal.style.display = 'block';
+}
+
+/**
+ * Ferme le modal de jeton de reprise
+ */
+function fermerModalJetonReprise() {
+    const modal = document.getElementById('modalJetonReprise');
+    if (modal) modal.style.display = 'none';
+}
+
+/**
+ * Charge la liste des évaluations éligibles pour un jeton de reprise
+ */
+function chargerListeEvaluationsJeton() {
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const select = document.getElementById('selectEvaluationJeton');
+
+    if (!select) return;
+
+    // Filtrer les évaluations non remplacées et non verrouillées
+    const evaluationsEligibles = evaluations
+        .filter(e => !e.remplaceeParId) // Pas déjà remplacée
+        .sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+
+    select.innerHTML = '<option value="">-- Sélectionnez une évaluation --</option>';
+
+    evaluationsEligibles.forEach(eval => {
+        const dateEval = new Date(eval.dateEvaluation).toLocaleDateString('fr-CA');
+        const option = document.createElement('option');
+        option.value = eval.id;
+        option.textContent = `${eval.etudiantNom} - ${eval.productionNom} - ${eval.niveauFinal} (${dateEval})`;
+        select.appendChild(option);
+    });
+}
+
+/**
+ * Affiche les détails de l'évaluation sélectionnée pour le jeton
+ */
+function afficherDetailsEvaluationJeton() {
+    const select = document.getElementById('selectEvaluationJeton');
+    const conteneur = document.getElementById('detailsEvaluationJeton');
+
+    if (!select || !conteneur) return;
+
+    const evaluationId = select.value;
+    if (!evaluationId) {
+        conteneur.style.display = 'none';
+        return;
+    }
+
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluation = evaluations.find(e => e.id === evaluationId);
+
+    if (!evaluation) return;
+
+    const dateEval = new Date(evaluation.dateEvaluation).toLocaleString('fr-CA');
+
+    conteneur.innerHTML = `
+        <h4 style="margin-top: 0;">Détails de l'évaluation sélectionnée</h4>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+            <div><strong>Étudiant:</strong> ${echapperHtml(evaluation.etudiantNom)}</div>
+            <div><strong>Production:</strong> ${echapperHtml(evaluation.productionNom)}</div>
+            <div><strong>Grille:</strong> ${echapperHtml(evaluation.grilleNom)}</div>
+            <div><strong>Cartouche:</strong> ${echapperHtml(obtenirNomCartouche(evaluation.cartoucheId, evaluation.grilleId))}</div>
+            <div><strong>Note:</strong> ${evaluation.niveauFinal} (${Math.round(evaluation.noteFinale)}%)</div>
+            <div><strong>Date:</strong> ${dateEval}</div>
+        </div>
+        <div style="padding: 10px; background: #e3f2fd; border-radius: 4px; font-size: 0.9rem;">
+            <strong>Critères évalués:</strong> ${evaluation.criteres.length} critères
+        </div>
+    `;
+
+    conteneur.style.display = 'block';
+}
+
+/**
+ * Applique un jeton de reprise à l'évaluation sélectionnée
+ * Crée un duplicata, marque l'originale comme remplacée, et charge la nouvelle dans le formulaire
+ */
+function appliquerJetonReprise() {
+    const select = document.getElementById('selectEvaluationJeton');
+    const evaluationId = select?.value;
+
+    if (!evaluationId) {
+        afficherNotificationErreur('Erreur', 'Veuillez sélectionner une évaluation');
+        return;
+    }
+
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const indexOriginal = evaluations.findIndex(e => e.id === evaluationId);
+
+    if (indexOriginal === -1) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    const evaluationOriginale = evaluations[indexOriginal];
+
+    // Créer le duplicata avec un nouvel ID
+    const nouvelleEvaluation = {
+        ...evaluationOriginale,
+        id: 'EVAL_REPRISE_' + Date.now(),
+        dateEvaluation: new Date().toISOString(),
+        repriseDeId: evaluationOriginale.id, // Lien vers l'originale
+        jetonRepriseApplique: true,
+        dateApplicationJeton: new Date().toISOString()
+    };
+
+    // Marquer l'originale comme remplacée
+    evaluations[indexOriginal].remplaceeParId = nouvelleEvaluation.id;
+    evaluations[indexOriginal].dateRemplacement = new Date().toISOString();
+
+    // Ajouter la nouvelle évaluation
+    evaluations.push(nouvelleEvaluation);
+
+    // Sauvegarder
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        return;
+    }
+
+    afficherNotificationSucces(`Jeton de reprise appliqué pour ${evaluationOriginale.etudiantNom}`);
+
+    // Fermer le modal
+    fermerModalJetonReprise();
+
+    // Charger la nouvelle évaluation dans le formulaire pour modification
+    setTimeout(() => {
+        modifierEvaluation(nouvelleEvaluation.id);
+    }, 500);
+
+    // Recalculer les indices
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
     }
 }
