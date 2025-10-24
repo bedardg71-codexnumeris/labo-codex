@@ -1,8 +1,9 @@
 /* ===============================
-   SYSTÈME DE DESIGN - Beta 0.50
-   Index: 50 10-10-2025a
+   SYSTÈME DE DESIGN - Beta 0.60
+   Index: 60 24-10-2025a
    Convention: 100% français
-   Dernière mise à jour: 16-10-2025
+   Palette: "Nuit Élégante" (Terracotta)
+   Dernière mise à jour: 24-10-2025
    =============================== */
 
 /* ===============================
@@ -53,8 +54,8 @@
     --sous-nav-bg-simulation: #dce8f5;
     --sous-nav-bg-anonymisation: #e0f0f0;
 
-    /* === BOUTONS D'ACTION === */
-    --btn-principal: #065dbb;
+    /* === BOUTONS D'ACTION - Palette Nuit Élégante === */
+    --btn-principal: #032e5c;
     --btn-principal-hover: #054a95;
     --btn-ajouter: #1e5a4a;
     --btn-ajouter-hover: #165040;
@@ -62,8 +63,8 @@
     --btn-modifier-hover: #3a2a5a;
     --btn-confirmer: #1e5a4a;
     --btn-confirmer-hover: #165040;
-    --btn-annuler: #7a5a1a;
-    --btn-annuler-hover: #6a4a10;
+    --btn-annuler: #8a4a2a;
+    --btn-annuler-hover: #7a3a1a;
     --btn-supprimer: #8a2a2a;
     --btn-supprimer-hover: #7a1a1a;
 
@@ -75,6 +76,57 @@
     --risque-eleve: #fd7e14;
     --risque-tres-eleve: #dc3545;
     --risque-critique: #721c24;
+
+    /* === COULEURS GRISES === */
+    --gris-tres-fonce: #222222;
+    --gris-fonce: #333333;
+    --gris-moyen: #666666;
+    --gris-clair: #999999;
+    --gris-tres-clair: #cccccc;
+    --gris-tres-pale: #f9f9f9;
+
+    /* === BORDURES === */
+    --bordure-claire: #dddddd;
+    --bordure-moyenne: #cccccc;
+
+    /* === ALERTES - Attention (orange/terracotta) === */
+    --alerte-fond-attention: #fff8f0;
+    --alerte-bordure-attention: #ff6b35;
+    --alerte-texte-attention: #8a4a2a;
+
+    /* === ALERTES - Information (bleue) === */
+    --alerte-fond-information: #e8f2fd;
+    --alerte-bordure-information: #032e5c;
+    --alerte-texte-information: #032e5c;
+
+    /* === ALERTES - Succès (sarcelle) === */
+    --alerte-fond-succes: #e8f5f2;
+    --alerte-bordure-succes: #1e5a4a;
+    --alerte-texte-succes: #165040;
+
+    /* === ALERTES - Erreur (rouge) === */
+    --alerte-fond-erreur: #f8e8e8;
+    --alerte-bordure-erreur: #8a2a2a;
+    --alerte-texte-erreur: #7a1a1a;
+
+    /* === ÉTATS FORMULAIRES === */
+    --etat-erreur-fond: #fff8f0;
+    --etat-erreur-bordure: #ff6b35;
+    --etat-erreur-texte: #8a4a2a;
+    --etat-valide-fond: #e8f5f2;
+    --etat-valide-bordure: #1e5a4a;
+    --etat-valide-texte: #165040;
+    --etat-verrouille-fond: #e9ecef;
+    --etat-verrouille-bordure: #6c757d;
+    --etat-verrouille-texte: #495057;
+
+    /* === BADGES - Statuts d'évaluation === */
+    --badge-evalue-fond: #e8f5f2;
+    --badge-evalue-texte: #165040;
+    --badge-evalue-bordure: #b3d9cf;
+    --badge-non-evalue-fond: #f8f9fa;
+    --badge-non-evalue-texte: #6c757d;
+    --badge-non-evalue-bordure: #dee2e6;
 
     /* === ESPACEMENT === */
     --espacement-petit: 10px;
@@ -985,6 +1037,77 @@ input[type="number"].controle-form {
 }
 
 /* ===============================
+   ALERTES ET BOÎTES D'INFORMATION
+   =============================== */
+
+.alerte {
+    padding: 15px 20px;
+    border-radius: 8px;
+    border-left: 4px solid;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.alerte-attention {
+    background: var(--alerte-fond-attention);
+    border-color: var(--alerte-bordure-attention);
+    color: var(--alerte-texte-attention);
+}
+
+.alerte-attention strong,
+.alerte-attention h4 {
+    color: var(--alerte-texte-attention);
+}
+
+.alerte-information {
+    background: var(--alerte-fond-information);
+    border-color: var(--alerte-bordure-information);
+    color: var(--alerte-texte-information);
+}
+
+.alerte-information strong,
+.alerte-information h4 {
+    color: var(--alerte-texte-information);
+}
+
+.alerte-succes {
+    background: var(--alerte-fond-succes);
+    border-color: var(--alerte-bordure-succes);
+    color: var(--alerte-texte-succes);
+}
+
+.alerte-succes strong,
+.alerte-succes h4 {
+    color: var(--alerte-texte-succes);
+}
+
+.alerte-erreur {
+    background: var(--alerte-fond-erreur);
+    border-color: var(--alerte-bordure-erreur);
+    color: var(--alerte-texte-erreur);
+}
+
+.alerte-erreur strong,
+.alerte-erreur h4 {
+    color: var(--alerte-texte-erreur);
+}
+
+.alerte h4 {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.alerte p {
+    margin: 8px 0 0 0;
+}
+
+.alerte ul {
+    margin: 8px 0 0 20px;
+}
+
+/* ===============================
    FORMULAIRES
    =============================== */
 
@@ -1024,6 +1147,40 @@ input[type="number"].controle-form {
 #tbody-saisie-presences input[type="number"]:not(:placeholder-shown) {
     background-color: white;
     border: 1px solid var(--bleu-leger);
+}
+
+/* ===============================
+   ÉTATS DE VALIDATION FORMULAIRES
+   =============================== */
+
+.etat-erreur {
+    padding: 16px 24px;
+    border-radius: 8px;
+    border: 2px solid var(--etat-erreur-bordure);
+    background: var(--etat-erreur-fond);
+    color: var(--etat-erreur-texte);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.etat-valide {
+    padding: 16px 24px;
+    border-radius: 8px;
+    border: 2px solid var(--etat-valide-bordure);
+    background: var(--etat-valide-fond);
+    color: var(--etat-valide-texte);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.etat-verrouille {
+    padding: 16px 24px;
+    border-radius: 8px;
+    border: 2px solid var(--etat-verrouille-bordure);
+    background: var(--etat-verrouille-fond);
+    color: var(--etat-verrouille-texte);
+    text-align: center;
+    transition: all 0.3s ease;
 }
 
 /* ===============================
@@ -1106,30 +1263,110 @@ input[type="number"].controle-form {
 }
 
 /* ===============================
+   MODIFICATEURS DE BOUTONS
+   =============================== */
+
+/* Tailles alternatives */
+.btn-compact {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.btn-tres-compact {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+}
+
+.btn-large {
+    padding: 12px 24px;
+    font-size: 1rem;
+}
+
+/* Largeur */
+.btn-pleine-largeur {
+    width: 100%;
+}
+
+.btn-largeur-auto {
+    width: auto;
+    flex: 1;
+}
+
+/* Espacement */
+.btn-sans-marge {
+    margin: 0;
+}
+
+.btn-marge-droite {
+    margin-right: 10px;
+}
+
+/* ===============================
    MODAUX
    =============================== */
 
 .modal-overlay {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    z-index: 9999;
+    overflow-y: auto;
+}
+
+.modal-overlay.actif {
+    display: block;
 }
 
 .modal-contenu {
+    max-width: 800px;
+    margin: 50px auto;
     background: white;
+    border-radius: 12px;
     padding: 30px;
-    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-contenu.modal-large {
+    max-width: 1200px;
+}
+
+.modal-contenu.modal-compact {
     max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
+    margin: 100px auto;
+}
+
+.modal-fermer {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--gris-moyen);
+    transition: color 0.2s;
+}
+
+.modal-fermer:hover {
+    color: var(--gris-fonce);
+}
+
+.modal-titre {
+    margin: 0 0 20px 0;
+    color: var(--bleu-principal);
+    font-size: 1.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
 }
 
 /* ===============================
@@ -1237,6 +1474,226 @@ input[type="number"].controle-form {
         transform: translateX(0);
         opacity: 1;
     }
+}
+
+/* ===============================
+   GRILLES RÉUTILISABLES
+   =============================== */
+
+.grille-2-colonnes {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.grille-3-colonnes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.grille-4-colonnes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.grille-5-colonnes {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+}
+
+/* Grilles avec colonnes personnalisées */
+.grille-filtres {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr;
+    gap: 15px;
+    align-items: end;
+}
+
+.grille-saisie-presences {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 20px;
+}
+
+.grille-evaluation-principale {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 25px;
+}
+
+.grille-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+}
+
+/* Variantes d'espacement */
+.grille-gap-petit {
+    gap: 8px;
+}
+
+.grille-gap-moyen {
+    gap: 15px;
+}
+
+.grille-gap-grand {
+    gap: 25px;
+}
+
+/* Alignement */
+.grille-alignement-fin {
+    align-items: end;
+}
+
+.grille-alignement-centre {
+    align-items: center;
+}
+
+/* ===============================
+   COMPOSANTS SPÉCIALISÉS
+   =============================== */
+
+/* Séparateur horizontal */
+.separateur-horizontal {
+    margin: 15px 0;
+    border: none;
+    border-top: 1px solid var(--bordure-claire);
+}
+
+/* Boîte note finale */
+.boite-note-finale {
+    margin-top: 20px;
+    padding: 12px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+}
+
+.boite-note-finale .label {
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+    margin-bottom: 5px;
+}
+
+.boite-note-finale .valeur {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--bleu-principal);
+}
+
+.boite-note-finale .niveau {
+    font-size: 1.2rem;
+    margin-top: 5px;
+    color: var(--gris-moyen);
+}
+
+/* Zone de critères d'évaluation */
+.zone-criteres {
+    padding: 15px;
+    background: var(--gris-tres-pale);
+    border-radius: 8px;
+}
+
+.zone-criteres h4 {
+    margin: 0 0 15px 0;
+    color: var(--gris-fonce);
+}
+
+.zone-criteres .conteneur-liste {
+    max-height: 750px;
+    overflow-y: auto;
+}
+
+/* Zone de rétroaction */
+.zone-retroaction {
+    padding: 15px;
+    background: var(--gris-tres-pale);
+    border-radius: 8px;
+}
+
+.zone-retroaction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.zone-retroaction h4 {
+    margin: 0;
+    color: var(--gris-fonce);
+}
+
+/* Labels de formulaire standardisés */
+.label-formulaire {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--bleu-principal);
+    font-size: 0.9rem;
+}
+
+/* Conteneur de boutons en groupe */
+.groupe-boutons-colonne {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.groupe-boutons-ligne {
+    display: flex;
+    gap: 8px;
+}
+
+/* Indicateur de verrouillage */
+.indicateur-verrouillage {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.indicateur-verrouillage .icone {
+    font-size: 1rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.indicateur-verrouillage .icone-inactive {
+    color: var(--gris-clair);
+}
+
+.indicateur-verrouillage .icone-active {
+    color: var(--bleu-principal);
+}
+
+/* ===============================
+   BADGES - Statuts d'évaluation
+   =============================== */
+
+.badge-statut {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-block;
+    border: 1px solid;
+}
+
+.badge-statut.evalue {
+    background: var(--badge-evalue-fond);
+    color: var(--badge-evalue-texte);
+    border-color: var(--badge-evalue-bordure);
+}
+
+.badge-statut.non-evalue {
+    background: var(--badge-non-evalue-fond);
+    color: var(--badge-non-evalue-texte);
+    border-color: var(--badge-non-evalue-bordure);
 }
 
 /* ===============================
