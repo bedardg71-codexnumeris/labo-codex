@@ -926,16 +926,15 @@
                     <p class="text-muted">Enregistrer les présences pour une séance</p>
 
                     <!-- Avertissement si format non configuré -->
-                    <div id="alerteFormatHoraire"
-                        style="display: none; background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
-                        <strong style="color: #856404;">⚠️ Configuration requise</strong>
-                        <p style="margin: 8px 0 0 0; color: #856404; font-size: 0.95rem;">
+                    <div id="alerteFormatHoraire" class="alerte alerte-attention" style="display: none;">
+                        <h4>⚠️ Configuration requise</h4>
+                        <p>
                             Le format horaire n'est pas configuré. La durée par défaut est fixée à <strong>2h par
                                 séance</strong>.
                             <br>Pour définir le format exact (2×2h ou 1×4h), veuillez configurer l'horaire dans
                             <a href="#"
                                 onclick="afficherSection('reglages'); afficherSousSection('reglages-horaire'); return false;"
-                                style="color: #856404; text-decoration: underline; font-weight: 600;">Réglages >
+                                style="text-decoration: underline; font-weight: 600;">Réglages >
                                 Horaire</a>.
                         </p>
                     </div>
@@ -947,32 +946,32 @@
 
                     <!-- Contrôles de saisie -->
                     <div class="carte" style="margin-bottom: 20px;">
-                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px;">
+                        <div class="grille-saisie-presences">
                             <div class="groupe-form">
-                                <label for="date-cours">Date du cours</label>
+                                <label for="date-cours" class="label-formulaire">Date du cours</label>
                                 <div style="display: flex; gap: 8px; align-items: center;">
                                     <button id="btn-cours-precedent" onclick="allerCoursPrecedent()"
-                                        class="btn btn-secondaire" style="padding: 8px 12px; flex-shrink: 0;">
+                                        class="btn btn-secondaire btn-compact" style="flex-shrink: 0;">
                                         ← Précédent
                                     </button>
                                     <input type="date" id="date-cours" class="controle-form"
                                         onchange="initialiserSaisiePresences(); mettreAJourBoutonsNavigation();"
                                         style="flex: 1;">
                                     <button id="btn-cours-suivant" onclick="allerCoursSuivant()"
-                                        class="btn btn-secondaire" style="padding: 8px 12px; flex-shrink: 0;">
+                                        class="btn btn-secondaire btn-compact" style="flex-shrink: 0;">
                                         Suivant →
                                     </button>
                                 </div>
                             </div>
                             <div class="groupe-form">
-                                <label for="selectGroupePresences">Filtrer par groupe</label>
+                                <label for="selectGroupePresences" class="label-formulaire">Filtrer par groupe</label>
                                 <select id="selectGroupePresences" class="controle-form"
                                     onchange="initialiserSaisiePresences()">
                                     <option value="">Tous les groupes</option>
                                 </select>
                             </div>
                             <div class="groupe-form">
-                                <label for="selectTriPresences">Trier par</label>
+                                <label for="selectTriPresences" class="label-formulaire">Trier par</label>
                                 <select id="selectTriPresences" class="controle-form"
                                     onchange="initialiserSaisiePresences()">
                                     <option value="nom">Ordre alphabétique (nom)</option>
@@ -1004,13 +1003,13 @@
                                             <div
                                                 style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px; align-items: center;">
                                                 <button id="btn-tous-presents" onclick="remplirTousPresents()"
-                                                    class="btn btn-principal"
-                                                    style="padding: 4px 12px; font-size: 0.85rem; font-weight: 600;">
+                                                    class="btn btn-principal btn-compact"
+                                                    style="font-weight: 600;">
                                                     Tous 2h
                                                 </button>
                                                 <button id="btn-reinit-saisie" onclick="reinitialiserSaisie()"
-                                                    class="btn btn-secondaire"
-                                                    style="padding: 4px 12px; font-size: 1rem;">
+                                                    class="btn btn-secondaire btn-compact"
+                                                    style="font-size: 1rem;">
                                                     ↻
                                                 </button>
                                             </div>
@@ -1073,8 +1072,7 @@
                 <!-- Filtres -->
                 <div class="carte">
                     <h3>🔍 Filtres</h3>
-                    <div
-                        style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr; gap: 15px; align-items: end;">
+                    <div class="grille-filtres">
                         <div class="groupe-form">
                             <label for="filtre-groupe-eval">Filtrer par groupe</label>
                             <select id="filtre-groupe-eval" class="controle-form" onchange="filtrerListeEvaluations()">
@@ -1111,8 +1109,8 @@
                                 <option value="risque-desc">Par risque décroissant (↓)</option>
                             </select>
                         </div>
-                        <button class="btn btn-principal" onclick="reinitialiserFiltresEval()"
-                            style="white-space: nowrap; padding: 8px 12px;">
+                        <button class="btn btn-principal btn-compact" onclick="reinitialiserFiltresEval()"
+                            style="white-space: nowrap;">
                             ↻ Réinit.
                         </button>
                     </div>
@@ -1142,7 +1140,7 @@
                 <div class="carte" style="margin-bottom: 20px;">
 
                     <!-- PARTIE HAUTE : 2 colonnes -->
-                    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 25px; margin-bottom: 20px;">
+                    <div class="grille-evaluation-principale" style="margin-bottom: 20px;">
 
                         <!-- COLONNE GAUCHE : PARAMÈTRES DE L'ÉVALUATION -->
                         <div style="padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
