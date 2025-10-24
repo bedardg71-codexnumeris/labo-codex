@@ -1195,7 +1195,8 @@ function chargerListeEvaluationsRefonte() {
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const indicesA = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
-    const indicesCP = JSON.parse(localStorage.getItem('indicesEvaluation') || '{}');
+    // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : portfolio.js génère indicesCP
+    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
 
     // Grouper les évaluations par étudiant
     const evaluationsParEtudiant = {};
@@ -1210,25 +1211,17 @@ function chargerListeEvaluationsRefonte() {
     donneesEvaluationsFiltrees = etudiants.map(etudiant => {
         const evalsEtudiant = evaluationsParEtudiant[etudiant.da] || [];
 
-        // Lire l'indice C - Compatible avec les deux structures
-        let indiceC = 0;
-        if (indicesCP.completion?.sommatif) {
-            // Nouvelle structure
-            indiceC = indicesCP.completion.sommatif[etudiant.da] || 0;
-        } else if (indicesCP[etudiant.da]?.completion !== undefined) {
-            // Ancienne structure (compatibilité)
-            indiceC = indicesCP[etudiant.da].completion || 0;
-        }
-
-        console.log(`Étudiant ${etudiant.da}: C=${(indiceC * 100).toFixed(1)}%`);
-
-        console.log(`Étudiant ${etudiant.da}: C=${indiceC}`);
+        // 🎯 Lire les indices C et P depuis portfolio.js (Single Source of Truth)
+        const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
+        const indiceC = indicesCPEtudiant ? indicesCPEtudiant.C / 100 : 0; // Convertir de 0-100 à 0-1
+        const indiceP = indicesCPEtudiant ? indicesCPEtudiant.P / 100 : 0;
 
         return {
             ...etudiant,
             evaluations: evalsEtudiant,
             indices: {
-                completion: indiceC
+                completion: indiceC,
+                performance: indiceP
             }
         };
     });
@@ -1260,68 +1253,29 @@ function chargerListeEvaluationsRefonte() {
  * @returns {string} HTML du badge
  */
 function genererBadgeCompletion(etudiant) {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
-    const afficherAlternatif = config.affichageTableauBord?.afficherAlternatif || false;
+    // 🎯 Lire depuis la source unique : portfolio.js génère indicesCP
+    // Note : Les indices C et P n'ont pas de distinction sommatif/alternatif (uniquement l'indice A)
+    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
 
-    // Récupérer les indices depuis localStorage
-    const indicesEval = JSON.parse(localStorage.getItem('indicesEvaluation') || '{}');
-
-    let completionSommatif = 0;
-    let completionAlternatif = 0;
-
-    // Lire les indices (compatible avec les deux structures)
-    if (indicesEval.completion?.sommatif) {
-        completionSommatif = indicesEval.completion.sommatif[etudiant.da] || 0;
-        completionAlternatif = indicesEval.completion.alternatif[etudiant.da] || 0;
-    } else if (indicesEval[etudiant.da]?.completion !== undefined) {
-        completionSommatif = indicesEval[etudiant.da].completion || 0;
-        completionAlternatif = completionSommatif; // Fallback
-    }
-
+    // Convertir de pourcentage (0-100) en proportion (0-1)
+    const completion = indicesCPEtudiant ? indicesCPEtudiant.C / 100 : 0;
     const nbArtefacts = etudiant.evaluations.length;
 
-    // Déterminer la couleur selon le taux (utiliser le sommatif par défaut)
-    const tauxPrincipal = afficherSommatif ? completionSommatif : completionAlternatif;
+    // Déterminer la couleur selon le taux de complétion
     let couleurFond = '#e8f5e9'; // Vert clair par défaut
-    if (tauxPrincipal < 0.5) {
+    if (completion < 0.5) {
         couleurFond = '#ffebee'; // Rouge clair
-    } else if (tauxPrincipal < 0.75) {
+    } else if (completion < 0.75) {
         couleurFond = '#fff3e0'; // Orange clair
     }
 
-    // CAS 1 : Afficher LES DEUX (sommatif / alternatif)
-    if (afficherSommatif && afficherAlternatif) {
-        return `
-            <span class="carte-metrique" style="padding:8px 15px; background: ${couleurFond}; border-radius: 6px;">
-                <strong style="font-size: 1.1rem;">C</strong>
-                <span style="font-size: 1.1rem; font-weight: 600; margin-left: 8px;">
-                    ${Math.round(completionSommatif * 100)}% / ${Math.round(completionAlternatif * 100)}%
-                </span>
-                <span style="font-size: 0.75rem; color: #666; margin-left: 5px;">(${nbArtefacts} artefacts)</span>
-            </span>
-        `;
-    }
-
-    // CAS 2 : Afficher SEULEMENT alternatif
-    if (afficherAlternatif) {
-        return `
-            <span class="carte-metrique" style="padding:8px 15px; background: ${couleurFond}; border-radius: 6px;">
-                <strong style="font-size: 1.1rem;">C (PAN)</strong>
-                <span style="font-size: 1.1rem; font-weight: 600; margin-left: 8px;">
-                    ${Math.round(completionAlternatif * 100)}%
-                </span>
-                <span style="font-size: 0.75rem; color: #666; margin-left: 5px;">(${nbArtefacts} artefacts)</span>
-            </span>
-        `;
-    }
-
-    // CAS 3 : Afficher SEULEMENT sommatif (par défaut)
+    // Affichage unique (les indices C et P n'ont pas de modalité sommatif/alternatif)
     return `
         <span class="carte-metrique" style="padding:8px 15px; background: ${couleurFond}; border-radius: 6px;">
             <strong style="font-size: 1.1rem;">C</strong>
             <span style="font-size: 1.1rem; font-weight: 600; margin-left: 8px;">
-                ${Math.round(completionSommatif * 100)}%
+                ${Math.round(completion * 100)}%
             </span>
             <span style="font-size: 0.75rem; color: #666; margin-left: 5px;">(${nbArtefacts} artefacts)</span>
         </span>
@@ -1713,17 +1667,36 @@ function mettreAJourStatistiquesEvaluations() {
     const nbEtudiants = etudiants.length;
     const etudiantsEvalues = etudiants.filter(e => e.evaluations.length > 0).length;
 
-    // Calculer le total d'artefacts
+    // 🎯 Calculer le total d'artefacts DONNÉS (même logique que portfolio.js)
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
-    const nbArtefactsAttendus = productions.filter(p =>
-        p.type === 'artefact-portfolio' || p.type === 'production'
-    ).length;
-    const totalArtefactsAttendus = nbEtudiants * nbArtefactsAttendus;
+
+    // Identifier les artefacts-portfolio
+    const artefactsPortfolioIds = new Set(
+        productions
+            .filter(p => p.type === 'artefact-portfolio')
+            .map(a => a.id)
+    );
+
+    // Identifier les artefacts réellement donnés (avec au moins une évaluation)
+    const artefactsDonnes = new Set();
+    evaluations.forEach(evaluation => {
+        if (artefactsPortfolioIds.has(evaluation.productionId)) {
+            artefactsDonnes.add(evaluation.productionId);
+        }
+    });
+
+    const nbArtefactsDonnes = artefactsDonnes.size;
+    const totalArtefactsAttendus = nbEtudiants * nbArtefactsDonnes;
     const totalArtefactsRemis = etudiants.reduce((sum, e) => sum + e.evaluations.length, 0);
 
-    // Calculer les moyennes
-    const moyenneC = etudiants.reduce((sum, e) => sum + e.indices.completion, 0) / nbEtudiants;
-    const moyenneP = etudiants.reduce((sum, e) => sum + e.indices.performance, 0) / nbEtudiants;
+    // Calculer les moyennes C et P
+    const moyenneC = nbEtudiants > 0
+        ? etudiants.reduce((sum, e) => sum + (e.indices.completion || 0), 0) / nbEtudiants
+        : 0;
+    const moyenneP = nbEtudiants > 0
+        ? etudiants.reduce((sum, e) => sum + (e.indices.performance || 0), 0) / nbEtudiants
+        : 0;
 
     // Mettre à jour l'affichage
     const statEtudiants = document.getElementById('stat-etudiants-evalues');
