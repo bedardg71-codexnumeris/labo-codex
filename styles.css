@@ -1040,12 +1040,17 @@ input[type="number"].controle-form {
     transition: all 0.2s;
 }
 
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .btn-principal {
     background: var(--btn-principal);
     color: white;
 }
 
-.btn-principal:hover {
+.btn-principal:hover:not(:disabled) {
     background: var(--btn-principal-hover);
 }
 
@@ -1054,7 +1059,7 @@ input[type="number"].controle-form {
     color: white;
 }
 
-.btn-ajouter:hover {
+.btn-ajouter:hover:not(:disabled) {
     background: var(--btn-ajouter-hover);
 }
 
@@ -1063,7 +1068,7 @@ input[type="number"].controle-form {
     color: white;
 }
 
-.btn-modifier:hover {
+.btn-modifier:hover:not(:disabled) {
     background: var(--btn-modifier-hover);
 }
 
@@ -1072,7 +1077,7 @@ input[type="number"].controle-form {
     color: white;
 }
 
-.btn-confirmer:hover {
+.btn-confirmer:hover:not(:disabled) {
     background: var(--btn-confirmer-hover);
 }
 
@@ -1081,7 +1086,7 @@ input[type="number"].controle-form {
     color: white;
 }
 
-.btn-annuler:hover {
+.btn-annuler:hover:not(:disabled) {
     background: var(--btn-annuler-hover);
 }
 
@@ -1090,7 +1095,7 @@ input[type="number"].controle-form {
     color: white;
 }
 
-.btn-supprimer:hover {
+.btn-supprimer:hover:not(:disabled) {
     background: var(--btn-supprimer-hover);
 }
 
