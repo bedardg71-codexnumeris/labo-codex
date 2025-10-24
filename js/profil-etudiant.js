@@ -1791,6 +1791,11 @@ function afficherProfilComplet(da) {
         return;
     }
 
+    // 🔄 Forcer le calcul/mise à jour des indices C et P avant affichage
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+
     // Calculer tous les indices
     const indices = calculerTousLesIndices(da);
     const A = indices.A / 100;
@@ -3324,6 +3329,11 @@ function genererSectionPerformance(da) {
                 auto: true
             };
             localStorage.setItem('portfoliosEleves', JSON.stringify(selectionsPortfolios));
+
+            // 🔄 Recalculer les indices C et P après sélection automatique
+            if (typeof calculerEtStockerIndicesCP === 'function') {
+                calculerEtStockerIndicesCP();
+            }
 
             // Mettre à jour le flag retenu
             artefacts.forEach(art => {

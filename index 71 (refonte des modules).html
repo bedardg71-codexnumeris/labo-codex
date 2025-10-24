@@ -554,26 +554,25 @@
                             <!-- Interventions requises -->
                             <div class="carte-metrique">
                                 <strong id="tb-interventions-requises">0</strong>
-                                <span>Interventions requises</span>
+                                <span>Élèves à risque</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ========== ALERTES PRIORITAIRES ========== -->
-                    <div class="carte" style="border-left: 4px solid var(--risque-critique);">
-                        <h3>🚨 Alertes prioritaires</h3>
+                    <!-- ========== RISQUE D'ÉCHEC ========== -->
+                    <div class="carte">
+                        <h3>📊 Risque d'échec</h3>
 
                         <div
-                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                            <!-- Risque critique -->
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <!-- Risque élevé -->
                             <div
-                                style="background: #fff5f5; padding: 15px; border-radius: 8px; border: 2px solid var(--risque-critique);">
+                                style="background: #fffbf0; padding: 15px; border-radius: 8px; border: 2px solid var(--risque-eleve);">
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <span style="font-size: 0.9rem; color: #666;">Risque critique</span>
-                                    <strong id="tb-risque-critique"
-                                        style="font-size: 1.8rem; color: var(--risque-critique);">0</strong>
+                                    <span style="font-size: 0.9rem; color: #666;">Risque élevé</span>
+                                    <strong id="tb-risque-eleve"
+                                        style="font-size: 1.8rem; color: var(--risque-eleve);">0</strong>
                                 </div>
-                                <small style="color: #666;">RàI Niveau 3</small>
                             </div>
 
                             <!-- Risque très élevé -->
@@ -584,35 +583,16 @@
                                     <strong id="tb-risque-tres-eleve"
                                         style="font-size: 1.8rem; color: var(--risque-tres-eleve);">0</strong>
                                 </div>
-                                <small style="color: #666;">RàI Niveau 2-3</small>
                             </div>
 
-                            <!-- Risque élevé -->
+                            <!-- Risque critique -->
                             <div
-                                style="background: #fffbf0; padding: 15px; border-radius: 8px; border: 2px solid var(--risque-eleve);">
+                                style="background: #fff5f5; padding: 15px; border-radius: 8px; border: 2px solid var(--risque-critique);">
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <span style="font-size: 0.9rem; color: #666;">Risque élevé</span>
-                                    <strong id="tb-risque-eleve"
-                                        style="font-size: 1.8rem; color: var(--risque-eleve);">0</strong>
+                                    <span style="font-size: 0.9rem; color: #666;">Risque critique</span>
+                                    <strong id="tb-risque-critique"
+                                        style="font-size: 1.8rem; color: var(--risque-critique);">0</strong>
                                 </div>
-                                <small style="color: #666;">RàI Niveau 2</small>
-                            </div>
-                        </div>
-
-                        <!-- Message si aucune alerte -->
-                        <div id="tb-aucune-alerte" style="display: none; background: var(--vert-pale); padding: 15px; 
-                 border-radius: 8px; border-left: 4px solid var(--vert-leger); color: var(--vert-leger);">
-                            <strong>✓ Aucune alerte prioritaire</strong>
-                            <p style="margin: 5px 0 0 0; color: #666;">Tous les étudiants sont dans une zone de risque
-                                acceptable.</p>
-                        </div>
-
-                        <!-- Liste des étudiants à risque critique -->
-                        <div id="tb-liste-critique" style="display: none; margin-top: 15px;">
-                            <h4 style="color: var(--risque-critique); margin-bottom: 10px;">Interventions urgentes
-                                requises</h4>
-                            <div id="tb-etudiants-critique" style="display: flex; flex-direction: column; gap: 10px;">
-                                <!-- Généré dynamiquement par JS -->
                             </div>
                         </div>
                     </div>
@@ -624,7 +604,7 @@
                         <div
                             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                             <!-- Stable -->
-                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; 
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px;
                      border-left: 4px solid var(--bleu-principal);">
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <span style="font-size: 0.9rem; color: #666;">Stable</span>
@@ -636,11 +616,10 @@
                                     <div id="tb-barre-stable"
                                         style="height: 100%; background: var(--bleu-principal); width: 0%;"></div>
                                 </div>
-                                <small style="color: #666; margin-top: 5px; display: block;">RàI Niveau 1</small>
                             </div>
 
                             <!-- Défi spécifique -->
-                            <div style="background: #fffbf0; padding: 15px; border-radius: 8px; 
+                            <div style="background: #fffbf0; padding: 15px; border-radius: 8px;
                      border-left: 4px solid var(--risque-modere);">
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <span style="font-size: 0.9rem; color: #666;">Défi spécifique</span>
@@ -652,11 +631,10 @@
                                     <div id="tb-barre-defi"
                                         style="height: 100%; background: var(--risque-modere); width: 0%;"></div>
                                 </div>
-                                <small style="color: #666; margin-top: 5px; display: block;">RàI Niveau 2</small>
                             </div>
 
                             <!-- Blocage émergent -->
-                            <div style="background: #fff8f0; padding: 15px; border-radius: 8px; 
+                            <div style="background: #fff8f0; padding: 15px; border-radius: 8px;
                      border-left: 4px solid var(--risque-eleve);">
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <span style="font-size: 0.9rem; color: #666;">Blocage émergent</span>
@@ -668,11 +646,10 @@
                                     <div id="tb-barre-emergent"
                                         style="height: 100%; background: var(--risque-eleve); width: 0%;"></div>
                                 </div>
-                                <small style="color: #666; margin-top: 5px; display: block;">RàI Niveau 2-3</small>
                             </div>
 
                             <!-- Blocage critique -->
-                            <div style="background: #fff5f5; padding: 15px; border-radius: 8px; 
+                            <div style="background: #fff5f5; padding: 15px; border-radius: 8px;
                      border-left: 4px solid var(--risque-critique);">
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <span style="font-size: 0.9rem; color: #666;">Blocage critique</span>
@@ -684,42 +661,62 @@
                                     <div id="tb-barre-critique"
                                         style="height: 100%; background: var(--risque-critique); width: 0%;"></div>
                                 </div>
-                                <small style="color: #666; margin-top: 5px; display: block;">RàI Niveau 3</small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ========== ACTIONS RECOMMANDÉES ========== -->
+                    <!-- ========== SYSTÈME RÀI ========== -->
                     <div class="carte">
-                        <h3>🎯 Actions recommandées</h3>
+                        <h3>🎯 Système de Réponse à l'intervention (RàI)</h3>
 
-                        <!-- Zone info pédagogique -->
-                        <div style="background: var(--bleu-pale); padding: 15px; border-radius: 8px; 
-                 margin-bottom: 20px; border-left: 4px solid var(--bleu-moyen);">
-                            <p style="margin: 0; color: var(--bleu-moyen);">
-                                <strong>💡 Principe du système RàI :</strong>
-                                Prioriser les interventions selon l'intensité requise pour maximiser l'impact
-                                pédagogique.
-                            </p>
-                        </div>
-
-                        <!-- Top 5 des interventions prioritaires -->
-                        <div id="tb-actions-prioritaires">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">Top 5 des interventions
-                                prioritaires</h4>
-                            <div id="tb-liste-actions" style="display: flex; flex-direction: column; gap: 12px;">
-                                <!-- Généré dynamiquement par JS -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <!-- Niveau 1 -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px;
+                                        border-left: 4px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 0.9rem; color: #666;">Niveau 1</span>
+                                    <div style="display: flex; align-items: baseline; gap: 6px;">
+                                        <strong id="tb-rai-niveau1"
+                                                style="font-size: 1.8rem; color: var(--bleu-principal);">0</strong>
+                                        <span id="tb-rai-niveau1-pct"
+                                              style="font-size: 1rem; color: #666; font-weight: 600;">(0%)</span>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.85rem; color: #666; font-weight: 600;">Stable</div>
+                                <small style="color: #999;">Suivi régulier</small>
                             </div>
-                        </div>
 
-                        <!-- Message si aucune action -->
-                        <div id="tb-aucune-action" style="display: none; text-align: center; padding: 30px; 
-                 background: #f8f9fa; border-radius: 8px; color: #666;">
-                            <p style="font-size: 1.1rem; margin-bottom: 10px;">📭 Aucune donnée disponible</p>
-                            <p style="font-size: 0.9rem;">
-                                Ajoutez des étudiants et saisissez des données de présences et d'évaluations
-                                pour voir apparaître les recommandations.
-                            </p>
+                            <!-- Niveau 2 -->
+                            <div style="background: #fffbf0; padding: 15px; border-radius: 8px;
+                                        border-left: 4px solid var(--risque-modere);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 0.9rem; color: #666;">Niveau 2</span>
+                                    <div style="display: flex; align-items: baseline; gap: 6px;">
+                                        <strong id="tb-rai-niveau2"
+                                                style="font-size: 1.8rem; color: var(--risque-modere);">0</strong>
+                                        <span id="tb-rai-niveau2-pct"
+                                              style="font-size: 1rem; color: #666; font-weight: 600;">(0%)</span>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.85rem; color: #666; font-weight: 600;">Défi / Émergent</div>
+                                <small style="color: #999;">Interventions ciblées</small>
+                            </div>
+
+                            <!-- Niveau 3 -->
+                            <div style="background: #fff5f5; padding: 15px; border-radius: 8px;
+                                        border-left: 4px solid var(--risque-critique);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 0.9rem; color: #666;">Niveau 3</span>
+                                    <div style="display: flex; align-items: baseline; gap: 6px;">
+                                        <strong id="tb-rai-niveau3"
+                                                style="font-size: 1.8rem; color: var(--risque-critique);">0</strong>
+                                        <span id="tb-rai-niveau3-pct"
+                                              style="font-size: 1rem; color: #666; font-weight: 600;">(0%)</span>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.85rem; color: #666; font-weight: 600;">Critique</div>
+                                <small style="color: #999;">Interventions intensives</small>
+                            </div>
                         </div>
                     </div>
 
@@ -773,23 +770,6 @@
                                     Corriger et évaluer les artefacts du portfolio
                                 </div>
                             </button>
-                        </div>
-                    </div>
-
-                    <!-- Distribution des risques -->
-                    <div class="carte" style="margin-top: 20px;">
-                        <h3>📊 Distribution des niveaux de risque (3 derniers artefacts)</h3>
-                        <div id="tb-distribution-risques"
-                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px;">
-                            <!-- Généré dynamiquement -->
-                        </div>
-                    </div>
-
-                    <!-- Alertes prioritaires -->
-                    <div class="carte" style="margin-top: 20px;">
-                        <h3>🚨 Étudiant·es nécessitant une intervention</h3>
-                        <div id="tb-alertes-prioritaires">
-                            <!-- Généré dynamiquement -->
                         </div>
                     </div>
 
@@ -1183,6 +1163,14 @@
                                 </div>
 
                                 <div style="display: flex; gap: 6px;">
+                                    <button class="btn btn-secondaire" onclick="afficherModalReparationEvaluations()"
+                                        style="padding: 6px 10px; font-size: 0.8rem; flex: 1;"
+                                        title="Réparer les évaluations avec critères manquants">
+                                        Réparer
+                                    </button>
+                                </div>
+
+                                <div style="display: flex; gap: 6px;">
                                     <button class="btn btn-principal" onclick="sauvegarderEvaluation()"
                                         style="padding: 6px 10px; font-size: 0.8rem; flex: 1;"
                                         title="Sauvegarder l'évaluation">
@@ -1474,6 +1462,61 @@
                         </button>
                         <button class="btn btn-principal" onclick="appliquerJetonReprise()" style="padding: 10px 20px; background: #9c27b0;">
                             🎫 Appliquer le jeton de reprise
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Réparation des évaluations -->
+            <div id="modalReparationEvaluations" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; overflow-y: auto;">
+                <div style="max-width: 700px; margin: 100px auto; background: white; border-radius: 12px; padding: 30px; position: relative;">
+                    <button onclick="fermerModalReparationEvaluations()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">✕</button>
+
+                    <h2 style="margin-bottom: 20px; color: var(--bleu-principal);">🔧 Réparation des évaluations</h2>
+
+                    <div style="margin-bottom: 25px;">
+                        <h3 style="color: var(--bleu-principal); font-size: 1rem; margin-bottom: 10px;">Qu'est-ce que cette fonction ?</h3>
+                        <p style="color: #666; line-height: 1.6;">
+                            Cette fonction permet de <strong>réparer automatiquement</strong> les évaluations dont les critères n'ont pas été correctement sauvegardés.
+                            Elle extrait les niveaux (I, D, M, E) depuis la rétroaction finale et reconstruit le tableau des critères manquants.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding: 15px; background: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;">
+                        <h3 style="color: #e65100; font-size: 1rem; margin-top: 0; margin-bottom: 10px;">⚠️ Quand l'utiliser ?</h3>
+                        <ul style="margin: 0; padding-left: 20px; color: #666; line-height: 1.8;">
+                            <li><strong>Après une migration de données</strong> depuis une ancienne version</li>
+                            <li><strong>Si des évaluations ne se chargent pas</strong> correctement lors de la modification</li>
+                            <li><strong>Si vous constatez des critères vides</strong> alors que la rétroaction contient les niveaux</li>
+                            <li><strong>Après un problème technique</strong> ayant affecté la sauvegarde</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196F3;">
+                        <h3 style="color: #1565c0; font-size: 1rem; margin-top: 0; margin-bottom: 10px;">ℹ️ Comment ça fonctionne ?</h3>
+                        <ol style="margin: 0; padding-left: 20px; color: #666; line-height: 1.8;">
+                            <li>Analyse toutes les évaluations sauvegardées</li>
+                            <li>Détecte celles avec un tableau <code>criteres</code> vide</li>
+                            <li>Extrait les niveaux depuis la rétroaction (ex: "STRUCTURE (I)")</li>
+                            <li>Reconstruit automatiquement les critères manquants</li>
+                            <li>Sauvegarde les modifications dans le localStorage</li>
+                        </ol>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding: 15px; background: #f1f8e9; border-radius: 8px; border-left: 4px solid #8bc34a;">
+                        <h3 style="color: #558b2f; font-size: 1rem; margin-top: 0; margin-bottom: 10px;">✅ Résultat attendu</h3>
+                        <p style="margin: 0; color: #666; line-height: 1.6;">
+                            Après la réparation, un rapport détaillé affichera le nombre d'évaluations réparées, ignorées (déjà correctes) et échouées.
+                            Les évaluations réparées pourront être modifiées normalement avec tous leurs critères restaurés.
+                        </p>
+                    </div>
+
+                    <div style="text-align: right; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                        <button class="btn" onclick="fermerModalReparationEvaluations()" style="padding: 10px 20px; margin-right: 10px;">
+                            Annuler
+                        </button>
+                        <button class="btn btn-principal" onclick="lancerReparationEvaluations()" style="padding: 10px 20px;">
+                            Lancer la réparation
                         </button>
                     </div>
                 </div>
@@ -3357,16 +3400,6 @@ Exemple :
                 <!-- fin sous-section import-export -->
 
             </section>
-
-            <!-- ZONE DE DEBUG -->
-            <div class="debug-zone">
-                <h4>🔍 Zone de débogage</h4>
-                <p><strong>Section active:</strong> <span id="debug-section">--</span></p>
-                <p><strong>Sous-section active:</strong> <span id="debug-sous-section">--</span></p>
-                <p><strong>Instructions:</strong> Ouvre la console du navigateur (F12) pour voir les logs détaillés.
-                </p>
-                <div class="badge-succes">✅ Si tu vois ce texte, le HTML est chargé correctement</div>
-            </div>
 
         </main>
 

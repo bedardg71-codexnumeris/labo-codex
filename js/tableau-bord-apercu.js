@@ -65,12 +65,13 @@ function chargerTableauBordApercu() {
             };
         });
         
-        // Afficher tout
+        // Afficher tout (sans noms d'étudiants dans l'aperçu)
         afficherMetriquesGlobales(etudiantsAvecIndices);
-        afficherDistributionRisques(etudiantsAvecIndices);
-        afficherAlertesPrioritaires(etudiantsAvecIndices);
-        
-        console.log('✅ Tableau de bord chargé');
+        afficherAlertesPrioritairesCompteurs(etudiantsAvecIndices);
+        afficherPatternsApprentissage(etudiantsAvecIndices);
+        afficherNiveauxRaI(etudiantsAvecIndices);
+
+        console.log('✅ Tableau de bord chargé (aperçu anonyme)');
         
     } catch (error) {
         console.error('❌ Erreur chargement tableau de bord:', error);
@@ -269,8 +270,322 @@ function afficherMetriquesGlobales(etudiants) {
 }
 
 /**
+ * Affiche les compteurs d'alertes prioritaires
+ *
+ * @param {Array} etudiants - Étudiants avec indices calculés
+ */
+function afficherAlertesPrioritairesCompteurs(etudiants) {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
+
+    // Compter par niveau de risque (utiliser sommatif ou alternatif selon config)
+    let critique = 0, tresEleve = 0, eleve = 0;
+
+    etudiants.forEach(e => {
+        const risque = afficherSommatif ? e.sommatif.risque : e.alternatif.risque;
+        const niveau = afficherSommatif ? e.sommatif.niveauRisque : e.alternatif.niveauRisque;
+
+        if (niveau === 'critique') {
+            critique++;
+        } else if (niveau === 'très élevé') {
+            tresEleve++;
+        } else if (niveau === 'élevé') {
+            eleve++;
+        }
+    });
+
+    // Afficher les compteurs
+    setStatText('tb-risque-critique', critique);
+    setStatText('tb-risque-tres-eleve', tresEleve);
+    setStatText('tb-risque-eleve', eleve);
+
+    // Note: Pas de liste d'étudiants dans l'aperçu pour respecter la confidentialité
+    // L'utilisateur doit aller dans "Liste complète" pour voir les détails
+}
+
+/**
+ * Affiche la liste des étudiants à risque critique
+ *
+ * @param {Array} etudiants - Étudiants avec indices calculés
+ * @param {boolean} afficherSommatif - Utiliser les indices sommatifs
+ */
+function afficherListeEtudiantsCritiques(etudiants, afficherSommatif) {
+    const container = document.getElementById('tb-etudiants-critique');
+    if (!container) return;
+
+    const etudiantsCritiques = etudiants
+        .filter(e => {
+            const niveau = afficherSommatif ? e.sommatif.niveauRisque : e.alternatif.niveauRisque;
+            return niveau === 'critique';
+        })
+        .sort((a, b) => {
+            const risqueA = afficherSommatif ? a.sommatif.risque : a.alternatif.risque;
+            const risqueB = afficherSommatif ? b.sommatif.risque : b.alternatif.risque;
+            return risqueB - risqueA;
+        });
+
+    container.innerHTML = etudiantsCritiques.map(e => {
+        const indices = afficherSommatif ? e.sommatif : e.alternatif;
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center;
+                        padding: 12px; background: white; border-radius: 6px;
+                        border-left: 4px solid var(--risque-critique);">
+                <div>
+                    <strong>${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}</strong>
+                    <span style="color: #666; margin-left: 10px;">(${echapperHtml(e.groupe || '—')})</span>
+                    <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
+                        A: ${formatPourcentage(indices.assiduite)} |
+                        C: ${formatPourcentage(indices.completion)} |
+                        P: ${formatPourcentage(indices.performance)}
+                    </div>
+                </div>
+                <button class="btn btn-principal"
+                        onclick="afficherSection('etudiants'); setTimeout(() => { afficherSousSection('profil-etudiant'); chargerProfilEtudiant('${e.da}'); }, 100);"
+                        style="padding: 6px 12px; font-size: 0.9rem;">
+                    Voir profil
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Affiche les patterns d'apprentissage
+ *
+ * @param {Array} etudiants - Étudiants avec indices calculés
+ */
+function afficherPatternsApprentissage(etudiants) {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
+
+    const nbTotal = etudiants.length;
+
+    // Déterminer les patterns selon les indices A-C-P
+    let stable = 0, defi = 0, emergent = 0, critique = 0;
+
+    etudiants.forEach(e => {
+        const indices = afficherSommatif ? e.sommatif : e.alternatif;
+        const pattern = determinerPattern(indices);
+
+        if (pattern === 'stable') stable++;
+        else if (pattern === 'défi') defi++;
+        else if (pattern === 'émergent') emergent++;
+        else if (pattern === 'critique') critique++;
+    });
+
+    // Afficher les compteurs
+    setStatText('tb-pattern-stable', stable);
+    setStatText('tb-pattern-defi', defi);
+    setStatText('tb-pattern-emergent', emergent);
+    setStatText('tb-pattern-critique', critique);
+
+    // Afficher les barres de progression
+    if (nbTotal > 0) {
+        setBarre('tb-barre-stable', (stable / nbTotal) * 100);
+        setBarre('tb-barre-defi', (defi / nbTotal) * 100);
+        setBarre('tb-barre-emergent', (emergent / nbTotal) * 100);
+        setBarre('tb-barre-critique', (critique / nbTotal) * 100);
+    }
+}
+
+/**
+ * Affiche les niveaux RàI (Réponse à l'intervention)
+ *
+ * @param {Array} etudiants - Étudiants avec indices calculés
+ */
+function afficherNiveauxRaI(etudiants) {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
+
+    const nbTotal = etudiants.length;
+
+    // Compter les étudiants par niveau RàI
+    let niveau1 = 0; // Stable
+    let niveau2 = 0; // Défi + Émergent
+    let niveau3 = 0; // Critique
+
+    etudiants.forEach(e => {
+        const indices = afficherSommatif ? e.sommatif : e.alternatif;
+        const pattern = determinerPattern(indices);
+
+        if (pattern === 'stable') {
+            niveau1++;
+        } else if (pattern === 'défi' || pattern === 'émergent') {
+            niveau2++;
+        } else if (pattern === 'critique') {
+            niveau3++;
+        }
+    });
+
+    // Calculer les pourcentages
+    const pct1 = nbTotal > 0 ? Math.round((niveau1 / nbTotal) * 100) : 0;
+    const pct2 = nbTotal > 0 ? Math.round((niveau2 / nbTotal) * 100) : 0;
+    const pct3 = nbTotal > 0 ? Math.round((niveau3 / nbTotal) * 100) : 0;
+
+    // Afficher les compteurs
+    setStatText('tb-rai-niveau1', niveau1);
+    setStatText('tb-rai-niveau2', niveau2);
+    setStatText('tb-rai-niveau3', niveau3);
+
+    // Afficher les pourcentages
+    setStatText('tb-rai-niveau1-pct', `(${pct1}%)`);
+    setStatText('tb-rai-niveau2-pct', `(${pct2}%)`);
+    setStatText('tb-rai-niveau3-pct', `(${pct3}%)`);
+}
+
+/**
+ * Détermine le pattern d'apprentissage selon les indices A-C-P
+ *
+ * @param {Object} indices - Indices {assiduite, completion, performance, risque, niveauRisque}
+ * @returns {string} Pattern: 'stable', 'défi', 'émergent', 'critique'
+ */
+function determinerPattern(indices) {
+    const {assiduite, completion, performance, niveauRisque} = indices;
+
+    // Stable: tous les indices > 0.75, risque faible/minimal
+    if (assiduite >= 0.75 && completion >= 0.75 && performance >= 0.75) {
+        return 'stable';
+    }
+
+    // Critique: niveau de risque critique
+    if (niveauRisque === 'critique') {
+        return 'critique';
+    }
+
+    // Émergent: assiduité OK mais complétion ou performance en baisse
+    if (assiduite >= 0.75 && (completion < 0.65 || performance < 0.65)) {
+        return 'émergent';
+    }
+
+    // Défi: au moins un indice sous 0.75 mais pas de blocage critique
+    return 'défi';
+}
+
+/**
+ * Affiche les actions recommandées (Top 5)
+ *
+ * @param {Array} etudiants - Étudiants avec indices calculés
+ */
+function afficherActionsRecommandees(etudiants) {
+    const container = document.getElementById('tb-liste-actions');
+    const messageVide = document.getElementById('tb-aucune-action');
+
+    if (!container) return;
+
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
+
+    // Filtrer étudiants à risque et trier par priorité (risque décroissant)
+    const etudiantsARisque = etudiants
+        .filter(e => {
+            const risque = afficherSommatif ? e.sommatif.risque : e.alternatif.risque;
+            return risque >= 0.4; // Seuil: élevé ou plus
+        })
+        .sort((a, b) => {
+            const risqueA = afficherSommatif ? a.sommatif.risque : a.alternatif.risque;
+            const risqueB = afficherSommatif ? b.sommatif.risque : b.alternatif.risque;
+            return risqueB - risqueA;
+        })
+        .slice(0, 5); // Top 5
+
+    if (etudiantsARisque.length === 0) {
+        container.style.display = 'none';
+        if (messageVide) messageVide.style.display = 'block';
+        return;
+    }
+
+    container.style.display = 'flex';
+    if (messageVide) messageVide.style.display = 'none';
+
+    container.innerHTML = etudiantsARisque.map((e, index) => {
+        const indices = afficherSommatif ? e.sommatif : e.alternatif;
+        const recommendation = genererRecommandation(indices);
+
+        return `
+            <div style="padding: 15px; background: white; border-radius: 8px;
+                        border-left: 4px solid ${getCouleurRisque(indices.niveauRisque)};">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <div>
+                        <span style="display: inline-block; width: 24px; height: 24px;
+                                     background: ${getCouleurRisque(indices.niveauRisque)};
+                                     color: white; border-radius: 50%; text-align: center;
+                                     line-height: 24px; font-weight: bold; margin-right: 10px;">
+                            ${index + 1}
+                        </span>
+                        <strong>${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}</strong>
+                        <span style="color: #666; margin-left: 8px;">(${echapperHtml(e.groupe || '—')})</span>
+                    </div>
+                    <span class="badge-risque risque-${indices.niveauRisque.replace(' ', '-')}"
+                          style="text-transform: capitalize;">
+                        ${indices.niveauRisque}
+                    </span>
+                </div>
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">
+                    ${recommendation}
+                </div>
+                <div style="display: flex; gap: 8px; font-size: 0.85rem;">
+                    <span>A: ${formatPourcentage(indices.assiduite)}</span> |
+                    <span>C: ${formatPourcentage(indices.completion)}</span> |
+                    <span>P: ${formatPourcentage(indices.performance)}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Génère une recommandation d'action selon les indices
+ *
+ * @param {Object} indices - Indices A-C-P
+ * @returns {string} Recommandation pédagogique
+ */
+function genererRecommandation(indices) {
+    const {assiduite, completion, performance} = indices;
+
+    // Identifier le défi principal
+    if (assiduite < 0.65) {
+        return "📅 <strong>Priorité: Assiduité</strong> - Contacter l'étudiant pour comprendre les absences et proposer un soutien";
+    }
+    if (completion < 0.65) {
+        return "📝 <strong>Priorité: Complétion</strong> - Rencontre pour identifier les obstacles et établir un échéancier réaliste";
+    }
+    if (performance < 0.65) {
+        return "🎯 <strong>Priorité: Performance</strong> - Offrir du soutien pédagogique et des stratégies d'apprentissage";
+    }
+    if (assiduite < 0.75) {
+        return "⚠️ <strong>Suivi: Assiduité</strong> - Surveiller l'évolution et encourager la régularité";
+    }
+    if (completion < 0.75) {
+        return "⚠️ <strong>Suivi: Complétion</strong> - Rappeler les échéances et vérifier la charge de travail";
+    }
+    if (performance < 0.75) {
+        return "⚠️ <strong>Suivi: Performance</strong> - Proposer des ressources complémentaires";
+    }
+
+    return "✓ Situation sous contrôle - Maintenir le suivi régulier";
+}
+
+/**
+ * Retourne la couleur CSS selon le niveau de risque
+ *
+ * @param {string} niveau - Niveau de risque
+ * @returns {string} Couleur CSS
+ */
+function getCouleurRisque(niveau) {
+    const couleurs = {
+        'critique': '#d32f2f',
+        'très élevé': '#f57c00',
+        'élevé': '#fbc02d',
+        'modéré': '#fdd835',
+        'faible': '#7cb342',
+        'minimal': '#388e3c'
+    };
+    return couleurs[niveau] || '#999';
+}
+
+/**
  * Affiche la distribution des niveaux de risque
- * 
+ *
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherDistributionRisques(etudiants) {
@@ -403,7 +718,7 @@ function setStatText(id, valeur) {
 
 /**
  * Formate un nombre en pourcentage
- * 
+ *
  * @param {number} valeur - Valeur entre 0 et 1
  * @returns {string} Pourcentage formaté (ex: "87%")
  */
@@ -412,6 +727,19 @@ function formatPourcentage(valeur) {
         return '—';
     }
     return Math.round(valeur * 100) + '%';
+}
+
+/**
+ * Met à jour la largeur d'une barre de progression
+ *
+ * @param {string} id - ID de l'élément barre
+ * @param {number} pourcentage - Pourcentage de largeur (0-100)
+ */
+function setBarre(id, pourcentage) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.style.width = Math.round(pourcentage) + '%';
+    }
 }
 
 /* ===============================
