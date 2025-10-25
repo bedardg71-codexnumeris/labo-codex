@@ -2433,3 +2433,99 @@ body[data-mode="anonymisation"] .sous-navigation button.actif {
     color: white;
     border-color: var(--bleu-anonymisation);
 }
+/* ===============================================
+   CARTES INFO-TOGGLE (Notes et Conseils)
+   Affichage des informations via emojis cliquables
+   =============================================== */
+
+/* Emojis cliquables dans les H2 */
+.emoji-toggle {
+    cursor: pointer;
+    margin-left: 10px;
+    transition: transform 0.2s ease, opacity 0.3s ease;
+    display: inline-block;
+    user-select: none;
+}
+
+.emoji-toggle:hover {
+    transform: scale(1.2);
+    opacity: 0.8;
+}
+
+.emoji-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Animation keyframes pour slide-down */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 500px;
+    }
+}
+
+/* Classe de base pour toutes les cartes info-toggle */
+.carte-info-toggle {
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 3px solid var(--bleu-moyen);
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    margin-left: 5%;
+    margin-right: 5%;
+    position: relative;
+    animation: slideDown 0.3s ease-out;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Triangle pointeur vers le haut à droite */
+.carte-info-toggle::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 60px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid currentColor;
+}
+
+/* Variante Note (⚠️) */
+.carte-info-note {
+    background: var(--bleu-pale);
+    border-left-color: var(--bleu-moyen);
+}
+
+.carte-info-note::before {
+    color: var(--bleu-pale);
+}
+
+/* Variante Conseil (💡) */
+.carte-info-conseil {
+    background: var(--bleu-tres-pale);
+    border-left-color: var(--bleu-moyen);
+}
+
+.carte-info-conseil::before {
+    color: var(--bleu-tres-pale);
+}
+
+/* Listes à l'intérieur des cartes info-toggle */
+.carte-info-toggle ul {
+    margin: 0;
+    padding-left: 20px;
+    line-height: 1.6;
+}
+
+.carte-info-toggle strong {
+    color: var(--bleu-principal);
+}
