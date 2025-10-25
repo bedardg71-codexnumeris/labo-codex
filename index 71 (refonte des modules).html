@@ -1461,13 +1461,34 @@
                     <h2>Vue d'ensemble</h2>
                     <p class="text-muted">Résumé du matériel pédagogique configuré</p>
 
-                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
-                         background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
-                        <strong>Note :</strong> Cette vue d'ensemble présente un résumé du matériel pédagogique configuré pour le cours.
-                        Le matériel comprend les productions (exercices formatifs et certificatifs), les grilles de critères d'évaluation,
-                        les échelles de performance (IDME), et les cartouches de rétroaction. Un matériel bien configuré facilite l'évaluation
-                        cohérente et permet le suivi longitudinal des apprentissages.
-                    </div>
+                    <!-- Toggle Note ⚠️ -->
+                    <details style="margin-bottom: 15px;">
+                        <summary style="cursor: pointer; padding: 12px; background: var(--bleu-pale);
+                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                            color: var(--bleu-principal); user-select: none;">
+                            ⚠️ Note
+                        </summary>
+                        <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                            Cette vue d'ensemble présente un résumé du matériel pédagogique configuré pour le cours.
+                            Le matériel comprend les productions (exercices formatifs et certificatifs), les grilles de critères d'évaluation,
+                            les échelles de performance (IDME), et les cartouches de rétroaction. Un matériel bien configuré facilite l'évaluation
+                            cohérente et permet le suivi longitudinal des apprentissages.
+                        </div>
+                    </details>
+
+                    <!-- Toggle Conseil pratique 💡 -->
+                    <details style="margin-bottom: 20px;">
+                        <summary style="cursor: pointer; padding: 12px; background: var(--bleu-tres-pale);
+                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                            color: var(--bleu-principal); user-select: none;">
+                            💡 Conseil pratique
+                        </summary>
+                        <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                            Commence par configurer la pratique de notation dans la section Réglages, puis crée tes grilles de critères
+                            et ton échelle de performance. Enfin, définis les productions du cours en les associant aux grilles créées.
+                            Cette séquence assure une configuration cohérente et facilite la gestion des évaluations.
+                        </div>
+                    </details>
 
                     <div class="carte">
                         <h3>Matériel configuré</h3>
@@ -1484,14 +1505,36 @@
                     <h2>Exercices formatifs et certificatifs</h2>
                     <p class="text-muted">Définir les évaluations du cours et leurs pondérations</p>
 
-                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
-                         background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
-                        <strong>Note :</strong> Les productions représentent l'ensemble des travaux que les étudiants doivent réaliser
-                        durant le cours. Elles peuvent être de type formatif (pour l'apprentissage) ou certificatif (pour l'évaluation).
-                        Chaque production peut être associée à une grille de critères et possède une pondération qui contribue à la note finale.
-                        Les portfolios permettent de regrouper plusieurs artefacts et de sélectionner automatiquement les N meilleurs selon
-                        la pratique de notation configurée.
-                    </div>
+                    <!-- Toggle Note ⚠️ -->
+                    <details style="margin-bottom: 15px;">
+                        <summary style="cursor: pointer; padding: 12px; background: var(--bleu-pale);
+                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                            color: var(--bleu-principal); user-select: none;">
+                            ⚠️ Note
+                        </summary>
+                        <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                            Les productions représentent l'ensemble des travaux que les étudiants doivent réaliser
+                            durant le cours. Elles peuvent être de type formatif (pour l'apprentissage) ou certificatif (pour l'évaluation).
+                            Chaque production peut être associée à une grille de critères et possède une pondération qui contribue à la note finale.
+                            Les portfolios permettent de regrouper plusieurs artefacts et de sélectionner automatiquement les N meilleurs selon
+                            la pratique de notation configurée.
+                        </div>
+                    </details>
+
+                    <!-- Toggle Conseil pratique 💡 -->
+                    <details style="margin-bottom: 20px;">
+                        <summary style="cursor: pointer; padding: 12px; background: var(--bleu-tres-pale);
+                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                            color: var(--bleu-principal); user-select: none;">
+                            💡 Conseil pratique
+                        </summary>
+                        <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                            Assure-toi que la somme des pondérations totalise 100%. Pour les portfolios, définis d'abord le nombre d'artefacts
+                            à retenir (ex: les 3 meilleurs sur 9). Les artefacts individuels n'ont pas de pondération propre, c'est le portfolio
+                            conteneur qui définit la pondération globale. Pense à verrouiller les productions une fois finalisées pour éviter
+                            les modifications accidentelles.
+                        </div>
+                    </details>
 
                     <!-- DÉFINITION DES ÉVALUATIONS -->
                     <div class="carte">
@@ -1653,14 +1696,36 @@
                         de
                         productions.</p>
 
-                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
-                         background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
-                        <strong>Note :</strong> Les grilles de critères définissent les aspects sur lesquels les productions sont évaluées.
-                        Chaque critère possède une pondération relative et peut être de type holistique (jugement global), analytique
-                        (points par élément) ou algorithmique (calcul automatique). Dans le modèle SRPNF, les cinq critères sont :
-                        Structure (15%), Rigueur (20%), Plausibilité (10%), Nuance (25%) et Français (30%). Les grilles peuvent être
-                        réutilisées pour différentes productions et verrouillées une fois finalisées.
-                    </div>
+                    <!-- Toggle Note ⚠️ -->
+                    <details style="margin-bottom: 15px;">
+                        <summary style="cursor: pointer; padding: 12px; background: var(--bleu-pale);
+                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                            color: var(--bleu-principal); user-select: none;">
+                            ⚠️ Note
+                        </summary>
+                        <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                            Les grilles de critères définissent les aspects sur lesquels les productions sont évaluées.
+                            Chaque critère possède une pondération relative et peut être de type holistique (jugement global), analytique
+                            (points par élément) ou algorithmique (calcul automatique). Dans le modèle SRPNF, les cinq critères sont :
+                            Structure (15%), Rigueur (20%), Plausibilité (10%), Nuance (25%) et Français (30%). Les grilles peuvent être
+                            réutilisées pour différentes productions et verrouillées une fois finalisées.
+                        </div>
+                    </details>
+
+                    <!-- Toggle Conseil pratique 💡 -->
+                    <details style="margin-bottom: 20px;">
+                        <summary style="cursor: pointer; padding: 12px; background: var(--bleu-tres-pale);
+                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                            color: var(--bleu-principal); user-select: none;">
+                            💡 Conseil pratique
+                        </summary>
+                        <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                            Pour le critère Français, utilise le type algorithmique avec la formule (nb_erreurs / nb_mots) × 100.
+                            Les grilles peuvent être dupliquées et modifiées pour créer des variantes adaptées à différents types
+                            de productions. Pense à nommer tes grilles de façon descriptive (ex: "Grille analyse littéraire", "Grille dissertation").
+                            La somme des pondérations des critères doit totaliser 100%.
+                        </div>
+                    </details>
 
                     <!-- CARTE : GRILLES DE CRITÈRES -->
                     <div class="carte">
@@ -1814,14 +1879,21 @@
                     <h2>Niveaux de performance</h2>
                     <p class="text-muted">Configuration de l'échelle de notation pour les PAN/SBG</p>
 
-                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
-                         background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
-                        <strong>Note :</strong> L'échelle de performance définit les niveaux de maîtrise utilisés pour évaluer les critères.
-                        Le système utilise par défaut l'échelle IDME (Insuffisant, en Développement, Maîtrisé, Étendu) basée sur la taxonomie SOLO.
-                        Chaque niveau correspond à un seuil de performance : Insuffisant (&lt; 64%), Développement (65-74%), Maîtrisé (75-84%),
-                        Étendu (≥ 85%). Cette échelle peut être personnalisée selon les besoins pédagogiques et permet un suivi longitudinal
-                        de la progression des étudiants.
-                    </div>
+                    <!-- Toggle Note ⚠️ -->
+                    <details style="margin-bottom: 15px;">
+                        <summary style="cursor: pointer; padding: 12px; background: var(--bleu-pale);
+                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                            color: var(--bleu-principal); user-select: none;">
+                            ⚠️ Note
+                        </summary>
+                        <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                            L'échelle de performance définit les niveaux de maîtrise utilisés pour évaluer les critères.
+                            Le système utilise par défaut l'échelle IDME (Insuffisant, en Développement, Maîtrisé, Étendu) basée sur la taxonomie SOLO.
+                            Chaque niveau correspond à un seuil de performance : Insuffisant (&lt; 64%), Développement (65-74%), Maîtrisé (75-84%),
+                            Étendu (≥ 85%). Cette échelle peut être personnalisée selon les besoins pédagogiques et permet un suivi longitudinal
+                            de la progression des étudiants.
+                        </div>
+                    </details>
 
                     <!-- CARTE : ÉCHELLE DE PERFORMANCE PAN/SBG -->
                     <div class="carte">
@@ -1948,20 +2020,25 @@
                             </div>
                         </div>
 
-                        <!-- Aide contextuelle -->
-                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
-     background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
-                            <strong>💡 Aide à la configuration :</strong>
-                            <ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.6;">
-                                <li><strong>Code</strong> : 1 à 3 caractères (ex: I, D, M, E)</li>
-                                <li><strong>Nom</strong> : Titre du niveau (ex: Maîtrisé)</li>
-                                <li><strong>Description</strong> : Contexte pédagogique (optionnel)</li>
-                                <li><strong>Min/Max</strong> : Plage de % (0-100%)</li>
-                                <li><strong>Valeur ponctuelle</strong> : Note utilisée pour les calculs (ex: 75%)
-                                </li>
-                                <li><strong>Couleur</strong> : Choisir dans la palette</li>
-                            </ul>
-                        </div>
+                        <!-- Toggle Conseil pratique 💡 -->
+                        <details style="margin-bottom: 20px;">
+                            <summary style="cursor: pointer; padding: 12px; background: var(--bleu-tres-pale);
+                                border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                                color: var(--bleu-principal); user-select: none;">
+                                💡 Conseil pratique
+                            </summary>
+                            <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                                <strong>Aide à la configuration :</strong>
+                                <ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.6;">
+                                    <li><strong>Code</strong> : 1 à 3 caractères (ex: I, D, M, E)</li>
+                                    <li><strong>Nom</strong> : Titre du niveau (ex: Maîtrisé)</li>
+                                    <li><strong>Description</strong> : Contexte pédagogique (optionnel)</li>
+                                    <li><strong>Min/Max</strong> : Plage de % (0-100%)</li>
+                                    <li><strong>Valeur ponctuelle</strong> : Note utilisée pour les calculs (ex: 75%)</li>
+                                    <li><strong>Couleur</strong> : Choisir dans la palette</li>
+                                </ul>
+                            </div>
+                        </details>
 
                     </div>
 
@@ -1979,20 +2056,35 @@
                     <div class="carte">
                         <h3>💬 Cartouches de rétroaction</h3>
 
-                        <!-- Note explicative -->
-                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
-             background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
-                            <strong>Note :</strong> Les rétroactions seront générées automatiquement en assemblant
-                            les
-                            commentaires prérédigés par l'enseignant·e selon les critères d'évaluation et le niveau
-                            de
-                            performance
-                            atteint pour chaque critère. Un ensemble complet de commentaires porte ici le nom de
-                            <strong>cartouche</strong>.
-                            <br><br>
-                            <strong>Recommandation :</strong> Les commentaires peuvent avoir entre 50 et 75 mots
-                            environ.
-                        </div>
+                        <!-- Toggle Note ⚠️ -->
+                        <details style="margin-bottom: 15px;">
+                            <summary style="cursor: pointer; padding: 12px; background: var(--bleu-pale);
+                                border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                                color: var(--bleu-principal); user-select: none;">
+                                ⚠️ Note
+                            </summary>
+                            <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                                Les rétroactions seront générées automatiquement en assemblant les commentaires prérédigés
+                                par l'enseignant·e selon les critères d'évaluation et le niveau de performance atteint pour
+                                chaque critère. Un ensemble complet de commentaires porte ici le nom de <strong>cartouche</strong>.
+                            </div>
+                        </details>
+
+                        <!-- Toggle Conseil pratique 💡 -->
+                        <details style="margin-bottom: 20px;">
+                            <summary style="cursor: pointer; padding: 12px; background: var(--bleu-tres-pale);
+                                border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                                color: var(--bleu-principal); user-select: none;">
+                                💡 Conseil pratique
+                            </summary>
+                            <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                                Les commentaires peuvent avoir entre 50 et 75 mots environ. Rédige-les de façon personnelle
+                                et constructive. Chaque cellule de la matrice correspond à un commentaire pour un niveau de
+                                performance donné sur un critère spécifique. Utilise les codes de ta grille (I, D, M, E) et
+                                le format proposé pour structurer tes commentaires. Les cartouches peuvent être verrouillées
+                                une fois finalisées.
+                            </div>
+                        </details>
 
                         <!-- Sélecteur de grille et cartouche -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
@@ -2161,29 +2253,28 @@
                             </button>
                         </div>
 
-                        <!-- Aide contextuelle -->
-                        <div style="margin-top: 20px; padding: 12px; background: var(--bleu-tres-pale); 
-             border-radius: 6px; font-size: 0.85rem; color: var(--bleu-moyen);">
-                            <strong>💡 Conseils d'utilisation :</strong>
-                            <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                                <li><strong>Matrice :</strong> Chaque cellule correspond à un commentaire pour un
-                                    critère et un
-                                    niveau spécifiques</li>
-                                <li><strong>Import Markdown :</strong> Préparez vos commentaires dans un document
-                                    externe et collez-les
-                                    pour gagner du temps</li>
-                                <li><strong>Aperçu aléatoire :</strong> Testez visuellement vos commentaires avant
-                                    utilisation réelle
-                                </li>
-                                <li><strong>Verrouillage :</strong> Verrouillez une cartouche complète pour éviter
-                                    les
-                                    modifications
-                                    accidentelles</li>
-                                <li><strong>Duplication :</strong> Créez des variantes rapidement en dupliquant une
-                                    cartouche
-                                    existante</li>
-                            </ul>
-                        </div>
+                        <!-- Toggle Conseil pratique 💡 (DANS CARTE) -->
+                        <details style="margin-top: 20px;">
+                            <summary style="cursor: pointer; padding: 12px; background: var(--bleu-tres-pale);
+                                border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                                color: var(--bleu-principal); user-select: none;">
+                                💡 Conseil pratique
+                            </summary>
+                            <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                                <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                                    <li><strong>Matrice :</strong> Chaque cellule correspond à un commentaire pour un
+                                        critère et un niveau spécifiques</li>
+                                    <li><strong>Import Markdown :</strong> Préparez vos commentaires dans un document
+                                        externe et collez-les pour gagner du temps</li>
+                                    <li><strong>Aperçu aléatoire :</strong> Testez visuellement vos commentaires avant
+                                        utilisation réelle</li>
+                                    <li><strong>Verrouillage :</strong> Verrouillez une cartouche complète pour éviter
+                                        les modifications accidentelles</li>
+                                    <li><strong>Duplication :</strong> Créez des variantes rapidement en dupliquant une
+                                        cartouche existante</li>
+                                </ul>
+                            </div>
+                        </details>
 
                     </div>
 
@@ -2405,30 +2496,28 @@
                             </div>
                         </div>
 
-                        <!-- Aide contextuelle -->
-                        <div style="margin-top: 20px; padding: 12px; background: var(--bleu-tres-pale); 
-             border-radius: 6px; font-size: 0.85rem; color: var(--bleu-moyen);">
-                            <strong>💡 Conseils d'utilisation :</strong>
-                            <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                                <li><strong>Cours actif :</strong> Un seul cours peut être actif à la fois. Le cours
-                                    actif est
-                                    utilisé comme référence dans toute l'application</li>
-                                <li><strong>Verrouillage :</strong> Verrouillez un cours terminé pour éviter les
-                                    modifications
-                                    accidentelles</li>
-                                <li><strong>Duplication :</strong> Dupliquez un cours pour créer rapidement une
-                                    nouvelle
-                                    session en
-                                    modifiant seulement l'année</li>
-                                <li><strong>Code de cours :</strong> Format habituel : XXX-XXX-XX
-                                    (département-numéro-pondération)
-                                </li>
-                                <li><strong>Format horaire :</strong> Définit comment les heures sont réparties dans
-                                    la
-                                    semaine
-                                    (utilisé pour le calendrier)</li>
-                            </ul>
-                        </div>
+                        <!-- Toggle Conseil pratique 💡 (DANS CARTE) -->
+                        <details style="margin-top: 20px;">
+                            <summary style="cursor: pointer; padding: 12px; background: var(--bleu-tres-pale);
+                                border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                                color: var(--bleu-principal); user-select: none;">
+                                💡 Conseil pratique
+                            </summary>
+                            <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                                <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                                    <li><strong>Cours actif :</strong> Un seul cours peut être actif à la fois. Le cours
+                                        actif est utilisé comme référence dans toute l'application</li>
+                                    <li><strong>Verrouillage :</strong> Verrouillez un cours terminé pour éviter les
+                                        modifications accidentelles</li>
+                                    <li><strong>Duplication :</strong> Dupliquez un cours pour créer rapidement une
+                                        nouvelle session en modifiant seulement l'année</li>
+                                    <li><strong>Code de cours :</strong> Format habituel : XXX-XXX-XX
+                                        (département-numéro-pondération)</li>
+                                    <li><strong>Format horaire :</strong> Définit comment les heures sont réparties dans
+                                        la semaine (utilisé pour le calendrier)</li>
+                                </ul>
+                            </div>
+                        </details>
                     </div>
 
                 </div><!--fin sous-section cours-->
@@ -2763,22 +2852,26 @@
                             + Configurer l'horaire
                         </button>
 
-                        <!-- Aide contextuelle -->
-                        <div style="margin-top: 20px; padding: 12px; background: var(--bleu-tres-pale); 
-             border-radius: 6px; font-size: 0.85rem; color: var(--bleu-moyen);">
-                            <strong>💡 Conseils d'utilisation :</strong>
-                            <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                                <li><strong>Format 2×2h :</strong> Idéal pour deux périodes de cours séparées dans
-                                    la
-                                    semaine (ex: lundi et mercredi).</li>
-                                <li><strong>Format 1×4h :</strong> Pour un cours d'une seule période de 4 heures
-                                    consécutives.</li>
-                                <li><strong>Modification :</strong> Pour changer l'horaire, supprimez d'abord les
-                                    séances existantes puis reconfigurez.</li>
-                                <li><strong>Impact :</strong> L'horaire configuré sera utilisé pour le calcul des
-                                    présences et la génération du calendrier.</li>
-                            </ul>
-                        </div>
+                        <!-- Toggle Conseil pratique 💡 (DANS CARTE) -->
+                        <details style="margin-top: 20px;">
+                            <summary style="cursor: pointer; padding: 12px; background: var(--bleu-tres-pale);
+                                border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                                color: var(--bleu-principal); user-select: none;">
+                                💡 Conseil pratique
+                            </summary>
+                            <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                                <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                                    <li><strong>Format 2×2h :</strong> Idéal pour deux périodes de cours séparées dans
+                                        la semaine (ex: lundi et mercredi).</li>
+                                    <li><strong>Format 1×4h :</strong> Pour un cours d'une seule période de 4 heures
+                                        consécutives.</li>
+                                    <li><strong>Modification :</strong> Pour changer l'horaire, supprimez d'abord les
+                                        séances existantes puis reconfigurez.</li>
+                                    <li><strong>Impact :</strong> L'horaire configuré sera utilisé pour le calcul des
+                                        présences et la génération du calendrier.</li>
+                                </ul>
+                            </div>
+                        </details>
 
                     </div><!-- FIN carte horaire -->
 
@@ -3016,40 +3109,35 @@ Exemple :
                             </p>
                         </div>
 
-                        <!-- SECTION CONSEILS D'UTILISATION -->
-                        <div style="margin-top: 30px; padding: 15px; background: var(--bleu-tres-pale); 
-                    border-radius: 6px; font-size: 0.9rem; color: var(--bleu-moyen);">
-                            <strong>💡 Conseils d'utilisation :</strong>
-                            <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-                                <li><strong>Champ Groupe :</strong> Permet d'organiser tes étudiants si tu as
-                                    plusieurs
-                                    groupes
-                                    (ex: Groupe 1, Groupe 2). Utilise le filtre en haut pour afficher un groupe
-                                    spécifique.</li>
-                                <li><strong>Import CSV/TSV :</strong> Format attendu avec 7 colonnes : DA, Groupe,
-                                    Nom,
-                                    Prénom,
-                                    Programme, SA, CAF. Les colonnes peuvent être séparées par des virgules ou des
-                                    tabulations.</li>
-                                <li><strong>Copier-coller :</strong> Tu peux copier directement depuis Excel ou
-                                    Google
-                                    Sheets.
-                                    La prévisualisation te permet de vérifier avant d'importer.</li>
-                                <li><strong>Modification :</strong> Utilise l'icône pour modifier un·e
-                                    étudiant·e,
-                                    ou pour le·la supprimer.</li>
-                                <li><strong>Export :</strong> Exporte ta liste au format CSV pour backup ou partage.
-                                    Le fichier peut ensuite être réimporté.</li>
-                                <li><strong>Réinitialisation :</strong> Attention ! Le bouton « Réinitialiser »
-                                    supprime
-                                    <strong>tous les étudiants</strong>. Cette action est irréversible.
-                                </li>
-                                <li><strong>Lien avec les autres sections :</strong> La liste configurée ici est
-                                    automatiquement
-                                    disponible dans l'onglet « Étudiants › Liste des individus » pour la gestion des
-                                    portfolios.</li>
-                            </ul>
-                        </div>
+                        <!-- Toggle Conseil pratique 💡 (DANS CARTE) -->
+                        <details style="margin-top: 30px;">
+                            <summary style="cursor: pointer; padding: 15px; background: var(--bleu-tres-pale);
+                                border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-weight: bold;
+                                color: var(--bleu-principal); user-select: none;">
+                                💡 Conseil pratique
+                            </summary>
+                            <div style="padding: 12px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                                <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                                    <li><strong>Champ Groupe :</strong> Permet d'organiser tes étudiants si tu as
+                                        plusieurs groupes (ex: Groupe 1, Groupe 2). Utilise le filtre en haut pour afficher un groupe
+                                        spécifique.</li>
+                                    <li><strong>Import CSV/TSV :</strong> Format attendu avec 7 colonnes : DA, Groupe,
+                                        Nom, Prénom, Programme, SA, CAF. Les colonnes peuvent être séparées par des virgules ou des
+                                        tabulations.</li>
+                                    <li><strong>Copier-coller :</strong> Tu peux copier directement depuis Excel ou
+                                        Google Sheets. La prévisualisation te permet de vérifier avant d'importer.</li>
+                                    <li><strong>Modification :</strong> Utilise l'icône pour modifier un·e
+                                        étudiant·e, ou pour le·la supprimer.</li>
+                                    <li><strong>Export :</strong> Exporte ta liste au format CSV pour backup ou partage.
+                                        Le fichier peut ensuite être réimporté.</li>
+                                    <li><strong>Réinitialisation :</strong> Attention ! Le bouton « Réinitialiser »
+                                        supprime <strong>tous les étudiants</strong>. Cette action est irréversible.</li>
+                                    <li><strong>Lien avec les autres sections :</strong> La liste configurée ici est
+                                        automatiquement disponible dans l'onglet « Étudiants › Liste des individus » pour la gestion des
+                                        portfolios.</li>
+                                </ul>
+                            </div>
+                        </details>
 
                     </div><!-- FIN carte -->
 
@@ -3259,15 +3347,19 @@ Exemple :
 
                             </div>
 
-                            <!-- Conseil recherche -->
-                            <div style="margin-top: 12px; padding: 10px; background: var(--vert-pale); 
-                 border-radius: 4px; font-size: 0.85rem; color: #555; border-left: 3px solid var(--vert-moyen);">
-                                💡 <strong>Mode recherche/expérimentation :</strong> Active les deux options pour
-                                comparer
-                                côte à côte les indices sommatifs traditionnels et les indices PAN. Cela permet
-                                d'évaluer
-                                l'écart entre les deux approches et d'ajuster tes interventions.
-                            </div>
+                            <!-- Toggle Conseil pratique 💡 (DANS CARTE) -->
+                            <details style="margin-top: 12px;">
+                                <summary style="cursor: pointer; padding: 10px; background: var(--vert-pale);
+                                    border-radius: 4px; border-left: 3px solid var(--vert-moyen); font-weight: bold;
+                                    color: var(--bleu-principal); user-select: none;">
+                                    💡 Conseil pratique
+                                </summary>
+                                <div style="padding: 10px; font-size: 0.85rem; color: #555; line-height: 1.6;">
+                                    <strong>Mode recherche/expérimentation :</strong> Active les deux options pour
+                                    comparer côte à côte les indices sommatifs traditionnels et les indices PAN. Cela permet
+                                    d'évaluer l'écart entre les deux approches et d'ajuster tes interventions.
+                                </div>
+                            </details>
 
                         </div>
                         <!-- FIN SECTION OPTIONS AFFICHAGE -->
