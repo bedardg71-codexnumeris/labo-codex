@@ -95,30 +95,43 @@ function creerSelecteurMode() {
     // Vider le conteneur
     conteneur.innerHTML = '';
 
-    // Créer les boutons pour chaque mode
+    // Créer le label
+    const label = document.createElement('label');
+    label.htmlFor = 'select-mode';
+    label.textContent = 'Mode d\'affichage : ';
+    label.style.cssText = 'font-size: 0.9rem; color: white; margin-right: 8px;';
+
+    // Créer le select
+    const select = document.createElement('select');
+    select.id = 'select-mode';
+    select.className = 'select-mode';
+
+    // Créer les options pour chaque mode
+    const labels = {
+        'normal': 'Normal',
+        'simulation': 'Simulation',
+        'anonymisation': 'Anonymisation'
+    };
+
     Object.entries(MODES).forEach(([key, mode]) => {
-        const bouton = document.createElement('button');
-        bouton.className = 'btn-mode';
-        bouton.dataset.mode = mode;
+        const option = document.createElement('option');
+        option.value = mode;
+        option.textContent = labels[mode];
 
-        // Texte du bouton sans icônes
-        const labels = {
-            'normal': 'Normal',
-            'simulation': 'Simulation',
-            'anonymisation': 'Anonymisation'
-        };
-        bouton.textContent = labels[mode];
-
-        // Marquer comme actif si c'est le mode actuel
+        // Sélectionner l'option si c'est le mode actuel
         if (mode === modeActuel) {
-            bouton.classList.add('actif');
+            option.selected = true;
         }
 
-        // Ajouter l'événement click
-        bouton.addEventListener('click', () => changerMode(mode));
-
-        conteneur.appendChild(bouton);
+        select.appendChild(option);
     });
+
+    // Ajouter l'événement change
+    select.addEventListener('change', (e) => changerMode(e.target.value));
+
+    // Ajouter au conteneur
+    conteneur.appendChild(label);
+    conteneur.appendChild(select);
 }
 
 // ============================================
