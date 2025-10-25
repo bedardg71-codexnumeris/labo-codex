@@ -303,6 +303,13 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
+        case 'evaluations-apercu':
+            console.log('🔄 Rafraîchissement de l\'aperçu des évaluations...');
+            if (typeof chargerApercuEvaluations === 'function') {
+                chargerApercuEvaluations();
+            }
+            break;
+
         case 'evaluations-liste':
             console.log('🔄 Rafraîchissement de la liste des évaluations...');
             if (typeof chargerListeEvaluationsRefonte === 'function') {

@@ -1125,11 +1125,85 @@
             </section>
 
             <!-- ===============================
-     PARTIE HTML : Structure de la sous-section
-     À intégrer dans index.html
+     SECTION: ÉVALUATIONS
      =============================== -->
+            <section id="section-evaluations" class="section">
 
-            <div id="evaluations-liste" class="sous-section">
+                <!-- Sous-section: Aperçu -->
+                <div id="evaluations-apercu" class="sous-section">
+                    <h2 style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Aperçu des évaluations</span>
+                        <span style="font-size: 1.2rem;">
+                            <span class="emoji-toggle" data-target="note-evaluations-apercu">ℹ️</span>
+                        </span>
+                    </h2>
+                    <p class="text-muted">Vue d'ensemble des évaluations du groupe</p>
+
+                    <!-- Note explicative -->
+                    <div id="note-evaluations-apercu" class="carte-info-toggle carte-info-note" style="display: none;">
+                        <strong>Note :</strong> Les statistiques d'évaluations sont calculées à partir des artefacts complétés.
+                        La moyenne du groupe reflète la performance globale selon les critères d'évaluation configurés (SRPNF).
+                        Le taux de complétion mesure le nombre d'artefacts remis par rapport aux artefacts attendus.
+                    </div>
+
+                    <!-- STATISTIQUES GLOBALES -->
+                    <div class="carte">
+                        <h3>Statistiques du groupe</h3>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <!-- Étudiants évalués -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Étudiant·es évalué·es</span>
+                                    <strong id="ea-etudiants-evalues" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Artefacts complétés -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Artefacts complétés</span>
+                                    <strong id="ea-artefacts-completes" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Moyenne du groupe -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Moyenne du groupe</span>
+                                    <strong id="ea-moyenne-groupe" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Taux de complétion -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Taux de complétion moyen</span>
+                                    <strong id="ea-taux-completion" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Productions configurées -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Productions configurées</span>
+                                    <strong id="ea-productions-configurees" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Dernière évaluation -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Dernière évaluation</span>
+                                    <strong id="ea-derniere-evaluation" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sous-section: Liste des évaluations -->
+                <div id="evaluations-liste" class="sous-section">
                 <h2>Historique et filtres</h2>
                 <p class="description-section">Vue d'ensemble des évaluations et calcul automatique des indices C et
                     P</p>
@@ -3592,6 +3666,7 @@ Exemple :
     <script src="js/import-export.js?v=1761387764"></script>
     <script src="js/statistiques.js"></script>
     <script src="js/profil-etudiant.js"></script>
+    <script src="js/evaluations-apercu.js"></script>
     <script src="js/liste-evaluations.js?v=1761391739"></script>
     <script src="js/modes.js"></script>
 
