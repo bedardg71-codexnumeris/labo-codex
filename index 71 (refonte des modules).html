@@ -1456,7 +1456,22 @@
                  =================================== -->
             <section id="section-materiel" class="section">
 
-                <!-- Les sous-sections seront ajoutées ici -->
+                <!-- Sous-section: Aperçu du matériel -->
+                <div id="materiel-apercu" class="sous-section">
+                    <h2>Vue d'ensemble</h2>
+                    <p class="text-muted">Résumé du matériel pédagogique configuré</p>
+
+                    <div class="carte">
+                        <h3>Matériel configuré</h3>
+                        <p><strong>Pratique de notation :</strong> <span id="stat-pratique">—</span></p>
+                        <p><strong>Productions :</strong> <span id="stat-productions">—</span></p>
+                        <p><strong>Grilles de critères :</strong> <span id="stat-grilles">—</span></p>
+                        <p><strong>Échelles de performance :</strong> <span id="stat-echelles">—</span></p>
+                        <p><strong>Cartouches de rétroaction :</strong> <span id="stat-cartouches">—</span></p>
+                    </div>
+                </div>
+
+                <!-- Sous-section: Productions -->
                 <div id="materiel-productions" class="sous-section">
                     <h2>Exercices formatifs et certificatifs</h2>
                     <p class="text-muted">Définir les évaluations du cours et leurs pondérations</p>
@@ -2148,10 +2163,15 @@
 
                 <!-- Sous-section: Aperçu des réglages -->
                 <div id="reglages-apercu" class="sous-section">
+                    <h2>Aperçu de la configuration</h2>
+                    <p class="text-muted">
+                        Résumé de la configuration actuelle du système. Les statistiques sont calculées en temps réel depuis les données stockées localement.
+                    </p>
+
                     <div class="carte">
-                        <h3>Aperçu de la configuration</h3>
+                        <h3>📊 Informations du cours</h3>
                         <p class="text-muted">
-                            Vue d'ensemble des réglages du système de monitorage.
+                            Données de base du cours configuré.
                         </p>
                         <button class="btn btn-principal" onclick="chargerStatistiquesApercu()"
                             style="margin-top: 10px;">
@@ -2173,16 +2193,6 @@
                             <p><strong>Élèves :</strong> <span id="stat-nb-eleves">—</span></p>
                         </div>
 
-                        <!-- Carte : Matériel configuré -->
-                        <div class="carte">
-                            <h3>Matériel configuré</h3>
-                            <p><strong>Pratique de notation :</strong> <span id="stat-pratique">—</span></p>
-                            <p><strong>Productions :</strong> <span id="stat-productions">—</span></p>
-                            <p><strong>Grilles de critères :</strong> <span id="stat-grilles">—</span></p>
-                            <p><strong>Échelles de performance :</strong> <span id="stat-echelles">—</span></p>
-                            <p><strong>Cartouches de rétroaction :</strong> <span id="stat-cartouches">—</span></p>
-                        </div>
-
                         <!-- Carte : Système -->
                         <div class="carte">
                             <h3>Système</h3>
@@ -2194,19 +2204,6 @@
                     </div>
                     <!-- fin grille-statistiques -->
 
-                    <!-- Informations supplémentaires -->
-                    <div class="carte">
-                        <h4>À propos de cet aperçu</h4>
-                        <p style="font-size: 0.95rem; line-height: 1.6;">
-                            Cette page affiche un résumé de la configuration actuelle du système.
-                            Les statistiques sont calculées en temps réel depuis les données stockées localement.
-                        </p>
-                        <p style="font-size: 0.95rem; line-height: 1.6; margin-top: 10px;">
-                            <strong>Note :</strong> Pour des analyses pédagogiques détaillées (indices de
-                            performance,
-                            diagnostics individuels), consulte la section <strong>Tableau de bord</strong>.
-                        </p>
-                    </div>
 
                 </div>
                 <!-- fin sous-section reglages-apercu -->
