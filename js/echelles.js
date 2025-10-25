@@ -664,8 +664,8 @@ function afficherTableauNiveaux(niveaux) {
 </td>
                         <td style="text-align: center;">
                             ${niveaux.length > 1 ?
-            `<button onclick="supprimerNiveau(${index})" 
-                                         class="btn btn-supprimer" 
+            `<button onclick="supprimerNiveau(${index})"
+                                         class="btn btn-supprimer btn-compact"
                                          title="Supprimer ce niveau">
                                     Supprimer
                                 </button>`
@@ -675,7 +675,7 @@ function afficherTableauNiveaux(niveaux) {
                 `).join('')}
             </tbody>
         </table>
-        <button class="btn btn-ajouter mt-2" onclick="ajouterNiveau()">
+        <button class="btn btn-confirmer mt-2" onclick="ajouterNiveau()">
             + Ajouter un niveau
         </button>
     `;
