@@ -193,9 +193,9 @@ function chargerEvenementsPrevus() {
             <button onclick="supprimerEvenement('${evt.id}', 'prevus')" 
                     class="btn btn-supprimer" ${disabled}>Supprimer</button>
             <label class="item-carte-checkbox">
-                <input type="checkbox" ${verrouille} 
+                <input type="checkbox" ${verrouille}
                        onchange="basculerVerrouillageEvenement('${evt.id}', 'prevus')">
-                <span>Verrouiller</span>
+                <span>🔒</span>
             </label>
         </div>
     </div>
@@ -354,9 +354,9 @@ function chargerEvenementsImprevus() {
                     <button onclick="supprimerEvenement('${evt.id}', 'imprevus')" 
                             class="btn btn-supprimer" ${disabled}>Supprimer</button>
                     <label class="item-carte-checkbox">
-                        <input type="checkbox" ${verrouille} 
+                        <input type="checkbox" ${verrouille}
                                onchange="basculerVerrouillageEvenement('${evt.id}', 'imprevus')">
-                        <span>Verrouiller</span>
+                        <span>🔒</span>
                     </label>
                 </div>
             </div>
