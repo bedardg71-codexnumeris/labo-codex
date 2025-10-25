@@ -25,15 +25,15 @@
    =============================== */
 
 function initialiserModuleImportExport() {
-    console.log('📦 Module import-export initialisé');
-    
+    console.log('Module import-export initialisé');
+
     const modalExport = document.getElementById('modalExport');
     const modalImport = document.getElementById('modalImport');
-    
+
     if (modalExport && modalImport) {
-        console.log('   ✓ Modales import/export détectées');
+        console.log('   Modales import/export détectées');
     } else {
-        console.warn('   ⚠️ Modales import/export manquantes');
+        console.warn('   Modales import/export manquantes');
     }
 }
 
@@ -116,7 +116,7 @@ function executerExport() {
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`Export réussi : ${clesSelectionnees.length} clé(s) exportée(s)`);
     } else {
-        console.log(`✓ Export réussi: ${clesSelectionnees.length} clés`);
+        console.log(`Export réussi: ${clesSelectionnees.length} clés`);
     }
 }
 
@@ -162,7 +162,7 @@ function previsualiserImport(event) {
             
             const apercu = document.getElementById('apercu-import');
             apercu.innerHTML = `
-                <strong>✓ Fichier valide</strong><br>
+                <strong>Fichier valide</strong><br>
                 <span style="color: var(--bleu-leger); font-size: 0.9rem;">
                     ${nbCles} clé(s) · ${tailleKo} Ko
                 </span>
@@ -198,7 +198,7 @@ function executerImport() {
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`Import réussi : ${nbCles} clé(s) importée(s)`);
     } else {
-        console.log(`✓ Import réussi: ${nbCles} clés`);
+        console.log(`Import réussi: ${nbCles} clés`);
     }
     
     if (confirm('Import terminé ! Recharger la page pour appliquer les changements ?')) {
@@ -211,24 +211,24 @@ function executerImport() {
    =============================== */
 
 function reinitialiserDonnees() {
-    if (!confirm('⚠️ ATTENTION : Cette action va effacer TOUTES les données de l\'application.\n\nEs-tu sûr de vouloir continuer ?')) {
+    if (!confirm('ATTENTION : Cette action va effacer TOUTES les données de l\'application.\n\nEs-tu sûr de vouloir continuer ?')) {
         return;
     }
-    
+
     if (!confirm('Cette action est IRRÉVERSIBLE.\n\nAs-tu exporté tes données avant de continuer ?')) {
         return;
     }
-    
+
     const confirmation = prompt('Pour confirmer, tape "EFFACER" en majuscules :');
-    
+
     if (confirmation !== 'EFFACER') {
         alert('Réinitialisation annulée');
         return;
     }
-    
+
     try {
         localStorage.clear();
-        alert('✓ Toutes les données ont été effacées.\n\nLa page va se recharger.');
+        alert('Toutes les données ont été effacées.\n\nLa page va se recharger.');
         location.reload();
     } catch (erreur) {
         console.error('Erreur lors de la réinitialisation:', erreur);
