@@ -46,6 +46,7 @@ const configurationsOnglets = {
         { id: 'individuelles', label: 'Procéder à une évaluation' }
     ],
     'materiel': [
+        { id: 'apercu', label: 'Aperçu' },
         { id: 'productions', label: 'Productions' },
         { id: 'grille-criteres', label: 'Grilles de critères' },
         { id: 'echelle-performance', label: 'Échelle de performance' },
