@@ -557,58 +557,58 @@
                         <div
                             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                             <!-- Stable -->
-                            <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border: 2px solid #10b981;">
+                            <div style="background: var(--alerte-fond-succes); padding: 15px; border-radius: 8px; border: 2px solid var(--btn-confirmer);">
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <span style="font-size: 0.9rem; color: #666;">Progression stable</span>
                                     <strong id="tb-pattern-stable"
-                                        style="font-size: 1.5rem; color: #10b981;">0</strong>
+                                        style="font-size: 1.5rem; color: var(--btn-confirmer);">0</strong>
                                 </div>
                                 <div
                                     style="margin-top: 8px; background: white; height: 8px; border-radius: 4px; overflow: hidden;">
                                     <div id="tb-barre-stable"
-                                        style="height: 100%; background: #10b981; width: 0%;"></div>
+                                        style="height: 100%; background: var(--btn-confirmer); width: 0%;"></div>
                                 </div>
                             </div>
 
                             <!-- Défi spécifique -->
-                            <div style="background: #faf5ff; padding: 15px; border-radius: 8px; border: 2px solid #a855f7;">
+                            <div style="background: #f3eeff; padding: 15px; border-radius: 8px; border: 2px solid var(--btn-modifier);">
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <span style="font-size: 0.9rem; color: #666;">Défi spécifique</span>
                                     <strong id="tb-pattern-defi"
-                                        style="font-size: 1.5rem; color: #a855f7;">0</strong>
+                                        style="font-size: 1.5rem; color: var(--btn-modifier);">0</strong>
                                 </div>
                                 <div
                                     style="margin-top: 8px; background: white; height: 8px; border-radius: 4px; overflow: hidden;">
                                     <div id="tb-barre-defi"
-                                        style="height: 100%; background: #a855f7; width: 0%;"></div>
+                                        style="height: 100%; background: var(--btn-modifier); width: 0%;"></div>
                                 </div>
                             </div>
 
                             <!-- Blocage émergent -->
-                            <div style="background: #fefce8; padding: 15px; border-radius: 8px; border: 2px solid #f59e0b;">
+                            <div style="background: #fffbea; padding: 15px; border-radius: 8px; border: 2px solid var(--risque-modere);">
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <span style="font-size: 0.9rem; color: #666;">Blocage émergent</span>
                                     <strong id="tb-pattern-emergent"
-                                        style="font-size: 1.5rem; color: #f59e0b;">0</strong>
+                                        style="font-size: 1.5rem; color: var(--risque-modere);">0</strong>
                                 </div>
                                 <div
                                     style="margin-top: 8px; background: white; height: 8px; border-radius: 4px; overflow: hidden;">
                                     <div id="tb-barre-emergent"
-                                        style="height: 100%; background: #f59e0b; width: 0%;"></div>
+                                        style="height: 100%; background: var(--risque-modere); width: 0%;"></div>
                                 </div>
                             </div>
 
                             <!-- Blocage critique -->
-                            <div style="background: #fff7ed; padding: 15px; border-radius: 8px; border: 2px solid #f97316;">
+                            <div style="background: var(--alerte-fond-attention); padding: 15px; border-radius: 8px; border: 2px solid var(--btn-annuler);">
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <span style="font-size: 0.9rem; color: #666;">Blocage critique</span>
                                     <strong id="tb-pattern-critique"
-                                        style="font-size: 1.5rem; color: #f97316;">0</strong>
+                                        style="font-size: 1.5rem; color: var(--btn-annuler);">0</strong>
                                 </div>
                                 <div
                                     style="margin-top: 8px; background: white; height: 8px; border-radius: 4px; overflow: hidden;">
                                     <div id="tb-barre-critique"
-                                        style="height: 100%; background: #f97316; width: 0%;"></div>
+                                        style="height: 100%; background: var(--btn-annuler); width: 0%;"></div>
                                 </div>
                             </div>
                         </div>
@@ -620,12 +620,12 @@
 
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                             <!-- Niveau 1 -->
-                            <div style="background: #ffffff; padding: 15px; border-radius: 8px; border: 2px solid #d1d5db;">
+                            <div style="background: #ffffff; padding: 15px; border-radius: 8px; border: 2px solid var(--bordure-moyenne);">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                                     <span style="font-size: 0.9rem; color: #666;">Niveau 1</span>
                                     <div style="display: flex; align-items: baseline; gap: 6px;">
                                         <strong id="tb-rai-niveau1"
-                                                style="font-size: 1.8rem; color: #6b7280;">0</strong>
+                                                style="font-size: 1.8rem; color: var(--gris-moyen);">0</strong>
                                         <span id="tb-rai-niveau1-pct"
                                               style="font-size: 1rem; color: #666; font-weight: 600;">(0%)</span>
                                     </div>
@@ -635,12 +635,12 @@
                             </div>
 
                             <!-- Niveau 2 -->
-                            <div style="background: #faf5ff; padding: 15px; border-radius: 8px; border: 2px solid #a855f7;">
+                            <div style="background: #f3eeff; padding: 15px; border-radius: 8px; border: 2px solid var(--btn-modifier);">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                                     <span style="font-size: 0.9rem; color: #666;">Niveau 2</span>
                                     <div style="display: flex; align-items: baseline; gap: 6px;">
                                         <strong id="tb-rai-niveau2"
-                                                style="font-size: 1.8rem; color: #a855f7;">0</strong>
+                                                style="font-size: 1.8rem; color: var(--btn-modifier);">0</strong>
                                         <span id="tb-rai-niveau2-pct"
                                               style="font-size: 1rem; color: #666; font-weight: 600;">(0%)</span>
                                     </div>
@@ -650,12 +650,12 @@
                             </div>
 
                             <!-- Niveau 3 -->
-                            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; border: 2px solid #d97706;">
+                            <div style="background: var(--alerte-fond-attention); padding: 15px; border-radius: 8px; border: 2px solid var(--btn-annuler);">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                                     <span style="font-size: 0.9rem; color: #666;">Niveau 3</span>
                                     <div style="display: flex; align-items: baseline; gap: 6px;">
                                         <strong id="tb-rai-niveau3"
-                                                style="font-size: 1.8rem; color: #d97706;">0</strong>
+                                                style="font-size: 1.8rem; color: var(--btn-annuler);">0</strong>
                                         <span id="tb-rai-niveau3-pct"
                                               style="font-size: 1rem; color: #666; font-weight: 600;">(0%)</span>
                                     </div>
