@@ -3256,7 +3256,7 @@ Exemple :
                 <!-- Sous-section: Import/Export des données -->
                 <div id="reglages-import-export" class="sous-section">
                     <div class="carte">
-                        <h3>📦 Sauvegarde et restauration</h3>
+                        <h3>Sauvegarde et restauration</h3>
                         <p class="text-muted">
                             Gère tes données locales : exporte pour sauvegarder, importe pour restaurer.
                         </p>
@@ -3264,52 +3264,52 @@ Exemple :
 
                     <!-- Export -->
                     <div class="carte">
-                        <h4>📤 Exporter les données</h4>
+                        <h4>Exporter les données</h4>
                         <p>
                             Sauvegarde tes données dans un fichier JSON. Tu pourras choisir quelles
                             données exporter (toutes ou sélection personnalisée).
                         </p>
                         <button class="btn btn-principal" onclick="ouvrirModalExport()">
-                            📥 Ouvrir l'exportation
+                            Ouvrir l'exportation
                         </button>
                         <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem;">
-                            💡 Exporte régulièrement pour éviter toute perte de données.
+                            Exporte régulièrement pour éviter toute perte de données.
                         </p>
                     </div>
 
                     <!-- Import -->
                     <div class="carte">
-                        <h4>📥 Importer des données</h4>
+                        <h4>Importer des données</h4>
                         <p>
                             Restaure des données depuis un fichier JSON exporté précédemment.
                         </p>
                         <button class="btn btn-principal" onclick="ouvrirModalImport()">
-                            📤 Ouvrir l'importation
+                            Ouvrir l'importation
                         </button>
                         <div class="badge-alerte" style="margin-top: 15px;">
-                            ⚠️ <strong>Important :</strong> L'import écrasera les données existantes
+                            <strong>Important :</strong> L'import écrasera les données existantes
                             pour les clés importées. Exporte d'abord si nécessaire !
                         </div>
                     </div>
 
                     <!-- Réinitialisation -->
                     <div class="carte">
-                        <h4>🗑️ Réinitialisation complète</h4>
+                        <h4>Réinitialisation complète</h4>
                         <p>
                             Efface <strong>toutes</strong> les données et revient à l'état initial.
                             <strong>Cette action est irréversible.</strong>
                         </p>
-                        <button class="btn btn-danger" onclick="reinitialiserDonnees()">
-                            ⚠️ Réinitialiser toutes les données
+                        <button class="btn btn-supprimer" onclick="reinitialiserDonnees()">
+                            Réinitialiser toutes les données
                         </button>
                         <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem;">
-                            ⚠️ Triple confirmation requise + mot de passe "EFFACER" pour sécurité
+                            Triple confirmation requise + mot de passe "EFFACER" pour sécurité
                         </p>
                     </div>
 
                     <!-- Informations -->
                     <div class="carte">
-                        <h4>ℹ️ Informations</h4>
+                        <h4>Informations</h4>
                         <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95rem;">
                             <li><strong>Stockage :</strong> Local dans le navigateur (localStorage)</li>
                             <li><strong>Format :</strong> Fichiers JSON lisibles</li>
