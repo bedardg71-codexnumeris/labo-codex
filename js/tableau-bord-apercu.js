@@ -279,7 +279,7 @@ function afficherAlertesPrioritairesCompteurs(etudiants) {
     const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
 
     // Compter par niveau de risque (utiliser sommatif ou alternatif selon config)
-    let critique = 0, tresEleve = 0, eleve = 0;
+    let critique = 0, tresEleve = 0, eleve = 0, faibles = 0;
 
     etudiants.forEach(e => {
         const risque = afficherSommatif ? e.sommatif.risque : e.alternatif.risque;
@@ -291,10 +291,13 @@ function afficherAlertesPrioritairesCompteurs(etudiants) {
             tresEleve++;
         } else if (niveau === 'élevé') {
             eleve++;
+        } else if (niveau === 'minimal' || niveau === 'faible' || niveau === 'modéré') {
+            faibles++;
         }
     });
 
     // Afficher les compteurs
+    setStatText('tb-risque-faibles', faibles);
     setStatText('tb-risque-critique', critique);
     setStatText('tb-risque-tres-eleve', tresEleve);
     setStatText('tb-risque-eleve', eleve);
