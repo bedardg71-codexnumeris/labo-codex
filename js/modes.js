@@ -95,22 +95,16 @@ function creerSelecteurMode() {
     // Vider le conteneur
     conteneur.innerHTML = '';
 
-    // Créer le label
-    const label = document.createElement('label');
-    label.htmlFor = 'select-mode';
-    label.textContent = 'Mode d\'affichage : ';
-    label.style.cssText = 'font-size: 0.9rem; color: white; margin-right: 8px;';
-
     // Créer le select
     const select = document.createElement('select');
     select.id = 'select-mode';
     select.className = 'select-mode';
 
-    // Créer les options pour chaque mode
+    // Créer les options pour chaque mode (tous adjectifs)
     const labels = {
         'normal': 'Normal',
-        'simulation': 'Simulation',
-        'anonymisation': 'Anonymisation'
+        'simulation': 'Simulé',
+        'anonymisation': 'Anonymisé'
     };
 
     Object.entries(MODES).forEach(([key, mode]) => {
@@ -130,7 +124,6 @@ function creerSelecteurMode() {
     select.addEventListener('change', (e) => changerMode(e.target.value));
 
     // Ajouter au conteneur
-    conteneur.appendChild(label);
     conteneur.appendChild(select);
 }
 
