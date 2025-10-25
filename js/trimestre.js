@@ -314,6 +314,10 @@ function basculerVerrouillageEvenement(id, type) {
         evt.verrouille = !evt.verrouille;
         localStorage.setItem(cle, JSON.stringify(evenements));
 
+        // Afficher notification
+        const message = evt.verrouille ? 'Événement verrouillé' : 'Événement déverrouillé';
+        afficherNotification(message);
+
         if (type === 'prevus') {
             chargerEvenementsPrevus();
         } else {
