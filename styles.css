@@ -2509,14 +2509,14 @@ body[data-mode="anonymisation"] .sous-navigation button.actif {
     color: #fffbea;
 }
 
-/* Variante Conseil (💡) */
+/* Variante Conseil (💡) - Style vert pratique */
 .carte-info-conseil {
-    background: var(--bleu-tres-pale);
-    border-left-color: var(--bleu-moyen);
+    background: #f0fdf4;
+    border-left-color: #4ade80;
 }
 
 .carte-info-conseil::before {
-    color: var(--bleu-tres-pale);
+    color: #f0fdf4;
 }
 
 /* Listes à l'intérieur des cartes info-toggle */
