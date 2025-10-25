@@ -819,9 +819,8 @@
                                     Allez dans <strong>Réglages › Groupe</strong> pour ajouter des étudiant·es
                                 </span>
                             </p>
-                            <button onclick="resetFiltresListe()" id="btn-reset-filtres" class="btn btn-secondaire"
-                                style="padding: 8px 15px;">
-                                ↺ Réinitialiser les filtres
+                            <button onclick="resetFiltresListe()" id="btn-reset-filtres" class="btn btn-annuler">
+                                Réinitialiser les filtres
                             </button>
                         </div>
 
@@ -896,14 +895,14 @@
                                 <label for="date-cours" class="label-formulaire">Date du cours</label>
                                 <div style="display: flex; gap: 8px; align-items: center;">
                                     <button id="btn-cours-precedent" onclick="allerCoursPrecedent()"
-                                        class="btn btn-secondaire btn-compact" style="flex-shrink: 0;">
+                                        class="btn btn-principal btn-compact" style="flex-shrink: 0;">
                                         ← Précédent
                                     </button>
                                     <input type="date" id="date-cours" class="controle-form"
                                         onchange="initialiserSaisiePresences(); mettreAJourBoutonsNavigation();"
                                         style="flex: 1;">
                                     <button id="btn-cours-suivant" onclick="allerCoursSuivant()"
-                                        class="btn btn-secondaire btn-compact" style="flex-shrink: 0;">
+                                        class="btn btn-principal btn-compact" style="flex-shrink: 0;">
                                         Suivant →
                                     </button>
                                 </div>
@@ -953,9 +952,9 @@
                                                     Tous 2h
                                                 </button>
                                                 <button id="btn-reinit-saisie" onclick="reinitialiserSaisie()"
-                                                    class="btn btn-secondaire btn-compact"
-                                                    style="font-size: 1rem;">
-                                                    ↻
+                                                    class="btn btn-annuler btn-compact"
+                                                    title="Réinitialiser la saisie">
+                                                    Réinitialiser
                                                 </button>
                                             </div>
                                         </th>
@@ -1104,7 +1103,7 @@
                                 </div>
 
                                 <div class="groupe-boutons-ligne">
-                                    <button class="btn btn-secondaire btn-tres-compact btn-largeur-auto" onclick="afficherModalReparationEvaluations()"
+                                    <button class="btn btn-modifier btn-tres-compact btn-largeur-auto" onclick="afficherModalReparationEvaluations()"
                                         title="Réparer les évaluations avec critères manquants">
                                         Réparer
                                     </button>
@@ -1116,7 +1115,7 @@
                                         Sauvegarder
                                     </button>
 
-                                    <button class="btn btn-secondaire btn-tres-compact btn-largeur-auto" onclick="nouvelleEvaluation()"
+                                    <button class="btn btn-annuler btn-tres-compact btn-largeur-auto" onclick="nouvelleEvaluation()"
                                         title="Réinitialiser tous les paramètres et commencer une nouvelle évaluation">
                                         Réinitialiser
                                     </button>
@@ -2100,9 +2099,8 @@
                                     <option value="">Tous les groupes</option>
                                     <!-- Options générées dynamiquement -->
                                 </select>
-                                <button onclick="resetFiltreGroupe()" class="btn btn-secondaire"
-                                    style="padding: 8px 15px;">
-                                    ↺ Réinitialiser
+                                <button onclick="resetFiltreGroupe()" class="btn btn-annuler">
+                                    Réinitialiser
                                 </button>
                             </div>
                         </div>
@@ -2375,13 +2373,13 @@ Exemple :
                             <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Actions rapides</h4>
                             <div class="btn-groupe">
                                 <button onclick="genererMappingAleatoire()" class="btn btn-principal">
-                                    🎲 Générer mapping aléatoire (10 étudiants)
+                                    Générer mapping aléatoire (10 étudiants)
                                 </button>
-                                <button onclick="synchroniserDonnees()" class="btn btn-secondaire">
-                                    🔄 Synchroniser maintenant
+                                <button onclick="synchroniserDonnees()" class="btn btn-principal">
+                                    Synchroniser maintenant
                                 </button>
-                                <button onclick="afficherTableauMapping()" class="btn btn-secondaire">
-                                    📋 Afficher le mapping
+                                <button onclick="afficherTableauMapping()" class="btn btn-principal">
+                                    Afficher le mapping
                                 </button>
                             </div>
                         </div>
