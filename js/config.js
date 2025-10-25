@@ -30,7 +30,7 @@
  * ⚠️ NE PAS MODIFIER - Référencé dans noms_stables.json
  */
 const configurationsOnglets = {
-    'tableau-bord': [                           
+    'tableau-bord': [
         { id: 'apercu', label: 'Aperçu' },
         { id: 'liste', label: 'Liste des individus' },
         { id: 'profil', label: 'Profil' }
@@ -45,6 +45,12 @@ const configurationsOnglets = {
         { id: 'liste', label: 'Liste des évaluations' },
         { id: 'individuelles', label: 'Procéder à une évaluation' }
     ],
+    'materiel': [
+        { id: 'productions', label: 'Productions' },
+        { id: 'grille-criteres', label: 'Grilles de critères' },
+        { id: 'echelle-performance', label: 'Échelle de performance' },
+        { id: 'retroactions', label: 'Rétroactions' }
+    ],
     'reglages': [
         { id: 'apercu', label: 'Aperçu' },
         { id: 'cours', label: 'Cours' },
@@ -52,11 +58,11 @@ const configurationsOnglets = {
         { id: 'horaire', label: 'Horaire' },
         { id: 'groupe', label: 'Groupe' },
         { id: 'pratique-notation', label: 'Pratique de notation' },
-        { id: 'productions', label: 'Productions' },
-        { id: 'grille-criteres', label: 'Grilles de critères' },
-        { id: 'echelle-performance', label: 'Échelle de performance' },
-        { id: 'retroactions', label: 'Rétroactions' },
         { id: 'import-export', label: 'Import/Export' }
+    ],
+    'aide': [
+        { id: 'documentation', label: 'Documentation' },
+        { id: 'a-propos', label: 'À propos' }
     ]
 };
 
