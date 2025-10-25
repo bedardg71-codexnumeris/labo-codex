@@ -2235,14 +2235,14 @@ function extraireNiveauxDepuisRetroaction(retroaction, grille) {
  * Affiche le modal d'explication pour la réparation des évaluations
  */
 function afficherModalReparationEvaluations() {
-    document.getElementById('modalReparationEvaluations').style.display = 'block';
+    document.getElementById('modalReparationEvaluations').classList.add('actif');
 }
 
 /**
  * Ferme le modal de réparation
  */
 function fermerModalReparationEvaluations() {
-    document.getElementById('modalReparationEvaluations').style.display = 'none';
+    document.getElementById('modalReparationEvaluations').classList.remove('actif');
 }
 
 /**
@@ -2900,7 +2900,7 @@ function ouvrirBanqueEvaluations() {
     // Afficher les évaluations
     filtrerBanqueEvaluations();
 
-    modal.style.display = 'block';
+    modal.classList.add('actif');
 }
 
 /**
@@ -2908,7 +2908,7 @@ function ouvrirBanqueEvaluations() {
  */
 function fermerBanqueEvaluations() {
     const modal = document.getElementById('modalBanqueEvaluations');
-    if (modal) modal.style.display = 'none';
+    if (modal) modal.classList.remove('actif');
 }
 
 /**
@@ -3221,7 +3221,7 @@ function ouvrirModalJetonReprise() {
     // Charger la liste des évaluations pouvant bénéficier d'un jeton
     chargerListeEvaluationsJeton(evaluationCouranteId);
 
-    modal.style.display = 'block';
+    modal.classList.add('actif');
 }
 
 /**
@@ -3229,7 +3229,7 @@ function ouvrirModalJetonReprise() {
  */
 function fermerModalJetonReprise() {
     const modal = document.getElementById('modalJetonReprise');
-    if (modal) modal.style.display = 'none';
+    if (modal) modal.classList.remove('actif');
 
     // Réinitialiser les variables de sélection
     window.evaluationJetonPreselection = null;
