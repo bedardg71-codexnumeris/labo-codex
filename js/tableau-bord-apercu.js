@@ -544,7 +544,7 @@ function genererRecommandation(indices) {
 
     // Identifier le défi principal
     if (assiduite < 0.65) {
-        return "📅 <strong>Priorité: Assiduité</strong> - Contacter l'étudiant pour comprendre les absences et proposer un soutien";
+        return "<strong>Priorité: Assiduité</strong> - Contacter l'étudiant pour comprendre les absences et proposer un soutien";
     }
     if (completion < 0.65) {
         return "📝 <strong>Priorité: Complétion</strong> - Rencontre pour identifier les obstacles et établir un échéancier réaliste";

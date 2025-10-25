@@ -63,7 +63,7 @@
  * - Sortie silencieuse si les éléments n'existent pas
  */
 function initialiserModuleVueCalendaire() {
-    console.log('📅 Initialisation du module Vue Calendaire');
+    console.log('Initialisation du module Vue Calendaire');
 
     // Vérifier que nous sommes dans la bonne section
     const conteneurCalendrier = document.getElementById('presences-calendrier');
@@ -230,7 +230,7 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
         const dateStr = calendrierVue_formaterDate(new Date(annee, mois - 1, jour));
 
         if (jour <= 2) {
-            console.log('📅 Jour', jour, 'du mois', mois, '→ dateStr:', dateStr);
+            console.log('Jour', jour, 'du mois', mois, '→ dateStr:', dateStr);
         }
         
         const statut = obtenirStatutJour(dateStr, calendrierComplet);
