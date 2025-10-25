@@ -467,18 +467,24 @@ function afficherCalendrierScolaire() {
     htmlCalendrier += '</p>';
     htmlCalendrier += '</div>';
 
-    // Statistiques - UTILISER LES VALEURS DÉJÀ CALCULÉES
+    // Statistiques - FORMAT HARMONISÉ (texte gauche / chiffre droite)
     let htmlStats = '<div style="margin-bottom: 20px;">';
-    htmlStats += '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">';
+    htmlStats += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">';
 
-    htmlStats += '<div style="background: var(--bleu-pale); padding: 20px; border-radius: 8px; text-align: center; border: 2px solid var(--bleu-carte);">';
-    htmlStats += '<div style="font-size: 2rem; font-weight: 600; color: var(--bleu-principal);">' + nombreSemainesReel + '</div>';
-    htmlStats += '<div style="color: var(--bleu-moyen); font-size: 0.9rem; margin-top: 5px;">Semaines scolaires</div>';
+    // Carte 1 : Semaines scolaires
+    htmlStats += '<div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">';
+    htmlStats += '<div style="display: flex; align-items: center; justify-content: space-between;">';
+    htmlStats += '<span style="font-size: 0.9rem; color: #666;">Semaines scolaires</span>';
+    htmlStats += '<strong style="font-size: 1.8rem; color: var(--bleu-principal);">' + nombreSemainesReel + '</strong>';
+    htmlStats += '</div>';
     htmlStats += '</div>';
 
-    htmlStats += '<div style="background: var(--bleu-pale); padding: 20px; border-radius: 8px; text-align: center; border: 2px solid var(--bleu-carte);">';
-    htmlStats += '<div style="font-size: 2rem; font-weight: 600; color: var(--bleu-principal);">' + nombreJoursReel + '</div>';
-    htmlStats += '<div style="color: var(--bleu-moyen); font-size: 0.9rem; margin-top: 5px;">Jours de cours</div>';
+    // Carte 2 : Jours de cours
+    htmlStats += '<div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">';
+    htmlStats += '<div style="display: flex; align-items: center; justify-content: space-between;">';
+    htmlStats += '<span style="font-size: 0.9rem; color: #666;">Jours de cours</span>';
+    htmlStats += '<strong style="font-size: 1.8rem; color: var(--bleu-principal);">' + nombreJoursReel + '</strong>';
+    htmlStats += '</div>';
     htmlStats += '</div>';
 
     // Compter uniquement les congés AVEC reprise
@@ -486,9 +492,12 @@ function afficherCalendrierScolaire() {
         return evt.dateReprise && evt.dateReprise !== '';
     }).length;
 
-    htmlStats += '<div style="background: var(--bleu-pale); padding: 20px; border-radius: 8px; text-align: center; border: 2px solid var(--bleu-carte);">';
-    htmlStats += '<div style="font-size: 2rem; font-weight: 600; color: var(--bleu-principal);">' + congesAvecReprise + '</div>';
-    htmlStats += '<div style="color: var(--bleu-moyen); font-size: 0.9rem; margin-top: 5px;">Congés avec reprises</div>';
+    // Carte 3 : Congés avec reprises
+    htmlStats += '<div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">';
+    htmlStats += '<div style="display: flex; align-items: center; justify-content: space-between;">';
+    htmlStats += '<span style="font-size: 0.9rem; color: #666;">Congés avec reprises</span>';
+    htmlStats += '<strong style="font-size: 1.8rem; color: var(--bleu-principal);">' + congesAvecReprise + '</strong>';
+    htmlStats += '</div>';
     htmlStats += '</div>';
 
     htmlStats += '</div></div>';
