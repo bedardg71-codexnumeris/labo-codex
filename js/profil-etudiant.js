@@ -715,30 +715,19 @@ function genererSectionMobilisation(da) {
     const interpM = interpreterMobilisation(A, C);
 
     return `
-        <!-- STATISTIQUES - NOUVEAU FORMAT (TEST) -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
-            <!-- Assiduité (A) -->
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Assiduité (A)</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.A}%</strong>
-                </div>
+        <!-- STATISTIQUES -->
+        <div class="grille-statistiques mb-2">
+            <div class="carte-metrique">
+                <strong>${indices.A}%</strong>
+                <span>Assiduité (A)</span>
             </div>
-
-            <!-- Complétion (C) -->
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Complétion (C)</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.C}%</strong>
-                </div>
+            <div class="carte-metrique">
+                <strong>${indices.C}%</strong>
+                <span>Complétion (C)</span>
             </div>
-
-            <!-- Mobilisation (M) - avec couleur contextuelle -->
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid ${interpM.couleur};">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Mobilisation (M)</span>
-                    <strong style="font-size: 1.8rem; color: ${interpM.couleur};">${indices.M}</strong>
-                </div>
+            <div class="carte-metrique" style="border-left: 3px solid ${interpM.couleur};">
+                <strong>${indices.M}</strong>
+                <span>Mobilisation (M)</span>
             </div>
         </div>
 
