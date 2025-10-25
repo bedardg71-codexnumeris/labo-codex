@@ -1676,11 +1676,48 @@
 
                     <div class="carte">
                         <h3>Matériel configuré</h3>
-                        <p><strong>Pratique de notation :</strong> <span id="stat-pratique">—</span></p>
-                        <p><strong>Productions :</strong> <span id="stat-productions">—</span></p>
-                        <p><strong>Grilles de critères :</strong> <span id="stat-grilles">—</span></p>
-                        <p><strong>Échelles de performance :</strong> <span id="stat-echelles">—</span></p>
-                        <p><strong>Cartouches de rétroaction :</strong> <span id="stat-cartouches">—</span></p>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <!-- Pratique de notation -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Pratique de notation</span>
+                                    <strong id="stat-pratique" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Productions -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Productions</span>
+                                    <strong id="stat-productions" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Grilles de critères -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Grilles de critères</span>
+                                    <strong id="stat-grilles" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Échelles de performance -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Échelles de performance</span>
+                                    <strong id="stat-echelles" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Cartouches de rétroaction -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Cartouches de rétroaction</span>
+                                    <strong id="stat-cartouches" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
