@@ -2499,14 +2499,14 @@ body[data-mode="anonymisation"] .sous-navigation button.actif {
     border-bottom: 8px solid currentColor;
 }
 
-/* Variante Note (⚠️) */
+/* Variante Note (ℹ️) - Style post-it jaune */
 .carte-info-note {
-    background: var(--bleu-pale);
-    border-left-color: var(--bleu-moyen);
+    background: #fffbea;
+    border-left-color: #f5c842;
 }
 
 .carte-info-note::before {
-    color: var(--bleu-pale);
+    color: #fffbea;
 }
 
 /* Variante Conseil (💡) */
