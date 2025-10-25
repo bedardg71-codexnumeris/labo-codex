@@ -128,8 +128,8 @@ function afficherTableauCours() {
                 <th>Enseignant·e</th>
                 <th>Session</th>
                 <th style="width: 60px;">Actif</th>
-                <th style="width: 60px;">🔒</th>
                 <th style="width: 200px;">Actions</th>
+                <th style="width: 60px;">🔒</th>
             </tr>
         </thead>
         <tbody>
@@ -154,41 +154,34 @@ function afficherTableauCours() {
             <td>${prenomEchappe} ${nomEnsEchappe}</td>
             <td>${sessionEchappe}</td>
             <td style="text-align: center;">
-                <input type="radio" 
-                       name="cours-actif" 
+                <input type="radio"
+                       name="cours-actif"
                        ${c.actif ? 'checked' : ''}
                        onchange="activerCours('${c.id}')"
                        title="Définir comme cours actif">
             </td>
-            <td style="text-align: center;">
-                <input type="checkbox" 
-                       id="verrou-cours-${c.id}" 
-                       ${isVerrouille ? 'checked' : ''}
-                       onchange="basculerVerrouillageCours('${c.id}')"
-                       title="Verrouiller/Déverrouiller">
-            </td>
             <td>
                 <div class="btn-groupe" style="gap: 5px;">
-                    <button class="btn btn-principal btn-sm" 
+                    <button class="btn btn-principal btn-sm"
                             onclick="voirCours('${c.id}')"
                             title="Voir les détails"
                             style="padding: 5px 10px; font-size: 0.85rem;">
                         Voir
                     </button>
-                    <button class="btn btn-modifier btn-sm" 
+                    <button class="btn btn-modifier btn-sm"
                             onclick="modifierCours('${c.id}')"
                             ${isVerrouille ? 'disabled' : ''}
                             title="Modifier"
                             style="padding: 5px 10px; font-size: 0.85rem;">
                         Modifier
                     </button>
-                    <button class="btn btn-ajouter btn-sm" 
+                    <button class="btn btn-ajouter btn-sm"
                             onclick="dupliquerCours('${c.id}')"
                             title="Dupliquer"
                             style="padding: 5px 10px; font-size: 0.85rem;">
                         Dupliquer
                     </button>
-                    <button class="btn btn-supprimer btn-sm" 
+                    <button class="btn btn-supprimer btn-sm"
                             onclick="supprimerCours('${c.id}')"
                             ${isVerrouille ? 'disabled' : ''}
                             title="Supprimer"
@@ -196,6 +189,13 @@ function afficherTableauCours() {
                         Supprimer
                     </button>
                 </div>
+            </td>
+            <td style="text-align: center;">
+                <input type="checkbox"
+                       id="verrou-cours-${c.id}"
+                       ${isVerrouille ? 'checked' : ''}
+                       onchange="basculerVerrouillageCours('${c.id}')"
+                       title="Verrouiller/Déverrouiller">
             </td>
         </tr>
         `;

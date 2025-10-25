@@ -512,20 +512,22 @@ function afficherListeCriteres(criteres, grilleId) {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <strong style="color: var(--bleu-principal);">${critere.nom}</strong>
                 <div style="white-space: nowrap;">
-                    <label style="margin-right: 10px;">
-                        <input type="checkbox" id="unlock-critere-${critere.id}" 
-                               onchange="basculerVerrouillageCritere('${critere.id}')" 
-                               ${critere.verrouille ? 'checked' : ''}>
-                        <span style="font-size: 0.85rem;">🔒</span>
-                    </label>
                     <button class="btn btn-modifier" onclick="modifierCritere('${critere.id}')"
-                            ${critere.verrouille ? 'disabled' : ''}>
+                            ${critere.verrouille ? 'disabled' : ''}
+                            style="margin-right: 10px;">
                         Modifier
                     </button>
                     <button class="btn btn-supprimer" onclick="supprimerCritere('${critere.id}')"
-                            ${critere.verrouille ? 'disabled' : ''}>
+                            ${critere.verrouille ? 'disabled' : ''}
+                            style="margin-right: 10px;">
                         Supprimer
                     </button>
+                    <label>
+                        <input type="checkbox" id="unlock-critere-${critere.id}"
+                               onchange="basculerVerrouillageCritere('${critere.id}')"
+                               ${critere.verrouille ? 'checked' : ''}>
+                        <span style="font-size: 0.85rem;">🔒</span>
+                    </label>
                 </div>
             </div>
             ${critere.description ? `<p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">${critere.description}</p>` : ''}

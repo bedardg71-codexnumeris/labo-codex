@@ -503,22 +503,22 @@ function genererBoutonsActionsEvalue(ligne) {
     }
 
     return `
-        <label style="display: inline-flex; align-items: center; margin-right: 10px;">
-            <input type="checkbox"
-                   ${ligne.verrouille ? 'checked' : ''}
-                   onchange="toggleVerrouillerEvaluation('${ligne.evaluationId}')"
-                   style="margin-right: 5px;">
-            <span style="font-size: 0.85rem;">🔒</span>
-        </label>
         <button class="btn btn-modifier btn-compact btn-marge-droite" onclick="modifierEvaluation('${ligne.da}', '${ligne.productionId}')" title="Modifier">
             Modifier
         </button>
         <button class="btn btn-annuler btn-compact btn-marge-droite" onclick="dupliquerEvaluation('${ligne.evaluationId}')" title="Dupliquer">
             Dupliquer
         </button>
-        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer">
+        <button class="btn btn-supprimer btn-compact btn-marge-droite" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer">
             Supprimer
         </button>
+        <label style="display: inline-flex; align-items: center; margin-left: 10px;">
+            <input type="checkbox"
+                   ${ligne.verrouille ? 'checked' : ''}
+                   onchange="toggleVerrouillerEvaluation('${ligne.evaluationId}')"
+                   style="margin-right: 5px;">
+            <span style="font-size: 0.85rem;">🔒</span>
+        </label>
     `;
 }
 

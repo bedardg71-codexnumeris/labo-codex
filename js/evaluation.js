@@ -1368,8 +1368,8 @@ function genererDetailsEtudiant(etudiant) {
                     <th>Note (%)</th>
                     <th>Statut</th>
                     <th>Date</th>
-                    <th style="width: 60px;">🔒</th>
                     <th>Actions</th>
+                    <th style="width: 60px;">🔒</th>
                 </tr>
             </thead>
             <tbody>
@@ -1398,14 +1398,6 @@ function genererDetailsEtudiant(etudiant) {
                                     </span>
                                 </td>
                                 <td>${item.evaluation.dateEvaluation ? new Date(item.evaluation.dateEvaluation).toLocaleDateString('fr-CA') : '—'}</td>
-                                <td style="text-align: center;">
-                                    ${estRemplacee ? '' : `
-                                        <input type="checkbox"
-                                               ${item.evaluation.verrouillee ? 'checked' : ''}
-                                               onchange="basculerVerrouillageEvaluation('${item.evaluation.id}')"
-                                               title="Verrouiller/Déverrouiller">
-                                    `}
-                                </td>
                                 <td>
                                     ${estRemplacee ? `
                                         <span style="color: #999; font-size: 0.85rem; font-style: italic;">
@@ -1418,6 +1410,14 @@ function genererDetailsEtudiant(etudiant) {
                                         <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${item.evaluation.id}')" ${item.evaluation.verrouillee ? 'disabled title="Déverrouillez d\'abord pour supprimer"' : ''}>
                                             Supprimer
                                         </button>
+                                    `}
+                                </td>
+                                <td style="text-align: center;">
+                                    ${estRemplacee ? '' : `
+                                        <input type="checkbox"
+                                               ${item.evaluation.verrouillee ? 'checked' : ''}
+                                               onchange="basculerVerrouillageEvaluation('${item.evaluation.id}')"
+                                               title="Verrouiller/Déverrouiller">
                                     `}
                                 </td>
                             </tr>
@@ -1437,12 +1437,12 @@ function genererDetailsEtudiant(etudiant) {
                                     </span>
                                 </td>
                                 <td>—</td>
-                                <td>—</td>
                                 <td>
                                     <button class="btn btn-confirmer btn-compact" onclick="evaluerProduction('${etudiant.da}', '${item.production.id}')">
                                         Évaluer
                                     </button>
                                 </td>
+                                <td>—</td>
                             </tr>
                         `;
         }
