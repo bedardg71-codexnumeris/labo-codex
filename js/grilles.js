@@ -92,7 +92,7 @@ function chargerListeGrillesTemplates() {
 }
 
 /* ===============================
-   📝 FONCTION: CHARGER GRILLE TEMPLATE
+   FONCTION: CHARGER GRILLE TEMPLATE
    Charge une grille pour édition
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -740,8 +740,8 @@ function afficherGrillesCriteres() {
                     </div>
                 </div>
                 <div style="color: #666; font-size: 0.85rem;">
-                    <span style="margin-right: 20px;">📝 ${grille.criteres?.length || 0} critères</span>
-                    <span>⚖️ Pondération totale : ${grille.criteres?.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0) || 0}%</span>
+                    <span style="margin-right: 20px;">${grille.criteres?.length || 0} critères</span>
+                    <span>Pondération totale : ${grille.criteres?.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0) || 0}%</span>
                 </div>
                 <details style="margin-top: 10px;">
                     <summary style="cursor: pointer; color: var(--bleu-moyen); font-size: 0.9rem;">
@@ -1037,7 +1037,7 @@ function basculerVerrouillageCritere(critereId) {
 }
 
 /* ===============================
-   🏷️ FONCTION: GET TYPE CRITÈRE LABEL
+   FONCTION: GET TYPE CRITÈRE LABEL
    Retourne le libellé d'un type
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */

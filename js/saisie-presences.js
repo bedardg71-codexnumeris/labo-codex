@@ -1258,14 +1258,14 @@ function mettreAJourBoutonsNavigation() {
         btnPrecedent.disabled = !coursPrecedent;
         btnPrecedent.style.opacity = coursPrecedent ? '1' : '0.5';
         btnPrecedent.style.cursor = coursPrecedent ? 'pointer' : 'not-allowed';
-        console.log('⬅️ Bouton précédent:', coursPrecedent ? 'actif' : 'inactif');
+        console.log('Bouton précédent:', coursPrecedent ? 'actif' : 'inactif');
     }
 
     if (btnSuivant) {
         btnSuivant.disabled = !coursSuivant;
         btnSuivant.style.opacity = coursSuivant ? '1' : '0.5';
         btnSuivant.style.cursor = coursSuivant ? 'pointer' : 'not-allowed';
-        console.log('➡️ Bouton suivant:', coursSuivant ? 'actif' : 'inactif');
+        console.log('Bouton suivant:', coursSuivant ? 'actif' : 'inactif');
     }
 }
 

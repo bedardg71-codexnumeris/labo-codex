@@ -56,8 +56,8 @@
  * - Sortie silencieuse si les éléments n'existent pas
  */
 function initialiserModulePratiques() {
-    console.log('⚖️  Initialisation du module Pratiques de notation');
-    
+    console.log('Initialisation du module Pratiques de notation');
+
     // Vérifier que nous sommes dans la bonne section
     const selectPratique = document.getElementById('pratiqueNotation');
     if (!selectPratique) {

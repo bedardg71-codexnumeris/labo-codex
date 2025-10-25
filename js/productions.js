@@ -488,7 +488,7 @@ function verrouillerEvaluation(id) {
 }
 
 /* ===============================
-   ⬆️ FONCTION: MONTER ÉVALUATION
+   FONCTION: MONTER ÉVALUATION
    Déplace une production vers le haut
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -520,7 +520,7 @@ function monterEvaluation(id) {
 }
 
 /* ===============================
-   ⬇️ FONCTION: DESCENDRE ÉVALUATION
+   FONCTION: DESCENDRE ÉVALUATION
    Déplace une production vers le bas
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -721,7 +721,7 @@ function mettreAJourResumeTypes(evaluations) {
 }
 
 /* ===============================
-   🏷️ FONCTION: GET TYPE LABEL
+   FONCTION: GET TYPE LABEL
    Retourne le libellé d'un type de production
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
