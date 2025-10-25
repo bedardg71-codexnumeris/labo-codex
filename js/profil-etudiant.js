@@ -539,7 +539,7 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Liste des absences et retards -->
                 <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
-                    📅 ABSENCES ET RETARDS
+                    ABSENCES ET RETARDS
                 </h4>
                 ${detailsA.absences.length > 0 ? `
                     <div style="display: flex; flex-wrap: wrap; gap: 10px;">
@@ -1985,7 +1985,7 @@ function genererSectionAssiduite(da) {
         <!-- LISTE DES ABSENCES -->
         ${details.absences.length > 0 ? `
             <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
-                📅 Absences et retards
+                Absences et retards
             </h4>
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                 ${details.absences.map(abs => {
@@ -2155,7 +2155,7 @@ function toggleDetailIndice(indice, da) {
         case 'A':
             html = `
                 <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
-                    📅 Assiduité détaillée
+                    Assiduité détaillée
                 </h3>
                 ${genererSectionAssiduite(da)}
             `;
@@ -3564,7 +3564,7 @@ function genererSectionAssiduite(da) {
 
             <!-- Liste des absences et retards -->
             <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
-                📅 ABSENCES ET RETARDS
+                ABSENCES ET RETARDS
             </h4>
             ${details.absences.length > 0 ? `
                 <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">

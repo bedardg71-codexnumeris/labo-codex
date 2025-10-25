@@ -84,7 +84,7 @@
    =============================== */
 
 function initialiserModuleTrimestre() {
-    console.log('📅 Initialisation du module Trimestre (refonte)');
+    console.log('Initialisation du module Trimestre (refonte)');
 
     const elementDebut = document.getElementById('debutTrimestre');
     if (!elementDebut) {
@@ -107,7 +107,7 @@ function initialiserModuleTrimestre() {
 }
 
 /* ===============================
-   📅 GESTION DU CADRE CALENDRIER
+   GESTION DU CADRE CALENDRIER
    =============================== */
 
 function chargerCadreCalendrier() {
@@ -186,7 +186,7 @@ function chargerEvenementsPrevus() {
         html += `
 <div class="item-carte">
     <div class="item-carte-header">
-        <strong class="item-carte-titre">📅 ${evt.description}</strong>
+        <strong class="item-carte-titre">${evt.description}</strong>
         <div class="item-carte-actions">
             <button onclick="modifierEvenement('${evt.id}', 'prevus')" 
                     class="btn btn-modifier" ${disabled}>Modifier</button>
@@ -351,7 +351,7 @@ function chargerEvenementsImprevus() {
         html += `
         <div class="item-carte">
             <div class="item-carte-header">
-                <strong class="item-carte-titre">📅 ${evt.description}</strong>
+                <strong class="item-carte-titre">${evt.description}</strong>
                 <div class="item-carte-actions">
                     <button onclick="modifierEvenement('${evt.id}', 'imprevus')" 
                             class="btn btn-modifier" ${disabled}>Modifier</button>

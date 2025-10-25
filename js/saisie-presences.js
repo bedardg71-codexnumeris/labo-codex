@@ -227,7 +227,7 @@ function obtenirDonneesSelonMode(cle) {
 }
 
 /* ===============================
-   📅 FONCTIONS DE CALENDRIER
+   FONCTIONS DE CALENDRIER
    Utilisent les sources uniques
    =============================== */
 
@@ -1179,7 +1179,7 @@ function allerCoursSuivant() {
     const dateActuelle = dateInput.value;
     const datesCours = obtenirToutesDatesCours();
 
-    console.log(`📅 Date actuelle: ${dateActuelle}`);
+    console.log(`Date actuelle: ${dateActuelle}`);
     console.log(`📚 Nombre total de dates de cours: ${datesCours.length}`);
 
     // Trouver le prochain cours après la date actuelle
@@ -1216,7 +1216,7 @@ function allerCoursPrecedent() {
     const dateActuelle = dateInput.value;
     const datesCours = obtenirToutesDatesCours();
 
-    console.log(`📅 Date actuelle: ${dateActuelle}`);
+    console.log(`Date actuelle: ${dateActuelle}`);
     console.log(`📚 Nombre total de dates de cours: ${datesCours.length}`);
 
     // Trouver le cours précédent avant la date actuelle
@@ -1305,7 +1305,7 @@ function echapperHtml(str) {
  * Ouvre la saisie de présence depuis le calendrier
  */
 function ouvrirSaisiePresence(date) {
-    console.log('📅 Ouverture saisie depuis calendrier pour:', date);
+    console.log('Ouverture saisie depuis calendrier pour:', date);
 
     // Naviguer vers la section présences
     if (typeof sectionActive !== 'undefined' && sectionActive !== 'presences') {

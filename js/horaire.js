@@ -167,7 +167,7 @@ function genererOptionsHeureFin() {
 }
 
 /* ===============================
-   📅 GÉNÉRATION DES SÉANCES COMPLÈTES
+   GÉNÉRATION DES SÉANCES COMPLÈTES
    =============================== */
 
 /**
