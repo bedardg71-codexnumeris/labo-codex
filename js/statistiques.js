@@ -83,14 +83,15 @@ function chargerStatistiquesApercu() {
 function chargerInfosCours() {
     const listeCours = JSON.parse(localStorage.getItem('listeCours') || '[]');
     const coursActif = listeCours.find(c => c.actif) || listeCours[0] || null;
-    
-    // Code du cours et trimestre
+
+    // Nombre de cours configurés
+    setStatText('stat-nb-cours', listeCours.length || '0');
+
+    // Trimestre du cours actif
     if (coursActif) {
-        setStatText('stat-code-cours', coursActif.codeCours || '—');
         const trimestre = `${coursActif.session || ''}${coursActif.annee || ''}`;
         setStatText('stat-trimestre', trimestre || '—');
     } else {
-        setStatText('stat-code-cours', '—');
         setStatText('stat-trimestre', '—');
     }
     
@@ -170,15 +171,9 @@ function chargerMaterielConfigure() {
  * Charge les informations système
  */
 function chargerInfosSysteme() {
-    // Version
-    setStatText('stat-version', 'Beta 0.60');
-    
-    // Dernière MAJ
-    const maintenant = new Date();
-    const dateFormattee = maintenant.toLocaleDateString('fr-CA') + ' ' +
-        maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
-    setStatText('stat-derniere-maj', dateFormattee);
-    
+    // Version (β = lettre grecque beta)
+    setStatText('stat-version', 'β 0.60');
+
     // Poids des données
     let poidsTotal = 0;
     for (let i = 0; i < localStorage.length; i++) {
