@@ -1145,51 +1145,46 @@
                         <!-- COLONNE GAUCHE : PARAMÈTRES DE L'ÉVALUATION -->
                         <div style="padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
                             <!-- Boutons de gestion des évaluations -->
-                            <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px;">
-                                <div style="display: flex; gap: 6px;">
-                                    <button class="btn btn-modifier" onclick="ouvrirBanqueEvaluations()"
-                                        style="padding: 6px 10px; font-size: 0.8rem; flex: 1;"
+                            <div class="groupe-boutons-colonne" style="margin-bottom: 15px;">
+                                <div class="groupe-boutons-ligne">
+                                    <button class="btn btn-modifier btn-tres-compact btn-largeur-auto" onclick="ouvrirBanqueEvaluations()"
                                         title="Parcourir les évaluations sauvegardées et en charger une">
                                         Charger
                                     </button>
 
-                                    <button class="btn btn-modifier" onclick="ouvrirModalJetonReprise()"
-                                        style="padding: 6px 10px; font-size: 0.8rem; flex: 1;"
+                                    <button class="btn btn-modifier btn-tres-compact btn-largeur-auto" onclick="ouvrirModalJetonReprise()"
                                         title="Appliquer un jeton de reprise pour créer une nouvelle version d'une évaluation">
                                         Jeton
                                     </button>
                                 </div>
 
-                                <div style="display: flex; gap: 6px;">
-                                    <button class="btn btn-secondaire" onclick="afficherModalReparationEvaluations()"
-                                        style="padding: 6px 10px; font-size: 0.8rem; flex: 1;"
+                                <div class="groupe-boutons-ligne">
+                                    <button class="btn btn-secondaire btn-tres-compact btn-largeur-auto" onclick="afficherModalReparationEvaluations()"
                                         title="Réparer les évaluations avec critères manquants">
                                         Réparer
                                     </button>
                                 </div>
 
-                                <div style="display: flex; gap: 6px;">
-                                    <button class="btn btn-principal" onclick="sauvegarderEvaluation()"
-                                        style="padding: 6px 10px; font-size: 0.8rem; flex: 1;"
+                                <div class="groupe-boutons-ligne">
+                                    <button class="btn btn-principal btn-tres-compact btn-largeur-auto" onclick="sauvegarderEvaluation()"
                                         title="Sauvegarder l'évaluation">
                                         Sauvegarder
                                     </button>
 
-                                    <button class="btn btn-secondaire" onclick="nouvelleEvaluation()"
-                                        style="padding: 6px 10px; font-size: 0.8rem; flex: 1;"
+                                    <button class="btn btn-secondaire btn-tres-compact btn-largeur-auto" onclick="nouvelleEvaluation()"
                                         title="Réinitialiser tous les paramètres et commencer une nouvelle évaluation">
                                         Réinitialiser
                                     </button>
                                 </div>
                             </div>
 
-                            <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
+                            <hr class="separateur-horizontal">
 
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
-                                <h4 style="margin: 0; color: var(--gris-fonce);">Paramètres de l'évaluation</h4>
+                            <div class="indicateur-verrouillage" style="margin-bottom: 15px;">
+                                <h4 style="margin: 0;">Paramètres de l'évaluation</h4>
 
                                 <!-- Indicateur de verrouillage (style productions) -->
-                                <div id="indicateurVerrouillageEval" style="display: none; align-items: center; gap: 4px;">
+                                <div id="indicateurVerrouillageEval" style="display: none;">
                                     <span id="iconeStatutVerrouillageEval" onclick="basculerVerrouillageEvaluationCourante()"
                                         style="font-size: 1rem; cursor: pointer; user-select: none;"
                                         title="Cliquez pour verrouiller/déverrouiller">✅</span>
@@ -1200,8 +1195,7 @@
                             </div>
 
                             <div class="groupe-form" style="margin-bottom: 12px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Groupe
-                                    :</label>
+                                <label class="label-formulaire">Groupe :</label>
                                 <select id="selectGroupeEval" class="controle-form"
                                     onchange="filtrerEtudiantsParGroupe()">
                                     <option value="">Tous les groupes</option>
@@ -1209,8 +1203,7 @@
                             </div>
 
                             <div class="groupe-form" style="margin-bottom: 12px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Étudiant·e
-                                    :</label>
+                                <label class="label-formulaire">Étudiant·e :</label>
                                 <select id="selectEtudiantEval" class="controle-form"
                                     onchange="chargerEvaluationsEtudiant()">
                                     <option value="">-- Choisir un·e étudiant·e --</option>
@@ -1218,24 +1211,21 @@
                             </div>
 
                             <div class="groupe-form" style="margin-bottom: 12px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Production
-                                    étudiante :</label>
+                                <label class="label-formulaire">Production étudiante :</label>
                                 <select id="selectProduction1" class="controle-form" onchange="chargerProduction(1)">
                                     <option value="">-- Choisir une production --</option>
                                 </select>
                             </div>
 
                             <div class="groupe-form" style="margin-bottom: 12px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Grille
-                                    d'évaluation :</label>
+                                <label class="label-formulaire">Grille d'évaluation :</label>
                                 <select id="selectGrille1" class="controle-form" onchange="chargerGrilleSelectionnee()">
                                     <option value="">-- Choisir une grille --</option>
                                 </select>
                             </div>
 
                             <div class="groupe-form" style="margin-bottom: 12px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Échelle de
-                                    performance :</label>
+                                <label class="label-formulaire">Échelle de performance :</label>
                                 <select id="selectEchelle1" class="controle-form"
                                     onchange="changerEchelleEvaluation(1)">
                                     <option value="">-- Choisir une échelle --</option>
@@ -1243,8 +1233,7 @@
                             </div>
 
                             <div class="groupe-form" style="margin-bottom: 12px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Cartouche de
-                                    rétroaction :</label>
+                                <label class="label-formulaire">Cartouche de rétroaction :</label>
                                 <select id="selectCartoucheEval" class="controle-form"
                                     onchange="cartoucheSelectionnee()">
                                     <option value="">-- Choisir une cartouche --</option>
@@ -1252,8 +1241,7 @@
                             </div>
 
                             <div class="groupe-form" style="margin-bottom: 12px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Statut de
-                                    remise :</label>
+                                <label class="label-formulaire">Statut de remise :</label>
                                 <select id="remiseProduction1" class="controle-form" onchange="changerStatutRemise(1)">
                                     <option value="non-remis">Non remis</option>
                                     <option value="remis">Remis</option>
@@ -1262,25 +1250,22 @@
                             </div>
 
                             <!-- NOTE ET NIVEAU -->
-                            <div id="noteFinale1"
-                                style="margin-top: 20px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
-                                <div style="font-size: 0.85rem; color: var(--gris-fonce); margin-bottom: 5px;">Note
-                                    finale</div>
-                                <div style="font-size: 2rem; font-weight: bold; color: var(--bleu-principal);">
+                            <div id="noteFinale1" class="boite-note-finale">
+                                <div class="label">Note finale</div>
+                                <div class="valeur">
                                     <span id="noteProduction1">0.0</span>
                                 </div>
-                                <div style="font-size: 1.2rem; margin-top: 5px; color: var(--gris-fonce);">
+                                <div class="niveau">
                                     Niveau: <span id="niveauProduction1">--</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- COLONNE DROITE : CRITÈRES AVEC RÉTROACTIONS -->
-                        <div style="padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
-                            <h4 style="margin: 0 0 15px 0; color: var(--gris-fonce);">Évaluation et prévisualisation
-                                de la rétroaction</h4>
+                        <div class="zone-criteres">
+                            <h4>Évaluation et prévisualisation de la rétroaction</h4>
 
-                            <div id="listeCriteresGrille1" style="max-height: 750px; overflow-y: auto;">
+                            <div id="listeCriteresGrille1" class="conteneur-liste">
                                 <p style="color: #999; font-style: italic; font-size: 0.85rem;">
                                     Sélectionnez une grille et une cartouche
                                 </p>
@@ -1289,15 +1274,13 @@
                     </div>
 
                     <!-- PARTIE BASSE : RÉTROACTION FINALE -->
-                    <div style="padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h4 style="margin: 0; color: var(--gris-fonce);">Rétroaction finale</h4>
+                    <div class="zone-retroaction">
+                        <div class="zone-retroaction-header">
+                            <h4>Rétroaction finale</h4>
                         </div>
 
                         <!-- Options à inclure (TOUTES COCHÉES PAR DÉFAUT) -->
-                        <div
-                            style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px;">
+                        <div class="grille-checkboxes" style="margin-bottom: 15px;">
                             <label style="font-size: 0.85rem; cursor: pointer;">
                                 <input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)"
                                     checked>
@@ -1324,13 +1307,13 @@
                         <!-- Zone de texte pour la rétroaction finale -->
                         <textarea id="retroactionFinale1" class="controle-form" rows="12"
                             placeholder="La rétroaction sera générée automatiquement ici selon vos évaluations et les options cochées. Vous pouvez modifier le texte avant de le copier."
-                            style="width: 100%; height: 200px; padding: 12px; border-radius: 5px; 
-    border: 1px solid #ddd; font-family: inherit; resize: vertical; 
+                            style="width: 100%; height: 200px; padding: 12px; border-radius: 5px;
+    border: 1px solid #ddd; font-family: inherit; resize: vertical;
     font-size: 0.85rem; line-height: 1.5; background: white;">
 </textarea>
 
-                        <button class="btn btn-confirmer" onclick="copierRetroaction(1)"
-                            style="padding: 8px 20px; margin-top: 10px;">
+                        <button class="btn btn-confirmer btn-compact" onclick="copierRetroaction(1)"
+                            style="margin-top: 10px;">
                             📋 Copier dans le presse-papier
                         </button>
                     </div>
@@ -1340,35 +1323,35 @@
             </div><!-- fin sous-section evaluations-individuelles -->
 
             <!-- MODAL: Banque d'évaluations (Charger une évaluation) -->
-            <div id="modalBanqueEvaluations" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; overflow-y: auto;">
-                <div style="max-width: 1200px; margin: 50px auto; background: white; border-radius: 12px; padding: 30px; position: relative;">
-                    <button onclick="fermerBanqueEvaluations()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">✕</button>
+            <div id="modalBanqueEvaluations" class="modal-overlay">
+                <div class="modal-contenu modal-large">
+                    <button onclick="fermerBanqueEvaluations()" class="modal-fermer">✕</button>
 
-                    <h2 style="margin-bottom: 20px;">Banque d'évaluations</h2>
+                    <h2 class="modal-titre">Banque d'évaluations</h2>
                     <p style="color: #666; margin-bottom: 20px;">Parcourez toutes les évaluations sauvegardées et sélectionnez-en une pour la charger dans le formulaire.</p>
 
                     <!-- Filtres -->
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
+                    <div class="grille-4-colonnes" style="margin-bottom: 20px; padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
                         <div>
-                            <label style="font-weight: 600; margin-bottom: 5px; display: block;">Groupe</label>
+                            <label class="label-formulaire">Groupe</label>
                             <select id="filtreBanqueGroupe" onchange="filtrerBanqueEvaluations()" class="controle-form">
                                 <option value="">Tous les groupes</option>
                             </select>
                         </div>
                         <div>
-                            <label style="font-weight: 600; margin-bottom: 5px; display: block;">Étudiant</label>
+                            <label class="label-formulaire">Étudiant</label>
                             <select id="filtreBanqueEtudiant" onchange="filtrerBanqueEvaluations()" class="controle-form">
                                 <option value="">Tous les étudiants</option>
                             </select>
                         </div>
                         <div>
-                            <label style="font-weight: 600; margin-bottom: 5px; display: block;">Production</label>
+                            <label class="label-formulaire">Production</label>
                             <select id="filtreBanqueProduction" onchange="filtrerBanqueEvaluations()" class="controle-form">
                                 <option value="">Toutes les productions</option>
                             </select>
                         </div>
                         <div>
-                            <label style="font-weight: 600; margin-bottom: 5px; display: block;">Trier par</label>
+                            <label class="label-formulaire">Trier par</label>
                             <select id="triBanqueEvaluation" onchange="filtrerBanqueEvaluations()" class="controle-form">
                                 <option value="date-desc">Date (plus récent)</option>
                                 <option value="date-asc">Date (plus ancien)</option>
@@ -1399,32 +1382,32 @@
             </div>
 
             <!-- MODAL: Appliquer un jeton de reprise -->
-            <div id="modalJetonReprise" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; overflow-y: auto;">
-                <div style="max-width: 800px; margin: 100px auto; background: white; border-radius: 12px; padding: 30px; position: relative;">
-                    <button onclick="fermerModalJetonReprise()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">✕</button>
+            <div id="modalJetonReprise" class="modal-overlay">
+                <div class="modal-contenu">
+                    <button onclick="fermerModalJetonReprise()" class="modal-fermer">✕</button>
 
-                    <h2 style="margin-bottom: 20px;">🎫 Appliquer un jeton de reprise</h2>
+                    <h2 class="modal-titre">🎫 Appliquer un jeton de reprise</h2>
                     <p style="color: #666; margin-bottom: 20px;">
                         Un jeton de reprise permet à un étudiant de refaire une évaluation. Le système créera un duplicata de l'évaluation sélectionnée,
                         conservera l'ancienne version pour référence, et comptabilisera uniquement la nouvelle évaluation dans les indices.
                     </p>
 
                     <!-- Filtres et tri -->
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
+                    <div class="grille-3-colonnes" style="margin-bottom: 20px; padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
                         <div>
-                            <label style="font-weight: 600; margin-bottom: 5px; display: block;">Étudiant</label>
+                            <label class="label-formulaire">Étudiant</label>
                             <select id="filtreJetonEtudiant" onchange="filtrerListeJetons()" class="controle-form">
                                 <option value="">Tous les étudiants</option>
                             </select>
                         </div>
                         <div>
-                            <label style="font-weight: 600; margin-bottom: 5px; display: block;">Production</label>
+                            <label class="label-formulaire">Production</label>
                             <select id="filtreJetonProduction" onchange="filtrerListeJetons()" class="controle-form">
                                 <option value="">Toutes les productions</option>
                             </select>
                         </div>
                         <div>
-                            <label style="font-weight: 600; margin-bottom: 5px; display: block;">Trier par</label>
+                            <label class="label-formulaire">Trier par</label>
                             <select id="triJetonEvaluation" onchange="filtrerListeJetons()" class="controle-form">
                                 <option value="date-desc">Date (plus récent)</option>
                                 <option value="date-asc">Date (plus ancien)</option>
@@ -1466,11 +1449,11 @@
             </div>
 
             <!-- Modal Réparation des évaluations -->
-            <div id="modalReparationEvaluations" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; overflow-y: auto;">
-                <div style="max-width: 700px; margin: 100px auto; background: white; border-radius: 12px; padding: 30px; position: relative;">
-                    <button onclick="fermerModalReparationEvaluations()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">✕</button>
+            <div id="modalReparationEvaluations" class="modal-overlay">
+                <div class="modal-contenu modal-compact">
+                    <button onclick="fermerModalReparationEvaluations()" class="modal-fermer">✕</button>
 
-                    <h2 style="margin-bottom: 20px; color: var(--bleu-principal);">🔧 Réparation des évaluations</h2>
+                    <h2 class="modal-titre">🔧 Réparation des évaluations</h2>
 
                     <div style="margin-bottom: 25px;">
                         <h3 style="color: var(--bleu-principal); font-size: 1rem; margin-bottom: 10px;">Qu'est-ce que cette fonction ?</h3>
@@ -1480,8 +1463,8 @@
                         </p>
                     </div>
 
-                    <div style="margin-bottom: 25px; padding: 15px; background: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;">
-                        <h3 style="color: #e65100; font-size: 1rem; margin-top: 0; margin-bottom: 10px;">⚠️ Quand l'utiliser ?</h3>
+                    <div class="alerte alerte-attention" style="margin-bottom: 25px;">
+                        <h4>⚠️ Quand l'utiliser ?</h4>
                         <ul style="margin: 0; padding-left: 20px; color: #666; line-height: 1.8;">
                             <li><strong>Après une migration de données</strong> depuis une ancienne version</li>
                             <li><strong>Si des évaluations ne se chargent pas</strong> correctement lors de la modification</li>
