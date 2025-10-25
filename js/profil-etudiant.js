@@ -716,18 +716,24 @@ function genererSectionMobilisation(da) {
 
     return `
         <!-- STATISTIQUES -->
-        <div class="grille-statistiques mb-2">
-            <div class="carte-metrique">
-                <strong>${indices.A}%</strong>
-                <span>Assiduité (A)</span>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Assiduité (A)</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.A}%</strong>
+                </div>
             </div>
-            <div class="carte-metrique">
-                <strong>${indices.C}%</strong>
-                <span>Complétion (C)</span>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Complétion (C)</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.C}%</strong>
+                </div>
             </div>
-            <div class="carte-metrique" style="border-left: 3px solid ${interpM.couleur};">
-                <strong>${indices.M}</strong>
-                <span>Mobilisation (M)</span>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${interpM.couleur};">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Mobilisation (M)</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.M}</strong>
+                </div>
             </div>
         </div>
 
@@ -854,22 +860,30 @@ function genererSectionEngagement(da) {
 
     return `
         <!-- STATISTIQUES -->
-        <div class="grille-statistiques mb-2">
-            <div class="carte-metrique">
-                <strong>${indices.A}%</strong>
-                <span>Assiduité (A)</span>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Assiduité (A)</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.A}%</strong>
+                </div>
             </div>
-            <div class="carte-metrique">
-                <strong>${indices.C}%</strong>
-                <span>Complétion (C)</span>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Complétion (C)</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.C}%</strong>
+                </div>
             </div>
-            <div class="carte-metrique">
-                <strong>${indices.P}%</strong>
-                <span>Performance (P)</span>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Performance (P)</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.P}%</strong>
+                </div>
             </div>
-            <div class="carte-metrique" style="border-left: 3px solid ${interpE.couleur};">
-                <strong>${indices.E}</strong>
-                <span>Engagement (E)</span>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${interpE.couleur};">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Engagement (E)</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.E}</strong>
+                </div>
             </div>
         </div>
 
@@ -1072,22 +1086,30 @@ function genererSectionRisque(da) {
         </div>
 
         <!-- STATISTIQUES CLÉS -->
-        <div class="grille-statistiques mb-2">
-            <div class="carte-metrique">
-                <strong>${indices.E}</strong>
-                <span>Engagement (E)</span>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Engagement (E)</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.E}</strong>
+                </div>
             </div>
-            <div class="carte-metrique" style="border-left: 3px solid ${interpR.couleur};">
-                <strong>${indices.R}</strong>
-                <span>Risque (R)</span>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${interpR.couleur};">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Risque (R)</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.R}</strong>
+                </div>
             </div>
-            <div class="carte-metrique">
-                <strong>Niveau ${niveauRaI}</strong>
-                <span>RàI</span>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">RàI</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">Niveau ${niveauRaI}</strong>
+                </div>
             </div>
-            <div class="carte-metrique" style="border-left: 3px solid ${margeSécurité > 0.25 ? '#28a745' : '#ff9800'};">
-                <strong>${pourcentageSécurité}%</strong>
-                <span>Marge de sécurité</span>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${margeSécurité > 0.25 ? '#28a745' : '#ff9800'};">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Marge de sécurité</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${pourcentageSécurité}%</strong>
+                </div>
             </div>
         </div>
 
@@ -1963,22 +1985,30 @@ function genererSectionAssiduite(da) {
 
     return `
         <!-- STATISTIQUES avec classes CSS natives -->
-        <div class="grille-statistiques mb-2">
-            <div class="carte-metrique">
-                <strong>${details.heuresPresentes}h</strong>
-                <span>Présentes</span>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Heures présentes</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${details.heuresPresentes}h</strong>
+                </div>
             </div>
-            <div class="carte-metrique">
-                <strong>${details.heuresOffertes}h</strong>
-                <span>Offertes</span>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Heures offertes</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${details.heuresOffertes}h</strong>
+                </div>
             </div>
-            <div class="carte-metrique">
-                <strong>${taux}%</strong>
-                <span>Taux d'assiduité</span>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Taux d'assiduité</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${taux}%</strong>
+                </div>
             </div>
-            <div class="carte-metrique">
-                <strong>${details.nombreSeances}</strong>
-                <span>Séances</span>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Séances</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${details.nombreSeances}</strong>
+                </div>
             </div>
         </div>
         
