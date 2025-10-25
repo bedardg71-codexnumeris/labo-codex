@@ -1403,20 +1403,20 @@ function genererDetailsEtudiant(etudiant) {
                                             Évaluation archivée
                                         </span>
                                     ` : item.evaluation.verrouillee ? `
-                                        <button class="btn btn-modifier" onclick="deverrouillerEvaluation('${item.evaluation.id}')" style="padding:5px 10px; background: var(--orange-accent);">
-                                            🔓 Déverrouiller
+                                        <button class="btn btn-annuler btn-compact" onclick="deverrouillerEvaluation('${item.evaluation.id}')">
+                                            Déverrouiller
                                         </button>
                                         <button class="btn" disabled style="padding:5px 10px; opacity: 0.5; cursor: not-allowed;" title="Déverrouillez d'abord pour supprimer">
                                             Supprimer
                                         </button>
                                     ` : `
-                                        <button class="btn btn-modifier" onclick="modifierEvaluation('${item.evaluation.id}')" style="padding:5px 10px;">
-                                            📝 Modifier
+                                        <button class="btn btn-modifier btn-compact" onclick="modifierEvaluation('${item.evaluation.id}')">
+                                            Modifier
                                         </button>
-                                        <button class="btn" onclick="verrouillerEvaluation('${item.evaluation.id}')" style="padding:5px 10px; background: #ffc107; color: #000;">
-                                            🔒 Verrouiller
+                                        <button class="btn btn-annuler btn-compact" onclick="verrouillerEvaluation('${item.evaluation.id}')">
+                                            Verrouiller
                                         </button>
-                                        <button class="btn btn-supprimer" onclick="supprimerEvaluation('${item.evaluation.id}')" style="padding:5px 10px;">
+                                        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${item.evaluation.id}')">
                                             Supprimer
                                         </button>
                                     `}
