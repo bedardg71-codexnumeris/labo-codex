@@ -264,38 +264,10 @@ body {
 /* === SÉLECTEUR DE MODE === */
 
 #selecteur-mode {
-    position: absolute;
-    top: 20px;
-    right: 30px;
+    margin-top: 15px;
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.btn-mode {
-    padding: 8px 15px;
-    background: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.7);
-    border: 2px solid transparent;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-    white-space: nowrap;
-    backdrop-filter: blur(5px);
-}
-
-.btn-mode:hover {
-    background: rgba(255, 255, 255, 0.25);
-    color: white;
-}
-
-.btn-mode.actif {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    border: 2px solid white;
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+    align-items: center;
+    justify-content: center;
 }
 
 /* === RESPONSIVE === */
@@ -304,11 +276,6 @@ body {
     .entete-conteneur {
         flex-direction: column;
         text-align: center;
-    }
-
-    #selecteur-mode {
-        position: static;
-        margin-top: 20px;
     }
 
     .titre-section h1 {
