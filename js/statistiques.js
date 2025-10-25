@@ -94,25 +94,9 @@ function chargerInfosCours() {
         setStatText('stat-trimestre', '—');
     }
     
-    // Heures par semaine (calculées depuis l'horaire)
-    const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
-    if (seancesHoraire.length > 0) {
-        // Calculer la durée totale en heures
-        let totalMinutes = 0;
-        seancesHoraire.forEach(seance => {
-            // Parse les heures de début et fin (format "HH:MM")
-            const [debutH, debutM] = seance.debut.split(':').map(Number);
-            const [finH, finM] = seance.fin.split(':').map(Number);
-
-            const minutesDebut = debutH * 60 + debutM;
-            const minutesFin = finH * 60 + finM;
-            const duree = minutesFin - minutesDebut;
-
-            totalMinutes += duree;
-        });
-
-        const totalHeures = totalMinutes / 60;
-        setStatText('stat-heures-semaine', `${totalHeures}h`);
+    // Heures par semaine (depuis la configuration du cours)
+    if (coursActif && coursActif.heuresParSemaine) {
+        setStatText('stat-heures-semaine', `${coursActif.heuresParSemaine}h`);
     } else {
         setStatText('stat-heures-semaine', '—');
     }
