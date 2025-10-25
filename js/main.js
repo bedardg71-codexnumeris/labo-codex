@@ -186,6 +186,11 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModuleTableauBordApercu();
     }
 
+    if (typeof initialiserModulePresencesApercu === 'function') {
+        console.log('   → Module Présences (aperçu) détecté');
+        initialiserModulePresencesApercu();
+    }
+
     // ===============================
     // 3. ÉVÉNEMENTS GLOBAUX
     // ===============================

@@ -897,11 +897,97 @@
 
                 <!-- Sous-section: Aperçu -->
                 <div id="presences-apercu" class="sous-section">
+                    <h2 style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Aperçu des présences</span>
+                        <span style="font-size: 1.2rem;">
+                            <span class="emoji-toggle" data-target="note-presences-apercu">ℹ️</span>
+                        </span>
+                    </h2>
+                    <p class="text-muted">Vue d'ensemble des statistiques de présence du groupe</p>
+
+                    <!-- Note explicative -->
+                    <div id="note-presences-apercu" class="carte-info-toggle carte-info-note" style="display: none;">
+                        <strong>Note :</strong> Les statistiques d'assiduité sont calculées à partir des présences saisies.
+                        Le taux d'assiduité moyen reflète la proportion d'heures de présence par rapport aux heures offertes.
+                        Les modes Sommatif (SOM) et Alternatif (PAN) peuvent différer selon la configuration dans Réglages › Pratique de notation.
+                    </div>
+
+                    <!-- STATISTIQUES GLOBALES -->
                     <div class="carte">
-                        <h3>Aperçu des présences</h3>
-                        <p>Vue d'ensemble des présences.</p>
-                        <div class="badge-info">Section: presences</div>
-                        <div class="badge-info">Sous-section: apercu</div>
+                        <h3>Statistiques du groupe</h3>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <!-- Taux moyen SOM -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Taux moyen (SOM)</span>
+                                    <strong id="pa-taux-som" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Taux moyen PAN -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Taux moyen (PAN)</span>
+                                    <strong id="pa-taux-pan" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Heures offertes -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Heures offertes</span>
+                                    <strong id="pa-heures-offertes" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Heures manquées (total) -->
+                            <div style="background: var(--alerte-fond-attention); padding: 15px; border-radius: 8px; border: 2px solid var(--btn-annuler);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Heures manquées</span>
+                                    <strong id="pa-heures-manquees" style="font-size: 1.8rem; color: var(--btn-annuler);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Séances complétées -->
+                            <div style="background: var(--alerte-fond-succes); padding: 15px; border-radius: 8px; border: 2px solid var(--btn-confirmer);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Séances complétées</span>
+                                    <strong id="pa-seances-completees" style="font-size: 1.8rem; color: var(--btn-confirmer);">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Absences non justifiées -->
+                            <div style="background: var(--alerte-fond-attention); padding: 15px; border-radius: 8px; border: 2px solid var(--btn-annuler);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Absences non justifiées</span>
+                                    <strong id="pa-absences-non-justifiees" style="font-size: 1.8rem; color: var(--btn-annuler);">—</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ALERTES ASSIDUITÉ -->
+                    <div class="carte">
+                        <h3>Alertes d'assiduité</h3>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <!-- Assiduité < 80% -->
+                            <div style="background: var(--alerte-fond-attention); padding: 15px; border-radius: 8px; border: 2px solid #ffc107;">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Assiduité &lt; 80%</span>
+                                    <strong id="pa-alerte-80" style="font-size: 1.8rem; color: #f57c00;">—</strong>
+                                </div>
+                            </div>
+
+                            <!-- Assiduité < 70% -->
+                            <div style="background: var(--alerte-fond-attention); padding: 15px; border-radius: 8px; border: 2px solid var(--btn-annuler);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Assiduité &lt; 70%</span>
+                                    <strong id="pa-alerte-70" style="font-size: 1.8rem; color: var(--btn-annuler);">—</strong>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -3497,6 +3583,7 @@ Exemple :
     <!-- PRIORITÉ 3: Modules fonctionnels -->
     <script src="js/calendrier-vue.js"></script>
     <script src="js/saisie-presences.js"></script>
+    <script src="js/presences-apercu.js"></script>
     <script src="js/horaire.js?v=1761391190"></script>
     <script src="js/groupe.js"></script>
     <script src="js/pratiques.js"></script>

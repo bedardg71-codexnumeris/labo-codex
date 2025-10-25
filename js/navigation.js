@@ -275,6 +275,13 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
+        case 'presences-apercu':
+            console.log('🔄 Rafraîchissement de l\'aperçu des présences...');
+            if (typeof chargerApercuPresences === 'function') {
+                chargerApercuPresences();
+            }
+            break;
+
         case 'presences-calendrier':
             console.log('🔄 Rafraîchissement de la vue calendaire...');
             if (typeof afficherCalendrierScolaire === 'function') {
