@@ -95,13 +95,6 @@ function chargerInfosCours() {
         setStatText('stat-trimestre', '—');
     }
     
-    // Heures par semaine (depuis la configuration du cours)
-    if (coursActif && coursActif.heuresParSemaine) {
-        setStatText('stat-heures-semaine', `${coursActif.heuresParSemaine}h`);
-    } else {
-        setStatText('stat-heures-semaine', '—');
-    }
-    
     // Nombre de groupes
     setStatText('stat-nb-groupes', listeCours.length > 0 ? '1' : '—');
     
