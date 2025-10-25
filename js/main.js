@@ -191,6 +191,11 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModulePresencesApercu();
     }
 
+    if (typeof initialiserModuleEvaluationsApercu === 'function') {
+        console.log('   → Module Évaluations (aperçu) détecté');
+        initialiserModuleEvaluationsApercu();
+    }
+
     // ===============================
     // 3. ÉVÉNEMENTS GLOBAUX
     // ===============================
