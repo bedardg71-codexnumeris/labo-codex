@@ -422,15 +422,10 @@ function afficherNiveauxRaI(etudiants) {
     const pct2 = nbTotal > 0 ? Math.round((niveau2 / nbTotal) * 100) : 0;
     const pct3 = nbTotal > 0 ? Math.round((niveau3 / nbTotal) * 100) : 0;
 
-    // Afficher les compteurs
-    setStatText('tb-rai-niveau1', niveau1);
-    setStatText('tb-rai-niveau2', niveau2);
-    setStatText('tb-rai-niveau3', niveau3);
-
-    // Afficher les pourcentages
-    setStatText('tb-rai-niveau1-pct', `(${pct1}%)`);
-    setStatText('tb-rai-niveau2-pct', `(${pct2}%)`);
-    setStatText('tb-rai-niveau3-pct', `(${pct3}%)`);
+    // Afficher les pourcentages uniquement
+    setStatText('tb-rai-niveau1-pct', `${pct1}%`);
+    setStatText('tb-rai-niveau2-pct', `${pct2}%`);
+    setStatText('tb-rai-niveau3-pct', `${pct3}%`);
 }
 
 /**
