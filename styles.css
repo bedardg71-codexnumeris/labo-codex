@@ -460,44 +460,6 @@ body {
     border: none;
 }
 
-/* Regroupement visuel dans Réglages */
-button[data-sous-onglet="reglages-apercu"]::before {
-    content: "Réglages généraux";
-    display: block;
-    width: 100%;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--bleu-moyen);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-    margin-top: -4px;
-}
-
-button[data-sous-onglet="reglages-productions"]::before {
-    content: "Matériel pédagogique";
-    display: block;
-    width: 100%;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--bleu-moyen);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-    margin-top: -4px;
-    padding-top: 12px;
-    margin-left: -16px;
-    padding-left: 16px;
-    border-top: 1px solid var(--bleu-leger);
-}
-
-/* Ajustement pour que les labels s'affichent au-dessus */
-button[data-sous-onglet="reglages-apercu"],
-button[data-sous-onglet="reglages-productions"] {
-    flex-basis: 100%;
-    text-align: left;
-}
-
 .sous-navigation .vide {
     width: 100%;
     padding: 20px;
