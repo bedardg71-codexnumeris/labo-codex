@@ -477,37 +477,57 @@
 
                     <!-- ========== MÉTRIQUES GLOBALES DU GROUPE ========== -->
                     <div class="carte">
-                        <h3>Indicateurs globaux du groupe</h3>
+                        <h3 style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Indicateurs globaux du groupe</span>
+                            <span style="font-size: 1.2rem;">
+                                <span class="emoji-toggle" data-target="note-indicateurs">ℹ️</span>
+                            </span>
+                        </h3>
 
-                        <div class="grille-statistiques">
+                        <!-- Carte Note -->
+                        <div id="note-indicateurs" class="carte-info-toggle carte-info-note" style="display: none;">
+                            <strong>Note :</strong> Les indices A-C-P mesurent l'engagement des étudiants. Assiduité (A) : présence en classe. Complétion (C) : remise des travaux. Performance (P) : qualité des productions évaluées. Ces trois indicateurs permettent d'identifier les étudiants à risque.
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                             <!-- Total étudiants -->
-                            <div class="carte-metrique">
-                                <strong id="tb-total-etudiants">0</strong>
-                                <span>Étudiant·es inscrit·es</span>
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Étudiant·es inscrit·es</span>
+                                    <strong id="tb-total-etudiants" style="font-size: 1.8rem; color: var(--bleu-principal);">0</strong>
+                                </div>
                             </div>
 
                             <!-- Assiduité sommative -->
-                            <div class="carte-metrique">
-                                <strong id="tb-assiduite-moyenne">—</strong>
-                                <span>Assiduité moyenne</span>
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Assiduité moyenne</span>
+                                    <strong id="tb-assiduite-moyenne" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
                             </div>
 
                             <!-- Complétion sommative -->
-                            <div class="carte-metrique">
-                                <strong id="tb-completion-moyenne">—</strong>
-                                <span>Complétion moyenne</span>
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Complétion moyenne</span>
+                                    <strong id="tb-completion-moyenne" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
                             </div>
 
                             <!-- Performance alternative (3 derniers) -->
-                            <div class="carte-metrique">
-                                <strong id="tb-performance-moyenne">—</strong>
-                                <span>Performance (3 derniers)</span>
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Performance (3 derniers)</span>
+                                    <strong id="tb-performance-moyenne" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                                </div>
                             </div>
 
                             <!-- Interventions requises -->
-                            <div class="carte-metrique">
-                                <strong id="tb-interventions-requises">0</strong>
-                                <span>Élèves à risque</span>
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Élèves à risque</span>
+                                    <strong id="tb-interventions-requises" style="font-size: 1.8rem; color: var(--bleu-principal);">0</strong>
+                                </div>
                             </div>
                         </div>
                     </div>

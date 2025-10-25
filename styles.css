@@ -2526,6 +2526,75 @@ body[data-mode="anonymisation"] .sous-navigation button.actif {
 }
 
 /* ===============================================
+   CARTES MÉTRIQUES - FORMAT STANDARD
+   Texte à gauche / Chiffre à droite (réutilisable)
+   =============================================== */
+
+/* Grille de disposition des métriques */
+.grille-metriques {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+/* Carte métrique de base */
+.carte-metrique-standard {
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.carte-metrique-standard .label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.carte-metrique-standard .valeur {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+/* Variantes de couleur */
+.carte-metrique-bleue {
+    background: var(--bleu-tres-pale);
+    border-color: var(--bleu-principal);
+}
+
+.carte-metrique-bleue .valeur {
+    color: var(--bleu-principal);
+}
+
+.carte-metrique-verte {
+    background: var(--alerte-fond-succes);
+    border-color: var(--btn-confirmer);
+}
+
+.carte-metrique-verte .valeur {
+    color: var(--btn-confirmer);
+}
+
+.carte-metrique-violette {
+    background: #f3eeff;
+    border-color: var(--btn-modifier);
+}
+
+.carte-metrique-violette .valeur {
+    color: var(--btn-modifier);
+}
+
+.carte-metrique-terracotta {
+    background: var(--alerte-fond-attention);
+    border-color: var(--btn-annuler);
+}
+
+.carte-metrique-terracotta .valeur {
+    color: var(--btn-annuler);
+}
+
+/* ===============================================
    SELECT MODE D'AFFICHAGE
    Menu déroulant pour changer de mode
    =============================================== */
