@@ -1753,21 +1753,30 @@
                     <div class="carte">
                         <h3>📝 Productions</h3>
 
-                        <!-- VUE D'ENSEMBLE -->
-                        <div class="grille-statistiques" style="margin-bottom: 20px;">
-                            <div class="carte-metrique">
-                                <strong id="nombreEvaluations">0</strong>
-                                <span>Productions</span>
+                        <!-- VUE D'ENSEMBLE - FORMAT HARMONISÉ -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <!-- Nombre de productions -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Productions</span>
+                                    <strong id="nombreEvaluations" style="font-size: 1.8rem; color: var(--bleu-principal);">0</strong>
+                                </div>
                             </div>
-                            <div class="carte-metrique">
-                                <strong id="ponderationTotale">0%</strong>
-                                <span>Total</span>
-                                <small id="statutPonderation" style="display: block; margin-top: 5px;"></small>
+
+                            <!-- Pondération totale -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Pondération totale</span>
+                                    <strong id="ponderationTotale" style="font-size: 1.8rem; color: var(--bleu-principal);">0%</strong>
+                                </div>
+                                <div id="statutPonderation" style="font-size: 0.75rem; color: #666; margin-top: 5px; text-align: right;"></div>
                             </div>
-                            <div class="carte-metrique" style="grid-column: span 2;">
-                                <span id="typesEvaluations" style="font-size: 0.9rem;">
+
+                            <!-- Types d'évaluations (portfolios/artefacts) -->
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); grid-column: 1 / -1;">
+                                <div id="typesEvaluations" style="font-size: 0.9rem; color: #666; text-align: center;">
                                     Aucune production configurée
-                                </span>
+                                </div>
                             </div>
                         </div>
 
