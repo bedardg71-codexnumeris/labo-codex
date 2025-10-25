@@ -1159,7 +1159,7 @@ function initialiserModuleGrilles() {
     chargerListeGrillesTemplates();
 
     // Charger automatiquement si on est sur la page grilles
-    const sousSection = document.querySelector('#reglages-grille-criteres');
+    const sousSection = document.querySelector('#materiel-grille-criteres');
     if (sousSection && sousSection.classList.contains('active')) {
         chargerListeGrillesTemplates();
     }
