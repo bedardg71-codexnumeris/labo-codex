@@ -464,8 +464,8 @@ function appliquerFiltresSurLignes(lignes) {
  */
 function genererLigneHTML(ligne) {
     const badgeStatut = ligne.statut === 'evalue'
-        ? '<span style="background: #28a745; color: white; padding: 4px 10px; border-radius: 4px; font-weight: 500; font-size: 0.85rem; display: inline-block;">Évalué</span>'
-        : '<span style="background: #6c757d; color: white; padding: 4px 10px; border-radius: 4px; font-weight: 500; font-size: 0.85rem; display: inline-block;">Non évalué</span>';
+        ? '<span class="badge-statut evalue">Évalué</span>'
+        : '<span class="badge-statut non-evalue">Non évalué</span>';
 
     const lienCartouche = ligne.cartoucheNom && ligne.cartoucheNom !== '-'
         ? `<button class="btn btn-secondaire" style="padding: 4px 10px; font-size: 0.85rem;" onclick="ouvrirCartouche('${ligne.cartoucheId}', '${ligne.productionId}'); return false;" title="Voir la cartouche">
@@ -505,16 +505,16 @@ function genererBoutonsActionsEvalue(ligne) {
     }
 
     return `
-        <button class="btn btn-secondaire" style="padding: 4px 8px; font-size: 0.85rem; margin-right: 5px;" onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')" title="${texteVerrouillage}">
+        <button class="btn btn-annuler btn-compact btn-marge-droite" onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')" title="${texteVerrouillage}">
             ${texteVerrouillage}
         </button>
-        <button class="btn btn-modifier" style="padding: 4px 8px; font-size: 0.85rem; margin-right: 5px;" onclick="modifierEvaluation('${ligne.da}', '${ligne.productionId}')" title="Modifier">
+        <button class="btn btn-modifier btn-compact btn-marge-droite" onclick="modifierEvaluation('${ligne.da}', '${ligne.productionId}')" title="Modifier">
             Modifier
         </button>
-        <button class="btn btn-secondaire" style="padding: 4px 8px; font-size: 0.85rem; margin-right: 5px;" onclick="dupliquerEvaluation('${ligne.evaluationId}')" title="Dupliquer">
+        <button class="btn btn-annuler btn-compact btn-marge-droite" onclick="dupliquerEvaluation('${ligne.evaluationId}')" title="Dupliquer">
             Dupliquer
         </button>
-        <button class="btn btn-supprimer" style="padding: 4px 8px; font-size: 0.85rem;" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer">
+        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer">
             Supprimer
         </button>
     `;
@@ -525,8 +525,8 @@ function genererBoutonsActionsEvalue(ligne) {
  */
 function genererBoutonsActionsNonEvalue(ligne) {
     return `
-        <button class="btn btn-ajouter" style="padding: 6px 12px; font-size: 0.85rem;" onclick="modifierEvaluation('${ligne.da}', '${ligne.productionId}')" title="Évaluer">
-            ➕ Évaluer
+        <button class="btn btn-confirmer btn-compact" onclick="modifierEvaluation('${ligne.da}', '${ligne.productionId}')" title="Évaluer">
+            Évaluer
         </button>
     `;
 }
