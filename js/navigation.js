@@ -282,7 +282,7 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'reglages-productions':
+        case 'materiel-productions':
             console.log('🔄 Rafraîchissement du module Productions...');
             if (typeof initialiserModuleProductions === 'function') {
                 initialiserModuleProductions();

@@ -808,7 +808,7 @@ function initialiserModuleProductions() {
     console.log('Initialisation du module Productions');
 
     // Charger automatiquement si on est sur la page productions
-    const sousSection = document.querySelector('#reglages-productions');
+    const sousSection = document.querySelector('#materiel-productions');
     if (sousSection && sousSection.classList.contains('active')) {
         afficherTableauProductions();
         mettreAJourPonderationTotale();

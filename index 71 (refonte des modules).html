@@ -1461,6 +1461,14 @@
                     <h2>Vue d'ensemble</h2>
                     <p class="text-muted">Résumé du matériel pédagogique configuré</p>
 
+                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
+                         background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
+                        <strong>Note :</strong> Cette vue d'ensemble présente un résumé du matériel pédagogique configuré pour le cours.
+                        Le matériel comprend les productions (exercices formatifs et certificatifs), les grilles de critères d'évaluation,
+                        les échelles de performance (IDME), et les cartouches de rétroaction. Un matériel bien configuré facilite l'évaluation
+                        cohérente et permet le suivi longitudinal des apprentissages.
+                    </div>
+
                     <div class="carte">
                         <h3>Matériel configuré</h3>
                         <p><strong>Pratique de notation :</strong> <span id="stat-pratique">—</span></p>
@@ -1475,6 +1483,15 @@
                 <div id="materiel-productions" class="sous-section">
                     <h2>Exercices formatifs et certificatifs</h2>
                     <p class="text-muted">Définir les évaluations du cours et leurs pondérations</p>
+
+                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
+                         background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
+                        <strong>Note :</strong> Les productions représentent l'ensemble des travaux que les étudiants doivent réaliser
+                        durant le cours. Elles peuvent être de type formatif (pour l'apprentissage) ou certificatif (pour l'évaluation).
+                        Chaque production peut être associée à une grille de critères et possède une pondération qui contribue à la note finale.
+                        Les portfolios permettent de regrouper plusieurs artefacts et de sélectionner automatiquement les N meilleurs selon
+                        la pratique de notation configurée.
+                    </div>
 
                     <!-- DÉFINITION DES ÉVALUATIONS -->
                     <div class="carte">
@@ -1636,6 +1653,15 @@
                         de
                         productions.</p>
 
+                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
+                         background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
+                        <strong>Note :</strong> Les grilles de critères définissent les aspects sur lesquels les productions sont évaluées.
+                        Chaque critère possède une pondération relative et peut être de type holistique (jugement global), analytique
+                        (points par élément) ou algorithmique (calcul automatique). Dans le modèle SRPNF, les cinq critères sont :
+                        Structure (15%), Rigueur (20%), Plausibilité (10%), Nuance (25%) et Français (30%). Les grilles peuvent être
+                        réutilisées pour différentes productions et verrouillées une fois finalisées.
+                    </div>
+
                     <!-- CARTE : GRILLES DE CRITÈRES -->
                     <div class="carte">
                         <h3>Gestion des grilles de critères d'évaluation</h3>
@@ -1787,6 +1813,15 @@
                 <div id="materiel-echelle-performance" class="sous-section">
                     <h2>Niveaux de performance</h2>
                     <p class="text-muted">Configuration de l'échelle de notation pour les PAN/SBG</p>
+
+                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
+                         background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
+                        <strong>Note :</strong> L'échelle de performance définit les niveaux de maîtrise utilisés pour évaluer les critères.
+                        Le système utilise par défaut l'échelle IDME (Insuffisant, en Développement, Maîtrisé, Étendu) basée sur la taxonomie SOLO.
+                        Chaque niveau correspond à un seuil de performance : Insuffisant (&lt; 64%), Développement (65-74%), Maîtrisé (75-84%),
+                        Étendu (≥ 85%). Cette échelle peut être personnalisée selon les besoins pédagogiques et permet un suivi longitudinal
+                        de la progression des étudiants.
+                    </div>
 
                     <!-- CARTE : ÉCHELLE DE PERFORMANCE PAN/SBG -->
                     <div class="carte">
@@ -3268,38 +3303,38 @@ Exemple :
 
                     <div class="carte">
                         <h3>Sauvegarde et restauration</h3>
-                        <p class="text-muted">
+                        <p class="text-muted" style="margin-bottom: 25px;">
                             Gère tes données locales : exporte pour sauvegarder, importe pour restaurer.
                         </p>
-                    </div>
 
-                    <!-- Export -->
-                    <div class="carte">
-                        <h4>Exporter les données</h4>
-                        <p>
-                            Sauvegarde tes données dans un fichier JSON. Tu pourras choisir quelles
-                            données exporter (toutes ou sélection personnalisée).
-                        </p>
-                        <button class="btn btn-principal" onclick="ouvrirModalExport()">
-                            Ouvrir l'exportation
-                        </button>
-                        <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem;">
-                            Exporte régulièrement pour éviter toute perte de données.
-                        </p>
-                    </div>
+                        <!-- Export -->
+                        <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; margin-bottom: 20px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📤 Exporter les données</h4>
+                            <p>
+                                Sauvegarde tes données dans un fichier JSON. Tu pourras choisir quelles
+                                données exporter (toutes ou sélection personnalisée).
+                            </p>
+                            <button class="btn btn-principal" onclick="ouvrirModalExport()" style="margin-top: 10px;">
+                                Ouvrir l'exportation
+                            </button>
+                            <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem;">
+                                💡 Exporte régulièrement pour éviter toute perte de données.
+                            </p>
+                        </div>
 
-                    <!-- Import -->
-                    <div class="carte">
-                        <h4>Importer des données</h4>
-                        <p>
-                            Restaure des données depuis un fichier JSON exporté précédemment.
-                        </p>
-                        <button class="btn btn-principal" onclick="ouvrirModalImport()">
-                            Ouvrir l'importation
-                        </button>
-                        <div class="badge-alerte" style="margin-top: 15px;">
-                            <strong>Important :</strong> L'import écrasera les données existantes
-                            pour les clés importées. Exporte d'abord si nécessaire !
+                        <!-- Import -->
+                        <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📥 Importer des données</h4>
+                            <p>
+                                Restaure des données depuis un fichier JSON exporté précédemment.
+                            </p>
+                            <button class="btn btn-principal" onclick="ouvrirModalImport()" style="margin-top: 10px;">
+                                Ouvrir l'importation
+                            </button>
+                            <div class="badge-alerte" style="margin-top: 15px;">
+                                <strong>Important :</strong> L'import écrasera les données existantes
+                                pour les clés importées. Exporte d'abord si nécessaire !
+                            </div>
                         </div>
                     </div>
 
@@ -3379,14 +3414,14 @@ Exemple :
 
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>
-    <script src="js/navigation.js"></script>
+    <script src="js/navigation.js?v=1761397763"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=1761390149"></script>
     <script src="js/tableau-bord-apercu.js"></script>
     <script src="js/etudiants.js"></script>
-    <script src="js/productions.js?v=1761389502"></script>
-    <script src="js/grilles.js?v=1761391739"></script>
+    <script src="js/productions.js?v=1761397763"></script>
+    <script src="js/grilles.js?v=1761397763"></script>
     <script src="js/echelles.js?v=1761354698"></script>
     <script src="js/cartouches.js"></script>
     <script src="js/cours.js?v=1761391739"></script>
