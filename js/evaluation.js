@@ -2980,10 +2980,10 @@ function filtrerBanqueEvaluations() {
     const tri = document.getElementById('triBanqueEvaluation')?.value || 'date-desc';
 
     // Filtrer
-    let evaluationsFiltrees = evaluations.filter(eval => {
-        if (filtreGroupe && eval.groupe !== filtreGroupe) return false;
-        if (filtreEtudiant && eval.etudiantDA !== filtreEtudiant) return false;
-        if (filtreProduction && eval.productionId !== filtreProduction) return false;
+    let evaluationsFiltrees = evaluations.filter(evaluation => {
+        if (filtreGroupe && evaluation.groupe !== filtreGroupe) return false;
+        if (filtreEtudiant && evaluation.etudiantDA !== filtreEtudiant) return false;
+        if (filtreProduction && evaluation.productionId !== filtreProduction) return false;
         return true;
     });
 
@@ -3028,26 +3028,26 @@ function afficherListeBanqueEvaluations(evaluations) {
         return;
     }
 
-    const html = evaluations.map(eval => {
-        const dateEval = new Date(eval.dateEvaluation).toLocaleDateString('fr-CA');
-        const heureEval = eval.heureEvaluation || new Date(eval.dateEvaluation).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
-        const estRemplacee = eval.remplaceeParId ? true : false;
-        const estReprise = eval.repriseDeId ? true : false;
+    const html = evaluations.map(evaluation => {
+        const dateEval = new Date(evaluation.dateEvaluation).toLocaleDateString('fr-CA');
+        const heureEval = evaluation.heureEvaluation || new Date(evaluation.dateEvaluation).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+        const estRemplacee = evaluation.remplaceeParId ? true : false;
+        const estReprise = evaluation.repriseDeId ? true : false;
 
         return `
             <div class="carte" style="margin-bottom: 15px; ${estRemplacee ? 'opacity: 0.6; border-left: 3px solid #999;' : ''}">
                 <div style="display: flex; justify-content: space-between; align-items: start;">
                     <div style="flex: 1;">
                         <h4 style="margin: 0 0 10px 0;">
-                            ${echapperHtml(eval.etudiantNom)}
-                            ${eval.verrouillee ? '<span style="color: #ff9800; margin-left: 8px;">(Verrouillée)</span>' : ''}
+                            ${echapperHtml(evaluation.etudiantNom)}
+                            ${evaluation.verrouillee ? '<span style="color: #ff9800; margin-left: 8px;">(Verrouillée)</span>' : ''}
                             ${estReprise ? '<span style="color: #9c27b0; margin-left: 8px;" title="Jeton de reprise appliqué">(Reprise)</span>' : ''}
                             ${estRemplacee ? '<span style="color: #999; margin-left: 8px;" title="Évaluation remplacée">(Remplacée)</span>' : ''}
                         </h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: #666; font-size: 0.9rem;">
-                            <div><strong>Production:</strong> ${echapperHtml(eval.productionNom)}</div>
-                            <div><strong>Grille:</strong> ${echapperHtml(eval.grilleNom)}</div>
-                            <div><strong>Note:</strong> ${eval.niveauFinal} (${Math.round(eval.noteFinale)}%)</div>
+                            <div><strong>Production:</strong> ${echapperHtml(evaluation.productionNom)}</div>
+                            <div><strong>Grille:</strong> ${echapperHtml(evaluation.grilleNom)}</div>
+                            <div><strong>Note:</strong> ${evaluation.niveauFinal} (${Math.round(evaluation.noteFinale)}%)</div>
                             <div><strong>Date:</strong> ${dateEval} à ${heureEval}</div>
                         </div>
                         ${estRemplacee ? `
@@ -3062,13 +3062,13 @@ function afficherListeBanqueEvaluations(evaluations) {
                         ` : ''}
                     </div>
                     <div style="margin-left: 20px; display: flex; flex-direction: column; gap: 6px;">
-                        <button class="btn btn-modifier btn-compact" onclick="chargerEvaluationDepuisBanque('${eval.id}')">
+                        <button class="btn btn-modifier btn-compact" onclick="chargerEvaluationDepuisBanque('${evaluation.id}')">
                             Charger
                         </button>
-                        <button class="btn btn-annuler btn-compact" onclick="basculerVerrouillageEvaluation('${eval.id}')">
-                            ${eval.verrouillee ? 'Déverrouiller' : 'Verrouiller'}
+                        <button class="btn btn-annuler btn-compact" onclick="basculerVerrouillageEvaluation('${evaluation.id}')">
+                            ${evaluation.verrouillee ? 'Déverrouiller' : 'Verrouiller'}
                         </button>
-                        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluationBanque('${eval.id}')">
+                        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluationBanque('${evaluation.id}')">
                             Supprimer
                         </button>
                     </div>
@@ -3337,26 +3337,26 @@ function filtrerListeJetons() {
         return;
     }
 
-    const html = evaluationsFiltrees.map(eval => {
-        const dateEval = new Date(eval.dateEvaluation).toLocaleDateString('fr-CA');
-        const heureEval = eval.heureEvaluation || new Date(eval.dateEvaluation).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
-        const estPreselection = eval.id === window.evaluationJetonPreselection;
-        const estSelectionne = eval.id === window.evaluationJetonSelectionnee;
+    const html = evaluationsFiltrees.map(evaluation => {
+        const dateEval = new Date(evaluation.dateEvaluation).toLocaleDateString('fr-CA');
+        const heureEval = evaluation.heureEvaluation || new Date(evaluation.dateEvaluation).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+        const estPreselection = evaluation.id === window.evaluationJetonPreselection;
+        const estSelectionne = evaluation.id === window.evaluationJetonSelectionnee;
 
         return `
             <div class="item-carte" style="margin-bottom: 10px; padding: 15px; border: 2px solid ${estSelectionne ? 'var(--bleu-principal)' : estPreselection ? 'var(--bleu-moyen)' : '#ddd'}; border-radius: 8px; cursor: pointer; transition: all 0.2s; ${estSelectionne ? 'background: var(--bleu-tres-pale);' : ''}"
-                onclick="selectionnerEvaluationJeton('${eval.id}')">
+                onclick="selectionnerEvaluationJeton('${evaluation.id}')">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div style="flex: 1;">
                         <h4 style="margin: 0 0 8px 0; color: var(--gris-fonce);">
-                            ${echapperHtml(eval.etudiantNom)}
-                            ${estPreselection && !estSelectionne ? '<span style="color: var(--bleu-moyen); margin-left: 8px;" title="Évaluation courante">📌</span>' : ''}
-                            ${estSelectionne ? '<span style="color: var(--bleu-principal); margin-left: 8px;" title="Sélectionnée">✓</span>' : ''}
+                            ${echapperHtml(evaluation.etudiantNom)}
+                            ${estPreselection && !estSelectionne ? '<span style="color: var(--bleu-moyen); margin-left: 8px;" title="Évaluation courante">(Courante)</span>' : ''}
+                            ${estSelectionne ? '<span style="color: var(--bleu-principal); margin-left: 8px;" title="Sélectionnée">(Sélectionnée)</span>' : ''}
                         </h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: #666; font-size: 0.9rem;">
-                            <div><strong>Production:</strong> ${echapperHtml(eval.productionNom)}</div>
-                            <div><strong>Grille:</strong> ${echapperHtml(eval.grilleNom)}</div>
-                            <div><strong>Note:</strong> ${eval.niveauFinal} (${Math.round(eval.noteFinale)}%)</div>
+                            <div><strong>Production:</strong> ${echapperHtml(evaluation.productionNom)}</div>
+                            <div><strong>Grille:</strong> ${echapperHtml(evaluation.grilleNom)}</div>
+                            <div><strong>Note:</strong> ${evaluation.niveauFinal} (${Math.round(evaluation.noteFinale)}%)</div>
                             <div><strong>Date:</strong> ${dateEval} à ${heureEval}</div>
                         </div>
                     </div>
