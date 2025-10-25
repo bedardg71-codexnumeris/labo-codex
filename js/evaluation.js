@@ -1406,7 +1406,7 @@ function genererDetailsEtudiant(etudiant) {
                                         <button class="btn btn-annuler btn-compact" onclick="deverrouillerEvaluation('${item.evaluation.id}')">
                                             Déverrouiller
                                         </button>
-                                        <button class="btn" disabled style="padding:5px 10px; opacity: 0.5; cursor: not-allowed;" title="Déverrouillez d'abord pour supprimer">
+                                        <button class="btn btn-supprimer btn-compact" disabled title="Déverrouillez d'abord pour supprimer">
                                             Supprimer
                                         </button>
                                     ` : `
