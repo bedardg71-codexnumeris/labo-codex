@@ -19,7 +19,7 @@
  * Appelée par main.js au chargement
  */
 /* ===============================
-   📊 CALCUL DES INDICES D'ASSIDUITÉ
+   CALCUL DES INDICES D'ASSIDUITÉ
    =============================== */
 
 /**
@@ -27,7 +27,7 @@
  * Appelée après chaque enregistrement de présences
  */
 function calculerEtSauvegarderIndicesAssiduite() {
-    console.log('📊 Calcul des indices d\'assiduité...');
+    console.log('Calcul des indices d\'assiduité...');
 
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
 
@@ -176,7 +176,7 @@ function initialiserModuleSaisiePresences() {
 }
 
 /* ===============================
-   📊 GESTION DES GROUPES
+   GESTION DES GROUPES
    =============================== */
 
 /**
@@ -916,7 +916,7 @@ function mettreAJourLigne(da, dateStr) {
 }
 
 /* ===============================
-   💾 ENREGISTREMENT
+   ENREGISTREMENT
    =============================== */
 
 /**
@@ -1270,7 +1270,7 @@ function mettreAJourBoutonsNavigation() {
 }
 
 /* ===============================
-   🔧 UTILITAIRES
+   UTILITAIRES
    =============================== */
 
 /**

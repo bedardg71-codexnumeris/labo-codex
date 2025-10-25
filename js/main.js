@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
     // 1. NAVIGATION PRINCIPALE
     // ===============================
-    console.log('⚙️  Initialisation de la navigation...');
+    console.log(' Initialisation de la navigation...');
 
     document.querySelectorAll('.navigation-principale button').forEach(bouton => {
         bouton.addEventListener('click', function () {
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // ===============================
     // 2. CHARGEMENTS CONDITIONNELS
     // ===============================
-    console.log('⚙️  Vérification des modules additionnels...');
+    console.log(' Vérification des modules additionnels...');
 
     console.log('✅ Application initialisée');
 
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===============================
     // 3. ÉVÉNEMENTS GLOBAUX
     // ===============================
-    console.log('⚙️  Initialisation des événements globaux...');
+    console.log(' Initialisation des événements globaux...');
 
     // Sélecteur d'étudiant dans le détail individuel
     const selectEtudiant = document.getElementById('select-etudiant');

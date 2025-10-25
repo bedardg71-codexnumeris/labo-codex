@@ -18,7 +18,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES DE CE MODULE
+   DÉPENDANCES DE CE MODULE
    
    Modules requis (doivent être chargés AVANT):
    - 01-config.js : Variables globales
@@ -193,7 +193,7 @@ function afficherInfoPAN() {
 }
 
 /* ===============================
-   📊 GESTION DES OPTIONS D'AFFICHAGE (NOUVEAU)
+   GESTION DES OPTIONS D'AFFICHAGE (NOUVEAU)
    =============================== */
 
 /**
@@ -268,7 +268,7 @@ function sauvegarderOptionsAffichage() {
 }
 
 /* ===============================
-   💾 SAUVEGARDE ET CHARGEMENT
+   SAUVEGARDE ET CHARGEMENT
    =============================== */
 
 /**
@@ -398,7 +398,7 @@ function chargerModalites() {
 }
 
 /* ===============================
-   📊 MISE À JOUR DU STATUT
+   MISE À JOUR DU STATUT
    =============================== */
 
 /**
@@ -459,7 +459,7 @@ function afficherNotificationSucces(message) {
 }
 
 /* ===============================
-   🔧 UTILITAIRES PUBLICS
+   UTILITAIRES PUBLICS
    =============================== */
 
 /**

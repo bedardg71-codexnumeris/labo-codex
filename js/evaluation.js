@@ -16,7 +16,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES DE CE MODULE
+   DÉPENDANCES DE CE MODULE
    
    Modules requis (doivent être chargés AVANT):
    - 01-config.js : Variables globales, evaluationEnCours
@@ -336,7 +336,7 @@ function chargerProduction(productionNum) {
 }
 
 /* ===============================
-   📊 GRILLE ET CARTOUCHE
+   GRILLE ET CARTOUCHE
    =============================== */
 
 /**
@@ -710,7 +710,7 @@ function genererRetroaction(num) {
 }
 
 /* ===============================
-   💾 SAUVEGARDE DE L'ÉVALUATION
+   SAUVEGARDE DE L'ÉVALUATION
    =============================== */
 
 /**
@@ -988,7 +988,7 @@ function afficherNotificationSucces(message) {
 let donneesEvaluationsFiltrees = [];
 
 /* ===============================
-   📊 CALCUL DES INDICES
+   CALCUL DES INDICES
    =============================== */
 
 /**
@@ -996,7 +996,7 @@ let donneesEvaluationsFiltrees = [];
  * Basé sur le Guide de monitorage
  */
 function calculerEtSauvegarderIndicesEvaluation() {
-    console.log('📊 Calcul des indices C et P...');
+    console.log('Calcul des indices C et P...');
 
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
@@ -1179,14 +1179,14 @@ function obtenirClasseNote(note, echelleId) {
 }
 
 /* ===============================
-   📋 AFFICHAGE DE LA LISTE
+   AFFICHAGE DE LA LISTE
    =============================== */
 
 /**
  * Charge et affiche la liste des évaluations avec accordéon
  */
 function chargerListeEvaluationsRefonte() {
-    console.log('📋 Chargement de la liste des évaluations...');
+    console.log('Chargement de la liste des évaluations...');
 
     // 🆕 NOUVEAU : Les indices sont maintenant calculés par liste-evaluations.js
     // L'ancien calcul est désactivé pour éviter les conflits de structure
@@ -1656,7 +1656,7 @@ function restaurerPreferenceTri() {
 }
 
 /* ===============================
-   📊 STATISTIQUES
+   STATISTIQUES
    =============================== */
 
 /**
@@ -1716,7 +1716,7 @@ function mettreAJourStatistiquesEvaluations() {
 }
 
 /* ===============================
-   🔧 FONCTIONS UTILITAIRES
+   FONCTIONS UTILITAIRES
    =============================== */
 
 // ✅ Fonction obtenirNomCartouche() supprimée (doublon incorrect)
@@ -1778,7 +1778,7 @@ function echapperHtml(texte) {
  * Ajouter à la fonction d'initialisation existante
  */
 function initialiserListeEvaluations() {
-    console.log('📋 Initialisation de la liste des évaluations');
+    console.log('Initialisation de la liste des évaluations');
 
     const sousSection = document.getElementById('evaluations-liste');
     if (!sousSection) {
@@ -1917,7 +1917,7 @@ function verifierEtChargerEvaluationExistante() {
     );
 
     if (!evaluationExistante) {
-        console.log('ℹ️ Aucune évaluation existante pour cet étudiant et cette production');
+        console.log('Aucune évaluation existante pour cet étudiant et cette production');
 
         // Masquer l'indicateur de verrouillage et réactiver le formulaire
         afficherOuMasquerBoutonVerrouillage(false);
@@ -2257,12 +2257,12 @@ function lancerReparationEvaluations() {
 }
 
 /**
- * 🔧 FONCTION DE RÉPARATION : Migre les évaluations avec critères manquants
+ * FONCTION DE RÉPARATION : Migre les évaluations avec critères manquants
  * Parcourt toutes les évaluations et extrait les critères depuis la rétroaction si absents
  * ⚠️ À utiliser manuellement en cas de pépin (ne s'active PAS automatiquement)
  */
 function reparer_evaluations_criteres_manquants() {
-    console.log('🔧 Début de la réparation des évaluations...');
+    console.log('Début de la réparation des évaluations...');
 
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
@@ -2280,7 +2280,7 @@ function reparer_evaluations_criteres_manquants() {
                                evaluation.criteres.length === 0;
 
         if (criteresMissing) {
-            console.log(`\n📋 Évaluation à réparer : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
+            console.log(`\nÉvaluation à réparer : ${evaluation.etudiantNom} - ${evaluation.productionNom}`);
 
             // Récupérer la grille
             const grille = grilles.find(g => g.id === evaluation.grilleId);
@@ -2332,15 +2332,15 @@ function reparer_evaluations_criteres_manquants() {
     // Sauvegarder les modifications
     if (nbEvaluationsReparees > 0) {
         localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
-        console.log(`\n💾 ${nbEvaluationsReparees} évaluation(s) sauvegardée(s)`);
+        console.log(`\n${nbEvaluationsReparees} évaluation(s) sauvegardée(s)`);
     }
 
     // Rapport final
-    console.log('\n📊 RAPPORT DE RÉPARATION :');
+    console.log('\nRAPPORT DE RÉPARATION :');
     console.log(`  ✅ Réparées : ${nbEvaluationsReparees}`);
     console.log(`  ⏭️ Ignorées (déjà OK) : ${nbEvaluationsIgnorees}`);
     console.log(`  ❌ Échecs : ${nbEchoues}`);
-    console.log('\n📋 Détails :');
+    console.log('\nDétails :');
     rapport.forEach(ligne => console.log(`  ${ligne}`));
 
     // Notification utilisateur
@@ -2351,7 +2351,7 @@ function reparer_evaluations_criteres_manquants() {
               `• ${nbEchoues} échec(s)\n\n` +
               `Consultez la console (F12) pour les détails.`);
     } else {
-        alert(`ℹ️ Aucune évaluation à réparer.\n\n` +
+        alert(`Aucune évaluation à réparer.\n\n` +
               `• ${nbEvaluationsIgnorees} évaluation(s) ont déjà leurs critères.\n` +
               `• ${nbEchoues} échec(s)`);
     }
@@ -2421,7 +2421,7 @@ function modifierEvaluation(evaluationId) {
                 setTimeout(() => {
                     // ⚠️ IMPORTANT : Initialiser evaluationEnCours AVANT de déclencher les événements
                     // Sinon cartoucheSelectionnee() retourne immédiatement car evaluationEnCours n'existe pas
-                    console.log('🔧 Initialisation de evaluationEnCours AVANT les événements...');
+                    console.log('Initialisation de evaluationEnCours AVANT les événements...');
                     window.evaluationEnCours = {
                         etudiantDA: evaluation.etudiantDA,
                         productionId: evaluation.productionId,
@@ -2475,7 +2475,7 @@ function modifierEvaluation(evaluationId) {
                     const selectEchelle = document.getElementById('selectEchelle1');
                     if (selectEchelle) {
                         selectEchelle.value = evaluation.echelleId;
-                        console.log('🔧 Déclenchement de l\'événement change sur selectEchelle...');
+                        console.log('Déclenchement de l\'événement change sur selectEchelle...');
                         selectEchelle.dispatchEvent(new Event('change', { bubbles: true }));
                     }
 
@@ -2483,7 +2483,7 @@ function modifierEvaluation(evaluationId) {
                     const selectCartouche = document.getElementById('selectCartoucheEval');
                     if (selectCartouche) {
                         selectCartouche.value = evaluation.cartoucheId;
-                        console.log('🔧 Déclenchement de l\'événement change sur selectCartouche...');
+                        console.log('Déclenchement de l\'événement change sur selectCartouche...');
                         selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
                     }
 
@@ -2491,7 +2491,7 @@ function modifierEvaluation(evaluationId) {
                     const selectRemise = document.getElementById('remiseProduction1');
                     if (selectRemise) {
                         selectRemise.value = evaluation.statutRemise;
-                        console.log('🔧 Déclenchement de l\'événement change sur selectRemise...');
+                        console.log('Déclenchement de l\'événement change sur selectRemise...');
                         selectRemise.dispatchEvent(new Event('change', { bubbles: true }));
                     }
 
@@ -2507,7 +2507,7 @@ function modifierEvaluation(evaluationId) {
                             return;
                         }
 
-                        console.log('📋 Critères à charger:', evaluation.criteres.map(c => ({
+                        console.log('Critères à charger:', evaluation.criteres.map(c => ({
                             id: c.critereId,
                             nom: c.critereNom,
                             niveau: c.niveauSelectionne
@@ -3204,7 +3204,7 @@ function verrouillerToutesEvaluations(verrouiller) {
 }
 
 /* ===============================
-   🎫 SYSTÈME DE JETONS DE REPRISE
+   SYSTÈME DE JETONS DE REPRISE
    =============================== */
 
 /**

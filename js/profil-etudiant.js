@@ -17,7 +17,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES DE CE MODULE
+   DÉPENDANCES DE CE MODULE
    
    Modules requis (doivent être chargés AVANT):
    - 01-config.js : echapperHtml()
@@ -760,7 +760,7 @@ function genererSectionMobilisation(da) {
 
         <!-- DÉCOMPOSITION VISUELLE -->
         <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
-            📊 Décomposition de l'indice M
+            Décomposition de l'indice M
         </h4>
         <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
             <div style="font-family: monospace; font-size: 1.1rem; text-align: center; color: var(--bleu-principal);">
@@ -894,7 +894,7 @@ function genererSectionEngagement(da) {
 
         <!-- DÉCOMPOSITION VISUELLE -->
         <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
-            📊 Décomposition de l'indice E (effet multiplicatif)
+            Décomposition de l'indice E (effet multiplicatif)
         </h4>
         <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
             <div style="font-family: monospace; font-size: 1rem; text-align: center; color: var(--bleu-principal); margin-bottom: 10px;">
@@ -1030,7 +1030,7 @@ function genererSectionRisque(da) {
 
         <!-- VISUALISATION ZONES DE RISQUE -->
         <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
-            📊 Zones de risque (modèle RàI)
+            Zones de risque (modèle RàI)
         </h4>
         <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
             <!-- Barre de progression du risque -->
@@ -1167,7 +1167,7 @@ function calculerPerformancePAN(da) {
             if (evaluationsRetenues.length > 0) {
                 // Calculer la moyenne des artefacts sélectionnés
                 const moyenne = evaluationsRetenues.reduce((sum, e) => sum + e.noteFinale, 0) / evaluationsRetenues.length;
-                console.log(`📊 Indice P calculé depuis ${evaluationsRetenues.length} artefact(s) sélectionné(s): ${moyenne.toFixed(1)}%`);
+                console.log(`Indice P calculé depuis ${evaluationsRetenues.length} artefact(s) sélectionné(s): ${moyenne.toFixed(1)}%`);
                 return moyenne / 100; // Retourner en proportion 0-1
             }
         }
@@ -1180,7 +1180,7 @@ function calculerPerformancePAN(da) {
         .slice(0, 3);
 
     const moyenne = meilleuresNotes.reduce((sum, note) => sum + note, 0) / meilleuresNotes.length;
-    console.log(`📊 Indice P calculé depuis les ${meilleuresNotes.length} meilleure(s) note(s): ${moyenne.toFixed(1)}%`);
+    console.log(`Indice P calculé depuis les ${meilleuresNotes.length} meilleure(s) note(s): ${moyenne.toFixed(1)}%`);
     return moyenne / 100; // Retourner en proportion 0-1
 }
 
@@ -1293,7 +1293,7 @@ function formaterDate(dateISO) {
 }
 
 /* ===============================
-   📊 AFFICHAGE DU PROFIL COMPLET
+   AFFICHAGE DU PROFIL COMPLET
    =============================== */
 
 /**
@@ -1337,7 +1337,7 @@ function genererCarteCibleIntervention(da) {
     const descriptionNiveau = cibleInfo.niveau === 3
         ? '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).'
         : cibleInfo.niveau === 2
-        ? '📋 <strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages et prévenir l\'aggravation des difficultés.'
+        ? '<strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages et prévenir l\'aggravation des difficultés.'
         : cibleInfo.cible.includes('Pratique autonome')
         ? '✨ <strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.'
         : '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
@@ -1502,7 +1502,7 @@ function changerSectionProfil(section) {
             contenu = `
                 <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
                             padding: 40px 20px; text-align: center; color: var(--bleu-moyen);">
-                    <div style="font-size: 2rem; margin-bottom: 15px;">📋</div>
+                    <div style="font-size: 2rem; margin-bottom: 15px;"></div>
                     <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
                         Rapport pour l'API
                     </div>
@@ -1549,7 +1549,7 @@ function genererContenuCibleIntervention(da) {
     if (indices3Derniers.nbArtefacts === 0) {
         return `
             <div style="text-align: center; padding: 60px 20px;">
-                <div style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;">📊</div>
+                <div style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></div>
                 <h3 style="color: #666; margin-bottom: 10px;">Données insuffisantes</h3>
                 <p style="color: #999;">
                     Pas encore d'artefacts évalués pour cet étudiant.<br>
@@ -1566,7 +1566,7 @@ function genererContenuCibleIntervention(da) {
     const descriptionNiveau = cibleInfo.niveau === 3
         ? '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).'
         : cibleInfo.niveau === 2
-        ? '📋 <strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages et prévenir l\'aggravation des difficultés.'
+        ? '<strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages et prévenir l\'aggravation des difficultés.'
         : cibleInfo.cible.includes('Pratique autonome')
         ? '✨ <strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.'
         : '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
@@ -1712,7 +1712,7 @@ function genererContenuCibleIntervention(da) {
                 <!-- Calcul Risque -->
                 <div style="margin-bottom: 20px;">
                     <h5 style="color: var(--bleu-principal); margin: 0 0 10px 0; font-size: 0.95rem;">
-                        📊 CALCUL DU RISQUE (R)
+                        CALCUL DU RISQUE (R)
                     </h5>
                     <div style="background: white; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem;">
                         <div style="margin-bottom: 8px;"><strong>Formule:</strong></div>
@@ -2084,7 +2084,7 @@ function genererSectionPerformance(da) {
             `).join('')}
             
             <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9rem; color: #666;">
-                <strong>ℹ️ Principe PAN :</strong> La note finale est calculée sur la moyenne des 3 meilleurs artefacts 
+                <strong>Principe PAN :</strong> La note finale est calculée sur la moyenne des 3 meilleurs artefacts 
                 plutôt que sur la moyenne de tous les artefacts.
             </div>
         </div>
@@ -2317,7 +2317,7 @@ function genererSectionCompletion(da) {
 
             <!-- Gestion des jetons (placeholder) -->
             <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
-                🎫 GESTION DES JETONS
+                GESTION DES JETONS
             </h4>
             <div style="background: #fff3cd; border: 2px dashed #ffc107; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
                 <div style="font-size: 1.2rem; color: #856404; margin-bottom: 10px;">
@@ -2439,7 +2439,7 @@ function obtenirTableConversionIDME(echelleId = null) {
         }
     });
 
-    console.log('📊 Table conversion IDME:', table);
+    console.log('Table conversion IDME:', table);
     return table;
 }
 
@@ -2464,7 +2464,7 @@ function calculerMoyennesCriteres(da) {
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.retroactionFinale);
 
-    console.log('📊 calculerMoyennesCriteres pour DA:', da);
+    console.log('calculerMoyennesCriteres pour DA:', da);
     console.log('  Total évaluations dans système:', evaluations.length);
     console.log('  Évaluations pour cet élève avec rétroaction:', evaluationsEleve.length);
 
@@ -2742,7 +2742,7 @@ function calculerIndicesTroisDerniersArtefacts(da) {
         ? scoresFrancais.reduce((sum, s) => sum + s, 0) / scoresFrancais.length
         : 0;
 
-    console.log(`📊 Indices 3 derniers artefacts pour DA ${da}:`, {
+    console.log(`Indices 3 derniers artefacts pour DA ${da}:`, {
         nbArtefacts: troisDerniers.length,
         performance: (performance * 100).toFixed(1) + '%',
         idmeMoyen: (idmeMoyen * 100).toFixed(1) + '%',
@@ -3258,7 +3258,7 @@ function genererSectionPerformance(da) {
     if (!portfolio) {
         return `
             <div class="text-muted" style="text-align: center; padding: 30px;">
-                <p>📋 Aucun portfolio configuré</p>
+                <p>Aucun portfolio configuré</p>
             </div>
         `;
     }

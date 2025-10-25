@@ -37,7 +37,7 @@ function echapperHtml(texte) {
  * ARCHITECTURE: Identique à calculerEtSauvegarderIndicesAssiduite() dans saisie-presences.js
  */
 function calculerEtSauvegarderIndiceCompletion() {
-    console.log('📊 Calcul des indices de complétion...');
+    console.log('Calcul des indices de complétion...');
     
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     
@@ -559,7 +559,7 @@ function ouvrirCartouche(cartoucheId, productionId) {
 function modifierEvaluation(da, productionId) {
     // Naviguer vers Évaluations › Évaluer avec pré-sélection
     // TODO: Implémenter la navigation et la pré-sélection
-    console.log(`✏️ Modification de l'évaluation: DA ${da}, Production ${productionId}`);
+    console.log(`Modification de l'évaluation: DA ${da}, Production ${productionId}`);
     alert(`Navigation vers l'évaluation à implémenter:\nDA: ${da}\nProduction: ${productionId}`);
 }
 
@@ -568,7 +568,7 @@ function modifierEvaluation(da, productionId) {
  */
 function dupliquerEvaluation(evaluationId) {
     // TODO: Implémenter la duplication
-    console.log(`📋 Duplication de l'évaluation ${evaluationId}`);
+    console.log(`Duplication de l'évaluation ${evaluationId}`);
 
     if (!confirm('Voulez-vous dupliquer cette évaluation pour un autre élève ?')) {
         return;
@@ -590,7 +590,7 @@ function supprimerEvaluation(evaluationId) {
 
     localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluationsFiltered));
 
-    console.log(`🗑️ Évaluation ${evaluationId} supprimée`);
+    console.log(`Évaluation ${evaluationId} supprimée`);
 
     // Recharger le tableau
     chargerDonneesEvaluations();

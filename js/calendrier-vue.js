@@ -15,7 +15,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES DE CE MODULE
+   DÉPENDANCES DE CE MODULE
    
    Modules requis (doivent être chargés AVANT):
    - config.js : Variables globales
@@ -79,7 +79,7 @@ function initialiserModuleVueCalendaire() {
 }
 
 /* ===============================
-   📊 FONCTIONS UTILITAIRES DATES
+   FONCTIONS UTILITAIRES DATES
    =============================== */
 
 /**
@@ -357,7 +357,7 @@ function desilluminerSemaines() {
 }
 
 /* ===============================
-   📊 AFFICHAGE PRINCIPAL DU CALENDRIER
+   AFFICHAGE PRINCIPAL DU CALENDRIER
    =============================== */
 
 /**
