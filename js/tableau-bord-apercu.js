@@ -177,96 +177,47 @@ function determinerNiveauRisque(risque) {
 
 /**
  * Affiche les métriques globales du groupe
- * Respecte les réglages d'affichage sommatif/alternatif
- * 
+ * Affiche toujours les deux modes (Sommatif et PAN) séparément
+ *
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherMetriquesGlobales(etudiants) {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false; // true par défaut
-    const afficherAlternatif = config.affichageTableauBord?.afficherAlternatif || false;
-    
     const nbTotal = etudiants.length;
-    
+
     // Affichage du nombre total (toujours affiché)
     setStatText('tb-total-etudiants', nbTotal);
-    
-    // AFFICHAGE CONDITIONNEL
-    if (afficherSommatif && afficherAlternatif) {
-        // CAS 1 : Afficher les DEUX (format : "85% / 90%")
-        const assiduiteSommatif = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.sommatif.assiduite, 0) / nbTotal
-            : 0;
-        const assiduiteAlternatif = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.alternatif.assiduite, 0) / nbTotal
-            : 0;
-        
-        setStatText('tb-assiduite-moyenne', 
-            `${formatPourcentage(assiduiteSommatif)} / ${formatPourcentage(assiduiteAlternatif)}`);
-        
-        // Même chose pour completion et performance
-        const completionSommatif = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.sommatif.completion, 0) / nbTotal
-            : 0;
-        const completionAlternatif = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.alternatif.completion, 0) / nbTotal
-            : 0;
-        
-        setStatText('tb-completion-moyenne',
-            `${formatPourcentage(completionSommatif)} / ${formatPourcentage(completionAlternatif)}`);
-        
-        const performanceSommatif = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.sommatif.performance, 0) / nbTotal
-            : 0;
-        const performanceAlternatif = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.alternatif.performance, 0) / nbTotal
-            : 0;
-        
-        setStatText('tb-performance-moyenne',
-            `${formatPourcentage(performanceSommatif)} / ${formatPourcentage(performanceAlternatif)}`);
-        
-        // Interventions : utiliser le risque sommatif par défaut
-        const interventionsRequises = etudiants.filter(e => e.sommatif.risque >= 0.4).length;
-        setStatText('tb-interventions-requises', interventionsRequises);
-        
-    } else if (afficherAlternatif) {
-        // CAS 2 : Afficher SEULEMENT alternatif
-        const assiduite = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.alternatif.assiduite, 0) / nbTotal
-            : 0;
-        const completion = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.alternatif.completion, 0) / nbTotal
-            : 0;
-        const performance = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.alternatif.performance, 0) / nbTotal
-            : 0;
-        
-        setStatText('tb-assiduite-moyenne', formatPourcentage(assiduite));
-        setStatText('tb-completion-moyenne', formatPourcentage(completion));
-        setStatText('tb-performance-moyenne', formatPourcentage(performance));
-        
-        const interventionsRequises = etudiants.filter(e => e.alternatif.risque >= 0.4).length;
-        setStatText('tb-interventions-requises', interventionsRequises);
-        
-    } else {
-        // CAS 3 : Afficher SEULEMENT sommatif (par défaut)
-        const assiduite = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.sommatif.assiduite, 0) / nbTotal
-            : 0;
-        const completion = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.sommatif.completion, 0) / nbTotal
-            : 0;
-        const performance = nbTotal > 0
-            ? etudiants.reduce((sum, e) => sum + e.sommatif.performance, 0) / nbTotal
-            : 0;
-        
-        setStatText('tb-assiduite-moyenne', formatPourcentage(assiduite));
-        setStatText('tb-completion-moyenne', formatPourcentage(completion));
-        setStatText('tb-performance-moyenne', formatPourcentage(performance));
-        
-        const interventionsRequises = etudiants.filter(e => e.sommatif.risque >= 0.4).length;
-        setStatText('tb-interventions-requises', interventionsRequises);
-    }
+
+    // Calculer les moyennes pour SOMMATIF
+    const assiduiteSommatif = nbTotal > 0
+        ? etudiants.reduce((sum, e) => sum + e.sommatif.assiduite, 0) / nbTotal
+        : 0;
+    const completionSommatif = nbTotal > 0
+        ? etudiants.reduce((sum, e) => sum + e.sommatif.completion, 0) / nbTotal
+        : 0;
+    const performanceSommatif = nbTotal > 0
+        ? etudiants.reduce((sum, e) => sum + e.sommatif.performance, 0) / nbTotal
+        : 0;
+
+    // Calculer les moyennes pour PAN (Alternatif)
+    const assiduiteAlternatif = nbTotal > 0
+        ? etudiants.reduce((sum, e) => sum + e.alternatif.assiduite, 0) / nbTotal
+        : 0;
+    const completionAlternatif = nbTotal > 0
+        ? etudiants.reduce((sum, e) => sum + e.alternatif.completion, 0) / nbTotal
+        : 0;
+    const performanceAlternatif = nbTotal > 0
+        ? etudiants.reduce((sum, e) => sum + e.alternatif.performance, 0) / nbTotal
+        : 0;
+
+    // Afficher les 6 cartes séparées
+    setStatText('tb-assiduite-som', formatPourcentage(assiduiteSommatif));
+    setStatText('tb-assiduite-pan', formatPourcentage(assiduiteAlternatif));
+
+    setStatText('tb-completion-som', formatPourcentage(completionSommatif));
+    setStatText('tb-completion-pan', formatPourcentage(completionAlternatif));
+
+    setStatText('tb-performance-som', formatPourcentage(performanceSommatif));
+    setStatText('tb-performance-pan', formatPourcentage(performanceAlternatif));
 }
 
 /**
