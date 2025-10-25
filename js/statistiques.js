@@ -94,36 +94,27 @@ function chargerInfosCours() {
         setStatText('stat-trimestre', '—');
     }
     
-    // Calendrier
-    const cadreCalendrier = JSON.parse(localStorage.getItem('cadreCalendrier') || 'null');
-    if (cadreCalendrier && cadreCalendrier.dateDebut && cadreCalendrier.dateFin) {
-        const debut = cadreCalendrier.dateDebut;
-        const fin = cadreCalendrier.dateFin;
-        
-        let nbSemaines = cadreCalendrier.nombreSemaines;
-        if (!nbSemaines) {
-            const dateDebut = new Date(debut);
-            const dateFin = new Date(fin);
-            const diffJours = Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24));
-            nbSemaines = Math.ceil(diffJours / 7);
-        }
-        
-        setStatText('stat-calendrier', `${debut} → ${fin} (${nbSemaines} sem.)`);
-    } else {
-        setStatText('stat-calendrier', '—');
-    }
-    
-    // Horaire
+    // Heures par semaine (calculées depuis l'horaire)
     const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
     if (seancesHoraire.length > 0) {
-        const horaireTexte = seancesHoraire.map(s => {
-            return `${s.jour} ${s.debut}-${s.fin}`;
-        }).join(' · ');
-        setStatText('stat-horaire', horaireTexte);
-    } else if (coursActif && coursActif.formatHoraire) {
-        setStatText('stat-horaire', coursActif.formatHoraire);
+        // Calculer la durée totale en heures
+        let totalMinutes = 0;
+        seancesHoraire.forEach(seance => {
+            // Parse les heures de début et fin (format "HH:MM")
+            const [debutH, debutM] = seance.debut.split(':').map(Number);
+            const [finH, finM] = seance.fin.split(':').map(Number);
+
+            const minutesDebut = debutH * 60 + debutM;
+            const minutesFin = finH * 60 + finM;
+            const duree = minutesFin - minutesDebut;
+
+            totalMinutes += duree;
+        });
+
+        const totalHeures = totalMinutes / 60;
+        setStatText('stat-heures-semaine', `${totalHeures}h`);
     } else {
-        setStatText('stat-horaire', '—');
+        setStatText('stat-heures-semaine', '—');
     }
     
     // Nombre de groupes
