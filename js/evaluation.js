@@ -1438,7 +1438,7 @@ function genererDetailsEtudiant(etudiant) {
                                 </td>
                                 <td>—</td>
                                 <td>
-                                    <button class="btn btn-principal" onclick="evaluerProduction('${etudiant.da}', '${item.production.id}')" style="padding:5px 10px;">
+                                    <button class="btn btn-confirmer btn-compact" onclick="evaluerProduction('${etudiant.da}', '${item.production.id}')">
                                         Évaluer
                                     </button>
                                 </td>
