@@ -1311,10 +1311,10 @@
 
                     <!-- Actions globales -->
                     <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-                        <button class="btn btn-principal" onclick="verrouillerToutesEvaluations(true)" style="padding: 6px 10px; font-size: 0.8rem;">
+                        <button class="btn btn-principal btn-compact" onclick="verrouillerToutesEvaluations(true)">
                             Verrouiller tout
                         </button>
-                        <button class="btn btn-secondaire" onclick="verrouillerToutesEvaluations(false)" style="padding: 6px 10px; font-size: 0.8rem;">
+                        <button class="btn btn-annuler btn-compact" onclick="verrouillerToutesEvaluations(false)">
                             Déverrouiller tout
                         </button>
                     </div>
@@ -1383,11 +1383,11 @@
                     </div>
 
                     <div style="text-align: right;">
-                        <button class="btn" onclick="fermerModalJetonReprise()" style="padding: 10px 20px; margin-right: 10px;">
+                        <button class="btn btn-annuler" onclick="fermerModalJetonReprise()" style="margin-right: 10px;">
                             Annuler
                         </button>
-                        <button class="btn btn-principal" onclick="appliquerJetonReprise()" style="padding: 10px 20px; background: #9c27b0;">
-                            🎫 Appliquer le jeton de reprise
+                        <button class="btn btn-confirmer" onclick="appliquerJetonReprise()">
+                            Appliquer le jeton de reprise
                         </button>
                     </div>
                 </div>
@@ -1438,10 +1438,10 @@
                     </div>
 
                     <div style="text-align: right; padding-top: 15px; border-top: 1px solid #dee2e6;">
-                        <button class="btn" onclick="fermerModalReparationEvaluations()" style="padding: 10px 20px; margin-right: 10px;">
+                        <button class="btn btn-annuler" onclick="fermerModalReparationEvaluations()" style="margin-right: 10px;">
                             Annuler
                         </button>
-                        <button class="btn btn-principal" onclick="lancerReparationEvaluations()" style="padding: 10px 20px;">
+                        <button class="btn btn-confirmer" onclick="lancerReparationEvaluations()">
                             Lancer la réparation
                         </button>
                     </div>
@@ -2233,11 +2233,11 @@ Exemple :
                                 <!-- Le tableau sera généré ici -->
                             </div>
                             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                <button onclick="confirmImport()" class="btn btn-confirmer" style="padding: 10px 20px;">
-                                    ✅ Confirmer l'import
+                                <button onclick="confirmImport()" class="btn btn-confirmer">
+                                    Confirmer l'import
                                 </button>
-                                <button onclick="cancelImport()" class="btn btn-annuler" style="padding: 10px 20px;">
-                                    ❌ Annuler
+                                <button onclick="cancelImport()" class="btn btn-annuler">
+                                    Annuler
                                 </button>
                             </div>
                         </div>
