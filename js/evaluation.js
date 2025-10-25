@@ -1904,7 +1904,7 @@ function verifierEtChargerEvaluationExistante() {
     const productionId = document.getElementById('selectProduction1')?.value;
 
     if (!etudiantDA || !productionId) {
-        console.log('⏭️ Pas d\'étudiant ou de production sélectionné, skip');
+        console.log('Pas d\'étudiant ou de production sélectionné, skip');
         return;
     }
 
@@ -2338,7 +2338,7 @@ function reparer_evaluations_criteres_manquants() {
     // Rapport final
     console.log('\nRAPPORT DE RÉPARATION :');
     console.log(`  ✅ Réparées : ${nbEvaluationsReparees}`);
-    console.log(`  ⏭️ Ignorées (déjà OK) : ${nbEvaluationsIgnorees}`);
+    console.log(`  Ignorées (déjà OK) : ${nbEvaluationsIgnorees}`);
     console.log(`  ❌ Échecs : ${nbEchoues}`);
     console.log('\nDétails :');
     rapport.forEach(ligne => console.log(`  ${ligne}`));
@@ -3537,7 +3537,7 @@ function mettreAJourBoutonVerrouillage(estVerrouillee) {
 
     if (estVerrouillee) {
         // Verrouillée : coche grisée, cadenas actif
-        iconeStatut.textContent = '☑️';
+        iconeStatut.textContent = '';
         iconeStatut.style.color = '#999';
         iconeVerrou.style.color = '#f44336'; // Rouge
         iconeStatut.title = 'Évaluation verrouillée - Cliquez pour déverrouiller';

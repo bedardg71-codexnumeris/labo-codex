@@ -24,7 +24,7 @@
 // - 01-config.js : Variables globales
 
 /* ===============================
-   🗄️ STRUCTURE DES DONNÉES
+   STRUCTURE DES DONNÉES
    =============================== */
 
 /**
@@ -662,7 +662,7 @@ function afficherNotification(message, details = '') {
 }
 
 /* ===============================
-   🎛️ FONCTIONS UI (formulaires)
+   FONCTIONS UI (formulaires)
    =============================== */
 
 function afficherFormEvenement() {
