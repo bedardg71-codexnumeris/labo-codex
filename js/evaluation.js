@@ -1393,7 +1393,7 @@ function genererDetailsEtudiant(etudiant) {
                                 <td>${Math.round(item.evaluation.noteFinale) || '—'}%</td>
                                 <td>
                                     <span class="badge-statut badge-succes">
-                                        ${item.evaluation.verrouillee ? '🔒 ' : ''}${estReprise ? '🎫 ' : ''}${estRemplacee ? '⏸️ Remplacée' : 'Évalué'}
+                                        ${estRemplacee ? 'Remplacée' : 'Évalué'}
                                     </span>
                                 </td>
                                 <td>${item.evaluation.dateEvaluation ? new Date(item.evaluation.dateEvaluation).toLocaleDateString('fr-CA') : '—'}</td>
@@ -1458,7 +1458,7 @@ function genererDetailsEtudiant(etudiant) {
 
     const resumeHTML = `
         <div class="carte" style="margin-top: 15px; background: var(--bleu-pale);">
-            <h4 style="margin-bottom: 10px;">📊 Résumé de l'étudiant</h4>
+            <h4 style="margin-bottom: 10px;">Résumé de l'étudiant</h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                 <div>
                     <strong>Artefacts remis:</strong> ${nbRemis} / ${nbAttendus}
@@ -1473,7 +1473,7 @@ function genererDetailsEtudiant(etudiant) {
             </div>
             ${nbReprises > 0 ? `
                 <div style="margin-top: 15px; padding: 10px; background: #f3e5f5; border-radius: 6px; border-left: 4px solid #9c27b0;">
-                    <strong>🎫 Jetons de reprise appliqués:</strong> ${nbReprises}<br>
+                    <strong>Jetons de reprise appliqués:</strong> ${nbReprises}<br>
                     <span style="font-size: 0.85rem; color: #666;">
                         ${nbRemplacees} évaluation${nbRemplacees > 1 ? 's' : ''} remplacée${nbRemplacees > 1 ? 's' : ''} (archivée${nbRemplacees > 1 ? 's' : ''}, ne compte${nbRemplacees > 1 ? 'nt' : ''} plus dans les indices)
                     </span>
@@ -2819,7 +2819,6 @@ function afficherIndicateurModeModification(evaluation) {
     // Mettre à jour le contenu
     const dateEval = evaluation.dateEvaluation ? new Date(evaluation.dateEvaluation).toLocaleString('fr-CA') : 'Inconnue';
     indicateur.innerHTML = `
-        <span style="font-size: 1.5rem;">📝</span>
         <div style="flex: 1;">
             <strong>MODE MODIFICATION</strong><br>
             <span style="font-size: 0.9rem; opacity: 0.95;">
@@ -3041,9 +3040,9 @@ function afficherListeBanqueEvaluations(evaluations) {
                     <div style="flex: 1;">
                         <h4 style="margin: 0 0 10px 0;">
                             ${echapperHtml(eval.etudiantNom)}
-                            ${eval.verrouillee ? '<span style="color: #ff9800; margin-left: 8px;">🔒</span>' : ''}
-                            ${estReprise ? '<span style="color: #9c27b0; margin-left: 8px;" title="Jeton de reprise appliqué">♻️</span>' : ''}
-                            ${estRemplacee ? '<span style="color: #999; margin-left: 8px;" title="Évaluation remplacée">⏸️</span>' : ''}
+                            ${eval.verrouillee ? '<span style="color: #ff9800; margin-left: 8px;">(Verrouillée)</span>' : ''}
+                            ${estReprise ? '<span style="color: #9c27b0; margin-left: 8px;" title="Jeton de reprise appliqué">(Reprise)</span>' : ''}
+                            ${estRemplacee ? '<span style="color: #999; margin-left: 8px;" title="Évaluation remplacée">(Remplacée)</span>' : ''}
                         </h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: #666; font-size: 0.9rem;">
                             <div><strong>Production:</strong> ${echapperHtml(eval.productionNom)}</div>
@@ -3053,23 +3052,23 @@ function afficherListeBanqueEvaluations(evaluations) {
                         </div>
                         ${estRemplacee ? `
                             <div style="margin-top: 10px; padding: 8px; background: #f5f5f5; border-radius: 4px; font-size: 0.85rem; color: #666;">
-                                ⏸️ Cette évaluation a été remplacée par un jeton de reprise et ne compte plus dans les indices
+                                Cette évaluation a été remplacée par un jeton de reprise et ne compte plus dans les indices
                             </div>
                         ` : ''}
                         ${estReprise ? `
                             <div style="margin-top: 10px; padding: 8px; background: #f3e5f5; border-radius: 4px; font-size: 0.85rem; color: #7b1fa2;">
-                                🎫 Jeton de reprise appliqué - Remplace l'évaluation précédente
+                                Jeton de reprise appliqué - Remplace l'évaluation précédente
                             </div>
                         ` : ''}
                     </div>
                     <div style="margin-left: 20px; display: flex; flex-direction: column; gap: 6px;">
-                        <button class="btn btn-modifier" onclick="chargerEvaluationDepuisBanque('${eval.id}')" style="padding: 6px 10px; font-size: 0.8rem; white-space: nowrap;">
+                        <button class="btn btn-modifier btn-compact" onclick="chargerEvaluationDepuisBanque('${eval.id}')">
                             Charger
                         </button>
-                        <button class="btn btn-principal" onclick="basculerVerrouillageEvaluation('${eval.id}')" style="padding: 6px 10px; font-size: 0.8rem; white-space: nowrap;">
+                        <button class="btn btn-annuler btn-compact" onclick="basculerVerrouillageEvaluation('${eval.id}')">
                             ${eval.verrouillee ? 'Déverrouiller' : 'Verrouiller'}
                         </button>
-                        <button class="btn btn-supprimer" onclick="supprimerEvaluationBanque('${eval.id}')" style="padding: 6px 10px; font-size: 0.8rem; white-space: nowrap;">
+                        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluationBanque('${eval.id}')">
                             Supprimer
                         </button>
                     </div>
