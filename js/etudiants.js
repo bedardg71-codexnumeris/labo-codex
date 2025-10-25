@@ -15,7 +15,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES DE CE MODULE
+   DÉPENDANCES DE CE MODULE
    
    Modules requis (doivent être chargés AVANT):
    - 01-config.js : Variables globales, echapperHtml()
@@ -95,7 +95,7 @@ function rechargerListeEtudiants() {
 }
 
 /* ===============================
-   📋 CHARGEMENT DES OPTIONS DE FILTRES
+   CHARGEMENT DES OPTIONS DE FILTRES
    =============================== */
 
 /**
@@ -152,7 +152,7 @@ function chargerOptionsFiltres() {
 }
 
 /* ===============================
-   📊 CALCUL DE L'ASSIDUITÉ
+   CALCUL DE L'ASSIDUITÉ
    =============================== */
 
 /**
@@ -332,7 +332,7 @@ function filtrerEtudiants(etudiants) {
 }
 
 /* ===============================
-   📊 AFFICHAGE DU TABLEAU
+   AFFICHAGE DU TABLEAU
    =============================== */
 
 /**
@@ -356,12 +356,12 @@ function afficherListeEtudiantsConsultation() {
     // Charger les étudiants
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
-    console.log('📋 Nombre total d\'étudiants:', etudiants.length);
+    console.log('Nombre total d\'étudiants:', etudiants.length);
 
     // Appliquer les filtres
     const etudiantsFiltres = filtrerEtudiants(etudiants);
 
-    console.log('📋 Nombre d\'étudiants après filtrage:', etudiantsFiltres.length);
+    console.log('Nombre d\'étudiants après filtrage:', etudiantsFiltres.length);
 
     // Mettre à jour le compteur
     if (compteur) {

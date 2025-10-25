@@ -16,7 +16,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES DE CE MODULE
+   DÉPENDANCES DE CE MODULE
    
    Variables du module 01-config.js:
    - grilleTemplateActuelle : Grille actuellement en édition
@@ -60,7 +60,7 @@
 let critereEnEdition = null;
 
 /* ===============================
-   📊 FONCTION: CHARGER LISTE GRILLES
+   FONCTION: CHARGER LISTE GRILLES
    Charge les grilles dans le select
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -154,7 +154,7 @@ function chargerGrilleTemplate() {
 }
 
 /* ===============================
-   ✏️ FONCTION: AFFICHER FORMULAIRE CRITÈRE
+   FONCTION: AFFICHER FORMULAIRE CRITÈRE
    Affiche le formulaire d'ajout/modification
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -220,7 +220,7 @@ function afficherFormCritere(id = null) {
 }
 
 /* ===============================
-   💾 FONCTION: SAUVEGARDER CRITÈRE
+   FONCTION: SAUVEGARDER CRITÈRE
    Enregistre un critère
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -329,7 +329,7 @@ function sauvegarderCritere() {
 }
 
 /* ===============================
-   💾 FONCTION: SAUVEGARDER ET FERMER
+   FONCTION: SAUVEGARDER ET FERMER
    Sauvegarde puis ferme le formulaire
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -378,7 +378,7 @@ function annulerAjoutCritere() {
 }
 
 /* ===============================
-   ✏️ FONCTION: MODIFIER CRITÈRE
+   FONCTION: MODIFIER CRITÈRE
    Lance la modification d'un critère
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -419,7 +419,7 @@ function modifierCritere(id) {
 }
 
 /* ===============================
-   🗑️ FONCTION: SUPPRIMER CRITÈRE
+   FONCTION: SUPPRIMER CRITÈRE
    Supprime un critère après confirmation
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -471,7 +471,7 @@ function supprimerCritere(id) {
 }
 
 /* ===============================
-   📊 FONCTION: AFFICHER LISTE CRITÈRES
+   FONCTION: AFFICHER LISTE CRITÈRES
    Affiche tous les critères d'une grille
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -584,7 +584,7 @@ function afficherChampFormule() {
 }
 
 /* ===============================
-   💾 FONCTION: SAUVEGARDER GRILLE TEMPLATE
+   FONCTION: SAUVEGARDER GRILLE TEMPLATE
    Enregistre la grille complète
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -663,7 +663,7 @@ function sauvegarderGrilleTemplate(silencieux = false) {
 }
 
 /* ===============================
-   💾 FONCTION: SAUVEGARDER NOM GRILLE
+   FONCTION: SAUVEGARDER NOM GRILLE
    Sauvegarde automatique du nom
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -684,7 +684,7 @@ function sauvegarderNomGrille() {
 }
 
 /* ===============================
-   📋 FONCTION: AFFICHER GRILLES CRITÈRES
+   FONCTION: AFFICHER GRILLES CRITÈRES
    Affiche le modal des grilles existantes
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -786,7 +786,7 @@ function fermerModalGrilles() {
 }
 
 /* ===============================
-   ✏️ FONCTION: CHARGER GRILLE EN ÉDITION
+   FONCTION: CHARGER GRILLE EN ÉDITION
    Charge une grille depuis le modal
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -818,7 +818,7 @@ function chargerGrilleEnEdition(grilleId) {
 }
 
 /* ===============================
-   🗑️ FONCTION: SUPPRIMER GRILLE
+   FONCTION: SUPPRIMER GRILLE
    Supprime une grille après confirmation
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -1067,7 +1067,7 @@ function getTypeCritereLabel(type) {
 }
 
 /* ===============================
-   📊 FONCTION: CALCULER TOTAL PONDÉRATION
+   FONCTION: CALCULER TOTAL PONDÉRATION
    Calcule et affiche le total des pondérations
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -1110,7 +1110,7 @@ function calculerTotalPonderationCriteres(criteres) {
 }
 
 /* ===============================
-   💾 FONCTION: ENREGISTRER COMME GRILLE
+   FONCTION: ENREGISTRER COMME GRILLE
    Alias de sauvegarde (compatibilité)
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */

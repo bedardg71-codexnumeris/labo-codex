@@ -16,7 +16,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES DE CE MODULE
+   DÉPENDANCES DE CE MODULE
    
    Modules requis (doivent être chargés AVANT):
    - 01-config.js : Variables globales, cartoucheActuel
@@ -161,7 +161,7 @@ function chargerCartouchesRetroaction() {
 }
 
 /* ===============================
-   ✏️ CRÉATION ET ÉDITION DE CARTOUCHE
+   CRÉATION ET ÉDITION DE CARTOUCHE
    =============================== */
 
 /**
@@ -282,7 +282,7 @@ function chargerMatriceRetroaction() {
 }
 
 /* ===============================
-   📊 AFFICHAGE DE LA MATRICE
+   AFFICHAGE DE LA MATRICE
    =============================== */
 
 /**
@@ -407,7 +407,7 @@ function sauvegarderCommentaire(key) {
 }
 
 /* ===============================
-   💾 SAUVEGARDE DE LA CARTOUCHE
+   SAUVEGARDE DE LA CARTOUCHE
    =============================== */
 
 /**
@@ -472,7 +472,7 @@ function sauvegarderCartouche() {
 }
 
 /* ===============================
-   📋 IMPORT DE COMMENTAIRES
+   IMPORT DE COMMENTAIRES
    =============================== */
 
 /**
@@ -607,7 +607,7 @@ function importerCommentaires() {
 }
 
 /* ===============================
-   🎲 GÉNÉRATION D'APERÇU
+   GÉNÉRATION D'APERÇU
    =============================== */
 
 /**
@@ -665,7 +665,7 @@ function genererApercuAleatoire() {
 }
 
 /* ===============================
-   📊 MÉTRIQUES ET PROGRESSION
+   MÉTRIQUES ET PROGRESSION
    =============================== */
 
 /**
@@ -760,7 +760,7 @@ function calculerPourcentageComplete() {
 }
 
 /* ===============================
-   📋 LISTE DES CARTOUCHES
+   LISTE DES CARTOUCHES
    =============================== */
 
 /**
@@ -954,7 +954,7 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
 }
 
 /* ===============================
-   🗑️ SUPPRESSION
+   SUPPRESSION
    =============================== */
 
 /**
@@ -1000,7 +1000,7 @@ function supprimerCartoucheConfirm(cartoucheId, grilleId) {
  * Appelée depuis le bouton de suppression principal
  * 
  * UTILISÉ PAR:
- * - Bouton «🗑️ Supprimer» dans la zone d'édition
+ * - Bouton «Supprimer» dans la zone d'édition
  */
 function supprimerCartouche() {
     if (!cartoucheActuel) return;

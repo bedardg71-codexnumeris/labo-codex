@@ -21,7 +21,7 @@
  */
 
 /* ===============================
-   🔧 INITIALISATION DU MODULE
+   INITIALISATION DU MODULE
    =============================== */
 
 function initialiserModuleImportExport() {
@@ -38,7 +38,7 @@ function initialiserModuleImportExport() {
 }
 
 /* ===============================
-   📤 EXPORT DES DONNÉES
+   EXPORT DES DONNÉES
    =============================== */
 
 function ouvrirModalExport() {
@@ -121,7 +121,7 @@ function executerExport() {
 }
 
 /* ===============================
-   📥 IMPORT DES DONNÉES
+   IMPORT DES DONNÉES
    =============================== */
 
 let donneesImportEnAttente = null;
@@ -207,7 +207,7 @@ function executerImport() {
 }
 
 /* ===============================
-   🗑️ RÉINITIALISATION
+   RÉINITIALISATION
    =============================== */
 
 function reinitialiserDonnees() {

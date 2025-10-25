@@ -17,7 +17,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES DE CE MODULE
+   DÉPENDANCES DE CE MODULE
    
    Modules requis (doivent être chargés AVANT):
    - 01-config.js : Variables globales, coursEnEdition
@@ -72,7 +72,7 @@ function initialiserModuleCours() {
 }
 
 /* ===============================
-   📊 AFFICHAGE DU TABLEAU
+   AFFICHAGE DU TABLEAU
    =============================== */
 
 /**
@@ -217,7 +217,7 @@ function afficherTableauCours() {
 }
 
 /* ===============================
-   ✏️ FORMULAIRE D'AJOUT/ÉDITION
+   FORMULAIRE D'AJOUT/ÉDITION
    =============================== */
 
 /**
@@ -409,7 +409,7 @@ function sauvegarderCours() {
 }
 
 /* ===============================
-   👁️ VUE DÉTAILLÉE
+   VUE DÉTAILLÉE
    =============================== */
 
 /**
@@ -448,7 +448,7 @@ function voirCours(id) {
 }
 
 /* ===============================
-   ✏️ MODIFICATION
+   MODIFICATION
    =============================== */
 
 /**
@@ -592,7 +592,7 @@ function activerCours(id) {
 }
 
 /* ===============================
-   🗑️ SUPPRESSION
+   SUPPRESSION
    =============================== */
 
 /**

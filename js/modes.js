@@ -446,13 +446,13 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         
         const cleSimulation = mappingCles[cle] || `simulation_${cle}`;
         localStorage.setItem(cleSimulation, JSON.stringify(donnees));
-        console.log(`💾 [Simulation] Sauvegarde dans ${cleSimulation}`);
+        console.log(`[Simulation] Sauvegarde dans ${cleSimulation}`);
         return true;
     }
     
     // MODE NORMAL : Sauvegarder normalement
     localStorage.setItem(cle, JSON.stringify(donnees));
-    console.log(`💾 [Normal] Sauvegarde dans ${cle}`);
+    console.log(`[Normal] Sauvegarde dans ${cle}`);
     return true;
 }
 
@@ -590,13 +590,13 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         
         const cleSimulation = mappingCles[cle] || `simulation_${cle}`;
         localStorage.setItem(cleSimulation, JSON.stringify(donnees));
-        console.log(`💾 [Simulation] Sauvegarde dans ${cleSimulation}`);
+        console.log(`[Simulation] Sauvegarde dans ${cleSimulation}`);
         return true;
     }
     
     // MODE NORMAL : Sauvegarder normalement
     localStorage.setItem(cle, JSON.stringify(donnees));
-    console.log(`💾 [Normal] Sauvegarde dans ${cle}`);
+    console.log(`[Normal] Sauvegarde dans ${cle}`);
     return true;
 }
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;

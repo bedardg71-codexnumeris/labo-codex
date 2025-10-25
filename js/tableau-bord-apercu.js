@@ -1,5 +1,5 @@
 /* ===============================
-   📊 MODULE: TABLEAU DE BORD - APERÇU
+   MODULE: TABLEAU DE BORD - APERÇU
    Calculs des indices A-C-P et affichage des métriques globales
    =============================== */
 
@@ -33,7 +33,7 @@
  * Appelée par main.js au chargement
  */
 function initialiserModuleTableauBordApercu() {
-    console.log('📊 Module Tableau de bord - Aperçu initialisé');
+    console.log('Module Tableau de bord - Aperçu initialisé');
     
     // Charger les statistiques si la sous-section aperçu est active
     const apercu = document.getElementById('tableau-bord-apercu');
@@ -47,7 +47,7 @@ function initialiserModuleTableauBordApercu() {
    =============================== */
 
 function chargerTableauBordApercu() {
-    console.log('📊 Chargement du tableau de bord - aperçu');
+    console.log('Chargement du tableau de bord - aperçu');
     
     try {
         const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
@@ -172,7 +172,7 @@ function determinerNiveauRisque(risque) {
 }
 
 /* ===============================
-   📊 AFFICHAGE DES MÉTRIQUES
+   AFFICHAGE DES MÉTRIQUES
    =============================== */
 
 /**
@@ -698,7 +698,7 @@ function afficherAlertesPrioritaires(etudiants) {
 }
 
 /* ===============================
-   🔧 FONCTIONS UTILITAIRES
+   FONCTIONS UTILITAIRES
    =============================== */
 
 /**

@@ -18,7 +18,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES
+   DÉPENDANCES
    =============================== */
 // Modules requis (chargés AVANT):
 // - 01-config.js : Variables globales
@@ -162,7 +162,7 @@ function sauvegarderCadreCalendrier() {
 }
 
 /* ===============================
-   📋 GESTION DES ÉVÉNEMENTS PRÉVUS
+   GESTION DES ÉVÉNEMENTS PRÉVUS
    =============================== */
 
 function chargerEvenementsPrevus() {
@@ -323,7 +323,7 @@ function basculerVerrouillageEvenement(id, type) {
 }
 
 /* ===============================
-   📋 GESTION DES ÉVÉNEMENTS IMPRÉVUS
+   GESTION DES ÉVÉNEMENTS IMPRÉVUS
    =============================== */
 
 function chargerEvenementsImprevus() {
@@ -564,7 +564,7 @@ function genererCalendrierComplet() {
 }
 
 /* ===============================
-   📊 STATISTIQUES DU TRIMESTRE
+   STATISTIQUES DU TRIMESTRE
    =============================== */
 
 function afficherStatistiquesTrimestre() {
@@ -605,11 +605,11 @@ function afficherStatistiquesTrimestre() {
     if (elemJours) elemJours.textContent = nbJoursCours;
     if (elemConges) elemConges.textContent = nbConges;
 
-    console.log(`📊 Statistiques: ${nbSemaines} sem. | ${nbJoursCours} jours | ${nbConges} congés`);
+    console.log(`Statistiques: ${nbSemaines} sem. | ${nbJoursCours} jours | ${nbConges} congés`);
 }
 
 /* ===============================
-   🛠️ FONCTIONS UTILITAIRES
+   FONCTIONS UTILITAIRES
    =============================== */
 
 function creerDateLocale(dateStr) {

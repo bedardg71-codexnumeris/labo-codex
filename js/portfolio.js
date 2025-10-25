@@ -10,7 +10,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES
+   DÉPENDANCES
    
    LocalStorage lu:
    - 'listeGrilles' : Array des productions (inclut portfolio + artefacts)
@@ -383,7 +383,7 @@ function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
  * @returns {Object} - Structure complète des indices
  */
 function calculerEtStockerIndicesCP() {
-    console.log('📊 Calcul des indices C et P...');
+    console.log('Calcul des indices C et P...');
 
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
     const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');

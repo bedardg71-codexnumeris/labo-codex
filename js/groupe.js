@@ -20,7 +20,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES
+   DÉPENDANCES
    
    Modules requis (AVANT):
    - 01-config.js : echapperHtml()
@@ -160,7 +160,7 @@ function addStudent() {
         // SI MODE MODIFICATION : SUPPRIMER L'ANCIEN
         // ============================================
         if (modeModification) {
-            console.log('🗑️ Suppression de l\'ancien étudiant avec DA:', daEnModification);
+            console.log('Suppression de l\'ancien étudiant avec DA:', daEnModification);
             students = students.filter(s => s.da !== daEnModification);
         }
 
@@ -218,7 +218,7 @@ function addStudent() {
 }
 
 /* ===============================
-   📥 IMPORT CSV/TSV
+   IMPORT CSV/TSV
    =============================== */
 
 /**
@@ -395,7 +395,7 @@ function cancelImport() {
 }
 
 /* ===============================
-   📊 AFFICHAGE ET FILTRAGE
+   AFFICHAGE ET FILTRAGE
    =============================== */
 
 /**
@@ -595,11 +595,11 @@ function filtrerParGroupe() {
 <td style="text-align: center;">
     <button data-action="modifier" data-da="${s.da}" class="btn btn-modifier" 
             style="padding: 5px 10px; margin-right: 5px;">
-        ✏️
+        Modifier
     </button>
     <button data-action="supprimer" data-da="${s.da}" class="btn btn-supprimer" 
             style="padding: 5px 10px;">
-        🗑️
+        Supprimer
     </button>
 </td>
                 </tr>
@@ -626,7 +626,7 @@ function resetFiltreGroupe() {
 }
 
 /* ===============================
-   ✏️ MODIFICATION
+   MODIFICATION
    =============================== */
 
 /**
@@ -687,7 +687,7 @@ function modifierEtudiant(da) {
 }
 
 /* ===============================
-   🗑️ SUPPRESSION
+   SUPPRESSION
    =============================== */
 
 /**
@@ -720,7 +720,7 @@ function deleteStudent(id, silent = false) {
 }
 
 /* ===============================
-   📤 EXPORT
+   EXPORT
    =============================== */
 
 /**

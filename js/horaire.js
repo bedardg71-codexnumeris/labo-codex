@@ -15,7 +15,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES DE CE MODULE
+   DÉPENDANCES DE CE MODULE
    
    Modules requis (doivent être chargés AVANT):
    - 01-config.js : Variables globales
@@ -93,7 +93,7 @@ function initialiserModuleHoraire() {
 }
 
 /* ===============================
-   🔧 FONCTIONS UTILITAIRES
+   FONCTIONS UTILITAIRES
    =============================== */
 
 /**
@@ -605,7 +605,7 @@ function confirmerAjoutSeances() {
 }
 
 /* ===============================
-   📊 AFFICHAGE DES SÉANCES
+   AFFICHAGE DES SÉANCES
    =============================== */
 
 /**
@@ -734,7 +734,7 @@ function supprimerSeance(id) {
 }
 
 /* ===============================
-   ✏️ MODIFICATION
+   MODIFICATION
    =============================== */
 
 /**

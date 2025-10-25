@@ -16,7 +16,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES DE CE MODULE
+   DÉPENDANCES DE CE MODULE
    
    Variables du module 01-config.js:
    - productionEnEdition : ID de la production en cours d'édition
@@ -47,7 +47,7 @@
    =============================== */
 
 /* ===============================
-   📊 FONCTION: AFFICHER TABLEAU DES PRODUCTIONS
+   FONCTION: AFFICHER TABLEAU DES PRODUCTIONS
    Affiche toutes les productions avec leurs détails
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -163,7 +163,7 @@ function afficherTableauProductions() {
 }
 
 /* ===============================
-   ✏️ FONCTION: AFFICHER FORMULAIRE PRODUCTION
+   FONCTION: AFFICHER FORMULAIRE PRODUCTION
    Affiche le formulaire d'ajout ou de modification
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -261,7 +261,7 @@ function afficherFormProduction(id) {
 }
 
 /* ===============================
-   💾 FONCTION: SAUVEGARDER PRODUCTION
+   FONCTION: SAUVEGARDER PRODUCTION
    Enregistre une production (création ou modification)
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -397,7 +397,7 @@ function annulerFormProduction() {
 }
 
 /* ===============================
-   ✏️ FONCTION: MODIFIER ÉVALUATION
+   FONCTION: MODIFIER ÉVALUATION
    Lance la modification d'une production
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -418,7 +418,7 @@ function modifierEvaluation(id) {
 }
 
 /* ===============================
-   🗑️ FONCTION: SUPPRIMER PRODUCTION
+   FONCTION: SUPPRIMER PRODUCTION
    Supprime une production après confirmation
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */
@@ -642,7 +642,7 @@ function chargerArtefactsDisponibles() {
 }
 
 /* ===============================
-   📊 FONCTION: METTRE À JOUR PONDÉRATION TOTALE
+   FONCTION: METTRE À JOUR PONDÉRATION TOTALE
    Calcule et affiche la pondération totale
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
    =============================== */

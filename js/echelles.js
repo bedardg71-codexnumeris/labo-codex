@@ -17,7 +17,7 @@
    =============================== */
 
 /* ===============================
-   📋 DÉPENDANCES DE CE MODULE
+   DÉPENDANCES DE CE MODULE
    
    Modules requis (doivent être chargés AVANT):
    - 01-config.js : Variables globales
@@ -43,7 +43,7 @@
    =============================== */
 
 /* ===============================
-   📊 NIVEAUX PAR DÉFAUT
+   NIVEAUX PAR DÉFAUT
    Échelle SOLO (Structure of Observed Learning Outcomes)
    =============================== */
 
@@ -132,7 +132,7 @@ const paletteCouleurs = [
 ];
 
 /* ===============================
-   🔧 VARIABLE GLOBALE D'ÉTAT
+   VARIABLE GLOBALE D'ÉTAT
    =============================== */
 
 /**
@@ -442,7 +442,7 @@ function supprimerEchelle(echelleId) {
 }
 
 /* ===============================
-   ⚙️ CONFIGURATION GLOBALE
+   CONFIGURATION GLOBALE
    =============================== */
 
 /**
@@ -560,7 +560,7 @@ function changerTypeEchelle() {
 }
 
 /* ===============================
-   📊 GESTION DES NIVEAUX
+   GESTION DES NIVEAUX
    =============================== */
 
 /**
@@ -962,7 +962,7 @@ function genererNiveauxPersonnalises() {
 }
 
 /* ===============================
-   📥 CHARGEMENT DANS LES SELECTS
+   CHARGEMENT DANS LES SELECTS
    Pour utilisation dans d'autres modules
    =============================== */
 
