@@ -110,11 +110,11 @@ function afficherTableauProductions() {
                     <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer"
                             ${prod.verrouille ? 'disabled' : ''}>Supprimer</button>
                     <label style="display: inline-flex; align-items: center; margin-left: 10px;">
-                        <input type="checkbox" 
-                               ${prod.verrouille ? 'checked' : ''} 
+                        <input type="checkbox"
+                               ${prod.verrouille ? 'checked' : ''}
                                onchange="verrouillerEvaluation('${prod.id}')"
                                style="margin-right: 5px;">
-                        <span style="font-size: 0.85rem;">Verrouiller</span>
+                        <span style="font-size: 0.85rem;">🔒</span>
                     </label>
                 </div>
             </div>
