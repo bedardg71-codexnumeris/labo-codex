@@ -184,9 +184,6 @@ function determinerNiveauRisque(risque) {
 function afficherMetriquesGlobales(etudiants) {
     const nbTotal = etudiants.length;
 
-    // Affichage du nombre total (toujours affiché)
-    setStatText('tb-total-etudiants', nbTotal);
-
     // Calculer les moyennes pour SOMMATIF
     const assiduiteSommatif = nbTotal > 0
         ? etudiants.reduce((sum, e) => sum + e.sommatif.assiduite, 0) / nbTotal
