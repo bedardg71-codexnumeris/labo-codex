@@ -2529,3 +2529,45 @@ body[data-mode="anonymisation"] .sous-navigation button.actif {
 .carte-info-toggle strong {
     color: var(--bleu-principal);
 }
+
+/* ===============================================
+   SELECT MODE D'AFFICHAGE
+   Menu déroulant pour changer de mode
+   =============================================== */
+
+#selecteur-mode {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.select-mode {
+    padding: 6px 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.select-mode:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.select-mode:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.select-mode option {
+    background: var(--bleu-principal);
+    color: white;
+    padding: 8px;
+}
