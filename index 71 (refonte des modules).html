@@ -436,9 +436,8 @@
                         Beta 0.71 | Créé par Grégoire Bédard | Licence GNU GPL v3
                         <br>20 octobre 2025
                     </div>
-                </div>
 
-                <!-- Sélecteur de mode (sera généré par 17-modes.js) -->
+<!-- Sélecteur de mode (sera généré par 17-modes.js) -->
                 <div id="selecteur-mode"></div>
             </div>
         </header>
@@ -1461,30 +1460,25 @@
                     <h2 style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Vue d'ensemble</span>
                         <span style="font-size: 1.2rem;">
-                            <span class="emoji-toggle" data-target="note-apercu" style="cursor: pointer; margin-left: 10px;">⚠️</span>
-                            <span class="emoji-toggle" data-target="conseil-apercu" style="cursor: pointer; margin-left: 10px;">💡</span>
+                            <span class="emoji-toggle" data-target="note-apercu">⚠️</span>
+                            <span class="emoji-toggle" data-target="conseil-apercu">💡</span>
                         </span>
                     </h2>
                     <p class="text-muted">Résumé du matériel pédagogique configuré</p>
 
-                    <!-- Cartes Note et Conseil (masquées par défaut) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                        <!-- Carte Note -->
-                        <div id="note-apercu" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-pale);
-                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6;">
-                            <strong>Note :</strong> Cette vue d'ensemble présente un résumé du matériel pédagogique configuré pour le cours.
-                            Le matériel comprend les productions (exercices formatifs et certificatifs), les grilles de critères d'évaluation,
-                            les échelles de performance (IDME), et les cartouches de rétroaction. Un matériel bien configuré facilite l'évaluation
-                            cohérente et permet le suivi longitudinal des apprentissages.
-                        </div>
+                    <!-- Carte Note -->
+                    <div id="note-apercu" class="carte-info-toggle carte-info-note" style="display: none;">
+                        <strong>Note :</strong> Cette vue d'ensemble présente un résumé du matériel pédagogique configuré pour le cours.
+                        Le matériel comprend les productions (exercices formatifs et certificatifs), les grilles de critères d'évaluation,
+                        les échelles de performance (IDME), et les cartouches de rétroaction. Un matériel bien configuré facilite l'évaluation
+                        cohérente et permet le suivi longitudinal des apprentissages.
+                    </div>
 
-                        <!-- Carte Conseil pratique -->
-                        <div id="conseil-apercu" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-tres-pale);
-                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6;">
-                            <strong>Conseil pratique :</strong> Commence par configurer la pratique de notation dans la section Réglages, puis crée tes grilles de critères
-                            et ton échelle de performance. Enfin, définis les productions du cours en les associant aux grilles créées.
-                            Cette séquence assure une configuration cohérente et facilite la gestion des évaluations.
-                        </div>
+                    <!-- Carte Conseil pratique -->
+                    <div id="conseil-apercu" class="carte-info-toggle carte-info-conseil" style="display: none;">
+                        <strong>Conseil pratique :</strong> Commence par configurer la pratique de notation dans la section Réglages, puis crée tes grilles de critères
+                        et ton échelle de performance. Enfin, définis les productions du cours en les associant aux grilles créées.
+                        Cette séquence assure une configuration cohérente et facilite la gestion des évaluations.
                     </div>
 
                     <div class="carte">
@@ -1502,32 +1496,27 @@
                     <h2 style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Exercices formatifs et certificatifs</span>
                         <span style="font-size: 1.2rem;">
-                            <span class="emoji-toggle" data-target="note-productions" style="cursor: pointer; margin-left: 10px;">⚠️</span>
-                            <span class="emoji-toggle" data-target="conseil-productions" style="cursor: pointer; margin-left: 10px;">💡</span>
+                            <span class="emoji-toggle" data-target="note-productions">⚠️</span>
+                            <span class="emoji-toggle" data-target="conseil-productions">💡</span>
                         </span>
                     </h2>
                     <p class="text-muted">Définir les évaluations du cours et leurs pondérations</p>
 
-                    <!-- Cartes Note et Conseil (masquées par défaut) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                        <!-- Carte Note -->
-                        <div id="note-productions" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-pale);
-                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6;">
-                            <strong>Note :</strong> Les productions représentent l'ensemble des travaux que les étudiants doivent réaliser
-                            durant le cours. Elles peuvent être de type formatif (pour l'apprentissage) ou certificatif (pour l'évaluation).
-                            Chaque production peut être associée à une grille de critères et possède une pondération qui contribue à la note finale.
-                            Les portfolios permettent de regrouper plusieurs artefacts et de sélectionner automatiquement les N meilleurs selon
-                            la pratique de notation configurée.
-                        </div>
+                    <!-- Carte Note -->
+                    <div id="note-productions" class="carte-info-toggle carte-info-note" style="display: none;">
+                        <strong>Note :</strong> Les productions représentent l'ensemble des travaux que les étudiants doivent réaliser
+                        durant le cours. Elles peuvent être de type formatif (pour l'apprentissage) ou certificatif (pour l'évaluation).
+                        Chaque production peut être associée à une grille de critères et possède une pondération qui contribue à la note finale.
+                        Les portfolios permettent de regrouper plusieurs artefacts et de sélectionner automatiquement les N meilleurs selon
+                        la pratique de notation configurée.
+                    </div>
 
-                        <!-- Carte Conseil pratique -->
-                        <div id="conseil-productions" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-tres-pale);
-                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6;">
-                            <strong>Conseil pratique :</strong> Assure-toi que la somme des pondérations totalise 100%. Pour les portfolios, définis d'abord le nombre d'artefacts
-                            à retenir (ex: les 3 meilleurs sur 9). Les artefacts individuels n'ont pas de pondération propre, c'est le portfolio
-                            conteneur qui définit la pondération globale. Pense à verrouiller les productions une fois finalisées pour éviter
-                            les modifications accidentelles.
-                        </div>
+                    <!-- Carte Conseil pratique -->
+                    <div id="conseil-productions" class="carte-info-toggle carte-info-conseil" style="display: none;">
+                        <strong>Conseil pratique :</strong> Assure-toi que la somme des pondérations totalise 100%. Pour les portfolios, définis d'abord le nombre d'artefacts
+                        à retenir (ex: les 3 meilleurs sur 9). Les artefacts individuels n'ont pas de pondération propre, c'est le portfolio
+                        conteneur qui définit la pondération globale. Pense à verrouiller les productions une fois finalisées pour éviter
+                        les modifications accidentelles.
                     </div>
 
                     <!-- DÉFINITION DES ÉVALUATIONS -->
@@ -1688,34 +1677,29 @@
                     <h2 style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Critères d'évaluation</span>
                         <span style="font-size: 1.2rem;">
-                            <span class="emoji-toggle" data-target="note-grilles" style="cursor: pointer; margin-left: 10px;">⚠️</span>
-                            <span class="emoji-toggle" data-target="conseil-grilles" style="cursor: pointer; margin-left: 10px;">💡</span>
+                            <span class="emoji-toggle" data-target="note-grilles">⚠️</span>
+                            <span class="emoji-toggle" data-target="conseil-grilles">💡</span>
                         </span>
                     </h2>
                     <p class="text-muted">Créer des grilles de critères réutilisables pour évaluer différents types
                         de
                         productions.</p>
 
-                    <!-- Cartes Note et Conseil (masquées par défaut) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                        <!-- Carte Note -->
-                        <div id="note-grilles" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-pale);
-                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6;">
-                            <strong>Note :</strong> Les grilles de critères définissent les aspects sur lesquels les productions sont évaluées.
-                            Chaque critère possède une pondération relative et peut être de type holistique (jugement global), analytique
-                            (points par élément) ou algorithmique (calcul automatique). Dans le modèle SRPNF, les cinq critères sont :
-                            Structure (15%), Rigueur (20%), Plausibilité (10%), Nuance (25%) et Français (30%). Les grilles peuvent être
-                            réutilisées pour différentes productions et verrouillées une fois finalisées.
-                        </div>
+                    <!-- Carte Note -->
+                    <div id="note-grilles" class="carte-info-toggle carte-info-note" style="display: none;">
+                        <strong>Note :</strong> Les grilles de critères définissent les aspects sur lesquels les productions sont évaluées.
+                        Chaque critère possède une pondération relative et peut être de type holistique (jugement global), analytique
+                        (points par élément) ou algorithmique (calcul automatique). Dans le modèle SRPNF, les cinq critères sont :
+                        Structure (15%), Rigueur (20%), Plausibilité (10%), Nuance (25%) et Français (30%). Les grilles peuvent être
+                        réutilisées pour différentes productions et verrouillées une fois finalisées.
+                    </div>
 
-                        <!-- Carte Conseil pratique -->
-                        <div id="conseil-grilles" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-tres-pale);
-                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6;">
-                            <strong>Conseil pratique :</strong> Pour le critère Français, utilise le type algorithmique avec la formule (nb_erreurs / nb_mots) × 100.
-                            Les grilles peuvent être dupliquées et modifiées pour créer des variantes adaptées à différents types
-                            de productions. Pense à nommer tes grilles de façon descriptive (ex: "Grille analyse littéraire", "Grille dissertation").
-                            La somme des pondérations des critères doit totaliser 100%.
-                        </div>
+                    <!-- Carte Conseil pratique -->
+                    <div id="conseil-grilles" class="carte-info-toggle carte-info-conseil" style="display: none;">
+                        <strong>Conseil pratique :</strong> Pour le critère Français, utilise le type algorithmique avec la formule (nb_erreurs / nb_mots) × 100.
+                        Les grilles peuvent être dupliquées et modifiées pour créer des variantes adaptées à différents types
+                        de productions. Pense à nommer tes grilles de façon descriptive (ex: "Grille analyse littéraire", "Grille dissertation").
+                        La somme des pondérations des critères doit totaliser 100%.
                     </div>
 
                     <!-- CARTE : GRILLES DE CRITÈRES -->
@@ -1870,14 +1854,13 @@
                     <h2 style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Niveaux de performance</span>
                         <span style="font-size: 1.2rem;">
-                            <span class="emoji-toggle" data-target="note-echelle" style="cursor: pointer; margin-left: 10px;">⚠️</span>
+                            <span class="emoji-toggle" data-target="note-echelle">⚠️</span>
                         </span>
                     </h2>
                     <p class="text-muted">Configuration de l'échelle de notation pour les PAN/SBG</p>
 
                     <!-- Carte Note (pas de Conseil pour Échelle) -->
-                    <div id="note-echelle" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-pale);
-                        border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6; margin-bottom: 20px;">
+                    <div id="note-echelle" class="carte-info-toggle carte-info-note" style="display: none;">
                         <strong>Note :</strong> L'échelle de performance définit les niveaux de maîtrise utilisés pour évaluer les critères.
                         Le système utilise par défaut l'échelle IDME (Insuffisant, en Développement, Maîtrisé, Étendu) basée sur la taxonomie SOLO.
                         Chaque niveau correspond à un seuil de performance : Insuffisant (&lt; 64%), Développement (65-74%), Maîtrisé (75-84%),
@@ -2042,36 +2025,31 @@
                     <h2 style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Rétroactions prédéfinies</span>
                         <span style="font-size: 1.2rem;">
-                            <span class="emoji-toggle" data-target="note-retroactions" style="cursor: pointer; margin-left: 10px;">⚠️</span>
-                            <span class="emoji-toggle" data-target="conseil-retroactions" style="cursor: pointer; margin-left: 10px;">💡</span>
+                            <span class="emoji-toggle" data-target="note-retroactions">⚠️</span>
+                            <span class="emoji-toggle" data-target="conseil-retroactions">💡</span>
                         </span>
                     </h2>
                     <p class="text-muted">Créer des cartouches de rétroaction basées sur les critères et l'échelle
                         de
                         performance</p>
 
-                    <!-- Cartes Note et Conseil (masquées par défaut) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                        <!-- Carte Note -->
-                        <div id="note-retroactions" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-pale);
-                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6;">
-                            <strong>Note :</strong> Les rétroactions seront générées automatiquement en assemblant les commentaires prérédigés
-                            par l'enseignant·e selon les critères d'évaluation et le niveau de performance atteint pour
-                            chaque critère. Un ensemble complet de commentaires porte ici le nom de <strong>cartouche</strong>.
-                        </div>
+                    <!-- Carte Note -->
+                    <div id="note-retroactions" class="carte-info-toggle carte-info-note" style="display: none;">
+                        <strong>Note :</strong> Les rétroactions seront générées automatiquement en assemblant les commentaires prérédigés
+                        par l'enseignant·e selon les critères d'évaluation et le niveau de performance atteint pour
+                        chaque critère. Un ensemble complet de commentaires porte ici le nom de <strong>cartouche</strong>.
+                    </div>
 
-                        <!-- Carte Conseil pratique -->
-                        <div id="conseil-retroactions" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-tres-pale);
-                            border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6;">
+                    <!-- Carte Conseil pratique -->
+                    <div id="conseil-retroactions" class="carte-info-toggle carte-info-conseil" style="display: none;">
                             <strong>Conseil pratique :</strong> Les commentaires peuvent avoir entre 50 et 75 mots environ. Rédige-les de façon personnelle
                             et constructive. Chaque cellule de la matrice correspond à un commentaire pour un niveau de
                             performance donné sur un critère spécifique. Utilise les codes de ta grille (I, D, M, E) et
                             le format proposé pour structurer tes commentaires. Les cartouches peuvent être verrouillées
                             une fois finalisées.
                         </div>
-                    </div>
 
-                    <!-- CARTE : CARTOUCHES DE RÉTROACTION -->
+<!-- CARTE : CARTOUCHES DE RÉTROACTION -->
                     <div class="carte">
                         <h3>💬 Cartouches de rétroaction</h3>
 
@@ -2304,7 +2282,7 @@
                     <h2 style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Configuration du cours</span>
                         <span style="font-size: 1.2rem;">
-                            <span class="emoji-toggle" data-target="conseil-cours" style="cursor: pointer; margin-left: 10px;">💡</span>
+                            <span class="emoji-toggle" data-target="conseil-cours">💡</span>
                         </span>
                     </h2>
                     <p class="text-muted">Informations techniques du cours : code, nom, compétences, enseignant·e,
@@ -2312,8 +2290,7 @@
                         format horaire</p>
 
                     <!-- Carte Conseil pratique (masquée par défaut) -->
-                    <div id="conseil-cours" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-tres-pale);
-                        border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6; margin-bottom: 20px;">
+                    <div id="conseil-cours" class="carte-info-toggle" carte-info-conseil" style="display: none;">
                         <strong>Conseil pratique :</strong>
                         <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
                             <li><strong>Cours actif :</strong> Un seul cours peut être actif à la fois. Le cours
@@ -2754,14 +2731,13 @@
                     <h2 style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Configuration de l'horaire</span>
                         <span style="font-size: 1.2rem;">
-                            <span class="emoji-toggle" data-target="conseil-horaire" style="cursor: pointer; margin-left: 10px;">💡</span>
+                            <span class="emoji-toggle" data-target="conseil-horaire">💡</span>
                         </span>
                     </h2>
                     <p class="text-muted">Définissez le format horaire hebdomadaire de vos séances de cours</p>
 
                     <!-- Carte Conseil pratique (masquée par défaut) -->
-                    <div id="conseil-horaire" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-tres-pale);
-                        border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6; margin-bottom: 20px;">
+                    <div id="conseil-horaire" class="carte-info-toggle" carte-info-conseil" style="display: none;">
                         <strong>Conseil pratique :</strong>
                         <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
                             <li><strong>Format 2×2h :</strong> Idéal pour deux périodes de cours séparées dans
@@ -2849,7 +2825,7 @@
                     <h2 style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Configuration du groupe d'étudiants</span>
                         <span style="font-size: 1.2rem;">
-                            <span class="emoji-toggle" data-target="conseil-groupe" style="cursor: pointer; margin-left: 10px;">💡</span>
+                            <span class="emoji-toggle" data-target="conseil-groupe">💡</span>
                         </span>
                     </h2>
                     <p class="text-muted">Liste complète des étudiants inscrits : ajout, import, modification,
@@ -2857,8 +2833,7 @@
                     </p>
 
                     <!-- Carte Conseil pratique (masquée par défaut) -->
-                    <div id="conseil-groupe" class="carte-info-toggle" style="display: none; padding: 12px; background: var(--bleu-tres-pale);
-                        border-radius: 6px; border-left: 3px solid var(--bleu-moyen); font-size: 0.85rem; color: #666; line-height: 1.6; margin-bottom: 20px;">
+                    <div id="conseil-groupe" class="carte-info-toggle" carte-info-conseil" style="display: none;">
                         <strong>Conseil pratique :</strong>
                         <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
                             <li><strong>Champ Groupe :</strong> Permet d'organiser tes étudiants si tu as
