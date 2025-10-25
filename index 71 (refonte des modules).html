@@ -2590,19 +2590,23 @@
                         <h3>📚 Cours configurés</h3>
 
                         <!-- VUE D'ENSEMBLE -->
-                        <div class="grille-statistiques" style="margin-bottom: 20px;">
-                            <div class="carte-metrique">
-                                <strong id="nombreCours">0</strong>
-                                <span>Configurations</span>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Configurations</span>
+                                    <strong id="nombreCours" style="font-size: 1.8rem; color: var(--bleu-principal);">0</strong>
+                                </div>
                             </div>
-                            <div class="carte-metrique">
-                                <strong id="sessionActive">H2025</strong>
-                                <span>Session active</span>
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Session active</span>
+                                    <strong id="sessionActive" style="font-size: 1.8rem; color: var(--bleu-principal);">H2025</strong>
+                                </div>
                             </div>
-                            <div class="carte-metrique" style="grid-column: span 2;">
-                                <span id="resumeCours" style="font-size: 0.9rem;">
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); grid-column: 1 / -1;">
+                                <div id="resumeCours" style="font-size: 0.9rem; color: #666; text-align: center;">
                                     Aucune configuration de cours
-                                </span>
+                                </div>
                             </div>
                         </div>
 
@@ -2760,18 +2764,24 @@
                         <h3>Cadre régulier</h3>
 
                         <!-- Statistiques (calculées automatiquement) -->
-                        <div class="grille-statistiques" style="margin-bottom: 20px;">
-                            <div class="carte-metrique">
-                                <strong id="nombreSemaines">0</strong>
-                                <span>Semaines</span>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Semaines</span>
+                                    <strong id="nombreSemaines" style="font-size: 1.8rem; color: var(--bleu-principal);">0</strong>
+                                </div>
                             </div>
-                            <div class="carte-metrique">
-                                <strong id="nombreJoursCours">0</strong>
-                                <span>Jours de cours</span>
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Jours de cours</span>
+                                    <strong id="nombreJoursCours" style="font-size: 1.8rem; color: var(--bleu-principal);">0</strong>
+                                </div>
                             </div>
-                            <div class="carte-metrique">
-                                <strong id="totalConges">0</strong>
-                                <span>Congés</span>
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Congés</span>
+                                    <strong id="totalConges" style="font-size: 1.8rem; color: var(--bleu-principal);">0</strong>
+                                </div>
                             </div>
                         </div>
 
@@ -3140,17 +3150,21 @@
                         <h3>👥 Groupe d'étudiants</h3>
 
                         <!-- VUE D'ENSEMBLE -->
-                        <div class="grille-statistiques" style="margin-bottom: 20px;">
-                            <div class="carte-metrique">
-                                <strong id="nbEtudiantsTotal">0</strong>
-                                <span>Étudiant·es au total</span>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Étudiant·es au total</span>
+                                    <strong id="nbEtudiantsTotal" style="font-size: 1.8rem; color: var(--bleu-principal);">0</strong>
+                                </div>
                             </div>
-                            <div class="carte-metrique">
-                                <strong id="nbGroupes">0</strong>
-                                <span>Groupes</span>
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 0.9rem; color: #666;">Groupes</span>
+                                    <strong id="nbGroupes" style="font-size: 1.8rem; color: var(--bleu-principal);">0</strong>
+                                </div>
                             </div>
-                            <div class="carte-metrique" style="grid-column: span 2;">
-                                <div id="detailGroupes" style="font-size: 0.9rem; color: #666; text-align: left;">
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); grid-column: 1 / -1;">
+                                <div id="detailGroupes" style="font-size: 0.9rem; color: #666; text-align: center;">
                                     <em>Aucun groupe configuré</em>
                                 </div>
                             </div>
