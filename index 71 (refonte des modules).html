@@ -2471,46 +2471,87 @@
 
                 <!-- Sous-section: Aperçu des réglages -->
                 <div id="reglages-apercu" class="sous-section">
-                    <h2>Aperçu de la configuration</h2>
+                    <h2 style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Aperçu de la configuration</span>
+                        <button class="btn btn-principal" onclick="chargerStatistiquesApercu()"
+                            style="font-size: 0.9rem; padding: 8px 16px;">
+                            Rafraîchir
+                        </button>
+                    </h2>
                     <p class="text-muted">
                         Résumé de la configuration actuelle du système. Les statistiques sont calculées en temps réel depuis les données stockées localement.
                     </p>
 
-                    <div class="carte">
-                        <h3>📊 Informations du cours</h3>
-                        <p class="text-muted">
-                            Données de base du cours configuré.
-                        </p>
-                        <button class="btn btn-principal" onclick="chargerStatistiquesApercu()"
-                            style="margin-top: 10px;">
-                            Rafraîchir les statistiques
-                        </button>
-                    </div>
+                    <!-- Grille de cartes métriques bleues harmonisées -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
 
-                    <!-- Grille de cartes statistiques -->
-                    <div class="grille-statistiques">
-
-                        <!-- Carte : Informations du cours -->
-                        <div class="carte">
-                            <h3>📚 Informations du cours</h3>
-                            <p><strong>Code :</strong> <span id="stat-code-cours">—</span></p>
-                            <p><strong>Trimestre :</strong> <span id="stat-trimestre">—</span></p>
-                            <p><strong>Bornes du trimestre :</strong> <span id="stat-calendrier">—</span></p>
-                            <p><strong>Horaire :</strong> <span id="stat-horaire">—</span></p>
-                            <p><strong>Groupes :</strong> <span id="stat-nb-groupes">—</span></p>
-                            <p><strong>Élèves :</strong> <span id="stat-nb-eleves">—</span></p>
+                        <!-- Informations du cours (6 cartes) -->
+                        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.9rem; color: #666;">Code du cours</span>
+                                <strong id="stat-code-cours" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                            </div>
                         </div>
 
-                        <!-- Carte : Système -->
-                        <div class="carte">
-                            <h3>Système</h3>
-                            <p><strong>Version :</strong> <span id="stat-version">—</span></p>
-                            <p><strong>Dernière MAJ :</strong> <span id="stat-derniere-maj">—</span></p>
-                            <p><strong>Poids données :</strong> <span id="stat-poids">—</span></p>
+                        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.9rem; color: #666;">Trimestre</span>
+                                <strong id="stat-trimestre" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.9rem; color: #666;">Bornes du trimestre</span>
+                                <strong id="stat-calendrier" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.9rem; color: #666;">Horaire</span>
+                                <strong id="stat-horaire" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.9rem; color: #666;">Groupes</span>
+                                <strong id="stat-nb-groupes" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.9rem; color: #666;">Élèves</span>
+                                <strong id="stat-nb-eleves" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                            </div>
+                        </div>
+
+                        <!-- Informations système (3 cartes) -->
+                        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.9rem; color: #666;">Version</span>
+                                <strong id="stat-version" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.9rem; color: #666;">Dernière MAJ</span>
+                                <strong id="stat-derniere-maj" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.9rem; color: #666;">Poids des données</span>
+                                <strong id="stat-poids" style="font-size: 1.8rem; color: var(--bleu-principal);">—</strong>
+                            </div>
                         </div>
 
                     </div>
-                    <!-- fin grille-statistiques -->
+                    <!-- fin grille cartes métriques -->
 
 
                 </div>
