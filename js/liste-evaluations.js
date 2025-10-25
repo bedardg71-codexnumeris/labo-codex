@@ -498,16 +498,18 @@ function genererBoutonsActionsEvalue(ligne) {
     const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
     const disabled = lectureSeule ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '';
 
-    const texteVerrouillage = ligne.verrouille ? 'Déverrouiller' : 'Verrouiller';
-
     if (lectureSeule) {
         return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
     }
 
     return `
-        <button class="btn btn-annuler btn-compact btn-marge-droite" onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')" title="${texteVerrouillage}">
-            ${texteVerrouillage}
-        </button>
+        <label style="display: inline-flex; align-items: center; margin-right: 10px;">
+            <input type="checkbox"
+                   ${ligne.verrouille ? 'checked' : ''}
+                   onchange="toggleVerrouillerEvaluation('${ligne.evaluationId}')"
+                   style="margin-right: 5px;">
+            <span style="font-size: 0.85rem;">🔒</span>
+        </label>
         <button class="btn btn-modifier btn-compact btn-marge-droite" onclick="modifierEvaluation('${ligne.da}', '${ligne.productionId}')" title="Modifier">
             Modifier
         </button>

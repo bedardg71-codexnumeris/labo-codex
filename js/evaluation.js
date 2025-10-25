@@ -1368,6 +1368,7 @@ function genererDetailsEtudiant(etudiant) {
                     <th>Note (%)</th>
                     <th>Statut</th>
                     <th>Date</th>
+                    <th style="width: 60px;">🔒</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -1397,26 +1398,24 @@ function genererDetailsEtudiant(etudiant) {
                                     </span>
                                 </td>
                                 <td>${item.evaluation.dateEvaluation ? new Date(item.evaluation.dateEvaluation).toLocaleDateString('fr-CA') : '—'}</td>
+                                <td style="text-align: center;">
+                                    ${estRemplacee ? '' : `
+                                        <input type="checkbox"
+                                               ${item.evaluation.verrouillee ? 'checked' : ''}
+                                               onchange="basculerVerrouillageEvaluation('${item.evaluation.id}')"
+                                               title="Verrouiller/Déverrouiller">
+                                    `}
+                                </td>
                                 <td>
                                     ${estRemplacee ? `
                                         <span style="color: #999; font-size: 0.85rem; font-style: italic;">
                                             Évaluation archivée
                                         </span>
-                                    ` : item.evaluation.verrouillee ? `
-                                        <button class="btn btn-annuler btn-compact" onclick="deverrouillerEvaluation('${item.evaluation.id}')">
-                                            Déverrouiller
-                                        </button>
-                                        <button class="btn btn-supprimer btn-compact" disabled title="Déverrouillez d'abord pour supprimer">
-                                            Supprimer
-                                        </button>
                                     ` : `
-                                        <button class="btn btn-modifier btn-compact" onclick="modifierEvaluation('${item.evaluation.id}')">
+                                        <button class="btn btn-modifier btn-compact" onclick="modifierEvaluation('${item.evaluation.id}')" ${item.evaluation.verrouillee ? 'disabled' : ''}>
                                             Modifier
                                         </button>
-                                        <button class="btn btn-annuler btn-compact" onclick="verrouillerEvaluation('${item.evaluation.id}')">
-                                            Verrouiller
-                                        </button>
-                                        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${item.evaluation.id}')">
+                                        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${item.evaluation.id}')" ${item.evaluation.verrouillee ? 'disabled title="Déverrouillez d\'abord pour supprimer"' : ''}>
                                             Supprimer
                                         </button>
                                     `}
@@ -1431,11 +1430,13 @@ function genererDetailsEtudiant(etudiant) {
                                 <td>—</td>
                                 <td>—</td>
                                 <td>—</td>
+                                <td>—</td>
                                 <td>
                                     <span class="badge-statut">
                                         Non remis
                                     </span>
                                 </td>
+                                <td>—</td>
                                 <td>—</td>
                                 <td>
                                     <button class="btn btn-confirmer btn-compact" onclick="evaluerProduction('${etudiant.da}', '${item.production.id}')">
@@ -3065,9 +3066,12 @@ function afficherListeBanqueEvaluations(evaluations) {
                         <button class="btn btn-modifier btn-compact" onclick="chargerEvaluationDepuisBanque('${evaluation.id}')">
                             Charger
                         </button>
-                        <button class="btn btn-annuler btn-compact" onclick="basculerVerrouillageEvaluation('${evaluation.id}')">
-                            ${evaluation.verrouillee ? 'Déverrouiller' : 'Verrouiller'}
-                        </button>
+                        <label style="display: inline-flex; align-items: center; gap: 5px;">
+                            <input type="checkbox"
+                                   ${evaluation.verrouillee ? 'checked' : ''}
+                                   onchange="basculerVerrouillageEvaluation('${evaluation.id}')">
+                            <span style="font-size: 0.85rem;">🔒</span>
+                        </label>
                         <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluationBanque('${evaluation.id}')">
                             Supprimer
                         </button>
