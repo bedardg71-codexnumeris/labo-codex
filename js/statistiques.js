@@ -165,7 +165,7 @@ function chargerMaterielConfigure() {
  */
 function chargerInfosSysteme() {
     // Version (β = lettre grecque beta)
-    setStatText('stat-version', 'β 0.60');
+    setStatText('stat-version', 'β 0.72');
 
     // Poids des données
     let poidsTotal = 0;
