@@ -1,7 +1,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 0.71</title>
+    <title>Système de suivi Beta 1.0 - Support dépistage dual</title>
 
     <!-- AJOUTER CETTE LIGNE -->
     <link rel="stylesheet" href="styles.css">
@@ -1813,13 +1813,24 @@
                                     <select id="productionType" class="controle-form"
                                         onchange="gererChangementTypeProduction()">
                                         <option value="">Choisir...</option>
-                                        <option value="examen">Examen</option>
-                                        <option value="travail">Travail écrit</option>
-                                        <option value="quiz">Quiz/Test</option>
-                                        <option value="presentation">Présentation</option>
-                                        <option value="portfolio">📁 Portfolio (conteneur d'artefacts)</option>
-                                        <option value="artefact-portfolio">Artefact d'un portfolio</option>
-                                        <option value="autre">Autre</option>
+                                        <optgroup label="Évaluations sommatives (comptent dans la note)">
+                                            <option value="examen">Examen</option>
+                                            <option value="travail">Travail écrit</option>
+                                            <option value="quiz">Quiz/Test</option>
+                                            <option value="presentation">Présentation</option>
+                                            <option value="autre">Autre</option>
+                                        </optgroup>
+                                        <optgroup label="Évaluations formatives (ne comptent PAS dans la note)">
+                                            <option value="examen-formatif">Examen formatif</option>
+                                            <option value="travail-formatif">Travail formatif</option>
+                                            <option value="quiz-formatif">Quiz/Test formatif</option>
+                                            <option value="presentation-formatif">Présentation formative</option>
+                                            <option value="autre-formatif">Autre formatif</option>
+                                        </optgroup>
+                                        <optgroup label="Pratique Alternative de Notation (PAN)">
+                                            <option value="portfolio">📁 Portfolio (conteneur d'artefacts)</option>
+                                            <option value="artefact-portfolio">Artefact d'un portfolio</option>
+                                        </optgroup>
                                     </select>
                                 </div>
                                 <div class="groupe-form">
@@ -3519,47 +3530,31 @@ Exemple :
                         <!-- ==========================================
              SECTION : OPTIONS D'AFFICHAGE DES INDICES
              ========================================== -->
-                        <div id="optionsAffichageIndices" style="display: none; margin-top: 25px; padding: 15px; 
+                        <div id="optionsAffichageIndices" style="display: none; margin-top: 25px; padding: 15px;
              background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-moyen);">
 
                             <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">
-                                Affichage des indices au tableau de bord
+                                Affichage au tableau de bord
                             </h4>
 
                             <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
-                                Choisir quels types d'indices afficher dans le tableau de bord.
-                                Pour fins de recherche ou d'expérimentation, tu peux afficher les deux systèmes
-                                simultanément
-                                pour comparer les approches sommative et alternative.
+                                Par défaut, le tableau de bord affiche uniquement les indices de la pratique choisie ci-dessus.
+                                Pour fins de recherche ou d'expérimentation, tu peux activer le mode comparatif pour afficher
+                                <strong>les deux systèmes simultanément</strong> (SOM et PAN).
                             </p>
 
-                            <div style="display: flex; flex-direction: column; gap: 12px;">
-
-                                <!-- Option 1 : Indices sommatifs -->
-                                <label style="display: flex; align-items: start; gap: 10px; cursor: pointer; 
-                       padding: 10px; background: white; border-radius: 4px;">
-                                    <input type="checkbox" id="afficherSommatif" checked style="margin-top: 3px;">
-                                    <div>
-                                        <strong>Afficher les indices sommatifs</strong>
-                                        <div style="font-size: 0.8rem; color: #666; margin-top: 3px;">
-                                            Calcul sur toute la session (A, C, P globaux)
-                                        </div>
+                            <!-- Option : Mode comparatif -->
+                            <label style="display: flex; align-items: start; gap: 10px; cursor: pointer;
+                   padding: 12px; background: white; border-radius: 4px;">
+                                <input type="checkbox" id="modeComparatif" style="margin-top: 3px;">
+                                <div>
+                                    <strong>Activer le mode comparatif (expérimental)</strong>
+                                    <div style="font-size: 0.8rem; color: #666; margin-top: 3px;">
+                                        Affiche les indices SOM et PAN côte à côte pour comparer les deux approches
                                     </div>
-                                </label>
+                                </div>
+                            </label>
 
-                                <!-- Option 2 : Indices alternatifs PAN -->
-                                <label style="display: flex; align-items: start; gap: 10px; cursor: pointer; 
-                       padding: 10px; background: white; border-radius: 4px;">
-                                    <input type="checkbox" id="afficherAlternatif" style="margin-top: 3px;">
-                                    <div>
-                                        <strong>Afficher les indices alternatifs (PAN)</strong>
-                                        <div style="font-size: 0.8rem; color: #666; margin-top: 3px;">
-                                            Calcul sur 3 derniers cours (12h) et meilleurs artefacts
-                                        </div>
-                                    </div>
-                                </label>
-
-                            </div>
                         </div>
                         <!-- FIN SECTION OPTIONS AFFICHAGE -->
 
@@ -3666,29 +3661,1681 @@ Exemple :
                  =================================== -->
             <section id="section-aide" class="section">
 
-                <!-- Sous-section: Documentation -->
-                <div id="aide-documentation" class="sous-section">
-                    <h2>Documentation</h2>
-                    <p class="text-muted">Guide d'utilisation et ressources pédagogiques</p>
+                <!--LLM:OK_TO_EDIT -->
+                <!-- ===================================
+                     SOUS-SECTION 1: INTRODUCTION
+                     =================================== -->
+                <div id="aide-introduction" class="sous-section">
+                    <h2>Introduction au système de monitorage</h2>
+                    <p class="text-muted">« L'objectif est de faire mentir les prédictions de risque par nos interventions proactives ! »</p>
 
+                    <!-- Carte: Qu'est-ce que le monitorage -->
                     <div class="carte">
-                        <h3>Guide de monitorage</h3>
-                        <p>Documentation complète à venir.</p>
+                        <h3 class="carte-titre-bleu">Qu'est-ce que le monitorage pédagogique ?</h3>
+                        <p><strong>Le système transforme votre intuition pédagogique en intelligence prédictive.</strong></p>
+
+                        <p>Ce système formalise et systématise ce que tout enseignant fait intuitivement : observer ses étudiants, détecter les difficultés émergentes et ajuster ses interventions. Cette formalisation apporte :</p>
+
+                        <ul>
+                            <li><strong>Objectivité</strong> : Données factuelles plutôt qu'impressions</li>
+                            <li><strong>Systématicité</strong> : Suivi régulier et exhaustif</li>
+                            <li><strong>Prédictivité</strong> : Détection précoce des signaux faibles</li>
+                        </ul>
+
+                        <p><strong>Fondements théoriques :</strong></p>
+                        <ul>
+                            <li><strong>RàI (Réponse à l'Intervention)</strong> : Modèle adapté au collégial avec 3 niveaux d'intensification</li>
+                            <li><strong>Enseignement explicite</strong> : Efficacité et explicitation des stratégies</li>
+                            <li><strong>Taxonomie SOLO / Échelle IDME</strong> : Évaluation de la profondeur de compréhension</li>
+                        </ul>
+                    </div>
+
+                    <!-- Carte: Concepts clés A-C-P -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Les trois indices primaires (A-C-P)</h3>
+
+                        <div style="margin: 15px 0; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-moyen); border-radius: 4px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">A - Assiduité</h4>
+                            <p><strong>Présence en classe</strong> - Mesure l'engagement cognitif</p>
+                            <p style="font-size: 0.9em; color: #666;"><em>Module source : saisie-presences.js</em></p>
+                            <p>Les étudiants assidus sont davantage exposés au contenu, aux explications et aux pratiques guidées.</p>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-moyen); border-radius: 4px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">C - Complétion</h4>
+                            <p><strong>Remise des travaux</strong> - Mesure la mobilisation</p>
+                            <p style="font-size: 0.9em; color: #666;"><em>Module source : portfolio.js</em></p>
+                            <p>Reflète la constance et la persévérance dans les efforts, la régularité d'exécution et le respect des délais.</p>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-moyen); border-radius: 4px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">P - Performance</h4>
+                            <p><strong>Qualité des productions</strong> - Mesure la maîtrise</p>
+                            <p style="font-size: 0.9em; color: #666;"><em>Module source : portfolio.js</em></p>
+                            <p>Évaluée selon les critères SRPNF et l'échelle IDME, indique directement les compétences en lecture et écriture.</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Critères SRPNF -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Critères d'évaluation SRPNF</h3>
+                        <p>Inspirés de l'approche ELLAC (Enseignement de la Lecture Littéraire Au Collégial)</p>
+
+                        <table class="tableau">
+                            <thead>
+                                <tr>
+                                    <th>Critère</th>
+                                    <th style="text-align: center;">Pondération</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Structure</strong></td>
+                                    <td style="text-align: center;">15%</td>
+                                    <td>Organisation logique des idées</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Rigueur</strong></td>
+                                    <td style="text-align: center;">20%</td>
+                                    <td>Exhaustivité des observations</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Plausibilité</strong></td>
+                                    <td style="text-align: center;">10%</td>
+                                    <td>Crédibilité de l'interprétation</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Nuance</strong></td>
+                                    <td style="text-align: center;">25%</td>
+                                    <td>Qualité du raisonnement</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Français</strong></td>
+                                    <td style="text-align: center;">30%</td>
+                                    <td>Maîtrise linguistique</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Carte: Échelle IDME -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Taxonomie SOLO et échelle IDME</h3>
+                        <p>L'échelle IDME traduit la profondeur de compréhension selon la taxonomie SOLO :</p>
+
+                        <table class="tableau">
+                            <thead>
+                                <tr>
+                                    <th>IDME</th>
+                                    <th>SOLO</th>
+                                    <th style="text-align: center;">Score</th>
+                                    <th>Compréhension</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>I</strong> - Insuffisant</td>
+                                    <td>Préstructurel / Unistructurel</td>
+                                    <td style="text-align: center;">&lt; 2.0</td>
+                                    <td>Incompréhension ou superficielle</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>D</strong> - Développement</td>
+                                    <td>Multistructurel</td>
+                                    <td style="text-align: center;">2.0-2.999</td>
+                                    <td>Points pertinents sans liens</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>M</strong> - Maîtrisé</td>
+                                    <td>Relationnel</td>
+                                    <td style="text-align: center;">3.0-3.999</td>
+                                    <td>Compréhension globale avec liens</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>E</strong> - Étendu</td>
+                                    <td>Abstrait étendu</td>
+                                    <td style="text-align: center;">4.0</td>
+                                    <td>Transfert à autres contextes</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Carte: Architecture Single Source of Truth -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Architecture : Single Source of Truth</h3>
+                        <p><strong>Principe fondamental :</strong> Chaque donnée a UNE source unique qui la génère et la stocke. Les autres modules la lisent via localStorage.</p>
+
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 15px; font-family: monospace; font-size: 0.9em;">
+                            <p style="margin: 0; color: #28a745;"><strong>MODULE SOURCE</strong> (génère/stocke)</p>
+                            <p style="margin: 5px 0 5px 20px;">trimestre.js → calendrierComplet</p>
+                            <p style="margin: 5px 0 5px 20px;">saisie-presences.js → indicesAssiduiteDetailles</p>
+                            <p style="margin: 5px 0 5px 20px;">portfolio.js → indicesCP</p>
+
+                            <p style="margin: 15px 0 0 0; color: #007bff;"><strong>MODULE LECTEUR</strong> (lit/affiche)</p>
+                            <p style="margin: 5px 0 5px 20px;">calendrier-vue.js → lit calendrierComplet</p>
+                            <p style="margin: 5px 0 5px 20px;">tableau-bord-apercu.js → lit indices A, C, P</p>
+                            <p style="margin: 5px 0 5px 20px;">profil-etudiant.js → lit indices A, C, P</p>
+                        </div>
+
+                        <p style="margin-top: 15px;"><strong>Règle d'or :</strong> Les modules ne se parlent JAMAIS directement. Communication via localStorage uniquement.</p>
                     </div>
                 </div>
 
-                <!-- Sous-section: À propos -->
-                <div id="aide-a-propos" class="sous-section">
-                    <h2>À propos</h2>
-                    <p class="text-muted">Informations sur l'application</p>
+                <!-- ===================================
+                     SOUS-SECTION 2: CONFIGURATION
+                     =================================== -->
+                <div id="aide-configuration" class="sous-section">
+                    <h2>Configuration initiale (1ʳᵉ utilisation)</h2>
+                    <p class="text-muted">Guide pas-à-pas pour configurer votre système de monitorage</p>
 
+                    <!-- Carte: Vue d'ensemble -->
                     <div class="carte">
-                        <h3>Application de monitorage pédagogique</h3>
-                        <p>Version : Beta 1.0</p>
-                        <p>Développé par : Grégoire Bédard</p>
-                        <p>Licence : Creative Commons BY-NC-SA 4.0</p>
+                        <h3 class="carte-titre-bleu">Étapes de configuration</h3>
+                        <p>Suivez ces étapes dans l'ordre pour configurer correctement le système :</p>
+                        <ol style="line-height: 1.8;">
+                            <li><strong>Cours</strong> : Informations de base (code, titre, pondération)</li>
+                            <li><strong>Trimestre</strong> : Dates et calendrier complet (SOURCE)</li>
+                            <li><strong>Groupe</strong> : Liste des étudiants</li>
+                            <li><strong>Horaire</strong> : Séances hebdomadaires (en refonte)</li>
+                            <li><strong>Pratiques PAN</strong> : Nombre d'artefacts et jetons</li>
+                        </ol>
+                    </div>
+
+                    <!-- Carte: 1. Cours -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">1. Configurer le cours</h3>
+                        <p><strong>Navigation :</strong> Réglages → Cours</p>
+
+                        <p><strong>Informations à saisir :</strong></p>
+                        <ul>
+                            <li><strong>Code du cours</strong> : Ex. 601-101-MQ</li>
+                            <li><strong>Titre</strong> : Ex. Écriture et littérature</li>
+                            <li><strong>Pondération</strong> : Ex. 2-2-3</li>
+                            <li><strong>Heures/semaine</strong> : Ex. 4 heures</li>
+                            <li><strong>Format horaire</strong> : 2×2h, 3h ou 4h continu</li>
+                        </ul>
+
+                        <div class="alerte alerte-attention">
+                            <strong>Astuce :</strong> Le format horaire est important pour le calcul correct de l'assiduité.
+                        </div>
+                    </div>
+
+                    <!-- Carte: 2. Trimestre -->
+                    <div class="carte" style="border-left: 4px solid var(--succes);">
+                        <h3 class="carte-titre-bleu">2. Définir le trimestre - MODULE SOURCE</h3>
+                        <p><strong>Navigation :</strong> Réglages → Trimestre</p>
+                        <p style="color: var(--succes); font-weight: bold;">Ce module GÉNÈRE le calendrierComplet (source unique)</p>
+
+                        <p><strong>Informations à saisir :</strong></p>
+                        <ul>
+                            <li><strong>Date de début</strong> : Premier jour de cours</li>
+                            <li><strong>Date de fin</strong> : Dernier jour de cours</li>
+                            <li><strong>Jours fériés</strong> : Congés prévus</li>
+                            <li><strong>Congés imprévus</strong> : À ajouter en cours de trimestre</li>
+                            <li><strong>Reprises</strong> : Si nécessaire</li>
+                        </ul>
+
+                        <p><strong>Génération automatique :</strong></p>
+                        <ul>
+                            <li>Calendrier complet sur 124 jours</li>
+                            <li>Calcul automatique des semaines (5 jours cours = 1 semaine)</li>
+                            <li>Gestion des congés et reprises</li>
+                        </ul>
+
+                        <div class="alerte alerte-succes">
+                            <strong>API disponibles :</strong><br>
+                            <code>obtenirCalendrierComplet()</code> - Récupère le calendrier<br>
+                            <code>obtenirInfosJour(date)</code> - Détails d'une journée
+                        </div>
+                    </div>
+
+                    <!-- Carte: 3. Groupe -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">3. Créer le groupe</h3>
+                        <p><strong>Navigation :</strong> Réglages → Groupe</p>
+
+                        <p><strong>Informations à saisir pour chaque étudiant :</strong></p>
+                        <ul>
+                            <li><strong>Numéro DA</strong> : Dossier administratif</li>
+                            <li><strong>Nom</strong> : Nom de famille</li>
+                            <li><strong>Prénom</strong> : Prénom</li>
+                            <li><strong>Services adaptés (SA)</strong> : Si applicable</li>
+                            <li><strong>CAF</strong> : Centre d'Aide en Français (si inscrit)</li>
+                        </ul>
+
+                        <p><strong>Options d'import :</strong></p>
+                        <ul>
+                            <li>Saisie manuelle</li>
+                            <li>Import depuis fichier CSV (à venir)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Carte: 4. Horaire -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">4. Établir l'horaire</h3>
+                        <p><strong>Navigation :</strong> Réglages → Horaire</p>
+                        <div class="alerte alerte-attention">
+                            <strong>Module en refonte :</strong> À venir - génération de seancesCompletes comme source unique
+                        </div>
+
+                        <p><strong>Fonctionnalités prévues :</strong></p>
+                        <ul>
+                            <li>Définition des séances hebdomadaires</li>
+                            <li>Gestion des reprises (ex: "Horaire du lundi" le jeudi)</li>
+                            <li>API : <code>obtenirSeancesCompletes()</code></li>
+                        </ul>
+                    </div>
+
+                    <!-- Carte: 5. Pratiques PAN -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">5. Paramétrer les pratiques (PAN)</h3>
+                        <p><strong>Navigation :</strong> Réglages → Pratique de notation</p>
+
+                        <p><strong>Paramètres à définir :</strong></p>
+                        <ul>
+                            <li><strong>Nombre d'artefacts</strong> : 8-14 recommandé
+                                <ul style="margin-top: 5px;">
+                                    <li>8 artefacts : Pour enseignants débutants</li>
+                                    <li>12 artefacts : Configuration standard</li>
+                                    <li>14 artefacts : Pour enseignants expérimentés</li>
+                                </ul>
+                            </li>
+                            <li><strong>Système de jetons</strong> : 3-4 jetons maximum
+                                <ul style="margin-top: 5px;">
+                                    <li>Jeton de délai : Report d'échéance sans pénalité</li>
+                                    <li>Jeton de reprise : Possibilité de refaire un artefact</li>
+                                </ul>
+                            </li>
+                            <li><strong>Méthode de sélection</strong> : N meilleurs artefacts (PAN)</li>
+                        </ul>
+
+                        <div class="alerte alerte-information">
+                            <strong>PAN (Pratiques Alternatives de Notation) :</strong> Sélection automatique des N meilleurs artefacts pour l'évaluation finale, permettant aux étudiants de progresser sans pénaliser leurs erreurs initiales.
+                        </div>
+                    </div>
+
+                    <!-- Carte: Checklist -->
+                    <div class="carte" style="background: var(--bleu-tres-pale);">
+                        <h3 class="carte-titre-bleu">Checklist de configuration</h3>
+                        <p>Avant de commencer à utiliser le système, assurez-vous d'avoir complété :</p>
+                        <ul style="list-style: none; padding-left: 0;">
+                            <li style="padding: 8px 0;">[ ] Informations du cours saisies</li>
+                            <li style="padding: 8px 0;">[ ] Calendrier du trimestre généré</li>
+                            <li style="padding: 8px 0;">[ ] Liste des étudiants importée/saisie</li>
+                            <li style="padding: 8px 0;">[ ] Horaire défini (si disponible)</li>
+                            <li style="padding: 8px 0;">[ ] Pratiques PAN paramétrées</li>
+                        </ul>
+                        <p style="margin-top: 15px; font-weight: bold; color: var(--bleu-principal);">→ Vous êtes prêt à commencer le suivi hebdomadaire !</p>
                     </div>
                 </div>
+
+                <!-- ===================================
+                     SOUS-SECTION 3: UTILISATION HEBDOMADAIRE
+                     =================================== -->
+                <div id="aide-utilisation" class="sous-section">
+                    <h2>Utilisation hebdomadaire</h2>
+                    <p class="text-muted">Routine de saisie et flux de travail (5-15 min/semaine)</p>
+
+                    <!-- Carte: Vue d'ensemble -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Flux de travail hebdomadaire</h3>
+                        <p><strong>Temps estimé :</strong> 5-15 minutes par semaine</p>
+
+                        <div style="background: linear-gradient(90deg, var(--bleu-pale) 0%, var(--bleu-tres-pale) 100%); padding: 20px; border-radius: 8px; margin-top: 15px;">
+                            <p style="font-size: 1.1em; font-weight: bold; color: var(--bleu-principal); margin-bottom: 15px;">Étapes recommandées :</p>
+                            <ol style="line-height: 2;">
+                                <li><strong>Pendant/après le cours</strong> : Noter les absences/retards</li>
+                                <li><strong>Fin de cours</strong> : Saisir les présences (2-5 min)</li>
+                                <li><strong>Vérification automatique</strong> : Observer les changements d'indices</li>
+                                <li><strong>Action si nécessaire</strong> : Intervenir si seuils critiques atteints</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Saisir les présences -->
+                    <div class="carte" style="border-left: 4px solid var(--succes);">
+                        <h3 class="carte-titre-bleu">1. Saisir les présences - MODULE SOURCE</h3>
+                        <p><strong>Navigation :</strong> Présences → Saisie</p>
+                        <p style="color: var(--succes); font-weight: bold;">Ce module GÉNÈRE les indicesAssiduiteDetailles (source unique)</p>
+
+                        <p><strong>Interface de saisie rapide :</strong></p>
+                        <ul>
+                            <li><strong>Format 2×2h</strong> : Saisir 2h par bloc (ou 1h/0h si partiel/absent)</li>
+                            <li><strong>Retards</strong> : Décompter proportionnellement
+                                <ul style="margin-top: 5px;">
+                                    <li>Ex: 20 min de retard sur 2h = 1.7h</li>
+                                </ul>
+                            </li>
+                            <li><strong>Départs anticipés</strong> : Décompter de même</li>
+                            <li><strong>Absences justifiées</strong> : Même traitement (le système ne distingue pas)</li>
+                        </ul>
+
+                        <p><strong>Cas particulier - Reprises :</strong></p>
+                        <ul>
+                            <li>Si un étudiant rattrape dans un autre groupe : additionner les heures</li>
+                            <li>Ex: 2h cours officiel + 2h reprise = 4h dans la cellule</li>
+                        </ul>
+
+                        <div class="alerte alerte-succes">
+                            <strong>Calcul automatique :</strong> Le système génère immédiatement les indices d'assiduité (A) qui alimentent tous les diagnostics.
+                        </div>
+
+                        <p><strong>Périodes configurables :</strong></p>
+                        <ul>
+                            <li>Assiduité sommative : sur tout le trimestre</li>
+                            <li>Assiduité alternative : sur les 3, 7 ou 12 derniers artefacts</li>
+                        </ul>
+                    </div>
+
+                    <!-- Carte: Évaluer les productions -->
+                    <div class="carte" style="border-left: 4px solid var(--succes);">
+                        <h3 class="carte-titre-bleu">2. Évaluer les productions - MODULE SOURCE</h3>
+                        <p><strong>Navigation :</strong> Portfolio → Évaluation</p>
+                        <p style="color: var(--succes); font-weight: bold;">Ce module GÉNÈRE les indicesCP (Complétion & Performance)</p>
+
+                        <p><strong>Processus d'évaluation :</strong></p>
+                        <ol style="line-height: 1.8;">
+                            <li><strong>Lecture et annotation</strong> : Lire le travail de l'étudiant</li>
+                            <li><strong>Attribution notes SRPNF</strong> : Noter selon les 5 critères (échelle 1-4)</li>
+                            <li><strong>Comptage erreurs</strong> : Saisir le nombre d'erreurs linguistiques</li>
+                            <li><strong>Confirmation mots</strong> : Vérifier le nombre de mots</li>
+                            <li><strong>Diagnostic automatique</strong> : Observer forces/défis/parcours</li>
+                            <li><strong>Rétroaction personnalisée</strong> : Basée sur les diagnostics</li>
+                        </ol>
+
+                        <p><strong>Temps estimé :</strong> 15-30 min par production (selon complexité)</p>
+
+                        <div class="alerte alerte-succes">
+                            <strong>Génération automatique :</strong>
+                            <ul style="margin: 10px 0 0 0;">
+                                <li>Indices C (Complétion) : % d'artefacts remis</li>
+                                <li>Indices P (Performance) : Qualité moyenne des productions</li>
+                                <li>Historique longitudinal : Évolution dans le temps</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Gérer les jetons -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">3. Gérer les jetons</h3>
+                        <p><strong>Navigation :</strong> Portfolio → Gestion</p>
+
+                        <p><strong>Types de jetons :</strong></p>
+                        <ul>
+                            <li><strong>Jeton de délai</strong> : Report d'échéance sans pénalité
+                                <ul style="margin-top: 5px;">
+                                    <li>À utiliser pour gérer les imprévus</li>
+                                    <li>Maintient l'exigence de complétion</li>
+                                </ul>
+                            </li>
+                            <li><strong>Jeton de reprise</strong> : Possibilité de refaire un artefact
+                                <ul style="margin-top: 5px;">
+                                    <li>Encourage l'amélioration continue</li>
+                                    <li>Philosophie PAN : apprendre de ses erreurs</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <p><strong>Suivi automatique :</strong> Le système compte automatiquement les jetons utilisés (maximum 3-4 selon configuration).</p>
+
+                        <div class="alerte alerte-attention">
+                            <strong>Bonnes pratiques :</strong> Expliquer clairement le système de jetons aux étudiants dès le début du trimestre.
+                        </div>
+                    </div>
+
+                    <!-- Carte: Vérification hebdomadaire -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">4. Vérification hebdomadaire</h3>
+                        <p><strong>Navigation :</strong> Tableau de bord → Aperçu</p>
+
+                        <p><strong>Indices à surveiller :</strong></p>
+                        <ul>
+                            <li><strong>Assiduité (AE/AI)</strong> : Sommative et alternative (3 derniers cours)</li>
+                            <li><strong>Complétion (C)</strong> : % d'artefacts remis</li>
+                            <li><strong>Performance (P)</strong> : Qualité moyenne</li>
+                            <li><strong>Risque (R)</strong> : Calcul automatique 1-(A×C×P)</li>
+                        </ul>
+
+                        <p><strong>Seuils d'alerte critiques :</strong></p>
+                        <table class="tableau">
+                            <thead>
+                                <tr>
+                                    <th>Indice</th>
+                                    <th style="text-align: center;">Seuil critique</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Assiduité</td>
+                                    <td style="text-align: center;">&lt; 70%</td>
+                                    <td>Rencontre immédiate</td>
+                                </tr>
+                                <tr>
+                                    <td>Complétion</td>
+                                    <td style="text-align: center;">&lt; 70%</td>
+                                    <td>Investigation obstacles</td>
+                                </tr>
+                                <tr>
+                                    <td>Performance</td>
+                                    <td style="text-align: center;">&lt; 60%</td>
+                                    <td>Soutien pédagogique</td>
+                                </tr>
+                                <tr>
+                                    <td>Risque</td>
+                                    <td style="text-align: center;">&gt; 50%</td>
+                                    <td>Plan d'intervention personnalisé</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="alerte alerte-erreur">
+                            <strong>Détérioration récente :</strong> Comparer les indices sommatifs et alternatifs pour détecter les changements récents, même chez des étudiants au bilan global acceptable.
+                        </div>
+                    </div>
+
+                    <!-- Carte: Temps estimés -->
+                    <div class="carte" style="background: var(--bleu-tres-pale);">
+                        <h3 class="carte-titre-bleu">Temps estimés par activité</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="background: white;">
+                                <td style="padding: 10px; border-bottom: 1px solid var(--bleu-leger);"><strong>Saisie présences</strong></td>
+                                <td style="padding: 10px; text-align: right; border-bottom: 1px solid var(--bleu-leger);">2-5 min</td>
+                            </tr>
+                            <tr style="background: white;">
+                                <td style="padding: 10px; border-bottom: 1px solid var(--bleu-leger);"><strong>Évaluation production</strong></td>
+                                <td style="padding: 10px; text-align: right; border-bottom: 1px solid var(--bleu-leger);">15-30 min/production</td>
+                            </tr>
+                            <tr style="background: white;">
+                                <td style="padding: 10px; border-bottom: 1px solid var(--bleu-leger);"><strong>Gestion jetons</strong></td>
+                                <td style="padding: 10px; text-align: right; border-bottom: 1px solid var(--bleu-leger);">1-2 min</td>
+                            </tr>
+                            <tr style="background: white;">
+                                <td style="padding: 10px;"><strong>Vérification hebdomadaire</strong></td>
+                                <td style="padding: 10px; text-align: right;">3-5 min</td>
+                            </tr>
+                        </table>
+                        <p style="margin-top: 15px; font-weight: bold; color: var(--bleu-principal);">Total hebdomadaire (hors évaluations) : 5-15 minutes</p>
+                    </div>
+                </div>
+
+                <!-- ===================================
+                     SOUS-SECTION 4: CONSULTATION
+                     =================================== -->
+                <div id="aide-consultation" class="sous-section">
+                    <h2>Consultation et interprétation</h2>
+                    <p class="text-muted">Prendre des décisions basées sur les données</p>
+
+                    <!-- Carte: Tableau de bord Aperçu -->
+                    <div class="carte" style="border-left: 4px solid #007bff;">
+                        <h3 class="carte-titre-bleu">Tableau de bord → Aperçu - LECTEUR</h3>
+                        <p><strong>Navigation :</strong> Tableau de bord → Aperçu</p>
+                        <p style="color: #007bff; font-weight: bold;">Ce module LIT indicesAssiduiteDetailles et indicesCP</p>
+
+                        <p><strong>Vue d'ensemble :</strong></p>
+                        <ul>
+                            <li>Liste complète de tous les étudiants</li>
+                            <li>Indices A-C-P en un coup d'œil</li>
+                            <li>Codes couleur pour identification rapide des risques</li>
+                            <li>Filtres par niveau de risque (à venir)</li>
+                        </ul>
+
+                        <p><strong>Action :</strong> Identifier rapidement qui nécessite une intervention.</p>
+
+                        <div class="alerte alerte-information">
+                            <strong>Rechargement automatique :</strong> Les données se mettent à jour automatiquement après chaque saisie.
+                        </div>
+                    </div>
+
+                    <!-- Carte: Profil étudiant -->
+                    <div class="carte" style="border-left: 4px solid #007bff;">
+                        <h3 class="carte-titre-bleu">Profil étudiant (détaillé) - LECTEUR</h3>
+                        <p><strong>Navigation :</strong> Tableau de bord → Profil</p>
+                        <p style="color: #007bff; font-weight: bold;">Ce module LIT toutes les sources de données</p>
+
+                        <p><strong>Layout 2 colonnes :</strong></p>
+                        <ul>
+                            <li><strong>Sidebar gauche</strong> : Navigation Précédent/Suivant entre étudiants</li>
+                            <li><strong>Zone principale</strong> : 3 sections structurées</li>
+                        </ul>
+
+                        <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <h4 style="color: var(--bleu-principal);">Section 1 : Suivi de l'apprentissage</h4>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>Indices R (Risque)</strong> : Sommaire et alternatif (1-A×C×P)</li>
+                                <li><strong>RàI (Niveau d'intervention)</strong> : 1, 2 ou 3</li>
+                                <li><strong>Échelle de risque visuelle</strong> : Gradient 6 niveaux avec indicateur de position</li>
+                                <li><strong>Recommandations</strong> : Selon niveau de risque</li>
+                            </ul>
+                        </div>
+
+                        <div style="margin-top: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <h4 style="color: var(--bleu-principal);">Section 2 : Développement des habiletés</h4>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>Performance SRPNF</strong> : Détail par critère (S, R, P, N, F)</li>
+                                <li><strong>Forces identifiées</strong> : Critères ≥ 2.85</li>
+                                <li><strong>Défis identifiés</strong> : Critères &lt; 2.85</li>
+                                <li><strong>Diagnostic pattern</strong> : Stable / Défi spécifique / Blocage émergent / Blocage critique</li>
+                            </ul>
+                        </div>
+
+                        <div style="margin-top: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <h4 style="color: var(--bleu-principal);">Section 3 : Mobilisation</h4>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>Assiduité (A)</strong> : Sommative et alternative avec interprétation</li>
+                                <li><strong>Complétion (C)</strong> : % d'artefacts remis</li>
+                                <li><strong>Historique artefacts</strong> : Notes et évolution</li>
+                                <li><strong>Toggles</strong> : Détails techniques et formules (masquables)</li>
+                            </ul>
+                        </div>
+
+                        <p style="margin-top: 15px;"><strong>Navigation intuitive :</strong> Boutons centrés Précédent/Suivant pour parcourir rapidement tous les profils.</p>
+                    </div>
+
+                    <!-- Carte: Interpréter les seuils -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Interpréter les diagnostics</h3>
+                        <p><strong>Seuils harmonisés A/C/M :</strong> 70%, 80%, 85%</p>
+
+                        <table class="tableau">
+                            <thead>
+                                <tr>
+                                    <th>Niveau</th>
+                                    <th style="text-align: center;">Seuil</th>
+                                    <th>Interprétation</th>
+                                    <th>Action RàI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong style="color: #28a745;">Favorable</strong></td>
+                                    <td style="text-align: center;">≥ 85%</td>
+                                    <td>Excellent engagement et performance</td>
+                                    <td>Niveau 1 - Enseignement universel</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: #17a2b8;">Acceptable</strong></td>
+                                    <td style="text-align: center;">80-84%</td>
+                                    <td>Bonne progression, surveiller</td>
+                                    <td>Niveau 1 - Suivi régulier</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: #ffc107;">Fragile</strong></td>
+                                    <td style="text-align: center;">70-79%</td>
+                                    <td>Situation précaire, intervention ciblée</td>
+                                    <td>Niveau 2 - Soutien ciblé</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: #dc3545;">Critique</strong></td>
+                                    <td style="text-align: center;">&lt; 70%</td>
+                                    <td>Situation alarmante, action urgente</td>
+                                    <td>Niveau 3 - Intervention intensive</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Carte: Patterns d'apprentissage -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Patterns d'apprentissage</h3>
+                        <p>Le système identifie automatiquement 4 patterns selon la performance moyenne IDME et les défis identifiés :</p>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #d4edda; border-left: 4px solid #28a745; border-radius: 4px;">
+                            <h4 style="color: #28a745; margin-bottom: 10px;">Stable</h4>
+                            <p><strong>Critères :</strong> Performance &gt; 3.0 OU aucun défi majeur</p>
+                            <p><strong>Intervention :</strong> RàI Niveau 1 - Enseignement universel avec suivi</p>
+                            <p><strong>Action :</strong> Maintenir l'engagement, possibilités d'enrichissement</p>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                            <h4 style="color: #856404; margin-bottom: 10px;">Défi spécifique</h4>
+                            <p><strong>Critères :</strong> Performance ≤ 3.0 avec défis identifiés</p>
+                            <p><strong>Intervention :</strong> RàI Niveau 2 - Soutien ciblé en petit groupe</p>
+                            <p><strong>Action :</strong> Pratique guidée en s'appuyant sur les forces</p>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #f8d7da; border-left: 4px solid #dc3545; border-radius: 4px;">
+                            <h4 style="color: #dc3545; margin-bottom: 10px;">Blocage émergent</h4>
+                            <p><strong>Critères :</strong> Performance ≤ 2.0 avec défis identifiés</p>
+                            <p><strong>Intervention :</strong> RàI Niveau 2 - Intervention intensive personnalisée</p>
+                            <p><strong>Action :</strong> Remédiation ciblée sur le critère en difficulté</p>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #721c24; color: white; border-left: 4px solid #8B0000; border-radius: 4px;">
+                            <h4 style="color: white; margin-bottom: 10px;">Blocage critique</h4>
+                            <p><strong>Critères :</strong> Performance ≤ 1.5</p>
+                            <p><strong>Intervention :</strong> RàI Niveau 3 - Intervention très intensive ou spécialisée</p>
+                            <p><strong>Action :</strong> Rencontre individuelle + CAF + Dépistage + Services adaptés si nécessaire</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Guide détaillé du profil étudiant (Phase 2) -->
+                    <div class="carte" style="background: #f0f8ff;">
+                        <h3 class="carte-titre-bleu">Guide détaillé : Profil étudiant</h3>
+
+                        <p style="margin-bottom: 20px;">Le profil étudiant est l'outil central de diagnostic et d'intervention. Il est organisé en 3 grandes sections, chacune fournissant des informations complémentaires pour une vision complète de la progression de l'étudiant.</p>
+
+                        <div class="alerte alerte-info">
+                            <strong>Accès :</strong> Tableau de bord → Profil OU Tableau de bord → Liste des individus → Cliquer sur un nom
+                        </div>
+
+                        <hr style="margin: 25px 0; border: none; border-top: 2px solid var(--bleu-pale);">
+
+                        <h4 style="color: var(--bleu-principal); margin-top: 25px; margin-bottom: 15px;">Section 1 : Suivi de l'apprentissage</h4>
+
+                        <p><strong>Cette section affiche :</strong></p>
+                        <ul>
+                            <li><strong>Indice de risque (R)</strong> avec valeur en gros caractères</li>
+                            <li><strong>Échelle de risque visuelle</strong> : gradient à 6 niveaux avec indicateur de position</li>
+                            <li><strong>Indice RàI</strong> : niveau d'intervention recommandé (Universel / Ciblé / Intensif)</li>
+                            <li><strong>Recommandations d'intervention</strong> : actions concrètes adaptées au niveau</li>
+                        </ul>
+
+                        <div style="margin: 20px 0; padding: 15px; background: white; border: 2px solid var(--bleu-moyen); border-radius: 6px;">
+                            <h5 style="color: var(--bleu-principal); margin-top: 0;">Comment interpréter l'échelle de risque ?</h5>
+                            <p>L'échelle visuelle affiche 6 zones de couleur, du vert foncé (Excellent ≥85%) au rouge foncé (Échec probable &lt;40%). Un indicateur triangulaire pointe vers la position exacte de l'étudiant.</p>
+
+                            <table class="tableau" style="margin-top: 10px; font-size: 0.9em;">
+                                <thead>
+                                    <tr>
+                                        <th>Position</th>
+                                        <th>Couleur</th>
+                                        <th>Interprétation</th>
+                                        <th>Action immédiate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="font-weight: bold;">Zone verte foncée</td>
+                                        <td>85-100%</td>
+                                        <td>Excellent, autonome</td>
+                                        <td>Valoriser, offrir enrichissements</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: bold;">Zone verte claire</td>
+                                        <td>70-84%</td>
+                                        <td>Bon, progression normale</td>
+                                        <td>Suivi régulier, RàI niveau 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: bold;">Zone jaune</td>
+                                        <td>60-69%</td>
+                                        <td>Fragile, surveiller</td>
+                                        <td>Interventions ciblées, RàI niveau 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: bold;">Zone orange</td>
+                                        <td>50-59%</td>
+                                        <td>À risque sérieux</td>
+                                        <td>Plan d'action, RàI niveau 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: bold;">Zone rouge claire</td>
+                                        <td>40-49%</td>
+                                        <td>Critique, échec probable</td>
+                                        <td>RàI niveau 3, rencontre urgente</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: bold;">Zone rouge foncée</td>
+                                        <td>&lt; 40%</td>
+                                        <td>Échec très probable</td>
+                                        <td>Référer aux services, CAF</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #fffacd; border-left: 4px solid #ffd700; border-radius: 4px;">
+                            <h5 style="color: #856404; margin-top: 0;">Astuce : Toggle «Détails techniques»</h5>
+                            <p>Cliquez sur ce bouton pour afficher :</p>
+                            <ul style="margin: 5px 0 0 20px;">
+                                <li>La formule exacte de calcul de R : (2×A + C + P) / 4</li>
+                                <li>Les valeurs numériques des indices primaires A, C, P</li>
+                                <li>Les seuils précis utilisés pour déterminer le niveau RàI</li>
+                            </ul>
+                            <p style="margin-top: 10px;"><strong>Utilité :</strong> Expliquer le calcul à un étudiant ou justifier une intervention auprès d'un service.</p>
+                        </div>
+
+                        <hr style="margin: 25px 0; border: none; border-top: 2px solid var(--bleu-pale);">
+
+                        <h4 style="color: var(--bleu-principal); margin-top: 25px; margin-bottom: 15px;">Section 2 : Développement des habiletés et compétences</h4>
+
+                        <p><strong>Cette section affiche :</strong></p>
+                        <ul>
+                            <li><strong>Performance IDME</strong> : niveau moyen selon l'échelle (I/D/M/E)</li>
+                            <li><strong>Scores par critère SRPNF</strong> : tableau détaillé avec badges colorés</li>
+                            <li><strong>Diagnostic pédagogique</strong> : forces et défis identifiés automatiquement</li>
+                        </ul>
+
+                        <div style="margin: 20px 0; padding: 15px; background: white; border: 2px solid var(--bleu-moyen); border-radius: 6px;">
+                            <h5 style="color: var(--bleu-principal); margin-top: 0;">Comment lire le tableau SRPNF ?</h5>
+                            <p>Le tableau présente 5 lignes (un critère par ligne) avec 3 colonnes :</p>
+
+                            <ol>
+                                <li><strong>Critère</strong> : Nom du critère avec sa pondération (ex: Structure 15%)</li>
+                                <li><strong>Score pondéré</strong> : Moyenne pondérée des évaluations (ex: 0.72)</li>
+                                <li><strong>Niveau IDME</strong> : Badge coloré indiquant le niveau atteint
+                                    <ul style="margin-top: 5px;">
+                                        <li>Badge rouge : Insuffisant (&lt; .64)</li>
+                                        <li>Badge orange : Développement (.65-.74)</li>
+                                        <li>Badge bleu : Maîtrisé (.75-.84)</li>
+                                        <li>Badge vert : Étendu (≥ .85)</li>
+                                    </ul>
+                                </li>
+                            </ol>
+
+                            <p style="margin-top: 15px;"><strong>Exemple d'interprétation :</strong></p>
+                            <div style="background: #f8f9fa; padding: 10px; border-radius: 4px; margin-top: 10px; font-family: monospace; font-size: 0.85em;">
+                                Structure (15%) : 0.68 [Badge orange : Développement]<br>
+                                Rigueur (20%)   : 0.72 [Badge orange : Développement]<br>
+                                Plausibilité (10%) : 0.80 [Badge bleu : Maîtrisé]<br>
+                                Nuance (25%)    : 0.58 [Badge rouge : Insuffisant]<br>
+                                Français (30%)  : 0.75 [Badge bleu : Maîtrisé]
+                            </div>
+
+                            <p style="margin-top: 10px;"><strong>→ Diagnostic :</strong> Forces en Plausibilité et Français (maîtrisés). Défi majeur en Nuance (insuffisant). Structure et Rigueur en développement.</p>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: white; border: 2px solid var(--bleu-moyen); border-radius: 6px;">
+                            <h5 style="color: var(--bleu-principal); margin-top: 0;">Comment utiliser le diagnostic pédagogique ?</h5>
+
+                            <p>Le diagnostic automatique identifie :</p>
+                            <ul>
+                                <li><strong>Forces</strong> : Critères ≥ .75 (Maîtrisé ou Étendu)</li>
+                                <li><strong>Défis</strong> : Critères &lt; .75 (Insuffisant ou Développement)</li>
+                            </ul>
+
+                            <p style="margin-top: 15px;"><strong>Stratégies d'intervention différenciée :</strong></p>
+
+                            <table class="tableau" style="margin-top: 10px;">
+                                <thead>
+                                    <tr>
+                                        <th>Situation</th>
+                                        <th>Approche recommandée</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Défi Insuffisant (&lt; .64)</strong></td>
+                                        <td>
+                                            • Remédiation intensive individuelle<br>
+                                            • Enseignement explicite du critère<br>
+                                            • Pratique guidée avec rétroaction immédiate<br>
+                                            • Référer aux services d'aide si blocage persistant
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Défi Développement (.65-.74)</strong></td>
+                                        <td>
+                                            • Pratique guidée additionnelle<br>
+                                            • S'appuyer sur les forces pour consolider<br>
+                                            • Exercices ciblés sur le critère<br>
+                                            • Rétroaction formative fréquente
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Force Maîtrisée (.75-.84)</strong></td>
+                                        <td>
+                                            • Valoriser et encourager<br>
+                                            • Proposer transfert à d'autres contextes<br>
+                                            • Tutorat par les pairs (si applicable)<br>
+                                            • Maintenir avec pratique autonome
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Force Étendue (≥ .85)</strong></td>
+                                        <td>
+                                            • Enrichissement et approfondissement<br>
+                                            • Tâches complexes et créatives<br>
+                                            • Mentorat des pairs<br>
+                                            • Autonomie accrue
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #fffacd; border-left: 4px solid #ffd700; border-radius: 4px;">
+                            <h5 style="color: #856404; margin-top: 0;">Astuce : Toggle «Voir formules»</h5>
+                            <p>Affiche les formules exactes de calcul pour chaque critère :</p>
+                            <ul style="margin: 5px 0 0 20px;">
+                                <li>Score pondéré = (Score1 × Pond1 + Score2 × Pond2 + ...) / Σ Pondérations</li>
+                                <li>Seuils IDME pour chaque niveau (I/D/M/E)</li>
+                                <li>Nombre d'évaluations prises en compte dans la moyenne</li>
+                            </ul>
+                        </div>
+
+                        <hr style="margin: 25px 0; border: none; border-top: 2px solid var(--bleu-pale);">
+
+                        <h4 style="color: var(--bleu-principal); margin-top: 25px; margin-bottom: 15px;">Section 3 : Mobilisation (A-C-P)</h4>
+
+                        <p><strong>Cette section affiche :</strong></p>
+                        <ul>
+                            <li><strong>Assiduité (A)</strong> : Taux de présence + interprétation (Acceptable/Confortable/Maîtrisé)</li>
+                            <li><strong>Complétion (C)</strong> : Taux de remise des travaux + interprétation</li>
+                            <li><strong>Liste des artefacts</strong> : Tableau détaillé de toutes les productions évaluées</li>
+                        </ul>
+
+                        <div style="margin: 20px 0; padding: 15px; background: white; border: 2px solid var(--bleu-moyen); border-radius: 6px;">
+                            <h5 style="color: var(--bleu-principal); margin-top: 0;">Comment interpréter les indices A et C ?</h5>
+
+                            <p>Les deux indices utilisent les mêmes seuils harmonisés :</p>
+
+                            <table class="tableau" style="margin-top: 10px;">
+                                <thead>
+                                    <tr>
+                                        <th>Seuil</th>
+                                        <th>Interprétation</th>
+                                        <th>Badge</th>
+                                        <th>Signification</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>≥ 85%</td>
+                                        <td>Maîtrisé</td>
+                                        <td style="color: #28a745; font-weight: bold;">Vert</td>
+                                        <td>Engagement excellent, aucune inquiétude</td>
+                                    </tr>
+                                    <tr>
+                                        <td>80-84%</td>
+                                        <td>Confortable</td>
+                                        <td style="color: #17a2b8; font-weight: bold;">Bleu</td>
+                                        <td>Bon engagement, surveiller pour maintenir</td>
+                                    </tr>
+                                    <tr>
+                                        <td>70-79%</td>
+                                        <td>Acceptable</td>
+                                        <td style="color: #ffc107; font-weight: bold;">Jaune</td>
+                                        <td>Engagement minimal, attention requise</td>
+                                    </tr>
+                                    <tr>
+                                        <td>&lt; 70%</td>
+                                        <td>Insuffisant</td>
+                                        <td style="color: #dc3545; font-weight: bold;">Rouge</td>
+                                        <td>Mobilisation problématique, intervention</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <p style="margin-top: 15px;"><strong>Exemples de profils :</strong></p>
+                            <ul>
+                                <li><strong>A=95%, C=90%</strong> → Étudiant très mobilisé, présent et productif</li>
+                                <li><strong>A=85%, C=65%</strong> → Présent mais ne remet pas tous les travaux (procrastination ?)</li>
+                                <li><strong>A=60%, C=85%</strong> → Absent souvent mais remet les travaux (maladie ? travail ?)</li>
+                                <li><strong>A=55%, C=50%</strong> → Désengagement généralisé, intervention urgente</li>
+                            </ul>
+                        </div>
+
+                        <div style="margin: 20px 0; padding: 15px; background: white; border: 2px solid var(--bleu-moyen); border-radius: 6px;">
+                            <h5 style="color: var(--bleu-principal); margin-top: 0;">Comment lire le tableau des artefacts ?</h5>
+
+                            <p>Le tableau affiche une ligne par production évaluée avec :</p>
+                            <ol>
+                                <li><strong>Production</strong> : Nom de l'évaluation (ex: Dissertation 1, Examen mi-session)</li>
+                                <li><strong>Statut</strong> : Complété ✓ (vert) ou Non complété ✗ (rouge)</li>
+                                <li><strong>Score</strong> : Note sur 4 selon l'échelle IDME (ex: 2.8)</li>
+                                <li><strong>Niveau IDME</strong> : Badge coloré (I/D/M/E)</li>
+                                <li><strong>Retenu PAN</strong> : ★ si l'artefact compte dans la note finale du portfolio</li>
+                            </ol>
+
+                            <div class="alerte alerte-info" style="margin-top: 15px;">
+                                <strong>ℹ️ Astuce :</strong> Les artefacts marqués d'une étoile ★ sont ceux sélectionnés automatiquement par les règles PAN (les N meilleurs). Si un étudiant a 9 artefacts mais que seuls les 3 meilleurs comptent, seuls ces 3 auront l'étoile.
+                            </div>
+
+                            <p style="margin-top: 15px;"><strong>Actions possibles depuis ce tableau :</strong></p>
+                            <ul>
+                                <li>Identifier rapidement les travaux non remis</li>
+                                <li>Voir la progression de la performance dans le temps</li>
+                                <li>Vérifier quels artefacts comptent réellement pour la note (★)</li>
+                                <li>Détecter des patterns (ex: toujours faible en Structure)</li>
+                            </ul>
+                        </div>
+
+                        <hr style="margin: 25px 0; border: none; border-top: 2px solid var(--bleu-pale);">
+
+                        <h4 style="color: var(--bleu-principal); margin-top: 25px; margin-bottom: 15px;">Navigation entre étudiants</h4>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid var(--bleu-moyen); border-radius: 4px;">
+                            <p>Les boutons <strong>« ← Précédent »</strong> et <strong>« Suivant → »</strong> en haut de la page permettent de naviguer rapidement entre les profils sans retourner à la liste.</p>
+
+                            <p style="margin-top: 10px;"><strong>Workflow recommandé pour révision complète :</strong></p>
+                            <ol>
+                                <li>Aller dans Tableau de bord → Liste des individus</li>
+                                <li>Cliquer sur le premier étudiant</li>
+                                <li>Consulter les 3 sections du profil</li>
+                                <li>Prendre des notes d'intervention si nécessaire</li>
+                                <li>Cliquer «Suivant →» pour passer au prochain</li>
+                                <li>Répéter jusqu'au dernier étudiant</li>
+                            </ol>
+
+                            <div class="alerte alerte-succes" style="margin-top: 15px;">
+                                <strong>✓ Astuce :</strong> Les boutons sont désactivés visuellement (grisés) quand vous êtes au premier ou au dernier étudiant de la liste. Le curseur change pour indiquer qu'ils ne sont pas cliquables.
+                            </div>
+                        </div>
+
+                        <hr style="margin: 25px 0; border: none; border-top: 2px solid var(--bleu-pale);">
+
+                        <h4 style="color: var(--bleu-principal); margin-top: 25px; margin-bottom: 15px;">Checklist d'utilisation hebdomadaire</h4>
+
+                        <div style="margin: 20px 0; padding: 15px; background: #e7f3ff; border: 2px solid var(--bleu-moyen); border-radius: 6px;">
+                            <p><strong>Pour un suivi efficace, consultez les profils régulièrement :</strong></p>
+
+                            <table class="tableau" style="margin-top: 15px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 15%;">Fréquence</th>
+                                        <th style="width: 40%;">Action</th>
+                                        <th style="width: 45%;">Objectif</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Hebdomadaire</strong></td>
+                                        <td>Consulter l'Aperçu du Tableau de bord</td>
+                                        <td>Vue d'ensemble, identifier rapidement les étudiants en difficulté (zones orange/rouge)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Hebdomadaire</strong></td>
+                                        <td>Profils des étudiants «À risque» ou «Critique»</td>
+                                        <td>Planifier interventions ciblées, vérifier l'évolution</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Bi-hebdomadaire</strong></td>
+                                        <td>Profils des étudiants «Fragile»</td>
+                                        <td>Prévenir la dégradation, offrir soutien proactif</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Mi-session</strong></td>
+                                        <td>Révision complète de tous les profils</td>
+                                        <td>Bilan global, ajustements pédagogiques, rencontres individuelles</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Fin session</strong></td>
+                                        <td>Analyse longitudinale des profils</td>
+                                        <td>Évaluer l'efficacité des interventions, documenter les cas critiques</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Planifier interventions -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Planifier les interventions RàI</h3>
+
+                        <div style="margin: 15px 0; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-moyen); border-radius: 4px;">
+                            <h4 style="color: var(--bleu-principal);">Niveau 1 : Enseignement universel avec suivi</h4>
+                            <p><strong>Pour qui :</strong> Étudiants en progression normale (≥ 70% en A-C-P)</p>
+                            <p><strong>Modalités :</strong></p>
+                            <ul>
+                                <li>Enseignement explicite en grand groupe</li>
+                                <li>Pratique guidée intégrée naturellement</li>
+                                <li>Suivi hebdomadaire des indices</li>
+                                <li>Rétroactions formatives régulières</li>
+                            </ul>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                            <h4 style="color: #856404;">Niveau 2 : Soutien ciblé en petit groupe</h4>
+                            <p><strong>Pour qui :</strong> Étudiants identifiés comme à risque (un ou plusieurs indices &lt; 70%)</p>
+                            <p><strong>Modalités :</strong></p>
+                            <ul>
+                                <li>Approche proactive de l'enseignant</li>
+                                <li>Interventions en classe avec opportunités de reprise/rattrapage</li>
+                                <li>Pratique guidée additionnelle sur critères en difficulté</li>
+                                <li>Remédiation ciblée (ex: Structure, Rigueur, Nuance)</li>
+                                <li>Utilisation des forces pour développer les défis</li>
+                            </ul>
+                            <p><strong>Exemples concrets :</strong></p>
+                            <ul>
+                                <li>"Remédiation en Structure | Exercice supplémentaire"</li>
+                                <li>"Pratique guidée en Rigueur"</li>
+                                <li>"Pratique autonome → Explorer jumelage"</li>
+                            </ul>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #f8d7da; border-left: 4px solid #dc3545; border-radius: 4px;">
+                            <h4 style="color: #dc3545;">Niveau 3 : Intervention très intensive ou spécialisée</h4>
+                            <p><strong>Pour qui :</strong> Blocages critiques (performance ≤ 1.5 ou risque &gt; 70%)</p>
+                            <p><strong>Modalités :</strong></p>
+                            <ul>
+                                <li>Hors classe, sur rendez-vous</li>
+                                <li>Accompagnement plus approfondi selon besoins spécifiques</li>
+                                <li>Collaboration avec services spécialisés :
+                                    <ul>
+                                        <li>CAF (Centre d'Aide en Français)</li>
+                                        <li>Services adaptés</li>
+                                        <li>Soutien psychosocial si nécessaire</li>
+                                    </ul>
+                                </li>
+                                <li>Plan d'intervention personnalisé</li>
+                                <li>Suivi rapproché hebdomadaire</li>
+                            </ul>
+                            <p><strong>Exemples concrets :</strong></p>
+                            <ul>
+                                <li>"Rencontre individuelle | CAF | Dépistage"</li>
+                                <li>"Blocage critique | Intervention intensive | Services adaptés"</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================================
+                     SOUS-SECTION 5: RÉFÉRENCE RAPIDE
+                     =================================== -->
+                <div id="aide-reference" class="sous-section">
+                    <h2>Référence rapide</h2>
+                    <p class="text-muted">Aide-mémoire et seuils critiques</p>
+
+                    <!-- Carte: Seuils critiques -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Seuils critiques d'alerte</h3>
+
+                        <div style="background: linear-gradient(90deg, #d4edda 0%, #f8d7da 100%); padding: 20px; border-radius: 8px; margin-top: 15px;">
+                            <h4 style="margin-bottom: 15px;">ASSIDUITÉ (A)</h4>
+                            <table style="width: 100%; border-collapse: collapse; background: white;">
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>&lt; 70%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #dc3545;">Critique - Intervention immédiate</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>70-79%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #ffc107;">Fragile - Surveiller de près</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>80-89%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #17a2b8;">Acceptable</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;"><strong>≥ 90%</strong></td>
+                                    <td style="padding: 10px; color: #28a745;">Favorable</td>
+                                </tr>
+                            </table>
+
+                            <h4 style="margin: 20px 0 15px 0;">COMPLÉTION (C) - Mêmes seuils</h4>
+                            <table style="width: 100%; border-collapse: collapse; background: white;">
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>&lt; 70%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #dc3545;">Critique - Investigation obstacles</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>70-79%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #ffc107;">Fragile - Système de rappels</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>80-89%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #17a2b8;">Acceptable</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;"><strong>≥ 90%</strong></td>
+                                    <td style="padding: 10px; color: #28a745;">Favorable</td>
+                                </tr>
+                            </table>
+
+                            <h4 style="margin: 20px 0 15px 0;">PERFORMANCE (P) - Mêmes seuils</h4>
+                            <table style="width: 100%; border-collapse: collapse; background: white;">
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>&lt; 70%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #dc3545;">Critique - Soutien pédagogique urgent</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>70-79%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #ffc107;">Fragile - Remédiation ciblée</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>80-89%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #17a2b8;">Acceptable</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;"><strong>≥ 90%</strong></td>
+                                    <td style="padding: 10px; color: #28a745;">Favorable</td>
+                                </tr>
+                            </table>
+
+                            <h4 style="margin: 20px 0 15px 0;">RISQUE D'ÉCHEC (1-A×C×P)</h4>
+                            <table style="width: 100%; border-collapse: collapse; background: white;">
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>&gt; 70%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #dc3545;">Critique</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>50-70%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #dc3545;">Très élevé</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>40-50%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #fd7e14;">Élevé</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>30-40%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #ffc107;">Modéré</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><strong>20-30%</strong></td>
+                                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #17a2b8;">Faible</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;"><strong>≤ 20%</strong></td>
+                                    <td style="padding: 10px; color: #28a745;">Minimal</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div class="alerte alerte-erreur">
+                            <strong>Règle d'or :</strong> Un étudiant avec un indice &lt; 70% nécessite UNE action. Un étudiant avec un risque &gt; 50% nécessite un PLAN D'INTERVENTION.
+                        </div>
+                    </div>
+
+                    <!-- Carte: Architecture Single Source of Truth -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Architecture Single Source of Truth (rappel)</h3>
+                        <p><strong>Les modules sources ne doivent JAMAIS être contournés.</strong></p>
+
+                        <table class="tableau">
+                            <thead>
+                                <tr>
+                                    <th>Module SOURCE</th>
+                                    <th>Génère/Stocke</th>
+                                    <th>Module LECTEUR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>trimestre.js</strong></td>
+                                    <td><code>calendrierComplet</code></td>
+                                    <td>calendrier-vue.js</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>saisie-presences.js</strong></td>
+                                    <td><code>indicesAssiduiteDetailles</code></td>
+                                    <td>tableau-bord-apercu.js<br>profil-etudiant.js</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>portfolio.js</strong></td>
+                                    <td><code>indicesCP</code></td>
+                                    <td>tableau-bord-apercu.js<br>profil-etudiant.js</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="alerte alerte-information">
+                            <strong>Règle d'or :</strong> Les modules ne se parlent JAMAIS directement. Toute communication passe exclusivement par localStorage.
+                        </div>
+                    </div>
+
+                    <!-- Carte: Résolution de problèmes -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Résolution de problèmes courants</h3>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid var(--bleu-moyen); border-radius: 4px;">
+                            <h4 style="color: var(--bleu-principal);">Calendrier vide après rechargement</h4>
+                            <p><strong>Cause :</strong> calendrierComplet pas généré ou corrompu</p>
+                            <p><strong>Solution :</strong> Aller dans Réglages → Trimestre → Régénérer le calendrier</p>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid var(--bleu-moyen); border-radius: 4px;">
+                            <h4 style="color: var(--bleu-principal);">Indices A non calculés</h4>
+                            <p><strong>Cause :</strong> Présences pas saisies ou module non initialisé</p>
+                            <p><strong>Solution :</strong>
+                                <ol style="margin: 5px 0 0 20px;">
+                                    <li>Vérifier ordre de chargement dans index 71</li>
+                                    <li>Aller dans Présences → Saisie</li>
+                                    <li>Saisir au moins une présence pour initialiser</li>
+                                </ol>
+                            </p>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid var(--bleu-moyen); border-radius: 4px;">
+                            <h4 style="color: var(--bleu-principal);">« Invalid Date » dans le calendrier</h4>
+                            <p><strong>Cause :</strong> Conflit de noms de fonctions entre modules</p>
+                            <p><strong>Solution :</strong> Vérifier que les fonctions sont préfixées (ex: formaterDateTrimestreYMD au lieu de formaterDate)</p>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid var(--bleu-moyen); border-radius: 4px;">
+                            <h4 style="color: var(--bleu-principal);">Données perdues</h4>
+                            <p><strong>Cause :</strong> localStorage effacé (navigation privée, nettoyage navigateur)</p>
+                            <p><strong>Solution :</strong> Utiliser Import/Export régulièrement pour backup JSON</p>
+                            <p><strong>Prévention :</strong> Activer Export automatique hebdomadaire (à venir)</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Debug localStorage -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Debug - Console navigateur</h3>
+                        <p>Commandes à exécuter dans la console du navigateur (F12) :</p>
+
+                        <div style="background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 0.9em; margin-top: 15px;">
+                            <p style="color: #6c757d;">// Vérifier calendrierComplet</p>
+                            <p style="color: #66d9ef;">console</p><span style="color: #f8f8f2;">.log(</span><span style="color: #e6db74;">'calendrierComplet existe?'</span><span style="color: #f8f8f2;">, </span><span style="color: #f92672;">!!</span><span style="color: #66d9ef;">localStorage</span><span style="color: #f8f8f2;">.getItem(</span><span style="color: #e6db74;">'calendrierComplet'</span><span style="color: #f8f8f2;">));</span>
+                            <br><br>
+                            <p style="color: #6c757d;">// Voir contenu calendrier</p>
+                            <p><span style="color: #66d9ef;">JSON</span><span style="color: #f8f8f2;">.parse(</span><span style="color: #66d9ef;">localStorage</span><span style="color: #f8f8f2;">.getItem(</span><span style="color: #e6db74;">'calendrierComplet'</span><span style="color: #f8f8f2;">));</span></p>
+                            <br>
+                            <p style="color: #6c757d;">// Vérifier indices A</p>
+                            <p><span style="color: #66d9ef;">console</span><span style="color: #f8f8f2;">.log(</span><span style="color: #e6db74;">'Indices A existent?'</span><span style="color: #f8f8f2;">, </span><span style="color: #f92672;">!!</span><span style="color: #66d9ef;">localStorage</span><span style="color: #f8f8f2;">.getItem(</span><span style="color: #e6db74;">'indicesAssiduiteDetailles'</span><span style="color: #f8f8f2;">));</span></p>
+                            <br>
+                            <p style="color: #6c757d;">// Vérifier APIs disponibles</p>
+                            <p><span style="color: #66d9ef;">console</span><span style="color: #f8f8f2;">.log(</span><span style="color: #e6db74;">'API calendrier:'</span><span style="color: #f8f8f2;">, </span><span style="color: #f92672;">typeof</span><span style="color: #f8f8f2;"> obtenirCalendrierComplet);</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: FAQ (Phase 2) -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Questions fréquentes (FAQ)</h3>
+
+                        <div style="margin: 20px 0;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 8px;">Questions sur le monitorage</h4>
+
+                            <details style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <summary style="font-weight: bold; cursor: pointer; color: var(--bleu-principal);">Quelle est la différence entre Assiduité (A), Complétion (C) et Performance (P) ?</summary>
+                                <div style="margin-top: 10px; padding-left: 10px;">
+                                    <ul>
+                                        <li><strong>Assiduité (A) :</strong> Mesure la présence physique et cognitive en classe. Un étudiant assidu est engagé dans son apprentissage.</li>
+                                        <li><strong>Complétion (C) :</strong> Mesure la remise des travaux demandés. Un taux élevé indique une bonne mobilisation.</li>
+                                        <li><strong>Performance (P) :</strong> Mesure la qualité des productions selon les critères SRPNF. Reflète le niveau de maîtrise.</li>
+                                    </ul>
+                                    <p style="margin-top: 10px;"><strong>Exemple concret :</strong> Un étudiant peut avoir A=95% (toujours présent), C=80% (remet la plupart des travaux) et P=65% (qualité variable). L'indice R combinera ces trois dimensions pour prédire le risque.</p>
+                                </div>
+                            </details>
+
+                            <details style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <summary style="font-weight: bold; cursor: pointer; color: var(--bleu-principal);">Comment interpréter l'indice de risque R ?</summary>
+                                <div style="margin-top: 10px; padding-left: 10px;">
+                                    <p>L'indice R prédit le risque d'échec selon 6 niveaux :</p>
+                                    <table class="tableau" style="margin-top: 10px;">
+                                        <thead>
+                                            <tr>
+                                                <th>Indice R</th>
+                                                <th>Niveau</th>
+                                                <th>Action recommandée</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>≥ 85%</td>
+                                                <td style="color: #28a745; font-weight: bold;">Excellent</td>
+                                                <td>Valoriser et encourager l'autonomie</td>
+                                            </tr>
+                                            <tr>
+                                                <td>70-84%</td>
+                                                <td style="color: #5cb85c;">Bon</td>
+                                                <td>Maintenir l'engagement, offrir défis</td>
+                                            </tr>
+                                            <tr>
+                                                <td>60-69%</td>
+                                                <td style="color: #ffc107; font-weight: bold;">Fragile</td>
+                                                <td>Surveiller de près, interventions ciblées</td>
+                                            </tr>
+                                            <tr>
+                                                <td>50-59%</td>
+                                                <td style="color: #ff9800; font-weight: bold;">À risque</td>
+                                                <td>Rencontre individuelle, plan d'action</td>
+                                            </tr>
+                                            <tr>
+                                                <td>40-49%</td>
+                                                <td style="color: #f44336; font-weight: bold;">Critique</td>
+                                                <td>Intervention intensive, RàI niveau 2</td>
+                                            </tr>
+                                            <tr>
+                                                <td>&lt; 40%</td>
+                                                <td style="color: #d32f2f; font-weight: bold;">Échec probable</td>
+                                                <td>RàI niveau 3, référer aux services</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+
+                            <details style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <summary style="font-weight: bold; cursor: pointer; color: var(--bleu-principal);">Qu'est-ce que la Réponse à l'Intervention (RàI) ?</summary>
+                                <div style="margin-top: 10px; padding-left: 10px;">
+                                    <p>La RàI est un système d'intervention à trois niveaux :</p>
+                                    <ul>
+                                        <li><strong>Niveau 1 - Universel :</strong> Enseignement de qualité pour tous (80% des étudiants)</li>
+                                        <li><strong>Niveau 2 - Ciblé :</strong> Interventions de groupe pour étudiants fragiles ou à risque (15% des étudiants)</li>
+                                        <li><strong>Niveau 3 - Intensif :</strong> Soutien individualisé pour étudiants en situation critique (&lt; 5% des étudiants)</li>
+                                    </ul>
+                                    <p style="margin-top: 10px;"><strong>Dans l'application :</strong> Le profil étudiant suggère automatiquement le niveau RàI selon l'indice R et fournit des recommandations d'intervention adaptées.</p>
+                                </div>
+                            </details>
+                        </div>
+
+                        <div style="margin: 20px 0;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 8px;">Questions techniques</h4>
+
+                            <details style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <summary style="font-weight: bold; cursor: pointer; color: var(--bleu-principal);">Mes données sont-elles sauvegardées automatiquement ?</summary>
+                                <div style="margin-top: 10px; padding-left: 10px;">
+                                    <p><strong>Oui,</strong> toutes les modifications sont sauvegardées automatiquement dans le localStorage du navigateur.</p>
+                                    <div class="alerte alerte-attention" style="margin-top: 10px;">
+                                        <strong>⚠️ Important :</strong> Le localStorage peut être effacé si vous :
+                                        <ul style="margin: 10px 0 0 20px;">
+                                            <li>Utilisez le mode navigation privée</li>
+                                            <li>Nettoyez l'historique/les données du navigateur</li>
+                                            <li>Changez de navigateur ou d'appareil</li>
+                                        </ul>
+                                    </div>
+                                    <p style="margin-top: 10px;"><strong>Recommandation :</strong> Exportez vos données régulièrement via Réglages → Import/Export pour créer des sauvegardes JSON.</p>
+                                </div>
+                            </details>
+
+                            <details style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <summary style="font-weight: bold; cursor: pointer; color: var(--bleu-principal);">Puis-je utiliser l'application sur plusieurs appareils ?</summary>
+                                <div style="margin-top: 10px; padding-left: 10px;">
+                                    <p><strong>Oui,</strong> mais avec transfert manuel :</p>
+                                    <ol>
+                                        <li>Sur l'appareil source : Réglages → Import/Export → Exporter</li>
+                                        <li>Transférer le fichier JSON (email, iCloud, USB, etc.)</li>
+                                        <li>Sur l'appareil cible : Réglages → Import/Export → Importer</li>
+                                    </ol>
+                                    <p style="margin-top: 10px;"><strong>Note :</strong> Il n'y a pas de synchronisation automatique pour garantir la protection des données et le fonctionnement hors-ligne.</p>
+                                </div>
+                            </details>
+
+                            <details style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <summary style="font-weight: bold; cursor: pointer; color: var(--bleu-principal);">L'application fonctionne-t-elle sans connexion Internet ?</summary>
+                                <div style="margin-top: 10px; padding-left: 10px;">
+                                    <p><strong>Oui, totalement.</strong> L'application est 100% autonome et ne nécessite aucune connexion Internet pour fonctionner.</p>
+                                    <p style="margin-top: 10px;">Vous pouvez l'utiliser :</p>
+                                    <ul>
+                                        <li>En mode hors-ligne complet</li>
+                                        <li>Sur un appareil sans accès réseau</li>
+                                        <li>En ouvrant simplement le fichier HTML local</li>
+                                    </ul>
+                                </div>
+                            </details>
+
+                            <details style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <summary style="font-weight: bold; cursor: pointer; color: var(--bleu-principal);">Pourquoi le calendrier affiche «Invalid Date» ?</summary>
+                                <div style="margin-top: 10px; padding-left: 10px;">
+                                    <p><strong>Cause probable :</strong> Le calendrier n'a pas été généré ou a été corrompu.</p>
+                                    <p style="margin-top: 10px;"><strong>Solution :</strong></p>
+                                    <ol>
+                                        <li>Aller dans Réglages → Trimestre</li>
+                                        <li>Remplir les champs (date début, date fin, nb semaines)</li>
+                                        <li>Cliquer sur «Générer le calendrier complet»</li>
+                                        <li>Vérifier que le message de succès apparaît</li>
+                                        <li>Retourner dans Présences → Vue calendaire pour confirmer</li>
+                                    </ol>
+                                </div>
+                            </details>
+                        </div>
+
+                        <div style="margin: 20px 0;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 8px;">Questions sur l'utilisation</h4>
+
+                            <details style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <summary style="font-weight: bold; cursor: pointer; color: var(--bleu-principal);">Dans quel ordre dois-je configurer l'application ?</summary>
+                                <div style="margin-top: 10px; padding-left: 10px;">
+                                    <p><strong>Ordre recommandé :</strong></p>
+                                    <ol>
+                                        <li><strong>Réglages → Cours :</strong> Informations de base (code, titre, programme)</li>
+                                        <li><strong>Réglages → Trimestre :</strong> Dates et génération du calendrier complet</li>
+                                        <li><strong>Réglages → Horaire :</strong> Définir les plages horaires des séances</li>
+                                        <li><strong>Réglages → Groupe :</strong> Importer ou créer la liste des étudiants</li>
+                                        <li><strong>Matériel → Grilles de critères :</strong> Créer vos grilles SRPNF</li>
+                                        <li><strong>Matériel → Échelle de performance :</strong> Personnaliser l'échelle IDME si nécessaire</li>
+                                        <li><strong>Matériel → Productions :</strong> Définir toutes les évaluations du cours</li>
+                                        <li><strong>Matériel → Rétroactions :</strong> Créer vos cartouches de rétroaction</li>
+                                    </ol>
+                                    <div class="alerte alerte-succes" style="margin-top: 10px;">
+                                        <strong>✓ Astuce :</strong> Une fois configuré, vous pouvez exporter tout le matériel et le réutiliser pour les prochaines sessions !
+                                    </div>
+                                </div>
+                            </details>
+
+                            <details style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <summary style="font-weight: bold; cursor: pointer; color: var(--bleu-principal);">Comment gérer un étudiant qui abandonne en cours de session ?</summary>
+                                <div style="margin-top: 10px; padding-left: 10px;">
+                                    <ol>
+                                        <li>Aller dans Réglages → Groupe</li>
+                                        <li>Trouver l'étudiant dans la liste</li>
+                                        <li>Changer son statut de «Actif» à «Inactif» ou «Abandon»</li>
+                                        <li>L'étudiant disparaîtra des aperçus actifs mais ses données seront conservées</li>
+                                    </ol>
+                                    <p style="margin-top: 10px;"><strong>Note :</strong> Vous pouvez réactiver l'étudiant en changeant à nouveau son statut si nécessaire.</p>
+                                </div>
+                            </details>
+
+                            <details style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <summary style="font-weight: bold; cursor: pointer; color: var(--bleu-principal);">Que faire si la pondération totale n'est pas 100% ?</summary>
+                                <div style="margin-top: 10px; padding-left: 10px;">
+                                    <p>L'application affiche la pondération totale dans Matériel → Productions. Si elle n'est pas égale à 100% :</p>
+                                    <ol>
+                                        <li>Vérifier que toutes les évaluations sont créées</li>
+                                        <li>Ajuster les pondérations pour atteindre exactement 100%</li>
+                                        <li>Les artefacts d'un portfolio ne comptent PAS dans le total (seul le Portfolio conteneur compte)</li>
+                                    </ol>
+                                    <div class="alerte alerte-attention" style="margin-top: 10px;">
+                                        <strong>⚠️ Important :</strong> Le calcul de la note finale nécessite que la pondération totale soit exactement 100%.
+                                    </div>
+                                </div>
+                            </details>
+
+                            <details style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                                <summary style="font-weight: bold; cursor: pointer; color: var(--bleu-principal);">Puis-je modifier les seuils des indices A, C, M ?</summary>
+                                <div style="margin-top: 10px; padding-left: 10px;">
+                                    <p><strong>Actuellement :</strong> Les seuils sont harmonisés à 70% (Acceptable), 80% (Confortable), 85% (Maîtrisé) et ne sont pas modifiables dans l'interface.</p>
+                                    <p style="margin-top: 10px;"><strong>Pourquoi ?</strong> Ces seuils sont basés sur la recherche pédagogique et garantissent la cohérence des prédictions de risque.</p>
+                                    <p style="margin-top: 10px;"><strong>Personnalisation future :</strong> Une version avancée pourrait permettre de personnaliser ces seuils dans Réglages → Pratique de notation.</p>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Glossaire (Phase 2) -->
+                    <div class="carte" style="background: #fff9e6;">
+                        <h3 class="carte-titre-bleu">Glossaire des termes</h3>
+
+                        <div style="margin: 15px 0;">
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin-bottom: 15px;">A</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Artefact</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Production évaluée d'un étudiant. Peut être une dissertation, un examen, une présentation, etc. Dans un portfolio, plusieurs artefacts sont regroupés et seuls les N meilleurs sont retenus pour la note finale selon les règles PAN.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Assiduité (A)</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Indice primaire mesurant la présence en classe. Calculé automatiquement à partir des présences saisies. Formule : (nombre de présences / nombre de séances) × 100. Reflète l'engagement cognitif de l'étudiant.</dd>
+                            </dl>
+
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin: 25px 0 15px 0;">C</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Calendrier complet</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Structure de données générée par le module trimestre.js. Contient 124 jours (début session jusqu'à fin + 10 jours). Chaque jour indique s'il y a cours, congé, reprise, etc. Source unique pour toutes les dates de l'application.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Cartouche de rétroaction</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Matrice de commentaires prédéfinis organisés par critère SRPNF et niveau de performance IDME. Permet de générer rapidement des rétroactions personnalisées et cohérentes. Peut être verrouillée une fois finalisée.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Complétion (C)</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Indice primaire mesurant la remise des travaux. Formule : (nombre d'artefacts complétés / nombre d'artefacts attendus) × 100. Reflète la mobilisation de l'étudiant. Calculé par portfolio.js.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Congé imprévu</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Jour où le cours est annulé de manière non planifiée (tempête, urgence, etc.). N'affecte pas le calcul des semaines. Peut nécessiter une reprise pour maintenir le nombre de séances requis.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Congé prévu</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Jour férié ou pause planifiée dans le calendrier académique (ex: semaine de lecture). Pris en compte lors de la génération du calendrier complet.</dd>
+                            </dl>
+
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin: 25px 0 15px 0;">É</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Échelle IDME</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Échelle de performance à 4 niveaux : <strong>I</strong>nsuffisant (&lt;.64), <strong>D</strong>éveloppement (.65-.74), <strong>M</strong>aîtrisé (.75-.84), <strong>E</strong>tendu (≥.85). Basée sur la taxonomie SOLO de Biggs & Collis. Utilisée pour interpréter les scores SRPNF.</dd>
+                            </dl>
+
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin: 25px 0 15px 0;">G</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Grille de critères SRPNF</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Outil d'évaluation structuré selon 5 critères : Structure (15%), Rigueur (20%), Plausibilité (10%), Nuance (25%), Français (30%). Chaque critère comporte 4 descripteurs permettant d'attribuer un score précis. Peut être dupliquée et personnalisée.</dd>
+                            </dl>
+
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin: 25px 0 15px 0;">I</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Indice de risque (R)</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Indice composite prédisant le risque d'échec. Formule : R = (2×A + C + P) / 4. Combine assiduité, complétion et performance en un seul score. 6 niveaux d'interprétation : Excellent (≥85%), Bon (70-84%), Fragile (60-69%), À risque (50-59%), Critique (40-49%), Échec probable (&lt;40%).</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Indice RàI</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Score déterminant le niveau d'intervention selon le cadre Réponse à l'Intervention. Calculé à partir de l'indice R. Trois niveaux : Universel (≥70%), Ciblé (40-69%), Intensif (&lt;40%).</dd>
+                            </dl>
+
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin: 25px 0 15px 0;">L</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">localStorage</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Mécanisme de stockage local du navigateur. Toutes les données de l'application y sont sauvegardées automatiquement. Permet le fonctionnement 100% hors-ligne. Limité à 5-10 MB selon les navigateurs. Peut être effacé (mode privé, nettoyage) d'où l'importance des exports réguliers.</dd>
+                            </dl>
+
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin: 25px 0 15px 0;">M</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Mode provisoire / final (Portfolio)</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;"><strong>Provisoire :</strong> Tous les artefacts complétés sont considérés, même si &lt; nombre total attendu. <strong>Final :</strong> Ne calcule la note que si le nombre minimum d'artefacts complétés est atteint, sinon retourne 0. Permet de gérer les portfolios en cours de session.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Monitorage pédagogique</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Approche systémique de suivi des apprentissages combinant observation continue (présences), évaluation formative (artefacts) et intervention différenciée (RàI). Objectif : identifier précocement les étudiants à risque pour intervenir avant l'échec.</dd>
+                            </dl>
+
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin: 25px 0 15px 0;">P</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">PAN (Pratiques d'Appréciation Nuancée)</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Système de notation permettant de sélectionner automatiquement les N meilleurs artefacts d'un portfolio. Exemple : sur 9 artefacts, retenir les 3 meilleurs. Règle configurable par portfolio. Respecte un minimum de complétion requis.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Performance (P)</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Indice primaire mesurant la qualité des productions. Moyenne pondérée des scores SRPNF des artefacts sélectionnés (PAN). Reflète le niveau de maîtrise des compétences. Calculé par portfolio.js.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Pondération</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Poids relatif d'une évaluation dans la note finale (%). La somme de toutes les pondérations doit être exactement 100%. Les artefacts d'un portfolio n'ont pas de pondération individuelle ; seul le Portfolio conteneur en a une.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Portfolio</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Production composite regroupant plusieurs artefacts. Définit des règles PAN (nombre total, nombre à retenir, minimum requis). Le score final du portfolio est calculé selon les N meilleurs artefacts. Type spécial dans Matériel → Productions.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Production</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Terme générique désignant toute évaluation du cours : examen, travail écrit, quiz, présentation, portfolio. Chaque production a un type, une pondération, et peut être liée à une grille de critères.</dd>
+                            </dl>
+
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin: 25px 0 15px 0;">R</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Reprise</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Séance de rattrapage planifiée pour compenser un congé imprévu. Exemple : si le lundi est férié, on peut reprendre le jeudi avec «Horaire du lundi». Gérée dans le calendrier complet pour maintenir le nombre requis de séances.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">RàI (Réponse à l'Intervention)</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Cadre d'intervention à trois paliers : <strong>Niveau 1</strong> (Universel, 80% des étudiants), <strong>Niveau 2</strong> (Ciblé, 15%), <strong>Niveau 3</strong> (Intensif, 5%). Permet d'adapter le soutien selon l'indice de risque. L'application suggère automatiquement le niveau approprié.</dd>
+                            </dl>
+
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin: 25px 0 15px 0;">S</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Séances complètes</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Structure de données générée par horaire.js. Fusionne les plages horaires (seancesHoraire) avec le calendrier complet pour créer la liste exhaustive de toutes les séances du trimestre avec leurs horaires précis. Source unique pour la saisie des présences.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Single Source of Truth</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Principe architectural : chaque donnée a UNE source unique qui la génère et la stocke dans localStorage. Les autres modules la lisent uniquement. Exemples : trimestre.js génère calendrierComplet, saisie-presences.js génère indicesAssiduiteDetailles. Évite les duplications et incohérences.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">SOLO (Taxonomie)</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Structure of Observed Learning Outcomes (Biggs & Collis). Hiérarchie de 5 niveaux de compréhension : Préstructurel, Unistructurel, Multistructurel, Relationnel, Abstrait étendu. Fondement théorique de l'échelle IDME.</dd>
+
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">SRPNF (Critères)</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Grille d'évaluation en 5 critères : <strong>S</strong>tructure (15%), <strong>R</strong>igueur (20%), <strong>P</strong>lausibilité (10%), <strong>N</strong>uance (25%), <strong>F</strong>rançais (30%). Développée spécifiquement pour l'évaluation de productions en littératie. Permet une évaluation objective et cohérente.</dd>
+                            </dl>
+
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin: 25px 0 15px 0;">T</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Trimestre</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Période académique (automne, hiver, été). Défini par une date de début, une date de fin, et un nombre de semaines de cours. Le module trimestre.js génère automatiquement le calendrier complet de 124 jours couvrant toute la session.</dd>
+                            </dl>
+
+                            <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin: 25px 0 15px 0;">V</h4>
+
+                            <dl style="margin-left: 10px;">
+                                <dt style="font-weight: bold; color: var(--bleu-principal); margin-top: 15px;">Verrouillage</dt>
+                                <dd style="margin-left: 20px; margin-bottom: 10px;">Fonction de protection empêchant la modification ou suppression accidentelle. Disponible pour : productions, grilles de critères, échelles, cartouches. Un élément verrouillé affiche une icône de cadenas et ses boutons d'action sont désactivés. Peut être déverrouillé si nécessaire.</dd>
+                            </dl>
+                        </div>
+
+                        <div class="alerte alerte-info" style="margin-top: 20px;">
+                            <strong>ℹ️ Note :</strong> Ce glossaire est une référence rapide. Pour des explications détaillées avec exemples et formules, consultez le Guide complet (PDF) disponible dans les ressources ci-dessous.
+                        </div>
+                    </div>
+
+                    <!-- Carte: Ressources -->
+                    <div class="carte" style="background: var(--bleu-tres-pale);">
+                        <h3 class="carte-titre-bleu">Ressources et documentation</h3>
+
+                        <p><strong>Guide complet (PDF) :</strong></p>
+                        <ul>
+                            <li>Guide de monitorage vA2025-1-06-08-25.pdf (36 pages)</li>
+                            <li>Formules détaillées et exemples complets</li>
+                        </ul>
+
+                        <p style="margin-top: 15px;"><strong>Articles scientifiques :</strong></p>
+                        <ul>
+                            <li>« L'enseignement explicite de la littératie » - Pédagogie collégiale, printemps-été 2024</li>
+                            <li>« Observer pour mieux accompagner » - Pédagogie collégiale, hiver 2025</li>
+                        </ul>
+
+                        <p style="margin-top: 15px;"><strong>Labo Codex :</strong></p>
+                        <ul>
+                            <li>Site web : <a href="https://codexnumeris.org/apropos" target="_blank" style="color: var(--bleu-principal);">https://codexnumeris.org/apropos</a></li>
+                            <li>Approche systémique complète</li>
+                            <li>Ressources additionnelles et outils</li>
+                        </ul>
+
+                        <p style="margin-top: 15px;"><strong>Licence et partage :</strong></p>
+                        <ul>
+                            <li><strong>Licence :</strong> Creative Commons BY-SA 4.0 (Grégoire Bédard)</li>
+                            <li>Partage et adaptation autorisés (sans usage commercial)</li>
+                            <li>Attribution requise</li>
+                            <li>Redistribution sous même licence</li>
+                        </ul>
+                    </div>
+
+                    <!-- Carte: À propos -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">À propos de l'application</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 10px; font-weight: bold; width: 30%; border-bottom: 1px solid var(--bleu-pale);">Version</td>
+                                <td style="padding: 10px; border-bottom: 1px solid var(--bleu-pale);">Beta 0.71 (refonte modulaire)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; font-weight: bold; border-bottom: 1px solid var(--bleu-pale);">Développé par</td>
+                                <td style="padding: 10px; border-bottom: 1px solid var(--bleu-pale);">Grégoire Bédard<br>
+                                    <span style="font-size: 0.9em; color: #666;">Cégep de Drummondville</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; font-weight: bold; border-bottom: 1px solid var(--bleu-pale);">Licence</td>
+                                <td style="padding: 10px; border-bottom: 1px solid var(--bleu-pale);">Creative Commons BY-SA 4.0</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; font-weight: bold; border-bottom: 1px solid var(--bleu-pale);">Technologies</td>
+                                <td style="padding: 10px; border-bottom: 1px solid var(--bleu-pale);">HTML5 / CSS3 / JavaScript ES6+ pur<br>
+                                    <span style="font-size: 0.9em; color: #666;">100% autonome, aucune dépendance externe</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; font-weight: bold;">Stockage</td>
+                                <td style="padding: 10px;">localStorage uniquement<br>
+                                    <span style="font-size: 0.9em; color: #666;">Fonctionnement hors-ligne</span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin-top: 20px; text-align: center; font-style: italic; color: var(--bleu-principal);">
+                            <strong>"L'objectif pédagogique : Faire mentir les prédictions de risque par des interventions proactives !"</strong>
+                        </p>
+                    </div>
+                </div>
+                <!-- LLM:OK_TO_EDIT -->
 
             </section><!-- fin section-aide -->
 
@@ -3709,7 +5356,6 @@ Exemple :
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=1761390149"></script>
-    <script src="js/tableau-bord-apercu.js"></script>
     <script src="js/etudiants.js"></script>
     <script src="js/productions.js?v=1761397763"></script>
     <script src="js/grilles.js?v=1761397763"></script>
@@ -3717,27 +5363,32 @@ Exemple :
     <script src="js/cartouches.js"></script>
     <script src="js/cours.js?v=1761391739"></script>
 
-    <!-- PRIORITÉ 3: Modules fonctionnels -->
-    <script src="js/calendrier-vue.js"></script>
+    <!-- PRIORITÉ 3: Calcul des indices (AVANT affichage) -->
+    <script src="js/portfolio.js"></script>
     <script src="js/saisie-presences.js"></script>
+
+    <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
+    <script src="js/tableau-bord-apercu.js"></script>
+    <script src="js/profil-etudiant.js"></script>
     <script src="js/presences-apercu.js"></script>
+    <script src="js/evaluations-apercu.js"></script>
+
+    <!-- PRIORITÉ 5: Modules fonctionnels -->
+    <script src="js/calendrier-vue.js"></script>
     <script src="js/horaire.js?v=1761391190"></script>
     <script src="js/groupe.js"></script>
     <script src="js/pratiques.js"></script>
 
-    <!-- PRIORITÉ 4: Modules avancés -->
+    <!-- PRIORITÉ 6: Modules avancés -->
     <script src="js/import-export.js?v=1761387764"></script>
     <script src="js/statistiques.js"></script>
-    <script src="js/profil-etudiant.js"></script>
-    <script src="js/evaluations-apercu.js"></script>
     <script src="js/liste-evaluations.js?v=1761391739"></script>
     <script src="js/modes.js"></script>
 
-    <!-- PRIORITÉ 5: Utilitaires -->
+    <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation.js?v=1761391739"></script>
-    <script src="js/portfolio.js"></script>
 
-    <!-- PRIORITÉ 6: Initialisation finale (TOUJOURS EN DERNIER) -->
+    <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js"></script>
 
     <!-- Script de débogage additionnel (optionnel) -->

@@ -242,17 +242,70 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - ✅ Mise à jour Documentation profil-etudiant.md (1218 → 3696 lignes)
 - ✅ Mise à jour Documentation Style CSS.md (Beta 0.50 → 0.55)
 
+**MODULE horaire.js** (Session 25 octobre - complété)
+- Génération de `seancesCompletes` comme source unique
+- API : `genererSeancesCompletes()` et `obtenirSeancesCompletes()`
+- Gestion des reprises (ex: «Horaire du lundi» le jeudi)
+- Calcul automatique des séances avec calendrierComplet
+- Interface de configuration complète
+
+**MODULE productions.js** (Session 25 octobre - complété)
+- Gestion complète des productions et évaluations
+- Support portfolios, artefacts, pondérations
+- API : `afficherTableauProductions()`, `sauvegarderProduction()`, `initialiserModuleProductions()`
+- Lien avec grilles de critères (grillesTemplates)
+- Verrouillage et réorganisation des évaluations
+- Calcul automatique de la pondération totale
+
+**SECTION AIDE** (Session 25 octobre - Phase 1 et 2 complétées)
+- 5 sous-sections implémentées (Introduction, Configuration, Utilisation, Consultation, Référence)
+- Harmonisation CSS complète (classes .tableau, .alerte-*, .carte-titre-bleu)
+- Suppression de tous les emojis (72 total)
+- Utilisation des guillemets français «...»
+- Titres avec fond bleu dégradé pour meilleure structure visuelle
+- FAQ avec 13 questions en 3 catégories (monitorage, technique, usage)
+- Glossaire avec 45 termes techniques (A-V alphabétiquement)
+- Guide détaillé du profil étudiant avec exemples et workflows
+
+**IMPLÉMENTATION SUPPORT SOM-PAN HYBRIDE** (Session 26 octobre - Beta 1.0)
+- ✅ **Fichier** : `index 72 (support SOM-PAN hybride).html` - Version Beta 1.0
+- ✅ **Types formatifs** : Ajout de `examen-formatif`, `travail-formatif`, `quiz-formatif`, etc. avec organisation par `<optgroup>`
+- ✅ **Fonctions helpers** dans `portfolio.js` :
+  - `obtenirModePratique()` : Détecte 'SOM' ou 'PAN' depuis `localStorage.modalitesEvaluation`
+  - `comptesDansDepistage(production, mode)` : Filtre les productions selon le mode
+  - `convertirNiveauEnPourcentage(niveau, echelleId)` : Convertit IDME en %
+- ✅ **Calcul dual** dans `calculerEtStockerIndicesCP()` :
+  - Calcule TOUJOURS SOM **ET** PAN simultanément
+  - Structure : `indicesCP[da].actuel = { SOM: {C, P, details}, PAN: {C, P, details} }`
+  - Filtrage SOM : examen, travail, quiz, presentation, autre (exclut formatifs)
+  - Filtrage PAN : artefact-portfolio uniquement
+  - P_som : Moyenne pondérée provisoire
+  - P_pan : Moyenne des N meilleurs artefacts
+- ✅ **Adaptation lecteurs** :
+  - `profil-etudiant.js` : `calculerTousLesIndices(da, pratique)` lit la branche appropriée
+  - `tableau-bord-apercu.js` : `calculerIndicesEtudiant(da)` lit SOM et PAN séparément
+  - API : `obtenirIndicesCP(da, 'SOM')` ou `obtenirIndicesCP(da, 'PAN')`
+- ✅ **Bénéfices** :
+  - Permet comparaison expérimentale des deux pratiques
+  - Dépistage A-C-P-R fonctionne dans les deux modes
+  - Checkboxes contrôlent l'affichage, pas le calcul
+
 ### 🔴 Prochaines priorités
 
-1. **MODULE horaire.js** - À refondre
-   - Générer `seancesCompletes` comme source unique
-   - Gestion des reprises (ex: "Horaire du lundi" le jeudi)
-   - API : `obtenirSeancesCompletes()`
+1. **Tests et validation** - Support SOM-PAN hybride
+   - Tester calcul dual avec données réelles
+   - Valider affichage selon checkboxes pratiques
+   - Vérifier cohérence indices A-C-P-R dans les deux modes
 
-2. **MODULE productions.js** - À créer
-   - Gestion des artefacts/productions
-   - Évaluations selon critères SRPNF
-   - Lien avec grilles.js et echelles.js
+2. **MODULE évaluations individuelles** - À développer
+   - Interface de saisie des évaluations SRPNF
+   - Calcul automatique des scores selon grilles
+   - Lien avec cartouches de rétroaction
+
+3. **Optimisations futures**
+   - Migration données anciennes vers structure duale
+   - Tests de performance avec grands volumes
+   - Documentation utilisateur pour mode hybride
 
 ---
 
@@ -260,15 +313,26 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 ```bash
 # Test local
-open "index 70 (refonte des modules).html"   # macOS
+open "index 72 (support SOM-PAN hybride).html"   # macOS
 
 # Voir localStorage dans console Safari
 localStorage.getItem('calendrierComplet')
 localStorage.getItem('indicesAssiduiteDetailles')
+localStorage.getItem('indicesCP')
 
 # Debug - Vérifier existence données
 !!localStorage.getItem('calendrierComplet')  # true/false
 JSON.parse(localStorage.getItem('calendrierComplet'))  # Voir contenu
+
+# Tester le calcul dual SOM-PAN
+calculerEtStockerIndicesCP();  // Force le recalcul
+const indices = JSON.parse(localStorage.getItem('indicesCP'));
+console.log(indices);
+
+// Vérifier pour un étudiant spécifique
+const da = '1234567';
+console.log('SOM:', obtenirIndicesCP(da, 'SOM'));
+console.log('PAN:', obtenirIndicesCP(da, 'PAN'));
 ```
 
 ---

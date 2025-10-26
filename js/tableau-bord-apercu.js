@@ -25,6 +25,96 @@
  */
 
 /* ===============================
+   🔧 FONCTIONS HELPERS
+   =============================== */
+
+/**
+ * Génère un badge HTML indiquant la pratique de notation active
+ * @returns {string} - HTML du badge avec icône et texte
+ */
+function genererBadgePratique() {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const pratique = config.pratique || 'alternative';
+    const typePAN = config.typePAN || 'maitrise';
+    const affichage = config.affichageTableauBord || {};
+
+    let texte = '';
+    let couleur = '';
+    let description = '';
+
+    if (affichage.afficherSommatif && affichage.afficherAlternatif) {
+        // Mode hybride
+        texte = 'Mode Hybride (SOM + PAN)';
+        couleur = '#9c27b0'; // Violet
+        description = 'Comparaison expérimentale des deux pratiques';
+    } else if (pratique === 'sommative') {
+        texte = 'Sommative traditionnelle (SOM)';
+        couleur = '#ff6f00'; // Orange
+        description = 'Moyenne pondérée provisoire';
+    } else {
+        // PAN
+        const typesPAN = {
+            'maitrise': 'Maîtrise (IDME)',
+            'specifications': 'Spécifications',
+            'denotation': 'Dénotation'
+        };
+        texte = `Alternative - ${typesPAN[typePAN] || 'PAN'}`;
+        couleur = '#0277bd'; // Bleu
+        description = 'N meilleurs artefacts';
+    }
+
+    return `
+        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+                     background: ${couleur}15; border: 1.5px solid ${couleur}; border-radius: 20px;
+                     font-size: 0.85rem; font-weight: 600; color: ${couleur}; margin-left: 12px;"
+              title="${description}">
+            ${texte}
+        </span>
+    `;
+}
+
+/**
+ * Génère un badge compact indiquant la source des données (SOM, PAN, ou Hybride)
+ * Pour les sections du tableau de bord
+ * @returns {string} - HTML du badge
+ */
+function genererBadgeSourceDonnees() {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const affichage = config.affichageTableauBord || {};
+    const afficherSommatif = affichage.afficherSommatif !== false;
+    const afficherAlternatif = affichage.afficherAlternatif !== false;
+
+    let texte = '';
+    let couleur = '';
+    let titre = '';
+
+    if (afficherSommatif && afficherAlternatif) {
+        // Mode hybride - les cartes montrent déjà (SOM) et (PAN)
+        texte = 'Hybride';
+        couleur = '#9c27b0';
+        titre = 'Affichage des deux pratiques';
+    } else if (afficherSommatif) {
+        texte = 'Source : SOM';
+        couleur = '#ff6f00';
+        titre = 'Données calculées selon pratique sommative';
+    } else {
+        texte = 'Source : PAN';
+        couleur = '#0277bd';
+        titre = 'Données calculées selon pratique alternative';
+    }
+
+    return `
+        <span style="display: inline-block; padding: 3px 10px; background: ${couleur}15;
+                     border: 1px solid ${couleur}; border-radius: 12px;
+                     font-size: 0.75rem; font-weight: 700; color: ${couleur};
+                     margin-left: 8px; vertical-align: middle;"
+              title="${titre}">
+            ${texte}
+        </span>
+    `;
+}
+
+/* ===============================
    🚀 INITIALISATION DU MODULE
    =============================== */
 
@@ -34,7 +124,7 @@
  */
 function initialiserModuleTableauBordApercu() {
     console.log('Module Tableau de bord - Aperçu initialisé');
-    
+
     // Charger les statistiques si la sous-section aperçu est active
     const apercu = document.getElementById('tableau-bord-apercu');
     if (apercu && apercu.classList.contains('active')) {
@@ -48,14 +138,21 @@ function initialiserModuleTableauBordApercu() {
 
 function chargerTableauBordApercu() {
     console.log('Chargement du tableau de bord - aperçu');
-    
+
+    // 🔄 Calculer les indices C et P (SOM + PAN) avant l'affichage
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    } else {
+        console.warn('⚠️ calculerEtStockerIndicesCP non disponible - Module portfolio.js non chargé ?');
+    }
+
     try {
         const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
-        
-        const etudiantsActifs = etudiants.filter(e => 
+
+        const etudiantsActifs = etudiants.filter(e =>
             e.statut !== 'décrochage' && e.statut !== 'abandon'
         );
-        
+
         // Ajouter les indices (structure : {sommatif: {...}, alternatif: {...}})
         const etudiantsAvecIndices = etudiantsActifs.map(etudiant => {
             const indices = calculerIndicesEtudiant(etudiant.da);
@@ -64,7 +161,36 @@ function chargerTableauBordApercu() {
                 ...indices  // Ajoute sommatif et alternatif
             };
         });
-        
+
+        // Ajouter l'indicateur de pratique ou les checkboxes selon le mode
+        const titre = document.querySelector('#tableau-bord-apercu h2');
+        if (titre) {
+            const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+            const affichage = config.affichageTableauBord || {};
+            const modeComparatif = affichage.afficherSommatif && affichage.afficherAlternatif;
+
+            titre.innerHTML = '';
+            const conteneurTitre = document.createElement('div');
+
+            if (modeComparatif) {
+                // Mode comparatif: checkboxes à droite
+                conteneurTitre.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;';
+                conteneurTitre.innerHTML = `
+                    <span>Vue d'ensemble</span>
+                    ${genererIndicateurPratiqueOuCheckboxes()}
+                `;
+            } else {
+                // Mode normal: badge inline après le titre
+                conteneurTitre.style.cssText = 'display: flex; align-items: center; margin-bottom: 10px;';
+                conteneurTitre.innerHTML = `
+                    <span>Vue d'ensemble</span>
+                    ${genererIndicateurPratiqueOuCheckboxes()}
+                `;
+            }
+
+            titre.appendChild(conteneurTitre);
+        }
+
         // Afficher tout (sans noms d'étudiants dans l'aperçu)
         afficherMetriquesGlobales(etudiantsAvecIndices);
         afficherAlertesPrioritairesCompteurs(etudiantsAvecIndices);
@@ -72,10 +198,95 @@ function chargerTableauBordApercu() {
         afficherNiveauxRaI(etudiantsAvecIndices);
 
         console.log('✅ Tableau de bord chargé (aperçu anonyme)');
-        
+
     } catch (error) {
         console.error('❌ Erreur chargement tableau de bord:', error);
     }
+}
+
+/**
+ * Génère soit un badge de pratique simple, soit les checkboxes selon le mode
+ * @returns {string} HTML du badge ou des checkboxes
+ */
+function genererIndicateurPratiqueOuCheckboxes() {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif !== false;
+    const afficherPan = affichage.afficherAlternatif !== false;
+    const modeComparatif = afficherSom && afficherPan;
+
+    // MODE COMPARATIF: Afficher les checkboxes interactives
+    if (modeComparatif) {
+        return `
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;
+                              padding: 6px 12px; background: color-mix(in srgb, var(--som-orange) 9%, transparent);
+                              border: 1.5px solid var(--som-orange); border-radius: 6px; font-size: 0.9rem; font-weight: 600;">
+                    <input type="checkbox" id="checkbox-som" ${afficherSom ? 'checked' : ''}
+                           onchange="togglerAffichagePratique('som', this.checked)"
+                           style="cursor: pointer;">
+                    <span style="color: var(--som-orange);">SOM</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;
+                              padding: 6px 12px; background: color-mix(in srgb, var(--pan-bleu) 9%, transparent);
+                              border: 1.5px solid var(--pan-bleu); border-radius: 6px; font-size: 0.9rem; font-weight: 600;">
+                    <input type="checkbox" id="checkbox-pan" ${afficherPan ? 'checked' : ''}
+                           onchange="togglerAffichagePratique('pan', this.checked)"
+                           style="cursor: pointer;">
+                    <span style="color: var(--pan-bleu);">PAN</span>
+                </label>
+            </div>
+        `;
+    }
+
+    // MODE NORMAL: Afficher un simple badge identifiant la pratique
+    const pratique = afficherSom ? 'SOM' : 'PAN';
+    const couleur = afficherSom ? 'var(--som-orange)' : 'var(--pan-bleu)';
+
+    return `
+        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+                     background: color-mix(in srgb, ${couleur} 9%, transparent);
+                     border: 1.5px solid ${couleur}; border-radius: 20px;
+                     font-size: 0.85rem; font-weight: 600; color: ${couleur}; margin-left: 12px;">
+            ${pratique}
+        </span>
+    `;
+}
+
+/**
+ * Toggle l'affichage d'une pratique et met à jour les réglages
+ * @param {string} pratique - 'som' ou 'pan'
+ * @param {boolean} afficher - true pour afficher, false pour masquer
+ */
+function togglerAffichagePratique(pratique, afficher) {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+
+    if (!config.affichageTableauBord) {
+        config.affichageTableauBord = {};
+    }
+
+    // Mettre à jour la pratique sélectionnée
+    if (pratique === 'som') {
+        config.affichageTableauBord.afficherSommatif = afficher;
+    } else if (pratique === 'pan') {
+        config.affichageTableauBord.afficherAlternatif = afficher;
+    }
+
+    // Validation: au moins une pratique doit rester affichée
+    if (!config.affichageTableauBord.afficherSommatif && !config.affichageTableauBord.afficherAlternatif) {
+        alert('Au moins une pratique doit rester affichée !');
+        // Recocher la pratique qu'on vient de décocher
+        if (pratique === 'som') {
+            config.affichageTableauBord.afficherSommatif = true;
+        } else if (pratique === 'pan') {
+            config.affichageTableauBord.afficherAlternatif = true;
+        }
+    }
+
+    localStorage.setItem('modalitesEvaluation', JSON.stringify(config));
+
+    // Recharger le tableau de bord
+    chargerTableauBordApercu();
 }
 
 /* ===============================
@@ -86,9 +297,13 @@ function chargerTableauBordApercu() {
  * Récupère les indices calculés pour un étudiant
  * Retourne TOUJOURS sommatif ET alternatif
  * C'est l'affichage qui décide quoi montrer
- * 
+ *
+ * LECTURE DEPUIS STRUCTURE DUALE (SOM + PAN) :
+ * - indicesCP[da].actuel.SOM → indices sommatifs
+ * - indicesCP[da].actuel.PAN → indices alternatifs
+ *
  * @param {string} da - DA de l'étudiant
- * @returns {Object} Indices complets
+ * @returns {Object} Indices complets { sommatif: {...}, alternatif: {...} }
  */
 function calculerIndicesEtudiant(da) {
     // Récupérer les indices A depuis saisie-presences.js
@@ -98,20 +313,24 @@ function calculerIndicesEtudiant(da) {
     const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
     const indicesCPEtudiant = indicesCP[da]?.actuel || null;
 
+    // 🔀 LECTURE DEPUIS LES DEUX BRANCHES
+    const indicesSOM = indicesCPEtudiant?.SOM || null;
+    const indicesPAN = indicesCPEtudiant?.PAN || null;
+
     // Structure complète avec sommatif ET alternatif
     const indices = {
         sommatif: {
             assiduite: indicesA.sommatif?.[da] || 0,
-            completion: indicesCPEtudiant ? indicesCPEtudiant.C / 100 : 0,
-            performance: indicesCPEtudiant ? indicesCPEtudiant.P / 100 : 0
+            completion: indicesSOM ? indicesSOM.C / 100 : 0,
+            performance: indicesSOM ? indicesSOM.P / 100 : 0
         },
         alternatif: {
             assiduite: indicesA.alternatif?.[da] || 0,
-            completion: indicesCPEtudiant ? indicesCPEtudiant.C / 100 : 0,
-            performance: indicesCPEtudiant ? indicesCPEtudiant.P / 100 : 0
+            completion: indicesPAN ? indicesPAN.C / 100 : 0,
+            performance: indicesPAN ? indicesPAN.P / 100 : 0
         }
     };
-    
+
     // Calculer les risques pour les deux
     indices.sommatif.risque = calculerRisque(
         indices.sommatif.assiduite,
@@ -119,14 +338,14 @@ function calculerIndicesEtudiant(da) {
         indices.sommatif.performance
     );
     indices.sommatif.niveauRisque = determinerNiveauRisque(indices.sommatif.risque);
-    
+
     indices.alternatif.risque = calculerRisque(
         indices.alternatif.assiduite,
         indices.alternatif.completion,
         indices.alternatif.performance
     );
     indices.alternatif.niveauRisque = determinerNiveauRisque(indices.alternatif.risque);
-    
+
     return indices;
 }
 
@@ -177,12 +396,16 @@ function determinerNiveauRisque(risque) {
 
 /**
  * Affiche les métriques globales du groupe
- * Affiche toujours les deux modes (Sommatif et PAN) séparément
+ * Affiche les valeurs avec badges (SOM) et (PAN) dans les mêmes cartes
  *
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherMetriquesGlobales(etudiants) {
     const nbTotal = etudiants.length;
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif !== false;
+    const afficherPan = affichage.afficherAlternatif !== false;
 
     // Calculer les moyennes pour SOMMATIF
     const assiduiteSommatif = nbTotal > 0
@@ -206,52 +429,161 @@ function afficherMetriquesGlobales(etudiants) {
         ? etudiants.reduce((sum, e) => sum + e.alternatif.performance, 0) / nbTotal
         : 0;
 
-    // Afficher les 6 cartes séparées
-    setStatText('tb-assiduite-som', formatPourcentage(assiduiteSommatif));
-    setStatText('tb-assiduite-pan', formatPourcentage(assiduiteAlternatif));
+    // Trouver la carte des indicateurs globaux
+    const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
+    let carteIndicateurs = null;
+    cartes.forEach(carte => {
+        const h3 = carte.querySelector('h3 span');
+        if (h3 && h3.textContent.includes("Indicateurs globaux")) {
+            carteIndicateurs = carte;
+        }
+    });
 
-    setStatText('tb-completion-som', formatPourcentage(completionSommatif));
-    setStatText('tb-completion-pan', formatPourcentage(completionAlternatif));
+    if (!carteIndicateurs) return;
 
-    setStatText('tb-performance-som', formatPourcentage(performanceSommatif));
-    setStatText('tb-performance-pan', formatPourcentage(performanceAlternatif));
+    // Conserver le header et la note toggle
+    const noteToggle = carteIndicateurs.querySelector('.carte-info-toggle');
+    const header = carteIndicateurs.querySelector('h3');
+
+    carteIndicateurs.innerHTML = '';
+    carteIndicateurs.appendChild(header);
+    if (noteToggle) carteIndicateurs.appendChild(noteToggle);
+
+    // Générer les cartes avec les 2 valeurs côte à côte
+    const html = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            ${genererCarteMetrique('Assiduité', assiduiteSommatif, assiduiteAlternatif, afficherSom, afficherPan)}
+            ${genererCarteMetrique('Complétion', completionSommatif, completionAlternatif, afficherSom, afficherPan)}
+            ${genererCarteMetrique('Performance', performanceSommatif, performanceAlternatif, afficherSom, afficherPan)}
+        </div>
+    `;
+
+    carteIndicateurs.insertAdjacentHTML('beforeend', html);
 }
 
 /**
- * Affiche les compteurs d'alertes prioritaires
+ * Génère une carte de métrique avec les valeurs SOM et PAN
+ * Valeurs colorées selon la pratique (orange=SOM, bleu=PAN)
+ * @param {string} label - Nom de la métrique
+ * @param {number} valeurSom - Valeur SOM
+ * @param {number} valeurPan - Valeur PAN
+ * @param {boolean} afficherSom - Afficher SOM
+ * @param {boolean} afficherPan - Afficher PAN
+ * @returns {string} HTML de la carte
+ */
+function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficherPan) {
+    const valeurs = [];
+
+    if (afficherSom) {
+        valeurs.push(`<strong style="font-size: 1.8rem; color: var(--som-orange); font-weight: 700;">${formatPourcentage(valeurSom)}</strong>`);
+    }
+
+    if (afficherPan) {
+        valeurs.push(`<strong style="font-size: 1.8rem; color: var(--pan-bleu); font-weight: 700;">${formatPourcentage(valeurPan)}</strong>`);
+    }
+
+    return `
+        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.9rem; color: #666;">${label}</span>
+                <div style="display: flex; gap: 15px; align-items: baseline;">
+                    ${valeurs.join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Affiche les compteurs d'alertes prioritaires (Risque d'échec)
+ * Valeurs colorées selon la pratique (orange=SOM, bleu=PAN)
  *
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherAlertesPrioritairesCompteurs(etudiants) {
     const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif !== false;
+    const afficherPan = affichage.afficherAlternatif !== false;
+    const nbTotal = etudiants.length;
 
-    // Compter par niveau de risque (utiliser sommatif ou alternatif selon config)
-    let critique = 0, tresEleve = 0, eleve = 0, faibles = 0;
-
+    // Calculer les statistiques pour SOM
+    let somCritique = 0, somTresEleve = 0, somEleve = 0, somFaibles = 0;
     etudiants.forEach(e => {
-        const risque = afficherSommatif ? e.sommatif.risque : e.alternatif.risque;
-        const niveau = afficherSommatif ? e.sommatif.niveauRisque : e.alternatif.niveauRisque;
+        const niveau = e.sommatif.niveauRisque;
+        if (niveau === 'critique') somCritique++;
+        else if (niveau === 'très élevé') somTresEleve++;
+        else if (niveau === 'élevé') somEleve++;
+        else somFaibles++;
+    });
 
-        if (niveau === 'critique') {
-            critique++;
-        } else if (niveau === 'très élevé') {
-            tresEleve++;
-        } else if (niveau === 'élevé') {
-            eleve++;
-        } else if (niveau === 'minimal' || niveau === 'faible' || niveau === 'modéré') {
-            faibles++;
+    // Calculer les statistiques pour PAN
+    let panCritique = 0, panTresEleve = 0, panEleve = 0, panFaibles = 0;
+    etudiants.forEach(e => {
+        const niveau = e.alternatif.niveauRisque;
+        if (niveau === 'critique') panCritique++;
+        else if (niveau === 'très élevé') panTresEleve++;
+        else if (niveau === 'élevé') panEleve++;
+        else panFaibles++;
+    });
+
+    // Trouver la carte Risque d'échec
+    const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
+    let carteRisque = null;
+    cartes.forEach(carte => {
+        const h3 = carte.querySelector('h3 span');
+        if (h3 && h3.textContent.includes("Risque d'échec")) {
+            carteRisque = carte;
         }
     });
 
-    // Afficher les compteurs
-    setStatText('tb-risque-faibles', faibles);
-    setStatText('tb-risque-critique', critique);
-    setStatText('tb-risque-tres-eleve', tresEleve);
-    setStatText('tb-risque-eleve', eleve);
+    if (!carteRisque) return;
 
-    // Note: Pas de liste d'étudiants dans l'aperçu pour respecter la confidentialité
-    // L'utilisateur doit aller dans "Liste complète" pour voir les détails
+    // Conserver le header et la note toggle
+    const noteToggle = carteRisque.querySelector('.carte-info-toggle');
+    const header = carteRisque.querySelector('h3');
+
+    carteRisque.innerHTML = '';
+    carteRisque.appendChild(header);
+    if (noteToggle) carteRisque.appendChild(noteToggle);
+
+    // Générer les cartes
+    const html = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            ${genererCarteRisque('Risques faibles', somFaibles, panFaibles, nbTotal, afficherSom, afficherPan, 'var(--alerte-fond-succes)', 'var(--btn-confirmer)')}
+            ${genererCarteRisque('Risque élevé', somEleve, panEleve, nbTotal, afficherSom, afficherPan, '#fffbf0', 'var(--risque-eleve)')}
+            ${genererCarteRisque('Risque très élevé', somTresEleve, panTresEleve, nbTotal, afficherSom, afficherPan, '#fff8f0', 'var(--risque-tres-eleve)')}
+            ${genererCarteRisque('Risque critique', somCritique, panCritique, nbTotal, afficherSom, afficherPan, '#fff5f5', 'var(--risque-critique)')}
+        </div>
+    `;
+
+    carteRisque.insertAdjacentHTML('beforeend', html);
+}
+
+/**
+ * Génère une carte de risque avec les valeurs SOM et PAN colorées
+ */
+function genererCarteRisque(label, valeurSom, valeurPan, total, afficherSom, afficherPan, bgColor, borderColor) {
+    const valeurs = [];
+
+    if (afficherSom) {
+        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--som-orange); font-weight: 700;">${valeurSom}</strong>`);
+    }
+
+    if (afficherPan) {
+        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--pan-bleu); font-weight: 700;">${valeurPan}</strong>`);
+    }
+
+    return `
+        <div style="background: ${bgColor}; padding: 12px; border-radius: 6px; border: 2px solid ${borderColor};">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.85rem; color: #666;">${label}</span>
+                <div style="display: flex; gap: 15px; align-items: baseline;">
+                    ${valeurs.join('')}
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 /**
@@ -301,82 +633,212 @@ function afficherListeEtudiantsCritiques(etudiants, afficherSommatif) {
 }
 
 /**
+ * Génère une carte de pattern avec valeurs SOM et PAN colorées
+ */
+function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, afficherPan, bgColor, borderColor) {
+    const valeurs = [];
+
+    if (afficherSom) {
+        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--som-orange); font-weight: 700;">${valeurSom}</strong>`);
+    }
+
+    if (afficherPan) {
+        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--pan-bleu); font-weight: 700;">${valeurPan}</strong>`);
+    }
+
+    return `
+        <div style="background: ${bgColor}; padding: 12px; border-radius: 6px; border: 2px solid ${borderColor};">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.85rem; color: #666;">${label}</span>
+                <div style="display: flex; gap: 15px; align-items: baseline;">
+                    ${valeurs.join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
  * Affiche les patterns d'apprentissage
+ * En mode hybride, affiche SOM et PAN côte à côte
  *
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherPatternsApprentissage(etudiants) {
     const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
-
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif !== false;
+    const afficherPan = affichage.afficherAlternatif !== false;
     const nbTotal = etudiants.length;
 
-    // Déterminer les patterns selon les indices A-C-P
-    let stable = 0, defi = 0, emergent = 0, critique = 0;
-
+    // Calculer les patterns pour SOM
+    let somStable = 0, somDefi = 0, somEmergent = 0, somCritique = 0;
     etudiants.forEach(e => {
-        const indices = afficherSommatif ? e.sommatif : e.alternatif;
-        const pattern = determinerPattern(indices);
-
-        if (pattern === 'stable') stable++;
-        else if (pattern === 'défi') defi++;
-        else if (pattern === 'émergent') emergent++;
-        else if (pattern === 'critique') critique++;
+        const pattern = determinerPattern(e.sommatif);
+        if (pattern === 'stable') somStable++;
+        else if (pattern === 'défi') somDefi++;
+        else if (pattern === 'émergent') somEmergent++;
+        else if (pattern === 'critique') somCritique++;
     });
 
-    // Afficher les compteurs
-    setStatText('tb-pattern-stable', stable);
-    setStatText('tb-pattern-defi', defi);
-    setStatText('tb-pattern-emergent', emergent);
-    setStatText('tb-pattern-critique', critique);
+    // Calculer les patterns pour PAN
+    let panStable = 0, panDefi = 0, panEmergent = 0, panCritique = 0;
+    etudiants.forEach(e => {
+        const pattern = determinerPattern(e.alternatif);
+        if (pattern === 'stable') panStable++;
+        else if (pattern === 'défi') panDefi++;
+        else if (pattern === 'émergent') panEmergent++;
+        else if (pattern === 'critique') panCritique++;
+    });
 
-    // Afficher les barres de progression
-    if (nbTotal > 0) {
-        setBarre('tb-barre-stable', (stable / nbTotal) * 100);
-        setBarre('tb-barre-defi', (defi / nbTotal) * 100);
-        setBarre('tb-barre-emergent', (emergent / nbTotal) * 100);
-        setBarre('tb-barre-critique', (critique / nbTotal) * 100);
+    // Trouver le conteneur de la section Patterns
+    const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
+    let cartePatterns = null;
+    cartes.forEach(carte => {
+        const h3 = carte.querySelector('h3 span');
+        if (h3 && h3.textContent.includes("patterns")) {
+            cartePatterns = carte;
+        }
+    });
+
+    if (!cartePatterns) return;
+
+    // Conserver le header et les notes
+    const noteToggle = cartePatterns.querySelector('.carte-info-toggle');
+    const header = cartePatterns.querySelector('h3');
+
+    cartePatterns.innerHTML = '';
+    cartePatterns.appendChild(header);
+    if (noteToggle) cartePatterns.appendChild(noteToggle);
+
+    // Générer les cartes avec valeurs colorées
+    const html = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 15px;">
+            ${genererCartePattern('Progression stable', somStable, panStable, nbTotal, afficherSom, afficherPan, 'var(--alerte-fond-succes)', 'var(--btn-confirmer)')}
+            ${genererCartePattern('Défi spécifique', somDefi, panDefi, nbTotal, afficherSom, afficherPan, '#f3eeff', 'var(--btn-modifier)')}
+            ${genererCartePattern('Blocage émergent', somEmergent, panEmergent, nbTotal, afficherSom, afficherPan, '#fffbea', 'var(--risque-modere)')}
+            ${genererCartePattern('Blocage critique', somCritique, panCritique, nbTotal, afficherSom, afficherPan, 'var(--alerte-fond-attention)', 'var(--btn-annuler)')}
+        </div>
+    `;
+
+    cartePatterns.insertAdjacentHTML('beforeend', html);
+}
+
+/**
+ * Génère une carte RàI avec valeurs SOM et PAN colorées
+ */
+function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurSomCount, valeurPanCount, afficherSom, afficherPan, bgColor, borderColor) {
+    const valeurs = [];
+
+    if (afficherSom) {
+        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--som-orange); font-weight: 700;">${valeurSomPct}%</strong>`);
     }
+
+    if (afficherPan) {
+        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--pan-bleu); font-weight: 700;">${valeurPanPct}%</strong>`);
+    }
+
+    // Générer le texte du nombre d'étudiants
+    let texteEtudiants = '';
+    if (afficherSom && afficherPan) {
+        texteEtudiants = `${valeurSomCount} / ${valeurPanCount} étudiants – ${description}`;
+    } else if (afficherSom) {
+        texteEtudiants = `${valeurSomCount} étudiants – ${description}`;
+    } else if (afficherPan) {
+        texteEtudiants = `${valeurPanCount} étudiants – ${description}`;
+    }
+
+    return `
+        <div style="background: ${bgColor}; padding: 12px; border-radius: 6px; border: 2px solid ${borderColor};">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.85rem; color: #666;">${label}</span>
+                <div style="display: flex; gap: 15px; align-items: baseline;">
+                    ${valeurs.join('')}
+                </div>
+            </div>
+            <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">${texteEtudiants}</div>
+        </div>
+    `;
 }
 
 /**
  * Affiche les niveaux RàI (Réponse à l'intervention)
+ * Valeurs colorées selon la pratique (orange=SOM, bleu=PAN)
  *
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherNiveauxRaI(etudiants) {
     const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
-
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif !== false;
+    const afficherPan = affichage.afficherAlternatif !== false;
     const nbTotal = etudiants.length;
 
-    // Compter les étudiants par niveau RàI
-    let niveau1 = 0; // Stable
-    let niveau2 = 0; // Défi + Émergent
-    let niveau3 = 0; // Critique
-
+    // Calculer les niveaux RàI pour SOM
+    let somNiveau1 = 0, somNiveau2 = 0, somNiveau3 = 0;
     etudiants.forEach(e => {
-        const indices = afficherSommatif ? e.sommatif : e.alternatif;
-        const pattern = determinerPattern(indices);
-
+        const pattern = determinerPattern(e.sommatif);
         if (pattern === 'stable') {
-            niveau1++;
+            somNiveau1++;
         } else if (pattern === 'défi' || pattern === 'émergent') {
-            niveau2++;
+            somNiveau2++;
         } else if (pattern === 'critique') {
-            niveau3++;
+            somNiveau3++;
+        }
+    });
+
+    // Calculer les niveaux RàI pour PAN
+    let panNiveau1 = 0, panNiveau2 = 0, panNiveau3 = 0;
+    etudiants.forEach(e => {
+        const pattern = determinerPattern(e.alternatif);
+        if (pattern === 'stable') {
+            panNiveau1++;
+        } else if (pattern === 'défi' || pattern === 'émergent') {
+            panNiveau2++;
+        } else if (pattern === 'critique') {
+            panNiveau3++;
         }
     });
 
     // Calculer les pourcentages
-    const pct1 = nbTotal > 0 ? Math.round((niveau1 / nbTotal) * 100) : 0;
-    const pct2 = nbTotal > 0 ? Math.round((niveau2 / nbTotal) * 100) : 0;
-    const pct3 = nbTotal > 0 ? Math.round((niveau3 / nbTotal) * 100) : 0;
+    const somPct1 = nbTotal > 0 ? Math.round((somNiveau1 / nbTotal) * 100) : 0;
+    const somPct2 = nbTotal > 0 ? Math.round((somNiveau2 / nbTotal) * 100) : 0;
+    const somPct3 = nbTotal > 0 ? Math.round((somNiveau3 / nbTotal) * 100) : 0;
 
-    // Afficher les pourcentages uniquement
-    setStatText('tb-rai-niveau1-pct', `${pct1}%`);
-    setStatText('tb-rai-niveau2-pct', `${pct2}%`);
-    setStatText('tb-rai-niveau3-pct', `${pct3}%`);
+    const panPct1 = nbTotal > 0 ? Math.round((panNiveau1 / nbTotal) * 100) : 0;
+    const panPct2 = nbTotal > 0 ? Math.round((panNiveau2 / nbTotal) * 100) : 0;
+    const panPct3 = nbTotal > 0 ? Math.round((panNiveau3 / nbTotal) * 100) : 0;
+
+    // Trouver le conteneur de la section RàI
+    const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
+    let carteRaI = null;
+    cartes.forEach(carte => {
+        const h3 = carte.querySelector('h3 span');
+        if (h3 && h3.textContent.includes("Réponse à l'intervention")) {
+            carteRaI = carte;
+        }
+    });
+
+    if (!carteRaI) return;
+
+    // Conserver le header et les notes
+    const noteToggle = carteRaI.querySelector('.carte-info-toggle');
+    const header = carteRaI.querySelector('h3');
+
+    carteRaI.innerHTML = '';
+    carteRaI.appendChild(header);
+    if (noteToggle) carteRaI.appendChild(noteToggle);
+
+    // Générer les cartes avec valeurs colorées
+    const html = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 15px;">
+            ${genererCarteRaI('Niveau 1 (Universel)', 'Suivi régulier', somPct1, panPct1, somNiveau1, panNiveau1, afficherSom, afficherPan, 'var(--alerte-fond-succes)', 'var(--btn-confirmer)')}
+            ${genererCarteRaI('Niveau 2 (Ciblé)', 'Interventions ciblées', somPct2, panPct2, somNiveau2, panNiveau2, afficherSom, afficherPan, '#f3eeff', 'var(--btn-modifier)')}
+            ${genererCarteRaI('Niveau 3 (Intensif)', 'Interventions intensives', somPct3, panPct3, somNiveau3, panNiveau3, afficherSom, afficherPan, 'var(--alerte-fond-attention)', 'var(--btn-annuler)')}
+        </div>
+    `;
+
+    carteRaI.insertAdjacentHTML('beforeend', html);
 }
 
 /**

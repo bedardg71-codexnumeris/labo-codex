@@ -91,15 +91,10 @@ function attacherEvenementsPratiques() {
         selectTypePAN.addEventListener('change', afficherInfoPAN);
     }
 
-    // Checkboxes d'affichage
-    const checkSommatif = document.getElementById('afficherSommatif');
-    if (checkSommatif) {
-        checkSommatif.addEventListener('change', sauvegarderOptionsAffichage);
-    }
-
-    const checkAlternatif = document.getElementById('afficherAlternatif');
-    if (checkAlternatif) {
-        checkAlternatif.addEventListener('change', sauvegarderOptionsAffichage);
+    // Checkbox mode comparatif
+    const checkComparatif = document.getElementById('modeComparatif');
+    if (checkComparatif) {
+        checkComparatif.addEventListener('change', sauvegarderOptionsAffichage);
     }
 
     // Bouton sauvegarder
@@ -199,71 +194,78 @@ function afficherInfoPAN() {
 /**
  * Gère l'affichage de la section des options d'affichage
  * Appelée après le changement de pratique de notation
- * 
+ *
  * FONCTIONNEMENT:
  * 1. Affiche/masque la section selon la pratique choisie
- * 2. Pré-coche les bonnes options par défaut
+ * 2. Décoche le mode comparatif par défaut
  * 3. Sauvegarde automatiquement
  */
 function afficherOptionsAffichage() {
     const pratique = document.getElementById('pratiqueNotation').value;
     const optionsAffichage = document.getElementById('optionsAffichageIndices');
-    
+    const checkComparatif = document.getElementById('modeComparatif');
+
     if (!optionsAffichage) return;
-    
-    if (pratique === 'alternative') {
+
+    if (pratique === 'alternative' || pratique === 'sommative') {
         optionsAffichage.style.display = 'block';
-        // Par défaut : cocher les deux pour recherche
-        document.getElementById('afficherSommatif').checked = true;
-        document.getElementById('afficherAlternatif').checked = true;
-    } else if (pratique === 'sommative') {
-        optionsAffichage.style.display = 'block';
-        // Seul le sommatif coché
-        document.getElementById('afficherSommatif').checked = true;
-        document.getElementById('afficherAlternatif').checked = false;
+        // Par défaut : mode comparatif désactivé (affichage de la pratique principale uniquement)
+        if (checkComparatif) {
+            checkComparatif.checked = false;
+        }
     } else {
         optionsAffichage.style.display = 'none';
     }
-    
+
     sauvegarderOptionsAffichage();
 }
 
 /**
  * Sauvegarde les options d'affichage des indices
- * Appelée par les événements change des checkboxes
- * 
+ * Appelée par l'événement change de la checkbox mode comparatif
+ *
  * FONCTIONNEMENT:
- * 1. Récupère l'état des checkboxes
- * 2. Valide qu'au moins une option est cochée
- * 3. Sauvegarde dans localStorage
+ * 1. Récupère l'état du mode comparatif
+ * 2. Si mode comparatif actif → affiche SOM + PAN
+ * 3. Sinon → affiche uniquement la pratique principale choisie
+ * 4. Sauvegarde dans localStorage
  */
 function sauvegarderOptionsAffichage() {
-    const checkSommatif = document.getElementById('afficherSommatif');
-    const checkAlternatif = document.getElementById('afficherAlternatif');
-    
-    if (!checkSommatif || !checkAlternatif) return;
-    
-    const afficherSommatif = checkSommatif.checked;
-    const afficherAlternatif = checkAlternatif.checked;
-    
-    // Validation : au moins un doit être coché
-    if (!afficherSommatif && !afficherAlternatif) {
-        alert('Au moins un type d\'affichage doit être activé !');
-        checkSommatif.checked = true;
-        return;
-    }
-    
+    const checkComparatif = document.getElementById('modeComparatif');
+    const selectPratique = document.getElementById('pratiqueNotation');
+
+    if (!checkComparatif || !selectPratique) return;
+
+    const modeComparatif = checkComparatif.checked;
+    const pratique = selectPratique.value;
+
     // Récupérer la config existante
     let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-    
-    // Ajouter les options d'affichage
-    modalites.affichageTableauBord = {
-        afficherSommatif: afficherSommatif,
-        afficherAlternatif: afficherAlternatif
-    };
-    
+
+    // Définir l'affichage selon le mode comparatif
+    if (modeComparatif) {
+        // Mode comparatif : afficher les deux
+        modalites.affichageTableauBord = {
+            afficherSommatif: true,
+            afficherAlternatif: true
+        };
+    } else {
+        // Mode normal : afficher uniquement la pratique principale
+        if (pratique === 'sommative') {
+            modalites.affichageTableauBord = {
+                afficherSommatif: true,
+                afficherAlternatif: false
+            };
+        } else if (pratique === 'alternative') {
+            modalites.affichageTableauBord = {
+                afficherSommatif: false,
+                afficherAlternatif: true
+            };
+        }
+    }
+
     localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
-    
+
     console.log('Options d\'affichage sauvegardées:', modalites.affichageTableauBord);
 }
 
@@ -304,13 +306,27 @@ function sauvegarderPratiqueNotation() {
     
     // S'assurer que les options d'affichage sont incluses
     if (!modalites.affichageTableauBord) {
-        const checkSommatif = document.getElementById('afficherSommatif');
-        const checkAlternatif = document.getElementById('afficherAlternatif');
-        
-        modalites.affichageTableauBord = {
-            afficherSommatif: checkSommatif ? checkSommatif.checked : true,
-            afficherAlternatif: checkAlternatif ? checkAlternatif.checked : false
-        };
+        const checkComparatif = document.getElementById('modeComparatif');
+        const modeComparatif = checkComparatif ? checkComparatif.checked : false;
+
+        if (modeComparatif) {
+            modalites.affichageTableauBord = {
+                afficherSommatif: true,
+                afficherAlternatif: true
+            };
+        } else {
+            if (pratique === 'sommative') {
+                modalites.affichageTableauBord = {
+                    afficherSommatif: true,
+                    afficherAlternatif: false
+                };
+            } else if (pratique === 'alternative') {
+                modalites.affichageTableauBord = {
+                    afficherSommatif: false,
+                    afficherAlternatif: true
+                };
+            }
+        }
     }
     
     localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
@@ -379,14 +395,13 @@ function chargerModalites() {
 
     // Charger les options d'affichage
     if (modalites.affichageTableauBord) {
-        const checkSommatif = document.getElementById('afficherSommatif');
-        const checkAlternatif = document.getElementById('afficherAlternatif');
-        
-        if (checkSommatif) {
-            checkSommatif.checked = modalites.affichageTableauBord.afficherSommatif !== false;
-        }
-        if (checkAlternatif) {
-            checkAlternatif.checked = modalites.affichageTableauBord.afficherAlternatif || false;
+        const checkComparatif = document.getElementById('modeComparatif');
+
+        if (checkComparatif) {
+            // Mode comparatif activé si les deux sont affichés
+            const modeComparatif = modalites.affichageTableauBord.afficherSommatif &&
+                                   modalites.affichageTableauBord.afficherAlternatif;
+            checkComparatif.checked = modeComparatif;
         }
     }
     

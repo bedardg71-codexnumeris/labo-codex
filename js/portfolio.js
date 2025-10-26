@@ -337,31 +337,136 @@ function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
  * }
  *
  * indicesCP (généré par ce module - Single Source of Truth):
+ * Structure DUALE : calcule TOUJOURS les deux pratiques (SOM et PAN)
  * {
  *   "DA123": {
  *     historique: [
  *       {
- *         date: "2025-10-15T...",
- *         C: 75,
- *         P: 82,
- *         details: {
- *           nbArtefactsRemis: 6,
- *           nbArtefactsDonnes: 8,
- *           artefactsRetenus: ["PROD1", "PROD2", "PROD3"],
- *           notesMeilleursArtefacts: [85, 82, 80]
+ *         date: "2025-10-26T...",
+ *         SOM: {
+ *           C: 67,
+ *           P: 72,
+ *           details: {
+ *             nbProductionsRemises: 2,
+ *             nbProductionsDonnees: 3,
+ *             productionsRetenues: ["EXAM1", "TRAVAIL1"],
+ *             notes: [75, 69]
+ *           }
+ *         },
+ *         PAN: {
+ *           C: 87,
+ *           P: 85,
+ *           details: {
+ *             nbArtefactsRemis: 7,
+ *             nbArtefactsDonnes: 8,
+ *             artefactsRetenus: ["ART1", "ART2", "ART3"],
+ *             notes: [88, 85, 82]
+ *           }
  *         }
  *       }
  *     ],
  *     actuel: {
- *       date: "2025-10-20T...",
- *       C: 87.5,
- *       P: 85,
- *       details: { ... }
+ *       date: "2025-10-26T...",
+ *       SOM: { C: 67, P: 72, details: {...} },
+ *       PAN: { C: 87, P: 85, details: {...} }
  *     }
  *   },
- *   dateCalcul: "2025-10-24T..."
+ *   dateCalcul: "2025-10-26T..."
  * }
  */
+
+/* ===============================
+   🔧 FONCTIONS HELPERS POUR SUPPORT SOM ET PAN
+   =============================== */
+
+/**
+ * Détermine le mode de pratique pédagogique actuel
+ *
+ * @returns {string} - 'SOM' (sommative traditionnelle) ou 'PAN' (pratique alternative)
+ *
+ * SOURCE : localStorage.modalitesEvaluation.pratique
+ * - 'sommative' → retourne 'SOM'
+ * - 'alternative' → retourne 'PAN'
+ * - Par défaut (si non configuré) → retourne 'PAN' (rétrocompatibilité)
+ */
+function obtenirModePratique() {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    return config.pratique === 'sommative' ? 'SOM' : 'PAN';
+}
+
+/**
+ * Détermine si une production compte dans le dépistage (indices C et P)
+ *
+ * @param {Object} production - Objet production avec propriété 'type'
+ * @param {string} mode - 'SOM' ou 'PAN'
+ * @returns {boolean} - true si la production doit être comptée
+ *
+ * LOGIQUE :
+ * - Mode PAN : Seuls les 'artefact-portfolio' comptent
+ * - Mode SOM : Tous les types SAUF formatifs et conteneurs
+ *   - ✅ Compte : examen, travail, quiz, presentation, autre
+ *   - ❌ Ne compte PAS : *-formatif, portfolio (conteneur)
+ */
+function comptesDansDepistage(production, mode) {
+    const type = production.type;
+
+    if (mode === 'PAN') {
+        // En PAN, seuls les artefacts-portfolio comptent
+        return type === 'artefact-portfolio';
+    } else {
+        // En SOM, tous les types sommative comptent (pas les formatifs ni le conteneur portfolio)
+        const estFormatif = type.endsWith('-formatif');
+        const estConteneur = type === 'portfolio';
+        return !estFormatif && !estConteneur;
+    }
+}
+
+/**
+ * Convertit un niveau de performance (IDME) en pourcentage
+ *
+ * @param {string} niveau - Code du niveau ('I', 'D', 'M', 'E')
+ * @param {string} echelleId - ID de l'échelle de performance (optionnel)
+ * @returns {number} - Valeur en % (0-100)
+ *
+ * FONCTIONNEMENT :
+ * - Cherche le niveau dans l'échelle spécifiée (ou échelle par défaut)
+ * - Utilise la valeur 'valeurCalcul' définie dans echelles.js
+ * - Valeurs par défaut si échelle non trouvée :
+ *   I = 32%, D = 69.5%, M = 79.5%, E = 92.5%
+ *
+ * UTILISÉ PAR :
+ * - Calcul indice P en mode PAN (artefacts évalués avec IDME)
+ * - Conversion des notes qualitatives en notes quantitatives
+ */
+function convertirNiveauEnPourcentage(niveau, echelleId = null) {
+    // Valeurs par défaut (basées sur les niveaux IDME standard)
+    const valeursDefaut = {
+        'I': 32,
+        'D': 69.5,
+        'M': 79.5,
+        'E': 92.5
+    };
+
+    // Tenter de récupérer depuis l'échelle configurée
+    const echelles = JSON.parse(localStorage.getItem('echellesPerformance') || '[]');
+    let echelle;
+
+    if (echelleId) {
+        echelle = echelles.find(e => e.id === echelleId);
+    } else {
+        echelle = echelles.find(e => e.parDefaut === true) || echelles[0];
+    }
+
+    if (echelle && echelle.niveaux) {
+        const niveauObj = echelle.niveaux.find(n => n.code === niveau);
+        if (niveauObj && niveauObj.valeurCalcul !== undefined) {
+            return niveauObj.valeurCalcul;
+        }
+    }
+
+    // Fallback sur valeurs par défaut
+    return valeursDefaut[niveau] || 0;
+}
 
 /* ===============================
    🔄 CALCUL ET STOCKAGE DES INDICES C et P
@@ -371,19 +476,34 @@ function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
    - Calcule l'indice P (Performance) pour tous les étudiants
    - Stocke dans localStorage.indicesCP avec historique
    - À appeler après chaque évaluation ou modification de sélection
+
+   SUPPORT UNIVERSEL SOM ET PAN :
+   - Détecte automatiquement le mode via obtenirModePratique()
+   - Filtre les productions via comptesDansDepistage()
+   - Calcule P avec logique bifurquée (PAN vs SOM)
    =============================== */
 
 /**
  * Calcule et stocke les indices C (Complétion) et P (Performance) pour tous les étudiants
  * Maintient un historique pour analyse longitudinale
  *
- * INDICE C : (artefacts remis) / (artefacts donnés) × 100
- * INDICE P : Moyenne des N meilleurs artefacts (PAN)
+ * 🔀 CALCUL DUAL (SOM ET PAN SIMULTANÉMENT) :
+ * - Calcule TOUJOURS les deux pratiques en parallèle
+ * - Stocke les résultats dans une structure à deux branches
+ * - Permet la comparaison expérimentale des deux approches
  *
- * @returns {Object} - Structure complète des indices
+ * PRATIQUE SOM (Sommative traditionnelle) :
+ * - C_som : (évaluations sommatives remises) / (sommatives données) × 100
+ * - P_som : Moyenne pondérée provisoire
+ *
+ * PRATIQUE PAN (Alternative - Portfolio) :
+ * - C_pan : (artefacts remis) / (artefacts donnés) × 100
+ * - P_pan : Moyenne des N meilleurs artefacts
+ *
+ * @returns {Object} - Structure complète avec indices SOM et PAN pour chaque étudiant
  */
 function calculerEtStockerIndicesCP() {
-    console.log('Calcul des indices C et P...');
+    console.log('🔄 Calcul DUAL des indices C et P (SOM + PAN)...');
 
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
     const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
@@ -393,20 +513,37 @@ function calculerEtStockerIndicesCP() {
     // Récupérer l'historique existant ou initialiser
     const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
 
-    // Portfolio et artefacts
-    const portfolio = productions.find(p => p.type === 'portfolio');
-    const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
-    const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
+    // 🎯 PRÉPARER LES FILTRES POUR LES DEUX PRATIQUES
 
-    // Identifier les artefacts réellement donnés (avec au moins une évaluation)
-    const artefactsDonnes = new Set();
+    // Productions SOM : toutes les sommatives (exclut formatifs et conteneur portfolio)
+    const productionsSOM = productions.filter(p => comptesDansDepistage(p, 'SOM'));
+    const productionsSOMIds = new Set(productionsSOM.map(p => p.id));
+
+    // Productions PAN : uniquement artefact-portfolio
+    const productionsPAN = productions.filter(p => comptesDansDepistage(p, 'PAN'));
+    const productionsPANIds = new Set(productionsPAN.map(p => p.id));
+
+    // Identifier les productions SOM réellement données
+    const productionsSOMDonnees = new Set();
     evaluations.forEach(evaluation => {
-        if (artefactsPortfolioIds.has(evaluation.productionId)) {
-            artefactsDonnes.add(evaluation.productionId);
+        if (productionsSOMIds.has(evaluation.productionId)) {
+            productionsSOMDonnees.add(evaluation.productionId);
         }
     });
 
-    const nombreArtefactsDonnes = artefactsDonnes.size;
+    // Identifier les artefacts PAN réellement donnés
+    const artefactsPANDonnes = new Set();
+    evaluations.forEach(evaluation => {
+        if (productionsPANIds.has(evaluation.productionId)) {
+            artefactsPANDonnes.add(evaluation.productionId);
+        }
+    });
+
+    const nbProductionsSOMDonnees = productionsSOMDonnees.size;
+    const nbArtefactsPANDonnes = artefactsPANDonnes.size;
+
+    // Portfolio (pour PAN)
+    const portfolio = productions.find(p => p.type === 'portfolio');
 
     // Filtrer les étudiants actifs
     const etudiantsActifs = etudiants.filter(e =>
@@ -419,57 +556,113 @@ function calculerEtStockerIndicesCP() {
     etudiantsActifs.forEach(etudiant => {
         const da = etudiant.da;
 
-        // === CALCUL INDICE C (Complétion) ===
-        const evaluationsEleve = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            artefactsDonnes.has(e.productionId)
-        );
-        const nbArtefactsRemis = evaluationsEleve.length;
-        const C = nombreArtefactsDonnes === 0 ? 0 : Math.round((nbArtefactsRemis / nombreArtefactsDonnes) * 100);
+        // ========================================
+        // CALCUL PRATIQUE SOM
+        // ========================================
 
-        // === CALCUL INDICE P (Performance) ===
-        let P = 0;
-        let notesMeilleursArtefacts = [];
-        let artefactsRetenus = [];
+        const evaluationsSOM = evaluations.filter(e =>
+            e.etudiantDA === da &&
+            productionsSOMDonnees.has(e.productionId)
+        );
+        const nbSOMRemises = evaluationsSOM.length;
+        const C_som = nbProductionsSOMDonnees === 0 ? 0 : Math.round((nbSOMRemises / nbProductionsSOMDonnees) * 100);
+
+        let P_som = 0;
+        let notesSOM = [];
+        let productionsSOMRetenues = [];
+
+        const evaluationsSOMAvecNote = evaluationsSOM.filter(e => e.noteFinale !== null);
+        if (evaluationsSOMAvecNote.length > 0) {
+            let sommePonderee = 0;
+            let totalPonderation = 0;
+
+            evaluationsSOMAvecNote.forEach(evaluation => {
+                const production = productions.find(p => p.id === evaluation.productionId);
+                const ponderation = production?.ponderation || 0;
+                sommePonderee += evaluation.noteFinale * ponderation;
+                totalPonderation += ponderation;
+            });
+
+            if (totalPonderation > 0) {
+                P_som = Math.round(sommePonderee / totalPonderation);
+            } else {
+                // Fallback : moyenne simple si pondérations = 0
+                const somme = evaluationsSOMAvecNote.map(e => e.noteFinale).reduce((sum, note) => sum + note, 0);
+                P_som = Math.round(somme / evaluationsSOMAvecNote.length);
+            }
+
+            productionsSOMRetenues = evaluationsSOMAvecNote.map(e => e.productionId);
+            notesSOM = evaluationsSOMAvecNote.map(e => e.noteFinale);
+        }
+
+        // ========================================
+        // CALCUL PRATIQUE PAN
+        // ========================================
+
+        const evaluationsPAN = evaluations.filter(e =>
+            e.etudiantDA === da &&
+            artefactsPANDonnes.has(e.productionId)
+        );
+        const nbPANRemis = evaluationsPAN.length;
+        const C_pan = nbArtefactsPANDonnes === 0 ? 0 : Math.round((nbPANRemis / nbArtefactsPANDonnes) * 100);
+
+        let P_pan = 0;
+        let notesPAN = [];
+        let artefactsPANRetenus = [];
 
         if (portfolio && selectionsPortfolios[da]?.[portfolio.id]) {
             // Utiliser les artefacts sélectionnés manuellement
-            artefactsRetenus = selectionsPortfolios[da][portfolio.id].artefactsRetenus || [];
-            const evaluationsRetenues = evaluationsEleve.filter(e =>
-                artefactsRetenus.includes(e.productionId) && e.noteFinale !== null
+            artefactsPANRetenus = selectionsPortfolios[da][portfolio.id].artefactsRetenus || [];
+            const evaluationsRetenues = evaluationsPAN.filter(e =>
+                artefactsPANRetenus.includes(e.productionId) && e.noteFinale !== null
             );
 
             if (evaluationsRetenues.length > 0) {
-                notesMeilleursArtefacts = evaluationsRetenues.map(e => e.noteFinale);
-                const somme = notesMeilleursArtefacts.reduce((sum, note) => sum + note, 0);
-                P = Math.round(somme / evaluationsRetenues.length);
+                notesPAN = evaluationsRetenues.map(e => e.noteFinale);
+                const somme = notesPAN.reduce((sum, note) => sum + note, 0);
+                P_pan = Math.round(somme / evaluationsRetenues.length);
             }
         } else {
-            // Sélection automatique des N meilleurs (PAN)
+            // Sélection automatique des N meilleurs
             const nombreARetenir = portfolio?.regles?.nombreARetenir || 3;
-            const evaluationsAvecNote = evaluationsEleve
+            const evaluationsPANAvecNote = evaluationsPAN
                 .filter(e => e.noteFinale !== null)
                 .sort((a, b) => b.noteFinale - a.noteFinale)
                 .slice(0, nombreARetenir);
 
-            if (evaluationsAvecNote.length > 0) {
-                artefactsRetenus = evaluationsAvecNote.map(e => e.productionId);
-                notesMeilleursArtefacts = evaluationsAvecNote.map(e => e.noteFinale);
-                const somme = notesMeilleursArtefacts.reduce((sum, note) => sum + note, 0);
-                P = Math.round(somme / evaluationsAvecNote.length);
+            if (evaluationsPANAvecNote.length > 0) {
+                artefactsPANRetenus = evaluationsPANAvecNote.map(e => e.productionId);
+                notesPAN = evaluationsPANAvecNote.map(e => e.noteFinale);
+                const somme = notesPAN.reduce((sum, note) => sum + note, 0);
+                P_pan = Math.round(somme / evaluationsPANAvecNote.length);
             }
         }
 
-        // Créer l'entrée actuelle
+        // ========================================
+        // STRUCTURE À DEUX BRANCHES
+        // ========================================
+
         const entreeActuelle = {
             date: dateCalcul,
-            C: C,
-            P: P,
-            details: {
-                nbArtefactsRemis: nbArtefactsRemis,
-                nbArtefactsDonnes: nombreArtefactsDonnes,
-                artefactsRetenus: artefactsRetenus,
-                notesMeilleursArtefacts: notesMeilleursArtefacts
+            SOM: {
+                C: C_som,
+                P: P_som,
+                details: {
+                    nbProductionsRemises: nbSOMRemises,
+                    nbProductionsDonnees: nbProductionsSOMDonnees,
+                    productionsRetenues: productionsSOMRetenues,
+                    notes: notesSOM
+                }
+            },
+            PAN: {
+                C: C_pan,
+                P: P_pan,
+                details: {
+                    nbArtefactsRemis: nbPANRemis,
+                    nbArtefactsDonnes: nbArtefactsPANDonnes,
+                    artefactsRetenus: artefactsPANRetenus,
+                    notes: notesPAN
+                }
             }
         };
 
@@ -483,7 +676,13 @@ function calculerEtStockerIndicesCP() {
 
         // Ajouter à l'historique (seulement si différent du dernier)
         const dernierHistorique = indicesCP[da].historique[indicesCP[da].historique.length - 1];
-        if (!dernierHistorique || dernierHistorique.C !== C || dernierHistorique.P !== P) {
+        const aDiffere = !dernierHistorique ||
+            dernierHistorique.SOM?.C !== C_som ||
+            dernierHistorique.SOM?.P !== P_som ||
+            dernierHistorique.PAN?.C !== C_pan ||
+            dernierHistorique.PAN?.P !== P_pan;
+
+        if (aDiffere) {
             indicesCP[da].historique.push(entreeActuelle);
         }
 
@@ -497,29 +696,63 @@ function calculerEtStockerIndicesCP() {
     // Sauvegarder
     localStorage.setItem('indicesCP', JSON.stringify(indicesCP));
 
-    console.log('✅ Indices C et P sauvegardés');
+    console.log('✅ Indices C et P sauvegardés (SOM + PAN)');
     console.log('   Étudiants:', etudiantsActifs.length);
-    console.log('   Artefacts donnés:', nombreArtefactsDonnes);
+    console.log('   Productions SOM données:', nbProductionsSOMDonnees);
+    console.log('   Artefacts PAN donnés:', nbArtefactsPANDonnes);
 
     return indicesCP;
 }
 
 /**
  * Récupère les indices C et P actuels pour un étudiant
+ *
  * @param {string} da - Numéro DA de l'étudiant
- * @returns {Object} - {C: number, P: number, details: Object} ou null
+ * @param {string} pratique - (Optionnel) 'SOM' ou 'PAN' pour une pratique spécifique
+ * @returns {Object} - Structure complète ou pratique spécifique, ou null
+ *
+ * EXEMPLES :
+ * obtenirIndicesCP('1234567')        → { date, SOM: {...}, PAN: {...} }
+ * obtenirIndicesCP('1234567', 'SOM') → { C: 67, P: 72, details: {...} }
+ * obtenirIndicesCP('1234567', 'PAN') → { C: 87, P: 85, details: {...} }
  */
-function obtenirIndicesCP(da) {
+function obtenirIndicesCP(da, pratique = null) {
     const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
-    return indicesCP[da]?.actuel || null;
+    const actuel = indicesCP[da]?.actuel;
+
+    if (!actuel) return null;
+
+    // Si une pratique spécifique est demandée
+    if (pratique === 'SOM') return actuel.SOM || null;
+    if (pratique === 'PAN') return actuel.PAN || null;
+
+    // Sinon retourner la structure complète
+    return actuel;
 }
 
 /**
  * Récupère l'historique complet des indices C et P pour un étudiant
+ *
  * @param {string} da - Numéro DA de l'étudiant
- * @returns {Array} - Historique des indices ou []
+ * @param {string} pratique - (Optionnel) 'SOM' ou 'PAN' pour une pratique spécifique
+ * @returns {Array} - Historique complet ou filtré par pratique
+ *
+ * EXEMPLES :
+ * obtenirHistoriqueIndicesCP('1234567')        → [{ date, SOM: {...}, PAN: {...} }, ...]
+ * obtenirHistoriqueIndicesCP('1234567', 'SOM') → [{ date, C: 67, P: 72 }, ...]
+ * obtenirHistoriqueIndicesCP('1234567', 'PAN') → [{ date, C: 87, P: 85 }, ...]
  */
-function obtenirHistoriqueIndicesCP(da) {
+function obtenirHistoriqueIndicesCP(da, pratique = null) {
     const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
-    return indicesCP[da]?.historique || [];
+    const historique = indicesCP[da]?.historique || [];
+
+    if (!pratique) return historique;
+
+    // Transformer l'historique pour n'inclure que la pratique demandée
+    return historique.map(entree => ({
+        date: entree.date,
+        C: entree[pratique]?.C || 0,
+        P: entree[pratique]?.P || 0,
+        details: entree[pratique]?.details || {}
+    }));
 }
