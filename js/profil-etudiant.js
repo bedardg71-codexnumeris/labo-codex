@@ -72,27 +72,79 @@ function initialiserModuleProfilEtudiant() {
     console.log('   ✅ Module Profil Étudiant initialisé');
 }
 
+/* ===============================
+   🔧 FONCTIONS HELPERS
+   =============================== */
+
+/**
+ * Génère un badge compact indiquant la pratique de notation pour le profil
+ * @param {string} pratiqueUtilisee - 'SOM' ou 'PAN' (fourni par calculerTousLesIndices)
+ * @returns {string} - HTML du badge
+ */
+function genererBadgePratiqueProfil(pratiqueUtilisee) {
+    let texte = '';
+    let couleur = '';
+
+    if (pratiqueUtilisee === 'SOM') {
+        texte = 'SOM';
+        couleur = '#ff6f00'; // Orange
+    } else {
+        texte = 'PAN';
+        couleur = '#0277bd'; // Bleu
+    }
+
+    return `
+        <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+                     background: ${couleur}15; border: 1.5px solid ${couleur}; border-radius: 12px;
+                     font-size: 0.7rem; font-weight: 700; color: ${couleur}; margin-left: 8px;
+                     vertical-align: middle;">
+            ${texte}
+        </span>
+    `;
+}
+
 /**
  * Calcule tous les indices pour un étudiant
+ *
  * @param {string} da - Numéro de DA
+ * @param {string} pratique - (Optionnel) 'SOM' ou 'PAN' pour forcer une pratique
+ *                            Si non spécifié, détecte depuis modalitesEvaluation
  * @returns {Object} - Objet avec tous les indices
+ *
+ * STRUCTURE DE RETOUR :
+ * {
+ *   A: 85,              // % assiduité
+ *   C: 67,              // % complétion (selon pratique)
+ *   P: 72,              // % performance (selon pratique)
+ *   M: 0.760,           // Mobilisation (composite)
+ *   E: 0.516,           // Engagement (composite)
+ *   R: 0.484,           // Risque (composite)
+ *   pratique: 'SOM'     // Pratique utilisée pour le calcul
+ * }
  */
-function calculerTousLesIndices(da) {
-    // INDICE A : Assiduité
+function calculerTousLesIndices(da, pratique = null) {
+    // INDICE A : Assiduité (universel - identique dans les deux pratiques)
     const A = calculerAssiduitéGlobale(da) / 100; // Convertir en proportion 0-1
+
+    // 🔍 DÉTERMINER LA PRATIQUE À UTILISER
+    if (!pratique) {
+        // Détecter depuis la configuration
+        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
+    }
 
     // INDICES C et P : Lire depuis localStorage.indicesCP (Single Source of Truth)
     let C = 0;
     let P = 0;
 
     if (typeof obtenirIndicesCP === 'function') {
-        const indicesCP = obtenirIndicesCP(da);
+        const indicesCP = obtenirIndicesCP(da, pratique); // Lire la branche spécifique
         if (indicesCP) {
             C = indicesCP.C / 100; // Convertir en proportion 0-1
             P = indicesCP.P / 100;
         } else {
             // Fallback : calculer à la volée si pas encore généré
-            console.warn('⚠️ indicesCP non trouvé pour', da, '- Calcul à la volée');
+            console.warn(`⚠️ indicesCP non trouvé pour ${da} (${pratique}) - Calcul à la volée`);
             C = calculerTauxCompletion(da) / 100;
             P = calculerPerformancePAN(da);
         }
@@ -117,7 +169,10 @@ function calculerTousLesIndices(da) {
         // Indices composites (valeurs normalisées 0-1 avec 3 décimales)
         M: parseFloat(M.toFixed(3)),
         E: parseFloat(E.toFixed(3)),
-        R: parseFloat(R.toFixed(3))
+        R: parseFloat(R.toFixed(3)),
+
+        // Traçabilité de la pratique utilisée
+        pratique: pratique
     };
 }
 
@@ -1931,7 +1986,10 @@ function afficherProfilComplet(da) {
             <div class="profil-contenu" id="profil-contenu-dynamique">
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
-                    <div class="profil-contenu-titre">Suivi de l'apprentissage</div>
+                    <div class="profil-contenu-titre">
+                        Suivi de l'apprentissage
+                        ${genererBadgePratiqueProfil(indices.pratique)}
+                    </div>
                 </div>
                 <div class="profil-contenu-body">
                     ${genererContenuCibleIntervention(da)}

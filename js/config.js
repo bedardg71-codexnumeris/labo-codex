@@ -62,8 +62,11 @@ const configurationsOnglets = {
         { id: 'import-export', label: 'Import/Export' }
     ],
     'aide': [
-        { id: 'documentation', label: 'Documentation' },
-        { id: 'a-propos', label: 'À propos' }
+        { id: 'introduction', label: 'Introduction' },
+        { id: 'configuration', label: 'Configuration' },
+        { id: 'utilisation', label: 'Utilisation hebdomadaire' },
+        { id: 'consultation', label: 'Consultation' },
+        { id: 'reference', label: 'Référence rapide' }
     ]
 };
 

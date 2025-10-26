@@ -31,6 +31,11 @@
     --vert-doux: #b8d4b8;
     --vert-leger: #2a8a6a;
 
+    /* Couleurs pratiques d'évaluation */
+    --som-orange: #ff6f00;
+    --pan-bleu: #0277bd;
+    --hybride-violet: #9c27b0;
+
     /* === NAVIGATION === */
     --nav-bg: #f8f9fa;
     --nav-normal: #04376f;
@@ -552,6 +557,23 @@ body {
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 2px solid var(--bleu-pale);
+}
+
+/* Titre avec fond bleu dégradé (comme l'en-tête) */
+.carte h3.carte-titre-bleu {
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
+    color: white;
+    margin: -20px -20px 15px -20px;
+    padding: 15px 20px;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+}
+
+.carte ul,
+.carte ol {
+    padding-left: 30px;
+    margin: 10px 0;
 }
 
 @keyframes slideDown {
