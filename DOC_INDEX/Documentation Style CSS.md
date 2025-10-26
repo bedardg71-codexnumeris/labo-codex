@@ -4,9 +4,9 @@ Voici la documentation complète du fichier styles.css :
   # Documentation technique - styles.css
 
   **Date de création** : Octobre 2025
-  **Dernière modification** : 24 octobre 2025
-  **Version** : Beta 0.55
-  **Lignes de code** : 1977 lignes
+  **Dernière modification** : 26 octobre 2025
+  **Version** : Beta 0.72
+  **Lignes de code** : ~2000 lignes
   **Convention** : 100% français
 
   ---
@@ -160,6 +160,32 @@ Voici la documentation complète du fichier styles.css :
   --vert-pale: #f8fef8;           /* Vert très pâle - Fonds */
   --vert-doux: #b8d4b8;           /* Vert doux - Accents */
   --vert-leger: #2a8a6a;          /* Vert foncé - Succès */
+
+  Système hybride SOM-PAN (Beta 0.72)
+
+  --som-orange: #ff6f00;          /* Orange SOM - Mode comparatif */
+  --pan-bleu: #0277bd;            /* Bleu PAN - Mode comparatif */
+  --hybride-violet: #9c27b0;      /* Violet hybride - Usage futur */
+
+  Usage :
+  - --som-orange : Coloration des valeurs SOM en mode comparatif (moyenne pondérée)
+  - --pan-bleu : Coloration des valeurs PAN en mode comparatif (N meilleurs artefacts)
+  - --hybride-violet : Réservé pour usage futur (badges hybrides)
+
+  Contexte :
+  Le système hybride permet d'afficher simultanément les indices calculés selon deux
+  pratiques d'évaluation distinctes :
+  - SOM (Sommative traditionnelle) : Moyenne pondérée de TOUS les travaux
+  - PAN (Pratique Alternative de Notation) : Sélection des N meilleurs artefacts
+
+  En mode comparatif, les valeurs sont colorées pour distinguer instantanément leur
+  provenance :
+  - 85% (orange) → Valeur SOM
+  - 87% (bleu) → Valeur PAN
+
+  Ces variables sont utilisées par :
+  - tableau-bord-apercu.js : Coloration des valeurs dans les cartes métriques
+  - Fonctions helper : genererCarteMetrique(), genererCarteRisque(), etc.
 
   3.2 Navigation
 

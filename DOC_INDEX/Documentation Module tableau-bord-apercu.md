@@ -1,564 +1,747 @@
-Voici la documentation technique complète du module tableau-bord-apercu.js :
+# Documentation Module tableau-bord-apercu.js
 
-  ---
-  Module tableau-bord-apercu.js
+**Version** : Beta 0.72
+**Date de mise à jour** : 26 octobre 2025
+**Fichier source** : `js/tableau-bord-apercu.js` (1197 lignes)
 
-  Vue d'ensemble
+---
 
-  Module LECTEUR qui affiche les statistiques pédagogiques globales du tableau de
-  bord.
+## Vue d'ensemble
 
-  Lit les indices A-C-P calculés par d'autres modules (saisie-presences.js,
-  portfolio.js) et génère :
-  - Métriques globales : Moyennes de groupe pour A, C, P et nombre d'interventions
-   requises
-  - Distribution des risques : Répartition des étudiants par niveau (minimal →
-  critique)
-  - Alertes prioritaires : Liste des étudiants à risque ≥ élevé (seuil 0.4)
+Module **LECTEUR** qui affiche les statistiques pédagogiques globales dans la section "Tableau de bord → Aperçu".
 
-  Principe fondamental : Ce module ne calcule PAS les indices primaires (A-C-P).
-  Il les lit depuis localStorage et les agrège pour affichage.
+**Principe fondamental** : Ce module ne calcule PAS les indices primaires (A-C-P). Il les lit depuis localStorage (calculés par `saisie-presences.js` et `portfolio.js`) et les agrège pour affichage.
 
-  Fondements théoriques : Basé sur le Guide de monitorage - Section ROUGE (indices
-   primaires et calcul de risque).
+**Affichage dual** : Supporte deux modes d'affichage :
+- **Mode normal** : Une seule pratique (SOM ou PAN) avec valeurs uniques
+- **Mode comparatif** : Deux pratiques simultanées (SOM + PAN) avec valeurs colorées et checkboxes interactives
 
-  Type
+**Sections affichées** :
+1. Indicateurs globaux du groupe (moyennes A, C, P)
+2. Risque d'échec (distribution et liste des étudiants à risque)
+3. Répartition des patterns d'apprentissage (Stable, Défi, Blocages)
+4. Système de Réponse à l'intervention (RàI - 3 niveaux)
 
-  - SOURCE - Génère et stocke des données
-  - LECTEUR - Lit et affiche des données
+---
 
-  Données gérées
+## Type de module
 
-  Lecture localStorage (aucune écriture)
+- ❌ **SOURCE** - Génère et stocke des données
+- ✅ **LECTEUR** - Lit et affiche des données
 
-  1. indicesAssiduite (lecture seule)
-  - Clé : indicesAssiduite
-  - Source : saisie-presences.js
-  - Structure : { sommatif: { da: valeur }, alternatif: { da: valeur }, dateCalcul
-   }
-  - Usage : Lecture des indices A (assiduité)
+---
 
-  2. indicesEvaluation (lecture seule, futur)
-  - Clé : indicesEvaluation
-  - Source : portfolio.js (à créer)
-  - Structure : { sommatif: { da: { completion, performance } }, alternatif: { da:
-   { completion, performance } } }
-  - Usage : Lecture des indices C (complétion) et P (performance)
+## Fondements théoriques
 
-  3. groupeEtudiants (lecture seule)
-  - Clé : groupeEtudiants
-  - Source : etudiants.js
-  - Usage : Liste des étudiants (filtre actifs uniquement)
+Basé sur le **Guide de monitorage - Section ROUGE** (indices primaires)
 
-  4. modalitesEvaluation (lecture seule)
-  - Clé : modalitesEvaluation
-  - Source : pratiques.js
-  - Usage : Configuration affichage (sommatif/alternatif)
-  - Structure utilisée : { affichageTableauBord: { afficherSommatif, 
-  afficherAlternatif } }
+### Indices primaires (A-C-P)
 
-  API publique
+- **Assiduité (A)** : Proportion de présences en classe
+  - Source : `indicesAssiduiteDetailles` (calculé par `saisie-presences.js`)
+  - Formule : Nombre de présences / Total de jours
 
-  Initialisation et chargement
+- **Complétion (C)** : Proportion d'artefacts remis
+  - Source : `indicesCP` (calculé par `portfolio.js`)
+  - Formule : Artefacts remis / Artefacts requis
 
-  initialiserModuleTableauBordApercu()
-  Description : Initialise le module et charge les statistiques si la sous-section
-   est active.
+- **Performance (P)** : Performance moyenne
+  - Source : `indicesCP` (calculé par `portfolio.js`)
+  - SOM : Moyenne pondérée de TOUS les travaux
+  - PAN : Moyenne des N meilleurs artefacts
 
-  Paramètres : Aucun
+### Indice de risque (R)
 
-  Retour : void
+- **Formule** : R = 1 - (A × C × P)
+- **Interprétation** : Plus R est élevé, plus le risque d'échec est important
+- **Seuils** :
+  - < 30% : Risque minimal (vert)
+  - 30-40% : Risque modéré (jaune)
+  - 40-60% : Risque élevé (orange)
+  - ≥ 60% : Risque critique (rouge)
 
-  Appelée : Par navigation.js lors de l'activation de "Tableau de bord › Aperçu"
+### Patterns d'apprentissage
 
-  Utilisation :
-  // Appelée automatiquement par navigation.js
-  initialiserModuleTableauBordApercu();
+- **Stable** : A ≥ 75%, C ≥ 75%, P ≥ 75%
+- **Défi** : A ≥ 75%, mais C < 65% OU P < 65%
+- **Blocage émergent** : A ≥ 75%, mais C < 65% ET P < 65%
+- **Blocage critique** : Risque d'échec > 70%
 
-  chargerTableauBordApercu()
-  Description : Fonction principale qui charge et affiche toutes les statistiques
-  du tableau de bord.
+### Système RàI (Réponse à l'intervention)
 
-  Paramètres : Aucun
+- **Niveau 1** (Enseignement universel) : Risque < 30%
+- **Niveau 2** (Interventions ciblées) : Risque 30-60%
+- **Niveau 3** (Interventions intensives) : Risque ≥ 60%
 
-  Retour : void
+---
 
-  Séquence :
-  1. Lit groupeEtudiants depuis localStorage
-  2. Filtre étudiants actifs (statut ≠ décrochage/abandon)
-  3. Calcule indices pour chaque étudiant (calculerIndicesEtudiant())
-  4. Affiche métriques globales (afficherMetriquesGlobales())
-  5. Affiche distribution des risques (afficherDistributionRisques())
-  6. Affiche alertes prioritaires (afficherAlertesPrioritaires())
+## Données gérées
 
-  Utilisation :
-  // Appelée par saisie-presences.js après enregistrement
-  chargerTableauBordApercu();
+### Lecture localStorage (aucune écriture)
 
-  // Ou manuellement pour rafraîchir
-  chargerTableauBordApercu();
+#### 1. `indicesAssiduiteDetailles`
+- **Source** : `saisie-presences.js`
+- **Structure** :
+```javascript
+{
+  "1234567": {
+    "3derniers": { "valeur": 0.85, ... },
+    "7derniers": { "valeur": 0.82, ... },
+    "12derniers": { "valeur": 0.80, ... }
+  },
+  ...
+}
+```
+- **Usage** : Lecture de l'indice A (assiduité) pour chaque étudiant
 
-  Calculs
-
-  calculerIndicesEtudiant(da)
-  Description : Récupère les indices A-C-P pour un étudiant et calcule son risque
-  (sommatif + alternatif).
-
-  Paramètres :
-  - da (String) : Numéro DA de l'étudiant
-
-  Retour : (Object) Structure complète des indices
-
-  Structure retournée :
-  {
-    sommatif: {
-      assiduite: 0.92,
-      completion: 0.85,
-      performance: 0.75,
-      risque: 0.42,
-      niveauRisque: "élevé"
+#### 2. `indicesCP`
+- **Source** : `portfolio.js`
+- **Structure** :
+```javascript
+{
+  "SOM": {
+    "1234567": {
+      "C": 0.85,
+      "P": 0.72,
+      "dateCalcul": "2025-10-26T10:30:00"
     },
-    alternatif: {
-      assiduite: 0.95,
-      completion: 0.90,
-      performance: 0.80,
-      risque: 0.32,
-      niveauRisque: "modéré"
-    }
+    ...
+  },
+  "PAN": {
+    "1234567": {
+      "C": 0.87,
+      "P": 0.78,
+      "dateCalcul": "2025-10-26T10:30:00"
+    },
+    ...
   }
+}
+```
+- **Usage** : Lecture des indices C (complétion) et P (performance) pour SOM et PAN
 
-  Utilisation :
-  const indices = calculerIndicesEtudiant('2012345');
-  console.log(`Risque sommatif: ${(indices.sommatif.risque * 100).toFixed(1)}%`);
-  console.log(`Niveau: ${indices.sommatif.niveauRisque}`);
+#### 3. `groupeEtudiants`
+- **Source** : `etudiants.js`
+- **Usage** : Liste des étudiants actifs (filtre statut ≠ décrochage/abandon)
 
-  calculerRisque(assiduite, completion, performance)
-  Description : Calcule le risque d'échec selon la formule du Guide de monitorage.
-
-  Paramètres :
-  - assiduite (Number) : Indice A (0-1)
-  - completion (Number) : Indice C (0-1)
-  - performance (Number) : Indice P (0-1)
-
-  Retour : (Number) Risque entre 0 et 1
-
-  Formule :
-  Risque = 1 - (A × C × P)
-
-  Cas particuliers :
-  - Si A = 0 ou C = 0 ou P = 0 → Risque = 1 (critique)
-
-  Utilisation :
-  const risque = calculerRisque(0.92, 0.85, 0.75);
-  console.log(risque);  // 0.413 (41.3% de risque)
-
-  determinerNiveauRisque(risque)
-  Description : Détermine le niveau de risque textuel selon les seuils du Guide.
-
-  Paramètres :
-  - risque (Number) : Indice de risque (0-1)
-
-  Retour : (String) Niveau de risque
-
-  Seuils :
-  | Risque    | Niveau       |
-  |-----------|--------------|
-  | > 0.7     | "critique"   |
-  | 0.5 - 0.7 | "très élevé" |
-  | 0.4 - 0.5 | "élevé"      |
-  | 0.3 - 0.4 | "modéré"     |
-  | 0.2 - 0.3 | "faible"     |
-  | ≤ 0.2     | "minimal"    |
-
-  Utilisation :
-  const niveau = determinerNiveauRisque(0.45);
-  console.log(niveau);  // "élevé"
-
-  Fonctions d'affichage
-
-  Métriques globales
-
-  afficherMetriquesGlobales(etudiants)
-  Description : Affiche les moyennes de groupe pour A, C, P et interventions
-  requises. Respecte la configuration d'affichage (sommatif/alternatif).
-
-  Paramètres :
-  - etudiants (Array) : Étudiants avec indices calculés
-
-  Comportement :
-  1. Lit modalitesEvaluation.affichageTableauBord
-  2. CAS 1 : Les deux activés → Format "85% / 90%" (sommatif / alternatif)
-  3. CAS 2 : Seulement alternatif → Affiche alternatif seul
-  4. CAS 3 : Seulement sommatif (défaut) → Affiche sommatif seul
-
-  Éléments HTML mis à jour :
-  - #tb-total-etudiants : Nombre total d'étudiants actifs
-  - #tb-assiduite-moyenne : Moyenne de l'indice A
-  - #tb-completion-moyenne : Moyenne de l'indice C
-  - #tb-performance-moyenne : Moyenne de l'indice P
-  - #tb-interventions-requises : Nombre d'étudiants avec risque ≥ 0.4
-
-  Distribution des risques
-
-  afficherDistributionRisques(etudiants)
-  Description : Génère un graphique de distribution (6 cartes colorées) montrant
-  le nombre d'étudiants par niveau de risque.
-
-  Paramètres :
-  - etudiants (Array) : Étudiants avec indices calculés
-
-  Élément HTML : #tb-distribution-risques
-
-  Codes couleurs :
-  | Niveau     | Couleur          | Variable CSS          |
-  |------------|------------------|-----------------------|
-  | Minimal    | Vert             | var(--risque-nul)     |
-  | Faible     | Vert clair       | var(--risque-minimal) |
-  | Modéré     | Jaune            | var(--risque-modere)  |
-  | Élevé      | Orange           | var(--risque-eleve)   |
-  | Très élevé | Rouge foncé      | #c0392b               |
-  | Critique   | Rouge très foncé | #7f0000               |
-
-  Alertes prioritaires
-
-  afficherAlertesPrioritaires(etudiants)
-  Description : Affiche un tableau des étudiants à risque ≥ élevé (seuil 0.4),
-  triés par risque décroissant.
-
-  Paramètres :
-  - etudiants (Array) : Étudiants avec indices calculés
-
-  Élément HTML : #tb-alertes-prioritaires
-
-  Colonnes du tableau :
-  1. Nom
-  2. Prénom
-  3. Groupe
-  4. Assiduité (%)
-  5. Complétion (%)
-  6. Performance (%)
-  7. Niveau de risque (badge coloré)
-  8. Actions (bouton "Voir profil")
-
-  Comportement :
-  - Si aucun étudiant à risque ≥ 0.4 → Message "✅ Aucune intervention urgente 
-  requise"
-  - Sinon → Tableau trié par risque décroissant (plus critique en premier)
-
-  Fonctions utilitaires
-
-  setStatText(id, valeur)
-  - Met à jour le contenu textuel d'un élément
-  - Affiche warning si élément non trouvé
-
-  formatPourcentage(valeur)
-  - Convertit 0-1 → "85%"
-  - Retourne "—" si valeur invalide
-
-  Dépendances
-
-  Lit depuis :
-  - localStorage.indicesAssiduite (généré par saisie-presences.js)
-  - localStorage.indicesEvaluation (généré par portfolio.js, à créer)
-  - localStorage.groupeEtudiants (généré par etudiants.js)
-  - localStorage.modalitesEvaluation (généré par pratiques.js)
-
-  Utilise (fonctions externes) :
-  - echapperHtml() depuis config.js (sécurité XSS)
-  - afficherSousSection() depuis navigation.js (navigation vers profil)
-  - chargerProfilEtudiant() depuis tableau-bord-profil.js (affichage profil)
-
-  Utilisé par :
-  - saisie-presences.js - Appelle chargerTableauBordApercu() après enregistrement
-  - Interface utilisateur (section "Tableau de bord › Aperçu")
-
-  Modules requis (chargement avant) :
-  - config.js - Variables globales et echapperHtml()
-  - navigation.js - Fonctions de navigation
-
-  Initialisation
-
-  Fonction : initialiserModuleTableauBordApercu()
-
-  Appelée depuis : navigation.js lors de l'activation de "Tableau de bord"
-
-  Ordre de chargement : Après config.js, navigation.js, saisie-presences.js
-
-  Conditions d'initialisation :
-  - Élément DOM #tableau-bord-apercu doit exister
-  - Classe active sur cet élément déclenche le chargement automatique
-
-  Configuration d'affichage (PAN)
-
-  Trois modes d'affichage
-
-  1. Sommatif seul (défaut) :
-  {
-    affichageTableauBord: {
-      afficherSommatif: true,
-      afficherAlternatif: false
-    }
+#### 4. `modalitesEvaluation`
+- **Source** : `pratiques.js`
+- **Structure utilisée** :
+```javascript
+{
+  "pratique": "sommative",  // ou "alternative"
+  "typePAN": "maitrise",
+  "affichageTableauBord": {
+    "afficherSommatif": true,
+    "afficherAlternatif": false
   }
-  Affichage : "85%" (valeur unique)
+}
+```
+- **Usage** : Détermine le mode d'affichage (normal vs comparatif)
 
-  2. Alternatif seul :
-  {
-    affichageTableauBord: {
-      afficherSommatif: false,
-      afficherAlternatif: true
-    }
+---
+
+## API publique
+
+### Initialisation
+
+#### `initialiserModuleTableauBordApercu()`
+
+Initialise le module et charge les statistiques si la sous-section est active.
+
+**Paramètres** : Aucun
+**Retour** : `void`
+**Appelée par** : `navigation.js` lors de l'activation de "Tableau de bord → Aperçu"
+
+```javascript
+// Appelée automatiquement par navigation.js
+initialiserModuleTableauBordApercu();
+```
+
+---
+
+### Fonction principale
+
+#### `chargerTableauBordApercu()`
+
+Fonction principale qui charge et affiche toutes les statistiques du tableau de bord.
+
+**Paramètres** : Aucun
+**Retour** : `void`
+
+**Séquence d'exécution** :
+1. Lit `groupeEtudiants` depuis localStorage
+2. Filtre les étudiants actifs (statut ≠ décrochage/abandon)
+3. Calcule les indices pour chaque étudiant (`calculerIndicesEtudiant()`)
+4. Affiche les 4 sections principales :
+   - `afficherMetriquesGlobales(etudiants)`
+   - `afficherAlertesPrioritairesCompteurs(etudiants)`
+   - `afficherPatternsApprentissage(etudiants)`
+   - `afficherNiveauxRaI(etudiants)`
+
+**Gestion du mode d'affichage** :
+- Détecte automatiquement le mode (normal vs comparatif) via `modalitesEvaluation`
+- En mode comparatif : Affiche les checkboxes et les valeurs colorées
+- En mode normal : Affiche le badge simple et les valeurs uniques
+
+```javascript
+// Appelée par saisie-presences.js après enregistrement
+chargerTableauBordApercu();
+
+// Ou manuellement pour rafraîchir
+chargerTableauBordApercu();
+```
+
+---
+
+## Fonctions de génération de badges
+
+### `genererBadgePratique()`
+
+Génère un badge HTML indiquant la pratique de notation active (pour le titre principal).
+
+**Retour** : `string` - HTML du badge
+
+**Logique** :
+- Si `afficherSommatif && afficherAlternatif` : Badge "Mode Hybride (SOM + PAN)" en violet
+- Sinon si `pratique === 'sommative'` : Badge "Sommative traditionnelle (SOM)" en orange
+- Sinon : Badge "Alternative - PAN Maîtrise/Spécifications/Dénotation" en bleu
+
+**Style** : Badge large avec bordure et fond coloré (opacité 9%)
+
+```javascript
+const badgeHTML = genererBadgePratique();
+// Résultat : '<span style="...">Sommative traditionnelle (SOM)</span>'
+```
+
+---
+
+### `genererBadgeSourceDonnees()`
+
+Génère un badge compact indiquant la source des données (pour les sections).
+
+**Retour** : `string` - HTML du badge
+
+**Logique** :
+- Si mode comparatif : Badge "Hybride" en violet
+- Sinon si SOM actif : Badge "Source : SOM" en orange
+- Sinon : Badge "Source : PAN" en bleu
+
+**Note** : En Beta 0.72, cette fonction est encore présente mais peu utilisée (remplacée par les checkboxes en mode comparatif)
+
+---
+
+### `genererIndicateurPratiqueOuCheckboxes()`
+
+Génère soit un badge informatif (mode normal) soit des checkboxes interactives (mode comparatif).
+
+**Retour** : `string` - HTML du badge ou des checkboxes
+
+**Logique** :
+```javascript
+if (modeComparatif) {
+    // Retourne des checkboxes interactives [☑ SOM] [☑ PAN]
+    return '<div class="pratique-checkboxes">...</div>';
+} else {
+    // Retourne un badge simple [SOM] ou [PAN - Maîtrise]
+    return '<span class="badge-pratique">[SOM]</span>';
+}
+```
+
+**Utilisation** : Injectée dans le titre de chaque section en mode comparatif
+
+---
+
+## Fonctions de calcul
+
+### `calculerIndicesEtudiant(da)`
+
+Calcule tous les indices (A-C-P-R) pour un étudiant donné, dans les deux pratiques (SOM et PAN).
+
+**Paramètres** :
+- `da` (string) : Numéro de DA de l'étudiant
+
+**Retour** : Objet avec structure suivante
+```javascript
+{
+  sommatif: {
+    A: 0.85,
+    C: 0.75,
+    P: 0.68,
+    R: 0.567  // Risque calculé : 1 - (A × C × P)
+  },
+  alternatif: {
+    A: 0.85,   // Même valeur que sommatif (source unique)
+    C: 0.82,
+    P: 0.76,
+    R: 0.467
   }
-  Affichage : "90%" (valeur unique)
+}
+```
 
-  3. Les deux :
-  {
-    affichageTableauBord: {
-      afficherSommatif: true,
-      afficherAlternatif: true
+**Logique** :
+1. Lit `indicesAssiduiteDetailles[da]['12derniers']` pour A
+2. Lit `indicesCP.SOM[da]` pour C et P (SOM)
+3. Lit `indicesCP.PAN[da]` pour C et P (PAN)
+4. Calcule R avec `calculerRisque(A, C, P)` pour chaque pratique
+5. Retourne un objet avec les deux branches (sommatif et alternatif)
+
+**Gestion des données manquantes** :
+- Si un indice est manquant : utilise 0.0 par défaut
+- Avertissement console si données incomplètes
+
+---
+
+### `calculerRisque(assiduite, completion, performance)`
+
+Calcule le risque d'échec selon la formule R = 1 - (A × C × P).
+
+**Paramètres** :
+- `assiduite` (number) : Indice A (0.0 à 1.0)
+- `completion` (number) : Indice C (0.0 à 1.0)
+- `performance` (number) : Indice P (0.0 à 1.0)
+
+**Retour** : `number` - Risque entre 0.0 et 1.0
+
+**Exemple** :
+```javascript
+const risque = calculerRisque(0.85, 0.75, 0.68);
+// Résultat : 1 - (0.85 × 0.75 × 0.68) = 1 - 0.4335 = 0.5665 (57%)
+```
+
+---
+
+### `determinerNiveauRisque(risque)`
+
+Détermine le niveau de risque selon les seuils définis.
+
+**Paramètres** :
+- `risque` (number) : Valeur entre 0.0 et 1.0
+
+**Retour** : `string` - Un des niveaux suivants :
+- `"minimal"` : risque < 0.30
+- `"modere"` : 0.30 ≤ risque < 0.40
+- `"eleve"` : 0.40 ≤ risque < 0.60
+- `"critique"` : risque ≥ 0.60
+
+**Exemple** :
+```javascript
+determinerNiveauRisque(0.25); // "minimal"
+determinerNiveauRisque(0.35); // "modere"
+determinerNiveauRisque(0.55); // "eleve"
+determinerNiveauRisque(0.75); // "critique"
+```
+
+---
+
+### `determinerPattern(indices)`
+
+Détermine le pattern d'apprentissage d'un étudiant selon ses indices A-C-P.
+
+**Paramètres** :
+- `indices` (object) : `{ A, C, P, R }`
+
+**Retour** : `string` - Un des patterns suivants :
+- `"Stable"` : A ≥ 75%, C ≥ 75%, P ≥ 75%
+- `"Défi"` : A ≥ 75%, mais C < 65% OU P < 65% (pas les deux)
+- `"Blocage émergent"` : A ≥ 75%, mais C < 65% ET P < 65%
+- `"Blocage critique"` : Risque > 70% (1 - A×C×P > 0.70)
+- `"Inconnu"` : Autres cas (assiduité insuffisante)
+
+**Logique** :
+```javascript
+if (R > 0.70) return "Blocage critique";
+if (A >= 0.75 && C >= 0.75 && P >= 0.75) return "Stable";
+if (A >= 0.75 && C < 0.65 && P < 0.65) return "Blocage émergent";
+if (A >= 0.75 && (C < 0.65 || P < 0.65)) return "Défi";
+return "Inconnu";
+```
+
+---
+
+## Fonctions de génération de cartes (helper functions)
+
+Ces fonctions génèrent le HTML pour chaque type de carte d'information.
+
+### `genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficherPan)`
+
+Génère une carte pour les indicateurs globaux (A, C, P).
+
+**Paramètres** :
+- `label` (string) : Label affiché (ex: "Assiduité (A)")
+- `valeurSom` (string) : Valeur formatée pour SOM (ex: "85%")
+- `valeurPan` (string) : Valeur formatée pour PAN (ex: "87%")
+- `afficherSom` (boolean) : Afficher la valeur SOM
+- `afficherPan` (boolean) : Afficher la valeur PAN
+
+**Retour** : `string` - HTML de la carte
+
+**Structure HTML** :
+```html
+<div class="statistique-item">
+  <span class="label-left">Assiduité (A)</span>
+  <span class="values-right">
+    <span style="color: var(--som-orange);">85%</span> |
+    <span style="color: var(--pan-bleu);">87%</span>
+  </span>
+</div>
+```
+
+**Logique d'affichage** :
+- Mode comparatif + les deux cochées : Affiche "valeurSom | valeurPan" (coloré)
+- Mode comparatif + une seule cochée : Affiche uniquement la valeur cochée (colorée)
+- Mode normal : Affiche une seule valeur (non colorée)
+
+---
+
+### `genererCarteRisque(label, valeurSom, valeurPan, total, afficherSom, afficherPan, bgColor, borderColor)`
+
+Génère une carte pour la distribution des risques (minimal, modéré, élevé, critique).
+
+**Paramètres** :
+- `label` (string) : Label du niveau de risque (ex: "Risque élevé")
+- `valeurSom` (string) : Pourcentage SOM (ex: "25%")
+- `valeurPan` (string) : Pourcentage PAN
+- `total` (number) : Nombre total d'étudiants
+- `afficherSom` (boolean) : Afficher SOM
+- `afficherPan` (boolean) : Afficher PAN
+- `bgColor` (string) : Couleur de fond (ex: "#fff3e0")
+- `borderColor` (string) : Couleur de bordure (ex: "#ff9800")
+
+**Retour** : `string` - HTML de la carte avec fond coloré
+
+**Structure** : Similaire à `genererCarteMetrique()` mais avec styling spécifique (fond coloré)
+
+---
+
+### `genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, afficherPan, bgColor, borderColor)`
+
+Génère une carte pour les patterns d'apprentissage (Stable, Défi, Blocages).
+
+**Paramètres** : Identiques à `genererCarteRisque()`
+
+**Retour** : `string` - HTML de la carte
+
+**Note** : Beta 0.72 a supprimé les barres de progression (redondantes avec les pourcentages)
+
+---
+
+### `genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurSomCount, valeurPanCount, afficherSom, afficherPan, bgColor, borderColor)`
+
+Génère une carte pour le système RàI (Niveaux 1, 2, 3).
+
+**Paramètres** :
+- `label` (string) : Label du niveau (ex: "Niveau 1")
+- `description` (string) : Description (ex: "Enseignement universel")
+- `valeurSomPct` (string) : Pourcentage SOM (ex: "65%")
+- `valeurPanPct` (string) : Pourcentage PAN
+- `valeurSomCount` (number) : Nombre d'étudiants SOM
+- `valeurPanCount` (number) : Nombre d'étudiants PAN
+- `afficherSom` / `afficherPan` : Flags d'affichage
+- `bgColor` / `borderColor` : Couleurs de style
+
+**Retour** : `string` - HTML de la carte avec pourcentages et comptes
+
+**Structure** : Affiche "65% (18 étudiants)" en une seule ligne
+
+---
+
+## Fonctions d'affichage des sections
+
+### `afficherMetriquesGlobales(etudiants)`
+
+Affiche la section "Indicateurs globaux du groupe" avec les moyennes A, C, P.
+
+**Paramètres** :
+- `etudiants` (array) : Liste des étudiants avec leurs indices calculés
+
+**Affichage** :
+1. Calcule les moyennes de groupe pour A, C, P (SOM et PAN séparément)
+2. Génère les cartes avec `genererCarteMetrique()`
+3. Injecte dans `#metriques-globales-container`
+4. Ajoute les checkboxes ou le badge selon le mode
+
+**Exemple de sortie (mode comparatif)** :
+```
+Indicateurs globaux du groupe [☑ SOM] [☑ PAN]
+├─ Assiduité (A)    85% | 85%  (même valeur, source unique)
+├─ Complétion (C)   75% | 82%
+└─ Performance (P)  68% | 76%
+```
+
+---
+
+### `afficherAlertesPrioritairesCompteurs(etudiants)`
+
+Affiche la section "Risque d'échec" avec la distribution des niveaux de risque.
+
+**Paramètres** :
+- `etudiants` (array) : Liste des étudiants avec indices
+
+**Affichage** :
+1. Compte le nombre d'étudiants par niveau (minimal, modéré, élevé, critique)
+2. Calcule les pourcentages pour SOM et PAN
+3. Génère les cartes avec `genererCarteRisque()` (fond coloré selon niveau)
+4. Affiche aussi une liste des étudiants à risque élevé/critique
+
+**Couleurs** :
+- Minimal : Vert (#e8f5e9 / #4caf50)
+- Modéré : Jaune (#fff9c4 / #fbc02d)
+- Élevé : Orange (#fff3e0 / #ff9800)
+- Critique : Rouge (#ffebee / #f44336)
+
+---
+
+### `afficherPatternsApprentissage(etudiants)`
+
+Affiche la section "Répartition des patterns d'apprentissage".
+
+**Paramètres** :
+- `etudiants` (array) : Liste des étudiants
+
+**Patterns affichés** :
+- Stable (vert)
+- Défi (jaune)
+- Blocage émergent (orange)
+- Blocage critique (rouge)
+
+**Affichage** : Pourcentages et comptes pour chaque pattern (SOM vs PAN)
+
+---
+
+### `afficherNiveauxRaI(etudiants)`
+
+Affiche la section "Système de Réponse à l'intervention (RàI)".
+
+**Paramètres** :
+- `etudiants` (array) : Liste des étudiants
+
+**Niveaux affichés** :
+- **Niveau 1** (vert) : Enseignement universel (R < 30%)
+- **Niveau 2** (jaune) : Interventions ciblées (30% ≤ R < 60%)
+- **Niveau 3** (rouge) : Interventions intensives (R ≥ 60%)
+
+**Affichage** : Pourcentages et comptes avec description de chaque niveau
+
+---
+
+## Fonctions de gestion des checkboxes
+
+### `togglerAffichagePratique(pratique, afficher)`
+
+Bascule l'affichage d'une pratique (SOM ou PAN) en mode comparatif.
+
+**Paramètres** :
+- `pratique` (string) : "sommatif" ou "alternatif"
+- `afficher` (boolean) : true pour afficher, false pour masquer
+
+**Logique** :
+1. Vérifie qu'au moins une pratique reste affichée (validation)
+2. Recharge le tableau de bord avec `chargerTableauBordApercu()`
+
+**Écouteurs d'événements** :
+```javascript
+document.getElementById('toggle-som')?.addEventListener('change', function() {
+    if (!this.checked && !document.getElementById('toggle-pan').checked) {
+        this.checked = true; // Empêche de tout décocher
+        return;
     }
-  }
-  Affichage : "85% / 90%" (sommatif / alternatif)
+    chargerTableauBordApercu();
+});
+```
 
-  Risque utilisé pour interventions
+---
 
-  - Si les deux affichés : Utilise risque sommatif par défaut
-  - Si alternatif seul : Utilise risque alternatif
-  - Si sommatif seul : Utilise risque sommatif
+## Fonctions utilitaires
 
-  Formules détaillées
+### `formatPourcentage(valeur)`
 
-  Risque d'échec
+Formate un nombre entre 0.0 et 1.0 en pourcentage avec 0 décimale.
 
-  Formule du Guide de monitorage :
-  Risque = 1 - (A × C × P)
+**Paramètres** :
+- `valeur` (number) : Valeur entre 0.0 et 1.0
 
-  Interprétation :
-  - A × C × P = Probabilité de réussite
-  - 1 - (A × C × P) = Probabilité d'échec (risque)
+**Retour** : `string` - Pourcentage formaté (ex: "85%")
 
-  Exemples :
-  | A    | C    | P    | A×C×P | Risque | Niveau     |
-  |------|------|------|-------|--------|------------|
-  | 0.95 | 0.90 | 0.85 | 0.727 | 0.27   | Faible     |
-  | 0.85 | 0.75 | 0.70 | 0.446 | 0.55   | Très élevé |
-  | 0.50 | 0.60 | 0.40 | 0.120 | 0.88   | Critique   |
-  | 0.00 | 0.80 | 0.70 | 0.000 | 1.00   | Critique   |
+```javascript
+formatPourcentage(0.8547); // "85%"
+```
 
-  Cas limite : Si un seul indice = 0 → Risque automatiquement = 1 (critique)
+---
 
-  Interventions requises
+### `getCouleurRisque(niveau)`
 
-  Définition : Nombre d'étudiants avec Risque ≥ 0.4 (seuil "élevé")
+Retourne les couleurs de fond et de bordure pour un niveau de risque donné.
 
-  Calcul :
-  interventions = étudiants.filter(e => e.risque >= 0.4).length
+**Paramètres** :
+- `niveau` (string) : "minimal", "modere", "eleve", ou "critique"
 
-  Seuils d'intervention (Guide de monitorage) :
-  - Risque < 0.4 : Suivi régulier
-  - Risque ≥ 0.4 : Intervention proactive requise
-  - Risque ≥ 0.7 : Intervention urgente requise
+**Retour** : Objet `{ bgColor: string, borderColor: string }`
 
-  Tests
+```javascript
+getCouleurRisque("eleve");
+// { bgColor: "#fff3e0", borderColor: "#ff9800" }
+```
 
-  Console navigateur
+---
 
-  // Vérifier disponibilité du module
-  typeof initialiserModuleTableauBordApercu === 'function'  // true
-  typeof chargerTableauBordApercu === 'function'  // true
-  typeof calculerIndicesEtudiant === 'function'  // true
+### `setStatText(id, valeur)`
 
-  // Vérifier données sources
-  !!localStorage.getItem('indicesAssiduite')  // true
-  !!localStorage.getItem('groupeEtudiants')  // true
+Met à jour le texte d'un élément HTML par son ID.
 
-  // Tester calcul pour un étudiant
-  const indices = calculerIndicesEtudiant('2012345');
-  console.table(indices.sommatif);
-  console.table(indices.alternatif);
+**Paramètres** :
+- `id` (string) : ID de l'élément
+- `valeur` (string|number) : Valeur à afficher
 
-  // Tester formule de risque
-  const risque = calculerRisque(0.85, 0.75, 0.70);
-  console.log(`Risque: ${(risque * 100).toFixed(1)}%`);  // "55.4%"
+**Avertissement** : Affiche un warning console si l'élément n'existe pas
 
-  const niveau = determinerNiveauRisque(risque);
-  console.log(`Niveau: ${niveau}`);  // "très élevé"
+---
 
-  // Voir configuration d'affichage
-  const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-  console.log(config.affichageTableauBord);
+## Ordre de chargement et dépendances
 
-  Tests fonctionnels
+### Scripts requis (AVANT ce module)
 
-  1. Test affichage basique :
-    - Aller dans Tableau de bord → Aperçu
-    - Vérifier : 4 cartes métriques affichées (Total, A, C, P, Interventions)
-    - Vérifier : Distribution des risques (6 cartes colorées)
-    - Vérifier : Section alertes prioritaires
-  2. Test avec données :
-    - Saisir présences pour 3 dates
-    - Aller dans Tableau de bord → Aperçu
-    - Vérifier : Assiduité moyenne > 0%
-    - Vérifier : Distribution montre au moins 1 étudiant
-    - Vérifier : Si risque ≥ 0.4, étudiant apparaît dans alertes
-  3. Test mode sommatif seul :
-    - Réglages → Pratiques → Cocher "Sommatif", décocher "Alternatif"
-    - Tableau de bord → Aperçu
-    - Vérifier : Format "85%" (valeur unique)
-  4. Test mode les deux :
-    - Réglages → Pratiques → Cocher les deux cases
-    - Tableau de bord → Aperçu
-    - Vérifier : Format "85% / 90%" (deux valeurs)
-  5. Test alertes prioritaires :
-    - Créer un étudiant avec faible assiduité (< 40%)
-    - Tableau de bord → Aperçu
-    - Vérifier : Étudiant apparaît dans tableau alertes
-    - Vérifier : Badge rouge "critique" ou "très élevé"
-    - Cliquer "Voir profil"
-    - Vérifier : Navigation vers profil étudiant
-  6. Test rafraîchissement auto :
-    - Ouvrir Tableau de bord → Aperçu
-    - Noter l'assiduité moyenne (ex: 85%)
-    - Aller dans Présences → Saisie
-    - Saisir présences, Enregistrer
-    - Revenir Tableau de bord → Aperçu
-    - Vérifier : Valeurs mises à jour automatiquement
-  7. Test distribution des risques :
-    - Vérifier somme des 6 cartes = Total étudiants
-    - Vérifier codes couleurs (vert → jaune → orange → rouge)
-    - Vérifier capitalisation des noms ("Minimal", "Critique")
+```html
+<!-- PRIORITÉ 1: Configuration -->
+<script src="js/config.js"></script>
+<script src="js/navigation.js"></script>
 
-  Métriques affichées
+<!-- PRIORITÉ 2: Gestion des données -->
+<script src="js/etudiants.js"></script>
+<script src="js/pratiques.js"></script>
 
-  Carte 1 : Total étudiants
+<!-- PRIORITÉ 3: Calcul des indices (CRITIQUE) -->
+<script src="js/saisie-presences.js"></script>  <!-- Calcule indices A -->
+<script src="js/portfolio.js"></script>          <!-- Calcule indices C et P -->
 
-  - Valeur : Nombre d'étudiants actifs (statut ≠ décrochage/abandon)
-  - Élément : #tb-total-etudiants
+<!-- PRIORITÉ 4: Affichage -->
+<script src="js/tableau-bord-apercu.js"></script> <!-- CE MODULE -->
+```
 
-  Carte 2 : Assiduité moyenne
+**⚠️ IMPORTANT** : Les modules `saisie-presences.js` et `portfolio.js` doivent être chargés AVANT ce module, sinon les données d'indices ne seront pas disponibles.
 
-  - Valeur : Moyenne de l'indice A du groupe
-  - Formule : SOMME(A_étudiants) / NOMBRE_étudiants
-  - Format : "85%" ou "85% / 90%"
-  - Élément : #tb-assiduite-moyenne
+---
 
-  Carte 3 : Complétion moyenne
+## Flux de données
 
-  - Valeur : Moyenne de l'indice C du groupe
-  - Formule : SOMME(C_étudiants) / NOMBRE_étudiants
-  - Format : "75%" ou "75% / 80%"
-  - Élément : #tb-completion-moyenne
-  - Note : Actuellement 0% (indices C non calculés, en attente de portfolio.js)
+```
+SOURCES                      LECTEUR                    AFFICHAGE
+┌──────────────────┐        ┌────────────────┐         ┌─────────────┐
+│ saisie-          │        │ tableau-bord-  │         │ Section     │
+│ presences.js     │───────▶│ apercu.js      │────────▶│ Aperçu      │
+│ (calcule A)      │        │ (agrège et     │         │             │
+└──────────────────┘        │  affiche)      │         │ - Métriques │
+                            │                │         │ - Risques   │
+┌──────────────────┐        │                │         │ - Patterns  │
+│ portfolio.js     │───────▶│                │         │ - RàI       │
+│ (calcule C et P) │        │                │         └─────────────┘
+└──────────────────┘        └────────────────┘
 
-  Carte 4 : Performance moyenne
+localStorage:
+- indicesAssiduiteDetailles
+- indicesCP (SOM et PAN)
+- groupeEtudiants
+- modalitesEvaluation
+```
 
-  - Valeur : Moyenne de l'indice P du groupe
-  - Formule : SOMME(P_étudiants) / NOMBRE_étudiants
-  - Format : "70%" ou "70% / 75%"
-  - Élément : #tb-performance-moyenne
-  - Note : Actuellement 0% (indices P non calculés, en attente de portfolio.js)
+---
 
-  Carte 5 : Interventions requises
+## Variables CSS utilisées
 
-  - Valeur : Nombre d'étudiants avec Risque ≥ 0.4
-  - Formule : COUNT(étudiants WHERE risque >= 0.4)
-  - Élément : #tb-interventions-requises
+```css
+:root {
+    --som-orange: #ff6f00;     /* Couleur SOM (mode comparatif) */
+    --pan-bleu: #0277bd;       /* Couleur PAN (mode comparatif) */
+    --hybride-violet: #9c27b0; /* Réservé pour usage futur */
+}
+```
 
-  Problèmes connus
+---
 
-  Indices C et P toujours à 0%
+## Exemples d'utilisation
 
-  Cause : Module portfolio.js pas encore créé, indicesEvaluation vide
+### Recharger le tableau de bord après saisie de présences
 
-  Solution : Normal pour l'instant. Une fois portfolio.js implémenté :
-  // portfolio.js devra créer cette structure
-  localStorage.setItem('indicesEvaluation', JSON.stringify({
-    sommatif: { '2012345': { completion: 0.85, performance: 0.75 } },
-    alternatif: { '2012345': { completion: 0.90, performance: 0.80 } }
-  }));
+```javascript
+// Dans saisie-presences.js, après enregistrement
+function enregistrerPresences() {
+    // ... logique d'enregistrement ...
 
-  Tableau de bord ne se rafraîchit pas
+    // Recalculer les indices A
+    calculerEtStockerIndicesAssiduite();
 
-  Cause : chargerTableauBordApercu() non appelée après modification
+    // Rafraîchir le tableau de bord
+    if (typeof chargerTableauBordApercu === 'function') {
+        chargerTableauBordApercu();
+    }
+}
+```
 
-  Solution :
-  // Appel manuel
-  chargerTableauBordApercu();
+---
 
-  // Ou vérifier que saisie-presences.js appelle bien la fonction (lignes 
-  1005-1018)
+### Recharger après modification des indices C-P
 
-  Alertes prioritaires vides malgré étudiants faibles
+```javascript
+// Dans portfolio.js, après calcul des indices
+function calculerEtStockerIndicesCP() {
+    // ... calcul des indices C et P ...
 
-  Cause : Risque calculé < 0.4 (seuil "élevé")
+    // Rafraîchir le tableau de bord si visible
+    const apercu = document.getElementById('tableau-bord-apercu');
+    if (apercu && apercu.classList.contains('active')) {
+        chargerTableauBordApercu();
+    }
+}
+```
 
-  Solution : Vérifier calcul du risque :
-  const indices = calculerIndicesEtudiant('2012345');
-  console.log('Risque:', indices.sommatif.risque);  // Doit être >= 0.4
-  // Si A=0.50, C=0, P=0 → Risque = 1 (apparaît)
-  // Si A=0.70, C=0.70, P=0.70 → Risque = 0.657 (apparaît)
-  // Si A=0.80, C=0.80, P=0.80 → Risque = 0.488 (apparaît)
+---
 
-  Format "85% / 90%" ne s'affiche pas
+## Limitations connues
 
-  Cause : Configuration PAN incorrecte
+1. **Pas de rafraîchissement automatique** : Le tableau de bord ne se met pas à jour automatiquement. Il faut appeler `chargerTableauBordApercu()` manuellement.
 
-  Solution :
-  // Vérifier config
-  const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-  console.log(config.affichageTableauBord);
-  // Doit être : { afficherSommatif: true, afficherAlternatif: true }
+2. **Données synchrones** : Toutes les lectures sont synchrones depuis localStorage. Avec un très grand nombre d'étudiants (> 100), cela pourrait causer des ralentissements.
 
-  Distribution des risques montre tous à "minimal"
+3. **Mode comparatif limité au Tableau de bord** : Le profil étudiant ne supporte pas encore le mode comparatif (affichage d'une seule pratique à la fois).
 
-  Cause : Indices C et P à 0, mais A élevé → Risque = 1 (critique)
+4. **Données manquantes** : Si `indicesCP` n'existe pas pour un étudiant, les valeurs par défaut (0.0) sont utilisées, ce qui peut fausser les statistiques de groupe.
 
-  Explication : Si C=0 ou P=0, la formule 1 - (A × C × P) donne toujours Risque =
-  1
-  // Exemple
-  calculerRisque(0.95, 0, 0);  // Retourne 1 (critique)
+---
 
-  Solution temporaire : Attendre implémentation de portfolio.js
+## Notes de migration (Beta 0.71 → Beta 0.72)
 
-  Règles de modification
+### Changements majeurs
 
-  ⚠️ ZONES CRITIQUES - NE PAS MODIFIER :
-  - Fonction calculerRisque() (lignes 140-147) - Formule officielle du Guide
-  - Fonction determinerNiveauRisque() (lignes 163-170) - Seuils officiels
-  - Lecture de indicesAssiduite (ligne 94) - Couplage avec saisie-presences.js
-  - Structure retournée par calculerIndicesEtudiant() - Utilisée par d'autres
-  modules
+1. **Suppression des badges "Hybride" dans les sections** → Remplacés par checkboxes interactives en mode comparatif
 
-  ✅ ZONES MODIFIABLES :
-  - Styles visuels (couleurs, bordures, espacements)
-  - Textes d'interface (labels, messages)
-  - Ajout de nouvelles métriques (ex: taux de remise, moyenne SOLO)
-  - Format d'affichage des pourcentages (ex: "85.5%" au lieu de "86%")
+2. **Nouvelles fonctions helper** : `genererCarteMetrique()`, `genererCarteRisque()`, `genererCartePattern()`, `genererCarteRaI()`
 
-  Règle d'or : Ce module est un LECTEUR pur. Il ne doit JAMAIS calculer les
-  indices primaires (A-C-P). Ces calculs appartiennent à saisie-presences.js et
-  portfolio.js.
+3. **Layout unifié** : Label à gauche, valeurs à droite (class `label-left` et `values-right`)
 
-  Historique
+4. **Colorisation** : Valeurs colorées uniquement en mode comparatif (orange/bleu)
 
-  - Version initiale : Affichage basique des statistiques
-  - Refonte octobre 2025 :
-    - Transformation en module LECTEUR pur
-    - Lecture des indices depuis indicesAssiduite (saisie-presences.js)
-    - Support des deux modes (sommatif/alternatif)
-    - Calcul du risque selon formule du Guide
-    - Distribution des risques (6 niveaux)
-    - Alertes prioritaires avec tri par risque
-    - Rafraîchissement automatique depuis saisie-presences.js
-  - Session 20 octobre 2025 :
-    - Support affichage double "85% / 90%"
-    - Configuration via modalitesEvaluation.affichageTableauBord
-    - Documentation complète en-tête
+5. **Suppression barres de progression** : Retirées de la section Patterns (redondance)
 
-  ---
-  Référence code : /js/tableau-bord-apercu.js (461 lignes)
+### Fonctions supprimées
 
-  Modules liés :
-  - saisie-presences.js (source indices A)
-  - portfolio.js (source indices C et P, à créer)
-  - pratiques.js (config affichage)
-  - etudiants.js (liste étudiants)
+- `afficherPatternsHybride()` - Code mort
+- `afficherRaIHybride()` - Code mort
+
+### Fonctions ajoutées
+
+- `genererIndicateurPratiqueOuCheckboxes()` - Génère badge ou checkboxes selon mode
+- `togglerAffichagePratique()` - Gère les événements checkboxes
+
+---
+
+## Références
+
+- **CLAUDE.md** : Architecture globale du projet
+- **Documentation_Indicateurs_Pratique.md** : Guide utilisateur du mode comparatif
+- **Guide de monitorage** : Fondements théoriques (Section ROUGE)
+- **Documentation Module saisie-presences.md** : Source des indices A
+- **Documentation Module portfolio.md** : Source des indices C et P
+
+---
+
+**Licence** : Creative Commons BY-NC-SA 4.0 (Grégoire Bédard)
+**Contact** : Labo Codex (https://codexnumeris.org/apropos)

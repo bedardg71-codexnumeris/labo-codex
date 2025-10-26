@@ -928,6 +928,9 @@ function nouvelleEvaluation() {
     afficherOuMasquerBoutonVerrouillage(false);
     desactiverFormulaireEvaluation(false);
 
+    // Masquer la section de gestion des jetons (seulement pour les évaluations existantes)
+    afficherGestionJetons(false);
+
     afficherNotificationSucces('Paramètres réinitialisés - Prêt pour une nouvelle série d\'évaluations');
 }
 
@@ -1258,9 +1261,22 @@ function genererBadgeCompletion(etudiant) {
     const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
     const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
 
+    // Compter uniquement les artefacts distincts (exclure les évaluations remplacées)
+    const evaluationsActives = etudiant.evaluations.filter(e => !e.remplaceeParId);
+    const productionsDistinctes = new Set(evaluationsActives.map(e => e.productionId));
+    const nbArtefacts = productionsDistinctes.size;
+
     // Convertir de pourcentage (0-100) en proportion (0-1)
-    const completion = indicesCPEtudiant ? indicesCPEtudiant.C / 100 : 0;
-    const nbArtefacts = etudiant.evaluations.length;
+    // Vérification robuste pour éviter NaN
+    let completion = 0;
+    if (indicesCPEtudiant && typeof indicesCPEtudiant.C === 'number' && !isNaN(indicesCPEtudiant.C)) {
+        completion = indicesCPEtudiant.C / 100;
+    } else if (nbArtefacts > 0) {
+        // Fallback : calculer depuis le nombre d'artefacts et productions attendues
+        const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+        const productionsAttendues = productions.filter(p => p.type !== 'portfolio').length;
+        completion = productionsAttendues > 0 ? nbArtefacts / productionsAttendues : 0;
+    }
 
     // Déterminer la couleur selon le taux de complétion
     let couleurFond = '#e8f5e9'; // Vert clair par défaut
@@ -1348,11 +1364,22 @@ function genererDetailsEtudiant(etudiant) {
     // Créer un tableau avec TOUTES les productions et leur statut
     const tableauComplet = productions.map(production => {
         // Chercher si cette production a été évaluée pour cet étudiant
-        const evaluation = evaluations.find(e => e.productionId === production.id);
+        // PRIORISER l'évaluation active (sans remplaceeParId) si elle existe
+        const evaluationsProduction = evaluations.filter(e => e.productionId === production.id);
+        let evaluation = null;
+
+        if (evaluationsProduction.length > 0) {
+            // Chercher d'abord une évaluation active (non remplacée)
+            evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
+            // Si toutes sont remplacées, prendre la première (cas rare)
+            if (!evaluation) {
+                evaluation = evaluationsProduction[0];
+            }
+        }
 
         return {
             production: production,
-            evaluation: evaluation || null
+            evaluation: evaluation
         };
     });
 
@@ -1396,6 +1423,8 @@ function genererDetailsEtudiant(etudiant) {
                                     <span class="badge-statut badge-succes">
                                         ${estRemplacee ? 'Remplacée' : 'Évalué'}
                                     </span>
+                                    ${estReprise ? '<span style="color: #9c27b0; font-size: 1.2rem; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
+                                    ${item.evaluation.jetonDelaiApplique ? '<span style="color: #ff6f00; font-size: 1.2rem; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
                                 </td>
                                 <td>${item.evaluation.dateEvaluation ? new Date(item.evaluation.dateEvaluation).toLocaleDateString('fr-CA') : '—'}</td>
                                 <td>
@@ -1453,33 +1482,46 @@ function genererDetailsEtudiant(etudiant) {
 
     // Ajouter le résumé
     const nbAttendus = productions.filter(p => p.type !== 'portfolio').length;
-    const nbRemis = evaluations.filter(e => !e.remplaceeParId).length; // Ne compter que les évaluations actives
+
+    // Compter les artefacts distincts actifs (exclure remplacées)
+    const evaluationsActives = evaluations.filter(e => !e.remplaceeParId);
+    const productionsDistinctes = new Set(evaluationsActives.map(e => e.productionId));
+    const nbRemis = productionsDistinctes.size;
+
+    // Lire les indices depuis la source unique (portfolio.js)
+    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
+
+    const tauxCompletion = indicesCPEtudiant?.C ?? (nbAttendus > 0 ? Math.round((nbRemis / nbAttendus) * 100) : 0);
+
+    // Calcul de la performance moyenne avec fallback
+    let performanceMoyenne = 0;
+    if (indicesCPEtudiant && typeof indicesCPEtudiant.P === 'number' && !isNaN(indicesCPEtudiant.P)) {
+        performanceMoyenne = Math.round(indicesCPEtudiant.P);
+    } else if (evaluationsActives.length > 0) {
+        // Fallback : calculer la moyenne des notes des évaluations actives
+        const sommeNotes = evaluationsActives.reduce((sum, e) => sum + (e.noteFinale || 0), 0);
+        performanceMoyenne = Math.round(sommeNotes / evaluationsActives.length);
+    }
+
     const nbRemplacees = evaluations.filter(e => e.remplaceeParId).length;
     const nbReprises = evaluations.filter(e => e.repriseDeId).length;
+    const nbDelais = evaluations.filter(e => e.jetonDelaiApplique && !e.remplaceeParId).length;
 
     const resumeHTML = `
         <div class="carte" style="margin-top: 15px; background: var(--bleu-pale);">
             <h4 style="margin-bottom: 10px;">Résumé de l'étudiant</h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                 <div>
-                    <strong>Artefacts remis:</strong> ${nbRemis} / ${nbAttendus}
-                    (${Math.round(etudiant.indices.completion * 100)}%)
+                    <strong>Artefacts remis:</strong> ${nbRemis} / ${nbAttendus} (${tauxCompletion}%)
                 </div>
                 <div>
-                    <strong>Performance moyenne:</strong> ${Math.round(etudiant.indices.performance * 100)}%
+                    <strong>Performance moyenne:</strong> ${performanceMoyenne}%
                 </div>
                 <div>
-                    <strong>Tendance:</strong> ${obtenirTendance(evaluations.filter(e => !e.remplaceeParId))}
+                    <strong>Tendance:</strong> ${obtenirTendance(evaluationsActives)}
                 </div>
             </div>
-            ${nbReprises > 0 ? `
-                <div style="margin-top: 15px; padding: 10px; background: #f3e5f5; border-radius: 6px; border-left: 4px solid #9c27b0;">
-                    <strong>Jetons de reprise appliqués:</strong> ${nbReprises}<br>
-                    <span style="font-size: 0.85rem; color: #666;">
-                        ${nbRemplacees} évaluation${nbRemplacees > 1 ? 's' : ''} remplacée${nbRemplacees > 1 ? 's' : ''} (archivée${nbRemplacees > 1 ? 's' : ''}, ne compte${nbRemplacees > 1 ? 'nt' : ''} plus dans les indices)
-                    </span>
-                </div>
-            ` : ''}
         </div>
     `;
 
@@ -2606,6 +2648,9 @@ function modifierEvaluation(evaluationId) {
                     } else {
                         afficherNotificationSucces('Évaluation chargée - Vous pouvez maintenant la modifier');
                     }
+
+                    // Afficher la section de gestion des jetons
+                    afficherGestionJetons(true);
                 }, 300);
             }, 300);
         }, 300);
@@ -2974,17 +3019,36 @@ function chargerFiltresBanqueEvaluations() {
 function filtrerBanqueEvaluations() {
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
 
-    // Récupérer les filtres
+    // Récupérer les filtres dropdown
     const filtreGroupe = document.getElementById('filtreBanqueGroupe')?.value || '';
     const filtreEtudiant = document.getElementById('filtreBanqueEtudiant')?.value || '';
     const filtreProduction = document.getElementById('filtreBanqueProduction')?.value || '';
     const tri = document.getElementById('triBanqueEvaluation')?.value || 'date-desc';
 
+    // Récupérer le terme de recherche textuelle
+    const recherche = document.getElementById('recherche-banque-evaluations');
+    const termeRecherche = recherche ? recherche.value.toLowerCase().trim() : '';
+
     // Filtrer
     let evaluationsFiltrees = evaluations.filter(evaluation => {
+        // Filtres dropdown
         if (filtreGroupe && evaluation.groupe !== filtreGroupe) return false;
         if (filtreEtudiant && evaluation.etudiantDA !== filtreEtudiant) return false;
         if (filtreProduction && evaluation.productionId !== filtreProduction) return false;
+
+        // Filtre de recherche textuelle
+        if (termeRecherche) {
+            const texteRecherche = [
+                evaluation.etudiantNom || '',
+                evaluation.etudiantDA || '',
+                evaluation.productionNom || '',
+                evaluation.grilleNom || '',
+                evaluation.groupe || ''
+            ].join(' ').toLowerCase();
+
+            if (!texteRecherche.includes(termeRecherche)) return false;
+        }
+
         return true;
     });
 
@@ -3034,6 +3098,7 @@ function afficherListeBanqueEvaluations(evaluations) {
         const heureEval = evaluation.heureEvaluation || new Date(evaluation.dateEvaluation).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
         const estRemplacee = evaluation.remplaceeParId ? true : false;
         const estReprise = evaluation.repriseDeId ? true : false;
+        const estDelai = evaluation.jetonDelaiApplique ? true : false;
 
         return `
             <div class="carte" style="margin-bottom: 15px; ${estRemplacee ? 'opacity: 0.6; border-left: 3px solid #999;' : ''}">
@@ -3043,6 +3108,7 @@ function afficherListeBanqueEvaluations(evaluations) {
                             ${echapperHtml(evaluation.etudiantNom)}
                             ${evaluation.verrouillee ? '<span style="color: #ff9800; margin-left: 8px;">(Verrouillée)</span>' : ''}
                             ${estReprise ? '<span style="color: #9c27b0; margin-left: 8px;" title="Jeton de reprise appliqué">(Reprise)</span>' : ''}
+                            ${estDelai ? '<span style="color: #ff6f00; margin-left: 8px;" title="Jeton de délai de remise appliqué">(Délai)</span>' : ''}
                             ${estRemplacee ? '<span style="color: #999; margin-left: 8px;" title="Évaluation remplacée">(Remplacée)</span>' : ''}
                         </h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: #666; font-size: 0.9rem;">
@@ -3059,6 +3125,11 @@ function afficherListeBanqueEvaluations(evaluations) {
                         ${estReprise ? `
                             <div style="margin-top: 10px; padding: 8px; background: #f3e5f5; border-radius: 4px; font-size: 0.85rem; color: #7b1fa2;">
                                 Jeton de reprise appliqué - Remplace l'évaluation précédente
+                            </div>
+                        ` : ''}
+                        ${estDelai ? `
+                            <div style="margin-top: 10px; padding: 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100;">
+                                Jeton de délai de remise appliqué - Date limite étendue
                             </div>
                         ` : ''}
                     </div>
@@ -3427,14 +3498,27 @@ function afficherDetailsEvaluationJeton() {
 }
 
 /**
- * Applique un jeton de reprise à l'évaluation sélectionnée
- * Crée un duplicata, marque l'originale comme remplacée, et charge la nouvelle dans le formulaire
+ * Applique un ou plusieurs jetons à l'évaluation sélectionnée
+ * - Jeton de reprise : Crée un duplicata, marque l'originale comme remplacée
+ * - Jeton de délai : Marque l'évaluation comme ayant bénéficié d'un délai supplémentaire
  */
 function appliquerJetonReprise() {
     const evaluationId = window.evaluationJetonSelectionnee;
 
     if (!evaluationId) {
         afficherNotificationErreur('Erreur', 'Veuillez sélectionner une évaluation');
+        return;
+    }
+
+    // Lire l'état des checkboxes
+    const jetonRepriseCheck = document.getElementById('jetonRepriseCheck');
+    const jetonDelaiCheck = document.getElementById('jetonDelaiCheck');
+
+    const appliquerReprise = jetonRepriseCheck && jetonRepriseCheck.checked;
+    const appliquerDelai = jetonDelaiCheck && jetonDelaiCheck.checked;
+
+    if (!appliquerReprise && !appliquerDelai) {
+        afficherNotificationErreur('Erreur', 'Veuillez sélectionner au moins un type de jeton');
         return;
     }
 
@@ -3447,24 +3531,63 @@ function appliquerJetonReprise() {
     }
 
     const evaluationOriginale = evaluations[indexOriginal];
+    let messageSucces = '';
+    let nouvelleEvaluationId = null;
 
-    // Créer le duplicata avec un nouvel ID
-    const nouvelleEvaluation = {
-        ...evaluationOriginale,
-        id: 'EVAL_REPRISE_' + Date.now(),
-        dateEvaluation: new Date().toISOString(),
-        repriseDeId: evaluationOriginale.id, // Lien vers l'originale
-        jetonRepriseApplique: true,
-        dateApplicationJeton: new Date().toISOString(),
-        verrouillee: false // Déverrouiller pour permettre la modification immédiate
-    };
+    // Scénario 1 : Jeton de reprise uniquement
+    if (appliquerReprise && !appliquerDelai) {
+        // Créer le duplicata avec un nouvel ID
+        const nouvelleEvaluation = {
+            ...evaluationOriginale,
+            id: 'EVAL_REPRISE_' + Date.now(),
+            dateEvaluation: new Date().toISOString(),
+            repriseDeId: evaluationOriginale.id, // Lien vers l'originale
+            jetonRepriseApplique: true,
+            dateApplicationJetonReprise: new Date().toISOString(),
+            verrouillee: false // Déverrouiller pour permettre la modification immédiate
+        };
 
-    // Marquer l'originale comme remplacée
-    evaluations[indexOriginal].remplaceeParId = nouvelleEvaluation.id;
-    evaluations[indexOriginal].dateRemplacement = new Date().toISOString();
+        // Marquer l'originale comme remplacée
+        evaluations[indexOriginal].remplaceeParId = nouvelleEvaluation.id;
+        evaluations[indexOriginal].dateRemplacement = new Date().toISOString();
 
-    // Ajouter la nouvelle évaluation
-    evaluations.push(nouvelleEvaluation);
+        // Ajouter la nouvelle évaluation
+        evaluations.push(nouvelleEvaluation);
+        nouvelleEvaluationId = nouvelleEvaluation.id;
+        messageSucces = `Jeton de reprise appliqué pour ${evaluationOriginale.etudiantNom}`;
+    }
+    // Scénario 2 : Jeton de délai uniquement
+    else if (!appliquerReprise && appliquerDelai) {
+        // Marquer l'évaluation existante avec un jeton de délai
+        evaluations[indexOriginal].jetonDelaiApplique = true;
+        evaluations[indexOriginal].dateApplicationJetonDelai = new Date().toISOString();
+        messageSucces = `Jeton de délai de remise appliqué pour ${evaluationOriginale.etudiantNom}`;
+        nouvelleEvaluationId = evaluationOriginale.id; // Pas de nouvelle éval, on modifie l'existante
+    }
+    // Scénario 3 : Les deux jetons
+    else if (appliquerReprise && appliquerDelai) {
+        // Créer le duplicata avec un nouvel ID ET marquer le jeton de délai
+        const nouvelleEvaluation = {
+            ...evaluationOriginale,
+            id: 'EVAL_REPRISE_' + Date.now(),
+            dateEvaluation: new Date().toISOString(),
+            repriseDeId: evaluationOriginale.id,
+            jetonRepriseApplique: true,
+            dateApplicationJetonReprise: new Date().toISOString(),
+            jetonDelaiApplique: true,
+            dateApplicationJetonDelai: new Date().toISOString(),
+            verrouillee: false
+        };
+
+        // Marquer l'originale comme remplacée
+        evaluations[indexOriginal].remplaceeParId = nouvelleEvaluation.id;
+        evaluations[indexOriginal].dateRemplacement = new Date().toISOString();
+
+        // Ajouter la nouvelle évaluation
+        evaluations.push(nouvelleEvaluation);
+        nouvelleEvaluationId = nouvelleEvaluation.id;
+        messageSucces = `Jetons de reprise et de délai appliqués pour ${evaluationOriginale.etudiantNom}`;
+    }
 
     // Sauvegarder
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
@@ -3472,19 +3595,275 @@ function appliquerJetonReprise() {
         return;
     }
 
-    afficherNotificationSucces(`Jeton de reprise appliqué pour ${evaluationOriginale.etudiantNom}`);
+    afficherNotificationSucces(messageSucces);
 
     // Fermer le modal
     fermerModalJetonReprise();
 
-    // Charger la nouvelle évaluation dans le formulaire pour modification
-    setTimeout(() => {
-        modifierEvaluation(nouvelleEvaluation.id);
-    }, 500);
+    // Si on a créé une nouvelle évaluation (reprise), la charger pour modification
+    if (appliquerReprise && nouvelleEvaluationId) {
+        setTimeout(() => {
+            modifierEvaluation(nouvelleEvaluationId);
+        }, 500);
+    } else {
+        // Sinon, recharger la liste des évaluations pour afficher le badge de délai
+        if (typeof chargerListeEvaluationsRefonte === 'function') {
+            chargerListeEvaluationsRefonte();
+        }
+    }
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
+    }
+}
+
+/**
+ * Toggle le jeton de reprise pour l'évaluation en cours de modification
+ */
+function togglerJetonReprise() {
+    if (!evaluationEnCours || !evaluationEnCours.idModification) {
+        afficherNotificationErreur('Erreur', 'Veuillez d\'abord charger une évaluation existante');
+        return;
+    }
+
+    const evaluationId = evaluationEnCours.idModification;
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const index = evaluations.findIndex(e => e.id === evaluationId);
+
+    if (index === -1) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    const evaluation = evaluations[index];
+
+    // Si c'est déjà une reprise, ne pas permettre d'ajouter un autre jeton de reprise
+    if (evaluation.repriseDeId) {
+        afficherNotificationInfo('Information', 'Cette évaluation est déjà une reprise');
+        return;
+    }
+
+    // Si l'évaluation a été remplacée, ne pas permettre de modifier
+    if (evaluation.remplaceeParId) {
+        afficherNotificationInfo('Information', 'Cette évaluation a été remplacée par une reprise. Modifiez la nouvelle version.');
+        return;
+    }
+
+    // Toggle le jeton de reprise
+    if (evaluation.jetonRepriseApplique) {
+        // Annuler le jeton de reprise
+        delete evaluation.jetonRepriseApplique;
+        delete evaluation.dateApplicationJetonReprise;
+        evaluations[index] = evaluation;
+        localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+
+        afficherNotificationSucces('Jeton de reprise annulé');
+
+        // Mettre à jour l'affichage
+        mettreAJourAffichageJetons();
+
+        // Recharger la liste
+        if (typeof chargerListeEvaluationsRefonte === 'function') {
+            chargerListeEvaluationsRefonte();
+        }
+
+        // Recalculer les indices
+        if (typeof calculerEtStockerIndicesCP === 'function') {
+            calculerEtStockerIndicesCP();
+        }
+    } else {
+        // Appliquer le jeton de reprise - créer une nouvelle évaluation
+        const nouvelleEvaluation = {
+            ...evaluation,
+            id: 'EVAL_REPRISE_' + Date.now(),
+            dateEvaluation: new Date().toISOString(),
+            repriseDeId: evaluation.id,
+            jetonRepriseApplique: true,
+            dateApplicationJetonReprise: new Date().toISOString(),
+            verrouillee: false
+        };
+
+        // Marquer l'ancienne comme remplacée
+        evaluations[index].remplaceeParId = nouvelleEvaluation.id;
+        evaluations[index].dateRemplacement = new Date().toISOString();
+
+        // Ajouter la nouvelle
+        evaluations.push(nouvelleEvaluation);
+        localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+
+        afficherNotificationSucces(`Jeton de reprise appliqué - Nouvelle évaluation créée`);
+
+        // Charger la nouvelle évaluation pour modification
+        setTimeout(() => {
+            modifierEvaluation(nouvelleEvaluation.id);
+        }, 500);
+
+        // Recalculer les indices
+        if (typeof calculerEtStockerIndicesCP === 'function') {
+            calculerEtStockerIndicesCP();
+        }
+    }
+}
+
+/**
+ * Toggle le jeton de délai pour l'évaluation en cours de modification
+ */
+function togglerJetonDelai() {
+    if (!evaluationEnCours || !evaluationEnCours.idModification) {
+        afficherNotificationErreur('Erreur', 'Veuillez d\'abord charger une évaluation existante');
+        return;
+    }
+
+    const evaluationId = evaluationEnCours.idModification;
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const index = evaluations.findIndex(e => e.id === evaluationId);
+
+    if (index === -1) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    const evaluation = evaluations[index];
+
+    // Toggle le jeton de délai
+    if (evaluation.jetonDelaiApplique) {
+        // Annuler le jeton de délai
+        delete evaluation.jetonDelaiApplique;
+        delete evaluation.dateApplicationJetonDelai;
+        afficherNotificationSucces('Jeton de délai annulé');
+    } else {
+        // Appliquer le jeton de délai
+        evaluation.jetonDelaiApplique = true;
+        evaluation.dateApplicationJetonDelai = new Date().toISOString();
+        afficherNotificationSucces('Jeton de délai appliqué');
+    }
+
+    evaluations[index] = evaluation;
+    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+
+    // Mettre à jour l'affichage
+    mettreAJourAffichageJetons();
+
+    // Recharger la liste
+    if (typeof chargerListeEvaluationsRefonte === 'function') {
+        chargerListeEvaluationsRefonte();
+    }
+
+    // Recalculer les indices
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+}
+
+/**
+ * Met à jour l'affichage visuel des boutons jetons selon l'état de l'évaluation
+ */
+function mettreAJourAffichageJetons() {
+    if (!evaluationEnCours || !evaluationEnCours.idModification) {
+        return;
+    }
+
+    const evaluationId = evaluationEnCours.idModification;
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluation = evaluations.find(e => e.id === evaluationId);
+
+    if (!evaluation) return;
+
+    const btnReprise = document.getElementById('btnToggleJetonReprise');
+    const btnDelai = document.getElementById('btnToggleJetonDelai');
+    const infoDiv = document.getElementById('infoJetonsAppliques');
+
+    // État du jeton de reprise
+    const estReprise = evaluation.repriseDeId ? true : false;
+    const estRemplacee = evaluation.remplaceeParId ? true : false;
+    const jetonRepriseApplique = evaluation.jetonRepriseApplique ? true : false;
+
+    // État du jeton de délai
+    const jetonDelaiApplique = evaluation.jetonDelaiApplique ? true : false;
+
+    // Mise à jour du bouton Reprise
+    if (btnReprise) {
+        if (estReprise) {
+            // C'est déjà une reprise - désactiver le bouton
+            btnReprise.style.background = '#f5f5f5';
+            btnReprise.style.borderColor = '#e0e0e0';
+            btnReprise.style.color = '#999';
+            btnReprise.style.cursor = 'not-allowed';
+            btnReprise.disabled = true;
+        } else if (estRemplacee) {
+            // A été remplacée - désactiver le bouton
+            btnReprise.style.background = '#f5f5f5';
+            btnReprise.style.borderColor = '#e0e0e0';
+            btnReprise.style.color = '#999';
+            btnReprise.style.cursor = 'not-allowed';
+            btnReprise.disabled = true;
+        } else if (jetonRepriseApplique) {
+            // Jeton de reprise appliqué (ne devrait pas arriver, mais au cas où)
+            btnReprise.style.background = '#f3e5f5';
+            btnReprise.style.borderColor = '#9c27b0';
+            btnReprise.style.color = '#7b1fa2';
+            btnReprise.disabled = false;
+            btnReprise.style.cursor = 'pointer';
+        } else {
+            // Pas de jeton de reprise
+            btnReprise.style.background = 'white';
+            btnReprise.style.borderColor = '#e0e0e0';
+            btnReprise.style.color = '#333';
+            btnReprise.disabled = false;
+            btnReprise.style.cursor = 'pointer';
+        }
+    }
+
+    // Mise à jour du bouton Délai
+    if (btnDelai) {
+        if (jetonDelaiApplique) {
+            btnDelai.style.background = '#fff3e0';
+            btnDelai.style.borderColor = '#ff6f00';
+            btnDelai.style.color = '#e65100';
+        } else {
+            btnDelai.style.background = 'white';
+            btnDelai.style.borderColor = '#e0e0e0';
+            btnDelai.style.color = '#333';
+        }
+        btnDelai.disabled = false;
+        btnDelai.style.cursor = 'pointer';
+    }
+
+    // Mise à jour du texte d'information
+    if (infoDiv) {
+        let infos = [];
+
+        if (estReprise) {
+            infos.push('⭐ Cette évaluation est une reprise');
+        }
+        if (estRemplacee) {
+            infos.push('⚠️ Cette évaluation a été remplacée');
+        }
+        if (jetonDelaiApplique) {
+            infos.push('⭐ Jeton de délai appliqué');
+        }
+
+        if (infos.length > 0) {
+            infoDiv.innerHTML = infos.join('<br>');
+            infoDiv.style.display = 'block';
+        } else {
+            infoDiv.innerHTML = '';
+            infoDiv.style.display = 'none';
+        }
+    }
+}
+
+/**
+ * Affiche ou masque la section de gestion des jetons
+ */
+function afficherGestionJetons(afficher) {
+    const section = document.getElementById('gestionJetonsEvaluation');
+    if (section) {
+        section.style.display = afficher ? 'block' : 'none';
+        if (afficher) {
+            mettreAJourAffichageJetons();
+        }
     }
 }
 
@@ -3635,3 +4014,58 @@ function desactiverFormulaireEvaluation(desactiver) {
 
     console.log(`✅ Formulaire ${desactiver ? 'verrouillé' : 'déverrouillé'}`);
 }
+
+/**
+ * Filtre la liste des évaluations selon la recherche
+ */
+function filtrerListeEvaluations() {
+    const recherche = document.getElementById('recherche-liste-evaluations');
+    if (!recherche) return;
+
+    const terme = recherche.value.toLowerCase().trim();
+    const conteneur = document.getElementById('conteneur-evaluations-accordeon');
+    if (!conteneur) return;
+
+    const cartes = conteneur.getElementsByClassName('carte etudiant-evaluation-carte');
+
+    for (let carte of cartes) {
+        const da = carte.getAttribute('data-da') || '';
+        const nom = carte.textContent.toLowerCase();
+
+        if (terme === '' || da.includes(terme) || nom.includes(terme)) {
+            carte.style.display = '';
+        } else {
+            carte.style.display = 'none';
+        }
+    }
+}
+
+/**
+ * Ouvre la banque d'évaluations avec le terme de recherche pré-rempli
+ */
+function ouvrirBanqueAvecRecherche() {
+    // Récupérer le terme de recherche rapide
+    const rechercheRapide = document.getElementById('recherche-rapide-evaluation');
+    const terme = rechercheRapide ? rechercheRapide.value : '';
+
+    // Ouvrir la banque
+    ouvrirBanqueEvaluations();
+
+    // Transférer le terme dans le champ de recherche de la banque
+    setTimeout(() => {
+        const rechercheBanque = document.getElementById('recherche-banque-evaluations');
+        if (rechercheBanque) {
+            rechercheBanque.value = terme;
+            rechercheBanque.focus();
+            // Appliquer le filtre si un terme est présent
+            if (terme.trim()) {
+                filtrerBanqueEvaluations();
+            }
+        }
+    }, 100);
+}
+
+// Exporter les fonctions
+window.filtrerListeEvaluations = filtrerListeEvaluations;
+window.filtrerBanqueEvaluations = filtrerBanqueEvaluations;
+window.ouvrirBanqueAvecRecherche = ouvrirBanqueAvecRecherche;

@@ -562,7 +562,8 @@ function calculerEtStockerIndicesCP() {
 
         const evaluationsSOM = evaluations.filter(e =>
             e.etudiantDA === da &&
-            productionsSOMDonnees.has(e.productionId)
+            productionsSOMDonnees.has(e.productionId) &&
+            !e.remplaceeParId  // Exclure les évaluations remplacées par des reprises
         );
         const nbSOMRemises = evaluationsSOM.length;
         const C_som = nbProductionsSOMDonnees === 0 ? 0 : Math.round((nbSOMRemises / nbProductionsSOMDonnees) * 100);
@@ -601,7 +602,8 @@ function calculerEtStockerIndicesCP() {
 
         const evaluationsPAN = evaluations.filter(e =>
             e.etudiantDA === da &&
-            artefactsPANDonnes.has(e.productionId)
+            artefactsPANDonnes.has(e.productionId) &&
+            !e.remplaceeParId  // Exclure les évaluations remplacées par des reprises
         );
         const nbPANRemis = evaluationsPAN.length;
         const C_pan = nbArtefactsPANDonnes === 0 ? 0 : Math.round((nbPANRemis / nbArtefactsPANDonnes) * 100);

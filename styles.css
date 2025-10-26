@@ -1894,9 +1894,9 @@ input[type="number"].controle-form {
 
 /* Colonne gauche (sidebar) */
 .profil-sidebar {
-    background: white;
+    background: var(--bleu-pale);
     border-radius: 8px;
-    border: 1px solid var(--bleu-pale);
+    border: 1px solid var(--bleu-moyen);
     padding: 15px;
     position: sticky;
     top: 20px;
@@ -1907,7 +1907,7 @@ input[type="number"].controle-form {
 /* En-tête sidebar */
 .profil-sidebar-header {
     padding-bottom: 12px;
-    border-bottom: 2px solid var(--bleu-pale);
+    border-bottom: 2px solid var(--bleu-moyen);
     margin-bottom: 12px;
 }
 
@@ -1933,9 +1933,9 @@ input[type="number"].controle-form {
 
 .profil-sidebar-metriques-titre {
     font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--bleu-moyen);
-    margin-bottom: 8px;
+    font-weight: 700;
+    color: var(--bleu-principal);
+    margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -1980,9 +1980,9 @@ input[type="number"].controle-form {
 
 .profil-sidebar-nav-titre {
     font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--bleu-moyen);
-    margin-bottom: 8px;
+    font-weight: 700;
+    color: var(--bleu-principal);
+    margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -1996,15 +1996,18 @@ input[type="number"].controle-form {
     font-size: 0.95rem;
     color: #333;
     background: white;
-    border: 1px solid transparent;
+    border: 2px solid #d0e6f7;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .profil-nav-item:hover {
-    background: var(--bleu-tres-pale);
-    border-color: var(--bleu-pale);
+    background: white;
+    border-color: var(--bleu-moyen);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
 }
 
 .profil-nav-item.actif {
@@ -2012,10 +2015,14 @@ input[type="number"].controle-form {
     color: white;
     font-weight: 600;
     border-color: var(--bleu-principal);
+    box-shadow: 0 3px 8px rgba(0, 82, 204, 0.25);
+    transform: translateX(2px);
 }
 
 .profil-nav-item.actif:hover {
     background: var(--bleu-moyen);
+    box-shadow: 0 4px 10px rgba(0, 82, 204, 0.3);
+    transform: translateX(2px) translateY(-1px);
 }
 
 /* Ligne principale du nav item */
@@ -2450,6 +2457,16 @@ body[data-mode="anonymisation"] .sous-navigation button.actif {
     color: white;
     border-color: var(--bleu-anonymisation);
 }
+
+/* Noms et prénoms en italique en mode anonymisation */
+body[data-mode="anonymisation"] .tableau tbody td:nth-child(3),
+body[data-mode="anonymisation"] .tableau tbody td:nth-child(4),
+body[data-mode="anonymisation"] .etudiant-nom,
+body[data-mode="anonymisation"] .profil-sidebar-nom,
+body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
+    font-style: italic;
+}
+
 /* ===============================================
    CARTES INFO-TOGGLE (Notes et Conseils)
    Affichage des informations via emojis cliquables
