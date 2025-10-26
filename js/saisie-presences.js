@@ -1377,6 +1377,37 @@ window.initialiserModuleSaisiePresences = initialiserModuleSaisiePresences;
 window.chargerGroupesPresences = chargerGroupesPresences;
 window.initialiserSaisiePresences = initialiserSaisiePresences;
 window.enregistrerPresences = enregistrerPresences;
+/**
+ * Filtre le tableau de saisie des présences selon la recherche
+ */
+function filtrerTableauPresences() {
+    const recherche = document.getElementById('recherche-saisie-presences');
+    if (!recherche) return;
+
+    const terme = recherche.value.toLowerCase().trim();
+    const tbody = document.getElementById('tbody-saisie-presences');
+    if (!tbody) return;
+
+    const lignes = tbody.getElementsByTagName('tr');
+
+    for (let ligne of lignes) {
+        // Ne pas filtrer la ligne de message "Sélectionnez une date"
+        if (ligne.cells.length < 3) {
+            continue;
+        }
+
+        const da = ligne.cells[0]?.textContent.toLowerCase() || '';
+        const prenom = ligne.cells[1]?.textContent.toLowerCase() || '';
+        const nom = ligne.cells[2]?.textContent.toLowerCase() || '';
+
+        if (terme === '' || da.includes(terme) || prenom.includes(terme) || nom.includes(terme)) {
+            ligne.style.display = '';
+        } else {
+            ligne.style.display = 'none';
+        }
+    }
+}
+
 window.tousPresents = tousPresents;
 window.reinitialiserSaisie = reinitialiserSaisie;
 window.allerCoursSuivant = allerCoursSuivant;
@@ -1385,5 +1416,6 @@ window.basculerVerrouillageDate = basculerVerrouillageDate;
 window.ouvrirSaisiePresence = ouvrirSaisiePresence;
 window.mettreAJourLigne = mettreAJourLigne;
 window.appliquerCodeCouleurSaisie = appliquerCodeCouleurSaisie;
+window.filtrerTableauPresences = filtrerTableauPresences;
 
 console.log('✅ Module saisie-presences.js chargé (version refondée complète)');

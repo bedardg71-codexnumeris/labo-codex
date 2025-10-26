@@ -1073,6 +1073,13 @@
                                 </span>
                             </h3>
 
+                            <!-- Champ de recherche -->
+                            <div class="groupe-form" style="margin-bottom: 15px;">
+                                <input type="text" id="recherche-saisie-presences" class="controle-form"
+                                    placeholder="🔍 Rechercher un étudiant (nom, prénom, DA)..."
+                                    oninput="filtrerTableauPresences()">
+                            </div>
+
                             <table class="tableau">
                                 <thead>
                                     <tr>
@@ -1254,6 +1261,13 @@
                     </div>
                 </div>
 
+                <!-- Champ de recherche -->
+                <div class="carte" style="margin-bottom: 15px;">
+                    <input type="text" id="recherche-liste-evaluations" class="controle-form"
+                        placeholder="🔍 Rechercher un étudiant (nom, prénom, DA)..."
+                        oninput="filtrerListeEvaluations()">
+                </div>
+
                 <!-- Liste des étudiants avec évaluations -->
                 <div id="conteneur-evaluations-accordeon">
                     <!-- Sera rempli dynamiquement par JavaScript -->
@@ -1281,7 +1295,7 @@
                     <div class="grille-evaluation-principale" style="margin-bottom: 20px;">
 
                         <!-- COLONNE GAUCHE : PARAMÈTRES DE L'ÉVALUATION -->
-                        <div style="padding: 15px; background: var(--gris-tres-clair); border-radius: 8px;">
+                        <div style="padding: 15px; background: var(--bleu-pale); border-radius: 8px;">
                             <!-- Boutons de gestion des évaluations -->
                             <div class="groupe-boutons-colonne" style="margin-bottom: 15px;">
                                 <div class="groupe-boutons-ligne">
@@ -1294,16 +1308,23 @@
                                         title="Appliquer un jeton de reprise pour créer une nouvelle version d'une évaluation">
                                         Jeton
                                     </button>
-                                </div>
 
-                                <div class="groupe-boutons-ligne">
                                     <button class="btn btn-modifier btn-tres-compact btn-largeur-auto" onclick="afficherModalReparationEvaluations()"
-                                        title="Réparer les évaluations avec critères manquants">
-                                        Réparer
+                                        title="Réparer les évaluations avec critères manquants"
+                                        style="font-size: 1.2rem; padding: 4px 10px;">
+                                        🔧
                                     </button>
                                 </div>
 
-                                <div class="groupe-boutons-ligne">
+                                <!-- Champ de recherche rapide -->
+                                <div style="margin-top: 10px;">
+                                    <input type="text" id="recherche-rapide-evaluation" class="controle-form"
+                                        placeholder="🔍 Rechercher une évaluation..."
+                                        onfocus="ouvrirBanqueAvecRecherche()"
+                                        style="font-size: 0.9rem;">
+                                </div>
+
+                                <div class="groupe-boutons-ligne" style="margin-top: 10px;">
                                     <button class="btn btn-principal btn-tres-compact btn-largeur-auto" onclick="sauvegarderEvaluation()"
                                         title="Sauvegarder l'évaluation">
                                         Sauvegarder
@@ -1385,6 +1406,28 @@
                                     <option value="remis">Remis</option>
                                     <option value="en-retard">En retard</option>
                                 </select>
+                            </div>
+
+                            <!-- GESTION DES JETONS -->
+                            <div id="gestionJetonsEvaluation" class="groupe-form" style="margin-bottom: 12px; display: none;">
+                                <label class="label-formulaire">Jetons ⭐ :</label>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
+                                    <button id="btnToggleJetonReprise"
+                                            class="btn-jeton"
+                                            onclick="togglerJetonReprise()"
+                                            style="padding: 6px 12px; border-radius: 6px; border: 2px solid #e0e0e0; background: white; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                                        <span class="etoile-jeton">⭐</span>
+                                        <span>Reprise</span>
+                                    </button>
+                                    <button id="btnToggleJetonDelai"
+                                            class="btn-jeton"
+                                            onclick="togglerJetonDelai()"
+                                            style="padding: 6px 12px; border-radius: 6px; border: 2px solid #e0e0e0; background: white; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                                        <span class="etoile-jeton">⭐</span>
+                                        <span>Délai</span>
+                                    </button>
+                                </div>
+                                <div id="infoJetonsAppliques" style="margin-top: 8px; font-size: 0.85rem; color: #666;"></div>
                             </div>
 
                             <!-- NOTE ET NIVEAU -->
@@ -1512,6 +1555,13 @@
                         </button>
                     </div>
 
+                    <!-- Champ de recherche -->
+                    <div style="margin-bottom: 15px;">
+                        <input type="text" id="recherche-banque-evaluations" class="controle-form"
+                            placeholder="🔍 Rechercher une évaluation (étudiant, production)..."
+                            oninput="filtrerBanqueEvaluations()">
+                    </div>
+
                     <!-- Liste des évaluations -->
                     <div id="listeBanqueEvaluations" style="max-height: 500px; overflow-y: auto;">
                         <!-- Généré par JS -->
@@ -1564,13 +1614,38 @@
                         </div>
                     </div>
 
+                    <!-- Type de jeton à appliquer -->
+                    <div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+                        <h4 style="margin-top: 0; color: #1565c0;">🎫 Type de jeton à appliquer</h4>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <label style="display: flex; align-items: center; cursor: pointer; padding: 10px; background: white; border-radius: 6px; border: 2px solid #e0e0e0; transition: all 0.2s;">
+                                <input type="checkbox" id="jetonRepriseCheck" checked style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                                <div>
+                                    <strong style="color: #9c27b0;">Jeton de reprise</strong>
+                                    <div style="font-size: 0.9em; color: #666; margin-top: 4px;">
+                                        Permet à l'étudiant de refaire l'évaluation. L'ancienne version ne comptera plus dans les indices.
+                                    </div>
+                                </div>
+                            </label>
+                            <label style="display: flex; align-items: center; cursor: pointer; padding: 10px; background: white; border-radius: 6px; border: 2px solid #e0e0e0; transition: all 0.2s;">
+                                <input type="checkbox" id="jetonDelaiCheck" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                                <div>
+                                    <strong style="color: #ff6f00;">Jeton de délai de remise</strong>
+                                    <div style="font-size: 0.9em; color: #666; margin-top: 4px;">
+                                        Étend la date limite de remise. L'évaluation comptera dans les indices sans pénalité de retard.
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Options du jeton -->
                     <div style="margin-bottom: 20px; padding: 15px; background: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;">
                         <h4 style="margin-top: 0; color: #e65100;">ℹ️ Important</h4>
                         <ul style="margin: 10px 0; padding-left: 20px; color: #666;">
-                            <li>L'évaluation originale sera marquée comme "remplacée" et ne comptera plus dans les indices</li>
-                            <li>Une nouvelle évaluation sera créée avec les mêmes paramètres</li>
-                            <li>Vous pourrez modifier la nouvelle évaluation avant de la sauvegarder</li>
+                            <li>Si <strong>jeton de reprise</strong> : L'évaluation originale sera marquée comme "remplacée" et ne comptera plus dans les indices</li>
+                            <li>Si <strong>jeton de délai</strong> : L'évaluation gardera sa note mais sera identifiée comme ayant bénéficié d'un délai supplémentaire</li>
+                            <li>Vous pouvez appliquer les deux types de jetons simultanément si nécessaire</li>
                             <li>Les deux versions resteront visibles dans la liste avec un lien de traçabilité</li>
                         </ul>
                     </div>
@@ -1580,7 +1655,7 @@
                             Annuler
                         </button>
                         <button class="btn btn-confirmer" onclick="appliquerJetonReprise()">
-                            Appliquer le jeton de reprise
+                            Appliquer le(s) jeton(s)
                         </button>
                     </div>
                 </div>

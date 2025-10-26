@@ -42,9 +42,9 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 
 ```
 projet/
-├── index 70 (refonte des modules).html   # Point d'entrée actuel
+├── index 72 (support SOM-PAN hybride).html   # Point d'entrée actuel (Beta 0.72)
 ├── css/
-│   └── styles.css                        # Styles globaux
+│   └── styles.css                        # Styles globaux + variables CSS pratiques
 ├── js/
 │   ├── config.js                         # ⚠️ PROTÉGÉ - Configuration globale
 │   ├── navigation.js                     # ⚠️ PROTÉGÉ - Gestion navigation
@@ -290,22 +290,78 @@ localStorage.seancesCompletes             // horaire.js (futur)
   - Dépistage A-C-P-R fonctionne dans les deux modes
   - Checkboxes contrôlent l'affichage, pas le calcul
 
+**REFONTE COMPLÈTE AFFICHAGE HYBRIDE SOM-PAN** (Session 26 octobre suite - Beta 0.72)
+- ✅ **Fichier** : `index 72 (support SOM-PAN hybride).html` - Version Beta 0.72
+- ✅ **Variables CSS ajoutées** dans `styles.css` :
+  - `--som-orange: #ff6f00` (couleur SOM)
+  - `--pan-bleu: #0277bd` (couleur PAN)
+  - `--hybride-violet: #9c27b0` (couleur mode hybride, réservé pour futur usage)
+- ✅ **Module tableau-bord-apercu.js** - Refonte complète :
+  - **Design unifié** : 4 sections (Indicateurs globaux, Risque d'échec, Patterns, RàI)
+  - **Valeurs colorées** : Orange (#ff6f00) pour SOM, Bleu (#0277bd) pour PAN
+  - **Mode normal** : Badge simple [SOM] ou [PAN] sans checkboxes
+  - **Mode comparatif** : Checkboxes interactives pour basculer entre vues
+  - **Fonctions helper** réutilisables :
+    * `genererCarteMetrique(label, valeurSom, valeurPan, ...)` - Indicateurs globaux
+    * `genererCarteRisque(label, valeurSom, valeurPan, ...)` - Risque d'échec
+    * `genererCartePattern(label, valeurSom, valeurPan, ...)` - Patterns (sans barres)
+    * `genererCarteRaI(label, description, valeurSomPct, valeurPanPct, ...)` - RàI
+  - **Fonction** `genererIndicateurPratiqueOuCheckboxes()` :
+    * Détecte mode comparatif vs mode normal
+    * Génère soit badge informatif soit checkboxes selon le contexte
+  - **Suppression** : Fonctions `afficherPatternsHybride()` et `afficherRaIHybride()` (code mort)
+  - **Layout** : Label à gauche, valeurs colorées à droite (label-left, values-right)
+  - **Barres de progression** : Retirées de la section Patterns (redondance)
+- ✅ **Module pratiques.js** - Interface simplifiée :
+  - **Une seule checkbox** : "Activer le mode comparatif (expérimental)"
+  - **Mode normal** (checkbox non cochée) :
+    * Pratique = 'sommative' → afficherSommatif=true, afficherAlternatif=false
+    * Pratique = 'alternative' → afficherSommatif=false, afficherAlternatif=true
+  - **Mode comparatif** (checkbox cochée) :
+    * Quelle que soit la pratique → afficherSommatif=true, afficherAlternatif=true
+  - **Fonction** `sauvegarderOptionsAffichage()` : Logique simplifiée basée sur une checkbox
+  - **Fonction** `chargerModalites()` : Détecte automatiquement mode comparatif
+  - **Suppression** : 2 checkboxes séparées (afficherSommatif, afficherAlternatif)
+- ✅ **Documentation corrigée** dans `index 72.html` :
+  - **Tableau IDME** : Scores sur 4 → Pourcentages (< 64%, 65-74%, 75-84%, ≥ 85%)
+  - **Description artefacts** : "Note sur 4" → "Pourcentage selon l'échelle IDME"
+  - **Forces/Défis** : ≥ 2.85 et < 2.85 → ≥ 75% et < 75%
+  - **Blocage émergent** : Performance ≤ 2.0 → Assiduité ≥ 75% mais C ou P < 65%
+  - **Blocage critique** : Performance ≤ 1.5 → Risque d'échec > 70% (formule: 1 - A×C×P)
+- ✅ **Expérience utilisateur** :
+  - Interface épurée sans badges "Hybride" redondants
+  - Identification claire de la pratique en mode normal
+  - Contrôles intuitifs en mode comparatif
+  - Validation : au moins une pratique doit rester affichée
+- ✅ **Commits créés** :
+  1. Refonte complète du système d'affichage hybride SOM-PAN (11 fichiers)
+  2. Correction de l'aide: échelle IDME en pourcentages (1 fichier)
+  3. Mise à jour version Beta 0.72 (2 fichiers)
+
 ### 🔴 Prochaines priorités
 
-1. **Tests et validation** - Support SOM-PAN hybride
-   - Tester calcul dual avec données réelles
-   - Valider affichage selon checkboxes pratiques
-   - Vérifier cohérence indices A-C-P-R dans les deux modes
+1. **Documentation** - Finaliser documentation Beta 0.72
+   - ✅ CLAUDE.md (complété)
+   - 🔄 Documentation_Indicateurs_Pratique.md (en cours)
+   - Documentation utilisateur pour mode comparatif
 
-2. **MODULE évaluations individuelles** - À développer
-   - Interface de saisie des évaluations SRPNF
+2. **MODULE horaire.js** - À refondre
+   - Générer `seancesCompletes` comme source unique
+   - Gestion des reprises (ex: "Horaire du lundi" le jeudi)
+   - API : `obtenirSeancesCompletes()`
+   - Adapter calendrier-vue.js pour lecture seule
+
+3. **MODULE productions.js** - À créer
+   - Gestion des artefacts/productions
+   - Évaluations selon critères SRPNF
+   - Lien avec grilles.js et echelles.js
+   - Stockage dans localStorage
+
+4. **MODULE évaluations individuelles** - Interface de saisie
+   - Saisie des évaluations SRPNF par critère
    - Calcul automatique des scores selon grilles
    - Lien avec cartouches de rétroaction
-
-3. **Optimisations futures**
-   - Migration données anciennes vers structure duale
-   - Tests de performance avec grands volumes
-   - Documentation utilisateur pour mode hybride
+   - Intégration avec portfolio.js pour calcul indices C-P
 
 ---
 

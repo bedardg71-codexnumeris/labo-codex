@@ -168,7 +168,7 @@ function changerMode(nouveauMode) {
  */
 function rafraichirContenuSelonMode() {
     console.log('🔄 Rafraîchissement du contenu selon le nouveau mode...');
-    
+
     // Sauvegarder la sous-section active
     const sousSectionSauvegardee = sousSectionActive;
 
@@ -184,11 +184,14 @@ function rafraichirContenuSelonMode() {
         const mappingModules = {
             'reglages-groupe': 'afficherListeEtudiants',
             'etudiants-liste': 'afficherListeEtudiantsConsultation',
-            'evaluations-liste-evaluations': 'chargerListeEvaluationsRefonte'
+            'etudiants-profil': 'afficherProfilEtudiant',
+            'evaluations-liste-evaluations': 'chargerListeEvaluationsRefonte',
+            'presences-saisie': 'afficherTableauPresences',
+            'tableau-bord-apercu': 'afficherTableauBordApercu'
         };
 
         const fonctionAAppeler = mappingModules[sousSectionSauvegardee];
-        
+
         if (fonctionAAppeler && typeof window[fonctionAAppeler] === 'function') {
             console.log(`   → Rafraîchissement: ${fonctionAAppeler}()`);
             window[fonctionAAppeler]();
@@ -481,7 +484,8 @@ function anonymiserDonnees(cle, donnees) {
             return donnees.map(etudiant => ({
                 ...etudiant,
                 nom: mapping[etudiant.da]?.nom || etudiant.nom,
-                prenom: mapping[etudiant.da]?.prenom || etudiant.prenom
+                prenom: mapping[etudiant.da]?.prenom || etudiant.prenom,
+                groupe: etudiant.groupe ? `AN.${etudiant.groupe}` : etudiant.groupe
             }));
 
         case 'evaluationsSauvegardees':
@@ -489,7 +493,8 @@ function anonymiserDonnees(cle, donnees) {
                 const nomAnonyme = mapping[evaluation.etudiantDA]?.nomComplet || evaluation.etudiantNom;
                 return {
                     ...evaluation,
-                    etudiantNom: nomAnonyme
+                    etudiantNom: nomAnonyme,
+                    groupe: evaluation.groupe ? `AN.${evaluation.groupe}` : evaluation.groupe
                 };
             });
 
@@ -526,7 +531,8 @@ function anonymiserDonnees(cle, donnees) {
             return donnees.map(etudiant => ({
                 ...etudiant,
                 nom: mapping[etudiant.da]?.nom || etudiant.nom,
-                prenom: mapping[etudiant.da]?.prenom || etudiant.prenom
+                prenom: mapping[etudiant.da]?.prenom || etudiant.prenom,
+                groupe: etudiant.groupe ? `AN.${etudiant.groupe}` : etudiant.groupe
             }));
 
         case 'evaluationsSauvegardees':
@@ -534,7 +540,8 @@ function anonymiserDonnees(cle, donnees) {
                 const nomAnonyme = mapping[evaluation.etudiantDA]?.nomComplet || evaluation.etudiantNom;
                 return {
                     ...evaluation,
-                    etudiantNom: nomAnonyme
+                    etudiantNom: nomAnonyme,
+                    groupe: evaluation.groupe ? `AN.${evaluation.groupe}` : evaluation.groupe
                 };
             });
 

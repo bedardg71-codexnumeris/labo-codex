@@ -1,791 +1,698 @@
-Documentation technique : pratiques.js
+# Documentation Module pratiques.js
 
-  📋 Vue d'ensemble
+**Version** : Beta 0.72
+**Date de mise à jour** : 26 octobre 2025
+**Fichier source** : `js/pratiques.js`
 
-  Nom du module : 12-pratiques.js (Pratiques de notation)Version : Index 50
-  (10-10-2025a - Modularisation)Étendu : 20 octobre 2025 (options
-  d'affichage)Lignes de code : 505 lignesResponsable : Grégoire Bédard
+---
 
-  Description :Module de configuration du système de notation du cours. Permet de
-  choisir entre une pratique sommative traditionnelle (pourcentages) ou une
-  pratique alternative (PAN - Pratiques Alternatives de Notation). Gère également
-  les options d'affichage des indices au tableau de bord (sommatif, alternatif, ou
-   les deux).
+## 📋 Vue d'ensemble
 
-  Exemple concret :Un enseignant peut configurer son cours en "pratique
-  alternative - maîtrise" (Standards-Based Grading). Il décide d'afficher à la
-  fois les indices sommatifs (pour comparaison) et alternatifs (basés sur les N
-  derniers artefacts) au tableau de bord. Cette configuration influence tous les
-  calculs et affichages de l'application.
+**Nom du module** : `pratiques.js` (Pratiques de notation)
 
-  ---
-  🏷️ Type de module
+**Description** : Module de configuration du système de notation du cours. Permet de choisir entre une pratique sommative traditionnelle (moyenne pondérée) ou une pratique alternative (PAN - Pratiques Alternatives de Notation). Gère également le mode d'affichage (normal vs comparatif) des indices au tableau de bord.
 
-  Type : SOURCE (Configuration)
+**Fonctionnalités principales** :
+1. Configuration de la pratique de notation (sommative vs alternative)
+2. Sélection du type de PAN (Maîtrise, Spécifications, Dénotation)
+3. **Mode comparatif** : Affichage simultané des deux pratiques (Beta 0.72)
+4. Sauvegarde et chargement de la configuration
+5. Mise à jour du statut de configuration
 
-  Ce module génère et stocke la configuration de notation dans localStorage.
+**Exemple concret** : Un enseignant configure son cours en "pratique alternative - maîtrise" (Standards-Based Grading). Il active le "mode comparatif" pour afficher simultanément les indices sommatifs et alternatifs au tableau de bord, lui permettant de comparer empiriquement les deux approches.
 
-  Données générées :
-  - modalitesEvaluation : Object avec configuration complète (pratique, type PAN,
-  options affichage)
+---
 
-  Modules lecteurs :
-  - tableau-bord-apercu.js (lit pour savoir quels indices afficher)
-  - saisie-presences.js (peut adapter les calculs selon la pratique)
-  - evaluations.js (adapte comportement selon pratique)
-  - statistiques.js (calculs selon configuration)
+## 🏷️ Type de module
 
-  ---
-  💾 Données gérées
+**Type** : SOURCE (Configuration)
 
-  Structure de données principales
+Ce module **génère et stocke** la configuration de notation dans localStorage.
 
-  1. modalitesEvaluation (objet complet)
+**Données générées** :
+- `modalitesEvaluation` : Objet complet avec configuration de notation et options d'affichage
 
-  {
-    pratique: string,              // "sommative" | "alternative"
-    typePAN: string | null,        // "maitrise" | "specifications" | "denotation"
-   | null
-    affichageTableauBord: {
-      afficherSommatif: boolean,   // Afficher indices sommatifs (% global)
-      afficherAlternatif: boolean  // Afficher indices alternatifs (N derniers)
-    },
-    dateConfiguration: string      // ISO format (ex: "2025-10-20T14:30:00.000Z")
-  }
+**Modules lecteurs** :
+- `tableau-bord-apercu.js` : Lit pour savoir quel mode d'affichage utiliser
+- `profil-etudiant.js` : Lit la pratique pour afficher les bons indices
+- `portfolio.js` : Calcule les indices selon les deux pratiques
 
-  2. Exemples concrets de configurations
+---
 
-  Configuration sommative traditionnelle :
-  {
-    pratique: "sommative",
-    typePAN: null,
-    affichageTableauBord: {
-      afficherSommatif: true,
-      afficherAlternatif: false
-    },
-    dateConfiguration: "2025-08-15T08:00:00.000Z"
-  }
+## 💾 Données gérées
 
-  Configuration alternative - maîtrise (SBG) :
-  {
-    pratique: "alternative",
-    typePAN: "maitrise",
-    affichageTableauBord: {
-      afficherSommatif: true,      // Pour comparaison
-      afficherAlternatif: true     // Méthode principale
-    },
-    dateConfiguration: "2025-08-15T08:30:00.000Z"
-  }
+### Structure de données principale
 
-  Configuration alternative - spécifications :
-  {
-    pratique: "alternative",
-    typePAN: "specifications",
-    affichageTableauBord: {
-      afficherSommatif: false,     // Pas pertinent
-      afficherAlternatif: true     // Critères binaires
-    },
-    dateConfiguration: "2025-08-15T09:00:00.000Z"
-  }
+#### `modalitesEvaluation`
 
-  Configuration alternative - dénotation (Ungrading) :
-  {
-    pratique: "alternative",
-    typePAN: "denotation",
-    affichageTableauBord: {
-      afficherSommatif: false,     // Pas de notes
-      afficherAlternatif: false    // Pas de notes
-    },
-    dateConfiguration: "2025-08-15T09:30:00.000Z"
-  }
+```javascript
+{
+  pratique: string,              // "sommative" | "alternative"
+  typePAN: string | null,        // "maitrise" | "specifications" | "denotation" | null
+  affichageTableauBord: {
+    afficherSommatif: boolean,   // Afficher indices sommatifs (SOM)
+    afficherAlternatif: boolean  // Afficher indices alternatifs (PAN)
+  },
+  dateConfiguration: string      // ISO format (ex: "2025-10-26T14:30:00.000Z")
+}
+```
 
-  Types de PAN (Pratiques Alternatives de Notation)
+---
 
-  | Type           | Nom anglais             | Description
-                                 |
-  |----------------|-------------------------|------------------------------------
-  -------------------------------|
-  | maitrise       | Standards-Based Grading | Niveaux de maîtrise (En
-  développement, Acquis, Avancé...)         |
-  | specifications | Specifications Grading  | Critères binaires (réussi/non
-  réussi) pour chaque compétence      |
-  | denotation     | Ungrading               | Pas de notes chiffrées, rétroaction
-   descriptive et autoévaluation |
+### Exemples de configurations
 
-  Clés localStorage utilisées
+#### Configuration 1 : Sommative traditionnelle (mode normal)
 
-  | Clé                 | Type   | Générée par  | Description
-            |
-  |---------------------|--------|--------------|---------------------------------
-  ----------|
-  | modalitesEvaluation | Object | pratiques.js | SOURCE UNIQUE - Configuration de
-   notation |
+```javascript
+{
+  pratique: "sommative",
+  typePAN: null,
+  affichageTableauBord: {
+    afficherSommatif: true,      // Afficher SOM uniquement
+    afficherAlternatif: false
+  },
+  dateConfiguration: "2025-08-15T08:00:00.000Z"
+}
+```
 
-  ---
-  🔌 API publique
+**Interface** : Pratique = Sommative, Checkbox "mode comparatif" **non cochée**
+**Résultat** : Tableau de bord affiche uniquement les indices SOM avec badge `[SOM]`
 
-  Fonctions d'initialisation
+---
 
-  initialiserModulePratiques()
+#### Configuration 2 : Alternative - maîtrise (mode normal)
 
-  /**
-   * Initialise le module au chargement
-   * Appelée automatiquement par 99-main.js
-   * 
-   * FONCTIONNEMENT:
-   * 1. Vérifie présence DOM (#pratiqueNotation)
-   * 2. Attache événements via attacherEvenementsPratiques()
-   * 3. Charge modalités via chargerModalites()
-   * 
-   * RETOUR: void (sortie silencieuse si DOM non prêt)
-   */
+```javascript
+{
+  pratique: "alternative",
+  typePAN: "maitrise",
+  affichageTableauBord: {
+    afficherSommatif: false,
+    afficherAlternatif: true     // Afficher PAN uniquement
+  },
+  dateConfiguration: "2025-08-15T08:30:00.000Z"
+}
+```
 
-  attacherEvenementsPratiques()
+**Interface** : Pratique = Alternative (PAN - Maîtrise), Checkbox "mode comparatif" **non cochée**
+**Résultat** : Tableau de bord affiche uniquement les indices PAN avec badge `[PAN - Maîtrise]`
 
-  /**
-   * Attache événements aux éléments HTML
-   * 
-   * ÉVÉNEMENTS ATTACHÉS:
-   * - #pratiqueNotation change → changerPratiqueNotation()
-   * - #typePAN change → afficherInfoPAN()
-   * - #afficherSommatif change → sauvegarderOptionsAffichage()
-   * - #afficherAlternatif change → sauvegarderOptionsAffichage()
-   * - #btnSauvegarderPratiqueNotation click → sauvegarderPratiqueNotation()
-   * 
-   * UTILISÉ PAR:
-   * - initialiserModulePratiques()
-   * 
-   * RETOUR: void
-   */
+---
 
-  Fonctions de gestion pratique
+#### Configuration 3 : Alternative - maîtrise (mode comparatif)
 
-  changerPratiqueNotation()
+```javascript
+{
+  pratique: "alternative",
+  typePAN: "maitrise",
+  affichageTableauBord: {
+    afficherSommatif: true,      // Afficher les deux pour comparaison
+    afficherAlternatif: true
+  },
+  dateConfiguration: "2025-10-26T10:00:00.000Z"
+}
+```
 
-  /**
-   * Gère changement de pratique de notation
-   * 
-   * FONCTIONNEMENT:
-   * 1. Récupère pratique sélectionnée
-   * 2. Si "alternative":
-   *    - Affiche #colonnePAN
-   * 3. Si "sommative":
-   *    - Masque #colonnePAN
-   *    - Réinitialise typePAN = null
-   *    - Masque #infoPAN
-   * 4. Sauvegarde dans modalitesEvaluation
-   * 5. Appelle afficherOptionsAffichage()
-   * 6. Met à jour statut
-   * 
-   * UTILISÉ PAR:
-   * - Événement change sur #pratiqueNotation
-   * 
-   * RETOUR: void
-   */
+**Interface** : Pratique = Alternative (PAN - Maîtrise), Checkbox "mode comparatif" **cochée**
+**Résultat** : Tableau de bord affiche checkboxes interactives `[☑ SOM] [☑ PAN]` avec valeurs colorées
 
-  Fonctions de gestion type PAN
+---
 
-  afficherInfoPAN()
+#### Configuration 4 : Sommative (mode comparatif expérimental)
 
-  /**
-   * Affiche informations sur type PAN sélectionné
-   * 
-   * FONCTIONNEMENT:
-   * 1. Récupère typePAN sélectionné
-   * 2. Trouve description dans table
-   * 3. Affiche dans #infoPAN
-   * 4. Sauvegarde dans modalitesEvaluation
-   * 5. Met à jour statut
-   * 
-   * DESCRIPTIONS:
-   * - maitrise: Standard Based Grading
-   * - specifications: Specifications Grading
-   * - denotation: Ungrading
-   * 
-   * UTILISÉ PAR:
-   * - Événement change sur #typePAN
-   * - chargerModalites() (si typePAN déjà sauvegardé)
-   * 
-   * RETOUR: void
-   */
+```javascript
+{
+  pratique: "sommative",
+  typePAN: "maitrise",          // PAN calculé mais pas la pratique "officielle"
+  affichageTableauBord: {
+    afficherSommatif: true,
+    afficherAlternatif: true
+  },
+  dateConfiguration: "2025-10-26T10:30:00.000Z"
+}
+```
 
-  Fonctions d'affichage options
+**Interface** : Pratique = Sommative, Checkbox "mode comparatif" **cochée**
+**Résultat** : Tableau de bord affiche les deux pratiques côte à côte pour comparaison
 
-  afficherOptionsAffichage()
+**Note** : Cette configuration permet à un enseignant utilisant la notation traditionnelle d'explorer les résultats d'une pratique alternative sans changer sa pratique officielle.
 
-  /**
-   * Gère affichage section options d'affichage
-   * 
-   * FONCTIONNEMENT:
-   * 1. Si pratique = "alternative":
-   *    - Affiche #optionsAffichageIndices
-   *    - Coche les deux par défaut (recherche)
-   * 2. Si pratique = "sommative":
-   *    - Affiche #optionsAffichageIndices
-   *    - Coche seulement sommatif
-   * 3. Sinon:
-   *    - Masque #optionsAffichageIndices
-   * 4. Appelle sauvegarderOptionsAffichage()
-   * 
-   * UTILISÉ PAR:
-   * - changerPratiqueNotation()
-   * - chargerModalites()
-   * 
-   * RETOUR: void
-   */
+---
 
-  sauvegarderOptionsAffichage()
+## 🔧 Fonctions principales
 
-  /**
-   * Sauvegarde options d'affichage des indices
-   * 
-   * FONCTIONNEMENT:
-   * 1. Récupère état checkboxes
-   * 2. Validation: au moins une cochée
-   * 3. Si aucune: alerte + force sommatif
-   * 4. Sauvegarde dans modalitesEvaluation.affichageTableauBord
-   * 5. Log console
-   * 
-   * VALIDATION:
-   * - Au moins une option obligatoire
-   * - Si aucune: force afficherSommatif = true
-   * 
-   * UTILISÉ PAR:
-   * - Événements change des checkboxes
-   * - afficherOptionsAffichage()
-   * 
-   * RETOUR: void
-   */
+### Initialisation
 
-  Fonctions de sauvegarde/chargement
+#### `initialiserModulePratiques()`
 
-  sauvegarderPratiqueNotation()
+Initialise le module des pratiques de notation.
 
-  /**
-   * Sauvegarde configuration complète
-   * 
-   * FONCTIONNEMENT:
-   * 1. Récupère pratique et typePAN
-   * 2. Validation:
-   *    - Pratique obligatoire
-   *    - Si alternative: typePAN obligatoire
-   * 3. Construit objet modalitesEvaluation
-   * 4. Ajoute timestamp dateConfiguration
-   * 5. S'assure que affichageTableauBord existe
-   * 6. Sauvegarde dans localStorage
-   * 7. Notification succès
-   * 8. Met à jour statut
-   * 9. Log console
-   * 
-   * VALIDATION:
-   * - pratique obligatoire (alerte si vide)
-   * - Si pratique = "alternative": typePAN obligatoire
-   * 
-   * UTILISÉ PAR:
-   * - Bouton «Sauvegarder la configuration»
-   * 
-   * RETOUR: void + notification
-   */
+**Appelée par** : `main.js` au chargement de la page
 
-  chargerModalites()
+**Fonctionnement** :
+1. Vérifie que les éléments DOM existent (section active)
+2. Attache les événements aux éléments
+3. Charge les modalités sauvegardées (`chargerModalites()`)
+4. Met à jour le statut d'affichage
 
-  /**
-   * Charge modalités sauvegardées depuis localStorage
-   * 
-   * FONCTIONNEMENT:
-   * 1. Lit modalitesEvaluation
-   * 2. Vérifie éléments DOM existent
-   * 3. Si pas de données:
-   *    - Réinitialise tous les champs
-   *    - Masque colonnePAN et optionsAffichage
-   * 4. Sinon:
-   *    - Remplit #pratiqueNotation
-   *    - Si alternative: affiche colonnePAN + charge typePAN
-   *    - Charge affichageTableauBord (checkboxes)
-   *    - Appelle afficherOptionsAffichage()
-   * 5. Met à jour statut
-   * 
-   * UTILISÉ PAR:
-   * - initialiserModulePratiques()
-   * 
-   * RETOUR: void
-   */
+**Retour** : `void` (sortie silencieuse si les éléments n'existent pas)
 
-  Fonctions de statut
+```javascript
+// Appelée automatiquement
+initialiserModulePratiques();
+```
 
-  mettreAJourStatutModalites()
+---
 
-  /**
-   * Met à jour affichage du statut
-   * 
-   * FONCTIONNEMENT:
-   * 1. Lit modalitesEvaluation
-   * 2. Détermine statut selon valeurs:
-   *    - Pas de pratique: "✗ À configurer" (rouge)
-   *    - Sommative: "✓ Sommative traditionnelle (%)" (vert)
-   *    - Alternative + typePAN: "✓ Alternative (Type)" (vert)
-   *    - Alternative sans typePAN: "⚠ Choisir un type de PAN" (orange)
-   * 3. Met à jour #statutModalites avec HTML
-   * 
-   * COULEURS:
-   * - Rouge: var(--risque-critique) - À configurer
-   * - Orange: var(--orange-accent) - Incomplet
-   * - Vert: var(--vert-moyen) - Configuré
-   * 
-   * UTILISÉ PAR:
-   * - changerPratiqueNotation()
-   * - afficherInfoPAN()
-   * - sauvegarderPratiqueNotation()
-   * - chargerModalites()
-   * 
-   * RETOUR: void
-   */
+#### `attacherEvenementsPratiques()`
 
-  Fonctions utilitaires
+Attache les événements aux éléments HTML.
 
-  obtenirConfigurationNotation()
+**Appelée par** : `initialiserModulePratiques()`
 
-  /**
-   * Récupère configuration complète (API publique)
-   * 
-   * FONCTIONNEMENT:
-   * Parse et retourne modalitesEvaluation
-   * 
-   * UTILISÉ PAR:
-   * - tableau-bord-apercu.js (savoir quels indices afficher)
-   * - evaluations.js (adapter comportement)
-   * - statistiques.js (calculs)
-   * 
-   * @returns {Object} Configuration complète
-   * 
-   * EXEMPLE:
-   * const config = obtenirConfigurationNotation();
-   * if (config.affichageTableauBord?.afficherAlternatif) {
-   *   // Afficher indices alternatifs
-   * }
-   */
+**Événements attachés** :
+- `#pratiqueNotation` (change) → `changerPratiqueNotation()`
+- `#typePAN` (change) → `changerTypePAN()`
+- `#modeComparatif` (change) → `sauvegarderOptionsAffichage()`
+- `#btnSauvegarderPratiqueNotation` (click) → `sauvegarderPratiqueNotation()`
 
-  afficherNotificationSucces(message)
+---
 
-  /**
-   * Affiche notification temporaire
-   * 
-   * PARAMÈTRES:
-   * @param {string} message - Message à afficher
-   * 
-   * FONCTIONNEMENT:
-   * 1. Crée div.notification-succes
-   * 2. Append au body
-   * 3. Supprime après 3s
-   * 
-   * STYLE:
-   * - Position: fixed top-right
-   * - Fond: vert succès
-   * - Animation: slideIn
-   * 
-   * UTILISÉ PAR:
-   * - sauvegarderPratiqueNotation()
-   * 
-   * RETOUR: void
-   */
+### Gestion de la pratique de notation
 
-  ---
-  🔗 Dépendances
+#### `changerPratiqueNotation()`
 
-  Modules requis (ordre de chargement)
+Gère le changement de pratique (sommative ↔ alternative).
 
-  1. 01-config.js (optionnel)
-    - Pour : Variables globales (si utilisées)
+**Déclencheur** : Événement `change` sur `#pratiqueNotation`
 
-  Éléments HTML requis
+**Fonctionnement** :
+1. Récupère la pratique sélectionnée
+2. Si pratique = "alternative" :
+   - Affiche `#colonnePAN` (sélection du type de PAN)
+   - Réinitialise le type PAN si nécessaire
+3. Si pratique = "sommative" :
+   - Masque `#colonnePAN`
+   - Efface les infos PAN
+4. Appelle `afficherOptionsAffichage()`
 
-  <!-- Sélecteur pratique -->
-  <select id="pratiqueNotation">
+**Exemple** :
+```javascript
+// Utilisateur sélectionne "Alternative" dans le menu déroulant
+// → La colonne type PAN s'affiche
+// → L'utilisateur peut choisir Maîtrise / Spécifications / Dénotation
+```
+
+---
+
+#### `changerTypePAN()`
+
+Gère le changement du type de PAN (maîtrise, spécifications, dénotation).
+
+**Déclencheur** : Événement `change` sur `#typePAN`
+
+**Fonctionnement** :
+1. Récupère le type de PAN sélectionné
+2. Affiche les informations correspondantes dans `#infoPAN` :
+   - **Maîtrise** : Standard-Based Grading (échelle IDME : I-D-M-E)
+   - **Spécifications** : Specifications Grading (critères binaires)
+   - **Dénotation** : Ungrading (pas de notes quantitatives)
+
+**Descriptions** :
+- **Maîtrise** : Évaluation selon une échelle de maîtrise des compétences (IDME basée sur SOLO)
+- **Spécifications** : Critères binaires (satisfait / non satisfait)
+- **Dénotation** : Abandon des notes quantitatives au profit de rétroactions qualitatives
+
+---
+
+### Gestion du mode d'affichage (Beta 0.72)
+
+#### `afficherOptionsAffichage()`
+
+Gère l'affichage de la section "Options d'affichage" avec la checkbox "mode comparatif".
+
+**Appelée par** :
+- `changerPratiqueNotation()`
+- `chargerModalites()`
+
+**Fonctionnement** :
+1. Affiche la section `#optionsAffichageIndices`
+2. Configure la checkbox `#modeComparatif` selon la pratique :
+   - Pratique alternative : Checkbox disponible (souvent cochée pour recherche)
+   - Pratique sommative : Checkbox disponible (généralement non cochée)
+3. Appelle `sauvegarderOptionsAffichage()`
+
+**Interface Beta 0.72** :
+```
+Options d'affichage au tableau de bord
+☐ Activer le mode comparatif (expérimental)
+  ↓ Si cochée
+  → Affiche SOM et PAN simultanément avec checkboxes interactives
+```
+
+---
+
+#### `sauvegarderOptionsAffichage()`
+
+Sauvegarde les options d'affichage selon l'état de la checkbox "mode comparatif".
+
+**Déclencheur** : Événement `change` sur `#modeComparatif`
+
+**Fonctionnement** :
+```javascript
+if (modeComparatif) {
+    // Mode comparatif : afficher les deux pratiques
+    modalites.affichageTableauBord = {
+        afficherSommatif: true,
+        afficherAlternatif: true
+    };
+} else {
+    // Mode normal : afficher uniquement la pratique principale
+    if (pratique === 'sommative') {
+        modalites.affichageTableauBord = {
+            afficherSommatif: true,
+            afficherAlternatif: false
+        };
+    } else if (pratique === 'alternative') {
+        modalites.affichageTableauBord = {
+            afficherSommatif: false,
+            afficherAlternatif: true
+        };
+    }
+}
+```
+
+**Validation** : Aucune validation nécessaire (la checkbox détermine tout)
+
+**Sauvegarde** : Écrit directement dans `localStorage.modalitesEvaluation`
+
+**Log console** : Affiche l'état sauvegardé
+
+---
+
+### Sauvegarde et chargement
+
+#### `sauvegarderPratiqueNotation()`
+
+Sauvegarde la configuration complète de la pratique de notation.
+
+**Déclencheur** : Clic sur le bouton "Sauvegarder la configuration"
+
+**Fonctionnement** :
+1. Récupère les valeurs des champs (`#pratiqueNotation`, `#typePAN`)
+2. **Validation** :
+   - Pratique obligatoire (affiche alerte si vide)
+   - Si pratique = "alternative" : typePAN obligatoire
+3. Construit l'objet `modalitesEvaluation` :
+   ```javascript
+   {
+       pratique: pratique,
+       typePAN: typePAN,
+       dateConfiguration: new Date().toISOString(),
+       affichageTableauBord: affichageTableauBord  // Préservé ou créé
+   }
+   ```
+4. S'assure que `affichageTableauBord` existe (défaut selon pratique si absent)
+5. Sauvegarde dans `localStorage.modalitesEvaluation`
+6. Affiche notification de succès
+7. Met à jour le statut avec `mettreAJourStatut()`
+8. Log console
+
+**Notifications** :
+- Succès : "✓ Configuration sauvegardée" (vert)
+- Erreur : "⚠️ Veuillez sélectionner une pratique" (orange)
+- Erreur : "⚠️ Veuillez sélectionner un type de PAN" (orange)
+
+---
+
+#### `chargerModalites()`
+
+Charge les modalités sauvegardées depuis localStorage au démarrage.
+
+**Appelée par** : `initialiserModulePratiques()`
+
+**Fonctionnement** :
+1. Lit `localStorage.modalitesEvaluation`
+2. Vérifie que les éléments DOM existent
+3. **Si pas de données sauvegardées** :
+   - Réinitialise tous les champs à vide
+   - Masque la colonne PAN
+   - Masque les options d'affichage
+   - Affiche statut "Non configuré"
+4. **Si données existent** :
+   - Sélectionne la pratique dans `#pratiqueNotation`
+   - Si pratique = "alternative" :
+     - Affiche `#colonnePAN`
+     - Sélectionne le type PAN dans `#typePAN`
+     - Affiche les infos PAN avec `changerTypePAN()`
+   - Charge l'état de la checkbox `#modeComparatif` :
+     ```javascript
+     const modeComparatif = modalites.affichageTableauBord.afficherSommatif &&
+                            modalites.affichageTableauBord.afficherAlternatif;
+     checkComparatif.checked = modeComparatif;
+     ```
+   - Appelle `afficherOptionsAffichage()`
+   - Met à jour le statut avec `mettreAJourStatut()`
+
+**Gestion de la rétrocompatibilité** : Si `affichageTableauBord` est absent, le crée avec des valeurs par défaut selon la pratique.
+
+---
+
+### Affichage du statut
+
+#### `mettreAJourStatut()`
+
+Met à jour l'affichage du statut de configuration dans `#statutModalites`.
+
+**Appelée par** :
+- `sauvegarderPratiqueNotation()`
+- `chargerModalites()`
+
+**Fonctionnement** :
+1. Lit `modalitesEvaluation` depuis localStorage
+2. **Si pas de configuration** :
+   ```html
+   <span style="color: #666;">Aucune configuration sauvegardée</span>
+   ```
+3. **Si configuration existe** :
+   ```html
+   <span style="color: #2196f3;">
+     Pratique actuelle : <strong>Alternative - Maîtrise</strong>
+   </span>
+   ```
+4. Affiche la date de dernière configuration (format lisible)
+5. Affiche le mode d'affichage :
+   - **Mode comparatif** : "Mode comparatif activé (SOM + PAN)"
+   - **Mode normal** : "Affichage : SOM uniquement" ou "Affichage : PAN uniquement"
+
+**Exemple de statut** :
+```
+Pratique actuelle : Alternative - Maîtrise
+Mode comparatif activé (SOM + PAN)
+Dernière configuration : 26 octobre 2025 à 10:30
+```
+
+---
+
+## 🔗 Dépendances
+
+### Modules requis (AVANT ce module)
+
+```html
+<script src="js/config.js"></script>      <!-- Variables globales -->
+<script src="js/pratiques.js"></script>   <!-- CE MODULE -->
+```
+
+### Éléments HTML requis
+
+```html
+<!-- Sélection de la pratique -->
+<select id="pratiqueNotation">
+  <option value="">-- Choisir --</option>
+  <option value="sommative">Sommative traditionnelle</option>
+  <option value="alternative">Alternative (PAN)</option>
+</select>
+
+<!-- Type de PAN (affiché si pratique = alternative) -->
+<div id="colonnePAN" style="display:none;">
+  <select id="typePAN">
     <option value="">-- Choisir --</option>
-    <option value="sommative">Sommative (traditionnelle)</option>
-    <option value="alternative">Alternative (PAN)</option>
+    <option value="maitrise">Maîtrise (IDME)</option>
+    <option value="specifications">Spécifications</option>
+    <option value="denotation">Dénotation</option>
   </select>
+  <div id="infoPAN"></div>
+</div>
+
+<!-- Options d'affichage (Beta 0.72) -->
+<div id="optionsAffichageIndices">
+  <label>
+    <input type="checkbox" id="modeComparatif">
+    Activer le mode comparatif (expérimental)
+  </label>
+</div>
+
+<!-- Bouton de sauvegarde -->
+<button id="btnSauvegarderPratiqueNotation">Sauvegarder la configuration</button>
+
+<!-- Statut -->
+<div id="statutModalites"></div>
+```
+
+### LocalStorage utilisé
+
+**Écriture** :
+- `modalitesEvaluation` : Configuration complète (pratique, type PAN, options affichage)
+
+**Lecture** : Aucune (module source uniquement)
+
+---
+
+## 📊 Flux de données
+
+```
+INTERFACE UTILISATEUR          MODULE PRATIQUES           MODULES LECTEURS
+┌─────────────────┐           ┌──────────────┐           ┌──────────────────┐
+│ Select pratique │──────────▶│ pratiques.js │──────────▶│ tableau-bord-    │
+│ Select type PAN │           │              │           │ apercu.js        │
+│ Checkbox mode   │           │ Sauvegarde   │           │                  │
+│ comparatif      │           │ dans         │           │ Lit mode pour    │
+└─────────────────┘           │ localStorage │           │ afficher badge   │
+                              └──────────────┘           │ ou checkboxes    │
+                                     ↓                    └──────────────────┘
+                              localStorage:
+                              modalitesEvaluation          ┌──────────────────┐
+                              {                           │ profil-          │
+                                pratique,                 │ etudiant.js      │
+                                typePAN,          ────────▶│                  │
+                                affichageTableauBord,     │ Lit pratique     │
+                                dateConfiguration         │ pour afficher    │
+                              }                           │ les bons indices │
+                                                          └──────────────────┘
+```
+
+---
+
+## 🔄 Cycle de vie typique
+
+### 1. Première configuration (enseignant)
+
+```
+Utilisateur ouvre Réglages → Pratiques de notation
+   ↓
+chargerModalites() → Aucune donnée → Statut "Non configuré"
+   ↓
+Utilisateur sélectionne "Alternative"
+   ↓
+changerPratiqueNotation() → Affiche colonne type PAN
+   ↓
+Utilisateur sélectionne "Maîtrise"
+   ↓
+changerTypePAN() → Affiche infos sur PAN-Maîtrise
+   ↓
+Utilisateur coche "Mode comparatif"
+   ↓
+sauvegarderOptionsAffichage() → afficherSom=true, afficherAlt=true
+   ↓
+Utilisateur clique "Sauvegarder"
+   ↓
+sauvegarderPratiqueNotation() → Sauvegarde complète
+   ↓
+mettreAJourStatut() → Affiche statut "Alternative - Maîtrise (Mode comparatif)"
+```
+
+---
+
+### 2. Rechargement de page (session suivante)
+
+```
+Utilisateur revient sur Réglages → Pratiques de notation
+   ↓
+initialiserModulePratiques()
+   ↓
+chargerModalites() → Lit modalitesEvaluation depuis localStorage
+   ↓
+Restaure l'interface :
+  - Pratique = "alternative"
+  - Type PAN = "maitrise"
+  - Checkbox "mode comparatif" cochée
+   ↓
+mettreAJourStatut() → Affiche statut sauvegardé
+```
+
+---
+
+### 3. Basculement mode normal ↔ comparatif
 
-  <!-- Colonne PAN (cachée par défaut) -->
-  <div id="colonnePAN" style="display: none;">
-    <label>Type de PAN :</label>
-    <select id="typePAN">
-      <option value="">-- Choisir --</option>
-      <option value="maitrise">Maîtrise (SBG)</option>
-      <option value="specifications">Spécifications</option>
-      <option value="denotation">Dénotation (Ungrading)</option>
-    </select>
-    <div id="infoPAN" style="display: none;"></div>
-  </div>
-
-  <!-- Options d'affichage (cachées par défaut) -->
-  <div id="optionsAffichageIndices" style="display: none;">
-    <h5>Options d'affichage au tableau de bord</h5>
-    <label>
-      <input type="checkbox" id="afficherSommatif">
-      Afficher indices sommatifs (% global)
-    </label>
-    <label>
-      <input type="checkbox" id="afficherAlternatif">
-      Afficher indices alternatifs (N derniers artefacts)
-    </label>
-  </div>
-
-  <!-- Statut -->
-  <div id="statutModalites">✗ À configurer</div>
-
-  <!-- Bouton sauvegarde -->
-  <button id="btnSauvegarderPratiqueNotation">Sauvegarder la
-  configuration</button>
-
-  Classes CSS requises
-
-  .notification-succes    /* Notification temporaire */
-
-  ---
-  🚀 Initialisation
-
-  Appel depuis 99-main.js
-
-  // PRIORITÉ 2 : DONNÉES DE BASE
-
-  // MODULE 12: Pratiques de notation
-  if (typeof initialiserModulePratiques === 'function') {
-      console.log('   → Module 12-pratiques détecté');
-      initialiserModulePratiques();
-  }
-
-  Ordre de chargement critique
-
-  1. config.js        (optionnel)
-  2. pratiques.js     (génère modalitesEvaluation)
-  3. tableau-bord-apercu.js (lit modalitesEvaluation)
-  4. main.js          (appelle initialiserModulePratiques)
-
-  Événements gérés
-
-  Tous attachés dynamiquement dans attacherEvenementsPratiques() :
-  // Sélecteurs
-  #pratiqueNotation change → changerPratiqueNotation()
-  #typePAN change → afficherInfoPAN()
-
-  // Checkboxes
-  #afficherSommatif change → sauvegarderOptionsAffichage()
-  #afficherAlternatif change → sauvegarderOptionsAffichage()
-
-  // Bouton
-  #btnSauvegarderPratiqueNotation click → sauvegarderPratiqueNotation()
-
-  ---
-  🧪 Tests et vérification
-
-  Test 1 : Vérifier modalitesEvaluation existe
-
-  // Console navigateur
-  const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') ||
-  '{}');
-  console.log('Configuration:', modalites);
-  console.log('Pratique:', modalites.pratique);
-  console.log('Type PAN:', modalites.typePAN);
-  console.log('Affichage:', modalites.affichageTableauBord);
-
-  Test 2 : Configuration sommative
-
-  1. Sélectionner "Sommative (traditionnelle)"
-  2. Vérifier colonnePAN masquée
-  3. Vérifier optionsAffichageIndices visible
-  4. Vérifier afficherSommatif coché
-  5. Vérifier afficherAlternatif décoché
-  6. Clic "Sauvegarder"
-  7. Vérifier notification succès
-  8. Vérifier statut "✓ Sommative traditionnelle (%)"
-
-  Test 3 : Configuration alternative - maîtrise
-
-  1. Sélectionner "Alternative (PAN)"
-  2. Vérifier colonnePAN visible
-  3. Sélectionner "Maîtrise (SBG)"
-  4. Vérifier description affichée
-  5. Vérifier optionsAffichageIndices visible
-  6. Vérifier les deux checkboxes cochées
-  7. Clic "Sauvegarder"
-  8. Vérifier statut "✓ Alternative (Maîtrise)"
-
-  Test 4 : Validation alternative sans type PAN
-
-  1. Sélectionner "Alternative (PAN)"
-  2. Ne pas sélectionner de type
-  3. Clic "Sauvegarder"
-  4. Vérifier alerte "Veuillez choisir un type de pratique alternative"
-  5. Vérifier pas sauvegardé
-
-  Test 5 : Validation options affichage
-
-  1. Configurer alternative + maîtrise
-  2. Décocher les deux checkboxes
-  3. Vérifier alerte "Au moins un type d'affichage..."
-  4. Vérifier afficherSommatif recoché automatiquement
-
-  Test 6 : Rechargement page
-
-  1. Configurer alternative + spécifications
-  2. Cocher seulement afficherAlternatif
-  3. Sauvegarder
-  4. Recharger page (F5)
-  5. Vérifier pratique = "alternative"
-  6. Vérifier typePAN = "specifications"
-  7. Vérifier afficherSommatif décoché
-  8. Vérifier afficherAlternatif coché
-  9. Vérifier statut correct
-
-  Test 7 : API publique
-
-  // Tester obtenirConfigurationNotation()
-  const config = obtenirConfigurationNotation();
-  console.log('Config:', config);
-
-  // Vérifier structure
-  console.log('Pratique:', config.pratique);
-  console.log('Affichage sommatif?',
-  config.affichageTableauBord?.afficherSommatif);
-  console.log('Affichage alternatif?',
-  config.affichageTableauBord?.afficherAlternatif);
-
-  Test 8 : Changement de pratique
-
-  1. Configurer sommative
-  2. Sauvegarder
-  3. Changer pour alternative
-  4. Vérifier colonnePAN apparaît
-  5. Changer pour sommative
-  6. Vérifier colonnePAN disparaît
-  7. Vérifier typePAN réinitialisé
-
-  Test 9 : États du statut
-
-  // Tester les 4 états possibles
-
-  // État 1: Aucune config
-  localStorage.removeItem('modalitesEvaluation');
-  chargerModalites();
-  // Vérifier: "✗ À configurer" (rouge)
+```
+Mode comparatif activé (SOM + PAN affichés)
+   ↓
+Utilisateur décoche "Mode comparatif"
+   ↓
+sauvegarderOptionsAffichage()
+   ↓
+Détecte pratique = "alternative"
+   ↓
+Sauvegarde : afficherSom=false, afficherAlt=true
+   ↓
+Tableau de bord se rafraîchit → Affiche uniquement PAN avec badge [PAN - Maîtrise]
+```
 
-  // État 2: Sommative
-  localStorage.setItem('modalitesEvaluation', JSON.stringify({
-      pratique: 'sommative',
-      typePAN: null
-  }));
-  chargerModalites();
-  // Vérifier: "✓ Sommative traditionnelle (%)" (vert)
-
-  // État 3: Alternative sans type
-  localStorage.setItem('modalitesEvaluation', JSON.stringify({
-      pratique: 'alternative',
-      typePAN: null
-  }));
-  chargerModalites();
-  // Vérifier: "⚠ Choisir un type de PAN" (orange)
-
-  // État 4: Alternative avec type
-  localStorage.setItem('modalitesEvaluation', JSON.stringify({
-      pratique: 'alternative',
-      typePAN: 'maitrise'
-  }));
-  chargerModalites();
-  // Vérifier: "✓ Alternative (Maîtrise)" (vert)
-
-  ---
-  🐛 Problèmes connus
-
-  Problème 1 : Options affichage pas sauvegardées
-
-  Symptôme : Checkboxes pas cochées après rechargement
-
-  Cause : affichageTableauBord absent dans modalitesEvaluation
-
-  Solution :
-  // Vérifier structure
-  const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') ||
-  '{}');
-  console.log('affichageTableauBord existe?', !!modalites.affichageTableauBord);
-
-  // Ajouter manuellement si absent
-  if (!modalites.affichageTableauBord) {
-      modalites.affichageTableauBord = {
-          afficherSommatif: true,
-          afficherAlternatif: false
-      };
-      localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
-  }
-
-  Problème 2 : Statut pas mis à jour
-
-  Symptôme : #statutModalites reste "À configurer" malgré sauvegarde
-
-  Cause : Élément pas trouvé ou mettreAJourStatutModalites() pas appelée
-
-  Solution :
-  // Vérifier élément existe
-  console.log('statutModalites existe?',
-  !!document.getElementById('statutModalites'));
-
-  // Forcer mise à jour
-  mettreAJourStatutModalites();
-
-  Problème 3 : colonnePAN reste visible après changement
-
-  Symptôme : Menu PAN visible même en mode sommative
-
-  Cause : Style inline pas appliqué
-
-  Solution :
-  // Forcer masquage
-  document.getElementById('colonnePAN').style.display = 'none';
-  document.getElementById('typePAN').value = '';
-  document.getElementById('infoPAN').style.display = 'none';
-
-  Problème 4 : Validation échoue silencieusement
-
-  Symptôme : Pas d'alerte malgré champs vides
-
-  Cause : Erreur JavaScript bloque l'exécution
-
-  Solution :
-  // Déboguer sauvegarde
-  try {
-      sauvegarderPratiqueNotation();
-  } catch (error) {
-      console.error('Erreur sauvegarde:', error);
-  }
-
-  // Vérifier valeurs
-  const pratique = document.getElementById('pratiqueNotation').value;
-  const typePAN = document.getElementById('typePAN').value;
-  console.log('Pratique:', pratique, 'TypePAN:', typePAN);
-
-  Problème 5 : obtenirConfigurationNotation() retourne objet vide
-
-  Symptôme : {} retourné malgré configuration existante
-
-  Cause : localStorage.modalitesEvaluation corrompu ou absent
-
-  Solution :
-  // Vérifier données brutes
-  const raw = localStorage.getItem('modalitesEvaluation');
-  console.log('Données brutes:', raw);
-
-  // Si corrompu, supprimer
-  if (raw && raw !== '{}') {
-      try {
-          JSON.parse(raw);
-      } catch (e) {
-          console.error('Données corrompues:', e);
-          localStorage.removeItem('modalitesEvaluation');
-      }
-  }
-
-  ---
-  📐 Règles de modification
-
-  ⚠️ ZONES PROTÉGÉES
-
-  1. Noms de fonctions : Listés dans noms_stables.json
-  2. IDs HTML : Ne pas renommer les id des éléments
-  3. Clé localStorage : modalitesEvaluation (fixe)
-  4. Structure modalitesEvaluation : Champs (modules dépendants)
-  5. API publique : obtenirConfigurationNotation()
-
-  ✅ Modifications autorisées
-
-  1. Commentaires : Ajout/modification sans limite
-  2. Descriptions PAN : Textes dans table descriptions
-  3. Messages utilisateur : Textes alertes/notifications
-  4. Durée notification : setTimeout (actuellement 3000ms)
-  5. Validation : Ajout de règles supplémentaires
-  6. Types PAN : Ajout de nouveaux types (avec description)
-
-  Ajout d'un nouveau type PAN
-
-  Procédure :
-  1. ✅ Ajouter option dans #typePAN :
-  <option value="nouveau_type">Nouveau Type</option>
-  2. ✅ Ajouter description dans afficherInfoPAN() :
-  const descriptions = {
-      'maitrise': '...',
-      'specifications': '...',
-      'denotation': '...',
-      'nouveau_type': 'Description du nouveau type...'
-  };
-  3. ✅ Ajouter label dans mettreAJourStatutModalites() :
-  const types = {
-      'maitrise': 'Maîtrise',
-      'specifications': 'Spécifications',
-      'denotation': 'Dénotation',
-      'nouveau_type': 'Nouveau Type'
-  };
-  4. ✅ Tester exhaustivement
-
-  Workflow modification
-
-  1. ✅ Lire CLAUDE.md (règles globales)
-  2. ✅ Vérifier noms_stables.json
-  3. ✅ Sauvegarder (commit Git)
-  4. ✅ Modifier uniquement zones autorisées
-  5. ✅ Tester immédiatement
-  6. ✅ Rollback si erreur
-
-  ---
-  📜 Historique
-
-  | Date       | Version  | Changements                                        |
-  |------------|----------|----------------------------------------------------|
-  | 10-10-2025 | Index 50 | Modularisation initiale                            |
-  |            |          | - Gestion pratique sommative/alternative           |
-  |            |          | - Types PAN (maîtrise, spécifications, dénotation) |
-  |            |          | - Descriptions contextuelles                       |
-  |            |          | - Statut de configuration                          |
-  | 20-10-2025 | Étendu   | Ajout options d'affichage                          |
-  |            |          | - Checkbox afficherSommatif                        |
-  |            |          | - Checkbox afficherAlternatif                      |
-  |            |          | - Validation (au moins une cochée)                 |
-  |            |          | - Sauvegarde dans affichageTableauBord             |
-
-  ---
-  📞 Support et ressources
-
-  Documentation projet : README_PROJET.mdArchitecture :
-  structure-modulaire.txtGuide pédagogique : Labo Codex
-  (https://codexnumeris.org/apropos)Articles PAN : Revue Pédagogie collégiale
-  (printemps-été 2024, hiver 2025)
-
-  Debug console :
-  // Vérifier configuration
-  const config = obtenirConfigurationNotation();
-  console.log('Configuration complète:', config);
-
-  // Vérifier structure
-  console.log('Pratique:', config.pratique);
-  console.log('Type PAN:', config.typePAN);
-  console.log('Affichage TB:', config.affichageTableauBord);
-
-  // Vérifier dates
-  console.log('Date config:', config.dateConfiguration);
-  console.log('Config récente?', new Date(config.dateConfiguration) > new
-  Date('2025-10-01'));
-
-  // Vérifier fonctions disponibles
-  console.log('API disponible?', {
-      init: typeof initialiserModulePratiques,
-      obtenir: typeof obtenirConfigurationNotation,
-      sauvegarder: typeof sauvegarderPratiqueNotation
-  });
-
-  // Tester états
-  mettreAJourStatutModalites();
-
-  ---
-  ⚠️ RAPPEL CRITIQUE : Ce module définit la philosophie pédagogique de
-  l'évaluation pour tout le cours. La configuration choisie influence les calculs
-  d'indices, l'affichage au tableau de bord, et l'interprétation des résultats.
-  Assurez-vous que la configuration correspond bien à votre approche pédagogique
-  avant de commencer à saisir des données.
+---
+
+## 🎯 Cas d'utilisation
+
+### Cas 1 : Enseignant traditionaliste
+
+**Profil** : Utilise uniquement la notation sommative (moyennes pondérées)
+
+**Configuration** :
+- Pratique : Sommative
+- Mode comparatif : Non coché
+
+**Résultat** : Tableau de bord affiche uniquement indices SOM avec badge `[SOM]`
+
+---
+
+### Cas 2 : Enseignant PAN convaincu
+
+**Profil** : Utilise uniquement la pratique alternative (PAN-Maîtrise)
+
+**Configuration** :
+- Pratique : Alternative - Maîtrise
+- Mode comparatif : Non coché
+
+**Résultat** : Tableau de bord affiche uniquement indices PAN avec badge `[PAN - Maîtrise]`
+
+---
+
+### Cas 3 : Chercheur / Expérimentateur
+
+**Profil** : Veut comparer empiriquement les deux approches
+
+**Configuration** :
+- Pratique : Alternative - Maîtrise (pratique "officielle")
+- Mode comparatif : Coché ✓
+
+**Résultat** : Tableau de bord affiche :
+```
+Indicateurs globaux du groupe [☑ SOM] [☑ PAN]
+├─ Assiduité (A)    85% | 85%  (orange | bleu)
+├─ Complétion (C)   75% | 82%
+└─ Performance (P)  68% | 76%
+```
+
+**Avantage** : Peut basculer les checkboxes pour isoler une pratique sans recharger la page
+
+---
+
+### Cas 4 : Enseignant en transition
+
+**Profil** : Utilise la notation traditionnelle mais explore le PAN
+
+**Configuration** :
+- Pratique : Sommative (pratique officielle)
+- Type PAN : Maîtrise (configuré pour exploration)
+- Mode comparatif : Coché ✓
+
+**Résultat** : Voit les deux pratiques côte à côte sans changer sa pratique officielle. Peut analyser les divergences pour éclairer une future transition vers le PAN.
+
+---
+
+## ⚠️ Validation et gestion d'erreurs
+
+### Validation des champs obligatoires
+
+#### Pratique vide
+
+```javascript
+if (!pratique) {
+    alert('⚠️ Veuillez sélectionner une pratique de notation');
+    return;
+}
+```
+
+#### Type PAN manquant (si pratique = alternative)
+
+```javascript
+if (pratique === 'alternative' && !typePAN) {
+    alert('⚠️ Veuillez sélectionner un type de PAN');
+    return;
+}
+```
+
+### Création automatique de `affichageTableauBord`
+
+Si l'objet `affichageTableauBord` est absent (ancienne version), le module le crée automatiquement :
+
+```javascript
+if (!modalites.affichageTableauBord) {
+    modalites.affichageTableauBord = {
+        afficherSommatif: pratique === 'sommative',
+        afficherAlternatif: pratique === 'alternative'
+    };
+}
+```
+
+---
+
+## 🚀 Changements Beta 0.72
+
+### Modifications majeures
+
+1. **Interface simplifiée** :
+   - ❌ Anciennes : 2 checkboxes séparées (afficherSommatif, afficherAlternatif)
+   - ✅ Nouvelle : 1 checkbox unique "Activer le mode comparatif (expérimental)"
+
+2. **Logique automatique** :
+   - Mode comparatif coché → Affiche SOM et PAN
+   - Mode comparatif décoché → Affiche uniquement la pratique principale
+
+3. **Validation supprimée** :
+   - ❌ Ancienne : Validation "au moins une checkbox cochée"
+   - ✅ Nouvelle : Pas de validation nécessaire (checkbox unique détermine tout)
+
+4. **Fonction `sauvegarderOptionsAffichage()` refactorée** :
+   - Lecture d'une seule checkbox
+   - Logique conditionnelle selon `modeComparatif` et `pratique`
+
+### Rétrocompatibilité
+
+Les anciennes configurations restent valides :
+- Si `affichageTableauBord` existe → Le mode comparatif est détecté automatiquement
+- Si `afficherSommatif && afficherAlternatif` → Checkbox "mode comparatif" cochée au chargement
+
+---
+
+## 📚 Références
+
+- **CLAUDE.md** : Architecture globale du projet
+- **Documentation_Indicateurs_Pratique.md** : Guide utilisateur du mode comparatif
+- **Documentation Module tableau-bord-apercu.md** : Lecteur principal de cette configuration
+- **Guide de monitorage** : Fondements théoriques des pratiques alternatives
+
+---
+
+## 📝 Notes pour les développeurs
+
+### Points d'attention
+
+1. **Ordre de chargement** : Ce module doit être chargé AVANT les modules d'affichage (tableau-bord-apercu.js, profil-etudiant.js)
+
+2. **Événements** : Les événements sont attachés uniquement si les éléments DOM existent (gestion des sections inactives)
+
+3. **localStorage** : Toujours vérifier l'existence de `modalitesEvaluation` avant de lire
+
+4. **Validation** : Seuls les champs critiques sont validés (pratique, typePAN si alternative)
+
+### Extensions futures
+
+- Mode comparatif étendu au profil étudiant
+- Historique des configurations (undo/redo)
+- Import/export de configurations
+- Préréglages (templates) pour démarrage rapide
+
+---
+
+**Licence** : Creative Commons BY-NC-SA 4.0 (Grégoire Bédard)
+**Contact** : Labo Codex (https://codexnumeris.org/apropos)

@@ -530,13 +530,22 @@ function genererSectionMobilisationEngagement(da) {
     });
     const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
     const artefacts = artefactsDonnes.map(art => {
-        const evaluation = evaluationsEleve.find(e => e.productionId === art.id);
+        // Trouver l'évaluation ACTIVE (non remplacée) pour cette production
+        const evaluationsProduction = evaluationsEleve.filter(e => e.productionId === art.id);
+        let evaluation = null;
+        if (evaluationsProduction.length > 0) {
+            // Prioriser l'évaluation active (sans remplaceeParId)
+            evaluation = evaluationsProduction.find(e => !e.remplaceeParId) || evaluationsProduction[0];
+        }
+
         return {
             id: art.id,
             titre: art.titre,
             remis: !!evaluation,
             note: evaluation?.noteFinale || null,
-            niveau: evaluation?.niveauFinal || null
+            niveau: evaluation?.niveauFinal || null,
+            jetonReprise: evaluation?.repriseDeId ? true : false,
+            jetonDelai: evaluation?.jetonDelaiApplique ? true : false
         };
     }).sort((a, b) => {
         if (a.remis && !b.remis) return -1;
@@ -549,6 +558,18 @@ function genererSectionMobilisationEngagement(da) {
     const interpC = interpreterCompletion(indices.C);
     const artefactsRemis = artefacts.filter(a => a.remis);
     const artefactsNonRemis = artefacts.filter(a => !a.remis);
+
+    // Comptabiliser les jetons utilisés et récupérer les noms des artefacts
+    const evaluationsAvecJetonReprise = evaluationsEleve.filter(e => e.repriseDeId);
+    const evaluationsAvecJetonDelai = evaluationsEleve.filter(e => e.jetonDelaiApplique && !e.remplaceeParId);
+
+    const jetonsRepriseUtilises = evaluationsAvecJetonReprise.length;
+    const jetonsDelaiUtilises = evaluationsAvecJetonDelai.length;
+    const totalJetonsUtilises = jetonsRepriseUtilises + jetonsDelaiUtilises;
+
+    // Lister les artefacts concernés
+    const artefactsAvecJetonReprise = evaluationsAvecJetonReprise.map(e => e.productionNom || 'Artefact inconnu');
+    const artefactsAvecJetonDelai = evaluationsAvecJetonDelai.map(e => e.productionNom || 'Artefact inconnu');
 
     return `
         <!-- Badge interprétatif Mobilisation globale -->
@@ -649,20 +670,39 @@ function genererSectionMobilisationEngagement(da) {
 
                 <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
 
-                <!-- Gestion des jetons (placeholder) -->
-                <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
-                    GESTION DES JETONS
-                </h4>
-                <div style="background: #fff3cd; border: 2px dashed #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center;">
-                    <div style="font-size: 1rem; color: #856404;">
-                        <strong>Jetons disponibles :</strong> 2 / 2
+                <!-- Gestion des jetons -->
+                ${totalJetonsUtilises > 0 ? `
+                    <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                        🎫 JETONS UTILISÉS
+                    </h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                        ${jetonsRepriseUtilises > 0 ? `
+                            <div style="background: #f3e5f5; border-left: 4px solid #9c27b0; border-radius: 8px; padding: 12px;">
+                                <div style="font-size: 1rem; color: #7b1fa2; font-weight: 600;">
+                                    <span style="font-size: 1.2rem;">⭐</span> Jetons de reprise : ${jetonsRepriseUtilises}
+                                </div>
+                                <div style="font-size: 0.85rem; color: #666; margin-top: 8px;">
+                                    ${artefactsAvecJetonReprise.map(nom => `
+                                        <div style="padding: 4px 0;">• ${echapperHtml(nom)}</div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${jetonsDelaiUtilises > 0 ? `
+                            <div style="background: #fff3e0; border-left: 4px solid #ff6f00; border-radius: 8px; padding: 12px;">
+                                <div style="font-size: 1rem; color: #e65100; font-weight: 600;">
+                                    <span style="font-size: 1.2rem;">⭐</span> Jetons de délai : ${jetonsDelaiUtilises}
+                                </div>
+                                <div style="font-size: 0.85rem; color: #666; margin-top: 8px;">
+                                    ${artefactsAvecJetonDelai.map(nom => `
+                                        <div style="padding: 4px 0;">• ${echapperHtml(nom)}</div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
-                    <div style="font-size: 0.85rem; color: #666; font-style: italic; margin-top: 5px;">
-                        Système à implémenter
-                    </div>
-                </div>
-
-                <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+                    <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+                ` : ''}
 
                 <!-- Artefacts remis -->
                 <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
@@ -675,6 +715,8 @@ function genererSectionMobilisationEngagement(da) {
                                         border-radius: 4px; font-size: 0.85rem;">
                                 <div style="color: #155724; font-weight: 500;">
                                     ✅ ${echapperHtml(art.titre)}
+                                    ${art.jetonReprise ? '<span style="color: #9c27b0; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
+                                    ${art.jetonDelai ? '<span style="color: #ff6f00; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
                                 </div>
                                 <div style="font-size: 0.8rem; color: #666;">
                                     <strong>${art.note}/100</strong>${art.niveau ? ` · ${art.niveau}` : ''}
@@ -2353,13 +2395,22 @@ function genererSectionCompletion(da) {
 
     // Construire la liste des artefacts avec leur statut
     const artefacts = artefactsDonnes.map(art => {
-        const evaluation = evaluationsEleve.find(e => e.productionId === art.id);
+        // Trouver l'évaluation ACTIVE (non remplacée) pour cette production
+        const evaluationsProduction = evaluationsEleve.filter(e => e.productionId === art.id);
+        let evaluation = null;
+        if (evaluationsProduction.length > 0) {
+            // Prioriser l'évaluation active (sans remplaceeParId)
+            evaluation = evaluationsProduction.find(e => !e.remplaceeParId) || evaluationsProduction[0];
+        }
+
         return {
             id: art.id,
             titre: art.titre,
             remis: !!evaluation,
             note: evaluation?.noteFinale || null,
-            niveau: evaluation?.niveauFinal || null
+            niveau: evaluation?.niveauFinal || null,
+            jetonReprise: evaluation?.repriseDeId ? true : false,
+            jetonDelai: evaluation?.jetonDelaiApplique ? true : false
         };
     }).sort((a, b) => {
         if (a.remis && !b.remis) return -1;
@@ -2429,6 +2480,8 @@ function genererSectionCompletion(da) {
                                     background: #d4edda; border-left: 3px solid #28a745; border-radius: 4px;">
                             <div style="color: #155724; font-weight: 500; margin-bottom: 5px;">
                                 ✅ ${echapperHtml(art.titre)}
+                                ${art.jetonReprise ? '<span style="color: #9c27b0; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
+                                ${art.jetonDelai ? '<span style="color: #ff6f00; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
                             </div>
                             <div style="font-size: 0.9rem; color: #666;">
                                 <strong>${art.note}/100</strong>${art.niveau ? ` · ${art.niveau}` : ''}
