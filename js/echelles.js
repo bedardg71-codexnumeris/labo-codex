@@ -606,52 +606,59 @@ function afficherTableauNiveaux(niveaux) {
 </thead>
             <tbody>
                 ${niveaux.map((niveau, index) => `
-                    <tr>
+                    <tr style="opacity: ${niveau.verrouille ? '0.7' : '1'};">
                         <td>
-                            <input type="text" 
-                                   value="${echapperHtml(niveau.code)}" 
+                            <input type="text"
+                                   value="${echapperHtml(niveau.code)}"
                                    onchange="modifierNiveau(${index}, 'code', this.value)"
-                                   class="controle-form" 
-                                   style="width: 60px; padding: 4px;">
-                        </td>
-                        <td>
-                            <input type="text" 
-                                   value="${echapperHtml(niveau.nom)}" 
-                                   onchange="modifierNiveau(${index}, 'nom', this.value)"
-                                   class="controle-form" 
-                                   style="width: 100%; padding: 4px;">
-                        </td>
-                        <td>
-                            <input type="text" 
-                                   value="${echapperHtml(niveau.description || '')}" 
-                                   onchange="modifierNiveau(${index}, 'description', this.value)"
-                                   class="controle-form" 
-                                   style="width: 100%; padding: 4px;">
-                        </td>
-                        <td>
-                            <input type="number" 
-                                   value="${niveau.min}" 
-                                   onchange="modifierNiveau(${index}, 'min', this.value)"
-                                   class="controle-form" 
+                                   class="controle-form"
                                    style="width: 60px; padding: 4px;"
-                                   min="0" max="100">
+                                   ${niveau.verrouille ? 'disabled' : ''}>
+                        </td>
+                        <td>
+                            <input type="text"
+                                   value="${echapperHtml(niveau.nom)}"
+                                   onchange="modifierNiveau(${index}, 'nom', this.value)"
+                                   class="controle-form"
+                                   style="width: 100%; padding: 4px;"
+                                   ${niveau.verrouille ? 'disabled' : ''}>
+                        </td>
+                        <td>
+                            <input type="text"
+                                   value="${echapperHtml(niveau.description || '')}"
+                                   onchange="modifierNiveau(${index}, 'description', this.value)"
+                                   class="controle-form"
+                                   style="width: 100%; padding: 4px;"
+                                   ${niveau.verrouille ? 'disabled' : ''}>
+                        </td>
+                        <td>
+                            <input type="number"
+                                   value="${niveau.min}"
+                                   onchange="modifierNiveau(${index}, 'min', this.value)"
+                                   class="controle-form"
+                                   style="width: 60px; padding: 4px;"
+                                   min="0" max="100"
+                                   ${niveau.verrouille ? 'disabled' : ''}>
                         </td>
 <td>
-    <input type="number" 
-           value="${niveau.max}" 
+    <input type="number"
+           value="${niveau.max}"
            onchange="modifierNiveau(${index}, 'max', this.value)"
-           style="width: 60px;" min="0" max="100">
+           style="width: 60px;" min="0" max="100"
+           ${niveau.verrouille ? 'disabled' : ''}>
 </td>
 <td>
-                            <input type="number" 
-                                   value="${niveau.valeurCalcul || ''}" 
+                            <input type="number"
+                                   value="${niveau.valeurCalcul || ''}"
                                    onchange="modifierNiveau(${index}, 'valeurCalcul', this.value)"
                                    style="width: 80px;" min="0" max="100" step="0.1"
-                                   placeholder="Ex: 32">
+                                   placeholder="Ex: 32"
+                                   ${niveau.verrouille ? 'disabled' : ''}>
                         </td>
                         <td>
     <select onchange="modifierNiveau(${index}, 'couleur', this.value)"
-            style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;">
+            style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"
+            ${niveau.verrouille ? 'disabled' : ''}>
         ${paletteCouleurs.map(c => `
             <option value="${c.valeur}" ${niveau.couleur === c.valeur ? 'selected' : ''}>
                 ${c.nom}
@@ -666,10 +673,17 @@ function afficherTableauNiveaux(niveaux) {
                             ${niveaux.length > 1 ?
             `<button onclick="supprimerNiveau(${index})"
                                          class="btn btn-supprimer btn-compact"
-                                         title="Supprimer ce niveau">
+                                         ${niveau.verrouille ? 'disabled' : ''}
+                                         title="${niveau.verrouille ? 'Déverrouillez d\'abord pour supprimer' : 'Supprimer ce niveau'}">
                                     Supprimer
                                 </button>`
             : ''}
+                            <span id="cadenas-niveau-${index}"
+                                  onclick="basculerVerrouillageNiveau(${index})"
+                                  style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 8px;"
+                                  title="${niveau.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                                ${niveau.verrouille ? '🔒' : '🔓'}
+                            </span>
                         </td>
                     </tr>
                 `).join('')}
@@ -785,17 +799,60 @@ function supprimerNiveau(index) {
 }
 
 /**
+ * Bascule le verrouillage d'un niveau
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère les niveaux depuis localStorage
+ * 2. Toggle la propriété verrouille du niveau
+ * 3. Sauvegarde dans localStorage
+ * 4. Met à jour le cadenas immédiatement dans le DOM
+ * 5. Rafraîchit le tableau pour mettre à jour l'état disabled
+ *
+ * PARAMÈTRES:
+ * @param {number} index - Index du niveau à verrouiller/déverrouiller
+ *
+ * UTILISÉ PAR:
+ * - Clic sur le cadenas dans la colonne Actions
+ *
+ * EFFET VISUEL:
+ * - Cadenas 🔓 → 🔒 (ou inverse)
+ * - Inputs disabled si verrouillé
+ * - Opacité réduite si verrouillé
+ */
+function basculerVerrouillageNiveau(index) {
+    let niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || JSON.stringify(niveauxDefaut));
+
+    // Toggle le verrouillage
+    niveaux[index].verrouille = !niveaux[index].verrouille;
+    const estVerrouille = niveaux[index].verrouille;
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('niveauxEchelle', JSON.stringify(niveaux));
+
+    // Mettre à jour le cadenas dans le DOM immédiatement
+    const cadenasElement = document.getElementById(`cadenas-niveau-${index}`);
+    if (cadenasElement) {
+        cadenasElement.textContent = estVerrouille ? '🔒' : '🔓';
+        cadenasElement.title = estVerrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+    }
+
+    // Rafraîchir le tableau pour mettre à jour l'état disabled et l'opacité
+    afficherTableauNiveaux(niveaux);
+    afficherApercuEchelle(niveaux);
+}
+
+/**
  * Réinitialise l'échelle aux niveaux par défaut
- * 
+ *
  * FONCTIONNEMENT:
  * 1. Demande confirmation
  * 2. Restaure les niveaux SOLO par défaut
  * 3. Met à jour l'affichage
- * 
+ *
  * UTILISÉ PAR:
  * - Bouton «Réinitialiser»
  * - chargerEchelleTemplate() (nouvelle échelle)
- * 
+ *
  * SÉCURITÉ:
  * - Confirmation obligatoire
  * - Perte des modifications actuelles
