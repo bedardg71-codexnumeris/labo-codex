@@ -411,7 +411,7 @@ function modifierCritere(id) {
     }
 
     if (critere && critere.verrouille) {
-        alert('Décochez "🔒" avant de modifier ce critère');
+        alert('Déverrouillez ce critère (🔓) avant de le modifier');
         return;
     }
 
@@ -454,7 +454,7 @@ function supprimerCritere(id) {
     }
 
     if (critere && critere.verrouille) {
-        alert('Décochez "🔒" avant de supprimer ce critère');
+        alert('Déverrouillez ce critère (🔓) avant de le supprimer');
         return;
     }
 
@@ -522,12 +522,11 @@ function afficherListeCriteres(criteres, grilleId) {
                             style="margin-right: 10px;">
                         Supprimer
                     </button>
-                    <label>
-                        <input type="checkbox" id="unlock-critere-${critere.id}"
-                               onchange="basculerVerrouillageCritere('${critere.id}')"
-                               ${critere.verrouille ? 'checked' : ''}>
-                        <span style="font-size: 0.85rem;">🔒</span>
-                    </label>
+                    <span onclick="basculerVerrouillageCritere('${critere.id}')"
+                          style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
+                          title="${critere.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                        ${critere.verrouille ? '🔒' : '🔓'}
+                    </span>
                 </div>
             </div>
             ${critere.description ? `<p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">${critere.description}</p>` : ''}

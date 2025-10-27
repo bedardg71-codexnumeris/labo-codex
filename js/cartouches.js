@@ -812,12 +812,11 @@ function afficherListeCartouches(cartouches, grilleId) {
                     </small>
                 </div>
                 <div>
-                    <label style="font-size: 0.85rem; margin-right: 10px;">
-                        <input type="checkbox" id="verrou-cartouche-${cartouche.id}" 
-                               onchange="basculerVerrouillageCartouche('${cartouche.id}', '${grilleId}')" 
-                               ${cartouche.verrouille ? 'checked' : ''}>
-                        🔒
-                    </label>
+                    <span onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grilleId}')"
+                          style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-right: 10px;"
+                          title="${cartouche.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                        ${cartouche.verrouille ? '🔒' : '🔓'}
+                    </span>
                     <button class="btn btn-modifier" 
                             onclick="chargerCartouchePourModif('${cartouche.id}', '${grilleId}')" 
                             style="padding: 5px 12px; font-size: 0.85rem; 
@@ -982,7 +981,7 @@ function supprimerCartoucheConfirm(cartoucheId, grilleId) {
     const cartouche = cartouches.find(c => c.id === cartoucheId);
     
     if (cartouche && cartouche.verrouille) {
-        alert('Décochez "🔒" avant de supprimer');
+        alert('Déverrouillez ce cartouche (🔓) avant de le supprimer');
         return;
     }
     

@@ -652,14 +652,11 @@ function afficherSeancesExistantes() {
                 <div style="flex: 1;">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
                         <strong style="color: var(--bleu-moyen);">Séance ${seance.nom}</strong>
-                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem;">
-                            <input type="checkbox"
-                                   id="verrou-seance-${seance.id}"
-                                   ${isVerrouille ? 'checked' : ''}
-                                   onchange="basculerVerrouillageSeance(${seance.id})"
-                                   title="Verrouiller/Déverrouiller">
-                            🔒
-                        </label>
+                        <span onclick="basculerVerrouillageSeance(${seance.id})"
+                              style="font-size: 1.2rem; cursor: pointer; user-select: none;"
+                              title="${isVerrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                            ${isVerrouille ? '🔒' : '🔓'}
+                        </span>
                     </div>
                     <div style="color: #666; font-size: 0.9rem;">
                         ${jourEchappe} • ${debutEchappe} à ${finEchappe}

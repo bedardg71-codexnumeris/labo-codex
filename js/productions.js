@@ -109,13 +109,11 @@ function afficherTableauProductions() {
                             ${prod.verrouille ? 'disabled' : ''}>Modifier</button>
                     <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer"
                             ${prod.verrouille ? 'disabled' : ''}>Supprimer</button>
-                    <label style="display: inline-flex; align-items: center; margin-left: 10px;">
-                        <input type="checkbox"
-                               ${prod.verrouille ? 'checked' : ''}
-                               onchange="verrouillerEvaluation('${prod.id}')"
-                               style="margin-right: 5px;">
-                        <span style="font-size: 0.85rem;">🔒</span>
-                    </label>
+                    <span onclick="verrouillerEvaluation('${prod.id}')"
+                          style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
+                          title="${prod.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                        ${prod.verrouille ? '🔒' : '🔓'}
+                    </span>
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: ${prod.type === 'artefact-portfolio' ? '1fr 1fr' : '1fr 1fr 1fr'}; gap: 10px;">

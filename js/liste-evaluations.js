@@ -512,13 +512,12 @@ function genererBoutonsActionsEvalue(ligne) {
         <button class="btn btn-supprimer btn-compact btn-marge-droite" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer">
             Supprimer
         </button>
-        <label style="display: inline-flex; align-items: center; margin-left: 10px;">
-            <input type="checkbox"
-                   ${ligne.verrouille ? 'checked' : ''}
-                   onchange="toggleVerrouillerEvaluation('${ligne.evaluationId}')"
-                   style="margin-right: 5px;">
-            <span style="font-size: 0.85rem;">🔒</span>
-        </label>
+        <span id="cadenas-liste-${ligne.evaluationId}"
+              onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')"
+              style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
+              title="${ligne.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+            ${ligne.verrouille ? '🔒' : '🔓'}
+        </span>
     `;
 }
 
@@ -626,8 +625,20 @@ function toggleVerrouillerEvaluation(evaluationId) {
 
     console.log(`🔒 Évaluation ${evaluationId} ${evaluation.verrouillee ? 'verrouillée' : 'déverrouillée'}`);
 
+    // Mettre à jour le cadenas dans le DOM immédiatement
+    const cadenasElement = document.getElementById(`cadenas-liste-${evaluationId}`);
+    if (cadenasElement) {
+        cadenasElement.textContent = evaluation.verrouillee ? '🔒' : '🔓';
+        cadenasElement.title = evaluation.verrouillee ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+    }
+
     // Recharger le tableau
     chargerDonneesEvaluations();
+
+    // Rafraîchir le profil étudiant si affiché (pour mettre à jour les autres éléments)
+    if (typeof afficherProfilComplet === 'function' && window.profilActuelDA) {
+        setTimeout(() => afficherProfilComplet(window.profilActuelDA), 100);
+    }
 }
 
 // ============================================
