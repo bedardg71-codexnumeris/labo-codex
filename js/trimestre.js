@@ -192,11 +192,11 @@ function chargerEvenementsPrevus() {
                     class="btn btn-modifier" ${disabled}>Modifier</button>
             <button onclick="supprimerEvenement('${evt.id}', 'prevus')" 
                     class="btn btn-supprimer" ${disabled}>Supprimer</button>
-            <label class="item-carte-checkbox">
-                <input type="checkbox" ${verrouille}
-                       onchange="basculerVerrouillageEvenement('${evt.id}', 'prevus')">
-                <span>🔒</span>
-            </label>
+            <span onclick="basculerVerrouillageEvenement('${evt.id}', 'prevus')"
+                  style="font-size: 1.2rem; cursor: pointer; user-select: none;"
+                  title="${evt.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                ${evt.verrouille ? '🔒' : '🔓'}
+            </span>
         </div>
     </div>
     <div class="item-carte-grille ${evt.dateReprise ? 'item-carte-grille-custom' : ''}">
@@ -357,11 +357,11 @@ function chargerEvenementsImprevus() {
                             class="btn btn-modifier" ${disabled}>Modifier</button>
                     <button onclick="supprimerEvenement('${evt.id}', 'imprevus')" 
                             class="btn btn-supprimer" ${disabled}>Supprimer</button>
-                    <label class="item-carte-checkbox">
-                        <input type="checkbox" ${verrouille}
-                               onchange="basculerVerrouillageEvenement('${evt.id}', 'imprevus')">
-                        <span>🔒</span>
-                    </label>
+                    <span onclick="basculerVerrouillageEvenement('${evt.id}', 'imprevus')"
+                          style="font-size: 1.2rem; cursor: pointer; user-select: none;"
+                          title="${evt.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                        ${evt.verrouille ? '🔒' : '🔓'}
+                    </span>
                 </div>
             </div>
             <div class="item-carte-grille ${evt.dateReprise ? 'item-carte-grille-custom' : ''}">

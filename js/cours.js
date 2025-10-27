@@ -129,7 +129,7 @@ function afficherTableauCours() {
                 <th>Session</th>
                 <th style="width: 60px;">Actif</th>
                 <th style="width: 200px;">Actions</th>
-                <th style="width: 60px;">🔒</th>
+                <th style="width: 60px;" title="Verrouillage">🔒/🔓</th>
             </tr>
         </thead>
         <tbody>
@@ -191,11 +191,11 @@ function afficherTableauCours() {
                 </div>
             </td>
             <td style="text-align: center;">
-                <input type="checkbox"
-                       id="verrou-cours-${c.id}"
-                       ${isVerrouille ? 'checked' : ''}
-                       onchange="basculerVerrouillageCours('${c.id}')"
-                       title="Verrouiller/Déverrouiller">
+                <span onclick="basculerVerrouillageCours('${c.id}')"
+                      style="font-size: 1.2rem; cursor: pointer; user-select: none;"
+                      title="${isVerrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                    ${isVerrouille ? '🔒' : '🔓'}
+                </span>
             </td>
         </tr>
         `;
@@ -537,9 +537,9 @@ function dupliquerCours(id) {
 function basculerVerrouillageCours(id) {
     let cours = JSON.parse(localStorage.getItem('listeCours') || '[]');
     const index = cours.findIndex(c => c.id === id);
-    
+
     if (index !== -1) {
-        cours[index].verrouille = document.getElementById(`verrou-cours-${id}`).checked;
+        cours[index].verrouille = !cours[index].verrouille;
         localStorage.setItem('listeCours', JSON.stringify(cours));
         afficherTableauCours();
     }
@@ -622,7 +622,7 @@ function supprimerCours(id) {
     const coursASupprimer = cours.find(c => c.id === id);
     
     if (coursASupprimer && coursASupprimer.verrouille) {
-        alert('Décochez "🔒" avant de supprimer ce cours');
+        alert('Déverrouillez ce cours (🔓) avant de le supprimer');
         return;
     }
     

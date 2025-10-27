@@ -649,7 +649,7 @@ function resetFiltreGroupe() {
 function modifierEtudiant(da) {
     const verrouille = JSON.parse(localStorage.getItem('groupeVerrouille') || 'false');
     if (verrouille) {
-        alert('Décochez "🔒" avant de modifier');
+        alert('Déverrouillez le groupe (🔓) avant de le modifier');
         return;
     }
 
@@ -846,7 +846,7 @@ function attacherEventListenersEtudiants() {
 function supprimerEtudiant(id) {
     const verrouille = JSON.parse(localStorage.getItem('groupeVerrouille') || 'false');
     if (verrouille) {
-        alert('Décochez "🔒" avant de supprimer');
+        alert('Déverrouillez le groupe (🔓) avant de supprimer');
         return;
     }
 
