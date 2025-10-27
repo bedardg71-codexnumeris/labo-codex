@@ -417,7 +417,11 @@ function afficherListeEtudiants() {
  */
 function mettreAJourStatistiquesGroupes() {
     try {
-        const students = obtenirDonneesSelonMode('groupeEtudiants');
+        const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        // Vérifier que la fonction de filtrage existe
+        const students = typeof filtrerEtudiantsParMode === 'function'
+            ? filtrerEtudiantsParMode(tousEtudiants)
+            : tousEtudiants.filter(e => e.groupe !== '9999');
 
         // Compteur total
         const compteurTotal = document.getElementById('nbEtudiantsTotal');
@@ -477,7 +481,10 @@ function mettreAJourStatistiquesGroupes() {
  */
 function remplirSelectFiltreGroupe() {
     try {
-        const students = obtenirDonneesSelonMode('groupeEtudiants');
+        const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const students = typeof filtrerEtudiantsParMode === 'function'
+            ? filtrerEtudiantsParMode(tousEtudiants)
+            : tousEtudiants.filter(e => e.groupe !== '9999');
         const selectFiltre = document.getElementById('filtreGroupe');
 
         if (!selectFiltre) return;
@@ -522,7 +529,10 @@ function filtrerParGroupe() {
         const selectFiltre = document.getElementById('filtreGroupe');
         const groupeSelectionné = selectFiltre ? selectFiltre.value : '';
 
-        const students = obtenirDonneesSelonMode('groupeEtudiants');
+        const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const students = typeof filtrerEtudiantsParMode === 'function'
+            ? filtrerEtudiantsParMode(tousEtudiants)
+            : tousEtudiants.filter(e => e.groupe !== '9999');
         const tbody = document.getElementById('students-tbody');
         const container = document.getElementById('students-list-container');
         const noMsg = document.getElementById('no-students-msg');

@@ -102,7 +102,10 @@ function rechargerListeEtudiants() {
  * Charge les options des filtres (groupes et programmes)
  */
 function chargerOptionsFiltres() {
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiants = typeof filtrerEtudiantsParMode === 'function'
+        ? filtrerEtudiantsParMode(tousEtudiants)
+        : tousEtudiants.filter(e => e.groupe !== '9999');
 
     // Charger les groupes
     const filtreGroupe = document.getElementById('filtre-groupe-liste');
@@ -174,7 +177,8 @@ function calculerAssiduitéGlobale(da) {
     }
 
     // Compter le nombre de séances RÉELLEMENT SAISIES pour cet élève
-    const presences = JSON.parse(localStorage.getItem('presences') || '[]');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const presences = obtenirDonneesSelonMode('presences') || [];
     const datesSaisies = new Set();
     presences.forEach(p => {
         if (p.da === da && p.heures !== null && p.heures !== undefined) {
@@ -221,20 +225,36 @@ function obtenirCouleurAssiduite(taux) {
  */
 /**
  * Calcule le taux de complétion pour un étudiant
- * VERSION CORRIGÉE - Cohérente avec le calcul d'assiduité
- * 
+ * VERSION CORRIGÉE - Lit depuis indicesCP (Single Source of Truth)
+ *
  * PRINCIPE :
- * - Comme l'assiduité se base sur les séances RÉELLEMENT SAISIES,
- * - La complétion se base sur les artefacts RÉELLEMENT ÉVALUÉS (au moins une évaluation existe)
- * 
- * FORMULE : (artefacts remis par l'étudiant) / (artefacts pour lesquels AU MOINS une évaluation existe) × 100
- * 
+ * - L'indice C est calculé par portfolio.js avec le système PAN (N meilleurs artefacts)
+ * - Cette fonction LIT l'indice C depuis indicesCP au lieu de le recalculer
+ * - Respecte la pratique de notation configurée (SOM ou PAN)
+ *
  * @param {string} da - Numéro de DA
  * @returns {number} - Taux de complétion en pourcentage (0-100)
  */
 function calculerTauxCompletion(da) {
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    // LIRE depuis la source unique de vérité (portfolio.js)
+    if (typeof obtenirIndicesCP === 'function') {
+        // Détecter la pratique active
+        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
+
+        const indicesCP = obtenirIndicesCP(da, pratique);
+
+        if (indicesCP && indicesCP.C !== undefined) {
+            return Math.round(indicesCP.C);
+        }
+    }
+
+    // Fallback : si obtenirIndicesCP n'est pas disponible ou pas encore calculé
+    console.warn(`⚠️ Indice C non trouvé pour ${da} - Recalcul à la volée`);
+
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const productions = obtenirDonneesSelonMode('listeGrilles') || [];
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
     // ✅ CORRECTION : Ne compter QUE les artefacts-portfolio pour l'indice C
     const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
@@ -261,8 +281,8 @@ function calculerTauxCompletion(da) {
     // Si aucun artefact n'a encore été donné, retourner 0
     if (nombreArtefactsDonnes === 0) return 0;
 
-    // Calculer le pourcentage
-    return Math.round((evaluationsEleve.length / nombreArtefactsDonnes) * 100);
+    // Calculer le pourcentage (sans dépasser 100%)
+    return Math.min(100, Math.round((evaluationsEleve.length / nombreArtefactsDonnes) * 100));
 }
 
 /**
@@ -354,7 +374,10 @@ function afficherListeEtudiantsConsultation() {
     }
 
     // Charger les étudiants
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiants = typeof filtrerEtudiantsParMode === 'function'
+        ? filtrerEtudiantsParMode(tousEtudiants)
+        : tousEtudiants.filter(e => e.groupe !== '9999');
 
     console.log('Nombre total d\'étudiants:', etudiants.length);
 
@@ -567,7 +590,10 @@ function afficherPortfolio(da) {
         // Fallback basique si le module n'est pas chargé
         console.warn('⚠️ Module profil-etudiant.js non chargé, affichage basique');
 
-        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const etudiants = typeof filtrerEtudiantsParMode === 'function'
+            ? filtrerEtudiantsParMode(tousEtudiants)
+            : tousEtudiants.filter(e => e.groupe !== '9999');
         const etudiant = etudiants.find(e => e.da === da);
 
         if (!etudiant) {

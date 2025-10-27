@@ -168,7 +168,7 @@ function chargerDonneesEvaluations() {
     // Charger les données selon le mode actif (géré automatiquement par le module 17)
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = obtenirDonneesSelonMode('listeGrilles');
 
     // Extraire les groupes uniques depuis les étudiants
     const groupes = [...new Set(etudiants.map(e => e.groupe))].sort().map(g => ({ numero: g }));
@@ -413,7 +413,7 @@ function appliquerFiltres() {
     // Charger les données selon le mode actif
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = obtenirDonneesSelonMode('listeGrilles');
 
     // Afficher le tableau avec les filtres appliqués
     afficherTableauEvaluations(evaluations, productions, etudiants);
@@ -587,10 +587,11 @@ function supprimerEvaluation(evaluationId) {
         return;
     }
 
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const evaluationsFiltered = evaluations.filter(ev => ev.id !== evaluationId);
 
-    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluationsFiltered));
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsFiltered);
 
     console.log(`Évaluation ${evaluationId} supprimée`);
 
@@ -602,7 +603,8 @@ function supprimerEvaluation(evaluationId) {
  * Verrouille/Déverrouille une évaluation
  */
 function toggleVerrouillerEvaluation(evaluationId) {
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const evaluation = evaluations.find(ev => ev.id === evaluationId);
 
     if (!evaluation) {
@@ -620,7 +622,7 @@ function toggleVerrouillerEvaluation(evaluationId) {
         delete evaluation.dateVerrouillage;
     }
 
-    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
 
     console.log(`🔒 Évaluation ${evaluationId} ${evaluation.verrouillee ? 'verrouillée' : 'déverrouillée'}`);
 

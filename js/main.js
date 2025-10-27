@@ -156,8 +156,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // MODULE 17: Gestion des modes
     if (typeof initialiserSystemeModes === 'function') {
-        console.log('   → Module 17-modes détecté');
-        initialiserSystemeModes();
+        console.log('   → Module 17-modes détecté (déjà initialisé automatiquement)');
+        // Note: initialiserSystemeModes() est appelé automatiquement à la fin de modes.js
+        // pour garantir que le système est prêt AVANT les autres modules
     }
 
     // ===============================

@@ -505,13 +505,14 @@ function convertirNiveauEnPourcentage(niveau, echelleId = null) {
 function calculerEtStockerIndicesCP() {
     console.log('🔄 Calcul DUAL des indices C et P (SOM + PAN)...');
 
-    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const selectionsPortfolios = JSON.parse(localStorage.getItem('portfoliosEleves') || '{}');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const productions = obtenirDonneesSelonMode('listeGrilles');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    const selectionsPortfolios = obtenirDonneesSelonMode('portfoliosEleves');
 
     // Récupérer l'historique existant ou initialiser
-    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    const indicesCP = obtenirDonneesSelonMode('indicesCP');
 
     // 🎯 PRÉPARER LES FILTRES POUR LES DEUX PRATIQUES
 
@@ -696,7 +697,8 @@ function calculerEtStockerIndicesCP() {
     indicesCP.dateCalcul = dateCalcul;
 
     // Sauvegarder
-    localStorage.setItem('indicesCP', JSON.stringify(indicesCP));
+    // IMPORTANT : Utiliser sauvegarderDonneesSelonMode pour respecter le mode actuel
+    sauvegarderDonneesSelonMode('indicesCP', indicesCP);
 
     console.log('✅ Indices C et P sauvegardés (SOM + PAN)');
     console.log('   Étudiants:', etudiantsActifs.length);
@@ -719,7 +721,8 @@ function calculerEtStockerIndicesCP() {
  * obtenirIndicesCP('1234567', 'PAN') → { C: 87, P: 85, details: {...} }
  */
 function obtenirIndicesCP(da, pratique = null) {
-    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const indicesCP = obtenirDonneesSelonMode('indicesCP') || {};
     const actuel = indicesCP[da]?.actuel;
 
     if (!actuel) return null;
@@ -745,7 +748,8 @@ function obtenirIndicesCP(da, pratique = null) {
  * obtenirHistoriqueIndicesCP('1234567', 'PAN') → [{ date, C: 87, P: 85 }, ...]
  */
 function obtenirHistoriqueIndicesCP(da, pratique = null) {
-    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const indicesCP = obtenirDonneesSelonMode('indicesCP') || {};
     const historique = indicesCP[da]?.historique || [];
 
     if (!pratique) return historique;

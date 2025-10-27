@@ -29,7 +29,8 @@
 function calculerEtSauvegarderIndicesAssiduite() {
     console.log('Calcul des indices d\'assiduité...');
 
-    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
     // Structure de sortie
     const indices = {
@@ -50,7 +51,8 @@ function calculerEtSauvegarderIndicesAssiduite() {
     });
 
     // Sauvegarder
-    localStorage.setItem('indicesAssiduite', JSON.stringify(indices));
+    // IMPORTANT : Utiliser sauvegarderDonneesSelonMode pour respecter le mode actuel
+    sauvegarderDonneesSelonMode('indicesAssiduite', indices);
 
     console.log('✅ Indices d\'assiduité sauvegardés');
     console.log('   Sommatif:', Object.keys(indices.sommatif).length, 'étudiants');
@@ -67,7 +69,8 @@ function calculerEtSauvegarderIndicesAssiduite() {
  * @returns {number} - Indice entre 0 et 1
  */
 function calculerAssiduiteSommative(da) {
-    const presences = JSON.parse(localStorage.getItem('presences') || '[]');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const presences = obtenirDonneesSelonMode('presences') || [];
     
     // Obtenir toutes les DATES où des présences ont été saisies
     const datesSaisies = [...new Set(presences.map(p => p.date))].sort();
@@ -104,7 +107,8 @@ function calculerAssiduiteSommative(da) {
  * @returns {number} - Indice entre 0 et 1
  */
 function calculerAssiduiteAlternative(da) {
-    const presences = JSON.parse(localStorage.getItem('presences') || '[]');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const presences = obtenirDonneesSelonMode('presences') || [];
 
     // Obtenir le nombre de séances depuis les réglages
     const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
@@ -190,9 +194,8 @@ function chargerGroupesPresences() {
     }
 
     // Obtenir les étudiants selon le mode actif
-    const mode = localStorage.getItem('modeActif') || 'reel';
-    const cleComplete = mode === 'demo' ? 'demo_groupeEtudiants' : 'groupeEtudiants';
-    const etudiants = JSON.parse(localStorage.getItem(cleComplete) || '[]');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
 
     // Extraire les groupes uniques
     const groupesSet = new Set();
@@ -217,18 +220,12 @@ function chargerGroupesPresences() {
     calculerEtSauvegarderIndicesAssiduite();
 }
 
-/**
- * Obtient les données selon le mode actif
- */
-function obtenirDonneesSelonMode(cle) {
-    const mode = localStorage.getItem('modeActif') || 'reel';
-    const cleComplete = mode === 'demo' ? `demo_${cle}` : cle;
-    return JSON.parse(localStorage.getItem(cleComplete) || '[]');
-}
-
 /* ===============================
    FONCTIONS DE CALENDRIER
    Utilisent les sources uniques
+
+   NOTE: obtenirDonneesSelonMode() est fournie par modes.js (fonction globale)
+   Ne PAS redéfinir localement pour éviter les conflits!
    =============================== */
 
 /**
@@ -1028,7 +1025,8 @@ function enregistrerPresences() {
  * Calcule le total des heures de présence d'un étudiant
  */
 function calculerTotalHeuresPresence(da, dateActuelle) {
-    const presences = JSON.parse(localStorage.getItem('presences') || '[]');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const presences = obtenirDonneesSelonMode('presences') || [];
 
     return presences
         .filter(p => p.da === da && (dateActuelle === null || p.date < dateActuelle))

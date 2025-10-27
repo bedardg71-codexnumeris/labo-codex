@@ -513,8 +513,9 @@ function genererSectionMobilisationEngagement(da) {
         : 0;
     const interpA = interpreterAssiduite(parseFloat(tauxA));
 
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const productions = obtenirDonneesSelonMode('listeGrilles') || [];
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
     const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
     const artefactsDonnes = [];
@@ -534,8 +535,23 @@ function genererSectionMobilisationEngagement(da) {
         const evaluationsProduction = evaluationsEleve.filter(e => e.productionId === art.id);
         let evaluation = null;
         if (evaluationsProduction.length > 0) {
-            // Prioriser l'évaluation active (sans remplaceeParId)
-            evaluation = evaluationsProduction.find(e => !e.remplaceeParId) || evaluationsProduction[0];
+            // PRIORITÉ 1 : Chercher une reprise active (repriseDeId ET non remplacée)
+            evaluation = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
+
+            // PRIORITÉ 2 : Si pas de reprise, chercher une évaluation avec jeton de délai actif
+            if (!evaluation) {
+                evaluation = evaluationsProduction.find(e => e.jetonDelaiApplique && !e.remplaceeParId);
+            }
+
+            // PRIORITÉ 3 : Si pas de jeton, chercher toute évaluation active (non remplacée)
+            if (!evaluation) {
+                evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
+            }
+
+            // PRIORITÉ 4 : Si toutes sont remplacées, prendre la première (cas rare)
+            if (!evaluation) {
+                evaluation = evaluationsProduction[0];
+            }
         }
 
         return {
@@ -554,7 +570,6 @@ function genererSectionMobilisationEngagement(da) {
     });
     const nbTotal = artefacts.length;
     const nbRemis = artefacts.filter(a => a.remis).length;
-    const tauxCompletion = nbTotal > 0 ? Math.round((nbRemis / nbTotal) * 100) : 0;
     const interpC = interpreterCompletion(indices.C);
     const artefactsRemis = artefacts.filter(a => a.remis);
     const artefactsNonRemis = artefacts.filter(a => !a.remis);
@@ -1261,7 +1276,7 @@ function genererSectionRisque(da) {
  * @returns {number} - Performance en proportion 0-1
  */
 function calculerPerformancePAN(da) {
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.noteFinale);
 
     if (evaluationsEleve.length === 0) {
@@ -1269,7 +1284,7 @@ function calculerPerformancePAN(da) {
     }
 
     // 🆕 PRIORITÉ 1 : Utiliser les artefacts SÉLECTIONNÉS dans le portfolio
-    const selectionsPortfolios = JSON.parse(localStorage.getItem('portfoliosEleves') || '{}');
+    const selectionsPortfolios = obtenirDonneesSelonMode('portfoliosEleves') || {};
     const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
     const portfolio = productions.find(p => p.type === 'portfolio');
 
@@ -1342,7 +1357,7 @@ function obtenirDetailsAssiduite(da) {
     const heuresPresentes = calculerTotalHeuresPresence(da, null);
 
     // Compter le nombre de séances RÉELLEMENT SAISIES (au moins un élève présent)
-    const presences = JSON.parse(localStorage.getItem('presences') || '[]');
+    const presences = obtenirDonneesSelonMode('presences') || [];
 
     // Obtenir toutes les dates uniques pour lesquelles une saisie a été faite
     const datesSaisies = new Set();
@@ -1357,6 +1372,7 @@ function obtenirDetailsAssiduite(da) {
     const heuresOffertes = nombreSeances * dureeSeance;
 
     // Récupérer les séances configurées
+    // NOTE: seancesHoraire n'est pas mode-aware (configuration globale)
     const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
 
     // Détecter les absences (totales ET partielles)
@@ -1661,7 +1677,10 @@ function genererContenuCibleIntervention(da) {
     const interpR = interpreterRisque(indices.R);
 
     // Récupérer infos élève pour CAF/SA
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiants = typeof filtrerEtudiantsParMode === 'function'
+        ? filtrerEtudiantsParMode(tousEtudiants)
+        : tousEtudiants.filter(e => e.groupe !== '9999');
     const eleve = etudiants.find(e => e.da === da);
 
     // Ne pas afficher si pas assez de données
@@ -1892,7 +1911,10 @@ function afficherProfilComplet(da) {
     // Sauvegarder le DA pour navigation
     profilActuelDA = da;
 
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiants = typeof filtrerEtudiantsParMode === 'function'
+        ? filtrerEtudiantsParMode(tousEtudiants)
+        : tousEtudiants.filter(e => e.groupe !== '9999');
     const eleve = etudiants.find(e => e.da === da);
 
     if (!eleve) {
@@ -2372,7 +2394,7 @@ function fermerDetailIndice() {
  */
 function genererSectionCompletion(da) {
     const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
     // Identifier les artefacts-portfolio réellement donnés
@@ -2399,8 +2421,23 @@ function genererSectionCompletion(da) {
         const evaluationsProduction = evaluationsEleve.filter(e => e.productionId === art.id);
         let evaluation = null;
         if (evaluationsProduction.length > 0) {
-            // Prioriser l'évaluation active (sans remplaceeParId)
-            evaluation = evaluationsProduction.find(e => !e.remplaceeParId) || evaluationsProduction[0];
+            // PRIORITÉ 1 : Chercher une reprise active (repriseDeId ET non remplacée)
+            evaluation = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
+
+            // PRIORITÉ 2 : Si pas de reprise, chercher une évaluation avec jeton de délai actif
+            if (!evaluation) {
+                evaluation = evaluationsProduction.find(e => e.jetonDelaiApplique && !e.remplaceeParId);
+            }
+
+            // PRIORITÉ 3 : Si pas de jeton, chercher toute évaluation active (non remplacée)
+            if (!evaluation) {
+                evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
+            }
+
+            // PRIORITÉ 4 : Si toutes sont remplacées, prendre la première (cas rare)
+            if (!evaluation) {
+                evaluation = evaluationsProduction[0];
+            }
         }
 
         return {
@@ -2420,7 +2457,6 @@ function genererSectionCompletion(da) {
 
     const nbTotal = artefacts.length;
     const nbRemis = artefacts.filter(a => a.remis).length;
-    const tauxCompletion = nbTotal > 0 ? Math.round((nbRemis / nbTotal) * 100) : 0;
     const indices = calculerTousLesIndices(da);
 
     // Interprétation de la complétion
@@ -2448,7 +2484,6 @@ function genererSectionCompletion(da) {
             <!-- Statistiques -->
             <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
                 <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
-                <li><strong>• Taux de complétion :</strong> ${tauxCompletion}%</li>
                 <li><strong>• Indice C :</strong> ${indices.C}%</li>
             </ul>
 
@@ -2535,8 +2570,7 @@ function genererSectionCompletion(da) {
         <div class="hidden" style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
             <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📐 Détails des calculs</h4>
             <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
-                <li><strong>Indice C :</strong> ${indices.C}%</li>
-                <li><strong>Taux complétion :</strong> ${tauxCompletion}%</li>
+                <li><strong>Indice C :</strong> ${indices.C}% (calculé par portfolio.js avec système PAN)</li>
                 <li><strong>Artefacts remis :</strong> ${nbRemis}</li>
                 <li><strong>Artefacts totaux :</strong> ${nbTotal}</li>
                 <li><strong>Artefacts non remis :</strong> ${artefactsNonRemis.length}</li>
@@ -2602,7 +2636,7 @@ function convertirNiveauIDMEEnScore(niveau, tableConversion) {
  * @returns {Object} - { structure, rigueur, plausibilite, nuance, francais } (scores 0-1)
  */
 function calculerMoyennesCriteres(da) {
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.retroactionFinale);
 
     console.log('calculerMoyennesCriteres pour DA:', da);
@@ -2818,7 +2852,7 @@ function diagnostiquerForcesChallenges(moyennes, seuil = 0.7125) {
  * @returns {Object} - { performance, idmeMoyen, francaisMoyen, nbArtefacts }
  */
 function calculerIndicesTroisDerniersArtefacts(da) {
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
 
     // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
@@ -3416,7 +3450,7 @@ function genererSectionPerformance(da) {
     }
 
     // ✅ CORRECTION : Identifier les artefacts RÉELLEMENT ÉVALUÉS
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productionsEvaluees = new Set();
     evaluations.forEach(evaluation => {
         productionsEvaluees.add(evaluation.productionId);
@@ -3429,7 +3463,7 @@ function genererSectionPerformance(da) {
 
     // Récupérer les évaluations et sélections de l'élève
     const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
-    const selectionsPortfolios = JSON.parse(localStorage.getItem('portfoliosEleves') || '{}');
+    const selectionsPortfolios = obtenirDonneesSelonMode('portfoliosEleves') || {};
     const selectionEleve = selectionsPortfolios[da]?.[portfolio.id] || { artefactsRetenus: [] };
 
     // Construire la liste des artefacts (seulement ceux évalués)
