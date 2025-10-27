@@ -233,14 +233,60 @@ function rafraichirContenuSelonMode() {
             'etudiants-profil': 'afficherProfilEtudiant',
             'evaluations-liste-evaluations': 'chargerListeEvaluationsRefonte',
             'presences-saisie': 'afficherTableauPresences',
-            'tableau-bord-apercu': 'afficherTableauBordApercu'
+            'tableau-bord-apercu': 'afficherTableauBordApercu',
+            'tableau-bord-profil': 'afficherProfilComplet'  // AJOUT: Rafraîchir le profil lors du changement de mode
         };
 
         const fonctionAAppeler = mappingModules[sousSectionSauvegardee];
 
         if (fonctionAAppeler && typeof window[fonctionAAppeler] === 'function') {
             console.log(`   → Rafraîchissement: ${fonctionAAppeler}()`);
-            window[fonctionAAppeler]();
+
+            // SPÉCIAL : Pour afficherProfilComplet
+            if (fonctionAAppeler === 'afficherProfilComplet' && window.profilActuelDA) {
+                // Récupérer les étudiants AVANT le changement de mode pour connaître la position
+                const etudiantsAvant = window.etudiantsListeCache || [];
+                const indexAvant = etudiantsAvant.findIndex(e => e.da === window.profilActuelDA);
+
+                // Vérifier si le DA existe dans le nouveau mode
+                const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+                const etudiantsTries = typeof filtrerEtudiantsParMode === 'function'
+                    ? filtrerEtudiantsParMode(etudiants)
+                    : etudiants.filter(e => e.groupe !== '9999');
+
+                const etudiantExiste = etudiantsTries.find(e => e.da === window.profilActuelDA);
+
+                if (etudiantExiste) {
+                    // L'étudiant existe dans le nouveau mode, afficher son profil
+                    console.log(`   ✅ Même étudiant (DA: ${window.profilActuelDA})`);
+                    window[fonctionAAppeler](window.profilActuelDA);
+                } else {
+                    // L'étudiant n'existe pas : afficher l'étudiant à la même position dans la nouvelle liste
+                    let daAAfficher;
+
+                    if (indexAvant >= 0 && indexAvant < etudiantsTries.length) {
+                        // Afficher l'étudiant à la même position
+                        daAAfficher = etudiantsTries[indexAvant].da;
+                        console.log(`   ↔️ DA inexistant, position ${indexAvant + 1}/${etudiantsTries.length} → DA: ${daAAfficher}`);
+                    } else {
+                        // Position invalide : afficher le premier étudiant
+                        daAAfficher = etudiantsTries[0]?.da;
+                        console.log(`   ↔️ DA inexistant, affichage du premier étudiant → DA: ${daAAfficher}`);
+                    }
+
+                    if (daAAfficher) {
+                        window[fonctionAAppeler](daAAfficher);
+                    } else {
+                        // Aucun étudiant disponible, retourner à la liste
+                        console.log(`   ⚠️ Aucun étudiant disponible, retour à la liste`);
+                        if (typeof afficherSousSection === 'function') {
+                            afficherSousSection('tableau-bord-apercu');
+                        }
+                    }
+                }
+            } else {
+                window[fonctionAAppeler]();
+            }
         } else {
             // Fallback : réafficher la sous-section
             if (typeof afficherSousSection === 'function') {

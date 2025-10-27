@@ -1917,6 +1917,10 @@ function afficherProfilComplet(da) {
     const etudiants = typeof filtrerEtudiantsParMode === 'function'
         ? filtrerEtudiantsParMode(tousEtudiants)
         : tousEtudiants.filter(e => e.groupe !== '9999');
+
+    // 🗂️ Cache la liste des étudiants pour la navigation cross-mode
+    window.etudiantsListeCache = etudiants;
+
     const eleve = etudiants.find(e => e.da === da);
 
     if (!eleve) {
