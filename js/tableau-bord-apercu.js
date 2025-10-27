@@ -147,7 +147,10 @@ function chargerTableauBordApercu() {
     }
 
     try {
-        const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+        const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const etudiants = typeof filtrerEtudiantsParMode === 'function'
+            ? filtrerEtudiantsParMode(tousEtudiants)
+            : tousEtudiants.filter(e => e.groupe !== '9999');
 
         const etudiantsActifs = etudiants.filter(e =>
             e.statut !== 'décrochage' && e.statut !== 'abandon'
@@ -307,10 +310,11 @@ function togglerAffichagePratique(pratique, afficher) {
  */
 function calculerIndicesEtudiant(da) {
     // Récupérer les indices A depuis saisie-presences.js
-    const indicesA = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const indicesA = obtenirDonneesSelonMode('indicesAssiduite') || {};
 
     // Récupérer les indices C et P depuis portfolio.js (Single Source of Truth)
-    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    const indicesCP = obtenirDonneesSelonMode('indicesCP') || {};
     const indicesCPEtudiant = indicesCP[da]?.actuel || null;
 
     // 🔀 LECTURE DEPUIS LES DEUX BRANCHES

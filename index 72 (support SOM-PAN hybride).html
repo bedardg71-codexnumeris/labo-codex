@@ -3483,16 +3483,57 @@ Exemple :
                         <!-- ACTIONS -->
                         <div style="margin-bottom: 20px;">
                             <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Actions rapides</h4>
+
+                            <!-- Options de génération -->
+                            <div style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 6px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;">
+                                    📊 Nombre d'étudiants fictifs :
+                                </label>
+                                <input type="number" id="input-nb-etudiants" value="10" min="5" max="50"
+                                       style="width: 80px; padding: 6px 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.95rem; margin-right: 10px;">
+                                <span style="font-size: 0.85rem; color: #666;">(entre 5 et 50 étudiants)</span>
+                            </div>
+
                             <div class="btn-groupe">
                                 <button onclick="genererMappingAleatoire()" class="btn btn-principal">
-                                    Générer mapping aléatoire (10 étudiants)
+                                    📋 Cloner depuis Groupe 1
                                 </button>
+                                <button onclick="genererGroupeFictifAleatoire()" class="btn btn-confirmer">
+                                    🎲 Générer groupe aléatoire
+                                </button>
+                            </div>
+
+                            <div class="btn-groupe" style="margin-top: 10px;">
                                 <button onclick="synchroniserDonnees()" class="btn btn-principal">
                                     Synchroniser maintenant
                                 </button>
                                 <button onclick="afficherTableauMapping()" class="btn btn-principal">
                                     Afficher le mapping
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- IMPORT / EXPORT -->
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📦 Import / Export</h4>
+                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">
+                                Partagez des groupes fictifs pour formation ou démonstration. Idéal pour apprendre comment l'application fonctionne.
+                            </p>
+                            <div class="btn-groupe">
+                                <button onclick="exporterGroupeFictif()" class="btn btn-confirmer">
+                                    📤 Exporter le Groupe 9999
+                                </button>
+                                <button onclick="importerGroupeFictif()" class="btn btn-modifier">
+                                    📥 Importer un groupe fictif
+                                </button>
+                            </div>
+                            <div class="btn-groupe" style="margin-top: 10px;">
+                                <button onclick="supprimerGroupeFictif()" class="btn btn-annuler" style="width: 100%;">
+                                    🗑️ Supprimer le Groupe 9999
+                                </button>
+                            </div>
+                            <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.85rem; color: #666;">
+                                <strong>💡 Astuce :</strong> Exportez votre Groupe 9999, passez en mode "Simulé" et explorez l'application sans risque !
                             </div>
                         </div>
 
@@ -4047,7 +4088,256 @@ Exemple :
                 </div>
 
                 <!-- ===================================
-                     SOUS-SECTION 3: UTILISATION HEBDOMADAIRE
+                     SOUS-SECTION 3: FORMATION ET DÉMONSTRATION
+                     =================================== -->
+                <div id="aide-formation" class="sous-section">
+                    <h2>Formation et démonstration</h2>
+                    <p class="text-muted">Modes de fonctionnement pour explorer l'application sans risque</p>
+
+                    <!-- Carte: Modes de fonctionnement -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Les trois modes de l'application</h3>
+                        <p>L'application offre trois modes de fonctionnement pour différents contextes d'utilisation :</p>
+
+                        <div style="margin: 15px 0; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid #28a745; border-radius: 4px;">
+                            <h4 style="color: #28a745; margin-bottom: 10px;">Mode Normal</h4>
+                            <p><strong>Utilisation en contexte réel</strong> - Données authentiques des étudiants</p>
+                            <ul style="margin-top: 8px;">
+                                <li>Toutes les modifications sont sauvegardées dans localStorage</li>
+                                <li>Données réelles du cours</li>
+                                <li>Mode par défaut de l'application</li>
+                            </ul>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                            <h4 style="color: #856404; margin-bottom: 10px;">Mode Simulé</h4>
+                            <p><strong>Exploration et formation</strong> - Données fictives pour expérimenter</p>
+                            <ul style="margin-top: 8px;">
+                                <li>Données sauvegardées avec préfixe <code>simulation_*</code></li>
+                                <li>Totalement isolé des données réelles</li>
+                                <li>Parfait pour apprendre sans risque</li>
+                                <li>Permet de tester scénarios pédagogiques</li>
+                            </ul>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #d1ecf1; border-left: 4px solid #17a2b8; border-radius: 4px;">
+                            <h4 style="color: #0c5460; margin-bottom: 10px;">Mode Anonymisé</h4>
+                            <p><strong>Démonstration publique</strong> - Données réelles avec noms fictifs</p>
+                            <ul style="margin-top: 8px;">
+                                <li>Noms et prénoms remplacés par des noms fictifs</li>
+                                <li>Préfixe "AN." devant les numéros de groupe</li>
+                                <li>Lecture seule (aucune modification possible)</li>
+                                <li>Idéal pour présentations et captures d'écran</li>
+                            </ul>
+                        </div>
+
+                        <div class="alerte alerte-information">
+                            <strong>Basculer entre les modes :</strong> Utilisez le sélecteur de mode en haut à droite de l'interface (⚙️ Mode: Normal/Simulé/Anonymisé)
+                        </div>
+                    </div>
+
+                    <!-- Carte: Groupe fictif 9999 -->
+                    <div class="carte" style="border-left: 4px solid #9c27b0;">
+                        <h3 class="carte-titre-bleu">Le Groupe 9999 : Votre laboratoire pédagogique</h3>
+                        <p><strong>Navigation :</strong> Réglages → Groupe → Section "Clonage de groupe"</p>
+
+                        <p style="font-size: 1.05em; margin-top: 15px;"><strong>Qu'est-ce que le Groupe 9999 ?</strong></p>
+                        <p>C'est un groupe fictif réservé pour :</p>
+                        <ul>
+                            <li>Formation des enseignants</li>
+                            <li>Démonstrations pédagogiques</li>
+                            <li>Tests de scénarios d'intervention</li>
+                            <li>Exploration de l'application sans risque</li>
+                        </ul>
+
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                            <p style="margin: 0; font-weight: 600; color: var(--bleu-principal);">
+                                ✨ Avantage clé : Données réalistes sans impact sur vos vrais étudiants
+                            </p>
+                        </div>
+
+                        <p style="font-size: 1.05em; margin-top: 20px;"><strong>Deux méthodes de création :</strong></p>
+
+                        <div style="margin: 15px 0; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-moyen); border-radius: 4px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📋 Cloner depuis Groupe 1</h4>
+                            <p><strong>Clone fidèle de vos données réelles</strong></p>
+                            <p>Le système copie :</p>
+                            <ul>
+                                <li>Les étudiants avec noms fictifs cohérents</li>
+                                <li>Toutes les évaluations existantes</li>
+                                <li>L'historique des présences</li>
+                                <li>Les indices A, C, P recalculés</li>
+                            </ul>
+                            <p style="margin-top: 10px;"><strong>Utilisation :</strong> Parfait pour créer un jumeau numérique de votre groupe réel et explorer différentes stratégies d'intervention.</p>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #fff8e1; border-left: 4px solid #ff6f00; border-radius: 4px;">
+                            <h4 style="color: #e65100; margin-bottom: 10px;">🎲 Générer groupe aléatoire</h4>
+                            <p><strong>Création complète avec données réalistes</strong></p>
+
+                            <p style="margin-top: 12px; font-weight: 600;">Configuration :</p>
+                            <ul>
+                                <li><strong>Nombre d'étudiants</strong> : Choisir entre 5 et 50 étudiants</li>
+                                <li><strong>Noms générés</strong> : 85% québécois, 15% diversifiés (africains, latinos, arabes)</li>
+                                <li><strong>Programmes variés</strong> : Assignation aléatoire parmi 15 programmes collégiaux</li>
+                            </ul>
+
+                            <p style="margin-top: 12px; font-weight: 600;">Le système génère automatiquement :</p>
+                            <ul>
+                                <li><strong>Étudiants fictifs</strong> : DA format 9999XXX (9999001, 9999002, etc.)</li>
+                                <li><strong>Évaluations réalistes</strong> : 3 à 6 par étudiant
+                                    <ul style="margin-top: 5px;">
+                                        <li>Notes suivant distribution normale (moyenne 75%, écart-type 10%)</li>
+                                        <li>Critères SRPNF cohérents avec variation naturelle (±5%)</li>
+                                        <li>Conversion automatique en niveaux IDME (I/D/M/E)</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Présences variées</strong> : Taux d'assiduité entre 75% et 95%</li>
+                                <li><strong>Indices calculés</strong> : A, C, P recalculés automatiquement</li>
+                            </ul>
+
+                            <div class="alerte alerte-succes" style="margin-top: 15px;">
+                                <strong>Avantage pédagogique :</strong> Aucun prérequis nécessaire ! Génère un groupe complet même si vous n'avez pas encore créé de données réelles.
+                            </div>
+
+                            <p style="margin-top: 12px; font-weight: 600;">Étapes de génération :</p>
+                            <ol style="line-height: 1.8;">
+                                <li>Accéder à <strong>Réglages → Groupe</strong></li>
+                                <li>Dans la section "Clonage de groupe", définir le nombre d'étudiants (5-50)</li>
+                                <li>Cliquer sur <strong>🎲 Générer groupe aléatoire</strong></li>
+                                <li>Patienter quelques secondes (calculs automatiques)</li>
+                                <li>Confirmation : Le système affiche le nombre d'étudiants et d'évaluations créés</li>
+                            </ol>
+
+                            <p style="margin-top: 12px; font-weight: 600;">Réalisme statistique :</p>
+                            <p>Les notes générées suivent une <strong>distribution normale de Gauss</strong> :</p>
+                            <ul>
+                                <li>Environ 68% des notes entre 65% et 85%</li>
+                                <li>Environ 95% des notes entre 55% et 95%</li>
+                                <li>Pas de valeurs aberrantes ou "fafelues"</li>
+                                <li>Reflète la distribution naturelle des résultats étudiants</li>
+                            </ul>
+                        </div>
+
+                        <div class="alerte alerte-attention" style="margin-top: 15px;">
+                            <strong>⚠️ Important :</strong> Générer un nouveau groupe efface l'ancien Groupe 9999. Utilisez l'export/import si vous voulez conserver plusieurs scénarios.
+                        </div>
+                    </div>
+
+                    <!-- Carte: Export/Import de groupes fictifs -->
+                    <div class="carte" style="border-left: 4px solid #673ab7;">
+                        <h3 class="carte-titre-bleu">📦 Partager des scénarios pédagogiques</h3>
+                        <p><strong>Navigation :</strong> Réglages → Groupe → Section "Import / Export"</p>
+
+                        <p style="font-size: 1.05em; margin-top: 15px;"><strong>Pourquoi exporter/importer ?</strong></p>
+                        <ul>
+                            <li><strong>Formation</strong> : Partager des cas types avec collègues</li>
+                            <li><strong>Tutoriels</strong> : Créer des scénarios pédagogiques documentés</li>
+                            <li><strong>Archivage</strong> : Conserver plusieurs versions du Groupe 9999</li>
+                            <li><strong>Démonstrations</strong> : Préparer des contextes de présentation</li>
+                        </ul>
+
+                        <p style="font-size: 1.05em; margin-top: 20px;"><strong>📤 Exporter le Groupe 9999</strong></p>
+                        <ol style="line-height: 1.8;">
+                            <li>Cliquer sur <strong>📤 Exporter le Groupe 9999</strong></li>
+                            <li>Un fichier JSON est téléchargé : <code>groupe-fictif-9999_YYYY-MM-DD.json</code></li>
+                            <li>Ce fichier contient :
+                                <ul style="margin-top: 5px;">
+                                    <li>Tous les étudiants du Groupe 9999</li>
+                                    <li>Toutes leurs évaluations</li>
+                                    <li>Historiques de présences</li>
+                                    <li>Indices A, C, P</li>
+                                    <li>Mapping (si créé par clonage)</li>
+                                </ul>
+                            </li>
+                        </ol>
+
+                        <p style="font-size: 1.05em; margin-top: 20px;"><strong>📥 Importer un groupe fictif</strong></p>
+                        <ol style="line-height: 1.8;">
+                            <li>Cliquer sur <strong>📥 Importer un groupe fictif</strong></li>
+                            <li>Sélectionner un fichier <code>.json</code> exporté précédemment</li>
+                            <li>Confirmer l'importation (remplacera le Groupe 9999 actuel)</li>
+                            <li>Le système charge toutes les données et recalcule les indices</li>
+                        </ol>
+
+                        <div style="background: linear-gradient(90deg, var(--bleu-pale) 0%, var(--bleu-tres-pale) 100%); padding: 20px; border-radius: 8px; margin-top: 15px;">
+                            <p style="font-size: 1.1em; font-weight: bold; color: var(--bleu-principal); margin-bottom: 10px;">
+                                💡 Workflow recommandé pour formation :
+                            </p>
+                            <ol style="line-height: 2;">
+                                <li>Générer un Groupe 9999 réaliste (ou cloner Groupe 1)</li>
+                                <li>Exporter le groupe : crée un fichier de sauvegarde</li>
+                                <li>Basculer en <strong>Mode Simulé</strong> (sélecteur en haut à droite)</li>
+                                <li>Explorer librement : évaluer, modifier, tester interventions</li>
+                                <li>Si nécessaire, ré-importer le fichier pour recommencer</li>
+                            </ol>
+                        </div>
+
+                        <div class="alerte alerte-information" style="margin-top: 15px;">
+                            <strong>Format du fichier :</strong> JSON standard, lisible et modifiable. Inclut métadonnées (version Beta 0.72, date d'export, statistiques).
+                        </div>
+                    </div>
+
+                    <!-- Carte: Cas d'usage pédagogiques -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">🎓 Cas d'usage pédagogiques</h3>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 4px;">
+                            <h4 style="color: #2e7d32; margin-bottom: 10px;">1. Formation des enseignants</h4>
+                            <p><strong>Objectif :</strong> Apprendre à utiliser le système sans données réelles</p>
+                            <ul>
+                                <li>Générer un groupe aléatoire de 15-20 étudiants</li>
+                                <li>Basculer en mode Simulé</li>
+                                <li>Pratiquer la saisie de présences</li>
+                                <li>Explorer les profils étudiants</li>
+                                <li>Tester différentes interventions RàI</li>
+                            </ul>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px;">
+                            <h4 style="color: #e65100; margin-bottom: 10px;">2. Test de scénarios d'intervention</h4>
+                            <p><strong>Objectif :</strong> Planifier interventions avant d'agir sur vrais étudiants</p>
+                            <ul>
+                                <li>Cloner votre Groupe 1 réel → Groupe 9999</li>
+                                <li>Identifier étudiants à risque dans le clone</li>
+                                <li>Simuler différentes stratégies d'intervention</li>
+                                <li>Observer impact sur indices A-C-P</li>
+                                <li>Affiner approche avant intervention réelle</li>
+                            </ul>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #f3e5f5; border-left: 4px solid #9c27b0; border-radius: 4px;">
+                            <h4 style="color: #6a1b9a; margin-bottom: 10px;">3. Démonstrations et présentations</h4>
+                            <p><strong>Objectif :</strong> Présenter le système sans compromettre confidentialité</p>
+                            <ul>
+                                <li>Créer Groupe 9999 avec profils variés (15-25 étudiants)</li>
+                                <li>Basculer en mode Anonymisé pour présentation publique</li>
+                                <li>Montrer tableaux de bord, profils, échelles de risque</li>
+                                <li>Expliquer logique des indices A-C-P</li>
+                                <li>Capturer écrans pour documentation sans risque RGPD</li>
+                            </ul>
+                        </div>
+
+                        <div style="margin: 15px 0; padding: 15px; background: #e1f5fe; border-left: 4px solid #03a9f4; border-radius: 4px;">
+                            <h4 style="color: #01579b; margin-bottom: 10px;">4. Partage de bonnes pratiques</h4>
+                            <p><strong>Objectif :</strong> Créer bibliothèque de cas pédagogiques</p>
+                            <ul>
+                                <li>Créer scénarios types (ex: "Groupe avec 5 étudiants à risque élevé")</li>
+                                <li>Exporter en JSON avec nom descriptif</li>
+                                <li>Partager avec collègues ou communauté</li>
+                                <li>Importer cas partagés pour apprentissage collaboratif</li>
+                                <li>Documenter stratégies efficaces testées</li>
+                            </ul>
+                        </div>
+
+                        <div class="alerte alerte-succes" style="margin-top: 15px;">
+                            <strong>Principe directeur :</strong> Le Groupe 9999 est votre terrain de jeu pédagogique. Explorez, expérimentez, apprenez sans risque !
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================================
+                     SOUS-SECTION 4: UTILISATION HEBDOMADAIRE
                      =================================== -->
                 <div id="aide-utilisation" class="sous-section">
                     <h2>Utilisation hebdomadaire</h2>
@@ -4237,7 +4527,7 @@ Exemple :
                 </div>
 
                 <!-- ===================================
-                     SOUS-SECTION 4: CONSULTATION
+                     SOUS-SECTION 5: CONSULTATION
                      =================================== -->
                 <div id="aide-consultation" class="sous-section">
                     <h2>Consultation et interprétation</h2>
@@ -4799,7 +5089,7 @@ Exemple :
                 </div>
 
                 <!-- ===================================
-                     SOUS-SECTION 5: RÉFÉRENCE RAPIDE
+                     SOUS-SECTION 6: RÉFÉRENCE RAPIDE
                      =================================== -->
                 <div id="aide-reference" class="sous-section">
                     <h2>Référence rapide</h2>
@@ -5428,6 +5718,7 @@ Exemple :
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>
     <script src="js/navigation.js?v=1761397763"></script>
+    <script src="js/modes.js"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=1761390149"></script>
@@ -5458,7 +5749,6 @@ Exemple :
     <script src="js/import-export.js?v=1761387764"></script>
     <script src="js/statistiques.js"></script>
     <script src="js/liste-evaluations.js?v=1761391739"></script>
-    <script src="js/modes.js"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation.js?v=1761391739"></script>

@@ -20,16 +20,17 @@ function chargerApercuEvaluations() {
 
     try {
         // Récupérer les étudiants actifs
-        const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+        // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const etudiantsActifs = etudiants.filter(e =>
             e.statut !== 'décrochage' && e.statut !== 'abandon'
         );
 
         // Récupérer les évaluations
-        const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
 
         // Récupérer les productions configurées
-        const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+        const productions = obtenirDonneesSelonMode('listeGrilles');
 
         // Calculer les statistiques
         calculerStatistiquesEvaluations(etudiantsActifs, evaluations, productions);

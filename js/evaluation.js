@@ -1201,6 +1201,10 @@ function chargerListeEvaluationsRefonte() {
     // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : portfolio.js génère indicesCP
     const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
 
+    // Détecter la pratique active
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
+
     // Grouper les évaluations par étudiant
     const evaluationsParEtudiant = {};
     evaluations.forEach(evaluation => {
@@ -1215,9 +1219,10 @@ function chargerListeEvaluationsRefonte() {
         const evalsEtudiant = evaluationsParEtudiant[etudiant.da] || [];
 
         // 🎯 Lire les indices C et P depuis portfolio.js (Single Source of Truth)
-        const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
-        const indiceC = indicesCPEtudiant ? indicesCPEtudiant.C / 100 : 0; // Convertir de 0-100 à 0-1
-        const indiceP = indicesCPEtudiant ? indicesCPEtudiant.P / 100 : 0;
+        // Utiliser la pratique active (SOM ou PAN)
+        const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel?.[pratique] || null;
+        const indiceC = indicesCPEtudiant && typeof indicesCPEtudiant.C === 'number' ? indicesCPEtudiant.C / 100 : 0;
+        const indiceP = indicesCPEtudiant && typeof indicesCPEtudiant.P === 'number' ? indicesCPEtudiant.P / 100 : 0;
 
         return {
             ...etudiant,
@@ -1257,9 +1262,9 @@ function chargerListeEvaluationsRefonte() {
  */
 function genererBadgeCompletion(etudiant) {
     // 🎯 Lire depuis la source unique : portfolio.js génère indicesCP
-    // Note : Les indices C et P n'ont pas de distinction sommatif/alternatif (uniquement l'indice A)
-    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
-    const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
+    // Détecter la pratique active pour lire le bon indice C
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
     // Compter uniquement les artefacts distincts (exclure les évaluations remplacées)
     const evaluationsActives = etudiant.evaluations.filter(e => !e.remplaceeParId);
@@ -1267,12 +1272,27 @@ function genererBadgeCompletion(etudiant) {
     const nbArtefacts = productionsDistinctes.size;
 
     // Convertir de pourcentage (0-100) en proportion (0-1)
-    // Vérification robuste pour éviter NaN
     let completion = 0;
-    if (indicesCPEtudiant && typeof indicesCPEtudiant.C === 'number' && !isNaN(indicesCPEtudiant.C)) {
-        completion = indicesCPEtudiant.C / 100;
-    } else if (nbArtefacts > 0) {
-        // Fallback : calculer depuis le nombre d'artefacts et productions attendues
+
+    // PRIORITÉ 1 : Utiliser obtenirIndicesCP si disponible (Single Source of Truth)
+    if (typeof obtenirIndicesCP === 'function') {
+        const indicesCPEtudiant = obtenirIndicesCP(etudiant.da, pratique);
+        if (indicesCPEtudiant && typeof indicesCPEtudiant.C === 'number' && !isNaN(indicesCPEtudiant.C)) {
+            completion = indicesCPEtudiant.C / 100;
+        }
+    }
+
+    // PRIORITÉ 2 : Fallback - Lire directement depuis localStorage
+    if (completion === 0) {
+        const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+        const actuel = indicesCP[etudiant.da]?.actuel;
+        if (actuel && actuel[pratique] && typeof actuel[pratique].C === 'number') {
+            completion = actuel[pratique].C / 100;
+        }
+    }
+
+    // PRIORITÉ 3 : Fallback final - Calculer depuis le nombre d'artefacts
+    if (completion === 0 && nbArtefacts > 0) {
         const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
         const productionsAttendues = productions.filter(p => p.type !== 'portfolio').length;
         completion = productionsAttendues > 0 ? nbArtefacts / productionsAttendues : 0;
@@ -1369,9 +1389,22 @@ function genererDetailsEtudiant(etudiant) {
         let evaluation = null;
 
         if (evaluationsProduction.length > 0) {
-            // Chercher d'abord une évaluation active (non remplacée)
-            evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
-            // Si toutes sont remplacées, prendre la première (cas rare)
+            // PRIORITÉ 1 : Chercher une évaluation de reprise active (repriseDeId ET non remplacée)
+            // C'est l'évaluation qui doit afficher l'étoile ⭐ violette
+            evaluation = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
+
+            // PRIORITÉ 2 : Si pas de reprise, chercher une évaluation avec jeton de délai actif
+            // C'est l'évaluation qui doit afficher l'étoile ⭐ orange
+            if (!evaluation) {
+                evaluation = evaluationsProduction.find(e => e.jetonDelaiApplique && !e.remplaceeParId);
+            }
+
+            // PRIORITÉ 3 : Si pas de jeton, chercher toute évaluation active (non remplacée)
+            if (!evaluation) {
+                evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
+            }
+
+            // PRIORITÉ 4 : Si toutes sont remplacées, prendre la première (cas rare)
             if (!evaluation) {
                 evaluation = evaluationsProduction[0];
             }
@@ -1513,7 +1546,7 @@ function genererDetailsEtudiant(etudiant) {
             <h4 style="margin-bottom: 10px;">Résumé de l'étudiant</h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                 <div>
-                    <strong>Artefacts remis:</strong> ${nbRemis} / ${nbAttendus} (${tauxCompletion}%)
+                    <strong>Artefacts remis:</strong> ${nbRemis} / ${nbAttendus}
                 </div>
                 <div>
                     <strong>Performance moyenne:</strong> ${performanceMoyenne}%

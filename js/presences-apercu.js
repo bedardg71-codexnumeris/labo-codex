@@ -20,16 +20,17 @@ function chargerApercuPresences() {
 
     try {
         // Récupérer les étudiants actifs
-        const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+        // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const etudiantsActifs = etudiants.filter(e =>
             e.statut !== 'décrochage' && e.statut !== 'abandon'
         );
 
         // Récupérer les indices d'assiduité calculés
-        const indicesAssiduite = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
+        const indicesAssiduite = obtenirDonneesSelonMode('indicesAssiduite');
 
         // Récupérer les présences brutes
-        const presences = JSON.parse(localStorage.getItem('presences') || '[]');
+        const presences = obtenirDonneesSelonMode('presences');
 
         // Calculer les statistiques
         calculerStatistiquesPresences(etudiantsActifs, indicesAssiduite, presences);

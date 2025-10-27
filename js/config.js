@@ -61,13 +61,14 @@ const configurationsOnglets = {
         { id: 'pratique-notation', label: 'Pratique de notation' },
         { id: 'import-export', label: 'Import/Export' }
     ],
-    'aide': [
-        { id: 'introduction', label: 'Introduction' },
-        { id: 'configuration', label: 'Configuration' },
-        { id: 'utilisation', label: 'Utilisation hebdomadaire' },
-        { id: 'consultation', label: 'Consultation' },
-        { id: 'reference', label: 'Référence rapide' }
-    ]
+  'aide': [
+      { id: 'introduction', label: 'Introduction' },
+      { id: 'configuration', label: 'Configuration' },
+      { id: 'formation', label: 'Formation et démonstration' },
+      { id: 'utilisation', label: 'Utilisation hebdomadaire' },
+      { id: 'consultation', label: 'Consultation' },
+      { id: 'reference', label: 'Référence rapide' }
+  ]
 };
 
 /* ===============================
