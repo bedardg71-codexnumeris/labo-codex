@@ -566,7 +566,10 @@ function calculerEtStockerIndicesCP() {
             productionsSOMDonnees.has(e.productionId) &&
             !e.remplaceeParId  // Exclure les évaluations remplacées par des reprises
         );
-        const nbSOMRemises = evaluationsSOM.length;
+        // Compter les productions DISTINCTES (pas le nombre total d'évaluations)
+        // Un étudiant peut avoir plusieurs évaluations du même artefact (reprises, jetons)
+        const productionsSOMRemises = new Set(evaluationsSOM.map(e => e.productionId));
+        const nbSOMRemises = productionsSOMRemises.size;
         const C_som = nbProductionsSOMDonnees === 0 ? 0 : Math.round((nbSOMRemises / nbProductionsSOMDonnees) * 100);
 
         let P_som = 0;
@@ -606,7 +609,10 @@ function calculerEtStockerIndicesCP() {
             artefactsPANDonnes.has(e.productionId) &&
             !e.remplaceeParId  // Exclure les évaluations remplacées par des reprises
         );
-        const nbPANRemis = evaluationsPAN.length;
+        // Compter les artefacts DISTINCTS (pas le nombre total d'évaluations)
+        // Un étudiant peut avoir plusieurs évaluations du même artefact (reprises, jetons)
+        const artefactsPANRemis = new Set(evaluationsPAN.map(e => e.productionId));
+        const nbPANRemis = artefactsPANRemis.size;
         const C_pan = nbArtefactsPANDonnes === 0 ? 0 : Math.round((nbPANRemis / nbArtefactsPANDonnes) * 100);
 
         let P_pan = 0;
