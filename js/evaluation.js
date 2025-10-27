@@ -898,8 +898,11 @@ function afficherBadgesJetons() {
     // Badge pour jeton de reprise (violet)
     if (evaluation.jetonRepriseApplique || evaluation.repriseDeId) {
         badges.push(`
-            <span class="statut-badge" style="background: #9c27b0; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px;">
-                ⭐ Reprise
+            <span class="statut-badge" style="background: #9c27b0; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
+                <span>⭐ Reprise</span>
+                <button onclick="retirerJetonDepuisSidebar('${evaluation.id}', 'reprise')"
+                        style="background: none; border: none; color: white; cursor: pointer; font-size: 1rem; padding: 0; font-weight: bold; line-height: 1;"
+                        title="Retirer le jeton de reprise">×</button>
             </span>
         `);
     }
@@ -908,8 +911,11 @@ function afficherBadgesJetons() {
     const aDejaJetonDelai = evaluation.jetonDelaiApplique || evaluation.delaiAccorde;
     if (aDejaJetonDelai) {
         badges.push(`
-            <span class="statut-badge" style="background: #ff6f00; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px;">
-                ⭐ Délai
+            <span class="statut-badge" style="background: #ff6f00; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
+                <span>⭐ Délai</span>
+                <button onclick="retirerJetonDepuisSidebar('${evaluation.id}', 'delai')"
+                        style="background: none; border: none; color: white; cursor: pointer; font-size: 1rem; padding: 0; font-weight: bold; line-height: 1;"
+                        title="Retirer le jeton de délai">×</button>
             </span>
         `);
     }
@@ -937,6 +943,87 @@ function afficherBadgesJetons() {
                 labelParent.style.pointerEvents = 'auto';
             }
         }
+    }
+}
+
+/**
+ * Retire un jeton depuis la barre latérale (pendant l'édition)
+ * @param {string} evaluationId - ID de l'évaluation
+ * @param {string} typeJeton - Type de jeton à retirer ('reprise' ou 'delai')
+ */
+function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
+    // Demander confirmation
+    const typeTexte = typeJeton === 'reprise' ? 'de reprise' : 'de délai';
+    const confirmation = confirm(`Voulez-vous vraiment retirer ce jeton ${typeTexte} ?\n\nCette action est irréversible.`);
+
+    if (!confirmation) {
+        return; // Annulation
+    }
+
+    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const index = evaluations.findIndex(e => e.id === evaluationId);
+
+    if (index === -1) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    const evaluation = evaluations[index];
+
+    if (typeJeton === 'reprise') {
+        // Retirer le jeton de reprise
+        delete evaluation.jetonRepriseApplique;
+        delete evaluation.dateApplicationJetonReprise;
+        delete evaluation.repriseDeId;
+
+        // Mettre à jour evaluationEnCours si c'est la même évaluation
+        if (window.evaluationEnCours && window.evaluationEnCours.idModification === evaluationId) {
+            delete window.evaluationEnCours.jetonRepriseApplique;
+            delete window.evaluationEnCours.dateApplicationJetonReprise;
+            delete window.evaluationEnCours.repriseDeId;
+        }
+
+        afficherNotificationSucces('Jeton de reprise retiré');
+    } else if (typeJeton === 'delai') {
+        // Retirer le jeton de délai
+        delete evaluation.jetonDelaiApplique;
+        delete evaluation.dateApplicationJetonDelai;
+        delete evaluation.delaiAccorde;
+
+        // Mettre à jour evaluationEnCours si c'est la même évaluation
+        if (window.evaluationEnCours && window.evaluationEnCours.idModification === evaluationId) {
+            delete window.evaluationEnCours.jetonDelaiApplique;
+            delete window.evaluationEnCours.dateApplicationJetonDelai;
+            delete window.evaluationEnCours.delaiAccorde;
+        }
+
+        // Réactiver la checkbox de délai
+        const checkboxDelai = document.getElementById('delaiAccordeCheck');
+        if (checkboxDelai) {
+            checkboxDelai.checked = false;
+            checkboxDelai.disabled = false;
+            const labelParent = checkboxDelai.closest('.groupe-form');
+            if (labelParent) {
+                labelParent.style.opacity = '1';
+                labelParent.style.pointerEvents = 'auto';
+            }
+        }
+
+        afficherNotificationSucces('Jeton de délai retiré');
+    }
+
+    // Sauvegarder
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        return;
+    }
+
+    // Rafraîchir l'affichage des badges
+    afficherBadgesJetons();
+
+    // Recalculer les indices
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
     }
 }
 
@@ -1517,7 +1604,7 @@ function genererDetailsEtudiant(etudiant) {
                     <th>Statut</th>
                     <th>Date</th>
                     <th>Actions</th>
-                    <th style="width: 60px;">🔒</th>
+                    <th style="width: 60px;" title="Verrouillage">🔒/🔓</th>
                 </tr>
             </thead>
             <tbody>
@@ -1564,10 +1651,12 @@ function genererDetailsEtudiant(etudiant) {
                                 </td>
                                 <td style="text-align: center;">
                                     ${estRemplacee ? '' : `
-                                        <input type="checkbox"
-                                               ${item.evaluation.verrouillee ? 'checked' : ''}
-                                               onchange="basculerVerrouillageEvaluation('${item.evaluation.id}')"
-                                               title="Verrouiller/Déverrouiller">
+                                        <span id="cadenas-${item.evaluation.id}"
+                                              onclick="basculerVerrouillageEvaluation('${item.evaluation.id}')"
+                                              style="font-size: 1.2rem; cursor: pointer; user-select: none;"
+                                              title="${item.evaluation.verrouillee ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                                            ${item.evaluation.verrouillee ? '🔒' : '🔓'}
+                                        </span>
                                     `}
                                 </td>
                             </tr>
@@ -3293,12 +3382,11 @@ function afficherListeBanqueEvaluations(evaluations) {
                                 style="background: #9c27b0; color: white;">
                             Jeton de reprise
                         </button>
-                        <label style="display: inline-flex; align-items: center; gap: 5px;">
-                            <input type="checkbox"
-                                   ${evaluation.verrouillee ? 'checked' : ''}
-                                   onchange="basculerVerrouillageEvaluation('${evaluation.id}')">
-                            <span style="font-size: 0.85rem;">🔒</span>
-                        </label>
+                        <span onclick="basculerVerrouillageEvaluation('${evaluation.id}')"
+                              style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-right: 8px;"
+                              title="${evaluation.verrouillee ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                            ${evaluation.verrouillee ? '🔒' : '🔓'}
+                        </span>
                         <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluationBanque('${evaluation.id}')">
                             Supprimer
                         </button>
@@ -3408,8 +3496,20 @@ function basculerVerrouillageEvaluation(evaluationId) {
     const message = estVerrouillee ? 'Évaluation verrouillée' : 'Évaluation déverrouillée';
     afficherNotificationSucces(message);
 
+    // Mettre à jour le cadenas dans le DOM immédiatement
+    const cadenasElement = document.getElementById(`cadenas-${evaluationId}`);
+    if (cadenasElement) {
+        cadenasElement.textContent = estVerrouillee ? '🔒' : '🔓';
+        cadenasElement.title = estVerrouillee ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+    }
+
     // Rafraîchir la liste
     filtrerBanqueEvaluations();
+
+    // Rafraîchir le profil étudiant si affiché (pour mettre à jour les autres éléments)
+    if (typeof afficherProfilComplet === 'function' && window.profilActuelDA) {
+        setTimeout(() => afficherProfilComplet(window.profilActuelDA), 100);
+    }
 }
 
 /**
@@ -3418,6 +3518,14 @@ function basculerVerrouillageEvaluation(evaluationId) {
  * @param {string} typeJeton - Type de jeton à retirer ('reprise' ou 'delai')
  */
 function retirerJeton(evaluationId, typeJeton) {
+    // Demander confirmation
+    const typeTexte = typeJeton === 'reprise' ? 'de reprise' : 'de délai';
+    const confirmation = confirm(`Voulez-vous vraiment retirer ce jeton ${typeTexte} ?\n\nCette action est irréversible.`);
+
+    if (!confirmation) {
+        return; // Annulation
+    }
+
     let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
@@ -3590,25 +3698,20 @@ function basculerVerrouillageEvaluationCourante() {
  * Met à jour l'icône de verrouillage (style productions)
  */
 function mettreAJourBoutonVerrouillage(estVerrouillee) {
-    const iconeStatut = document.getElementById('iconeStatutVerrouillageEval');
     const iconeVerrou = document.getElementById('iconeVerrouEval');
 
-    if (!iconeStatut || !iconeVerrou) return;
+    if (!iconeVerrou) return;
 
     if (estVerrouillee) {
-        // Verrouillée : coche grisée, cadenas actif
-        iconeStatut.textContent = '';
-        iconeStatut.style.color = '#999';
+        // Verrouillée : cadenas fermé rouge
+        iconeVerrou.textContent = '🔒';
         iconeVerrou.style.color = '#f44336'; // Rouge
-        iconeStatut.title = 'Évaluation verrouillée - Cliquez pour déverrouiller';
         iconeVerrou.title = 'Évaluation verrouillée - Cliquez pour déverrouiller';
     } else {
-        // Déverrouillée : coche bleue, cadenas grisé
-        iconeStatut.textContent = '✅';
-        iconeStatut.style.color = '';
-        iconeVerrou.style.color = '#999';
-        iconeStatut.title = 'Évaluation active - Cliquez pour verrouiller';
-        iconeVerrou.title = 'Évaluation active - Cliquez pour verrouiller';
+        // Déverrouillée : cadenas ouvert vert
+        iconeVerrou.textContent = '🔓';
+        iconeVerrou.style.color = '#4caf50'; // Vert
+        iconeVerrou.title = 'Évaluation modifiable - Cliquez pour verrouiller';
     }
 }
 

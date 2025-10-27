@@ -1573,6 +1573,7 @@ function toggleDetailsTechniques(detailsId) {
  * Variable globale pour stocker le DA actuel (utilisée pour navigation)
  */
 let profilActuelDA = null;
+window.profilActuelDA = null;
 
 /**
  * Change la section affichée dans la colonne droite du profil
@@ -1910,6 +1911,7 @@ function afficherProfilComplet(da) {
 
     // Sauvegarder le DA pour navigation
     profilActuelDA = da;
+    window.profilActuelDA = da;
 
     const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiants = typeof filtrerEtudiantsParMode === 'function'

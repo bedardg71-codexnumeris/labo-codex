@@ -2674,3 +2674,45 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     color: white;
     padding: 8px;
 }
+
+/* ===============================
+   CALENDRIER - Vue mensuelle
+   =============================== */
+
+/* Conteneur principal du calendrier */
+.calendrier-conteneur {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Titre du mois - Texte blanc sur fond bleu */
+.calendrier-titre-mois {
+    text-align: center;
+    color: white !important;
+    background: var(--bleu-principal);
+    margin: 0 0 15px 0;
+    padding: 10px 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+/* Tableau du calendrier */
+.calendrier-tableau {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Cellules de jours du calendrier */
+.jour-calendrier {
+    text-align: center;
+    padding: 8px 4px;
+    position: relative;
+    transition: opacity 0.15s ease;
+    min-height: 50px;
+    vertical-align: top;
+    border: 2px solid #e8e8e8;
+}

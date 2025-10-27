@@ -203,11 +203,11 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
     const jourSemaineDebut = premierJour.getDay();
     const nombreJours = dernierJour.getDate();
 
-    let html = '<div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">';
-    html += '<h3 style="text-align: center; color: var(--bleu-principal); margin: 0 0 15px 0; font-size: 1.1rem; font-weight: 600;">';
+    let html = '<div class="calendrier-conteneur">';
+    html += '<h3 class="calendrier-titre-mois">';
     html += nomsMois[mois] + ' ' + annee;
     html += '</h3>';
-    html += '<table style="width: 100%; border-collapse: collapse;">';
+    html += '<table class="calendrier-tableau">';
     html += '<thead><tr>';
 
     // En-tête des jours
@@ -289,9 +289,7 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
         html += onclickAttr + ' ';
         html += hoverStyle + ' ';
         html += 'style="background: ' + bgColor + '; color: ' + textColor + '; ';
-        html += 'border: 2px solid ' + borderColor + '; text-align: center; padding: 8px 4px; ';
-        html += 'position: relative; cursor: ' + cursorStyle + '; transition: opacity 0.15s ease; ';
-        html += 'min-height: 50px; vertical-align: top; font-weight: ' + fontWeight + ';">';
+        html += 'border-color: ' + borderColor + '; cursor: ' + cursorStyle + '; font-weight: ' + fontWeight + ';">';
         html += '<div style="font-size: 0.95rem;">' + jour + '</div>';
 
         if (statut.label) {
