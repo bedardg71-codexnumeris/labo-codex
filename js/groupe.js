@@ -344,7 +344,7 @@ function confirmImport() {
     }
 
     try {
-        const students = obtenirDonneesSelonMode('groupeEtudiants');
+        let students = obtenirDonneesSelonMode('groupeEtudiants');
         const ancienTotal = students.length;
 
         // Vérifier doublons DA
