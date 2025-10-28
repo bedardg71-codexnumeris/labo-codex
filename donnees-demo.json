@@ -23,7 +23,8 @@
       "nom": "Tremblay",
       "groupe": "9999",
       "programme": "300.M0",
-      "nomProgramme": "Sciences humaines"
+      "nomProgramme": "Sciences humaines",
+      "sa": "Non"
     },
     {
       "da": "9999002",
@@ -31,7 +32,8 @@
       "nom": "Gagnon",
       "groupe": "9999",
       "programme": "200.B0",
-      "nomProgramme": "Sciences de la nature"
+      "nomProgramme": "Sciences de la nature",
+      "sa": "Non"
     },
     {
       "da": "9999003",
@@ -39,7 +41,8 @@
       "nom": "Roy",
       "groupe": "9999",
       "programme": "420.B0",
-      "nomProgramme": "Techniques de l'informatique"
+      "nomProgramme": "Techniques de l'informatique",
+      "sa": "Non"
     },
     {
       "da": "9999004",
@@ -47,7 +50,8 @@
       "nom": "Côté",
       "groupe": "9999",
       "programme": "410.B0",
-      "nomProgramme": "Techniques de comptabilité et de gestion"
+      "nomProgramme": "Techniques de comptabilité et de gestion",
+      "sa": "Oui"
     },
     {
       "da": "9999005",
@@ -55,7 +59,8 @@
       "nom": "Bouchard",
       "groupe": "9999",
       "programme": "180.A0",
-      "nomProgramme": "Soins Infirmiers"
+      "nomProgramme": "Soins Infirmiers",
+      "sa": "Non"
     },
     {
       "da": "9999006",
@@ -63,7 +68,8 @@
       "nom": "Nguyen",
       "groupe": "9999",
       "programme": "300.M0",
-      "nomProgramme": "Sciences humaines"
+      "nomProgramme": "Sciences humaines",
+      "sa": "Non"
     },
     {
       "da": "9999007",
@@ -71,7 +77,8 @@
       "nom": "Morin",
       "groupe": "9999",
       "programme": "500.AL",
-      "nomProgramme": "Arts, lettres et communication – Langues"
+      "nomProgramme": "Arts, lettres et communication – Langues",
+      "sa": "Non"
     },
     {
       "da": "9999008",
@@ -79,7 +86,8 @@
       "nom": "Lavoie",
       "groupe": "9999",
       "programme": "200.B0",
-      "nomProgramme": "Sciences de la nature"
+      "nomProgramme": "Sciences de la nature",
+      "sa": "Non"
     },
     {
       "da": "9999009",
@@ -87,7 +95,8 @@
       "nom": "Fortin",
       "groupe": "9999",
       "programme": "351.A1",
-      "nomProgramme": "Techniques d'éducation spécialisée"
+      "nomProgramme": "Techniques d'éducation spécialisée",
+      "sa": "Oui"
     },
     {
       "da": "9999010",
@@ -95,7 +104,8 @@
       "nom": "Gagné",
       "groupe": "9999",
       "programme": "300.M1",
-      "nomProgramme": "Sciences humaines avec mathématiques"
+      "nomProgramme": "Sciences humaines avec mathématiques",
+      "sa": "Non"
     }
   ],
   "modalitesEvaluation": {

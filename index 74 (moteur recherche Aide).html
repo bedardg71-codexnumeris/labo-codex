@@ -3130,8 +3130,8 @@
                                 plusieurs groupes (ex: Groupe 1, Groupe 2). Utilise le filtre en haut pour afficher un groupe
                                 spécifique.</li>
                             <li><strong>Import CSV/TSV :</strong> Format attendu avec 7 colonnes : DA, Groupe,
-                                Nom, Prénom, Programme, SA, CAF. Les colonnes peuvent être séparées par des virgules ou des
-                                tabulations.</li>
+                                Nom, Prénom, Programme, Nom du programme, SA. Les colonnes peuvent être séparées par des virgules ou des
+                                tabulations. La colonne CAF peut être ajoutée manuellement après l'import.</li>
                             <li><strong>Copier-coller :</strong> Tu peux copier directement depuis Excel ou
                                 Google Sheets. La prévisualisation te permet de vérifier avant d'importer.</li>
                             <li><strong>Modification :</strong> Utilise l'icône pour modifier un·e
@@ -3281,7 +3281,7 @@
                                     <input type="file" id="fichierCsvEntree" accept=".csv,.tsv,.txt"
                                         onchange="handleFileImport(event)" class="controle-form">
                                     <small style="color: #666; display: block; margin-top: 5px;">
-                                        Format attendu : DA, Groupe, Nom, Prénom, Programme, SA, CAF
+                                        Format attendu : DA, Groupe, Nom, Prénom, Programme, Nom du programme, SA
                                     </small>
                                 </div>
 

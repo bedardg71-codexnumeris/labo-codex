@@ -282,7 +282,7 @@ function parseAndPreview(content) {
         });
 
         if (tempImportData.length === 0) {
-            afficherNotificationErreur('Aucune donnée valide', 'Format attendu : DA, Groupe, Nom, Prénom, Programme, SA, CAF');
+            afficherNotificationErreur('Aucune donnée valide', 'Format attendu : DA, Groupe, Nom, Prénom, Programme, Nom du programme, SA');
             return;
         }
 
@@ -313,7 +313,6 @@ function afficherPrevisualisation(data, titre) {
                     <th style="padding: 8px; text-align: left;">Prénom</th>
                     <th style="padding: 8px; text-align: left;">Programme</th>
                     <th style="padding: 8px; text-align: center;">SA</th>
-                    <th style="padding: 8px; text-align: center;">CAF</th>
                 </tr>
             </thead>
             <tbody>
@@ -325,7 +324,6 @@ function afficherPrevisualisation(data, titre) {
                         <td style="padding: 8px;">${echapperHtml(s.prenom)}</td>
                         <td style="padding: 8px;">${echapperHtml(s.programme || '---')}</td>
                         <td style="padding: 8px; text-align: center;">${s.sa === 'Oui' ? '✓' : ''}</td>
-                        <td style="padding: 8px; text-align: center;">${s.caf === 'Oui' ? '✓' : ''}</td>
                     </tr>
                 `).join('')}
             </tbody>
