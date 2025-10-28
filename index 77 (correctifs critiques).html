@@ -1,7 +1,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 0.74 - Moteur de recherche Aide</title>
+    <title>Système de suivi Beta 0.77 - Correctifs critiques</title>
 
     <!-- AJOUTER CETTE LIGNE -->
     <link rel="stylesheet" href="styles.css">
@@ -478,10 +478,10 @@
                 <!-- Informations légales et techniques (à droite) -->
                 <div class="info-legales-section">
                     <div class="meta">
-                        Beta 0.74
+                        Beta 0.77
                         <br>Créé par Grégoire Bédard
                         <br>Double licence : GPL v3 (code) + CC BY-SA 4.0 (contenu)
-                        <br>27 octobre 2025
+                        <br>28 octobre 2025
                     </div>
                 </div>
             </div>
@@ -1790,6 +1790,17 @@
                             </div>
                         </div>
 
+                        <!-- IMPORT/EXPORT PRODUCTIONS -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: #f1f8e9; border-radius: 6px; border-left: 4px solid #4caf50;">
+                            <button class="btn btn-confirmer" onclick="exporterProductions()" style="flex: 1;">
+                                📤 Exporter les productions
+                            </button>
+                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-productions-local').click()" style="flex: 1;">
+                                📥 Importer des productions
+                            </button>
+                            <input type="file" id="fichier-import-productions-local" accept=".json" style="display: none;" onchange="importerProductions(event)">
+                        </div>
+
                         <!-- TABLEAU/CONTENEUR DES ÉVALUATIONS -->
                         <div id="tableauEvaluationsContainer" style="margin-bottom: 20px;">
                             <p class="text-muted" id="aucuneEvaluation" style="font-style: italic;">
@@ -1983,6 +1994,17 @@
                                 placeholder="Ex: Grille analyse littéraire" onchange="sauvegarderNomGrille()">
                         </div>
 
+                        <!-- IMPORT/EXPORT GRILLES -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: #fff8f0; border-radius: 6px; border-left: 4px solid #ff9800;">
+                            <button class="btn btn-confirmer" onclick="exporterGrilles()" style="flex: 1;">
+                                📤 Exporter les grilles
+                            </button>
+                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-grilles-local').click()" style="flex: 1;">
+                                📥 Importer des grilles
+                            </button>
+                            <input type="file" id="fichier-import-grilles-local" accept=".json" style="display: none;" onchange="importerGrilles(event)">
+                        </div>
+
                         <!-- Message si aucune évaluation sélectionnée -->
                         <div id="aucuneEvalSelectionnee" style="padding: 20px; background: var(--bleu-tres-pale); 
              border-radius: 6px; text-align: center; color: var(--bleu-leger);">
@@ -2150,6 +2172,17 @@
                                 placeholder="Ex: Échelle standard A-F" onchange="sauvegarderNomEchelle()">
                         </div>
 
+                        <!-- IMPORT/EXPORT ÉCHELLES -->
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: #f0f8ff; border-radius: 6px; border-left: 4px solid #2196f3;">
+                            <button class="btn btn-principal" onclick="exporterEchelles()" style="flex: 1;">
+                                📤 Exporter l'échelle
+                            </button>
+                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-echelles-local').click()" style="flex: 1;">
+                                📥 Importer une échelle
+                            </button>
+                            <input type="file" id="fichier-import-echelles-local" accept=".json" style="display: none;" onchange="importerEchelles(event)">
+                        </div>
+
                         <!-- Note explicative -->
                         <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
              background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
@@ -2313,6 +2346,36 @@
                     <div class="carte">
                         <h3>💬 Cartouches de rétroaction</h3>
 
+                        <!-- IMPORT/EXPORT CARTOUCHES -->
+                        <div style="margin-bottom: 20px;">
+                            <!-- Export et Import JSON (partage entre enseignants) -->
+                            <div style="display: flex; gap: 10px; padding: 15px; background: #f0f8ff; border-radius: 6px; border-left: 4px solid #2196f3; margin-bottom: 10px;">
+                                <button class="btn btn-confirmer" onclick="exporterCartouches()" style="flex: 1;">
+                                    📤 Exporter les cartouches (JSON)
+                                </button>
+                                <button class="btn btn-principal" onclick="document.getElementById('fichier-import-cartouches-local').click()" style="flex: 1;">
+                                    📥 Importer des cartouches (JSON)
+                                </button>
+                                <input type="file" id="fichier-import-cartouches-local" accept=".json" style="display: none;" onchange="importerCartouches(event)">
+                            </div>
+
+                            <!-- Import TXT (pour remplir une cartouche) -->
+                            <div style="padding: 12px; background: #e3f2fd; border-radius: 6px; border-left: 4px solid #1976d2;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <button class="btn btn-principal" onclick="document.getElementById('fichier-import-txt-local').click()" style="font-size: 0.9rem;">
+                                        📄 Importer depuis fichier .txt
+                                    </button>
+                                    <input type="file" id="fichier-import-txt-local" accept=".txt" style="display: none;" onchange="importerCartoucheDepuisTxt(event)">
+                                    <small style="color: #1565c0;">
+                                        Pour remplir la cartouche sélectionnée avec vos commentaires rédigés dans un fichier .txt (format Markdown)
+                                    </small>
+                                </div>
+                                <div style="font-size: 0.85rem; color: #0d47a1; background: white; padding: 8px; border-radius: 4px;">
+                                    <strong>⚠️ Important :</strong> Les noms de critères dans la grille doivent correspondre exactement aux noms dans le fichier .txt (ex: STRUCTURE, RIGUEUR, PLAUSIBILITÉ, NUANCE).
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Sélecteur de grille et cartouche -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                             <div class="groupe-form">
@@ -2433,14 +2496,6 @@
                                     </small>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Boutons d'action principaux -->
-                        <div class="btn-groupe" style="margin-bottom: 20px;">
-                            <button class="btn btn-principal" onclick="afficherImportCommentaires()"
-                                style="margin-right: auto;">
-                                Importer des commentaires
-                            </button>
                         </div>
 
                         <!-- MATRICE DE RÉTROACTION -->
@@ -3694,6 +3749,27 @@ Exemple :
                         </div>
                     </div>
 
+                    <!-- Informations sur les backups -->
+                    <div class="carte">
+                        <h3>ℹ️ À propos des sauvegardes</h3>
+                        <div style="padding: 15px; background: #f0f8ff; border-radius: 6px; border-left: 4px solid #2196f3;">
+                            <h4 style="color: #1565c0; margin-bottom: 10px;">💾 Backup complet vs Import/Export partiel</h4>
+                            <p style="margin-bottom: 15px;">
+                                <strong>Les boutons ci-dessus</strong> permettent de faire un <strong>backup complet</strong>
+                                de toutes tes données d'application (cours, trimestre, étudiants, évaluations, présences, etc.).
+                            </p>
+                            <p style="margin-bottom: 15px;">
+                                Pour exporter/importer uniquement du <strong>matériel pédagogique</strong> (grilles, échelles, productions),
+                                utilise les boutons d'import/export directement dans les sections :
+                            </p>
+                            <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95rem;">
+                                <li><strong>Matériel pédagogique → Productions</strong> : Import/export des évaluations</li>
+                                <li><strong>Matériel pédagogique → Critères d'évaluation</strong> : Import/export des grilles</li>
+                                <li><strong>Matériel pédagogique → Niveaux de performance</strong> : Import/export des échelles</li>
+                            </ul>
+                        </div>
+                    </div>
+
                     <!-- Réinitialisation -->
                     <div class="carte">
                         <h4>Réinitialisation complète</h4>
@@ -4255,7 +4331,7 @@ Exemple :
                         </div>
 
                         <div class="alerte alerte-information" style="margin-top: 15px;">
-                            <strong>Format du fichier :</strong> JSON standard, lisible et modifiable. Inclut métadonnées (version Beta 0.74, date d'export, statistiques).
+                            <strong>Format du fichier :</strong> JSON standard, lisible et modifiable. Inclut métadonnées (version Beta 0.77, date d'export, statistiques).
                         </div>
                     </div>
 
@@ -4479,6 +4555,107 @@ Exemple :
 
                         <div class="alerte alerte-erreur">
                             <strong>Détérioration récente :</strong> Comparer les indices sommatifs et alternatifs pour détecter les changements récents, même chez des étudiants au bilan global acceptable.
+                        </div>
+                    </div>
+
+                    <!-- Carte: Collaboration entre collègues -->
+                    <div class="carte" style="border-left: 4px solid #9c27b0;">
+                        <h3 class="carte-titre-bleu">5. Collaboration entre collègues</h3>
+                        <p><strong>Partage de matériel pédagogique via Import/Export</strong></p>
+
+                        <p>Le système permet de partager facilement du matériel pédagogique entre enseignant·es, favorisant la collaboration départementale et l'harmonisation des pratiques.</p>
+
+                        <div style="background: #f3e5f5; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                            <h4 style="color: #6a1b9a; margin-bottom: 10px;">📤 Matériel partageable (JSON)</h4>
+                            <p style="margin-bottom: 10px;">Chaque type de matériel peut être exporté et partagé :</p>
+                            <ul style="line-height: 1.8;">
+                                <li><strong>Grilles de critères</strong> (Matériel → Critères d'évaluation)
+                                    <ul style="margin-top: 5px; font-size: 0.95em;">
+                                        <li>Export : <code>grilles-criteres-YYYY-MM-DD.json</code></li>
+                                        <li>Contient : critères SRPNF, pondérations, descriptions</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Échelles de performance</strong> (Matériel → Niveaux de performance)
+                                    <ul style="margin-top: 5px; font-size: 0.95em;">
+                                        <li>Export : <code>echelle-performance-YYYY-MM-DD.json</code></li>
+                                        <li>Contient : niveaux IDME, seuils, descriptions</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Productions</strong> (Matériel → Productions)
+                                    <ul style="margin-top: 5px; font-size: 0.95em;">
+                                        <li>Export : <code>productions-YYYY-MM-DD.json</code></li>
+                                        <li>Contient : artefacts, pondérations, liens avec grilles</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Cartouches de rétroaction</strong> (Matériel → Rétroactions)
+                                    <ul style="margin-top: 5px; font-size: 0.95em;">
+                                        <li>Export : <code>cartouches-retroaction-YYYY-MM-DD.json</code></li>
+                                        <li>Contient : commentaires prédéfinis par critère et niveau</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div style="background: #e8f5e9; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                            <h4 style="color: #2e7d32; margin-bottom: 10px;">🤝 Scénarios de collaboration</h4>
+
+                            <p><strong>1. Harmonisation départementale</strong></p>
+                            <ul style="margin-bottom: 15px; line-height: 1.6;">
+                                <li>Plusieurs enseignant·es du même cours collaborent</li>
+                                <li>Création de grilles et échelles communes</li>
+                                <li>Partage de cartouches standardisées</li>
+                                <li>Cohérence interdépartementale</li>
+                            </ul>
+
+                            <p><strong>2. Mentorat et formation</strong></p>
+                            <ul style="margin-bottom: 15px; line-height: 1.6;">
+                                <li>Enseignant·e expérimenté·e partage avec nouvel·le collègue</li>
+                                <li>Exemples de bonnes pratiques</li>
+                                <li>Modèles prêts à adapter</li>
+                                <li>Réduction du temps de préparation initial</li>
+                            </ul>
+
+                            <p><strong>3. Réutilisation entre sessions</strong></p>
+                            <ul style="margin-bottom: 15px; line-height: 1.6;">
+                                <li>Exporter son propre matériel en fin de trimestre</li>
+                                <li>Réimporter et ajuster pour la session suivante</li>
+                                <li>Amélioration continue du matériel</li>
+                                <li>Conservation d'une base de départ éprouvée</li>
+                            </ul>
+
+                            <p><strong>4. Communautés de pratique</strong></p>
+                            <ul style="line-height: 1.6;">
+                                <li>Partage de matériel entre collèges</li>
+                                <li>Contribution à un répertoire commun</li>
+                                <li>Mutualisation des efforts de création</li>
+                            </ul>
+                        </div>
+
+                        <div style="background: #fff3e0; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                            <h4 style="color: #e65100; margin-bottom: 10px;">📄 Import spécial : fichiers .txt Markdown</h4>
+                            <p style="margin-bottom: 10px;">Pour les <strong>cartouches de rétroaction</strong> uniquement, vous pouvez aussi :</p>
+                            <ul style="line-height: 1.6;">
+                                <li>Rédiger vos commentaires dans un document texte (Word, Google Docs, etc.)</li>
+                                <li>Sauvegarder au format .txt avec structure Markdown</li>
+                                <li>Importer directement dans une cartouche en édition</li>
+                                <li>Gain de temps : rédaction dans votre environnement préféré</li>
+                            </ul>
+                            <p style="margin-top: 10px; font-size: 0.9em; color: #bf360c;"><strong>Format requis :</strong> Les noms de critères dans le fichier doivent correspondre exactement à ceux de la grille (ex: STRUCTURE, RIGUEUR, PLAUSIBILITÉ, NUANCE).</p>
+                        </div>
+
+                        <div class="alerte alerte-info">
+                            <strong>🔒 Protection de la vie privée :</strong> Les exports de matériel pédagogique ne contiennent JAMAIS de données confidentielles (noms d'étudiants, numéros DA, notes individuelles, présences). Seul le matériel pédagogique réutilisable est exporté.
+                        </div>
+
+                        <div style="background: linear-gradient(90deg, var(--bleu-pale) 0%, var(--bleu-tres-pale) 100%); padding: 15px; border-radius: 6px; margin-top: 15px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Flux typique de partage</h4>
+                            <ol style="line-height: 1.8;">
+                                <li><strong>Enseignant·e A</strong> : Exporte son matériel (boutons 📤 dans chaque section)</li>
+                                <li><strong>Partage</strong> : Fichiers JSON envoyés par courriel, Drive, Teams, etc.</li>
+                                <li><strong>Enseignant·e B</strong> : Importe les fichiers (boutons 📥 dans chaque section)</li>
+                                <li><strong>Adaptation</strong> : Ajuste le matériel selon ses besoins</li>
+                                <li><strong>Utilisation</strong> : Matériel prêt pour le trimestre</li>
+                            </ol>
                         </div>
                     </div>
 
@@ -5682,7 +5859,7 @@ Exemple :
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="padding: 10px; font-weight: bold; width: 30%; border-bottom: 1px solid var(--bleu-pale);">Version</td>
-                                <td style="padding: 10px; border-bottom: 1px solid var(--bleu-pale);">Beta 0.74 (moteur de recherche Aide)</td>
+                                <td style="padding: 10px; border-bottom: 1px solid var(--bleu-pale);">Beta 0.77 (correctifs critiques)</td>
                             </tr>
                             <tr>
                                 <td style="padding: 10px; font-weight: bold; border-bottom: 1px solid var(--bleu-pale);">Développé par</td>
@@ -6080,6 +6257,410 @@ Exemple :
                 }
             }
         });
+    </script>
+
+    <!-- Fonctions d'import/export du matériel pédagogique (Beta 0.77) -->
+    <script>
+        // ========================================
+        // DEBUG: AFFICHER LE CONTENU DU LOCALSTORAGE
+        // ========================================
+        function debugLocalStorage() {
+            console.clear();
+            console.log('========================================');
+            console.log('DEBUG: Contenu du localStorage');
+            console.log('========================================');
+
+            // Lister toutes les clés
+            console.log('\n📋 Toutes les clés disponibles:');
+            for (let i = 0; i < localStorage.length; i++) {
+                const cle = localStorage.key(i);
+                console.log(`  - ${cle}`);
+            }
+
+            // Vérifier productions (clé: productions)
+            console.log('\n📝 Productions (artefacts):');
+            const productions = localStorage.getItem('productions');
+            if (productions) {
+                try {
+                    const parsed = JSON.parse(productions);
+                    console.log(`  Trouvées: ${Array.isArray(parsed) ? parsed.length : 'Structure invalide'} production(s)`);
+                    console.log('  Contenu:', parsed);
+                } catch (e) {
+                    console.log('  ERREUR de parsing:', e);
+                }
+            } else {
+                console.log('  ❌ Aucune production trouvée (clé "productions" vide)');
+            }
+
+            // Vérifier grillesTemplates
+            console.log('\n📊 Grilles de critères:');
+            const grilles = localStorage.getItem('grillesTemplates');
+            if (grilles) {
+                try {
+                    const parsed = JSON.parse(grilles);
+                    if (Array.isArray(parsed)) {
+                        console.log(`  Grilles: ${parsed.length}`);
+                        console.log('  Contenu:', parsed);
+                    } else {
+                        console.log('  Structure invalide (pas un tableau)');
+                    }
+                } catch (e) {
+                    console.log('  ERREUR de parsing:', e);
+                }
+            } else {
+                console.log('  ❌ Aucune grille trouvée (clé "grillesTemplates" vide)');
+            }
+
+            // Vérifier échelles
+            console.log('\n📐 Échelles de performance:');
+            const echellesTemplates = localStorage.getItem('echellesTemplates');
+            const niveauxEchelle = localStorage.getItem('niveauxEchelle');
+            const configEchelle = localStorage.getItem('configEchelle');
+
+            if (echellesTemplates || niveauxEchelle || configEchelle) {
+                console.log('  Données trouvées:');
+                if (echellesTemplates) {
+                    console.log('    • echellesTemplates:', JSON.parse(echellesTemplates));
+                }
+                if (niveauxEchelle) {
+                    console.log('    • niveauxEchelle:', JSON.parse(niveauxEchelle));
+                }
+                if (configEchelle) {
+                    console.log('    • configEchelle:', JSON.parse(configEchelle));
+                }
+            } else {
+                console.log('  ❌ Aucune échelle trouvée');
+            }
+
+            console.log('\n========================================');
+            alert('Informations affichées dans la console du navigateur.\n\nAppuie sur F12 pour voir les détails.');
+        }
+
+        // ========================================
+        // EXPORT DES GRILLES D'ÉVALUATION
+        // ========================================
+        function exporterGrilles() {
+            try {
+                const grillesTemplates = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+
+                // Filtrer pour garder seulement les grilles (pas les échelles)
+                const grilles = grillesTemplates.filter(g => g.type !== 'echelle');
+
+                if (grilles.length === 0) {
+                    alert('Aucune grille d\'évaluation à exporter.\n\nCrée d\'abord des grilles dans la section Évaluations.');
+                    return;
+                }
+
+                // Créer le fichier JSON
+                const json = JSON.stringify(grilles, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+
+                // Télécharger
+                const a = document.createElement('a');
+                a.href = url;
+                const dateStr = new Date().toISOString().slice(0, 10);
+                a.download = `grilles-evaluation-${dateStr}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                if (typeof afficherNotificationSucces === 'function') {
+                    afficherNotificationSucces(`Export réussi : ${grilles.length} grille(s) exportée(s)`);
+                } else {
+                    alert(`Export réussi : ${grilles.length} grille(s) exportée(s)`);
+                }
+
+            } catch (err) {
+                console.error('Erreur exportation grilles:', err);
+                alert('Erreur lors de l\'exportation des grilles.');
+            }
+        }
+
+        // ========================================
+        // EXPORT DES ÉCHELLES DE PERFORMANCE
+        // ========================================
+        function exporterEchelles() {
+            try {
+                const echellesTemplates = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+                const niveauxEchelle = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
+                const configEchelle = JSON.parse(localStorage.getItem('configEchelle') || '{}');
+
+                // Vérifier qu'il y a des données
+                if (echellesTemplates.length === 0 && niveauxEchelle.length === 0 && Object.keys(configEchelle).length === 0) {
+                    alert('Aucune échelle de performance à exporter.\n\nConfigure d\'abord ton échelle dans Réglages → Échelles de performance.');
+                    return;
+                }
+
+                // Créer un objet avec toutes les données d'échelles
+                const exportData = {
+                    echellesTemplates: echellesTemplates,
+                    niveauxEchelle: niveauxEchelle,
+                    configEchelle: configEchelle
+                };
+
+                // Créer le fichier JSON
+                const json = JSON.stringify(exportData, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+
+                // Télécharger
+                const a = document.createElement('a');
+                a.href = url;
+                const dateStr = new Date().toISOString().slice(0, 10);
+                a.download = `echelles-performance-${dateStr}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                if (typeof afficherNotificationSucces === 'function') {
+                    afficherNotificationSucces(`Export réussi : échelle(s) exportée(s)`);
+                } else {
+                    alert(`Export réussi : échelle(s) exportée(s)`);
+                }
+
+            } catch (err) {
+                console.error('Erreur exportation échelles:', err);
+                alert('Erreur lors de l\'exportation des échelles.');
+            }
+        }
+
+        // ========================================
+        // EXPORT DES PRODUCTIONS
+        // ========================================
+        function exporterProductions() {
+            try {
+                const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+
+                if (productions.length === 0) {
+                    alert('Aucune production à exporter.\n\nCrée d\'abord des productions dans Réglages → Productions.');
+                    return;
+                }
+
+                // Créer le fichier JSON
+                const json = JSON.stringify(productions, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+
+                // Télécharger
+                const a = document.createElement('a');
+                a.href = url;
+                const dateStr = new Date().toISOString().slice(0, 10);
+                a.download = `productions-${dateStr}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                if (typeof afficherNotificationSucces === 'function') {
+                    afficherNotificationSucces(`Export réussi : ${productions.length} production(s) exportée(s)`);
+                } else {
+                    alert(`Export réussi : ${productions.length} production(s) exportée(s)`);
+                }
+
+            } catch (err) {
+                console.error('Erreur exportation productions:', err);
+                alert('Erreur lors de l\'exportation des productions.');
+            }
+        }
+
+        // ========================================
+        // IMPORT DES GRILLES D'ÉVALUATION
+        // ========================================
+        function importerGrilles(event) {
+            const fichier = event.target.files[0];
+            if (!fichier) return;
+
+            const lecteur = new FileReader();
+            lecteur.onload = function(e) {
+                try {
+                    const grillesImportees = JSON.parse(e.target.result);
+
+                    // Validation structure
+                    if (!Array.isArray(grillesImportees)) {
+                        alert('Format invalide : le fichier doit contenir un tableau de grilles.');
+                        return;
+                    }
+
+                    // Validation contenu
+                    for (let grille of grillesImportees) {
+                        if (!grille.id || !grille.nom || !grille.criteres) {
+                            alert('Format invalide : chaque grille doit avoir un id, un nom et des critères.');
+                            return;
+                        }
+                    }
+
+                    // Charger les grilles existantes
+                    let grillesTemplates = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+
+                    // Fusionner (remplacer si ID existe, ajouter sinon)
+                    let nbAjoutees = 0;
+                    let nbMisesAJour = 0;
+
+                    grillesImportees.forEach(grilleImportee => {
+                        const index = grillesTemplates.findIndex(g => g.id === grilleImportee.id);
+                        if (index >= 0) {
+                            grillesTemplates[index] = grilleImportee;
+                            nbMisesAJour++;
+                        } else {
+                            grillesTemplates.push(grilleImportee);
+                            nbAjoutees++;
+                        }
+                    });
+
+                    // Sauvegarder
+                    localStorage.setItem('grillesTemplates', JSON.stringify(grillesTemplates));
+
+                    // Notification
+                    let message = `Import réussi :\n• ${nbAjoutees} grille(s) ajoutée(s)\n• ${nbMisesAJour} grille(s) mise(s) à jour`;
+
+                    if (typeof afficherNotificationSucces === 'function') {
+                        afficherNotificationSucces(message.replace(/\n/g, ' '));
+                    } else {
+                        alert(message);
+                    }
+
+                    // Réinitialiser le champ fichier
+                    event.target.value = '';
+
+                } catch (err) {
+                    console.error('Erreur import grilles:', err);
+                    alert('Fichier JSON invalide ou format incorrect.');
+                }
+            };
+            lecteur.readAsText(fichier);
+        }
+
+        // ========================================
+        // IMPORT DES ÉCHELLES DE PERFORMANCE
+        // ========================================
+        function importerEchelles(event) {
+            const fichier = event.target.files[0];
+            if (!fichier) return;
+
+            const lecteur = new FileReader();
+            lecteur.onload = function(e) {
+                try {
+                    const donneesImportees = JSON.parse(e.target.result);
+
+                    // Validation structure (doit contenir au moins une des trois clés)
+                    if (!donneesImportees.echellesTemplates && !donneesImportees.niveauxEchelle && !donneesImportees.configEchelle) {
+                        alert('Format invalide : le fichier doit contenir echellesTemplates, niveauxEchelle ou configEchelle.');
+                        return;
+                    }
+
+                    // Importer echellesTemplates
+                    if (donneesImportees.echellesTemplates) {
+                        localStorage.setItem('echellesTemplates', JSON.stringify(donneesImportees.echellesTemplates));
+                    }
+
+                    // Importer niveauxEchelle
+                    if (donneesImportees.niveauxEchelle) {
+                        localStorage.setItem('niveauxEchelle', JSON.stringify(donneesImportees.niveauxEchelle));
+                    }
+
+                    // Importer configEchelle
+                    if (donneesImportees.configEchelle) {
+                        localStorage.setItem('configEchelle', JSON.stringify(donneesImportees.configEchelle));
+                    }
+
+                    // Notification
+                    let message = 'Import réussi : Échelle(s) de performance importée(s)';
+
+                    if (typeof afficherNotificationSucces === 'function') {
+                        afficherNotificationSucces(message);
+                    } else {
+                        alert(message);
+                    }
+
+                    // Réinitialiser le champ fichier
+                    event.target.value = '';
+
+                    // Recharger la page pour appliquer les changements
+                    if (confirm('Import terminé ! Recharger la page pour voir les échelles importées ?')) {
+                        location.reload();
+                    }
+
+                } catch (err) {
+                    console.error('Erreur import échelles:', err);
+                    alert('Fichier JSON invalide ou format incorrect.');
+                }
+            };
+            lecteur.readAsText(fichier);
+        }
+
+        // ========================================
+        // IMPORT DES PRODUCTIONS
+        // ========================================
+        function importerProductions(event) {
+            const fichier = event.target.files[0];
+            if (!fichier) return;
+
+            const lecteur = new FileReader();
+            lecteur.onload = function(e) {
+                try {
+                    const productionsImportees = JSON.parse(e.target.result);
+
+                    // Validation structure
+                    if (!Array.isArray(productionsImportees)) {
+                        alert('Format invalide : le fichier doit contenir un tableau de productions.');
+                        return;
+                    }
+
+                    // Validation contenu
+                    for (let prod of productionsImportees) {
+                        if (!prod.id || !prod.titre || !prod.type) {
+                            alert('Format invalide : chaque production doit avoir au minimum un id, un titre et un type.');
+                            return;
+                        }
+                    }
+
+                    // Charger les productions existantes (clé: productions)
+                    let productions = JSON.parse(localStorage.getItem('productions') || '[]');
+
+                    // Fusionner (remplacer si ID existe, ajouter sinon)
+                    let nbAjoutees = 0;
+                    let nbMisesAJour = 0;
+
+                    productionsImportees.forEach(prodImportee => {
+                        const index = productions.findIndex(p => p.id === prodImportee.id);
+                        if (index >= 0) {
+                            productions[index] = prodImportee;
+                            nbMisesAJour++;
+                        } else {
+                            productions.push(prodImportee);
+                            nbAjoutees++;
+                        }
+                    });
+
+                    // Sauvegarder (clé: productions)
+                    localStorage.setItem('productions', JSON.stringify(productions));
+
+                    // Recalculer si module disponible
+                    if (typeof afficherTableauProductions === 'function') {
+                        afficherTableauProductions();
+                    }
+
+                    // Notification
+                    let message = `Import réussi :\n• ${nbAjoutees} production(s) ajoutée(s)\n• ${nbMisesAJour} production(s) mise(s) à jour`;
+
+                    if (typeof afficherNotificationSucces === 'function') {
+                        afficherNotificationSucces(message.replace(/\n/g, ' '));
+                    } else {
+                        alert(message);
+                    }
+
+                    // Réinitialiser le champ fichier
+                    event.target.value = '';
+
+                    // Recharger la page pour appliquer les changements
+                    if (confirm('Import terminé ! Recharger la page pour voir les productions importées ?')) {
+                        location.reload();
+                    }
+
+                } catch (err) {
+                    console.error('Erreur import productions:', err);
+                    alert('Fichier JSON invalide ou format incorrect.');
+                }
+            };
+            lecteur.readAsText(fichier);
+        }
     </script>
 </body>
 
