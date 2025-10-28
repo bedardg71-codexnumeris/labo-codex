@@ -4,7 +4,7 @@
 
 ---
 
-## 🎁 Fichiers prêts à l'emploi (Beta 0.75)
+## 🎁 Fichiers prêts à l'emploi (Beta 0.77)
 
 **Nouveauté :** Des fichiers de démonstration sont maintenant inclus dans le projet !
 
@@ -46,9 +46,13 @@
 2. Choisir `etudiants-demo.txt` ou `etudiants-demo-groupe9999.txt`
 3. Les étudiants sont importés automatiquement
 
-### ✨ Nouveauté Beta 0.75 : Import/Export matériel pédagogique
+### ✨ Nouveauté Beta 0.77 : Correctifs critiques
 
-Vous pouvez maintenant importer/exporter séparément :
+**IMPORTANT :** Cette version corrige deux bugs critiques de Beta 0.75 qui empêchaient l'import de données. Si vous aviez essayé d'importer `donnees-demo.json` avec Beta 0.75 ou 0.76, veuillez effacer votre localStorage et réessayer avec Beta 0.77.
+
+### Import/Export matériel pédagogique
+
+Vous pouvez importer/exporter séparément :
 - **Productions** (Matériel → Productions)
 - **Grilles de critères** (Matériel → Critères d'évaluation)
 - **Échelles de performance** (Matériel → Niveaux de performance)
@@ -352,7 +356,7 @@ Le fichier `donnees-demo.json` doit contenir ces clés :
 
 **Taille approximative :** 50-200 Ko selon le nombre d'étudiants et de données
 
-**Note Beta 0.75 :** La clé `cartouches_grille-srpnf` contient les cartouches de rétroaction liées à la grille SRPNF.
+**Note Beta 0.77 :** La clé `cartouches_grille-srpnf` contient les cartouches de rétroaction liées à la grille SRPNF. Les correctifs import/export garantissent que ces données sont correctement sauvegardées dans localStorage.
 
 ---
 
@@ -415,4 +419,4 @@ Le fichier `donnees-demo.json` doit contenir ces clés :
 
 Contact : labo@codexnumeris.org
 
-**Fichier mis à jour le :** 28 octobre 2025 (Beta 0.75)
+**Fichier mis à jour le :** 28 octobre 2025 (Beta 0.77 - correctifs critiques)
