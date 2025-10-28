@@ -884,7 +884,7 @@ function deleteStudent(id) {
 
 window.supprimerEtudiant = supprimerEtudiant;
 window.modifierEtudiant = modifierEtudiant;
-window.ajouterEtudiant = ajouterEtudiant;
+// window.ajouterEtudiant = ajouterEtudiant; // FIXME: fonction n'existe pas - utiliser addStudent() à la place
 window.afficherListeEtudiants = afficherListeEtudiants;
 window.basculerVerrouillageGroupe = basculerVerrouillageGroupe;
 window.resetStudentsData = resetStudentsData;
