@@ -1,1 +1,7 @@
 *.bak
+
+# Dossier de distribution (packages ZIP)
+dist/
+
+# Fichiers système macOS
+.DS_Store
