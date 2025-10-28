@@ -1,0 +1,30 @@
+9999001	9999	Tremblay	Émilie	300.M0	Sciences humaines	Non
+9999002	9999	Gagnon	Thomas	200.B0	Sciences de la nature	Non
+9999003	9999	Roy	Camille	420.B0	Techniques de l'informatique	Non
+9999004	9999	Côté	Alexandre	410.B0	Techniques de comptabilité et de gestion	Oui
+9999005	9999	Bouchard	Sarah	180.A0	Soins Infirmiers	Non
+9999006	9999	Nguyen	Minh	300.M0	Sciences humaines	Non
+9999007	9999	Morin	Léa	500.AL	Arts, lettres et communication – Langues	Non
+9999008	9999	Lavoie	Maxime	200.B0	Sciences de la nature	Non
+9999009	9999	Fortin	Jade	351.A1	Techniques d'éducation spécialisée	Oui
+9999010	9999	Gagné	William	300.M1	Sciences humaines avec mathématiques	Non
+9999011	9999	Ouellet	Florence	322.A1	Techniques d'éducation à l'enfance	Non
+9999012	9999	Pelletier	Nathan	200.B0	Sciences de la nature	Non
+9999013	9999	Bélanger	Chloé	300.M0	Sciences humaines	Non
+9999014	9999	Lévesque	Olivier	420.B0	Techniques de l'informatique	Non
+9999015	9999	El Khoury	Nour	410.D0	Gestion de commerces	Non
+9999016	9999	Leblanc	Samuel	180.A0	Soins Infirmiers	Non
+9999017	9999	Paquette	Alice	500.AL	Arts, lettres et communication – Langues	Oui
+9999018	9999	Girard	Félix	200.B0	Sciences de la nature	Non
+9999019	9999	Simard	Juliette	300.M0	Sciences humaines	Non
+9999020	9999	Boucher	Antoine	410.B0	Techniques de comptabilité et de gestion	Non
+9999021	9999	Caron	Maude	351.A1	Techniques d'éducation spécialisée	Non
+9999022	9999	Beaulieu	Lucas	420.B0	Techniques de l'informatique	Non
+9999023	9999	Rodriguez	Sofia	300.M1	Sciences humaines avec mathématiques	Non
+9999024	9999	Poirier	Raphaël	200.B0	Sciences de la nature	Non
+9999025	9999	Fournier	Amélie	180.A0	Soins Infirmiers	Oui
+9999026	9999	Leclerc	Louis	410.D0	Gestion de commerces	Non
+9999027	9999	Dupont	Charlotte	300.M0	Sciences humaines	Non
+9999028	9999	Diallo	Amadou	322.A1	Techniques d'éducation à l'enfance	Non
+9999029	9999	Dubois	Élizabeth	500.AL	Arts, lettres et communication – Langues	Non
+9999030	9999	Martinez	Diego	420.B0	Techniques de l'informatique	Non

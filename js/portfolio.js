@@ -13,7 +13,7 @@
    DÉPENDANCES
    
    LocalStorage lu:
-   - 'listeGrilles' : Array des productions (inclut portfolio + artefacts)
+   - 'productions' : Array des productions (inclut portfolio + artefacts)
    - 'evaluationsSauvegardees' : Array des évaluations par étudiant
    - 'portfoliosEleves' : Object {da: {portfolioId: {artefactsRetenus: [...]}}}
    =============================== */
@@ -25,7 +25,7 @@
 function chargerPortfolioEleveDetail(da) {
     try {
         // Récupérer les données
-        const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
         const portfolio = productions.find(p => p.type === 'portfolio');
 
         if (!portfolio) {
@@ -312,8 +312,8 @@ function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
 
 /*
  * STRUCTURE DES DONNÉES:
- * 
- * listeGrilles (productions):
+ *
+ * productions:
  * [
  *   {id, type: 'portfolio', regles: {nombreARetenir, minimumCompletion}, ...},
  *   {id, type: 'artefact-portfolio', titre, description, ...},
@@ -507,7 +507,7 @@ function calculerEtStockerIndicesCP() {
 
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const productions = obtenirDonneesSelonMode('listeGrilles');
+    const productions = obtenirDonneesSelonMode('productions');
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const selectionsPortfolios = obtenirDonneesSelonMode('portfoliosEleves');
 

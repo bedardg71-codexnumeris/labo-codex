@@ -1044,6 +1044,252 @@ function afficherNotificationSucces(message) {
 }
 
 /* ===============================
+   📤📥 EXPORT / IMPORT JSON
+   =============================== */
+
+/**
+ * Exporte toutes les cartouches au format JSON
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère toutes les clés localStorage commençant par 'cartouches_'
+ * 2. Compile dans un objet structuré
+ * 3. Génère un fichier JSON téléchargeable
+ *
+ * UTILISÉ PAR:
+ * - Bouton «Exporter les cartouches»
+ *
+ * FORMAT EXPORT:
+ * {
+ *   version: "1.0",
+ *   dateExport: "ISO string",
+ *   cartouches: {
+ *     grilleId1: [...],
+ *     grilleId2: [...]
+ *   }
+ * }
+ */
+function exporterCartouches() {
+    const cartouches = {};
+
+    // Parcourir toutes les clés localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('cartouches_')) {
+            const grilleId = key.replace('cartouches_', '');
+            cartouches[grilleId] = JSON.parse(localStorage.getItem(key) || '[]');
+        }
+    }
+
+    const data = {
+        version: "1.0",
+        dateExport: new Date().toISOString(),
+        cartouches: cartouches
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cartouches-retroaction-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    afficherNotificationSucces('Cartouches exportées avec succès !');
+}
+
+/**
+ * Importe des cartouches depuis un fichier JSON
+ *
+ * FONCTIONNEMENT:
+ * 1. Lit le fichier JSON sélectionné
+ * 2. Valide la structure
+ * 3. Fusionne avec les cartouches existantes (ou remplace si conflit)
+ * 4. Sauvegarde dans localStorage
+ * 5. Rafraîchit l'interface
+ *
+ * UTILISÉ PAR:
+ * - Input file «Importer des cartouches»
+ *
+ * PARAMÈTRES:
+ * @param {Event} event - Événement de changement du file input
+ *
+ * VALIDATION:
+ * - Vérifie la version
+ * - Vérifie la structure des données
+ * - Alerte en cas d'erreur
+ *
+ * GESTION CONFLITS:
+ * - Propose de remplacer ou fusionner
+ * - Les cartouches avec même ID sont remplacées
+ */
+function importerCartouches(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+
+            // Validation de base
+            if (!data.version || !data.cartouches) {
+                alert('Format de fichier invalide');
+                return;
+            }
+
+            let compteur = 0;
+
+            // Importer chaque grille de cartouches
+            Object.keys(data.cartouches).forEach(grilleId => {
+                const cartouchesImportees = data.cartouches[grilleId];
+                const cartouchesExistantes = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+
+                // Fusionner : remplacer si même ID, sinon ajouter
+                cartouchesImportees.forEach(importee => {
+                    const index = cartouchesExistantes.findIndex(c => c.id === importee.id);
+                    if (index !== -1) {
+                        cartouchesExistantes[index] = importee;
+                    } else {
+                        cartouchesExistantes.push(importee);
+                    }
+                    compteur++;
+                });
+
+                localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouchesExistantes));
+            });
+
+            // Rafraîchir l'interface si on est dans la section
+            const selectGrille = document.getElementById('selectGrilleRetroaction');
+            if (selectGrille && selectGrille.value) {
+                chargerCartouchesRetroaction();
+            }
+
+            afficherNotificationSucces(`${compteur} cartouche(s) importée(s) avec succès !`);
+
+        } catch (error) {
+            console.error('Erreur d\'import:', error);
+            alert('Erreur lors de l\'import du fichier. Vérifiez le format.');
+        }
+    };
+
+    reader.readAsText(file);
+
+    // Réinitialiser l'input pour permettre de réimporter le même fichier
+    event.target.value = '';
+}
+
+/**
+ * Importe une cartouche depuis un fichier texte Markdown (.txt)
+ *
+ * FONCTIONNEMENT:
+ * 1. Lit le fichier .txt sélectionné
+ * 2. Parse le contenu Markdown
+ * 3. Extrait les commentaires par critère et niveau
+ * 4. Remplit la cartouche en cours d'édition
+ * 5. Met à jour l'affichage
+ *
+ * UTILISÉ PAR:
+ * - Input file «Importer depuis fichier .txt»
+ *
+ * PARAMÈTRES:
+ * @param {Event} event - Événement de changement du file input
+ *
+ * FORMAT ATTENDU:
+ * ## NOM_DU_CRITÈRE
+ *
+ * **NOM_DU_CRITÈRE (I)** : Commentaire...
+ * **NOM_DU_CRITÈRE (D)** : Commentaire...
+ * **NOM_DU_CRITÈRE (M)** : Commentaire...
+ * **NOM_DU_CRITÈRE (E)** : Commentaire...
+ *
+ * VALIDATION:
+ * - Vérifie qu'une cartouche est active
+ * - Compte les imports réussis
+ * - Alerte si aucun import
+ */
+function importerCartoucheDepuisTxt(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!cartoucheActuel) {
+        alert('Veuillez d\'abord sélectionner une grille et créer/sélectionner une cartouche');
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const texte = e.target.result.trim();
+
+            if (!texte) {
+                alert('Le fichier est vide');
+                return;
+            }
+
+            // Parser le texte
+            const lignes = texte.split('\n');
+            let critereActuel = null;
+            let compteur = 0;
+
+            lignes.forEach(ligne => {
+                ligne = ligne.trim();
+
+                // Détecter un titre de critère : ## CRITÈRE
+                if (ligne.startsWith('##')) {
+                    critereActuel = ligne.replace('##', '').trim().toUpperCase();
+                    return;
+                }
+
+                // Détecter un commentaire : **CRITÈRE (NIVEAU)** : Texte...
+                const match = ligne.match(/^\*\*(.+?)\s*\(([IDME])\)\*\*\s*:\s*(.+)$/);
+                if (match && critereActuel) {
+                    const nomCritere = match[1].trim().toUpperCase();
+                    const niveau = match[2].trim();
+                    const commentaire = match[3].trim();
+
+                    // Vérifier que le critère correspond
+                    if (nomCritere === critereActuel) {
+                        // Trouver le critère correspondant dans la cartouche
+                        const critere = cartoucheActuel.criteres.find(c =>
+                            c.nom.toUpperCase() === critereActuel
+                        );
+
+                        if (critere) {
+                            const key = `${critere.id}_${niveau}`;
+                            cartoucheActuel.commentaires[key] = commentaire;
+                            compteur++;
+                        }
+                    }
+                }
+            });
+
+            if (compteur === 0) {
+                alert('Aucun commentaire n\'a pu être importé. Vérifiez que :\n- Le fichier est au format Markdown attendu\n- Les noms de critères correspondent à ceux de la grille sélectionnée');
+                return;
+            }
+
+            // Rafraîchir l'affichage
+            afficherMatriceRetroaction();
+            calculerPourcentageComplete();
+
+            afficherNotificationSucces(`${compteur} commentaire(s) importé(s) depuis le fichier !`);
+
+        } catch (error) {
+            console.error('Erreur d\'import depuis .txt:', error);
+            alert('Erreur lors de l\'import du fichier. Vérifiez le format.');
+        }
+    };
+
+    reader.readAsText(file);
+
+    // Réinitialiser l'input pour permettre de réimporter le même fichier
+    event.target.value = '';
+}
+
+/* ===============================
    📌 NOTES D'UTILISATION
    =============================== */
 
@@ -1054,22 +1300,22 @@ function afficherNotificationSucces(message) {
  * 3. Charger le module 06-echelles.js (niveaux de performance)
  * 4. Charger ce module 07-cartouches.js
  * 5. Appeler initialiserModuleCartouches() depuis 99-main.js
- * 
+ *
  * DÉPENDANCES:
  * - echapperHtml() depuis 01-config.js
  * - cartoucheActuel depuis 01-config.js
  * - Classes CSS depuis styles.css
  * - Grilles depuis localStorage (module 05)
  * - Niveaux depuis localStorage (module 06)
- * 
+ *
  * LOCALSTORAGE:
  * - 'cartouches_{grilleId}' : Array des cartouches par grille
  * - 'grillesTemplates' : Array des grilles (lecture)
  * - 'niveauxEchelle' : Array des niveaux (lecture)
- * 
+ *
  * MODULES DÉPENDANTS:
  * - 04-productions.js : Utilisera les cartouches pour générer rétroactions
- * 
+ *
  * STRUCTURE DONNÉES:
  * Cartouche = {
  *   id: string (CART + timestamp),
@@ -1081,16 +1327,16 @@ function afficherNotificationSucces(message) {
  *   commentaires: {critereId_niveauCode: string, ...},
  *   verrouille: boolean
  * }
- * 
+ *
  * ÉVÉNEMENTS:
  * Tous les événements sont gérés via attributs HTML (onchange, onclick)
  * Pas d'addEventListener requis dans 99-main.js
- * 
+ *
  * FORMAT IMPORT:
  * Markdown avec structure:
  * ## NOM_CRITÈRE
  * **NOM_CRITÈRE (CODE)** : Commentaire
- * 
+ *
  * COMPATIBILITÉ:
  * - Nécessite ES6+ pour les arrow functions et template literals
  * - Fonctionne avec tous les navigateurs modernes

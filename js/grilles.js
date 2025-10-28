@@ -704,7 +704,7 @@ function sauvegarderNomGrille() {
  */
 function afficherGrillesCriteres() {
     const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
-    const listeDiv = document.getElementById('listeGrilles');
+    const listeDiv = document.getElementById('productions');
 
     if (!listeDiv) return;
 

@@ -1,6 +1,68 @@
-# Création du fichier de données de démonstration
+# Données de démonstration - Guide complet
 
-**Objectif :** Créer un fichier `donnees-demo.json` avec des données réalistes que les testeurs pourront importer pour découvrir immédiatement l'application.
+**Objectif :** Fournir des données réalistes que les testeurs pourront importer pour découvrir immédiatement l'application.
+
+---
+
+## 🎁 Fichiers prêts à l'emploi (Beta 0.75)
+
+**Nouveauté :** Des fichiers de démonstration sont maintenant inclus dans le projet !
+
+### Fichiers disponibles
+
+1. **`donnees-demo.json`** - Package complet
+   - 30 étudiants avec diversité culturelle (groupe 9999)
+   - 9 productions configurées (5 sommatives + 4 artefacts)
+   - Grille SRPNF complète
+   - Échelle IDME (Insuffisant, Développement, Maîtrisé, Étendu)
+   - **NOUVEAU** : Cartouche de rétroaction complète "A2 Description d'un personnage"
+     * 16 commentaires prédéfinis (4 critères × 4 niveaux IDME)
+     * Tutoiement et approche constructive avec suggestions concrètes
+     * Critères : Structure, Rigueur, Plausibilité, Nuance
+   - Calendrier trimestre (Hiver 2025)
+   - Horaire configuré (2 séances/semaine)
+
+2. **`etudiants-demo.txt`** - Liste d'étudiants (groupe TEST)
+   - 30 étudiants avec noms québécois (80%) et multiculturels (20%)
+   - 10 programmes différents
+   - 13% avec Services Adaptés
+   - Format : DA → Groupe → Nom → Prénom → Programme → Nom programme → SA
+   - Prêt pour import direct dans Réglages → Groupe
+
+3. **`etudiants-demo-groupe9999.txt`** - Liste alternative (groupe 9999)
+   - Mêmes 30 étudiants avec identifiants 9999xxx
+   - Pour remplacer le groupe simulé par défaut
+
+### Import rapide (2 minutes)
+
+**Option A : Tout-en-un (recommandé)**
+1. Ouvrir `index 75 (import-export matériel pédagogique).html`
+2. Réglages → Import/Export
+3. Importer `donnees-demo.json`
+4. ✅ Application prête à tester !
+
+**Option B : Import manuel des étudiants**
+1. Réglages → Groupe → Import/Export
+2. Choisir `etudiants-demo.txt` ou `etudiants-demo-groupe9999.txt`
+3. Les étudiants sont importés automatiquement
+
+### ✨ Nouveauté Beta 0.75 : Import/Export matériel pédagogique
+
+Vous pouvez maintenant importer/exporter séparément :
+- **Productions** (Matériel → Productions)
+- **Grilles de critères** (Matériel → Critères d'évaluation)
+- **Échelles de performance** (Matériel → Niveaux de performance)
+- **Cartouches de rétroaction** (Matériel → Rétroactions)
+  - Format JSON pour partage entre collègues
+  - Format .txt Markdown pour rédaction externe
+
+**Utilité :** Partage de matériel pédagogique entre enseignant·es sans partager les données étudiants.
+
+---
+
+## 📖 Créer vos propres données (méthode détaillée)
+
+**Si vous préférez créer des données personnalisées, suivez ce guide :**
 
 **Durée :** 10-15 minutes
 
@@ -38,7 +100,7 @@
 
 ### ÉTAPE 1 : Ouvrir l'application en mode vierge
 
-1. Ouvrir `index 74 (moteur recherche Aide).html`
+1. Ouvrir `index 75 (import-export matériel pédagogique).html`
 2. Vérifier que vous êtes en mode **Normal**
 3. Si des données existent déjà :
    - Réglages → Import/Export
@@ -283,11 +345,14 @@ Le fichier `donnees-demo.json` doit contenir ces clés :
   "evaluations": {...},
   "indicesAssiduiteDetailles": {...},
   "indicesCP": {...},
-  "grillesTemplates": [...]
+  "grillesTemplates": [...],
+  "cartouches_grille-srpnf": [...]
 }
 ```
 
 **Taille approximative :** 50-200 Ko selon le nombre d'étudiants et de données
+
+**Note Beta 0.75 :** La clé `cartouches_grille-srpnf` contient les cartouches de rétroaction liées à la grille SRPNF.
 
 ---
 
@@ -350,4 +415,4 @@ Le fichier `donnees-demo.json` doit contenir ces clés :
 
 Contact : labo@codexnumeris.org
 
-**Fichier créé le :** 27 octobre 2025
+**Fichier mis à jour le :** 28 octobre 2025 (Beta 0.75)

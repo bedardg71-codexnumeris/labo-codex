@@ -42,7 +42,7 @@
    - Tous les champs du formulaire (productionTitre, productionDescription, etc.)
    
    LocalStorage utilisé:
-   - 'listeGrilles' : Array des productions/évaluations
+   - 'productions' : Array des productions/évaluations
    - 'grillesTemplates' : Array des grilles de critères (pour association)
    =============================== */
 
@@ -63,7 +63,7 @@
  * - afficherSousSection() quand on arrive sur reglages-productions
  * 
  * FONCTIONNEMENT:
- * 1. Charge les productions depuis localStorage ('listeGrilles')
+ * 1. Charge les productions depuis localStorage ('productions')
  * 2. Charge les grilles depuis localStorage ('grillesTemplates')
  * 3. Si liste vide : affiche un message
  * 4. Sinon : génère le HTML pour chaque production
@@ -71,7 +71,7 @@
  * 6. Gère l'affichage spécial pour les portfolios
  */
 function afficherTableauProductions() {
-    const evaluations = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
     const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
     const container = document.getElementById('tableauEvaluationsContainer');
 
@@ -207,7 +207,7 @@ function afficherFormProduction(id) {
 
     if (id) {
         // Mode modification
-        const evaluations = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+        const evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
         const prod = evaluations.find(e => e.id === id);
 
         if (prod) {
@@ -302,7 +302,7 @@ function sauvegarderProduction() {
         return;
     }
 
-    let evaluations = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    let evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
 
     // Préparer l'objet de base
     let productionData = {
@@ -346,7 +346,7 @@ function sauvegarderProduction() {
         evaluations.push(productionData);
     }
 
-    localStorage.setItem('listeGrilles', JSON.stringify(evaluations));
+    localStorage.setItem('productions', JSON.stringify(evaluations));
 
     annulerFormProduction();
     afficherTableauProductions();
@@ -439,10 +439,10 @@ function modifierEvaluation(id) {
  */
 function supprimerProduction(id) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette production ?')) {
-        let evaluations = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+        let evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
         evaluations = evaluations.filter(e => e.id !== id);
 
-        localStorage.setItem('listeGrilles', JSON.stringify(evaluations));
+        localStorage.setItem('productions', JSON.stringify(evaluations));
         afficherTableauProductions();
         mettreAJourPonderationTotale();
         
@@ -475,12 +475,12 @@ function supprimerProduction(id) {
  * 5. Rafraîchit l'affichage
  */
 function verrouillerEvaluation(id) {
-    let evaluations = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    let evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
     const index = evaluations.findIndex(e => e.id === id);
 
     if (index !== -1) {
         evaluations[index].verrouille = !evaluations[index].verrouille;
-        localStorage.setItem('listeGrilles', JSON.stringify(evaluations));
+        localStorage.setItem('productions', JSON.stringify(evaluations));
         afficherTableauProductions();
     }
 }
@@ -507,12 +507,12 @@ function verrouillerEvaluation(id) {
  * 5. Rafraîchit l'affichage
  */
 function monterEvaluation(id) {
-    let evaluations = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    let evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
     const index = evaluations.findIndex(e => e.id === id);
 
     if (index > 0) {
         [evaluations[index - 1], evaluations[index]] = [evaluations[index], evaluations[index - 1]];
-        localStorage.setItem('listeGrilles', JSON.stringify(evaluations));
+        localStorage.setItem('productions', JSON.stringify(evaluations));
         afficherTableauProductions();
     }
 }
@@ -539,12 +539,12 @@ function monterEvaluation(id) {
  * 5. Rafraîchit l'affichage
  */
 function descendreEvaluation(id) {
-    let evaluations = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    let evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
     const index = evaluations.findIndex(e => e.id === id);
 
     if (index < evaluations.length - 1) {
         [evaluations[index], evaluations[index + 1]] = [evaluations[index + 1], evaluations[index]];
-        localStorage.setItem('listeGrilles', JSON.stringify(evaluations));
+        localStorage.setItem('productions', JSON.stringify(evaluations));
         afficherTableauProductions();
     }
 }
@@ -618,7 +618,7 @@ function gererChangementTypeProduction() {
  * 4. Sinon : génère des checkboxes pour chaque artefact
  */
 function chargerArtefactsDisponibles() {
-    const evaluations = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
     const artefacts = evaluations.filter(p => p.type === 'artefact-portfolio');
     const container = document.getElementById('listeArtefactsDisponibles');
 
@@ -664,7 +664,7 @@ function chargerArtefactsDisponibles() {
  *    - Orange si < 100%
  */
 function mettreAJourPonderationTotale() {
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
 
     // Ignorer les artefacts-portfolio dans le calcul (ils font partie du Portfolio)
     const productionsComptees = productions.filter(p => p.type !== 'artefact-portfolio');
@@ -836,9 +836,9 @@ function initialiserModuleProductions() {
  * Ce module DOIT être chargé APRÈS 01-config.js et 02-navigation.js
  * 
  * LOCALSTORAGE UTILISÉ:
- * - 'listeGrilles' : Array des productions/évaluations
+ * - 'productions' : Array des productions/évaluations
  *   Structure: [{ id, titre, description, type, ponderation, grilleId, objectif, tache, verrouille }, ...]
- *   Note: Le nom 'listeGrilles' est historique et sera peut-être renommé
+ *   Note: Le nom 'productions' est historique et sera peut-être renommé
  * - 'grillesTemplates' : Array des grilles de critères (pour association)
  * 
  * FONCTIONS EXPORTÉES (accessibles globalement):

@@ -1,0 +1,30 @@
+2024001	TEST	Tremblay	Émilie	300.M0	Sciences humaines	Non
+2024002	TEST	Gagnon	Thomas	200.B0	Sciences de la nature	Non
+2024003	TEST	Roy	Camille	420.B0	Techniques de l'informatique	Non
+2024004	TEST	Côté	Alexandre	410.B0	Techniques de comptabilité et de gestion	Oui
+2024005	TEST	Bouchard	Sarah	180.A0	Soins Infirmiers	Non
+2024006	TEST	Nguyen	Minh	300.M0	Sciences humaines	Non
+2024007	TEST	Morin	Léa	500.AL	Arts, lettres et communication – Langues	Non
+2024008	TEST	Lavoie	Maxime	200.B0	Sciences de la nature	Non
+2024009	TEST	Fortin	Jade	351.A1	Techniques d'éducation spécialisée	Oui
+2024010	TEST	Gagné	William	300.M1	Sciences humaines avec mathématiques	Non
+2024011	TEST	Ouellet	Florence	322.A1	Techniques d'éducation à l'enfance	Non
+2024012	TEST	Pelletier	Nathan	200.B0	Sciences de la nature	Non
+2024013	TEST	Bélanger	Chloé	300.M0	Sciences humaines	Non
+2024014	TEST	Lévesque	Olivier	420.B0	Techniques de l'informatique	Non
+2024015	TEST	El Khoury	Nour	410.D0	Gestion de commerces	Non
+2024016	TEST	Leblanc	Samuel	180.A0	Soins Infirmiers	Non
+2024017	TEST	Paquette	Alice	500.AL	Arts, lettres et communication – Langues	Oui
+2024018	TEST	Girard	Félix	200.B0	Sciences de la nature	Non
+2024019	TEST	Simard	Juliette	300.M0	Sciences humaines	Non
+2024020	TEST	Boucher	Antoine	410.B0	Techniques de comptabilité et de gestion	Non
+2024021	TEST	Caron	Maude	351.A1	Techniques d'éducation spécialisée	Non
+2024022	TEST	Beaulieu	Lucas	420.B0	Techniques de l'informatique	Non
+2024023	TEST	Rodriguez	Sofia	300.M1	Sciences humaines avec mathématiques	Non
+2024024	TEST	Poirier	Raphaël	200.B0	Sciences de la nature	Non
+2024025	TEST	Fournier	Amélie	180.A0	Soins Infirmiers	Oui
+2024026	TEST	Leclerc	Louis	410.D0	Gestion de commerces	Non
+2024027	TEST	Dupont	Charlotte	300.M0	Sciences humaines	Non
+2024028	TEST	Diallo	Amadou	322.A1	Techniques d'éducation à l'enfance	Non
+2024029	TEST	Dubois	Élizabeth	500.AL	Arts, lettres et communication – Langues	Non
+2024030	TEST	Martinez	Diego	420.B0	Techniques de l'informatique	Non

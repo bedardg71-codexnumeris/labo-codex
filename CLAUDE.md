@@ -338,6 +338,76 @@ localStorage.seancesCompletes             // horaire.js (futur)
   2. Correction de l'aide: échelle IDME en pourcentages (1 fichier)
   3. Mise à jour version Beta 0.72 (2 fichiers)
 
+**SYSTÈME D'IMPORT/EXPORT MATÉRIEL PÉDAGOGIQUE** (Session 28 octobre - Beta 0.75)
+- ✅ **Fichier** : `index 75 (import-export matériel pédagogique).html` - Version Beta 0.75
+- ✅ **Objectif** : Faciliter la collaboration entre enseignant·es et le partage de matériel pédagogique
+- ✅ **Fonctionnalités d'export/import JSON** :
+  - **Productions** : Boutons 📤📥 dans Matériel → Productions
+    * Export : `productions-YYYY-MM-DD.json`
+    * Contient : artefacts, pondérations, liens avec grilles
+  - **Grilles de critères** : Boutons 📤📥 dans Matériel → Critères d'évaluation
+    * Export : `grilles-criteres-YYYY-MM-DD.json`
+    * Contient : critères SRPNF, pondérations, descriptions
+  - **Échelles de performance** : Boutons 📤📥 dans Matériel → Niveaux de performance
+    * Export : `echelle-performance-YYYY-MM-DD.json`
+    * Contient : niveaux IDME, seuils, descriptions
+  - **Cartouches de rétroaction** : Boutons 📤📥 dans Matériel → Rétroactions
+    * Export : `cartouches-retroaction-YYYY-MM-DD.json`
+    * Contient : commentaires prédéfinis par critère et niveau
+    * **NOUVEAU** : Import spécial depuis fichiers .txt Markdown
+- ✅ **Module cartouches.js** - Nouvelles fonctions :
+  - `exporterCartouches()` : Compile toutes les cartouches (toutes grilles) en un seul fichier
+  - `importerCartouches(event)` : Importe et fusionne avec cartouches existantes
+  - `importerCartoucheDepuisTxt(event)` : Import depuis fichier .txt Markdown (format spécial)
+    * Permet de rédiger commentaires dans éditeur externe (Word, Google Docs)
+    * Format : `## CRITÈRE` puis `**CRITÈRE (NIVEAU)** : Commentaire`
+    * Validation : noms de critères doivent correspondre exactement
+- ✅ **Interface utilisateur** :
+  - Boutons d'export/import dans chaque section de matériel pédagogique
+  - IDs uniques pour éviter conflits : `-local` suffix
+  - Codes couleur distincts par type :
+    * Productions : 🟢 Vert (`#f1f8e9`)
+    * Grilles : 🟠 Orange (`#fff8f0`)
+    * Échelles : 🔵 Bleu clair (`#f0f8ff`)
+    * Cartouches : 🔵 Bleu foncé (`#e3f2fd` pour .txt)
+  - Note d'avertissement pour import .txt : correspondance exacte des noms requis
+- ✅ **Section Réglages → Import/Export clarifiée** :
+  - Carte informative expliquant la différence entre :
+    * **Backup complet** (boutons modaux) : toutes les données d'application
+    * **Export partiel** (boutons sections) : matériel pédagogique seulement
+  - Préserve la fonctionnalité critique de backup complet
+- ✅ **Section Aide enrichie** :
+  - **Nouvelle carte "5. Collaboration entre collègues"** dans Utilisation hebdomadaire
+  - 4 scénarios de collaboration documentés :
+    1. Harmonisation départementale
+    2. Mentorat et formation
+    3. Réutilisation entre sessions
+    4. Communautés de pratique
+  - Explication des formats JSON vs .txt Markdown
+  - Note de confidentialité : exports ne contiennent JAMAIS de données étudiants
+  - Flux typique de partage illustré (5 étapes)
+- ✅ **Package de démonstration enrichi** :
+  - `donnees-demo.json` : Ajout de `cartouches_grille-srpnf`
+  - Cartouche complète "A2 Description d'un personnage" (16 commentaires)
+  - Commentaires réalistes pour 4 critères × IDME (Structure, Rigueur, Plausibilité, Nuance)
+  - Tutoiement et approche constructive avec suggestions concrètes d'amélioration
+- ✅ **Fichiers de démonstration pour testeurs** :
+  - `etudiants-demo.txt` : 30 étudiants groupe TEST
+  - `etudiants-demo-groupe9999.txt` : 30 étudiants groupe 9999
+  - Diversité culturelle : 80% noms québécois, 20% multiculturels
+  - 10 codes de programmes différents
+  - 13% avec Services Adaptés (SA)
+- ✅ **Bénéfices pédagogiques** :
+  - Réduction du temps de préparation initiale
+  - Harmonisation des pratiques départementales
+  - Mutualisation des efforts de création de matériel
+  - Facilite le mentorat et la transmission de bonnes pratiques
+  - Conservation et amélioration continue du matériel entre sessions
+- ✅ **Protection vie privée** :
+  - Exports JSON contiennent UNIQUEMENT le matériel pédagogique réutilisable
+  - Aucune donnée confidentielle exportée (noms, DA, notes, présences)
+  - Partage sécuritaire entre collègues
+
 ### 🔴 Prochaines priorités
 
 1. **Documentation** - Finaliser documentation Beta 0.72

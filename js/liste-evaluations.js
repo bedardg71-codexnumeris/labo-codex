@@ -80,7 +80,7 @@ function calculerEtSauvegarderIndiceCompletion() {
  */
 function calculerCompletionSommative(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     
     // Productions à évaluer (exclure portfolio)
     const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
@@ -168,7 +168,7 @@ function chargerDonneesEvaluations() {
     // Charger les données selon le mode actif (géré automatiquement par le module 17)
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const productions = obtenirDonneesSelonMode('listeGrilles');
+    const productions = obtenirDonneesSelonMode('productions');
 
     // Extraire les groupes uniques depuis les étudiants
     const groupes = [...new Set(etudiants.map(e => e.groupe))].sort().map(g => ({ numero: g }));
@@ -413,7 +413,7 @@ function appliquerFiltres() {
     // Charger les données selon le mode actif
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const productions = obtenirDonneesSelonMode('listeGrilles');
+    const productions = obtenirDonneesSelonMode('productions');
 
     // Afficher le tableau avec les filtres appliqués
     afficherTableauEvaluations(evaluations, productions, etudiants);
