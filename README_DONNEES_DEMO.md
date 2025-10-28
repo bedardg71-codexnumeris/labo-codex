@@ -84,42 +84,42 @@
 Réglages → Groupe → Coller ce texte :
 
 ```
-2024001	Émilie	Tremblay	TEST	300.A0	Sciences humaines
-2024002	Thomas	Gagnon	TEST	300.A0	Sciences humaines
-2024003	Camille	Roy	TEST	300.A0	Sciences humaines
-2024004	Alexandre	Côté	TEST	300.A0	Sciences humaines
-2024005	Sarah	Bouchard	TEST	300.A0	Sciences humaines
-2024006	Gabriel	Gauthier	TEST	300.A0	Sciences humaines
-2024007	Léa	Morin	TEST	300.A0	Sciences humaines
-2024008	Maxime	Lavoie	TEST	300.A0	Sciences humaines
-2024009	Jade	Fortin	TEST	300.A0	Sciences humaines
-2024010	William	Gagné	TEST	300.A0	Sciences humaines
+2024001	TEST	Tremblay	Émilie	300.A0	Sciences humaines
+2024002	TEST	Gagnon	Thomas	300.A0	Sciences humaines
+2024003	TEST	Roy	Camille	300.A0	Sciences humaines
+2024004	TEST	Côté	Alexandre	300.A0	Sciences humaines
+2024005	TEST	Bouchard	Sarah	300.A0	Sciences humaines
+2024006	TEST	Gauthier	Gabriel	300.A0	Sciences humaines
+2024007	TEST	Morin	Léa	300.A0	Sciences humaines
+2024008	TEST	Lavoie	Maxime	300.A0	Sciences humaines
+2024009	TEST	Fortin	Jade	300.A0	Sciences humaines
+2024010	TEST	Gagné	William	300.A0	Sciences humaines
 ```
 
 **Option B : Groupe complet (30 étudiants)**
 
 Ajouter aussi :
 ```
-2024011	Florence	Ouellet	TEST	300.A0	Sciences humaines
-2024012	Nathan	Pelletier	TEST	300.A0	Sciences humaines
-2024013	Chloé	Bélanger	TEST	300.A0	Sciences humaines
-2024014	Olivier	Lévesque	TEST	300.A0	Sciences humaines
-2024015	Rosalie	Bergeron	TEST	300.A0	Sciences humaines
-2024016	Samuel	Leblanc	TEST	300.A0	Sciences humaines
-2024017	Alice	Paquette	TEST	300.A0	Sciences humaines
-2024018	Félix	Girard	TEST	300.A0	Sciences humaines
-2024019	Juliette	Simard	TEST	300.A0	Sciences humaines
-2024020	Antoine	Boucher	TEST	300.A0	Sciences humaines
-2024021	Maude	Caron	TEST	300.A0	Sciences humaines
-2024022	Lucas	Beaulieu	TEST	300.A0	Sciences humaines
-2024023	Zoé	Cloutier	TEST	300.A0	Sciences humaines
-2024024	Raphaël	Poirier	TEST	300.A0	Sciences humaines
-2024025	Amélie	Fournier	TEST	300.A0	Sciences humaines
-2024026	Louis	Leclerc	TEST	300.A0	Sciences humaines
-2024027	Charlotte	Dupont	TEST	300.A0	Sciences humaines
-2024028	Charles	Lefebvre	TEST	300.A0	Sciences humaines
-2024029	Élizabeth	Dubois	TEST	300.A0	Sciences humaines
-2024030	Étienne	Martin	TEST	300.A0	Sciences humaines
+2024011	TEST	Ouellet	Florence	300.A0	Sciences humaines
+2024012	TEST	Pelletier	Nathan	300.A0	Sciences humaines
+2024013	TEST	Bélanger	Chloé	300.A0	Sciences humaines
+2024014	TEST	Lévesque	Olivier	300.A0	Sciences humaines
+2024015	TEST	Bergeron	Rosalie	300.A0	Sciences humaines
+2024016	TEST	Leblanc	Samuel	300.A0	Sciences humaines
+2024017	TEST	Paquette	Alice	300.A0	Sciences humaines
+2024018	TEST	Girard	Félix	300.A0	Sciences humaines
+2024019	TEST	Simard	Juliette	300.A0	Sciences humaines
+2024020	TEST	Boucher	Antoine	300.A0	Sciences humaines
+2024021	TEST	Caron	Maude	300.A0	Sciences humaines
+2024022	TEST	Beaulieu	Lucas	300.A0	Sciences humaines
+2024023	TEST	Cloutier	Zoé	300.A0	Sciences humaines
+2024024	TEST	Poirier	Raphaël	300.A0	Sciences humaines
+2024025	TEST	Fournier	Amélie	300.A0	Sciences humaines
+2024026	TEST	Leclerc	Louis	300.A0	Sciences humaines
+2024027	TEST	Dupont	Charlotte	300.A0	Sciences humaines
+2024028	TEST	Lefebvre	Charles	300.A0	Sciences humaines
+2024029	TEST	Dubois	Élizabeth	300.A0	Sciences humaines
+2024030	TEST	Martin	Étienne	300.A0	Sciences humaines
 ```
 
 ---
