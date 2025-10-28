@@ -84,42 +84,42 @@
 Réglages → Groupe → Coller ce texte :
 
 ```
-2024001	TEST	Tremblay	Émilie	300.A0	Sciences humaines
-2024002	TEST	Gagnon	Thomas	300.A0	Sciences humaines
-2024003	TEST	Roy	Camille	300.A0	Sciences humaines
-2024004	TEST	Côté	Alexandre	300.A0	Sciences humaines
-2024005	TEST	Bouchard	Sarah	300.A0	Sciences humaines
-2024006	TEST	Gauthier	Gabriel	300.A0	Sciences humaines
-2024007	TEST	Morin	Léa	300.A0	Sciences humaines
-2024008	TEST	Lavoie	Maxime	300.A0	Sciences humaines
-2024009	TEST	Fortin	Jade	300.A0	Sciences humaines
-2024010	TEST	Gagné	William	300.A0	Sciences humaines
+2024001	TEST	Tremblay	Émilie	300.M0	Sciences humaines
+2024002	TEST	Gagnon	Thomas	200.B0	Sciences de la nature
+2024003	TEST	Roy	Camille	420.B0	Techniques de l'informatique
+2024004	TEST	Côté	Alexandre	410.B0	Techniques de comptabilité et de gestion
+2024005	TEST	Bouchard	Sarah	180.A0	Soins Infirmiers
+2024006	TEST	Nguyen	Minh	300.M0	Sciences humaines
+2024007	TEST	Morin	Léa	500.AL	Arts, lettres et communication – Langues
+2024008	TEST	Lavoie	Maxime	200.B0	Sciences de la nature
+2024009	TEST	Fortin	Jade	351.A1	Techniques d'éducation spécialisée
+2024010	TEST	Gagné	William	300.M1	Sciences humaines avec mathématiques
 ```
 
 **Option B : Groupe complet (30 étudiants)**
 
 Ajouter aussi :
 ```
-2024011	TEST	Ouellet	Florence	300.A0	Sciences humaines
-2024012	TEST	Pelletier	Nathan	300.A0	Sciences humaines
-2024013	TEST	Bélanger	Chloé	300.A0	Sciences humaines
-2024014	TEST	Lévesque	Olivier	300.A0	Sciences humaines
-2024015	TEST	Bergeron	Rosalie	300.A0	Sciences humaines
-2024016	TEST	Leblanc	Samuel	300.A0	Sciences humaines
-2024017	TEST	Paquette	Alice	300.A0	Sciences humaines
-2024018	TEST	Girard	Félix	300.A0	Sciences humaines
-2024019	TEST	Simard	Juliette	300.A0	Sciences humaines
-2024020	TEST	Boucher	Antoine	300.A0	Sciences humaines
-2024021	TEST	Caron	Maude	300.A0	Sciences humaines
-2024022	TEST	Beaulieu	Lucas	300.A0	Sciences humaines
-2024023	TEST	Cloutier	Zoé	300.A0	Sciences humaines
-2024024	TEST	Poirier	Raphaël	300.A0	Sciences humaines
-2024025	TEST	Fournier	Amélie	300.A0	Sciences humaines
-2024026	TEST	Leclerc	Louis	300.A0	Sciences humaines
-2024027	TEST	Dupont	Charlotte	300.A0	Sciences humaines
-2024028	TEST	Lefebvre	Charles	300.A0	Sciences humaines
-2024029	TEST	Dubois	Élizabeth	300.A0	Sciences humaines
-2024030	TEST	Martin	Étienne	300.A0	Sciences humaines
+2024011	TEST	Ouellet	Florence	322.A1	Techniques d'éducation à l'enfance
+2024012	TEST	Pelletier	Nathan	200.B0	Sciences de la nature
+2024013	TEST	Bélanger	Chloé	300.M0	Sciences humaines
+2024014	TEST	Lévesque	Olivier	420.B0	Techniques de l'informatique
+2024015	TEST	El Khoury	Nour	410.D0	Gestion de commerces
+2024016	TEST	Leblanc	Samuel	180.A0	Soins Infirmiers
+2024017	TEST	Paquette	Alice	500.AL	Arts, lettres et communication – Langues
+2024018	TEST	Girard	Félix	200.B0	Sciences de la nature
+2024019	TEST	Simard	Juliette	300.M0	Sciences humaines
+2024020	TEST	Boucher	Antoine	410.B0	Techniques de comptabilité et de gestion
+2024021	TEST	Caron	Maude	351.A1	Techniques d'éducation spécialisée
+2024022	TEST	Beaulieu	Lucas	420.B0	Techniques de l'informatique
+2024023	TEST	Rodriguez	Sofia	300.M1	Sciences humaines avec mathématiques
+2024024	TEST	Poirier	Raphaël	200.B0	Sciences de la nature
+2024025	TEST	Fournier	Amélie	180.A0	Soins Infirmiers
+2024026	TEST	Leclerc	Louis	410.D0	Gestion de commerces
+2024027	TEST	Dupont	Charlotte	300.M0	Sciences humaines
+2024028	TEST	Diallo	Amadou	322.A1	Techniques d'éducation à l'enfance
+2024029	TEST	Dubois	Élizabeth	500.AL	Arts, lettres et communication – Langues
+2024030	TEST	Martinez	Diego	420.B0	Techniques de l'informatique
 ```
 
 ---
