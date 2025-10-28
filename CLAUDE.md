@@ -42,7 +42,7 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 
 ```
 projet/
-├── index 72 (support SOM-PAN hybride).html   # Point d'entrée actuel (Beta 0.72)
+├── index 77 (correctifs critiques).html      # Point d'entrée actuel (Beta 0.77)
 ├── css/
 │   └── styles.css                        # Styles globaux + variables CSS pratiques
 ├── js/
@@ -407,6 +407,44 @@ localStorage.seancesCompletes             // horaire.js (futur)
   - Exports JSON contiennent UNIQUEMENT le matériel pédagogique réutilisable
   - Aucune donnée confidentielle exportée (noms, DA, notes, présences)
   - Partage sécuritaire entre collègues
+
+**CORRECTIFS CRITIQUES** (Session 28 octobre - Beta 0.77)
+- ✅ **Fichier** : `index 77 (correctifs critiques).html` - Version Beta 0.77
+- ✅ **Bugs corrigés** : Deux bugs bloquants lors de l'import de `donnees-demo.json`
+
+**Bug #1 : Corruption de données (import-export.js)**
+- ✅ **Symptômes** : Erreurs `JSON.parse: unexpected character at line 1 column 2` (multiples)
+- ✅ **Cause racine** : Dans `js/import-export.js` ligne 192
+  - Code buggé : `localStorage.setItem(cle, donneesImportEnAttente[cle])`
+  - Problème : `donneesImportEnAttente[cle]` est déjà un objet JavaScript (parsed JSON)
+  - Résultat : localStorage.setItem() convertit avec `.toString()` → `"[object Object]"`
+  - Conséquence : Impossible de parser les données corrompues
+- ✅ **Correctif appliqué** (lignes 191-198) :
+  ```javascript
+  Object.keys(donneesImportEnAttente).forEach(cle => {
+      // IMPORTANT : Convertir en JSON string avant de sauvegarder dans localStorage
+      const valeur = typeof donneesImportEnAttente[cle] === 'string'
+          ? donneesImportEnAttente[cle]
+          : JSON.stringify(donneesImportEnAttente[cle]);
+      localStorage.setItem(cle, valeur);
+      nbCles++;
+  });
+  ```
+
+**Bug #2 : Export fonction inexistante (groupe.js)**
+- ✅ **Symptômes** : Erreur `ajouterEtudiant is not defined` (groupe.js:887)
+- ✅ **Cause racine** : Dans `js/groupe.js` ligne 887
+  - Code buggé : `window.ajouterEtudiant = ajouterEtudiant;`
+  - Problème : La fonction `ajouterEtudiant` n'existe pas dans le fichier
+  - Résultat : ReferenceError lors du chargement du module
+  - Note : La fonction `addStudent()` existe et peut être utilisée à la place
+- ✅ **Correctif appliqué** (ligne 887) :
+  ```javascript
+  // window.ajouterEtudiant = ajouterEtudiant; // FIXME: fonction n'existe pas - utiliser addStudent() à la place
+  ```
+
+- ✅ **Impact** : Bugs bloquants corrigés, import de `donnees-demo.json` fonctionne maintenant
+- ✅ **Package mis à jour** : `Monitorage_Beta_0.77.zip` (318 Ko) prêt pour distribution
 
 ### 🔴 Prochaines priorités
 
