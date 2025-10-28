@@ -182,14 +182,18 @@ function previsualiserImport(event) {
 
 function executerImport() {
     if (!donneesImportEnAttente) return;
-    
+
     if (!confirm('Confirmer l\'importation ? Les données existantes seront écrasées pour les clés importées.')) {
         return;
     }
-    
+
     let nbCles = 0;
     Object.keys(donneesImportEnAttente).forEach(cle => {
-        localStorage.setItem(cle, donneesImportEnAttente[cle]);
+        // IMPORTANT : Convertir en JSON string avant de sauvegarder dans localStorage
+        const valeur = typeof donneesImportEnAttente[cle] === 'string'
+            ? donneesImportEnAttente[cle]
+            : JSON.stringify(donneesImportEnAttente[cle]);
+        localStorage.setItem(cle, valeur);
         nbCles++;
     });
     
