@@ -1,0 +1,418 @@
+{
+  "infoCours": {
+    "code": "601-101-MQ",
+    "titre": "Écriture et littérature",
+    "session": "Hiver 2025",
+    "ponderation": "2-2-3"
+  },
+  "infoTrimestre": {
+    "dateDebut": "2025-01-20",
+    "dateFin": "2025-05-23",
+    "congesPrevus": [
+      {
+        "dateDebut": "2025-03-03",
+        "dateFin": "2025-03-07",
+        "nom": "Semaine de lecture"
+      }
+    ]
+  },
+  "groupeEtudiants": [
+    {
+      "da": "9999001",
+      "prenom": "Émilie",
+      "nom": "Tremblay",
+      "groupe": "9999",
+      "programme": "300.A0",
+      "nomProgramme": "Sciences humaines"
+    },
+    {
+      "da": "9999002",
+      "prenom": "Thomas",
+      "nom": "Gagnon",
+      "groupe": "9999",
+      "programme": "300.A0",
+      "nomProgramme": "Sciences humaines"
+    },
+    {
+      "da": "9999003",
+      "prenom": "Camille",
+      "nom": "Roy",
+      "groupe": "9999",
+      "programme": "300.A0",
+      "nomProgramme": "Sciences humaines"
+    },
+    {
+      "da": "9999004",
+      "prenom": "Alexandre",
+      "nom": "Côté",
+      "groupe": "9999",
+      "programme": "300.A0",
+      "nomProgramme": "Sciences humaines"
+    },
+    {
+      "da": "9999005",
+      "prenom": "Sarah",
+      "nom": "Bouchard",
+      "groupe": "9999",
+      "programme": "300.A0",
+      "nomProgramme": "Sciences humaines"
+    },
+    {
+      "da": "9999006",
+      "prenom": "Gabriel",
+      "nom": "Gauthier",
+      "groupe": "9999",
+      "programme": "300.A0",
+      "nomProgramme": "Sciences humaines"
+    },
+    {
+      "da": "9999007",
+      "prenom": "Léa",
+      "nom": "Morin",
+      "groupe": "9999",
+      "programme": "300.A0",
+      "nomProgramme": "Sciences humaines"
+    },
+    {
+      "da": "9999008",
+      "prenom": "Maxime",
+      "nom": "Lavoie",
+      "groupe": "9999",
+      "programme": "300.A0",
+      "nomProgramme": "Sciences humaines"
+    },
+    {
+      "da": "9999009",
+      "prenom": "Jade",
+      "nom": "Fortin",
+      "groupe": "9999",
+      "programme": "300.A0",
+      "nomProgramme": "Sciences humaines"
+    },
+    {
+      "da": "9999010",
+      "prenom": "William",
+      "nom": "Gagné",
+      "groupe": "9999",
+      "programme": "300.A0",
+      "nomProgramme": "Sciences humaines"
+    }
+  ],
+  "modalitesEvaluation": {
+    "pratiquePrincipale": "sommative",
+    "afficherSommatif": true,
+    "afficherAlternatif": true,
+    "modeComparatif": true,
+    "nombreArtefacts": 4,
+    "periodeDepistage": 3
+  },
+  "productions": [
+    {
+      "id": "prod-001",
+      "titre": "Examen formatif 1",
+      "type": "examen-formatif",
+      "dateRemise": "2025-02-05",
+      "ponderation": 0,
+      "grilleId": "grille-srpnf",
+      "verrouille": false
+    },
+    {
+      "id": "prod-002",
+      "titre": "Travail 1 : Analyse littéraire",
+      "type": "travail",
+      "dateRemise": "2025-02-12",
+      "ponderation": 20,
+      "grilleId": "grille-srpnf",
+      "verrouille": false
+    },
+    {
+      "id": "prod-003",
+      "titre": "Examen intra",
+      "type": "examen",
+      "dateRemise": "2025-02-26",
+      "ponderation": 25,
+      "grilleId": "grille-srpnf",
+      "verrouille": false
+    },
+    {
+      "id": "prod-004",
+      "titre": "Travail 2 : Dissertation",
+      "type": "travail",
+      "dateRemise": "2025-03-19",
+      "ponderation": 25,
+      "grilleId": "grille-srpnf",
+      "verrouille": false
+    },
+    {
+      "id": "prod-005",
+      "titre": "Examen final",
+      "type": "examen",
+      "dateRemise": "2025-05-14",
+      "ponderation": 30,
+      "grilleId": "grille-srpnf",
+      "verrouille": false
+    },
+    {
+      "id": "prod-006",
+      "titre": "Artefact 1 : Fiche de lecture",
+      "type": "artefact-portfolio",
+      "dateRemise": "2025-02-07",
+      "ponderation": 0,
+      "grilleId": "grille-idme",
+      "verrouille": false
+    },
+    {
+      "id": "prod-007",
+      "titre": "Artefact 2 : Analyse comparative",
+      "type": "artefact-portfolio",
+      "dateRemise": "2025-02-21",
+      "ponderation": 0,
+      "grilleId": "grille-idme",
+      "verrouille": false
+    },
+    {
+      "id": "prod-008",
+      "titre": "Artefact 3 : Essai critique",
+      "type": "artefact-portfolio",
+      "dateRemise": "2025-03-14",
+      "ponderation": 0,
+      "grilleId": "grille-idme",
+      "verrouille": false
+    },
+    {
+      "id": "prod-009",
+      "titre": "Artefact 4 : Production finale",
+      "type": "artefact-portfolio",
+      "dateRemise": "2025-04-11",
+      "ponderation": 0,
+      "grilleId": "grille-idme",
+      "verrouille": false
+    }
+  ],
+  "evaluations": {
+    "9999001": {
+      "prod-001": {"S": 0.85, "R": 0.90, "P": 0.85, "N": 0.85, "F": 0.90},
+      "prod-002": {"S": 0.85, "R": 0.85, "P": 0.80, "N": 0.85, "F": 0.90},
+      "prod-003": {"S": 0.85, "R": 0.85, "P": 0.80, "N": 0.85, "F": 0.90},
+      "prod-006": {"niveau": "M"},
+      "prod-007": {"niveau": "M"},
+      "prod-008": {"niveau": "M"},
+      "prod-009": {"niveau": "E"}
+    },
+    "9999002": {
+      "prod-001": {"S": 0.90, "R": 0.90, "P": 0.85, "N": 0.90, "F": 0.90},
+      "prod-002": {"S": 0.85, "R": 0.90, "P": 0.85, "N": 0.85, "F": 0.90},
+      "prod-003": {"S": 0.85, "R": 0.85, "P": 0.85, "N": 0.90, "F": 0.90},
+      "prod-006": {"niveau": "M"},
+      "prod-007": {"niveau": "E"},
+      "prod-008": {"niveau": "M"},
+      "prod-009": {"niveau": "E"}
+    },
+    "9999003": {
+      "prod-001": {"S": 0.85, "R": 0.85, "P": 0.80, "N": 0.85, "F": 0.85},
+      "prod-002": {"S": 0.80, "R": 0.85, "P": 0.85, "N": 0.85, "F": 0.90},
+      "prod-003": {"S": 0.85, "R": 0.85, "P": 0.80, "N": 0.85, "F": 0.85},
+      "prod-006": {"niveau": "M"},
+      "prod-007": {"niveau": "M"},
+      "prod-008": {"niveau": "M"},
+      "prod-009": {"niveau": "M"}
+    },
+    "9999004": {
+      "prod-001": {"S": 0.70, "R": 0.75, "P": 0.70, "N": 0.70, "F": 0.75},
+      "prod-002": {"S": 0.70, "R": 0.70, "P": 0.70, "N": 0.75, "F": 0.75},
+      "prod-003": {"S": 0.70, "R": 0.70, "P": 0.70, "N": 0.70, "F": 0.75},
+      "prod-006": {"niveau": "D"},
+      "prod-007": {"niveau": "M"},
+      "prod-008": {"niveau": "D"},
+      "prod-009": {"niveau": "M"}
+    },
+    "9999005": {
+      "prod-001": {"S": 0.70, "R": 0.75, "P": 0.75, "N": 0.70, "F": 0.70},
+      "prod-002": {"S": 0.75, "R": 0.70, "P": 0.70, "N": 0.70, "F": 0.75},
+      "prod-003": {"S": 0.70, "R": 0.70, "P": 0.70, "N": 0.75, "F": 0.70},
+      "prod-006": {"niveau": "D"},
+      "prod-007": {"niveau": "D"},
+      "prod-008": {"niveau": "M"},
+      "prod-009": {"niveau": "D"}
+    },
+    "9999006": {
+      "prod-001": {"S": 0.75, "R": 0.70, "P": 0.70, "N": 0.70, "F": 0.75},
+      "prod-002": {"S": 0.70, "R": 0.75, "P": 0.70, "N": 0.70, "F": 0.70},
+      "prod-003": {"S": 0.70, "R": 0.70, "P": 0.75, "N": 0.70, "F": 0.75},
+      "prod-006": {"niveau": "D"},
+      "prod-007": {"niveau": "D"},
+      "prod-008": {"niveau": "D"},
+      "prod-009": {"niveau": "M"}
+    },
+    "9999007": {
+      "prod-001": {"S": 0.60, "R": 0.62, "P": 0.58, "N": 0.60, "F": 0.65},
+      "prod-002": {"S": 0.60, "R": 0.60, "P": 0.60, "N": 0.62, "F": 0.60},
+      "prod-003": {"S": 0.58, "R": 0.60, "P": 0.58, "N": 0.60, "F": 0.62},
+      "prod-006": {"niveau": "D"},
+      "prod-007": {"niveau": "D"},
+      "prod-008": {"niveau": "I"},
+      "prod-009": {"niveau": "D"}
+    },
+    "9999008": {
+      "prod-001": {"S": 0.60, "R": 0.60, "P": 0.62, "N": 0.58, "F": 0.60},
+      "prod-002": {"S": 0.62, "R": 0.58, "P": 0.60, "N": 0.60, "F": 0.65},
+      "prod-003": {"S": 0.58, "R": 0.60, "P": 0.58, "N": 0.62, "F": 0.60},
+      "prod-006": {"niveau": "I"},
+      "prod-007": {"niveau": "D"},
+      "prod-008": {"niveau": "D"},
+      "prod-009": {"niveau": "D"}
+    },
+    "9999009": {
+      "prod-001": {"S": 0.45, "R": 0.50, "P": 0.45, "N": 0.48, "F": 0.52},
+      "prod-002": {"S": 0.48, "R": 0.45, "P": 0.50, "N": 0.45, "F": 0.48},
+      "prod-003": {"S": 0.45, "R": 0.48, "P": 0.45, "N": 0.50, "F": 0.45},
+      "prod-006": {"niveau": "I"},
+      "prod-007": {"niveau": "I"},
+      "prod-008": {"niveau": "I"},
+      "prod-009": {"niveau": "D"}
+    },
+    "9999010": {
+      "prod-001": {"S": 0.48, "R": 0.45, "P": 0.50, "N": 0.45, "F": 0.50},
+      "prod-002": {"S": 0.45, "R": 0.50, "P": 0.48, "N": 0.48, "F": 0.45},
+      "prod-003": {"S": 0.50, "R": 0.45, "P": 0.45, "N": 0.48, "F": 0.52},
+      "prod-006": {"niveau": "I"},
+      "prod-007": {"niveau": "I"},
+      "prod-008": {"niveau": "I"},
+      "prod-009": {"niveau": "I"}
+    }
+  },
+  "seancesCompletes": {
+    "2025-01-20": {"type": "Cours", "seanceId": "lundi-8h"},
+    "2025-01-22": {"type": "Cours", "seanceId": "mercredi-13h"},
+    "2025-01-27": {"type": "Cours", "seanceId": "lundi-8h"},
+    "2025-01-29": {"type": "Cours", "seanceId": "mercredi-13h"},
+    "2025-02-03": {"type": "Cours", "seanceId": "lundi-8h"},
+    "2025-02-05": {"type": "Cours", "seanceId": "mercredi-13h"},
+    "2025-02-10": {"type": "Cours", "seanceId": "lundi-8h"},
+    "2025-02-12": {"type": "Cours", "seanceId": "mercredi-13h"},
+    "2025-02-17": {"type": "Cours", "seanceId": "lundi-8h"},
+    "2025-02-19": {"type": "Cours", "seanceId": "mercredi-13h"},
+    "2025-02-24": {"type": "Cours", "seanceId": "lundi-8h"},
+    "2025-02-26": {"type": "Cours", "seanceId": "mercredi-13h"},
+    "2025-03-10": {"type": "Cours", "seanceId": "lundi-8h"},
+    "2025-03-12": {"type": "Cours", "seanceId": "mercredi-13h"},
+    "2025-03-17": {"type": "Cours", "seanceId": "lundi-8h"},
+    "2025-03-19": {"type": "Cours", "seanceId": "mercredi-13h"}
+  },
+  "presences": {
+    "2025-01-20": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": true,
+      "9999006": true, "9999007": true, "9999008": true, "9999009": false, "9999010": true
+    },
+    "2025-01-22": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": true,
+      "9999006": true, "9999007": true, "9999008": false, "9999009": false, "9999010": false
+    },
+    "2025-01-27": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": true,
+      "9999006": true, "9999007": false, "9999008": true, "9999009": true, "9999010": false
+    },
+    "2025-01-29": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": false,
+      "9999006": true, "9999007": true, "9999008": true, "9999009": false, "9999010": false
+    },
+    "2025-02-03": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": true,
+      "9999006": false, "9999007": true, "9999008": false, "9999009": false, "9999010": true
+    },
+    "2025-02-05": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": false, "9999005": true,
+      "9999006": true, "9999007": true, "9999008": true, "9999009": false, "9999010": false
+    },
+    "2025-02-10": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": true,
+      "9999006": true, "9999007": false, "9999008": true, "9999009": true, "9999010": false
+    },
+    "2025-02-12": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": true,
+      "9999006": true, "9999007": true, "9999008": false, "9999009": false, "9999010": false
+    },
+    "2025-02-17": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": false,
+      "9999006": true, "9999007": true, "9999008": true, "9999009": false, "9999010": true
+    },
+    "2025-02-19": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": false, "9999005": true,
+      "9999006": true, "9999007": false, "9999008": true, "9999009": false, "9999010": false
+    },
+    "2025-02-24": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": true,
+      "9999006": true, "9999007": true, "9999008": false, "9999009": true, "9999010": false
+    },
+    "2025-02-26": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": true,
+      "9999006": false, "9999007": true, "9999008": true, "9999009": false, "9999010": false
+    },
+    "2025-03-10": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": true,
+      "9999006": true, "9999007": false, "9999008": true, "9999009": false, "9999010": true
+    },
+    "2025-03-12": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": false, "9999005": true,
+      "9999006": true, "9999007": true, "9999008": false, "9999009": false, "9999010": false
+    },
+    "2025-03-17": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": true,
+      "9999006": true, "9999007": true, "9999008": true, "9999009": true, "9999010": false
+    },
+    "2025-03-19": {
+      "9999001": true, "9999002": true, "9999003": true, "9999004": true, "9999005": false,
+      "9999006": true, "9999007": false, "9999008": true, "9999009": false, "9999010": false
+    }
+  },
+  "horaire": [
+    {
+      "id": "lundi-8h",
+      "jour": "lundi",
+      "heureDebut": "08:00",
+      "heureFin": "11:00"
+    },
+    {
+      "id": "mercredi-13h",
+      "jour": "mercredi",
+      "heureDebut": "13:00",
+      "heureFin": "16:00"
+    }
+  ],
+  "grillesTemplates": [
+    {
+      "id": "grille-srpnf",
+      "nom": "Grille SRPNF",
+      "criteres": [
+        {"nom": "S", "libelle": "Structure", "poids": 0.15},
+        {"nom": "R", "libelle": "Rigueur", "poids": 0.20},
+        {"nom": "P", "libelle": "Plausibilité", "poids": 0.10},
+        {"nom": "N", "libelle": "Nuance", "poids": 0.25},
+        {"nom": "F", "libelle": "Français", "poids": 0.30}
+      ]
+    },
+    {
+      "id": "grille-idme",
+      "nom": "Échelle IDME",
+      "type": "echelle",
+      "niveaux": [
+        {"code": "I", "libelle": "Insuffisant", "valeur": 0.50},
+        {"code": "D", "libelle": "Développement", "valeur": 0.70},
+        {"code": "M", "libelle": "Maîtrisé", "valeur": 0.80},
+        {"code": "E", "libelle": "Étendu", "valeur": 0.90}
+      ]
+    }
+  ],
+  "artefactsSelectionnes": {
+    "9999001": ["prod-006", "prod-007", "prod-008", "prod-009"],
+    "9999002": ["prod-006", "prod-007", "prod-008", "prod-009"],
+    "9999003": ["prod-006", "prod-007", "prod-008", "prod-009"],
+    "9999004": ["prod-006", "prod-007", "prod-008", "prod-009"],
+    "9999005": ["prod-006", "prod-007", "prod-008", "prod-009"],
+    "9999006": ["prod-006", "prod-007", "prod-008", "prod-009"],
+    "9999007": ["prod-006", "prod-007", "prod-008", "prod-009"],
+    "9999008": ["prod-006", "prod-007", "prod-008", "prod-009"],
+    "9999009": ["prod-006", "prod-007", "prod-008", "prod-009"],
+    "9999010": ["prod-006", "prod-007", "prod-008", "prod-009"]
+  }
+}
