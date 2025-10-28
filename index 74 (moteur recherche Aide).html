@@ -3379,8 +3379,12 @@ Exemple :
                     <!-- ↓↓↓ AJOUTER LA NOUVELLE CARTE ICI ↓↓↓ -->
 
                     <div class="carte">
-                        <h3>🔒 Clonage anonymisé (Groupe 9999 → Démo)</h3>
+                        <h3 style="cursor: pointer; user-select: none;" onclick="toggleSection('section-clonage-anonymise')">
+                            <span id="icone-clonage-anonymise">▶</span> 🔒 Clonage anonymisé (Groupe 9999 → Démo)
+                            <span style="font-size: 0.8em; color: #666; font-weight: normal;">(Section avancée)</span>
+                        </h3>
 
+                        <div id="section-clonage-anonymise" style="display: none;">
                         <div
                             style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid var(--bleu-principal);">
                             <p style="margin: 0; font-size: 0.95rem; color: var(--bleu-moyen);">
@@ -3492,9 +3496,24 @@ Exemple :
                                 </ul>
                             </details>
                         </div>
+                        </div><!-- FIN section-clonage-anonymise -->
                     </div><!-- FIN carte clonage -->
 
                     <script>
+                        // Fonction pour plier/déplier une section
+                        function toggleSection(sectionId) {
+                            const section = document.getElementById(sectionId);
+                            const icone = document.getElementById('icone-' + sectionId);
+
+                            if (section.style.display === 'none') {
+                                section.style.display = 'block';
+                                icone.textContent = '▼';
+                            } else {
+                                section.style.display = 'none';
+                                icone.textContent = '▶';
+                            }
+                        }
+
                         // Initialisation statistiques clonage
                         document.addEventListener('DOMContentLoaded', function () {
                             setTimeout(function () {
