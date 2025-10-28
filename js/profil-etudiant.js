@@ -34,7 +34,7 @@
    
    LocalStorage utilisé:
    - 'groupeEtudiants' : Array des étudiants
-   - 'listeGrilles' : Array des productions (dont artefacts)
+   - 'productions' : Array des productions (dont artefacts)
    - 'evaluationsSauvegardees' : Array des évaluations
    - 'portfoliosEleves' : Object avec sélections d'artefacts
    
@@ -514,7 +514,7 @@ function genererSectionMobilisationEngagement(da) {
     const interpA = interpreterAssiduite(parseFloat(tauxA));
 
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const productions = obtenirDonneesSelonMode('listeGrilles') || [];
+    const productions = obtenirDonneesSelonMode('productions') || [];
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
     const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
@@ -1285,7 +1285,7 @@ function calculerPerformancePAN(da) {
 
     // 🆕 PRIORITÉ 1 : Utiliser les artefacts SÉLECTIONNÉS dans le portfolio
     const selectionsPortfolios = obtenirDonneesSelonMode('portfoliosEleves') || {};
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     if (portfolio && selectionsPortfolios[da]?.[portfolio.id]) {
@@ -2399,7 +2399,7 @@ function fermerDetailIndice() {
  * @returns {string} - HTML de la section
  */
 function genererSectionCompletion(da) {
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
@@ -2859,7 +2859,7 @@ function diagnostiquerForcesChallenges(moyennes, seuil = 0.7125) {
  */
 function calculerIndicesTroisDerniersArtefacts(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
 
     // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
     const artefactsPortfolio = productions
@@ -3433,7 +3433,7 @@ function genererDiagnosticCriteres(da) {
  * @returns {string} - HTML de la section
  */
 function genererSectionPerformance(da) {
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     if (!portfolio) {

@@ -1174,7 +1174,7 @@ function setBarre(id, pourcentage) {
  * - 'groupeEtudiants' : Array des étudiants
  * - 'presences' : Array des présences
  * - 'evaluationsSauvegardees' : Array des évaluations
- * - 'listeGrilles' : Array des productions
+ * - 'productions' : Array des productions
  * 
  * HTML REQUIS:
  * Éléments avec IDs dans la sous-section tableau-bord-apercu:

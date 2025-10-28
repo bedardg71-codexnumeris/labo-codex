@@ -210,7 +210,7 @@ Mais même **1 semaine d'exploration** est utile !
 
 ### Formulaire de feedback (RECOMMANDÉ)
 
-**Lien du formulaire :** [À AJOUTER QUAND LE FORMULAIRE SERA CRÉÉ]
+**Lien du formulaire :** [https://forms.office.com/r/c2MBEzES32]
 
 - ⏱️ Durée : 5-10 minutes
 - 🔒 Anonyme si vous le souhaitez

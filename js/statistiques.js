@@ -131,7 +131,7 @@ function chargerMaterielConfigure() {
     setStatText('stat-pratique', pratique);
     
     // Productions
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     setStatText('stat-productions', productions.length);
     
     // Grilles de critères
@@ -221,7 +221,7 @@ function setStatText(id, valeur) {
  * - seancesHoraire
  * - groupeEtudiants
  * - modalitesEvaluation
- * - listeGrilles
+ * - productions
  * - grillesTemplates
  * - configEchelle
  * - niveauxEchelle

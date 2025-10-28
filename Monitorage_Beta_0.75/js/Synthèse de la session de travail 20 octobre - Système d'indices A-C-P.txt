@@ -1,0 +1,271 @@
+# 📋 Synthèse de la session de travail 20 octobre - Système d'indices A-C-P
+
+## 🎯 CONTEXTE DU PROJET
+
+**Application** : Codex Numeris - Système de suivi des apprentissages (monitorage pédagogique)
+
+**Architecture** : Application web modulaire avec principe "Single Source of Truth"
+- Chaque module calcule **ses propres données** et les stocke dans `localStorage`
+- Les modules ne se parlent **jamais directement**, uniquement via `localStorage`
+- Les modules "lecteurs" (comme tableau de bord) **lisent** les données, ne les calculent pas
+
+**Modules clés** :
+- `trimestre.js` → génère `calendrierComplet` ✅
+- `horaire.js` → génère `seancesCompletes` ✅
+- `saisie-presences.js` → calcule `indicesAssiduite` ✅
+- `tableau-bord-apercu.js` → lit et affiche tous les indices
+
+---
+
+## ✅ CE QUI A ÉTÉ RÉALISÉ CETTE SESSION
+
+### 1. Système d'indices d'assiduité (Indice A) - COMPLET ✅
+
+**Objectif** : Calculer deux indices d'assiduité (sommatif et alternatif) pour chaque étudiant.
+
+**Implémentation** :
+- **Fonction orchestratrice** : `calculerEtSauvegarderIndicesAssiduite()` dans `saisie-presences.js`
+- **Fonction sommatif** : `calculerAssiduiteSommative(da)` 
+  - Formule : Heures présentes ÷ Heures de cours **données** (pas théoriques)
+  - Exemple : 23h / 30h = 76.7%
+- **Fonction alternatif (PAN)** : `calculerAssiduiteAlternative(da)`
+  - Formule : Heures présentes sur N derniers cours ÷ (N × 4h)
+  - Paramétrable via `modalitesEvaluation.configPAN.nombreCours` (par défaut : 3 cours = 6 séances = 12h)
+  - Mais actuellement réglé à 4 cours = 8 séances = 16h selon les logs
+  - Exemple : 13h / 16h = 81.3%
+
+**Stockage** :
+```javascript
+localStorage.indicesAssiduite = {
+    sommatif: {
+        "9000260": 0.767,  // 76.7%
+        "9000116": 1.00,   // 100%
+        // ...
+    },
+    alternatif: {
+        "9000260": 0.813,  // 81.3%
+        "9000116": 1.00,   // 100%
+        // ...
+    },
+    dateCalcul: "2025-10-21T01:51:50.437Z"
+}
+```
+
+**Déclenchement** :
+- Après chaque `enregistrerPresences()` dans `saisie-presences.js`
+- Rechargement automatique du tableau de bord si section active
+
+### 2. Affichage dans le tableau de bord - PARTIEL ✅
+
+**Module modifié** : `tableau-bord-apercu.js`
+
+**Fonctions modifiées** :
+- `calculerIndicesEtudiant(da)` → Lit les indices depuis `localStorage` (ne calcule plus)
+- `afficherMetriquesGlobales()` → Affiche selon les réglages (sommatif/alternatif/les deux)
+
+**Affichage actuel** :
+- Format double : `0% / 94%` → Sommatif / Alternatif
+- **Problème résolu** : Les indices sommatifs étaient `null` ou `NaN` à cause d'un bug dans le calcul (division par `NaN`)
+- **Solution** : Calcul basé sur les heures **données** (dates saisies) au lieu des heures théoriques totales
+
+### 3. Rechargement automatique - COMPLET ✅
+
+**Dans `navigation.js`** :
+- Ajout du rechargement automatique quand on change de sous-section
+- `afficherSousSection('tableau-bord-apercu')` → déclenche `chargerTableauBordApercu()`
+
+**Dans `saisie-presences.js`** :
+- Après `enregistrerPresences()` → rafraîchit le tableau de bord si actif
+
+---
+
+## 🔧 PROBLÈMES RÉSOLUS
+
+### Bug 1 : Indice sommatif = NaN
+**Cause** : `totalHeuresTheoriques` calculé incorrectement (tableaux vides dans `seancesCompletes`)
+**Solution** : Calcul basé sur le nombre de dates où des présences ont été saisies
+
+### Bug 2 : Logique incorrecte pour l'assiduité sommative
+**Cause** : Calcul sur total trimestre (60h) au lieu des heures données (30h)
+**Solution** : `totalHeuresDonnees = datesSaisies.length × 2`
+
+### Bug 3 : Profil étudiant ne s'affiche pas
+**Cause** : Fonction `afficherProfilEtudiant()` obsolète appelée au lieu de `afficherProfilComplet()`
+**Solution suggérée** : Modifier les boutons pour appeler `afficherProfilComplet(da)`
+
+---
+
+## ⏳ CE QUI RESTE À FAIRE
+
+### PRIORITÉ 1 : Indices C et P (Complétion et Performance)
+
+**Module à créer/modifier** : `portfolio.js` ou `productions.js`
+
+**Fonctions à implémenter** :
+
+```javascript
+/**
+ * Calcule et sauvegarde les indices C et P
+ * Appelée après chaque évaluation d'artefact
+ */
+function calculerEtSauvegarderIndicesEvaluation() {
+    const config = obtenirConfigurationNotation();
+    const etudiants = // récupérer étudiants actifs
+    
+    const indices = {
+        sommatif: {},
+        alternatif: {},
+        dateCalcul: new Date().toISOString()
+    };
+    
+    etudiants.forEach(etudiant => {
+        indices.sommatif[etudiant.da] = calculerIndicesSommatifs(etudiant.da);
+        indices.alternatif[etudiant.da] = calculerIndicesAlternatifs(etudiant.da);
+    });
+    
+    localStorage.setItem('indicesEvaluation', JSON.stringify(indices));
+}
+
+/**
+ * Calcule complétion et performance SOMMATIFS
+ */
+function calculerIndicesSommatifs(da) {
+    const evaluations = // récupérer évaluations de l'étudiant
+    const artefacts = // récupérer tous les artefacts attendus
+    
+    // Complétion : artefacts remis ÷ artefacts attendus
+    const completion = evaluations.length / artefacts.length;
+    
+    // Performance : moyenne de tous les artefacts
+    const performance = calculerMoyenneIDME(evaluations);
+    
+    return { completion, performance };
+}
+
+/**
+ * Calcule complétion et performance ALTERNATIFS (PAN)
+ */
+function calculerIndicesAlternatifs(da) {
+    const config = obtenirConfigurationNotation();
+    const nombreArtefacts = config.configPAN?.nombreArtefacts || 3;
+    
+    const evaluations = // récupérer évaluations de l'étudiant
+    
+    // Trier par note décroissante et prendre les N meilleurs
+    const meilleurs = evaluations
+        .sort((a, b) => b.noteFinale - a.noteFinale)
+        .slice(0, nombreArtefacts);
+    
+    // Complétion : nombre de meilleurs ÷ nombre attendu
+    const completion = meilleurs.length / nombreArtefacts;
+    
+    // Performance : moyenne des N meilleurs
+    const performance = calculerMoyenneIDME(meilleurs);
+    
+    return { completion, performance };
+}
+
+/**
+ * Convertit les niveaux IDME en moyenne
+ * I=1, D=2, M=3, E=4 → moyenne / 4
+ */
+function calculerMoyenneIDME(evaluations) {
+    if (evaluations.length === 0) return 0;
+    
+    const valeurs = evaluations.map(e => {
+        const niveau = e.niveauFinal || '';
+        switch(niveau.toUpperCase()) {
+            case 'E': return 4;
+            case 'M': return 3;
+            case 'D': return 2;
+            case 'I': return 1;
+            default: return 0;
+        }
+    });
+    
+    const moyenne = valeurs.reduce((sum, v) => sum + v, 0) / valeurs.length;
+    return moyenne / 4; // Normaliser entre 0 et 1
+}
+```
+
+**Stockage attendu** :
+```javascript
+localStorage.indicesEvaluation = {
+    sommatif: {
+        "9000260": { completion: 0.60, performance: 0.54 },
+        "9000116": { completion: 0.80, performance: 0.75 },
+        // ...
+    },
+    alternatif: {
+        "9000260": { completion: 1.00, performance: 0.67 },
+        "9000116": { completion: 1.00, performance: 0.83 },
+        // ...
+    },
+    dateCalcul: "2025-10-21T..."
+}
+```
+
+**Déclenchement** :
+- Après chaque sauvegarde d'évaluation
+- Rechargement du tableau de bord si actif
+
+---
+
+### PRIORITÉ 2 : Compléter l'affichage du tableau de bord
+
+**Modifications dans `tableau-bord-apercu.js`** :
+
+1. **Fonction `calculerIndicesEtudiant()`** → Lire aussi `indicesEvaluation`
+2. **Fonction `afficherMetriquesGlobales()`** → Afficher C et P en plus de A
+3. **Fonction `afficherAlertesPrioritaires()`** → Utiliser les 3 indices (A, C, P)
+4. **Indices composites** :
+   - Mobilisation = A × C
+   - Rendement = C × P
+   - Engagement = A × C × P
+   - Risque d'échec = 1 - (A × C × P)
+
+---
+
+### PRIORITÉ 3 : Liste des individus (affichage double)
+
+**Fichier à modifier** : Code qui génère la liste des étudiants dans le tableau de bord
+
+**Action** : Modifier les colonnes pour afficher :
+- `Assiduité (S)` et `Assiduité (A)` séparément (si les deux activés)
+- `Complétion (S)` et `Complétion (A)` séparément
+- Idem pour Performance
+
+**Selon les réglages** :
+- Si `afficherSommatif` seulement → 1 colonne par indice
+- Si `afficherAlternatif` seulement → 1 colonne par indice
+- Si les deux → 2 colonnes par indice (format : `85% / 90%`)
+
+---
+
+### PRIORITÉ 4 : Profil individuel
+
+**Bug à corriger** : Boutons dans la liste n'ouvrent pas le profil
+
+**Solution** : Modifier les boutons pour appeler `afficherProfilComplet(da)` au lieu de `afficherProfilEtudiant(da)`
+
+**Ensuite** : Afficher les indices A-C-P dans le profil avec le double affichage si activé
+
+---
+
+## 🔑 POINTS CLÉS À RETENIR POUR LA PROCHAINE SESSION
+
+1. **Architecture** : Toujours calculer dans le module propriétaire, lire dans les autres
+2. **Flexibilité** : Les paramètres PAN viennent de `modalitesEvaluation.configPAN`
+3. **Indépendance** : Calculs sommatif et alternatif sont **toujours** effectués, l'affichage décide quoi montrer
+4. **Cohérence** : Les formules doivent correspondre au Guide de monitorage
+
+---
+
+## 📂 FICHIERS MODIFIÉS CETTE SESSION
+
+- ✅ `js/saisie-presences.js` → Calcul des indices A
+- ✅ `js/tableau-bord-apercu.js` → Affichage des indices
+- ✅ `js/navigation.js` → Rechargement automatique
+- ⏳ `js/portfolio.js` ou `js/productions.js` → À créer pour indices C et P
+
+Bon courage pour la suite ! 🚀

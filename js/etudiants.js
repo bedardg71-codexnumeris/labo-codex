@@ -253,7 +253,7 @@ function calculerTauxCompletion(da) {
     console.warn(`⚠️ Indice C non trouvé pour ${da} - Recalcul à la volée`);
 
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const productions = obtenirDonneesSelonMode('listeGrilles') || [];
+    const productions = obtenirDonneesSelonMode('productions') || [];
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
     // ✅ CORRECTION : Ne compter QUE les artefacts-portfolio pour l'indice C

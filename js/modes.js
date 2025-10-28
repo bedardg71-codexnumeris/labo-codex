@@ -409,7 +409,7 @@ function genererDonneesSimulation() {
 
     // Générer des évaluations réalistes
     const evaluations = [];
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     const artefacts = productions.filter(p => p.type === 'artefact-portfolio');
 
     etudiants.forEach(etudiant => {

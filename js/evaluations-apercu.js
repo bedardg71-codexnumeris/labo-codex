@@ -30,7 +30,7 @@ function chargerApercuEvaluations() {
         const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
 
         // Récupérer les productions configurées
-        const productions = obtenirDonneesSelonMode('listeGrilles');
+        const productions = obtenirDonneesSelonMode('productions');
 
         // Calculer les statistiques
         calculerStatistiquesEvaluations(etudiantsActifs, evaluations, productions);

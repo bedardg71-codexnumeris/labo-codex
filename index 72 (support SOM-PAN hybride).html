@@ -403,6 +403,44 @@
             color: #6c757d;
             margin-bottom: 10px;
         }
+
+        /* ===============================
+           MOTEUR DE RECHERCHE AIDE
+           =============================== */
+        #aide-recherche-input:focus {
+            border-color: var(--bleu-principal);
+            box-shadow: 0 0 0 3px rgba(3, 46, 92, 0.1);
+        }
+
+        #aide-recherche-clear:hover {
+            color: var(--risque-critique);
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        mark.aide-surlignage {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                background-color: #fff;
+            }
+            to {
+                opacity: 1;
+                background-color: #ffeb3b;
+            }
+        }
+
+        /* Animation des cartes lors du filtrage */
+        #section-aide .carte {
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+
+        #section-aide .carte[style*="display: none"] {
+            opacity: 0;
+            transform: scale(0.98);
+        }
     </style>
 </head>
 
@@ -3777,6 +3815,30 @@ Exemple :
                  =================================== -->
             <section id="section-aide" class="section">
 
+                <!-- Champ de recherche -->
+                <div id="aide-recherche-container" style="position: sticky; top: 0; z-index: 100; background: white; padding: 20px; border-bottom: 2px solid var(--bleu-principal); margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="max-width: 800px; margin: 0 auto;">
+                        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                            <div style="flex: 1; position: relative;">
+                                <input
+                                    type="text"
+                                    id="aide-recherche-input"
+                                    placeholder="🔍 Rechercher dans l'aide... (ex: risque, SRPNF, assiduité, RàI)"
+                                    style="width: 100%; padding: 12px 40px 12px 15px; font-size: 1rem; border: 2px solid var(--bleu-moyen); border-radius: 8px; outline: none; transition: all 0.3s;"
+                                    onkeyup="rechercherDansAide()"
+                                >
+                                <button
+                                    id="aide-recherche-clear"
+                                    onclick="effacerRechercheAide()"
+                                    style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #999; font-size: 1.2rem; cursor: pointer; padding: 5px 10px; display: none;"
+                                    title="Effacer la recherche"
+                                >✕</button>
+                            </div>
+                        </div>
+                        <div id="aide-recherche-resultats" style="font-size: 0.9rem; color: #666; text-align: center; display: none;"></div>
+                    </div>
+                </div>
+
                 <!--LLM:OK_TO_EDIT -->
                 <!-- ===================================
                      SOUS-SECTION 1: INTRODUCTION
@@ -5862,6 +5924,210 @@ Exemple :
             </div>
         </div>
     </div>
+
+    <!-- ===============================
+     MOTEUR DE RECHERCHE AIDE
+     =============================== -->
+    <script>
+        /**
+         * Recherche dans la section Aide en temps réel
+         */
+        function rechercherDansAide() {
+            const input = document.getElementById('aide-recherche-input');
+            const clearBtn = document.getElementById('aide-recherche-clear');
+            const resultatsDiv = document.getElementById('aide-recherche-resultats');
+            const recherche = input.value.trim().toLowerCase();
+
+            // Afficher/masquer le bouton X
+            clearBtn.style.display = recherche ? 'block' : 'none';
+
+            // Si recherche vide, tout réafficher
+            if (!recherche) {
+                reafficherToutesLesCartes();
+                resultatsDiv.style.display = 'none';
+                return;
+            }
+
+            // Rechercher dans toutes les cartes
+            const cartes = document.querySelectorAll('#section-aide .carte');
+            let nbResultats = 0;
+            let nbCartesVisibles = 0;
+
+            cartes.forEach(carte => {
+                // Retirer les surlignages précédents
+                retirerSurlignage(carte);
+
+                // Chercher dans le texte de la carte
+                const texte = carte.textContent.toLowerCase();
+
+                if (texte.includes(recherche)) {
+                    carte.style.display = 'block';
+                    nbCartesVisibles++;
+
+                    // Surligner les occurrences
+                    nbResultats += surlignerTexte(carte, recherche);
+                } else {
+                    carte.style.display = 'none';
+                }
+            });
+
+            // Afficher/masquer les sous-sections vides
+            const sousSections = document.querySelectorAll('#section-aide .sous-section');
+            sousSections.forEach(section => {
+                const cartesVisibles = section.querySelectorAll('.carte[style*="display: block"], .carte:not([style*="display: none"])').length;
+
+                // Masquer le titre de la sous-section s'il n'y a pas de cartes visibles
+                const titre = section.querySelector('h2');
+                if (titre) {
+                    titre.style.display = cartesVisibles > 0 ? 'block' : 'none';
+                }
+            });
+
+            // Afficher les résultats
+            resultatsDiv.style.display = 'block';
+            if (nbCartesVisibles === 0) {
+                resultatsDiv.innerHTML = '❌ Aucun résultat trouvé pour « ' + recherche + ' »';
+                resultatsDiv.style.color = '#dc3545';
+            } else {
+                resultatsDiv.innerHTML = '✅ ' + nbResultats + ' occurrence(s) trouvée(s) dans ' + nbCartesVisibles + ' carte(s)';
+                resultatsDiv.style.color = '#28a745';
+            }
+        }
+
+        /**
+         * Surligne le texte recherché dans un élément
+         */
+        function surlignerTexte(element, recherche) {
+            let nbOccurrences = 0;
+            const regex = new RegExp('(' + recherche.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+
+            // Parcourir tous les nœuds de texte
+            const walker = document.createTreeWalker(
+                element,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            const nodesATraiter = [];
+            let node;
+            while (node = walker.nextNode()) {
+                if (node.textContent.toLowerCase().includes(recherche)) {
+                    nodesATraiter.push(node);
+                }
+            }
+
+            nodesATraiter.forEach(node => {
+                const parent = node.parentNode;
+
+                // Ne pas surligner dans les scripts ou styles
+                if (parent.nodeName === 'SCRIPT' || parent.nodeName === 'STYLE') {
+                    return;
+                }
+
+                const texte = node.textContent;
+                const fragments = texte.split(regex);
+
+                if (fragments.length > 1) {
+                    const span = document.createElement('span');
+
+                    fragments.forEach((fragment, index) => {
+                        if (fragment.toLowerCase() === recherche.toLowerCase()) {
+                            const mark = document.createElement('mark');
+                            mark.textContent = fragment;
+                            mark.style.backgroundColor = '#ffeb3b';
+                            mark.style.padding = '2px 4px';
+                            mark.style.borderRadius = '3px';
+                            mark.style.fontWeight = 'bold';
+                            mark.className = 'aide-surlignage';
+                            span.appendChild(mark);
+                            nbOccurrences++;
+                        } else if (fragment) {
+                            span.appendChild(document.createTextNode(fragment));
+                        }
+                    });
+
+                    parent.replaceChild(span, node);
+                }
+            });
+
+            return nbOccurrences;
+        }
+
+        /**
+         * Retire tous les surlignages
+         */
+        function retirerSurlignage(element) {
+            const marks = element.querySelectorAll('mark.aide-surlignage');
+            marks.forEach(mark => {
+                const parent = mark.parentNode;
+                parent.replaceChild(document.createTextNode(mark.textContent), mark);
+                parent.normalize(); // Fusionner les nœuds de texte adjacents
+            });
+        }
+
+        /**
+         * Réaffiche toutes les cartes et sous-sections
+         */
+        function reafficherToutesLesCartes() {
+            // Réafficher toutes les cartes
+            const cartes = document.querySelectorAll('#section-aide .carte');
+            cartes.forEach(carte => {
+                carte.style.display = 'block';
+                retirerSurlignage(carte);
+            });
+
+            // Réafficher tous les titres de sous-sections
+            const titres = document.querySelectorAll('#section-aide .sous-section h2');
+            titres.forEach(titre => {
+                titre.style.display = 'block';
+            });
+        }
+
+        /**
+         * Efface la recherche et réinitialise l'affichage
+         */
+        function effacerRechercheAide() {
+            const input = document.getElementById('aide-recherche-input');
+            const clearBtn = document.getElementById('aide-recherche-clear');
+            const resultatsDiv = document.getElementById('aide-recherche-resultats');
+
+            input.value = '';
+            clearBtn.style.display = 'none';
+            resultatsDiv.style.display = 'none';
+            reafficherToutesLesCartes();
+
+            // Remettre le focus sur le champ
+            input.focus();
+        }
+
+        // Amélioration UX : Focus sur le champ de recherche avec Ctrl+F ou Cmd+F
+        document.addEventListener('keydown', function(e) {
+            // Vérifier si on est dans la section Aide
+            const sectionAide = document.getElementById('section-aide');
+            if (!sectionAide || !sectionAide.classList.contains('active')) {
+                return;
+            }
+
+            // Ctrl+F ou Cmd+F
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                const input = document.getElementById('aide-recherche-input');
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
+            }
+
+            // ESC pour effacer
+            if (e.key === 'Escape') {
+                const input = document.getElementById('aide-recherche-input');
+                if (input && document.activeElement === input) {
+                    effacerRechercheAide();
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

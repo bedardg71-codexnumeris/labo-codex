@@ -42,7 +42,7 @@
    
    LocalStorage utilisé:
    - 'groupeEtudiants' : Array des étudiants
-   - 'listeGrilles' : Array des productions (nom historique)
+   - 'productions' : Array des productions (nom historique)
    - 'grillesTemplates' : Array des grilles de critères
    - 'niveauxEchelle' : Array des niveaux de performance
    - 'cartouches_{grilleId}' : Array des cartouches par grille
@@ -188,10 +188,10 @@ function filtrerEtudiantsParGroupe() {
  * 2. Remplit le select
  * 
  * CLÉ LOCALSTORAGE:
- * - 'listeGrilles' : Array des productions (nom historique)
+ * - 'productions' : Array des productions (nom historique)
  */
 function chargerProductionsDansSelect() {
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     const select = document.getElementById('selectProduction1');
 
     if (!select) return;
@@ -326,7 +326,7 @@ function chargerProduction(productionNum) {
     evaluationEnCours.productionId = productionId;
 
     // Récupérer les infos de la production
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     const production = productions.find(p => p.id === productionId);
 
     if (production) {
@@ -649,7 +649,7 @@ function genererRetroaction(num) {
 
     if (!cartouche) return;
 
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     const production = productions.find(p => p.id === evaluationEnCours.productionId);
 
     let texte = '';
@@ -755,7 +755,7 @@ function sauvegarderEvaluation() {
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiant = etudiants.find(e => e.da === etudiantDA);
 
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     const production = productions.find(p => p.id === productionId);
 
     const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
@@ -1178,7 +1178,7 @@ function calculerEtSauvegarderIndicesEvaluation() {
 
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
 
     const indicesEvaluation = {};
 
@@ -1468,7 +1468,7 @@ function genererBadgeCompletion(etudiant) {
 
     // PRIORITÉ 3 : Fallback final - Calculer depuis le nombre d'artefacts
     if (completion === 0 && nbArtefacts > 0) {
-        const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
         const productionsAttendues = productions.filter(p => p.type !== 'portfolio').length;
         completion = productionsAttendues > 0 ? nbArtefacts / productionsAttendues : 0;
     }
@@ -1554,7 +1554,7 @@ ${genererBadgeCompletion(etudiant)}
  */
 function genererDetailsEtudiant(etudiant) {
     const evaluations = etudiant.evaluations || [];
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
 
     // Créer un tableau avec TOUTES les productions et leur statut
     const tableauComplet = productions.map(production => {
@@ -1777,7 +1777,7 @@ function chargerFiltresEvaluations() {
     // Charger les productions
     const selectProduction = document.getElementById('filtre-production-eval');
     if (selectProduction) {
-        const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
         selectProduction.innerHTML = '<option value="">Toutes les productions</option>';
         productions.forEach(prod => {
             selectProduction.innerHTML += `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`;
@@ -1922,7 +1922,7 @@ function mettreAJourStatistiquesEvaluations() {
 
     // 🎯 Calculer le total d'artefacts DONNÉS (même logique que portfolio.js)
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
 
     // Identifier les artefacts-portfolio
     const artefactsPortfolioIds = new Set(
@@ -2928,7 +2928,7 @@ function sauvegarderEvaluationModifiee() {
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
     const etudiant = etudiants.find(e => e.da === etudiantDA);
 
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     const production = productions.find(p => p.id === productionId);
 
     const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
@@ -3197,7 +3197,7 @@ function fermerBanqueEvaluations() {
 function chargerFiltresBanqueEvaluations() {
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
-    const productions = JSON.parse(localStorage.getItem('listeGrilles') || '[]');
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
 
     // Filtre étudiants
     const selectEtudiant = document.getElementById('filtreBanqueEtudiant');
