@@ -22,7 +22,7 @@
       "prenom": "Émilie",
       "nom": "Tremblay",
       "groupe": "9999",
-      "programme": "300.A0",
+      "programme": "300.M0",
       "nomProgramme": "Sciences humaines"
     },
     {
@@ -30,39 +30,39 @@
       "prenom": "Thomas",
       "nom": "Gagnon",
       "groupe": "9999",
-      "programme": "300.A0",
-      "nomProgramme": "Sciences humaines"
+      "programme": "200.B0",
+      "nomProgramme": "Sciences de la nature"
     },
     {
       "da": "9999003",
       "prenom": "Camille",
       "nom": "Roy",
       "groupe": "9999",
-      "programme": "300.A0",
-      "nomProgramme": "Sciences humaines"
+      "programme": "420.B0",
+      "nomProgramme": "Techniques de l'informatique"
     },
     {
       "da": "9999004",
       "prenom": "Alexandre",
       "nom": "Côté",
       "groupe": "9999",
-      "programme": "300.A0",
-      "nomProgramme": "Sciences humaines"
+      "programme": "410.B0",
+      "nomProgramme": "Techniques de comptabilité et de gestion"
     },
     {
       "da": "9999005",
       "prenom": "Sarah",
       "nom": "Bouchard",
       "groupe": "9999",
-      "programme": "300.A0",
-      "nomProgramme": "Sciences humaines"
+      "programme": "180.A0",
+      "nomProgramme": "Soins Infirmiers"
     },
     {
       "da": "9999006",
-      "prenom": "Gabriel",
-      "nom": "Gauthier",
+      "prenom": "Minh",
+      "nom": "Nguyen",
       "groupe": "9999",
-      "programme": "300.A0",
+      "programme": "300.M0",
       "nomProgramme": "Sciences humaines"
     },
     {
@@ -70,32 +70,32 @@
       "prenom": "Léa",
       "nom": "Morin",
       "groupe": "9999",
-      "programme": "300.A0",
-      "nomProgramme": "Sciences humaines"
+      "programme": "500.AL",
+      "nomProgramme": "Arts, lettres et communication – Langues"
     },
     {
       "da": "9999008",
       "prenom": "Maxime",
       "nom": "Lavoie",
       "groupe": "9999",
-      "programme": "300.A0",
-      "nomProgramme": "Sciences humaines"
+      "programme": "200.B0",
+      "nomProgramme": "Sciences de la nature"
     },
     {
       "da": "9999009",
       "prenom": "Jade",
       "nom": "Fortin",
       "groupe": "9999",
-      "programme": "300.A0",
-      "nomProgramme": "Sciences humaines"
+      "programme": "351.A1",
+      "nomProgramme": "Techniques d'éducation spécialisée"
     },
     {
       "da": "9999010",
       "prenom": "William",
       "nom": "Gagné",
       "groupe": "9999",
-      "programme": "300.A0",
-      "nomProgramme": "Sciences humaines"
+      "programme": "300.M1",
+      "nomProgramme": "Sciences humaines avec mathématiques"
     }
   ],
   "modalitesEvaluation": {
