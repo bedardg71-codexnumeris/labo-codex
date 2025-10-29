@@ -1378,14 +1378,8 @@ function initialiserModuleGrilles() {
     // Charger la liste des grilles
     chargerListeGrillesTemplates();
 
-    // Charger automatiquement si on est sur la page grilles
-    const sousSection = document.querySelector('#materiel-grille-criteres');
-    if (sousSection && sousSection.classList.contains('active')) {
-        chargerListeGrillesTemplates();
-
-        // Afficher la nouvelle vue hiérarchique
-        afficherToutesLesGrillesCriteres();
-    }
+    // Toujours afficher la vue hiérarchique (indépendamment de la section active)
+    afficherToutesLesGrillesCriteres();
 
     // Pas d'événements globaux à attacher pour l'instant
     // Les événements sont gérés via les attributs onclick dans le HTML

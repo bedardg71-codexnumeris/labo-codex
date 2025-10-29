@@ -197,6 +197,8 @@ function afficherTableauProductions() {
  * 5. Charge la liste des grilles disponibles
  */
 function afficherFormProduction(id) {
+    console.log('📝 afficherFormProduction appelée avec ID:', id, 'type:', typeof id);
+
     const form = document.getElementById('formulaireProduction');
     const btnAjouter = document.getElementById('btnajouterProduction');
     const titre = document.getElementById('titreFormEvaluation');
@@ -217,7 +219,17 @@ function afficherFormProduction(id) {
     if (id) {
         // Mode modification
         const evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
+        console.log('📦 Nombre de productions:', evaluations.length);
+        console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
+
+        // Debug détaillé de la recherche
+        evaluations.forEach((e, idx) => {
+            const match = e.id === id;
+            console.log(`   [${idx}] "${e.id}" === "${id}" ? ${match} (types: ${typeof e.id} vs ${typeof id})`);
+        });
+
         const prod = evaluations.find(e => e.id === id);
+        console.log('📍 Production trouvée?', !!prod);
 
         if (prod) {
             productionEnEdition = id;
@@ -240,6 +252,17 @@ function afficherFormProduction(id) {
                 document.getElementById('portfolioNombreRetenir').value = prod.regles.nombreARetenir || 3;
                 document.getElementById('portfolioMinimumCompleter').value = prod.regles.minimumCompletion || 7;
             }
+        } else {
+            // Production non trouvée
+            console.error('❌ Production non trouvée avec ID:', id);
+            console.error('IDs disponibles:', evaluations.map(e => ({ id: e.id, titre: e.titre })));
+
+            if (typeof afficherNotificationErreur === 'function') {
+                afficherNotificationErreur('Évaluation introuvable', `ID: ${id}`);
+            } else {
+                alert('Erreur : Évaluation introuvable');
+            }
+            return;
         }
     } else {
         // Mode ajout
