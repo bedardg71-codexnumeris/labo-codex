@@ -115,15 +115,17 @@ function chargerListeGrillesTemplates() {
  *    - Affiche ses critères
  *    - Affiche bouton dupliquer
  */
-function chargerGrilleTemplate() {
-    const grilleId = document.getElementById('selectGrilleTemplate').value;
+function chargerGrilleTemplate(grilleId) {
+    // Si aucun ID fourni en paramètre, lire depuis le select
+    const select = document.getElementById('selectGrilleTemplate');
+    const selectValue = grilleId || (select ? select.value : '');
     const nomContainer = document.getElementById('nomGrilleContainer');
     const nomInput = document.getElementById('nomGrilleTemplate');
     const btnDupliquer = document.getElementById('btnDupliquerGrille');
     const criteresContainer = document.getElementById('criteresContainer');
     const aucuneEvalDiv = document.getElementById('aucuneEvalSelectionnee');
 
-    if (!grilleId || grilleId === 'new') {
+    if (!selectValue || selectValue === 'new') {
         // Mode création nouvelle grille
         if (nomContainer) nomContainer.style.display = 'block';
         if (nomInput) nomInput.value = '';
@@ -138,9 +140,14 @@ function chargerGrilleTemplate() {
     } else {
         // Charger la grille existante
         const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
-        const grille = grilles.find(g => g.id === grilleId);
+        const grille = grilles.find(g => g.id === selectValue);
 
         if (grille) {
+            // Mettre à jour le select si un ID a été passé en paramètre
+            if (grilleId && select) {
+                select.value = grilleId;
+            }
+
             grilleTemplateActuelle = grille;
             if (nomContainer) nomContainer.style.display = 'block';
             if (nomInput) nomInput.value = grille.nom;
@@ -149,6 +156,12 @@ function chargerGrilleTemplate() {
             if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
 
             afficherListeCriteres(grille.criteres || [], grille.id);
+
+            // Scroll vers le formulaire pour que l'utilisateur voie le changement
+            const formulaire = document.getElementById('formGrille');
+            if (formulaire) {
+                formulaire.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
     }
 }
