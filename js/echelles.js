@@ -152,6 +152,217 @@ const paletteCouleurs = [
 let echelleTemplateActuelle = null;
 
 /* ===============================
+   NOUVELLE VUE HIÉRARCHIQUE
+   Affichage toutes les échelles avec leurs niveaux
+   =============================== */
+
+/**
+ * Affiche toutes les échelles avec leurs niveaux
+ *
+ * FONCTIONNEMENT:
+ * - Utilise <details> pour sections repliables
+ * - Chaque échelle montre ses niveaux
+ * - Bouton contextuel pour ajouter un niveau à l'échelle
+ * - Affiche aperçu visuel de l'échelle
+ */
+function afficherToutesLesEchellesNiveaux() {
+    const container = document.getElementById('vueEchellesNiveaux');
+    if (!container) return;
+
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+
+    if (echelles.length === 0) {
+        container.innerHTML = `
+            <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
+                <p style="color: var(--bleu-leger);">Aucune échelle définie</p>
+                <small>Créez une échelle en utilisant le formulaire ci-dessous</small>
+            </div>
+        `;
+        return;
+    }
+
+    /**
+     * Fonction helper pour générer le HTML d'un niveau
+     */
+    function genererHtmlNiveau(niveau, echelleId) {
+        return `
+            <div class="item-liste" style="margin-bottom: 10px; border-left: 4px solid ${niveau.couleur};">
+                <div style="display: grid; grid-template-columns: 80px 180px 1fr 80px 80px 120px; gap: 10px; align-items: center;">
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--bleu-moyen);">Code</label>
+                        <strong style="font-size: 1.1rem; color: var(--bleu-principal);">${echapperHtml(niveau.code)}</strong>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--bleu-moyen);">Nom</label>
+                        <span style="font-size: 0.9rem;">${echapperHtml(niveau.nom)}</span>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--bleu-moyen);">Description</label>
+                        <span style="font-size: 0.85rem; color: #666;">${echapperHtml(niveau.description || '')}</span>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--bleu-moyen);">Min</label>
+                        <span style="font-size: 0.9rem;">${niveau.min}%</span>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: var(--bleu-moyen);">Max</label>
+                        <span style="font-size: 0.9rem;">${niveau.max}%</span>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 30px; height: 30px; background: ${niveau.couleur};
+                             border-radius: 4px; border: 1px solid #ccc; display: inline-block;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Construire le HTML
+    const html = echelles.map(echelle => {
+        const niveaux = echelle.niveaux || [];
+
+        return `
+            <details class="echelle-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
+                     border-radius: 8px; background: white; overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                         color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
+                         user-select: none; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📊 ${echapperHtml(echelle.nom)}</span>
+                    <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
+                        ${niveaux.length} niveau${niveaux.length > 1 ? 'x' : ''}
+                    </span>
+                </summary>
+                <div style="padding: 15px;">
+                    ${niveaux.length > 0 ? `
+                        <div style="margin-bottom: 15px;">
+                            ${niveaux.map(n => genererHtmlNiveau(n, echelle.id)).join('')}
+                        </div>
+
+                        <!-- Aperçu visuel de l'échelle -->
+                        <div style="margin-bottom: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <strong style="display: block; margin-bottom: 10px; color: var(--bleu-principal);">Aperçu visuel :</strong>
+                            <div style="position: relative;">
+                                <div style="display: flex; gap: 5px; height: 40px;">
+                                    ${niveaux.map(n => {
+                                        const largeur = n.max - n.min + 1;
+                                        return `
+                                            <div style="flex: ${largeur}; background: ${n.couleur};
+                                                 border-radius: 4px; display: flex; align-items: center; justify-content: center;
+                                                 color: white; font-weight: bold; font-size: 0.9rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+                                                ${n.code}
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                                <div style="display: flex; margin-top: 5px; font-size: 0.7rem; color: #666; position: relative;">
+                                    <span style="position: absolute; left: 0;">0%</span>
+                                    ${niveaux.map((n, idx) => {
+                                        // Calculer la position de chaque séparateur
+                                        const position = ((n.max + 1) / 100) * 100; // Position en %
+                                        return idx < niveaux.length - 1 ? `
+                                            <span style="position: absolute; left: ${position}%; transform: translateX(-50%);">
+                                                ${n.max}% | ${n.max + 1}%
+                                            </span>
+                                        ` : '';
+                                    }).join('')}
+                                    <span style="position: absolute; right: 0;">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                    ` : `
+                        <p style="color: var(--bleu-leger); font-style: italic; margin-bottom: 15px;">
+                            Aucun niveau pour cette échelle
+                        </p>
+                    `}
+
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-modifier" onclick="chargerEchelleTemplate('${echelle.id}')">
+                            Modifier
+                        </button>
+                        <button class="btn btn-principal" onclick="dupliquerEchelle('${echelle.id}')">
+                            Dupliquer
+                        </button>
+                        <button class="btn btn-supprimer" onclick="supprimerEchelle('${echelle.id}')">
+                            Supprimer
+                        </button>
+                    </div>
+                </div>
+            </details>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+}
+
+/**
+ * Ajoute un niveau à une échelle spécifique
+ *
+ * @param {string} echelleId - ID de l'échelle
+ *
+ * FONCTIONNEMENT:
+ * 1. Charge l'échelle dans le select
+ * 2. Affiche le formulaire de niveau
+ * 3. Scroll vers le formulaire
+ */
+function ajouterNiveauAEchelle(echelleId) {
+    // Charger l'échelle dans le select
+    const select = document.getElementById('selectEchelleTemplate');
+    if (select) {
+        select.value = echelleId;
+        chargerEchelleTemplate();
+    }
+
+    // Scroll vers le tableau des niveaux
+    const tableau = document.getElementById('tableauNiveaux');
+    if (tableau) {
+        tableau.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+/**
+ * Duplique une échelle spécifique par son ID
+ *
+ * @param {string} echelleId - ID de l'échelle à dupliquer
+ *
+ * FONCTIONNEMENT:
+ * 1. Trouve l'échelle dans localStorage
+ * 2. Crée une copie avec un nouveau nom
+ * 3. Sauvegarde la copie
+ * 4. Rafraîchit l'affichage
+ */
+function dupliquerEchelle(echelleId) {
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelle = echelles.find(e => e.id === echelleId);
+
+    if (!echelle) {
+        console.error('Échelle introuvable:', echelleId);
+        return;
+    }
+
+    const nouveauNom = prompt('Nom de la nouvelle échelle :', echelle.nom + ' (copie)');
+    if (!nouveauNom) return;
+
+    const nouvelleEchelle = {
+        id: 'ECH' + Date.now(),
+        nom: nouveauNom,
+        niveaux: JSON.parse(JSON.stringify(echelle.niveaux || [])), // Copie profonde
+        config: JSON.parse(JSON.stringify(echelle.config || {})),
+        dateCreation: new Date().toISOString(),
+        dateModification: new Date().toISOString(),
+        baseSur: echelle.nom
+    };
+
+    echelles.push(nouvelleEchelle);
+    localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
+
+    // Mettre à jour l'interface
+    chargerEchellesTemplates();
+    afficherToutesLesEchellesNiveaux();
+
+    afficherNotificationSucces(`📑 Échelle «${nouvelleEchelle.nom}» créée avec succès !`);
+}
+
+/* ===============================
    🚀 INITIALISATION DU MODULE
    =============================== */
 
@@ -181,10 +392,13 @@ function initialiserModuleEchelles() {
     // Charger les échelles templates
     chargerEchellesTemplates();
 
+    // Afficher la nouvelle vue hiérarchique
+    afficherToutesLesEchellesNiveaux();
+
     // Charger la configuration
     chargerConfigurationEchelle();
 
-    console.log('   ✅ Module Échelles initialisé');
+    console.log('   ✅ Module Échelles initialisé avec nouvelle vue hiérarchique');
 }
 
 /* ===============================
@@ -223,18 +437,21 @@ function chargerEchellesTemplates() {
 /**
  * Charge une échelle template sélectionnée
  * Appelée lors du changement de sélection dans le select
- * 
+ *
+ * @param {string} echelleId - ID optionnel de l'échelle à charger
+ *
  * FONCTIONNEMENT:
  * 1. Si "nouvelle" ou vide: réinitialise aux valeurs par défaut
  * 2. Si échelle existante: charge ses données
  * 3. Met à jour l'interface (nom, niveaux, config, aperçu)
  * 4. Affiche/masque le bouton dupliquer selon le cas
- * 
+ *
  * GÈRE:
  * - Changement d'événement sur #selectEchelleTemplate
  */
-function chargerEchelleTemplate() {
-    const selectValue = document.getElementById('selectEchelleTemplate').value;
+function chargerEchelleTemplate(echelleId) {
+    const select = document.getElementById('selectEchelleTemplate');
+    const selectValue = echelleId || (select ? select.value : '');
     const nomContainer = document.getElementById('nomEchelleContainer');
     const btnDupliquer = document.getElementById('btnDupliquerEchelle');
 
@@ -256,6 +473,11 @@ function chargerEchelleTemplate() {
         const echelle = echelles.find(e => e.id === selectValue);
 
         if (echelle) {
+            // Mettre à jour le select si un ID a été passé en paramètre
+            if (echelleId && select) {
+                select.value = echelleId;
+            }
+
             nomContainer.style.display = 'block';
             document.getElementById('nomEchelleTemplate').value = echelle.nom;
 
@@ -368,6 +590,7 @@ function enregistrerCommeEchelle() {
 
     // Recharger le select et sélectionner l'échelle actuelle
     chargerEchellesTemplates();
+    afficherToutesLesEchellesNiveaux();
     document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
 
     afficherNotificationSucces(`📑 Échelle «${nomEchelle}» enregistrée avec succès !`);
@@ -409,6 +632,7 @@ function dupliquerEchelleActuelle() {
     // Mettre à jour l'interface
     echelleTemplateActuelle = nouvelleEchelle;
     chargerEchellesTemplates();
+    afficherToutesLesEchellesNiveaux();
     document.getElementById('selectEchelleTemplate').value = nouvelleEchelle.id;
     document.getElementById('nomEchelleTemplate').value = nouvelleEchelle.nom;
 
@@ -437,6 +661,8 @@ function supprimerEchelle(echelleId) {
     echelles = echelles.filter(e => e.id !== echelleId);
     localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
 
+    chargerEchellesTemplates();
+    afficherToutesLesEchellesNiveaux();
     afficherEchellesPerformance();
     afficherNotificationSucces('Échelle supprimée');
 }
@@ -1155,13 +1381,44 @@ function afficherNotificationSucces(message) {
  * MODULES DÉPENDANTS:
  * - 04-productions.js: Utilise les échelles pour l'évaluation
  * - 07-cartouches.js: Utilise les niveaux pour les rétroactions
- * 
+ *
  * ÉVÉNEMENTS:
  * Tous les événements sont gérés via attributs HTML (onchange, onclick)
  * Pas d'addEventListener requis dans 99-main.js
- * 
+ *
  * COMPATIBILITÉ:
  * - Nécessite ES6+ pour les arrow functions et template literals
  * - Fonctionne avec tous les navigateurs modernes
  * - Pas de dépendances externes
  */
+
+/* ===============================
+   EXPORTS GLOBAUX
+   =============================== */
+
+// Exports des nouvelles fonctions hiérarchiques
+window.afficherToutesLesEchellesNiveaux = afficherToutesLesEchellesNiveaux;
+window.ajouterNiveauAEchelle = ajouterNiveauAEchelle;
+window.dupliquerEchelle = dupliquerEchelle;
+
+// Exports des fonctions existantes (pour compatibilité)
+window.initialiserModuleEchelles = initialiserModuleEchelles;
+window.chargerEchellesTemplates = chargerEchellesTemplates;
+window.chargerEchelleTemplate = chargerEchelleTemplate;
+window.supprimerEchelle = supprimerEchelle;
+window.dupliquerEchelleActuelle = dupliquerEchelleActuelle;
+window.enregistrerCommeEchelle = enregistrerCommeEchelle;
+window.sauvegarderNomEchelle = sauvegarderNomEchelle;
+window.sauvegarderConfigEchelle = sauvegarderConfigEchelle;
+window.changerTypeEchelle = changerTypeEchelle;
+window.afficherTableauNiveaux = afficherTableauNiveaux;
+window.afficherApercuEchelle = afficherApercuEchelle;
+window.ajouterNiveau = ajouterNiveau;
+window.modifierNiveau = modifierNiveau;
+window.supprimerNiveau = supprimerNiveau;
+window.basculerVerrouillageNiveau = basculerVerrouillageNiveau;
+window.reinitialiserNiveauxDefaut = reinitialiserNiveauxDefaut;
+window.afficherEchellesPerformance = afficherEchellesPerformance;
+window.fermerModalEchelles = fermerModalEchelles;
+window.convertirNiveauVersNote = convertirNiveauVersNote;
+window.convertirNoteVersNiveau = convertirNoteVersNiveau;

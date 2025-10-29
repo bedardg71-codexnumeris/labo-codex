@@ -64,18 +64,24 @@
  */
 function initialiserModuleCartouches() {
     console.log('💬 Initialisation du module Cartouches de rétroaction');
-    
+
     // Vérifier que nous sommes dans la bonne section
-    const selectGrille = document.getElementById('selectGrilleRetroaction');
-    if (!selectGrille) {
+    const vueGrillesContainer = document.getElementById('vueGrillesCartouches');
+    if (!vueGrillesContainer) {
         console.log('   ⚠️  Section rétroactions non active, initialisation reportée');
         return;
     }
-    
-    // Charger les grilles disponibles
-    chargerSelectGrillesRetroaction();
-    
-    console.log('   ✅ Module Cartouches initialisé');
+
+    // Afficher la nouvelle vue par grille
+    afficherToutesLesGrillesEtCartouches();
+
+    // Charger aussi l'ancien système pour compatibilité (caché)
+    const selectGrille = document.getElementById('selectGrilleRetroaction');
+    if (selectGrille) {
+        chargerSelectGrillesRetroaction();
+    }
+
+    console.log('   ✅ Module Cartouches initialisé avec la nouvelle vue');
 }
 
 /* ===============================
@@ -467,7 +473,10 @@ function sauvegarderCartouche() {
     // Rafraîchir l'interface
     chargerCartouchesRetroaction();
     document.getElementById('selectCartouche').value = cartoucheActuel.id;
-    
+
+    // Rafraîchir la nouvelle vue
+    afficherToutesLesGrillesEtCartouches();
+
     afficherNotificationSucces('Cartouche sauvegardée avec succès !');
 }
 
@@ -793,17 +802,16 @@ function calculerPourcentageComplete() {
  */
 function afficherListeCartouches(cartouches, grilleId) {
     const container = document.getElementById('listeCartouchesContainer');
-    
+
     container.innerHTML = cartouches.map(cartouche => {
         const nomEchappe = echapperHtml(cartouche.nom);
         const nbRemplis = Object.keys(cartouche.commentaires || {})
             .filter(k => cartouche.commentaires[k] && cartouche.commentaires[k].trim())
             .length;
         const nbTotal = (cartouche.criteres?.length || 0) * (cartouche.niveaux?.length || 0);
-        
+
         return `
-        <div style="padding: 12px; background: var(--bleu-tres-pale); border: 1px solid var(--bleu-leger); 
-             border-radius: 6px; margin-bottom: 10px;">
+        <div class="item-liste" style="background: var(--bleu-tres-pale);">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <strong style="color: var(--bleu-principal);">${nomEchappe}</strong>
@@ -817,22 +825,19 @@ function afficherListeCartouches(cartouches, grilleId) {
                           title="${cartouche.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
                         ${cartouche.verrouille ? '🔒' : '🔓'}
                     </span>
-                    <button class="btn btn-modifier" 
-                            onclick="chargerCartouchePourModif('${cartouche.id}', '${grilleId}')" 
-                            style="padding: 5px 12px; font-size: 0.85rem; 
-                                   opacity: ${cartouche.verrouille ? '0.5' : '1'};"
+                    <button class="btn btn-modifier"
+                            onclick="chargerCartouchePourModif('${cartouche.id}', '${grilleId}')"
+                            style="opacity: ${cartouche.verrouille ? '0.5' : '1'};"
                             ${cartouche.verrouille ? 'disabled' : ''}>
                         Modifier
                     </button>
-                    <button class="btn btn-principal" 
-                            onclick="dupliquerCartouche('${cartouche.id}', '${grilleId}')" 
-                            style="padding: 5px 12px; font-size: 0.85rem;">
+                    <button class="btn btn-principal"
+                            onclick="dupliquerCartouche('${cartouche.id}', '${grilleId}')">
                         Dupliquer
                     </button>
-                    <button class="btn btn-supprimer" 
-                            onclick="supprimerCartoucheConfirm('${cartouche.id}', '${grilleId}')" 
-                            style="padding: 5px 12px; font-size: 0.85rem; 
-                                   opacity: ${cartouche.verrouille ? '0.5' : '1'};"
+                    <button class="btn btn-supprimer"
+                            onclick="supprimerCartoucheConfirm('${cartouche.id}', '${grilleId}')"
+                            style="opacity: ${cartouche.verrouille ? '0.5' : '1'};"
                             ${cartouche.verrouille ? 'disabled' : ''}>
                         Supprimer
                     </button>
@@ -840,6 +845,122 @@ function afficherListeCartouches(cartouches, grilleId) {
             </div>
         </div>
     `;
+    }).join('');
+}
+
+/* ===============================
+   📂 NOUVELLE INTERFACE: VUE PAR GRILLE
+   Affiche toutes les grilles avec leurs cartouches
+   =============================== */
+
+/**
+ * Affiche toutes les grilles avec leurs cartouches regroupées
+ * NOUVELLE ARCHITECTURE: Sections repliables par grille
+ *
+ * FONCTIONNEMENT:
+ * 1. Charge toutes les grilles depuis localStorage
+ * 2. Pour chaque grille, charge ses cartouches
+ * 3. Génère une section <details> repliable
+ * 4. Affiche les cartouches de la grille
+ * 5. Ajoute un bouton "Ajouter" spécifique à la grille
+ *
+ * AVANTAGES:
+ * - Vue d'ensemble complète
+ * - Hiérarchie grille → cartouches visible
+ * - Navigation par scroll au lieu de select
+ * - Actions contextuelles par grille
+ */
+function afficherToutesLesGrillesEtCartouches() {
+    const container = document.getElementById('vueGrillesCartouches');
+    if (!container) return;
+
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+
+    if (grilles.length === 0) {
+        container.innerHTML = `
+            <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
+                <p style="color: var(--bleu-leger);">Aucune grille de critères disponible</p>
+                <small>Créez d'abord une grille dans <strong>Réglages → Grilles de critères</strong></small>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = grilles.map(grille => {
+        const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grille.id}`) || '[]');
+        const nomGrilleEchappe = echapperHtml(grille.nom);
+
+        return `
+            <details class="grille-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
+                     border-radius: 8px; background: white; overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                         color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
+                         user-select: none; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📋 ${nomGrilleEchappe}</span>
+                    <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
+                        ${cartouches.length} cartouche${cartouches.length > 1 ? 's' : ''}
+                    </span>
+                </summary>
+
+                <div style="padding: 15px;">
+                    ${cartouches.length > 0 ? `
+                        <div style="margin-bottom: 15px;">
+                            ${cartouches.map(cartouche => {
+                                const nomCartoucheEchappe = echapperHtml(cartouche.nom);
+                                const nbRemplis = Object.keys(cartouche.commentaires || {})
+                                    .filter(k => cartouche.commentaires[k] && cartouche.commentaires[k].trim())
+                                    .length;
+                                const nbTotal = (cartouche.criteres?.length || 0) * (cartouche.niveaux?.length || 0);
+
+                                return `
+                                    <div class="item-liste" style="background: var(--bleu-tres-pale);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <strong style="color: var(--bleu-principal);">${nomCartoucheEchappe}</strong>
+                                                <small style="color: var(--bleu-leger); margin-left: 10px;">
+                                                    ${nbRemplis} / ${nbTotal} commentaires
+                                                </small>
+                                            </div>
+                                            <div style="white-space: nowrap;">
+                                                <span onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grille.id}')"
+                                                      style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-right: 10px;"
+                                                      title="${cartouche.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                                                    ${cartouche.verrouille ? '🔒' : '🔓'}
+                                                </span>
+                                                <button class="btn btn-modifier"
+                                                        onclick="chargerCartouchePourModif('${cartouche.id}', '${grille.id}')"
+                                                        style="opacity: ${cartouche.verrouille ? '0.5' : '1'};"
+                                                        ${cartouche.verrouille ? 'disabled' : ''}>
+                                                    Modifier
+                                                </button>
+                                                <button class="btn btn-principal"
+                                                        onclick="dupliquerCartouche('${cartouche.id}', '${grille.id}')">
+                                                    Dupliquer
+                                                </button>
+                                                <button class="btn btn-supprimer"
+                                                        onclick="supprimerCartoucheConfirm('${cartouche.id}', '${grille.id}')"
+                                                        style="opacity: ${cartouche.verrouille ? '0.5' : '1'};"
+                                                        ${cartouche.verrouille ? 'disabled' : ''}>
+                                                    Supprimer
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    ` : `
+                        <p style="color: var(--bleu-leger); font-style: italic; margin-bottom: 15px;">
+                            Aucune cartouche pour cette grille
+                        </p>
+                    `}
+
+                    <button class="btn btn-confirmer" onclick="ajouterCartoucheAGrille('${grille.id}')">
+                        + Ajouter une cartouche à cette grille
+                    </button>
+                </div>
+            </details>
+        `;
     }).join('');
 }
 
@@ -872,11 +993,22 @@ function afficherListeCartouches(cartouches, grilleId) {
 function basculerVerrouillageCartouche(cartoucheId, grilleId) {
     let cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
     const index = cartouches.findIndex(c => c.id === cartoucheId);
-    
+
     if (index !== -1) {
-        cartouches[index].verrouille = document.getElementById(`verrou-cartouche-${cartoucheId}`).checked;
+        // Basculer directement l'état (pas de checkbox, juste un span cliquable)
+        cartouches[index].verrouille = !cartouches[index].verrouille;
         localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouches));
+
+        // Afficher une notification spécifique
+        const statut = cartouches[index].verrouille ? 'verrouillée' : 'déverrouillée';
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(`Cartouche "${cartouches[index].nom}" ${statut}`);
+        }
+
         afficherListeCartouches(cartouches, grilleId);
+
+        // Rafraîchir la nouvelle vue
+        afficherToutesLesGrillesEtCartouches();
     }
 }
 
@@ -926,7 +1058,10 @@ function dupliquerCartouche(cartoucheId, grilleId) {
         chargerCartouchesRetroaction();
         document.getElementById('selectCartouche').value = nouveauCartouche.id;
         chargerMatriceRetroaction();
-        
+
+        // Rafraîchir la nouvelle vue
+        afficherToutesLesGrillesEtCartouches();
+
         afficherNotificationSucces('Cartouche dupliquée avec succès !');
     }
 }
@@ -988,8 +1123,12 @@ function supprimerCartoucheConfirm(cartoucheId, grilleId) {
     if (confirm(`Êtes-vous sûr de vouloir supprimer la cartouche «${cartouche?.nom}» ?`)) {
         const nouveauxCartouches = cartouches.filter(c => c.id !== cartoucheId);
         localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(nouveauxCartouches));
-        
+
         chargerCartouchesRetroaction();
+
+        // Rafraîchir la nouvelle vue
+        afficherToutesLesGrillesEtCartouches();
+
         afficherNotificationSucces('Cartouche supprimée');
     }
 }
@@ -1291,6 +1430,56 @@ function importerCartoucheDepuisTxt(event) {
 
 /* ===============================
    📌 NOTES D'UTILISATION
+   =============================== */
+
+/**
+ * Ajoute une cartouche à une grille spécifique
+ * Utilisée par le bouton "+ Ajouter une cartouche" dans chaque section de grille
+ *
+ * @param {string} grilleId - ID de la grille à laquelle ajouter une cartouche
+ *
+ * FONCTIONNEMENT:
+ * 1. Sélectionne la grille dans le select (pour compatibilité avec l'ancien système)
+ * 2. Appelle initialiserNouveauCartouche() pour créer une nouvelle cartouche
+ * 3. Affiche le formulaire d'édition
+ */
+function ajouterCartoucheAGrille(grilleId) {
+    // Sélectionner la grille dans le select (si existant, pour compatibilité)
+    const selectGrille = document.getElementById('selectGrilleRetroaction');
+    if (selectGrille) {
+        selectGrille.value = grilleId;
+    }
+
+    // Initialiser une nouvelle cartouche pour cette grille
+    initialiserNouveauCartouche(grilleId);
+
+    // Afficher les sections nécessaires
+    document.getElementById('aucuneEvalRetroaction').style.display = 'none';
+    document.getElementById('infoCartouche').style.display = 'block';
+    document.getElementById('matriceRetroaction').style.display = 'block';
+
+    // Scroll vers le formulaire
+    document.getElementById('infoCartouche').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ===============================
+   EXPORT DES FONCTIONS GLOBALES
+   =============================== */
+
+window.afficherToutesLesGrillesEtCartouches = afficherToutesLesGrillesEtCartouches;
+window.ajouterCartoucheAGrille = ajouterCartoucheAGrille;
+window.basculerVerrouillageCartouche = basculerVerrouillageCartouche;
+window.chargerCartouchePourModif = chargerCartouchePourModif;
+window.dupliquerCartouche = dupliquerCartouche;
+window.supprimerCartoucheConfirm = supprimerCartoucheConfirm;
+window.chargerCartouchesRetroaction = chargerCartouchesRetroaction;
+window.sauvegarderCartouche = sauvegarderCartouche;
+window.genererApercuRetroaction = genererApercuRetroaction;
+window.importerCommentaires = importerCommentaires;
+window.initialiserModuleCartouches = initialiserModuleCartouches;
+
+/* ===============================
+   📝 NOTES DE DOCUMENTATION
    =============================== */
 
 /*

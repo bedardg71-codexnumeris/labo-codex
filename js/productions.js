@@ -93,23 +93,23 @@ function afficherTableauProductions() {
         const borderColor = estPortfolio ? 'var(--bleu-moyen)' : 'var(--bleu-leger)';
 
         return `
-        <div style="padding: 12px; background: ${bgColor}; border: 2px solid ${borderColor}; border-radius: 6px; margin-bottom: 10px;">
+        <div class="item-liste" style="background: ${bgColor}; border-color: ${borderColor}; border-width: 2px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <strong style="color: var(--bleu-principal);">
                     ${estPortfolio ? '📁 ' : ''}${prod.titre}${prod.description ? ' - ' + prod.description : ''}
                 </strong>
                 <div style="white-space: nowrap;">
                     ${index > 0 ?
-                `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal" 
+                `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal"
                          ${prod.verrouille ? 'disabled' : ''}>↑</button>` : ''}
                     ${index < evaluations.length - 1 ?
-                `<button onclick="descendreEvaluation('${prod.id}')" class="btn btn-principal" 
+                `<button onclick="descendreEvaluation('${prod.id}')" class="btn btn-principal"
                          ${prod.verrouille ? 'disabled' : ''}>↓</button>` : ''}
                     <button onclick="modifierEvaluation('${prod.id}')" class="btn btn-modifier"
                             ${prod.verrouille ? 'disabled' : ''}>Modifier</button>
                     <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer"
                             ${prod.verrouille ? 'disabled' : ''}>Supprimer</button>
-                    <span onclick="verrouillerEvaluation('${prod.id}')"
+                    <span class="btn-verrouiller" data-production-id="${prod.id}"
                           style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
                           title="${prod.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
                         ${prod.verrouille ? '🔒' : '🔓'}
@@ -158,6 +158,15 @@ function afficherTableauProductions() {
 
     document.getElementById('nombreEvaluations').textContent = evaluations.length;
     mettreAJourResumeTypes(evaluations);
+
+    // Attacher les gestionnaires d'événements pour les boutons de verrouillage
+    document.querySelectorAll('.btn-verrouiller').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productionId = this.dataset.productionId;
+            console.log('Clic sur verrouiller, ID:', productionId);
+            verrouillerEvaluation(productionId);
+        });
+    });
 }
 
 /* ===============================
@@ -350,6 +359,7 @@ function sauvegarderProduction() {
 
     annulerFormProduction();
     afficherTableauProductions();
+    afficherToutesLesProductionsParType();
     mettreAJourPonderationTotale();
 
     // Afficher la notification de succès si la fonction existe
@@ -444,8 +454,9 @@ function supprimerProduction(id) {
 
         localStorage.setItem('productions', JSON.stringify(evaluations));
         afficherTableauProductions();
+        afficherToutesLesProductionsParType();
         mettreAJourPonderationTotale();
-        
+
         // Mettre à jour le statut des modalités si la fonction existe
         if (typeof mettreAJourStatutModalites === 'function') {
             mettreAJourStatutModalites();
@@ -475,13 +486,43 @@ function supprimerProduction(id) {
  * 5. Rafraîchit l'affichage
  */
 function verrouillerEvaluation(id) {
+    console.log('🔐 verrouillerEvaluation appelée avec ID:', id, 'type:', typeof id);
+
     let evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
+    console.log('📦 Nombre de productions:', evaluations.length);
+    console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
+
+    // Debug détaillé de la recherche
+    evaluations.forEach((e, idx) => {
+        const match = e.id === id;
+        console.log(`   [${idx}] "${e.id}" === "${id}" ? ${match} (types: ${typeof e.id} vs ${typeof id})`);
+    });
+
     const index = evaluations.findIndex(e => e.id === id);
+    console.log('📍 Index trouvé:', index);
 
     if (index !== -1) {
         evaluations[index].verrouille = !evaluations[index].verrouille;
         localStorage.setItem('productions', JSON.stringify(evaluations));
         afficherTableauProductions();
+        afficherToutesLesProductionsParType();
+
+        // Notification de succès
+        if (typeof afficherNotificationSucces === 'function') {
+            const statut = evaluations[index].verrouille ? 'verrouillée' : 'déverrouillée';
+            afficherNotificationSucces(`Production ${statut}`);
+        }
+    } else {
+        // Si l'évaluation n'est pas trouvée, afficher une erreur
+        console.error('❌ Production non trouvée!');
+        console.error('ID recherché:', id);
+        console.error('IDs disponibles:', evaluations.map(e => ({ id: e.id, titre: e.titre })));
+
+        if (typeof afficherNotificationErreur === 'function') {
+            afficherNotificationErreur('Évaluation introuvable', `ID: ${id}`);
+        } else {
+            alert('Erreur : Évaluation introuvable');
+        }
     }
 }
 
@@ -514,6 +555,7 @@ function monterEvaluation(id) {
         [evaluations[index - 1], evaluations[index]] = [evaluations[index], evaluations[index - 1]];
         localStorage.setItem('productions', JSON.stringify(evaluations));
         afficherTableauProductions();
+        afficherToutesLesProductionsParType();
     }
 }
 
@@ -546,6 +588,7 @@ function descendreEvaluation(id) {
         [evaluations[index], evaluations[index + 1]] = [evaluations[index + 1], evaluations[index]];
         localStorage.setItem('productions', JSON.stringify(evaluations));
         afficherTableauProductions();
+        afficherToutesLesProductionsParType();
     }
 }
 
@@ -779,6 +822,247 @@ function gererPortfolio(id) {
 }
 
 /* ===============================
+   NOUVELLE VUE HIÉRARCHIQUE
+   Affichage groupé par type de production
+   =============================== */
+
+/**
+ * Affiche toutes les productions regroupées par type
+ *
+ * GROUPES:
+ * 1. Portfolio + artefacts (portfolio et artefact-portfolio)
+ * 2. Évaluations sommatives (examen, travail, quiz, presentation, autre)
+ * 3. Évaluations formatives (types avec '-formatif')
+ *
+ * FONCTIONNEMENT:
+ * - Utilise <details> pour sections repliables
+ * - Chaque section affiche ses productions
+ * - Bouton contextuel pour ajouter une production au type
+ */
+function afficherToutesLesProductionsParType() {
+    const container = document.getElementById('vueProductionsParType');
+    if (!container) return;
+
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+
+    if (productions.length === 0) {
+        container.innerHTML = `
+            <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
+                <p style="color: var(--bleu-leger);">Aucune production définie</p>
+                <small>Ajoutez une production en utilisant les boutons ci-dessous</small>
+            </div>
+        `;
+        return;
+    }
+
+    // Grouper les productions
+    const portfolio = productions.find(p => p.type === 'portfolio');
+    const artefacts = productions.filter(p => p.type === 'artefact-portfolio');
+    const sommatives = productions.filter(p =>
+        !p.type.includes('formatif') &&
+        p.type !== 'portfolio' &&
+        p.type !== 'artefact-portfolio'
+    );
+    const formatives = productions.filter(p => p.type.includes('formatif'));
+
+    /**
+     * Fonction helper pour générer le HTML d'une production
+     */
+    function genererHtmlProduction(prod, index, total) {
+        const grilleAssociee = grilles.find(g => g.id === prod.grilleId);
+        const nomGrille = grilleAssociee ? grilleAssociee.nom : 'Aucune grille';
+        const estPortfolio = prod.type === 'portfolio';
+        const bgColor = estPortfolio ? 'var(--bleu-carte)' : 'white';
+
+        return `
+            <div class="item-liste" style="background: ${bgColor}; margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong style="color: var(--bleu-principal);">
+                        ${estPortfolio ? '📁 ' : ''}${echapperHtml(prod.titre)}${prod.description ? ' - ' + echapperHtml(prod.description) : ''}
+                    </strong>
+                    <div style="white-space: nowrap;">
+                        ${index > 0 ?
+                            `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal"
+                                 ${prod.verrouille ? 'disabled' : ''}>↑</button>` : ''}
+                        ${index < total - 1 ?
+                            `<button onclick="descendreEvaluation('${prod.id}')" class="btn btn-principal"
+                                 ${prod.verrouille ? 'disabled' : ''}>↓</button>` : ''}
+                        <button onclick="modifierEvaluation('${prod.id}')" class="btn btn-modifier"
+                                ${prod.verrouille ? 'disabled' : ''}>Modifier</button>
+                        <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer"
+                                ${prod.verrouille ? 'disabled' : ''}>Supprimer</button>
+                        <span class="btn-verrouiller-prod" data-production-id="${prod.id}"
+                              style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
+                              title="${prod.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                            ${prod.verrouille ? '🔒' : '🔓'}
+                        </span>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: ${prod.type === 'artefact-portfolio' ? '1fr 1fr' : '1fr 1fr 1fr'}; gap: 10px;">
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Type</label>
+                        <input type="text" value="${getTypeLabel(prod.type)}" class="controle-form"
+                               readonly style="font-size: 0.85rem;">
+                    </div>
+                    ${prod.type !== 'artefact-portfolio' ? `
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Pondération</label>
+                        <input type="text" value="${prod.ponderation}%" class="controle-form"
+                               readonly style="font-size: 0.85rem; font-weight: bold;">
+                    </div>
+                    ` : ''}
+                    ${!estPortfolio ? `
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Grilles de critères</label>
+                        <input type="text" value="${echapperHtml(nomGrille)}" class="controle-form"
+                               readonly style="font-size: 0.85rem; ${!grilleAssociee ? 'color: var(--bleu-leger); font-style: italic;' : ''}">
+                    </div>
+                    ` : ''}
+                </div>
+                ${estPortfolio && prod.artefactsIds && prod.artefactsIds.length > 0 ? `
+                    <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px;">
+                        <strong style="font-size: 0.85rem; color: var(--bleu-principal);">
+                            ${prod.artefactsIds.length} artefacts sélectionnés
+                        </strong> ·
+                        ${prod.regles.nombreARetenir} à retenir pour note finale ·
+                        Min. ${prod.regles.minimumCompletion} complétés requis
+                    </div>
+                ` : ''}
+                ${prod.objectif || prod.tache ? `
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--bleu-tres-pale);">
+                        ${prod.objectif ? `<p style="font-size: 0.85rem; margin-bottom: 5px;"><strong>Objectif:</strong> ${echapperHtml(prod.objectif)}</p>` : ''}
+                        ${prod.tache ? `<p style="font-size: 0.85rem; margin-bottom: 0;"><strong>Tâche:</strong> ${echapperHtml(prod.tache)}</p>` : ''}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    // Construire le HTML
+    let html = '';
+
+    // Section 1: Portfolio + Artefacts
+    if (portfolio || artefacts.length > 0) {
+        html += `
+            <details class="production-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
+                     border-radius: 8px; background: white; overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                         color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
+                         user-select: none; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📁 Portfolio et artefacts</span>
+                    <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
+                        ${portfolio ? '1 portfolio' : ''}${portfolio && artefacts.length > 0 ? ' · ' : ''}${artefacts.length > 0 ? `${artefacts.length} artefact${artefacts.length > 1 ? 's' : ''}` : ''}
+                    </span>
+                </summary>
+                <div style="padding: 15px;">
+                    ${portfolio ? genererHtmlProduction(portfolio, 0, 1) : ''}
+                    ${artefacts.map((art, idx) => genererHtmlProduction(art, idx, artefacts.length)).join('')}
+                    ${!portfolio ? `
+                        <button class="btn btn-confirmer" onclick="ajouterProductionAuType('portfolio')" style="margin-top: 10px;">
+                            + Ajouter un portfolio
+                        </button>
+                    ` : ''}
+                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('artefact-portfolio')" style="margin-top: 10px; margin-left: 10px;">
+                        + Ajouter un artefact
+                    </button>
+                </div>
+            </details>
+        `;
+    }
+
+    // Section 2: Évaluations sommatives
+    if (sommatives.length > 0) {
+        html += `
+            <details class="production-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
+                     border-radius: 8px; background: white; overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                         color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
+                         user-select: none; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📝 Évaluations sommatives</span>
+                    <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
+                        ${sommatives.length} évaluation${sommatives.length > 1 ? 's' : ''}
+                    </span>
+                </summary>
+                <div style="padding: 15px;">
+                    ${sommatives.map((prod, idx) => genererHtmlProduction(prod, idx, sommatives.length)).join('')}
+                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen')" style="margin-top: 10px;">
+                        + Ajouter une évaluation sommative
+                    </button>
+                </div>
+            </details>
+        `;
+    }
+
+    // Section 3: Évaluations formatives
+    if (formatives.length > 0) {
+        html += `
+            <details class="production-section" style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
+                     border-radius: 8px; background: white; overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                         color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
+                         user-select: none; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📝 Évaluations formatives</span>
+                    <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
+                        ${formatives.length} évaluation${formatives.length > 1 ? 's' : ''}
+                    </span>
+                </summary>
+                <div style="padding: 15px;">
+                    ${formatives.map((prod, idx) => genererHtmlProduction(prod, idx, formatives.length)).join('')}
+                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen-formatif')" style="margin-top: 10px;">
+                        + Ajouter une évaluation formative
+                    </button>
+                </div>
+            </details>
+        `;
+    }
+
+    container.innerHTML = html;
+
+    // Attacher les gestionnaires d'événements pour les boutons de verrouillage
+    document.querySelectorAll('.btn-verrouiller-prod').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productionId = this.dataset.productionId;
+            console.log('🔐 Clic verrouillage, ID du bouton:', productionId);
+            if (productionId) {
+                verrouillerEvaluation(productionId);
+            } else {
+                console.error('❌ Pas d\'ID de production sur le bouton');
+            }
+        });
+    });
+}
+
+/**
+ * Ajoute une production du type spécifié
+ *
+ * @param {string} type - Type de production à créer
+ *
+ * FONCTIONNEMENT:
+ * 1. Ouvre le formulaire
+ * 2. Pré-sélectionne le type
+ * 3. Scroll vers le formulaire
+ */
+function ajouterProductionAuType(type) {
+    // Ouvrir le formulaire d'ajout
+    afficherFormProduction(null);
+
+    // Pré-sélectionner le type
+    const selectType = document.getElementById('productionType');
+    if (selectType) {
+        selectType.value = type;
+        // Déclencher l'événement change pour adapter l'interface
+        gererChangementTypeProduction();
+    }
+
+    // Scroll vers le formulaire
+    const form = document.getElementById('formulaireProduction');
+    if (form) {
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+/* ===============================
    🚀 FONCTION D'INITIALISATION
    Point d'entrée du module
    ⚠️ NE PAS RENOMMER - Appelée par 99-main.js
@@ -808,6 +1092,10 @@ function initialiserModuleProductions() {
     // Charger automatiquement si on est sur la page productions
     const sousSection = document.querySelector('#materiel-productions');
     if (sousSection && sousSection.classList.contains('active')) {
+        // Afficher la nouvelle vue hiérarchique
+        afficherToutesLesProductionsParType();
+
+        // Afficher aussi l'ancienne vue (cachée) pour compatibilité
         afficherTableauProductions();
         mettreAJourPonderationTotale();
     }
@@ -815,8 +1103,30 @@ function initialiserModuleProductions() {
     // Pas d'événements globaux à attacher pour l'instant
     // Les événements sont gérés via les attributs onclick dans le HTML
 
-    console.log('✅ Module Productions initialisé');
+    console.log('✅ Module Productions initialisé avec nouvelle vue hiérarchique');
 }
+
+/* ===============================
+   EXPORT DES FONCTIONS GLOBALES
+   =============================== */
+
+window.afficherTableauProductions = afficherTableauProductions;
+window.afficherToutesLesProductionsParType = afficherToutesLesProductionsParType;
+window.ajouterProductionAuType = ajouterProductionAuType;
+window.afficherFormProduction = afficherFormProduction;
+window.sauvegarderProduction = sauvegarderProduction;
+window.annulerFormProduction = annulerFormProduction;
+window.modifierEvaluation = modifierEvaluation;
+window.supprimerProduction = supprimerProduction;
+window.verrouillerEvaluation = verrouillerEvaluation;
+window.monterEvaluation = monterEvaluation;
+window.descendreEvaluation = descendreEvaluation;
+window.gererChangementTypeProduction = gererChangementTypeProduction;
+window.chargerArtefactsDisponibles = chargerArtefactsDisponibles;
+window.mettreAJourPonderationTotale = mettreAJourPonderationTotale;
+window.getTypeLabel = getTypeLabel;
+window.gererPortfolio = gererPortfolio;
+window.initialiserModuleProductions = initialiserModuleProductions;
 
 /* ===============================
    📌 NOTES D'UTILISATION

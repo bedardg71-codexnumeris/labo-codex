@@ -3007,10 +3007,11 @@ function sauvegarderEvaluationModifiee() {
 }
 
 /**
- * Verrouille une évaluation pour empêcher sa modification
+ * Verrouille une évaluation individuelle (saisie de notes) pour empêcher sa modification
  * @param {string} evaluationId - ID de l'évaluation à verrouiller
+ * NOTE: Fonction renommée pour éviter conflit avec verrouillerEvaluation de productions.js
  */
-function verrouillerEvaluation(evaluationId) {
+function verrouillerEvaluationIndividuelle(evaluationId) {
     let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
@@ -3036,10 +3037,11 @@ function verrouillerEvaluation(evaluationId) {
 }
 
 /**
- * Déverrouille une évaluation pour permettre sa modification
+ * Déverrouille une évaluation individuelle (saisie de notes) pour permettre sa modification
  * @param {string} evaluationId - ID de l'évaluation à déverrouiller
+ * NOTE: Fonction renommée pour cohérence avec verrouillerEvaluationIndividuelle
  */
-function deverrouillerEvaluation(evaluationId) {
+function deverrouillerEvaluationIndividuelle(evaluationId) {
     let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const index = evaluations.findIndex(e => e.id === evaluationId);
 

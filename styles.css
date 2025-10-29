@@ -1299,6 +1299,32 @@ input[type="number"].controle-form {
     font-size: 1rem;
 }
 
+/* ===============================
+   RÈGLE ÉPURÉE: TAILLE CONTEXTUELLE
+   Approche simple et maintenable
+   =============================== */
+
+/* Classe sémantique pour items de liste/cartes */
+.item-liste {
+    padding: 12px;
+    background: white;
+    border: 1px solid var(--bleu-leger);
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+/* TOUS les boutons dans un .item-liste sont automatiquement compacts */
+.item-liste .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* Exception: forcer taille normale si besoin */
+.item-liste .btn-large {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+}
+
 /* Largeur */
 .btn-pleine-largeur {
     width: 100%;

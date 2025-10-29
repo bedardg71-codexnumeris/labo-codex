@@ -507,8 +507,7 @@ function afficherListeCriteres(criteres, grilleId) {
     }
 
     container.innerHTML = criteres.map(critere => `
-        <div style="padding: 12px; background: white; border: 1px solid var(--bleu-leger); 
-             border-radius: 6px; margin-bottom: 10px;">
+        <div class="item-liste">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <strong style="color: var(--bleu-principal);">${critere.nom}</strong>
                 <div style="white-space: nowrap;">
@@ -650,6 +649,9 @@ function sauvegarderGrilleTemplate(silencieux = false) {
     // Recharger la liste des grilles
     chargerListeGrillesTemplates();
 
+    // Rafraîchir la nouvelle vue hiérarchique
+    afficherToutesLesGrillesCriteres();
+
     // Sélectionner la grille actuelle
     const select = document.getElementById('selectGrilleTemplate');
     if (select && grilleTemplateActuelle) {
@@ -704,7 +706,7 @@ function sauvegarderNomGrille() {
  */
 function afficherGrillesCriteres() {
     const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
-    const listeDiv = document.getElementById('productions');
+    const listeDiv = document.getElementById('listeGrilles');
 
     if (!listeDiv) return;
 
@@ -718,8 +720,7 @@ function afficherGrillesCriteres() {
         `;
     } else {
         listeDiv.innerHTML = grilles.map(grille => `
-            <div style="padding: 15px; background: var(--bleu-tres-pale); border: 1px solid var(--bleu-leger); 
-                 border-radius: 6px; margin-bottom: 15px;">
+            <div class="item-liste" style="background: var(--bleu-tres-pale); padding: 15px; margin-bottom: 15px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <div>
                         <strong style="color: var(--bleu-principal);">${grille.nom}</strong>
@@ -730,7 +731,7 @@ function afficherGrillesCriteres() {
                     </div>
                     <div style="white-space: nowrap;">
                         <button class="btn btn-principal" onclick="chargerGrilleEnEdition('${grille.id}')">
-                            Utiliser
+                            Charger
                         </button>
                         <button class="btn btn-modifier" onclick="dupliquerGrille('${grille.id}')">
                             Dupliquer
@@ -849,9 +850,12 @@ function supprimerGrille(grilleId) {
 
     // Rafraîchir le modal
     afficherGrillesCriteres();
-    
+
     // Recharger le select
     chargerListeGrillesTemplates();
+
+    // Rafraîchir la nouvelle vue hiérarchique
+    afficherToutesLesGrillesCriteres();
 
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Grille supprimée');
@@ -918,6 +922,7 @@ function dupliquerGrille(grilleId) {
     // Charger la nouvelle grille en édition
     grilleTemplateActuelle = nouvelleGrille;
     chargerListeGrillesTemplates();
+    afficherToutesLesGrillesCriteres();
     const select = document.getElementById('selectGrilleTemplate');
     if (select) select.value = nouvelleGrille.id;
     chargerGrilleTemplate();
@@ -976,6 +981,7 @@ function dupliquerGrilleActuelle() {
     // Mettre à jour l'interface
     grilleTemplateActuelle = nouvelleGrille;
     chargerListeGrillesTemplates();
+    afficherToutesLesGrillesCriteres();
     const select = document.getElementById('selectGrilleTemplate');
     const nomInput = document.getElementById('nomGrilleTemplate');
     if (select) select.value = nouvelleGrille.id;
@@ -1024,13 +1030,18 @@ function basculerVerrouillageCritere(critereId) {
 
     const index = criteres.findIndex(c => c.id === critereId);
     if (index !== -1) {
-        const checkbox = document.getElementById(`unlock-critere-${critereId}`);
-        if (checkbox) {
-            criteres[index].verrouille = checkbox.checked;
-        }
+        // Basculer directement l'état (pas de checkbox, juste un span cliquable)
+        criteres[index].verrouille = !criteres[index].verrouille;
 
         if (grilleTemplateActuelle) {
-            sauvegarderGrilleTemplate();
+            // Sauvegarder en mode silencieux pour éviter la notification "Grille sauvegardée"
+            sauvegarderGrilleTemplate(true);
+
+            // Afficher une notification spécifique au verrouillage
+            const statut = criteres[index].verrouille ? 'verrouillé' : 'déverrouillé';
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces(`Critère "${criteres[index].nom}" ${statut}`);
+            }
         }
 
         afficherListeCriteres(criteres, grilleTemplateActuelle?.id || null);
@@ -1133,6 +1144,216 @@ function enregistrerCommeGrille() {
 }
 
 /* ===============================
+   NOUVELLE VUE HIÉRARCHIQUE
+   Affichage toutes les grilles avec leurs critères
+   =============================== */
+
+/**
+ * Affiche toutes les grilles avec leurs critères
+ *
+ * FONCTIONNEMENT:
+ * - Utilise <details> pour sections repliables
+ * - Chaque grille montre ses critères
+ * - Bouton contextuel pour ajouter un critère à la grille
+ * - Affiche totaux de pondération
+ */
+function afficherToutesLesGrillesCriteres() {
+    console.log('📋 Appel de afficherToutesLesGrillesCriteres()');
+    const container = document.getElementById('vueGrillesCriteres');
+    if (!container) {
+        console.error('❌ Conteneur vueGrillesCriteres introuvable');
+        return;
+    }
+
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    console.log('📋 Nombre de grilles trouvées:', grilles.length);
+
+    if (grilles.length === 0) {
+        container.innerHTML = `
+            <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
+                <p style="color: var(--bleu-leger);">Aucune grille définie</p>
+                <small>Créez une grille en utilisant le formulaire ci-dessous</small>
+            </div>
+        `;
+        return;
+    }
+
+    /**
+     * Fonction helper pour générer le HTML d'un critère
+     */
+    function genererHtmlCritere(critere, grilleId) {
+        return `
+            <div class="item-liste" style="margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong style="color: var(--bleu-principal);">${echapperHtml(critere.nom)}</strong>
+                    <div style="white-space: nowrap;">
+                        <button class="btn btn-modifier" onclick="chargerGrilleTemplate('${grilleId}'); modifierCritere('${critere.id}')"
+                                ${critere.verrouille ? 'disabled' : ''}>
+                            Modifier
+                        </button>
+                        <button class="btn btn-supprimer" onclick="chargerGrilleTemplate('${grilleId}'); supprimerCritere('${critere.id}')"
+                                ${critere.verrouille ? 'disabled' : ''}>
+                            Supprimer
+                        </button>
+                        <span class="btn-verrouiller-critere" data-critere-id="${critere.id}" data-grille-id="${grilleId}"
+                              style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
+                              title="${critere.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                            ${critere.verrouille ? '🔒' : '🔓'}
+                        </span>
+                    </div>
+                </div>
+                ${critere.description ? `<p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">${echapperHtml(critere.description)}</p>` : ''}
+                <div style="display: grid; grid-template-columns: 1fr 1fr ${critere.type === 'algorithmique' ? '2fr' : ''}; gap: 15px;">
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Type</label>
+                        <input type="text" value="${getTypeCritereLabel(critere.type)}"
+                               class="controle-form" readonly style="font-size: 0.85rem;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Pondération</label>
+                        <input type="text" value="${critere.ponderation || 0}%"
+                               class="controle-form" readonly style="font-size: 0.85rem; font-weight: bold;">
+                    </div>
+                    ${critere.type === 'algorithmique' && critere.formule ? `
+                    <div>
+                        <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Formule</label>
+                        <input type="text" value="${echapperHtml(critere.formule)}"
+                               class="controle-form" readonly style="font-size: 0.85rem; font-family: monospace;">
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Fonction helper pour calculer total pondération
+     */
+    function calculerTotal(criteres) {
+        const total = criteres.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0);
+        let couleur = '#666';
+        let texteStatut = '';
+
+        if (total < 100) {
+            couleur = 'var(--risque-eleve)';
+            texteStatut = '⚠️ Incomplet';
+        } else if (total > 100) {
+            couleur = 'var(--risque-critique)';
+            texteStatut = '❌ Dépasse 100%';
+        } else {
+            couleur = 'var(--vert-valide)';
+            texteStatut = '✅ Complet';
+        }
+
+        return { total, couleur, texteStatut };
+    }
+
+    // Construire le HTML
+    const html = grilles.map(grille => {
+        const criteres = grille.criteres || [];
+        const { total, couleur, texteStatut } = calculerTotal(criteres);
+
+        return `
+            <details class="grille-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
+                     border-radius: 8px; background: white; overflow: hidden;">
+                <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
+                         color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
+                         user-select: none; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📋 ${echapperHtml(grille.nom)}</span>
+                    <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
+                        ${criteres.length} critère${criteres.length > 1 ? 's' : ''} ·
+                        <span style="color: ${total === 100 ? '#4caf50' : total < 100 ? '#ff9800' : '#f44336'};">
+                            ${total}%
+                        </span>
+                    </span>
+                </summary>
+                <div style="padding: 15px;">
+                    ${criteres.length > 0 ? `
+                        <div style="margin-bottom: 15px;">
+                            ${criteres.map(c => genererHtmlCritere(c, grille.id)).join('')}
+                        </div>
+                        <div style="padding: 10px; background: var(--bleu-tres-pale); border-radius: 4px; margin-bottom: 15px;">
+                            <strong>Pondération totale: <span style="color: ${couleur};">${total}%</span></strong>
+                            <span style="color: ${couleur}; margin-left: 10px;">${texteStatut}</span>
+                        </div>
+                    ` : `
+                        <p style="color: var(--bleu-leger); font-style: italic; margin-bottom: 15px;">
+                            Aucun critère pour cette grille
+                        </p>
+                    `}
+
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-confirmer" onclick="ajouterCritereAGrille('${grille.id}')">
+                            + Ajouter un critère à cette grille
+                        </button>
+                        <button class="btn btn-modifier" onclick="chargerGrilleTemplate('${grille.id}')">
+                            ✏️ Éditer la grille
+                        </button>
+                        <button class="btn btn-principal" onclick="dupliquerGrille('${grille.id}')">
+                            📋 Dupliquer
+                        </button>
+                        <button class="btn btn-supprimer" onclick="supprimerGrille('${grille.id}')">
+                            🗑️ Supprimer
+                        </button>
+                    </div>
+                </div>
+            </details>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+
+    // Attacher les gestionnaires d'événements pour les boutons de verrouillage
+    document.querySelectorAll('.btn-verrouiller-critere').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const critereId = this.dataset.critereId;
+            const grilleId = this.dataset.grilleId;
+
+            // Charger la grille d'abord
+            const select = document.getElementById('selectGrilleTemplate');
+            if (select) {
+                select.value = grilleId;
+                chargerGrilleTemplate();
+            }
+
+            // Basculer le verrouillage
+            basculerVerrouillageCritere(critereId);
+        });
+    });
+}
+
+/**
+ * Ajoute un critère à une grille spécifique
+ *
+ * @param {string} grilleId - ID de la grille
+ *
+ * FONCTIONNEMENT:
+ * 1. Charge la grille dans le select
+ * 2. Affiche le formulaire de critère
+ * 3. Scroll vers le formulaire
+ */
+function ajouterCritereAGrille(grilleId) {
+    // Charger la grille dans le select
+    const select = document.getElementById('selectGrilleTemplate');
+    if (select) {
+        select.value = grilleId;
+        chargerGrilleTemplate();
+    }
+
+    // Afficher le formulaire de critère (s'il existe)
+    const formCritere = document.getElementById('formAjoutCritere');
+    if (formCritere) {
+        formCritere.style.display = 'block';
+        formCritere.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Focus sur le champ nom
+    const champNom = document.getElementById('critereNom');
+    if (champNom) {
+        setTimeout(() => champNom.focus(), 300);
+    }
+}
+
+/* ===============================
    🚀 FONCTION D'INITIALISATION
    Point d'entrée du module
    ⚠️ NE PAS RENOMMER - Appelée par 99-main.js
@@ -1161,12 +1382,15 @@ function initialiserModuleGrilles() {
     const sousSection = document.querySelector('#materiel-grille-criteres');
     if (sousSection && sousSection.classList.contains('active')) {
         chargerListeGrillesTemplates();
+
+        // Afficher la nouvelle vue hiérarchique
+        afficherToutesLesGrillesCriteres();
     }
 
     // Pas d'événements globaux à attacher pour l'instant
     // Les événements sont gérés via les attributs onclick dans le HTML
 
-    console.log('✅ Module Grilles initialisé');
+    console.log('✅ Module Grilles initialisé avec nouvelle vue hiérarchique');
 }
 
 /* ===============================
@@ -1234,3 +1458,36 @@ function initialiserModuleGrilles() {
  * - Export/Import de grilles au format JSON
  * - Prévisualisation d'une grille avant utilisation
  */
+
+/* ===============================
+   EXPORTS GLOBAUX
+   =============================== */
+
+// Exports des nouvelles fonctions hiérarchiques
+window.afficherToutesLesGrillesCriteres = afficherToutesLesGrillesCriteres;
+window.ajouterCritereAGrille = ajouterCritereAGrille;
+
+// Exports des fonctions existantes (pour compatibilité)
+window.chargerListeGrillesTemplates = chargerListeGrillesTemplates;
+window.chargerGrilleTemplate = chargerGrilleTemplate;
+window.afficherFormCritere = afficherFormCritere;
+window.sauvegarderCritere = sauvegarderCritere;
+window.sauvegarderEtFermer = sauvegarderEtFermer;
+window.annulerAjoutCritere = annulerAjoutCritere;
+window.modifierCritere = modifierCritere;
+window.supprimerCritere = supprimerCritere;
+window.afficherListeCriteres = afficherListeCriteres;
+window.afficherChampFormule = afficherChampFormule;
+window.sauvegarderGrilleTemplate = sauvegarderGrilleTemplate;
+window.sauvegarderNomGrille = sauvegarderNomGrille;
+window.afficherGrillesCriteres = afficherGrillesCriteres;
+window.fermerModalGrilles = fermerModalGrilles;
+window.chargerGrilleEnEdition = chargerGrilleEnEdition;
+window.supprimerGrille = supprimerGrille;
+window.dupliquerGrille = dupliquerGrille;
+window.dupliquerGrilleActuelle = dupliquerGrilleActuelle;
+window.basculerVerrouillageCritere = basculerVerrouillageCritere;
+window.getTypeCritereLabel = getTypeCritereLabel;
+window.calculerTotalPonderationCriteres = calculerTotalPonderationCriteres;
+window.enregistrerCommeGrille = enregistrerCommeGrille;
+window.initialiserModuleGrilles = initialiserModuleGrilles;
