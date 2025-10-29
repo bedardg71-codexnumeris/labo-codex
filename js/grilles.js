@@ -525,18 +525,16 @@ function afficherListeCriteres(criteres, grilleId) {
                 <strong style="color: var(--bleu-principal);">${critere.nom}</strong>
                 <div style="white-space: nowrap;">
                     <button class="btn btn-modifier" onclick="modifierCritere('${critere.id}')"
-                            ${critere.verrouille ? 'disabled' : ''}
                             style="margin-right: 10px;">
                         Modifier
                     </button>
                     <button class="btn btn-supprimer" onclick="supprimerCritere('${critere.id}')"
-                            ${critere.verrouille ? 'disabled' : ''}
                             style="margin-right: 10px;">
                         Supprimer
                     </button>
                     <span onclick="basculerVerrouillageCritere('${critere.id}')"
                           style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
-                          title="${critere.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                          title="${critere.verrouille ? 'Verrouillé (indicateur visuel)' : 'Déverrouillé (indicateur visuel)'}">
                         ${critere.verrouille ? '🔒' : '🔓'}
                     </span>
                 </div>
@@ -1200,17 +1198,15 @@ function afficherToutesLesGrillesCriteres() {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <strong style="color: var(--bleu-principal);">${echapperHtml(critere.nom)}</strong>
                     <div style="white-space: nowrap;">
-                        <button class="btn btn-modifier" onclick="chargerGrilleTemplate('${grilleId}'); modifierCritere('${critere.id}')"
-                                ${critere.verrouille ? 'disabled' : ''}>
+                        <button class="btn btn-modifier" onclick="chargerGrilleTemplate('${grilleId}'); modifierCritere('${critere.id}')">
                             Modifier
                         </button>
-                        <button class="btn btn-supprimer" onclick="chargerGrilleTemplate('${grilleId}'); supprimerCritere('${critere.id}')"
-                                ${critere.verrouille ? 'disabled' : ''}>
+                        <button class="btn btn-supprimer" onclick="chargerGrilleTemplate('${grilleId}'); supprimerCritere('${critere.id}')">
                             Supprimer
                         </button>
                         <span class="btn-verrouiller-critere" data-critere-id="${critere.id}" data-grille-id="${grilleId}"
                               style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
-                              title="${critere.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                              title="${critere.verrouille ? 'Verrouillé (indicateur visuel)' : 'Déverrouillé (indicateur visuel)'}">
                             ${critere.verrouille ? '🔒' : '🔓'}
                         </span>
                     </div>

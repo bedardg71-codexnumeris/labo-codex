@@ -845,7 +845,7 @@ function afficherTableauNiveaux(niveaux) {
                                    onchange="modifierNiveau(${index}, 'code', this.value)"
                                    class="controle-form"
                                    style="width: 60px; padding: 4px;"
-                                   ${niveau.verrouille ? 'disabled' : ''}>
+                                   >
                         </td>
                         <td>
                             <input type="text"
@@ -853,7 +853,7 @@ function afficherTableauNiveaux(niveaux) {
                                    onchange="modifierNiveau(${index}, 'nom', this.value)"
                                    class="controle-form"
                                    style="width: 100%; padding: 4px;"
-                                   ${niveau.verrouille ? 'disabled' : ''}>
+                                   >
                         </td>
                         <td>
                             <input type="text"
@@ -861,7 +861,7 @@ function afficherTableauNiveaux(niveaux) {
                                    onchange="modifierNiveau(${index}, 'description', this.value)"
                                    class="controle-form"
                                    style="width: 100%; padding: 4px;"
-                                   ${niveau.verrouille ? 'disabled' : ''}>
+                                   >
                         </td>
                         <td>
                             <input type="number"
@@ -870,14 +870,14 @@ function afficherTableauNiveaux(niveaux) {
                                    class="controle-form"
                                    style="width: 60px; padding: 4px;"
                                    min="0" max="100"
-                                   ${niveau.verrouille ? 'disabled' : ''}>
+                                   >
                         </td>
 <td>
     <input type="number"
            value="${niveau.max}"
            onchange="modifierNiveau(${index}, 'max', this.value)"
            style="width: 60px;" min="0" max="100"
-           ${niveau.verrouille ? 'disabled' : ''}>
+           >
 </td>
 <td>
                             <input type="number"
@@ -885,12 +885,12 @@ function afficherTableauNiveaux(niveaux) {
                                    onchange="modifierNiveau(${index}, 'valeurCalcul', this.value)"
                                    style="width: 80px;" min="0" max="100" step="0.1"
                                    placeholder="Ex: 32"
-                                   ${niveau.verrouille ? 'disabled' : ''}>
+                                   >
                         </td>
                         <td>
     <select onchange="modifierNiveau(${index}, 'couleur', this.value)"
             style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"
-            ${niveau.verrouille ? 'disabled' : ''}>
+            >
         ${paletteCouleurs.map(c => `
             <option value="${c.valeur}" ${niveau.couleur === c.valeur ? 'selected' : ''}>
                 ${c.nom}
@@ -905,7 +905,7 @@ function afficherTableauNiveaux(niveaux) {
                             ${niveaux.length > 1 ?
             `<button onclick="supprimerNiveau(${index})"
                                          class="btn btn-supprimer btn-compact"
-                                         ${niveau.verrouille ? 'disabled' : ''}
+                                         
                                          title="${niveau.verrouille ? 'Déverrouillez d\'abord pour supprimer' : 'Supprimer ce niveau'}">
                                     Supprimer
                                 </button>`
