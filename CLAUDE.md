@@ -42,7 +42,7 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 
 ```
 projet/
-├── index 77 (correctifs critiques).html      # Point d'entrée actuel (Beta 0.77)
+├── index 78 (bouton soutien).html            # Point d'entrée actuel (Beta 0.78)
 ├── css/
 │   └── styles.css                        # Styles globaux + variables CSS pratiques
 ├── js/
@@ -151,13 +151,36 @@ localStorage.seancesCompletes             // horaire.js (futur)
 ```
 
 **Classes CSS** :
-```javascript
+```css
 // Réutiliser les classes existantes
 .item-carte                  // Conteneur carte
 .item-carte-header          // En-tête de carte
 .item-carte-body            // Corps de carte
 .statut-badge               // Badge de statut
 .statistique-item           // Item statistique
+```
+
+**Règles des boutons (styles.css:1302-1324)** :
+```css
+/* RÈGLE AUTOMATIQUE appliquée depuis Beta 0.79 */
+/* Les boutons DANS les cartes/listes/formulaires sont automatiquement compacts */
+/* Les boutons HORS contexte (actions principales) restent standards */
+
+✅ Compacts automatiquement (6px 12px, 0.85rem) :
+- Boutons dans .carte
+- Boutons dans #listeCriteres, #tableauEvaluationsContainer
+- Boutons dans [id*="liste"] ou [id*="tableau"]
+- Boutons dans divs avec background: white ou var(--bleu-tres-pale)
+- Exemples: "Modifier", "Supprimer" dans les items
+
+✅ Standards (10px 20px, 0.95rem) :
+- Boutons au niveau racine d'une sous-section
+- Boutons d'actions principales
+- Exemples: "Voir les grilles existantes", "Dupliquer cette grille", "Sauvegarder"
+
+⚠️ Exceptions :
+- .btn-large : Force taille grande (12px 24px)
+- .btn-tres-compact : Force taille très petite (4px 10px)
 ```
 
 ### Workflow de modification
@@ -445,6 +468,18 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 - ✅ **Impact** : Bugs bloquants corrigés, import de `donnees-demo.json` fonctionne maintenant
 - ✅ **Package mis à jour** : `Monitorage_Beta_0.77.zip` (318 Ko) prêt pour distribution
+
+**AJOUT BOUTON SOUTIEN** (Session 28 octobre - Beta 0.78)
+- ✅ **Fichier** : `index 78 (bouton soutien).html` - Version Beta 0.78
+- ✅ **Nouvelle fonctionnalité** : Bouton "Soutenir le projet" dans l'en-tête
+- ✅ **Emplacement** : Partie gauche de l'en-tête, sous "Réfléchir, expérimenter, partager"
+- ✅ **Lien** : https://codexnumeris.org/#/portal/support (Ghost/Stripe)
+- ✅ **Style** : Bouton orange discret mais visible avec effet hover
+  - Couleur : `--orange-accent` (#ff6b35)
+  - Effet hover : élévation visuelle (translateY -2px)
+  - Ombre portée : 0 2px 8px avec transition smooth
+- ✅ **CSS** : Classe `.btn-soutien` (lignes 445-469)
+- ✅ **Objectif** : Permettre aux utilisateurs de soutenir financièrement le développement du projet
 
 ### 🔴 Prochaines priorités
 

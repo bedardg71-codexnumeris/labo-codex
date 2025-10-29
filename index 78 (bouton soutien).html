@@ -1,10 +1,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 0.77 - Correctifs critiques</title>
+    <title>Système de suivi Beta 0.79 - Correctifs hiérarchie</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=1761668400">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -441,6 +441,32 @@
             opacity: 0;
             transform: scale(0.98);
         }
+
+        /* Bouton Soutenir le projet */
+        .btn-soutien {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: var(--orange-accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-soutien:hover {
+            background: #ff5722;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-soutien:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3);
+        }
     </style>
 </head>
 
@@ -463,6 +489,9 @@
                             class="site-link">codexnumeris.org</a>
                         <br>
                         Réfléchir, expérimenter, partager.
+                        <br>
+                        <a href="https://codexnumeris.org/#/portal/support" target="_blank" rel="noopener noreferrer"
+                            class="btn-soutien">Soutenir le projet</a>
                     </div>
                 </div>
 
@@ -478,7 +507,7 @@
                 <!-- Informations légales et techniques (à droite) -->
                 <div class="info-legales-section">
                     <div class="meta">
-                        Beta 0.77
+                        Beta 0.79
                         <br>Créé par Grégoire Bédard
                         <br>Double licence : GPL v3 (code) + CC BY-SA 4.0 (contenu)
                         <br>28 octobre 2025
@@ -1801,11 +1830,19 @@
                             <input type="file" id="fichier-import-productions-local" accept=".json" style="display: none;" onchange="importerProductions(event)">
                         </div>
 
-                        <!-- TABLEAU/CONTENEUR DES ÉVALUATIONS -->
-                        <div id="tableauEvaluationsContainer" style="margin-bottom: 20px;">
-                            <p class="text-muted" id="aucuneEvaluation" style="font-style: italic;">
-                                Aucune évaluation définie.
-                            </p>
+                        <!-- NOUVELLE VUE: Toutes les productions par type -->
+                        <div id="vueProductionsParType" style="margin-bottom: 30px;">
+                            <!-- Contenu généré par afficherToutesLesProductionsParType() -->
+                        </div>
+
+                        <!-- ANCIEN SYSTÈME (Caché par défaut, gardé pour compatibilité) -->
+                        <div style="display: none;">
+                            <!-- TABLEAU/CONTENEUR DES ÉVALUATIONS -->
+                            <div id="tableauEvaluationsContainer" style="margin-bottom: 20px;">
+                                <p class="text-muted" id="aucuneEvaluation" style="font-style: italic;">
+                                    Aucune évaluation définie.
+                                </p>
+                            </div>
                         </div>
 
                         <!-- FORMULAIRE D'AJOUT/MODIFICATION (caché par défaut) -->
@@ -1977,6 +2014,14 @@
                     <div class="carte">
                         <h3>Gestion des grilles de critères d'évaluation</h3>
 
+                        <!-- NOUVELLE VUE: Toutes les grilles et critères -->
+                        <div id="vueGrillesCriteres" style="margin-bottom: 30px;">
+                            <!-- Contenu généré par afficherToutesLesGrillesCriteres() -->
+                        </div>
+
+                        <!-- ANCIEN SYSTÈME (Caché par défaut, gardé pour compatibilité) -->
+                        <div style="display: none;">
+
                         <!-- Sélecteur d'évaluation -->
                         <div class="groupe-form" style="max-width: 400px; margin-bottom: 20px;">
                             <label>Créer ou modifier une grille d'évaluation :</label>
@@ -2119,7 +2164,7 @@
                             </div>
 
                             <!-- Résumé de la pondération -->
-                            <div style="margin-top: 20px; padding: 10px; background: var(--bleu-tres-pale); 
+                            <div style="margin-top: 20px; padding: 10px; background: var(--bleu-tres-pale);
                  border-radius: 6px; text-align: right;">
                                 <strong>Total des pondérations : </strong>
                                 <span id="totalPonderationCriteres"
@@ -2127,6 +2172,8 @@
                                 <small id="statutPonderationCriteres" style="display: block; margin-top: 5px;"></small>
                             </div>
                         </div>
+
+                        </div><!-- Fin ANCIEN SYSTÈME -->
                     </div>
 
                 </div><!--fin sous-section grille-criteres-->
@@ -2153,6 +2200,14 @@
                     <!-- CARTE : ÉCHELLE DE PERFORMANCE PAN/SBG -->
                     <div class="carte">
                         <h3>📈 Échelle de performance</h3>
+
+                        <!-- NOUVELLE VUE: Toutes les échelles et niveaux -->
+                        <div id="vueEchellesNiveaux" style="margin-bottom: 30px;">
+                            <!-- Contenu généré par afficherToutesLesEchellesNiveaux() -->
+                        </div>
+
+                        <!-- ANCIEN SYSTÈME (Caché par défaut, gardé pour compatibilité) -->
+                        <div style="display: none;">
 
                         <!-- Sélecteur d'échelle -->
                         <div class="groupe-form" style="max-width: 400px; margin-bottom: 20px;">
@@ -2308,6 +2363,7 @@
                             </div>
                         </details>
 
+                        </div><!-- Fin ANCIEN SYSTÈME -->
                     </div>
 
                 </div><!--fin sous-section echelle-performance-->
@@ -2376,30 +2432,38 @@
                             </div>
                         </div>
 
-                        <!-- Sélecteur de grille et cartouche -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                            <div class="groupe-form">
-                                <label>Grille de critères :</label>
-                                <select id="selectGrilleRetroaction" class="controle-form"
-                                    onchange="chargerCartouchesRetroaction()">
-                                    <option value="">-- Choisir une grille --</option>
-                                </select>
-                            </div>
-                            <div class="groupe-form">
-                                <label>Cartouche :</label>
-                                <select id="selectCartouche" class="controle-form"
-                                    onchange="chargerMatriceRetroaction()">
-                                    <option value="">-- Nouvelle cartouche --</option>
-                                </select>
-                            </div>
+                        <!-- NOUVELLE VUE: Toutes les grilles et cartouches -->
+                        <div id="vueGrillesCartouches" style="margin-bottom: 30px;">
+                            <!-- Contenu généré par afficherToutesLesGrillesEtCartouches() -->
                         </div>
 
-                        <!-- Message si aucune grille sélectionnée -->
-                        <div id="aucuneEvalRetroaction" style="padding: 20px; background: var(--bleu-tres-pale); 
-             border-radius: 6px; text-align: center; color: var(--bleu-leger);">
-                            <p>Sélectionnez une grille de critères pour créer ou modifier une cartouche de
-                                rétroaction
-                            </p>
+                        <!-- ANCIEN SYSTÈME (Caché par défaut, gardé pour compatibilité) -->
+                        <div style="display: none;">
+                            <!-- Sélecteur de grille et cartouche -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                                <div class="groupe-form">
+                                    <label>Grille de critères :</label>
+                                    <select id="selectGrilleRetroaction" class="controle-form"
+                                        onchange="chargerCartouchesRetroaction()">
+                                        <option value="">-- Choisir une grille --</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Cartouche :</label>
+                                    <select id="selectCartouche" class="controle-form"
+                                        onchange="chargerMatriceRetroaction()">
+                                        <option value="">-- Nouvelle cartouche --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Message si aucune grille sélectionnée -->
+                            <div id="aucuneEvalRetroaction" style="padding: 20px; background: var(--bleu-tres-pale);
+                 border-radius: 6px; text-align: center; color: var(--bleu-leger);">
+                                <p>Sélectionnez une grille de critères pour créer ou modifier une cartouche de
+                                    rétroaction
+                                </p>
+                            </div>
                         </div>
 
                         <!-- Informations de la cartouche -->
@@ -4331,7 +4395,7 @@ Exemple :
                         </div>
 
                         <div class="alerte alerte-information" style="margin-top: 15px;">
-                            <strong>Format du fichier :</strong> JSON standard, lisible et modifiable. Inclut métadonnées (version Beta 0.77, date d'export, statistiques).
+                            <strong>Format du fichier :</strong> JSON standard, lisible et modifiable. Inclut métadonnées (version Beta 0.79, date d'export, statistiques).
                         </div>
                     </div>
 
@@ -5859,7 +5923,7 @@ Exemple :
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
                                 <td style="padding: 10px; font-weight: bold; width: 30%; border-bottom: 1px solid var(--bleu-pale);">Version</td>
-                                <td style="padding: 10px; border-bottom: 1px solid var(--bleu-pale);">Beta 0.77 (correctifs critiques)</td>
+                                <td style="padding: 10px; border-bottom: 1px solid var(--bleu-pale);">Beta 0.79 (correctifs hiérarchie)</td>
                             </tr>
                             <tr>
                                 <td style="padding: 10px; font-weight: bold; border-bottom: 1px solid var(--bleu-pale);">Développé par</td>
@@ -5915,10 +5979,10 @@ Exemple :
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=1761390149"></script>
     <script src="js/etudiants.js"></script>
-    <script src="js/productions.js?v=1761397763"></script>
-    <script src="js/grilles.js?v=1761397763"></script>
-    <script src="js/echelles.js?v=1761354698"></script>
-    <script src="js/cartouches.js"></script>
+    <script src="js/productions.js?v=1761685000"></script>
+    <script src="js/grilles.js?v=1761685100"></script>
+    <script src="js/echelles.js?v=1761685200"></script>
+    <script src="js/cartouches.js?v=1761668600"></script>
     <script src="js/cours.js?v=1761391739"></script>
 
     <!-- PRIORITÉ 3: Calcul des indices (AVANT affichage) -->
@@ -5943,7 +6007,7 @@ Exemple :
     <script src="js/liste-evaluations.js?v=1761391739"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
-    <script src="js/evaluation.js?v=1761391739"></script>
+    <script src="js/evaluation.js?v=1761668100"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js"></script>
@@ -6259,7 +6323,7 @@ Exemple :
         });
     </script>
 
-    <!-- Fonctions d'import/export du matériel pédagogique (Beta 0.77) -->
+    <!-- Fonctions d'import/export du matériel pédagogique (Beta 0.78) -->
     <script>
         // ========================================
         // DEBUG: AFFICHER LE CONTENU DU LOCALSTORAGE
