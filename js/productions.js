@@ -103,13 +103,8 @@ function afficherTableauProductions() {
                 `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal">↑</button>` : ''}
                     ${index < evaluations.length - 1 ?
                 `<button onclick="descendreEvaluation('${prod.id}')" class="btn btn-principal">↓</button>` : ''}
-                    <button onclick="modifierEvaluation('${prod.id}')" class="btn btn-modifier">Modifier</button>
+                    <button onclick="modifierProduction('${prod.id}')" class="btn btn-modifier">Modifier</button>
                     <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer">Supprimer</button>
-                    <span class="btn-verrouiller" data-production-id="${prod.id}"
-                          style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
-                          title="${prod.verrouille ? 'Verrouillée (indicateur visuel)' : 'Déverrouillée (indicateur visuel)'}">
-                        ${prod.verrouille ? '🔒' : '🔓'}
-                    </span>
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: ${prod.type === 'artefact-portfolio' ? '1fr 1fr' : '1fr 1fr 1fr'}; gap: 10px;">
@@ -154,15 +149,6 @@ function afficherTableauProductions() {
 
     document.getElementById('nombreEvaluations').textContent = evaluations.length;
     mettreAJourResumeTypes(evaluations);
-
-    // Attacher les gestionnaires d'événements pour les boutons de verrouillage
-    document.querySelectorAll('.btn-verrouiller').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const productionId = this.dataset.productionId;
-            console.log('Clic sur verrouiller, ID:', productionId);
-            verrouillerEvaluation(productionId);
-        });
-    });
 }
 
 /* ===============================
@@ -431,16 +417,19 @@ function annulerFormProduction() {
 
 /**
  * Lance la modification d'une production existante
- * 
+ *
  * @param {string} id - ID de la production à modifier
- * 
+ *
  * UTILISÉ PAR:
  * - Bouton "Modifier" dans la liste des productions
- * 
+ *
  * FONCTIONNEMENT:
  * Appelle simplement afficherFormProduction() avec l'ID
+ *
+ * NOTE: Renommée de modifierEvaluation() en modifierProduction()
+ * pour éviter conflit avec la fonction du même nom dans evaluation.js
  */
-function modifierEvaluation(id) {
+function modifierProduction(id) {
     afficherFormProduction(id);
 }
 
@@ -889,6 +878,13 @@ function afficherToutesLesProductionsParType() {
      * Fonction helper pour générer le HTML d'une production
      */
     function genererHtmlProduction(prod, index, total) {
+        // Debug: vérifier si la production a un ID
+        if (!prod.id) {
+            console.error('❌ Production sans ID détectée:', prod);
+            console.error('   Titre:', prod.titre);
+            console.error('   Type:', prod.type);
+        }
+
         const grilleAssociee = grilles.find(g => g.id === prod.grilleId);
         const nomGrille = grilleAssociee ? grilleAssociee.nom : 'Aucune grille';
         const estPortfolio = prod.type === 'portfolio';
@@ -905,13 +901,8 @@ function afficherToutesLesProductionsParType() {
                             `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal">↑</button>` : ''}
                         ${index < total - 1 ?
                             `<button onclick="descendreEvaluation('${prod.id}')" class="btn btn-principal">↓</button>` : ''}
-                        <button onclick="modifierEvaluation('${prod.id}')" class="btn btn-modifier">Modifier</button>
+                        <button onclick="modifierProduction('${prod.id || 'ERROR_NO_ID'}')" class="btn btn-modifier">Modifier</button>
                         <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer">Supprimer</button>
-                        <span class="btn-verrouiller-prod" data-production-id="${prod.id}"
-                              style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
-                              title="${prod.verrouille ? 'Verrouillée (indicateur visuel)' : 'Déverrouillée (indicateur visuel)'}">
-                            ${prod.verrouille ? '🔒' : '🔓'}
-                        </span>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: ${prod.type === 'artefact-portfolio' ? '1fr 1fr' : '1fr 1fr 1fr'}; gap: 10px;">
@@ -1033,19 +1024,6 @@ function afficherToutesLesProductionsParType() {
     }
 
     container.innerHTML = html;
-
-    // Attacher les gestionnaires d'événements pour les boutons de verrouillage
-    document.querySelectorAll('.btn-verrouiller-prod').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const productionId = this.dataset.productionId;
-            console.log('🔐 Clic verrouillage, ID du bouton:', productionId);
-            if (productionId) {
-                verrouillerEvaluation(productionId);
-            } else {
-                console.error('❌ Pas d\'ID de production sur le bouton');
-            }
-        });
-    });
 }
 
 /**
@@ -1131,7 +1109,7 @@ window.ajouterProductionAuType = ajouterProductionAuType;
 window.afficherFormProduction = afficherFormProduction;
 window.sauvegarderProduction = sauvegarderProduction;
 window.annulerFormProduction = annulerFormProduction;
-window.modifierEvaluation = modifierEvaluation;
+window.modifierProduction = modifierProduction;
 window.supprimerProduction = supprimerProduction;
 window.verrouillerEvaluation = verrouillerEvaluation;
 window.monterEvaluation = monterEvaluation;
