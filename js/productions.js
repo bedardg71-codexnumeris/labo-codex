@@ -100,18 +100,14 @@ function afficherTableauProductions() {
                 </strong>
                 <div style="white-space: nowrap;">
                     ${index > 0 ?
-                `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal"
-                         ${prod.verrouille ? 'disabled' : ''}>↑</button>` : ''}
+                `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal">↑</button>` : ''}
                     ${index < evaluations.length - 1 ?
-                `<button onclick="descendreEvaluation('${prod.id}')" class="btn btn-principal"
-                         ${prod.verrouille ? 'disabled' : ''}>↓</button>` : ''}
-                    <button onclick="modifierEvaluation('${prod.id}')" class="btn btn-modifier"
-                            ${prod.verrouille ? 'disabled' : ''}>Modifier</button>
-                    <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer"
-                            ${prod.verrouille ? 'disabled' : ''}>Supprimer</button>
+                `<button onclick="descendreEvaluation('${prod.id}')" class="btn btn-principal">↓</button>` : ''}
+                    <button onclick="modifierEvaluation('${prod.id}')" class="btn btn-modifier">Modifier</button>
+                    <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer">Supprimer</button>
                     <span class="btn-verrouiller" data-production-id="${prod.id}"
                           style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
-                          title="${prod.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                          title="${prod.verrouille ? 'Verrouillée (indicateur visuel)' : 'Déverrouillée (indicateur visuel)'}">
                         ${prod.verrouille ? '🔒' : '🔓'}
                     </span>
                 </div>
@@ -906,18 +902,14 @@ function afficherToutesLesProductionsParType() {
                     </strong>
                     <div style="white-space: nowrap;">
                         ${index > 0 ?
-                            `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal"
-                                 ${prod.verrouille ? 'disabled' : ''}>↑</button>` : ''}
+                            `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal">↑</button>` : ''}
                         ${index < total - 1 ?
-                            `<button onclick="descendreEvaluation('${prod.id}')" class="btn btn-principal"
-                                 ${prod.verrouille ? 'disabled' : ''}>↓</button>` : ''}
-                        <button onclick="modifierEvaluation('${prod.id}')" class="btn btn-modifier"
-                                ${prod.verrouille ? 'disabled' : ''}>Modifier</button>
-                        <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer"
-                                ${prod.verrouille ? 'disabled' : ''}>Supprimer</button>
+                            `<button onclick="descendreEvaluation('${prod.id}')" class="btn btn-principal">↓</button>` : ''}
+                        <button onclick="modifierEvaluation('${prod.id}')" class="btn btn-modifier">Modifier</button>
+                        <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer">Supprimer</button>
                         <span class="btn-verrouiller-prod" data-production-id="${prod.id}"
                               style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
-                              title="${prod.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                              title="${prod.verrouille ? 'Verrouillée (indicateur visuel)' : 'Déverrouillée (indicateur visuel)'}">
                             ${prod.verrouille ? '🔒' : '🔓'}
                         </span>
                     </div>

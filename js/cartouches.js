@@ -826,9 +826,7 @@ function afficherListeCartouches(cartouches, grilleId) {
                         ${cartouche.verrouille ? '🔒' : '🔓'}
                     </span>
                     <button class="btn btn-modifier"
-                            onclick="chargerCartouchePourModif('${cartouche.id}', '${grilleId}')"
-                            style="opacity: ${cartouche.verrouille ? '0.5' : '1'};"
-                            ${cartouche.verrouille ? 'disabled' : ''}>
+                            onclick="chargerCartouchePourModif('${cartouche.id}', '${grilleId}')">
                         Modifier
                     </button>
                     <button class="btn btn-principal"
@@ -836,9 +834,7 @@ function afficherListeCartouches(cartouches, grilleId) {
                         Dupliquer
                     </button>
                     <button class="btn btn-supprimer"
-                            onclick="supprimerCartoucheConfirm('${cartouche.id}', '${grilleId}')"
-                            style="opacity: ${cartouche.verrouille ? '0.5' : '1'};"
-                            ${cartouche.verrouille ? 'disabled' : ''}>
+                            onclick="supprimerCartoucheConfirm('${cartouche.id}', '${grilleId}')">
                         Supprimer
                     </button>
                 </div>
@@ -928,9 +924,7 @@ function afficherToutesLesGrillesEtCartouches() {
                                                     ${cartouche.verrouille ? '🔒' : '🔓'}
                                                 </span>
                                                 <button class="btn btn-modifier"
-                                                        onclick="chargerCartouchePourModif('${cartouche.id}', '${grille.id}')"
-                                                        style="opacity: ${cartouche.verrouille ? '0.5' : '1'};"
-                                                        ${cartouche.verrouille ? 'disabled' : ''}>
+                                                        onclick="chargerCartouchePourModif('${cartouche.id}', '${grille.id}')">
                                                     Modifier
                                                 </button>
                                                 <button class="btn btn-principal"
@@ -938,9 +932,7 @@ function afficherToutesLesGrillesEtCartouches() {
                                                     Dupliquer
                                                 </button>
                                                 <button class="btn btn-supprimer"
-                                                        onclick="supprimerCartoucheConfirm('${cartouche.id}', '${grille.id}')"
-                                                        style="opacity: ${cartouche.verrouille ? '0.5' : '1'};"
-                                                        ${cartouche.verrouille ? 'disabled' : ''}>
+                                                        onclick="supprimerCartoucheConfirm('${cartouche.id}', '${grille.id}')">
                                                     Supprimer
                                                 </button>
                                             </div>
