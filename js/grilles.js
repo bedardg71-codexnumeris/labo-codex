@@ -416,18 +416,6 @@ function modifierCritere(id) {
         return;
     }
 
-    let critere;
-    if (grilleTemplateActuelle) {
-        critere = grilleTemplateActuelle.criteres.find(c => c.id === id);
-    } else {
-        critere = window.tempCriteres.find(c => c.id === id);
-    }
-
-    if (critere && critere.verrouille) {
-        alert('Déverrouillez ce critère (🔓) avant de le modifier');
-        return;
-    }
-
     afficherFormCritere(id);
 }
 
@@ -456,18 +444,6 @@ function modifierCritere(id) {
 function supprimerCritere(id) {
     if (!grilleTemplateActuelle && (!window.tempCriteres || window.tempCriteres.length === 0)) {
         alert('Aucune grille en cours de modification');
-        return;
-    }
-
-    let critere;
-    if (grilleTemplateActuelle) {
-        critere = grilleTemplateActuelle.criteres.find(c => c.id === id);
-    } else {
-        critere = window.tempCriteres.find(c => c.id === id);
-    }
-
-    if (critere && critere.verrouille) {
-        alert('Déverrouillez ce critère (🔓) avant de le supprimer');
         return;
     }
 
