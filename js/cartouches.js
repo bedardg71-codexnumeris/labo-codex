@@ -1080,10 +1080,20 @@ function dupliquerCartouche(cartoucheId, grilleId) {
 function chargerCartouchePourModif(cartoucheId, grilleId) {
     const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
     const cartouche = cartouches.find(c => c.id === cartoucheId);
-    
+
     if (cartouche && !cartouche.verrouille) {
+        // Mettre à jour AUSSI le select de la grille, pas seulement celui de la cartouche
+        const selectGrille = document.getElementById('selectGrilleRetroaction');
+        if (selectGrille) selectGrille.value = grilleId;
+
         document.getElementById('selectCartouche').value = cartoucheId;
         chargerMatriceRetroaction();
+
+        // Scroll vers le formulaire pour que l'utilisateur voie le changement
+        const formulaire = document.getElementById('formRetroactions');
+        if (formulaire) {
+            formulaire.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 }
 
