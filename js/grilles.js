@@ -1166,16 +1166,8 @@ function afficherToutesLesGrillesCriteres() {
     function genererHtmlCritere(critere, grilleId) {
         return `
             <div class="item-liste" style="margin-bottom: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="margin-bottom: 10px;">
                     <strong style="color: var(--bleu-principal);">${echapperHtml(critere.nom)}</strong>
-                    <div style="white-space: nowrap;">
-                        <button class="btn btn-modifier" onclick="chargerGrilleTemplate('${grilleId}'); modifierCritere('${critere.id}')">
-                            Modifier
-                        </button>
-                        <button class="btn btn-supprimer" onclick="chargerGrilleTemplate('${grilleId}'); supprimerCritere('${critere.id}')">
-                            Supprimer
-                        </button>
-                    </div>
                 </div>
                 ${critere.description ? `<p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">${echapperHtml(critere.description)}</p>` : ''}
                 <div style="display: grid; grid-template-columns: 1fr 1fr ${critere.type === 'algorithmique' ? '2fr' : ''}; gap: 15px;">
