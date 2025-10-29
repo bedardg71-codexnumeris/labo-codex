@@ -532,11 +532,6 @@ function afficherListeCriteres(criteres, grilleId) {
                             style="margin-right: 10px;">
                         Supprimer
                     </button>
-                    <span onclick="basculerVerrouillageCritere('${critere.id}')"
-                          style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
-                          title="${critere.verrouille ? 'Verrouillé (indicateur visuel)' : 'Déverrouillé (indicateur visuel)'}">
-                        ${critere.verrouille ? '🔒' : '🔓'}
-                    </span>
                 </div>
             </div>
             ${critere.description ? `<p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">${critere.description}</p>` : ''}
@@ -1204,11 +1199,6 @@ function afficherToutesLesGrillesCriteres() {
                         <button class="btn btn-supprimer" onclick="chargerGrilleTemplate('${grilleId}'); supprimerCritere('${critere.id}')">
                             Supprimer
                         </button>
-                        <span class="btn-verrouiller-critere" data-critere-id="${critere.id}" data-grille-id="${grilleId}"
-                              style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
-                              title="${critere.verrouille ? 'Verrouillé (indicateur visuel)' : 'Déverrouillé (indicateur visuel)'}">
-                            ${critere.verrouille ? '🔒' : '🔓'}
-                        </span>
                     </div>
                 </div>
                 ${critere.description ? `<p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">${echapperHtml(critere.description)}</p>` : ''}
@@ -1310,24 +1300,6 @@ function afficherToutesLesGrillesCriteres() {
     }).join('');
 
     container.innerHTML = html;
-
-    // Attacher les gestionnaires d'événements pour les boutons de verrouillage
-    document.querySelectorAll('.btn-verrouiller-critere').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const critereId = this.dataset.critereId;
-            const grilleId = this.dataset.grilleId;
-
-            // Charger la grille d'abord
-            const select = document.getElementById('selectGrilleTemplate');
-            if (select) {
-                select.value = grilleId;
-                chargerGrilleTemplate();
-            }
-
-            // Basculer le verrouillage
-            basculerVerrouillageCritere(critereId);
-        });
-    });
 }
 
 /**
