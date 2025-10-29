@@ -2019,8 +2019,15 @@
                             <!-- Contenu généré par afficherToutesLesGrillesCriteres() -->
                         </div>
 
-                        <!-- ANCIEN SYSTÈME (Caché par défaut, gardé pour compatibilité) -->
-                        <div style="display: none;">
+                        <!-- FORMULAIRE D'ÉDITION (Caché par défaut, affiché lors de l'édition) -->
+                        <div id="conteneurEditionGrille" style="display: none;">
+
+                        <!-- Bouton retour -->
+                        <div style="margin-bottom: 20px;">
+                            <button class="btn btn-annuler" onclick="retourVueHierarchique()">
+                                ← Retour à la vue d'ensemble
+                            </button>
+                        </div>
 
                         <!-- Sélecteur d'évaluation -->
                         <div class="groupe-form" style="max-width: 400px; margin-bottom: 20px;">
