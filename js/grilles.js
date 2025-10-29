@@ -99,11 +99,11 @@ function chargerListeGrillesTemplates() {
 
 /**
  * Charge une grille de critères pour édition ou crée une nouvelle
- * 
+ *
  * UTILISÉ PAR:
  * - Select "Créer ou modifier une grille" (événement onchange)
  * - chargerGrilleEnEdition() depuis le modal
- * 
+ *
  * FONCTIONNEMENT:
  * 1. Récupère l'ID sélectionné
  * 2. Si vide ou "new" : mode création
@@ -116,6 +116,12 @@ function chargerListeGrillesTemplates() {
  *    - Affiche bouton dupliquer
  */
 function chargerGrilleTemplate(grilleId) {
+    // Afficher le conteneur d'édition et cacher la vue hiérarchique
+    const conteneurEdition = document.getElementById('conteneurEditionGrille');
+    const vueHierarchique = document.getElementById('vueGrillesCriteres');
+    if (conteneurEdition) conteneurEdition.style.display = 'block';
+    if (vueHierarchique) vueHierarchique.style.display = 'none';
+
     // Si aucun ID fourni en paramètre, lire depuis le select
     const select = document.getElementById('selectGrilleTemplate');
     const selectValue = grilleId || (select ? select.value : '');
@@ -157,10 +163,9 @@ function chargerGrilleTemplate(grilleId) {
 
             afficherListeCriteres(grille.criteres || [], grille.id);
 
-            // Scroll vers le formulaire pour que l'utilisateur voie le changement
-            const formulaire = document.getElementById('formGrille');
-            if (formulaire) {
-                formulaire.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Scroll vers le conteneur d'édition
+            if (conteneurEdition) {
+                conteneurEdition.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
     }
@@ -496,38 +501,34 @@ function afficherListeCriteres(criteres, grilleId) {
     }
 
     container.innerHTML = criteres.map(critere => `
-        <div class="item-liste">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <strong style="color: var(--bleu-principal);">${critere.nom}</strong>
-                <div style="white-space: nowrap;">
-                    <button class="btn btn-modifier" onclick="modifierCritere('${critere.id}')"
-                            style="margin-right: 10px;">
-                        Modifier
-                    </button>
-                    <button class="btn btn-supprimer" onclick="supprimerCritere('${critere.id}')"
-                            style="margin-right: 10px;">
-                        Supprimer
-                    </button>
+        <div class="item-liste" style="margin-bottom: 8px; padding: 12px 15px;
+             border-left: 4px solid var(--bleu-principal);
+             display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex: 1;">
+                <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 2px;">
+                    ${critere.nom} (${critere.ponderation || 0}%) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${critere.formule}` : ''}
                 </div>
+                ${critere.description ? `
+                    <details style="margin-top: 4px;">
+                        <summary style="cursor: pointer; color: var(--bleu-moyen); font-size: 0.85rem; padding: 4px 0;">
+                            Voir la description
+                        </summary>
+                        <div style="margin-top: 8px; padding: 8px; background: var(--bleu-tres-pale);
+                             border-radius: 4px; font-size: 0.85rem; color: #666;">
+                            ${critere.description}
+                        </div>
+                    </details>
+                ` : ''}
             </div>
-            ${critere.description ? `<p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">${critere.description}</p>` : ''}
-            <div style="display: grid; grid-template-columns: 1fr 1fr ${critere.type === 'algorithmique' ? '2fr' : ''}; gap: 15px;">
-                <div>
-                    <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Type</label>
-                    <input type="text" value="${getTypeCritereLabel(critere.type)}" 
-                           class="controle-form" readonly style="font-size: 0.85rem;">
-                </div>
-                <div>
-                    <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Pondération</label>
-                    <input type="text" value="${critere.ponderation || 0}%" 
-                           class="controle-form" readonly style="font-size: 0.85rem; font-weight: bold;">
-                </div>
-                ${critere.type === 'algorithmique' && critere.formule ? `
-                <div>
-                    <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Formule</label>
-                    <input type="text" value="${critere.formule}" 
-                           class="controle-form" readonly style="font-size: 0.85rem; font-family: monospace;">
-                </div>` : ''}
+            <div style="white-space: nowrap; margin-left: 15px;">
+                <button class="btn btn-modifier" onclick="modifierCritere('${critere.id}')"
+                        style="padding: 4px 10px; font-size: 0.8rem; margin-right: 5px;">
+                    Modifier
+                </button>
+                <button class="btn btn-supprimer" onclick="supprimerCritere('${critere.id}')"
+                        style="padding: 4px 10px; font-size: 0.8rem;">
+                    Supprimer
+                </button>
             </div>
         </div>
     `).join('');
@@ -1161,32 +1162,39 @@ function afficherToutesLesGrillesCriteres() {
     }
 
     /**
-     * Fonction helper pour générer le HTML d'un critère
+     * Fonction helper pour générer le HTML d'un critère (format compact optimisé)
      */
     function genererHtmlCritere(critere, grilleId) {
         return `
-            <div class="item-liste" style="margin-bottom: 10px;">
-                <div style="margin-bottom: 10px;">
-                    <strong style="color: var(--bleu-principal);">${echapperHtml(critere.nom)}</strong>
+            <div class="item-liste" style="margin-bottom: 8px; padding: 12px 15px;
+                 border-left: 4px solid var(--bleu-principal);
+                 display: flex; justify-content: space-between; align-items: center;
+                 transition: background 0.2s;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 2px;">
+                        ${echapperHtml(critere.nom)} (${critere.ponderation || 0}%) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${echapperHtml(critere.formule)}` : ''}
+                    </div>
+                    ${critere.description ? `
+                        <details style="margin-top: 4px;">
+                            <summary style="cursor: pointer; color: var(--bleu-moyen); font-size: 0.85rem; padding: 4px 0;">
+                                Voir la description
+                            </summary>
+                            <div style="margin-top: 8px; padding: 8px; background: var(--bleu-tres-pale);
+                                 border-radius: 4px; font-size: 0.85rem; color: #666;">
+                                ${echapperHtml(critere.description)}
+                            </div>
+                        </details>
+                    ` : ''}
                 </div>
-                ${critere.description ? `<p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">${echapperHtml(critere.description)}</p>` : ''}
-                <div style="display: grid; grid-template-columns: 1fr 1fr ${critere.type === 'algorithmique' ? '2fr' : ''}; gap: 15px;">
-                    <div>
-                        <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Type</label>
-                        <input type="text" value="${getTypeCritereLabel(critere.type)}"
-                               class="controle-form" readonly style="font-size: 0.85rem;">
-                    </div>
-                    <div>
-                        <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Pondération</label>
-                        <input type="text" value="${critere.ponderation || 0}%"
-                               class="controle-form" readonly style="font-size: 0.85rem; font-weight: bold;">
-                    </div>
-                    ${critere.type === 'algorithmique' && critere.formule ? `
-                    <div>
-                        <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Formule</label>
-                        <input type="text" value="${echapperHtml(critere.formule)}"
-                               class="controle-form" readonly style="font-size: 0.85rem; font-family: monospace;">
-                    </div>` : ''}
+                <div style="white-space: nowrap; margin-left: 15px;">
+                    <button class="btn btn-modifier" onclick="modifierCritere('${critere.id}')"
+                            style="padding: 4px 10px; font-size: 0.8rem; margin-right: 5px;">
+                        Modifier
+                    </button>
+                    <button class="btn btn-supprimer" onclick="supprimerCritere('${critere.id}')"
+                            style="padding: 4px 10px; font-size: 0.8rem;">
+                        Supprimer
+                    </button>
                 </div>
             </div>
         `;
@@ -1303,6 +1311,52 @@ function ajouterCritereAGrille(grilleId) {
 }
 
 /* ===============================
+   FONCTION: RETOUR VUE HIÉRARCHIQUE
+   Retourne à la vue d'ensemble des grilles
+   ⚠️ NE PAS RENOMMER - Référencé dans HTML
+   =============================== */
+
+/**
+ * Retourne à la vue hiérarchique des grilles
+ *
+ * UTILISÉ PAR:
+ * - Bouton "← Retour à la vue d'ensemble"
+ *
+ * FONCTIONNEMENT:
+ * 1. Cache le conteneur d'édition
+ * 2. Réaffiche la vue hiérarchique
+ * 3. Rafraîchit la vue hiérarchique
+ * 4. Réinitialise le formulaire
+ */
+function retourVueHierarchique() {
+    // Cacher le conteneur d'édition
+    const conteneurEdition = document.getElementById('conteneurEditionGrille');
+    const vueHierarchique = document.getElementById('vueGrillesCriteres');
+
+    if (conteneurEdition) conteneurEdition.style.display = 'none';
+    if (vueHierarchique) vueHierarchique.style.display = 'block';
+
+    // Réinitialiser le formulaire
+    const formCritere = document.getElementById('formAjoutCritere');
+    if (formCritere) formCritere.style.display = 'none';
+
+    const select = document.getElementById('selectGrilleTemplate');
+    if (select) select.value = '';
+
+    // Réinitialiser l'état global
+    grilleTemplateActuelle = null;
+    critereEnEdition = null;
+
+    // Rafraîchir la vue hiérarchique
+    afficherToutesLesGrillesCriteres();
+
+    // Scroll vers la vue hiérarchique
+    if (vueHierarchique) {
+        vueHierarchique.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+/* ===============================
    🚀 FONCTION D'INITIALISATION
    Point d'entrée du module
    ⚠️ NE PAS RENOMMER - Appelée par 99-main.js
@@ -1409,6 +1463,7 @@ function initialiserModuleGrilles() {
 // Exports des nouvelles fonctions hiérarchiques
 window.afficherToutesLesGrillesCriteres = afficherToutesLesGrillesCriteres;
 window.ajouterCritereAGrille = ajouterCritereAGrille;
+window.retourVueHierarchique = retourVueHierarchique;
 
 // Exports des fonctions existantes (pour compatibilité)
 window.chargerListeGrillesTemplates = chargerListeGrillesTemplates;
