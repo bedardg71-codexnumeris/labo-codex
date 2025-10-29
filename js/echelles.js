@@ -507,6 +507,12 @@ function chargerEchelleTemplate(echelleId) {
 
             // Afficher le bouton dupliquer
             if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
+
+            // Scroll vers le formulaire pour que l'utilisateur voie le changement
+            const formulaire = document.getElementById('formEchelle');
+            if (formulaire) {
+                formulaire.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
     }
 }
