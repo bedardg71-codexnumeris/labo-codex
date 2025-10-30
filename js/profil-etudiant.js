@@ -1661,106 +1661,54 @@ function genererContenuCibleIntervention(da) {
 
     return `
         <!-- ENCADRÉ UNIQUE: SUIVI DE L'APPRENTISSAGE -->
-        <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <div class="profil-carte">
 
-            <!-- Badge RàI avec couleur selon niveau -->
-            <div style="${badgeStyle} display: inline-block; padding: 8px 16px; border-radius: 6px; font-weight: 600; margin-bottom: 15px;">
+            <!-- Badge RàI sobre -->
+            <div class="badge" style="${badgeStyle}">
                 ${niveauTexte}
             </div>
 
             <!-- Liste des informations -->
-            <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
-                <li><strong>• Risque :</strong> ${interpR.niveau} (${indices.R})</li>
-                <li><strong>• Pattern :</strong> ${cibleInfo.pattern}</li>
-                <li><strong>• Progression :</strong> ${interpBlocage ? `${interpBlocage.emoji} ${interpBlocage.niveau} (${Math.round(resultBlocage.score * 100)}%)` : 'Non évaluée'}</li>
-                <li><strong>• Services :</strong> ${eleve.caf === 'Oui' ? '✓ CAF' : ''} ${eleve.sa === 'Oui' ? '✓ SA' : ''} ${eleve.caf !== 'Oui' && eleve.sa !== 'Oui' ? 'Aucun' : ''}</li>
+            <ul class="info-liste">
+                <li><strong>Risque :</strong> ${interpR.niveau} (${indices.R})</li>
+                <li><strong>Pattern :</strong> ${cibleInfo.pattern}</li>
+                <li><strong>Progression :</strong> ${interpBlocage ? `${interpBlocage.emoji} ${interpBlocage.niveau} (${Math.round(resultBlocage.score * 100)}%)` : 'Non évaluée'}</li>
+                <li><strong>Services :</strong> ${eleve.caf === 'Oui' ? '✓ CAF' : ''} ${eleve.sa === 'Oui' ? '✓ SA' : ''} ${eleve.caf !== 'Oui' && eleve.sa !== 'Oui' ? 'Aucun' : ''}</li>
             </ul>
 
-            <!-- Séparateur -->
-            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+            <hr class="profil-separateur">
 
-            <!-- ÉCHELLE VISUELLE DU RISQUE -->
-            <div style="margin: 20px 0;">
-                <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
-                    POSITION SUR L'ÉCHELLE DE RISQUE
-                </h4>
+            <div class="section-titre">Position sur l'échelle de risque</div>
 
-                <!-- Barre de risque avec gradient -->
-                <div style="position: relative; height: 60px; border-radius: 8px; overflow: hidden; margin-bottom: 10px;">
-                    <!-- Segments colorés -->
-                    <div style="display: flex; height: 40px;">
-                        <!-- Minimal (0-0.2) -->
-                        <div style="flex: 20; background: #2196F3; display: flex; align-items: center; justify-content: center;
-                                    font-size: 0.75rem; color: white; font-weight: 500; border-right: 1px solid white;">
-                            Minimal
-                        </div>
-                        <!-- Faible (0.2-0.3) -->
-                        <div style="flex: 10; background: #90EE90; display: flex; align-items: center; justify-content: center;
-                                    font-size: 0.75rem; color: #155724; font-weight: 500; border-right: 1px solid white;">
-                            Faible
-                        </div>
-                        <!-- Modéré (0.3-0.4) -->
-                        <div style="flex: 10; background: #ffc107; display: flex; align-items: center; justify-content: center;
-                                    font-size: 0.75rem; color: #856404; font-weight: 500; border-right: 1px solid white;">
-                            Modéré
-                        </div>
-                        <!-- Élevé (0.4-0.5) -->
-                        <div style="flex: 10; background: #fd7e14; display: flex; align-items: center; justify-content: center;
-                                    font-size: 0.75rem; color: white; font-weight: 500; border-right: 1px solid white;">
-                            Élevé
-                        </div>
-                        <!-- Très élevé (0.5-0.7) -->
-                        <div style="flex: 20; background: #dc3545; display: flex; align-items: center; justify-content: center;
-                                    font-size: 0.75rem; color: white; font-weight: 500; border-right: 1px solid white;">
-                            Très élevé
-                        </div>
-                        <!-- Critique (0.7-1.0) -->
-                        <div style="flex: 30; background: #721c24; display: flex; align-items: center; justify-content: center;
-                                    font-size: 0.75rem; color: white; font-weight: 500;">
-                            Critique
-                        </div>
-                    </div>
-
-                    <!-- Label au-dessus de la flèche -->
-                    <div style="position: absolute; top: -25px; left: ${Math.min(indices.R * 100, 100)}%;
-                                transform: translateX(-50%); white-space: nowrap;
-                                background: #fff; padding: 2px 8px; border-radius: 4px;
-                                font-size: 0.85rem; font-weight: 600; color: ${interpR.couleur};
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        ${interpR.niveau}
-                    </div>
-
-                    <!-- Indicateur de position (ligne noire) -->
-                    <div style="position: absolute; top: 0; left: ${Math.min(indices.R * 100, 100)}%;
-                                width: 3px; height: 40px; background: #000; transform: translateX(-50%);
-                                box-shadow: 0 0 8px rgba(0,0,0,0.5);">
-                    </div>
-
-                    <!-- Triangle pointeur en bas de la ligne -->
-                    <div style="position: absolute; top: 40px; left: ${Math.min(indices.R * 100, 100)}%;
-                                width: 0; height: 0; transform: translateX(-50%);
-                                border-left: 8px solid transparent;
-                                border-right: 8px solid transparent;
-                                border-top: 12px solid #000;">
-                    </div>
+            <div class="profil-echelle-risque">
+                <div class="profil-echelle-barre" style="background: linear-gradient(to right,
+                            #cce5ff 0%, #cce5ff 20%,
+                            #b3d9ff 20%, #b3d9ff 35%,
+                            #ffe6b3 35%, #ffe6b3 50%,
+                            #ffd699 50%, #ffd699 70%,
+                            #ffb3b3 70%, #ffb3b3 85%,
+                            #ff9999 85%, #ff9999 100%);">
+                    <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(indices.R * 100, 100)}%;">▼</div>
+                    <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(indices.R * 100, 100)}%;">R = ${indices.R}</div>
                 </div>
 
-                <!-- Valeur numérique -->
-                <div style="text-align: center; font-size: 0.9rem; color: #666;">
-                    <strong>R = ${indices.R}</strong>
+                <div class="profil-echelle-legende">
+                    <div style="color: #2196F3;"><strong>Minimal</strong><br>0-0.19</div>
+                    <div style="color: #28a745;"><strong>Faible</strong><br>0.20-0.34</div>
+                    <div style="color: #ffc107;"><strong>Modéré</strong><br>0.35-0.49</div>
+                    <div style="color: #ff9800;"><strong>Élevé</strong><br>0.50-0.69</div>
+                    <div style="color: #dc3545;"><strong>Critique</strong><br>≥ 0.70</div>
                 </div>
             </div>
 
-            <!-- Séparateur -->
-            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+            <hr class="profil-separateur">
 
             <!-- Message d'intervention -->
             <div style="line-height: 1.6; color: #333;">
                 ${descriptionNiveau}
             </div>
 
-            <!-- Séparateur -->
-            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+            <hr class="profil-separateur">
 
             <!-- Placeholder graphique (en conclusion) -->
             <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
@@ -3494,8 +3442,7 @@ function genererSectionPerformance(da) {
                 <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
             </ul>
 
-            <!-- Séparateur -->
-            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+            <hr class="profil-separateur">
 
             <!-- Diagnostic SRPNF -->
             <div class="section-titre">
@@ -3525,8 +3472,7 @@ function genererSectionPerformance(da) {
                 }).join('')}
             </div>
 
-            <!-- Séparateur -->
-            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+            <hr class="profil-separateur">
 
             <!-- TITRE ARTEFACTS -->
         <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
