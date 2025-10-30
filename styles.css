@@ -3622,6 +3622,82 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     vertical-align: middle;
 }
 
+/* Badge sobre (général) */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+/* Liste d'informations */
+.info-liste {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+}
+
+.info-liste li {
+    padding: 5px 0;
+    font-size: 0.95rem;
+}
+
+.info-liste li strong {
+    color: var(--bleu-principal);
+}
+
+/* Barre de progression SRPNF */
+.critere {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.critere-nom {
+    flex: 0 0 120px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--bleu-principal);
+}
+
+.critere-valeur {
+    flex: 0 0 50px;
+    text-align: right;
+    font-weight: 600;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.critere-barre {
+    flex: 1;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    margin: 0 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.critere-barre-fill {
+    height: 100%;
+    background: var(--bleu-principal);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* Section titre (comme dans ébauche) */
+.section-titre {
+    color: var(--bleu-principal);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 20px 0 10px 0;
+}
+
 /* === MATRICE DE COMMENTAIRES EN TABLEAU === */
 .matrice-tableau {
     width: 100%;
