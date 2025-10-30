@@ -322,6 +322,13 @@ function afficherSousSection(idSousSection) {
                 chargerStatistiquesApercu();
             }
             break;
+
+        case 'materiel-apercu':
+            console.log('🔄 Rafraîchissement de l\'aperçu du matériel...');
+            if (typeof chargerMaterielConfigure === 'function') {
+                chargerMaterielConfigure();
+            }
+            break;
     }
 
         // Recharger le tableau de bord selon la sous-section

@@ -156,12 +156,17 @@ function chargerCartouchesRetroaction() {
     document.getElementById('infoCartouche').style.display = 'block';
     
     // Afficher la liste des cartouches existantes
-    if (cartouches.length > 0) {
-        afficherListeCartouches(cartouches, grilleId);
-        document.getElementById('listeCartouchesExistants').style.display = 'block';
-    } else {
-        document.getElementById('listeCartouchesExistants').style.display = 'none';
-    }
+    // DÉSACTIVÉ pour Beta 0.80.5+ : remplacé par la sidebar
+    // if (cartouches.length > 0) {
+    //     afficherListeCartouches(cartouches, grilleId);
+    //     document.getElementById('listeCartouchesExistants').style.display = 'block';
+    // } else {
+    //     document.getElementById('listeCartouchesExistants').style.display = 'none';
+    // }
+
+    // Toujours masquer l'ancienne liste (Beta 0.80.5+)
+    const listeAncienne = document.getElementById('listeCartouchesExistants');
+    if (listeAncienne) listeAncienne.style.display = 'none';
     
     // Initialiser une nouvelle cartouche par défaut
     initialiserNouveauCartouche(grilleId);
@@ -260,31 +265,65 @@ function initialiserNouveauCartouche(grilleId) {
  * GÈRE:
  * - Changement d'événement sur #selectCartouche
  */
-function chargerMatriceRetroaction() {
-    const grilleId = document.getElementById('selectGrilleRetroaction').value;
-    const cartoucheId = document.getElementById('selectCartouche').value;
-    
+function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam = null) {
+    console.log('📋 chargerMatriceRetroaction() appelé avec params:', cartoucheIdParam, grilleIdParam);
+
+    // Si appelé avec paramètres (nouvelle interface sidebar), utiliser directement
+    let grilleId = grilleIdParam;
+    let cartoucheId = cartoucheIdParam;
+
+    // Sinon, lire depuis les selects (ancienne interface, compatibilité)
+    if (!cartoucheId || !grilleId) {
+        const selectGrille = document.getElementById('selectGrilleRetroaction');
+        const selectCartouche = document.getElementById('selectCartouche');
+
+        console.log('Lecture depuis selects - selectGrille trouvé:', !!selectGrille, 'valeur:', selectGrille?.value);
+        console.log('Lecture depuis selects - selectCartouche trouvé:', !!selectCartouche, 'valeur:', selectCartouche?.value);
+
+        grilleId = grilleId || selectGrille?.value;
+        cartoucheId = cartoucheId || selectCartouche?.value;
+    }
+
+    console.log('GrilleId final:', grilleId, 'CartoucheId final:', cartoucheId);
+
     if (!cartoucheId) {
+        console.log('⚠️ Pas de cartouche sélectionnée, initialisation nouvelle cartouche');
         // Nouvelle cartouche
         initialiserNouveauCartouche(grilleId);
         return;
     }
-    
+
     // Charger la cartouche existante
     const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    console.log('Cartouches trouvées:', cartouches.length);
+
     cartoucheActuel = cartouches.find(c => c.id === cartoucheId);
-    
+    console.log('cartoucheActuel trouvé:', !!cartoucheActuel);
+
     if (cartoucheActuel) {
+        // Stocker dans window pour accès global
+        window.cartoucheActuel = cartoucheActuel;
+        window.cartoucheActuel.grilleId = grilleId;
+
         // Remplir les champs
-        document.getElementById('nomCartouche').value = cartoucheActuel.nom;
-        document.getElementById('contexteCartouche').value = cartoucheActuel.contexte || '';
-        
+        const inputNom = document.getElementById('nomCartouche');
+        const inputContexte = document.getElementById('contexteCartouche');
+
+        if (inputNom) inputNom.value = cartoucheActuel.nom;
+        if (inputContexte) inputContexte.value = cartoucheActuel.contexte || '';
+
+        console.log('Champs nom/contexte remplis');
+
         // Afficher la matrice
         afficherMatriceRetroaction();
         calculerPourcentageComplete();
-        
+
         document.getElementById('matriceRetroaction').style.display = 'block';
         document.getElementById('apercuRetroaction').style.display = 'block';
+
+        console.log('✅ Matrice affichée');
+    } else {
+        console.warn('❌ cartoucheActuel non trouvé');
     }
 }
 
@@ -321,19 +360,27 @@ function afficherMatriceRetroaction() {
 
     const container = document.getElementById('matriceContainer');
 
+    // Récupérer les couleurs depuis l'échelle de performance (localStorage.niveauxEchelle)
+    const niveauxEchelle = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
+    const couleursParCode = {};
+    niveauxEchelle.forEach(n => {
+        couleursParCode[n.code] = n.couleur;
+    });
+
     let html = `
         <table class="matrice-tableau">
             <thead>
                 <tr>
-                    <th>Critère / Niveau</th>
+                    <th style="background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);">Critère / Niveau</th>
     `;
 
-    // En-têtes des niveaux avec code et label
+    // En-têtes des niveaux avec code et label + couleur de l'échelle
     cartoucheActuel.niveaux.forEach(niveau => {
         const codeEchappe = echapperHtml(niveau.code);
         const nomEchappe = echapperHtml(niveau.nom);
+        const couleurNiveau = couleursParCode[niveau.code] || 'var(--bleu-moyen)';
         html += `
-                    <th>
+                    <th style="background: ${couleurNiveau};">
                         <span class="niveau-code">${codeEchappe}</span>
                         <span class="niveau-label">${nomEchappe}</span>
                     </th>`;
@@ -483,9 +530,15 @@ function sauvegarderCartouche() {
     document.getElementById('selectCartouche').value = cartoucheActuel.id;
 
     // Rafraîchir la nouvelle vue (ancien système)
-    afficherToutesLesGrillesEtCartouches();
+    // DÉSACTIVÉ Beta 0.80.5+ : ancienne interface remplacée par sidebar
+    // afficherToutesLesGrillesEtCartouches();
 
-    afficherNotificationSucces('Cartouche sauvegardée avec succès !');
+    // Rafraîchir la banque sidebar (Beta 0.80.5+)
+    if (typeof afficherBanqueCartouches === 'function') {
+        afficherBanqueCartouches();
+    }
+
+    console.log('✅ Cartouche sauvegardée avec succès');
 }
 
 /* ===============================
@@ -1003,14 +1056,16 @@ function basculerVerrouillageCartouche(cartoucheId, grilleId) {
 
         // Afficher une notification spécifique
         const statut = cartouches[index].verrouille ? 'verrouillée' : 'déverrouillée';
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`Cartouche "${cartouches[index].nom}" ${statut}`);
+        console.log(`🔒 Cartouche "${cartouches[index].nom}" ${statut}`);
+
+        // DÉSACTIVÉ Beta 0.80.5+ : ancienne interface remplacée par sidebar
+        // afficherListeCartouches(cartouches, grilleId);
+        // afficherToutesLesGrillesEtCartouches();
+
+        // Rafraîchir la banque sidebar (Beta 0.80.5+)
+        if (typeof afficherBanqueCartouches === 'function') {
+            afficherBanqueCartouches();
         }
-
-        afficherListeCartouches(cartouches, grilleId);
-
-        // Rafraîchir la nouvelle vue
-        afficherToutesLesGrillesEtCartouches();
     }
 }
 
@@ -1052,19 +1107,19 @@ function dupliquerCartouche(cartoucheId, grilleId) {
             verrouille: false,
             commentaires: { ...cartoucheOriginal.commentaires }
         };
-        
+
         cartouches.push(nouveauCartouche);
         localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouches));
-        
-        // Recharger et sélectionner la copie
-        chargerCartouchesRetroaction();
-        document.getElementById('selectCartouche').value = nouveauCartouche.id;
-        chargerMatriceRetroaction();
 
-        // Rafraîchir la nouvelle vue
-        afficherToutesLesGrillesEtCartouches();
+        // NOUVELLE INTERFACE (Beta 0.80.5+): Charger directement la copie
+        chargerCartouchePourModif(nouveauCartouche.id, grilleId);
 
-        afficherNotificationSucces('Cartouche dupliquée avec succès !');
+        // Rafraîchir la banque sidebar (Beta 0.80.5+)
+        if (typeof afficherBanqueCartouches === 'function') {
+            afficherBanqueCartouches();
+        }
+
+        console.log('✅ Cartouche dupliquée avec succès');
     }
 }
 
@@ -1080,37 +1135,84 @@ function dupliquerCartouche(cartoucheId, grilleId) {
  * - Bouton «Modifier» dans afficherListeCartouches()
  */
 function chargerCartouchePourModif(cartoucheId, grilleId) {
+    console.log('📝 Chargement cartouche:', cartoucheId, 'de la grille:', grilleId);
+
     const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
-    if (cartouche && !cartouche.verrouille) {
-        // Mettre à jour AUSSI le select de la grille, pas seulement celui de la cartouche
-        const selectGrille = document.getElementById('selectGrilleRetroaction');
-        if (selectGrille) selectGrille.value = grilleId;
+    console.log('Cartouche trouvée:', cartouche ? 'OUI' : 'NON');
+    console.log('Verrouillée:', cartouche?.verrouille);
 
-        document.getElementById('selectCartouche').value = cartoucheId;
-        chargerMatriceRetroaction();
+    if (cartouche) {
+        // Mettre à jour les selects cachés pour compatibilité (ancienne interface)
+        const selectGrille = document.getElementById('selectGrilleRetroaction');
+        const selectCartouche = document.getElementById('selectCartouche');
+        if (selectGrille) selectGrille.value = grilleId;
+        if (selectCartouche) selectCartouche.value = cartoucheId;
+
+        // NOUVELLE INTERFACE (Beta 0.80.5+): Passer les paramètres directement
+        chargerMatriceRetroaction(cartoucheId, grilleId);
 
         // NOUVELLE INTERFACE (Beta 0.80.2): Highlight dans la banque
         definirCartoucheActive(cartoucheId);
 
         // Afficher toutes les zones nécessaires
         const messageAccueil = document.getElementById('messageAccueilCartouche');
-        if (messageAccueil) messageAccueil.style.display = 'none';
+        console.log('messageAccueil trouvé:', !!messageAccueil);
+        if (messageAccueil) {
+            messageAccueil.style.display = 'none';
+            console.log('messageAccueil masqué');
+        }
 
         const infoCartouche = document.getElementById('infoCartouche');
-        if (infoCartouche) infoCartouche.style.display = 'block';
+        console.log('infoCartouche trouvé:', !!infoCartouche);
+        if (infoCartouche) {
+            infoCartouche.style.display = 'block';
+            console.log('infoCartouche affiché');
+        }
 
         const zoneImport = document.getElementById('zoneImportUnifiee');
-        if (zoneImport) zoneImport.style.display = 'block';
+        console.log('zoneImport trouvé:', !!zoneImport);
+        if (zoneImport) {
+            zoneImport.style.display = 'block';
+            console.log('zoneImport affiché');
+        }
 
         const matriceRetroaction = document.getElementById('matriceRetroaction');
-        if (matriceRetroaction) matriceRetroaction.style.display = 'block';
+        console.log('matriceRetroaction trouvé:', !!matriceRetroaction);
+        if (matriceRetroaction) {
+            matriceRetroaction.style.display = 'block';
+            console.log('matriceRetroaction affiché');
+        }
 
         // Générer la checklist pour l'import partiel
         genererChecklistCriteresImport();
 
+        console.log('✅ Cartouche chargée avec succès');
+
+        // Si verrouillée, afficher l'alerte de verrouillage
+        const alerteVerrouillage = document.getElementById('alerteVerrouillage');
+        const btnDeverrouiller = document.getElementById('btnDeverrouillerCartouche');
+
+        if (cartouche.verrouille) {
+            console.log('🔒 Cartouche en lecture seule (verrouillée)');
+            if (alerteVerrouillage) alerteVerrouillage.style.display = 'block';
+
+            // Attacher l'événement au bouton
+            if (btnDeverrouiller) {
+                btnDeverrouiller.onclick = function() {
+                    basculerVerrouillageCartouche(cartoucheId, grilleId);
+                    // Recharger la cartouche pour mettre à jour l'affichage
+                    setTimeout(() => chargerCartouchePourModif(cartoucheId, grilleId), 100);
+                };
+            }
+        } else {
+            if (alerteVerrouillage) alerteVerrouillage.style.display = 'none';
+        }
+
         // NE PLUS faire de scroll - la sidebar reste visible
+    } else {
+        console.warn('⚠️ Impossible de charger la cartouche (inexistante)');
     }
 }
 
@@ -1158,9 +1260,15 @@ function supprimerCartoucheConfirm(cartoucheId, grilleId) {
         chargerCartouchesRetroaction();
 
         // Rafraîchir la nouvelle vue
-        afficherToutesLesGrillesEtCartouches();
+        // DÉSACTIVÉ Beta 0.80.5+ : ancienne interface remplacée par sidebar
+        // afficherToutesLesGrillesEtCartouches();
 
-        afficherNotificationSucces('Cartouche supprimée');
+        // Rafraîchir la banque sidebar (Beta 0.80.5+)
+        if (typeof afficherBanqueCartouches === 'function') {
+            afficherBanqueCartouches();
+        }
+
+        console.log('✅ Cartouche supprimée');
     }
 }
 
@@ -1646,14 +1754,14 @@ function afficherBanqueCartouches(grilleIdFiltre = '') {
 
     const html = toutesLesCartouches.map(cart => {
         const estActive = window.cartoucheActuel?.id === cart.id;
-        const verrouClass = cart.verrou ? ' <span style="color: #999; font-size: 0.8rem;">(verrouillée)</span>' : '';
+        const verrouIcone = cart.verrouille ? ' <span style="color: #ffc107; font-size: 0.9rem;" title="Verrouillée">🔒</span>' : '';
 
         return `
             <div class="item-cartouche-banque ${estActive ? 'active' : ''}"
                  data-cartouche-id="${cart.id}"
                  data-grille-id="${cart.grilleId}"
                  onclick="chargerCartouchePourModif('${cart.id}', '${cart.grilleId}')">
-                <div class="nom-cartouche">${echapperHtml(cart.nom)}${verrouClass}</div>
+                <div class="nom-cartouche">${echapperHtml(cart.nom)}${verrouIcone}</div>
                 <div class="badge-grille">${echapperHtml(cart.grilleNom)}</div>
                 <div class="actions-cartouche">
                     <button onclick="event.stopPropagation(); dupliquerCartouche('${cart.id}', '${cart.grilleId}')"

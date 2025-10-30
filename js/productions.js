@@ -1077,8 +1077,8 @@ function initialiserModuleProductions() {
     // Charger automatiquement si on est sur la page productions
     const sousSection = document.querySelector('#materiel-productions');
     if (sousSection && sousSection.classList.contains('active')) {
-        // Afficher la nouvelle vue hiérarchique
-        afficherToutesLesProductionsParType();
+        // Afficher la sidebar avec la liste des productions (Beta 0.80.5+)
+        afficherListeProductions();
 
         // Afficher aussi l'ancienne vue (cachée) pour compatibilité
         afficherTableauProductions();
@@ -1088,7 +1088,7 @@ function initialiserModuleProductions() {
     // Pas d'événements globaux à attacher pour l'instant
     // Les événements sont gérés via les attributs onclick dans le HTML
 
-    console.log('✅ Module Productions initialisé avec nouvelle vue hiérarchique');
+    console.log('✅ Module Productions initialisé avec layout sidebar (Beta 0.80.5)');
 }
 
 /* ===============================
@@ -1164,3 +1164,361 @@ window.initialiserModuleProductions = initialiserModuleProductions;
  * - Permettre le glisser-déposer pour réorganiser
  * - Ajouter des filtres (par type, par pondération)
  */
+
+/* ===============================
+   FONCTIONS SIDEBAR (Beta 0.80.5+)
+   Layout 2 colonnes avec navigation latérale
+   =============================== */
+
+/**
+ * Affiche la liste des productions dans la sidebar
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère les productions depuis localStorage
+ * 2. Récupère les grilles pour afficher le nom de la grille associée
+ * 3. Génère le HTML pour chaque production
+ * 4. Affiche le badge de type et la pondération
+ * 5. Boutons Dupliquer (violet) et Supprimer (rouge)
+ */
+function afficherListeProductions(filtreType = '') {
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const container = document.getElementById('sidebarListeProductions');
+
+    if (!container) return;
+
+    // Filtrer selon le type si nécessaire
+    let productionsFiltrees = productions;
+    if (filtreType) {
+        if (filtreType === 'sommative') {
+            productionsFiltrees = productions.filter(p =>
+                !p.type.includes('formatif') && p.type !== 'portfolio' && p.type !== 'artefact-portfolio'
+            );
+        } else if (filtreType === 'formative') {
+            productionsFiltrees = productions.filter(p => p.type.includes('formatif'));
+        } else if (filtreType === 'portfolio') {
+            productionsFiltrees = productions.filter(p =>
+                p.type === 'portfolio' || p.type === 'artefact-portfolio'
+            );
+        }
+    }
+
+    if (productionsFiltrees.length === 0) {
+        container.innerHTML = '<p class="sidebar-vide">Aucune production disponible</p>';
+        return;
+    }
+
+    const html = productionsFiltrees.map(prod => {
+        const grille = grilles.find(g => g.id === prod.grilleId);
+        const nomGrille = grille ? grille.nom : 'Aucune grille';
+        const typeLabel = getTypeLabel(prod.type);
+        const ponderation = prod.type === 'artefact-portfolio' ? '-' : `${prod.ponderation || 0}%`;
+
+        return `
+            <div class="sidebar-item" data-id="${prod.id}" onclick="chargerProductionPourModif('${prod.id}')">
+                <div class="sidebar-item-titre">${echapperHtml(prod.description || 'Sans titre')}</div>
+                <div class="sidebar-item-badge">${typeLabel} · ${ponderation}</div>
+                <div class="sidebar-item-actions">
+                    <button class="btn-icone" onclick="event.stopPropagation(); dupliquerProduction('${prod.id}')" title="Dupliquer">Dupliquer</button>
+                    <button class="btn-icone" onclick="event.stopPropagation(); supprimerProduction('${prod.id}')" title="Supprimer">Supprimer</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+}
+
+/**
+ * Filtre la liste des productions par type
+ * Appelée par le select de filtre dans la sidebar
+ */
+function filtrerListeProductions() {
+    const select = document.getElementById('filtreTypeProduction');
+    if (!select) return;
+
+    const filtreType = select.value;
+    afficherListeProductions(filtreType);
+}
+
+/**
+ * Crée une nouvelle production (formulaire vide)
+ * Appelée par le bouton "+ Nouvelle production"
+ */
+function creerNouvelleProduction() {
+    // Masquer le message d'accueil
+    const accueil = document.getElementById('accueilProductions');
+    if (accueil) accueil.style.display = 'none';
+
+    // Afficher le formulaire et les options
+    const formulaire = document.getElementById('formulaireProduction');
+    if (formulaire) formulaire.style.display = 'block';
+
+    const options = document.getElementById('optionsImportExportProductions');
+    if (options) options.style.display = 'block';
+
+    // Réinitialiser le formulaire
+    document.getElementById('productionDescription').value = '';
+    document.getElementById('productionTitre').value = '';
+    document.getElementById('productionType').value = '';
+    document.getElementById('productionPonderation').value = '';
+    document.getElementById('productionGrille').value = '';
+    document.getElementById('productionObjectif').value = '';
+    document.getElementById('productionTache').value = '';
+
+    // Réinitialiser les champs portfolio
+    document.getElementById('champsPortfolio').style.display = 'none';
+    document.getElementById('msgPonderationArtefact').style.display = 'none';
+
+    // Changer le titre et le bouton
+    document.getElementById('btnTexteEvaluation').textContent = 'Ajouter';
+
+    // Réinitialiser les métriques
+    mettreAJourMetriquesProduction(null);
+
+    // Retirer le highlight de tous les items
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Charger les grilles disponibles
+    chargerGrillesDisponibles();
+}
+
+/**
+ * Charge une production existante pour modification
+ *
+ * @param {string} id - ID de la production à charger
+ */
+function chargerProductionPourModif(id) {
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const production = productions.find(p => p.id === id);
+
+    if (!production) return;
+
+    // Masquer le message d'accueil
+    const accueil = document.getElementById('accueilProductions');
+    if (accueil) accueil.style.display = 'none';
+
+    // Afficher le formulaire et les options
+    const formulaire = document.getElementById('formulaireProduction');
+    if (formulaire) formulaire.style.display = 'block';
+
+    const options = document.getElementById('optionsImportExportProductions');
+    if (options) options.style.display = 'block';
+
+    // Remplir le formulaire
+    document.getElementById('productionDescription').value = production.description || '';
+    document.getElementById('productionTitre').value = production.titre || '';
+    document.getElementById('productionType').value = production.type || '';
+    document.getElementById('productionPonderation').value = production.ponderation || 0;
+    document.getElementById('productionGrille').value = production.grilleId || '';
+    document.getElementById('productionObjectif').value = production.objectif || '';
+    document.getElementById('productionTache').value = production.tache || '';
+
+    // Gérer les champs spécifiques au portfolio
+    if (production.type === 'portfolio') {
+        document.getElementById('champsPortfolio').style.display = 'block';
+        document.getElementById('portfolioNombreRetenir').value = production.regles?.nombreRetenir || 3;
+        document.getElementById('portfolioMinimumCompleter').value = production.regles?.minimumCompleter || 7;
+        document.getElementById('portfolioNombreTotal').value = production.regles?.nombreTotal || 9;
+    } else {
+        document.getElementById('champsPortfolio').style.display = 'none';
+    }
+
+    // Gérer le message pour les artefacts
+    if (production.type === 'artefact-portfolio') {
+        document.getElementById('msgPonderationArtefact').style.display = 'block';
+        document.getElementById('productionPonderation').disabled = true;
+    } else {
+        document.getElementById('msgPonderationArtefact').style.display = 'none';
+        document.getElementById('productionPonderation').disabled = false;
+    }
+
+    // Changer le titre et le bouton
+    document.getElementById('btnTexteEvaluation').textContent = 'Sauvegarder';
+
+    // Mettre à jour les métriques
+    mettreAJourMetriquesProduction(production);
+
+    // Mettre le highlight sur l'item actif
+    definirProductionActive(id);
+
+    // Charger les grilles disponibles
+    chargerGrillesDisponibles();
+
+    // Stocker l'ID pour la sauvegarde
+    window.productionEnCoursEdition = id;
+}
+
+/**
+ * Met le highlight sur la production active dans la sidebar
+ *
+ * @param {string} id - ID de la production active
+ */
+function definirProductionActive(id) {
+    // Retirer le highlight de tous les items
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Ajouter le highlight à l'item actif
+    const itemActif = document.querySelector(`.sidebar-item[data-id="${id}"]`);
+    if (itemActif) {
+        itemActif.classList.add('active');
+    }
+}
+
+/**
+ * Met à jour les cartes métriques avec les infos de la production
+ *
+ * @param {object|null} production - Production à afficher (ou null pour réinitialiser)
+ */
+function mettreAJourMetriquesProduction(production) {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+
+    if (!production) {
+        document.getElementById('ponderationProdMetrique').textContent = '-';
+        document.getElementById('typeProdMetrique').textContent = '-';
+        document.getElementById('grilleProdMetrique').textContent = '-';
+        return;
+    }
+
+    // Pondération
+    const ponderation = production.type === 'artefact-portfolio' ? 'N/A' : `${production.ponderation || 0}%`;
+    document.getElementById('ponderationProdMetrique').textContent = ponderation;
+
+    // Type
+    const typeLabel = getTypeLabel(production.type);
+    document.getElementById('typeProdMetrique').textContent = typeLabel;
+
+    // Grille
+    const grille = grilles.find(g => g.id === production.grilleId);
+    const nomGrille = grille ? grille.nom : 'Aucune';
+    document.getElementById('grilleProdMetrique').textContent = nomGrille;
+}
+
+/**
+ * Charge les grilles disponibles dans le select
+ * (Fonction helper pour éviter la duplication de code)
+ */
+function chargerGrillesDisponibles() {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const select = document.getElementById('productionGrille');
+
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Aucune</option>';
+    grilles.forEach(grille => {
+        const option = document.createElement('option');
+        option.value = grille.id;
+        option.textContent = grille.nom;
+        select.appendChild(option);
+    });
+}
+
+/**
+ * Duplique une production existante
+ *
+ * @param {string} id - ID de la production à dupliquer
+ */
+function dupliquerProduction(id) {
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const production = productions.find(p => p.id === id);
+
+    if (!production) return;
+
+    // Créer une copie avec un nouvel ID
+    const copie = {
+        ...production,
+        id: Date.now().toString(),
+        description: `${production.description} (copie)`,
+        verrouille: false
+    };
+
+    productions.push(copie);
+    localStorage.setItem('productions', JSON.stringify(productions));
+
+    // Recharger la liste
+    afficherListeProductions();
+    chargerProductionPourModif(copie.id);
+
+    alert(`Production "${copie.description}" dupliquée avec succès`);
+}
+
+/**
+ * Adapte la fonction sauvegarderProduction existante pour le nouveau layout
+ * Cette fonction override la fonction originale pour ajouter le support sidebar
+ */
+const sauvegarderProductionOriginale = window.sauvegarderProduction;
+window.sauvegarderProduction = function() {
+    // Appeler la fonction originale
+    if (typeof sauvegarderProductionOriginale === 'function') {
+        sauvegarderProductionOriginale();
+    }
+
+    // Recharger la sidebar
+    afficherListeProductions();
+
+    // Mettre à jour les métriques
+    const id = window.productionEnCoursEdition;
+    if (id) {
+        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+        const production = productions.find(p => p.id === id);
+        if (production) {
+            mettreAJourMetriquesProduction(production);
+            definirProductionActive(id);
+        }
+    }
+};
+
+/**
+ * Adapte la fonction annulerFormProduction pour le nouveau layout
+ */
+const annulerFormProductionOriginale = window.annulerFormProduction;
+window.annulerFormProduction = function() {
+    // Masquer le formulaire
+    const formulaire = document.getElementById('formulaireProduction');
+    if (formulaire) formulaire.style.display = 'none';
+
+    const options = document.getElementById('optionsImportExportProductions');
+    if (options) options.style.display = 'none';
+
+    // Afficher le message d'accueil
+    const accueil = document.getElementById('accueilProductions');
+    if (accueil) accueil.style.display = 'block';
+
+    // Retirer le highlight
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Réinitialiser l'ID d'édition
+    window.productionEnCoursEdition = null;
+};
+
+/**
+ * Adapte la fonction supprimerProduction pour le nouveau layout
+ */
+const supprimerProductionOriginale = window.supprimerProduction;
+window.supprimerProduction = function(id) {
+    if (!confirm('Supprimer cette production ?')) return;
+
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const index = productions.findIndex(p => p.id === id);
+
+    if (index === -1) return;
+
+    productions.splice(index, 1);
+    localStorage.setItem('productions', JSON.stringify(productions));
+
+    // Recharger la sidebar
+    afficherListeProductions();
+
+    // Masquer le formulaire si c'était la production affichée
+    if (window.productionEnCoursEdition === id) {
+        annulerFormProduction();
+    }
+
+    alert('Production supprimée');
+};

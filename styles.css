@@ -2843,29 +2843,38 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 
 .actions-cartouche .btn-icone,
 .sidebar-item-actions .btn-icone {
-    background: white;
-    border: 1px solid #6b85b3;
     font-size: 0.8rem;
     padding: 4px 10px;
     cursor: pointer;
     border-radius: 4px;
-    color: #032e5c;
     font-weight: 500;
     transition: all 0.15s;
+    color: white;
+    border: none;
+}
+
+/* Bouton Dupliquer - violet */
+.actions-cartouche .btn-icone:first-child,
+.sidebar-item-actions .btn-icone:first-child {
+    background: #4a3a6a;
 }
 
 .actions-cartouche .btn-icone:first-child:hover,
 .sidebar-item-actions .btn-icone:first-child:hover {
-    background: #4a3a6a;
-    color: white;
-    border-color: #4a3a6a;
+    background: #3a2a5a;
+    box-shadow: 0 2px 6px rgba(74, 58, 106, 0.3);
+}
+
+/* Bouton Supprimer - rouge */
+.actions-cartouche .btn-icone:last-child,
+.sidebar-item-actions .btn-icone:last-child {
+    background: #8a2a2a;
 }
 
 .actions-cartouche .btn-icone:last-child:hover,
 .sidebar-item-actions .btn-icone:last-child:hover {
-    background: #8a2a2a;
-    color: white;
-    border-color: #8a2a2a;
+    background: #7a1a1a;
+    box-shadow: 0 2px 6px rgba(138, 42, 42, 0.3);
 }
 
 .btn-ajouter-cartouche,
@@ -2897,18 +2906,79 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     gap: 20px;
 }
 
+/* Message d'accueil zone principale */
+.zone-principale-accueil {
+    padding: 40px 20px;
+    text-align: center;
+    background: var(--bleu-tres-pale);
+    border-radius: 8px;
+}
+
+.zone-principale-accueil p {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* === SECTION ACCORDÉON D'IMPORT === */
 .accordeon-import,
 .section-accordeon {
-    background: white;
+    margin: 20px 0;
+    border: 1px solid #6b85b3;
     border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.accordeon-import h3,
+.accordeon-import h4,
+.section-accordeon h3,
+.section-accordeon h4 {
+    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);
+    color: white;
+    padding: 12px 15px;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.accordeon-import details,
+.section-accordeon details {
+    border-top: 1px solid #ddd;
+}
+
+.accordeon-import summary,
+.section-accordeon summary {
+    padding: 12px 15px;
+    cursor: pointer;
+    background: #f9f9f9;
+    font-weight: 600;
+    color: #032e5c;
+    user-select: none;
+}
+
+.accordeon-import summary:hover,
+.section-accordeon summary:hover {
+    background: #e8f2fd;
+}
+
+/* Summary pour sections de matériel pédagogique - style uniformisé */
+.summary-materiel {
+    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%) !important;
+    color: white !important;
+    padding: 12px 15px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.summary-materiel:hover {
+    background: linear-gradient(135deg, #2a4a8a 0%, #4a6aa8 100%) !important;
 }
 
 .panneau-import,
 .accordeon-contenu {
     padding: 15px;
-    background: #fafafa;
+    background: white;
 }
 
 .banque-vide,
@@ -2947,11 +3017,11 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 }
 
 .matrice-tableau thead {
-    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);
     color: white;
 }
 
 .matrice-tableau th {
+    /* Couleurs individuelles appliquées via inline style depuis cartouches.js */
     padding: 12px;
     text-align: center;
     font-weight: 600;
