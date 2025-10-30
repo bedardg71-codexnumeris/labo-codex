@@ -1799,195 +1799,207 @@
                         les modifications accidentelles.
                     </div>
 
-                    <!-- DÉFINITION DES ÉVALUATIONS -->
-                    <div class="carte">
-                        <h3>📝 Productions</h3>
+                    <!-- LAYOUT SIDEBAR 2 COLONNES -->
+                    <div class="layout-sidebar-2col">
 
-                        <!-- VUE D'ENSEMBLE - FORMAT HARMONISÉ -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                            <!-- Nombre de productions -->
-                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <span style="font-size: 0.9rem; color: #666;">Productions</span>
-                                    <strong id="nombreEvaluations" style="font-size: 1.8rem; color: var(--bleu-principal);">0</strong>
-                                </div>
+                        <!-- SIDEBAR GAUCHE (280px, sticky) -->
+                        <div class="sidebar-navigation">
+
+                            <!-- Filtre par type -->
+                            <div class="sidebar-filtre">
+                                <label>Filtrer par type :</label>
+                                <select class="controle-form" id="filtreTypeProduction" onchange="filtrerListeProductions()">
+                                    <option value="">Toutes</option>
+                                    <option value="sommative">Sommatives</option>
+                                    <option value="formative">Formatives</option>
+                                    <option value="portfolio">Portfolios</option>
+                                </select>
                             </div>
 
-                            <!-- Pondération totale -->
-                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <span style="font-size: 0.9rem; color: #666;">Pondération totale</span>
-                                    <strong id="ponderationTotale" style="font-size: 1.8rem; color: var(--bleu-principal);">0%</strong>
-                                </div>
-                                <div id="statutPonderation" style="font-size: 0.75rem; color: #666; margin-top: 5px; text-align: right;"></div>
+                            <!-- Liste des productions -->
+                            <div class="sidebar-liste" id="sidebarListeProductions">
+                                <!-- Généré par afficherListeProductions() -->
                             </div>
 
-                            <!-- Types d'évaluations (portfolios/artefacts) -->
-                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); grid-column: 1 / -1;">
-                                <div id="typesEvaluations" style="font-size: 0.9rem; color: #666; text-align: center;">
-                                    Aucune production configurée
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- IMPORT/EXPORT PRODUCTIONS -->
-                        <div style="display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: #f1f8e9; border-radius: 6px; border-left: 4px solid #4caf50;">
-                            <button class="btn btn-confirmer" onclick="exporterProductions()" style="flex: 1;">
-                                📤 Exporter les productions
+                            <!-- Bouton d'ajout -->
+                            <button class="sidebar-btn-ajouter" onclick="creerNouvelleProduction()">
+                                + Nouvelle production
                             </button>
-                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-productions-local').click()" style="flex: 1;">
-                                📥 Importer des productions
-                            </button>
-                            <input type="file" id="fichier-import-productions-local" accept=".json" style="display: none;" onchange="importerProductions(event)">
                         </div>
 
-                        <!-- NOUVELLE VUE: Toutes les productions par type -->
-                        <div id="vueProductionsParType" style="margin-bottom: 30px;">
-                            <!-- Contenu généré par afficherToutesLesProductionsParType() -->
-                        </div>
+                        <!-- ZONE PRINCIPALE (centrale, scroll) -->
+                        <div class="zone-principale">
 
-                        <!-- ANCIEN SYSTÈME (Caché par défaut, gardé pour compatibilité) -->
-                        <div style="display: none;">
-                            <!-- TABLEAU/CONTENEUR DES ÉVALUATIONS -->
-                            <div id="tableauEvaluationsContainer" style="margin-bottom: 20px;">
-                                <p class="text-muted" id="aucuneEvaluation" style="font-style: italic;">
-                                    Aucune évaluation définie.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- FORMULAIRE D'AJOUT/MODIFICATION (caché par défaut) -->
-                        <div id="formulaireProduction" style="display: none; margin-top: 20px; padding: 15px; 
-             background: var(--bleu-pale); border-radius: 6px;">
-
-                            <h4 id="titreFormEvaluation" style="color: var(--bleu-principal); margin-bottom: 15px;">
-                                Nouvelle production
-                            </h4>
-
-                            <!-- Ligne 1 : Tous les champs principaux sur une ligne -->
-                            <div
-                                style="display: grid; grid-template-columns: 1.5fr 2fr 2fr 1.5fr 100px; gap: 10px; margin-bottom: 15px;">
-                                <div class="groupe-form">
-                                    <label>Description</label>
-                                    <input type="text" id="productionDescription" class="controle-form"
-                                        placeholder="Ex: Stratégies">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Titre</label>
-                                    <input type="text" id="productionTitre" class="controle-form"
-                                        placeholder="Ex: Analyse #1">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Type</label>
-                                    <select id="productionType" class="controle-form"
-                                        onchange="gererChangementTypeProduction()">
-                                        <option value="">Choisir...</option>
-                                        <optgroup label="Évaluations sommatives (comptent dans la note)">
-                                            <option value="examen">Examen</option>
-                                            <option value="travail">Travail écrit</option>
-                                            <option value="quiz">Quiz/Test</option>
-                                            <option value="presentation">Présentation</option>
-                                            <option value="autre">Autre</option>
-                                        </optgroup>
-                                        <optgroup label="Évaluations formatives (ne comptent PAS dans la note)">
-                                            <option value="examen-formatif">Examen formatif</option>
-                                            <option value="travail-formatif">Travail formatif</option>
-                                            <option value="quiz-formatif">Quiz/Test formatif</option>
-                                            <option value="presentation-formatif">Présentation formative</option>
-                                            <option value="autre-formatif">Autre formatif</option>
-                                        </optgroup>
-                                        <optgroup label="Pratique Alternative de Notation (PAN)">
-                                            <option value="portfolio">📁 Portfolio (conteneur d'artefacts)</option>
-                                            <option value="artefact-portfolio">Artefact d'un portfolio</option>
-                                        </optgroup>
-                                    </select>
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Pondération (%)</label>
-                                    <input type="number" id="productionPonderation" class="controle-form" min="0"
-                                        max="100" placeholder="Ex: 20">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Grille</label>
-                                    <select id="productionGrille" class="controle-form">
-                                        <option value="">Aucune</option>
-                                    </select>
-                                </div>
+                            <!-- Message d'accueil initial -->
+                            <div class="zone-principale-accueil" id="accueilProductions">
+                                <p>Sélectionnez une production ou créez-en une nouvelle</p>
                             </div>
 
-                            <small id="msgPonderationArtefact"
-                                style="display: none; padding: 10px; background: var(--bleu-pale); border-radius: 4px; color: var(--bleu-principal); font-size: 0.85rem; margin-top: 10px;">
-                                Les artefacts individuels n'ont pas de pondération propre. C'est le Portfolio
-                                conteneur qui définit la pondération globale.
-                            </small>
+                            <!-- Formulaire d'édition -->
+                            <div id="formulaireProduction" style="display: none;">
 
-                            <!-- CHAMPS SPÉCIFIQUES AU PORTFOLIO (cachés par défaut) -->
-                            <div id="champsPortfolio" style="display: none; margin-top: 20px; padding: 15px; 
-                 background: var(--bleu-carte); border-radius: 6px; border: 2px solid var(--bleu-moyen);">
-
-                                <h5 style="color: var(--bleu-principal); margin-bottom: 15px;">Configuration du
-                                    portfolio</h5>
-
-                                <!-- Règles du portfolio -->
-                                <div
-                                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                                    <div class="groupe-form">
-                                        <label>Nombre d'artefacts à retenir (note finale)</label>
-                                        <input type="number" id="portfolioNombreRetenir" class="controle-form" value="3"
-                                            min="1" max="10">
+                                <!-- Cartes métriques -->
+                                <div class="cartes-metriques">
+                                    <div class="carte-metrique">
+                                        <div class="label">Pondération</div>
+                                        <div class="valeur" id="ponderationProdMetrique">0%</div>
                                     </div>
-                                    <div class="groupe-form">
-                                        <label>Minimum d'artefacts à compléter</label>
-                                        <input type="number" id="portfolioMinimumCompleter" class="controle-form"
-                                            value="7" min="1" max="20">
+                                    <div class="carte-metrique">
+                                        <div class="label">Type</div>
+                                        <div class="valeur" id="typeProdMetrique">-</div>
                                     </div>
-
-                                    <div class="groupe-form">
-                                        <label>Nombre total d'artefacts prévus</label>
-                                        <input type="number" id="portfolioNombreTotal" class="controle-form" value="9"
-                                            min="1" max="50">
-                                        <small style="color: #666; font-size: 0.8rem;">Ex: 9 au programme</small>
+                                    <div class="carte-metrique">
+                                        <div class="label">Grille</div>
+                                        <div class="valeur" id="grilleProdMetrique">Aucune</div>
                                     </div>
                                 </div>
 
-                                <p
-                                    style="background: var(--bleu-tres-pale); padding: 10px; border-radius: 4px; font-size: 0.9rem;">
-                                    Le portfolio inclura automatiquement tous les artefacts de type "Artefact
-                                    d'un
-                                    portfolio" créés durant la session.
-                                </p>
-                            </div>
-
-                            <!-- Ligne 2 : Objectif et Tâche sur 2 colonnes -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                                <div class="groupe-form">
-                                    <label>Objectif d'apprentissage</label>
-                                    <textarea id="productionObjectif" class="controle-form" rows="3"
-                                        placeholder="Ex: Développer les compétences d'analyse..."></textarea>
+                                <!-- Champs principaux -->
+                                <div style="display: grid; grid-template-columns: 1.5fr 2fr; gap: 15px; margin-bottom: 15px;">
+                                    <div class="groupe-form">
+                                        <label>Description</label>
+                                        <input type="text" id="productionDescription" class="controle-form"
+                                            placeholder="Ex: Stratégies">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Titre</label>
+                                        <input type="text" id="productionTitre" class="controle-form"
+                                            placeholder="Ex: Analyse #1">
+                                    </div>
                                 </div>
-                                <div class="groupe-form">
-                                    <label>Description de la tâche</label>
-                                    <textarea id="productionTache" class="controle-form" rows="3"
-                                        placeholder="Ex: Rédiger un texte de 500 mots..."></textarea>
+
+                                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div class="groupe-form">
+                                        <label>Type</label>
+                                        <select id="productionType" class="controle-form"
+                                            onchange="gererChangementTypeProduction()">
+                                            <option value="">Choisir...</option>
+                                            <optgroup label="Évaluations sommatives (comptent dans la note)">
+                                                <option value="examen">Examen</option>
+                                                <option value="travail">Travail écrit</option>
+                                                <option value="quiz">Quiz/Test</option>
+                                                <option value="presentation">Présentation</option>
+                                                <option value="autre">Autre</option>
+                                            </optgroup>
+                                            <optgroup label="Évaluations formatives (ne comptent PAS dans la note)">
+                                                <option value="examen-formatif">Examen formatif</option>
+                                                <option value="travail-formatif">Travail formatif</option>
+                                                <option value="quiz-formatif">Quiz/Test formatif</option>
+                                                <option value="presentation-formatif">Présentation formative</option>
+                                                <option value="autre-formatif">Autre formatif</option>
+                                            </optgroup>
+                                            <optgroup label="Pratique Alternative de Notation (PAN)">
+                                                <option value="portfolio">Portfolio (conteneur)</option>
+                                                <option value="artefact-portfolio">Artefact portfolio</option>
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Pondération (%)</label>
+                                        <input type="number" id="productionPonderation" class="controle-form" min="0"
+                                            max="100" placeholder="Ex: 20">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Grille</label>
+                                        <select id="productionGrille" class="controle-form">
+                                            <option value="">Aucune</option>
+                                        </select>
+                                    </div>
                                 </div>
+
+                                <small id="msgPonderationArtefact"
+                                    style="display: none; padding: 10px; background: var(--bleu-pale); border-radius: 4px; color: var(--bleu-principal); font-size: 0.85rem; margin-bottom: 15px;">
+                                    Les artefacts individuels n'ont pas de pondération propre. C'est le Portfolio
+                                    conteneur qui définit la pondération globale.
+                                </small>
+
+                                <!-- CHAMPS SPÉCIFIQUES AU PORTFOLIO -->
+                                <div id="champsPortfolio" style="display: none; margin-bottom: 20px; padding: 15px;
+                     background: var(--bleu-carte); border-radius: 6px; border: 1px solid var(--bleu-moyen);">
+
+                                    <h5 style="color: var(--bleu-principal); margin-bottom: 15px;">Configuration du portfolio</h5>
+
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                        <div class="groupe-form">
+                                            <label>Artefacts à retenir</label>
+                                            <input type="number" id="portfolioNombreRetenir" class="controle-form" value="3"
+                                                min="1" max="10">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label>Minimum à compléter</label>
+                                            <input type="number" id="portfolioMinimumCompleter" class="controle-form"
+                                                value="7" min="1" max="20">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label>Total prévus</label>
+                                            <input type="number" id="portfolioNombreTotal" class="controle-form" value="9"
+                                                min="1" max="50">
+                                        </div>
+                                    </div>
+
+                                    <p style="background: var(--bleu-tres-pale); padding: 10px; border-radius: 4px; font-size: 0.9rem; margin-top: 15px;">
+                                        Le portfolio inclura automatiquement tous les artefacts de type «Artefact portfolio» créés durant la session.
+                                    </p>
+                                </div>
+
+                                <!-- Objectif et Tâche -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                                    <div class="groupe-form">
+                                        <label>Objectif d'apprentissage</label>
+                                        <textarea id="productionObjectif" class="controle-form" rows="3"
+                                            placeholder="Ex: Développer les compétences d'analyse..."></textarea>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Description de la tâche</label>
+                                        <textarea id="productionTache" class="controle-form" rows="3"
+                                            placeholder="Ex: Rédiger un texte de 500 mots..."></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Boutons du formulaire -->
+                                <div class="btn-groupe" style="justify-content: flex-end;">
+                                    <button class="btn btn-annuler" onclick="annulerFormProduction()">Annuler</button>
+                                    <button class="btn btn-confirmer" onclick="sauvegarderProduction()">
+                                        <span id="btnTexteEvaluation">Ajouter</span>
+                                    </button>
+                                </div>
+
+                            </div><!-- Fin du formulaireProduction -->
+
+                            <!-- Options d'import/export (accordéon pliable) -->
+                            <div id="optionsImportExportProductions" class="section-accordeon" style="display: none; margin-top: 20px;">
+                                <details>
+                                    <summary class="summary-materiel">
+                                        Options d'import/export
+                                    </summary>
+                                    <div class="accordeon-contenu">
+                                        <div style="display: flex; gap: 10px;">
+                                            <button class="btn btn-confirmer" onclick="exporterProductions()" style="flex: 1;">
+                                                Exporter les productions
+                                            </button>
+                                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-productions-local').click()" style="flex: 1;">
+                                                Importer des productions
+                                            </button>
+                                            <input type="file" id="fichier-import-productions-local" accept=".json" style="display: none;" onchange="importerProductions(event)">
+                                        </div>
+                                        <p class="aide" style="margin-top: 10px;">Les fichiers exportés ne contiennent aucune donnée d'étudiants, seulement la structure des productions.</p>
+                                    </div>
+                                </details>
                             </div>
 
-                            <!-- Boutons du formulaire -->
-                            <div class="btn-groupe" style="justify-content: flex-end; margin-top: 15px;">
-                                <button class="btn btn-annuler" onclick="annulerFormProduction()">Annuler</button>
-                                <button class="btn btn-confirmer" onclick="sauvegarderProduction()">
-                                    <span id="btnTexteEvaluation">Ajouter</span>
-                                </button>
+                            <!-- Conteneurs cachés pour compatibilité -->
+                            <div style="display: none;">
+                                <div id="vueProductionsParType"></div>
+                                <div id="tableauEvaluationsContainer"></div>
+                                <span id="nombreEvaluations">0</span>
+                                <span id="ponderationTotale">0%</span>
+                                <span id="statutPonderation"></span>
+                                <span id="typesEvaluations"></span>
                             </div>
 
-                        </div><!-- Fin du formulaireProduction -->
+                        </div><!-- Fin zone-principale -->
 
-                        <button id="btnajouterProduction" class="btn btn-confirmer" style="margin-top: 15px;"
-                            onclick="afficherFormProduction()">
-                            + Ajouter une production
-                        </button>
-
-                    </div><!-- Fin de la carte -->
+                    </div><!-- Fin layout-sidebar-2col -->
 
                 </div><!--fin sous-section productions-->
 
@@ -2021,178 +2033,96 @@
                         La somme des pondérations des critères doit totaliser 100%.
                     </div>
 
-                    <!-- CARTE : GRILLES DE CRITÈRES -->
-                    <div class="carte">
-                        <h3>Gestion des grilles de critères d'évaluation</h3>
+                    <!-- LAYOUT SIDEBAR 2 COLONNES -->
+                    <div class="layout-sidebar-2col">
 
-                        <!-- NOUVELLE VUE: Toutes les grilles et critères -->
-                        <div id="vueGrillesCriteres" style="margin-bottom: 30px;">
-                            <!-- Contenu généré par afficherToutesLesGrillesCriteres() -->
-                        </div>
+                        <!-- SIDEBAR GAUCHE (280px, sticky) -->
+                        <div class="sidebar-navigation">
 
-                        <!-- FORMULAIRE D'ÉDITION (Caché par défaut, affiché lors de l'édition) -->
-                        <div id="conteneurEditionGrille" style="display: none;">
+                            <!-- Liste des grilles -->
+                            <div class="sidebar-liste" id="sidebarListeGrilles">
+                                <!-- Généré par afficherListeGrilles() -->
+                            </div>
 
-                        <!-- Bouton retour -->
-                        <div style="margin-bottom: 20px;">
-                            <button class="btn btn-annuler" onclick="retourVueHierarchique()">
-                                ← Retour à la vue d'ensemble
+                            <!-- Bouton d'ajout -->
+                            <button class="sidebar-btn-ajouter" onclick="creerNouvelleGrille()">
+                                + Nouvelle grille
                             </button>
                         </div>
 
-                        <!-- Sélecteur d'évaluation -->
-                        <div class="groupe-form" style="max-width: 400px; margin-bottom: 20px;">
-                            <label>Créer ou modifier une grille d'évaluation :</label>
-                            <select id="selectGrilleTemplate" class="controle-form" onchange="chargerGrilleTemplate()">
-                                <option value="">-- Nouvelle grille --</option>
-                                <option value="new">➕ Créer une nouvelle grille</option>
-                            </select>
-                        </div>
+                        <!-- ZONE PRINCIPALE (centrale, scroll) -->
+                        <div class="zone-principale">
 
-                        <!-- Nom de la grille (visible uniquement en création/édition) -->
-                        <div id="nomGrilleContainer" class="groupe-form"
-                            style="max-width: 400px; margin-bottom: 20px; display: none;">
-                            <label>Nom de la grille :</label>
-                            <input type="text" id="nomGrilleTemplate" class="controle-form"
-                                placeholder="Ex: Grille analyse littéraire" onchange="sauvegarderNomGrille()">
-                        </div>
-
-                        <!-- IMPORT/EXPORT GRILLES -->
-                        <div style="display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: #fff8f0; border-radius: 6px; border-left: 4px solid #ff9800;">
-                            <button class="btn btn-confirmer" onclick="exporterGrilles()" style="flex: 1;">
-                                📤 Exporter les grilles
-                            </button>
-                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-grilles-local').click()" style="flex: 1;">
-                                📥 Importer des grilles
-                            </button>
-                            <input type="file" id="fichier-import-grilles-local" accept=".json" style="display: none;" onchange="importerGrilles(event)">
-                        </div>
-
-                        <!-- Message si aucune évaluation sélectionnée -->
-                        <div id="aucuneEvalSelectionnee" style="padding: 20px; background: var(--bleu-tres-pale); 
-             border-radius: 6px; text-align: center; color: var(--bleu-leger);">
-                            <p>Créez une nouvelle grille ou sélectionnez une grille existante à modifier</p>
-                        </div>
-
-                        <!-- Conteneur des critères (caché par défaut) -->
-                        <div id="criteresContainer" style="display: none;">
-                            <!-- Liste des critères existants -->
-                            <div id="listeCriteres" style="margin-bottom: 20px;">
-                                <!-- Les critères seront affichés ici -->
+                            <!-- Message d'accueil initial -->
+                            <div class="zone-principale-accueil" id="accueilGrilles">
+                                <p>Sélectionnez une grille ou créez-en une nouvelle</p>
                             </div>
 
-                            <!-- Formulaire d'ajout de critère (caché par défaut) -->
-                            <div id="formAjoutCritere" style="display: none; padding: 15px; background: var(--bleu-pale); 
-                 border: 1px solid var(--bleu-leger); border-radius: 6px; margin-bottom: 20px;">
+                            <!-- Formulaire d'édition de grille -->
+                            <div id="conteneurEditionGrille" style="display: none;">
 
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">Nouveau critère</h4>
-
-                                <div
-                                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                                    <div class="groupe-form">
-                                        <label>Nom du critère *</label>
-                                        <input type="text" id="critereNom" class="controle-form"
-                                            placeholder="Ex: Qualité de l'argumentation">
+                                <!-- Cartes métriques -->
+                                <div class="cartes-metriques" id="metriquesGrille">
+                                    <div class="carte-metrique">
+                                        <div class="label">Critères</div>
+                                        <div class="valeur" id="nbCriteresGrille">0</div>
                                     </div>
-                                    <div class="groupe-form">
-                                        <label>Pondération relative (%)</label>
-                                        <input type="number" id="criterePonderation" class="controle-form" min="0"
-                                            max="100" placeholder="Ex: 25">
+                                    <div class="carte-metrique">
+                                        <div class="label">Pondération totale</div>
+                                        <div class="valeur" id="totalPondGrille">0%</div>
                                     </div>
                                 </div>
 
-                                <div class="groupe-form" style="margin-bottom: 15px;">
-                                    <label>Description</label>
-                                    <textarea id="critereDescription" class="controle-form" rows="3"
-                                        placeholder="Description détaillée du critère..."></textarea>
+                                <!-- Nom de la grille -->
+                                <div class="groupe-form" style="max-width: 500px; margin-bottom: 20px;">
+                                    <label>Nom de la grille :</label>
+                                    <input type="text" id="nomGrilleTemplate" class="controle-form"
+                                        placeholder="Ex: Grille analyse littéraire" onchange="sauvegarderNomGrille()">
                                 </div>
 
-                                <div class="groupe-form" style="margin-bottom: 15px;">
-                                    <label>Type de critère</label>
-                                    <select id="critereType" class="controle-form" onchange="afficherChampFormule()">
-                                        <option value="holistique">Holistique (jugement global)</option>
-                                        <option value="analytique">Analytique (points par élément)</option>
-                                        <option value="algorithmique">Algorithmique (calcul automatique)</option>
-                                    </select>
+                                <!-- Liste des critères -->
+                                <div id="listeCriteres" style="margin-bottom: 20px;">
+                                    <!-- Critères générés dynamiquement -->
                                 </div>
 
-                                <!-- Champ formule (caché par défaut) -->
-                                <div id="champFormule" class="groupe-form" style="display: none; margin-bottom: 15px;">
-                                    <label>Formule de calcul</label>
-                                    <input type="text" id="critereFormule" class="controle-form"
-                                        placeholder="Ex: (nb_erreurs / nb_mots) * 100">
-                                    <small style="color: var(--bleu-leger);">
-                                        Pour le français écrit : nombre d'erreurs / nombre de mots
-                                    </small>
-                                </div>
+                            </div><!-- Fin conteneurEditionGrille -->
 
-                                <div class="btn-groupe" style="justify-content: flex-end;">
-                                    <button class="btn btn-annuler" onclick="annulerAjoutCritere()">Fermer</button>
-                                    <button class="btn btn-principal" onclick="sauvegarderEtFermer()"
-                                        style="margin-left: 10px;">
-                                        Ajouter et fermer
-                                    </button>
-                                    <button class="btn btn-confirmer" onclick="sauvegarderCritere()">
-                                        <span id="btnTexteCritere">Ajouter et continuer</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Boutons d'actions -->
-                            <div class="btn-groupe" style="justify-content: space-between; margin-bottom: 20px;">
-                                <div>
-                                    <button id="btnAjouterCritere" class="btn btn-confirmer"
-                                        onclick="afficherFormCritere()">
-                                        + Ajouter un critère
-                                    </button>
-                                </div>
-                                <div>
-                                    <button class="btn btn-principal" onclick="afficherGrillesCriteres()"
-                                        style="margin-right: 10px;">
-                                        Voir les grilles existantes
-                                    </button>
-                                    <button id="btnDupliquerGrille" class="btn btn-modifier"
-                                        onclick="dupliquerGrilleActuelle()" style="margin-right: 10px; display: none;">
-                                        Dupliquer cette grille
-                                    </button>
-                                    <button class="btn btn-confirmer" onclick="enregistrerCommeGrille()">
-                                        Sauvegarder cette grille
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Modal pour les grilles existantes (caché par défaut) -->
-                            <div id="modalGrilles" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-                 background: rgba(0,0,0,0.5); z-index: 1000;">
-                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                     background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; 
-                     max-height: 80vh; overflow-y: auto;">
-                                    <h3 style="margin-bottom: 20px; color: var(--bleu-principal);">Grilles de
-                                        critères
-                                        disponibles</h3>
-
-                                    <div id="listeGrilles" style="margin-bottom: 20px;">
-                                        <!-- Les grilles seront affichées ici -->
+                            <!-- Options d'import/export (accordéon pliable) -->
+                            <div id="optionsImportExportGrilles" class="section-accordeon" style="display: none; margin-top: 20px;">
+                                <details>
+                                    <summary class="summary-materiel">
+                                        Options d'import/export
+                                    </summary>
+                                    <div class="accordeon-contenu">
+                                        <div style="display: flex; gap: 10px;">
+                                            <button class="btn btn-confirmer" onclick="exporterGrilles()" style="flex: 1;">
+                                                Exporter les grilles
+                                            </button>
+                                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-grilles-local').click()" style="flex: 1;">
+                                                Importer des grilles
+                                            </button>
+                                            <input type="file" id="fichier-import-grilles-local" accept=".json" style="display: none;" onchange="importerGrilles(event)">
+                                        </div>
+                                        <p class="aide" style="margin-top: 10px;">Les grilles exportées contiennent les critères et pondérations, mais aucune donnée d'étudiants.</p>
                                     </div>
-
-                                    <div class="btn-groupe" style="justify-content: flex-end;">
-                                        <button class="btn btn-annuler" onclick="fermerModalGrilles()">Fermer</button>
-                                    </div>
-                                </div>
+                                </details>
                             </div>
 
-                            <!-- Résumé de la pondération -->
-                            <div style="margin-top: 20px; padding: 10px; background: var(--bleu-tres-pale);
-                 border-radius: 6px; text-align: right;">
-                                <strong>Total des pondérations : </strong>
-                                <span id="totalPonderationCriteres"
-                                    style="font-size: 1.2rem; font-weight: bold;">0%</span>
-                                <small id="statutPonderationCriteres" style="display: block; margin-top: 5px;"></small>
+                            <!-- Conteneurs cachés pour compatibilité -->
+                            <div style="display: none;">
+                                <div id="vueGrillesCriteres"></div>
+                                <div id="selectGrilleTemplate"></div>
+                                <div id="nomGrilleContainer"></div>
+                                <div id="aucuneEvalSelectionnee"></div>
+                                <div id="criteresContainer"></div>
+                                <div id="formAjoutCritere"></div>
+                                <span id="totalPonderationCriteres">0%</span>
+                                <span id="statutPonderationCriteres"></span>
                             </div>
-                        </div>
 
-                        </div><!-- Fin ANCIEN SYSTÈME -->
-                    </div>
+                        </div><!-- Fin zone-principale -->
+
+                    </div><!-- Fin layout-sidebar-2col -->
 
                 </div><!--fin sous-section grille-criteres-->
 
@@ -2215,14 +2145,98 @@
                         de la progression des étudiants.
                     </div>
 
-                    <!-- CARTE : ÉCHELLE DE PERFORMANCE PAN/SBG -->
-                    <div class="carte">
-                        <h3>📈 Échelle de performance</h3>
+                    <!-- LAYOUT SIDEBAR 2 COLONNES -->
+                    <div class="layout-sidebar-2col">
 
-                        <!-- NOUVELLE VUE: Toutes les échelles et niveaux -->
-                        <div id="vueEchellesNiveaux" style="margin-bottom: 30px;">
-                            <!-- Contenu généré par afficherToutesLesEchellesNiveaux() -->
+                        <!-- SIDEBAR GAUCHE (280px, sticky) -->
+                        <div class="sidebar-navigation">
+
+                            <!-- Liste des échelles -->
+                            <div class="sidebar-liste" id="sidebarListeEchelles">
+                                <!-- Généré par afficherListeEchelles() -->
+                            </div>
+
+                            <!-- Bouton d'ajout -->
+                            <button class="sidebar-btn-ajouter" onclick="creerNouvelleEchelle()">
+                                + Nouvelle échelle
+                            </button>
                         </div>
+
+                        <!-- ZONE PRINCIPALE (centrale, scroll) -->
+                        <div class="zone-principale">
+
+                            <!-- Message d'accueil initial -->
+                            <div class="zone-principale-accueil" id="accueilEchelles">
+                                <p>Sélectionnez une échelle ou créez-en une nouvelle</p>
+                            </div>
+
+                            <!-- Formulaire d'édition -->
+                            <div id="conteneurEditionEchelle" style="display: none;">
+
+                                <!-- Cartes métriques -->
+                                <div class="cartes-metriques">
+                                    <div class="carte-metrique">
+                                        <div class="label">Niveaux</div>
+                                        <div class="valeur" id="nbNiveauxEchelle">0</div>
+                                    </div>
+                                </div>
+
+                                <!-- Nom de l'échelle -->
+                                <div class="groupe-form" style="max-width: 500px; margin-bottom: 20px;">
+                                    <label>Nom de l'échelle :</label>
+                                    <input type="text" id="nomEchelleTemplate" class="controle-form"
+                                        placeholder="Ex: Échelle standard A-F" onchange="sauvegarderNomEchelle()">
+                                </div>
+
+                                <!-- Tableau des niveaux -->
+                                <div id="tableauNiveauxEchelle" style="margin-bottom: 20px;">
+                                    <!-- Niveaux générés dynamiquement -->
+                                </div>
+
+                                <!-- Aperçu visuel -->
+                                <div id="apercuEchelleNiveaux" style="display: flex; gap: 10px; flex-wrap: wrap;
+                     align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                                    <!-- Généré par afficherApercuEchelle() -->
+                                </div>
+
+                            </div><!-- Fin conteneurEditionEchelle -->
+
+                            <!-- Options d'import/export (accordéon pliable) -->
+                            <div id="optionsImportExportEchelles" class="section-accordeon" style="display: none; margin-top: 20px;">
+                                <details>
+                                    <summary class="summary-materiel">
+                                        Options d'import/export
+                                    </summary>
+                                    <div class="accordeon-contenu">
+                                        <div style="display: flex; gap: 10px;">
+                                            <button class="btn btn-principal" onclick="exporterEchelles()" style="flex: 1;">
+                                                Exporter l'échelle
+                                            </button>
+                                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-echelles-local').click()" style="flex: 1;">
+                                                Importer une échelle
+                                            </button>
+                                            <input type="file" id="fichier-import-echelles-local" accept=".json" style="display: none;" onchange="importerEchelles(event)">
+                                        </div>
+                                        <p class="aide" style="margin-top: 10px;">Les échelles exportées contiennent les niveaux de performance, mais aucune donnée d'étudiants.</p>
+                                    </div>
+                                </details>
+                            </div>
+
+                            <!-- Conteneurs cachés pour compatibilité -->
+                            <div style="display: none;">
+                                <div id="vueEchellesNiveaux"></div>
+                                <div id="selectEchelleTemplate"></div>
+                                <div id="nomEchelleContainer"></div>
+                                <div id="typeEchelle"></div>
+                                <div id="seuilReussite"></div>
+                                <div id="champAutreEchelle"></div>
+                                <div id="tableauNiveaux"></div>
+                                <div id="apercuEchelle"></div>
+                            </div>
+
+                        </div><!-- Fin zone-principale -->
+
+                    </div><!-- Fin layout-sidebar-2col -->
 
                         <!-- ANCIEN SYSTÈME (Caché par défaut, gardé pour compatibilité) -->
                         <div style="display: none;">
@@ -2420,13 +2434,13 @@
                     <div class="carte">
                         <h3>Cartouches de rétroaction</h3>
 
-                        <!-- Layout 2 colonnes : Sidebar + Zone centrale -->
-                        <div class="layout-cartouches-2col">
+                        <!-- LAYOUT SIDEBAR 2 COLONNES -->
+                        <div class="layout-sidebar-2col">
 
-                            <!-- SIDEBAR GAUCHE : BANQUE DES CARTOUCHES -->
-                            <div class="sidebar-cartouches">
+                            <!-- SIDEBAR GAUCHE (280px, sticky) -->
+                            <div class="sidebar-navigation">
                                 <!-- Filtre par grille -->
-                                <div class="filtre-grille-cartouche">
+                                <div class="sidebar-filtre">
                                     <label>Filtrer par grille :</label>
                                     <select id="filtreGrilleCartouche" class="controle-form" onchange="filtrerCartouchesBanque()">
                                         <option value="">Toutes les grilles</option>
@@ -2435,24 +2449,22 @@
                                 </div>
 
                                 <!-- Liste des cartouches -->
-                                <div id="listeCartouchesBanque">
+                                <div class="sidebar-liste" id="listeCartouchesBanque">
                                     <p class="banque-vide">Chargement...</p>
                                 </div>
 
                                 <!-- Bouton nouvelle cartouche -->
-                                <button onclick="creerNouvelleCartouche()" class="btn-ajouter-cartouche">
+                                <button onclick="creerNouvelleCartouche()" class="sidebar-btn-ajouter">
                                     + Nouvelle cartouche
                                 </button>
                             </div>
 
-                            <!-- ZONE CENTRALE : ÉDITION + IMPORT -->
-                            <div class="zone-centrale-cartouche">
+                            <!-- ZONE PRINCIPALE (centrale, scroll) -->
+                            <div class="zone-principale">
 
-                                <!-- Message initial si aucune cartouche sélectionnée -->
-                                <div id="messageAccueilCartouche" class="carte" style="padding: 30px; text-align: center; background: var(--bleu-tres-pale);">
-                                    <p style="color: #666; margin: 0;">
-                                        Sélectionnez une cartouche dans la banque ou créez-en une nouvelle
-                                    </p>
+                                <!-- Message d'accueil initial -->
+                                <div class="zone-principale-accueil" id="messageAccueilCartouche">
+                                    <p>Sélectionnez une cartouche ou créez-en une nouvelle</p>
                                 </div>
 
                                 <!-- ANCIEN SYSTÈME (Caché, gardé pour compatibilité interne) -->
@@ -2462,10 +2474,10 @@
                                     <div id="aucuneEvalRetroaction"></div>
                                 </div>
 
-                        <!-- Informations de la cartouche -->
-                        <div id="infoCartouche" style="display: none; margin-bottom: 20px;">
-                            <!-- Métriques de la cartouche (en haut) -->
-                            <div class="cartes-metriques">
+                                <!-- Informations de la cartouche -->
+                                <div id="infoCartouche" style="display: none; margin-bottom: 20px;">
+                                    <!-- Métriques de la cartouche (en haut) -->
+                                    <div class="cartes-metriques">
                                 <div class="carte-metrique">
                                     <div class="label">Critères</div>
                                     <div class="valeur" id="nbCriteres">0</div>
@@ -2483,6 +2495,19 @@
                                     <div class="valeur" id="pctComplete">0%</div>
                                 </div>
                             </div>
+
+                                    <!-- Message de verrouillage -->
+                                    <div id="alerteVerrouillage" style="display: none; margin: 15px 0; padding: 12px 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <strong style="color: #856404;">🔒 Cartouche verrouillée</strong>
+                                                <p style="margin: 5px 0 0 0; color: #856404; font-size: 0.9rem;">Cette cartouche est en lecture seule. Déverrouillez-la pour pouvoir la modifier.</p>
+                                            </div>
+                                            <button class="btn btn-principal" id="btnDeverrouillerCartouche" style="white-space: nowrap;">
+                                                Déverrouiller
+                                            </button>
+                                        </div>
+                                    </div>
 
                             <div class="groupe-form" style="max-width: 500px;">
                                 <label>Nom de la cartouche :</label>
@@ -2503,13 +2528,15 @@
                             <div id="listeCartouchesExistants" style="display: none !important;">
                                 <div id="listeCartouchesContainer"></div>
                             </div>
-                        </div>
+                                </div>
 
-                        <!-- ZONE D'IMPORT UNIFIÉE (Accordéon 4 options) -->
-                        <div id="zoneImportUnifiee" class="accordeon-import" style="display: none; margin-bottom: 20px;">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">
-                                Options d'importation
-                            </h4>
+                                <!-- ZONE D'IMPORT UNIFIÉE (Accordéon 4 options) -->
+                                <div id="zoneImportUnifiee" class="accordeon-import" style="display: none; margin-bottom: 20px;">
+                            <details>
+                                <summary class="summary-materiel">
+                                    Options d'importation
+                                </summary>
+                                <div style="padding: 15px; background: white;">
 
                             <!-- Option 1: Import JSON complet -->
                             <details>
@@ -2576,10 +2603,13 @@
                                     <p class="aide">Importe seulement les commentaires des critères cochés</p>
                                 </div>
                             </details>
-                        </div>
 
-                        <!-- MATRICE DE RÉTROACTION -->
-                        <div id="matriceRetroaction" style="display: none;">
+                                </div>
+                            </details>
+                                </div>
+
+                                <!-- MATRICE DE RÉTROACTION -->
+                                <div id="matriceRetroaction" style="display: none;">
                             <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">
                                 Matrice des commentaires de rétroaction
                             </h4>
@@ -2598,26 +2628,26 @@
                                     Supprimer
                                 </button>
                             </div>
-                        </div>
+                                </div>
 
-                        <!-- APERÇU DE RÉTROACTION -->
-                        <div id="apercuRetroaction" style="display: none; margin-top: 20px; padding: 15px;
+                                <!-- APERÇU DE RÉTROACTION -->
+                                <div id="apercuRetroaction" style="display: none; margin-top: 20px; padding: 15px;
              background: var(--vert-pale); border-radius: 6px; border: 1px solid var(--vert-leger);">
-                            <h5 style="color: var(--vert-leger); margin-bottom: 10px;">
-                                Aperçu d'une rétroaction générée
-                            </h5>
-                            <div id="exempleRetroaction" style="padding: 15px; background: white;
+                                    <h5 style="color: var(--vert-leger); margin-bottom: 10px;">
+                                        Aperçu d'une rétroaction générée
+                                    </h5>
+                                    <div id="exempleRetroaction" style="padding: 15px; background: white;
                  border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
-                                <!-- L'aperçu sera généré ici par genererApercuAleatoire() -->
-                            </div>
-                            <button class="btn btn-principal mt-2" onclick="genererApercuAleatoire()">
-                                Générer un aperçu aléatoire
-                            </button>
-                        </div>
+                                        <!-- L'aperçu sera généré ici par genererApercuAleatoire() -->
+                                    </div>
+                                    <button class="btn btn-principal mt-2" onclick="genererApercuAleatoire()">
+                                        Générer un aperçu aléatoire
+                                    </button>
+                                </div>
 
-                            </div><!-- fin zone-centrale-cartouche -->
+                            </div><!-- fin zone-principale -->
 
-                        </div><!-- fin layout-cartouches-2col -->
+                        </div><!-- fin layout-sidebar-2col -->
 
                     </div><!-- fin carte -->
 

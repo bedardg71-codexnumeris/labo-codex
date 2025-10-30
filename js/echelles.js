@@ -382,10 +382,15 @@ function dupliquerEchelle(echelleId) {
 function initialiserModuleEchelles() {
     console.log('📈 Initialisation du module Échelles de performance');
 
+    // Afficher la sidebar avec la liste des échelles (Beta 0.80.5+)
+    if (typeof afficherListeEchelles === 'function') {
+        afficherListeEchelles();
+    }
+
     // Vérifier que nous sommes dans la bonne section
     const elementTypeEchelle = document.getElementById('typeEchelle');
     if (!elementTypeEchelle) {
-        console.log('   ⚠️  Section échelles non active, initialisation reportée');
+        console.log('   ⚠️  Section échelles non active (layout sidebar actif)');
         return;
     }
 
@@ -1428,3 +1433,295 @@ window.afficherEchellesPerformance = afficherEchellesPerformance;
 window.fermerModalEchelles = fermerModalEchelles;
 window.convertirNiveauVersNote = convertirNiveauVersNote;
 window.convertirNoteVersNiveau = convertirNoteVersNiveau;
+
+/* ===============================
+   FONCTIONS SIDEBAR (Beta 0.80.5+)
+   Layout 2 colonnes - Stubs minimaux
+   =============================== */
+
+function afficherListeEchelles() {
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const container = document.getElementById('sidebarListeEchelles');
+    if (!container) return;
+
+    // Ajouter l'échelle par défaut si aucune échelle n'existe
+    if (echelles.length === 0) {
+        container.innerHTML = '<p class="sidebar-vide">Aucune échelle disponible</p>';
+        return;
+    }
+
+    const html = echelles.map(echelle => {
+        const nomEchelle = echelle.nom || 'Sans titre';
+        const nbNiveaux = echelle.niveaux?.length || 0;
+        return `
+            <div class="sidebar-item" data-id="${echelle.id}" onclick="chargerEchellePourModif('${echelle.id}')">
+                <div class="sidebar-item-titre">${nomEchelle}</div>
+                <div class="sidebar-item-badge">${nbNiveaux} niveaux</div>
+                <div class="sidebar-item-actions">
+                    <button class="btn-icone" onclick="event.stopPropagation(); dupliquerEchelleDepuisSidebar('${echelle.id}')" title="Dupliquer">Dupliquer</button>
+                    <button class="btn-icone" onclick="event.stopPropagation(); supprimerEchelleDepuisSidebar('${echelle.id}')" title="Supprimer">Supprimer</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+}
+
+function creerNouvelleEchelle() {
+    document.getElementById('accueilEchelles').style.display = 'none';
+    document.getElementById('conteneurEditionEchelle').style.display = 'block';
+    document.getElementById('optionsImportExportEchelles').style.display = 'block';
+
+    // Réinitialiser le formulaire
+    document.getElementById('nomEchelleTemplate').value = '';
+    document.getElementById('tableauNiveauxEchelle').innerHTML = '';
+    document.getElementById('nbNiveauxEchelle').textContent = '0';
+
+    console.log('Création nouvelle échelle - Interface prête');
+}
+
+function chargerEchellePourModif(id) {
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelle = echelles.find(e => e.id === id);
+
+    if (!echelle) return;
+
+    document.getElementById('accueilEchelles').style.display = 'none';
+    document.getElementById('conteneurEditionEchelle').style.display = 'block';
+    document.getElementById('optionsImportExportEchelles').style.display = 'block';
+
+    // Remplir le formulaire
+    document.getElementById('nomEchelleTemplate').value = echelle.nom || '';
+    document.getElementById('nbNiveauxEchelle').textContent = echelle.niveaux?.length || 0;
+
+    // Afficher les niveaux
+    afficherNiveauxEchelle(echelle);
+
+    // Mettre le highlight
+    definirEchelleActive(id);
+
+    console.log('Échelle chargée:', echelle.nom);
+}
+
+function afficherNiveauxEchelle(echelle) {
+    const container = document.getElementById('tableauNiveauxEchelle');
+    const apercuContainer = document.getElementById('apercuEchelleNiveaux');
+
+    if (!container) return;
+
+    if (!echelle.niveaux || echelle.niveaux.length === 0) {
+        container.innerHTML = '<p style="color: #999; font-style: italic;">Aucun niveau défini</p>';
+        if (apercuContainer) apercuContainer.innerHTML = '';
+        return;
+    }
+
+    // Afficher le tableau des niveaux en mode édition
+    const html = echelle.niveaux.map((niveau, index) => `
+        <div class="item-liste" style="padding: 15px; background: white; border-left: 4px solid ${niveau.couleur}; border-radius: 6px; margin-bottom: 10px;">
+            <div style="display: grid; grid-template-columns: 60px 2fr 80px 80px 100px 80px; gap: 12px; align-items: end;">
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Code</label>
+                    <input type="text"
+                           class="controle-form"
+                           value="${niveau.code}"
+                           maxlength="3"
+                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'code', this.value)"
+                           style="font-weight: 600; text-align: center;">
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Nom du niveau</label>
+                    <input type="text"
+                           class="controle-form"
+                           value="${niveau.nom}"
+                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'nom', this.value)"
+                           style="font-weight: 500;">
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Min (%)</label>
+                    <input type="number"
+                           class="controle-form"
+                           value="${niveau.min}"
+                           min="0"
+                           max="100"
+                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'min', parseFloat(this.value))">
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Max (%)</label>
+                    <input type="number"
+                           class="controle-form"
+                           value="${niveau.max}"
+                           min="0"
+                           max="100"
+                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'max', parseFloat(this.value))">
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Valeur calc (%)</label>
+                    <input type="number"
+                           class="controle-form"
+                           value="${niveau.valeurCalcul}"
+                           min="0"
+                           max="100"
+                           step="0.01"
+                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'valeurCalcul', parseFloat(this.value))">
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Couleur</label>
+                    <input type="color"
+                           class="controle-form"
+                           value="${niveau.couleur}"
+                           onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'couleur', this.value)"
+                           style="height: 38px; cursor: pointer;">
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Ajouter un bouton pour ajouter un nouveau niveau
+    const btnAjouterNiveau = `
+        <button class="sidebar-btn-ajouter" onclick="ajouterNiveauEchelle('${echelle.id}')">
+            + Ajouter un niveau
+        </button>
+    `;
+
+    container.innerHTML = html + btnAjouterNiveau;
+
+    // Afficher l'aperçu visuel
+    if (apercuContainer) {
+        const apercuHtml = echelle.niveaux.map(niveau => `
+            <div style="text-align: center; flex: 1; padding: 10px; background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
+                <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${niveau.code}</strong>
+                <div style="font-size: 0.75rem; margin-top: 5px;">${niveau.min}%-${niveau.max}%</div>
+            </div>
+        `).join('');
+        apercuContainer.innerHTML = apercuHtml;
+    }
+}
+
+/**
+ * Modifie un champ d'un niveau d'échelle
+ * @param {string} echelleId - ID de l'échelle
+ * @param {number} niveauIndex - Index du niveau à modifier
+ * @param {string} champ - Nom du champ à modifier
+ * @param {any} valeur - Nouvelle valeur
+ */
+function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelle = echelles.find(e => e.id === echelleId);
+
+    if (!echelle || !echelle.niveaux || !echelle.niveaux[niveauIndex]) return;
+
+    // Mettre à jour le champ
+    echelle.niveaux[niveauIndex][champ] = valeur;
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
+
+    // Mettre à jour localStorage.niveauxEchelle si c'est l'échelle active
+    const niveauxEchelle = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
+    if (niveauxEchelle.length > 0 && niveauxEchelle[0].echelleId === echelleId) {
+        localStorage.setItem('niveauxEchelle', JSON.stringify(echelle.niveaux));
+    }
+
+    // Réafficher pour mettre à jour l'aperçu visuel et les bordures colorées
+    afficherNiveauxEchelle(echelle);
+
+    console.log('Niveau modifié:', champ, '=', valeur);
+}
+
+/**
+ * Ajoute un nouveau niveau à une échelle
+ * @param {string} echelleId - ID de l'échelle
+ */
+function ajouterNiveauEchelle(echelleId) {
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelle = echelles.find(e => e.id === echelleId);
+
+    if (!echelle) return;
+
+    // Initialiser le tableau de niveaux si nécessaire
+    if (!echelle.niveaux) {
+        echelle.niveaux = [];
+    }
+
+    // Créer un nouveau niveau avec des valeurs par défaut
+    const nouveauNiveau = {
+        code: 'N',
+        nom: 'Nouveau niveau',
+        min: 0,
+        max: 100,
+        valeurCalcul: 50,
+        couleur: '#cccccc'
+    };
+
+    // Ajouter le niveau à l'échelle
+    echelle.niveaux.push(nouveauNiveau);
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
+
+    // Réafficher la liste des niveaux
+    afficherNiveauxEchelle(echelle);
+
+    // Mettre à jour les métriques
+    document.getElementById('nbNiveauxEchelle').textContent = echelle.niveaux.length;
+
+    console.log('Nouveau niveau ajouté à l\'échelle:', echelleId);
+}
+
+function definirEchelleActive(id) {
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    const itemActif = document.querySelector(`.sidebar-item[data-id="${id}"]`);
+    if (itemActif) {
+        itemActif.classList.add('active');
+    }
+}
+
+function dupliquerEchelleDepuisSidebar(id) {
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelle = echelles.find(e => e.id === id);
+
+    if (!echelle) return;
+
+    const copie = {
+        ...echelle,
+        id: Date.now().toString(),
+        nom: echelle.nom + ' (copie)',
+        verrouille: false
+    };
+
+    echelles.push(copie);
+    localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
+
+    afficherListeEchelles();
+    chargerEchellePourModif(copie.id);
+
+    alert('Échelle "' + copie.nom + '" dupliquée avec succès');
+}
+
+function supprimerEchelleDepuisSidebar(id) {
+    if (!confirm('Supprimer cette échelle ?')) return;
+
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const index = echelles.findIndex(e => e.id === id);
+
+    if (index !== -1) {
+        echelles.splice(index, 1);
+        localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
+        afficherListeEchelles();
+        document.getElementById('conteneurEditionEchelle').style.display = 'none';
+        document.getElementById('optionsImportExportEchelles').style.display = 'none';
+        document.getElementById('accueilEchelles').style.display = 'block';
+        alert('Échelle supprimée');
+    }
+}
+
+// Export global
+window.afficherListeEchelles = afficherListeEchelles;
+window.creerNouvelleEchelle = creerNouvelleEchelle;
+window.chargerEchellePourModif = chargerEchellePourModif;
+window.dupliquerEchelleDepuisSidebar = dupliquerEchelleDepuisSidebar;
+window.supprimerEchelleDepuisSidebar = supprimerEchelleDepuisSidebar;

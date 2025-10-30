@@ -1381,13 +1381,18 @@ function initialiserModuleGrilles() {
     // Charger la liste des grilles
     chargerListeGrillesTemplates();
 
+    // Afficher la sidebar avec la liste des grilles (Beta 0.80.5+)
+    if (typeof afficherListeGrilles === 'function') {
+        afficherListeGrilles();
+    }
+
     // Toujours afficher la vue hiérarchique (indépendamment de la section active)
     afficherToutesLesGrillesCriteres();
 
     // Pas d'événements globaux à attacher pour l'instant
     // Les événements sont gérés via les attributs onclick dans le HTML
 
-    console.log('✅ Module Grilles initialisé avec nouvelle vue hiérarchique');
+    console.log('✅ Module Grilles initialisé avec layout sidebar (Beta 0.80.5)');
 }
 
 /* ===============================
@@ -1489,3 +1494,273 @@ window.getTypeCritereLabel = getTypeCritereLabel;
 window.calculerTotalPonderationCriteres = calculerTotalPonderationCriteres;
 window.enregistrerCommeGrille = enregistrerCommeGrille;
 window.initialiserModuleGrilles = initialiserModuleGrilles;
+
+/* ===============================
+   FONCTIONS SIDEBAR (Beta 0.80.5+)
+   Layout 2 colonnes - Stubs minimaux
+   =============================== */
+
+function afficherListeGrilles() {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const container = document.getElementById('sidebarListeGrilles');
+    if (!container) return;
+
+    if (grilles.length === 0) {
+        container.innerHTML = '<p class="sidebar-vide">Aucune grille disponible</p>';
+        return;
+    }
+
+    const html = grilles.map(grille => {
+        const nomGrille = grille.nom || 'Sans titre';
+        const nbCriteres = grille.criteres?.length || 0;
+        return `
+            <div class="sidebar-item" data-id="${grille.id}" onclick="chargerGrillePourModif('${grille.id}')">
+                <div class="sidebar-item-titre">${nomGrille}</div>
+                <div class="sidebar-item-badge">${nbCriteres} critères</div>
+                <div class="sidebar-item-actions">
+                    <button class="btn-icone" onclick="event.stopPropagation(); dupliquerGrilleDepuisSidebar('${grille.id}')" title="Dupliquer">Dupliquer</button>
+                    <button class="btn-icone" onclick="event.stopPropagation(); supprimerGrilleDepuisSidebar('${grille.id}')" title="Supprimer">Supprimer</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+}
+
+function creerNouvelleGrille() {
+    document.getElementById('accueilGrilles').style.display = 'none';
+    document.getElementById('conteneurEditionGrille').style.display = 'block';
+    document.getElementById('optionsImportExportGrilles').style.display = 'block';
+
+    // Réinitialiser le formulaire
+    document.getElementById('nomGrilleTemplate').value = '';
+    document.getElementById('listeCriteres').innerHTML = '<p style="color: #999; font-style: italic;">Utilisez les fonctions d\'édition existantes pour ajouter des critères</p>';
+    document.getElementById('nbCriteresGrille').textContent = '0';
+    document.getElementById('totalPondGrille').textContent = '0%';
+
+    // Retirer le highlight
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    console.log('Création nouvelle grille - Interface prête');
+}
+
+function chargerGrillePourModif(id) {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grille = grilles.find(g => g.id === id);
+
+    if (!grille) return;
+
+    document.getElementById('accueilGrilles').style.display = 'none';
+    document.getElementById('conteneurEditionGrille').style.display = 'block';
+    document.getElementById('optionsImportExportGrilles').style.display = 'block';
+
+    // Remplir le formulaire
+    document.getElementById('nomGrilleTemplate').value = grille.nom || '';
+
+    // Mettre à jour les métriques
+    document.getElementById('nbCriteresGrille').textContent = grille.criteres?.length || 0;
+
+    // Calculer la pondération totale
+    let totalPond = 0;
+    if (grille.criteres) {
+        totalPond = grille.criteres.reduce((sum, c) => sum + (c.ponderation || 0), 0);
+    }
+    document.getElementById('totalPondGrille').textContent = totalPond + '%';
+
+    // Afficher les critères
+    afficherCriteresGrille(grille);
+
+    // Mettre le highlight
+    definirGrilleActive(id);
+
+    console.log('Grille chargée:', grille.nom);
+}
+
+function afficherCriteresGrille(grille) {
+    const container = document.getElementById('listeCriteres');
+    if (!container) return;
+
+    if (!grille.criteres || grille.criteres.length === 0) {
+        container.innerHTML = '<p style="color: #999; font-style: italic;">Aucun critère défini</p>';
+        return;
+    }
+
+    const html = grille.criteres.map((critere, index) => `
+        <div class="item-liste" style="padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
+            <div style="display: grid; grid-template-columns: 2fr 140px 90px 3fr; gap: 12px; align-items: end;">
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Nom du critère</label>
+                    <input type="text"
+                           class="controle-form"
+                           value="${critere.nom}"
+                           onchange="modifierCritereGrille('${grille.id}', ${index}, 'nom', this.value)"
+                           style="font-weight: 500;">
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Type</label>
+                    <select class="controle-form"
+                            onchange="modifierCritereGrille('${grille.id}', ${index}, 'type', this.value)">
+                        <option value="holistique" ${critere.type === 'holistique' ? 'selected' : ''}>Holistique</option>
+                        <option value="analytique" ${critere.type === 'analytique' ? 'selected' : ''}>Analytique</option>
+                        <option value="algorithmique" ${critere.type === 'algorithmique' ? 'selected' : ''}>Algorithmique</option>
+                    </select>
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Pond. (%)</label>
+                    <input type="number"
+                           class="controle-form"
+                           value="${critere.ponderation}"
+                           min="0"
+                           max="100"
+                           onchange="modifierCritereGrille('${grille.id}', ${index}, 'ponderation', parseInt(this.value))">
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Description</label>
+                    <input type="text"
+                           class="controle-form"
+                           value="${critere.description || ''}"
+                           onchange="modifierCritereGrille('${grille.id}', ${index}, 'description', this.value)">
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Ajouter un bouton pour ajouter un nouveau critère
+    const btnAjouterCritere = `
+        <button class="sidebar-btn-ajouter" onclick="ajouterCritereGrille('${grille.id}')">
+            + Ajouter un critère
+        </button>
+    `;
+
+    container.innerHTML = html + btnAjouterCritere;
+}
+
+/**
+ * Modifie un critère d'une grille
+ * @param {string} grilleId - ID de la grille
+ * @param {number} critereIndex - Index du critère à modifier
+ * @param {string} champ - Nom du champ à modifier
+ * @param {any} valeur - Nouvelle valeur
+ */
+function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
+
+    // Mettre à jour le champ
+    grille.criteres[critereIndex][champ] = valeur;
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+
+    // Recalculer la pondération totale si nécessaire
+    if (champ === 'ponderation') {
+        const totalPond = grille.criteres.reduce((sum, c) => sum + (c.ponderation || 0), 0);
+        document.getElementById('totalPondGrille').textContent = totalPond + '%';
+    }
+
+    console.log('Critère modifié:', champ, '=', valeur);
+}
+
+/**
+ * Ajoute un nouveau critère à une grille
+ * @param {string} grilleId - ID de la grille
+ */
+function ajouterCritereGrille(grilleId) {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!grille) return;
+
+    // Initialiser le tableau de critères si nécessaire
+    if (!grille.criteres) {
+        grille.criteres = [];
+    }
+
+    // Créer un nouveau critère avec des valeurs par défaut
+    const nouveauCritere = {
+        nom: 'Nouveau critère',
+        type: 'holistique',
+        ponderation: 0,
+        description: ''
+    };
+
+    // Ajouter le critère à la grille
+    grille.criteres.push(nouveauCritere);
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+
+    // Réafficher la liste des critères
+    afficherCriteresGrille(grille);
+
+    // Mettre à jour les métriques
+    const nbCriteres = grille.criteres.length;
+    const totalPond = grille.criteres.reduce((sum, c) => sum + (c.ponderation || 0), 0);
+
+    document.getElementById('nbCriteresGrille').textContent = nbCriteres;
+    document.getElementById('totalPondGrille').textContent = totalPond + '%';
+
+    console.log('Nouveau critère ajouté à la grille:', grilleId);
+}
+
+function definirGrilleActive(id) {
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    const itemActif = document.querySelector(`.sidebar-item[data-id="${id}"]`);
+    if (itemActif) {
+        itemActif.classList.add('active');
+    }
+}
+
+function dupliquerGrilleDepuisSidebar(id) {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grille = grilles.find(g => g.id === id);
+
+    if (!grille) return;
+
+    const copie = {
+        ...grille,
+        id: Date.now().toString(),
+        nom: grille.nom + ' (copie)',
+        verrouille: false
+    };
+
+    grilles.push(copie);
+    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+
+    afficherListeGrilles();
+    chargerGrillePourModif(copie.id);
+
+    alert('Grille "' + copie.nom + '" dupliquée avec succès');
+}
+
+function supprimerGrilleDepuisSidebar(id) {
+    if (!confirm('Supprimer cette grille ?')) return;
+
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const index = grilles.findIndex(g => g.id === id);
+
+    if (index !== -1) {
+        grilles.splice(index, 1);
+        localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+        afficherListeGrilles();
+        document.getElementById('conteneurEditionGrille').style.display = 'none';
+        document.getElementById('optionsImportExportGrilles').style.display = 'none';
+        document.getElementById('accueilGrilles').style.display = 'block';
+        alert('Grille supprimée');
+    }
+}
+
+// Export global
+window.afficherListeGrilles = afficherListeGrilles;
+window.creerNouvelleGrille = creerNouvelleGrille;
+window.chargerGrillePourModif = chargerGrillePourModif;
+window.dupliquerGrilleDepuisSidebar = dupliquerGrilleDepuisSidebar;
+window.supprimerGrilleDepuisSidebar = supprimerGrilleDepuisSidebar;
