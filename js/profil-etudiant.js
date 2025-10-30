@@ -588,12 +588,12 @@ function genererSectionMobilisationEngagement(da) {
 
     return `
         <!-- Badge interprétatif Mobilisation globale -->
-        <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-            <div style="margin-bottom: 15px;">
-                <strong style="font-size: 1.1rem; color: ${interpM.couleur};">${interpM.niveau}</strong>
-                <span style="font-size: 1.3rem; font-weight: bold; color: ${interpM.couleur}; margin-left: 10px;">(${indices.M})</span>
+        <div class="profil-carte">
+            <div class="profil-carte-titre">
+                <strong style="color: ${interpM.couleur};">${interpM.niveau}</strong>
+                <span class="valeur-indice" style="color: ${interpM.couleur};">(${indices.M})</span>
             </div>
-            <div style="font-size: 0.95rem; color: #555; line-height: 1.6;">
+            <div class="profil-carte-description">
                 ${interpM.niveau === 'Décrochage' ?
                     "L'étudiant ne se présente plus au cours. Référer aux services d'aide." :
                   interpM.niveau.includes('critique') ?
@@ -609,31 +609,31 @@ function genererSectionMobilisationEngagement(da) {
         </div>
 
         <!-- GRILLE 2 COLONNES : ASSIDUITÉ ET COMPLÉTION -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div class="profil-grid-2col">
 
             <!-- FICHE ASSIDUITÉ -->
-            <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px;">
+            <div class="profil-carte">
                 <!-- Badge avec interprétation -->
-                <div style="margin-bottom: 15px;">
-                    <strong style="font-size: 1.1rem; color: ${interpA.couleur};">${interpA.niveau}</strong>
-                    <span style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur}; margin-left: 10px;">(A = ${indices.A}%)</span>
+                <div class="profil-carte-titre">
+                    <strong style="color: ${interpA.couleur};">${interpA.niveau}</strong>
+                    <span class="valeur-indice" style="color: ${interpA.couleur};">(A = ${indices.A}%)</span>
                 </div>
 
                 <!-- Statistiques -->
-                <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
+                <ul class="profil-liste-simple">
                     <li><strong>• Heures présentes :</strong> ${detailsA.heuresPresentes}h / ${detailsA.heuresOffertes}h</li>
                     <li><strong>• Nombre de séances :</strong> ${detailsA.nombreSeances}</li>
                     <li><strong>• Indice A :</strong> ${indices.A}%</li>
                 </ul>
 
-                <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+                <hr class="profil-separateur">
 
                 <!-- Liste des absences et retards -->
-                <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                <h4 class="profil-section-titre">
                     ABSENCES ET RETARDS
                 </h4>
                 ${detailsA.absences.length > 0 ? `
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <div class="profil-artefacts-container">
                         ${detailsA.absences.map(abs => {
                             const date = new Date(abs.date + 'T12:00:00');
                             const options = { weekday: 'short', day: 'numeric', month: 'short' };
@@ -643,16 +643,14 @@ function genererSectionMobilisationEngagement(da) {
                             const bordure = estAbsenceComplete ? '#dc3545' : '#ffc107';
 
                             return `
-                                <div style="flex: 0 0 auto; min-width: 140px; padding: 8px 10px;
-                                            background: var(--bleu-tres-pale); border-left: 3px solid ${bordure};
-                                            border-radius: 4px; cursor: pointer; font-size: 0.85rem;"
+                                <div class="profil-artefact-item" style="background: var(--bleu-tres-pale); border-left-color: ${bordure}; cursor: pointer; font-size: 0.85rem;"
                                      onclick="naviguerVersPresenceAvecDate('${abs.date}')"
                                      onmouseover="this.style.background='#e0e8f0'"
                                      onmouseout="this.style.background='var(--bleu-tres-pale)'">
-                                    <div style="color: var(--bleu-principal); font-weight: 500;">
+                                    <div class="profil-artefact-nom">
                                         ${icone} ${dateFormatee}
                                     </div>
-                                    <div style="font-size: 0.8rem; color: #666;">
+                                    <div class="profil-artefact-note">
                                         ${estAbsenceComplete
                                             ? `${abs.heuresManquees}h manquées`
                                             : `${abs.heuresPresence}h / ${abs.heuresPresence + abs.heuresManquees}h`
@@ -663,108 +661,104 @@ function genererSectionMobilisationEngagement(da) {
                         }).join('')}
                     </div>
                 ` : `
-                    <div style="text-align: center; padding: 15px; background: #d4edda; border-radius: 6px; color: #155724;">
-                        <div style="font-size: 1.5rem;">✅</div>
-                        <div style="font-weight: 500;">Assiduité parfaite !</div>
+                    <div class="profil-message-succes">
+                        <div class="profil-message-succes-icone">✅</div>
+                        <div class="profil-message-succes-texte">Assiduité parfaite !</div>
                     </div>
                 `}
             </div>
 
             <!-- FICHE COMPLÉTION -->
-            <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px;">
+            <div class="profil-carte">
                 <!-- Badge avec interprétation -->
-                <div style="margin-bottom: 15px;">
-                    <strong style="font-size: 1.1rem; color: ${interpC.couleur};">${interpC.niveau}</strong>
-                    <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(C = ${indices.C}%)</span>
+                <div class="profil-carte-titre">
+                    <strong style="color: ${interpC.couleur};">${interpC.niveau}</strong>
+                    <span class="valeur-indice" style="color: ${interpC.couleur};">(C = ${indices.C}%)</span>
                 </div>
 
                 <!-- Statistiques -->
-                <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
+                <ul class="profil-liste-simple">
                     <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
                 </ul>
 
-                <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+                <hr class="profil-separateur">
 
                 <!-- Gestion des jetons -->
                 ${totalJetonsUtilises > 0 ? `
-                    <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                    <h4 class="profil-section-titre">
                         🎫 JETONS UTILISÉS
                     </h4>
-                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    <div class="profil-artefacts-liste" style="margin-bottom: 20px;">
                         ${jetonsRepriseUtilises > 0 ? `
-                            <div style="background: #f3e5f5; border-left: 4px solid #9c27b0; border-radius: 8px; padding: 12px;">
-                                <div style="font-size: 1rem; color: #7b1fa2; font-weight: 600;">
-                                    <span style="font-size: 1.2rem;">⭐</span> Jetons de reprise : ${jetonsRepriseUtilises}
+                            <div class="profil-section-bordure-gauche profil-jetons-reprise">
+                                <div class="profil-jetons-reprise-titre">
+                                    <span class="profil-jetons-reprise-icone">⭐</span> Jetons de reprise : ${jetonsRepriseUtilises}
                                 </div>
-                                <div style="font-size: 0.85rem; color: #666; margin-top: 8px;">
+                                <div class="profil-jetons-details">
                                     ${artefactsAvecJetonReprise.map(nom => `
-                                        <div style="padding: 4px 0;">• ${echapperHtml(nom)}</div>
+                                        <div>• ${echapperHtml(nom)}</div>
                                     `).join('')}
                                 </div>
                             </div>
                         ` : ''}
                         ${jetonsDelaiUtilises > 0 ? `
-                            <div style="background: #fff3e0; border-left: 4px solid #ff6f00; border-radius: 8px; padding: 12px;">
-                                <div style="font-size: 1rem; color: #e65100; font-weight: 600;">
-                                    <span style="font-size: 1.2rem;">⭐</span> Jetons de délai : ${jetonsDelaiUtilises}
+                            <div class="profil-section-bordure-gauche profil-jetons-delai">
+                                <div class="profil-jetons-delai-titre">
+                                    <span class="profil-jetons-reprise-icone">⭐</span> Jetons de délai : ${jetonsDelaiUtilises}
                                 </div>
-                                <div style="font-size: 0.85rem; color: #666; margin-top: 8px;">
+                                <div class="profil-jetons-details">
                                     ${artefactsAvecJetonDelai.map(nom => `
-                                        <div style="padding: 4px 0;">• ${echapperHtml(nom)}</div>
+                                        <div>• ${echapperHtml(nom)}</div>
                                     `).join('')}
                                 </div>
                             </div>
                         ` : ''}
                     </div>
-                    <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+                    <hr class="profil-separateur">
                 ` : ''}
 
                 <!-- Artefacts remis -->
-                <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                <h4 class="profil-section-titre">
                     ✅ REMIS (${artefactsRemis.length})
                 </h4>
                 ${artefactsRemis.length > 0 ? `
-                    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                    <div class="profil-artefacts-liste">
                         ${artefactsRemis.map(art => `
-                            <div style="padding: 8px 10px; background: #d4edda; border-left: 3px solid #28a745;
-                                        border-radius: 4px; font-size: 0.85rem;">
-                                <div style="color: #155724; font-weight: 500;">
+                            <div class="profil-artefact-selectionne">
+                                <div class="profil-artefact-selectionne-nom">
                                     ✅ ${echapperHtml(art.titre)}
-                                    ${art.jetonReprise ? '<span style="color: #9c27b0; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
-                                    ${art.jetonDelai ? '<span style="color: #ff6f00; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
+                                    ${art.jetonReprise ? '<span class="profil-badge-jeton profil-badge-jeton-reprise" title="Jeton de reprise appliqué">⭐</span>' : ''}
+                                    ${art.jetonDelai ? '<span class="profil-badge-jeton profil-badge-jeton-delai" title="Jeton de délai appliqué">⭐</span>' : ''}
                                 </div>
-                                <div style="font-size: 0.8rem; color: #666;">
+                                <div class="profil-artefact-selectionne-details">
                                     <strong>${art.note}/100</strong>${art.niveau ? ` · ${art.niveau}` : ''}
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 ` : `
-                    <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 6px;
-                                color: #666; margin-bottom: 15px; font-size: 0.85rem;">
+                    <div class="profil-message-vide" style="margin-bottom: 15px;">
                         Aucun artefact remis
                     </div>
                 `}
 
                 <!-- Artefacts non remis -->
-                <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+                <h4 class="profil-section-titre">
                     NON REMIS (${artefactsNonRemis.length})
                 </h4>
                 ${artefactsNonRemis.length > 0 ? `
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div class="profil-artefacts-liste">
                         ${artefactsNonRemis.map(art => `
-                            <div style="padding: 8px 10px; background: #f5f5f5; border-left: 3px solid #ddd;
-                                        border-radius: 4px; opacity: 0.7; font-size: 0.85rem;">
-                                <div style="color: #666; font-weight: 500;">
+                            <div class="profil-artefact-non-remis" style="opacity: 0.7;">
+                                <div class="profil-artefact-non-remis-nom">
                                     ⏳ ${echapperHtml(art.titre)}
                                 </div>
-                                <div style="font-size: 0.8rem; color: #999;">Non remis</div>
+                                <div class="profil-artefact-non-remis-statut">Non remis</div>
                             </div>
                         `).join('')}
                     </div>
                 ` : `
-                    <div style="text-align: center; padding: 10px; background: #d4edda; border-radius: 6px;
-                                color: #155724; font-size: 0.85rem;">
+                    <div class="profil-message-tous-remis">
                         ✅ Tous les artefacts remis !
                     </div>
                 `}
@@ -772,36 +766,32 @@ function genererSectionMobilisationEngagement(da) {
         </div>
 
         <!-- Placeholder graphique unique (en bas des deux fiches) -->
-        <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
-                    padding: 30px 20px; text-align: center; color: var(--bleu-moyen); font-style: italic; margin-bottom: 20px;">
+        <div class="profil-zone-avertissement" style="padding: 30px 20px;">
             📈 Évolution temporelle A-C (à venir)
         </div>
 
         <!-- TOGGLE CALCULS UNIQUE (EXTÉRIEUR) -->
-        <div style="margin-top: 25px;">
+        <div class="profil-toggle-details">
             <button onclick="toggleDetailsTechniques('details-calculs-mobilisation-${da}')"
-                    style="background: var(--bleu-pale); border: 1px solid var(--bleu-moyen);
-                           color: var(--bleu-principal); padding: 8px 16px; border-radius: 6px;
-                           cursor: pointer; font-size: 0.9rem; width: 100%; text-align: left;
-                           display: flex; align-items: center; justify-content: space-between;">
+                    class="profil-toggle-btn" style="text-align: left; display: flex; align-items: center; justify-content: space-between;">
                 <span>🔽 Voir les calculs et formules</span>
-                <span style="font-size: 0.8rem; opacity: 0.7;">▼</span>
+                <span class="profil-toggle-fleche">▼</span>
             </button>
 
             <div id="details-calculs-mobilisation-${da}" class="details-techniques">
-                <div style="background: white; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem;">
-                    <h5 style="color: var(--bleu-principal); margin: 0 0 10px 0; font-size: 0.95rem;">📐 DÉTAILS DES CALCULS</h5>
-                    <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
+                <div class="profil-details-contenu">
+                    <h5 class="profil-details-titre">📐 DÉTAILS DES CALCULS</h5>
+                    <ul class="profil-details-liste">
                         <li><strong>Indice A (Assiduité) :</strong> ${indices.A}%</li>
-                        <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
+                        <li>
                             → ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
                         </li>
                         <li style="margin-top: 10px;"><strong>Indice C (Complétion) :</strong> ${indices.C}%</li>
-                        <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
+                        <li>
                             → ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
                         </li>
                         <li style="margin-top: 10px;"><strong>Indice M (Mobilisation) :</strong> ${indices.M}</li>
-                        <li style="color: #666; font-size: 0.9rem; margin-left: 20px;">
+                        <li>
                             → M = (A + C) / 2 = (${indices.A} + ${indices.C}) / 2
                         </li>
                     </ul>
@@ -1587,27 +1577,15 @@ function changerSectionProfil(section) {
 
     const da = profilActuelDA;
 
-    // Mettre à jour la navigation active avec style visuel
-    document.querySelectorAll('.profil-nav-item').forEach(item => {
-        item.classList.remove('actif');
-        item.style.background = '';
-        item.style.borderLeft = '';
-        item.style.color = '';
-        // Retirer le font-weight des titres
-        const titre = item.querySelector('.profil-nav-item-titre');
-        if (titre) titre.style.fontWeight = '';
+    // Mettre à jour la navigation active (utilise les classes CSS matériel)
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
     });
 
     // Trouver l'élément cliqué et le marquer comme actif
-    const clickedItem = event.target.closest('.profil-nav-item');
+    const clickedItem = event.target.closest('.sidebar-item');
     if (clickedItem) {
-        clickedItem.classList.add('actif');
-        clickedItem.style.background = 'var(--bleu-pale)';
-        clickedItem.style.borderLeft = '4px solid var(--bleu-principal)';
-        clickedItem.style.color = '#000';
-        // Ajouter font-weight au titre
-        const titre = clickedItem.querySelector('.profil-nav-item-titre');
-        if (titre) titre.style.fontWeight = '600';
+        clickedItem.classList.add('active');
     }
 
     // Générer le contenu selon la section
@@ -1653,9 +1631,13 @@ function changerSectionProfil(section) {
             contenu = '<p>Section non trouvée</p>';
     }
 
+    // Récupérer la pratique pour le badge (si section cible)
+    const indices = calculerTousLesIndices(da);
+    const badgePratique = section === 'cible' ? genererBadgePratiqueProfil(indices.pratique) : '';
+
     contenuContainer.innerHTML = `
         <div class="profil-contenu-header">
-            <div class="profil-contenu-titre">${titre}</div>
+            <h2 style="margin: 0 0 20px 0;">${titre}${badgePratique}</h2>
         </div>
         <div class="profil-contenu-body">
             ${contenu}
@@ -1956,110 +1938,102 @@ function afficherProfilComplet(da) {
     const etudiantPrecedent = indexActuel > 0 ? etudiants[indexActuel - 1] : null;
     const etudiantSuivant = indexActuel < etudiants.length - 1 ? etudiants[indexActuel + 1] : null;
 
-    // Générer le HTML avec layout 2 colonnes
+    // Générer le HTML avec layout sidebar matériel
     container.innerHTML = `
-        <!-- Boutons de navigation -->
-        <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; justify-content: center;">
-            <button class="btn btn-principal"
-                    onclick="afficherProfilComplet('${etudiantPrecedent?.da}')"
-                    ${!etudiantPrecedent ? 'disabled' : ''}
-                    title="Étudiant·e précédent·e">
-                ← Précédent·e
-            </button>
+        <div class="layout-sidebar-2col">
+            <!-- SIDEBAR GAUCHE (navigation) -->
+            <div class="sidebar-navigation">
+                <!-- Sélecteur d'étudiant -->
+                <div class="sidebar-filtre">
+                    <label style="font-size: 0.85rem; color: #666; margin-bottom: 5px; display: block;">Étudiant·e :</label>
+                    <select id="selecteurEtudiantProfil" class="controle-form" onchange="afficherProfilComplet(this.value)">
+                        ${etudiants.map(e => `
+                            <option value="${e.da}" ${e.da === da ? 'selected' : ''}>
+                                ${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} (${echapperHtml(e.da)})
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
 
-            <button class="btn btn-principal" onclick="afficherSousSection('tableau-bord-apercu')">
-                ← Retour à la liste
-            </button>
+                <!-- Navigation Précédent/Suivant -->
+                <div class="sidebar-nav-buttons">
+                    <button class="btn btn-principal"
+                            onclick="afficherProfilComplet('${etudiantPrecedent?.da}')"
+                            ${!etudiantPrecedent ? 'disabled' : ''}
+                            title="Étudiant·e précédent·e">
+                        ← Préc.
+                    </button>
+                    <button class="btn btn-principal"
+                            onclick="afficherProfilComplet('${etudiantSuivant?.da}')"
+                            ${!etudiantSuivant ? 'disabled' : ''}
+                            title="Étudiant·e suivant·e">
+                        Suiv. →
+                    </button>
+                </div>
 
-            <button class="btn btn-principal"
-                    onclick="afficherProfilComplet('${etudiantSuivant?.da}')"
-                    ${!etudiantSuivant ? 'disabled' : ''}
-                    title="Étudiant·e suivant·e">
-                Suivant·e →
-            </button>
-        </div>
+                <!-- Bouton retour -->
+                <button class="btn btn-annuler sidebar-btn-retour"
+                        onclick="afficherSousSection('tableau-bord-apercu')">
+                    ← Retour à la liste
+                </button>
 
-        <div class="profil-layout-2col">
-            <!-- COLONNE GAUCHE (SIDEBAR) -->
-            <div class="profil-sidebar">
-                <!-- En-tête étudiant -->
-                <div class="profil-sidebar-header">
-                    <div class="profil-sidebar-nom">
+                <!-- Informations étudiant -->
+                <div class="sidebar-info-card">
+                    <div class="sidebar-info-card-nom">
                         ${echapperHtml(eleve.prenom)} ${echapperHtml(eleve.nom)}
                     </div>
-                    <div class="profil-sidebar-meta">
-                        <span><strong>DA:</strong> ${echapperHtml(eleve.da)}</span>
-                        ${eleve.groupe ? `<span><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</span>` : ''}
-                        ${eleve.programme ? `<span><strong>Programme:</strong> ${echapperHtml(eleve.programme)}</span>` : ''}
-                        ${eleve.sa === 'Oui' ? '<span style="color: var(--bleu-principal);">✓ SA</span>' : ''}
-                        ${eleve.caf === 'Oui' ? '<span style="color: var(--bleu-principal);">✓ CAF</span>' : ''}
+                    <div class="sidebar-info-card-details">
+                        <div><strong>DA:</strong> ${echapperHtml(eleve.da)}</div>
+                        ${eleve.groupe ? `<div><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</div>` : ''}
+                        ${eleve.programme ? `<div><strong>Programme:</strong> ${echapperHtml(eleve.programme)}</div>` : ''}
+                        ${eleve.sa === 'Oui' ? '<div style="color: var(--bleu-principal);">✓ Services adaptés</div>' : ''}
+                        ${eleve.caf === 'Oui' ? '<div style="color: var(--bleu-principal);">✓ CAF</div>' : ''}
                     </div>
                 </div>
 
-                <!-- Navigation sections avec indices intégrés -->
-                <div class="profil-sidebar-nav">
-                    <div class="profil-sidebar-nav-titre">Observations</div>
+                <!-- Navigation sections (utilise les classes matériel) -->
+                <div class="sidebar-liste">
+                    <div class="sidebar-section-titre">OBSERVATIONS</div>
 
                     <!-- 1. Suivi de l'apprentissage -->
-                    <div class="profil-nav-item actif" onclick="changerSectionProfil('cible')"
-                         style="background: var(--bleu-pale); border-left: 4px solid var(--bleu-principal); color: #000;">
-                        <div class="profil-nav-item-ligne">
-                            <div class="profil-nav-item-titre" style="font-weight: 600;">
-                                Suivi de l'apprentissage
-                            </div>
-                        </div>
-                        <div class="profil-nav-item-sous-ligne">
-                            <span>R: ${indices.R}</span>
-                            <span>·</span>
-                            <span>${interpR.niveau}</span>
+                    <div class="sidebar-item active" onclick="changerSectionProfil('cible')">
+                        <div class="sidebar-item-titre">Suivi de l'apprentissage</div>
+                        <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
+                            R: ${indices.R} · ${interpR.niveau}
                         </div>
                     </div>
 
                     <!-- 2. Développement des habiletés -->
-                    <div class="profil-nav-item" onclick="changerSectionProfil('performance')">
-                        <div class="profil-nav-item-ligne">
-                            <div class="profil-nav-item-titre">
-                                Développement des habiletés
-                            </div>
-                            <div class="profil-nav-item-valeur" style="color: ${obtenirCouleurIndice(indices.P)};">
-                                ${indices.P}%
-                            </div>
+                    <div class="sidebar-item" onclick="changerSectionProfil('performance')">
+                        <div class="sidebar-item-titre">Développement des habiletés</div>
+                        <div style="font-size: 0.85rem; color: ${obtenirCouleurIndice(indices.P)}; margin-top: 4px; font-weight: 600;">
+                            ${indices.P}%
                         </div>
                     </div>
 
-                    <!-- 3. Mobilisation (A + C + M) -->
-                    <div class="profil-nav-item" onclick="changerSectionProfil('mobilisation')">
-                        <div class="profil-nav-item-ligne">
-                            <div class="profil-nav-item-titre">
-                                Mobilisation
-                            </div>
-                        </div>
-                        <div class="profil-nav-item-sous-ligne">
-                            <span>A: ${indices.A}%</span>
-                            <span>·</span>
-                            <span>C: ${indices.C}%</span>
+                    <!-- 3. Mobilisation -->
+                    <div class="sidebar-item" onclick="changerSectionProfil('mobilisation')">
+                        <div class="sidebar-item-titre">Mobilisation</div>
+                        <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
+                            A: ${indices.A}% · C: ${indices.C}%
                         </div>
                     </div>
 
                     <!-- 4. Rapport -->
-                    <div class="profil-nav-item" onclick="changerSectionProfil('rapport')">
-                        <div class="profil-nav-item-ligne">
-                            <div class="profil-nav-item-titre">
-                                Rapport
-                            </div>
-                        </div>
+                    <div class="sidebar-item" onclick="changerSectionProfil('rapport')">
+                        <div class="sidebar-item-titre">Rapport</div>
                     </div>
                 </div>
             </div>
 
-            <!-- COLONNE DROITE (CONTENU) -->
-            <div class="profil-contenu" id="profil-contenu-dynamique">
+            <!-- ZONE PRINCIPALE (centrale, scroll) -->
+            <div class="zone-principale" id="profil-contenu-dynamique">
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
-                    <div class="profil-contenu-titre">
+                    <h2 style="margin: 0 0 20px 0;">
                         Suivi de l'apprentissage
                         ${genererBadgePratiqueProfil(indices.pratique)}
-                    </div>
+                    </h2>
                 </div>
                 <div class="profil-contenu-body">
                     ${genererContenuCibleIntervention(da)}
