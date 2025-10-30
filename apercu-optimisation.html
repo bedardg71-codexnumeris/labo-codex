@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aperçu des optimisations d'espace</title>
+    <style>
+        :root {
+            --bleu-principal: #2c5f8d;
+            --bleu-moyen: #5a8bb5;
+            --bleu-leger: #7fa9c9;
+            --bleu-pale: #e8f1f8;
+            --bleu-tres-pale: #f5f9fc;
+            --bleu-carte: #f0f7fd;
+            --vert-valide: #4caf50;
+            --orange-accent: #ff9800;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--bleu-principal);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .panel h2 {
+            color: var(--bleu-principal);
+            margin-top: 0;
+            font-size: 1.1rem;
+            border-bottom: 2px solid var(--bleu-moyen);
+            padding-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge-actuel {
+            background: #ffd54f;
+            color: #f57f17;
+        }
+
+        .badge-optimise {
+            background: #81c784;
+            color: #2e7d32;
+        }
+
+        .stats {
+            background: var(--bleu-tres-pale);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        /* Structure ACTUELLE - Grilles de critères */
+        .critere-actuel {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .critere-actuel strong {
+            color: var(--bleu-principal);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .critere-actuel .description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .critere-actuel .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .critere-actuel .field {
+            margin-bottom: 5px;
+        }
+
+        .critere-actuel label {
+            font-size: 0.75rem;
+            color: var(--bleu-moyen);
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .critere-actuel input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            background: #f9f9f9;
+        }
+
+        .critere-actuel .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Structure OPTIMISÉE - Grilles de critères */
+        .critere-optimise {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid var(--bleu-principal);
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .critere-optimise:hover {
+            background: var(--bleu-tres-pale);
+        }
+
+        .critere-optimise .info {
+            flex: 1;
+        }
+
+        .critere-optimise .nom {
+            font-weight: 600;
+            color: var(--bleu-principal);
+        }
+
+        .critere-optimise .meta {
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 2px;
+        }
+
+        .critere-optimise .meta span {
+            margin-right: 15px;
+        }
+
+        .critere-optimise .actions {
+            white-space: nowrap;
+        }
+
+        /* Structure ACTUELLE - Productions */
+        .production-actuelle {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .production-actuelle .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .production-actuelle strong {
+            color: var(--bleu-principal);
+        }
+
+        .production-actuelle .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .production-actuelle .field label {
+            font-size: 0.75rem;
+            color: var(--bleu-moyen);
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .production-actuelle .field input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            background: #f9f9f9;
+        }
+
+        .production-actuelle .details {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--bleu-tres-pale);
+            font-size: 0.85rem;
+        }
+
+        /* Structure OPTIMISÉE - Productions */
+        .production-optimisee {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid var(--orange-accent);
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+        }
+
+        .production-optimisee .main-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .production-optimisee .info-line {
+            flex: 1;
+        }
+
+        .production-optimisee .titre {
+            font-weight: 600;
+            color: var(--bleu-principal);
+        }
+
+        .production-optimisee .meta {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .production-optimisee .meta .sep {
+            margin: 0 8px;
+            color: #ccc;
+        }
+
+        .production-optimisee .details {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 6px;
+            padding-left: 0;
+        }
+
+        .production-optimisee .actions {
+            white-space: nowrap;
+        }
+
+        /* Boutons */
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-modifier {
+            background: #64b5f6;
+            color: white;
+        }
+
+        .btn-modifier:hover {
+            background: #42a5f5;
+        }
+
+        .btn-supprimer {
+            background: #e57373;
+            color: white;
+        }
+
+        .btn-supprimer:hover {
+            background: #ef5350;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+
+        /* Détails repliables */
+        details {
+            margin-top: 8px;
+        }
+
+        summary {
+            cursor: pointer;
+            color: var(--bleu-moyen);
+            font-size: 0.85rem;
+            padding: 4px;
+        }
+
+        summary:hover {
+            color: var(--bleu-principal);
+        }
+
+        .description-detail {
+            margin-top: 8px;
+            padding: 8px;
+            background: var(--bleu-tres-pale);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .highlight strong {
+            color: #f57f17;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Aperçu des optimisations d'espace</h1>
+
+        <div class="highlight">
+            <strong>🎯 Objectif :</strong> Réduire l'espace vertical tout en gardant la lisibilité et l'accessibilité.<br>
+            <strong>📏 Gain d'espace estimé :</strong> Grilles de critères <strong>~70%</strong>, Productions <strong>~50%</strong>
+        </div>
+
+        <!-- ========== GRILLES DE CRITÈRES ========== -->
+        <h2 style="color: var(--bleu-principal); margin-top: 40px; margin-bottom: 20px;">
+            🔷 Grilles de critères d'évaluation
+        </h2>
+
+        <div class="comparison">
+            <!-- ACTUEL -->
+            <div class="panel">
+                <h2>Structure ACTUELLE <span class="badge badge-actuel">~160px par critère</span></h2>
+                <div class="stats">
+                    ❌ Inputs readonly volumineux<br>
+                    ❌ Grid 2 colonnes = hauteur excessive<br>
+                    ❌ Marges généreuses (15px)
+                </div>
+
+                <div class="critere-actuel">
+                    <strong>Structure</strong>
+                    <div class="description">Organisation logique des idées et cohérence du propos</div>
+                    <div class="grid">
+                        <div class="field">
+                            <label>Type</label>
+                            <input type="text" value="Holistique" readonly>
+                        </div>
+                        <div class="field">
+                            <label>Pondération</label>
+                            <input type="text" value="15%" readonly>
+                        </div>
+                    </div>
+                    <div class="buttons">
+                        <button class="btn btn-modifier">Modifier</button>
+                        <button class="btn btn-supprimer">Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="critere-actuel">
+                    <strong>Rigueur</strong>
+                    <div class="description">Exhaustivité des observations et précision des analyses</div>
+                    <div class="grid">
+                        <div class="field">
+                            <label>Type</label>
+                            <input type="text" value="Analytique" readonly>
+                        </div>
+                        <div class="field">
+                            <label>Pondération</label>
+                            <input type="text" value="20%" readonly>
+                        </div>
+                    </div>
+                    <div class="buttons">
+                        <button class="btn btn-modifier">Modifier</button>
+                        <button class="btn btn-supprimer">Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="critere-actuel">
+                    <strong>Nuance</strong>
+                    <div class="description">Qualité du raisonnement et profondeur de la réflexion</div>
+                    <div class="grid">
+                        <div class="field">
+                            <label>Type</label>
+                            <input type="text" value="Holistique" readonly>
+                        </div>
+                        <div class="field">
+                            <label>Pondération</label>
+                            <input type="text" value="25%" readonly>
+                        </div>
+                    </div>
+                    <div class="buttons">
+                        <button class="btn btn-modifier">Modifier</button>
+                        <button class="btn btn-supprimer">Supprimer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OPTIMISÉ -->
+            <div class="panel">
+                <h2>Structure OPTIMISÉE <span class="badge badge-optimise">~50px par critère</span></h2>
+                <div class="stats">
+                    ✅ Format ligne compact<br>
+                    ✅ Infos essentielles visibles<br>
+                    ✅ Description repliable (optionnel)
+                </div>
+
+                <div class="critere-optimise">
+                    <div class="info">
+                        <div class="nom">Structure (15%) • Holistique</div>
+                        <details>
+                            <summary>Voir la description</summary>
+                            <div class="description-detail">
+                                Organisation logique des idées et cohérence du propos
+                            </div>
+                        </details>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-modifier btn-small">Modifier</button>
+                        <button class="btn btn-supprimer btn-small">Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="critere-optimise">
+                    <div class="info">
+                        <div class="nom">Rigueur (20%) • Analytique</div>
+                        <details>
+                            <summary>Voir la description</summary>
+                            <div class="description-detail">
+                                Exhaustivité des observations et précision des analyses
+                            </div>
+                        </details>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-modifier btn-small">Modifier</button>
+                        <button class="btn btn-supprimer btn-small">Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="critere-optimise">
+                    <div class="info">
+                        <div class="nom">Nuance (25%) • Holistique</div>
+                        <details>
+                            <summary>Voir la description</summary>
+                            <div class="description-detail">
+                                Qualité du raisonnement et profondeur de la réflexion
+                            </div>
+                        </details>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-modifier btn-small">Modifier</button>
+                        <button class="btn btn-supprimer btn-small">Supprimer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== PRODUCTIONS ========== -->
+        <h2 style="color: var(--bleu-principal); margin-top: 40px; margin-bottom: 20px;">
+            🔶 Productions / Évaluations
+        </h2>
+
+        <div class="comparison">
+            <!-- ACTUEL -->
+            <div class="panel">
+                <h2>Structure ACTUELLE <span class="badge badge-actuel">~120px par production</span></h2>
+                <div class="stats">
+                    ❌ Grid 3 colonnes = hauteur importante<br>
+                    ❌ Inputs readonly encombrants<br>
+                    ❌ Détails toujours affichés
+                </div>
+
+                <div class="production-actuelle">
+                    <div class="header">
+                        <strong>A1 - Dissertation</strong>
+                        <div>
+                            <button class="btn btn-modifier btn-small">Modifier</button>
+                            <button class="btn btn-supprimer btn-small">Supprimer</button>
+                        </div>
+                    </div>
+                    <div class="grid">
+                        <div class="field">
+                            <label>Type</label>
+                            <input type="text" value="Examen" readonly>
+                        </div>
+                        <div class="field">
+                            <label>Pondération</label>
+                            <input type="text" value="25%" readonly>
+                        </div>
+                        <div class="field">
+                            <label>Grilles de critères</label>
+                            <input type="text" value="Grille SRPNF" readonly>
+                        </div>
+                    </div>
+                    <div class="details">
+                        <strong>Objectif:</strong> Analyser un texte argumentatif selon les critères SRPNF
+                    </div>
+                </div>
+
+                <div class="production-actuelle">
+                    <div class="header">
+                        <strong>T2 - Essai critique</strong>
+                        <div>
+                            <button class="btn btn-modifier btn-small">Modifier</button>
+                            <button class="btn btn-supprimer btn-small">Supprimer</button>
+                        </div>
+                    </div>
+                    <div class="grid">
+                        <div class="field">
+                            <label>Type</label>
+                            <input type="text" value="Travail" readonly>
+                        </div>
+                        <div class="field">
+                            <label>Pondération</label>
+                            <input type="text" value="30%" readonly>
+                        </div>
+                        <div class="field">
+                            <label>Grilles de critères</label>
+                            <input type="text" value="Grille SRPNF" readonly>
+                        </div>
+                    </div>
+                    <div class="details">
+                        <strong>Objectif:</strong> Développer une argumentation nuancée et rigoureuse
+                    </div>
+                </div>
+            </div>
+
+            <!-- OPTIMISÉ -->
+            <div class="panel">
+                <h2>Structure OPTIMISÉE <span class="badge badge-optimise">~60px par production</span></h2>
+                <div class="stats">
+                    ✅ Tout sur 2 lignes maximum<br>
+                    ✅ Infos essentielles inline<br>
+                    ✅ Plus aéré et scannable
+                </div>
+
+                <div class="production-optimisee">
+                    <div class="main-line">
+                        <div class="info-line">
+                            <span class="titre">A1 - Dissertation</span>
+                            <div class="meta">
+                                Examen <span class="sep">•</span>
+                                <strong style="color: var(--orange-accent);">25%</strong> <span class="sep">•</span>
+                                Grille SRPNF
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-modifier btn-small">↑</button>
+                            <button class="btn btn-modifier btn-small">↓</button>
+                            <button class="btn btn-modifier btn-small">Modifier</button>
+                            <button class="btn btn-supprimer btn-small">Supprimer</button>
+                        </div>
+                    </div>
+                    <div class="details">
+                        📌 Analyser un texte argumentatif selon les critères SRPNF
+                    </div>
+                </div>
+
+                <div class="production-optimisee">
+                    <div class="main-line">
+                        <div class="info-line">
+                            <span class="titre">T2 - Essai critique</span>
+                            <div class="meta">
+                                Travail <span class="sep">•</span>
+                                <strong style="color: var(--orange-accent);">30%</strong> <span class="sep">•</span>
+                                Grille SRPNF
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-modifier btn-small">↑</button>
+                            <button class="btn btn-modifier btn-small">↓</button>
+                            <button class="btn btn-modifier btn-small">Modifier</button>
+                            <button class="btn btn-supprimer btn-small">Supprimer</button>
+                        </div>
+                    </div>
+                    <div class="details">
+                        📌 Développer une argumentation nuancée et rigoureuse
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RÉSUMÉ -->
+        <div style="background: var(--bleu-pale); padding: 20px; border-radius: 8px; margin-top: 40px;">
+            <h3 style="color: var(--bleu-principal); margin-top: 0;">📈 Résumé des gains</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: var(--bleu-moyen); color: white;">
+                        <th style="padding: 10px; text-align: left;">Module</th>
+                        <th style="padding: 10px; text-align: center;">Hauteur actuelle</th>
+                        <th style="padding: 10px; text-align: center;">Hauteur optimisée</th>
+                        <th style="padding: 10px; text-align: center;">Gain</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: white;">
+                        <td style="padding: 10px; border: 1px solid #ddd;">Grilles de critères</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">~160px</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">~50px</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: var(--vert-valide); font-weight: bold;">-69%</td>
+                    </tr>
+                    <tr style="background: var(--bleu-tres-pale);">
+                        <td style="padding: 10px; border: 1px solid #ddd;">Productions</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">~120px</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">~60px</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center; color: var(--vert-valide); font-weight: bold;">-50%</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 15px; margin-bottom: 0; font-size: 0.9rem;">
+                <strong>💡 Pour 10 critères :</strong> 1600px → 500px (gain de <strong>1100px de scroll</strong>)<br>
+                <strong>💡 Pour 8 productions :</strong> 960px → 480px (gain de <strong>480px de scroll</strong>)
+            </p>
+        </div>
+    </div>
+</body>
+</html>

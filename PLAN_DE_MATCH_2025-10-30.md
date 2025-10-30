@@ -26,42 +26,62 @@
 **Versions** : Beta 0.80 → Beta 0.85
 **Objectif** : Finaliser fonctionnalités partiellement implémentées
 
-### 🎫 1.1 Système de jetons complet
+### 🎫 1.1 Système de jetons complet ✅ COMPLÉTÉ
 **Priorité** : ⚠️ HAUTE
 **Estimation** : 5-6 jours
-**Fichiers** : `portfolio.js`, `productions.js`, `profil-etudiant.js`
+**Fichiers** : `portfolio.js`, `productions.js`, `profil-etudiant.js`, `evaluation.js`
+**Statut** : ✅ **COMPLÉTÉ le 30 octobre 2025** (Beta 0.80.1)
+**Documentation** : Voir `NOTES_JETONS_COMPLETE.md`
 
-#### Fonctionnalités à implémenter
+#### Fonctionnalités implémentées
 
 **Jetons délai** :
-- [ ] Calcul automatique nouvelle échéance (date production + X jours configurables)
-- [ ] Exclusion temporaire du calcul de complétion C (jusqu'à nouvelle échéance)
-- [ ] Indicateur visuel "Délai accordé jusqu'au XX/XX/XXXX"
-- [ ] Retour automatique dans calcul C si nouvelle échéance dépassée sans remise
+- [x] Application/retrait jeton délai depuis sidebar
+- [x] Badge ⭐ orange avec date d'application
+- [x] Propriétés : `jetonDelaiApplique`, `dateApplicationJetonDelai`, `delaiAccorde`
+- [x] Recalcul automatique indices C-P après opération
+- [ ] ⏭️ **Future** : Calcul automatique nouvelle échéance (PHASE 1.1 avancée)
+- [ ] ⏭️ **Future** : Exclusion temporaire du calcul de complétion C
+- [ ] ⏭️ **Future** : Indicateur visuel "Délai accordé jusqu'au XX/XX/XXXX"
 
 **Jetons reprise** :
-- [ ] Remplacement automatique évaluation précédente (champ `remplaceeParId`)
-- [ ] Historique tentatives visible (1ère soumission, reprise 1, reprise 2...)
-- [ ] Affichage note précédente barrée + nouvelle note
-- [ ] Limitation nombre de reprises selon configuration (1, 2, ou illimité)
+- [x] Remplacement automatique évaluation précédente (champ `remplaceeParId`)
+- [x] Application depuis sidebar (`appliquerJetonRepriseDepuisSidebar()`)
+- [x] Application depuis banque (`appliquerJetonRepriseDepuisBanque()`)
+- [x] Badge ⭐ violet avec date d'application
+- [x] Archive évaluations remplacées (visible en grisé)
+- [x] Exclusion évaluations archivées des calculs indices
+- [x] Propriétés : `jetonRepriseApplique`, `repriseDeId`, `dateApplicationJetonReprise`
+- [ ] ⏭️ **Future** : Historique tentatives visible (1ère soumission, reprise 1, reprise 2...)
+- [ ] ⏭️ **Future** : Limitation nombre de reprises selon configuration
 
 **Interface utilisateur** :
-- [ ] Section "Jetons" dans profil étudiant avec compteurs visuels
-- [ ] Jetons délai disponibles / utilisés (ex: 2/3)
-- [ ] Jetons reprise disponibles / utilisés (ex: 1/2)
-- [ ] Alerte visuelle si jetons épuisés
-- [ ] Boutons "Accorder jeton délai" et "Accorder jeton reprise" dans profil
+- [x] Section "JETONS UTILISÉS" dans profil étudiant
+- [x] Bouton "Appliquer jeton de reprise" dans sidebar (Beta 0.80.1)
+- [x] Checkbox "Application de jeton de délai" dans sidebar
+- [x] Badges visuels (violet/orange) pendant édition évaluation
+- [x] Retrait jetons via bouton × (sidebar et banque)
+- [x] Étoiles ⭐ dans liste productions (identification rapide)
+- [ ] ⏭️ **Future** : Compteurs visuels jetons disponibles/utilisés (ex: 2/3)
+- [ ] ⏭️ **Future** : Alerte visuelle si jetons épuisés
 
 **Configuration** :
-- [ ] Réglages → Pratiques : Nombre de jetons délai par défaut (ex: 3)
-- [ ] Réglages → Pratiques : Nombre de jetons reprise par défaut (ex: 2)
-- [ ] Réglages → Pratiques : Durée délai standard (ex: 7 jours)
+- [ ] ⏭️ **Future** : Réglages → Pratiques : Nombre de jetons délai par défaut (ex: 3)
+- [ ] ⏭️ **Future** : Réglages → Pratiques : Nombre de jetons reprise par défaut (ex: 2)
+- [ ] ⏭️ **Future** : Réglages → Pratiques : Durée délai standard (ex: 7 jours)
+
+#### Fonctions créées/modifiées (Beta 0.80.1)
+1. **`afficherGestionJetons()`** : Contrôle visibilité sections jetons (CRÉÉE)
+2. **`gererDelaiAccorde()`** : Création vrais jetons avec date (AMÉLIORÉE)
+3. **`appliquerJetonRepriseDepuisSidebar()`** : Application jeton depuis sidebar (CRÉÉE)
 
 #### Tests de validation
-- [ ] Scénario 1 : Étudiant demande délai, échéance prolongée, C non affecté temporairement
-- [ ] Scénario 2 : Étudiant dépasse nouvelle échéance, C recalculé automatiquement
-- [ ] Scénario 3 : Étudiant utilise reprise, ancienne note remplacée, historique visible
-- [ ] Scénario 4 : Étudiant épuise tous jetons, alertes affichées, boutons désactivés
+- [x] ✅ Jeton de délai appliqué/retiré avec badge orange affiché
+- [x] ✅ Jeton de reprise crée duplicata et archive original
+- [x] ✅ Badges affichés dans sidebar et profil étudiant
+- [x] ✅ Étoiles visibles dans liste productions
+- [x] ✅ Indices C-P recalculés automatiquement
+- [x] ✅ Évaluations remplacées exclues des calculs
 
 ---
 

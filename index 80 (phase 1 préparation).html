@@ -2420,69 +2420,47 @@
                     <div class="carte">
                         <h3>💬 Cartouches de rétroaction</h3>
 
-                        <!-- IMPORT/EXPORT CARTOUCHES -->
-                        <div style="margin-bottom: 20px;">
-                            <!-- Export et Import JSON (partage entre enseignants) -->
-                            <div style="display: flex; gap: 10px; padding: 15px; background: #f0f8ff; border-radius: 6px; border-left: 4px solid #2196f3; margin-bottom: 10px;">
-                                <button class="btn btn-confirmer" onclick="exporterCartouches()" style="flex: 1;">
-                                    📤 Exporter les cartouches (JSON)
-                                </button>
-                                <button class="btn btn-principal" onclick="document.getElementById('fichier-import-cartouches-local').click()" style="flex: 1;">
-                                    📥 Importer des cartouches (JSON)
-                                </button>
-                                <input type="file" id="fichier-import-cartouches-local" accept=".json" style="display: none;" onchange="importerCartouches(event)">
-                            </div>
+                        <!-- Layout 2 colonnes : Sidebar + Zone centrale -->
+                        <div class="layout-cartouches-2col">
 
-                            <!-- Import TXT (pour remplir une cartouche) -->
-                            <div style="padding: 12px; background: #e3f2fd; border-radius: 6px; border-left: 4px solid #1976d2;">
-                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                                    <button class="btn btn-principal" onclick="document.getElementById('fichier-import-txt-local').click()" style="font-size: 0.9rem;">
-                                        📄 Importer depuis fichier .txt
-                                    </button>
-                                    <input type="file" id="fichier-import-txt-local" accept=".txt" style="display: none;" onchange="importerCartoucheDepuisTxt(event)">
-                                    <small style="color: #1565c0;">
-                                        Pour remplir la cartouche sélectionnée avec vos commentaires rédigés dans un fichier .txt (format Markdown)
-                                    </small>
-                                </div>
-                                <div style="font-size: 0.85rem; color: #0d47a1; background: white; padding: 8px; border-radius: 4px;">
-                                    <strong>⚠️ Important :</strong> Les noms de critères dans la grille doivent correspondre exactement aux noms dans le fichier .txt (ex: STRUCTURE, RIGUEUR, PLAUSIBILITÉ, NUANCE).
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- NOUVELLE VUE: Toutes les grilles et cartouches -->
-                        <div id="vueGrillesCartouches" style="margin-bottom: 30px;">
-                            <!-- Contenu généré par afficherToutesLesGrillesEtCartouches() -->
-                        </div>
-
-                        <!-- ANCIEN SYSTÈME (Caché par défaut, gardé pour compatibilité) -->
-                        <div style="display: none;">
-                            <!-- Sélecteur de grille et cartouche -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                                <div class="groupe-form">
-                                    <label>Grille de critères :</label>
-                                    <select id="selectGrilleRetroaction" class="controle-form"
-                                        onchange="chargerCartouchesRetroaction()">
-                                        <option value="">-- Choisir une grille --</option>
+                            <!-- SIDEBAR GAUCHE : BANQUE DES CARTOUCHES -->
+                            <div class="sidebar-cartouches">
+                                <!-- Filtre par grille -->
+                                <div class="filtre-grille-cartouche">
+                                    <label>Filtrer par grille :</label>
+                                    <select id="filtreGrilleCartouche" class="controle-form" onchange="filtrerCartouchesBanque()">
+                                        <option value="">Toutes les grilles</option>
+                                        <!-- Options générées dynamiquement -->
                                     </select>
                                 </div>
-                                <div class="groupe-form">
-                                    <label>Cartouche :</label>
-                                    <select id="selectCartouche" class="controle-form"
-                                        onchange="chargerMatriceRetroaction()">
-                                        <option value="">-- Nouvelle cartouche --</option>
-                                    </select>
+
+                                <!-- Liste des cartouches -->
+                                <div id="listeCartouchesBanque">
+                                    <p class="banque-vide">Chargement...</p>
                                 </div>
+
+                                <!-- Bouton nouvelle cartouche -->
+                                <button onclick="creerNouvelleCartouche()" class="btn-ajouter-cartouche">
+                                    + Nouvelle cartouche
+                                </button>
                             </div>
 
-                            <!-- Message si aucune grille sélectionnée -->
-                            <div id="aucuneEvalRetroaction" style="padding: 20px; background: var(--bleu-tres-pale);
-                 border-radius: 6px; text-align: center; color: var(--bleu-leger);">
-                                <p>Sélectionnez une grille de critères pour créer ou modifier une cartouche de
-                                    rétroaction
-                                </p>
-                            </div>
-                        </div>
+                            <!-- ZONE CENTRALE : ÉDITION + IMPORT -->
+                            <div class="zone-centrale-cartouche">
+
+                                <!-- Message initial si aucune cartouche sélectionnée -->
+                                <div id="messageAccueilCartouche" class="carte" style="padding: 30px; text-align: center; background: var(--bleu-tres-pale);">
+                                    <p style="color: #666; margin: 0;">
+                                        Sélectionnez une cartouche dans la banque ou créez-en une nouvelle
+                                    </p>
+                                </div>
+
+                                <!-- ANCIEN SYSTÈME (Caché, gardé pour compatibilité interne) -->
+                                <div style="display: none;">
+                                    <select id="selectGrilleRetroaction"></select>
+                                    <select id="selectCartouche"></select>
+                                    <div id="aucuneEvalRetroaction"></div>
+                                </div>
 
                         <!-- Informations de la cartouche -->
                         <div id="infoCartouche" style="display: none; margin-bottom: 20px;">
@@ -2533,51 +2511,77 @@
                             </div>
                         </div>
 
-                        <!-- ZONE D'IMPORTATION DES COMMENTAIRES -->
-                        <div id="zoneImportCommentaires" style="display: none; margin-bottom: 20px;">
-                            <div class="carte"
-                                style="background: var(--vert-pale); border-left: 3px solid var(--vert-leger);">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">
-                                    Importation rapide des commentaires
-                                </h4>
+                        <!-- ZONE D'IMPORT UNIFIÉE (Accordéon 4 options) -->
+                        <div id="zoneImportUnifiee" class="accordeon-import" style="display: none; margin-bottom: 20px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">
+                                📥 Options d'importation
+                            </h4>
 
-                                <div class="groupe-form">
-                                    <label>Collez vos commentaires ici (format Markdown) :</label>
-                                    <textarea id="commentairesColles" class="controle-form" rows="12"
-                                        placeholder="## STRUCTURE&#10;&#10;**STRUCTURE (I)** : Commentaire incomplet...&#10;&#10;**STRUCTURE (D)** : Commentaire en développement...&#10;&#10;**STRUCTURE (M)** : Commentaire maîtrisé...&#10;&#10;**STRUCTURE (E)** : Commentaire étendu..."
-                                        style="font-family: monospace; font-size: 0.85rem;"></textarea>
+                            <!-- Option 1: Import JSON complet -->
+                            <details>
+                                <summary>📤 Importer/Exporter JSON complet</summary>
+                                <div class="panneau-import">
+                                    <p class="aide">Importer une cartouche complète depuis un fichier JSON ou exporter la cartouche actuelle</p>
+                                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                        <button class="btn btn-principal" onclick="document.getElementById('fichier-import-json-modal').click()">
+                                            📥 Importer JSON
+                                        </button>
+                                        <input type="file" id="fichier-import-json-modal" accept=".json" style="display: none;" onchange="importerCartoucheJSON(event)">
+                                        <button class="btn btn-confirmer" onclick="exporterCartoucheActive()">
+                                            📤 Exporter JSON
+                                        </button>
+                                    </div>
+                                    <p class="aide" style="margin-top: 8px;">Le fichier JSON remplace toute la cartouche (nom, contexte, commentaires)</p>
                                 </div>
+                            </details>
 
-                                <div class="btn-groupe">
-                                    <button onclick="annulerImportCommentaires()" class="btn btn-annuler">
-                                        Annuler
-                                    </button>
-                                    <button onclick="importerCommentaires()" class="btn btn-confirmer">
+                            <!-- Option 2: Coller Markdown -->
+                            <details>
+                                <summary>📝 Coller Markdown (textarea)</summary>
+                                <div class="panneau-import">
+                                    <label style="font-size: 0.9rem; font-weight: 500; display: block; margin-bottom: 8px;">
+                                        Collez vos commentaires ici :
+                                    </label>
+                                    <textarea id="markdownColle" class="panneau-import textarea" rows="10"
+                                              placeholder="## STRUCTURE&#10;&#10;**STRUCTURE (I)** : Commentaire incomplet...&#10;&#10;**STRUCTURE (D)** : Commentaire en développement...&#10;&#10;**STRUCTURE (M)** : Commentaire maîtrisé...&#10;&#10;**STRUCTURE (E)** : Commentaire étendu..."></textarea>
+                                    <button class="btn btn-confirmer" onclick="importerDepuisMarkdown()">
                                         Importer les commentaires
                                     </button>
+                                    <p class="aide">Format: ## CRITÈRE puis **CRITÈRE (NIVEAU)** : Commentaire</p>
                                 </div>
+                            </details>
 
-                                <div
-                                    style="background: white; padding: 12px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem;">
-                                    <strong>Format attendu :</strong>
-                                    <pre
-                                        style="margin-top: 8px; color: #666; font-family: monospace; line-height: 1.4;">## NOM_DU_CRITÈRE
-
-**NOM_DU_CRITÈRE (I)** : Texte du commentaire...
-
-**NOM_DU_CRITÈRE (D)** : Texte du commentaire...
-
-**NOM_DU_CRITÈRE (M)** : Texte du commentaire...
-
-**NOM_DU_CRITÈRE (E)** : Texte du commentaire...</pre>
-                                    <small style="color: var(--bleu-moyen); display: block; margin-top: 10px;">
-                                        💡 Les codes de niveau (I, D, M, E) doivent correspondre à ceux de votre
-                                        échelle
-                                        de
-                                        performance.
-                                    </small>
+                            <!-- Option 3: Charger fichier .txt -->
+                            <details>
+                                <summary>📄 Charger fichier .txt Markdown</summary>
+                                <div class="panneau-import">
+                                    <button class="btn btn-principal" onclick="document.getElementById('fichier-import-txt-modal').click()">
+                                        Sélectionner fichier .txt
+                                    </button>
+                                    <input type="file" id="fichier-import-txt-modal" accept=".txt" style="display: none;" onchange="importerCartoucheDepuisTxt(event)">
+                                    <p class="aide">Même format que l'option textarea ci-dessus</p>
+                                    <div style="font-size: 0.85rem; color: #d32f2f; background: #ffebee; padding: 8px; border-radius: 4px; margin-top: 8px;">
+                                        <strong>⚠️ Important :</strong> Les noms de critères doivent correspondre exactement (ex: STRUCTURE, RIGUEUR, PLAUSIBILITÉ, NUANCE)
+                                    </div>
                                 </div>
-                            </div>
+                            </details>
+
+                            <!-- Option 4: Import partiel -->
+                            <details>
+                                <summary>🎯 Import partiel (sélection critères)</summary>
+                                <div class="panneau-import">
+                                    <p style="font-size: 0.9rem; margin-bottom: 10px;">Cochez les critères à importer :</p>
+                                    <div id="checklistCriteresImport" class="checkboxes-import-partiel">
+                                        <!-- Généré dynamiquement -->
+                                        <p style="color: #999; font-style: italic;">Chargez d'abord une cartouche pour voir les critères</p>
+                                    </div>
+                                    <textarea id="markdownImportPartiel" rows="8" placeholder="Collez vos commentaires ici (même format que ci-dessus)"></textarea>
+                                    <button class="btn btn-confirmer" onclick="importerPartiel()" disabled id="btnImportPartiel">
+                                        Importer critères sélectionnés
+                                    </button>
+                                    <p class="aide">Importe seulement les commentaires des critères cochés</p>
+                                </div>
+                            </details>
                         </div>
 
                         <!-- MATRICE DE RÉTROACTION -->
@@ -2603,12 +2607,12 @@
                         </div>
 
                         <!-- APERÇU DE RÉTROACTION -->
-                        <div id="apercuRetroaction" style="display: none; margin-top: 20px; padding: 15px; 
+                        <div id="apercuRetroaction" style="display: none; margin-top: 20px; padding: 15px;
              background: var(--vert-pale); border-radius: 6px; border: 1px solid var(--vert-leger);">
                             <h5 style="color: var(--vert-leger); margin-bottom: 10px;">
                                 Aperçu d'une rétroaction générée
                             </h5>
-                            <div id="exempleRetroaction" style="padding: 15px; background: white; 
+                            <div id="exempleRetroaction" style="padding: 15px; background: white;
                  border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
                                 <!-- L'aperçu sera généré ici par genererApercuAleatoire() -->
                             </div>
@@ -2616,7 +2620,12 @@
                                 Générer un aperçu aléatoire
                             </button>
                         </div>
-                    </div>
+
+                            </div><!-- fin zone-centrale-cartouche -->
+
+                        </div><!-- fin layout-cartouches-2col -->
+
+                    </div><!-- fin carte -->
 
                 </div><!--fin sous-section retroactions-->
 
