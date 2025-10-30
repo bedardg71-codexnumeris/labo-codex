@@ -1094,12 +1094,18 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
         // NOUVELLE INTERFACE (Beta 0.80.2): Highlight dans la banque
         definirCartoucheActive(cartoucheId);
 
-        // Masquer le message d'accueil et afficher les zones d'édition/import
+        // Afficher toutes les zones nécessaires
         const messageAccueil = document.getElementById('messageAccueilCartouche');
         if (messageAccueil) messageAccueil.style.display = 'none';
 
+        const infoCartouche = document.getElementById('infoCartouche');
+        if (infoCartouche) infoCartouche.style.display = 'block';
+
         const zoneImport = document.getElementById('zoneImportUnifiee');
         if (zoneImport) zoneImport.style.display = 'block';
+
+        const matriceRetroaction = document.getElementById('matriceRetroaction');
+        if (matriceRetroaction) matriceRetroaction.style.display = 'block';
 
         // Générer la checklist pour l'import partiel
         genererChecklistCriteresImport();
