@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aperçu - Sidebar Cartouches (Design amélioré)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .demo-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .demo-section h2 {
+            margin-bottom: 20px;
+            color: #1565c0;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #1565c0;
+            padding-bottom: 10px;
+        }
+
+        /* ANCIEN DESIGN */
+        .sidebar-ancien {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 320px;
+        }
+
+        .sidebar-ancien .filtre {
+            margin-bottom: 15px;
+        }
+
+        .sidebar-ancien label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .sidebar-ancien select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .item-ancien {
+            padding: 10px 12px;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid transparent;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .item-ancien:hover {
+            border-left-color: #42a5f5;
+            background: #e3f2fd;
+        }
+
+        .item-ancien.active {
+            border-left-color: #1976d2;
+            background: #e3f2fd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .item-ancien .nom {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .item-ancien .badge {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            margin-bottom: 6px;
+        }
+
+        .item-ancien .progression {
+            font-size: 0.8rem;
+            color: #999;
+            margin-bottom: 6px;
+        }
+
+        .item-ancien .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .item-ancien .actions button {
+            background: none;
+            border: none;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            cursor: pointer;
+            border-radius: 3px;
+            color: #666;
+        }
+
+        .item-ancien .actions button:hover {
+            background: rgba(0,0,0,0.06);
+        }
+
+        .btn-ajouter-ancien {
+            width: 100%;
+            margin-top: 12px;
+            padding: 9px 12px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* NOUVEAU DESIGN */
+        .sidebar-nouveau {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 320px;
+        }
+
+        .sidebar-nouveau .filtre {
+            margin-bottom: 15px;
+        }
+
+        .sidebar-nouveau label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .sidebar-nouveau select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #90caf9;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        .item-nouveau {
+            padding: 12px;
+            background: #e3f2fd;
+            border-radius: 6px;
+            border: 2px solid #90caf9;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .item-nouveau:hover {
+            border-color: #42a5f5;
+            box-shadow: 0 2px 6px rgba(25, 118, 210, 0.15);
+        }
+
+        .item-nouveau.active {
+            border: 3px solid #1976d2;
+            background: #bbdefb;
+            box-shadow: 0 3px 8px rgba(25, 118, 210, 0.25);
+        }
+
+        .item-nouveau .nom {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #0d47a1;
+            margin-bottom: 6px;
+        }
+
+        .item-nouveau .badge {
+            display: inline-block;
+            background: #1976d2;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .item-nouveau .progression {
+            font-size: 0.85rem;
+            color: #1565c0;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .item-nouveau .progression.complet {
+            color: #2e7d32;
+        }
+
+        .item-nouveau .progression.partiel {
+            color: #ef6c00;
+        }
+
+        .item-nouveau .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .item-nouveau .actions button {
+            background: white;
+            border: 1px solid #90caf9;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            color: #1976d2;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+
+        .item-nouveau .actions button:hover {
+            background: #1976d2;
+            color: white;
+            border-color: #1976d2;
+        }
+
+        .btn-ajouter-nouveau {
+            width: 100%;
+            margin-top: 15px;
+            padding: 11px 14px;
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(25, 118, 210, 0.3);
+            transition: all 0.15s;
+        }
+
+        .btn-ajouter-nouveau:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(25, 118, 210, 0.4);
+        }
+
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ANCIEN DESIGN -->
+        <div class="demo-section">
+            <h2>Ancien design (actuel)</h2>
+            <div class="note">
+                <strong>Caractéristiques :</strong><br>
+                • Fond blanc pour items<br>
+                • Bordure gauche uniquement<br>
+                • Badge gris clair<br>
+                • Boutons texte simples
+            </div>
+
+            <div class="sidebar-ancien">
+                <div class="filtre">
+                    <label>Filtrer par grille :</label>
+                    <select>
+                        <option>Toutes les grilles</option>
+                        <option>Global-4</option>
+                        <option>Global-5 FR-HOLIS</option>
+                    </select>
+                </div>
+
+                <div class="item-ancien active">
+                    <div class="nom">Description d'un personnage (verrouillée)</div>
+                    <div class="badge">Global-5 FR-HOLIS</div>
+                    <div class="progression">20 / 20 commentaires remplis</div>
+                    <div class="actions">
+                        <button>Dupliquer</button>
+                        <button>Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="item-ancien">
+                    <div class="nom">10 HOC Mécanismes et procédés</div>
+                    <div class="badge">Global-5 FR-HOLIS</div>
+                    <div class="progression">20 / 20 commentaires remplis</div>
+                    <div class="actions">
+                        <button>Dupliquer</button>
+                        <button>Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="item-ancien">
+                    <div class="nom">Plan de rédaction</div>
+                    <div class="badge">Global-5 FR-HOLIS</div>
+                    <div class="progression">15 / 20 commentaires remplis</div>
+                    <div class="actions">
+                        <button>Dupliquer</button>
+                        <button>Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="item-ancien">
+                    <div class="nom">Stratégies de lecture</div>
+                    <div class="badge">Global-4</div>
+                    <div class="progression">8 / 16 commentaires remplis</div>
+                    <div class="actions">
+                        <button>Dupliquer</button>
+                        <button>Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="item-ancien">
+                    <div class="nom">Carte mentale</div>
+                    <div class="badge">Global-4</div>
+                    <div class="progression">0 / 16 commentaires remplis</div>
+                    <div class="actions">
+                        <button>Dupliquer</button>
+                        <button>Supprimer</button>
+                    </div>
+                </div>
+
+                <button class="btn-ajouter-ancien">+ Nouvelle cartouche</button>
+            </div>
+        </div>
+
+        <!-- NOUVEAU DESIGN -->
+        <div class="demo-section">
+            <h2>Nouveau design (proposé)</h2>
+            <div class="note">
+                <strong>Améliorations :</strong><br>
+                • Fond bleu pâle pour items<br>
+                • Bordure complète (2px normale, 3px active)<br>
+                • Badge bleu vif avec texte blanc<br>
+                • Progression colorée selon complétude<br>
+                • Boutons encadrés avec hover
+            </div>
+
+            <div class="sidebar-nouveau">
+                <div class="filtre">
+                    <label>Filtrer par grille :</label>
+                    <select>
+                        <option>Toutes les grilles</option>
+                        <option>Global-4</option>
+                        <option>Global-5 FR-HOLIS</option>
+                    </select>
+                </div>
+
+                <div class="item-nouveau active">
+                    <div class="nom">Description d'un personnage</div>
+                    <div class="badge">Global-5 FR-HOLIS</div>
+                    <div class="progression complet">20 / 20 commentaires remplis</div>
+                    <div class="actions">
+                        <button>Dupliquer</button>
+                        <button>Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="item-nouveau">
+                    <div class="nom">10 HOC Mécanismes et procédés</div>
+                    <div class="badge">Global-5 FR-HOLIS</div>
+                    <div class="progression complet">20 / 20 commentaires remplis</div>
+                    <div class="actions">
+                        <button>Dupliquer</button>
+                        <button>Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="item-nouveau">
+                    <div class="nom">Plan de rédaction</div>
+                    <div class="badge">Global-5 FR-HOLIS</div>
+                    <div class="progression">15 / 20 commentaires remplis</div>
+                    <div class="actions">
+                        <button>Dupliquer</button>
+                        <button>Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="item-nouveau">
+                    <div class="nom">Stratégies de lecture</div>
+                    <div class="badge">Global-4</div>
+                    <div class="progression partiel">8 / 16 commentaires remplis</div>
+                    <div class="actions">
+                        <button>Dupliquer</button>
+                        <button>Supprimer</button>
+                    </div>
+                </div>
+
+                <div class="item-nouveau">
+                    <div class="nom">Carte mentale</div>
+                    <div class="badge">Global-4</div>
+                    <div class="progression partiel">0 / 16 commentaires remplis</div>
+                    <div class="actions">
+                        <button>Dupliquer</button>
+                        <button>Supprimer</button>
+                    </div>
+                </div>
+
+                <button class="btn-ajouter-nouveau">+ Nouvelle cartouche</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Rendre les items cliquables pour simuler l'interaction
+        document.querySelectorAll('.item-ancien, .item-nouveau').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (e.target.tagName === 'BUTTON') return;
+
+                const parent = this.parentElement;
+                parent.querySelectorAll('.item-ancien, .item-nouveau').forEach(i => {
+                    i.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+
+        // Empêcher propagation pour les boutons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (this.textContent === 'Dupliquer') {
+                    alert('Dupliquer cette cartouche');
+                } else if (this.textContent === 'Supprimer') {
+                    alert('Supprimer cette cartouche');
+                } else if (this.textContent.includes('Nouvelle')) {
+                    alert('Créer une nouvelle cartouche');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

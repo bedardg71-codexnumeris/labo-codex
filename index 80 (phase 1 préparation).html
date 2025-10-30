@@ -2418,7 +2418,7 @@
 
 <!-- CARTE : CARTOUCHES DE RÉTROACTION -->
                     <div class="carte">
-                        <h3>💬 Cartouches de rétroaction</h3>
+                        <h3>Cartouches de rétroaction</h3>
 
                         <!-- Layout 2 colonnes : Sidebar + Zone centrale -->
                         <div class="layout-cartouches-2col">
@@ -2464,6 +2464,26 @@
 
                         <!-- Informations de la cartouche -->
                         <div id="infoCartouche" style="display: none; margin-bottom: 20px;">
+                            <!-- Métriques de la cartouche (en haut) -->
+                            <div class="cartes-metriques">
+                                <div class="carte-metrique">
+                                    <div class="label">Critères</div>
+                                    <div class="valeur" id="nbCriteres">0</div>
+                                </div>
+                                <div class="carte-metrique">
+                                    <div class="label">Niveaux</div>
+                                    <div class="valeur" id="nbNiveaux">0</div>
+                                </div>
+                                <div class="carte-metrique">
+                                    <div class="label">Commentaires à rédiger</div>
+                                    <div class="valeur" id="nbCommentaires">0</div>
+                                </div>
+                                <div class="carte-metrique">
+                                    <div class="label">Complété</div>
+                                    <div class="valeur" id="pctComplete">0%</div>
+                                </div>
+                            </div>
+
                             <div class="groupe-form" style="max-width: 500px;">
                                 <label>Nom de la cartouche :</label>
                                 <input type="text" id="nomCartouche" class="controle-form"
@@ -2479,56 +2499,30 @@
                                     l'option est cochée lors de la génération.</small>
                             </div>
 
-                            <!-- Liste des cartouches existantes -->
-                            <div id="listeCartouchesExistants" style="display: none; margin-bottom: 20px;">
-                                <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">Cartouches
-                                    enregistrées
-                                </h4>
-                                <div id="listeCartouchesContainer">
-                                    <!-- Les cartouches seront affichées ici par afficherListeCartouches() -->
-                                </div>
-                            </div>
-
-                            <!-- Métriques de la cartouche -->
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; 
-                 margin-top: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                <div class="carte-metrique">
-                                    <strong id="nbCriteres">0</strong>
-                                    <span>Critères</span>
-                                </div>
-                                <div class="carte-metrique">
-                                    <strong id="nbNiveaux">0</strong>
-                                    <span>Niveaux</span>
-                                </div>
-                                <div class="carte-metrique">
-                                    <strong id="nbCommentaires">0</strong>
-                                    <span>Commentaires à rédiger</span>
-                                </div>
-                                <div class="carte-metrique">
-                                    <strong id="pctComplete">0%</strong>
-                                    <span>Complété</span>
-                                </div>
+                            <!-- Liste des cartouches existantes (DÉSACTIVÉ - remplacé par sidebar) -->
+                            <div id="listeCartouchesExistants" style="display: none !important;">
+                                <div id="listeCartouchesContainer"></div>
                             </div>
                         </div>
 
                         <!-- ZONE D'IMPORT UNIFIÉE (Accordéon 4 options) -->
                         <div id="zoneImportUnifiee" class="accordeon-import" style="display: none; margin-bottom: 20px;">
                             <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">
-                                📥 Options d'importation
+                                Options d'importation
                             </h4>
 
                             <!-- Option 1: Import JSON complet -->
                             <details>
-                                <summary>📤 Importer/Exporter JSON complet</summary>
+                                <summary>Importer/Exporter JSON complet</summary>
                                 <div class="panneau-import">
                                     <p class="aide">Importer une cartouche complète depuis un fichier JSON ou exporter la cartouche actuelle</p>
                                     <div style="display: flex; gap: 10px; margin-top: 10px;">
                                         <button class="btn btn-principal" onclick="document.getElementById('fichier-import-json-modal').click()">
-                                            📥 Importer JSON
+                                            Importer JSON
                                         </button>
                                         <input type="file" id="fichier-import-json-modal" accept=".json" style="display: none;" onchange="importerCartoucheJSON(event)">
                                         <button class="btn btn-confirmer" onclick="exporterCartoucheActive()">
-                                            📤 Exporter JSON
+                                            Exporter JSON
                                         </button>
                                     </div>
                                     <p class="aide" style="margin-top: 8px;">Le fichier JSON remplace toute la cartouche (nom, contexte, commentaires)</p>
@@ -2537,7 +2531,7 @@
 
                             <!-- Option 2: Coller Markdown -->
                             <details>
-                                <summary>📝 Coller Markdown (textarea)</summary>
+                                <summary>Coller Markdown</summary>
                                 <div class="panneau-import">
                                     <label style="font-size: 0.9rem; font-weight: 500; display: block; margin-bottom: 8px;">
                                         Collez vos commentaires ici :
@@ -2553,7 +2547,7 @@
 
                             <!-- Option 3: Charger fichier .txt -->
                             <details>
-                                <summary>📄 Charger fichier .txt Markdown</summary>
+                                <summary>Charger fichier .txt</summary>
                                 <div class="panneau-import">
                                     <button class="btn btn-principal" onclick="document.getElementById('fichier-import-txt-modal').click()">
                                         Sélectionner fichier .txt
@@ -2561,14 +2555,14 @@
                                     <input type="file" id="fichier-import-txt-modal" accept=".txt" style="display: none;" onchange="importerCartoucheDepuisTxt(event)">
                                     <p class="aide">Même format que l'option textarea ci-dessus</p>
                                     <div style="font-size: 0.85rem; color: #d32f2f; background: #ffebee; padding: 8px; border-radius: 4px; margin-top: 8px;">
-                                        <strong>⚠️ Important :</strong> Les noms de critères doivent correspondre exactement (ex: STRUCTURE, RIGUEUR, PLAUSIBILITÉ, NUANCE)
+                                        <strong>Important :</strong> Les noms de critères doivent correspondre exactement (ex: STRUCTURE, RIGUEUR, PLAUSIBILITÉ, NUANCE)
                                     </div>
                                 </div>
                             </details>
 
                             <!-- Option 4: Import partiel -->
                             <details>
-                                <summary>🎯 Import partiel (sélection critères)</summary>
+                                <summary>Import partiel (sélection critères)</summary>
                                 <div class="panneau-import">
                                     <p style="font-size: 0.9rem; margin-bottom: 10px;">Cochez les critères à importer :</p>
                                     <div id="checklistCriteresImport" class="checkboxes-import-partiel">

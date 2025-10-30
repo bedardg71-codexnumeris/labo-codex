@@ -318,68 +318,71 @@ function chargerMatriceRetroaction() {
  */
 function afficherMatriceRetroaction() {
     if (!cartoucheActuel) return;
-    
+
     const container = document.getElementById('matriceContainer');
-    
+
     let html = `
-        <table class="tableau" style="width: 100%;">
+        <table class="matrice-tableau">
             <thead>
                 <tr>
-                    <th style="width: 200px; position: sticky; left: 0; background: var(--bleu-pale);">
-                        Critère / Niveau
-                    </th>
+                    <th>Critère / Niveau</th>
     `;
-    
-    // En-têtes des niveaux
+
+    // En-têtes des niveaux avec code et label
     cartoucheActuel.niveaux.forEach(niveau => {
         const codeEchappe = echapperHtml(niveau.code);
         const nomEchappe = echapperHtml(niveau.nom);
-        html += `<th style="text-align: center; background: var(--bleu-pale);">
-            ${codeEchappe}<br>
-            <small style="font-weight: normal;">${nomEchappe}</small>
-         </th>`;
+        html += `
+                    <th>
+                        <span class="niveau-code">${codeEchappe}</span>
+                        <span class="niveau-label">${nomEchappe}</span>
+                    </th>`;
     });
-    
-    html += '</tr></thead><tbody>';
-    
+
+    html += `
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
     // Lignes des critères
     cartoucheActuel.criteres.forEach(critere => {
         const nomCritereEchappe = echapperHtml(critere.nom);
         html += `
-            <tr>
-                <td style="font-weight: bold; background: var(--bleu-tres-pale); 
-                     position: sticky; left: 0;">
-                    ${nomCritereEchappe}
-                </td>
+                <tr>
+                    <td>${nomCritereEchappe}</td>
         `;
-        
+
         // Cellules des commentaires
         cartoucheActuel.niveaux.forEach(niveau => {
             const key = `${critere.id}_${niveau.code}`;
             const commentaire = cartoucheActuel.commentaires[key] || '';
             const commentaireEchappe = echapperHtml(commentaire);
             const nomNiveauEchappe = echapperHtml(niveau.nom);
-            
+
             html += `
-                <td style="padding: 8px;">
-                    <textarea class="controle-form" 
-                              id="comm_${key}"
-                              data-critere="${critere.id}" 
-                              data-niveau="${niveau.code}"
-                              rows="3" 
-                              placeholder="Commentaire pour ${nomCritereEchappe} - ${nomNiveauEchappe}"
-                              onchange="sauvegarderCommentaire('${key}')"
-                              style="font-size: 0.85rem; min-width: 200px;">${commentaireEchappe}</textarea>
-                </td>
+                    <td>
+                        <textarea id="comm_${key}"
+                                  data-critere="${critere.id}"
+                                  data-niveau="${niveau.code}"
+                                  placeholder="Commentaire pour ${nomCritereEchappe} - ${nomNiveauEchappe}"
+                                  onchange="sauvegarderCommentaire('${key}')">${commentaireEchappe}</textarea>
+                    </td>
             `;
         });
-        
-        html += '</tr>';
+
+        html += `
+                </tr>
+        `;
     });
-    
-    html += '</tbody></table>';
+
+    html += `
+            </tbody>
+        </table>
+    `;
+
     container.innerHTML = html;
-    
+
     // Mettre à jour les métriques
     mettreAJourMetriques();
 }
@@ -825,11 +828,12 @@ function afficherListeCartouches(cartouches, grilleId) {
                     </small>
                 </div>
                 <div>
-                    <span onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grilleId}')"
-                          style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-right: 10px;"
-                          title="${cartouche.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
-                        ${cartouche.verrouille ? '🔒' : '🔓'}
-                    </span>
+                    <button onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grilleId}')"
+                          class="btn btn-tres-compact"
+                          style="margin-right: 10px;"
+                          title="${cartouche.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
+                        ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
+                    </button>
                     <button class="btn btn-modifier"
                             onclick="chargerCartouchePourModif('${cartouche.id}', '${grilleId}')">
                         Modifier
@@ -897,7 +901,7 @@ function afficherToutesLesGrillesEtCartouches() {
                 <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
-                    <span>📋 ${nomGrilleEchappe}</span>
+                    <span>${nomGrilleEchappe}</span>
                     <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
                         ${cartouches.length} cartouche${cartouches.length > 1 ? 's' : ''}
                     </span>
@@ -923,11 +927,12 @@ function afficherToutesLesGrillesEtCartouches() {
                                                 </small>
                                             </div>
                                             <div style="white-space: nowrap;">
-                                                <span onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grille.id}')"
-                                                      style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-right: 10px;"
+                                                <button onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grille.id}')"
+                                                      class="btn btn-tres-compact"
+                                                      style="margin-right: 10px;"
                                                       title="${cartouche.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
-                                                    ${cartouche.verrouille ? '🔒' : '🔓'}
-                                                </span>
+                                                    ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
+                                                </button>
                                                 <button class="btn btn-modifier"
                                                         onclick="chargerCartouchePourModif('${cartouche.id}', '${grille.id}')">
                                                     Modifier
@@ -1635,7 +1640,7 @@ function afficherBanqueCartouches(grilleIdFiltre = '') {
 
     const html = toutesLesCartouches.map(cart => {
         const estActive = window.cartoucheActuel?.id === cart.id;
-        const verrouClass = cart.verrou ? ' 🔒' : '';
+        const verrouClass = cart.verrou ? ' <span style="color: #999; font-size: 0.8rem;">(verrouillée)</span>' : '';
 
         return `
             <div class="item-cartouche-banque ${estActive ? 'active' : ''}"
@@ -1646,9 +1651,9 @@ function afficherBanqueCartouches(grilleIdFiltre = '') {
                 <div class="badge-grille">${echapperHtml(cart.grilleNom)}</div>
                 <div class="actions-cartouche">
                     <button onclick="event.stopPropagation(); dupliquerCartouche('${cart.id}', '${cart.grilleId}')"
-                            class="btn-icone" title="Dupliquer">📋</button>
+                            class="btn-icone" title="Dupliquer">Dupliquer</button>
                     <button onclick="event.stopPropagation(); supprimerCartoucheConfirm('${cart.id}', '${cart.grilleId}')"
-                            class="btn-icone" title="Supprimer">🗑️</button>
+                            class="btn-icone" title="Supprimer">Supprimer</button>
                 </div>
             </div>
         `;
