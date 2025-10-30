@@ -481,30 +481,62 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - ✅ **CSS** : Classe `.btn-soutien` (lignes 445-469)
 - ✅ **Objectif** : Permettre aux utilisateurs de soutenir financièrement le développement du projet
 
-### 🔴 Prochaines priorités
+**OPTIMISATION INTERFACE** (Session 29 octobre - Beta 0.79)
+- ✅ **Fichier** : `index 79 (optimisation espace).html` - Version Beta 0.79
+- ✅ **Grilles de critères** : Format compact (~70% d'espace gagné)
+  - Vue hiérarchique par défaut avec tous critères visibles
+  - Mode édition dédié (clic sur «✏️ Éditer la grille»)
+  - Bouton «← Retour à la vue d'ensemble» pour navigation fluide
+  - Descriptions repliables (clic sur «Voir la description»)
+  - Barre bleue à gauche pour identification visuelle
+- ✅ **Productions** : Format compact (~50% d'espace gagné)
+  - Format 2 lignes maximum
+  - Métadonnées inline avec séparateurs «•»
+  - Codes couleur par type (🟠 Orange sommative, 🔵 Bleu portfolio, ⚪ Gris artefacts)
+  - Icônes contextuelles (📌 objectif, ✏️ tâche, 📦 artefacts)
+- ✅ **Package testeurs** : `Monitorage_Beta_0.79.zip` avec guides
 
-1. **Documentation** - Finaliser documentation Beta 0.72
-   - ✅ CLAUDE.md (complété)
-   - 🔄 Documentation_Indicateurs_Pratique.md (en cours)
-   - Documentation utilisateur pour mode comparatif
+**AUDIT ET PLANIFICATION** (Session 30 octobre - Beta 0.80)
+- ✅ **Fichier** : `index 80 (phase 1 préparation).html` - Version Beta 0.80
+- ✅ **Audit complet** : `AUDIT_FONCTIONNALITES_2025-10-30.md`
+  - Analyse détaillée 72% de complétude
+  - Comparaison systématique avec Guide de monitorage (36 pages)
+  - Identification gaps critiques (jetons, cartouches, matrice évaluation, graphiques)
+- ✅ **Plan de match** : `PLAN_DE_MATCH_2025-10-30.md`
+  - Roadmap structurée en 4 phases vers version 1.0
+  - PHASE 1 : Consolidation (2-3 semaines) → Beta 0.85
+  - PHASE 2 : Enrichissement (3-4 semaines) → Beta 0.95
+  - PHASE 3 : Optimisation (2-3 semaines) → Version 1.0
+  - PHASE 4 : Analyses avancées (Post-1.0)
+- ✅ **Documentation** : `NOTES_VERSION_0.80.md`
 
-2. **MODULE horaire.js** - À refondre
-   - Générer `seancesCompletes` comme source unique
-   - Gestion des reprises (ex: "Horaire du lundi" le jeudi)
-   - API : `obtenirSeancesCompletes()`
-   - Adapter calendrier-vue.js pour lecture seule
+### 🔴 Prochaines priorités (PHASE 1 : Consolidation)
 
-3. **MODULE productions.js** - À créer
-   - Gestion des artefacts/productions
-   - Évaluations selon critères SRPNF
-   - Lien avec grilles.js et echelles.js
-   - Stockage dans localStorage
+**Objectif PHASE 1** : Finaliser fonctionnalités partiellement implémentées
+**Score cible fin PHASE 1** : 82% de complétude
 
-4. **MODULE évaluations individuelles** - Interface de saisie
-   - Saisie des évaluations SRPNF par critère
-   - Calcul automatique des scores selon grilles
-   - Lien avec cartouches de rétroaction
-   - Intégration avec portfolio.js pour calcul indices C-P
+1. **Système de jetons complet** (Priorité HAUTE - 5-6 jours)
+   - Jetons délai : Calcul automatique échéances prolongées
+   - Jetons reprise : Remplacement automatique évaluations
+   - Compteurs visuels jetons disponibles/utilisés
+   - Interface attribution jetons dans profil étudiant
+   - **Fichiers** : `portfolio.js`, `productions.js`, `profil-etudiant.js`
+
+2. **Cartouches de rétroaction contextuels** (Priorité HAUTE - 4-5 jours)
+   - Boutons "Insérer cartouche" dans formulaire évaluation
+   - Suggestions automatiques selon niveau IDME et défi identifié
+   - Personnalisation avant insertion
+   - Historique cartouches utilisées par étudiant
+   - **Fichiers** : `cartouches.js`, nouveau `evaluation.js`
+
+3. **Recommandations personnalisées** (Priorité MOYENNE - 3-4 jours)
+   - Intégration statut SA dans recommandations
+   - Liens vers ressources concrètes (capsules vidéo, exercices)
+   - Timeline d'intervention détaillée (JOUR 1-2-3, SEMAINE 1-2)
+   - Critères de réévaluation mesurables
+   - **Fichiers** : `profil-etudiant.js`, nouveau `interventions.js`
+
+**Voir** : `PLAN_DE_MATCH_2025-10-30.md` pour roadmap complète
 
 ---
 
@@ -512,7 +544,7 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 ```bash
 # Test local
-open "index 72 (support SOM-PAN hybride).html"   # macOS
+open "index 80 (phase 1 préparation).html"   # macOS
 
 # Voir localStorage dans console Safari
 localStorage.getItem('calendrierComplet')
