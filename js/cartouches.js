@@ -66,22 +66,23 @@ function initialiserModuleCartouches() {
     console.log('💬 Initialisation du module Cartouches de rétroaction');
 
     // Vérifier que nous sommes dans la bonne section
-    const vueGrillesContainer = document.getElementById('vueGrillesCartouches');
-    if (!vueGrillesContainer) {
+    const listeBanque = document.getElementById('listeCartouchesBanque');
+    if (!listeBanque) {
         console.log('   ⚠️  Section rétroactions non active, initialisation reportée');
         return;
     }
 
-    // Afficher la nouvelle vue par grille
-    afficherToutesLesGrillesEtCartouches();
+    // NOUVELLE INTERFACE (Beta 0.80.2): Banque + import unifiés
+    chargerFiltreGrillesCartouche();
+    afficherBanqueCartouches();
 
-    // Charger aussi l'ancien système pour compatibilité (caché)
+    // Charger aussi l'ancien système pour compatibilité interne (caché)
     const selectGrille = document.getElementById('selectGrilleRetroaction');
     if (selectGrille) {
         chargerSelectGrillesRetroaction();
     }
 
-    console.log('   ✅ Module Cartouches initialisé avec la nouvelle vue');
+    console.log('   ✅ Module Cartouches initialisé (interface unifiée 2 colonnes)');
 }
 
 /* ===============================
@@ -469,12 +470,16 @@ function sauvegarderCartouche() {
     
     // Sauvegarder
     localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouches));
-    
-    // Rafraîchir l'interface
+
+    // NOUVELLE INTERFACE (Beta 0.80.2): Rafraîchir la banque
+    afficherBanqueCartouches();
+    definirCartoucheActive(cartoucheActuel.id);
+
+    // Rafraîchir l'interface (ancien système - compatibilité)
     chargerCartouchesRetroaction();
     document.getElementById('selectCartouche').value = cartoucheActuel.id;
 
-    // Rafraîchir la nouvelle vue
+    // Rafraîchir la nouvelle vue (ancien système)
     afficherToutesLesGrillesEtCartouches();
 
     afficherNotificationSucces('Cartouche sauvegardée avec succès !');
@@ -1081,11 +1086,20 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
         document.getElementById('selectCartouche').value = cartoucheId;
         chargerMatriceRetroaction();
 
-        // Scroll vers le formulaire pour que l'utilisateur voie le changement
-        const formulaire = document.getElementById('formRetroactions');
-        if (formulaire) {
-            formulaire.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        // NOUVELLE INTERFACE (Beta 0.80.2): Highlight dans la banque
+        definirCartoucheActive(cartoucheId);
+
+        // Masquer le message d'accueil et afficher les zones d'édition/import
+        const messageAccueil = document.getElementById('messageAccueilCartouche');
+        if (messageAccueil) messageAccueil.style.display = 'none';
+
+        const zoneImport = document.getElementById('zoneImportUnifiee');
+        if (zoneImport) zoneImport.style.display = 'block';
+
+        // Générer la checklist pour l'import partiel
+        genererChecklistCriteresImport();
+
+        // NE PLUS faire de scroll - la sidebar reste visible
     }
 }
 
@@ -1116,16 +1130,20 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
 function supprimerCartoucheConfirm(cartoucheId, grilleId) {
     const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
     const cartouche = cartouches.find(c => c.id === cartoucheId);
-    
+
     if (cartouche && cartouche.verrouille) {
         alert('Déverrouillez ce cartouche (🔓) avant de le supprimer');
         return;
     }
-    
+
     if (confirm(`Êtes-vous sûr de vouloir supprimer la cartouche «${cartouche?.nom}» ?`)) {
         const nouveauxCartouches = cartouches.filter(c => c.id !== cartoucheId);
         localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(nouveauxCartouches));
 
+        // NOUVELLE INTERFACE (Beta 0.80.2): Rafraîchir la banque
+        afficherBanqueCartouches();
+
+        // Ancien système (compatibilité)
         chargerCartouchesRetroaction();
 
         // Rafraîchir la nouvelle vue
@@ -1460,8 +1478,17 @@ function ajouterCartoucheAGrille(grilleId) {
     document.getElementById('infoCartouche').style.display = 'block';
     document.getElementById('matriceRetroaction').style.display = 'block';
 
-    // Scroll vers le formulaire
-    document.getElementById('infoCartouche').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // NOUVELLE INTERFACE (Beta 0.80.2): Masquer accueil, afficher zones
+    const messageAccueil = document.getElementById('messageAccueilCartouche');
+    if (messageAccueil) messageAccueil.style.display = 'none';
+
+    const zoneImport = document.getElementById('zoneImportUnifiee');
+    if (zoneImport) zoneImport.style.display = 'block';
+
+    // Générer checklist pour import partiel
+    genererChecklistCriteresImport();
+
+    // NE PLUS faire de scroll - sidebar reste visible
 }
 
 /* ===============================
@@ -1479,6 +1506,16 @@ window.sauvegarderCartouche = sauvegarderCartouche;
 window.genererApercuRetroaction = genererApercuRetroaction;
 window.importerCommentaires = importerCommentaires;
 window.initialiserModuleCartouches = initialiserModuleCartouches;
+
+// Nouvelles fonctions Beta 0.80.2 (interface unifiée)
+window.afficherBanqueCartouches = afficherBanqueCartouches;
+window.filtrerCartouchesBanque = filtrerCartouchesBanque;
+window.creerNouvelleCartouche = creerNouvelleCartouche;
+window.importerDepuisMarkdown = importerDepuisMarkdown;
+window.importerPartiel = importerPartiel;
+window.exporterCartoucheActive = exporterCartoucheActive;
+window.importerCartoucheJSON = importerCartoucheJSON;
+window.importerCartoucheDepuisTxt = importerCartoucheDepuisTxt;
 
 /* ===============================
    📝 NOTES DE DOCUMENTATION
@@ -1533,3 +1570,410 @@ window.initialiserModuleCartouches = initialiserModuleCartouches;
  * - Fonctionne avec tous les navigateurs modernes
  * - Pas de dépendances externes
  */
+
+/* ===============================================
+   NOUVELLE INTERFACE (Beta 0.80.2) - BANQUE + IMPORT UNIFIÉS
+   Layout 2 colonnes avec sidebar sticky
+   =============================================== */
+
+/**
+ * Charge le filtre des grilles dans la sidebar
+ * Remplit le select avec toutes les grilles disponibles
+ */
+function chargerFiltreGrillesCartouche() {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const selectFiltre = document.getElementById('filtreGrilleCartouche');
+
+    if (!selectFiltre) return;
+
+    // Garder l'option "Toutes les grilles"
+    selectFiltre.innerHTML = '<option value="">Toutes les grilles</option>';
+
+    grilles.forEach(grille => {
+        const option = document.createElement('option');
+        option.value = grille.id;
+        option.textContent = echapperHtml(grille.nom);
+        selectFiltre.appendChild(option);
+    });
+}
+
+/**
+ * Affiche la banque des cartouches (liste plate)
+ * Peut être filtrée par grille via grilleIdFiltre
+ *
+ * @param {string} grilleIdFiltre - ID de la grille à filtrer (optionnel)
+ */
+function afficherBanqueCartouches(grilleIdFiltre = '') {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    let toutesLesCartouches = [];
+
+    // Récupérer toutes les cartouches de toutes les grilles
+    grilles.forEach(grille => {
+        const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grille.id}`) || '[]');
+        cartouches.forEach(cart => {
+            toutesLesCartouches.push({
+                ...cart,
+                grilleId: grille.id,
+                grilleNom: grille.nom
+            });
+        });
+    });
+
+    // Filtrer si nécessaire
+    if (grilleIdFiltre) {
+        toutesLesCartouches = toutesLesCartouches.filter(c => c.grilleId === grilleIdFiltre);
+    }
+
+    // Générer HTML de la liste
+    const container = document.getElementById('listeCartouchesBanque');
+    if (!container) return;
+
+    if (toutesLesCartouches.length === 0) {
+        container.innerHTML = '<p class="banque-vide">Aucune cartouche disponible</p>';
+        return;
+    }
+
+    const html = toutesLesCartouches.map(cart => {
+        const estActive = window.cartoucheActuel?.id === cart.id;
+        const verrouClass = cart.verrou ? ' 🔒' : '';
+
+        return `
+            <div class="item-cartouche-banque ${estActive ? 'active' : ''}"
+                 data-cartouche-id="${cart.id}"
+                 data-grille-id="${cart.grilleId}"
+                 onclick="chargerCartouchePourModif('${cart.id}', '${cart.grilleId}')">
+                <div class="nom-cartouche">${echapperHtml(cart.nom)}${verrouClass}</div>
+                <div class="badge-grille">${echapperHtml(cart.grilleNom)}</div>
+                <div class="actions-cartouche">
+                    <button onclick="event.stopPropagation(); dupliquerCartouche('${cart.id}', '${cart.grilleId}')"
+                            class="btn-icone" title="Dupliquer">📋</button>
+                    <button onclick="event.stopPropagation(); supprimerCartoucheConfirm('${cart.id}', '${cart.grilleId}')"
+                            class="btn-icone" title="Supprimer">🗑️</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+}
+
+/**
+ * Filtre les cartouches selon la grille sélectionnée
+ * Appelée par le select #filtreGrilleCartouche
+ */
+function filtrerCartouchesBanque() {
+    const selectFiltre = document.getElementById('filtreGrilleCartouche');
+    const grilleId = selectFiltre ? selectFiltre.value : '';
+
+    afficherBanqueCartouches(grilleId);
+}
+
+/**
+ * Crée une nouvelle cartouche vide
+ * Demande à l'utilisateur de choisir une grille
+ */
+function creerNouvelleCartouche() {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+
+    if (grilles.length === 0) {
+        alert('Vous devez d\'abord créer au moins une grille de critères dans la section « Critères d\'évaluation »');
+        return;
+    }
+
+    // Si une seule grille, l'utiliser directement
+    if (grilles.length === 1) {
+        ajouterCartoucheAGrille(grilles[0].id);
+        return;
+    }
+
+    // Sinon, demander de choisir
+    const choix = prompt(
+        'Choisissez une grille :\n\n' +
+        grilles.map((g, i) => `${i + 1}. ${g.nom}`).join('\n') +
+        '\n\nEntrez le numéro de la grille :'
+    );
+
+    if (!choix) return;
+
+    const index = parseInt(choix) - 1;
+    if (index >= 0 && index < grilles.length) {
+        ajouterCartoucheAGrille(grilles[index].id);
+    } else {
+        alert('Choix invalide');
+    }
+}
+
+/**
+ * Définit une cartouche comme active (highlight dans la banque)
+ *
+ * @param {string} cartoucheId - ID de la cartouche à marquer comme active
+ */
+function definirCartoucheActive(cartoucheId) {
+    // Retirer le highlight de toutes les cartouches
+    document.querySelectorAll('.item-cartouche-banque').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Ajouter le highlight à la cartouche active
+    const itemActif = document.querySelector(`[data-cartouche-id="${cartoucheId}"]`);
+    if (itemActif) {
+        itemActif.classList.add('active');
+    }
+}
+
+/**
+ * Importe des commentaires depuis le textarea Markdown
+ * Réutilise la logique existante de parsing
+ */
+function importerDepuisMarkdown() {
+    const textarea = document.getElementById('markdownColle');
+    if (!textarea) return;
+
+    const markdown = textarea.value.trim();
+    if (!markdown) {
+        alert('Veuillez coller du texte Markdown dans la zone prévue');
+        return;
+    }
+
+    // Vérifier qu'une cartouche est chargée
+    if (!window.cartoucheActuel) {
+        alert('Veuillez d\'abord créer ou charger une cartouche');
+        return;
+    }
+
+    // Parser le Markdown (réutilise la fonction existante)
+    try {
+        const commentairesParsed = parserMarkdownCartouche(markdown);
+
+        // Compter combien de commentaires seront importés
+        const nbCommentaires = Object.keys(commentairesParsed).length;
+
+        if (nbCommentaires === 0) {
+            alert('Aucun commentaire valide trouvé dans le texte fourni');
+            return;
+        }
+
+        // Confirmation
+        const confirmer = confirm(
+            `${nbCommentaires} commentaire(s) seront importés.\n\n` +
+            'Les commentaires existants seront remplacés. Continuer ?'
+        );
+
+        if (!confirmer) return;
+
+        // Remplir la matrice
+        Object.keys(commentairesParsed).forEach(cle => {
+            const textareaComment = document.getElementById(`comment_${cle}`);
+            if (textareaComment) {
+                textareaComment.value = commentairesParsed[cle];
+            }
+        });
+
+        // Notification succès
+        afficherNotificationSucces(`${nbCommentaires} commentaires importés avec succès !`);
+
+        // Vider le textarea
+        textarea.value = '';
+
+        // Recalculer le pourcentage de complétion
+        calculerPourcentageComplet();
+
+    } catch (error) {
+        console.error('Erreur lors du parsing Markdown:', error);
+        alert('Erreur lors de l\'importation : format Markdown invalide');
+    }
+}
+
+/**
+ * Parse le markdown et retourne un objet {cle: commentaire}
+ * Réutilise la logique existante de la fonction importerCommentaires()
+ *
+ * @param {string} markdown - Texte markdown à parser
+ * @returns {Object} Objet avec clés critère_niveau
+ */
+function parserMarkdownCartouche(markdown) {
+    const commentaires = {};
+    const lignes = markdown.split('\n');
+
+    lignes.forEach(ligne => {
+        // Chercher pattern : **CRITÈRE (NIVEAU)** : Commentaire
+        const match = ligne.match(/\*\*(.+?)\s*\(([IDME])\)\*\*\s*:\s*(.+)/);
+        if (match) {
+            const critere = match[1].trim().toUpperCase();
+            const niveau = match[2].trim();
+            const commentaire = match[3].trim();
+
+            const cle = `${critere}_${niveau}`;
+            commentaires[cle] = commentaire;
+        }
+    });
+
+    return commentaires;
+}
+
+/**
+ * Importe seulement les critères sélectionnés (import partiel)
+ */
+function importerPartiel() {
+    const checkboxes = document.querySelectorAll('#checklistCriteresImport input[type="checkbox"]:checked');
+    const textarea = document.getElementById('markdownImportPartiel');
+
+    if (checkboxes.length === 0) {
+        alert('Veuillez cocher au moins un critère à importer');
+        return;
+    }
+
+    if (!textarea || !textarea.value.trim()) {
+        alert('Veuillez coller du texte Markdown dans la zone prévue');
+        return;
+    }
+
+    // Parser le markdown
+    const commentairesParsed = parserMarkdownCartouche(textarea.value);
+
+    // Filtrer seulement les critères cochés
+    const criteresSelectionnes = Array.from(checkboxes).map(cb => cb.value);
+    let nbImportes = 0;
+
+    Object.keys(commentairesParsed).forEach(cle => {
+        // Extraire le critère de la clé (format: CRITERE_NIVEAU)
+        const critere = cle.split('_')[0];
+
+        if (criteresSelectionnes.includes(critere)) {
+            const textareaComment = document.getElementById(`comment_${cle}`);
+            if (textareaComment) {
+                textareaComment.value = commentairesParsed[cle];
+                nbImportes++;
+            }
+        }
+    });
+
+    if (nbImportes > 0) {
+        afficherNotificationSucces(`${nbImportes} commentaires importés (critères sélectionnés)`);
+        textarea.value = '';
+        calculerPourcentageComplet();
+    } else {
+        alert('Aucun commentaire n\'a pu être importé. Vérifiez les noms de critères.');
+    }
+}
+
+/**
+ * Exporte la cartouche actuellement active en JSON
+ */
+function exporterCartoucheActive() {
+    if (!window.cartoucheActuel) {
+        alert('Aucune cartouche n\'est chargée');
+        return;
+    }
+
+    const grilleId = window.cartoucheActuel.grilleId || document.getElementById('selectGrilleRetroaction').value;
+    const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    const cartouche = cartouches.find(c => c.id === window.cartoucheActuel.id);
+
+    if (!cartouche) {
+        alert('Cartouche introuvable');
+        return;
+    }
+
+    // Créer le fichier JSON
+    const dataStr = JSON.stringify([cartouche], null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+
+    // Télécharger
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    const nomFichier = cartouche.nom.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.download = `cartouche-${nomFichier}-${dateStr}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    afficherNotificationSucces('Cartouche exportée !');
+}
+
+/**
+ * Importe une cartouche depuis un fichier JSON
+ *
+ * @param {Event} event - Événement change du input file
+ */
+function importerCartoucheJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const cartouches = JSON.parse(e.target.result);
+
+            if (!Array.isArray(cartouches) || cartouches.length === 0) {
+                alert('Fichier JSON invalide');
+                return;
+            }
+
+            const cartouche = cartouches[0]; // Prendre la première
+
+            // Demander quelle grille utiliser
+            const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+            if (grilles.length === 0) {
+                alert('Créez d\'abord une grille de critères');
+                return;
+            }
+
+            const grilleId = grilles[0].id; // Utiliser la première grille par défaut
+
+            // Générer nouvel ID
+            cartouche.id = `cartouche_${Date.now()}`;
+            cartouche.grilleId = grilleId;
+
+            // Sauvegarder
+            const cartouchesExistantes = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+            cartouchesExistantes.push(cartouche);
+            localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouchesExistantes));
+
+            // Rafraîchir l'affichage
+            afficherBanqueCartouches();
+            chargerCartouchePourModif(cartouche.id, grilleId);
+
+            afficherNotificationSucces('Cartouche importée avec succès !');
+
+        } catch (error) {
+            console.error('Erreur import JSON:', error);
+            alert('Erreur lors de l\'importation du fichier JSON');
+        }
+    };
+    reader.readAsText(file);
+}
+
+/**
+ * Génère la checklist des critères pour l'import partiel
+ * Appelée quand une cartouche est chargée
+ */
+function genererChecklistCriteresImport() {
+    if (!window.cartoucheActuel) return;
+
+    const container = document.getElementById('checklistCriteresImport');
+    const btnImport = document.getElementById('btnImportPartiel');
+
+    if (!container) return;
+
+    const criteres = window.cartoucheActuel.criteres || [];
+
+    if (criteres.length === 0) {
+        container.innerHTML = '<p style="color: #999; font-style: italic;">Aucun critère disponible</p>';
+        if (btnImport) btnImport.disabled = true;
+        return;
+    }
+
+    const html = criteres.map(crit => {
+        return `
+            <label>
+                <input type="checkbox" value="${crit.nom.toUpperCase()}">
+                <span>${echapperHtml(crit.nom)}</span>
+            </label>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+    if (btnImport) btnImport.disabled = false;
+}
