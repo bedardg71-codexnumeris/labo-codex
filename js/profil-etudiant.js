@@ -818,34 +818,33 @@ function genererSectionMobilisation(da) {
 
     return `
         <!-- STATISTIQUES -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Assiduité (A)</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.A}%</strong>
+        <div class="profil-grid-indicateurs">
+            <div class="profil-indicateur">
+                <div class="profil-indicateur-contenu">
+                    <span class="profil-indicateur-label">Assiduité (A)</span>
+                    <strong class="profil-indicateur-valeur">${indices.A}%</strong>
                 </div>
             </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Complétion (C)</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.C}%</strong>
+            <div class="profil-indicateur">
+                <div class="profil-indicateur-contenu">
+                    <span class="profil-indicateur-label">Complétion (C)</span>
+                    <strong class="profil-indicateur-valeur">${indices.C}%</strong>
                 </div>
             </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${interpM.couleur};">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Mobilisation (M)</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.M}</strong>
+            <div class="profil-indicateur profil-indicateur-accent-gauche" style="color: ${interpM.couleur};">
+                <div class="profil-indicateur-contenu">
+                    <span class="profil-indicateur-label">Mobilisation (M)</span>
+                    <strong class="profil-indicateur-valeur">${indices.M}</strong>
                 </div>
             </div>
         </div>
 
         <!-- INTERPRÉTATION QUALITATIVE -->
-        <div style="padding: 15px; background: linear-gradient(to right, ${interpM.couleur}22, ${interpM.couleur}11);
-                    border-left: 4px solid ${interpM.couleur}; border-radius: 6px; margin-bottom: 15px;">
-            <div style="font-size: 1.1rem; font-weight: bold; color: ${interpM.couleur}; margin-bottom: 8px;">
+        <div class="profil-interpretation" style="background: linear-gradient(to right, ${interpM.couleur}22, ${interpM.couleur}11); border-left-color: ${interpM.couleur};">
+            <div class="profil-interpretation-titre" style="color: ${interpM.couleur};">
                 ${interpM.emoji} ${interpM.niveau}
             </div>
-            <div style="color: #666; line-height: 1.5;">
+            <div class="profil-interpretation-texte">
                 ${interpM.niveau === 'Décrochage' ?
                     "⚫ L'étudiant ne se présente plus au cours. Les interventions pédagogiques ne sont plus possibles. Référer aux services d'aide et à l'API." :
                   interpM.niveau === 'Assiduité ET complétion critiques' ?
@@ -1108,123 +1107,77 @@ function genererSectionRisque(da) {
     const pourcentageSécurité = ((1 - indices.R) * 100).toFixed(0);
 
     return `
-        <!-- ALERTE NIVEAU RISQUE -->
-        <div style="background: ${interpR.couleur}22; border: 2px solid ${interpR.couleur};
-                    padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <div style="text-align: center; margin-bottom: 12px;">
-                <div style="font-size: 3rem; margin-bottom: 8px;">${interpR.emoji}</div>
-                <div style="font-size: 1.3rem; font-weight: bold; color: ${interpR.couleur}; margin-bottom: 8px;">
-                    ${interpR.niveau}
-                </div>
-                <div style="font-size: 2rem; font-weight: bold; color: ${interpR.couleur};">
-                    R = ${indices.R}
+        <!-- BADGE NIVEAU RISQUE -->
+        <div class="badge" style="background-color: ${interpR.couleur}22; color: ${interpR.couleur}; border: 1px solid ${interpR.couleur};">
+            ${interpR.niveau} (${indices.R})
+        </div>
+
+        <ul class="info-liste">
+            <li><strong>Pattern :</strong> ${interpR.pattern || 'Analyse en cours'}</li>
+            <li><strong>Niveau RàI :</strong> ${descriptionRaI}</li>
+            <li><strong>Urgence :</strong> <span style="color: ${couleurUrgence};">${urgence}</span></li>
+        </ul>
+
+        <div class="section-titre" style="margin-top: 25px;">Position sur l'échelle de risque</div>
+
+        <div class="profil-echelle-risque">
+            <div class="profil-echelle-barre" style="background: linear-gradient(to right,
+                        #cce5ff 0%, #cce5ff 15%,
+                        #b3d9ff 15%, #b3d9ff 25%,
+                        #ffe6b3 25%, #ffe6b3 35%,
+                        #ffd699 35%, #ffd699 60%,
+                        #ffb3b3 60%, #ffb3b3 100%); margin-bottom: 15px;">
+                <div class="profil-echelle-indicateur-haut" style="left: ${indices.R * 100}%;">▼</div>
+                <div class="profil-echelle-indicateur-bas" style="left: ${indices.R * 100}%;">R = ${indices.R}</div>
+            </div>
+
+            <div class="profil-echelle-legende">
+                <div style="color: #2196F3;"><strong>Minimal</strong><br>0-0.19</div>
+                <div style="color: #28a745;"><strong>Faible</strong><br>0.20-0.34</div>
+                <div style="color: #ffc107;"><strong>Modéré</strong><br>0.35-0.49</div>
+                <div style="color: #ff9800;"><strong>Élevé</strong><br>0.50-0.69</div>
+                <div style="color: #dc3545;"><strong>Critique</strong><br>≥ 0.70</div>
+            </div>
+        </div>
+
+        <div class="profil-formule">
+            <div class="profil-formule-code">R = 1 - E = 1 - ${indices.E} = ${indices.R}</div>
+        </div>
+
+        <div class="profil-formule-explications">
+            Le risque d'échec est <strong>inversement proportionnel</strong> à l'engagement global.
+            <br>Engagement actuel : <strong style="color: ${interpE.couleur};">${interpE.niveau}</strong>
+        </div>
+
+        <div class="section-titre" style="margin-top: 25px;">Indicateurs clés</div>
+
+        <div class="profil-grid-indicateurs">
+            <div class="profil-indicateur">
+                <div class="profil-indicateur-contenu">
+                    <span class="profil-indicateur-label">Engagement (E)</span>
+                    <strong class="profil-indicateur-valeur">${indices.E}</strong>
                 </div>
             </div>
-            <div style="background: white; padding: 12px; border-radius: 6px; margin-top: 12px;">
-                <div style="font-weight: bold; color: ${couleurUrgence}; margin-bottom: 8px;">
-                    ${urgence}
+            <div class="profil-indicateur profil-indicateur-accent-gauche" style="color: ${interpR.couleur};">
+                <div class="profil-indicateur-contenu">
+                    <span class="profil-indicateur-label">Risque (R)</span>
+                    <strong class="profil-indicateur-valeur">${indices.R}</strong>
                 </div>
-                <div style="color: #666; font-size: 0.95rem;">
-                    ${descriptionRaI}
+            </div>
+            <div class="profil-indicateur">
+                <div class="profil-indicateur-contenu">
+                    <span class="profil-indicateur-label">Niveau RàI</span>
+                    <strong class="profil-indicateur-valeur">${niveauRaI}</strong>
                 </div>
             </div>
         </div>
 
-        <!-- RELATION R ↔ E -->
-        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
-            🔄 Relation Risque ↔ Engagement
-        </h4>
-        <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-            <div style="font-family: monospace; font-size: 1rem; text-align: center; color: var(--bleu-principal); margin-bottom: 10px;">
-                R = 1 - E = 1 - ${indices.E} = ${indices.R}
-            </div>
-            <div style="background: #f0f7ff; padding: 12px; border-radius: 4px; font-size: 0.9rem; color: #555; line-height: 1.6;">
-                Le risque d'échec est <strong>inversement proportionnel</strong> à l'engagement global.
-                <br>Engagement actuel : <strong style="color: ${interpE.couleur};">${interpE.niveau}</strong>
-            </div>
-        </div>
-
-        <!-- VISUALISATION ZONES DE RISQUE -->
-        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
-            Zones de risque (modèle RàI)
-        </h4>
-        <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-            <!-- Barre de progression du risque -->
-            <div style="position: relative; height: 40px; background: linear-gradient(to right,
-                        #2196F3 0%, #2196F3 15%,
-                        #28a745 15%, #28a745 25%,
-                        #ffc107 25%, #ffc107 35%,
-                        #ff9800 35%, #ff9800 60%,
-                        #dc3545 60%, #dc3545 100%);
-                        border-radius: 6px; margin-bottom: 15px;">
-                <!-- Marqueur position actuelle -->
-                <div style="position: absolute; left: ${indices.R * 100}%; transform: translateX(-50%);
-                            top: -5px; width: 3px; height: 50px; background: black;"></div>
-                <div style="position: absolute; left: ${indices.R * 100}%; transform: translateX(-50%);
-                            top: -25px; background: black; color: white; padding: 2px 8px;
-                            border-radius: 4px; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">
-                    ${indices.R}
-                </div>
-            </div>
-
-            <!-- Légende des zones -->
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; font-size: 0.75rem; text-align: center;">
-                <div style="color: #2196F3;">
-                    <strong>0-0.15</strong><br>Minimal
-                </div>
-                <div style="color: #28a745;">
-                    <strong>0.15-0.25</strong><br>Faible
-                </div>
-                <div style="color: #ffc107;">
-                    <strong>0.25-0.35</strong><br>Modéré
-                </div>
-                <div style="color: #ff9800;">
-                    <strong>0.35-0.60</strong><br>Élevé
-                </div>
-                <div style="color: #dc3545;">
-                    <strong>0.60+</strong><br>Très élevé
-                </div>
-            </div>
-        </div>
-
-        <!-- STATISTIQUES CLÉS -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Engagement (E)</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.E}</strong>
-                </div>
-            </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${interpR.couleur};">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Risque (R)</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.R}</strong>
-                </div>
-            </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">RàI</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">Niveau ${niveauRaI}</strong>
-                </div>
-            </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${margeSécurité > 0.25 ? '#28a745' : '#ff9800'};">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Marge de sécurité</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${pourcentageSécurité}%</strong>
-                </div>
-            </div>
-        </div>
-
-        <!-- PLAN D'ACTION -->
         ${indices.R >= 0.25 ? `
-            <div style="background: ${indices.R >= 0.60 ? '#f8d7da' : indices.R >= 0.35 ? '#fff3cd' : '#e7f3ff'};
-                        border-left: 4px solid ${indices.R >= 0.60 ? '#dc3545' : indices.R >= 0.35 ? '#ff9800' : '#2196F3'};
-                        padding: 15px; border-radius: 6px; margin-top: 15px;">
-                <h4 style="color: ${indices.R >= 0.60 ? '#721c24' : indices.R >= 0.35 ? '#856404' : '#1976d2'}; margin-bottom: 12px;">
-                    🎯 Plan d'action immédiat
+            <div class="profil-recommandations ${indices.R >= 0.60 ? 'profil-recommandations-danger' : indices.R >= 0.35 ? 'profil-recommandations-avertissement' : 'profil-recommandations-info'}" style="margin-top: 20px;">
+                <h4 class="profil-recommandations-titre ${indices.R >= 0.60 ? 'profil-texte-danger' : indices.R >= 0.35 ? 'profil-texte-avertissement' : 'profil-texte-info'}">
+                    Intervention ciblée recommandée
                 </h4>
-                <ol style="margin: 0; padding-left: 20px; color: ${indices.R >= 0.60 ? '#721c24' : indices.R >= 0.35 ? '#856404' : '#1976d2'};
-                           line-height: 1.8; font-weight: 500;">
+                <ol class="profil-recommandations-liste ${indices.R >= 0.60 ? 'profil-texte-danger' : indices.R >= 0.35 ? 'profil-texte-avertissement' : 'profil-texte-info'}">
                     ${indices.R >= 0.60 ? `
                         <li><strong>JOUR 1 :</strong> Rencontre individuelle urgente avec l'étudiant et conseiller pédagogique</li>
                         <li><strong>JOUR 2-3 :</strong> Établir un plan d'intervention personnalisé (PIP) avec objectifs mesurables</li>
@@ -1246,10 +1199,9 @@ function genererSectionRisque(da) {
                 </ol>
             </div>
         ` : `
-            <div style="background: linear-gradient(to right, #28a74522, #28a74511);
-                        border-left: 4px solid #28a745; padding: 15px; border-radius: 6px; margin-top: 15px;">
-                <h4 style="color: #155724; margin-bottom: 10px;">✅ Maintien de l'engagement</h4>
-                <ul style="margin: 0; padding-left: 20px; color: #155724; line-height: 1.6;">
+            <div class="profil-recommandations profil-recommandations-succes" style="margin-top: 20px;">
+                <h4 class="profil-recommandations-titre profil-texte-succes">Maintien de l'engagement</h4>
+                <ul class="profil-recommandations-liste profil-texte-succes">
                     <li>Continuer la surveillance universelle (Niveau RàI 1)</li>
                     <li>Fournir rétroaction positive régulière</li>
                     <li>Encourager l'autonomie et l'autorégulation</li>
@@ -3546,28 +3498,28 @@ function genererSectionPerformance(da) {
             <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
 
             <!-- Diagnostic SRPNF -->
-            <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
-                FORCES ET DÉFIS PARMI LES CRITÈRES
-            </h4>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+            <div class="section-titre">
+                Forces et défis parmi les critères
+            </div>
+            <div style="margin: 20px 0;">
                 ${['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
-                    const nomCritere = cle === 'structure' ? 'STRUCTURE' :
-                                     cle === 'rigueur' ? 'RIGUEUR' :
-                                     cle === 'plausibilite' ? 'PLAUSIBILITÉ' :
-                                     cle === 'nuance' ? 'NUANCE' : 'FRANÇAIS';
+                    const nomCritere = cle === 'structure' ? 'Structure' :
+                                     cle === 'rigueur' ? 'Rigueur' :
+                                     cle === 'plausibilite' ? 'Plausibilité' :
+                                     cle === 'nuance' ? 'Nuance' : 'Français';
                     const score = moyennes[cle];
 
                     if (score === null) return '';
 
                     const pourcentage = Math.round(score * 100);
-                    const couleur = obtenirCouleurBadge(score);
 
                     return `
-                        <div style="display: inline-flex; align-items: center; gap: 6px;
-                                    padding: 6px 12px; border-radius: 12px; font-weight: 600;
-                                    font-size: 0.9rem; background: ${couleur}22; color: ${couleur};
-                                    border: 2px solid ${couleur};">
-                            ${nomCritere} ${pourcentage}%
+                        <div class="critere">
+                            <span class="critere-nom">${nomCritere}</span>
+                            <div class="critere-barre">
+                                <div class="critere-barre-fill" style="width: ${pourcentage}%;"></div>
+                            </div>
+                            <span class="critere-valeur">${pourcentage}%</span>
                         </div>
                     `;
                 }).join('')}
