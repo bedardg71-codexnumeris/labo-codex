@@ -5,7 +5,7 @@
 # Système de Monitorage Pédagogique - Beta 0.81
 # Auteur: Grégoire Bédard
 # Contact: labo@codexnumeris.org
-# Date: 30 janvier 2025
+# Date: 30 octobre 2025
 ################################################################################
 
 # Couleurs pour l'affichage
@@ -35,7 +35,7 @@ echo ""
 echo -e "${YELLOW}[1/6] Vérifications préalables...${NC}"
 
 # Vérifier que nous sommes dans le bon répertoire
-if [ ! -f "index 81 (profil étudiant - 2025-01-30).html" ]; then
+if [ ! -f "index 81 (profil étudiant).html" ]; then
     echo -e "${RED}❌ ERREUR: Fichier principal introuvable.${NC}"
     echo -e "${RED}   Assurez-vous d'exécuter ce script depuis le répertoire racine du projet.${NC}"
     exit 1
@@ -88,8 +88,8 @@ echo ""
 echo -e "${YELLOW}[3/6] Copie des fichiers essentiels...${NC}"
 
 # Copier le fichier HTML principal
-cp "index 81 (profil étudiant - 2025-01-30).html" "$TEMP_DIR/"
-echo "  ✓ index 81 (profil étudiant - 2025-01-30).html"
+cp "index 81 (profil étudiant).html" "$TEMP_DIR/"
+echo "  ✓ index 81 (profil étudiant).html"
 
 # Copier styles.css
 cp "styles.css" "$TEMP_DIR/"
@@ -245,7 +245,7 @@ fi
 
 echo -e "${GREEN}2. ✅ Tester le package${NC}"
 echo "   • Décompresser le ZIP dans un nouveau dossier"
-echo "   • Ouvrir index 81 (profil étudiant - 2025-01-30).html"
+echo "   • Ouvrir index 81 (profil étudiant).html"
 echo "   • Importer donnees-demo.json"
 echo "   • Vérifier que tout fonctionne"
 echo ""
