@@ -330,8 +330,23 @@ function chargerProduction(productionNum) {
     const production = productions.find(p => p.id === productionId);
 
     if (production) {
-        // Mettre à jour les infos (si besoin d'affichage)
         console.log('Production chargée:', production.titre || production.nom);
+
+        // Pré-sélectionner la grille associée à cette production
+        if (production.grilleId) {
+            const selectGrille = document.getElementById('selectGrille1');
+            if (selectGrille) {
+                selectGrille.value = production.grilleId;
+
+                // Déclencher le chargement de la grille et des cartouches
+                chargerGrilleSelectionnee();
+
+                // Attendre que les cartouches soient chargées, puis vérifier si une évaluation existe
+                setTimeout(() => {
+                    verifierEtChargerEvaluationExistante();
+                }, 100);
+            }
+        }
     }
 }
 
@@ -1198,6 +1213,55 @@ function nouvelleEvaluation() {
  */
 function naviguerVersListeEvaluations() {
     afficherSousSection('evaluations-liste');
+}
+
+/**
+ * Navigation vers le formulaire d'évaluation pour un étudiant et une production spécifiques
+ * Appelée depuis les badges d'artefacts dans le profil étudiant
+ *
+ * FONCTIONNEMENT:
+ * - Si l'évaluation existe déjà : charge l'évaluation existante avec notes et commentaires
+ * - Si l'évaluation n'existe pas : affiche un formulaire vide prêt à évaluer
+ *
+ * @param {string} da - Code permanent de l'étudiant
+ * @param {string} productionId - ID de la production à évaluer
+ */
+function evaluerProduction(da, productionId) {
+    console.log('🎯 Navigation vers évaluation:', { da, productionId });
+
+    // 1. Naviguer vers la section d'évaluation individuelle
+    afficherSection('evaluations');
+    afficherSousSection('evaluations-individuelles');
+
+    // 2. Attendre que le DOM soit prêt et pré-remplir le formulaire
+    setTimeout(() => {
+        const selectEtudiant = document.getElementById('selectEtudiantEval');
+        const selectProduction = document.getElementById('selectProduction1');
+
+        if (!selectEtudiant || !selectProduction) {
+            console.error('❌ Éléments de formulaire introuvables');
+            return;
+        }
+
+        // 3. Pré-sélectionner l'étudiant
+        selectEtudiant.value = da;
+
+        // 4. Déclencher le chargement des productions pour cet étudiant
+        chargerEvaluationsEtudiant();
+
+        // 5. Attendre que les productions soient chargées et pré-sélectionner la production
+        setTimeout(() => {
+            selectProduction.value = productionId;
+
+            // 6. Déclencher le chargement de la production
+            // Le système va automatiquement détecter si une évaluation existe (via verifierEtChargerEvaluationExistante)
+            // et la charger, sinon affichera un formulaire vide
+            const event = new Event('change', { bubbles: true });
+            selectProduction.dispatchEvent(event);
+
+            console.log('✅ Formulaire d\'évaluation prêt pour:', { da, productionId });
+        }, 200);
+    }, 100);
 }
 
 /**
@@ -2272,7 +2336,34 @@ function verifierEtChargerEvaluationExistante() {
         return;
     }
 
-    console.log('📂 Évaluation existante trouvée, chargement des niveaux...', evaluationExistante);
+    console.log('📂 Évaluation existante trouvée, chargement des données...', evaluationExistante);
+
+    // Charger la cartouche (si elle existe)
+    if (evaluationExistante.cartoucheId) {
+        const selectCartouche = document.getElementById('selectCartoucheEval');
+        if (selectCartouche) {
+            selectCartouche.value = evaluationExistante.cartoucheId;
+        }
+    }
+
+    // Charger le statut de remise
+    if (evaluationExistante.statutRemise) {
+        const selectRemise = document.getElementById('remiseProduction1');
+        if (selectRemise) {
+            selectRemise.value = evaluationExistante.statutRemise;
+        }
+    }
+
+    // Charger l'échelle (si elle existe)
+    if (evaluationExistante.echelleId) {
+        const selectEchelle = document.getElementById('selectEchelle1');
+        if (selectEchelle) {
+            selectEchelle.value = evaluationExistante.echelleId;
+        }
+    }
+
+    // Déclencher l'affichage des critères maintenant que cartouche et statut sont chargés
+    cartoucheSelectionnee();
 
     // Charger les niveaux de maîtrise dans les selects de critères
     // Attendre que les selects soient générés
@@ -2302,6 +2393,10 @@ function verifierEtChargerEvaluationExistante() {
         if (window.evaluationEnCours) {
             window.evaluationEnCours.idModification = evaluationExistante.id;
             window.evaluationEnCours.delaiAccorde = evaluationExistante.delaiAccorde || false;
+            window.evaluationEnCours.grilleId = evaluationExistante.grilleId;
+            window.evaluationEnCours.echelleId = evaluationExistante.echelleId;
+            window.evaluationEnCours.cartoucheId = evaluationExistante.cartoucheId;
+            window.evaluationEnCours.statutRemise = evaluationExistante.statutRemise;
             window.evaluationEnCours.criteres = {};
             evaluationExistante.criteres.forEach(c => {
                 window.evaluationEnCours.criteres[c.critereId] = c.niveauSelectionne;
