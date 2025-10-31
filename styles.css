@@ -2531,18 +2531,14 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 
 /* Classe de base pour toutes les cartes info-toggle */
 .carte-info-toggle {
-    padding: 12px;
+    display: none; /* Caché par défaut */
+    padding: 15px;
     border-radius: 6px;
-    border-left: 3px solid var(--bleu-moyen);
+    background: var(--bleu-tres-pale);
+    margin-bottom: 20px;
     font-size: 0.85rem;
     color: #666;
     line-height: 1.6;
-    margin-bottom: 20px;
-    margin-left: 5%;
-    margin-right: 5%;
-    position: relative;
-    animation: slideDown 0.3s ease-out;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* Triangle pointeur vers le haut à droite */
@@ -2578,11 +2574,19 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     color: #f0fdf4;
 }
 
+/* Titres à l'intérieur des cartes info-toggle */
+.carte-info-toggle h4 {
+    color: var(--bleu-principal);
+    margin-bottom: 10px;
+    margin-top: 0;
+}
+
 /* Listes à l'intérieur des cartes info-toggle */
 .carte-info-toggle ul {
     margin: 0;
-    padding-left: 20px;
-    line-height: 1.6;
+    padding: 0;
+    list-style: none;
+    line-height: 1.8;
 }
 
 .carte-info-toggle strong {
@@ -3526,43 +3530,59 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     font-size: 0.95rem;
 }
 
-/* Échelle de risque visuelle */
+/* Échelle de risque visuelle (alignée avec barres SRPNF) */
 .profil-echelle-risque {
-    background: white;
-    padding: 15px;
-    border-radius: 6px;
-    margin-bottom: 15px;
+    margin: 20px 0;
 }
 
 .profil-echelle-barre {
     position: relative;
-    height: 40px;
-    border-radius: 20px;
-    margin-bottom: 15px;
+    height: 24px;
+    border-radius: 12px;
+    /* Gradient défini dynamiquement en JS */
 }
 
 .profil-echelle-indicateur-haut {
     position: absolute;
     transform: translateX(-50%);
-    top: -30px;
-    font-size: 2rem;
+    top: -22px;
+    font-size: 1.5rem;
+    color: #333;
 }
 
 .profil-echelle-indicateur-bas {
     position: absolute;
     transform: translateX(-50%);
-    bottom: -25px;
+    bottom: -30px;
     font-size: 0.9rem;
     font-weight: bold;
+    color: var(--bleu-principal);
     white-space: nowrap;
 }
 
-.profil-echelle-legende {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-    font-size: 0.75rem;
+/* Légende échelle de risque (alignée avec zones) */
+.legende-risque-container {
+    position: relative;
+    height: 50px;
+    margin-top: 40px;
+}
+
+.legende-risque-item {
+    position: absolute;
+    transform: translateX(-50%);
     text-align: center;
+}
+
+.legende-risque-niveau {
+    font-weight: bold;
+    font-size: 0.95rem;
+    display: block;
+}
+
+.legende-risque-seuil {
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 2px;
 }
 
 /* Explications formule avec fond bleu pâle */
@@ -3632,6 +3652,54 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     margin-bottom: 15px;
 }
 
+/* Badges d'absence/retard */
+.badge-absence {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.badge-absence:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.badge-absence-complete {
+    background: #dc354522;
+    border-color: #dc3545;
+}
+
+.badge-absence-complete .badge-absence-date {
+    color: #dc3545;
+}
+
+.badge-absence-partielle {
+    background: #ffc10722;
+    border-color: #ffc107;
+}
+
+.badge-absence-partielle .badge-absence-date {
+    color: #ffc107;
+}
+
+.badge-absence-date {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-absence-heures {
+    color: #666;
+    font-size: 0.8rem;
+}
+
 /* Liste d'informations */
 .info-liste {
     list-style: none;
@@ -3683,7 +3751,7 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 
 .critere-barre-fill {
     height: 100%;
-    background: var(--bleu-principal);
+    /* Couleur définie dynamiquement selon le niveau IDME (I/D/M/E) */
     border-radius: 4px;
     transition: width 0.3s ease;
 }
@@ -3696,6 +3764,56 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 20px 0 10px 0;
+}
+
+/* Barres de critères SRPNF avec échelle IDME */
+.critere-container {
+    margin-bottom: 25px;
+}
+
+.critere-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.critere-barre-gradient {
+    position: relative;
+    height: 24px;
+    border-radius: 12px;
+    /* Gradient défini dynamiquement en JS selon échelles personnalisées */
+}
+
+.critere-indicateur {
+    position: absolute;
+    transform: translateX(-50%);
+    top: -22px;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+/* Légende IDME alignée avec zones */
+.legende-idme-container {
+    position: relative;
+    height: 50px;
+    margin-top: 15px;
+}
+
+.legende-idme-item {
+    position: absolute;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.legende-idme-code {
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: block;
+}
+
+.legende-idme-nom {
+    font-size: 0.85rem;
+    display: block;
 }
 
 /* === MATRICE DE COMMENTAIRES EN TABLEAU === */
