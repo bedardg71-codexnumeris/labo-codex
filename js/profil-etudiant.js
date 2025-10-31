@@ -515,6 +515,7 @@ function genererSectionMobilisationEngagement(da) {
 
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
     const productions = obtenirDonneesSelonMode('productions') || [];
+    const portfolio = productions.find(p => p.type === 'portfolio');
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
     const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
@@ -561,15 +562,48 @@ function genererSectionMobilisationEngagement(da) {
             note: evaluation?.noteFinale || null,
             niveau: evaluation?.niveauFinal || null,
             jetonReprise: evaluation?.repriseDeId ? true : false,
-            jetonDelai: evaluation?.jetonDelaiApplique ? true : false
+            jetonDelai: evaluation?.jetonDelaiApplique ? true : false,
+            retenu: false // Par défaut, sera mis à true pour les meilleurs
         };
-    }).sort((a, b) => {
+    });
+
+    // Tri et sélection automatique des meilleurs artefacts
+    const nombreARetenir = portfolio?.regles?.nombreARetenir || 3;
+
+    // Trier les artefacts remis par note décroissante
+    const artefactsRemisTriés = artefacts
+        .filter(a => a.remis)
+        .sort((a, b) => (b.note || 0) - (a.note || 0));
+
+    // Marquer les N meilleurs comme retenus
+    artefactsRemisTriés.forEach((art, index) => {
+        if (index < nombreARetenir) {
+            art.retenu = true;
+        }
+    });
+
+    // Trier tous les artefacts : retenus d'abord, puis par note, puis remis/non remis
+    artefacts.sort((a, b) => {
+        // Critère 1: Retenus d'abord
+        if (a.retenu && !b.retenu) return -1;
+        if (!a.retenu && b.retenu) return 1;
+
+        // Critère 2: Remis avant non remis
         if (a.remis && !b.remis) return -1;
         if (!a.remis && b.remis) return 1;
+
+        // Critère 3: Note décroissante pour les remis
+        if (a.remis && b.remis) {
+            return (b.note || 0) - (a.note || 0);
+        }
+
+        // Critère 4: Alphabétique pour les non remis
         return a.titre.localeCompare(b.titre);
     });
+
     const nbTotal = artefacts.length;
     const nbRemis = artefacts.filter(a => a.remis).length;
+    const nbRetenus = artefacts.filter(a => a.retenu).length;
     const interpC = interpreterCompletion(indices.C);
     const artefactsRemis = artefacts.filter(a => a.remis);
     const artefactsNonRemis = artefacts.filter(a => !a.remis);
@@ -587,24 +621,52 @@ function genererSectionMobilisationEngagement(da) {
     const artefactsAvecJetonDelai = evaluationsAvecJetonDelai.map(e => e.productionNom || 'Artefact inconnu');
 
     return `
-        <!-- Badge interprétatif Mobilisation globale -->
-        <div class="profil-carte">
-            <div class="profil-carte-titre">
-                <strong style="color: ${interpM.couleur};">${interpM.niveau}</strong>
-                <span class="valeur-indice" style="color: ${interpM.couleur};">(${indices.M})</span>
+        <!-- TITRE AVEC TOGGLE INFO -->
+        <h3 style="display: flex; justify-content: space-between; align-items: center; color: var(--bleu-principal); margin-bottom: 20px;">
+            <span>Mobilisation</span>
+            <span style="font-size: 1.2rem;">
+                <span class="emoji-toggle" data-target="details-calculs-mobilisation-${da}">ℹ️</span>
+            </span>
+        </h3>
+
+        <!-- Détails des calculs (masqué par défaut) -->
+        <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle">
+            <h4>📐 Détails des calculs</h4>
+            <ul>
+                <li><strong>Indice A (Assiduité) :</strong> ${indices.A}%</li>
+                <li>
+                    → ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
+                </li>
+                <li style="margin-top: 10px;"><strong>Indice C (Complétion) :</strong> ${indices.C}%</li>
+                <li>
+                    → ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
+                </li>
+                <li style="margin-top: 10px;"><strong>Indice M (Mobilisation) :</strong> ${indices.M}</li>
+                <li>
+                    → M = (A + C) / 2 = (${indices.A} + ${indices.C}) / 2
+                </li>
+            </ul>
+        </div>
+
+        <!-- CARTES MÉTRIQUES EN HAUT -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Mobilisation</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.M}</strong>
+                </div>
             </div>
-            <div class="profil-carte-description">
-                ${interpM.niveau === 'Décrochage' ?
-                    "L'étudiant ne se présente plus au cours. Référer aux services d'aide." :
-                  interpM.niveau.includes('critique') ?
-                    "Situation critique nécessitant une intervention RàI niveau 3 immédiate." :
-                  interpM.niveau.includes('fragile') ?
-                    "Suivi renforcé recommandé pour prévenir la détérioration." :
-                  interpM.niveau.includes('favorable') ?
-                    "Assiduité et complétion satisfaisantes. Encourager la constance." :
-                  interpM.niveau.includes('optimale') ?
-                    "Mobilisation excellente. Modèle d'engagement." :
-                    "Mobilisation en cours d'évaluation."}
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Assiduité</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.A}%</strong>
+                </div>
+            </div>
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 0.9rem; color: #666;">Complétion</span>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.C}%</strong>
+                </div>
             </div>
         </div>
 
@@ -613,49 +675,39 @@ function genererSectionMobilisationEngagement(da) {
 
             <!-- FICHE ASSIDUITÉ -->
             <div class="profil-carte">
-                <!-- Badge avec interprétation -->
-                <div class="profil-carte-titre">
-                    <strong style="color: ${interpA.couleur};">${interpA.niveau}</strong>
-                    <span class="valeur-indice" style="color: ${interpA.couleur};">(A = ${indices.A}%)</span>
-                </div>
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
                     <li><strong>• Heures présentes :</strong> ${detailsA.heuresPresentes}h / ${detailsA.heuresOffertes}h</li>
-                    <li><strong>• Nombre de séances :</strong> ${detailsA.nombreSeances}</li>
-                    <li><strong>• Indice A :</strong> ${indices.A}%</li>
                 </ul>
 
                 <hr class="profil-separateur">
 
                 <!-- Liste des absences et retards -->
                 <h4 class="profil-section-titre">
-                    ABSENCES ET RETARDS
+                    ${detailsA.absences.length} absence${detailsA.absences.length > 1 ? 's' : ''} ou retard${detailsA.absences.length > 1 ? 's' : ''}
                 </h4>
                 ${detailsA.absences.length > 0 ? `
-                    <div class="profil-artefacts-container">
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
                         ${detailsA.absences.map(abs => {
                             const date = new Date(abs.date + 'T12:00:00');
                             const options = { weekday: 'short', day: 'numeric', month: 'short' };
                             const dateFormatee = date.toLocaleDateString('fr-CA', options);
                             const estAbsenceComplete = abs.heuresPresence === 0;
-                            const icone = estAbsenceComplete ? '🔴' : '🟡';
-                            const bordure = estAbsenceComplete ? '#dc3545' : '#ffc107';
+                            const classeBadge = estAbsenceComplete ? 'badge-absence-complete' : 'badge-absence-partielle';
 
                             return `
-                                <div class="profil-artefact-item" style="background: var(--bleu-tres-pale); border-left-color: ${bordure}; cursor: pointer; font-size: 0.85rem;"
-                                     onclick="naviguerVersPresenceAvecDate('${abs.date}')"
-                                     onmouseover="this.style.background='#e0e8f0'"
-                                     onmouseout="this.style.background='var(--bleu-tres-pale)'">
-                                    <div class="profil-artefact-nom">
-                                        ${icone} ${dateFormatee}
-                                    </div>
-                                    <div class="profil-artefact-note">
+                                <div class="badge-absence ${classeBadge}"
+                                     onclick="naviguerVersPresenceAvecDate('${abs.date}')">
+                                    <span class="badge-absence-date">
+                                        ${dateFormatee}
+                                    </span>
+                                    <span class="badge-absence-heures">
                                         ${estAbsenceComplete
-                                            ? `${abs.heuresManquees}h manquées`
-                                            : `${abs.heuresPresence}h / ${abs.heuresPresence + abs.heuresManquees}h`
+                                            ? `(${abs.heuresManquees}h manquées)`
+                                            : `(${abs.heuresPresence}/${abs.heuresPresence + abs.heuresManquees}h)`
                                         }
-                                    </div>
+                                    </span>
                                 </div>
                             `;
                         }).join('')}
@@ -670,18 +722,6 @@ function genererSectionMobilisationEngagement(da) {
 
             <!-- FICHE COMPLÉTION -->
             <div class="profil-carte">
-                <!-- Badge avec interprétation -->
-                <div class="profil-carte-titre">
-                    <strong style="color: ${interpC.couleur};">${interpC.niveau}</strong>
-                    <span class="valeur-indice" style="color: ${interpC.couleur};">(C = ${indices.C}%)</span>
-                </div>
-
-                <!-- Statistiques -->
-                <ul class="profil-liste-simple">
-                    <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
-                </ul>
-
-                <hr class="profil-separateur">
 
                 <!-- Gestion des jetons -->
                 ${totalJetonsUtilises > 0 ? `
@@ -717,24 +757,71 @@ function genererSectionMobilisationEngagement(da) {
                     <hr class="profil-separateur">
                 ` : ''}
 
-                <!-- Artefacts remis -->
+                <!-- Artefacts remis avec checkboxes (badges colorés) -->
                 <h4 class="profil-section-titre">
-                    ✅ REMIS (${artefactsRemis.length})
+                    ${artefactsRemis.length} production${artefactsRemis.length > 1 ? 's' : ''} remise${artefactsRemis.length > 1 ? 's' : ''}
+                    ${artefactsRemis.length > 0 && portfolio?.regles?.nombreARetenir ? `
+                        <span style="font-weight: normal; color: #666; font-size: 0.85rem; margin-left: 8px;">
+                            · ${nbRetenus}/${artefactsRemis.length} sélectionnés (${portfolio.regles.nombreARetenir} meilleures productions à retenir)
+                        </span>
+                    ` : ''}
                 </h4>
                 ${artefactsRemis.length > 0 ? `
-                    <div class="profil-artefacts-liste">
-                        ${artefactsRemis.map(art => `
-                            <div class="profil-artefact-selectionne">
-                                <div class="profil-artefact-selectionne-nom">
-                                    ✅ ${echapperHtml(art.titre)}
-                                    ${art.jetonReprise ? '<span class="profil-badge-jeton profil-badge-jeton-reprise" title="Jeton de reprise appliqué">⭐</span>' : ''}
-                                    ${art.jetonDelai ? '<span class="profil-badge-jeton profil-badge-jeton-delai" title="Jeton de délai appliqué">⭐</span>' : ''}
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                        ${artefactsRemis.map(art => {
+                            // Récupérer les couleurs depuis l'échelle configurée
+                            const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+                            const echelleActive = echelles.find(e => e.active) || echelles[0];
+
+                            // Déterminer la couleur selon la note
+                            let couleurBadge = '#999'; // Gris par défaut
+                            if (art.note !== null && echelleActive?.niveaux) {
+                                const niveau = echelleActive.niveaux.find(n => art.note >= n.min && art.note <= n.max);
+                                couleurBadge = niveau?.couleur || '#999';
+                            } else if (art.note !== null) {
+                                // Couleurs par défaut IDME
+                                if (art.note >= 85) couleurBadge = '#2196F3'; // Bleu
+                                else if (art.note >= 75) couleurBadge = '#28a745'; // Vert
+                                else if (art.note >= 65) couleurBadge = '#ffc107'; // Jaune
+                                else couleurBadge = '#ff9800'; // Orange
+                            }
+
+                            const opacite = art.retenu ? '1' : '0.6';
+                            const bordure = art.retenu ? '3px' : '2px';
+
+                            return `
+                                <div style="display: inline-flex; align-items: center; gap: 8px;
+                                            background: ${couleurBadge}22;
+                                            border: ${bordure} solid ${couleurBadge};
+                                            border-radius: 8px; padding: 8px 12px;
+                                            opacity: ${opacite};
+                                            transition: all 0.2s ease;">
+                                    <input type="checkbox"
+                                           name="artefactRetenu"
+                                           value="${art.id}"
+                                           ${art.retenu ? 'checked' : ''}
+                                           onchange="toggleArtefactPortfolio('${da}', '${portfolio?.id || ''}', ${portfolio?.regles?.nombreARetenir || 3})"
+                                           onclick="event.stopPropagation()"
+                                           style="margin: 0; accent-color: ${couleurBadge}; cursor: pointer; width: 16px; height: 16px;">
+                                    <div onclick="evaluerProduction('${da}', '${art.id}')"
+                                         style="display: flex; align-items: center; gap: 8px; cursor: pointer;"
+                                         onmouseover="this.parentElement.style.opacity='1'; this.parentElement.style.transform='translateY(-2px)'; this.parentElement.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';"
+                                         onmouseout="this.parentElement.style.opacity='${opacite}'; this.parentElement.style.transform='translateY(0)'; this.parentElement.style.boxShadow='none';">
+                                        <span style="font-weight: 600; color: ${couleurBadge}; font-size: 0.9rem;">
+                                            ${echapperHtml(art.titre)}
+                                        </span>
+                                        ${art.jetonReprise ? '<span style="font-size: 0.8rem;" title="Jeton de reprise appliqué">⭐</span>' : ''}
+                                        ${art.jetonDelai ? '<span style="font-size: 0.8rem;" title="Jeton de délai appliqué">⭐</span>' : ''}
+                                        <span style="color: ${couleurBadge}; font-weight: bold; font-size: 1rem;">
+                                            ${art.niveau || '--'}
+                                        </span>
+                                        <span style="color: #666; font-size: 0.85rem;">
+                                            (${art.note}/100)
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="profil-artefact-selectionne-details">
-                                    <strong>${art.note}/100</strong>${art.niveau ? ` · ${art.niveau}` : ''}
-                                </div>
-                            </div>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </div>
                 ` : `
                     <div class="profil-message-vide" style="margin-bottom: 15px;">
@@ -742,18 +829,30 @@ function genererSectionMobilisationEngagement(da) {
                     </div>
                 `}
 
-                <!-- Artefacts non remis -->
+                <!-- Artefacts non remis (badges gris) -->
                 <h4 class="profil-section-titre">
-                    NON REMIS (${artefactsNonRemis.length})
+                    ${artefactsNonRemis.length} production${artefactsNonRemis.length > 1 ? 's' : ''} non remise${artefactsNonRemis.length > 1 ? 's' : ''}
                 </h4>
                 ${artefactsNonRemis.length > 0 ? `
-                    <div class="profil-artefacts-liste">
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
                         ${artefactsNonRemis.map(art => `
-                            <div class="profil-artefact-non-remis" style="opacity: 0.7;">
-                                <div class="profil-artefact-non-remis-nom">
+                            <div onclick="evaluerProduction('${da}', '${art.id}')"
+                                 style="display: inline-flex; align-items: center; gap: 8px;
+                                        background: #f5f5f5;
+                                        border: 2px solid #ccc;
+                                        border-radius: 8px; padding: 8px 12px;
+                                        opacity: 0.6;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;"
+                                 onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.1)';"
+                                 onmouseout="this.style.opacity='0.6'; this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+                                 title="Cliquer pour évaluer cet artefact">
+                                <span style="font-weight: 500; color: #666; font-size: 0.9rem;">
                                     ⏳ ${echapperHtml(art.titre)}
-                                </div>
-                                <div class="profil-artefact-non-remis-statut">Non remis</div>
+                                </span>
+                                <span style="color: #999; font-size: 0.85rem; font-style: italic;">
+                                    Non remis
+                                </span>
                             </div>
                         `).join('')}
                     </div>
@@ -768,35 +867,6 @@ function genererSectionMobilisationEngagement(da) {
         <!-- Placeholder graphique unique (en bas des deux fiches) -->
         <div class="profil-zone-avertissement" style="padding: 30px 20px;">
             📈 Évolution temporelle A-C (à venir)
-        </div>
-
-        <!-- TOGGLE CALCULS UNIQUE (EXTÉRIEUR) -->
-        <div class="profil-toggle-details">
-            <button onclick="toggleDetailsTechniques('details-calculs-mobilisation-${da}')"
-                    class="profil-toggle-btn" style="text-align: left; display: flex; align-items: center; justify-content: space-between;">
-                <span>🔽 Voir les calculs et formules</span>
-                <span class="profil-toggle-fleche">▼</span>
-            </button>
-
-            <div id="details-calculs-mobilisation-${da}" class="details-techniques">
-                <div class="profil-details-contenu">
-                    <h5 class="profil-details-titre">📐 DÉTAILS DES CALCULS</h5>
-                    <ul class="profil-details-liste">
-                        <li><strong>Indice A (Assiduité) :</strong> ${indices.A}%</li>
-                        <li>
-                            → ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
-                        </li>
-                        <li style="margin-top: 10px;"><strong>Indice C (Complétion) :</strong> ${indices.C}%</li>
-                        <li>
-                            → ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
-                        </li>
-                        <li style="margin-top: 10px;"><strong>Indice M (Mobilisation) :</strong> ${indices.M}</li>
-                        <li>
-                            → M = (A + C) / 2 = (${indices.A} + ${indices.C}) / 2
-                        </li>
-                    </ul>
-                </div>
-            </div>
         </div>
     `;
 }
@@ -1122,21 +1192,36 @@ function genererSectionRisque(da) {
 
         <div class="profil-echelle-risque">
             <div class="profil-echelle-barre" style="background: linear-gradient(to right,
-                        #cce5ff 0%, #cce5ff 15%,
-                        #b3d9ff 15%, #b3d9ff 25%,
-                        #ffe6b3 25%, #ffe6b3 35%,
-                        #ffd699 35%, #ffd699 60%,
-                        #ffb3b3 60%, #ffb3b3 100%); margin-bottom: 15px;">
-                <div class="profil-echelle-indicateur-haut" style="left: ${indices.R * 100}%;">▼</div>
-                <div class="profil-echelle-indicateur-bas" style="left: ${indices.R * 100}%;">R = ${indices.R}</div>
+                        #2196F3 0%, #2196F3 20%,
+                        #28a745 20%, #28a745 35%,
+                        #ffc107 35%, #ffc107 50%,
+                        #ff9800 50%, #ff9800 70%,
+                        #dc3545 70%, #dc3545 100%);">
+                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(indices.R * 100, 100)}%;">▼</div>
+                <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(indices.R * 100, 100)}%;">R = ${indices.R}</div>
             </div>
 
-            <div class="profil-echelle-legende">
-                <div style="color: #2196F3;"><strong>Minimal</strong><br>0-0.19</div>
-                <div style="color: #28a745;"><strong>Faible</strong><br>0.20-0.34</div>
-                <div style="color: #ffc107;"><strong>Modéré</strong><br>0.35-0.49</div>
-                <div style="color: #ff9800;"><strong>Élevé</strong><br>0.50-0.69</div>
-                <div style="color: #dc3545;"><strong>Critique</strong><br>≥ 0.70</div>
+            <div class="legende-risque-container">
+                <div class="legende-risque-item" style="left: 10%; color: #2196F3;">
+                    <span class="legende-risque-niveau">Minimal</span>
+                    <span class="legende-risque-seuil">0-0.19</span>
+                </div>
+                <div class="legende-risque-item" style="left: 27.5%; color: #28a745;">
+                    <span class="legende-risque-niveau">Faible</span>
+                    <span class="legende-risque-seuil">0.20-0.34</span>
+                </div>
+                <div class="legende-risque-item" style="left: 42.5%; color: #ffc107;">
+                    <span class="legende-risque-niveau">Modéré</span>
+                    <span class="legende-risque-seuil">0.35-0.49</span>
+                </div>
+                <div class="legende-risque-item" style="left: 60%; color: #ff9800;">
+                    <span class="legende-risque-niveau">Élevé</span>
+                    <span class="legende-risque-seuil">0.50-0.69</span>
+                </div>
+                <div class="legende-risque-item" style="left: 85%; color: #dc3545;">
+                    <span class="legende-risque-niveau">Critique</span>
+                    <span class="legende-risque-seuil">≥ 0.70</span>
+                </div>
             </div>
         </div>
 
@@ -1682,22 +1767,36 @@ function genererContenuCibleIntervention(da) {
 
             <div class="profil-echelle-risque">
                 <div class="profil-echelle-barre" style="background: linear-gradient(to right,
-                            #cce5ff 0%, #cce5ff 20%,
-                            #b3d9ff 20%, #b3d9ff 35%,
-                            #ffe6b3 35%, #ffe6b3 50%,
-                            #ffd699 50%, #ffd699 70%,
-                            #ffb3b3 70%, #ffb3b3 85%,
-                            #ff9999 85%, #ff9999 100%);">
+                            #2196F3 0%, #2196F3 20%,
+                            #28a745 20%, #28a745 35%,
+                            #ffc107 35%, #ffc107 50%,
+                            #ff9800 50%, #ff9800 70%,
+                            #dc3545 70%, #dc3545 100%);">
                     <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(indices.R * 100, 100)}%;">▼</div>
                     <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(indices.R * 100, 100)}%;">R = ${indices.R}</div>
                 </div>
 
-                <div class="profil-echelle-legende">
-                    <div style="color: #2196F3;"><strong>Minimal</strong><br>0-0.19</div>
-                    <div style="color: #28a745;"><strong>Faible</strong><br>0.20-0.34</div>
-                    <div style="color: #ffc107;"><strong>Modéré</strong><br>0.35-0.49</div>
-                    <div style="color: #ff9800;"><strong>Élevé</strong><br>0.50-0.69</div>
-                    <div style="color: #dc3545;"><strong>Critique</strong><br>≥ 0.70</div>
+                <div class="legende-risque-container">
+                    <div class="legende-risque-item" style="left: 10%; color: #2196F3;">
+                        <span class="legende-risque-niveau">Minimal</span>
+                        <span class="legende-risque-seuil">0-0.19</span>
+                    </div>
+                    <div class="legende-risque-item" style="left: 27.5%; color: #28a745;">
+                        <span class="legende-risque-niveau">Faible</span>
+                        <span class="legende-risque-seuil">0.20-0.34</span>
+                    </div>
+                    <div class="legende-risque-item" style="left: 42.5%; color: #ffc107;">
+                        <span class="legende-risque-niveau">Modéré</span>
+                        <span class="legende-risque-seuil">0.35-0.49</span>
+                    </div>
+                    <div class="legende-risque-item" style="left: 60%; color: #ff9800;">
+                        <span class="legende-risque-niveau">Élevé</span>
+                        <span class="legende-risque-seuil">0.50-0.69</span>
+                    </div>
+                    <div class="legende-risque-item" style="left: 85%; color: #dc3545;">
+                        <span class="legende-risque-niveau">Critique</span>
+                        <span class="legende-risque-seuil">≥ 0.70</span>
+                    </div>
                 </div>
             </div>
 
@@ -1718,17 +1817,13 @@ function genererContenuCibleIntervention(da) {
         </div>
 
         <!-- TOGGLE CALCULS (EXTÉRIEUR) -->
-        <div style="margin-top: 25px;">
-            <button onclick="toggleDetailsTechniques('details-calculs-risque-${da}')"
-                    style="background: var(--bleu-pale); border: 1px solid var(--bleu-moyen);
-                           color: var(--bleu-principal); padding: 8px 16px; border-radius: 6px;
-                           cursor: pointer; font-size: 0.9rem; width: 100%; text-align: left;
-                           display: flex; align-items: center; justify-content: space-between;">
-                <span>🔽 Voir les calculs et formules</span>
-                <span style="font-size: 0.8rem; opacity: 0.7;">▼</span>
-            </button>
+        <!-- Emoji info toggle en haut à droite -->
+        <div style="text-align: right; margin-bottom: 10px;">
+            <span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span>
+        </div>
 
-            <div id="details-calculs-risque-${da}" class="details-techniques">
+        <!-- Détails des calculs (masqué par défaut) -->
+        <div id="details-calculs-risque-${da}" class="carte-info-toggle" style="display: none;">
 
                 <!-- Calcul Risque -->
                 <div style="margin-bottom: 20px;">
@@ -2025,25 +2120,20 @@ function genererSectionAssiduite(da) {
                     const options = { weekday: 'short', day: 'numeric', month: 'short' };
                     const dateFormatee = date.toLocaleDateString('fr-CA', options);
                     const estAbsenceComplete = abs.heuresPresence === 0;
-                    const icone = estAbsenceComplete ? '🔴' : '🟡';
-                    const bordure = estAbsenceComplete ? '#dc3545' : '#ffc107';
-                    
+                    const classeBadge = estAbsenceComplete ? 'badge-absence-complete' : 'badge-absence-partielle';
+
                     return `
-                        <div style="flex: 0 0 auto; min-width: 180px; padding: 10px 12px; 
-                                    background: var(--bleu-tres-pale); border-left: 3px solid ${bordure}; 
-                                    border-radius: 4px; cursor: pointer;"
-                             onclick="naviguerVersPresenceAvecDate('${abs.date}')"
-                             onmouseover="this.style.background='#e0e8f0'"
-                             onmouseout="this.style.background='var(--bleu-tres-pale)'">
-                            <div style="color: var(--bleu-principal); font-weight: 500; margin-bottom: 3px;">
-                                ${icone} ${dateFormatee}
-                            </div>
-                            <div style="font-size: 0.9rem; color: #666;">
-                                ${estAbsenceComplete 
-                                    ? `${abs.heuresManquees}h manquées` 
-                                    : `${abs.heuresPresence}h / ${abs.heuresPresence + abs.heuresManquees}h`
+                        <div class="badge-absence ${classeBadge}"
+                             onclick="naviguerVersPresenceAvecDate('${abs.date}')">
+                            <span class="badge-absence-date">
+                                ${dateFormatee}
+                            </span>
+                            <span class="badge-absence-heures">
+                                ${estAbsenceComplete
+                                    ? `(${abs.heuresManquees}h manquées)`
+                                    : `(${abs.heuresPresence}/${abs.heuresPresence + abs.heuresManquees}h)`
                                 }
-                            </div>
+                            </span>
                         </div>
                     `;
                 }).join('')}
@@ -2442,12 +2532,13 @@ function genererSectionCompletion(da) {
 
         </div>
 
-        <!-- TOGGLE CALCULS (EXTÉRIEUR) -->
-        <button class="btn-secondary" style="margin: 20px 0; padding: 8px 16px; border-radius: 6px;"
-                onclick="this.nextElementSibling.classList.toggle('hidden')">
-            🔍 Voir les calculs
-        </button>
-        <div class="hidden" style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+        <!-- Emoji info toggle en haut à droite -->
+        <div style="text-align: right; margin-bottom: 10px;">
+            <span class="emoji-toggle" data-target="details-calculs-completion-${da}">ℹ️</span>
+        </div>
+
+        <!-- Détails des calculs (masqué par défaut) -->
+        <div id="details-calculs-completion-${da}" class="carte-info-toggle" style="display: none;">
             <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📐 Détails des calculs</h4>
             <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
                 <li><strong>Indice C :</strong> ${indices.C}% (calculé par portfolio.js avec système PAN)</li>
@@ -3449,114 +3540,93 @@ function genererSectionPerformance(da) {
                 Forces et défis parmi les critères
             </div>
             <div style="margin: 20px 0;">
-                ${['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
-                    const nomCritere = cle === 'structure' ? 'Structure' :
-                                     cle === 'rigueur' ? 'Rigueur' :
-                                     cle === 'plausibilite' ? 'Plausibilité' :
-                                     cle === 'nuance' ? 'Nuance' : 'Français';
-                    const score = moyennes[cle];
+                ${(() => {
+                    // Récupérer les couleurs depuis l'échelle configurée (localStorage)
+                    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+                    const echelleActive = echelles.find(e => e.active) || echelles[0];
 
-                    if (score === null) return '';
+                    // Couleurs par défaut IDME (si aucune échelle configurée)
+                    let niveaux = [
+                        { code: 'I', nom: 'Incomplet', min: 0, max: 64, couleur: '#ff9800' },
+                        { code: 'D', nom: 'Développement', min: 65, max: 74, couleur: '#ffc107' },
+                        { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, couleur: '#28a745' },
+                        { code: 'E', nom: 'Étendu', min: 85, max: 100, couleur: '#2196F3' }
+                    ];
 
-                    const pourcentage = Math.round(score * 100);
+                    // Utiliser les niveaux de l'échelle active si disponible
+                    if (echelleActive && echelleActive.niveaux) {
+                        niveaux = echelleActive.niveaux.map(n => ({
+                            code: n.code,
+                            nom: n.nom,
+                            min: n.min,
+                            max: n.max,
+                            couleur: n.couleur
+                        }));
+                    }
 
-                    return `
-                        <div class="critere">
-                            <span class="critere-nom">${nomCritere}</span>
-                            <div class="critere-barre">
-                                <div class="critere-barre-fill" style="width: ${pourcentage}%;"></div>
+                    // Générer le gradient CSS basé sur les niveaux
+                    const gradientStops = niveaux.map((niveau, i) => {
+                        return `${niveau.couleur} ${niveau.min}%, ${niveau.couleur} ${i < niveaux.length - 1 ? niveaux[i + 1].min : niveau.max}%`;
+                    }).join(', ');
+
+                    const gradientCSS = `linear-gradient(to right, ${gradientStops})`;
+
+                    // Générer les barres pour chaque critère
+                    const barresHTML = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
+                        const nomCritere = cle === 'structure' ? 'Structure' :
+                                         cle === 'rigueur' ? 'Rigueur' :
+                                         cle === 'plausibilite' ? 'Plausibilité' :
+                                         cle === 'nuance' ? 'Nuance' : 'Français';
+                        const score = moyennes[cle];
+
+                        if (score === null) return '';
+
+                        const pourcentage = Math.round(score * 100);
+
+                        return `
+                            <div class="critere-container">
+                                <div class="critere-header">
+                                    <span class="critere-nom" style="min-width: 120px;">${nomCritere}</span>
+                                    <span class="critere-valeur" style="margin-left: auto; font-weight: 600;">${pourcentage}%</span>
+                                </div>
+                                <div class="critere-barre-gradient" style="background: ${gradientCSS};">
+                                    <div class="critere-indicateur" style="left: ${Math.min(pourcentage, 100)}%;">▼</div>
+                                </div>
                             </div>
-                            <span class="critere-valeur">${pourcentage}%</span>
+                        `;
+                    }).join('');
+
+                    // Calculer les positions de légende (centres des zones)
+                    const legendePositions = niveaux.map(niveau => {
+                        const centre = (niveau.min + niveau.max) / 2;
+                        return { ...niveau, position: centre };
+                    });
+
+                    // Générer la légende
+                    const legendeHTML = `
+                        <div class="legende-idme-container">
+                            ${legendePositions.map(item => `
+                                <div class="legende-idme-item" style="left: ${item.position}%; color: ${item.couleur};">
+                                    <span class="legende-idme-code">${item.code}</span>
+                                    <span class="legende-idme-nom">${item.nom}</span>
+                                </div>
+                            `).join('')}
                         </div>
                     `;
-                }).join('')}
+
+                    return barresHTML + legendeHTML;
+                })()}
             </div>
-
-            <hr class="profil-separateur">
-
-            <!-- TITRE ARTEFACTS -->
-        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
-            📝 Artefacts (${nbTotal})
-            ${!selectionComplete ? `
-                <span style="font-weight: normal; color: #666; font-size: 0.9rem;">
-                    · Sélectionnez ${portfolio.regles.nombreARetenir} artefacts pour construire la note finale (${nbRetenus}/${portfolio.regles.nombreARetenir})
-                </span>
-            ` : `
-                <span style="font-weight: normal; color: var(--risque-minimal); font-size: 0.9rem;">
-                    · ${portfolio.regles.nombreARetenir} artefacts sélectionnés ✓
-                </span>
-            `}
-        </h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-            ${artefacts.map(art => {
-                const iconeStatut = !art.remis ? '⏳' : '📄';
-                const fondCouleur = art.retenu
-                    ? 'linear-gradient(to right, #d4edda, #e8f5e9)'
-                    : (art.remis ? 'var(--bleu-tres-pale)' : '#f5f5f5');
-                const bordure = art.retenu ? '#28a745' : (art.remis ? 'var(--bleu-moyen)' : '#ddd');
-                const couleurTitre = art.retenu ? '#155724' : 'var(--bleu-principal)';
-                const fondHover = art.retenu ? '#c3e6cb' : '#e0e8f0';
-
-                return `
-                    <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
-                                background: ${fondCouleur};
-                                border-left: ${art.retenu ? '4px' : '3px'} solid ${bordure};
-                                border-radius: 4px;
-                                ${!art.remis ? 'opacity: 0.6;' : ''}
-                                ${art.retenu ? 'box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);' : ''}
-                                transition: all 0.3s ease;"
-                         onmouseover="this.style.background='${fondHover}'"
-                         onmouseout="this.style.background='${fondCouleur}'">
-                        <label style="display: flex; gap: 8px; cursor: ${art.remis ? 'pointer' : 'not-allowed'};">
-                            <input type="checkbox"
-                                   name="artefactRetenu"
-                                   value="${art.id}"
-                                   ${art.retenu ? 'checked' : ''}
-                                   ${!art.remis ? 'disabled' : ''}
-                                   onchange="toggleArtefactPortfolio('${da}', '${portfolio.id}', ${portfolio.regles.nombreARetenir})"
-                                   style="margin-top: 2px; accent-color: #28a745;">
-                            <div style="flex: 1;">
-                                <div style="color: ${couleurTitre}; font-weight: 500; margin-bottom: 5px;">
-                                    ${iconeStatut} ${echapperHtml(art.titre)}
-                                </div>
-                                ${art.remis ? `
-                                    <div style="font-size: 1rem; color: var(--bleu-principal);">
-                                        <strong style="font-size: 1.2rem;">${art.niveau || '--'}</strong>
-                                        <span style="font-size: 0.85rem; color: #888; margin-left: 4px;">(${art.note}/100)</span>
-                                    </div>
-                                ` : `
-                                    <div class="text-muted">Non remis</div>
-                                `}
-                            </div>
-                        </label>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-
-        <!-- Séparateur avant conclusion -->
-        <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
-
-        <!-- Placeholder graphique (en conclusion) -->
-        <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
-                    padding: 30px 20px; text-align: center; color: var(--bleu-moyen); font-style: italic;">
-            📈 Évolution temporelle de la performance (à venir)
-        </div>
 
     </div>
 
-    <!-- TOGGLE CALCULS (EXTÉRIEUR) -->
-    <div style="margin-top: 25px;">
-        <button onclick="toggleDetailsTechniques('details-calculs-performance-${da}')"
-                style="background: var(--bleu-pale); border: 1px solid var(--bleu-moyen);
-                       color: var(--bleu-principal); padding: 8px 16px; border-radius: 6px;
-                       cursor: pointer; font-size: 0.9rem; width: 100%; text-align: left;
-                       display: flex; align-items: center; justify-content: space-between;">
-            <span>🔽 Voir les calculs et formules</span>
-            <span style="font-size: 0.8rem; opacity: 0.7;">▼</span>
-        </button>
+    <!-- Emoji info toggle en haut à droite -->
+    <div style="text-align: right; margin-bottom: 10px;">
+        <span class="emoji-toggle" data-target="details-calculs-performance-${da}">ℹ️</span>
+    </div>
 
-        <div id="details-calculs-performance-${da}" class="details-techniques">
+    <!-- Détails des calculs (masqué par défaut) -->
+    <div id="details-calculs-performance-${da}" class="carte-info-toggle" style="display: none;">
             <div style="background: white; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem;">
                 <h5 style="color: var(--bleu-principal); margin: 0 0 10px 0; font-size: 0.95rem;">📐 DÉTAILS DES CALCULS</h5>
         <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
@@ -3609,15 +3679,13 @@ function genererSectionAssiduite(da) {
             <!-- Statistiques -->
             <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
                 <li><strong>• Heures présentes :</strong> ${details.heuresPresentes}h / ${details.heuresOffertes}h</li>
-                <li><strong>• Nombre de séances :</strong> ${details.nombreSeances}</li>
-                <li><strong>• Indice A :</strong> ${indices.A}%</li>
             </ul>
 
             <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
 
             <!-- Liste des absences et retards -->
             <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
-                ABSENCES ET RETARDS
+                ${details.absences.length} ABSENCE${details.absences.length > 1 ? 'S' : ''} OU RETARD${details.absences.length > 1 ? 'S' : ''}
             </h4>
             ${details.absences.length > 0 ? `
                 <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
@@ -3626,25 +3694,20 @@ function genererSectionAssiduite(da) {
                         const options = { weekday: 'short', day: 'numeric', month: 'short' };
                         const dateFormatee = date.toLocaleDateString('fr-CA', options);
                         const estAbsenceComplete = abs.heuresPresence === 0;
-                        const icone = estAbsenceComplete ? '🔴' : '🟡';
-                        const bordure = estAbsenceComplete ? '#dc3545' : '#ffc107';
+                        const classeBadge = estAbsenceComplete ? 'badge-absence-complete' : 'badge-absence-partielle';
 
                         return `
-                            <div style="flex: 0 0 auto; min-width: 180px; padding: 10px 12px;
-                                        background: var(--bleu-tres-pale); border-left: 3px solid ${bordure};
-                                        border-radius: 4px; cursor: pointer;"
-                                 onclick="naviguerVersPresenceAvecDate('${abs.date}')"
-                                 onmouseover="this.style.background='#e0e8f0'"
-                                 onmouseout="this.style.background='var(--bleu-tres-pale)'">
-                                <div style="color: var(--bleu-principal); font-weight: 500; margin-bottom: 3px;">
-                                    ${icone} ${dateFormatee}
-                                </div>
-                                <div style="font-size: 0.9rem; color: #666;">
+                            <div class="badge-absence ${classeBadge}"
+                                 onclick="naviguerVersPresenceAvecDate('${abs.date}')">
+                                <span class="badge-absence-date">
+                                    ${dateFormatee}
+                                </span>
+                                <span class="badge-absence-heures">
                                     ${estAbsenceComplete
-                                        ? `${abs.heuresManquees}h manquées`
-                                        : `${abs.heuresPresence}h / ${abs.heuresPresence + abs.heuresManquees}h`
+                                        ? `(${abs.heuresManquees}h manquées)`
+                                        : `(${abs.heuresPresence}/${abs.heuresPresence + abs.heuresManquees}h)`
                                     }
-                                </div>
+                                </span>
                             </div>
                         `;
                     }).join('')}
@@ -3666,12 +3729,13 @@ function genererSectionAssiduite(da) {
 
         </div>
 
-        <!-- TOGGLE CALCULS (EXTÉRIEUR) -->
-        <button class="btn-secondary" style="margin: 20px 0; padding: 8px 16px; border-radius: 6px;"
-                onclick="this.nextElementSibling.classList.toggle('hidden')">
-            🔍 Voir les calculs
-        </button>
-        <div class="hidden" style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+        <!-- Emoji info toggle en haut à droite -->
+        <div style="text-align: right; margin-bottom: 10px;">
+            <span class="emoji-toggle" data-target="details-calculs-assiduite-${da}">ℹ️</span>
+        </div>
+
+        <!-- Détails des calculs (masqué par défaut) -->
+        <div id="details-calculs-assiduite-${da}" class="carte-info-toggle" style="display: none;">
             <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📐 Détails des calculs</h4>
             <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
                 <li><strong>Indice A :</strong> ${indices.A}%</li>
