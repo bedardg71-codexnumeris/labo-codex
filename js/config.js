@@ -33,7 +33,8 @@ const configurationsOnglets = {
     'tableau-bord': [
         { id: 'apercu', label: 'Aperçu' },
         { id: 'liste', label: 'Liste des individus' },
-        { id: 'profil', label: 'Profil' }
+        { id: 'profil', label: 'Profil' },
+        { id: 'interventions', label: 'Interventions RàI' }
     ],
     'presences': [
         { id: 'apercu', label: 'Aperçu' },
@@ -59,6 +60,7 @@ const configurationsOnglets = {
         { id: 'horaire', label: 'Horaire' },
         { id: 'groupe', label: 'Groupe' },
         { id: 'pratique-notation', label: 'Pratique de notation' },
+        { id: 'interpretation', label: 'Interprétation des données' },
         { id: 'import-export', label: 'Import/Export' }
     ],
   'aide': [

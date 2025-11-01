@@ -94,6 +94,14 @@ function rechargerListeEtudiants() {
     initialiserModuleListeEtudiants();
 }
 
+/**
+ * Alias pour le rechargement (appelé par navigation.js)
+ */
+function chargerListeEtudiants() {
+    console.log('🔄 chargerListeEtudiants() appelée');
+    rechargerListeEtudiants();
+}
+
 /* ===============================
    CHARGEMENT DES OPTIONS DE FILTRES
    =============================== */
@@ -300,6 +308,109 @@ function obtenirCouleurCompletion(taux) {
     }
 }
 
+/**
+ * Calcule l'indice de Performance (P) pour un étudiant
+ * @param {string} da - Numéro de DA
+ * @returns {number} - Performance en pourcentage (0-100)
+ */
+function calculerPerformance(da) {
+    // LIRE depuis la source unique de vérité (portfolio.js)
+    if (typeof obtenirIndicesCP === 'function') {
+        // Détecter la pratique active
+        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
+
+        const indicesCP = obtenirIndicesCP(da, pratique);
+
+        if (indicesCP && indicesCP.P !== undefined) {
+            return Math.round(indicesCP.P);
+        }
+    }
+
+    // Fallback si pas de données
+    return 0;
+}
+
+/**
+ * Obtient la couleur d'affichage selon la performance
+ * @param {number} performance - Performance en pourcentage
+ * @returns {string} - Code couleur CSS
+ */
+function obtenirCouleurPerformance(performance) {
+    if (performance >= 85) {
+        return 'var(--risque-minimal)'; // Vert
+    } else if (performance >= 70) {
+        return 'var(--risque-modere)'; // Jaune
+    } else {
+        return 'var(--risque-tres-eleve)'; // Rouge
+    }
+}
+
+/**
+ * Calcule le niveau de risque à l'échec (RàI) pour un étudiant
+ * @param {string} da - Numéro de DA
+ * @returns {Object} - { niveau: number (1|2|3), label: string, couleurFond: string, couleurTexte: string }
+ */
+function calculerNiveauRaI(da) {
+    // Utiliser la fonction du profil étudiant si disponible
+    if (typeof determinerCibleIntervention === 'function') {
+        const cibleInfo = determinerCibleIntervention(da);
+
+        // Convertir le niveau en badge RàI avec les bonnes couleurs
+        let label, couleurFond, couleurTexte;
+
+        if (cibleInfo.niveau === 1) {
+            label = 'RàI 1';
+            couleurFond = '#e8f5e9'; // Vert pâle
+            couleurTexte = '#2e7d32'; // Vert foncé
+        } else if (cibleInfo.niveau === 2) {
+            label = 'RàI 2';
+            couleurFond = '#fff9e6'; // Jaune pâle
+            couleurTexte = '#f57c00'; // Orange/jaune foncé
+        } else { // niveau 3
+            label = 'RàI 3';
+            couleurFond = '#fff3e0'; // Orange pâle
+            couleurTexte = '#e65100'; // Orange foncé
+        }
+
+        return {
+            niveau: cibleInfo.niveau,
+            label: label,
+            couleurFond: couleurFond,
+            couleurTexte: couleurTexte
+        };
+    }
+
+    // Fallback : calculer simplement avec R = 1 - (A × C × P)
+    const assiduite = calculerAssiduitéGlobale(da) / 100;
+    const completion = calculerTauxCompletion(da) / 100;
+    const performance = calculerPerformance(da) / 100;
+
+    const risque = 1 - (assiduite * completion * performance);
+    const risquePct = risque * 100;
+
+    // Déterminer le niveau selon les seuils
+    let niveau, label, couleurFond, couleurTexte;
+    if (risquePct < 50) {
+        niveau = 1;
+        label = 'RàI 1';
+        couleurFond = '#e8f5e9';
+        couleurTexte = '#2e7d32';
+    } else if (risquePct < 70) {
+        niveau = 2;
+        label = 'RàI 2';
+        couleurFond = '#fff9e6';
+        couleurTexte = '#f57c00';
+    } else {
+        niveau = 3;
+        label = 'RàI 3';
+        couleurFond = '#fff3e0';
+        couleurTexte = '#e65100';
+    }
+
+    return { niveau, label, couleurFond, couleurTexte };
+}
+
 /* ===============================
    🔍 FILTRAGE ET RECHERCHE
    =============================== */
@@ -363,8 +474,8 @@ function filtrerEtudiants(etudiants) {
 function afficherListeEtudiantsConsultation() {
     console.log('🔵 Affichage de la liste des étudiants...');
 
-    const tbody = document.getElementById('tbody-tableau-bord-liste');           // ← CHANGÉ
-    const compteur = document.getElementById('compteur-etudiants-liste');
+    const tbody = document.getElementById('tbody-tableau-bord-liste');
+    const compteur = document.getElementById('compteur-tableau-bord-liste');
     const messageVide = document.getElementById('message-aucun-etudiant');
     const tableContainer = document.getElementById('tableEtudiantsListe');
 
@@ -438,11 +549,15 @@ function afficherListeEtudiantsConsultation() {
     tbody.innerHTML = '';
 
     etudiantsFiltres.forEach(function (etudiant) {
-        // Calcul de l'assiduité
+        // Calcul des indices
         const assiduite = calculerAssiduitéGlobale(etudiant.da);
         const couleurAssiduite = obtenirCouleurAssiduite(assiduite);
         const completion = calculerTauxCompletion(etudiant.da);
         const couleurCompletion = obtenirCouleurCompletion(completion);
+        const performance = calculerPerformance(etudiant.da);
+        const couleurPerformance = obtenirCouleurPerformance(performance);
+        const niveauRaI = calculerNiveauRaI(etudiant.da);
+
         const tr = document.createElement('tr');
         // Rendre la ligne cliquable
         tr.style.cursor = 'pointer';
@@ -462,7 +577,6 @@ function afficherListeEtudiantsConsultation() {
         const groupe = echapperHtml(etudiant.groupe || '');
         const nom = echapperHtml(etudiant.nom || '');
         const prenom = echapperHtml(etudiant.prenom || '');
-        const codeProgramme = echapperHtml(etudiant.programme || '');
         const nomProgramme = echapperHtml(obtenirNomProgramme(etudiant.programme) || '');
 
         // Construire le HTML ligne par ligne pour éviter les erreurs
@@ -471,12 +585,13 @@ function afficherListeEtudiantsConsultation() {
         html += '<td style="text-align: center;"><strong>' + groupe + '</strong></td>';
         html += '<td>' + nom + '</td>';
         html += '<td>' + prenom + '</td>';
-        html += '<td style="text-align: center;">' + codeProgramme + '</td>';
         html += '<td>' + nomProgramme + '</td>';
         html += '<td style="text-align: center;">' + (etudiant.sa === 'Oui' ? '✓' : '') + '</td>';
         html += '<td style="text-align: center;">' + (etudiant.caf === 'Oui' ? '✓' : '') + '</td>';
         html += '<td style="text-align: center;"><strong style="color: ' + couleurAssiduite + ';">' + assiduite + '%</strong></td>';
         html += '<td style="text-align: center;"><strong style="color: ' + couleurCompletion + ';">' + completion + '%</strong></td>';
+        html += '<td style="text-align: center;"><strong style="color: ' + couleurPerformance + ';">' + performance + '%</strong></td>';
+        html += '<td style="text-align: center;"><span style="background: ' + niveauRaI.couleurFond + '; color: ' + niveauRaI.couleurTexte + '; padding: 4px 10px; border-radius: 4px; font-weight: 600; display: inline-block; font-size: 0.85rem;">' + niveauRaI.label + '</span></td>';
 
         tr.innerHTML = html;
         tbody.appendChild(tr);
@@ -583,6 +698,9 @@ function resetFiltresListe() {
 function afficherPortfolio(da) {
     console.log('📂 Affichage du profil pour DA:', da);
 
+    // Basculer vers la sous-section profil
+    afficherSousSection('tableau-bord-profil');
+
     // Déléguer au module profil-etudiant.js pour l'affichage complet
     if (typeof afficherProfilComplet === 'function') {
         afficherProfilComplet(da);
@@ -601,8 +719,6 @@ function afficherPortfolio(da) {
             console.error('❌ Aucun étudiant trouvé avec le DA:', da);
             return;
         }
-
-        afficherSousSection('tableau-bord-profil');
 
         const container = document.getElementById('contenuProfilEtudiant');
         if (container) {

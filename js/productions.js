@@ -683,9 +683,9 @@ function chargerArtefactsDisponibles() {
     container.innerHTML = artefacts.map(art => `
         <label style="display: block; padding: 8px; margin-bottom: 5px; 
                background: var(--bleu-tres-pale); border-radius: 4px; cursor: pointer;">
-            <input type="checkbox" name="artefactPortfolio" value="${art.id}" 
+            <input type="checkbox" name="artefactPortfolio" value="${art.id}"
                    style="margin-right: 10px;">
-            <strong>${art.titre}</strong>${art.description ? ' - ' + art.description : ''}
+            <strong>${art.description || art.titre}</strong>
         </label>
     `).join('');
 }

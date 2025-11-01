@@ -778,29 +778,27 @@ function afficherNiveauxRaI(etudiants) {
     const afficherPan = affichage.afficherAlternatif !== false;
     const nbTotal = etudiants.length;
 
-    // Calculer les niveaux RàI pour SOM
+    // Calculer les niveaux RàI pour SOM et PAN
+    // Utiliser determinerCibleIntervention() pour assurer la cohérence avec la Liste
     let somNiveau1 = 0, somNiveau2 = 0, somNiveau3 = 0;
-    etudiants.forEach(e => {
-        const pattern = determinerPattern(e.sommatif);
-        if (pattern === 'stable') {
-            somNiveau1++;
-        } else if (pattern === 'défi' || pattern === 'émergent') {
-            somNiveau2++;
-        } else if (pattern === 'critique') {
-            somNiveau3++;
-        }
-    });
-
-    // Calculer les niveaux RàI pour PAN
     let panNiveau1 = 0, panNiveau2 = 0, panNiveau3 = 0;
+
     etudiants.forEach(e => {
-        const pattern = determinerPattern(e.alternatif);
-        if (pattern === 'stable') {
-            panNiveau1++;
-        } else if (pattern === 'défi' || pattern === 'émergent') {
-            panNiveau2++;
-        } else if (pattern === 'critique') {
-            panNiveau3++;
+        // Utiliser la même logique que dans la Liste des individus
+        if (typeof determinerCibleIntervention === 'function') {
+            const cibleInfo = determinerCibleIntervention(e.da);
+
+            // Compter pour les deux pratiques (SOM et PAN utilisent le même niveau RàI)
+            if (cibleInfo.niveau === 1) {
+                somNiveau1++;
+                panNiveau1++;
+            } else if (cibleInfo.niveau === 2) {
+                somNiveau2++;
+                panNiveau2++;
+            } else if (cibleInfo.niveau === 3) {
+                somNiveau3++;
+                panNiveau3++;
+            }
         }
     });
 
@@ -837,7 +835,7 @@ function afficherNiveauxRaI(etudiants) {
     const html = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 15px;">
             ${genererCarteRaI('Niveau 1 (Universel)', 'Suivi régulier', somPct1, panPct1, somNiveau1, panNiveau1, afficherSom, afficherPan, 'var(--alerte-fond-succes)', 'var(--btn-confirmer)')}
-            ${genererCarteRaI('Niveau 2 (Ciblé)', 'Interventions ciblées', somPct2, panPct2, somNiveau2, panNiveau2, afficherSom, afficherPan, '#f3eeff', 'var(--btn-modifier)')}
+            ${genererCarteRaI('Niveau 2 (Ciblé)', 'Interventions ciblées', somPct2, panPct2, somNiveau2, panNiveau2, afficherSom, afficherPan, '#fff9e6', '#f57c00')}
             ${genererCarteRaI('Niveau 3 (Intensif)', 'Interventions intensives', somPct3, panPct3, somNiveau3, panNiveau3, afficherSom, afficherPan, 'var(--alerte-fond-attention)', 'var(--btn-annuler)')}
         </div>
     `;

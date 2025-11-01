@@ -30,6 +30,7 @@
     --vert-pale: #f8fef8;
     --vert-doux: #b8d4b8;
     --vert-leger: #2a8a6a;
+    --vert-succes: #28a745;
 
     /* Couleurs pratiques d'évaluation */
     --som-orange: #ff6f00;
@@ -1007,50 +1008,91 @@ input[type="number"].controle-form {
 }
 
 /* ===============================
-   BADGES DE RISQUE
+   BADGES SYSTÈME (Beta 0.84)
+   Badges uniformisés pour Risque, Pattern, RàI
    =============================== */
 
-.badge-risque {
+/* Style de base pour tous les badges */
+.badge-sys {
     display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
-.risque-nul {
-    background: var(--risque-nul);
-    color: white;
+/* === BADGES DE RISQUE (sans émojis) === */
+.badge-risque-minimal {
+    background: #eff6ff;
+    color: #2563eb;
 }
 
-.risque-minimal {
-    background: var(--risque-minimal);
-    color: white;
+.badge-risque-faible {
+    background: #f0fdf4;
+    color: #16a34a;
 }
 
-.risque-faible {
-    background: var(--risque-faible);
-    color: #1a5f1a;
+.badge-risque-modere {
+    background: #fef9c3;
+    color: #ca8a04;
 }
 
-.risque-modere {
-    background: var(--risque-modere);
-    color: #7a5900;
+.badge-risque-eleve {
+    background: #ffedd5;
+    color: #ea580c;
 }
 
-.risque-eleve {
-    background: var(--risque-eleve);
-    color: white;
+.badge-risque-tres-eleve {
+    background: #fee2e2;
+    color: #dc2626;
 }
 
-.risque-tres-eleve {
-    background: var(--risque-tres-eleve);
-    color: white;
+.badge-risque-critique {
+    background: #fef2f2;
+    color: #991b1b;
 }
 
-.risque-critique {
-    background: var(--risque-critique);
-    color: white;
+/* === BADGES DE PATTERN D'APPRENTISSAGE === */
+.badge-pattern-blocage-critique {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.badge-pattern-blocage-emergent {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+.badge-pattern-defi-specifique {
+    background: #fef3c7;
+    color: #ca8a04;
+}
+
+.badge-pattern-stable {
+    background: #e0f2fe;
+    color: #0891b2;
+}
+
+.badge-pattern-progression {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+/* === BADGES DE NIVEAU RÀI === */
+.badge-rai-1 {
+    background: #f0f9ff;
+    color: #0ea5e9;
+}
+
+.badge-rai-2 {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+
+.badge-rai-3 {
+    background: #fee2e2;
+    color: #dc2626;
 }
 
 /* ===============================
@@ -1679,6 +1721,10 @@ input[type="number"].controle-form {
     font-weight: 500;
     color: var(--bleu-principal);
     font-size: 0.9rem;
+}
+
+.champ-formulaire {
+    margin-bottom: 15px;
 }
 
 /* Conteneur de boutons en groupe */
@@ -2591,6 +2637,102 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 
 .carte-info-toggle strong {
     color: var(--bleu-principal);
+}
+
+/* ===============================================
+   DÉTAILS DE CALCULS - STYLE UNIFORME
+   Basé sur le modèle du calcul du risque
+   =============================================== */
+
+/* Conteneur de section de calcul */
+.details-calculs-section {
+    margin-bottom: 20px;
+}
+
+/* Grille 2 colonnes pour calculs côte à côte */
+.details-calculs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .details-calculs-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Titre de section (CALCUL DU RISQUE, CALCUL DU BLOCAGE, etc.) */
+.details-calculs-titre {
+    color: var(--bleu-principal);
+    margin: 0 0 10px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* Bloc contenant les formules et calculs */
+.details-calculs-bloc {
+    background: var(--bleu-fonce);
+    padding: 12px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    color: var(--bleu-leger);
+    border: 1px solid var(--bleu-leger);
+}
+
+/* Label (Formule:, Calcul détaillé:, etc.) */
+.details-calculs-label {
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--bleu-leger);
+}
+
+/* Valeurs et formules */
+.details-calculs-valeur {
+    color: var(--bleu-leger);
+    margin-bottom: 12px;
+}
+
+.details-calculs-valeur:last-child {
+    margin-bottom: 0;
+}
+
+.details-calculs-valeur strong {
+    color: var(--bleu-leger);
+}
+
+.details-calculs-bloc strong {
+    color: var(--bleu-leger);
+}
+
+/* Alerte (avertissements, calculs partiels, etc.) */
+.details-calculs-alerte {
+    background: #fff3cd;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-family: sans-serif;
+}
+
+.details-calculs-alerte strong {
+    color: #856404;
+}
+
+/* Liste de détails dans les toggles */
+.details-calculs-liste {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    line-height: 1.8;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    color: var(--bleu-leger);
+}
+
+.details-calculs-liste strong {
+    color: var(--bleu-leger);
 }
 
 /* ===============================================
@@ -3537,15 +3679,15 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 
 .profil-echelle-barre {
     position: relative;
-    height: 24px;
-    border-radius: 12px;
+    height: 12px;
+    border-radius: 6px;
     /* Gradient défini dynamiquement en JS */
 }
 
 .profil-echelle-indicateur-haut {
     position: absolute;
     transform: translateX(-50%);
-    top: -22px;
+    top: -18px;
     font-size: 1.5rem;
     color: #333;
 }
@@ -3768,7 +3910,7 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 
 /* Barres de critères SRPNF avec échelle IDME */
 .critere-container {
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
 .critere-header {
@@ -3779,15 +3921,15 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 
 .critere-barre-gradient {
     position: relative;
-    height: 24px;
-    border-radius: 12px;
+    height: 12px;
+    border-radius: 6px;
     /* Gradient défini dynamiquement en JS selon échelles personnalisées */
 }
 
 .critere-indicateur {
     position: absolute;
     transform: translateX(-50%);
-    top: -22px;
+    top: -18px;
     font-size: 1.5rem;
     color: #333;
 }
@@ -3927,4 +4069,78 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     font-size: 1.8rem;
     color: #032e5c;
     font-weight: 700;
+}
+/* ===============================
+   INTERVENTIONS RàI (Beta 0.85)
+   =============================== */
+
+.profil-info-item {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.profil-info-item strong {
+    color: var(--bleu-principal);
+}
+
+.liste-etudiants-intervention {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.liste-etudiants-intervention > div {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+
+.liste-etudiants-intervention > div:hover {
+    background: var(--bleu-tres-pale);
+}
+
+.liste-etudiants-intervention > div:last-child {
+    border-bottom: none;
+}
+
+.liste-etudiants-intervention input[type="checkbox"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.liste-etudiants-intervention label {
+    flex: 1;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.intervention-item {
+    transition: box-shadow 0.2s;
+}
+
+.intervention-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ===============================
+   ANIMATIONS
+   =============================== */
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }

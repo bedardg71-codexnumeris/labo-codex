@@ -2,10 +2,10 @@
 
 ################################################################################
 # Script de préparation du package de distribution
-# Système de Monitorage Pédagogique - Beta 0.81
+# Système de Monitorage Pédagogique - Beta 0.83
 # Auteur: Grégoire Bédard
 # Contact: labo@codexnumeris.org
-# Date: 30 octobre 2025
+# Date: 31 octobre 2025
 ################################################################################
 
 # Couleurs pour l'affichage
@@ -16,7 +16,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-VERSION="Beta_0.81"
+VERSION="Beta_0.83"
 PACKAGE_NAME="Monitorage_${VERSION}"
 DIST_DIR="dist"
 TEMP_DIR="${DIST_DIR}/${PACKAGE_NAME}"
@@ -35,7 +35,7 @@ echo ""
 echo -e "${YELLOW}[1/6] Vérifications préalables...${NC}"
 
 # Vérifier que nous sommes dans le bon répertoire
-if [ ! -f "index 81 (profil étudiant).html" ]; then
+if [ ! -f "index 83 (seuils configurables).html" ]; then
     echo -e "${RED}❌ ERREUR: Fichier principal introuvable.${NC}"
     echo -e "${RED}   Assurez-vous d'exécuter ce script depuis le répertoire racine du projet.${NC}"
     exit 1
@@ -88,8 +88,8 @@ echo ""
 echo -e "${YELLOW}[3/6] Copie des fichiers essentiels...${NC}"
 
 # Copier le fichier HTML principal
-cp "index 81 (profil étudiant).html" "$TEMP_DIR/"
-echo "  ✓ index 81 (profil étudiant).html"
+cp "index 83 (seuils configurables).html" "$TEMP_DIR/"
+echo "  ✓ index 83 (seuils configurables).html"
 
 # Copier styles.css
 cp "styles.css" "$TEMP_DIR/"
@@ -151,6 +151,23 @@ fi
 if [ -f "README_DONNEES_DEMO.md" ]; then
     cp "README_DONNEES_DEMO.md" "$TEMP_DIR/"
     echo "  ✓ README_DONNEES_DEMO.md (référence)"
+fi
+
+# Copier NOTES_VERSION_0.83.md (notes de cette version)
+if [ -f "NOTES_VERSION_0.83.md" ]; then
+    cp "NOTES_VERSION_0.83.md" "$TEMP_DIR/"
+    echo "  ✓ NOTES_VERSION_0.83.md"
+fi
+
+# Copier les fichiers de démonstration
+if [ -f "etudiants-demo.txt" ]; then
+    cp "etudiants-demo.txt" "$TEMP_DIR/"
+    echo "  ✓ etudiants-demo.txt"
+fi
+
+if [ -f "etudiants-demo-groupe9999.txt" ]; then
+    cp "etudiants-demo-groupe9999.txt" "$TEMP_DIR/"
+    echo "  ✓ etudiants-demo-groupe9999.txt"
 fi
 
 echo -e "${GREEN}✅ Documentation copiée.${NC}"
@@ -245,7 +262,7 @@ fi
 
 echo -e "${GREEN}2. ✅ Tester le package${NC}"
 echo "   • Décompresser le ZIP dans un nouveau dossier"
-echo "   • Ouvrir index 81 (profil étudiant).html"
+echo "   • Ouvrir index 83 (seuils configurables).html"
 echo "   • Importer donnees-demo.json"
 echo "   • Vérifier que tout fonctionne"
 echo ""

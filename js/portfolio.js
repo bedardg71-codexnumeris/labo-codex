@@ -187,9 +187,8 @@ function chargerPortfolioEleveDetail(da) {
                                    style="margin-right: 15px; margin-top: 3px; transform: scale(1.4); accent-color: #28a745;">
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; color: ${art.retenu ? '#155724' : 'var(--bleu-principal)'}; margin-bottom: 5px;">
-                                    ${echapperHtml(art.titre)}
+                                    ${echapperHtml(art.description || art.titre)}
                                 </div>
-                                ${art.description ? `<div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">${echapperHtml(art.description)}</div>` : ''}
                                 <div style="display: flex; gap: 15px; font-size: 0.85rem;">
                                     ${art.remis
                                         ? `<span style="color: green;">✓ Remis</span>
@@ -204,7 +203,7 @@ function chargerPortfolioEleveDetail(da) {
                             <div style="width: 18px; height: 18px; border: 2px dashed #ccc; border-radius: 3px;"></div>
                             <div style="flex: 1;">
                                 <div style="font-weight: 500; color: #999; margin-bottom: 3px;">
-                                    ${echapperHtml(art.titre)}
+                                    ${echapperHtml(art.description || art.titre)}
                                 </div>
                                 <div style="font-size: 0.85rem; color: #999; font-style: italic;">
                                     Artefact à venir (non encore créé dans Réglages › Productions)

@@ -104,6 +104,69 @@ function genererBadgePratiqueProfil(pratiqueUtilisee) {
 }
 
 /**
+ * Génère un badge de risque (Beta 0.84)
+ * @param {number} risque - Valeur du risque (0-1)
+ * @returns {string} - HTML du badge
+ */
+function genererBadgeRisqueProfil(risque) {
+    let classe = '';
+    let label = '';
+
+    if (risque <= 0.20) {
+        classe = 'badge-sys badge-risque-minimal';
+        label = 'Minimal';
+    } else if (risque <= 0.30) {
+        classe = 'badge-sys badge-risque-faible';
+        label = 'Faible';
+    } else if (risque <= 0.40) {
+        classe = 'badge-sys badge-risque-modere';
+        label = 'Modéré';
+    } else if (risque <= 0.50) {
+        classe = 'badge-sys badge-risque-eleve';
+        label = 'Élevé';
+    } else if (risque <= 0.70) {
+        classe = 'badge-sys badge-risque-tres-eleve';
+        label = 'Très élevé';
+    } else {
+        classe = 'badge-sys badge-risque-critique';
+        label = 'Critique';
+    }
+
+    return `<span class="${classe}">${label}</span>`;
+}
+
+/**
+ * Génère un badge de pattern (Beta 0.84)
+ * @param {string} pattern - Pattern d'apprentissage
+ * @returns {string} - HTML du badge
+ */
+function genererBadgePatternProfil(pattern) {
+    let classe = '';
+
+    switch(pattern) {
+        case 'Blocage critique':
+            classe = 'badge-sys badge-pattern-blocage-critique';
+            break;
+        case 'Blocage émergent':
+            classe = 'badge-sys badge-pattern-blocage-emergent';
+            break;
+        case 'Défi spécifique':
+            classe = 'badge-sys badge-pattern-defi-specifique';
+            break;
+        case 'Stable':
+            classe = 'badge-sys badge-pattern-stable';
+            break;
+        case 'En progression':
+            classe = 'badge-sys badge-pattern-progression';
+            break;
+        default:
+            classe = 'badge-sys';
+    }
+
+    return `<span class="${classe}">${pattern}</span>`;
+}
+
+/**
  * Calcule tous les indices pour un étudiant
  *
  * @param {string} da - Numéro de DA
@@ -408,7 +471,11 @@ function interpreterPerformance(valeur) {
  */
 function interpreterCompletion(valeur) {
     const c = valeur / 100; // Normaliser en 0-1
-    if (c >= 0.85) {
+    const seuilExcellent = obtenirSeuil('interpretation.excellent');
+    const seuilBon = obtenirSeuil('interpretation.bon');
+    const seuilAcceptable = obtenirSeuil('interpretation.acceptable');
+
+    if (c >= seuilExcellent) {
         return {
             niveau: 'Taux de complétion excellent',
             emoji: '🔵',
@@ -416,7 +483,7 @@ function interpreterCompletion(valeur) {
             description: 'Remise régulière et complète des travaux'
         };
     }
-    if (c >= 0.80) {
+    if (c >= seuilBon) {
         return {
             niveau: 'Bon taux de complétion',
             emoji: '🟢',
@@ -424,7 +491,7 @@ function interpreterCompletion(valeur) {
             description: 'Majorité des travaux remis'
         };
     }
-    if (c >= 0.70) {
+    if (c >= seuilAcceptable) {
         return {
             niveau: 'Complétion acceptable',
             emoji: '🟡',
@@ -455,7 +522,11 @@ function interpreterCompletion(valeur) {
  */
 function interpreterAssiduite(valeur) {
     const a = valeur / 100; // Normaliser en 0-1
-    if (a >= 0.85) {
+    const seuilExcellent = obtenirSeuil('interpretation.excellent');
+    const seuilBon = obtenirSeuil('interpretation.bon');
+    const seuilAcceptable = obtenirSeuil('interpretation.acceptable');
+
+    if (a >= seuilExcellent) {
         return {
             niveau: 'Assiduité exemplaire',
             emoji: '🔵',
@@ -463,7 +534,7 @@ function interpreterAssiduite(valeur) {
             description: 'Présence constante et engagement soutenu'
         };
     }
-    if (a >= 0.80) {
+    if (a >= seuilBon) {
         return {
             niveau: 'Bonne assiduité',
             emoji: '🟢',
@@ -471,7 +542,7 @@ function interpreterAssiduite(valeur) {
             description: 'Présence régulière avec absences rares et justifiées'
         };
     }
-    if (a >= 0.70) {
+    if (a >= seuilAcceptable) {
         return {
             niveau: 'Assiduité acceptable',
             emoji: '🟡',
@@ -558,6 +629,7 @@ function genererSectionMobilisationEngagement(da) {
         return {
             id: art.id,
             titre: art.titre,
+            description: art.description || art.titre, // Utiliser description ou fallback sur titre
             remis: !!evaluation,
             note: evaluation?.noteFinale || null,
             niveau: evaluation?.niveauFinal || null,
@@ -621,31 +693,30 @@ function genererSectionMobilisationEngagement(da) {
     const artefactsAvecJetonDelai = evaluationsAvecJetonDelai.map(e => e.productionNom || 'Artefact inconnu');
 
     return `
-        <!-- TITRE AVEC TOGGLE INFO -->
-        <h3 style="display: flex; justify-content: space-between; align-items: center; color: var(--bleu-principal); margin-bottom: 20px;">
-            <span>Mobilisation</span>
-            <span style="font-size: 1.2rem;">
-                <span class="emoji-toggle" data-target="details-calculs-mobilisation-${da}">ℹ️</span>
-            </span>
-        </h3>
-
         <!-- Détails des calculs (masqué par défaut) -->
-        <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle">
-            <h4>📐 Détails des calculs</h4>
-            <ul>
-                <li><strong>Indice A (Assiduité) :</strong> ${indices.A}%</li>
-                <li>
-                    → ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
-                </li>
-                <li style="margin-top: 10px;"><strong>Indice C (Complétion) :</strong> ${indices.C}%</li>
-                <li>
-                    → ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
-                </li>
-                <li style="margin-top: 10px;"><strong>Indice M (Mobilisation) :</strong> ${indices.M}</li>
-                <li>
-                    → M = (A + C) / 2 = (${indices.A} + ${indices.C}) / 2
-                </li>
-            </ul>
+        <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle" style="display: none;">
+            <div class="details-calculs-section">
+                <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
+                <div class="details-calculs-bloc">
+                    <div class="details-calculs-label">Assiduité (A):</div>
+                    <div class="details-calculs-valeur">
+                        Indice A = ${indices.A}%<br>
+                        ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
+                    </div>
+
+                    <div class="details-calculs-label">Complétion (C):</div>
+                    <div class="details-calculs-valeur">
+                        Indice C = ${indices.C}%<br>
+                        ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
+                    </div>
+
+                    <div class="details-calculs-label">Mobilisation (M):</div>
+                    <div class="details-calculs-valeur">
+                        Formule: M = (A + C) / 2<br>
+                        M = (${indices.A} + ${indices.C}) / 2 = <strong>${indices.M}</strong>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- CARTES MÉTRIQUES EN HAUT -->
@@ -704,8 +775,8 @@ function genererSectionMobilisationEngagement(da) {
                                     </span>
                                     <span class="badge-absence-heures">
                                         ${estAbsenceComplete
-                                            ? `(${abs.heuresManquees}h manquées)`
-                                            : `(${abs.heuresPresence}/${abs.heuresPresence + abs.heuresManquees}h)`
+                                            ? `${abs.heuresManquees}/${abs.heuresPresence + abs.heuresManquees}`
+                                            : `${abs.heuresPresence}/${abs.heuresPresence + abs.heuresManquees}`
                                         }
                                     </span>
                                 </div>
@@ -808,7 +879,7 @@ function genererSectionMobilisationEngagement(da) {
                                          onmouseover="this.parentElement.style.opacity='1'; this.parentElement.style.transform='translateY(-2px)'; this.parentElement.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';"
                                          onmouseout="this.parentElement.style.opacity='${opacite}'; this.parentElement.style.transform='translateY(0)'; this.parentElement.style.boxShadow='none';">
                                         <span style="font-weight: 600; color: ${couleurBadge}; font-size: 0.9rem;">
-                                            ${echapperHtml(art.titre)}
+                                            ${echapperHtml(art.description)}
                                         </span>
                                         ${art.jetonReprise ? '<span style="font-size: 0.8rem;" title="Jeton de reprise appliqué">⭐</span>' : ''}
                                         ${art.jetonDelai ? '<span style="font-size: 0.8rem;" title="Jeton de délai appliqué">⭐</span>' : ''}
@@ -816,7 +887,7 @@ function genererSectionMobilisationEngagement(da) {
                                             ${art.niveau || '--'}
                                         </span>
                                         <span style="color: #666; font-size: 0.85rem;">
-                                            (${art.note}/100)
+                                            (${art.note})
                                         </span>
                                     </div>
                                 </div>
@@ -848,7 +919,7 @@ function genererSectionMobilisationEngagement(da) {
                                  onmouseout="this.style.opacity='0.6'; this.style.transform='translateY(0)'; this.style.boxShadow='none';"
                                  title="Cliquer pour évaluer cet artefact">
                                 <span style="font-weight: 500; color: #666; font-size: 0.9rem;">
-                                    ⏳ ${echapperHtml(art.titre)}
+                                    ⏳ ${echapperHtml(art.description)}
                                 </span>
                                 <span style="color: #999; font-size: 0.85rem; font-style: italic;">
                                     Non remis
@@ -1155,17 +1226,21 @@ function genererSectionRisque(da) {
     let urgence = 'Aucune action immédiate requise';
     let couleurUrgence = '#28a745';
 
-    if (indices.R >= 0.60) {
+    const seuilEleve = obtenirSeuil('risque.eleve');
+    const seuilModere = obtenirSeuil('risque.faible');  // 0.35 pour modéré ou plus
+    const seuilMinimal = obtenirSeuil('risque.minimal'); // 0.20 pour faible ou plus
+
+    if (indices.R >= seuilEleve) {
         niveauRaI = 3;
         descriptionRaI = 'Niveau 3 - Intervention intensive individuelle';
         urgence = '🚨 URGENCE MAXIMALE - Intervention immédiate requise';
         couleurUrgence = '#dc3545';
-    } else if (indices.R >= 0.35) {
+    } else if (indices.R >= seuilModere) {
         niveauRaI = 2;
         descriptionRaI = 'Niveau 2 - Intervention ciblée en petit groupe';
         urgence = '⚠️ Intervention prioritaire dans les prochains jours';
         couleurUrgence = '#ff9800';
-    } else if (indices.R >= 0.25) {
+    } else if (indices.R >= seuilMinimal) {
         niveauRaI = 2;
         descriptionRaI = 'Niveau 2 - Surveillance accrue';
         urgence = '⚡ Attention requise - Surveillance renforcée';
@@ -1257,19 +1332,19 @@ function genererSectionRisque(da) {
             </div>
         </div>
 
-        ${indices.R >= 0.25 ? `
-            <div class="profil-recommandations ${indices.R >= 0.60 ? 'profil-recommandations-danger' : indices.R >= 0.35 ? 'profil-recommandations-avertissement' : 'profil-recommandations-info'}" style="margin-top: 20px;">
-                <h4 class="profil-recommandations-titre ${indices.R >= 0.60 ? 'profil-texte-danger' : indices.R >= 0.35 ? 'profil-texte-avertissement' : 'profil-texte-info'}">
+        ${indices.R >= seuilMinimal ? `
+            <div class="profil-recommandations ${indices.R >= seuilEleve ? 'profil-recommandations-danger' : indices.R >= seuilModere ? 'profil-recommandations-avertissement' : 'profil-recommandations-info'}" style="margin-top: 20px;">
+                <h4 class="profil-recommandations-titre ${indices.R >= seuilEleve ? 'profil-texte-danger' : indices.R >= seuilModere ? 'profil-texte-avertissement' : 'profil-texte-info'}">
                     Intervention ciblée recommandée
                 </h4>
-                <ol class="profil-recommandations-liste ${indices.R >= 0.60 ? 'profil-texte-danger' : indices.R >= 0.35 ? 'profil-texte-avertissement' : 'profil-texte-info'}">
-                    ${indices.R >= 0.60 ? `
+                <ol class="profil-recommandations-liste ${indices.R >= seuilEleve ? 'profil-texte-danger' : indices.R >= seuilModere ? 'profil-texte-avertissement' : 'profil-texte-info'}">
+                    ${indices.R >= seuilEleve ? `
                         <li><strong>JOUR 1 :</strong> Rencontre individuelle urgente avec l'étudiant et conseiller pédagogique</li>
                         <li><strong>JOUR 2-3 :</strong> Établir un plan d'intervention personnalisé (PIP) avec objectifs mesurables</li>
                         <li><strong>SEMAINE 1 :</strong> Suivi quotidien de la présence et remise des travaux en retard</li>
                         <li><strong>Mobiliser :</strong> Parents, aide pédagogique individuelle (API), services étudiants</li>
                         <li><strong>Réévaluation :</strong> Rencontre de suivi hebdomadaire jusqu'à amélioration significative</li>
-                    ` : indices.R >= 0.35 ? `
+                    ` : indices.R >= seuilModere ? `
                         <li><strong>Cette semaine :</strong> Rencontre individuelle pour identifier les obstacles</li>
                         <li><strong>Mise en place :</strong> Soutien ciblé sur le(s) composant(s) faible(s) (A, C ou P)</li>
                         <li><strong>Suivi :</strong> Vérification bihebdomadaire des progrès</li>
@@ -1492,9 +1567,10 @@ function genererCarteCibleIntervention(da) {
         return '';
     }
 
-    const niveauTexte = cibleInfo.niveau === 3 ? 'Niveau 3 - Intervention intensive' :
-                       cibleInfo.niveau === 2 ? 'Niveau 2 - Intervention ciblée' :
-                       'Niveau 1 - Suivi régulier';
+    // Badge cohérent avec Liste et Aperçu
+    const niveauTexte = cibleInfo.niveau === 3 ? 'RàI 3' :
+                       cibleInfo.niveau === 2 ? 'RàI 2' :
+                       'RàI 1';
 
     const descriptionNiveau = cibleInfo.niveau === 3
         ? '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).'
@@ -1603,6 +1679,12 @@ let profilActuelDA = null;
 window.profilActuelDA = null;
 
 /**
+ * Variable globale pour mémoriser la section active du profil (Beta 0.85)
+ * Permet de conserver la même section lors de la navigation entre étudiants
+ */
+let sectionProfilActive = 'cible'; // Par défaut: Suivi de l'apprentissage
+
+/**
  * Change la section affichée dans la colonne droite du profil
  * @param {string} section - Nom de la section (cible, performance, assiduite, etc.)
  */
@@ -1614,15 +1696,33 @@ function changerSectionProfil(section) {
 
     const da = profilActuelDA;
 
+    // NOUVEAU (Beta 0.85): Mémoriser la section active pour navigation entre étudiants
+    sectionProfilActive = section;
+
     // Mettre à jour la navigation active (utilise les classes CSS matériel)
     document.querySelectorAll('.sidebar-item').forEach(item => {
         item.classList.remove('active');
     });
 
-    // Trouver l'élément cliqué et le marquer comme actif
-    const clickedItem = event.target.closest('.sidebar-item');
-    if (clickedItem) {
-        clickedItem.classList.add('active');
+    // NOUVEAU (Beta 0.85): Trouver l'élément correspondant à la section
+    // Supporte à la fois les clics directs (avec event) et les appels programmatiques
+    let itemToActivate = null;
+
+    if (typeof event !== 'undefined' && event.target) {
+        // Appel depuis un clic : utiliser event.target
+        itemToActivate = event.target.closest('.sidebar-item');
+    } else {
+        // Appel programmatique : trouver l'item par onclick
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            const onclickAttr = item.getAttribute('onclick');
+            if (onclickAttr && onclickAttr.includes(`'${section}'`)) {
+                itemToActivate = item;
+            }
+        });
+    }
+
+    if (itemToActivate) {
+        itemToActivate.classList.add('active');
     }
 
     // Générer le contenu selon la section
@@ -1668,20 +1768,304 @@ function changerSectionProfil(section) {
             contenu = '<p>Section non trouvée</p>';
     }
 
-    // Récupérer la pratique pour le badge (si section cible)
+    // Récupérer la pratique pour le badge (toutes les sections)
     const indices = calculerTousLesIndices(da);
-    const badgePratique = section === 'cible' ? genererBadgePratiqueProfil(indices.pratique) : '';
+    const badgePratique = genererBadgePratiqueProfil(indices.pratique);
+
+    // Générer le toggle info selon la section
+    let toggleInfo = '';
+    if (section === 'cible') {
+        toggleInfo = `<span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span></span>`;
+    } else if (section === 'performance') {
+        toggleInfo = `<span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-performance-${da}">ℹ️</span></span>`;
+    } else if (section === 'mobilisation') {
+        toggleInfo = `<span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-mobilisation-${da}">ℹ️</span></span>`;
+    }
 
     contenuContainer.innerHTML = `
         <div class="profil-contenu-header">
-            <h2 style="margin: 0 0 20px 0;">${titre}${badgePratique}</h2>
+            <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 0 0 20px 0;">
+                <span>${titre}${badgePratique}</span>
+                ${toggleInfo}
+            </h2>
         </div>
         <div class="profil-contenu-body">
             ${contenu}
         </div>
     `;
 
+    // Réattacher les événements des toggles après changement de section
+    setTimeout(() => {
+        if (typeof reattacherEvenementsToggles === 'function') {
+            reattacherEvenementsToggles();
+        }
+    }, 100);
+
     console.log(`📄 Section "${section}" chargée pour DA ${da}`);
+}
+
+/**
+ * Calcule la direction du risque (évolution temporelle)
+ * Compare le risque sur les 3 artefacts récents vs les 3 suivants (fenêtre glissante)
+ *
+ * @param {string} da - Numéro de DA
+ * @returns {Object} - { symbole: '→'|'←'|'—', interpretation: string }
+ */
+function calculerDirectionRisque(da) {
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+
+    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
+    const artefactsPortfolio = productions
+        .filter(p => p.type === 'artefact-portfolio')
+        .map(p => p.id);
+
+    const evaluationsEleve = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        artefactsPortfolio.includes(e.productionId) &&
+        e.noteFinale !== null &&
+        e.noteFinale !== undefined
+    );
+
+    // Pas assez de données pour calculer la direction du risque
+    if (evaluationsEleve.length < 4) {
+        return {
+            symbole: '',
+            interpretation: 'Données insuffisantes'
+        };
+    }
+
+    // Trier par date (plus récent d'abord)
+    evaluationsEleve.sort((a, b) => {
+        const dateA = a.dateEvaluation || a.dateCreation || 0;
+        const dateB = b.dateEvaluation || b.dateCreation || 0;
+        return new Date(dateB) - new Date(dateA);
+    });
+
+    // Calculer risque récent (3 plus récents: positions 0, 1, 2)
+    const troisRecents = evaluationsEleve.slice(0, 3);
+    const performanceRecente = troisRecents.reduce((sum, e) => sum + e.noteFinale, 0) / troisRecents.length / 100;
+    const risqueRecent = 1 - performanceRecente;
+
+    // Calculer risque précédent (3 suivants avec chevauchement: positions 1, 2, 3)
+    const troisSuivants = evaluationsEleve.slice(1, 4);
+    const performancePrecedente = troisSuivants.reduce((sum, e) => sum + e.noteFinale, 0) / troisSuivants.length / 100;
+    const risquePrecedent = 1 - performancePrecedente;
+
+    const difference = risqueRecent - risquePrecedent;
+
+    // Déterminer la direction selon le seuil configurable
+    const seuilDirection = obtenirSeuil('directionRisque');
+    let symbole, interpretation;
+    if (difference > seuilDirection) {
+        symbole = '→';
+        interpretation = 'Le risque augmente';
+    } else if (difference < -seuilDirection) {
+        symbole = '←';
+        interpretation = 'Le risque diminue';
+    } else {
+        symbole = '—';
+        interpretation = 'Risque plateau';
+    }
+
+    return {
+        symbole,
+        interpretation,
+        risqueRecent: (risqueRecent * 100).toFixed(1),
+        risquePrecedent: (risquePrecedent * 100).toFixed(1),
+        difference: (difference * 100).toFixed(1)
+    };
+}
+
+/**
+ * Calcule la direction de chaque critère SRPNF (évolution temporelle)
+ * Compare les scores sur les 3 artefacts récents vs les 3 suivants (fenêtre glissante)
+ *
+ * @param {string} da - Numéro de DA
+ * @returns {Object} - { structure: {symbole, interpretation}, rigueur: {...}, ... }
+ */
+function calculerDirectionsCriteres(da) {
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+
+    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
+    const artefactsPortfolio = productions
+        .filter(p => p.type === 'artefact-portfolio')
+        .map(p => p.id);
+
+    const evaluationsEleve = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        artefactsPortfolio.includes(e.productionId) &&
+        e.retroactionFinale
+    );
+
+    // Résultat par défaut si données insuffisantes
+    const resultatParDefaut = {
+        symbole: '',
+        interpretation: 'Données insuffisantes'
+    };
+
+    // Pas assez de données pour calculer la direction
+    if (evaluationsEleve.length < 4) {
+        return {
+            structure: resultatParDefaut,
+            rigueur: resultatParDefaut,
+            plausibilite: resultatParDefaut,
+            nuance: resultatParDefaut,
+            francais: resultatParDefaut
+        };
+    }
+
+    // Trier par date (plus récent d'abord)
+    evaluationsEleve.sort((a, b) => {
+        const dateA = a.dateEvaluation || a.dateCreation || 0;
+        const dateB = b.dateEvaluation || b.dateCreation || 0;
+        return new Date(dateB) - new Date(dateA);
+    });
+
+    // Obtenir la table de conversion IDME
+    const tableConversion = obtenirTableConversionIDME();
+
+    // Fonction helper pour extraire les scores d'une liste d'évaluations
+    const extraireScoresCriteres = (evaluations) => {
+        const scoresCriteres = {
+            structure: [],
+            rigueur: [],
+            plausibilite: [],
+            nuance: [],
+            francais: []
+        };
+
+        const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi;
+
+        evaluations.forEach(evaluation => {
+            const retroaction = evaluation.retroactionFinale || '';
+            let match;
+            while ((match = regexCritere.exec(retroaction)) !== null) {
+                const nomCritere = match[1].toUpperCase();
+                const niveauIDME = match[2].toUpperCase();
+                const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
+
+                if (score !== null) {
+                    if (nomCritere === 'STRUCTURE') {
+                        scoresCriteres.structure.push(score);
+                    } else if (nomCritere === 'RIGUEUR') {
+                        scoresCriteres.rigueur.push(score);
+                    } else if (nomCritere.startsWith('PLAUSIBILIT')) {
+                        scoresCriteres.plausibilite.push(score);
+                    } else if (nomCritere === 'NUANCE') {
+                        scoresCriteres.nuance.push(score);
+                    } else if (nomCritere.startsWith('FRAN')) {
+                        scoresCriteres.francais.push(score);
+                    }
+                }
+            }
+        });
+
+        return scoresCriteres;
+    };
+
+    // Extraire les scores pour les 3 plus récents (positions 0, 1, 2)
+    const troisRecents = evaluationsEleve.slice(0, 3);
+    const scoresRecents = extraireScoresCriteres(troisRecents);
+
+    // Extraire les scores pour les 3 suivants avec chevauchement (positions 1, 2, 3)
+    const troisSuivants = evaluationsEleve.slice(1, 4);
+    const scoresSuivants = extraireScoresCriteres(troisSuivants);
+
+    // Déterminer le seuil de direction (même seuil que pour le risque)
+    const seuilDirection = obtenirSeuil('directionRisque');
+
+    // Calculer la direction pour chaque critère
+    const directions = {};
+    const criteres = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'];
+
+    criteres.forEach(critere => {
+        const scoresRec = scoresRecents[critere];
+        const scoresSui = scoresSuivants[critere];
+
+        // Vérifier si nous avons assez de données pour ce critère
+        if (scoresRec.length === 0 || scoresSui.length === 0) {
+            directions[critere] = resultatParDefaut;
+            return;
+        }
+
+        // Calculer les moyennes
+        const moyenneRecente = scoresRec.reduce((sum, s) => sum + s, 0) / scoresRec.length;
+        const moyenneSuivante = scoresSui.reduce((sum, s) => sum + s, 0) / scoresSui.length;
+
+        // Calculer la différence (positif = amélioration, négatif = détérioration)
+        const difference = moyenneRecente - moyenneSuivante;
+
+        // Déterminer le symbole et l'interprétation
+        let symbole, interpretation;
+        if (difference > seuilDirection) {
+            symbole = '→';
+            interpretation = 'En amélioration';
+        } else if (difference < -seuilDirection) {
+            symbole = '←';
+            interpretation = 'En détérioration';
+        } else {
+            symbole = '—';
+            interpretation = 'Plateau';
+        }
+
+        directions[critere] = {
+            symbole,
+            interpretation,
+            moyenneRecente: (moyenneRecente * 100).toFixed(1),
+            moyenneSuivante: (moyenneSuivante * 100).toFixed(1),
+            difference: (difference * 100).toFixed(1)
+        };
+    });
+
+    return directions;
+}
+
+/**
+ * Génère l'historique des interventions pour le profil étudiant (Beta 0.85)
+ * @param {string} da - DA de l'étudiant
+ * @returns {string} - HTML de l'historique
+ */
+function genererHistoriqueInterventionsProfil(da) {
+    // Vérifier si la fonction obtenirInterventionsEtudiant existe
+    if (typeof obtenirInterventionsEtudiant !== 'function') {
+        return '';
+    }
+
+    const interventions = obtenirInterventionsEtudiant(da);
+
+    if (interventions.length === 0) {
+        return '';
+    }
+
+    // Trier par date décroissante
+    interventions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // Compter par niveau
+    const parNiveau = {
+        2: interventions.filter(i => i.niveauRai === 2).length,
+        3: interventions.filter(i => i.niveauRai === 3).length
+    };
+
+    let detail = [];
+    if (parNiveau[2] > 0) detail.push(`${parNiveau[2]} niveau 2`);
+    if (parNiveau[3] > 0) detail.push(`${parNiveau[3]} niveau 3`);
+
+    const totalText = interventions.length === 1 ? '1 intervention' : `${interventions.length} interventions`;
+    const detailText = detail.length > 0 ? ` (${detail.join(', ')})` : '';
+
+    // Dernière intervention
+    const derniere = interventions[0];
+    const dateDerniere = new Date(derniere.date).toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+
+    return `
+        <li><strong>Interventions reçues :</strong> ${totalText}${detailText}
+            <span style="display: block; font-size: 0.85rem; color: #666; margin-top: 3px;">
+                Dernière : ${derniere.titre} (${dateDerniere})
+            </span>
+        </li>
+    `;
 }
 
 /**
@@ -1695,6 +2079,7 @@ function genererContenuCibleIntervention(da) {
     const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
     const indices = calculerTousLesIndices(da);
     const interpR = interpreterRisque(indices.R);
+    const interpM = interpreterMobilisation(indices.A / 100, indices.C / 100);
 
     // Récupérer infos élève pour CAF/SA
     const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
@@ -1717,48 +2102,328 @@ function genererContenuCibleIntervention(da) {
         `;
     }
 
-    const niveauTexte = cibleInfo.niveau === 3 ? 'Réponse à l\'intervention : niveau 3 (intervention intensive)' :
-                       cibleInfo.niveau === 2 ? 'Réponse à l\'intervention : niveau 2 (intervention ciblée)' :
-                       'Réponse à l\'intervention : niveau 1 (suivi régulier)';
+    // Utiliser le même badge que dans Liste et Aperçu (défini plus haut : badgeLabel)
+    // const niveauTexte est maintenant badgeLabel
 
-    const descriptionNiveau = cibleInfo.niveau === 3
-        ? '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).'
-        : cibleInfo.niveau === 2
-        ? '<strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages et prévenir l\'aggravation des difficultés.'
-        : cibleInfo.cible.includes('Pratique autonome')
-        ? '✨ <strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.'
-        : '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
-
-    // Calculer le blocage pour progression
+    // Calculer les moyennes pour accéder aux scores des critères
     const moyennes = calculerMoyennesCriteres(da);
+
+    // Calculer les directions des critères pour identifier les critères en détérioration
+    const directionsCriteres = calculerDirectionsCriteres(da);
+    const criteresEnDeterioration = [];
+    const criteresEnAmelioration = [];
+    const criteresAvecScores = [];
+
+    ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].forEach(cle => {
+        const nomCritere = cle === 'structure' ? 'Structure' :
+                         cle === 'rigueur' ? 'Rigueur' :
+                         cle === 'plausibilite' ? 'Plausibilité' :
+                         cle === 'nuance' ? 'Nuance' : 'Français';
+
+        if (directionsCriteres[cle] && directionsCriteres[cle].symbole === '←') {
+            criteresEnDeterioration.push(nomCritere);
+        } else if (directionsCriteres[cle] && directionsCriteres[cle].symbole === '→') {
+            criteresEnAmelioration.push(nomCritere);
+        }
+
+        // Garder trace des scores pour identifier le plus faible
+        if (moyennes && moyennes[cle] !== null) {
+            criteresAvecScores.push({
+                nom: nomCritere,
+                score: moyennes[cle],
+                pourcentage: Math.round(moyennes[cle] * 100),
+                niveau: moyennes[cle] < 0.64 ? 'I' : moyennes[cle] < 0.75 ? 'D' : moyennes[cle] < 0.85 ? 'M' : 'E'
+            });
+        }
+    });
+
+    // Trier par score croissant pour identifier le critère le plus faible
+    criteresAvecScores.sort((a, b) => a.score - b.score);
+
+    // Identifier le critère le plus faible parmi ceux en I ou D
+    const critereLesPlusFaibles = criteresAvecScores.filter(c => c.niveau === 'I' || c.niveau === 'D');
+
+    // Générer la description en fonction du niveau et des critères identifiés
+    let descriptionNiveau = '';
+
+    if (cibleInfo.niveau === 3) {
+        descriptionNiveau = '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).';
+        if (criteresEnDeterioration.length > 0) {
+            descriptionNiveau += ` <strong>Critère(s) en détérioration :</strong> ${criteresEnDeterioration.join(', ')}.`;
+        } else if (critereLesPlusFaibles.length > 0) {
+            const plusFaible = critereLesPlusFaibles[0];
+            descriptionNiveau += ` <strong>Critère prioritaire à renforcer :</strong> ${plusFaible.nom} (${plusFaible.pourcentage}%, niveau ${plusFaible.niveau}).`;
+        }
+    } else if (cibleInfo.niveau === 2) {
+        descriptionNiveau = '<strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages';
+        if (criteresEnDeterioration.length > 0) {
+            descriptionNiveau += ` et prévenir l\'aggravation des difficultés en <strong>${criteresEnDeterioration.join(', ')}</strong>.`;
+        } else if (critereLesPlusFaibles.length > 0) {
+            const plusFaible = critereLesPlusFaibles[0];
+            descriptionNiveau += ` et renforcer <strong>${plusFaible.nom}</strong> (${plusFaible.pourcentage}%, niveau ${plusFaible.niveau}).`;
+        } else {
+            descriptionNiveau += ' et prévenir l\'aggravation des difficultés.';
+        }
+    } else if (cibleInfo.cible.includes('Pratique autonome')) {
+        descriptionNiveau = '✨ <strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.';
+        if (criteresEnAmelioration.length > 0) {
+            descriptionNiveau += ` <strong>Progrès observés en :</strong> ${criteresEnAmelioration.join(', ')}.`;
+        }
+    } else {
+        descriptionNiveau = '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
+        if (criteresEnAmelioration.length > 0) {
+            descriptionNiveau += ` <strong>Progrès observés en :</strong> ${criteresEnAmelioration.join(', ')}.`;
+        }
+    }
+
+    // Calculer le blocage pour affichage dans le toggle
     const resultBlocage = calculerIndiceBlocage(moyennes);
     const interpBlocage = resultBlocage ? interpreterIndiceBlocage(resultBlocage.score) : null;
 
-    // Couleurs badge selon niveau RàI
-    let badgeStyle = '';
+    // Calculer la progression (AM vs AL)
+    const progression = calculerProgressionEleve(da);
+
+    // Ajuster l'interprétation de la progression selon le contexte de risque
+    const seuilRisqueModere = obtenirSeuil('risque.modere');
+    const seuilRisqueFaible = obtenirSeuil('risque.faible');
+
+    let interpretationProgression = progression.interpretation;
+    if (progression.direction === '—' && indices.R >= seuilRisqueModere) {
+        // Plateau en zone de risque élevé/critique = plateau problématique
+        interpretationProgression = 'Plateau (progression insuffisante)';
+    } else if (progression.direction === '—' && indices.R >= seuilRisqueFaible) {
+        // Plateau en zone de risque modéré = attention
+        interpretationProgression = 'Plateau fragile';
+    }
+
+    // Calculer la direction du risque (évolution temporelle)
+    const directionRisque = calculerDirectionRisque(da);
+
+    // Identifier le défi spécifique (critère SRPNF le plus faible sur 3 derniers artefacts)
+    const defiSpecifique = identifierDefiSpecifique(da);
+
+    // Interpréter le niveau IDME du défi avec description SOLO (seuils configurables)
+    const interpreterScoreIDME = (score) => {
+        const seuilInsuffisant = obtenirSeuil('idme.insuffisant');
+        const seuilDeveloppement = obtenirSeuil('idme.developpement');
+        const seuilMaitrise = obtenirSeuil('idme.maitrise');
+
+        if (score < seuilInsuffisant) return 'Un seul aspect traité, compréhension superficielle';
+        if (score < seuilDeveloppement) return 'Plusieurs aspects sans vision d\'ensemble';
+        if (score < seuilMaitrise) return 'Vision globale avec liens entre les aspects';
+        return 'Transfert à d\'autres contextes';
+    };
+
+    // Construire le texte du pattern avec le défi intégré si applicable
+    let patternTexte = cibleInfo.pattern;
+    if (cibleInfo.pattern === 'Défi spécifique' && defiSpecifique.defi !== 'Aucun') {
+        const niveauIDME = interpreterScoreIDME(defiSpecifique.score);
+        patternTexte = `${cibleInfo.pattern} (${defiSpecifique.defi} - ${niveauIDME})`;
+    }
+
+    // Badge RàI avec classes CSS (Beta 0.84)
+    let badgeClasse = '';
+    let badgeLabel = '';
     if (cibleInfo.niveau === 3) {
-        badgeStyle = 'background: #ffe5d0; border: 2px solid #fd7e14; color: #bd4f00;';
+        badgeClasse = 'badge-sys badge-rai-3';
+        badgeLabel = 'Niveau 3';
     } else if (cibleInfo.niveau === 2) {
-        badgeStyle = 'background: #fff3cd; border: 2px solid #ffc107; color: #856404;';
+        badgeClasse = 'badge-sys badge-rai-2';
+        badgeLabel = 'Niveau 2';
     } else {
-        badgeStyle = 'background: white; border: 2px solid #6c757d; color: #495057;';
+        badgeClasse = 'badge-sys badge-rai-1';
+        badgeLabel = 'Niveau 1';
     }
 
     return `
+        <!-- Détails des calculs (masqué par défaut) - AFFICHÉ EN HAUT -->
+        <div id="details-calculs-risque-${da}" class="carte-info-toggle" style="display: none;">
+            <div class="details-calculs-section">
+                <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
+                <!-- Grille 2 colonnes pour Risque et Blocage -->
+                <div class="details-calculs-grid">
+                    <!-- Calcul Risque -->
+                    <div>
+                        <div class="details-calculs-bloc">
+                            <div class="details-calculs-label">Risque (R):</div>
+                            <div class="details-calculs-valeur">R = (1 - A) × 0.50 + (1 - C) × 0.25 + (1 - P) × 0.25</div>
+
+                            <div class="details-calculs-label">Calcul détaillé:</div>
+                            <div class="details-calculs-valeur">
+                                R = (1 - ${(indices.A / 100).toFixed(2)}) × 0.50 + (1 - ${(indices.C / 100).toFixed(2)}) × 0.25 + (1 - ${(indices.P / 100).toFixed(2)}) × 0.25<br>
+                                R = ${((1 - indices.A / 100) * 0.50).toFixed(3)} + ${((1 - indices.C / 100) * 0.25).toFixed(3)} + ${((1 - indices.P / 100) * 0.25).toFixed(3)}<br>
+                                R = <strong>${indices.R}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${interpBlocage ? `
+                        <!-- Calcul Blocage -->
+                        <div>
+                            <div class="details-calculs-bloc">
+                                <div class="details-calculs-label">Blocage${resultBlocage.partiel ? ' (ajusté)' : ''}:</div>
+                                <div class="details-calculs-valeur">
+                                    ${resultBlocage.partiel
+                                        ? `Blocage = (critères disponibles pondérés) / total pondération`
+                                        : `Blocage = 0.35 × Structure + 0.35 × Français + 0.30 × Rigueur`
+                                    }
+                                </div>
+
+                                ${resultBlocage.partiel ? `
+                                    <div class="details-calculs-alerte">
+                                        <strong>⚠️ Calcul partiel:</strong> ${resultBlocage.criteresManquants.join(', ')} non évalué(s)
+                                    </div>
+                                ` : ''}
+
+                                <div class="details-calculs-label">Calcul détaillé:</div>
+                                <div class="details-calculs-valeur">
+                                    ${moyennes.structure !== null ? `0.35 × ${Math.round(moyennes.structure * 100)}%<br>` : ''}
+                                    ${moyennes.francais !== null ? `0.35 × ${Math.round(moyennes.francais * 100)}%<br>` : ''}
+                                    ${moyennes.rigueur !== null ? `0.30 × ${Math.round(moyennes.rigueur * 100)}%<br>` : ''}
+                                    Blocage = <strong>${Math.round(resultBlocage.score * 100)}%</strong>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+                </div>
+
+                <!-- Calcul de la Progression -->
+                ${progression.direction ? `
+                <div style="margin-top: 20px;">
+                    <div class="details-calculs-bloc">
+                        <div class="details-calculs-label">Progression (Direction):</div>
+                        <div class="details-calculs-valeur">
+                            Comparer la performance récente (AM) vs performance précédente (AL)<br>
+                            SI AM > AL + 0.1 → ↗ Progression<br>
+                            SI AM < AL - 0.1 → ↘ Régression<br>
+                            Sinon → — Plateau
+                        </div>
+
+                        <div class="details-calculs-label">Calcul détaillé:</div>
+                        <div class="details-calculs-valeur">
+                            AM (3 artefacts récents) = <strong>${progression.AM}%</strong><br>
+                            AL (3 artefacts suivants, avec chevauchement) = <strong>${progression.AL}%</strong><br>
+                            Différence = ${progression.difference > 0 ? '+' : ''}${progression.difference} points<br>
+                            <strong>${progression.direction} ${interpretationProgression}</strong>
+                        </div>
+                    </div>
+                </div>
+                ` : `
+                <div style="margin-top: 20px;">
+                    <div class="details-calculs-bloc">
+                        <div class="details-calculs-label">Progression (Direction):</div>
+                        <div class="details-calculs-valeur">
+                            ${progression.interpretation}<br>
+                            <span style="font-size: 0.9rem; opacity: 0.8;">La progression sera calculée après l'évaluation de 4 artefacts (actuellement: ${progression.nbArtefacts})</span>
+                        </div>
+                    </div>
+                </div>
+                `}
+
+                <!-- Identification du Défi spécifique -->
+                <div style="margin-top: 20px;">
+                    <div class="details-calculs-bloc">
+                        <div class="details-calculs-label">Défi spécifique:</div>
+                        <div class="details-calculs-valeur">
+                            Identifier le critère SRPNF le plus faible parmi les 3 derniers artefacts<br>
+                            Seuil d'identification: &lt; ${(obtenirSeuil('defiSpecifique') * 100).toFixed(2)}% (configurable)
+                        </div>
+
+                        <div class="details-calculs-label">Résultat:</div>
+                        <div class="details-calculs-valeur">
+                            ${defiSpecifique.defi !== 'Aucun' ? `
+                                Critère identifié: <strong>${defiSpecifique.defi}</strong><br>
+                                Score moyen: <strong>${(defiSpecifique.score * 100).toFixed(1)}%</strong> (${defiSpecifique.score.toFixed(4)})<br>
+                                <span style="font-size: 0.9rem; opacity: 0.8;">Ce critère nécessite une attention particulière dans les prochaines interventions</span>
+                            ` : `
+                                <strong>Aucun défi spécifique identifié</strong><br>
+                                <span style="font-size: 0.9rem; opacity: 0.8;">Tous les critères SRPNF sont ≥ ${(obtenirSeuil('defiSpecifique') * 100).toFixed(2)}% sur les 3 derniers artefacts</span>
+                            `}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Identification du Pattern d'apprentissage et niveau RàI -->
+                <div style="margin-top: 20px;">
+                    <div class="details-calculs-bloc">
+                        <div class="details-calculs-label">Pattern d'apprentissage:</div>
+                        <div class="details-calculs-valeur">
+                            Analyser la performance sur les 3 derniers artefacts et la présence d'un défi pour identifier le pattern actuel:<br><br>
+                            <strong>• Blocage critique:</strong> Performance ≤ 0.40 (40%)<br>
+                            <span style="font-size: 0.9rem; opacity: 0.8; margin-left: 20px;">→ Difficultés majeures nécessitant une intervention intensive</span><br><br>
+                            <strong>• Blocage émergent:</strong> Performance ≤ 0.50 (50%) ET un défi est identifié<br>
+                            <span style="font-size: 0.9rem; opacity: 0.8; margin-left: 20px;">→ Difficultés en développement dans un critère spécifique</span><br><br>
+                            <strong>• Défi spécifique:</strong> Performance ≤ 0.75 (75%) ET un défi est identifié<br>
+                            <span style="font-size: 0.9rem; opacity: 0.8; margin-left: 20px;">→ Compétence en développement avec une lacune ciblée</span><br><br>
+                            <strong>• Stable:</strong> Performance > 0.75 (75%) OU aucun défi identifié<br>
+                            <span style="font-size: 0.9rem; opacity: 0.8; margin-left: 20px;">→ Apprentissage consolidé sans difficulté majeure</span>
+                        </div>
+
+                        <div class="details-calculs-label">Calcul pour cet étudiant:</div>
+                        <div class="details-calculs-valeur">
+                            Performance (3 derniers artefacts) = <strong>${(indices3Derniers.performance * 100).toFixed(1)}%</strong><br>
+                            Défi identifié = <strong>${defiSpecifique.defi !== 'Aucun' ? 'Oui (' + defiSpecifique.defi + ')' : 'Non'}</strong><br>
+                            Pattern identifié = <strong>${cibleInfo.pattern}</strong>
+                        </div>
+
+                        <div class="details-calculs-label">Détermination du niveau RàI (Réponse à l'Intervention):</div>
+                        <div class="details-calculs-valeur">
+                            Le pattern identifié est combiné avec d'autres facteurs pour déterminer le niveau RàI:<br><br>
+                            <strong>• Mobilisation</strong> (A et C): ${interpM.niveau}<br>
+                            <strong>• Risque</strong> (R): ${interpR.niveau}<br>
+                            <strong>• Pattern</strong>: ${cibleInfo.pattern}<br>
+                            <strong>• Défi principal</strong>: ${defiSpecifique.defi !== 'Aucun' ? defiSpecifique.defi : 'Aucun'}<br>
+                            <strong>• Performance en français</strong> (3 derniers): ${indices3Derniers.francaisMoyen.toFixed(1)}%<br><br>
+                            → <strong>Niveau RàI déterminé: ${cibleInfo.niveau}</strong><br>
+                            <span style="font-size: 0.9rem; opacity: 0.8;">
+                                ${cibleInfo.niveau === 3 ? 'Niveau 3 - Intervention intensive ciblée requise' :
+                                  cibleInfo.niveau === 2 ? 'Niveau 2 - Intervention ciblée recommandée' :
+                                  'Niveau 1 - Surveillance universelle et prévention'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Direction du risque (symbole sur l'échelle) -->
+                ${directionRisque.symbole ? `
+                <div style="margin-top: 20px;">
+                    <div class="details-calculs-bloc">
+                        <div class="details-calculs-label">Direction du risque (symbole sur l'échelle):</div>
+                        <div class="details-calculs-valeur">
+                            Comparer le risque récent vs le risque précédent (fenêtre glissante):<br><br>
+                            <strong>→</strong> Si le risque augmente de plus de 5% → L'étudiant s'enfonce dans la difficulté<br>
+                            <strong>←</strong> Si le risque diminue de plus de 5% → L'étudiant s'améliore<br>
+                            <strong>—</strong> Si la variation est inférieure à 5% → Plateau (risque stable)
+                        </div>
+
+                        <div class="details-calculs-label">Calcul pour cet étudiant:</div>
+                        <div class="details-calculs-valeur">
+                            Risque récent (3 derniers artefacts) = <strong>${directionRisque.risqueRecent}%</strong><br>
+                            Risque précédent (3 suivants, avec chevauchement) = <strong>${directionRisque.risquePrecedent}%</strong><br>
+                            Différence = ${directionRisque.difference > 0 ? '+' : ''}${directionRisque.difference}% (points de risque)<br>
+                            Symbole affiché = <strong style="font-size: 1.2rem;">${directionRisque.symbole}</strong> → ${directionRisque.interpretation}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            </div>
+        </div>
         <!-- ENCADRÉ UNIQUE: SUIVI DE L'APPRENTISSAGE -->
         <div class="profil-carte">
 
             <!-- Badge RàI sobre -->
-            <div class="badge" style="${badgeStyle}">
-                ${niveauTexte}
-            </div>
+            <span class="${badgeClasse}" style="display: inline-block; margin-bottom: 15px;">
+                ${badgeLabel}
+            </span>
 
             <!-- Liste des informations -->
             <ul class="info-liste">
-                <li><strong>Risque :</strong> ${interpR.niveau} (${indices.R})</li>
-                <li><strong>Pattern :</strong> ${cibleInfo.pattern}</li>
-                <li><strong>Progression :</strong> ${interpBlocage ? `${interpBlocage.emoji} ${interpBlocage.niveau} (${Math.round(resultBlocage.score * 100)}%)` : 'Non évaluée'}</li>
+                <li><strong>Risque :</strong> ${genererBadgeRisqueProfil(indices.R)} (${indices.R})</li>
+                <li><strong>Pattern :</strong> ${genererBadgePatternProfil(cibleInfo.pattern)} ${defiSpecifique.defi !== 'Aucun' ? '(' + defiSpecifique.defi + ' - ' + interpreterScoreIDME(defiSpecifique.score) + ')' : ''}</li>
+                <li><strong>Progression :</strong> ${progression.direction ? `${progression.direction} ${interpretationProgression} (${progression.difference > 0 ? '+' : ''}${progression.difference} points)` : `${progression.interpretation} (${progression.nbArtefacts}/4 artefacts)`}</li>
                 <li><strong>Services :</strong> ${eleve.caf === 'Oui' ? '✓ CAF' : ''} ${eleve.sa === 'Oui' ? '✓ SA' : ''} ${eleve.caf !== 'Oui' && eleve.sa !== 'Oui' ? 'Aucun' : ''}</li>
+                ${genererHistoriqueInterventionsProfil(da)}
             </ul>
 
             <hr class="profil-separateur">
@@ -1772,6 +2437,7 @@ function genererContenuCibleIntervention(da) {
                             #ffc107 35%, #ffc107 50%,
                             #ff9800 50%, #ff9800 70%,
                             #dc3545 70%, #dc3545 100%);">
+                    ${directionRisque.symbole ? `<div style="position: absolute; left: ${Math.min(indices.R * 100, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: #333;">${directionRisque.symbole}</div>` : ''}
                     <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(indices.R * 100, 100)}%;">▼</div>
                     <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(indices.R * 100, 100)}%;">R = ${indices.R}</div>
                 </div>
@@ -1800,11 +2466,12 @@ function genererContenuCibleIntervention(da) {
                 </div>
             </div>
 
-            <hr class="profil-separateur">
+            <div class="section-titre">Pistes d'intervention</div>
 
-            <!-- Message d'intervention -->
-            <div style="line-height: 1.6; color: #333;">
-                ${descriptionNiveau}
+            <div style="border: 2px solid ${cibleInfo.niveau === 3 ? '#dc3545' : cibleInfo.niveau === 2 ? '#ffc107' : cibleInfo.cible.includes('Pratique autonome') ? '#2196F3' : '#28a745'}; border-left-width: 4px; padding: 12px 15px; border-radius: 4px; background: white;">
+                <div style="color: #333; line-height: 1.6; font-size: 0.95rem;">
+                    ${descriptionNiveau}
+                </div>
             </div>
 
             <hr class="profil-separateur">
@@ -1813,67 +2480,6 @@ function genererContenuCibleIntervention(da) {
             <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
                         padding: 30px 20px; text-align: center; color: var(--bleu-moyen); font-style: italic;">
                 📈 Évolution temporelle du risque (à venir)
-            </div>
-        </div>
-
-        <!-- TOGGLE CALCULS (EXTÉRIEUR) -->
-        <!-- Emoji info toggle en haut à droite -->
-        <div style="text-align: right; margin-bottom: 10px;">
-            <span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span>
-        </div>
-
-        <!-- Détails des calculs (masqué par défaut) -->
-        <div id="details-calculs-risque-${da}" class="carte-info-toggle" style="display: none;">
-
-                <!-- Calcul Risque -->
-                <div style="margin-bottom: 20px;">
-                    <h5 style="color: var(--bleu-principal); margin: 0 0 10px 0; font-size: 0.95rem;">
-                        CALCUL DU RISQUE (R)
-                    </h5>
-                    <div style="background: white; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem;">
-                        <div style="margin-bottom: 8px;"><strong>Formule:</strong></div>
-                        <div style="color: #666; margin-bottom: 12px;">R = (1 - A) × 0.50 + (1 - C) × 0.25 + (1 - P) × 0.25</div>
-
-                        <div style="margin-bottom: 8px;"><strong>Calcul détaillé:</strong></div>
-                        <div style="color: #666;">
-                            R = (1 - ${(indices.A / 100).toFixed(2)}) × 0.50 + (1 - ${(indices.C / 100).toFixed(2)}) × 0.25 + (1 - ${(indices.P / 100).toFixed(2)}) × 0.25<br>
-                            R = ${((1 - indices.A / 100) * 0.50).toFixed(3)} + ${((1 - indices.C / 100) * 0.25).toFixed(3)} + ${((1 - indices.P / 100) * 0.25).toFixed(3)}<br>
-                            R = <strong>${indices.R}</strong>
-                        </div>
-                    </div>
-                </div>
-
-                ${interpBlocage ? `
-                    <!-- Calcul Blocage -->
-                    <div>
-                        <h5 style="color: var(--bleu-principal); margin: 0 0 10px 0; font-size: 0.95rem;">
-                            🔒 CALCUL DU BLOCAGE
-                        </h5>
-                        <div style="background: white; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem;">
-                            <div style="margin-bottom: 8px;"><strong>Formule${resultBlocage.partiel ? ' (ajustée)' : ''}:</strong></div>
-                            <div style="color: #666; margin-bottom: 12px;">
-                                ${resultBlocage.partiel
-                                    ? `Blocage = (critères disponibles pondérés) / total pondération`
-                                    : `Blocage = 0.35 × Structure + 0.35 × Français + 0.30 × Rigueur`
-                                }
-                            </div>
-
-                            ${resultBlocage.partiel ? `
-                                <div style="background: #fff3cd; padding: 8px; border-radius: 4px; margin-bottom: 10px; font-family: sans-serif;">
-                                    <strong style="color: #856404;">⚠️ Calcul partiel:</strong> ${resultBlocage.criteresManquants.join(', ')} non évalué(s)
-                                </div>
-                            ` : ''}
-
-                            <div style="margin-bottom: 8px;"><strong>Calcul détaillé:</strong></div>
-                            <div style="color: #666;">
-                                ${moyennes.structure !== null ? `0.35 × ${Math.round(moyennes.structure * 100)}%<br>` : ''}
-                                ${moyennes.francais !== null ? `0.35 × ${Math.round(moyennes.francais * 100)}%<br>` : ''}
-                                ${moyennes.rigueur !== null ? `0.30 × ${Math.round(moyennes.rigueur * 100)}%<br>` : ''}
-                                Blocage = <strong>${Math.round(resultBlocage.score * 100)}%</strong>
-                            </div>
-                        </div>
-                    </div>
-                ` : ''}
             </div>
         </div>
     `;
@@ -1933,6 +2539,38 @@ function afficherProfilComplet(da) {
     const etudiantPrecedent = indexActuel > 0 ? etudiants[indexActuel - 1] : null;
     const etudiantSuivant = indexActuel < etudiants.length - 1 ? etudiants[indexActuel + 1] : null;
 
+    // NOUVEAU (Beta 0.85): Déterminer quelle section afficher (section mémorisée ou 'cible' par défaut)
+    const sectionAffichee = sectionProfilActive || 'cible';
+
+    // Déterminer le titre et le contenu selon la section active
+    let titreSection = '';
+    let contenuSection = '';
+
+    if (sectionAffichee === 'cible') {
+        titreSection = 'Suivi de l\'apprentissage';
+        contenuSection = genererContenuCibleIntervention(da);
+    } else if (sectionAffichee === 'performance') {
+        titreSection = 'Développement des habiletés et compétences';
+        contenuSection = genererSectionPerformance(da);
+    } else if (sectionAffichee === 'mobilisation') {
+        titreSection = 'Mobilisation';
+        contenuSection = genererSectionMobilisationEngagement(da);
+    } else if (sectionAffichee === 'rapport') {
+        titreSection = 'Rapport';
+        contenuSection = `
+            <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
+                        padding: 40px 20px; text-align: center; color: var(--bleu-moyen);">
+                <div style="font-size: 2rem; margin-bottom: 15px;"></div>
+                <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
+                    Rapport pour l'API
+                </div>
+                <div style="font-style: italic; font-size: 0.95rem;">
+                    Outil de composition de rapport destiné à l'aide pédagogique individuel (à venir)
+                </div>
+            </div>
+        `;
+    }
+
     // Générer le HTML avec layout sidebar matériel
     container.innerHTML = `
         <div class="layout-sidebar-2col">
@@ -1966,12 +2604,6 @@ function afficherProfilComplet(da) {
                     </button>
                 </div>
 
-                <!-- Bouton retour -->
-                <button class="btn btn-annuler sidebar-btn-retour"
-                        onclick="afficherSousSection('tableau-bord-apercu')">
-                    ← Retour à la liste
-                </button>
-
                 <!-- Informations étudiant -->
                 <div class="sidebar-info-card">
                     <div class="sidebar-info-card-nom">
@@ -1991,7 +2623,7 @@ function afficherProfilComplet(da) {
                     <div class="sidebar-section-titre">OBSERVATIONS</div>
 
                     <!-- 1. Suivi de l'apprentissage -->
-                    <div class="sidebar-item active" onclick="changerSectionProfil('cible')">
+                    <div class="sidebar-item ${sectionAffichee === 'cible' ? 'active' : ''}" onclick="changerSectionProfil('cible')">
                         <div class="sidebar-item-titre">Suivi de l'apprentissage</div>
                         <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
                             R: ${indices.R} · ${interpR.niveau}
@@ -1999,7 +2631,7 @@ function afficherProfilComplet(da) {
                     </div>
 
                     <!-- 2. Développement des habiletés -->
-                    <div class="sidebar-item" onclick="changerSectionProfil('performance')">
+                    <div class="sidebar-item ${sectionAffichee === 'performance' ? 'active' : ''}" onclick="changerSectionProfil('performance')">
                         <div class="sidebar-item-titre">Développement des habiletés</div>
                         <div style="font-size: 0.85rem; color: ${obtenirCouleurIndice(indices.P)}; margin-top: 4px; font-weight: 600;">
                             ${indices.P}%
@@ -2007,7 +2639,7 @@ function afficherProfilComplet(da) {
                     </div>
 
                     <!-- 3. Mobilisation -->
-                    <div class="sidebar-item" onclick="changerSectionProfil('mobilisation')">
+                    <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" onclick="changerSectionProfil('mobilisation')">
                         <div class="sidebar-item-titre">Mobilisation</div>
                         <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
                             A: ${indices.A}% · C: ${indices.C}%
@@ -2015,7 +2647,7 @@ function afficherProfilComplet(da) {
                     </div>
 
                     <!-- 4. Rapport -->
-                    <div class="sidebar-item" onclick="changerSectionProfil('rapport')">
+                    <div class="sidebar-item ${sectionAffichee === 'rapport' ? 'active' : ''}" onclick="changerSectionProfil('rapport')">
                         <div class="sidebar-item-titre">Rapport</div>
                     </div>
                 </div>
@@ -2025,17 +2657,26 @@ function afficherProfilComplet(da) {
             <div class="zone-principale" id="profil-contenu-dynamique">
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
-                    <h2 style="margin: 0 0 20px 0;">
-                        Suivi de l'apprentissage
-                        ${genererBadgePratiqueProfil(indices.pratique)}
+                    <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 0 0 20px 0;">
+                        <span>${titreSection}${genererBadgePratiqueProfil(indices.pratique)}</span>
+                        <span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span></span>
                     </h2>
                 </div>
                 <div class="profil-contenu-body">
-                    ${genererContenuCibleIntervention(da)}
+                    ${contenuSection}
                 </div>
             </div>
         </div>
     `;
+
+    // Réattacher les événements des toggles après insertion du contenu
+    setTimeout(() => {
+        if (typeof reattacherEvenementsToggles === 'function') {
+            reattacherEvenementsToggles();
+        }
+        // SUPPRIMÉ (Beta 0.85): Plus besoin de restaurer la section après coup,
+        // elle est maintenant générée directement avec la bonne section active
+    }, 100);
 
     console.log('✅ Profil affiché (layout 2 colonnes) pour:', eleve.prenom, eleve.nom);
 }
@@ -2130,8 +2771,8 @@ function genererSectionAssiduite(da) {
                             </span>
                             <span class="badge-absence-heures">
                                 ${estAbsenceComplete
-                                    ? `(${abs.heuresManquees}h manquées)`
-                                    : `(${abs.heuresPresence}/${abs.heuresPresence + abs.heuresManquees}h)`
+                                    ? `${abs.heuresManquees}/${abs.heuresPresence + abs.heuresManquees}`
+                                    : `${abs.heuresPresence}/${abs.heuresPresence + abs.heuresManquees}`
                                 }
                             </span>
                         </div>
@@ -2187,7 +2828,7 @@ function genererSectionPerformance(da) {
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                         <div style="flex: 1;">
                             <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">
-                                #${index + 1} · ${echapperHtml(art.titre)}
+                                #${index + 1} · ${echapperHtml(art.description)}
                             </div>
                             <div style="font-size: 0.85rem; color: #666;">
                                 Évalué le ${formaterDate(art.dateEvaluation)}
@@ -2413,6 +3054,7 @@ function genererSectionCompletion(da) {
         return {
             id: art.id,
             titre: art.titre,
+            description: art.description || art.titre, // Utiliser description ou fallback sur titre
             remis: !!evaluation,
             note: evaluation?.noteFinale || null,
             niveau: evaluation?.niveauFinal || null,
@@ -2422,7 +3064,7 @@ function genererSectionCompletion(da) {
     }).sort((a, b) => {
         if (a.remis && !b.remis) return -1;
         if (!a.remis && b.remis) return 1;
-        return a.titre.localeCompare(b.titre);
+        return (a.description || a.titre).localeCompare(b.description || b.titre);
     });
 
     const nbTotal = artefacts.length;
@@ -2484,12 +3126,12 @@ function genererSectionCompletion(da) {
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
                                     background: #d4edda; border-left: 3px solid #28a745; border-radius: 4px;">
                             <div style="color: #155724; font-weight: 500; margin-bottom: 5px;">
-                                ✅ ${echapperHtml(art.titre)}
+                                ✅ ${echapperHtml(art.description)}
                                 ${art.jetonReprise ? '<span style="color: #9c27b0; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
                                 ${art.jetonDelai ? '<span style="color: #ff6f00; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
                             </div>
                             <div style="font-size: 0.9rem; color: #666;">
-                                <strong>${art.note}/100</strong>${art.niveau ? ` · ${art.niveau}` : ''}
+                                <strong>${art.note}</strong>${art.niveau ? ` · ${art.niveau}` : ''}
                             </div>
                         </div>
                     `).join('')}
@@ -2510,7 +3152,7 @@ function genererSectionCompletion(da) {
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
                                     background: #f5f5f5; border-left: 3px solid #ddd; border-radius: 4px; opacity: 0.6;">
                             <div style="color: #666; font-weight: 500; margin-bottom: 5px;">
-                                ⏳ ${echapperHtml(art.titre)}
+                                ⏳ ${echapperHtml(art.description)}
                             </div>
                             <div class="text-muted" style="font-size: 0.9rem;">Non remis</div>
                         </div>
@@ -2531,22 +3173,6 @@ function genererSectionCompletion(da) {
             </div>
 
         </div>
-
-        <!-- Emoji info toggle en haut à droite -->
-        <div style="text-align: right; margin-bottom: 10px;">
-            <span class="emoji-toggle" data-target="details-calculs-completion-${da}">ℹ️</span>
-        </div>
-
-        <!-- Détails des calculs (masqué par défaut) -->
-        <div id="details-calculs-completion-${da}" class="carte-info-toggle" style="display: none;">
-            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📐 Détails des calculs</h4>
-            <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
-                <li><strong>Indice C :</strong> ${indices.C}% (calculé par portfolio.js avec système PAN)</li>
-                <li><strong>Artefacts remis :</strong> ${nbRemis}</li>
-                <li><strong>Artefacts totaux :</strong> ${nbTotal}</li>
-                <li><strong>Artefacts non remis :</strong> ${artefactsNonRemis.length}</li>
-            </ul>
-        </div>
     `;
 }
 
@@ -2556,10 +3182,27 @@ function genererSectionCompletion(da) {
  * @returns {Object} - { I: 0.40, D: 0.65, M: 0.75, E: 1.00 }
  */
 function obtenirTableConversionIDME(echelleId = null) {
-    const echelles = JSON.parse(localStorage.getItem('echelles') || '[]');
+    // PRIORITÉ 1 : Charger l'échelle active depuis niveauxEchelle
+    let niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
 
-    // Trouver l'échelle IDME (soit par ID, soit la première trouvée)
+    // Si on a des niveaux IDME actifs, les utiliser
+    if (niveaux.length > 0 && niveaux.some(n => ['I', 'D', 'M', 'E'].includes(n.code))) {
+        const table = {};
+        niveaux.forEach(niveau => {
+            const code = niveau.code.toUpperCase();
+            if (['I', 'D', 'M', 'E'].includes(code)) {
+                // valeurCalcul peut être string ou number, on convertit en 0-1
+                const valeur = parseFloat(niveau.valeurCalcul || niveau.valeurPonctuelle || 0) / 100;
+                table[code] = valeur;
+            }
+        });
+        return table;
+    }
+
+    // PRIORITÉ 2 : Charger depuis echellesTemplates si niveauxEchelle est vide
+    let echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
     let echelle;
+
     if (echelleId) {
         echelle = echelles.find(e => e.id === echelleId);
     } else {
@@ -2570,23 +3213,20 @@ function obtenirTableConversionIDME(echelleId = null) {
         );
     }
 
-    if (!echelle || !echelle.niveaux) {
-        // Fallback: valeurs par défaut si échelle non trouvée
-        console.warn('⚠️ Échelle IDME non trouvée, utilisation des valeurs par défaut');
-        return { I: 0.40, D: 0.65, M: 0.75, E: 1.00 };
+    if (echelle && echelle.niveaux) {
+        const table = {};
+        echelle.niveaux.forEach(niveau => {
+            const code = niveau.code.toUpperCase();
+            if (['I', 'D', 'M', 'E'].includes(code)) {
+                const valeur = parseFloat(niveau.valeurCalcul || niveau.valeurPonctuelle || 0) / 100;
+                table[code] = valeur;
+            }
+        });
+        return table;
     }
 
-    // Construire la table de conversion depuis les valeurs ponctuelles
-    const table = {};
-    echelle.niveaux.forEach(niveau => {
-        const code = niveau.code.toUpperCase();
-        if (['I', 'D', 'M', 'E'].includes(code)) {
-            table[code] = (niveau.valeurPonctuelle || 0) / 100; // Convertir en 0-1
-        }
-    });
-
-    console.log('Table conversion IDME:', table);
-    return table;
+    // FALLBACK : Valeurs par défaut si aucune échelle trouvée
+    return { I: 0.40, D: 0.65, M: 0.75, E: 1.00 };
 }
 
 /**
@@ -2782,10 +3422,14 @@ function interpreterIndiceBlocage(blocage) {
 /**
  * Diagnostique les forces et défis selon le seuil pédagogique
  * @param {Object} moyennes - Moyennes par critère
- * @param {number} seuil - Seuil pour identifier une force (défaut: 0.7125)
+ * @param {number} seuil - Seuil pour identifier une force (défaut: valeur configurable via interpretation-config.js)
  * @returns {Object} - { forces: [], defis: [], principaleForce: '', principalDefi: '' }
  */
-function diagnostiquerForcesChallenges(moyennes, seuil = 0.7125) {
+function diagnostiquerForcesChallenges(moyennes, seuil = null) {
+    // Utiliser le seuil configurable si aucun seuil n'est fourni
+    if (seuil === null) {
+        seuil = obtenirSeuil('defiSpecifique');
+    }
     if (!moyennes) {
         return { forces: [], defis: [], principaleForce: null, principalDefi: null };
     }
@@ -2900,6 +3544,217 @@ function calculerIndicesTroisDerniersArtefacts(da) {
         idmeMoyen: idmeMoyen,
         francaisMoyen: francaisMoyen,
         nbArtefacts: troisDerniers.length
+    };
+}
+
+/**
+ * Calcule la progression (direction) selon le Guide de monitorage
+ * Compare la performance des 3 artefacts les plus récents (AM) vs les 3 suivants avec chevauchement (AL)
+ *
+ * Fenêtre glissante: Si artefacts = A, B, C, D (du plus récent au plus ancien)
+ * - AM = moyenne(A, B, C)
+ * - AL = moyenne(B, C, D)
+ *
+ * Formule: SI(AM > AL + 0.1; "↗"; SI(AM < AL - 0.1; "↘"; "→"))
+ *
+ * @param {string} da - Numéro de DA
+ * @returns {Object} - { direction: '↗'|'→'|'↘', interpretation, AM, AL, difference }
+ */
+function calculerProgressionEleve(da) {
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+
+    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
+    const artefactsPortfolio = productions
+        .filter(p => p.type === 'artefact-portfolio')
+        .map(p => p.id);
+
+    const evaluationsEleve = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        artefactsPortfolio.includes(e.productionId) &&
+        e.noteFinale !== null &&
+        e.noteFinale !== undefined
+    );
+
+    // Pas assez de données pour calculer la progression (besoin de 4 artefacts minimum)
+    if (evaluationsEleve.length < 4) {
+        return {
+            direction: null,
+            interpretation: 'Données insuffisantes (4 artefacts requis)',
+            AM: null,
+            AL: null,
+            difference: null,
+            nbArtefacts: evaluationsEleve.length
+        };
+    }
+
+    // Trier par date (plus récent d'abord)
+    evaluationsEleve.sort((a, b) => {
+        const dateA = a.dateEvaluation || a.dateCreation || 0;
+        const dateB = b.dateEvaluation || b.dateCreation || 0;
+        return new Date(dateB) - new Date(dateA);
+    });
+
+    // AM: Moyenne des 3 plus récents (positions 0, 1, 2)
+    const troisRecents = evaluationsEleve.slice(0, 3);
+    const AM = troisRecents.reduce((sum, e) => sum + e.noteFinale, 0) / troisRecents.length / 100;
+
+    // AL: Moyenne des 3 suivants avec chevauchement (positions 1, 2, 3)
+    const troisSuivants = evaluationsEleve.slice(1, 4);
+    const AL = troisSuivants.reduce((sum, e) => sum + e.noteFinale, 0) / troisSuivants.length / 100;
+
+    const difference = AM - AL;
+
+    // Déterminer la direction selon le seuil configurable
+    const seuilProgression = obtenirSeuil('progressionArtefacts');
+    let direction, interpretation;
+    if (difference > seuilProgression) {
+        direction = '↗';
+        interpretation = 'Progression';
+    } else if (difference < -seuilProgression) {
+        direction = '↘';
+        interpretation = 'Régression';
+    } else {
+        direction = '—';
+        interpretation = 'Plateau';
+    }
+
+    console.log(`Progression pour DA ${da}:`, {
+        direction,
+        interpretation,
+        AM: (AM * 100).toFixed(1) + '%',
+        AL: (AL * 100).toFixed(1) + '%',
+        difference: (difference * 100).toFixed(1) + ' points'
+    });
+
+    return {
+        direction,
+        interpretation,
+        AM: (AM * 100).toFixed(1),
+        AL: (AL * 100).toFixed(1),
+        difference: (difference * 100).toFixed(1),
+        nbArtefacts: evaluationsEleve.length
+    };
+}
+
+/**
+ * Identifie le défi spécifique (critère SRPNF le plus faible) sur les 3 derniers artefacts
+ * Seuil: Valeur configurable (défaut: 71.25%, ajustable via interpretation-config.js)
+ *
+ * @param {string} da - Numéro de DA
+ * @returns {Object} - { defi: 'Structure'|'Rigueur'|'Plausibilité'|'Nuance'|'Français'|'Aucun', score (0-1) }
+ */
+function identifierDefiSpecifique(da) {
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+
+    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
+    const artefactsPortfolio = productions
+        .filter(p => p.type === 'artefact-portfolio')
+        .map(p => p.id);
+
+    const evaluationsEleve = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        artefactsPortfolio.includes(e.productionId) &&
+        e.retroactionFinale
+    );
+
+    if (evaluationsEleve.length === 0) {
+        return { defi: 'Aucun', score: null };
+    }
+
+    // Trier par date (plus récent d'abord)
+    evaluationsEleve.sort((a, b) => {
+        const dateA = a.dateEvaluation || a.dateCreation || 0;
+        const dateB = b.dateEvaluation || b.dateCreation || 0;
+        return new Date(dateB) - new Date(dateA);
+    });
+
+    // Prendre les 3 derniers
+    const troisDerniers = evaluationsEleve.slice(0, 3);
+
+    // Obtenir la table de conversion IDME
+    const tableConversion = obtenirTableConversionIDME();
+
+    // Accumuler les scores par critère
+    const scoresCriteres = {
+        structure: [],
+        rigueur: [],
+        plausibilite: [],
+        nuance: [],
+        francais: []
+    };
+
+    // Regex pour extraire: NOM_CRITERE (NIVEAU)
+    const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi;
+
+    troisDerniers.forEach(evaluation => {
+        const retroaction = evaluation.retroactionFinale || '';
+        let match;
+        while ((match = regexCritere.exec(retroaction)) !== null) {
+            const nomCritere = match[1].toUpperCase();
+            const niveauIDME = match[2].toUpperCase();
+            const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
+
+            if (score !== null) {
+                if (nomCritere === 'STRUCTURE') {
+                    scoresCriteres.structure.push(score);
+                } else if (nomCritere === 'RIGUEUR') {
+                    scoresCriteres.rigueur.push(score);
+                } else if (nomCritere.startsWith('PLAUSIBILIT')) {
+                    scoresCriteres.plausibilite.push(score);
+                } else if (nomCritere === 'NUANCE') {
+                    scoresCriteres.nuance.push(score);
+                } else if (nomCritere.startsWith('FRAN')) {
+                    scoresCriteres.francais.push(score);
+                }
+            }
+        }
+    });
+
+    // Calculer les moyennes
+    const moyennes = {};
+    const seuil = obtenirSeuil('defiSpecifique'); // Seuil configurable (défaut: 71.25%)
+
+    for (const critere in scoresCriteres) {
+        const scores = scoresCriteres[critere];
+        if (scores.length > 0) {
+            moyennes[critere] = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+        } else {
+            moyennes[critere] = null;
+        }
+    }
+
+    // Identifier le critère le plus faible (< seuil)
+    let defiMinimum = null;
+    let scoreMinimum = 1.0;
+
+    const nomsCriteres = {
+        structure: 'Structure',
+        rigueur: 'Rigueur',
+        plausibilite: 'Plausibilité',
+        nuance: 'Nuance',
+        francais: 'Français'
+    };
+
+    for (const critere in moyennes) {
+        const score = moyennes[critere];
+        if (score !== null && score < seuil && score < scoreMinimum) {
+            scoreMinimum = score;
+            defiMinimum = nomsCriteres[critere];
+        }
+    }
+
+    console.log(`Défi spécifique pour DA ${da}:`, {
+        defi: defiMinimum || 'Aucun',
+        score: defiMinimum ? (scoreMinimum * 100).toFixed(1) + '%' : null,
+        scoreNormalise: defiMinimum ? scoreMinimum.toFixed(4) : null,
+        moyennes: moyennes
+    });
+
+    return {
+        defi: defiMinimum || 'Aucun',
+        score: defiMinimum ? scoreMinimum : null
     };
 }
 
@@ -3122,7 +3977,32 @@ function determinerCibleIntervention(da) {
         }
     }
 
-    // 5. Stable (performance satisfaisante)
+    // 5. Stable MAIS risque élevé = plateau problématique
+    const seuilRisqueModere = obtenirSeuil('risque.modere');
+    const seuilRisqueFaible = obtenirSeuil('risque.faible');
+
+    if (M === 'Stable' && indices.R >= seuilRisqueModere) {
+        return {
+            cible: 'Plateau à risque élevé | Intervention pour sortir de la zone de risque',
+            pattern: M,
+            niveau: 2,
+            couleur: '#ff9800',
+            emoji: '🟠'
+        };
+    }
+
+    // 6. Stable avec risque modéré = attention requise
+    if (M === 'Stable' && indices.R >= seuilRisqueFaible) {
+        return {
+            cible: 'Plateau à risque modéré | Soutien préventif recommandé',
+            pattern: M,
+            niveau: 2,
+            couleur: '#ffc107',
+            emoji: '🟡'
+        };
+    }
+
+    // 7. Stable (performance satisfaisante)
     if (M === 'Stable') {
         if (N === 'Aucun' && I >= 25) {
             return {
@@ -3313,7 +4193,7 @@ function genererDiagnosticCriteres(da) {
                             padding: 15px; border-radius: 6px; margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <h4 style="color: ${interpBlocage.couleur}; margin: 0; font-size: 1rem;">
-                            🔒 Indice de Blocage ${resultBlocage.partiel ? '(partiel)' : ''}
+                            Indice de Blocage ${resultBlocage.partiel ? '(partiel)' : ''}
                         </h4>
                         <div style="font-size: 1.5rem; font-weight: bold; color: ${interpBlocage.couleur};">
                             ${pourcentageBlocage}%
@@ -3443,6 +4323,7 @@ function genererSectionPerformance(da) {
         return {
             id: art.id,
             titre: art.titre,
+            description: art.description || art.titre, // Utiliser description ou fallback sur titre
             remis: !!evaluation,
             note: evaluation?.noteFinale || null,
             niveau: evaluation?.niveauFinal || null,
@@ -3451,7 +4332,7 @@ function genererSectionPerformance(da) {
     }).sort((a, b) => {
         if (a.remis && !b.remis) return -1;
         if (!a.remis && b.remis) return 1;
-        return a.titre.localeCompare(b.titre);
+        return a.description.localeCompare(b.description);
     });
 
     // ✨ SÉLECTION AUTOMATIQUE des meilleurs artefacts si aucune sélection manuelle
@@ -3492,13 +4373,36 @@ function genererSectionPerformance(da) {
     const nbRemis = artefacts.filter(a => a.remis).length;
     const nbRetenus = selectionEleve.artefactsRetenus.length;
     const indices = calculerTousLesIndices(da);
-    
-    // Note basée sur les 3 meilleurs
-    const artefactsRemisAvecNote = artefacts.filter(a => a.remis && a.note !== null);
-    const top3 = artefactsRemisAvecNote.sort((a, b) => b.note - a.note).slice(0, 3);
-    const noteTop3 = top3.length > 0 
-        ? (top3.reduce((sum, a) => sum + a.note, 0) / top3.length).toFixed(1) 
-        : null;
+
+    // 🎯 UTILISER LES DONNÉES DE LA SOURCE UNIQUE (portfolio.js)
+    let artefactsRetenus = [];
+    let notesRetenues = [];
+    let noteTop3 = null;
+
+    if (typeof obtenirIndicesCP === 'function') {
+        const indicesCP = obtenirIndicesCP(da, indices.pratique);
+        if (indicesCP && indicesCP.details) {
+            const idsRetenus = indicesCP.details.artefactsRetenus || [];
+            notesRetenues = indicesCP.details.notes || [];
+
+            // Récupérer les titres des artefacts retenus
+            artefactsRetenus = idsRetenus.map(id => {
+                const artefact = artefacts.find(a => a.id === id);
+                const idx = idsRetenus.indexOf(id);
+                return {
+                    titre: artefact ? artefact.titre : 'Artefact inconnu',
+                    note: notesRetenues[idx] || 0
+                };
+            });
+
+            // Calculer la moyenne des notes retenues
+            if (notesRetenues.length > 0) {
+                const somme = notesRetenues.reduce((sum, note) => sum + note, 0);
+                noteTop3 = (somme / notesRetenues.length).toFixed(1);
+            }
+        }
+    }
+
     const selectionComplete = nbRetenus === portfolio.regles.nombreARetenir;
 
     // Interprétation Performance uniquement (C va dans Mobilisation)
@@ -3517,21 +4421,71 @@ function genererSectionPerformance(da) {
     };
 
     return `
+        <!-- Détails des calculs (masqué par défaut) - AFFICHÉ EN HAUT -->
+        <div id="details-calculs-performance-${da}" class="carte-info-toggle" style="display: none;">
+            <div class="details-calculs-section">
+                <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
+                <div class="details-calculs-bloc">
+                    <div class="details-calculs-label">Pratique de notation active:</div>
+                    <div class="details-calculs-valeur">
+                        ${indices.pratique === 'PAN' ? 'PAN (Portfolio à nombre limité)' : 'SOM (Sommative provisoire)'}
+                    </div>
+
+                    <div class="details-calculs-label">Règle de sélection:</div>
+                    <div class="details-calculs-valeur">
+                        Les <strong>${portfolio.regles.nombreARetenir}</strong> meilleures productions sont retenues pour le calcul de l'indice P
+                    </div>
+
+                    <div class="details-calculs-label">Artefacts retenus pour le calcul:</div>
+                    <div class="details-calculs-valeur">
+                        ${artefactsRetenus.length > 0 ? artefactsRetenus.map((art, idx) =>
+                            `${idx + 1}. ${art.description} → <strong>${art.note.toFixed(1)}/100</strong>`
+                        ).join('<br>') : 'Aucun artefact évalué'}
+                    </div>
+
+                    <div class="details-calculs-label">Calcul de l'indice P:</div>
+                    <div class="details-calculs-valeur">
+                        ${artefactsRetenus.length > 0 ? `
+                            Moyenne des ${artefactsRetenus.length} artefact${artefactsRetenus.length > 1 ? 's' : ''} retenu${artefactsRetenus.length > 1 ? 's' : ''}<br>
+                            P = (${notesRetenues.map(n => n.toFixed(1)).join(' + ')}) / ${artefactsRetenus.length}<br>
+                            P = <strong>${noteTop3}/100</strong> soit <strong>${indices.P}%</strong>
+                        ` : 'Calcul impossible : aucune évaluation disponible'}
+                    </div>
+
+                    <div class="details-calculs-label">Calcul de la note de chaque artefact:</div>
+                    <div class="details-calculs-valeur">
+                        ${(() => {
+                            const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+                            const grilleActive = grilles.find(g => g.active) || grilles[0];
+                            if (grilleActive && grilleActive.criteres) {
+                                const ponderations = grilleActive.criteres
+                                    .map(c => `${c.nom}: ${c.ponderation || 0}%`)
+                                    .join(', ');
+                                return `Note = Pondération des critères configurés dans la grille «${grilleActive.nom}»<br>
+                                        (${ponderations})`;
+                            }
+                            return 'Note = Pondération des critères déterminée dans les réglages';
+                        })()}
+                    </div>
+
+                    ${selectionEleve.auto ? `
+                        <div class="details-calculs-label">Note:</div>
+                        <div class="details-calculs-valeur">
+                            Sélection automatique basée sur les meilleures notes
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+
         <!-- ENCADRÉ UNIQUE: DÉVELOPPEMENT DES HABILETÉS ET COMPÉTENCES -->
         <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
 
             <!-- Badge performance avec interprétation -->
-            <div style="margin-bottom: 15px;">
+            <div style="margin-bottom: 20px;">
                 <strong style="font-size: 1.1rem; color: ${interpP.couleur};">${interpP.niveau}</strong>
                 <span style="font-size: 1.3rem; font-weight: bold; color: ${interpP.couleur}; margin-left: 10px;">(${indices.P}%)</span>
             </div>
-
-            <!-- Statistiques -->
-            <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
-                <li><strong>• Note PAN :</strong> ${noteTop3 || '--'}${noteTop3 ? '/100' : ''}</li>
-                <li><strong>• Note sommative :</strong> À implémenter</li>
-                <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
-            </ul>
 
             <hr class="profil-separateur">
 
@@ -3571,6 +4525,9 @@ function genererSectionPerformance(da) {
 
                     const gradientCSS = `linear-gradient(to right, ${gradientStops})`;
 
+                    // Calculer les directions pour chaque critère
+                    const directions = calculerDirectionsCriteres(da);
+
                     // Générer les barres pour chaque critère
                     const barresHTML = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
                         const nomCritere = cle === 'structure' ? 'Structure' :
@@ -3583,13 +4540,20 @@ function genererSectionPerformance(da) {
 
                         const pourcentage = Math.round(score * 100);
 
+                        // Obtenir la direction pour ce critère
+                        const direction = directions[cle];
+                        const symboleDirection = direction && direction.symbole ? direction.symbole : '';
+
                         return `
                             <div class="critere-container">
                                 <div class="critere-header">
                                     <span class="critere-nom" style="min-width: 120px;">${nomCritere}</span>
-                                    <span class="critere-valeur" style="margin-left: auto; font-weight: 600;">${pourcentage}%</span>
+                                    <span class="critere-valeur" style="margin-left: auto; font-weight: 600;">
+                                        ${pourcentage}%
+                                    </span>
                                 </div>
                                 <div class="critere-barre-gradient" style="background: ${gradientCSS};">
+                                    ${symboleDirection ? `<div style="position: absolute; left: ${Math.min(pourcentage, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: #333;" title="${direction.interpretation}">${symboleDirection}</div>` : ''}
                                     <div class="critere-indicateur" style="left: ${Math.min(pourcentage, 100)}%;">▼</div>
                                 </div>
                             </div>
@@ -3618,32 +4582,6 @@ function genererSectionPerformance(da) {
                 })()}
             </div>
 
-    </div>
-
-    <!-- Emoji info toggle en haut à droite -->
-    <div style="text-align: right; margin-bottom: 10px;">
-        <span class="emoji-toggle" data-target="details-calculs-performance-${da}">ℹ️</span>
-    </div>
-
-    <!-- Détails des calculs (masqué par défaut) -->
-    <div id="details-calculs-performance-${da}" class="carte-info-toggle" style="display: none;">
-            <div style="background: white; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem;">
-                <h5 style="color: var(--bleu-principal); margin: 0 0 10px 0; font-size: 0.95rem;">📐 DÉTAILS DES CALCULS</h5>
-        <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
-            <li><strong>Indice P :</strong> ${indices.P}%</li>
-            <li><strong>Note PAN (top 3) :</strong> ${noteTop3 || '--'}/100</li>
-            <li><strong>Artefacts retenus :</strong> ${nbRetenus}/${portfolio.regles.nombreARetenir}</li>
-            <li><strong>Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
-            ${Object.entries(moyennes).map(([cle, val]) => {
-                const nom = cle === 'structure' ? 'Structure' :
-                           cle === 'rigueur' ? 'Rigueur' :
-                           cle === 'plausibilite' ? 'Plausibilité' :
-                           cle === 'nuance' ? 'Nuance' : 'Français';
-                return val !== null ? `<li><strong>${nom} :</strong> ${Math.round(val * 100)}%</li>` : '';
-            }).join('')}
-        </ul>
-            </div>
-        </div>
     </div>
     `;
 }
@@ -3704,8 +4642,8 @@ function genererSectionAssiduite(da) {
                                 </span>
                                 <span class="badge-absence-heures">
                                     ${estAbsenceComplete
-                                        ? `(${abs.heuresManquees}h manquées)`
-                                        : `(${abs.heuresPresence}/${abs.heuresPresence + abs.heuresManquees}h)`
+                                        ? `${abs.heuresManquees}/${abs.heuresPresence + abs.heuresManquees}`
+                                        : `${abs.heuresPresence}/${abs.heuresPresence + abs.heuresManquees}`
                                     }
                                 </span>
                             </div>
@@ -3727,23 +4665,6 @@ function genererSectionAssiduite(da) {
                 📈 Évolution temporelle de l'assiduité (à venir)
             </div>
 
-        </div>
-
-        <!-- Emoji info toggle en haut à droite -->
-        <div style="text-align: right; margin-bottom: 10px;">
-            <span class="emoji-toggle" data-target="details-calculs-assiduite-${da}">ℹ️</span>
-        </div>
-
-        <!-- Détails des calculs (masqué par défaut) -->
-        <div id="details-calculs-assiduite-${da}" class="carte-info-toggle" style="display: none;">
-            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">📐 Détails des calculs</h4>
-            <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
-                <li><strong>Indice A :</strong> ${indices.A}%</li>
-                <li><strong>Taux présence :</strong> ${taux}%</li>
-                <li><strong>Heures présentes :</strong> ${details.heuresPresentes}h</li>
-                <li><strong>Heures offertes :</strong> ${details.heuresOffertes}h</li>
-                <li><strong>Absences totales :</strong> ${details.absences.length}</li>
-            </ul>
         </div>
     `;
 }
@@ -3800,6 +4721,41 @@ function formaterDateCourte(dateISO) {
         year: 'numeric'
     };
     return date.toLocaleDateString('fr-CA', options);
+}
+
+/**
+ * Réattache les événements des toggles emoji après chargement dynamique
+ * NÉCESSAIRE car le contenu est inséré via innerHTML
+ */
+function reattacherEvenementsToggles() {
+    const emojiToggles = document.querySelectorAll('.emoji-toggle');
+
+    emojiToggles.forEach(emoji => {
+        // Retirer les anciens événements (éviter les doublons)
+        const newEmoji = emoji.cloneNode(true);
+        emoji.parentNode.replaceChild(newEmoji, emoji);
+
+        // Ajouter le nouvel événement
+        newEmoji.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Récupérer l'ID de la cible depuis l'attribut data-target
+            const targetId = this.getAttribute('data-target');
+            const targetElement = document.getElementById(targetId);
+
+            if (targetElement) {
+                // Toggle la visibilité
+                if (targetElement.style.display === 'none' || targetElement.style.display === '') {
+                    targetElement.style.display = 'block';
+                } else {
+                    targetElement.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    console.log(`✅ ${emojiToggles.length} toggles emoji réattachés`);
 }
 
 /* ===============================
