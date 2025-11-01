@@ -3820,6 +3820,163 @@ Exemple :
                     </div>
                 </div><!--fin sous-section pratique-notation-->
 
+                <!-- Sous-section : Interprétation des données -->
+                <div id="reglages-interpretation" class="sous-section">
+                    <h2>Configuration des seuils d'interprétation</h2>
+                    <p class="text-muted">
+                        Ajuste les seuils utilisés pour interpréter les données pédagogiques et détecter les patterns d'apprentissage
+                    </p>
+
+                    <!-- Note explicative -->
+                    <div style="padding: 15px; background: #f0f8ff; border-radius: 6px; border-left: 4px solid #2196f3; margin-bottom: 25px;">
+                        <h4 style="color: #1565c0; margin-bottom: 10px;">ℹ️ À propos de ces seuils</h4>
+                        <p style="margin-bottom: 10px;">
+                            Ces seuils déterminent la sensibilité des algorithmes de détection de progression,
+                            de risque et de patterns d'apprentissage. Les valeurs par défaut ont été établies
+                            après expérimentation, mais tu peux les ajuster selon ton contexte pédagogique.
+                        </p>
+                        <p style="margin-bottom: 0; font-size: 0.9rem; color: #666;">
+                            <strong>Note :</strong> Les modifications prennent effet immédiatement et sont
+                            sauvegardées automatiquement dans le navigateur.
+                        </p>
+                    </div>
+
+                    <!-- Progression des artefacts -->
+                    <div class="carte">
+                        <h3>Détection de la progression</h3>
+                        <p class="text-muted" style="margin-bottom: 20px;">
+                            Différence minimale entre la moyenne des 3 artefacts récents et la moyenne des 3 suivants
+                            pour considérer qu'il y a progression (↗) ou régression (↘). En dessous de ce seuil,
+                            la progression est considérée comme stable (→).
+                        </p>
+
+                        <div class="groupe-form">
+                            <label for="seuil-progression" style="font-weight: 600; margin-bottom: 10px; display: block;">
+                                Progression des artefacts
+                                <span id="valeur-progression" style="color: var(--bleu-principal); margin-left: 10px;">10 points (%)</span>
+                            </label>
+                            <input type="range" id="seuil-progression" class="controle-form"
+                                   min="0.05" max="0.20" step="0.01" value="0.10"
+                                   oninput="mettreAJourAffichageSeuil('progression', this.value)"
+                                   onchange="sauvegarderSeuil('progressionArtefacts', parseFloat(this.value))"
+                                   style="width: 100%; cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #666; margin-top: 5px;">
+                                <span>5 points (très sensible)</span>
+                                <span>20 points (moins sensible)</span>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <p style="margin: 0; font-size: 0.9rem; color: #666;">
+                                <strong>Exemple :</strong> Avec un seuil de <span id="exemple-progression">10</span> points,
+                                si un étudiant passe de 70% à 81%, cela sera considéré comme une progression (↗).
+                                De 70% à 78%, ce sera stable (→).
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Direction du risque -->
+                    <div class="carte">
+                        <h3>Évolution du risque</h3>
+                        <p class="text-muted" style="margin-bottom: 20px;">
+                            Variation minimale du risque pour afficher une flèche indiquant que le risque augmente (→)
+                            ou diminue (←). En dessous de ce seuil, un point (●) indique une stagnation.
+                        </p>
+
+                        <div class="groupe-form">
+                            <label for="seuil-risque" style="font-weight: 600; margin-bottom: 10px; display: block;">
+                                Direction du risque
+                                <span id="valeur-risque" style="color: var(--bleu-principal); margin-left: 10px;">5 points (%)</span>
+                            </label>
+                            <input type="range" id="seuil-risque" class="controle-form"
+                                   min="0.03" max="0.15" step="0.01" value="0.05"
+                                   oninput="mettreAJourAffichageSeuil('risque', this.value)"
+                                   onchange="sauvegarderSeuil('directionRisque', parseFloat(this.value))"
+                                   style="width: 100%; cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #666; margin-top: 5px;">
+                                <span>3 points (très sensible)</span>
+                                <span>15 points (moins sensible)</span>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <p style="margin: 0; font-size: 0.9rem; color: #666;">
+                                <strong>Exemple :</strong> Avec un seuil de <span id="exemple-risque">5</span> points,
+                                si le risque passe de 0.40 à 0.46, cela affichera (→). De 0.40 à 0.44, ce sera (●).
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Défi spécifique -->
+                    <div class="carte">
+                        <h3>Identification des défis SRPNF</h3>
+                        <p class="text-muted" style="margin-bottom: 20px;">
+                            Score en dessous duquel un critère SRPNF (Structure, Rigueur, Plausibilité, Nuance, Français)
+                            est considéré comme un défi spécifique nécessitant une attention particulière.
+                        </p>
+
+                        <div class="groupe-form">
+                            <label for="seuil-defi" style="font-weight: 600; margin-bottom: 10px; display: block;">
+                                Défi spécifique (SRPNF)
+                                <span id="valeur-defi" style="color: var(--bleu-principal); margin-left: 10px;">71.25%</span>
+                            </label>
+                            <input type="range" id="seuil-defi" class="controle-form"
+                                   min="0.60" max="0.80" step="0.0125" value="0.7125"
+                                   oninput="mettreAJourAffichageSeuil('defi', this.value)"
+                                   onchange="sauvegarderSeuil('defiSpecifique', parseFloat(this.value))"
+                                   style="width: 100%; cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #666; margin-top: 5px;">
+                                <span>60% (plus exigeant)</span>
+                                <span>80% (moins exigeant)</span>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <p style="margin: 0; font-size: 0.9rem; color: #666;">
+                                <strong>Exemple :</strong> Avec un seuil de <span id="exemple-defi">71.25</span>%,
+                                un critère à 70% sera identifié comme défi, mais un critère à 72% ne le sera pas.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="carte">
+                        <h3>Actions</h3>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <button class="btn btn-principal" onclick="chargerSeuilsInterpretationUI()">
+                                🔄 Recharger les valeurs actuelles
+                            </button>
+                            <button class="btn btn-secondaire" onclick="restaurerValeursParDefaut()">
+                                ↩️ Restaurer les valeurs par défaut
+                            </button>
+                        </div>
+                        <p class="text-muted" style="margin-top: 15px; font-size: 0.9rem;">
+                            💡 Les valeurs par défaut ont été établies après expérimentation avec plusieurs cohortes.
+                            Elles représentent un bon équilibre entre sensibilité et bruit statistique.
+                        </p>
+                    </div>
+
+                    <!-- Informations techniques -->
+                    <div class="carte">
+                        <h3>ℹ️ Informations techniques</h3>
+                        <div style="padding: 15px; background: #f0f8ff; border-radius: 6px;">
+                            <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+                                <li><strong>Stockage :</strong> Les seuils sont sauvegardés dans localStorage</li>
+                                <li><strong>Portée :</strong> Les modifications affectent tous les calculs immédiatement</li>
+                                <li><strong>Valeurs par défaut :</strong>
+                                    <ul style="margin-top: 8px;">
+                                        <li>Progression : 10 points (%)</li>
+                                        <li>Direction risque : 5 points (%)</li>
+                                        <li>Défi SRPNF : 71.25%</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Impact :</strong> Les seuils influencent les diagnostics RàI, patterns et recommandations</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div><!--fin sous-section reglages-interpretation-->
+
                 <!-- Sous-section : Productions -->
 
                 <!-- Sous-section: Import/Export des données -->
@@ -6036,7 +6193,8 @@ Exemple :
     <script src="js/cartouches.js?v=1761700300"></script>
     <script src="js/cours.js?v=1761391739"></script>
 
-    <!-- PRIORITÉ 3: Calcul des indices (AVANT affichage) -->
+    <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
+    <script src="js/interpretation-config.js"></script>
     <script src="js/portfolio.js"></script>
     <script src="js/saisie-presences.js"></script>
 
@@ -6105,6 +6263,46 @@ Exemple :
                     }
                 });
             });
+        });
+    </script>
+
+    <!-- Script d'initialisation des seuils d'interprétation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Charger les seuils d'interprétation dans l'interface dès que la page est chargée
+            if (typeof chargerSeuilsInterpretationUI === 'function') {
+                // Attendre que la sous-section soit potentiellement affichée
+                setTimeout(() => {
+                    const sectionInterpretation = document.getElementById('reglages-interpretation');
+                    if (sectionInterpretation) {
+                        chargerSeuilsInterpretationUI();
+                        console.log('✅ Interface des seuils d\'interprétation initialisée');
+                    }
+                }, 100);
+            }
+
+            // Observer les changements de sous-section pour recharger les seuils si nécessaire
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const section = mutation.target;
+                        if (section.id === 'reglages-interpretation' && section.classList.contains('actif')) {
+                            if (typeof chargerSeuilsInterpretationUI === 'function') {
+                                chargerSeuilsInterpretationUI();
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Observer la sous-section des réglages d'interprétation
+            const sectionInterpretation = document.getElementById('reglages-interpretation');
+            if (sectionInterpretation) {
+                observer.observe(sectionInterpretation, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+            }
         });
     </script>
 

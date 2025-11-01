@@ -115,6 +115,13 @@ function chargerListeEtudiantsEval() {
 
     if (!select) return;
 
+    // NOUVEAU (Beta 0.84): Trier par nom de famille (ordre alphabétique)
+    etudiants.sort((a, b) => {
+        const nomA = (a.nom + ' ' + a.prenom).toLowerCase();
+        const nomB = (b.nom + ' ' + b.prenom).toLowerCase();
+        return nomA.localeCompare(nomB);
+    });
+
     select.innerHTML = '<option value="">-- Choisir un·e étudiant·e --</option>';
     etudiants.forEach(etudiant => {
         const option = document.createElement('option');
@@ -167,6 +174,13 @@ function filtrerEtudiantsParGroupe() {
     const etudiantsFiltres = groupeId
         ? etudiants.filter(e => e.groupe === groupeId)
         : etudiants;
+
+    // NOUVEAU (Beta 0.84): Trier par nom de famille (ordre alphabétique)
+    etudiantsFiltres.sort((a, b) => {
+        const nomA = (a.nom + ' ' + a.prenom).toLowerCase();
+        const nomB = (b.nom + ' ' + b.prenom).toLowerCase();
+        return nomA.localeCompare(nomB);
+    });
 
     const select = document.getElementById('selectEtudiantEval');
     if (!select) return;

@@ -604,7 +604,12 @@ function enregistrerCommeEchelle() {
     afficherToutesLesEchellesNiveaux();
     document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
 
-    afficherNotificationSucces(`📑 Échelle «${nomEchelle}» enregistrée avec succès !`);
+    afficherNotificationSucces(`Échelle «${nomEchelle}» enregistrée avec succès !`);
+
+    // Retourner à l'accueil après la sauvegarde
+    setTimeout(() => {
+        annulerEditionEchelle();
+    }, 1500); // Attendre 1.5s pour que l'utilisateur voie la notification
 }
 
 /**
@@ -1481,6 +1486,23 @@ function creerNouvelleEchelle() {
     console.log('Création nouvelle échelle - Interface prête');
 }
 
+/**
+ * Annule l'édition d'une échelle et retourne à l'accueil
+ */
+function annulerEditionEchelle() {
+    // Masquer l'éditeur et réafficher l'accueil
+    document.getElementById('conteneurEditionEchelle').style.display = 'none';
+    document.getElementById('optionsImportExportEchelles').style.display = 'none';
+    document.getElementById('accueilEchelles').style.display = 'block';
+
+    // Réinitialiser les champs
+    document.getElementById('nomEchelleTemplate').value = '';
+    document.getElementById('tableauNiveauxEchelle').innerHTML = '';
+    document.getElementById('nbNiveauxEchelle').textContent = '0';
+
+    console.log('Édition annulée - Retour à l\'accueil');
+}
+
 function chargerEchellePourModif(id) {
     const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
     const echelle = echelles.find(e => e.id === id);
@@ -1722,6 +1744,7 @@ function supprimerEchelleDepuisSidebar(id) {
 // Export global
 window.afficherListeEchelles = afficherListeEchelles;
 window.creerNouvelleEchelle = creerNouvelleEchelle;
+window.annulerEditionEchelle = annulerEditionEchelle;
 window.chargerEchellePourModif = chargerEchellePourModif;
 window.dupliquerEchelleDepuisSidebar = dupliquerEchelleDepuisSidebar;
 window.supprimerEchelleDepuisSidebar = supprimerEchelleDepuisSidebar;

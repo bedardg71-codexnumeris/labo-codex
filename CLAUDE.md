@@ -42,7 +42,7 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 
 ```
 projet/
-├── index 78 (bouton soutien).html            # Point d'entrée actuel (Beta 0.78)
+├── index 83 (seuils configurables).html      # Point d'entrée actuel (Beta 0.83)
 ├── css/
 │   └── styles.css                        # Styles globaux + variables CSS pratiques
 ├── js/
@@ -509,6 +509,27 @@ localStorage.seancesCompletes             // horaire.js (futur)
   - PHASE 3 : Optimisation (2-3 semaines) → Version 1.0
   - PHASE 4 : Analyses avancées (Post-1.0)
 - ✅ **Documentation** : `NOTES_VERSION_0.80.md`
+
+**SEUILS CONFIGURABLES ET AFFICHAGE ÉPURÉ** (Session 31 octobre - Beta 0.83)
+- ✅ **Fichier** : `index 83 (seuils configurables).html` - Version Beta 0.83
+- ✅ **Configuration des seuils d'interprétation** :
+  - Interface de personnalisation dans Réglages › Pratique de notation
+  - Trois niveaux configurables : Fragile, Acceptable, Bon (par défaut 70%, 80%, 85%)
+  - Validation en temps réel pour empêcher seuils incohérents
+  - Recalcul automatique de tous les diagnostics et niveaux RàI
+  - Impact sur couleurs, recommandations, et alertes de patterns
+- ✅ **Affichage épuré section Mobilisation** :
+  - Descriptions au lieu de noms de productions ("Carte mentale" vs "Artefact 3")
+  - Notes simplifiées : `52.5` au lieu de `52.5/100`
+  - Heures d'absence en fraction : `2/3` au lieu de `(2h manquées)`
+  - Uniformisation complète de tous les formats
+- ✅ **Descriptions de productions partout** :
+  - Profil étudiant (sections Performance et Mobilisation)
+  - Portfolio (sélection des artefacts)
+  - Productions (formulaire d'ajout)
+  - Détails de calcul (artefacts retenus pour indice P)
+- ✅ **Fichiers modifiés** : `profil-etudiant.js`, `portfolio.js`, `productions.js`
+- ✅ **Documentation** : `NOTES_VERSION_0.83.md`
 
 ### 🔴 Prochaines priorités (PHASE 1 : Consolidation)
 

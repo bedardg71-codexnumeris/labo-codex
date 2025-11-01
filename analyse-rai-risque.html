@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse RàI vs Risque - Groupe TEST</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #0066cc;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card.green {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .stat-card.orange {
+            background: linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%);
+            color: #333;
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            background: linear-gradient(90deg, #0066cc, #004c99);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .alert.info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #0066cc;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .highlight {
+            background: #fff9e6 !important;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .risque-minimal {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .risque-faible {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .risque-modere {
+            background: #fff9e6;
+            color: #f57c00;
+        }
+
+        .risque-eleve {
+            background: #ffe0b2;
+            color: #e65100;
+        }
+
+        .risque-tres-eleve {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .risque-critique {
+            background: #f5f5f5;
+            color: #424242;
+        }
+
+        .rai-1 {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .rai-2 {
+            background: #fff9e6;
+            color: #f57c00;
+        }
+
+        .rai-3 {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .pattern {
+            font-style: italic;
+            color: #666;
+        }
+
+        .filters {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filters label {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .filters select, .filters input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .explication {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .explication h4 {
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+
+        .explication ul {
+            margin-left: 20px;
+        }
+
+        .explication li {
+            margin-bottom: 5px;
+        }
+
+        .numero {
+            background: #0066cc;
+            color: white;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .defi {
+            font-weight: 600;
+            color: #c62828;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+            th {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Analyse RàI vs Risque d'échec</h1>
+        <p class="subtitle">Groupe TEST - 30 étudiants - Basé sur les logs du 31 octobre 2025</p>
+
+        <!-- Statistiques globales -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total étudiants</h3>
+                <div class="number">30</div>
+            </div>
+            <div class="stat-card green">
+                <h3>Risques faibles<br>(minimal + faible)</h3>
+                <div class="number">13</div>
+                <small>43% du groupe</small>
+            </div>
+            <div class="stat-card orange">
+                <h3>RàI Niveau 2<br>(Ciblé)</h3>
+                <div class="number">22</div>
+                <small>73% du groupe</small>
+            </div>
+        </div>
+
+        <!-- Alerte principale -->
+        <div class="alert">
+            <strong>🎯 Question clé :</strong> Comment 13 étudiants peuvent avoir un risque faible ET être en RàI niveau 2 ?
+            <br><br>
+            <strong>Réponse :</strong> Le RàI niveau 2 est une <strong>intervention préventive et ciblée</strong>.
+            Ces étudiants ont un bon dossier global (risque faible) mais un <strong>défi spécifique identifié</strong>
+            (ex: Structure à 60% vs autres critères à 75%). L'intervention vise à corriger ce défi AVANT qu'il ne devienne bloquant.
+        </div>
+
+        <!-- Section 1 : Tableau complet -->
+        <div class="section">
+            <h2 class="section-title">📋 Tableau complet : Tous les étudiants (30)</h2>
+
+            <div class="legend">
+                <div><strong>Légende Risque :</strong></div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e3f2fd;"></div>
+                    <span>🔵 Minimal (≤20%)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #c8e6c9;"></div>
+                    <span>🟢 Faible (20-30%)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fff9e6;"></div>
+                    <span>🟡 Modéré (30-40%)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffe0b2;"></div>
+                    <span>🟠 Élevé (40-50%)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffcdd2;"></div>
+                    <span>🔴 Très élevé (50-70%)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f5f5f5;"></div>
+                    <span>⚫ Critique (>70%)</span>
+                </div>
+            </div>
+
+            <div class="filters">
+                <label>Filtrer par Risque:</label>
+                <select id="filterRisque" onchange="filtrerTableau()">
+                    <option value="">Tous</option>
+                    <option value="minimal">Minimal</option>
+                    <option value="faible">Faible</option>
+                    <option value="modere">Modéré</option>
+                    <option value="eleve">Élevé</option>
+                    <option value="tres-eleve">Très élevé</option>
+                    <option value="critique">Critique</option>
+                </select>
+
+                <label>Filtrer par RàI:</label>
+                <select id="filterRai" onchange="filtrerTableau()">
+                    <option value="">Tous</option>
+                    <option value="1">Niveau 1</option>
+                    <option value="2">Niveau 2</option>
+                    <option value="3">Niveau 3</option>
+                </select>
+
+                <label>Filtrer par Pattern:</label>
+                <select id="filterPattern" onchange="filtrerTableau()">
+                    <option value="">Tous</option>
+                    <option value="Défi spécifique">Défi spécifique</option>
+                    <option value="Stable">Stable</option>
+                </select>
+
+                <label style="margin-left: auto;">
+                    <input type="checkbox" id="highlightRisqueFaibleRai2" onchange="highlightCas()">
+                    Surligner Risque faible + RàI 2
+                </label>
+            </div>
+
+            <table id="tableauPrincipal">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>DA</th>
+                        <th>Mobilisation</th>
+                        <th>Risque</th>
+                        <th>Pattern</th>
+                        <th>Défi principal</th>
+                        <th>RàI</th>
+                        <th>Intervention recommandée</th>
+                    </tr>
+                </thead>
+                <tbody id="tableauBody">
+                    <!-- Données injectées par JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 2 : Focus sur les cas -->
+        <div class="section">
+            <h2 class="section-title">🎯 Focus : Risque FAIBLE + RàI Niveau 2 (11 cas)</h2>
+
+            <div class="explication">
+                <h4>💡 Pourquoi ces étudiants sont-ils en RàI niveau 2 malgré un risque faible ?</h4>
+                <ul>
+                    <li><strong>Bon dossier global</strong> : Assiduité, complétion et performance générale sont satisfaisantes (risque ≤ 30%)</li>
+                    <li><strong>MAIS un défi spécifique identifié</strong> : Un critère (Structure, Rigueur, Nuance) est significativement plus faible que les autres</li>
+                    <li><strong>Intervention préventive</strong> : Corriger ce défi AVANT qu'il ne devienne un blocage</li>
+                    <li><strong>Approche ciblée</strong> : Pratique guidée sur le critère faible uniquement</li>
+                </ul>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>DA</th>
+                        <th>Risque</th>
+                        <th>Défi identifié</th>
+                        <th>Intervention</th>
+                        <th>Explication détaillée</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>9000116</td>
+                        <td><span class="badge risque-faible">Faible</span></td>
+                        <td><span class="defi">Structure</span></td>
+                        <td>Pratique guidée en Structure</td>
+                        <td>Structure à 60% vs autres critères à 70-75%. Besoin de renforcement ciblé.</td>
+                    </tr>
+                    <tr>
+                        <td>9000262</td>
+                        <td><span class="badge risque-faible">Faible</span></td>
+                        <td><span class="defi">Rigueur</span></td>
+                        <td>Pratique guidée en Rigueur</td>
+                        <td>Rigueur à 69% (critère le plus faible). Performance récente stable à 71%.</td>
+                    </tr>
+                    <tr>
+                        <td>9000151</td>
+                        <td><span class="badge risque-faible">Faible</span></td>
+                        <td><span class="defi">Nuance</span></td>
+                        <td>Pratique guidée en Nuance</td>
+                        <td>Nuance à 62% (un artefact à 40%). Autres critères satisfaisants.</td>
+                    </tr>
+                    <tr>
+                        <td>9000131</td>
+                        <td><span class="badge risque-faible">Faible</span></td>
+                        <td><span class="defi">Rigueur</span></td>
+                        <td>Pratique guidée en Rigueur</td>
+                        <td>Rigueur à 68%. Un artefact à 40% détecté dans l'historique.</td>
+                    </tr>
+                    <tr class="highlight">
+                        <td>9000137</td>
+                        <td><span class="badge risque-faible">Faible</span></td>
+                        <td><span class="defi">Stagnation</span></td>
+                        <td>Suivi régulier (préventif)</td>
+                        <td><strong>CAS PARTICULIER :</strong> Stable à 75.5% sans progression. Soutien pour éviter régression.</td>
+                    </tr>
+                    <tr>
+                        <td>9000132</td>
+                        <td><span class="badge risque-faible">Faible</span></td>
+                        <td><span class="defi">Nuance</span></td>
+                        <td>Pratique guidée en Nuance</td>
+                        <td>Nuance à 62% (un artefact à 40%). Français moyen à 82.5%.</td>
+                    </tr>
+                    <tr>
+                        <td>9000166</td>
+                        <td><span class="badge risque-faible">Faible</span></td>
+                        <td><span class="defi">Structure</span></td>
+                        <td>Pratique guidée en Structure</td>
+                        <td>Structure à 66% (un artefact à 40%). Autres critères à 65-75%.</td>
+                    </tr>
+                    <tr>
+                        <td>9000153</td>
+                        <td><span class="badge risque-faible">Faible</span></td>
+                        <td><span class="defi">Nuance</span></td>
+                        <td>Pratique guidée en Nuance</td>
+                        <td>Nuance à 67%. Performance récente à 72.7%.</td>
+                    </tr>
+                    <tr>
+                        <td>9000134</td>
+                        <td><span class="badge risque-faible">Faible</span></td>
+                        <td><span class="defi">Structure</span></td>
+                        <td>Pratique guidée en Structure</td>
+                        <td>Structure à 68% (un artefact à 40%). Français excellent à 87.5%.</td>
+                    </tr>
+                    <tr>
+                        <td>9000159</td>
+                        <td><span class="badge risque-faible">Faible</span></td>
+                        <td><span class="defi">Rigueur</span></td>
+                        <td>Pratique guidée en Rigueur</td>
+                        <td>Rigueur à 67%. Performance récente à 70.2%.</td>
+                    </tr>
+                    <tr>
+                        <td>9000181</td>
+                        <td><span class="badge risque-faible">Faible</span></td>
+                        <td><span class="defi">Structure</span></td>
+                        <td>Pratique guidée en Structure</td>
+                        <td>Structure à 62% (un artefact à 40%). Français moyen à 65%.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="alert success">
+                <strong>✅ Répartition des défis (11 cas) :</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li><strong>Structure</strong> : 5 étudiants (45%)</li>
+                    <li><strong>Rigueur</strong> : 3 étudiants (27%)</li>
+                    <li><strong>Nuance</strong> : 3 étudiants (27%)</li>
+                    <li><strong>Stagnation</strong> : 1 étudiant (9%) - Cas particulier</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 3 : Observations et questions -->
+        <div class="section">
+            <h2 class="section-title">🔍 Observations et points de discussion</h2>
+
+            <div class="alert info">
+                <h4 style="margin-bottom: 10px;">📌 Observation 1 : Prédominance du "Défi spécifique"</h4>
+                <p><strong>73% des étudiants (22/30)</strong> ont le pattern "Défi spécifique"</p>
+                <p><strong>Question :</strong> Est-ce normal d'avoir autant d'étudiants avec un défi spécifique ? Ou cela révèle-t-il une sensibilité excessive du système ?</p>
+                <p style="margin-top: 10px;"><strong>Hypothèses :</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>Les seuils d'identification des défis sont peut-être trop sensibles (ex: 5-10% d'écart suffit)</li>
+                    <li>OU c'est réaliste : la plupart des étudiants ont effectivement un critère plus faible</li>
+                </ul>
+            </div>
+
+            <div class="alert info">
+                <h4 style="margin-bottom: 10px;">📌 Observation 2 : Structure est le défi le plus fréquent</h4>
+                <p><strong>5 des 11 cas</strong> avec risque faible + RàI 2 ont Structure comme défi principal</p>
+                <p><strong>Question :</strong> Cela reflète-t-il une difficulté réelle du groupe en Structure ? Ou un problème de calibration de ce critère ?</p>
+                <p style="margin-top: 10px;"><strong>À vérifier :</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>Les scores Structure sont-ils systématiquement plus bas que les autres critères ?</li>
+                    <li>La grille d'évaluation Structure est-elle plus exigeante ?</li>
+                    <li>Les étudiants reçoivent-ils assez d'enseignement explicite sur la Structure ?</li>
+                </ul>
+            </div>
+
+            <div class="alert info">
+                <h4 style="margin-bottom: 10px;">📌 Observation 3 : Impact des artefacts à 40%</h4>
+                <p>Plusieurs étudiants ont <strong>un seul artefact à 40%</strong> (niveau I = Insuffisant) qui fait baisser leur moyenne</p>
+                <p><strong>Question :</strong> Un seul artefact faible devrait-il suffire à déclencher une intervention RàI 2 ?</p>
+                <p style="margin-top: 10px;"><strong>Options possibles :</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>Garder la logique actuelle (détection précoce des difficultés)</li>
+                    <li>Exiger 2 artefacts faibles sur le même critère avant intervention</li>
+                    <li>Pondérer par la tendance (si l'artefact à 40% est ancien et suivi d'améliorations, ignorer)</li>
+                </ul>
+            </div>
+
+            <div class="alert info">
+                <h4 style="margin-bottom: 10px;">📌 Observation 4 : Aucun étudiant en "Progression"</h4>
+                <p><strong>0 étudiant</strong> identifié avec le pattern "En progression"</p>
+                <p><strong>Question :</strong> Les critères pour identifier une progression sont-ils trop stricts ?</p>
+                <p style="margin-top: 10px;"><strong>À investiguer :</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>Quel est le seuil actuel pour détecter une progression ?</li>
+                    <li>Combien d'artefacts consécutifs doivent montrer amélioration ?</li>
+                    <li>Certains étudiants progressent-ils sans être détectés ?</li>
+                </ul>
+            </div>
+
+            <div class="alert success">
+                <h4 style="margin-bottom: 10px;">✅ Point positif : Cohérence du modèle</h4>
+                <p>Les 4 étudiants avec <strong>risque minimal</strong> sont TOUS en <strong>RàI niveau 1</strong> (pratique autonome)</p>
+                <p>Cela démontre que le système fait bien la distinction entre :</p>
+                <ul style="margin-left: 20px;">
+                    <li>Étudiants excellents sans défi → RàI 1 ✅</li>
+                    <li>Étudiants bons avec défi spécifique → RàI 2 ✅</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Données des étudiants
+        const etudiants = [
+            { num: 1, da: "9000116", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Défi spécifique", defi: "Structure", rai: 2, intervention: "Pratique guidée en Structure" },
+            { num: 2, da: "9000157", mobilisation: "Acceptable", risque: "eleve", risqueLabel: "Élevé", pattern: "Défi spécifique", defi: "Nuance", rai: 2, intervention: "Pratique guidée en Nuance" },
+            { num: 3, da: "9000155", mobilisation: "Acceptable", risque: "eleve", risqueLabel: "Élevé", pattern: "Défi spécifique", defi: "Rigueur", rai: 2, intervention: "Pratique guidée en Rigueur" },
+            { num: 4, da: "9000162", mobilisation: "Acceptable", risque: "modere", risqueLabel: "Modéré", pattern: "Défi spécifique", defi: "Français", rai: 2, intervention: "Remédiation en révision linguistique" },
+            { num: 5, da: "9000262", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Défi spécifique", defi: "Rigueur", rai: 2, intervention: "Pratique guidée en Rigueur" },
+            { num: 6, da: "9000146", mobilisation: "Complétion critique", risque: "critique", risqueLabel: "Critique", pattern: "Défi spécifique", defi: "Plausibilité", rai: 3, intervention: "Intervention intensive" },
+            { num: 7, da: "9000151", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Défi spécifique", defi: "Nuance", rai: 2, intervention: "Pratique guidée en Nuance" },
+            { num: 8, da: "9000156", mobilisation: "Favorable", risque: "minimal", risqueLabel: "Minimal", pattern: "Stable", defi: "Nuance", rai: 1, intervention: "Pratique autonome" },
+            { num: 9, da: "9000131", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Défi spécifique", defi: "Rigueur", rai: 2, intervention: "Pratique guidée en Rigueur" },
+            { num: 10, da: "9000174", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Stable", defi: "Aucun", rai: 1, intervention: "Pratique autonome" },
+            { num: 11, da: "9000133", mobilisation: "Favorable", risque: "minimal", risqueLabel: "Minimal", pattern: "Stable", defi: "Aucun", rai: 1, intervention: "Pratique autonome" },
+            { num: 12, da: "9000060", mobilisation: "Assiduité ET complétion critiques", risque: "critique", risqueLabel: "Critique", pattern: "Défi spécifique", defi: "Rigueur", rai: 3, intervention: "Intervention intensive" },
+            { num: 13, da: "9000137", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Stable", defi: "Nuance", rai: 2, intervention: "Suivi régulier (stagnation)" },
+            { num: 14, da: "9000132", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Défi spécifique", defi: "Nuance", rai: 2, intervention: "Pratique guidée en Nuance" },
+            { num: 15, da: "9000152", mobilisation: "Favorable", risque: "modere", risqueLabel: "Modéré", pattern: "Défi spécifique", defi: "Structure", rai: 2, intervention: "Pratique guidée en Structure" },
+            { num: 16, da: "9000166", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Défi spécifique", defi: "Structure", rai: 2, intervention: "Pratique guidée en Structure" },
+            { num: 17, da: "9000130", mobilisation: "Acceptable", risque: "modere", risqueLabel: "Modéré", pattern: "Stable", defi: "Aucun", rai: 2, intervention: "Soutien préventif (stagnation)" },
+            { num: 18, da: "9000143", mobilisation: "Favorable", risque: "minimal", risqueLabel: "Minimal", pattern: "Stable", defi: "Aucun", rai: 1, intervention: "Pratique autonome" },
+            { num: 19, da: "9000153", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Défi spécifique", defi: "Nuance", rai: 2, intervention: "Pratique guidée en Nuance" },
+            { num: 20, da: "9000134", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Défi spécifique", defi: "Structure", rai: 2, intervention: "Pratique guidée en Structure" },
+            { num: 21, da: "9000159", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Défi spécifique", defi: "Rigueur", rai: 2, intervention: "Pratique guidée en Rigueur" },
+            { num: 22, da: "9000138", mobilisation: "Complétion critique", risque: "tres-eleve", risqueLabel: "Très élevé", pattern: "Défi spécifique", defi: "Nuance", rai: 3, intervention: "Intervention intensive" },
+            { num: 23, da: "9000246", mobilisation: "Acceptable", risque: "eleve", risqueLabel: "Élevé", pattern: "Stable", defi: "Structure", rai: 2, intervention: "Remédiation en Structure" },
+            { num: 24, da: "9000113", mobilisation: "Complétion critique", risque: "tres-eleve", risqueLabel: "Très élevé", pattern: "Défi spécifique", defi: "Rigueur", rai: 3, intervention: "Intervention intensive" },
+            { num: 25, da: "9000181", mobilisation: "Favorable", risque: "faible", risqueLabel: "Faible", pattern: "Défi spécifique", defi: "Structure", rai: 2, intervention: "Pratique guidée en Structure" },
+            { num: 26, da: "9000144", mobilisation: "Favorable", risque: "minimal", risqueLabel: "Minimal", pattern: "Stable", defi: "Structure", rai: 1, intervention: "Pratique autonome" },
+            { num: 27, da: "9000142", mobilisation: "Acceptable", risque: "modere", risqueLabel: "Modéré", pattern: "Défi spécifique", defi: "Nuance", rai: 2, intervention: "Pratique guidée en Nuance" },
+            { num: 28, da: "9000092", mobilisation: "Acceptable", risque: "eleve", risqueLabel: "Élevé", pattern: "Défi spécifique", defi: "Nuance", rai: 2, intervention: "Pratique guidée en Nuance" },
+            { num: 29, da: "9000179", mobilisation: "Acceptable", risque: "tres-eleve", risqueLabel: "Très élevé", pattern: "Défi spécifique", defi: "Structure", rai: 3, intervention: "Intervention intensive" },
+            { num: 30, da: "9000260", mobilisation: "Acceptable", risque: "tres-eleve", risqueLabel: "Très élevé", pattern: "Défi spécifique", defi: "Structure", rai: 3, intervention: "Intervention intensive" }
+        ];
+
+        // Fonction pour générer le tableau
+        function afficherTableau(data = etudiants) {
+            const tbody = document.getElementById('tableauBody');
+            tbody.innerHTML = data.map(e => {
+                const risqueClass = `risque-${e.risque}`;
+                const raiClass = `rai-${e.rai}`;
+                const highlightClass = (e.risque === 'faible' || e.risque === 'minimal') && e.rai === 2 ? 'highlight' : '';
+
+                return `
+                    <tr class="${highlightClass}" data-risque="${e.risque}" data-rai="${e.rai}" data-pattern="${e.pattern}">
+                        <td><span class="numero">${e.num}</span></td>
+                        <td><strong>${e.da}</strong></td>
+                        <td>${e.mobilisation}</td>
+                        <td><span class="badge ${risqueClass}">${e.risqueLabel}</span></td>
+                        <td class="pattern">${e.pattern}</td>
+                        <td><strong>${e.defi}</strong></td>
+                        <td><span class="badge ${raiClass}">Niveau ${e.rai}</span></td>
+                        <td>${e.intervention}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Fonction pour filtrer le tableau
+        function filtrerTableau() {
+            const filterRisque = document.getElementById('filterRisque').value;
+            const filterRai = document.getElementById('filterRai').value;
+            const filterPattern = document.getElementById('filterPattern').value;
+
+            let filtered = etudiants;
+
+            if (filterRisque) {
+                filtered = filtered.filter(e => e.risque === filterRisque);
+            }
+            if (filterRai) {
+                filtered = filtered.filter(e => e.rai === parseInt(filterRai));
+            }
+            if (filterPattern) {
+                filtered = filtered.filter(e => e.pattern === filterPattern);
+            }
+
+            afficherTableau(filtered);
+        }
+
+        // Fonction pour surligner les cas spécifiques
+        function highlightCas() {
+            const checked = document.getElementById('highlightRisqueFaibleRai2').checked;
+            const rows = document.querySelectorAll('#tableauPrincipal tbody tr');
+
+            if (checked) {
+                rows.forEach(row => {
+                    const risque = row.dataset.risque;
+                    const rai = parseInt(row.dataset.rai);
+                    if ((risque === 'faible' || risque === 'minimal') && rai === 2) {
+                        row.classList.add('highlight');
+                    }
+                });
+            } else {
+                rows.forEach(row => row.classList.remove('highlight'));
+            }
+        }
+
+        // Initialiser le tableau au chargement
+        afficherTableau();
+    </script>
+</body>
+</html>
