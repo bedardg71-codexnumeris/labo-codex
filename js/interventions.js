@@ -35,6 +35,7 @@
  *     risqueDistribution: { 'Minimal': 0, 'Faible': 2, 'Modéré': 3, 'Élevé': 2, 'Critique': 0 }
  *   },
  *   observations: 'Notes prises durant la rencontre...',
+ *   notesIndividuelles: { '1234567': 'Excellente participation...', '7654321': 'A besoin de...' },
  *   statut: 'planifiee' | 'en-cours' | 'completee',
  *   dateCreation: timestamp,
  *   dateModification: timestamp
@@ -132,6 +133,8 @@ function creerIntervention(data) {
         niveauRai: data.niveauRai || 2,
         titre: data.titre || '',
         description: data.description || '',
+        seanceConcernee: data.seanceConcernee || null,
+        marquerNonParticipantsMotives: data.marquerNonParticipantsMotives || false,
         etudiants: [],
         analyse: null,
         statut: 'planifiee',
@@ -411,7 +414,7 @@ function afficherListeInterventions() {
                     <div style="display: flex; gap: 8px;">
                         ${intervention.statut !== 'completee' ? `
                             <button onclick="ouvrirIntervention('${intervention.id}')" class="btn btn-principal">
-                                ${intervention.statut === 'planifiee' ? 'Ouvrir' : 'Continuer'}
+                                Ouvrir
                             </button>
                             <button onclick="afficherFormulaireModification('${intervention.id}')" class="btn btn-modifier">
                                 Modifier
@@ -437,10 +440,12 @@ function afficherListeInterventions() {
 
                 ${intervention.observations ? `
                     <div class="carte" style="margin-top: 10px; background: #fffef7;">
-                        <h5 style="margin: 0 0 8px 0; color: var(--bleu-principal);">Observations</h5>
+                        <h5 style="margin: 0 0 8px 0; color: var(--bleu-principal);">Observations générales</h5>
                         <p style="margin: 0; white-space: pre-wrap; color: #555;">${intervention.observations}</p>
                     </div>
                 ` : ''}
+
+                ${intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0 ? genererAffichageNotesIndividuelles(intervention.notesIndividuelles) : ''}
             </div>
         `;
     });
@@ -548,6 +553,35 @@ function genererAffichageAnalyse(analyse) {
 }
 
 /**
+ * Générer l'affichage des notes individuelles pour la liste des interventions
+ * @param {Object} notesIndividuelles - Objet avec format { 'DA': 'note text', ... }
+ * @returns {string} HTML des notes individuelles
+ */
+function genererAffichageNotesIndividuelles(notesIndividuelles) {
+    if (!notesIndividuelles || Object.keys(notesIndividuelles).length === 0) return '';
+
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    let html = `
+        <div class="carte" style="margin-top: 10px; background: #f0f8ff;">
+            <h5 style="margin: 0 0 8px 0; color: var(--bleu-principal);">Notes individuelles</h5>
+    `;
+
+    Object.entries(notesIndividuelles).forEach(([da, note]) => {
+        const etudiant = etudiants.find(e => e.da === da);
+        if (etudiant && note) {
+            html += `
+                <div style="margin-bottom: 8px;">
+                    <strong>${etudiant.prenom} ${etudiant.nom}:</strong> ${note}
+                </div>
+            `;
+        }
+    });
+
+    html += '</div>';
+    return html;
+}
+
+/**
  * Afficher le formulaire de création d'intervention
  */
 function afficherFormulaireIntervention() {
@@ -589,18 +623,44 @@ function afficherFormulaireIntervention() {
                     </div>
                 </div>
 
-                <div class="champ-formulaire">
-                    <label for="interventionType" class="label-formulaire">Type :</label>
-                    <select id="interventionType" class="controle-form" required>
-                        <option value="groupe">Groupe (séance en classe)</option>
-                        <option value="individuel">Individuel (rencontre en dispo)</option>
-                    </select>
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="champ-formulaire" style="margin: 0;">
+                        <label for="interventionType" class="label-formulaire">Type :</label>
+                        <select id="interventionType" class="controle-form" required>
+                            <option value="groupe">Groupe (séance en classe)</option>
+                            <option value="individuel">Individuel (rencontre en dispo)</option>
+                        </select>
+                    </div>
+
+                    <div class="champ-formulaire" style="margin: 0;">
+                        <label for="interventionDescription" class="label-formulaire">Description (optionnel) :</label>
+                        <textarea id="interventionDescription" class="controle-form" rows="2"
+                                  placeholder="Objectifs de l'intervention, sujets abordés..."></textarea>
+                    </div>
                 </div>
 
-                <div class="champ-formulaire">
-                    <label for="interventionDescription" class="label-formulaire">Description (optionnel) :</label>
-                    <textarea id="interventionDescription" class="controle-form" rows="3"
-                              placeholder="Objectifs de l'intervention, sujets abordés..."></textarea>
+                <div class="carte" style="background: var(--bleu-tres-pale); padding: 15px;">
+                    <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Gestion des absences</h4>
+                    <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
+                        Si cette intervention correspond à une séance de cours, vous pouvez marquer comme motivée l'absence des non-participants.
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; align-items: start;">
+                        <div class="champ-formulaire" style="margin: 0;">
+                            <label for="interventionSeance" class="label-formulaire">Séance concernée :</label>
+                            <input type="date" id="interventionSeance" class="controle-form">
+                        </div>
+
+                        <div class="champ-formulaire" style="margin: 0;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 5px;">
+                                <input type="checkbox" id="interventionMarquerMotivees" style="width: auto;">
+                                <span>Marquer les non-participants comme absents motivés</span>
+                            </label>
+                            <small class="text-muted" style="font-size: 0.85rem;">
+                                Les élèves non sélectionnés bénéficieront d'un «congé» pour cette séance.
+                            </small>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
@@ -629,7 +689,9 @@ function sauvegarderNouvelleIntervention(event) {
         heure: document.getElementById('interventionHeure').value,
         niveauRai: parseInt(document.getElementById('interventionNiveau').value),
         type: document.getElementById('interventionType').value,
-        description: document.getElementById('interventionDescription').value
+        description: document.getElementById('interventionDescription').value,
+        seanceConcernee: document.getElementById('interventionSeance').value || null,
+        marquerNonParticipantsMotives: document.getElementById('interventionMarquerMotivees').checked
     };
 
     const interventionId = creerIntervention(data);
@@ -779,7 +841,7 @@ function ouvrirIntervention(interventionId) {
         return nomA.localeCompare(nomB);
     });
 
-    // Générer la liste avec checkboxes
+    // Générer la liste avec checkboxes et notes individuelles
     let listeHtml = '';
     let nbCheckboxesCochees = 0;
     etudiants.forEach(etudiant => {
@@ -790,14 +852,21 @@ function ouvrirIntervention(interventionId) {
         }
         const indices = calculerTousLesIndices(etudiant.da);
         const cible = determinerCibleIntervention(etudiant.da);
+        const noteExistante = intervention.notesIndividuelles?.[etudiant.da] || '';
 
         listeHtml += `
-            <div>
-                <input type="checkbox" id="etud-${etudiant.da}" value="${etudiant.da}" ${checked}>
-                <label for="etud-${etudiant.da}">
-                    <span>${etudiant.prenom} ${etudiant.nom}</span>
-                    <span class="badge-sys badge-rai-${cible.niveau}">Niveau ${cible.niveau}</span>
+            <div style="display: grid; grid-template-columns: auto 1fr 2fr auto; gap: 10px; align-items: center;
+                        padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
+                <input type="checkbox" id="etud-${etudiant.da}" value="${etudiant.da}" ${checked}
+                       onchange="afficherAnalyseTempsReel('${intervention.id}')"
+                       style="width: auto; margin: 0;">
+                <label for="etud-${etudiant.da}" style="font-weight: 500; margin: 0; cursor: pointer;">
+                    ${etudiant.prenom} ${etudiant.nom}
                 </label>
+                <textarea id="note-${etudiant.da}" class="controle-form" rows="1"
+                          placeholder="Note individuelle..."
+                          style="font-size: 0.85rem; resize: vertical;">${noteExistante}</textarea>
+                <span class="badge-sys badge-rai-${cible.niveau}">Niveau ${cible.niveau}</span>
             </div>
         `;
     });
@@ -822,23 +891,36 @@ function ouvrirIntervention(interventionId) {
 
             <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
 
-            <h4>Marquer les présences</h4>
-            <p class="text-muted">
-                Cochez les étudiant·e·s qui se sont présenté·e·s à cette intervention.
-            </p>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; margin-bottom: 20px;">
+                <!-- Colonne gauche: Liste des étudiants avec notes (66%) -->
+                <div>
+                    <h4>Marquer les présences et notes individuelles</h4>
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
+                        Cochez les étudiant·e·s présent·e·s et documentez vos observations spécifiques.
+                    </p>
 
-            <div id="listeEtudiantsIntervention" class="liste-etudiants-intervention">
-                ${listeHtml}
+                    <div id="listeEtudiantsIntervention" class="liste-etudiants-intervention">
+                        ${listeHtml}
+                    </div>
+                </div>
+
+                <!-- Colonne droite: Analyse du sous-groupe -->
+                <div>
+                    <h4>Profilage du sous-groupe</h4>
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
+                        Cette aggrégation des profils des étudiant·e·s vise à éclairer votre préparation.
+                    </p>
+                    <div id="analyseTempsReel"></div>
+                </div>
             </div>
 
-            <div id="analyseTempsReel"></div>
-
-            <div class="carte" style="margin-top: 20px;">
-                <h4 style="margin-top: 0;">Observations et notes</h4>
+            <!-- Observations générales (pleine largeur) -->
+            <div class="carte" style="margin-bottom: 20px;">
+                <h4 style="margin-top: 0;">Observations générales</h4>
                 <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 10px;">
-                    Notez vos observations durant l'intervention (stratégies utilisées, réactions, pistes d'amélioration...)
+                    Notez vos observations durant l'intervention (stratégies à nouveau enseignées, réception du groupe...)
                 </p>
-                <textarea id="observationsIntervention" class="controle-form" rows="5" placeholder="Ex: Stratégie d'organisation enseignée. Bonne participation. À revoir lors de la prochaine séance...">${intervention.observations || ''}</textarea>
+                <textarea id="observationsIntervention" class="controle-form" rows="6" placeholder="Ex: Stratégie de lecture n°3...">${intervention.observations || ''}</textarea>
             </div>
 
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
@@ -857,15 +939,12 @@ function ouvrirIntervention(interventionId) {
         </div>
     `;
 
-    // Ajouter l'événement pour l'analyse temps réel
-    document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', () => afficherAnalyseTempsReel(interventionId));
-    });
-
-    // Afficher l'analyse si des étudiants sont déjà cochés
-    if (intervention.etudiants.length > 0) {
-        afficherAnalyseTempsReel(interventionId);
-    }
+    // Afficher l'analyse initiale si des étudiants sont déjà cochés
+    setTimeout(() => {
+        if (intervention.etudiants.length > 0) {
+            afficherAnalyseTempsReel(interventionId);
+        }
+    }, 100);
 }
 
 /**
@@ -879,12 +958,63 @@ function afficherAnalyseTempsReel(interventionId) {
     const analyseDiv = document.getElementById('analyseTempsReel');
 
     if (dasSelectionnes.length === 0) {
-        analyseDiv.innerHTML = '';
+        analyseDiv.innerHTML = '<p class="text-muted" style="font-style: italic;">Cochez des étudiant·e·s pour voir l\'analyse du sous-groupe.</p>';
         return;
     }
 
     const analyse = analyserSousGroupe(dasSelectionnes);
     analyseDiv.innerHTML = genererAffichageAnalyse(analyse);
+}
+
+/**
+ * Afficher les champs de notes individuelles pour les étudiants sélectionnés
+ * @param {string} interventionId - ID de l'intervention
+ * @param {Array} dasSelectionnes - Liste des DAs sélectionnés
+ */
+function afficherNotesIndividuelles(interventionId, dasSelectionnes) {
+    const intervention = obtenirIntervention(interventionId);
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const container = document.getElementById('notesIndividuellesContainer');
+
+    if (!container || dasSelectionnes.length === 0) return;
+
+    // Initialiser notesIndividuelles si inexistant
+    if (!intervention.notesIndividuelles) {
+        intervention.notesIndividuelles = {};
+    }
+
+    let html = `
+        <div class="carte" style="margin-top: 20px;">
+            <h4 style="margin-top: 0;">Notes individuelles</h4>
+            <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
+                Documentez vos observations spécifiques pour chaque étudiant·e (participation, compréhension, besoins identifiés...)
+            </p>
+    `;
+
+    dasSelectionnes.forEach(da => {
+        const etudiant = etudiants.find(e => e.da === da);
+        if (!etudiant) return;
+
+        const noteExistante = intervention.notesIndividuelles[da] || '';
+
+        html += `
+            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: var(--bleu-principal);">
+                    ${etudiant.prenom} ${etudiant.nom}
+                </label>
+                <textarea
+                    id="note-${da}"
+                    class="controle-form"
+                    rows="2"
+                    placeholder="Ex: Excellente participation, a bien saisi la stratégie enseignée..."
+                    style="font-size: 0.9rem;">${noteExistante}</textarea>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+
+    container.innerHTML = html;
 }
 
 /**
@@ -909,15 +1039,27 @@ function sauvegarderPresencesIntervention(interventionId) {
     // Marquer les présences (met à jour etudiants et analyse)
     marquerPresences(interventionId, dasSelectionnes);
 
-    // Sauvegarder les observations séparément
+    // Sauvegarder les observations et notes individuelles
     const interventions = obtenirInterventions();
     const index = interventions.findIndex(i => i.id === interventionId);
 
     if (index !== -1) {
         interventions[index].observations = observations;
+
+        // Récupérer les notes individuelles pour chaque étudiant présent
+        const notesIndividuelles = {};
+        dasSelectionnes.forEach(da => {
+            const noteField = document.getElementById(`note-${da}`);
+            if (noteField && noteField.value.trim()) {
+                notesIndividuelles[da] = noteField.value.trim();
+            }
+        });
+        interventions[index].notesIndividuelles = notesIndividuelles;
+
         interventions[index].dateModification = Date.now();
         sauvegarderInterventions(interventions);
         console.log('✅ Intervention sauvegardée dans localStorage');
+        console.log('   Notes individuelles:', Object.keys(notesIndividuelles).length, 'étudiant(s)');
     }
 
     // Retourner à la liste
@@ -946,12 +1088,23 @@ function terminerIntervention(interventionId) {
     // Marquer les présences (met à jour etudiants et analyse)
     marquerPresences(interventionId, dasSelectionnes);
 
-    // Sauvegarder les observations
+    // Sauvegarder les observations et notes individuelles
     const interventions = obtenirInterventions();
     const index = interventions.findIndex(i => i.id === interventionId);
 
     if (index !== -1) {
         interventions[index].observations = observations;
+
+        // Récupérer les notes individuelles pour chaque étudiant présent
+        const notesIndividuelles = {};
+        dasSelectionnes.forEach(da => {
+            const noteField = document.getElementById(`note-${da}`);
+            if (noteField && noteField.value.trim()) {
+                notesIndividuelles[da] = noteField.value.trim();
+            }
+        });
+        interventions[index].notesIndividuelles = notesIndividuelles;
+
         interventions[index].dateModification = Date.now();
         sauvegarderInterventions(interventions);
     }
@@ -1039,6 +1192,50 @@ function initialiserModuleInterventions() {
     console.log('✅ Module Interventions initialisé');
 }
 
+/**
+ * Obtenir la liste des DAs avec absence motivée pour une date donnée
+ * @param {string} date - Date au format YYYY-MM-DD
+ * @returns {Array} Liste des DAs avec absence motivée
+ */
+function obtenirAbsencesMotiveesParDate(date) {
+    const interventions = obtenirInterventions();
+    const dasMotives = [];
+
+    // Filtrer les interventions qui:
+    // 1. Ont marquerNonParticipantsMotives = true
+    // 2. Ont seanceConcernee = date
+    const interventionsConcernees = interventions.filter(intervention =>
+        intervention.marquerNonParticipantsMotives === true &&
+        intervention.seanceConcernee === date
+    );
+
+    if (interventionsConcernees.length === 0) {
+        return [];
+    }
+
+    // Récupérer tous les étudiants du groupe
+    const tousLesEtudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    const tousLesDas = tousLesEtudiants.map(e => e.da);
+
+    // Pour chaque intervention concernée
+    interventionsConcernees.forEach(intervention => {
+        // Les participants à l'intervention
+        const participants = intervention.etudiants || [];
+
+        // Les non-participants = tous les étudiants - participants
+        const nonParticipants = tousLesDas.filter(da => !participants.includes(da));
+
+        // Ajouter à la liste des DAs motivés (sans doublons)
+        nonParticipants.forEach(da => {
+            if (!dasMotives.includes(da)) {
+                dasMotives.push(da);
+            }
+        });
+    });
+
+    return dasMotives;
+}
+
 // Exporter les fonctions publiques
 window.obtenirInterventions = obtenirInterventions;
 window.obtenirIntervention = obtenirIntervention;
@@ -1055,3 +1252,6 @@ window.ouvrirIntervention = ouvrirIntervention;
 window.sauvegarderPresencesIntervention = sauvegarderPresencesIntervention;
 window.terminerIntervention = terminerIntervention;
 window.initialiserModuleInterventions = initialiserModuleInterventions;
+window.formaterDateLisible = formaterDateLisible;
+window.genererBadgeStatut = genererBadgeStatut;
+window.obtenirAbsencesMotiveesParDate = obtenirAbsencesMotiveesParDate;
