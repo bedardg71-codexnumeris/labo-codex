@@ -1077,7 +1077,7 @@ function initialiserModuleProductions() {
     // Charger automatiquement si on est sur la page productions
     const sousSection = document.querySelector('#materiel-productions');
     if (sousSection && sousSection.classList.contains('active')) {
-        // Afficher la sidebar avec la liste des productions (Beta 0.80.5+)
+        // Afficher la sidebar avec la liste des productions (Beta 80.5+)
         afficherListeProductions();
 
         // Afficher aussi l'ancienne vue (cachée) pour compatibilité
@@ -1088,7 +1088,7 @@ function initialiserModuleProductions() {
     // Pas d'événements globaux à attacher pour l'instant
     // Les événements sont gérés via les attributs onclick dans le HTML
 
-    console.log('✅ Module Productions initialisé avec layout sidebar (Beta 0.80.5)');
+    console.log('✅ Module Productions initialisé avec layout sidebar (Beta 80.5)');
 }
 
 /* ===============================
@@ -1166,7 +1166,7 @@ window.initialiserModuleProductions = initialiserModuleProductions;
  */
 
 /* ===============================
-   FONCTIONS SIDEBAR (Beta 0.80.5+)
+   FONCTIONS SIDEBAR (Beta 80.5+)
    Layout 2 colonnes avec navigation latérale
    =============================== */
 

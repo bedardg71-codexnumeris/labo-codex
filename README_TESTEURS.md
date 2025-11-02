@@ -1,4 +1,4 @@
-# Guide de test - Monitorage Beta 0.79
+# Guide de test - Monitorage Beta 79
 
 Merci de participer aux tests de l'application de monitorage pédagogique ! 🙏
 
@@ -96,7 +96,7 @@ Pour chaque bug :
 
 ---
 
-## 🔍 Points de vigilance spécifiques à Beta 0.79
+## 🔍 Points de vigilance spécifiques à Beta 79
 
 ### Nouveautés à valider
 - [ ] Le format compact des critères est-il trop dense ?
@@ -176,6 +176,6 @@ Vos retours permettront de :
 
 ---
 
-**Version du package** : Beta 0.79
+**Version du package** : Beta 79
 **Date de publication** : 29 octobre 2025
 **Statut** : Phase de tests - Retours attendus

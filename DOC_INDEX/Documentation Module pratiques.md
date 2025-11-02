@@ -1,6 +1,6 @@
 # Documentation Module pratiques.js
 
-**Version** : Beta 0.72
+**Version** : Beta 72
 **Date de mise à jour** : 26 octobre 2025
 **Fichier source** : `js/pratiques.js`
 
@@ -15,7 +15,7 @@
 **Fonctionnalités principales** :
 1. Configuration de la pratique de notation (sommative vs alternative)
 2. Sélection du type de PAN (Maîtrise, Spécifications, Dénotation)
-3. **Mode comparatif** : Affichage simultané des deux pratiques (Beta 0.72)
+3. **Mode comparatif** : Affichage simultané des deux pratiques (Beta 72)
 4. Sauvegarde et chargement de la configuration
 5. Mise à jour du statut de configuration
 
@@ -225,7 +225,7 @@ Gère le changement du type de PAN (maîtrise, spécifications, dénotation).
 
 ---
 
-### Gestion du mode d'affichage (Beta 0.72)
+### Gestion du mode d'affichage (Beta 72)
 
 #### `afficherOptionsAffichage()`
 
@@ -242,7 +242,7 @@ Gère l'affichage de la section "Options d'affichage" avec la checkbox "mode com
    - Pratique sommative : Checkbox disponible (généralement non cochée)
 3. Appelle `sauvegarderOptionsAffichage()`
 
-**Interface Beta 0.72** :
+**Interface Beta 72** :
 ```
 Options d'affichage au tableau de bord
 ☐ Activer le mode comparatif (expérimental)
@@ -424,7 +424,7 @@ Dernière configuration : 26 octobre 2025 à 10:30
   <div id="infoPAN"></div>
 </div>
 
-<!-- Options d'affichage (Beta 0.72) -->
+<!-- Options d'affichage (Beta 72) -->
 <div id="optionsAffichageIndices">
   <label>
     <input type="checkbox" id="modeComparatif">
@@ -636,7 +636,7 @@ if (!modalites.affichageTableauBord) {
 
 ---
 
-## 🚀 Changements Beta 0.72
+## 🚀 Changements Beta 72
 
 ### Modifications majeures
 

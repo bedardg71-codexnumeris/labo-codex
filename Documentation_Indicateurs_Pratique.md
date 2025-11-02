@@ -1,6 +1,6 @@
 # Guide utilisateur : Affichage comparatif SOM-PAN
 
-**Version** : 2.0 (Beta 0.72)
+**Version** : 2.0 (Beta 72)
 **Date** : 26 octobre 2025
 **Module** : Système de monitorage SOM-PAN hybride
 
@@ -495,7 +495,7 @@ document.getElementById('toggle-pan')?.addEventListener('change', function() {
 
 ## Historique des versions
 
-### Version 2.0 (26 octobre 2025 - Beta 0.72)
+### Version 2.0 (26 octobre 2025 - Beta 72)
 - **Refonte complète** du système d'affichage SOM-PAN hybride
 - **Mode normal** : Badge simple dans le titre, valeurs uniques en noir
 - **Mode comparatif** : Checkboxes interactives, valeurs colorées orange/bleu

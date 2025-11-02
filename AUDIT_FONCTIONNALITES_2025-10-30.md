@@ -1,4 +1,4 @@
-# Audit des fonctionnalités - Monitorage Beta 0.79
+# Audit des fonctionnalités - Monitorage Beta 79
 **Date** : 30 octobre 2025
 **Objectif** : Comparer l'état actuel de l'application avec les spécifications du Guide de monitorage complet
 
@@ -8,7 +8,7 @@
 
 Cet audit compare systématiquement :
 - **Référence** : Guide de monitorage vA2025-1-06-08-25.pdf (36 pages)
-- **Code actuel** : Beta 0.79 (index 78)
+- **Code actuel** : Beta 79 (index 78)
 - **Modules analysés** : profil-etudiant.js, tableau-bord-apercu.js, portfolio.js
 
 ---
@@ -396,7 +396,7 @@ Cet audit compare systématiquement :
    - ❌ Pas de raccourcis clavier pour actions fréquentes
 
 2. **Affichage** :
-   - ✅ Format compact des grilles et productions (Beta 0.79)
+   - ✅ Format compact des grilles et productions (Beta 79)
    - ✅ Descriptions repliables
    - ❌ Pas de mode "impression" optimisé
    - ❌ Pas de personnalisation de l'affichage (taille police, contraste)
@@ -447,7 +447,7 @@ Cet audit compare systématiquement :
 
 ## 🎯 PLAN DE MATCH MIS À JOUR
 
-### PHASE 1 : Consolidation (Beta 0.80 - 0.85) - 2-3 semaines
+### PHASE 1 : Consolidation (Beta 80 - 0.85) - 2-3 semaines
 
 **Objectif** : Finaliser les fonctionnalités partiellement implémentées
 
@@ -595,7 +595,7 @@ Cet audit compare systématiquement :
 2. ✅ **Architecture Single Source of Truth** : Évite les incohérences de données
 3. ✅ **Support SOM-PAN dual** : Permet comparaison expérimentale des pratiques
 4. ✅ **Diagnostic automatique** : Patterns, forces, défis, cibles d'intervention
-5. ✅ **Interface épurée** : Optimisations espace (Beta 0.79) améliorent lisibilité
+5. ✅ **Interface épurée** : Optimisations espace (Beta 79) améliorent lisibilité
 
 ### Gaps critiques à combler
 
@@ -609,11 +609,11 @@ Cet audit compare systématiquement :
 1. **Prioriser PHASE 1** : Finaliser jetons et cartouches avant d'ajouter nouvelles fonctionnalités
 2. **Créer module évaluation** : Interface matricielle centrale au workflow pédagogique
 3. **Ajouter visualisations** : Graphiques rendent données exploitables pour décisions pédagogiques
-4. **Tester en situation réelle** : Beta 0.79 prête pour tests utilisateurs, recueillir feedback avant PHASE 2
+4. **Tester en situation réelle** : Beta 79 prête pour tests utilisateurs, recueillir feedback avant PHASE 2
 
 ---
 
 **Audit réalisé par** : Claude Code
 **Date** : 30 octobre 2025
-**Version analysée** : Beta 0.79 (index 78)
+**Version analysée** : Beta 79 (index 78)
 **Prochaine étape** : Validation du plan de match avec l'équipe de développement

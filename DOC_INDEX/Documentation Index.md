@@ -5,7 +5,7 @@ Voici la documentation complète du fichier index 71 (refonte des modules).html 
 
   **Date de création** : Octobre 2025
   **Dernière modification** : Octobre 2025
-  **Version** : Beta 0.71
+  **Version** : Beta 71
   **Lignes de code** : 3351 lignes
   **Taille** : ~47 000 tokens
 
@@ -36,7 +36,7 @@ Voici la documentation complète du fichier index 71 (refonte des modules).html 
 
   LIGNES 1-514:  et styles CSS embarqués
     ├─ Meta tags (charset, viewport)
-    ├─ Titre: "Système de suivi Beta 0.71"
+    ├─ Titre: "Système de suivi Beta 71"
     ├─ Link vers styles.css externe
     ├─ Styles CSS embarqués (~500 lignes)
     └─ Variables CSS, reset, composants
@@ -77,7 +77,7 @@ Voici la documentation complète du fichier index 71 (refonte des modules).html 
   <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Système de suivi Beta 0.71</title>
+      <title>Système de suivi Beta 71</title>
 
       <!-- Styles CSS externes -->
       <link rel="stylesheet" href="styles.css">
@@ -121,7 +121,7 @@ Voici la documentation complète du fichier index 71 (refonte des modules).html 
           <div class="entete">
               <h1>Système de Monitorage Pédagogique</h1>
               <h2>Suivi des apprentissages et monitorage A-C-P</h2>
-              <div class="version">Version Beta 0.71 - Refonte modulaire</div>
+              <div class="version">Version Beta 71 - Refonte modulaire</div>
               <div class="statut-test">MODE TEST</div>
           </div>
 
@@ -1018,7 +1018,7 @@ Voici la documentation complète du fichier index 71 (refonte des modules).html 
   ---
   9. Historique et évolution
 
-  Version Beta 0.71 (octobre 2025)
+  Version Beta 71 (octobre 2025)
 
   État actuel : Application fonctionnelle avec 21 modules JavaScript
 
@@ -1118,7 +1118,7 @@ Voici la documentation complète du fichier index 71 (refonte des modules).html 
   FIN DE LA DOCUMENTATION - index 71 (refonte des modules).html
 
   Dernière mise à jour : 23 octobre 2025
-  Version : Beta 0.71 - Refonte modulaire
+  Version : Beta 71 - Refonte modulaire
 
   ⚠️ RAPPELS CRITIQUES :
   1. L'ordre de chargement des scripts est VITAL

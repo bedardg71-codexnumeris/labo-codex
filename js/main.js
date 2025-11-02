@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // pour garantir que le système est prêt AVANT les autres modules
     }
 
-    // MODULE: Interventions RàI (Beta 0.85)
+    // MODULE: Interventions RàI (Beta 85)
     if (typeof initialiserModuleInterventions === 'function') {
         console.log('   → Module Interventions RàI détecté');
         initialiserModuleInterventions();

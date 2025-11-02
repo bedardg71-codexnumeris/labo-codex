@@ -1,6 +1,6 @@
 ========================================
 PROMPT OPTIMISÉ POUR COPILOT
-Formulaire Microsoft Forms - Tests Beta 0.74
+Formulaire Microsoft Forms - Tests Beta 74
 ========================================
 
 INSTRUCTIONS :
@@ -15,7 +15,7 @@ INSTRUCTIONS :
 PROMPT À COPIER-COLLER
 ========================================
 
-Crée-moi un formulaire Microsoft Forms intitulé "Test du Système de Monitorage Pédagogique - Beta 0.74" pour collecter les retours de testeurs d'une application pédagogique web.
+Crée-moi un formulaire Microsoft Forms intitulé "Test du Système de Monitorage Pédagogique - Beta 74" pour collecter les retours de testeurs d'une application pédagogique web.
 
 DESCRIPTION DU FORMULAIRE :
 "Merci de prendre quelques minutes pour nous faire part de votre expérience avec l'application de monitorage pédagogique. Vos retours sont précieux pour améliorer l'outil et le rendre plus utile pour la communauté enseignante. ⏱️ Durée estimée : 5-10 minutes. 🔒 Anonymat : Vous pouvez rester anonyme si vous le souhaitez. 📧 Contact : labo@codexnumeris.org"
@@ -54,9 +54,9 @@ Q5. Quelle(s) version(s) avez-vous testée(s) ?
 - Type : Cases à cocher (choix multiples)
 - Obligatoire : Oui
 - Options :
-  • Beta 0.72 (support SOM-PAN hybride)
-  • Beta 0.73 (refonte système jetons)
-  • Beta 0.74 (moteur recherche Aide)
+  • Beta 72 (support SOM-PAN hybride)
+  • Beta 73 (refonte système jetons)
+  • Beta 74 (moteur recherche Aide)
   • Autre
 
 Q6. Quel(s) mode(s) de notation avez-vous testé(s) ?

@@ -1,5 +1,5 @@
 /* ===============================
-   INTERVENTIONS.JS - Beta 0.85
+   INTERVENTIONS.JS - Beta 85
    Gestion des interventions RàI
    =============================== */
 

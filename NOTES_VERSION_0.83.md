@@ -1,4 +1,4 @@
-# Notes de version - Beta 0.83
+# Notes de version - Beta 83
 
 **Date de publication** : 31 octobre 2025
 **Nom de code** : Seuils configurables
@@ -7,7 +7,7 @@
 
 ## 🎯 Objectif de cette version
 
-Beta 0.83 introduit la **configuration des seuils d'interprétation** pour les indices A-C-P-R, permettant aux enseignant·es de personnaliser les niveaux d'alerte selon leur contexte pédagogique. Cette version améliore également l'affichage de la section **Mobilisation** avec un format épuré et l'utilisation des descriptions de productions.
+Beta 83 introduit la **configuration des seuils d'interprétation** pour les indices A-C-P-R, permettant aux enseignant·es de personnaliser les niveaux d'alerte selon leur contexte pédagogique. Cette version améliore également l'affichage de la section **Mobilisation** avec un format épuré et l'utilisation des descriptions de productions.
 
 ---
 
@@ -76,7 +76,7 @@ Beta 0.83 introduit la **configuration des seuils d'interprétation** pour les i
 
 1. **index 83 (seuils configurables).html**
    - Ajout de l'interface de configuration des seuils
-   - Mise à jour des numéros de version (Beta 0.83)
+   - Mise à jour des numéros de version (Beta 83)
    - Mise à jour de la date (31 octobre 2025)
 
 2. **js/profil-etudiant.js**
@@ -213,7 +213,7 @@ Monitorage_Beta_0.83/
 
 ## 🚀 Prochaines étapes (PHASE 1.2)
 
-### Priorités pour Beta 0.84
+### Priorités pour Beta 84
 
 1. **Fenêtre glissante configurable** : Permettre de choisir 2, 3 ou 5 artefacts
 2. **Seuils par pratique** : Seuils différents pour SOM vs PAN
@@ -239,7 +239,7 @@ Monitorage_Beta_0.83/
 
 ## 🙏 Remerciements
 
-Merci aux testeurs de Beta 0.81-0.82 pour leurs retours sur :
+Merci aux testeurs de Beta 81-0.82 pour leurs retours sur :
 - La nécessité de personnaliser les seuils selon les contextes
 - L'importance d'afficher les descriptions de productions
 - La demande de simplification de l'affichage des notes
@@ -256,4 +256,4 @@ Merci aux testeurs de Beta 0.81-0.82 pour leurs retours sur :
 
 ---
 
-**Fichier mis à jour le** : 31 octobre 2025 (Beta 0.83 - seuils configurables)
+**Fichier mis à jour le** : 31 octobre 2025 (Beta 83 - seuils configurables)

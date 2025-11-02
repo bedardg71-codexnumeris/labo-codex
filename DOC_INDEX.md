@@ -1,7 +1,7 @@
 # 📚 Index de la documentation - Monitorage v6
 
 **Projet** : Système de Monitorage Pédagogique
-**Version** : Beta 0.71 - Refonte modulaire
+**Version** : Beta 71 - Refonte modulaire
 **Date** : 23 octobre 2025
 **Responsable** : Grégoire Bédard
 
@@ -356,7 +356,7 @@ Ces modules combinent plusieurs rôles : ils génèrent des données ET les affi
 
 **Responsable** : Grégoire Bédard
 **Projet** : Système de Monitorage Pédagogique
-**Version** : Beta 0.71 - Refonte modulaire
+**Version** : Beta 71 - Refonte modulaire
 
 ---
 

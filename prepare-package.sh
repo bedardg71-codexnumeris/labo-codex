@@ -2,7 +2,7 @@
 
 ################################################################################
 # Script de préparation du package de distribution
-# Système de Monitorage Pédagogique - Beta 0.83
+# Système de Monitorage Pédagogique - Beta 83
 # Auteur: Grégoire Bédard
 # Contact: labo@codexnumeris.org
 # Date: 31 octobre 2025

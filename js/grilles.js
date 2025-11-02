@@ -1381,7 +1381,7 @@ function initialiserModuleGrilles() {
     // Charger la liste des grilles
     chargerListeGrillesTemplates();
 
-    // Afficher la sidebar avec la liste des grilles (Beta 0.80.5+)
+    // Afficher la sidebar avec la liste des grilles (Beta 80.5+)
     if (typeof afficherListeGrilles === 'function') {
         afficherListeGrilles();
     }
@@ -1392,7 +1392,7 @@ function initialiserModuleGrilles() {
     // Pas d'événements globaux à attacher pour l'instant
     // Les événements sont gérés via les attributs onclick dans le HTML
 
-    console.log('✅ Module Grilles initialisé avec layout sidebar (Beta 0.80.5)');
+    console.log('✅ Module Grilles initialisé avec layout sidebar (Beta 80.5)');
 }
 
 /* ===============================
@@ -1496,7 +1496,7 @@ window.enregistrerCommeGrille = enregistrerCommeGrille;
 window.initialiserModuleGrilles = initialiserModuleGrilles;
 
 /* ===============================
-   FONCTIONS SIDEBAR (Beta 0.80.5+)
+   FONCTIONS SIDEBAR (Beta 80.5+)
    Layout 2 colonnes - Stubs minimaux
    =============================== */
 

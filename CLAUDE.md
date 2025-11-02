@@ -42,7 +42,7 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 
 ```
 projet/
-├── index 85 (interventions).html             # Point d'entrée actuel (Beta 0.85)
+├── index 85 (interventions).html             # Point d'entrée actuel (Beta 85)
 ├── css/
 │   └── styles.css                        # Styles globaux + variables CSS pratiques
 ├── js/
@@ -162,7 +162,7 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 **Règles des boutons (styles.css:1302-1324)** :
 ```css
-/* RÈGLE AUTOMATIQUE appliquée depuis Beta 0.79 */
+/* RÈGLE AUTOMATIQUE appliquée depuis Beta 79 */
 /* Les boutons DANS les cartes/listes/formulaires sont automatiquement compacts */
 /* Les boutons HORS contexte (actions principales) restent standards */
 
@@ -313,8 +313,8 @@ localStorage.seancesCompletes             // horaire.js (futur)
   - Dépistage A-C-P-R fonctionne dans les deux modes
   - Checkboxes contrôlent l'affichage, pas le calcul
 
-**REFONTE COMPLÈTE AFFICHAGE HYBRIDE SOM-PAN** (Session 26 octobre suite - Beta 0.72)
-- ✅ **Fichier** : `index 72 (support SOM-PAN hybride).html` - Version Beta 0.72
+**REFONTE COMPLÈTE AFFICHAGE HYBRIDE SOM-PAN** (Session 26 octobre suite - Beta 72)
+- ✅ **Fichier** : `index 72 (support SOM-PAN hybride).html` - Version Beta 72
 - ✅ **Variables CSS ajoutées** dans `styles.css` :
   - `--som-orange: #ff6f00` (couleur SOM)
   - `--pan-bleu: #0277bd` (couleur PAN)
@@ -359,10 +359,10 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - ✅ **Commits créés** :
   1. Refonte complète du système d'affichage hybride SOM-PAN (11 fichiers)
   2. Correction de l'aide: échelle IDME en pourcentages (1 fichier)
-  3. Mise à jour version Beta 0.72 (2 fichiers)
+  3. Mise à jour version Beta 72 (2 fichiers)
 
-**SYSTÈME D'IMPORT/EXPORT MATÉRIEL PÉDAGOGIQUE** (Session 28 octobre - Beta 0.75)
-- ✅ **Fichier** : `index 75 (import-export matériel pédagogique).html` - Version Beta 0.75
+**SYSTÈME D'IMPORT/EXPORT MATÉRIEL PÉDAGOGIQUE** (Session 28 octobre - Beta 75)
+- ✅ **Fichier** : `index 75 (import-export matériel pédagogique).html` - Version Beta 75
 - ✅ **Objectif** : Faciliter la collaboration entre enseignant·es et le partage de matériel pédagogique
 - ✅ **Fonctionnalités d'export/import JSON** :
   - **Productions** : Boutons 📤📥 dans Matériel → Productions
@@ -431,8 +431,8 @@ localStorage.seancesCompletes             // horaire.js (futur)
   - Aucune donnée confidentielle exportée (noms, DA, notes, présences)
   - Partage sécuritaire entre collègues
 
-**CORRECTIFS CRITIQUES** (Session 28 octobre - Beta 0.77)
-- ✅ **Fichier** : `index 77 (correctifs critiques).html` - Version Beta 0.77
+**CORRECTIFS CRITIQUES** (Session 28 octobre - Beta 77)
+- ✅ **Fichier** : `index 77 (correctifs critiques).html` - Version Beta 77
 - ✅ **Bugs corrigés** : Deux bugs bloquants lors de l'import de `donnees-demo.json`
 
 **Bug #1 : Corruption de données (import-export.js)**
@@ -469,8 +469,8 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - ✅ **Impact** : Bugs bloquants corrigés, import de `donnees-demo.json` fonctionne maintenant
 - ✅ **Package mis à jour** : `Monitorage_Beta_0.77.zip` (318 Ko) prêt pour distribution
 
-**AJOUT BOUTON SOUTIEN** (Session 28 octobre - Beta 0.78)
-- ✅ **Fichier** : `index 78 (bouton soutien).html` - Version Beta 0.78
+**AJOUT BOUTON SOUTIEN** (Session 28 octobre - Beta 78)
+- ✅ **Fichier** : `index 78 (bouton soutien).html` - Version Beta 78
 - ✅ **Nouvelle fonctionnalité** : Bouton "Soutenir le projet" dans l'en-tête
 - ✅ **Emplacement** : Partie gauche de l'en-tête, sous "Réfléchir, expérimenter, partager"
 - ✅ **Lien** : https://codexnumeris.org/#/portal/support (Ghost/Stripe)
@@ -481,8 +481,8 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - ✅ **CSS** : Classe `.btn-soutien` (lignes 445-469)
 - ✅ **Objectif** : Permettre aux utilisateurs de soutenir financièrement le développement du projet
 
-**OPTIMISATION INTERFACE** (Session 29 octobre - Beta 0.79)
-- ✅ **Fichier** : `index 79 (optimisation espace).html` - Version Beta 0.79
+**OPTIMISATION INTERFACE** (Session 29 octobre - Beta 79)
+- ✅ **Fichier** : `index 79 (optimisation espace).html` - Version Beta 79
 - ✅ **Grilles de critères** : Format compact (~70% d'espace gagné)
   - Vue hiérarchique par défaut avec tous critères visibles
   - Mode édition dédié (clic sur «✏️ Éditer la grille»)
@@ -496,22 +496,22 @@ localStorage.seancesCompletes             // horaire.js (futur)
   - Icônes contextuelles (📌 objectif, ✏️ tâche, 📦 artefacts)
 - ✅ **Package testeurs** : `Monitorage_Beta_0.79.zip` avec guides
 
-**AUDIT ET PLANIFICATION** (Session 30 octobre - Beta 0.80)
-- ✅ **Fichier** : `index 80 (phase 1 préparation).html` - Version Beta 0.80
+**AUDIT ET PLANIFICATION** (Session 30 octobre - Beta 80)
+- ✅ **Fichier** : `index 80 (phase 1 préparation).html` - Version Beta 80
 - ✅ **Audit complet** : `AUDIT_FONCTIONNALITES_2025-10-30.md`
   - Analyse détaillée 72% de complétude
   - Comparaison systématique avec Guide de monitorage (36 pages)
   - Identification gaps critiques (jetons, cartouches, matrice évaluation, graphiques)
 - ✅ **Plan de match** : `PLAN_DE_MATCH_2025-10-30.md`
   - Roadmap structurée en 4 phases vers version 1.0
-  - PHASE 1 : Consolidation (2-3 semaines) → Beta 0.85
+  - PHASE 1 : Consolidation (2-3 semaines) → Beta 85
   - PHASE 2 : Enrichissement (3-4 semaines) → Beta 0.95
   - PHASE 3 : Optimisation (2-3 semaines) → Version 1.0
   - PHASE 4 : Analyses avancées (Post-1.0)
 - ✅ **Documentation** : `NOTES_VERSION_0.80.md`
 
-**SEUILS CONFIGURABLES ET AFFICHAGE ÉPURÉ** (Session 31 octobre - Beta 0.83)
-- ✅ **Fichier** : `index 83 (seuils configurables).html` - Version Beta 0.83
+**SEUILS CONFIGURABLES ET AFFICHAGE ÉPURÉ** (Session 31 octobre - Beta 83)
+- ✅ **Fichier** : `index 83 (seuils configurables).html` - Version Beta 83
 - ✅ **Configuration des seuils d'interprétation** :
   - Interface de personnalisation dans Réglages › Pratique de notation
   - Trois niveaux configurables : Fragile, Acceptable, Bon (par défaut 70%, 80%, 85%)
@@ -531,8 +531,8 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - ✅ **Fichiers modifiés** : `profil-etudiant.js`, `portfolio.js`, `productions.js`
 - ✅ **Documentation** : `NOTES_VERSION_0.83.md`
 
-**INTERVENTIONS RÀI ET OPTIMISATIONS** (Session 1er novembre - Beta 0.85)
-- ✅ **Fichier** : `index 85 (interventions).html` - Version Beta 0.85
+**INTERVENTIONS RÀI ET OPTIMISATIONS** (Session 1er novembre - Beta 85)
+- ✅ **Fichier** : `index 85 (interventions).html` - Version Beta 85
 - ✅ **Cartes métriques uniformisées** :
   - Format standard appliqué: texte à gauche, données à droite
   - Utilisation classes CSS `.carte-metrique-standard` et `.carte-metrique-bleue`

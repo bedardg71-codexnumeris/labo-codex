@@ -818,7 +818,7 @@ body {
 
 /* ===============================
    CARTES MÉTRIQUES - FORMAT STANDARD
-   Beta 0.85+
+   Beta 85+
    Layout: Texte à gauche, données à droite
    =============================== */
 
@@ -1074,7 +1074,7 @@ input[type="number"].controle-form {
 }
 
 /* ===============================
-   BADGES SYSTÈME (Beta 0.84)
+   BADGES SYSTÈME (Beta 84)
    Badges uniformisés pour Risque, Pattern, RàI
    =============================== */
 
@@ -3030,7 +3030,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 
 /* ===============================================
-   SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 0.80.2+)
+   SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)
    Design épuré, efficace et uniforme
 
    USAGE : Cartouches, Productions, Grilles, Échelles
@@ -4192,7 +4192,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     min-width: 200px;
 }
 /* ===============================
-   INTERVENTIONS RàI (Beta 0.85)
+   INTERVENTIONS RàI (Beta 85)
    =============================== */
 
 .profil-info-item {
