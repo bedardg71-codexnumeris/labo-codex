@@ -583,6 +583,21 @@ function filtrerParGroupe() {
         if (container) container.style.display = 'block';
         if (noMsg) noMsg.style.display = 'none';
 
+        // Trier alphabétiquement par nom, puis par prénom (sauf en mode anonymisation)
+        const modeActif = localStorage.getItem('mode_actuel') || 'normal';
+        if (modeActif !== 'anonymisation') {
+            etudiantsFiltres.sort((a, b) => {
+                const nomA = a.nom.toLowerCase();
+                const nomB = b.nom.toLowerCase();
+                if (nomA < nomB) return -1;
+                if (nomA > nomB) return 1;
+                // Si noms identiques, trier par prénom
+                const prenomA = a.prenom.toLowerCase();
+                const prenomB = b.prenom.toLowerCase();
+                return prenomA.localeCompare(prenomB);
+            });
+        }
+
         // Générer le tableau
         tbody.innerHTML = etudiantsFiltres.map(s => {
             const daEchappe = echapperHtml(s.da);
