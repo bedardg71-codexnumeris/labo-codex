@@ -4,7 +4,7 @@
     <title>Système de suivi Beta 0.85 - Interventions RàI</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=1761871037">
+    <link rel="stylesheet" href="styles.css?v=2025110109">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -853,39 +853,41 @@
                         </h3>
 
                         <!-- CARTES DE STATISTIQUES DU GROUPE -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px;">
-                            <!-- Total étudiants -->
-                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border-left: 4px solid var(--bleu-principal);">
-                                <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Total</div>
-                                <div id="stat-total-etudiants" style="font-size: 2rem; font-weight: 700; color: var(--bleu-principal);">—</div>
-                            </div>
-
+                        <div class="grille-metriques">
                             <!-- Risques faibles -->
-                            <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid var(--succes);">
-                                <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Risques faibles</div>
-                                <div id="stat-risques-faibles" style="font-size: 2rem; font-weight: 700; color: var(--succes);">—</div>
-                                <div id="stat-risques-faibles-pct" style="font-size: 0.75rem; color: #666; margin-top: 2px;">—</div>
+                            <div class="carte-metrique-standard carte-metrique-bleue">
+                                <div class="label">Risques faibles</div>
+                                <div class="valeur">
+                                    <span id="stat-risques-faibles">—</span>
+                                    <span id="stat-risques-faibles-pct"></span>
+                                </div>
                             </div>
 
                             <!-- RàI Niveau 1 -->
-                            <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #0ea5e9;">
-                                <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">RàI Niveau 1</div>
-                                <div id="stat-rai-1" style="font-size: 2rem; font-weight: 700; color: #0ea5e9;">—</div>
-                                <div id="stat-rai-1-pct" style="font-size: 0.75rem; color: #666; margin-top: 2px;">—</div>
+                            <div class="carte-metrique-standard carte-metrique-bleue">
+                                <div class="label">RàI Niveau 1</div>
+                                <div class="valeur">
+                                    <span id="stat-rai-1">—</span>
+                                    <span id="stat-rai-1-pct"></span>
+                                </div>
                             </div>
 
                             <!-- RàI Niveau 2 -->
-                            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">RàI Niveau 2</div>
-                                <div id="stat-rai-2" style="font-size: 2rem; font-weight: 700; color: #f59e0b;">—</div>
-                                <div id="stat-rai-2-pct" style="font-size: 0.75rem; color: #666; margin-top: 2px;">—</div>
+                            <div class="carte-metrique-standard carte-metrique-bleue">
+                                <div class="label">RàI Niveau 2</div>
+                                <div class="valeur">
+                                    <span id="stat-rai-2">—</span>
+                                    <span id="stat-rai-2-pct"></span>
+                                </div>
                             </div>
 
                             <!-- RàI Niveau 3 -->
-                            <div style="background: #fee2e2; padding: 15px; border-radius: 8px; border-left: 4px solid var(--risque-critique);">
-                                <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">RàI Niveau 3</div>
-                                <div id="stat-rai-3" style="font-size: 2rem; font-weight: 700; color: var(--risque-critique);">—</div>
-                                <div id="stat-rai-3-pct" style="font-size: 0.75rem; color: #666; margin-top: 2px;">—</div>
+                            <div class="carte-metrique-standard carte-metrique-bleue">
+                                <div class="label">RàI Niveau 3</div>
+                                <div class="valeur">
+                                    <span id="stat-rai-3">—</span>
+                                    <span id="stat-rai-3-pct"></span>
+                                </div>
                             </div>
                         </div>
 
@@ -965,10 +967,26 @@
                                     <input type="text" id="recherche-nom-liste" class="controle-form"
                                         placeholder="Rechercher..." oninput="afficherListeEtudiantsConsultation()">
                                 </div>
-                                <div style="display: flex; gap: 10px;">
-                                    <label style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: white; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; user-select: none;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: #fef2f2; border-radius: 4px; cursor: pointer; user-select: none;">
                                         <input type="checkbox" id="surligner-critique" onchange="afficherListeEtudiantsConsultation()" style="cursor: pointer;">
-                                        <span style="font-size: 0.9rem;">Surligner critiques</span>
+                                        <span style="font-size: 0.8rem; font-weight: 600; color: #991b1b;">Critique (&gt;70%)</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: #fee2e2; border-radius: 4px; cursor: pointer; user-select: none;">
+                                        <input type="checkbox" id="surligner-tres-eleve" onchange="afficherListeEtudiantsConsultation()" style="cursor: pointer;">
+                                        <span style="font-size: 0.8rem; font-weight: 600; color: #dc2626;">Très élevé (60-70%)</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: #fee2e2; border-radius: 4px; cursor: pointer; user-select: none;">
+                                        <input type="checkbox" id="surligner-niveau3" onchange="afficherListeEtudiantsConsultation()" style="cursor: pointer;">
+                                        <span style="font-size: 0.8rem; font-weight: 600; color: #dc2626;">Niveau 3</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: #fef3c7; border-radius: 4px; cursor: pointer; user-select: none;">
+                                        <input type="checkbox" id="surligner-niveau2" onchange="afficherListeEtudiantsConsultation()" style="cursor: pointer;">
+                                        <span style="font-size: 0.8rem; font-weight: 600; color: #f59e0b;">Niveau 2</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: #fef2f2; border-radius: 4px; cursor: pointer; user-select: none;">
+                                        <input type="checkbox" id="surligner-blocage" onchange="afficherListeEtudiantsConsultation()" style="cursor: pointer;">
+                                        <span style="font-size: 0.8rem; font-weight: 600; color: #991b1b;">Blocage</span>
                                     </label>
                                 </div>
                             </div>
@@ -976,9 +994,9 @@
 
                         <!-- TABLEAU DES ÉTUDIANTS -->
                         <div id="tableEtudiantsListe"
-                            style="overflow-x: auto; border: 1px solid #ddd; border-radius: 4px;">
+                            style="max-height: 600px; overflow-x: auto; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
                             <table class="tableau" style="width: 100%; border-collapse: collapse; background: white;">
-                                <thead style="background: var(--bleu-principal); color: white;">
+                                <thead style="background: var(--bleu-principal); color: white; position: sticky; top: 0; z-index: 10;">
                                     <tr>
                                         <th onclick="trierTableauPar('num')" style="padding: 12px; text-align: center; width: 50px; cursor: pointer; user-select: none;" title="Cliquer pour trier">
                                             #<span id="tri-num" style="margin-left: 4px;">↕</span>
@@ -1006,7 +1024,7 @@
                                             P<br><span style="font-weight: normal; font-size: 0.75rem;">(performance)</span><span id="tri-performance" style="margin-left: 4px;">↕</span>
                                         </th>
                                         <th onclick="trierTableauPar('mobilisation')" style="padding: 12px; text-align: center; width: 90px; cursor: pointer; user-select: none;" title="Cliquer pour trier">
-                                            M<br><span style="font-weight: normal; font-size: 0.75rem;">(A×C)</span><span id="tri-mobilisation" style="margin-left: 4px;">↕</span>
+                                            M<br><span style="font-weight: normal; font-size: 0.75rem;">(A+C)/2</span><span id="tri-mobilisation" style="margin-left: 4px;">↕</span>
                                         </th>
                                         <th onclick="trierTableauPar('risque')" style="padding: 12px; text-align: center; width: 120px; cursor: pointer; user-select: none;" title="Cliquer pour trier">
                                             Risque<span id="tri-risque" style="margin-left: 4px;">↕</span>
@@ -6314,11 +6332,11 @@ Exemple :
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=1761390149"></script>
-    <script src="js/etudiants-ameliore.js"></script>
+    <script src="js/etudiants.js?v=2025110117"></script>
     <script src="js/productions.js?v=1761715000"></script>
     <script src="js/grilles.js?v=1761730000"></script>
-    <script src="js/echelles.js?v=1761700200"></script>
-    <script src="js/cartouches.js?v=1761700300"></script>
+    <script src="js/echelles.js?v=2025110106"></script>
+    <script src="js/cartouches.js?v=2025110106"></script>
     <script src="js/cours.js?v=1761391739"></script>
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
@@ -6328,16 +6346,16 @@ Exemple :
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js"></script>
-    <script src="js/profil-etudiant.js?v=1761871037"></script>
+    <script src="js/profil-etudiant.js?v=2025110111"></script>
     <script src="js/presences-apercu.js"></script>
     <script src="js/evaluations-apercu.js"></script>
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js"></script>
     <script src="js/horaire.js?v=1761391190"></script>
-    <script src="js/groupe.js"></script>
+    <script src="js/groupe.js?v=2025110106"></script>
     <script src="js/pratiques.js"></script>
-    <script src="js/interventions.js"></script>
+    <script src="js/interventions.js?v=2025110111"></script>
 
     <!-- PRIORITÉ 6: Modules avancés -->
     <script src="js/import-export.js?v=1761387764"></script>
