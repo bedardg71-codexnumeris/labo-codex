@@ -153,7 +153,14 @@ function creerSelecteurMode() {
         'anonymisation': 'Anonymisé'
     };
 
-    Object.entries(MODES).forEach(([key, mode]) => {
+    // Ordre souhaité : Normal → Anonymisé → Simulé
+    const ordreAffichage = [
+        MODES.NORMAL,
+        MODES.ANONYMISATION,
+        MODES.SIMULATION
+    ];
+
+    ordreAffichage.forEach(mode => {
         const option = document.createElement('option');
         option.value = mode;
         option.textContent = labels[mode];
