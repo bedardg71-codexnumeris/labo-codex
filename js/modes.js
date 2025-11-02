@@ -315,7 +315,22 @@ function appliquerTheme(mode) {
     if (mode !== MODES.NORMAL) {
         bandeau = document.createElement('div');
         bandeau.id = 'bandeau-mode';
-        bandeau.innerHTML = `${THEMES[mode].icone} ${THEMES[mode].nom.toUpperCase()} - Les identités affichées sont ${mode === MODES.SIMULATION ? 'fictives' : 'anonymisées'}`;
+
+        // Texte du bandeau
+        let texte = `${THEMES[mode].icone} ${THEMES[mode].nom.toUpperCase()} - Les identités affichées sont ${mode === MODES.SIMULATION ? 'fictives' : 'anonymisées'}`;
+
+        // Ajouter contrôle DA seulement en mode anonymisation
+        if (mode === MODES.ANONYMISATION) {
+            const afficherDAReel = obtenirOptionAffichageDA();
+            texte += ` | DA: <label style="cursor: pointer; margin-left: 10px;">
+                <input type="checkbox" id="checkbox-da-anonyme" ${afficherDAReel ? 'checked' : ''}
+                       onchange="definirOptionAffichageDA(this.checked)"
+                       style="margin-right: 5px; cursor: pointer;">
+                Afficher DA réels
+            </label>`;
+        }
+
+        bandeau.innerHTML = texte;
         bandeau.style.cssText = `
             background: ${couleur};
             color: white;
@@ -483,36 +498,19 @@ function genererMappingAnonyme() {
     // Sinon, créer un nouveau mapping
     // IMPORTANT : Lire DIRECTEMENT depuis localStorage pour éviter la récursion
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
-    const nomsUtilises = new Set();
 
-    etudiants.forEach(etudiant => {
-        // Choisir UNE catégorie pour cet étudiant (garantit cohérence nom + prénom)
-        const categorie = choisirCategorieCulturelle();
-        const listeCategorielle = NOMS_FICTIFS[categorie];
+    // Filtrer pour exclure le groupe 9999 (simulation)
+    const etudiantsReels = etudiants.filter(e => e.groupe !== '9999');
 
-        let nomAnonyme, prenomAnonyme;
-
-        // Générer un nom unique DANS CETTE CATÉGORIE
-        let tentatives = 0;
-        do {
-            nomAnonyme = listeCategorielle.noms[Math.floor(Math.random() * listeCategorielle.noms.length)];
-            prenomAnonyme = listeCategorielle.prenoms[Math.floor(Math.random() * listeCategorielle.prenoms.length)];
-            tentatives++;
-
-            // Sécurité : si trop de tentatives, abandonner
-            if (tentatives > 100) {
-                console.warn(`Impossible de générer un nom unique dans la catégorie ${categorie} pour DA ${etudiant.da}`);
-                break;
-            }
-        } while (nomsUtilises.has(`${prenomAnonyme} ${nomAnonyme}`));
-
-        nomsUtilises.add(`${prenomAnonyme} ${nomAnonyme}`);
+    etudiantsReels.forEach((etudiant, index) => {
+        // Utiliser simplement un numéro: "Élève 1", "Élève 2", etc.
+        const numero = index + 1;
 
         mapping[etudiant.da] = {
-            nom: nomAnonyme,
-            prenom: prenomAnonyme,
-            nomComplet: `${prenomAnonyme} ${nomAnonyme}`,
-            categorie: categorie
+            nom: '',
+            prenom: `Élève ${numero}`,
+            nomComplet: `Élève ${numero}`,
+            numero: numero
         };
     });
 
@@ -624,6 +622,38 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
 }
 
 /**
+ * Obtient l'option d'affichage du DA en mode anonymisation
+ * @returns {boolean} - true pour afficher le DA réel, false pour "ANONYME"
+ */
+function obtenirOptionAffichageDA() {
+    const option = localStorage.getItem('anonymisation_afficher_da_reel');
+    return option === null ? true : option === 'true'; // Par défaut: true (DA réel)
+}
+
+/**
+ * Définit l'option d'affichage du DA en mode anonymisation
+ * @param {boolean} afficherDAReel - true pour DA réel, false pour "ANONYME"
+ */
+function definirOptionAffichageDA(afficherDAReel) {
+    localStorage.setItem('anonymisation_afficher_da_reel', afficherDAReel.toString());
+    console.log(`📝 Option DA anonymisation: ${afficherDAReel ? 'DA réel' : 'DA fictif (ANONYME)'}`);
+
+    // Rafraîchir l'affichage si on est en mode anonymisation
+    if (modeActuel === MODES.ANONYMISATION && typeof rafraichirContenuSelonMode === 'function') {
+        rafraichirContenuSelonMode();
+    }
+}
+
+/**
+ * Réinitialise le mapping d'anonymisation (force regénération)
+ * Utile quand la liste d'étudiants change
+ */
+function reinitialiserMappingAnonyme() {
+    localStorage.removeItem('mapping_anonymisation');
+    console.log('🔄 Mapping d\'anonymisation réinitialisé');
+}
+
+/**
  * Anonymise les données selon leur type
  * @param {string} cle - Type de données (groupeEtudiants, evaluationsSauvegardees, etc.)
  * @param {Array|Object} donnees - Données à anonymiser
@@ -635,13 +665,15 @@ function anonymiserDonnees(cle, donnees) {
     }
 
     const mapping = genererMappingAnonyme();
+    const afficherDAReel = obtenirOptionAffichageDA();
 
     // Anonymiser selon le type de clé
     switch (cle) {
         case 'groupeEtudiants':
             return donnees.map(etudiant => ({
                 ...etudiant,
-                nom: mapping[etudiant.da]?.nom || etudiant.nom,
+                da: afficherDAReel ? etudiant.da : 'ANONYME',
+                nom: mapping[etudiant.da]?.nom || '',
                 prenom: mapping[etudiant.da]?.prenom || etudiant.prenom,
                 groupe: etudiant.groupe ? `AN.${etudiant.groupe}` : etudiant.groupe
             }));
@@ -651,6 +683,7 @@ function anonymiserDonnees(cle, donnees) {
                 const nomAnonyme = mapping[evaluation.etudiantDA]?.nomComplet || evaluation.etudiantNom;
                 return {
                     ...evaluation,
+                    etudiantDA: afficherDAReel ? evaluation.etudiantDA : 'ANONYME',
                     etudiantNom: nomAnonyme,
                     groupe: evaluation.groupe ? `AN.${evaluation.groupe}` : evaluation.groupe
                 };
@@ -660,7 +693,8 @@ function anonymiserDonnees(cle, donnees) {
             // Les présences gardent le DA mais on peut anonymiser le nom si présent
             return donnees.map(presence => ({
                 ...presence,
-                nom: mapping[presence.da]?.nom || presence.nom,
+                da: afficherDAReel ? presence.da : 'ANONYME',
+                nom: mapping[presence.da]?.nom || '',
                 prenom: mapping[presence.da]?.prenom || presence.prenom
             }));
 
@@ -689,6 +723,9 @@ window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
 window.anonymiserNom = anonymiserNom;
 window.estModeeLectureSeule = estModeeLectureSeule;
+window.obtenirOptionAffichageDA = obtenirOptionAffichageDA;
+window.definirOptionAffichageDA = definirOptionAffichageDA;
+window.reinitialiserMappingAnonyme = reinitialiserMappingAnonyme;
 
 // ============================================
 // CLONAGE DE GROUPE (pour démonstrations)
