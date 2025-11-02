@@ -1763,7 +1763,6 @@ function genererDetailsEtudiant(etudiant) {
                     <th>Cartouche</th>
                     <th>Note (lettre)</th>
                     <th>Note (%)</th>
-                    <th>Statut</th>
                     <th>Date</th>
                     <th>Actions</th>
                     <th style="width: 60px;" title="Verrouillage">🔒/🔓</th>
@@ -1788,11 +1787,9 @@ function genererDetailsEtudiant(etudiant) {
                                         ${item.evaluation.niveauFinal || '—'}
                                     </span>
                                 </td>
-                                <td>${Math.round(item.evaluation.noteFinale) || '—'}%</td>
                                 <td>
-                                    <span class="badge-statut badge-succes">
-                                        ${estRemplacee ? 'Remplacée' : 'Évalué'}
-                                    </span>
+                                    ${Math.round(item.evaluation.noteFinale) || '—'}%
+                                    ${estRemplacee ? '<span class="badge-statut" style="margin-left: 6px;">Remplacée</span>' : ''}
                                     ${estReprise ? '<span style="color: #9c27b0; font-size: 1.2rem; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
                                     ${item.evaluation.jetonDelaiApplique ? '<span style="color: #ff6f00; font-size: 1.2rem; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
                                 </td>
@@ -1828,7 +1825,6 @@ function genererDetailsEtudiant(etudiant) {
             return `
                             <tr style="opacity: 0.7;">
                                 <td>${echapperHtml(item.production.titre || item.production.nom || '—')}</td>
-                                <td>—</td>
                                 <td>—</td>
                                 <td>—</td>
                                 <td>—</td>
