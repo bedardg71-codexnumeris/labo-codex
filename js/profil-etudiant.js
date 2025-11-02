@@ -104,7 +104,7 @@ function genererBadgePratiqueProfil(pratiqueUtilisee) {
 }
 
 /**
- * Génère un badge de risque (Beta 0.84)
+ * Génère un badge de risque (Beta 84)
  * @param {number} risque - Valeur du risque (0-1)
  * @returns {string} - HTML du badge
  */
@@ -136,7 +136,7 @@ function genererBadgeRisqueProfil(risque) {
 }
 
 /**
- * Génère un badge de pattern (Beta 0.84)
+ * Génère un badge de pattern (Beta 84)
  * @param {string} pattern - Pattern d'apprentissage
  * @returns {string} - HTML du badge
  */
@@ -1827,7 +1827,7 @@ let profilActuelDA = null;
 window.profilActuelDA = null;
 
 /**
- * Variable globale pour mémoriser la section active du profil (Beta 0.85)
+ * Variable globale pour mémoriser la section active du profil (Beta 85)
  * Permet de conserver la même section lors de la navigation entre étudiants
  */
 let sectionProfilActive = 'cible'; // Par défaut: Suivi de l'apprentissage
@@ -1844,7 +1844,7 @@ function changerSectionProfil(section) {
 
     const da = profilActuelDA;
 
-    // NOUVEAU (Beta 0.85): Mémoriser la section active pour navigation entre étudiants
+    // NOUVEAU (Beta 85): Mémoriser la section active pour navigation entre étudiants
     sectionProfilActive = section;
 
     // Mettre à jour la navigation active (utilise les classes CSS matériel)
@@ -1852,7 +1852,7 @@ function changerSectionProfil(section) {
         item.classList.remove('active');
     });
 
-    // NOUVEAU (Beta 0.85): Trouver l'élément correspondant à la section
+    // NOUVEAU (Beta 85): Trouver l'élément correspondant à la section
     // Supporte à la fois les clics directs (avec event) et les appels programmatiques
     let itemToActivate = null;
 
@@ -2177,7 +2177,7 @@ function calculerDirectionsCriteres(da) {
 }
 
 /**
- * Génère l'historique des interventions pour le profil étudiant (Beta 0.85)
+ * Génère l'historique des interventions pour le profil étudiant (Beta 85)
  * @param {string} da - DA de l'étudiant
  * @returns {string} - HTML de l'historique
  */
@@ -2375,7 +2375,7 @@ function genererContenuCibleIntervention(da) {
         patternTexte = `${cibleInfo.pattern} (${defiSpecifique.defi} - ${niveauIDME})`;
     }
 
-    // Badge RàI avec classes CSS (Beta 0.84)
+    // Badge RàI avec classes CSS (Beta 84)
     let badgeClasse = '';
     let badgeLabel = '';
     if (cibleInfo.niveau === 3) {
@@ -2693,7 +2693,7 @@ function afficherProfilComplet(da) {
     const etudiantPrecedent = indexActuel > 0 ? etudiants[indexActuel - 1] : null;
     const etudiantSuivant = indexActuel < etudiants.length - 1 ? etudiants[indexActuel + 1] : null;
 
-    // NOUVEAU (Beta 0.85): Déterminer quelle section afficher (section mémorisée ou 'cible' par défaut)
+    // NOUVEAU (Beta 85): Déterminer quelle section afficher (section mémorisée ou 'cible' par défaut)
     const sectionAffichee = sectionProfilActive || 'cible';
 
     // Déterminer le titre et le contenu selon la section active
@@ -2827,7 +2827,7 @@ function afficherProfilComplet(da) {
         if (typeof reattacherEvenementsToggles === 'function') {
             reattacherEvenementsToggles();
         }
-        // SUPPRIMÉ (Beta 0.85): Plus besoin de restaurer la section après coup,
+        // SUPPRIMÉ (Beta 85): Plus besoin de restaurer la section après coup,
         // elle est maintenant générée directement avec la bonne section active
     }, 100);
 

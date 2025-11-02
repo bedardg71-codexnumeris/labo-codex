@@ -115,7 +115,7 @@ function chargerListeEtudiantsEval() {
 
     if (!select) return;
 
-    // NOUVEAU (Beta 0.84): Trier par nom de famille (ordre alphabétique)
+    // NOUVEAU (Beta 84): Trier par nom de famille (ordre alphabétique)
     etudiants.sort((a, b) => {
         const nomA = (a.nom + ' ' + a.prenom).toLowerCase();
         const nomB = (b.nom + ' ' + b.prenom).toLowerCase();
@@ -175,7 +175,7 @@ function filtrerEtudiantsParGroupe() {
         ? etudiants.filter(e => e.groupe === groupeId)
         : etudiants;
 
-    // NOUVEAU (Beta 0.84): Trier par nom de famille (ordre alphabétique)
+    // NOUVEAU (Beta 84): Trier par nom de famille (ordre alphabétique)
     etudiantsFiltres.sort((a, b) => {
         const nomA = (a.nom + ' ' + a.prenom).toLowerCase();
         const nomB = (b.nom + ' ' + b.prenom).toLowerCase();

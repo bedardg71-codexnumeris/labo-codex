@@ -1,6 +1,6 @@
 # Plan de match - Développement Monitorage v1.0
 **Date** : 30 octobre 2025
-**Version actuelle** : Beta 0.79
+**Version actuelle** : Beta 79
 **Score de complétude** : 72%
 **Objectif** : Version 1.0 stable avec toutes les fonctionnalités du guide
 
@@ -8,7 +8,7 @@
 
 ## 🎯 Vision globale
 
-### État actuel (Beta 0.79)
+### État actuel (Beta 79)
 - ✅ Fondations solides : Tous calculs A-C-P-M-E-R-B conformes au guide
 - ✅ Diagnostic automatique : Patterns, forces, défis, cibles RàI
 - ✅ Support SOM-PAN dual : Comparaison expérimentale des pratiques
@@ -23,14 +23,14 @@
 ---
 
 ## 📅 PHASE 1 : Consolidation (2-3 semaines)
-**Versions** : Beta 0.80 → Beta 0.85
+**Versions** : Beta 80 → Beta 85
 **Objectif** : Finaliser fonctionnalités partiellement implémentées
 
 ### 🎫 1.1 Système de jetons complet ✅ COMPLÉTÉ
 **Priorité** : ⚠️ HAUTE
 **Estimation** : 5-6 jours
 **Fichiers** : `portfolio.js`, `productions.js`, `profil-etudiant.js`, `evaluation.js`
-**Statut** : ✅ **COMPLÉTÉ le 30 octobre 2025** (Beta 0.80.1)
+**Statut** : ✅ **COMPLÉTÉ le 30 octobre 2025** (Beta 80.1)
 **Documentation** : Voir `NOTES_JETONS_COMPLETE.md`
 
 #### Fonctionnalités implémentées
@@ -57,7 +57,7 @@
 
 **Interface utilisateur** :
 - [x] Section "JETONS UTILISÉS" dans profil étudiant
-- [x] Bouton "Appliquer jeton de reprise" dans sidebar (Beta 0.80.1)
+- [x] Bouton "Appliquer jeton de reprise" dans sidebar (Beta 80.1)
 - [x] Checkbox "Application de jeton de délai" dans sidebar
 - [x] Badges visuels (violet/orange) pendant édition évaluation
 - [x] Retrait jetons via bouton × (sidebar et banque)
@@ -70,7 +70,7 @@
 - [ ] ⏭️ **Future** : Réglages → Pratiques : Nombre de jetons reprise par défaut (ex: 2)
 - [ ] ⏭️ **Future** : Réglages → Pratiques : Durée délai standard (ex: 7 jours)
 
-#### Fonctions créées/modifiées (Beta 0.80.1)
+#### Fonctions créées/modifiées (Beta 80.1)
 1. **`afficherGestionJetons()`** : Contrôle visibilité sections jetons (CRÉÉE)
 2. **`gererDelaiAccorde()`** : Création vrais jetons avec date (AMÉLIORÉE)
 3. **`appliquerJetonRepriseDepuisSidebar()`** : Application jeton depuis sidebar (CRÉÉE)

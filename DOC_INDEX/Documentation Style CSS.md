@@ -5,7 +5,7 @@ Voici la documentation complète du fichier styles.css :
 
   **Date de création** : Octobre 2025
   **Dernière modification** : 26 octobre 2025
-  **Version** : Beta 0.72
+  **Version** : Beta 72
   **Lignes de code** : ~2000 lignes
   **Convention** : 100% français
 
@@ -161,7 +161,7 @@ Voici la documentation complète du fichier styles.css :
   --vert-doux: #b8d4b8;           /* Vert doux - Accents */
   --vert-leger: #2a8a6a;          /* Vert foncé - Succès */
 
-  Système hybride SOM-PAN (Beta 0.72)
+  Système hybride SOM-PAN (Beta 72)
 
   --som-orange: #ff6f00;          /* Orange SOM - Mode comparatif */
   --pan-bleu: #0277bd;            /* Bleu PAN - Mode comparatif */

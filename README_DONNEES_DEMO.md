@@ -4,7 +4,7 @@
 
 ---
 
-## 🎁 Fichiers prêts à l'emploi (Beta 0.78)
+## 🎁 Fichiers prêts à l'emploi (Beta 78)
 
 **Nouveauté :** Des fichiers de démonstration sont maintenant inclus dans le projet !
 
@@ -46,11 +46,11 @@
 2. Choisir `etudiants-demo.txt` ou `etudiants-demo-groupe9999.txt`
 3. Les étudiants sont importés automatiquement
 
-### ✨ Nouveauté Beta 0.78 : Bouton de soutien
+### ✨ Nouveauté Beta 78 : Bouton de soutien
 
 **NOUVEAU :** Ajout d'un bouton "Soutenir le projet" dans l'en-tête permettant de contribuer financièrement au développement via Ghost/Stripe.
 
-**Rappel Beta 0.77 :** Correctifs critiques pour l'import de données. Si vous aviez des problèmes avec Beta 0.75 ou 0.76, ces bugs sont maintenant corrigés.
+**Rappel Beta 77 :** Correctifs critiques pour l'import de données. Si vous aviez des problèmes avec Beta 75 ou 0.76, ces bugs sont maintenant corrigés.
 
 ### Import/Export matériel pédagogique
 
@@ -358,7 +358,7 @@ Le fichier `donnees-demo.json` doit contenir ces clés :
 
 **Taille approximative :** 50-200 Ko selon le nombre d'étudiants et de données
 
-**Note Beta 0.78 :** La clé `cartouches_grille-srpnf` contient les cartouches de rétroaction liées à la grille SRPNF. Les correctifs import/export garantissent que ces données sont correctement sauvegardées dans localStorage.
+**Note Beta 78 :** La clé `cartouches_grille-srpnf` contient les cartouches de rétroaction liées à la grille SRPNF. Les correctifs import/export garantissent que ces données sont correctement sauvegardées dans localStorage.
 
 ---
 
@@ -421,4 +421,4 @@ Le fichier `donnees-demo.json` doit contenir ces clés :
 
 Contact : labo@codexnumeris.org
 
-**Fichier mis à jour le :** 28 octobre 2025 (Beta 0.78 - bouton soutien)
+**Fichier mis à jour le :** 28 octobre 2025 (Beta 78 - bouton soutien)

@@ -1,4 +1,4 @@
-# Notes de version - Beta 0.79
+# Notes de version - Beta 79
 
 **Date de publication** : 29 octobre 2025
 **Statut** : Beta - Phase de tests
@@ -118,7 +118,7 @@ Vos retours sont précieux ! Commentez sur :
 
 ## 📦 Contenu du package
 
-- `index 78 (bouton soutien).html` - Point d'entrée de l'application (Beta 0.79)
+- `index 78 (bouton soutien).html` - Point d'entrée de l'application (Beta 79)
 - Dossiers `css/` et `js/` - Styles et scripts
 - `donnees-demo.json` - Données de démonstration (optionnel)
 - `README_PROJET.md` - Documentation complète du projet

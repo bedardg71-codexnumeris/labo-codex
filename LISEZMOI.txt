@@ -1,5 +1,5 @@
 ================================================================================
-SYSTÈME DE SUIVI DES APPRENTISSAGES - BETA 0.74
+SYSTÈME DE SUIVI DES APPRENTISSAGES - Beta 74
 Guide d'installation rapide
 ================================================================================
 

@@ -72,7 +72,7 @@ function initialiserModuleCartouches() {
         return;
     }
 
-    // NOUVELLE INTERFACE (Beta 0.80.2): Banque + import unifiés
+    // NOUVELLE INTERFACE (Beta 80.2): Banque + import unifiés
     chargerFiltreGrillesCartouche();
     afficherBanqueCartouches();
 
@@ -156,7 +156,7 @@ function chargerCartouchesRetroaction() {
     document.getElementById('infoCartouche').style.display = 'block';
     
     // Afficher la liste des cartouches existantes
-    // DÉSACTIVÉ pour Beta 0.80.5+ : remplacé par la sidebar
+    // DÉSACTIVÉ pour Beta 80.5+ : remplacé par la sidebar
     // if (cartouches.length > 0) {
     //     afficherListeCartouches(cartouches, grilleId);
     //     document.getElementById('listeCartouchesExistants').style.display = 'block';
@@ -164,7 +164,7 @@ function chargerCartouchesRetroaction() {
     //     document.getElementById('listeCartouchesExistants').style.display = 'none';
     // }
 
-    // Toujours masquer l'ancienne liste (Beta 0.80.5+)
+    // Toujours masquer l'ancienne liste (Beta 80.5+)
     const listeAncienne = document.getElementById('listeCartouchesExistants');
     if (listeAncienne) listeAncienne.style.display = 'none';
     
@@ -521,7 +521,7 @@ function sauvegarderCartouche() {
     // Sauvegarder
     localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouches));
 
-    // NOUVELLE INTERFACE (Beta 0.80.2): Rafraîchir la banque
+    // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
     afficherBanqueCartouches();
     definirCartoucheActive(cartoucheActuel.id);
 
@@ -530,10 +530,10 @@ function sauvegarderCartouche() {
     document.getElementById('selectCartouche').value = cartoucheActuel.id;
 
     // Rafraîchir la nouvelle vue (ancien système)
-    // DÉSACTIVÉ Beta 0.80.5+ : ancienne interface remplacée par sidebar
+    // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
     // afficherToutesLesGrillesEtCartouches();
 
-    // Rafraîchir la banque sidebar (Beta 0.80.5+)
+    // Rafraîchir la banque sidebar (Beta 80.5+)
     if (typeof afficherBanqueCartouches === 'function') {
         afficherBanqueCartouches();
     }
@@ -1058,11 +1058,11 @@ function basculerVerrouillageCartouche(cartoucheId, grilleId) {
         const statut = cartouches[index].verrouille ? 'verrouillée' : 'déverrouillée';
         console.log(`🔒 Cartouche "${cartouches[index].nom}" ${statut}`);
 
-        // DÉSACTIVÉ Beta 0.80.5+ : ancienne interface remplacée par sidebar
+        // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
         // afficherListeCartouches(cartouches, grilleId);
         // afficherToutesLesGrillesEtCartouches();
 
-        // Rafraîchir la banque sidebar (Beta 0.80.5+)
+        // Rafraîchir la banque sidebar (Beta 80.5+)
         if (typeof afficherBanqueCartouches === 'function') {
             afficherBanqueCartouches();
         }
@@ -1111,10 +1111,10 @@ function dupliquerCartouche(cartoucheId, grilleId) {
         cartouches.push(nouveauCartouche);
         localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouches));
 
-        // NOUVELLE INTERFACE (Beta 0.80.5+): Charger directement la copie
+        // NOUVELLE INTERFACE (Beta 80.5+): Charger directement la copie
         chargerCartouchePourModif(nouveauCartouche.id, grilleId);
 
-        // Rafraîchir la banque sidebar (Beta 0.80.5+)
+        // Rafraîchir la banque sidebar (Beta 80.5+)
         if (typeof afficherBanqueCartouches === 'function') {
             afficherBanqueCartouches();
         }
@@ -1150,10 +1150,10 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
         if (selectGrille) selectGrille.value = grilleId;
         if (selectCartouche) selectCartouche.value = cartoucheId;
 
-        // NOUVELLE INTERFACE (Beta 0.80.5+): Passer les paramètres directement
+        // NOUVELLE INTERFACE (Beta 80.5+): Passer les paramètres directement
         chargerMatriceRetroaction(cartoucheId, grilleId);
 
-        // NOUVELLE INTERFACE (Beta 0.80.2): Highlight dans la banque
+        // NOUVELLE INTERFACE (Beta 80.2): Highlight dans la banque
         definirCartoucheActive(cartoucheId);
 
         // Afficher toutes les zones nécessaires
@@ -1253,17 +1253,17 @@ function supprimerCartoucheConfirm(cartoucheId, grilleId) {
         const nouveauxCartouches = cartouches.filter(c => c.id !== cartoucheId);
         localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(nouveauxCartouches));
 
-        // NOUVELLE INTERFACE (Beta 0.80.2): Rafraîchir la banque
+        // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
         afficherBanqueCartouches();
 
         // Ancien système (compatibilité)
         chargerCartouchesRetroaction();
 
         // Rafraîchir la nouvelle vue
-        // DÉSACTIVÉ Beta 0.80.5+ : ancienne interface remplacée par sidebar
+        // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
         // afficherToutesLesGrillesEtCartouches();
 
-        // Rafraîchir la banque sidebar (Beta 0.80.5+)
+        // Rafraîchir la banque sidebar (Beta 80.5+)
         if (typeof afficherBanqueCartouches === 'function') {
             afficherBanqueCartouches();
         }
@@ -1597,7 +1597,7 @@ function ajouterCartoucheAGrille(grilleId) {
     document.getElementById('infoCartouche').style.display = 'block';
     document.getElementById('matriceRetroaction').style.display = 'block';
 
-    // NOUVELLE INTERFACE (Beta 0.80.2): Masquer accueil, afficher zones
+    // NOUVELLE INTERFACE (Beta 80.2): Masquer accueil, afficher zones
     const messageAccueil = document.getElementById('messageAccueilCartouche');
     if (messageAccueil) messageAccueil.style.display = 'none';
 
@@ -1626,7 +1626,7 @@ window.sauvegarderCartouche = sauvegarderCartouche;
 window.importerCommentaires = importerCommentaires;
 window.initialiserModuleCartouches = initialiserModuleCartouches;
 
-// Nouvelles fonctions Beta 0.80.2 (interface unifiée)
+// Nouvelles fonctions Beta 80.2 (interface unifiée)
 window.afficherBanqueCartouches = afficherBanqueCartouches;
 window.filtrerCartouchesBanque = filtrerCartouchesBanque;
 window.creerNouvelleCartouche = creerNouvelleCartouche;
@@ -1691,7 +1691,7 @@ window.importerCartoucheDepuisTxt = importerCartoucheDepuisTxt;
  */
 
 /* ===============================================
-   NOUVELLE INTERFACE (Beta 0.80.2) - BANQUE + IMPORT UNIFIÉS
+   NOUVELLE INTERFACE (Beta 80.2) - BANQUE + IMPORT UNIFIÉS
    Layout 2 colonnes avec sidebar sticky
    =============================================== */
 

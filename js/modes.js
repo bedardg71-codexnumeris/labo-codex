@@ -1181,7 +1181,7 @@ function exporterGroupeFictif() {
 
     // Construire l'objet d'export
     const exportData = {
-        version: 'Beta 0.72',
+        version: 'Beta 72',
         type: 'groupe-fictif',
         dateExport: new Date().toISOString(),
         groupe: '9999',

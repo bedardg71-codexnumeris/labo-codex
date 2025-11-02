@@ -1,6 +1,6 @@
 # Système de jetons - Fonctionnalités complétées
 **Date** : 30 octobre 2025
-**Version** : Beta 0.80
+**Version** : Beta 80
 
 ---
 
@@ -270,7 +270,7 @@ function appliquerJetonRepriseDepuisSidebar() {
 
 ---
 
-## 🚀 Prochaines améliorations possibles (hors scope Beta 0.80)
+## 🚀 Prochaines améliorations possibles (hors scope Beta 80)
 
 ### Jetons de délai avancés
 - [ ] Calculer nouvelle date limite (date production + X jours configurables)
@@ -313,7 +313,7 @@ function appliquerJetonRepriseDepuisSidebar() {
 
 ## ✅ Conclusion
 
-Le système de jetons est maintenant **complet et fonctionnel** pour Beta 0.80. Toutes les fonctionnalités visibles dans les captures d'écran fournies ont été restaurées :
+Le système de jetons est maintenant **complet et fonctionnel** pour Beta 80. Toutes les fonctionnalités visibles dans les captures d'écran fournies ont été restaurées :
 
 1. ✅ Jetons identifiés par étoiles ⭐ (violet = reprise, orange = délai)
 2. ✅ Section "JETONS UTILISÉS" dans profil étudiant

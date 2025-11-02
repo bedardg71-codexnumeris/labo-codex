@@ -1,6 +1,6 @@
 /* ===============================
    MODULE: LISTE DES ÉTUDIANTS (VERSION AMÉLIORÉE)
-   Beta 0.84 - Tableau amélioré
+   Beta 84 - Tableau amélioré
 
    ⚠️ AVERTISSEMENT ⚠️
    Ce module gère l'affichage de la liste des étudiants
@@ -16,7 +16,7 @@
    - Cartes de statistiques du groupe
    - Navigation vers les portfolios
 
-   NOUVELLES FONCTIONNALITÉS BETA 0.84:
+   NOUVELLES FONCTIONNALITÉS Beta 84:
    - Cartes de statistiques (Total, Risques faibles, RàI 1/2/3)
    - Filtres avancés (Risque, RàI, Pattern)
    - Colonnes supplémentaires (Mobilisation M, Risque, Pattern)
@@ -834,7 +834,7 @@ function afficherListeEtudiantsConsultation() {
         // NOUVEAU: Colonne RàI avec badge amélioré
         html += '<td style="text-align: center;"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
 
-        // NOUVEAU (Beta 0.85): Colonne Interventions
+        // NOUVEAU (Beta 85): Colonne Interventions
         const nbInterventions = (typeof obtenirInterventionsEtudiant === 'function')
             ? obtenirInterventionsEtudiant(etudiant.da).length
             : 0;
@@ -988,7 +988,7 @@ function afficherPortfolio(da) {
 }
 
 /* ===============================
-   🆕 NOUVELLES FONCTIONNALITÉS BETA 0.84
+   🆕 NOUVELLES FONCTIONNALITÉS Beta 84
    =============================== */
 
 /**

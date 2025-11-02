@@ -1,4 +1,4 @@
-# Notes de version Beta 0.85 "Interventions RàI"
+# Notes de version Beta 85 "Interventions RàI"
 
 **Date:** 1er novembre 2025
 **Fichier principal:** `index 85 (interventions).html`
@@ -206,7 +206,7 @@ Toutes les versions ont été incrémentées pour forcer le rechargement des mod
 - ✅ Edge
 
 ### localStorage
-Aucun changement dans la structure des données stockées. Compatibilité totale avec Beta 0.83-0.84.
+Aucun changement dans la structure des données stockées. Compatibilité totale avec Beta 83-0.84.
 
 ---
 
@@ -236,7 +236,7 @@ Format standard appliqué:
 
 ---
 
-## 🚀 Prochaines étapes (Beta 0.86+)
+## 🚀 Prochaines étapes (Beta 86+)
 
 ### Priorité HAUTE
 - [ ] Système de jetons complet (délai, reprise)
@@ -283,4 +283,4 @@ Creative Commons BY-NC-SA 4.0
 ---
 
 **Date de publication:** 1er novembre 2025
-**Prochaine version prévue:** Beta 0.86 (date à déterminer)
+**Prochaine version prévue:** Beta 86 (date à déterminer)

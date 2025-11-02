@@ -622,11 +622,11 @@ Documentation technique : statistiques.js
 
   Solution :
   // Modifier ligne 199 dans chargerInfosSysteme()
-  setStatText('stat-version', 'Beta 0.70');  // Nouvelle version
+  setStatText('stat-version', 'Beta 70');  // Nouvelle version
 
   // Ou stocker dans config.js
   // config.js:
-  const VERSION_APP = 'Beta 0.70';
+  const VERSION_APP = 'Beta 70';
 
   // statistiques.js:
   setStatText('stat-version', VERSION_APP);

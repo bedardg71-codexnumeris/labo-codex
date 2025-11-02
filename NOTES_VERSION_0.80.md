@@ -1,4 +1,4 @@
-# Notes de version - Beta 0.80
+# Notes de version - Beta 80
 
 **Date de publication** : 30 octobre 2025
 **Statut** : Beta - Phase 1 Consolidation
@@ -26,15 +26,15 @@ Version de transition préparant l'implémentation des fonctionnalités de la **
 
 ---
 
-## 🔄 Changements dans Beta 0.80
+## 🔄 Changements dans Beta 80
 
 ### Mises à jour de version
-- ✅ Numéro de version : Beta 0.79 → **Beta 0.80**
+- ✅ Numéro de version : Beta 79 → **Beta 80**
 - ✅ Date : 29 octobre 2025 → **30 octobre 2025**
 - ✅ Nom descriptif : "Optimisation espace" → **"Phase 1 Consolidation"**
 
 ### Structure préservée
-- ✅ Toutes les fonctionnalités de Beta 0.79 conservées
+- ✅ Toutes les fonctionnalités de Beta 79 conservées
 - ✅ Calculs A-C-P-M-E-R-B conformes au guide
 - ✅ Diagnostic automatique (patterns, forces, défis)
 - ✅ Support SOM-PAN dual
@@ -44,7 +44,7 @@ Version de transition préparant l'implémentation des fonctionnalités de la **
 
 ## 📝 Ce qui reste identique
 
-Beta 0.80 est une **version de préparation** - aucune nouvelle fonctionnalité n'a été ajoutée par rapport à Beta 0.79.
+Beta 80 est une **version de préparation** - aucune nouvelle fonctionnalité n'a été ajoutée par rapport à Beta 79.
 
 ### Fonctionnalités existantes
 - ✅ Module trimestre.js : Calendrier complet avec gestion congés
@@ -100,7 +100,7 @@ Beta 0.80 est une **version de préparation** - aucune nouvelle fonctionnalité 
 | **Fonctionnalités du guide implémentées** | 18/25 |
 | **Modules JavaScript** | 19 fichiers |
 | **Lignes de code** | ~15 000 lignes |
-| **Taille package Beta 0.79** | 318 Ko |
+| **Taille package Beta 79** | 318 Ko |
 
 ---
 
@@ -119,7 +119,7 @@ Avant de commencer l'implémentation des nouvelles fonctionnalités, valider que
 
 ## 📦 Contenu du package (inchangé)
 
-- `index 80 (phase 1 préparation).html` - Point d'entrée (Beta 0.80)
+- `index 80 (phase 1 préparation).html` - Point d'entrée (Beta 80)
 - Dossiers `css/` et `js/` - Styles et scripts
 - `donnees-demo.json` - Données de démonstration
 - `README_PROJET.md` - Documentation complète du projet
@@ -138,6 +138,6 @@ Pour tout problème, suggestion ou question :
 
 ---
 
-**Version du package** : Beta 0.80
+**Version du package** : Beta 80
 **Date de publication** : 30 octobre 2025
 **Statut** : Préparation PHASE 1 - Prêt pour développement

@@ -382,7 +382,7 @@ function dupliquerEchelle(echelleId) {
 function initialiserModuleEchelles() {
     console.log('📈 Initialisation du module Échelles de performance');
 
-    // Afficher la sidebar avec la liste des échelles (Beta 0.80.5+)
+    // Afficher la sidebar avec la liste des échelles (Beta 80.5+)
     if (typeof afficherListeEchelles === 'function') {
         afficherListeEchelles();
     }
@@ -1440,7 +1440,7 @@ window.convertirNiveauVersNote = convertirNiveauVersNote;
 window.convertirNoteVersNiveau = convertirNoteVersNiveau;
 
 /* ===============================
-   FONCTIONS SIDEBAR (Beta 0.80.5+)
+   FONCTIONS SIDEBAR (Beta 80.5+)
    Layout 2 colonnes - Stubs minimaux
    =============================== */
 

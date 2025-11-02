@@ -1,6 +1,6 @@
 # Documentation Module tableau-bord-apercu.js
 
-**Version** : Beta 0.72
+**Version** : Beta 72
 **Date de mise à jour** : 26 octobre 2025
 **Fichier source** : `js/tableau-bord-apercu.js` (1197 lignes)
 
@@ -226,7 +226,7 @@ Génère un badge compact indiquant la source des données (pour les sections).
 - Sinon si SOM actif : Badge "Source : SOM" en orange
 - Sinon : Badge "Source : PAN" en bleu
 
-**Note** : En Beta 0.72, cette fonction est encore présente mais peu utilisée (remplacée par les checkboxes en mode comparatif)
+**Note** : En Beta 72, cette fonction est encore présente mais peu utilisée (remplacée par les checkboxes en mode comparatif)
 
 ---
 
@@ -421,7 +421,7 @@ Génère une carte pour les patterns d'apprentissage (Stable, Défi, Blocages).
 
 **Retour** : `string` - HTML de la carte
 
-**Note** : Beta 0.72 a supprimé les barres de progression (redondantes avec les pourcentages)
+**Note** : Beta 72 a supprimé les barres de progression (redondantes avec les pourcentages)
 
 ---
 
@@ -707,7 +707,7 @@ function calculerEtStockerIndicesCP() {
 
 ---
 
-## Notes de migration (Beta 0.71 → Beta 0.72)
+## Notes de migration (Beta 71 → Beta 72)
 
 ### Changements majeurs
 

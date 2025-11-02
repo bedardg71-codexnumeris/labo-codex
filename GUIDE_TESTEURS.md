@@ -1,4 +1,4 @@
-# Guide pour testeurs - Système de Monitorage Pédagogique Beta 0.74
+# Guide pour testeurs - Système de Monitorage Pédagogique Beta 74
 
 **Merci de participer aux tests de cette application !**
 
@@ -30,7 +30,7 @@ Une application web de **monitorage pédagogique** qui aide les enseignants à :
 
 ### Version testée
 
-**Beta 0.74** - Fonctionnalités principales :
+**Beta 74** - Fonctionnalités principales :
 - Système hybride SOM-PAN (notation sommative + portfolio alternatif)
 - Refonte du système de jetons
 - Moteur de recherche dans la section Aide
@@ -222,12 +222,12 @@ Si vous préférez un retour plus personnel ou détaillé :
 
 **📧 labo@codexnumeris.org**
 
-**Objet :** [Test Monitorage Beta 0.74] Vos retours
+**Objet :** [Test Monitorage Beta 74] Vos retours
 
 **Informations utiles à inclure :**
 - Navigateur utilisé (ex: Chrome 118)
 - Système d'exploitation (ex: macOS 14.1)
-- Version testée (Beta 0.74)
+- Version testée (Beta 74)
 - Mode de notation testé (SOM, PAN, ou les deux)
 - Durée du test (1 semaine, 1 mois, etc.)
 
@@ -363,4 +363,4 @@ Bons tests ! 🎓
 
 **Fichier créé le :** 27 octobre 2025  
 **Version du guide :** 1.0  
-**Version de l'app testée :** Beta 0.74
+**Version de l'app testée :** Beta 74
