@@ -1,0 +1,186 @@
+Timeline Nov 2025 → Début juin 2026
+
+  Contexte
+
+  - Aujourd'hui : 2 novembre 2024 (Beta 87, ~88-90% complétude)
+  - Phase tests : Trimestre d'hiver (janvier-mai 2026)
+  - Lancement v1.0 : du 3 au 5 juin 2026 au colloque de l'Association québécoise de pédagogie collégiale (AQPC)
+  - Durée disponible : 7 mois
+- Travail avec Claude Code Max 20x
+
+  ---
+ Calendrier réaliste recommandé
+
+  PHASE 2 - Enrichissement (Nov-Déc 2024)
+
+  Objectif : Terminer les fonctionnalités critiques avant Noël
+
+  Novembre (4 semaines) :
+  - Semaine 1 (4-8 nov) : Graphiques évolution temporelle
+  - Semaine 2 (11-15 nov) : Présences avancées (pendant les séances d'intervention niveau 2-3)
+  - Semaine 3 (18-22 nov) : Tests + correctifs
+  - Semaine 4 (25-29 nov) : Features avancées (cartouches améliorées, recommandations pédagogiques)
+
+  Décembre (3 semaines avant congés) :
+  - Semaine 1 (2-6 déc) : Optimisations performance (pagination, lazy
+  loading)
+  - Semaine 2 (9-13 déc) : Robustesse (validation, backups auto)
+  - Semaine 3 (16-20 déc) : Beta 95 feature-complete
+
+  Résultat fin décembre : Beta 95 - Feature complete (~95%)
+
+  ---
+  PHASE 3 - Tests utilisateurs (Jan-Mai 2026)
+
+  Objectif : Tests réels en classe, ajustements, documentation
+
+  Janvier (retour congés - déploiement) :
+  - Recrutement testeurs (5-10 enseignants, disciplines variées, différents cegeps)
+  - Formation testeurs (guide + vidéo courte)
+  - Déploiement Beta 95 aux testeurs
+  - Support actif, collecte feedback
+
+  Février-Mars (tests intensifs) :
+  - Utilisation quotidienne par testeurs
+  - Collecte feedback hebdomadaire
+  - Correctifs bugs mineurs (Beta 96, 0.97)
+  - Ajustements ergonomie selon retours terrain
+
+  Avril (consolidation) :
+  - Analyse feedback cumulé
+  - Priorisation améliorations finales
+  - Implémentation ajustements critiques
+  - Beta 98 - Release Candidate
+
+  Mai (finalisation) :
+  - Tests finaux (scenarios utilisateurs complets)
+  - Documentation utilisateur complète (guide + FAQ)
+  - Vidéos tutoriels (optionnel mais recommandé)
+  - Préparation présentation AQPC
+  - Version 1.0 - Stable (fin mai)
+
+  Juin (lancement) :
+  - Présentation colloque AQPC ✨
+  - Mise à disposition communauté
+  - Support post-lancement
+
+  ---
+  💡 Questions stratégiques pour vous
+
+  1. Phase de tests (Jan-Mai) - Testeurs
+
+  Combien de testeurs ?
+  - 5-10 pour diversité sans surcharge support
+  - Disciplines variées : chimie, sciences humaines, littérature
+  - Niveau collégial
+
+  Quelles pratiques de notation tester ?
+  - ✅ SOM (sommative classique)
+  - ✅ PAN (portfolio/artefacts)
+  - ✅ Hybride (mix SOM-PAN)
+  - ❓ Autres PAN (spécifications et dénotation)
+
+  Support prévu 
+  - Pour l'instant je suis seul mais je veux monter une équipe "Labo Codex"
+  - Fréquence feedback hebdomadaire
+  - Canal communication : Teams (Labo Codex)
+
+  ---
+  2. Fonctionnalités prioritaires Nov-Déc
+
+  Avant les tests de janvier, quelles fonctionnalités sont absolument 
+  critiques vs nice to have ?
+
+  Critiques (must-have pour tests) :
+  - ✅ Graphiques évolution (analyse longitudinale)
+  - ✅ Présences avancées pour la gestion des séances d'intervention RàI niveaux 2 et 3
+  - ❓ Recommandations d'intervention plus précises 
+  - ❓ Rapports à l'aide pédagogique individuelle (API)
+
+  Nice to have (peut attendre post-1.0) :
+  - ❓ Cartouches avancés (suggestions intelligentes) ?
+  - Stats groupe avancées
+  - Mode collaboratif (plusieurs enseignants)
+
+  ---
+  3. Documentation et formation
+
+  Pour les testeurs (janvier) :
+  - Guide utilisateur court (10-15 pages) à partir du Guide de monitorage actuel et de la section Aide actuelle
+  - Vidéos tutoriels (durée 5 minutes max. sujets prioritaires : réglages et utilisation quotidienne
+  - Webinaire formation synchrone avec Éductive ou AQPC
+
+  Pour le colloque AQPC (juin) :
+  - Présentation orale 60 minutes
+  - Communication écrite Éductive
+  - Publicité sur codexnumeris.org (mon blog)
+
+  ---
+  4. Risques et mitigation
+
+  Risques identifiés :
+  - ⚠️ Performance (> 100 étudiants) : Tester avec plusieurs groupes
+  - ⚠️ Navigateurs (Safari, Chrome, Firefox) : Tester multi-plateforme
+  - ⚠️ LocalStorage limite (5-10 MB) : Monitorer usage testeurs
+  - ⚠️ Bugs critiques découverts tard : Buffer temps suffisant
+
+  Mitigation :
+  - Tests charge (groupes 130 étudiants) en janvier 
+  - Tests multi-navigateurs systématiques
+  - Plan B si limite localStorage atteinte : passer à Python ?
+
+  ---
+  📊 Timeline révisée recommandée
+
+  | Phase             | Période       | Objectif                | Version
+          |
+  |-------------------|---------------|-------------------------|------------
+  --------|
+  | PHASE 2           | Nov-Déc 2025  | Features complètes      | Beta 95
+          |
+  | Tests déploiement | Janvier 20262026  | Formation + déploiement | Beta 95
+          |
+  | Tests intensifs   | Fév-Mars 2026 | Utilisation quotidienne | Beta
+  96-97     |
+  | Consolidation     | Avril 2026    | Ajustements finaux      | Beta 98
+  RC       |
+  | Finalisation      | Mai 2026      | Documentation + vidéos  | Version 1.0
+          |
+  | Lancement         | Juin 2026     | Colloque AQPC           | Version 1.0
+   stable |
+
+  ---
+  🎯 Prochaines actions suggérées
+
+  Court terme (cette semaine)
+
+  1. ✅ Valider cette timeline avec vous
+  2. ✅ Prioriser fonctionnalités Nov-Déc
+  3. ✅ Commencer graphiques évolution (si validé)
+
+  Moyen terme (novembre)
+
+  1. Compléter PHASE 2 (graphiques + présences)
+  2. Créer guide testeurs (draft)
+  3. Identifier testeurs potentiels
+
+  Long terme (décembre)
+
+  1. Beta 95 feature-complete
+  2. Tests charge (performance)
+  3. Plan formation testeurs
+
+  ---
+  Questions pour vous :
+  1. Cette timeline juin 2026 vous semble réaliste | Je crois que oui
+  2. Combien de testeurs prévoyez-vous | J'en voudrais une dizaine
+  3. Les 2-3 fonctionnalités absolument critiques pour les tests de janvier : gestion du portfolio, notation alternative, évaluation et rétroaction
+  4. Type de présentation pour l'AQPC : 
+
+L’Association québécoise de pédagogie collégiale (AQPC), en collaboration avec le Cégep Drummond, vous invite chaleureusement à participer à son 45e colloque annuel, qui se tiendra du 3 au 5 juin 2026 à Drummondville. L’ensemble de la communauté de l’enseignement supérieur est convié à se rassembler pour réfléchir, apprendre et discuter autour de ce point de convergence fondamental qu’est la pédagogie, qui nous unit toutes et tous, que l’on travaille en formation régulière, continue ou aux services aux entreprises. 
+
+La thématique « Pour une suite audacieuse » s’inscrit dans un contexte où les parcours éducatifs se diversifient, où les repères se transforment et où les savoirs évoluent à un rythme accéléré. Elle met de l’avant le savoir-faire professionnel, la complexité des réalités éducatives, la pluralité des parcours et la richesse du travail interdisciplinaire et interprofessionnel. Elle appelle aussi le milieu collégial à imaginer et à bâtir une suite audacieuse : en créant des liens entre disciplines, entre individus, entre générations, entre formation régulière et formation continue, de même qu’avec les communautés et les milieux de travail. Ces collaborations, porteuses d’audace, permettent de faire émerger des idées originales, d’enrichir la réflexion collective et d’ouvrir de nouvelles voies pour répondre aux défis éducatifs d’aujourd’hui et de demain.
+
+Les propositions de communication sont attendues d’ici le dimanche 11 janvier 2026. Prenez part à ce grand échange et faites avancer, ensemble, une vision de l’éducation plus humaine, plus ouverte, plus engagée et résolument audacieuse. 
+
+11 janvier 2026 : Date limite de dépôt des propositions de communications

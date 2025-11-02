@@ -286,13 +286,13 @@ function obtenirPerformancesSRPNF(da) {
     };
 
     // Collecter toutes les notes par critère
-    evaluations.forEach(eval => {
-        if (eval.criteres) {
-            Object.keys(eval.criteres).forEach(critere => {
-                const niveau = eval.criteres[critere];
+    evaluations.forEach(evaluation => {
+        if (evaluation.criteres) {
+            Object.keys(evaluation.criteres).forEach(critere => {
+                const niveau = evaluation.criteres[critere];
                 if (niveau !== null && performances[critere]) {
                     // Convertir le niveau IDME en pourcentage
-                    const pct = convertirNiveauEnPourcentage(niveau, eval.echelleId || 'idme');
+                    const pct = convertirNiveauEnPourcentage(niveau, evaluation.echelleId || 'idme');
                     performances[critere].push(pct);
                 }
             });
