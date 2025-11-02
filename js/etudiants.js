@@ -797,7 +797,9 @@ function afficherListeEtudiantsConsultation() {
         };
 
         // Échapper les valeurs pour sécurité
-        const da = echapperHtml(etudiant.da || '');
+        // IMPORTANT: Utiliser daAffichage pour l'affichage, mais garder da pour les calculs
+        const daAfficher = etudiant.daAffichage || etudiant.da; // Utiliser daAffichage si disponible
+        const da = echapperHtml(daAfficher || '');
         const groupe = echapperHtml(etudiant.groupe || '');
         const nom = echapperHtml(etudiant.nom || '');
         const prenom = echapperHtml(etudiant.prenom || '');

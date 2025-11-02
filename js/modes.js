@@ -488,33 +488,67 @@ function choisirCategorieCulturelle() {
  * @returns {Object} - Mapping DA réel → pseudonyme
  */
 function genererMappingAnonyme() {
-    const mapping = JSON.parse(localStorage.getItem('mapping_anonymisation') || '{}');
+    let mapping = JSON.parse(localStorage.getItem('mapping_anonymisation') || '{}');
 
-    // Si le mapping existe déjà, le retourner
+    // Vérifier si le mapping existe ET utilise le nouveau format
     if (Object.keys(mapping).length > 0) {
-        return mapping;
+        // Détecter l'ancien format (noms fictifs au lieu de "Élève X")
+        const premierDA = Object.keys(mapping)[0];
+        const premierMapping = mapping[premierDA];
+
+        // Ancien format si: nom n'est pas vide OU prenom ne commence pas par "Élève" OU pas de propriété numero/ordreAffichage
+        const estAncienFormat = premierMapping.nom ||
+                               !premierMapping.prenom?.startsWith('Élève') ||
+                               !premierMapping.hasOwnProperty('numero') ||
+                               !premierMapping.hasOwnProperty('ordreAffichage');
+
+        if (estAncienFormat) {
+            console.log('🔄 Ancien format de mapping détecté, régénération avec format "Élève X"...');
+            // Forcer la régénération
+            mapping = {};
+        } else {
+            // Format correct, retourner tel quel
+            return mapping;
+        }
     }
 
-    // Sinon, créer un nouveau mapping
+    // Créer un nouveau mapping avec format "Élève X"
     // IMPORTANT : Lire DIRECTEMENT depuis localStorage pour éviter la récursion
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
 
     // Filtrer pour exclure le groupe 9999 (simulation)
     const etudiantsReels = etudiants.filter(e => e.groupe !== '9999');
 
+    // Créer un tableau de numéros et le mélanger (Fisher-Yates shuffle)
+    // pour éviter de reconnaître les étudiants en début/fin de liste alphabétique
+    const numeros = Array.from({ length: etudiantsReels.length }, (_, i) => i + 1);
+    for (let i = numeros.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [numeros[i], numeros[j]] = [numeros[j], numeros[i]];
+    }
+
+    // Créer aussi un ordre d'affichage aléatoire pour éviter de reconnaître par la position
+    const ordresAffichage = Array.from({ length: etudiantsReels.length }, (_, i) => i);
+    for (let i = ordresAffichage.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ordresAffichage[i], ordresAffichage[j]] = [ordresAffichage[j], ordresAffichage[i]];
+    }
+
     etudiantsReels.forEach((etudiant, index) => {
-        // Utiliser simplement un numéro: "Élève 1", "Élève 2", etc.
-        const numero = index + 1;
+        // Utiliser un numéro aléatoire: "Élève 17", "Élève 3", etc.
+        const numero = numeros[index];
 
         mapping[etudiant.da] = {
             nom: '',
             prenom: `Élève ${numero}`,
             nomComplet: `Élève ${numero}`,
-            numero: numero
+            numero: numero,
+            ordreAffichage: ordresAffichage[index]  // Pour trier aléatoirement
         };
     });
 
     localStorage.setItem('mapping_anonymisation', JSON.stringify(mapping));
+    console.log(`✅ Mapping anonymisation créé avec ${etudiantsReels.length} étudiants (numéros aléatoires)`);
     return mapping;
 }
 
@@ -670,20 +704,29 @@ function anonymiserDonnees(cle, donnees) {
     // Anonymiser selon le type de clé
     switch (cle) {
         case 'groupeEtudiants':
-            return donnees.map(etudiant => ({
+            // Anonymiser et ajouter l'ordre d'affichage
+            const etudiantsAnonymes = donnees.map(etudiant => ({
                 ...etudiant,
-                da: afficherDAReel ? etudiant.da : 'ANONYME',
+                // IMPORTANT: Garder le DA réel pour les calculs, créer daAffichage pour l'interface
+                daReel: etudiant.da, // Toujours garder le vrai DA
+                daAffichage: afficherDAReel ? etudiant.da : 'ANONYME', // Pour affichage seulement
                 nom: mapping[etudiant.da]?.nom || '',
                 prenom: mapping[etudiant.da]?.prenom || etudiant.prenom,
-                groupe: etudiant.groupe ? `AN.${etudiant.groupe}` : etudiant.groupe
+                groupe: etudiant.groupe ? `AN.${etudiant.groupe}` : etudiant.groupe,
+                ordreAffichage: mapping[etudiant.da]?.ordreAffichage ?? 999 // Pour tri aléatoire
             }));
+
+            // Trier selon l'ordre d'affichage aléatoire pour éviter de reconnaître par la position
+            return etudiantsAnonymes.sort((a, b) => a.ordreAffichage - b.ordreAffichage);
 
         case 'evaluationsSauvegardees':
             return donnees.map(evaluation => {
                 const nomAnonyme = mapping[evaluation.etudiantDA]?.nomComplet || evaluation.etudiantNom;
                 return {
                     ...evaluation,
-                    etudiantDA: afficherDAReel ? evaluation.etudiantDA : 'ANONYME',
+                    // IMPORTANT: Garder le DA réel pour les calculs
+                    etudiantDAReel: evaluation.etudiantDA, // Toujours garder le vrai DA
+                    etudiantDAffichage: afficherDAReel ? evaluation.etudiantDA : 'ANONYME',
                     etudiantNom: nomAnonyme,
                     groupe: evaluation.groupe ? `AN.${evaluation.groupe}` : evaluation.groupe
                 };
@@ -693,7 +736,9 @@ function anonymiserDonnees(cle, donnees) {
             // Les présences gardent le DA mais on peut anonymiser le nom si présent
             return donnees.map(presence => ({
                 ...presence,
-                da: afficherDAReel ? presence.da : 'ANONYME',
+                // IMPORTANT: Garder le DA réel pour les calculs
+                daReel: presence.da, // Toujours garder le vrai DA
+                daAffichage: afficherDAReel ? presence.da : 'ANONYME',
                 nom: mapping[presence.da]?.nom || '',
                 prenom: mapping[presence.da]?.prenom || presence.prenom
             }));
@@ -702,6 +747,18 @@ function anonymiserDonnees(cle, donnees) {
             // Pour les autres types de données, retourner tel quel
             return donnees;
     }
+}
+
+/**
+ * Obtient le DA à afficher pour un étudiant en mode anonymisation
+ * @param {Object} etudiant - Objet étudiant avec propriétés da et daAffichage
+ * @returns {string} - Le DA à afficher
+ */
+function obtenirDAAffichage(etudiant) {
+    if (modeActuel !== MODES.ANONYMISATION) {
+        return etudiant.da;
+    }
+    return etudiant.daAffichage || etudiant.da;
 }
 
 /**
@@ -726,6 +783,7 @@ window.estModeeLectureSeule = estModeeLectureSeule;
 window.obtenirOptionAffichageDA = obtenirOptionAffichageDA;
 window.definirOptionAffichageDA = definirOptionAffichageDA;
 window.reinitialiserMappingAnonyme = reinitialiserMappingAnonyme;
+window.obtenirDAAffichage = obtenirDAAffichage;
 
 // ============================================
 // CLONAGE DE GROUPE (pour démonstrations)

@@ -2739,7 +2739,7 @@ function afficherProfilComplet(da) {
                     <select id="selecteurEtudiantProfil" class="controle-form" onchange="afficherProfilComplet(this.value)">
                         ${etudiants.map(e => `
                             <option value="${e.da}" ${e.da === da ? 'selected' : ''}>
-                                ${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} (${echapperHtml(e.da)})
+                                ${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} (${echapperHtml(e.daAffichage || e.da)})
                             </option>
                         `).join('')}
                     </select>
@@ -2767,7 +2767,7 @@ function afficherProfilComplet(da) {
                         ${echapperHtml(eleve.prenom)} ${echapperHtml(eleve.nom)}
                     </div>
                     <div class="sidebar-info-card-details">
-                        <div><strong>DA:</strong> ${echapperHtml(eleve.da)}</div>
+                        <div><strong>DA:</strong> ${echapperHtml(eleve.daAffichage || eleve.da)}</div>
                         ${eleve.groupe ? `<div><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</div>` : ''}
                         ${eleve.programme ? `<div><strong>Programme:</strong> ${typeof obtenirNomProgramme === 'function' ? echapperHtml(obtenirNomProgramme(eleve.programme)) : echapperHtml(eleve.programme)}</div>` : ''}
                         ${eleve.sa === 'Oui' ? '<div style="color: var(--bleu-principal);">✓ Services adaptés</div>' : ''}
