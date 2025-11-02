@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>En-tête avec Navigation Glassmorphisme</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* En-tête avec dégradé */
+        .entete {
+            background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+            color: white;
+            padding: 20px 40px 0 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Zone titre + bouton soutien */
+        .entete-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .entete-textes {
+            flex: 1;
+        }
+
+        .entete h1 {
+            margin: 0 0 5px 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .entete h2 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 400;
+            color: #9fc5e8;
+        }
+
+        /* Bouton soutien */
+        .btn-soutien {
+            background: var(--orange-accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+        }
+
+        .btn-soutien:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
+        }
+
+        /* Navigation principale - Glassmorphisme */
+        .navigation-principale {
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 0 20px 15px 20px;
+            border-bottom: 3px solid var(--bleu-fonce);
+        }
+
+        .navigation-principale button {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navigation-principale button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .navigation-principale button.actif {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Sous-navigation - Glassmorphisme */
+        .sous-navigation {
+            background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+            padding: 12px 40px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sous-navigation button {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sous-navigation button:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .sous-navigation button.actif {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Zone de contenu simulée */
+        .contenu-demo {
+            padding: 40px;
+            background: linear-gradient(135deg, #e8f2fd 0%, #f0f8ff 100%);
+            min-height: 400px;
+        }
+
+        .contenu-demo h3 {
+            color: #032e5c;
+            margin: 0 0 20px 0;
+        }
+
+        .contenu-demo p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Notes de comparaison */
+        .notes-comparaison {
+            margin: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(3, 46, 92, 0.1);
+        }
+
+        .notes-comparaison h2 {
+            color: #032e5c;
+            margin: 0 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #d97706;
+        }
+
+        .comparaison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .avant, .apres {
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .avant {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+        }
+
+        .apres {
+            background: #f0fdf4;
+            border: 2px solid #22c55e;
+        }
+
+        .avant h3, .apres h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+        }
+
+        .avant h3 {
+            color: #dc2626;
+        }
+
+        .apres h3 {
+            color: #16a34a;
+        }
+
+        .avant ul, .apres ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .avant li, .apres li {
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- EN-TÊTE AVEC NOUVEAU DESIGN -->
+<div class="entete">
+    <!-- Zone titre + bouton soutien -->
+    <div class="entete-top">
+        <div class="entete-textes">
+            <h1>Monitorage pédagogique v6</h1>
+            <h2>Réfléchir, expérimenter, partager</h2>
+        </div>
+        <button class="btn-soutien">Soutenir le projet</button>
+    </div>
+
+    <!-- Navigation principale avec glassmorphisme -->
+    <div class="navigation-principale">
+        <button class="actif">Tableau de bord</button>
+        <button>Présences</button>
+        <button>Évaluations</button>
+        <button>Matériel</button>
+        <button>Réglages</button>
+        <button>Aide</button>
+    </div>
+</div>
+
+<!-- Sous-navigation avec glassmorphisme -->
+<div class="sous-navigation">
+    <button class="actif">Aperçu</button>
+    <button>Liste des individus</button>
+    <button>Profil</button>
+    <button>Interventions RàI</button>
+</div>
+
+<!-- Contenu simulé -->
+<div class="contenu-demo">
+    <h3>Zone de contenu principale</h3>
+    <p>Ceci est une démonstration de l'en-tête avec le nouveau design glassmorphisme appliqué à votre navigation actuelle.</p>
+    <p>Survolez les boutons pour voir les effets de transition et l'élévation visuelle.</p>
+</div>
+
+<!-- Notes de comparaison -->
+<div class="notes-comparaison">
+    <h2>Améliorations apportées</h2>
+
+    <div class="comparaison-grid">
+        <div class="avant">
+            <h3>❌ Problèmes de l'ancien design</h3>
+            <ul>
+                <li>Navigation principale : boutons plats sans hiérarchie claire</li>
+                <li>Sous-navigation : fond bleu pâle opaque (#e8f2fd), séparation visuelle trop marquée</li>
+                <li>Pas de cohérence visuelle entre l'en-tête et les navigations</li>
+                <li>Effets hover basiques (fond uni)</li>
+                <li>Rupture visuelle entre en-tête et sous-navigation</li>
+            </ul>
+        </div>
+
+        <div class="apres">
+            <h3>✅ Avantages du nouveau design</h3>
+            <ul>
+                <li>Effet glassmorphisme élégant avec blur et transparence</li>
+                <li>Navigation principale : fond transparent, boutons glassmorphisme flottants</li>
+                <li>Sous-navigation : même dégradé que l'en-tête pour continuité visuelle parfaite</li>
+                <li>Boutons avec fond blanc transparent, état actif plus pâle (cohérent avec navigation principale)</li>
+                <li>Logique uniforme : bouton actif = plus clair pour tous les niveaux de navigation</li>
+                <li>Effets hover fluides avec élévation</li>
+                <li>Look moderne et professionnel type "liquid glass"</li>
+                <li>Adaptation automatique aux 3 modes (Normal/Simulation/Anonymisation)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px; padding: 20px; background: #fffbea; border-left: 4px solid #f5c842; border-radius: 0 6px 6px 0;">
+        <h3 style="margin: 0 0 10px 0; color: #d97706; font-size: 1rem;">💡 Conseil d'intégration</h3>
+        <p style="margin: 0; color: #666; line-height: 1.6;">
+            Pour appliquer ce design à votre application, il suffit que les classes CSS soient déjà mises à jour dans <code>styles.css</code>
+            (ce qui est fait). Les boutons de navigation dans vos fichiers HTML (index, etc.) utiliseront automatiquement le nouveau style glassmorphisme.
+            Aucune modification HTML nécessaire si vous utilisez déjà les classes <code>.navigation-principale</code> et <code>.sous-navigation</code>.
+        </p>
+    </div>
+
+    <div style="margin-top: 20px; padding: 20px; background: #f0fdf4; border-left: 4px solid #4ade80; border-radius: 0 6px 6px 0;">
+        <h3 style="margin: 0 0 10px 0; color: #16a34a; font-size: 1rem;">📐 Spécifications techniques appliquées</h3>
+        <ul style="margin: 0; padding-left: 20px; color: #666;">
+            <li><strong>Navigation principale :</strong> background transparent (boutons flottants), blur(10px)</li>
+            <li><strong>Boutons principale :</strong> background rgba(255,255,255,0.15), état actif 0.3 (plus pâle)</li>
+            <li><strong>Navigation secondaire :</strong> background linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%) - même dégradé que l'en-tête</li>
+            <li><strong>Boutons secondaire :</strong> background rgba(255,255,255,0.1), état actif 0.25 (plus pâle aussi)</li>
+            <li><strong>Logique cohérente :</strong> Bouton actif = plus clair pour les deux niveaux de navigation</li>
+            <li><strong>Transitions :</strong> all 0.3s ease pour fluidité maximale</li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>
