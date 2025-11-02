@@ -600,34 +600,46 @@ function filtrerParGroupe() {
 
         // Générer le tableau
         tbody.innerHTML = etudiantsFiltres.map(s => {
-            const daEchappe = echapperHtml(s.da);
+            // Utiliser daAffichage si disponible (mode anonymisation), sinon DA réel
+            const daAfficher = s.daAffichage || s.da;
+            const daEchappe = echapperHtml(daAfficher);
             const groupeEchappe = echapperHtml(s.groupe);
             const nomEchappe = echapperHtml(s.nom);
             const prenomEchappe = echapperHtml(s.prenom);
             const programmeEchappe = echapperHtml(s.programme || '');
 
             return `
-                <tr>
-                    <td>${daEchappe}</td>
-                    <td style="text-align: center;"><strong>${groupeEchappe}</strong></td>
-                    <td>${nomEchappe}</td>
-                    <td>${prenomEchappe}</td>
-                    <td>${programmeEchappe}</td>
-                    <td style="text-align: center;">${s.sa === 'Oui' ? '✓' : ''}</td>
-                    <td style="text-align: center;">${s.caf === 'Oui' ? '✓' : ''}</td>
-<td style="text-align: center;">
-    <button data-action="modifier" data-da="${s.da}" class="btn btn-modifier" 
-            style="padding: 5px 10px; margin-right: 5px;">
-        Modifier
-    </button>
-    <button data-action="supprimer" data-da="${s.da}" class="btn btn-supprimer" 
-            style="padding: 5px 10px;">
-        Supprimer
-    </button>
-</td>
+                <tr style="cursor: pointer; transition: background-color 0.2s ease;">
+                    <td style="padding: 12px 8px;">${daEchappe}</td>
+                    <td style="text-align: center; padding: 12px 8px;"><strong>${groupeEchappe}</strong></td>
+                    <td style="padding: 12px 8px;">${nomEchappe}</td>
+                    <td style="padding: 12px 8px;">${prenomEchappe}</td>
+                    <td style="padding: 12px 8px;">${programmeEchappe}</td>
+                    <td style="text-align: center; padding: 12px 8px;">${s.sa === 'Oui' ? '✓' : ''}</td>
+                    <td style="text-align: center; padding: 12px 8px;">${s.caf === 'Oui' ? '✓' : ''}</td>
+                    <td style="text-align: center; padding: 12px 8px;">
+                        <button data-action="modifier" data-da="${s.da}" class="btn btn-modifier"
+                                style="padding: 5px 10px; margin-right: 5px;">
+                            Modifier
+                        </button>
+                        <button data-action="supprimer" data-da="${s.da}" class="btn btn-supprimer"
+                                style="padding: 5px 10px;">
+                            Supprimer
+                        </button>
+                    </td>
                 </tr>
             `;
         }).join('');
+
+        // Ajouter l'effet de survol sur chaque rangée
+        tbody.querySelectorAll('tr').forEach(tr => {
+            tr.onmouseenter = function () {
+                this.style.backgroundColor = 'var(--bleu-tres-pale)';
+            };
+            tr.onmouseleave = function () {
+                this.style.backgroundColor = '';
+            };
+        });
 
     } catch (error) {
         console.error('Erreur filtrage:', error);
