@@ -1270,6 +1270,15 @@ input[type="number"].controle-form {
     background: var(--btn-principal-hover);
 }
 
+.btn-secondaire {
+    background: var(--bleu-moyen);
+    color: white;
+}
+
+.btn-secondaire:hover:not(:disabled) {
+    background: var(--bleu-clair);
+}
+
 .btn-ajouter {
     background: var(--btn-ajouter);
     color: white;
@@ -2745,6 +2754,7 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
+    margin-bottom: 20px;
 }
 
 /* Carte métrique de base */
@@ -2765,6 +2775,14 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 .carte-metrique-standard .valeur {
     font-size: 1.8rem;
     font-weight: bold;
+}
+
+/* Pourcentages dans les cartes métriques (plus petits) */
+.carte-metrique-standard .valeur span[id$="-pct"] {
+    font-size: 0.75rem;
+    font-weight: normal;
+    color: #666;
+    margin-left: 5px;
 }
 
 /* Variantes de couleur */
