@@ -467,6 +467,7 @@ function afficherMetriquesGlobales(etudiants) {
 
 /**
  * Génère une carte de métrique avec les valeurs SOM et PAN
+ * Format standard: fond blanc avec fine bordure
  * Valeurs colorées selon la pratique (orange=SOM, bleu=PAN)
  * @param {string} label - Nom de la métrique
  * @param {number} valeurSom - Valeur SOM
@@ -487,12 +488,10 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
     }
 
     return `
-        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.9rem; color: #666;">${label}</span>
-                <div style="display: flex; gap: 15px; align-items: baseline;">
-                    ${valeurs.join('')}
-                </div>
+        <div class="carte-metrique">
+            <span class="label">${label}</span>
+            <div style="display: flex; gap: 15px; align-items: baseline;">
+                ${valeurs.join('')}
             </div>
         </div>
     `;
