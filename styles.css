@@ -22,8 +22,8 @@
     --bleu-carte: #9fc5e8;
     --bleu-pale: #e8f2fd;
     --bleu-tres-pale: #f0f8ff;
-    --bleu-simulation: #0f1e3a;
-    --bleu-anonymisation: #1a5266;
+    --bleu-simulation: #1a5266;
+    --bleu-anonymisation: #0f1e3a;
 
     /* Couleurs d'accent */
     --orange-accent: #ff6b35;
@@ -46,8 +46,8 @@
 
     /* Navigation - États actifs par mode */
     --nav-actif-normal: #2a4a8a;
-    --nav-actif-simulation: #2a3d5a;
-    --nav-actif-anonymisation: #2a6a7a;
+    --nav-actif-simulation: #2a6a7a;
+    --nav-actif-anonymisation: #2a3d5a;
 
     /* === SOUS-NAVIGATION === */
     --sous-nav-bg: #e8f2fd;
@@ -57,8 +57,8 @@
 
     /* Sous-navigation - Fonds par mode */
     --sous-nav-bg-normal: #e8f2fd;
-    --sous-nav-bg-simulation: #dce8f5;
-    --sous-nav-bg-anonymisation: #e0f0f0;
+    --sous-nav-bg-simulation: #e0f0f0;
+    --sous-nav-bg-anonymisation: #dce8f5;
 
     /* === BOUTONS D'ACTION - Palette Nuit Élégante === */
     --btn-principal: #032e5c;
@@ -188,7 +188,7 @@ body {
 .entete {
     background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
     color: white;
-    padding: 30px;
+    padding: 30px 40px;
     position: relative;
 }
 
@@ -196,8 +196,6 @@ body {
     display: flex;
     align-items: center;
     gap: 30px;
-    max-width: 1400px;
-    margin: 0 auto;
 }
 
 /* === LOGO ET MÉTADONNÉES === */
@@ -383,76 +381,84 @@ body {
 }
 
 /* ===============================
-   NAVIGATION PRINCIPALE
+   NAVIGATION PRINCIPALE - GLASSMORPHISME
    =============================== */
 
 .navigation-principale {
-    background: var(--bleu-principal);
-    padding: 0;
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    padding: 0 20px 15px 20px;
     display: flex;
     justify-content: center;
-    gap: 0;
-    border-bottom: 3px solid var(--bleu-fonce);
+    gap: 10px;
 }
 
 .navigation-principale button {
-    flex: 1;
-    padding: 15px 25px;
-    background: transparent;
-    color: var(--bleu-pale);
-    border: none;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
     font-size: 0.95rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
-    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navigation-principale button:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .navigation-principale button.actif {
-    background: var(--bleu-moyen);
-    color: white;
-    border-bottom: 3px solid var(--orange-accent);
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* ===============================
-   SOUS-NAVIGATION
+   SOUS-NAVIGATION - GLASSMORPHISME
    =============================== */
 
 .sous-navigation {
-    background: var(--sous-nav-bg);
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
     padding: 12px 20px;
     display: flex;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
-    border-bottom: 1px solid var(--bleu-leger);
+    justify-content: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sous-navigation button {
     padding: 8px 16px;
-    background: white;
-    color: var(--sous-nav-normal);
-    border: 1px solid var(--bleu-leger);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 6px;
-    font-size: 0.9rem;
+    color: white;
+    font-size: 0.85rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
 }
 
 .sous-navigation button:hover {
-    background: var(--bleu-tres-pale);
-    border-color: var(--sous-nav-hover);
-    color: var(--sous-nav-hover);
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .sous-navigation button.actif {
-    background: var(--sous-nav-actif);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
     color: white;
-    border-color: var(--sous-nav-actif);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .sous-navigation.vide {
@@ -810,37 +816,97 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Cartes métriques - petites statistiques */
+/* ===============================
+   CARTES MÉTRIQUES - FORMAT STANDARD
+   Beta 0.85+
+   Layout: Texte à gauche, données à droite
+   =============================== */
+
 .carte-metrique {
-    background: var(--bleu-carte);
-    border: 1px solid var(--bleu-moyen);
-    border-radius: 6px;
-    padding: 12px 15px;
-    text-align: center;
-    min-width: 120px;
-    box-shadow: 0 2px 4px rgba(3, 46, 92, 0.1);
+    background: var(--bleu-tres-pale);
+    border: 1px solid var(--bleu-principal);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
     transition: all 0.2s ease;
-    display: inline-block;
 }
 
 .carte-metrique:hover {
-    box-shadow: 0 4px 8px rgba(3, 46, 92, 0.2);
+    box-shadow: 0 2px 8px rgba(3, 46, 92, 0.15);
     transform: translateY(-1px);
-    background: white;
 }
 
+.carte-metrique .label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.carte-metrique .valeur {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--bleu-principal);
+}
+
+/* Support ancien format (strong/span) - À DÉPRÉCIER */
 .carte-metrique strong {
     display: block;
-    font-size: 1.4rem;
-    font-weight: bold;
+    font-size: 1.8rem;
+    font-weight: 700;
     color: var(--bleu-principal);
-    margin-bottom: 4px;
 }
 
 .carte-metrique span {
-    font-size: 0.85rem;
-    color: var(--bleu-moyen);
+    font-size: 0.9rem;
+    color: #666;
     font-weight: 500;
+}
+
+/* ===============================
+   VARIANTES COLORÉES (selon echelles.js)
+   =============================== */
+
+.carte-metrique-critique {
+    background: white;
+    border: 2px solid var(--risque-critique);
+}
+
+.carte-metrique-critique .valeur,
+.carte-metrique-critique strong {
+    color: var(--risque-critique);
+}
+
+.carte-metrique-modere {
+    background: white;
+    border: 2px solid var(--risque-modere);
+}
+
+.carte-metrique-modere .valeur,
+.carte-metrique-modere strong {
+    color: var(--risque-modere);
+}
+
+.carte-metrique-minimal {
+    background: white;
+    border: 2px solid var(--risque-minimal);
+}
+
+.carte-metrique-minimal .valeur,
+.carte-metrique-minimal strong {
+    color: var(--risque-minimal);
+}
+
+.carte-metrique-nul {
+    background: white;
+    border: 2px solid var(--risque-nul);
+}
+
+.carte-metrique-nul .valeur,
+.carte-metrique-nul strong {
+    color: var(--risque-nul);
 }
 
 /* ===============================
@@ -1020,6 +1086,60 @@ input[type="number"].controle-form {
     font-size: 0.8rem;
     font-weight: 600;
     white-space: nowrap;
+}
+
+/* === BADGES GÉNÉRIQUES === */
+.badge-info {
+    display: inline-block;
+    background: var(--bleu-pale);
+    color: var(--bleu-principal);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.badge-succes {
+    display: inline-block;
+    background: #d4edda;
+    color: #155724;
+    padding: 4px 12px;
+    border: 1px solid #c3e6cb;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.badge-avertissement {
+    display: inline-block;
+    background: #fff3cd;
+    color: #856404;
+    padding: 4px 12px;
+    border: 1px solid #ffeaa7;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.badge-danger {
+    display: inline-block;
+    background: #f8d7da;
+    color: #721c24;
+    padding: 4px 12px;
+    border: 1px solid #f5c6cb;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.badge-neutre {
+    display: inline-block;
+    background: #e2e8f0;
+    color: #475569;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
 /* === BADGES DE RISQUE (sans émojis) === */
@@ -2475,67 +2595,37 @@ body[data-mode="normal"] .entete {
 }
 
 body[data-mode="normal"] .navigation-principale {
-    background: var(--bleu-principal);
-}
-
-body[data-mode="normal"] .navigation-principale button.actif {
-    background: var(--nav-actif-normal);
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
 }
 
 body[data-mode="normal"] .sous-navigation {
-    background: var(--sous-nav-bg-normal);
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
 }
 
-body[data-mode="normal"] .sous-navigation button.actif {
-    background: var(--bleu-principal);
-    color: white;
-    border-color: var(--bleu-principal);
-}
-
-/* MODE SIMULATION - Dégradé bleu nuit vers noir bleuté */
+/* MODE SIMULATION - Dégradé sarcelle vers sarcelle foncé */
 body[data-mode="simulation"] .entete {
-    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
-}
-
-body[data-mode="simulation"] .navigation-principale {
-    background: var(--bleu-simulation);
-}
-
-body[data-mode="simulation"] .navigation-principale button.actif {
-    background: var(--nav-actif-simulation);
-}
-
-body[data-mode="simulation"] .sous-navigation {
-    background: var(--sous-nav-bg-simulation);
-}
-
-body[data-mode="simulation"] .sous-navigation button.actif {
-    background: var(--bleu-simulation);
-    color: white;
-    border-color: var(--bleu-simulation);
-}
-
-/* MODE ANONYMISATION - Dégradé sarcelle vers sarcelle foncé */
-body[data-mode="anonymisation"] .entete {
     background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
 }
 
-body[data-mode="anonymisation"] .navigation-principale {
-    background: var(--bleu-anonymisation);
+body[data-mode="simulation"] .navigation-principale {
+    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
 }
 
-body[data-mode="anonymisation"] .navigation-principale button.actif {
-    background: var(--nav-actif-anonymisation);
+body[data-mode="simulation"] .sous-navigation {
+    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
+}
+
+/* MODE ANONYMISATION - Dégradé bleu nuit vers noir bleuté */
+body[data-mode="anonymisation"] .entete {
+    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
+}
+
+body[data-mode="anonymisation"] .navigation-principale {
+    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
 }
 
 body[data-mode="anonymisation"] .sous-navigation {
-    background: var(--sous-nav-bg-anonymisation);
-}
-
-body[data-mode="anonymisation"] .sous-navigation button.actif {
-    background: var(--bleu-anonymisation);
-    color: white;
-    border-color: var(--bleu-anonymisation);
+    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
 }
 
 /* Noms et prénoms en italique en mode anonymisation */
@@ -2545,6 +2635,17 @@ body[data-mode="anonymisation"] .etudiant-nom,
 body[data-mode="anonymisation"] .profil-sidebar-nom,
 body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     font-style: italic;
+}
+
+/* Adaptation des sidebars aux modes */
+body[data-mode="simulation"] .sidebar-cartouches,
+body[data-mode="simulation"] .sidebar-navigation {
+    background: var(--sous-nav-bg-simulation);
+}
+
+body[data-mode="anonymisation"] .sidebar-cartouches,
+body[data-mode="anonymisation"] .sidebar-navigation {
+    background: var(--sous-nav-bg-anonymisation);
 }
 
 /* ===============================================
@@ -2587,8 +2688,9 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 /* Classe de base pour toutes les cartes info-toggle */
 .carte-info-toggle {
     display: none; /* Caché par défaut */
-    padding: 15px;
-    border-radius: 6px;
+    padding: 15px 15px 15px 20px;
+    border-left: 4px solid;
+    border-radius: 0 6px 6px 0;
     background: var(--bleu-tres-pale);
     margin-bottom: 20px;
     font-size: 0.85rem;
@@ -2596,44 +2698,49 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     line-height: 1.6;
 }
 
-/* Triangle pointeur vers le haut à droite */
-.carte-info-toggle::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    right: 60px;
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid currentColor;
-}
-
-/* Variante Note (ℹ️) - Style post-it jaune */
+/* Variante Note (💡) - Style post-it jaune */
 .carte-info-note {
     background: #fffbea;
     border-left-color: #f5c842;
 }
 
-.carte-info-note::before {
-    color: #fffbea;
-}
-
-/* Variante Conseil (💡) - Style vert pratique */
+/* Variante Conseil (📐) - Style vert technique */
 .carte-info-conseil {
     background: #f0fdf4;
     border-left-color: #4ade80;
 }
 
-.carte-info-conseil::before {
-    color: #f0fdf4;
+.carte-info-conseil .carte-info-toggle-titre .texte {
+    color: #16a34a;
 }
 
-/* Titres à l'intérieur des cartes info-toggle */
-.carte-info-toggle h4 {
-    color: var(--bleu-principal);
-    margin-bottom: 10px;
-    margin-top: 0;
+/* Variante Pédagogique (🍎) - Style rouge pédagogique */
+.carte-info-pedagogique {
+    background: #fef2f2;
+    border-left-color: #f87171;
+}
+
+.carte-info-pedagogique .carte-info-toggle-titre .texte {
+    color: #dc2626;
+}
+
+/* En-tête de la carte avec emoji et titre */
+.carte-info-toggle-titre {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.carte-info-toggle-titre .emoji {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.carte-info-toggle-titre .texte {
+    font-weight: 600;
+    color: #d97706;
 }
 
 /* Listes à l'intérieur des cartes info-toggle */
@@ -2785,9 +2892,9 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     margin-left: 5px;
 }
 
-/* Variantes de couleur */
+/* Variantes de couleur (selon echelles.js) - Fond blanc */
 .carte-metrique-bleue {
-    background: var(--bleu-tres-pale);
+    background: white;
     border-color: var(--bleu-principal);
 }
 
@@ -2795,31 +2902,46 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     color: var(--bleu-principal);
 }
 
-.carte-metrique-verte {
-    background: var(--alerte-fond-succes);
-    border-color: var(--btn-confirmer);
+.carte-metrique-verte,
+.carte-metrique-standard.carte-metrique-minimal {
+    background: white;
+    border-color: var(--risque-minimal);
 }
 
-.carte-metrique-verte .valeur {
-    color: var(--btn-confirmer);
+.carte-metrique-verte .valeur,
+.carte-metrique-standard.carte-metrique-minimal .valeur {
+    color: var(--risque-minimal);
 }
 
-.carte-metrique-violette {
-    background: #f3eeff;
-    border-color: var(--btn-modifier);
+.carte-metrique-violette,
+.carte-metrique-standard.carte-metrique-nul {
+    background: white;
+    border-color: var(--risque-nul);
 }
 
-.carte-metrique-violette .valeur {
-    color: var(--btn-modifier);
+.carte-metrique-violette .valeur,
+.carte-metrique-standard.carte-metrique-nul .valeur {
+    color: var(--risque-nul);
 }
 
-.carte-metrique-terracotta {
-    background: var(--alerte-fond-attention);
-    border-color: var(--btn-annuler);
+.carte-metrique-terracotta,
+.carte-metrique-standard.carte-metrique-modere {
+    background: white;
+    border-color: var(--risque-modere);
 }
 
-.carte-metrique-terracotta .valeur {
-    color: var(--btn-annuler);
+.carte-metrique-terracotta .valeur,
+.carte-metrique-standard.carte-metrique-modere .valeur {
+    color: var(--risque-modere);
+}
+
+.carte-metrique-standard.carte-metrique-critique {
+    background: white;
+    border-color: var(--risque-critique);
+}
+
+.carte-metrique-standard.carte-metrique-critique .valeur {
+    color: var(--risque-critique);
 }
 
 /* ===============================================
@@ -2946,7 +3068,7 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     top: 20px;
     max-height: calc(100vh - 100px);
     overflow-y: auto;
-    background: #f5f5f5;
+    background: var(--bleu-pale);
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
@@ -4065,28 +4187,9 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     flex-wrap: wrap;
 }
 
-.carte-metrique {
+.cartes-metriques .carte-metrique {
     flex: 1;
     min-width: 200px;
-    padding: 15px 20px;
-    background: white;
-    border: 1px solid #6b85b3;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.carte-metrique .label {
-    font-size: 0.9rem;
-    color: #032e5c;
-    font-weight: 500;
-}
-
-.carte-metrique .valeur {
-    font-size: 1.8rem;
-    color: #032e5c;
-    font-weight: 700;
 }
 /* ===============================
    INTERVENTIONS RàI (Beta 0.85)

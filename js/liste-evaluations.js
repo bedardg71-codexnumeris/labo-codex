@@ -463,9 +463,10 @@ function appliquerFiltresSurLignes(lignes) {
  * Génère le HTML d'une ligne du tableau
  */
 function genererLigneHTML(ligne) {
-    const badgeStatut = ligne.statut === 'evalue'
-        ? '<span class="badge-statut evalue">Évalué</span>'
-        : '<span class="badge-statut non-evalue">Non évalué</span>';
+    // Afficher la note si elle existe, sinon afficher le badge "Non remis"
+    const affichageNote = ligne.statut === 'evalue' && ligne.note !== '-'
+        ? `<strong>${ligne.note}</strong>`
+        : '<span class="badge-statut non-evalue">Non remis</span>';
 
     const lienCartouche = ligne.cartoucheNom && ligne.cartoucheNom !== '-'
         ? `<button class="btn btn-secondaire" style="padding: 4px 10px; font-size: 0.85rem;" onclick="ouvrirCartouche('${ligne.cartoucheId}', '${ligne.productionId}'); return false;" title="Voir la cartouche">
@@ -484,8 +485,7 @@ function genererLigneHTML(ligne) {
             <td>${echapperHtml(ligne.productionNom)}</td>
             <td>${echapperHtml(ligne.grilleNom)}</td>
             <td>${lienCartouche}</td>
-            <td style="text-align: center;"><strong>${ligne.note}</strong></td>
-            <td style="text-align: center;">${badgeStatut}</td>
+            <td style="text-align: center;">${affichageNote}</td>
             <td style="white-space: nowrap;">${boutons}</td>
         </tr>
     `;
