@@ -943,6 +943,154 @@ function genererSectionMobilisationEngagement(da) {
 }
 
 /**
+ * Génère le HTML de la section Accompagnement (interventions RàI)
+ * @param {string} da - Numéro de DA
+ * @returns {string} - HTML de la section
+ */
+function genererSectionAccompagnement(da) {
+    // Récupérer toutes les interventions où cet étudiant était présent
+    const interventions = obtenirInterventionsEtudiant(da);
+
+    // Récupérer les infos de l'étudiant pour affichage
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const etudiant = etudiants.find(e => e.da === da);
+    const nomComplet = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : `DA ${da}`;
+
+    let html = `
+        <!-- Détails de la section (masqué par défaut) -->
+        <div id="details-calculs-accompagnement-${da}" class="carte-info-toggle" style="display: none;">
+            <div class="details-calculs-section">
+                <h5 class="details-calculs-titre">À PROPOS DE CETTE SECTION</h5>
+                <div class="details-calculs-bloc">
+                    <div class="details-calculs-label">Objectif :</div>
+                    <div class="details-calculs-valeur">
+                        Cette section centralise l'historique complet des interventions RàI (Réponse à l'Intervention)
+                        auxquelles l'étudiant·e a participé. Elle permet de suivre l'évolution de l'accompagnement
+                        pédagogique dans le temps et de documenter les observations spécifiques.
+                    </div>
+                </div>
+
+                <div class="details-calculs-bloc">
+                    <div class="details-calculs-label">Contenu :</div>
+                    <div class="details-calculs-valeur">
+                        • Liste chronologique des interventions (plus récentes en premier)<br>
+                        • Type et statut de chaque intervention (planifiée, en cours, complétée)<br>
+                        • Notes individuelles prises lors de chaque rencontre<br>
+                        • Accès rapide pour ouvrir ou créer une intervention
+                    </div>
+                </div>
+
+                <div class="details-calculs-bloc">
+                    <div class="details-calculs-label">Utilisation :</div>
+                    <div class="details-calculs-valeur">
+                        • <strong>Nouvelle intervention :</strong> Cliquez sur le bouton en haut à droite pour créer une intervention<br>
+                        • <strong>Consulter une intervention :</strong> Cliquez sur «Ouvrir» pour voir les détails complets<br>
+                        • <strong>Notes individuelles :</strong> Visibles directement sous chaque intervention
+                    </div>
+                </div>
+
+                <div class="details-calculs-bloc">
+                    <div class="details-calculs-label">Intégration RàI :</div>
+                    <div class="details-calculs-valeur">
+                        Les interventions documentées ici s'inscrivent dans une approche proactive de soutien
+                        à l'apprentissage. Elles permettent d'ajuster les stratégies pédagogiques en fonction
+                        des besoins identifiés et de maintenir une trace longitudinale de l'accompagnement.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="carte" style="margin-bottom: 20px; background: var(--bleu-tres-pale);">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <div>
+                    <h3 style="margin: 0 0 10px 0; color: var(--bleu-principal);">
+                        Historique des interventions pour ${nomComplet}
+                    </h3>
+                    <p class="text-muted" style="margin: 0;">
+                        Cette section présente les interventions RàI auxquelles l'étudiant·e a participé,
+                        ainsi que les notes individuelles prises lors de chaque rencontre.
+                    </p>
+                </div>
+                <div>
+                    <button class="btn btn-principal btn-large" onclick="naviguerVersNouvelleIntervention();">
+                        Nouvelle intervention
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (!interventions || interventions.length === 0) {
+        html += `
+            <div class="profil-zone-avertissement" style="text-align: center;">
+                <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; color: var(--bleu-moyen);">
+                    Aucune intervention enregistrée
+                </div>
+                <div style="font-style: italic; font-size: 0.95rem; color: var(--bleu-moyen);">
+                    Les interventions RàI auxquelles cet·te étudiant·e participe apparaîtront ici
+                </div>
+            </div>
+        `;
+        return html;
+    }
+
+    // Trier les interventions par date (plus récente en premier)
+    const interventionsTriees = [...interventions].sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+    });
+
+    // Afficher chaque intervention
+    interventionsTriees.forEach(intervention => {
+        const dateFormatee = formaterDateLisible(intervention.date);
+        const noteIndividuelle = intervention.notesIndividuelles?.[da] || null;
+
+        html += `
+            <div class="carte" style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0 0 5px 0; color: var(--bleu-principal);">
+                            ${intervention.titre || intervention.type}
+                        </h4>
+                        <div class="text-muted" style="font-size: 0.9rem;">
+                            ${dateFormatee}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button class="btn btn-secondaire" onclick="naviguerVersIntervention('${intervention.id}');">
+                            Ouvrir
+                        </button>
+                    </div>
+                </div>
+        `;
+
+        // Afficher la note individuelle si elle existe
+        if (noteIndividuelle) {
+            html += `
+                <div style="background: #f0f8ff; border-left: 3px solid var(--bleu-principal);
+                            padding: 12px 15px; border-radius: 4px; margin-top: 15px;">
+                    <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 5px;">
+                        Note d'accompagnement
+                    </div>
+                    <div style="white-space: pre-wrap; color: #333;">
+                        ${noteIndividuelle}
+                    </div>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="text-muted" style="font-style: italic; font-size: 0.9rem; margin-top: 10px;">
+                    Aucune note spécifique pour cet·te étudiant·e
+                </div>
+            `;
+        }
+
+        html += `</div>`;
+    });
+
+    return html;
+}
+
+/**
  * Génère le HTML de la section Mobilisation (M) détaillée
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
@@ -1763,6 +1911,10 @@ function changerSectionProfil(section) {
                 </div>
             `;
             break;
+        case 'accompagnement':
+            titre = 'Accompagnement';
+            contenu = genererSectionAccompagnement(da);
+            break;
         default:
             titre = 'Section inconnue';
             contenu = '<p>Section non trouvée</p>';
@@ -1780,6 +1932,8 @@ function changerSectionProfil(section) {
         toggleInfo = `<span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-performance-${da}">ℹ️</span></span>`;
     } else if (section === 'mobilisation') {
         toggleInfo = `<span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-mobilisation-${da}">ℹ️</span></span>`;
+    } else if (section === 'accompagnement') {
+        toggleInfo = `<span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-accompagnement-${da}">ℹ️</span></span>`;
     }
 
     contenuContainer.innerHTML = `
@@ -2569,6 +2723,9 @@ function afficherProfilComplet(da) {
                 </div>
             </div>
         `;
+    } else if (sectionAffichee === 'accompagnement') {
+        titreSection = 'Accompagnement';
+        contenuSection = genererSectionAccompagnement(da);
     }
 
     // Générer le HTML avec layout sidebar matériel
@@ -2612,7 +2769,7 @@ function afficherProfilComplet(da) {
                     <div class="sidebar-info-card-details">
                         <div><strong>DA:</strong> ${echapperHtml(eleve.da)}</div>
                         ${eleve.groupe ? `<div><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</div>` : ''}
-                        ${eleve.programme ? `<div><strong>Programme:</strong> ${echapperHtml(eleve.programme)}</div>` : ''}
+                        ${eleve.programme ? `<div><strong>Programme:</strong> ${typeof obtenirNomProgramme === 'function' ? echapperHtml(obtenirNomProgramme(eleve.programme)) : echapperHtml(eleve.programme)}</div>` : ''}
                         ${eleve.sa === 'Oui' ? '<div style="color: var(--bleu-principal);">✓ Services adaptés</div>' : ''}
                         ${eleve.caf === 'Oui' ? '<div style="color: var(--bleu-principal);">✓ CAF</div>' : ''}
                     </div>
@@ -2625,28 +2782,24 @@ function afficherProfilComplet(da) {
                     <!-- 1. Suivi de l'apprentissage -->
                     <div class="sidebar-item ${sectionAffichee === 'cible' ? 'active' : ''}" onclick="changerSectionProfil('cible')">
                         <div class="sidebar-item-titre">Suivi de l'apprentissage</div>
-                        <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
-                            R: ${indices.R} · ${interpR.niveau}
-                        </div>
                     </div>
 
                     <!-- 2. Développement des habiletés -->
                     <div class="sidebar-item ${sectionAffichee === 'performance' ? 'active' : ''}" onclick="changerSectionProfil('performance')">
                         <div class="sidebar-item-titre">Développement des habiletés</div>
-                        <div style="font-size: 0.85rem; color: ${obtenirCouleurIndice(indices.P)}; margin-top: 4px; font-weight: 600;">
-                            ${indices.P}%
-                        </div>
                     </div>
 
                     <!-- 3. Mobilisation -->
                     <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" onclick="changerSectionProfil('mobilisation')">
                         <div class="sidebar-item-titre">Mobilisation</div>
-                        <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">
-                            A: ${indices.A}% · C: ${indices.C}%
-                        </div>
                     </div>
 
-                    <!-- 4. Rapport -->
+                    <!-- 4. Accompagnement -->
+                    <div class="sidebar-item ${sectionAffichee === 'accompagnement' ? 'active' : ''}" onclick="changerSectionProfil('accompagnement')">
+                        <div class="sidebar-item-titre">Accompagnement</div>
+                    </div>
+
+                    <!-- 5. Rapport -->
                     <div class="sidebar-item ${sectionAffichee === 'rapport' ? 'active' : ''}" onclick="changerSectionProfil('rapport')">
                         <div class="sidebar-item-titre">Rapport</div>
                     </div>
@@ -4788,9 +4941,54 @@ function toggleSection(sectionId) {
     }
 }
 
+/**
+ * Naviguer vers une nouvelle intervention depuis le profil étudiant
+ */
+function naviguerVersNouvelleIntervention() {
+    // Naviguer vers la section
+    afficherSection('tableau-bord');
+    afficherSousSection('tableau-bord-interventions');
+
+    // Attendre que le conteneur soit prêt
+    const checkConteneur = setInterval(() => {
+        const conteneur = document.getElementById('conteneurPrincipal');
+        if (conteneur && conteneur.innerHTML.trim() !== '') {
+            clearInterval(checkConteneur);
+            afficherFormulaireIntervention();
+        }
+    }, 50); // Vérifier toutes les 50ms
+
+    // Timeout de sécurité (2 secondes max)
+    setTimeout(() => clearInterval(checkConteneur), 2000);
+}
+
+/**
+ * Naviguer vers une intervention existante depuis le profil étudiant
+ * @param {string} interventionId - ID de l'intervention à ouvrir
+ */
+function naviguerVersIntervention(interventionId) {
+    // Naviguer vers la section
+    afficherSection('tableau-bord');
+    afficherSousSection('tableau-bord-interventions');
+
+    // Attendre que le conteneur soit prêt
+    const checkConteneur = setInterval(() => {
+        const conteneur = document.getElementById('conteneurPrincipal');
+        if (conteneur && conteneur.innerHTML.trim() !== '') {
+            clearInterval(checkConteneur);
+            ouvrirIntervention(interventionId);
+        }
+    }, 50); // Vérifier toutes les 50ms
+
+    // Timeout de sécurité (2 secondes max)
+    setTimeout(() => clearInterval(checkConteneur), 2000);
+}
+
 /* ===============================
    📌 EXPORTS (accessibles globalement)
    =============================== */
 
 // Les fonctions sont automatiquement disponibles globalement
 // car non encapsulées dans un module ES6
+window.naviguerVersNouvelleIntervention = naviguerVersNouvelleIntervention;
+window.naviguerVersIntervention = naviguerVersIntervention;
