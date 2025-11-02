@@ -42,7 +42,7 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 
 ```
 projet/
-├── index 83 (seuils configurables).html      # Point d'entrée actuel (Beta 0.83)
+├── index 85 (interventions).html             # Point d'entrée actuel (Beta 0.85)
 ├── css/
 │   └── styles.css                        # Styles globaux + variables CSS pratiques
 ├── js/
@@ -531,6 +531,34 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - ✅ **Fichiers modifiés** : `profil-etudiant.js`, `portfolio.js`, `productions.js`
 - ✅ **Documentation** : `NOTES_VERSION_0.83.md`
 
+**INTERVENTIONS RÀI ET OPTIMISATIONS** (Session 1er novembre - Beta 0.85)
+- ✅ **Fichier** : `index 85 (interventions).html` - Version Beta 0.85
+- ✅ **Cartes métriques uniformisées** :
+  - Format standard appliqué: texte à gauche, données à droite
+  - Utilisation classes CSS `.carte-metrique-standard` et `.carte-metrique-bleue`
+  - Suppression de tous les styles inline
+  - Nouvelle règle CSS pour pourcentages (0.75rem, gris)
+  - Cartes: Risques faibles, RàI Niveau 1/2/3
+- ✅ **Affichage noms complets de programmes** :
+  - Fonction `obtenirNomProgramme()` exportée
+  - "200.B1" devient "Sciences de la nature"
+  - Support 40+ programmes réseau collégial
+- ✅ **Optimisation profil étudiant** :
+  - Barre latérale compacte (données supprimées)
+  - Élimination barre de défilement verticale
+  - "Rapport" déplacé après "Accompagnement"
+- ✅ **Correctifs critiques** :
+  - Exports fonctions inexistantes (echelles.js, cartouches.js, groupe.js)
+  - Crash chargement liste étudiants (élément DOM manquant)
+  - Fonctions non exportées vers window
+- ✅ **Refactorisation majeure** :
+  - Renommage `etudiants-ameliore.js` → `etudiants.js`
+  - Ancien `etudiants.js` archivé (Archives/etudiants.js.old)
+  - Code nettoyé et organisé
+- ✅ **Fichiers modifiés** : 10 fichiers, ~1500 lignes ajoutées
+- ✅ **Bugs corrigés** : 5 (ReferenceError, crash DOM, exports)
+- ✅ **Documentation** : `NOTES_VERSION_0.85.md`
+
 ### 🔴 Prochaines priorités (PHASE 1 : Consolidation)
 
 **Objectif PHASE 1** : Finaliser fonctionnalités partiellement implémentées
@@ -565,7 +593,7 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 ```bash
 # Test local
-open "index 80 (phase 1 préparation).html"   # macOS
+open "index 85 (interventions).html"   # macOS
 
 # Voir localStorage dans console Safari
 localStorage.getItem('calendrierComplet')
