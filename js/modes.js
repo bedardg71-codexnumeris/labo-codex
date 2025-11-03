@@ -22,12 +22,12 @@ const THEMES = {
         icone: ''
     },
     simulation: {
-        couleur: '#0f1e3a', // Mauve
+        couleur: '#1a5266', // Teal/sarcelle
         nom: 'Mode Simulation',
         icone: ''
     },
     anonymisation: {
-        couleur: '#1a5266', // Vert
+        couleur: '#0f1e3a', // Bleu très foncé
         nom: 'Mode Anonymisation',
         icone: ''
     }

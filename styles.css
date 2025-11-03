@@ -246,10 +246,10 @@ body {
 }
 
 .titre-section h1 {
-    font-size: 2.8rem;
+    font-size: 2rem;
     font-weight: bold;
     margin: 0 0 3px 0;
-    letter-spacing: 2px;
+    letter-spacing: 0px;
     color: white;
 }
 
@@ -276,10 +276,27 @@ body {
     margin-left: auto;
 }
 
+/* Informations contextuelles au centre (sous le titre) */
+.info-contextuelles-centre {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-align: center;
+    line-height: 1.6;
+    margin-top: 10px;
+}
+
+/* Sélecteur de mode dans la navigation (à droite) */
+.selecteur-mode-nav {
+    margin-left: auto;
+    padding-right: 20px;
+}
+
 .info-legales-section .meta {
     font-size: 0.7rem;
     color: #9fc5e8;
     margin: 0;
+    padding-top: 3px;
+    padding-right: 20px;
     text-align: right;
     line-height: 1.6;
 }
@@ -425,7 +442,10 @@ body {
    =============================== */
 
 .sous-navigation {
-    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    /* Couche rgba(0,0,0,0.15) par-dessus le gradient bleu pour créer effet de profondeur */
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)),
+        linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
     padding: 12px 20px;
     display: flex;
     gap: 8px;

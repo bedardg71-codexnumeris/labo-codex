@@ -64,34 +64,78 @@ function calculerEtSauvegarderIndicesAssiduite() {
 /**
  * Calcule l'assiduité SOMMATIVE (depuis le début du trimestre)
  * Formule : Total heures présentes ÷ Total heures DONNÉES (pas théoriques)
- * 
+ *
+ * IMPORTANT : Les séances facultatives (interventions RàI) ne pénalisent PAS l'assiduité.
+ * - Séance facultative où l'étudiant est PRÉSENT : compte au numérateur ET au dénominateur
+ * - Séance facultative où l'étudiant est ABSENT : ne compte NI au numérateur NI au dénominateur
+ *
  * @param {string} da - Numéro DA de l'étudiant
  * @returns {number} - Indice entre 0 et 1
  */
 function calculerAssiduiteSommative(da) {
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
     const presences = obtenirDonneesSelonMode('presences') || [];
-    
+
     // Obtenir toutes les DATES où des présences ont été saisies
     const datesSaisies = [...new Set(presences.map(p => p.date))].sort();
-    
+
     if (datesSaisies.length === 0) {
         console.warn('⚠️ Aucune présence saisie');
         return 1; // Par défaut 100%
     }
-    
-    // Calculer le total d'heures DONNÉES (pas théoriques)
-    // = nombre de séances saisies × 2h
-    const totalHeuresDonnees = datesSaisies.length * 2;
-    
-    // Calculer le total d'heures de présence de cet étudiant
+
+    // Obtenir les présences de cet étudiant
     const presencesEtudiant = presences.filter(p => p.da === da);
-    const totalHeuresPresentes = presencesEtudiant.reduce((sum, p) => sum + (p.heures || 0), 0);
-    
+
+    // Calculer le total d'heures DONNÉES pour cet étudiant
+    // = nombre de séances (excluant les séances facultatives où l'étudiant était absent) × 2h
+    let totalHeuresDonnees = 0;
+    let totalHeuresPresentes = 0;
+
+    datesSaisies.forEach(date => {
+        // Trouver la présence de l'étudiant pour cette date
+        const presenceDate = presencesEtudiant.find(p => p.date === date);
+
+        if (presenceDate) {
+            // L'étudiant a une entrée pour cette date
+            const estFacultatif = presenceDate.facultatif === true;
+            const heuresPresence = presenceDate.heures || 0;
+
+            if (estFacultatif && heuresPresence === 0) {
+                // Séance facultative où l'étudiant était absent
+                // Ne compte ni au numérateur ni au dénominateur
+                console.log(`   ⚪ ${date}: Séance facultative (absent) - non comptabilisée`);
+            } else {
+                // Séance normale OU séance facultative où l'étudiant était présent
+                totalHeuresDonnees += 2;
+                totalHeuresPresentes += heuresPresence;
+
+                if (estFacultatif) {
+                    console.log(`   ✅ ${date}: Séance facultative (présent) - ${heuresPresence}h comptabilisées`);
+                }
+            }
+        } else {
+            // L'étudiant n'a pas d'entrée pour cette date
+            // Vérifier si c'était une séance facultative pour tout le monde
+            const presencesDate = presences.filter(p => p.date === date);
+            const tousAbsentsFacultatif = presencesDate.every(p => p.facultatif === true && (p.heures || 0) === 0);
+
+            if (!tousAbsentsFacultatif) {
+                // Séance normale : compte au dénominateur (0 au numérateur)
+                totalHeuresDonnees += 2;
+            }
+        }
+    });
+
+    if (totalHeuresDonnees === 0) {
+        console.warn(`⚠️ Aucune heure donnée pour ${da}`);
+        return 1; // Par défaut 100%
+    }
+
     const indice = totalHeuresPresentes / totalHeuresDonnees;
-    
+
     console.log(`   Sommatif ${da}: ${totalHeuresPresentes}h / ${totalHeuresDonnees}h = ${(indice * 100).toFixed(1)}%`);
-    
+
     // Retourner l'indice (entre 0 et 1, plafonné à 1)
     return Math.min(indice, 1);
 }
