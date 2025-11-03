@@ -1073,6 +1073,14 @@ input.saisie-retard {
     font-weight: 600;
 }
 
+/* Absence motivée/facultative (RàI) - Ambre/Orange clair */
+input.saisie-absence-motivee {
+    background-color: #ffe8cc !important;
+    border-color: #ffb74d !important;
+    color: #e65100 !important;
+    font-weight: 600;
+}
+
 /* Présence complète - Vert léger */
 input.saisie-present {
     background-color: #d4edda !important;

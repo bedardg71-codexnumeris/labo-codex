@@ -142,11 +142,15 @@ function calculerAssiduiteSommative(da) {
 
 /**
  * Calcule l'assiduité ALTERNATIVE (sur les N dernières séances)
- * Formule : Heures présentes sur N dernières séances ÷ (N × 2h)
- * 
+ * Formule : Heures présentes sur N dernières séances ÷ heures données (excluant facultatif absent)
+ *
+ * IMPORTANT : Les séances facultatives (interventions RàI) ne pénalisent PAS l'assiduité.
+ * - Séance facultative où l'étudiant est PRÉSENT : compte au numérateur ET au dénominateur
+ * - Séance facultative où l'étudiant est ABSENT : ne compte NI au numérateur NI au dénominateur
+ *
  * Le nombre de séances est paramétrable via les réglages de notation.
  * Par défaut : 6 séances (= 3 cours = 12h)
- * 
+ *
  * @param {string} da - Numéro DA de l'étudiant
  * @returns {number} - Indice entre 0 et 1
  */
@@ -174,19 +178,52 @@ function calculerAssiduiteAlternative(da) {
 
     console.log(`   Dernières dates pour ${da}:`, dernieresDates);
 
-    // Calculer les heures théoriques sur ces séances
-    const heuresTheoriques = nombreSeances * 2; // N séances × 2h
-
-    // Calculer les heures de présence de cet étudiant sur ces dates
+    // Obtenir les présences de cet étudiant
     const presencesEtudiant = presences.filter(p =>
         p.da === da && dernieresDates.includes(p.date)
     );
 
-    const heuresPresentes = presencesEtudiant.reduce((sum, p) => sum + (p.heures || 0), 0);
+    // Calculer en tenant compte des séances facultatives
+    let totalHeuresDonnees = 0;
+    let totalHeuresPresentes = 0;
 
-    const indice = heuresPresentes / heuresTheoriques;
+    dernieresDates.forEach(date => {
+        const presenceDate = presencesEtudiant.find(p => p.date === date);
 
-    console.log(`   Alternatif ${da}: ${heuresPresentes}h / ${heuresTheoriques}h = ${(indice * 100).toFixed(1)}%`);
+        if (presenceDate) {
+            const estFacultatif = presenceDate.facultatif === true;
+            const heuresPresence = presenceDate.heures || 0;
+
+            if (estFacultatif && heuresPresence === 0) {
+                // Séance facultative où l'étudiant était absent
+                // Ne compte ni au numérateur ni au dénominateur
+                console.log(`   ⚪ ${date}: Séance facultative (absent) - non comptabilisée`);
+            } else {
+                // Séance normale OU séance facultative où l'étudiant était présent
+                totalHeuresDonnees += 2;
+                totalHeuresPresentes += heuresPresence;
+            }
+        } else {
+            // L'étudiant n'a pas d'entrée pour cette date
+            // Vérifier si c'était une séance facultative pour tout le monde
+            const presencesDate = presences.filter(p => p.date === date);
+            const tousAbsentsFacultatif = presencesDate.every(p => p.facultatif === true && (p.heures || 0) === 0);
+
+            if (!tousAbsentsFacultatif) {
+                // Séance normale : compte au dénominateur (0 au numérateur)
+                totalHeuresDonnees += 2;
+            }
+        }
+    });
+
+    if (totalHeuresDonnees === 0) {
+        console.warn(`   ⚠️ Aucune heure donnée pour ${da} (alternatif)`);
+        return 1; // Par défaut 100%
+    }
+
+    const indice = totalHeuresPresentes / totalHeuresDonnees;
+
+    console.log(`   Alternatif ${da}: ${totalHeuresPresentes}h / ${totalHeuresDonnees}h = ${(indice * 100).toFixed(1)}%`);
 
     // Retourner l'indice (entre 0 et 1, plafonné à 1)
     return Math.min(indice, 1);
@@ -669,6 +706,14 @@ function initialiserSaisiePresences() {
     mettreAJourEnteteDateSeance(dateInput.value);
     chargerTableauPresences(dateInput.value, validation.verrouille);
     mettreAJourBoutonsNavigation();
+
+    // Restaurer la valeur de recherche sauvegardée (persistance lors de la navigation)
+    const recherche = document.getElementById('recherche-saisie-presences');
+    const termeRecherche = localStorage.getItem('recherchePresences') || '';
+    if (recherche && termeRecherche) {
+        recherche.value = termeRecherche;
+        filtrerTableauPresences();
+    }
 }
 
 /**
@@ -809,6 +854,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
 
         const heuresPresence = presenceExistante ? (presenceExistante.heures || 0) : dureeSeance;
         const notes = presenceExistante ? (presenceExistante.notes || '') : '';
+        const estFacultatif = presenceExistante ? (presenceExistante.facultatif === true) : false;
 
         const heuresHistorique = calculerTotalHeuresPresence(etudiant.da, dateStr);
         const tauxAssiduiteActuel = calculerTauxAssiduite(
@@ -821,16 +867,19 @@ function chargerTableauPresences(dateStr, estVerrouille) {
 
         // Créer l'input des heures avec les bonnes classes CSS
         const inputHeuresHTML = `
-            <input type="number" 
-                   class="controle-form input-heures ${obtenirClasseSaisie(heuresPresence, dureeSeance)}"
+            <input type="number"
+                   class="controle-form input-heures ${obtenirClasseSaisie(heuresPresence, dureeSeance, estFacultatif)}"
                    id="heures_${etudiant.da}"
-                   value="${heuresPresence}" 
-                   min="0" 
-                   max="${dureeSeance}" 
+                   value="${heuresPresence}"
+                   min="0"
+                   max="${dureeSeance}"
                    step="0.5"
                    ${estVerrouille ? 'disabled' : ''}
                    onchange="mettreAJourLigne('${etudiant.da}', '${dateStr}')"
                    oninput="appliquerCodeCouleurSaisie(this, ${dureeSeance})">`;
+
+        // Calculer le total incluant la séance actuelle
+        const totalHeuresAvecSeanceActuelle = heuresHistorique + parseFloat(heuresPresence);
 
         // Structure : DA | Prénom | Nom | Présence | Notes | Total heures | Assiduité
         tr.innerHTML = `
@@ -839,14 +888,14 @@ function chargerTableauPresences(dateStr, estVerrouille) {
             <td>${echapperHtml(etudiant.nom)}</td>
             <td style="width: 80px;">${inputHeuresHTML}</td>
             <td>
-                <input type="text" 
-                       class="controle-form input-notes" 
+                <input type="text"
+                       class="controle-form input-notes"
                        id="notes_${etudiant.da}"
-                       value="${echapperHtml(notes)}" 
+                       value="${echapperHtml(notes)}"
                        placeholder="Notes..."
                        ${estVerrouille ? 'disabled' : ''}>
             </td>
-            <td><span id="heuresHisto_${etudiant.da}">${heuresHistorique.toFixed(1)}h</span></td>
+            <td><span id="heuresHisto_${etudiant.da}">${totalHeuresAvecSeanceActuelle.toFixed(1)}h</span></td>
             <td>
                 <span id="taux_${etudiant.da}" style="font-weight: 500;">
                     ${tauxAssiduiteActuel}%
@@ -897,11 +946,12 @@ function chargerTableauPresences(dateStr, estVerrouille) {
 /**
  * Obtient la classe CSS pour la saisie selon la valeur
  */
-function obtenirClasseSaisie(heures, dureeMax) {
+function obtenirClasseSaisie(heures, dureeMax, estFacultatif = false) {
     const valeur = parseFloat(heures) || 0;
 
     if (valeur === 0) {
-        return 'saisie-absence';
+        // Si c'est une absence facultative, utiliser une classe différente (couleur ambre)
+        return estFacultatif ? 'saisie-absence-motivee' : 'saisie-absence';
     } else if (valeur < dureeMax) {
         return 'saisie-retard';
     } else if (valeur === dureeMax) {
@@ -918,8 +968,8 @@ function appliquerCodeCouleurSaisie(inputHeures, dureeMax) {
 
     const valeur = parseFloat(inputHeures.value) || 0;
 
-    // Retirer toutes les classes
-    inputHeures.classList.remove('saisie-absence', 'saisie-retard', 'saisie-present', 'saisie-vide');
+    // Retirer toutes les classes (incluant saisie-absence-motivee)
+    inputHeures.classList.remove('saisie-absence', 'saisie-absence-motivee', 'saisie-retard', 'saisie-present', 'saisie-vide');
 
     // Appliquer la bonne classe
     if (valeur === 0) {
@@ -939,6 +989,7 @@ function appliquerCodeCouleurSaisie(inputHeures, dureeMax) {
 function mettreAJourLigne(da, dateStr) {
     const inputHeures = document.getElementById(`heures_${da}`);
     const spanTaux = document.getElementById(`taux_${da}`);
+    const spanHeuresHisto = document.getElementById(`heuresHisto_${da}`);
 
     if (!inputHeures || !spanTaux) return;
 
@@ -947,6 +998,13 @@ function mettreAJourLigne(da, dateStr) {
 
     // Appliquer le code couleur
     appliquerCodeCouleurSaisie(inputHeures, dureeMax);
+
+    // Mettre à jour le total des heures (historique + séance actuelle)
+    if (spanHeuresHisto) {
+        const heuresHistorique = calculerTotalHeuresPresence(da, dateStr);
+        const totalHeuresAvecSeanceActuelle = heuresHistorique + heuresSeance;
+        spanHeuresHisto.textContent = totalHeuresAvecSeanceActuelle.toFixed(1) + 'h';
+    }
 
     // Mettre à jour le taux
     const tauxAssiduiteActuel = calculerTauxAssiduite(da, dateStr, heuresSeance);
@@ -990,6 +1048,14 @@ function enregistrerPresences() {
         etudiantsATraiter = etudiants.filter(e => e.groupe === groupeFiltre);
     }
 
+    // IMPORTANT : Sauvegarder les flags facultatifs AVANT de supprimer les anciennes présences
+    const flagsFacultatifs = {};
+    presences.forEach(p => {
+        if (p.date === dateStr && p.facultatif === true) {
+            flagsFacultatifs[p.da] = true;
+        }
+    });
+
     // Supprimer les anciennes présences pour cette date et ces étudiants
     presences = presences.filter(p => {
         if (p.date !== dateStr) return true;
@@ -1005,12 +1071,20 @@ function enregistrerPresences() {
             const heures = parseFloat(inputHeures.value) || 0;
             const notes = inputNotes ? inputNotes.value.trim() : '';
 
-            presences.push({
+            // Créer l'objet de présence
+            const presenceObj = {
                 date: dateStr,
                 da: etudiant.da,
                 heures: heures,
                 notes: notes
-            });
+            };
+
+            // IMPORTANT : Préserver le flag facultatif s'il existait
+            if (flagsFacultatifs[etudiant.da] === true) {
+                presenceObj.facultatif = true;
+            }
+
+            presences.push(presenceObj);
         }
     });
 
@@ -1081,6 +1155,16 @@ function calculerTotalHeuresPresence(da, dateActuelle) {
  * Calcule le taux d'assiduité d'un étudiant
  */
 function calculerTauxAssiduite(da, dateActuelle, heuresSeanceActuelle) {
+    // Utiliser les indices sauvegardés qui tiennent compte des séances facultatives
+    const indices = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
+
+    if (indices.sommatif && indices.sommatif[da] !== undefined) {
+        // Retourner l'indice sommatif sauvegardé (déjà calculé avec logique facultative)
+        const taux = indices.sommatif[da] * 100;
+        return Math.min(Math.round(taux), 100);
+    }
+
+    // Fallback : ancienne logique si les indices ne sont pas disponibles
     const nombreSeances = calculerNombreSeances(dateActuelle);
 
     if (nombreSeances === 0) {
@@ -1427,6 +1511,10 @@ function filtrerTableauPresences() {
     if (!recherche) return;
 
     const terme = recherche.value.toLowerCase().trim();
+
+    // Sauvegarder la valeur de recherche pour la persistance lors de la navigation
+    localStorage.setItem('recherchePresences', terme);
+
     const tbody = document.getElementById('tbody-saisie-presences');
     if (!tbody) return;
 
@@ -1459,5 +1547,43 @@ window.ouvrirSaisiePresence = ouvrirSaisiePresence;
 window.mettreAJourLigne = mettreAJourLigne;
 window.appliquerCodeCouleurSaisie = appliquerCodeCouleurSaisie;
 window.filtrerTableauPresences = filtrerTableauPresences;
+
+/* ===============================
+   🔄 RECHARGEMENT AUTOMATIQUE
+   =============================== */
+
+/**
+ * Surveille l'activation de la sous-section 'presences-saisie'
+ * et recharge automatiquement le tableau pour refléter les changements
+ * faits depuis d'autres sections (ex: modifications d'interventions RàI)
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    const sectionSaisie = document.getElementById('presences-saisie');
+    if (!sectionSaisie) return;
+
+    // Observer les changements de la classe 'active' sur la sous-section
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                // Si la sous-section vient de devenir active
+                if (sectionSaisie.classList.contains('active')) {
+                    const dateInput = document.getElementById('date-cours');
+                    if (dateInput && dateInput.value) {
+                        console.log('🔄 Rechargement automatique du tableau de présences');
+                        initialiserSaisiePresences();
+                    }
+                }
+            }
+        });
+    });
+
+    // Commencer à observer
+    observer.observe(sectionSaisie, {
+        attributes: true,
+        attributeFilter: ['class']
+    });
+
+    console.log('✅ Observer de rechargement automatique activé pour presences-saisie');
+});
 
 console.log('✅ Module saisie-presences.js chargé (version refondée complète)');
