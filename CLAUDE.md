@@ -42,7 +42,7 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 
 ```
 projet/
-├── index 85 (interventions).html             # Point d'entrée actuel (Beta 85)
+├── index 88 (améliorations usage).html       # Point d'entrée actuel (Beta 88)
 ├── css/
 │   └── styles.css                        # Styles globaux + variables CSS pratiques
 ├── js/
@@ -558,6 +558,31 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - ✅ **Fichiers modifiés** : 10 fichiers, ~1500 lignes ajoutées
 - ✅ **Bugs corrigés** : 5 (ReferenceError, crash DOM, exports)
 - ✅ **Documentation** : `NOTES_VERSION_0.85.md`
+
+**CORRECTIFS ABSENCES MOTIVÉES RÀI ET AMÉLIORATIONS UX** (Session 3 novembre - Beta 88)
+- ✅ **Fichier** : `index 88 (améliorations usage).html` - Version Beta 88
+- ✅ **Correctifs système absences motivées** :
+  - Préservation flag `facultatif: true` lors enregistrement présences (saisie-presences.js:1040-1074)
+  - Les absences motivées RàI restent en couleur ambre après modification
+  - Les taux d'assiduité ne pénalisent plus les absences motivées (100% préservé)
+  - Synchronisation automatique interventions → présences (interventions.js:1064-1068)
+  - Modifications d'étudiants dans interventions propagées automatiquement
+  - Rechargement automatique du tableau présences via MutationObserver (saisie-presences.js:1540-1576)
+- ✅ **Améliorations UX** :
+  - Persistance du filtre de recherche lors navigation entre dates (saisie-presences.js:1481, 710-716)
+  - Le nom recherché reste actif en cliquant sur Précédent/Suivant
+  - Total heures inclut maintenant la séance actuelle (saisie-presences.js:881-882, 1002-1007)
+  - Affichage intuitif: Alya (38.0h) vs Loïc (36.0h) selon présence/absence
+  - Mise à jour dynamique du total lors modification heures
+- ✅ **Workflow validé de bout en bout** :
+  - Créer intervention RàI → Marquer complétée → Transfert auto vers présences
+  - Modifier participants → Mise à jour auto des présences sans rechargement manuel
+  - Enregistrer présences → Flag facultatif préservé → Assiduité correcte
+  - Navigation dates → Filtre recherche persistant → Rechargement auto tableau
+- ✅ **Fichiers modifiés** : 3 fichiers (interventions.js, saisie-presences.js, styles.css)
+- ✅ **Statistiques** : 168 insertions, 1367 suppressions
+- ✅ **Bugs corrigés** : 3 bugs critiques système absences motivées
+- ✅ **Documentation** : `NOTES_VERSION_0.88.md`
 
 ### 🔴 Prochaines priorités (PHASE 1 : Consolidation)
 

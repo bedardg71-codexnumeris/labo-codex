@@ -6998,10 +6998,10 @@ Exemple :
 
                     <!-- Carte: Interventions RàI avec présences facultatives -->
                     <div class="carte" class="border-left-primary">
-                        <h3 class="carte-titre-bleu">6. Interventions RàI avec présences facultatives</h3>
+                        <h3 class="carte-titre-bleu">6. Interventions RàI avec absences motivées</h3>
                         <p><strong>Navigation :</strong> Tableau de bord → Interventions</p>
 
-                        <p>Le système permet de documenter des interventions de Réponse à l'Intervention (RàI) de niveau 2 ou 3 tout en offrant un « congé » aux étudiants non participants, sans pénaliser leur assiduité.</p>
+                        <p>Le système permet de documenter des interventions de Réponse à l'Intervention (RàI) de niveau 2 ou 3 tout en justifiant les absences des étudiants non participants, sans pénaliser leur assiduité.</p>
 
                         <div class="carte-gradient-bleu">
                             <h4 class="titre-bleu-mb10">📋 Contexte pédagogique</h4>
@@ -7010,12 +7010,13 @@ Exemple :
                                 <li>Certains étudiants ont besoin de soutien spécifique (niveau 2 ou 3)</li>
                                 <li>Les autres étudiants reçoivent un congé ou travaillent de façon autonome</li>
                                 <li>Les absents ne devraient PAS être pénalisés dans leur calcul d'assiduité</li>
+                                <li><strong>Important :</strong> Les séances restent obligatoires, mais les absences sont justifiées</li>
                             </ul>
                         </div>
 
                         <div class="alerte alerte-info">
                             <h4 class="titre-11-mb10">🎯 Objectif du système</h4>
-                            <p class="mb-0-only">Permettre de <strong>documenter les présences</strong> aux interventions tout en <strong>marquant la séance comme facultative</strong>, afin que les absences ne pénalisent pas l'indice d'assiduité.</p>
+                            <p class="mb-0-only">Permettre de <strong>documenter les présences</strong> aux interventions tout en <strong>marquant les absences comme motivées</strong>, afin qu'elles ne pénalisent pas l'indice d'assiduité.</p>
                         </div>
 
                         <div class="carte-orange-my15">
@@ -7056,9 +7057,9 @@ Exemple :
                                 </li>
                                 <li><strong>Étudiants absents</strong> :
                                     <ul class="mt-5-text-95">
-                                        <li>0 heures enregistrées</li>
-                                        <li>Note : « Présence facultative RàI »</li>
-                                        <li>Ne compte NI au numérateur NI au dénominateur (congé effectif)</li>
+                                        <li>0 heures enregistrées (affichage en couleur ambre)</li>
+                                        <li>Note : « Absence motivée RàI »</li>
+                                        <li>Ne compte NI au numérateur NI au dénominateur (absence justifiée)</li>
                                     </ul>
                                 </li>
                             </ul>
@@ -7066,8 +7067,8 @@ Exemple :
 
                         <div class="alerte alerte-succes">
                             <h4 class="titre-11-mb10">✅ Résultat : Assiduité préservée</h4>
-                            <p class="mb-10-only">Les étudiants qui n'ont pas participé à l'intervention (et qui ont donc reçu un « congé ») ne voient <strong>pas leur indice d'assiduité diminuer</strong>.</p>
-                            <p class="text-095"><strong>Exemple :</strong> Un étudiant avec 85% d'assiduité qui est absent à une intervention facultative conservera son 85%. Sans ce système, son assiduité chuterait automatiquement.</p>
+                            <p class="mb-10-only">Les étudiants qui n'ont pas participé à l'intervention (absence motivée) ne voient <strong>pas leur indice d'assiduité diminuer</strong>.</p>
+                            <p class="text-095"><strong>Exemple :</strong> Un étudiant avec 85% d'assiduité qui a une absence motivée RàI conservera son 85%. Sans ce système, son assiduité chuterait automatiquement.</p>
                         </div>
 
                         <div class="carte-green-my15">
@@ -7078,8 +7079,8 @@ Exemple :
                                 <li>Sélectionner la date de l'intervention</li>
                                 <li>Vérifier dans le tableau :
                                     <ul class="mt-5-text-95">
-                                        <li>Les présents ont 2h avec la note d'intervention</li>
-                                        <li>Les absents ont 0h avec la note « Présence facultative RàI »</li>
+                                        <li>Les présents ont 2h (vert) avec la note d'intervention</li>
+                                        <li>Les absents ont 0h (ambre) avec la note « Absence motivée RàI »</li>
                                     </ul>
                                 </li>
                                 <li>Consulter un profil étudiant absent pour confirmer que l'assiduité n'a pas baissé</li>
@@ -7089,10 +7090,11 @@ Exemple :
                         <div class="alerte alerte-attention">
                             <h4 class="titre-11-mb10">⚠️ Important</h4>
                             <ul class="m-10-0-0-0-lh">
-                                <li>Le transfert automatique se déclenche uniquement quand vous cliquez sur « Marquer comme complétée »</li>
+                                <li>Le transfert automatique se déclenche quand vous cliquez sur « Marquer comme complétée »</li>
+                                <li>Si vous modifiez l'intervention (ajouter/retirer des étudiants), les changements se propagent automatiquement aux présences</li>
+                                <li>Le tableau de présences se recharge automatiquement quand vous revenez sur la section</li>
                                 <li>Si vous sauvegardez sans compléter, les données restent dans le module Interventions seulement</li>
-                                <li>Les présences transférées remplacent toute saisie manuelle existante pour cette date</li>
-                                <li>Le recalcul des indices d'assiduité se fait automatiquement après le transfert</li>
+                                <li>Le recalcul des indices d'assiduité se fait automatiquement après chaque modification</li>
                             </ul>
                         </div>
 
