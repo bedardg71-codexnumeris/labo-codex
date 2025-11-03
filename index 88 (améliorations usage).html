@@ -9171,10 +9171,23 @@ Exemple :
             const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
             const dateFormatee = new Date().toLocaleDateString('fr-CA', options);
 
-            // 4. Mettre à jour le HTML dans la navigation (sans labels)
+            // 4. Récupérer l'identification de la séance (A, B, ou Unique) si jour de cours
+            let seanceInfo = '';
+            const seancesCompletes = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
+            const seancesDuJour = seancesCompletes[aujourdhuiISO];
+
+            if (seancesDuJour && seancesDuJour.length > 0) {
+                // Extraire les noms de séances et les joindre
+                const nomsSeances = seancesDuJour.map(s => s.nom).filter(n => n);
+                if (nomsSeances.length > 0) {
+                    seanceInfo = ` · Séance ${nomsSeances.join(' et ')}`;
+                }
+            }
+
+            // 5. Mettre à jour le HTML dans la navigation (sans labels)
             container.innerHTML = `
                 <br>${nomCours}
-                <br>${semaine} · ${dateFormatee}
+                <br>${semaine} · ${dateFormatee}${seanceInfo}
             `;
         }
 
