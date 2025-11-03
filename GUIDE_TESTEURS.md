@@ -320,7 +320,7 @@ R : Non, les données restent dans localStorage. Mais exportez régulièrement p
 R : Réglages → Import/Export → "Effacer toutes les données"
 
 **Q : Puis-je modifier le code de l'application ?**
-R : Oui ! L'application est sous double licence (GPL v3 pour le code, CC BY-SA 4.0 pour le contenu). Voir LICENSE.md
+R : Oui ! L'application est sous double licence (AGPL v3 pour le code, CC BY-SA 4.0 pour le contenu). Voir LICENSE.md
 
 **Q : Que signifient les indices A-C-P-R ?**
 R : 
