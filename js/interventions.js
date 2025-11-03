@@ -1060,6 +1060,12 @@ function sauvegarderPresencesIntervention(interventionId) {
         sauvegarderInterventions(interventions);
         console.log('✅ Intervention sauvegardée dans localStorage');
         console.log('   Notes individuelles:', Object.keys(notesIndividuelles).length, 'étudiant(s)');
+
+        // IMPORTANT : Si l'intervention est complétée, re-transférer les présences vers le module
+        if (interventions[index].statut === 'completee') {
+            console.log('🔄 Intervention complétée : re-transfert des présences vers le module...');
+            transfererPresencesVersModule(interventionId);
+        }
     }
 
     // Retourner à la liste
@@ -1171,11 +1177,11 @@ function transfererPresencesVersModule(interventionId) {
             nbPresentsAjoutes++;
             console.log(`   ✅ ${etudiant.prenom} ${etudiant.nom}: PRÉSENT (${heures}h)`);
         } else {
-            // Étudiant absent : 0 heures + note de présence facultative
+            // Étudiant absent : 0 heures + note d'absence motivée
             heures = 0;
-            note = 'Présence facultative RàI';
+            note = 'Absence motivée RàI';
             nbAbsentsAjoutes++;
-            console.log(`   ⚪ ${etudiant.prenom} ${etudiant.nom}: ABSENT MOTIVÉ (facultatif)`);
+            console.log(`   ⚪ ${etudiant.prenom} ${etudiant.nom}: ABSENT MOTIVÉ (absence justifiée)`);
         }
 
         // Ajouter l'entrée de présence avec le flag facultatif
