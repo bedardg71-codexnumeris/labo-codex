@@ -4,7 +4,7 @@
     <title>Système de suivi Beta 88 - Améliorations usage</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=2025110210">
+    <link rel="stylesheet" href="styles.css?v=2025110308">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -87,6 +87,31 @@
            =============================== */
         /* Navigation principale et sous-navigation : styles définis dans styles.css */
         /* Glassmorphisme avec adaptation aux modes */
+
+        /* OVERRIDE pour sous-navigation - Option B : effet de profondeur */
+        /* Adaptation aux modes : la sous-navigation prend la couleur du mode actif */
+
+        /* Mode Normal (par défaut) */
+        body[data-mode="normal"] .sous-navigation,
+        .sous-navigation {
+            background:
+                linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)),
+                linear-gradient(135deg, #021d3a 100%, #032e5c 0%) !important;
+        }
+
+        /* Mode Anonymisé (plus foncé) */
+        body[data-mode="anonymisation"] .sous-navigation {
+            background:
+                linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)),
+                linear-gradient(135deg, #0a1428 100%, #0f1e3a 0%) !important;
+        }
+
+        /* Mode Simulé (teal/sarcelle) */
+        body[data-mode="simulation"] .sous-navigation {
+            background:
+                linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)),
+                linear-gradient(135deg, #0f3a44 100%, #1a5266 0%) !important;
+        }
 
         /* ===============================
            CONTENU PRINCIPAL
@@ -2326,47 +2351,60 @@
             border-bottom: 2px solid var(--bleu-leger);
         }
 
-        /* Ajustement layout navigation principale pour bouton orange à gauche + boutons centrés */
+        /* Section info-legales à droite du header avec boutons d'action */
+        .info-legales-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        /* Boutons d'action dans le header (Feedback + Soutenir) */
+        .info-legales-section .btn-action-header {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .info-legales-section .btn-action-header:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Ajustement layout navigation principale : navigation centrée */
         .navigation-principale {
-            display: grid;
-            grid-template-columns: 200px 1fr 200px;
+            display: flex;
             align-items: center;
+            justify-content: center;
             padding: 0 40px 15px 40px;
         }
 
-        /* Bouton Soutenir le projet - Compact, aligné avec le logo */
-        .navigation-principale .btn-soutien {
-            display: inline-block;
-            padding: 8px 16px;
-            background: var(--orange-accent);
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            border: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3);
-            justify-self: center;
-        }
-
-        /* Container pour les boutons de navigation (centrés sous CODEX NUMERIS) */
+        /* Container pour les boutons de navigation (centrés) */
         .navigation-boutons {
             display: flex;
             gap: 10px;
             justify-content: center;
         }
 
-        .navigation-principale .btn-soutien:hover {
-            background: #ff5722;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
-        }
-
-        .navigation-principale .btn-soutien:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(255, 107, 53, 0.3);
+        /* Sélecteur de mode au centre sous le titre */
+        .selecteur-mode-centre {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
@@ -2393,30 +2431,44 @@
 
                 <!-- Titre et description centrés -->
                 <div class="titre-section">
-                    <h1>CODEX NUMERIS</h1>
-                    <p class="sous-titre">Système de suivi des apprentissages</p>
+                    <h1>Système de suivi des apprentissages</h1>
+                    <p class="meta">Beta 88 par Grégoire Bédard (3 novembre 2025)</p>
 
-                    <!-- Sélecteur de mode (sera généré par 17-modes.js) -->
-                    <div id="selecteur-mode"></div>
+                    <!-- Sélecteur de mode au centre (sera généré par 17-modes.js) -->
+                    <div id="selecteur-mode" class="selecteur-mode-centre" style="margin-top: 10px;">
+                        <!-- Sera généré dynamiquement -->
+                    </div>
+
+                    <!-- Informations contextuelles au centre (cours, semaine, date) -->
+                    <div id="info-contextuelles-centre" class="info-contextuelles-centre">
+                        <!-- Sera rempli dynamiquement par JavaScript -->
+                    </div>
                 </div>
 
-                <!-- Informations légales et techniques (à droite) -->
+                <!-- Boutons d'action en haut à droite -->
                 <div class="info-legales-section">
-                    <div class="meta">
-                        Beta 88
-                        <br>Créé par Grégoire Bédard
-                        <br>Codé avec Claude Code (Anthropic)
-                        <br>Double licence : AGPL v3 (code) + CC BY-SA 4.0 (contenu)
-                        <br>3 novembre 2025
-                    </div>
+                    <!-- Bouton Feedback testeurs -->
+                    <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=ISONVhCY_k-ORNlO_ecv4ZE_a9_snRBOtx0ASfcIqmBUNUoxMzIzQ0wySVJEQzI3R1E0VlU3MFQ1TS4u"
+                       target="_blank" rel="noopener noreferrer"
+                       class="btn-action-header"
+                       title="Donner votre feedback sur cette version Beta">
+                        Feedback
+                    </a>
+
+                    <!-- Bouton Soutenir le projet -->
+                    <a href="https://codexnumeris.org/#/portal/support"
+                       target="_blank" rel="noopener noreferrer"
+                       class="btn-action-header"
+                       title="Soutenir financièrement le développement">
+                        Soutenir
+                    </a>
                 </div>
             </div>
         </header>
 
         <!-- NAVIGATION PRINCIPALE -->
         <nav class="navigation-principale">
-            <a href="https://codexnumeris.org/#/portal/support" target="_blank" rel="noopener noreferrer"
-                class="btn-soutien">Soutenir le projet</a>
+            <!-- Boutons de navigation centrés -->
             <div class="navigation-boutons">
                 <button data-onglet="tableau-bord">Tableau de bord</button>
                 <button data-onglet="presences">Présences</button>
@@ -2962,9 +3014,6 @@
                         <div class="d-flex-between-mb20">
                             <div>
                                 <h3 class="m-0">Mes interventions</h3>
-                                <p class="text-muted-sm-mt5">
-                                    Gardez une trace des séances de niveau 2 (groupe) et des rencontres individuelles (niveau 3)
-                                </p>
                             </div>
                             <button onclick="afficherFormulaireIntervention()" class="btn btn-principal">
                                 Planifier une intervention
@@ -4730,6 +4779,24 @@
                     </div>
                     <!-- fin grille cartes métriques -->
 
+                    <!-- Carte informations légales -->
+                    <div class="carte" style="margin-top: 25px;">
+                        <h3>Informations légales et crédits</h3>
+                        <div style="line-height: 1.8; color: #555;">
+                            <p><strong>Version :</strong> Beta 88</p>
+                            <p><strong>Auteur :</strong> Grégoire Bédard</p>
+                            <p><strong>Codé avec :</strong> Claude Code (Anthropic)</p>
+                            <p><strong>Licences :</strong></p>
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>Code source : AGPL v3.0 (<a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer">voir licence</a>)</li>
+                                <li>Contenu pédagogique : CC BY-SA 4.0 (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">voir licence</a>)</li>
+                            </ul>
+                            <p><strong>Dernière modification :</strong> 3 novembre 2025</p>
+                            <p style="margin-top: 15px; font-size: 0.9rem; color: #777;">
+                                Pour plus de détails sur les licences, consultez le fichier LICENSE.md dans le répertoire du projet.
+                            </p>
+                        </div>
+                    </div>
 
                 </div>
                 <!-- fin sous-section reglages-apercu -->
@@ -6929,6 +6996,109 @@ Exemple :
                         </div>
                     </div>
 
+                    <!-- Carte: Interventions RàI avec présences facultatives -->
+                    <div class="carte" class="border-left-primary">
+                        <h3 class="carte-titre-bleu">6. Interventions RàI avec présences facultatives</h3>
+                        <p><strong>Navigation :</strong> Tableau de bord → Interventions</p>
+
+                        <p>Le système permet de documenter des interventions de Réponse à l'Intervention (RàI) de niveau 2 ou 3 tout en offrant un « congé » aux étudiants non participants, sans pénaliser leur assiduité.</p>
+
+                        <div class="carte-gradient-bleu">
+                            <h4 class="titre-bleu-mb10">📋 Contexte pédagogique</h4>
+                            <p>Lorsque vous planifiez une intervention RàI ciblée :</p>
+                            <ul class="lh-16">
+                                <li>Certains étudiants ont besoin de soutien spécifique (niveau 2 ou 3)</li>
+                                <li>Les autres étudiants reçoivent un congé ou travaillent de façon autonome</li>
+                                <li>Les absents ne devraient PAS être pénalisés dans leur calcul d'assiduité</li>
+                            </ul>
+                        </div>
+
+                        <div class="alerte alerte-info">
+                            <h4 class="titre-11-mb10">🎯 Objectif du système</h4>
+                            <p class="mb-0-only">Permettre de <strong>documenter les présences</strong> aux interventions tout en <strong>marquant la séance comme facultative</strong>, afin que les absences ne pénalisent pas l'indice d'assiduité.</p>
+                        </div>
+
+                        <div class="carte-orange-my15">
+                            <h4 class="titre-orange-mb10">📝 Processus en 3 étapes</h4>
+
+                            <p class="mb-5"><strong>ÉTAPE 1 : Planifier l'intervention</strong></p>
+                            <ol class="lh-relaxed-mb15">
+                                <li>Aller dans <strong>Tableau de bord → Interventions</strong></li>
+                                <li>Cliquer sur « Planifier une intervention »</li>
+                                <li>Remplir le formulaire :
+                                    <ul class="mt-5-text-95">
+                                        <li>Titre (ex: « Intervention Rigueur et Nuance »)</li>
+                                        <li>Date et heure</li>
+                                        <li>Type : Groupe (niveau 2) ou Individuel (niveau 3)</li>
+                                        <li>Description optionnelle</li>
+                                    </ul>
+                                </li>
+                                <li>Cliquer sur « Planifier l'intervention »</li>
+                            </ol>
+
+                            <p class="mb-5"><strong>ÉTAPE 2 : Marquer les présences pendant l'intervention</strong></p>
+                            <ol class="lh-relaxed-mb15">
+                                <li>Cliquer sur « Ouvrir » sur l'intervention créée</li>
+                                <li>Cocher les étudiants présents à l'intervention</li>
+                                <li>Ajouter des observations générales et notes individuelles (optionnel)</li>
+                                <li>Cliquer sur « Marquer comme complétée »</li>
+                            </ol>
+
+                            <p class="mb-5"><strong>ÉTAPE 3 : Transfert automatique des présences</strong></p>
+                            <p class="text-095-lh-16">Dès que vous marquez l'intervention comme complétée, le système transfère automatiquement les données vers le module de saisie des présences :</p>
+                            <ul class="lh-16">
+                                <li><strong>Étudiants présents</strong> :
+                                    <ul class="mt-5-text-95">
+                                        <li>2 heures enregistrées</li>
+                                        <li>Note : « Intervention RàI : [titre de l'intervention] »</li>
+                                        <li>Compte au numérateur ET au dénominateur de l'assiduité</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Étudiants absents</strong> :
+                                    <ul class="mt-5-text-95">
+                                        <li>0 heures enregistrées</li>
+                                        <li>Note : « Présence facultative RàI »</li>
+                                        <li>Ne compte NI au numérateur NI au dénominateur (congé effectif)</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="alerte alerte-succes">
+                            <h4 class="titre-11-mb10">✅ Résultat : Assiduité préservée</h4>
+                            <p class="mb-10-only">Les étudiants qui n'ont pas participé à l'intervention (et qui ont donc reçu un « congé ») ne voient <strong>pas leur indice d'assiduité diminuer</strong>.</p>
+                            <p class="text-095"><strong>Exemple :</strong> Un étudiant avec 85% d'assiduité qui est absent à une intervention facultative conservera son 85%. Sans ce système, son assiduité chuterait automatiquement.</p>
+                        </div>
+
+                        <div class="carte-green-my15">
+                            <h4 class="text-success-dark-mb10">🔍 Vérification du transfert</h4>
+                            <p class="mb-10">Pour vérifier que le transfert a fonctionné correctement :</p>
+                            <ol class="lh-relaxed">
+                                <li>Aller dans <strong>Présences → Saisie</strong></li>
+                                <li>Sélectionner la date de l'intervention</li>
+                                <li>Vérifier dans le tableau :
+                                    <ul class="mt-5-text-95">
+                                        <li>Les présents ont 2h avec la note d'intervention</li>
+                                        <li>Les absents ont 0h avec la note « Présence facultative RàI »</li>
+                                    </ul>
+                                </li>
+                                <li>Consulter un profil étudiant absent pour confirmer que l'assiduité n'a pas baissé</li>
+                            </ol>
+                        </div>
+
+                        <div class="alerte alerte-attention">
+                            <h4 class="titre-11-mb10">⚠️ Important</h4>
+                            <ul class="m-10-0-0-0-lh">
+                                <li>Le transfert automatique se déclenche uniquement quand vous cliquez sur « Marquer comme complétée »</li>
+                                <li>Si vous sauvegardez sans compléter, les données restent dans le module Interventions seulement</li>
+                                <li>Les présences transférées remplacent toute saisie manuelle existante pour cette date</li>
+                                <li>Le recalcul des indices d'assiduité se fait automatiquement après le transfert</li>
+                            </ul>
+                        </div>
+
+                        <p class="titre-mt15-fw-bold-bleu">Temps estimé : 5-10 minutes par intervention (planification + saisie présences)</p>
+                    </div>
+
                     <!-- Carte: Temps estimés -->
                     <div class="carte" class="bg-bleu-tres-pale">
                         <h3 class="carte-titre-bleu">Temps estimés par activité</h3>
@@ -8973,6 +9143,46 @@ Exemple :
             };
             lecteur.readAsText(fichier);
         }
+    </script>
+
+    <!-- Script pour afficher les informations contextuelles dans la navigation -->
+    <script>
+        /**
+         * Affiche les informations contextuelles au centre sous le titre (cours, semaine, date)
+         * Sources : cours.js (listeCours), calendrierComplet (semaine), Date système
+         */
+        function afficherInfosContextuelles() {
+            const container = document.getElementById('info-contextuelles-centre');
+            if (!container) return;
+
+            // 1. Récupérer le cours actif depuis cours.js (localStorage)
+            const listeCours = JSON.parse(localStorage.getItem('listeCours') || '[]');
+            const coursActif = listeCours.find(c => c.actif) || listeCours[0] || null;
+            const nomCours = coursActif ? (coursActif.nomCours || coursActif.codeCours || 'Aucun cours') : 'Aucun cours';
+
+            // 2. Calculer la semaine actuelle depuis calendrierComplet (trimestre.js)
+            const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+            const aujourdhuiISO = new Date().toISOString().split('T')[0];
+            const infoJour = calendrier[aujourdhuiISO] || null;
+
+            const semaine = infoJour && infoJour.numeroSemaine ? `Semaine ${infoJour.numeroSemaine}` : 'Semaine non définie';
+
+            // 3. Formater la date d'aujourd'hui (format: lundi 3 novembre 2025)
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const dateFormatee = new Date().toLocaleDateString('fr-CA', options);
+
+            // 4. Mettre à jour le HTML dans la navigation (sans labels)
+            container.innerHTML = `
+                <br>${nomCours}
+                <br>${semaine} · ${dateFormatee}
+            `;
+        }
+
+        // Appeler au chargement de la page
+        document.addEventListener('DOMContentLoaded', afficherInfosContextuelles);
+
+        // Rafraîchir si changement de cours ou calendrier
+        window.addEventListener('storage', afficherInfosContextuelles);
     </script>
 </body>
 

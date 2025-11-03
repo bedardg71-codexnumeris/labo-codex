@@ -490,7 +490,7 @@ function genererAffichageAnalyse(analyse) {
 
     let html = `
         <div class="carte" style="background: var(--bleu-tres-pale); margin-top: 15px;">
-            <h4 style="margin-top: 0; color: var(--bleu-principal);">Profilage du sous-groupe (${analyse.nbEtudiants} étudiant·e·s)</h4>
+            <h4 style="margin-top: 0; color: var(--bleu-principal);">Aperçu du sous-groupe (${analyse.nbEtudiants} étudiant·e·s)</h4>
     `;
 
     // Niveaux RàI
@@ -906,7 +906,7 @@ function ouvrirIntervention(interventionId) {
 
                 <!-- Colonne droite: Analyse du sous-groupe -->
                 <div>
-                    <h4>Profilage du sous-groupe</h4>
+                    <h4>Aperçu du sous-groupe</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
                         Cette aggrégation des profils des étudiant·e·s vise à éclairer votre préparation.
                     </p>
@@ -1112,11 +1112,101 @@ function terminerIntervention(interventionId) {
     // Marquer comme complétée
     completerIntervention(interventionId);
 
+    // Transférer les présences vers le module presences.js
+    transfererPresencesVersModule(interventionId);
+
     // Retourner à la liste
     afficherListeInterventions();
 
     // Notification de succès
     afficherNotificationSucces('Intervention complétée avec succès');
+}
+
+/**
+ * Transférer les présences d'une intervention vers le module presences.js
+ * Cette fonction crée des entrées de présences facultatives pour TOUS les étudiants,
+ * qu'ils aient participé ou non à l'intervention.
+ *
+ * @param {string} interventionId - ID de l'intervention
+ */
+function transfererPresencesVersModule(interventionId) {
+    console.log('====================================');
+    console.log('📤 DÉBUT transfererPresencesVersModule()');
+    console.log('====================================');
+
+    const intervention = obtenirIntervention(interventionId);
+    if (!intervention) {
+        console.error('❌ Intervention introuvable:', interventionId);
+        return;
+    }
+
+    console.log('   Intervention:', intervention.titre);
+    console.log('   Date:', intervention.date);
+    console.log('   Étudiants présents:', intervention.etudiants.length);
+
+    // Obtenir tous les étudiants du groupe
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    console.log('   Total étudiants du groupe:', etudiants.length);
+
+    // Obtenir les présences existantes
+    let presences = JSON.parse(localStorage.getItem('presences') || '[]');
+
+    // Supprimer les entrées existantes pour cette date (pour éviter les doublons)
+    presences = presences.filter(p => p.date !== intervention.date);
+    console.log('   Présences après filtrage doublons:', presences.length);
+
+    // Créer une entrée de présence pour chaque étudiant
+    let nbPresentsAjoutes = 0;
+    let nbAbsentsAjoutes = 0;
+
+    etudiants.forEach(etudiant => {
+        const estPresent = intervention.etudiants.includes(etudiant.da);
+
+        // Déterminer les heures et la note selon la présence
+        let heures, note;
+        if (estPresent) {
+            // Étudiant présent : heures complètes + nom de l'intervention
+            heures = 2; // Durée standard d'une intervention
+            note = `Intervention RàI : ${intervention.titre}`;
+            nbPresentsAjoutes++;
+            console.log(`   ✅ ${etudiant.prenom} ${etudiant.nom}: PRÉSENT (${heures}h)`);
+        } else {
+            // Étudiant absent : 0 heures + note de présence facultative
+            heures = 0;
+            note = 'Présence facultative RàI';
+            nbAbsentsAjoutes++;
+            console.log(`   ⚪ ${etudiant.prenom} ${etudiant.nom}: ABSENT MOTIVÉ (facultatif)`);
+        }
+
+        // Ajouter l'entrée de présence avec le flag facultatif
+        presences.push({
+            date: intervention.date,
+            da: etudiant.da,
+            heures: heures,
+            notes: note,
+            facultatif: true  // Flag indiquant que cette séance est facultative
+        });
+    });
+
+    console.log('   ───────────────────────────────────');
+    console.log(`   📊 Résumé: ${nbPresentsAjoutes} présents, ${nbAbsentsAjoutes} absents motivés`);
+    console.log('   ───────────────────────────────────');
+
+    // Sauvegarder les présences mises à jour
+    localStorage.setItem('presences', JSON.stringify(presences));
+    console.log('   💾 Présences sauvegardées dans localStorage');
+
+    // Recalculer les indices d'assiduité
+    if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
+        calculerEtSauvegarderIndicesAssiduite();
+        console.log('   🔄 Indices d\'assiduité recalculés');
+    } else {
+        console.warn('   ⚠️ Fonction calculerEtSauvegarderIndicesAssiduite non disponible');
+    }
+
+    console.log('====================================');
+    console.log(`✅ FIN transfererPresencesVersModule()`);
+    console.log('====================================');
 }
 
 /* ===============================
@@ -1251,6 +1341,7 @@ window.sauvegarderNouvelleIntervention = sauvegarderNouvelleIntervention;
 window.ouvrirIntervention = ouvrirIntervention;
 window.sauvegarderPresencesIntervention = sauvegarderPresencesIntervention;
 window.terminerIntervention = terminerIntervention;
+window.transfererPresencesVersModule = transfererPresencesVersModule;
 window.initialiserModuleInterventions = initialiserModuleInterventions;
 window.formaterDateLisible = formaterDateLisible;
 window.genererBadgeStatut = genererBadgeStatut;
