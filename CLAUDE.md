@@ -42,7 +42,7 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 
 ```
 projet/
-├── index 88 (améliorations usage).html       # Point d'entrée actuel (Beta 88)
+├── index 89 (correctif échelles).html       # Point d'entrée actuel (Beta 89)
 ├── css/
 │   └── styles.css                        # Styles globaux + variables CSS pratiques
 ├── js/
@@ -584,6 +584,31 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - ✅ **Bugs corrigés** : 3 bugs critiques système absences motivées
 - ✅ **Documentation** : `NOTES_VERSION_0.88.md`
 
+**SUPPORT NIVEAU "0" ET AMÉLIORATIONS INTERFACE** (Session 4 novembre - Beta 89)
+- ✅ **Fichier** : `index 89 (correctif échelles).html` - Version Beta 89
+- ✅ **Nouvelle fonctionnalité : Niveau "0" dans échelle IDME** :
+  - Support complet échelles à 5 niveaux (0, I, D, M, E)
+  - Niveau "0" (Aucun/Nul) pour gérer plagiat ou utilisation IA non autorisée
+  - Configuration : Code=0, Nom=Aucun, Min=0, Max=0, Valeur=0
+  - Cas d'usage : Travail non original, non recevable pour évaluation
+- ✅ **Correctifs critiques** :
+  - evaluation.js (lignes 571-584, 657-672) : `calculerNote()` et `obtenirCouleurNiveau()` lisent maintenant l'échelle sélectionnée au lieu de l'ancienne `niveauxEchelle`
+  - profil-etudiant.js (lignes 634, 3233, 4502) : Remplacement `||` par `??` pour supporter note 0 (bug JavaScript : `0 || null` retourne `null`)
+  - Cache busters mis à jour : evaluation.js, profil-etudiant.js
+- ✅ **Améliorations interface** :
+  - Bouton "Courriel" ajouté dans l'en-tête (mailto:labo@codexnumeris.org)
+  - Interventions RàI : Badges compacts avec compteurs, bouton "Planifier" en haut
+  - Recherche étudiants : Étendue au numéro DA, vidage automatique champ
+- ✅ **Archivage** :
+  - index 88 déplacé vers Archives/
+  - 6 démos de design déplacées vers Documents de travail (obsolètes)/
+- ✅ **Fichiers modifiés** : 13 fichiers (evaluation.js, profil-etudiant.js, interventions.js, etudiants.js, styles.css, etc.)
+- ✅ **Statistiques** : ~3,900 insertions, ~400 suppressions, 4 commits
+- ✅ **Problèmes connus** :
+  - Évaluations anciennes conservent `niveauFinal: "--"` jusqu'à resauvegarde
+  - Page blanche occasionnelle lors chargement depuis liste (en investigation)
+- ✅ **Documentation** : `NOTES_VERSION_0.89.md`
+
 ### 🔴 Prochaines priorités (PHASE 1 : Consolidation)
 
 **Objectif PHASE 1** : Finaliser fonctionnalités partiellement implémentées
@@ -618,7 +643,7 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 ```bash
 # Test local
-open "index 85 (interventions).html"   # macOS
+open "index 89 (correctif échelles).html"   # macOS
 
 # Voir localStorage dans console Safari
 localStorage.getItem('calendrierComplet')
