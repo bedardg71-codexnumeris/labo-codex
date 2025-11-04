@@ -440,6 +440,7 @@ function comptesDansDepistage(production, mode) {
 function convertirNiveauEnPourcentage(niveau, echelleId = null) {
     // Valeurs par défaut (basées sur les niveaux IDME standard)
     const valeursDefaut = {
+        '0': 0,
         'I': 32,
         'D': 69.5,
         'M': 79.5,
