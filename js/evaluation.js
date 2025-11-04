@@ -442,6 +442,17 @@ function cartoucheSelectionnee() {
 
     if (!grille) return;
 
+    // CRITIQUE: Lire les niveaux depuis l'échelle sélectionnée (pas depuis la cartouche)
+    // Cela permet d'utiliser des échelles avec plus ou moins de niveaux que la cartouche
+    const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelleSelectionnee = echelles.find(e => e.id === echelleId);
+
+    // Fallback: Si pas d'échelle sélectionnée ou non trouvée, utiliser les niveaux de la cartouche
+    const niveauxDisponibles = (echelleSelectionnee && echelleSelectionnee.niveaux)
+        ? echelleSelectionnee.niveaux
+        : cartouche.niveaux;
+
     // Afficher les critères
     const html = cartouche.criteres.map(critere => {
         const critereGrille = grille.criteres.find(c => c.id === critere.id);
@@ -457,11 +468,11 @@ function cartoucheSelectionnee() {
     </div>
     ${critereGrille?.description ?
                 `<small style="display: block; color: #888; font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critereGrille.description)}</small>` : ''}
-    <select id="eval_${critere.id}" class="controle-form" 
-            onchange="niveauSelectionne('${critere.id}')" 
+    <select id="eval_${critere.id}" class="controle-form"
+            onchange="niveauSelectionne('${critere.id}')"
             style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
         <option value="">--</option>
-        ${cartouche.niveaux.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+        ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
     </select>
 </div>
             <div id="comm_${critere.id}" style="font-size: 0.85rem; line-height: 1.5; color: #555; font-style: italic; padding: 8px; background: #f8f9fa; border-radius: 4px; min-height: 60px;">
