@@ -841,23 +841,60 @@ function mettreAJourMetriques() {
  */
 function calculerPourcentageComplete() {
     if (!cartoucheActuel) return;
-    
-    const totalCases = cartoucheActuel.criteres.length * cartoucheActuel.niveaux.length;
+
+    // CRITIQUE: Utiliser la même logique que afficherMatriceRetroaction()
+    // pour compter tous les niveaux disponibles (pas seulement ceux de la cartouche)
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+
+    const niveauxDisponiblesMap = new Map();
+
+    // Fusionner les niveaux de toutes les échelles
+    echelles.forEach(echelle => {
+        if (echelle.niveaux) {
+            echelle.niveaux.forEach(n => {
+                if (!niveauxDisponiblesMap.has(n.code)) {
+                    niveauxDisponiblesMap.set(n.code, n);
+                }
+            });
+        }
+    });
+
+    // Ajouter les niveaux de la cartouche
+    if (cartoucheActuel.niveaux) {
+        cartoucheActuel.niveaux.forEach(n => {
+            if (!niveauxDisponiblesMap.has(n.code)) {
+                niveauxDisponiblesMap.set(n.code, n);
+            }
+        });
+    }
+
+    const niveauxAffichage = Array.from(niveauxDisponiblesMap.values());
+
+    const totalCases = cartoucheActuel.criteres.length * niveauxAffichage.length;
     let casesRemplies = 0;
-    
+
     // Compter les cases remplies
     cartoucheActuel.criteres.forEach(critere => {
-        cartoucheActuel.niveaux.forEach(niveau => {
+        niveauxAffichage.forEach(niveau => {
             const key = `${critere.id}_${niveau.code}`;
             if (cartoucheActuel.commentaires[key] && cartoucheActuel.commentaires[key].trim()) {
                 casesRemplies++;
             }
         });
     });
-    
+
     const pourcentage = Math.round((casesRemplies / totalCases) * 100);
+
+    // Mettre à jour les cartes métriques
+    const nbCriteres = cartoucheActuel.criteres.length;
+    const nbNiveaux = niveauxAffichage.length;
+    const nbCommARediger = totalCases - casesRemplies;
+
+    document.getElementById('nbCriteres').textContent = nbCriteres;
+    document.getElementById('nbNiveaux').textContent = nbNiveaux;
+    document.getElementById('nbCommentairesRestants').textContent = nbCommARediger;
     document.getElementById('pctComplete').textContent = pourcentage + '%';
-    
+
     // Changer la couleur selon le pourcentage
     const element = document.getElementById('pctComplete').parentElement;
     if (pourcentage === 100) {
