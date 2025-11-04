@@ -885,18 +885,24 @@ function calculerPourcentageComplete() {
 
     const pourcentage = Math.round((casesRemplies / totalCases) * 100);
 
-    // Mettre à jour les cartes métriques
+    // Mettre à jour les cartes métriques (vérification existence éléments)
     const nbCriteres = cartoucheActuel.criteres.length;
     const nbNiveaux = niveauxAffichage.length;
     const nbCommARediger = totalCases - casesRemplies;
 
-    document.getElementById('nbCriteres').textContent = nbCriteres;
-    document.getElementById('nbNiveaux').textContent = nbNiveaux;
-    document.getElementById('nbCommentairesRestants').textContent = nbCommARediger;
-    document.getElementById('pctComplete').textContent = pourcentage + '%';
+    const elemNbCriteres = document.getElementById('nbCriteres');
+    const elemNbNiveaux = document.getElementById('nbNiveaux');
+    const elemNbCommentaires = document.getElementById('nbCommentaires'); // ID correct: nbCommentaires (pas nbCommentairesRestants)
+    const elemPctComplete = document.getElementById('pctComplete');
+
+    if (elemNbCriteres) elemNbCriteres.textContent = nbCriteres;
+    if (elemNbNiveaux) elemNbNiveaux.textContent = nbNiveaux;
+    if (elemNbCommentaires) elemNbCommentaires.textContent = nbCommARediger;
+    if (elemPctComplete) elemPctComplete.textContent = pourcentage + '%';
 
     // Changer la couleur selon le pourcentage
-    const element = document.getElementById('pctComplete').parentElement;
+    const element = elemPctComplete ? elemPctComplete.parentElement : null;
+    if (!element) return;
     if (pourcentage === 100) {
         element.style.background = 'var(--vert-pale)';
     } else if (pourcentage >= 75) {
