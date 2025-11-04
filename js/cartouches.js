@@ -360,10 +360,52 @@ function afficherMatriceRetroaction() {
 
     const container = document.getElementById('matriceContainer');
 
-    // Récupérer les couleurs depuis l'échelle de performance (localStorage.niveauxEchelle)
-    const niveauxEchelle = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
+    // NOUVELLE LOGIQUE: Lire les niveaux depuis toutes les échelles disponibles
+    // pour permettre d'ajouter des niveaux manquants (ex: niveau "0")
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+
+    // Créer un Set de tous les niveaux disponibles (fusionner toutes les échelles)
+    const niveauxDisponiblesMap = new Map(); // code -> {code, nom, couleur}
+
+    // Ajouter les niveaux de TOUTES les échelles
+    echelles.forEach(echelle => {
+        if (echelle.niveaux) {
+            echelle.niveaux.forEach(n => {
+                if (!niveauxDisponiblesMap.has(n.code)) {
+                    niveauxDisponiblesMap.set(n.code, {
+                        code: n.code,
+                        nom: n.nom,
+                        couleur: n.couleur || '#cccccc'
+                    });
+                }
+            });
+        }
+    });
+
+    // Ajouter les niveaux de la cartouche (pour compatibilité ancienne structure)
+    if (cartoucheActuel.niveaux) {
+        cartoucheActuel.niveaux.forEach(n => {
+            if (!niveauxDisponiblesMap.has(n.code)) {
+                niveauxDisponiblesMap.set(n.code, {
+                    code: n.code,
+                    nom: n.nom,
+                    couleur: n.couleur || '#cccccc'
+                });
+            }
+        });
+    }
+
+    // Convertir en tableau et trier (0 en premier, puis I, D, M, E, etc.)
+    const niveauxAffichage = Array.from(niveauxDisponiblesMap.values()).sort((a, b) => {
+        // Ordre personnalisé: 0, I, D, M, E, puis autres
+        const ordre = {'0': 0, 'I': 1, 'D': 2, 'M': 3, 'E': 4};
+        const ordreA = ordre[a.code] !== undefined ? ordre[a.code] : 99;
+        const ordreB = ordre[b.code] !== undefined ? ordre[b.code] : 99;
+        return ordreA - ordreB;
+    });
+
     const couleursParCode = {};
-    niveauxEchelle.forEach(n => {
+    niveauxAffichage.forEach(n => {
         couleursParCode[n.code] = n.couleur;
     });
 
@@ -375,7 +417,7 @@ function afficherMatriceRetroaction() {
     `;
 
     // En-têtes des niveaux avec code et label + couleur de l'échelle
-    cartoucheActuel.niveaux.forEach(niveau => {
+    niveauxAffichage.forEach(niveau => {
         const codeEchappe = echapperHtml(niveau.code);
         const nomEchappe = echapperHtml(niveau.nom);
         const couleurNiveau = couleursParCode[niveau.code] || 'var(--bleu-moyen)';
@@ -400,8 +442,8 @@ function afficherMatriceRetroaction() {
                     <td>${nomCritereEchappe}</td>
         `;
 
-        // Cellules des commentaires
-        cartoucheActuel.niveaux.forEach(niveau => {
+        // Cellules des commentaires - UTILISER niveauxAffichage au lieu de cartoucheActuel.niveaux
+        niveauxAffichage.forEach(niveau => {
             const key = `${critere.id}_${niveau.code}`;
             const commentaire = cartoucheActuel.commentaires[key] || '';
             const commentaireEchappe = echapperHtml(commentaire);
