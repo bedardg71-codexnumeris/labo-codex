@@ -1243,6 +1243,152 @@ input[type="number"].controle-form {
     color: #dc2626;
 }
 
+/* === BADGES D'ANALYSE (Aperçu du sous-groupe) === */
+/* Style de base pour tous les badges d'analyse avec bordure + fond pâle */
+.badge-analyse {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 6px 12px;
+    border: 2px solid;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Badge compteur interne (petit badge avec nombre) */
+.badge-analyse-count {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: white;
+}
+
+/* === Badges RàI pour analyse === */
+.badge-rai-analyse-1 {
+    border-color: #17a2b8;
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.badge-rai-analyse-1 .badge-analyse-count {
+    background: #17a2b8;
+}
+
+.badge-rai-analyse-2 {
+    border-color: #ffc107;
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-rai-analyse-2 .badge-analyse-count {
+    background: #ffc107;
+}
+
+.badge-rai-analyse-3 {
+    border-color: #dc3545;
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.badge-rai-analyse-3 .badge-analyse-count {
+    background: #dc3545;
+}
+
+/* === Badges de risque pour analyse === */
+.badge-risque-analyse-minimal,
+.badge-risque-analyse-faible {
+    border-color: #28a745;
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-risque-analyse-minimal .badge-analyse-count,
+.badge-risque-analyse-faible .badge-analyse-count {
+    background: #28a745;
+}
+
+.badge-risque-analyse-modere {
+    border-color: #ffc107;
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-risque-analyse-modere .badge-analyse-count {
+    background: #ffc107;
+}
+
+.badge-risque-analyse-eleve {
+    border-color: #fd7e14;
+    background: #ffe5d0;
+    color: #fd7e14;
+}
+
+.badge-risque-analyse-eleve .badge-analyse-count {
+    background: #fd7e14;
+}
+
+.badge-risque-analyse-tres-eleve,
+.badge-risque-analyse-critique {
+    border-color: #dc3545;
+    background: #f8d7da;
+    color: #dc3545;
+}
+
+.badge-risque-analyse-tres-eleve .badge-analyse-count,
+.badge-risque-analyse-critique .badge-analyse-count {
+    background: #dc3545;
+}
+
+/* Badge de risque par défaut (gris neutre) */
+.badge-risque-analyse-defaut {
+    border-color: #6c757d;
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.badge-risque-analyse-defaut .badge-analyse-count {
+    background: #6c757d;
+}
+
+/* === Badge pattern d'apprentissage (neutre gris) === */
+.badge-pattern-analyse {
+    border-color: #6c757d;
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.badge-pattern-analyse .badge-analyse-count {
+    background: #6c757d;
+}
+
+/* === Badge intervention RàI (vert uniforme) === */
+.badge-intervention-vert {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 6px 12px;
+    border: 2px solid #4caf50;
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.badge-intervention-vert:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+}
+
+.badge-intervention-vert .badge-analyse-count {
+    background: #4caf50;
+    color: white;
+}
+
 /* ===============================
    ALERTES ET BOÎTES D'INFORMATION
    =============================== */
@@ -3997,7 +4143,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .badge-absence-partielle .badge-absence-date {
-    color: #ffc107;
+    color: #dc3545;
 }
 
 .badge-absence-date {
@@ -4006,8 +4152,165 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .badge-absence-heures {
-    color: #666;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
     font-size: 0.8rem;
+}
+
+/* Badge heures pour absences complètes (rouge) */
+.badge-absence-complete .badge-absence-heures {
+    background: #dc3545;
+    color: white;
+}
+
+/* Badge heures pour retards (orange avec texte rouge) */
+.badge-absence-partielle .badge-absence-heures {
+    background: #ffc107;
+    color: #dc3545;
+}
+
+/* Badge intervention RàI (style positif en vert) */
+.badge-intervention-rai {
+    background: #e8f5e9;
+    border-color: #4caf50;
+    cursor: default;
+}
+
+.badge-intervention-rai:hover {
+    opacity: 1;
+    transform: none;
+    box-shadow: none;
+}
+
+.badge-intervention-rai .badge-absence-date {
+    color: #2e7d32;
+}
+
+.badge-intervention-rai .badge-absence-heures {
+    background: #4caf50;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* Badge artefact (production remise/non remise) */
+.badge-artefact {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 6px 12px;
+    border-width: 2px;
+    border-style: solid;
+    transition: all 0.2s ease;
+}
+
+.badge-artefact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.badge-artefact-checkbox {
+    margin: 0;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.badge-artefact-contenu {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.badge-artefact-titre {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-artefact-note {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: white;
+}
+
+/* Badge artefact non remis (gris) */
+.badge-artefact-non-remis {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f5f5f5;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 6px 12px;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.badge-artefact-non-remis:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Timeline intervention (format compact pour Accompagnement) */
+.intervention-timeline-item {
+    display: flex;
+    align-items: start;
+    gap: 10px;
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    transition: background 0.2s ease;
+}
+
+.intervention-timeline-item:last-child {
+    border-bottom: none;
+}
+
+.intervention-timeline-item:hover {
+    background: #f9f9f9;
+}
+
+.intervention-timeline-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.intervention-timeline-note {
+    margin-top: 8px;
+    padding-left: 12px;
+    border-left: 3px solid var(--bleu-principal);
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.intervention-timeline-actions {
+    display: flex;
+    align-items: center;
+}
+
+/* Badge type intervention */
+.badge-intervention-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: var(--bleu-tres-pale);
+    color: var(--bleu-principal);
+    border: 2px solid var(--bleu-principal);
 }
 
 /* Liste d'informations */

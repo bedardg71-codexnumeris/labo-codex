@@ -103,6 +103,13 @@ function initialiserModuleListeEtudiants() {
         return;
     }
 
+    // Vider le champ de recherche lors du chargement de la section
+    // (contrairement à saisie-presences où la persistance est utile)
+    const rechercheNom = document.getElementById('recherche-nom-liste');
+    if (rechercheNom) {
+        rechercheNom.value = '';
+    }
+
     // Charger les options des filtres
     chargerOptionsFiltres();
 
@@ -525,13 +532,14 @@ function filtrerEtudiants(etudiants) {
         });
     }
 
-    // Recherche par nom/prénom
+    // Recherche par nom/prénom/DA
     const rechercheNom = document.getElementById('recherche-nom-liste');
     if (rechercheNom && rechercheNom.value.trim()) {
         const recherche = rechercheNom.value.trim().toLowerCase();
         resultats = resultats.filter(function (e) {
             const nomComplet = (e.nom + ' ' + e.prenom).toLowerCase();
-            return nomComplet.includes(recherche);
+            const da = (e.da || '').toString().toLowerCase();
+            return nomComplet.includes(recherche) || da.includes(recherche);
         });
     }
 
