@@ -2893,9 +2893,9 @@
                             </div>
                             <div class="grid-1fr-auto-end">
                                 <div class="groupe-form">
-                                    <label for="recherche-nom-liste">Recherche (nom/prénom)</label>
+                                    <label for="recherche-nom-liste">Recherche (nom/prénom/DA)</label>
                                     <input type="text" id="recherche-nom-liste" class="controle-form"
-                                        placeholder="Rechercher..." oninput="afficherListeEtudiantsConsultation()">
+                                        placeholder="Rechercher par nom, prénom ou DA..." oninput="afficherListeEtudiantsConsultation()">
                                 </div>
                                 <div class="d-flex-wrap-gap10">
                                     <label class="checkbox-danger-light">
@@ -3009,17 +3009,6 @@
                 <div id="tableau-bord-interventions" class="sous-section">
                     <h2>Planification et documentation des interventions</h2>
                     <p class="text-muted">Gardez une trace des interventions de niveau 2 et 3</p>
-
-                    <div class="carte">
-                        <div class="d-flex-between-mb20">
-                            <div>
-                                <h3 class="m-0">Mes interventions</h3>
-                            </div>
-                            <button onclick="afficherFormulaireIntervention()" class="btn btn-principal">
-                                Planifier une intervention
-                            </button>
-                        </div>
-                    </div>
 
                     <!-- Conteneur pour la liste des interventions ou le formulaire -->
                     <div id="conteneurPrincipal">
