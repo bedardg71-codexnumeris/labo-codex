@@ -525,15 +525,41 @@ function chargerEchelleTemplate(echelleId) {
 /**
  * Sauvegarde le nom de l'échelle actuelle
  * Appelée lors du changement de valeur dans #nomEchelleTemplate
- * 
+ *
  * FONCTIONNEMENT:
- * Met à jour le nom de l'échelle en mémoire (pas localStorage)
- * La sauvegarde complète se fait via enregistrerCommeEchelle()
+ * Met à jour le nom de l'échelle en mémoire ET dans localStorage
  */
 function sauvegarderNomEchelle() {
-    const nom = document.getElementById('nomEchelleTemplate').value;
-    if (echelleTemplateActuelle && nom) {
+    const nom = document.getElementById('nomEchelleTemplate')?.value?.trim();
+    if (echelleTemplateActuelle && echelleTemplateActuelle.id && nom) {
+        // CRITIQUE: Vérifier la synchronisation avec localStorage pour éviter perte de données
+        const echellesActuelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+        const echelleActuelleEnStorage = echellesActuelles.find(e => e.id === echelleTemplateActuelle.id);
+
+        // Protection: Si désynchronisation détectée, resynchroniser depuis localStorage
+        if (echelleActuelleEnStorage &&
+            echelleActuelleEnStorage.niveaux?.length !== echelleTemplateActuelle.niveaux?.length) {
+            console.warn('⚠️ Désynchronisation détectée - Resynchronisation depuis localStorage');
+            echelleTemplateActuelle = { ...echelleActuelleEnStorage };
+        }
+
+        // Mettre à jour en mémoire
         echelleTemplateActuelle.nom = nom;
+        echelleTemplateActuelle.dateModification = new Date().toISOString();
+
+        // Mettre à jour dans localStorage - SAUVEGARDER TOUTE L'ÉCHELLE (y compris les niveaux)
+        let echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+        const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
+        if (index !== -1) {
+            echelles[index] = { ...echelleTemplateActuelle };
+            localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
+
+            // Recharger la sidebar ET le select pour afficher le nouveau nom
+            afficherListeEchelles();
+            definirEchelleActive(echelleTemplateActuelle.id);
+            chargerEchellesTemplates();
+            document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
+        }
     }
 }
 
@@ -563,9 +589,6 @@ function enregistrerCommeEchelle() {
         return;
     }
 
-    const niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || JSON.stringify(niveauxDefaut));
-    const config = JSON.parse(localStorage.getItem('configEchelle') || '{}');
-
     let echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
 
     // Vérifier si on modifie une échelle existante
@@ -573,16 +596,20 @@ function enregistrerCommeEchelle() {
         // Mise à jour d'une échelle existante
         const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
         if (index !== -1) {
+            // CRITIQUE: Utiliser echelleTemplateActuelle.niveaux (version à jour avec modifications récentes)
+            // au lieu de localStorage.niveauxEchelle (ancienne version obsolète)
             echelles[index] = {
                 ...echelleTemplateActuelle,
                 nom: nomEchelle,
-                niveaux: niveaux.map(n => ({ ...n })),
-                config: { ...config },
+                niveaux: echelleTemplateActuelle.niveaux.map(n => ({ ...n })),
                 dateModification: new Date().toISOString()
             };
         }
     } else {
-        // Nouvelle échelle
+        // Nouvelle échelle - utiliser niveauxEchelle de localStorage (comportement normal pour création)
+        const niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || JSON.stringify(niveauxDefaut));
+        const config = JSON.parse(localStorage.getItem('configEchelle') || '{}');
+
         const nouvelleEchelle = {
             id: 'ECH' + Date.now(),
             nom: nomEchelle,
@@ -836,6 +863,7 @@ function afficherTableauNiveaux(niveaux) {
         <table class="tableau">
 <thead>
     <tr>
+        <th style="width: 80px;">Ordre</th>
         <th style="width: 80px;">Code</th>
         <th style="width: 180px;">Nom</th>
         <th>Description</th>
@@ -849,6 +877,24 @@ function afficherTableauNiveaux(niveaux) {
             <tbody>
                 ${niveaux.map((niveau, index) => `
                     <tr style="opacity: ${niveau.verrouille ? '0.7' : '1'};">
+                        <td style="text-align: center;">
+                            <div style="display: flex; gap: 4px; justify-content: center;">
+                                <button onclick="deplacerNiveauHaut(${index})"
+                                        class="btn btn-compact"
+                                        ${index === 0 ? 'disabled' : ''}
+                                        title="Déplacer vers le haut"
+                                        style="padding: 4px 8px; font-size: 0.8rem;">
+                                    ↑
+                                </button>
+                                <button onclick="deplacerNiveauBas(${index})"
+                                        class="btn btn-compact"
+                                        ${index === niveaux.length - 1 ? 'disabled' : ''}
+                                        title="Déplacer vers le bas"
+                                        style="padding: 4px 8px; font-size: 0.8rem;">
+                                    ↓
+                                </button>
+                            </div>
+                        </td>
                         <td>
                             <input type="text"
                                    value="${echapperHtml(niveau.code)}"
@@ -915,7 +961,7 @@ function afficherTableauNiveaux(niveaux) {
                             ${niveaux.length > 1 ?
             `<button onclick="supprimerNiveau(${index})"
                                          class="btn btn-supprimer btn-compact"
-                                         
+                                         ${niveau.verrouille ? 'disabled' : ''}
                                          title="${niveau.verrouille ? 'Déverrouillez d\'abord pour supprimer' : 'Supprimer ce niveau'}">
                                     Supprimer
                                 </button>`
@@ -995,6 +1041,17 @@ function modifierNiveau(index, champ, valeur) {
  * - Couleur: bleu moyen
  */
 function ajouterNiveau() {
+    // ⚠️ REDIRECTION : Cette fonction est obsolète, utiliser ajouterNiveauEchelle() à la place
+    console.warn('⚠️ ajouterNiveau() est obsolète. Utilisez ajouterNiveauEchelle() à la place.');
+
+    // Si on est dans le contexte d'une échelle de la sidebar, rediriger vers la nouvelle fonction
+    if (echelleTemplateActuelle && echelleTemplateActuelle.id) {
+        console.log('🔄 Redirection vers ajouterNiveauEchelle()');
+        ajouterNiveauEchelle(echelleTemplateActuelle.id);
+        return;
+    }
+
+    // Sinon, comportement ancien (pour compatibilité)
     let niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || JSON.stringify(niveauxDefaut));
 
     niveaux.push({
@@ -1035,6 +1092,66 @@ function supprimerNiveau(index) {
 
     let niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || JSON.stringify(niveauxDefaut));
     niveaux.splice(index, 1);
+    localStorage.setItem('niveauxEchelle', JSON.stringify(niveaux));
+    afficherTableauNiveaux(niveaux);
+    afficherApercuEchelle(niveaux);
+}
+
+/**
+ * Déplace un niveau vers le haut dans la liste
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère les niveaux depuis localStorage
+ * 2. Échange le niveau avec celui du dessus
+ * 3. Sauvegarde et met à jour l'affichage
+ *
+ * PARAMÈTRES:
+ * @param {number} index - Index du niveau à déplacer
+ *
+ * UTILISÉ PAR:
+ * - Bouton ↑ dans la colonne Ordre
+ *
+ * SÉCURITÉ:
+ * - Désactivé pour le premier niveau (index 0)
+ */
+function deplacerNiveauHaut(index) {
+    if (index === 0) return;
+
+    let niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || JSON.stringify(niveauxDefaut));
+
+    // Échanger avec le niveau précédent
+    [niveaux[index - 1], niveaux[index]] = [niveaux[index], niveaux[index - 1]];
+
+    localStorage.setItem('niveauxEchelle', JSON.stringify(niveaux));
+    afficherTableauNiveaux(niveaux);
+    afficherApercuEchelle(niveaux);
+}
+
+/**
+ * Déplace un niveau vers le bas dans la liste
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère les niveaux depuis localStorage
+ * 2. Échange le niveau avec celui du dessous
+ * 3. Sauvegarde et met à jour l'affichage
+ *
+ * PARAMÈTRES:
+ * @param {number} index - Index du niveau à déplacer
+ *
+ * UTILISÉ PAR:
+ * - Bouton ↓ dans la colonne Ordre
+ *
+ * SÉCURITÉ:
+ * - Désactivé pour le dernier niveau
+ */
+function deplacerNiveauBas(index) {
+    let niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || JSON.stringify(niveauxDefaut));
+
+    if (index === niveaux.length - 1) return;
+
+    // Échanger avec le niveau suivant
+    [niveaux[index], niveaux[index + 1]] = [niveaux[index + 1], niveaux[index]];
+
     localStorage.setItem('niveauxEchelle', JSON.stringify(niveaux));
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
@@ -1138,8 +1255,9 @@ function sauvegarderNiveaux() {
         if (!niveau.code || !niveau.nom) {
             erreurs.push(`Niveau ${i + 1}: Code et nom obligatoires`);
         }
-        if (niveau.min >= niveau.max) {
-            erreurs.push(`Niveau ${i + 1}: Min doit être < Max`);
+        // Permettre min === max seulement pour le niveau 0 (min=0, max=0)
+        if (niveau.min > niveau.max || (niveau.min === niveau.max && niveau.min !== 0)) {
+            erreurs.push(`Niveau ${i + 1}: Min doit être < Max (sauf pour niveau 0: min=0, max=0)`);
         }
     });
 
@@ -1509,6 +1627,9 @@ function chargerEchellePourModif(id) {
 
     if (!echelle) return;
 
+    // Définir l'échelle comme échelle actuelle pour permettre les modifications
+    echelleTemplateActuelle = echelle;
+
     document.getElementById('accueilEchelles').style.display = 'none';
     document.getElementById('conteneurEditionEchelle').style.display = 'block';
     document.getElementById('optionsImportExportEchelles').style.display = 'block';
@@ -1520,10 +1641,9 @@ function chargerEchellePourModif(id) {
     // Afficher les niveaux
     afficherNiveauxEchelle(echelle);
 
-    // Mettre le highlight
+    // Mettre le highlight et rafraîchir la sidebar
     definirEchelleActive(id);
-
-    console.log('Échelle chargée:', echelle.nom);
+    afficherListeEchelles();
 }
 
 function afficherNiveauxEchelle(echelle) {
@@ -1541,7 +1661,26 @@ function afficherNiveauxEchelle(echelle) {
     // Afficher le tableau des niveaux en mode édition
     const html = echelle.niveaux.map((niveau, index) => `
         <div class="item-liste" style="padding: 15px; background: white; border-left: 4px solid ${niveau.couleur}; border-radius: 6px; margin-bottom: 10px;">
-            <div style="display: grid; grid-template-columns: 60px 2fr 80px 80px 100px 80px; gap: 12px; align-items: end;">
+            <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px 100px; gap: 12px; align-items: end;">
+                <div class="groupe-form" style="text-align: center;">
+                    <label style="font-size: 0.85rem; color: #666;">Ordre</label>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <button onclick="deplacerNiveauEchelleHaut('${echelle.id}', ${index})"
+                                class="btn btn-compact"
+                                ${index === 0 ? 'disabled' : ''}
+                                title="Déplacer vers le haut"
+                                style="padding: 4px 8px; font-size: 0.8rem;">
+                            ↑
+                        </button>
+                        <button onclick="deplacerNiveauEchelleBas('${echelle.id}', ${index})"
+                                class="btn btn-compact"
+                                ${index === echelle.niveaux.length - 1 ? 'disabled' : ''}
+                                title="Déplacer vers le bas"
+                                style="padding: 4px 8px; font-size: 0.8rem;">
+                            ↓
+                        </button>
+                    </div>
+                </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: #666;">Code</label>
                     <input type="text"
@@ -1595,6 +1734,21 @@ function afficherNiveauxEchelle(echelle) {
                            onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'couleur', this.value)"
                            style="height: 38px; cursor: pointer;">
                 </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Actions</label>
+                    ${echelle.niveaux.length > 1 ? `
+                        <button onclick="supprimerNiveauEchelle('${echelle.id}', ${index})"
+                                class="btn btn-supprimer btn-compact"
+                                title="Supprimer ce niveau"
+                                style="width: 100%;">
+                            Supprimer
+                        </button>
+                    ` : `
+                        <div style="font-size: 0.75rem; color: #999; text-align: center; font-style: italic;">
+                            (minimum 1)
+                        </div>
+                    `}
+                </div>
             </div>
         </div>
     `).join('');
@@ -1629,26 +1783,41 @@ function afficherNiveauxEchelle(echelle) {
  */
 function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
     const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
-    const echelle = echelles.find(e => e.id === echelleId);
+    const echelleIndex = echelles.findIndex(e => e.id === echelleId);
 
-    if (!echelle || !echelle.niveaux || !echelle.niveaux[niveauIndex]) return;
+    if (echelleIndex === -1) {
+        console.error('❌ Échelle non trouvée pour modification:', echelleId);
+        return;
+    }
+
+    const echelle = echelles[echelleIndex];
+
+    if (!echelle.niveaux || !echelle.niveaux[niveauIndex]) {
+        console.error('❌ Niveau introuvable à l\'index:', niveauIndex);
+        return;
+    }
 
     // Mettre à jour le champ
     echelle.niveaux[niveauIndex][champ] = valeur;
 
+    // Remettre l'échelle modifiée dans le tableau
+    echelles[echelleIndex] = echelle;
+
     // Sauvegarder dans localStorage
     localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
 
-    // Mettre à jour localStorage.niveauxEchelle si c'est l'échelle active
+    // CRITIQUE: Recharger echelleTemplateActuelle depuis localStorage (évite références obsolètes)
+    const echellesRecharge = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
+
+    // Mettre à jour localStorage.niveauxEchelle si c'est l'échelle active (compatibilité ancienne logique)
     const niveauxEchelle = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
     if (niveauxEchelle.length > 0 && niveauxEchelle[0].echelleId === echelleId) {
-        localStorage.setItem('niveauxEchelle', JSON.stringify(echelle.niveaux));
+        localStorage.setItem('niveauxEchelle', JSON.stringify(echelleTemplateActuelle.niveaux));
     }
 
     // Réafficher pour mettre à jour l'aperçu visuel et les bordures colorées
-    afficherNiveauxEchelle(echelle);
-
-    console.log('Niveau modifié:', champ, '=', valeur);
+    afficherNiveauxEchelle(echelleTemplateActuelle);
 }
 
 /**
@@ -1656,10 +1825,16 @@ function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
  * @param {string} echelleId - ID de l'échelle
  */
 function ajouterNiveauEchelle(echelleId) {
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
-    const echelle = echelles.find(e => e.id === echelleId);
+    let echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const index = echelles.findIndex(e => e.id === echelleId);
 
-    if (!echelle) return;
+    if (index === -1) {
+        console.error('❌ Échelle non trouvée:', echelleId);
+        alert('Erreur: Échelle non trouvée');
+        return;
+    }
+
+    const echelle = echelles[index];
 
     // Initialiser le tableau de niveaux si nécessaire
     if (!echelle.niveaux) {
@@ -1679,16 +1854,135 @@ function ajouterNiveauEchelle(echelleId) {
     // Ajouter le niveau à l'échelle
     echelle.niveaux.push(nouveauNiveau);
 
+    // IMPORTANT: Mettre à jour l'échelle dans le tableau AVANT de sauvegarder
+    echelles[index] = echelle;
+
     // Sauvegarder dans localStorage
     localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
 
+    // Recharger l'échelle depuis localStorage pour avoir la bonne référence
+    const echellesRecharge = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
+
     // Réafficher la liste des niveaux
-    afficherNiveauxEchelle(echelle);
+    afficherNiveauxEchelle(echelleTemplateActuelle);
 
-    // Mettre à jour les métriques
-    document.getElementById('nbNiveauxEchelle').textContent = echelle.niveaux.length;
+    // Mettre à jour les métriques et la sidebar
+    document.getElementById('nbNiveauxEchelle').textContent = echelleTemplateActuelle.niveaux.length;
+    afficherListeEchelles();
 
-    console.log('Nouveau niveau ajouté à l\'échelle:', echelleId);
+    // Notification de succès
+    alert(`✅ Niveau ajouté avec succès !\n\nL'échelle contient maintenant ${echelleTemplateActuelle.niveaux.length} niveau(x).\nModifiez les propriétés du niveau (code, nom, min, max, etc.) puis continuez votre travail.`);
+}
+
+/**
+ * Supprime un niveau d'une échelle
+ * @param {string} echelleId - ID de l'échelle
+ * @param {number} index - Index du niveau à supprimer
+ */
+function supprimerNiveauEchelle(echelleId, index) {
+    if (!confirm('Supprimer ce niveau ?')) return;
+
+    let echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelleIndex = echelles.findIndex(e => e.id === echelleId);
+
+    if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return;
+
+    const echelle = echelles[echelleIndex];
+
+    // Sécurité : ne pas supprimer s'il ne reste qu'un seul niveau
+    if (echelle.niveaux.length <= 1) {
+        alert('Impossible de supprimer : une échelle doit avoir au moins 1 niveau.');
+        return;
+    }
+
+    // Supprimer le niveau
+    echelle.niveaux.splice(index, 1);
+
+    // Remettre l'échelle modifiée dans le tableau
+    echelles[echelleIndex] = echelle;
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
+
+    // Recharger echelleTemplateActuelle depuis localStorage
+    const echellesRecharge = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
+
+    // Réafficher la liste des niveaux
+    afficherNiveauxEchelle(echelleTemplateActuelle);
+
+    // Mettre à jour les métriques et la sidebar
+    document.getElementById('nbNiveauxEchelle').textContent = echelleTemplateActuelle.niveaux.length;
+    afficherListeEchelles();
+}
+
+/**
+ * Déplace un niveau vers le haut dans l'échelle
+ * @param {string} echelleId - ID de l'échelle
+ * @param {number} index - Index du niveau à déplacer
+ */
+function deplacerNiveauEchelleHaut(echelleId, index) {
+    if (index === 0) return;
+
+    let echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelleIndex = echelles.findIndex(e => e.id === echelleId);
+
+    if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return;
+
+    const echelle = echelles[echelleIndex];
+
+    // Échanger avec le niveau précédent
+    [echelle.niveaux[index - 1], echelle.niveaux[index]] = [echelle.niveaux[index], echelle.niveaux[index - 1]];
+
+    // Remettre l'échelle modifiée dans le tableau
+    echelles[echelleIndex] = echelle;
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
+
+    // Recharger echelleTemplateActuelle depuis localStorage
+    const echellesRecharge = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
+
+    // Réafficher
+    afficherNiveauxEchelle(echelleTemplateActuelle);
+
+    console.log('Niveau déplacé vers le haut');
+}
+
+/**
+ * Déplace un niveau vers le bas dans l'échelle
+ * @param {string} echelleId - ID de l'échelle
+ * @param {number} index - Index du niveau à déplacer
+ */
+function deplacerNiveauEchelleBas(echelleId, index) {
+    let echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelleIndex = echelles.findIndex(e => e.id === echelleId);
+
+    if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return;
+
+    const echelle = echelles[echelleIndex];
+
+    if (index === echelle.niveaux.length - 1) return;
+
+    // Échanger avec le niveau suivant
+    [echelle.niveaux[index], echelle.niveaux[index + 1]] = [echelle.niveaux[index + 1], echelle.niveaux[index]];
+
+    // Remettre l'échelle modifiée dans le tableau
+    echelles[echelleIndex] = echelle;
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
+
+    // Recharger echelleTemplateActuelle depuis localStorage
+    const echellesRecharge = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
+
+    // Réafficher
+    afficherNiveauxEchelle(echelleTemplateActuelle);
+
+    console.log('Niveau déplacé vers le bas');
 }
 
 function definirEchelleActive(id) {
@@ -1724,20 +2018,122 @@ function dupliquerEchelleDepuisSidebar(id) {
     alert('Échelle "' + copie.nom + '" dupliquée avec succès');
 }
 
+/**
+ * Vérifie si une échelle est utilisée par des évaluations existantes
+ * @param {string} echelleId - ID de l'échelle à vérifier
+ * @returns {Object} {utilisee: boolean, nbEvaluations: number, evaluations: Array}
+ */
+function verifierUtilisationEchelle(echelleId) {
+    // Récupérer toutes les évaluations
+    const evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
+
+    // Filtrer les évaluations qui utilisent cette échelle
+    const evaluationsUtilisant = evaluations.filter(eval => eval.echelleId === echelleId);
+
+    return {
+        utilisee: evaluationsUtilisant.length > 0,
+        nbEvaluations: evaluationsUtilisant.length,
+        evaluations: evaluationsUtilisant
+    };
+}
+
+/**
+ * Migre les évaluations d'une échelle vers une autre
+ * @param {string} ancienneEchelleId - ID de l'échelle à remplacer
+ * @param {string} nouvelleEchelleId - ID de la nouvelle échelle
+ * @returns {number} Nombre d'évaluations migrées
+ */
+function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleEchelleId) {
+    const evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
+    let nbMigrees = 0;
+
+    evaluations.forEach(eval => {
+        if (eval.echelleId === ancienneEchelleId) {
+            eval.echelleId = nouvelleEchelleId;
+            nbMigrees++;
+        }
+    });
+
+    localStorage.setItem('evaluations', JSON.stringify(evaluations));
+    return nbMigrees;
+}
+
 function supprimerEchelleDepuisSidebar(id) {
-    if (!confirm('Supprimer cette échelle ?')) return;
+    // Vérifier si l'échelle est utilisée
+    const utilisation = verifierUtilisationEchelle(id);
 
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
-    const index = echelles.findIndex(e => e.id === id);
+    if (utilisation.utilisee) {
+        // L'échelle est utilisée, offrir des choix à l'utilisateur
+        const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+        const echelle = echelles.find(e => e.id === id);
+        const nomEchelle = echelle?.nom || 'cette échelle';
 
-    if (index !== -1) {
-        echelles.splice(index, 1);
-        localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
-        afficherListeEchelles();
-        document.getElementById('conteneurEditionEchelle').style.display = 'none';
-        document.getElementById('optionsImportExportEchelles').style.display = 'none';
-        document.getElementById('accueilEchelles').style.display = 'block';
-        alert('Échelle supprimée');
+        // Créer une liste des autres échelles disponibles pour la migration
+        const autresEchelles = echelles.filter(e => e.id !== id);
+
+        let message = `⚠️ ATTENTION : L'échelle "${nomEchelle}" est utilisée par ${utilisation.nbEvaluations} évaluation(s) existante(s).\n\n`;
+
+        if (autresEchelles.length > 0) {
+            message += 'Options:\n';
+            message += '1. Migrer ces évaluations vers une autre échelle\n';
+            message += '2. Annuler la suppression\n\n';
+            message += `Voulez-vous migrer les évaluations vers une autre échelle ?`;
+
+            const choixMigration = confirm(message);
+
+            if (choixMigration) {
+                // Afficher un sélecteur d'échelle de remplacement
+                let listeEchelles = 'Sélectionnez l\'échelle de remplacement:\n\n';
+                autresEchelles.forEach((e, idx) => {
+                    listeEchelles += `${idx + 1}. ${e.nom} (${e.niveaux?.length || 0} niveaux)\n`;
+                });
+
+                const choixNumero = prompt(listeEchelles + '\nEntrez le numéro de l\'échelle:');
+                const numeroChoisi = parseInt(choixNumero);
+
+                if (numeroChoisi && numeroChoisi >= 1 && numeroChoisi <= autresEchelles.length) {
+                    const nouvelleEchelle = autresEchelles[numeroChoisi - 1];
+                    const nbMigrees = migrerEvaluationsVersNouvelleEchelle(id, nouvelleEchelle.id);
+
+                    // Maintenant supprimer l'échelle
+                    const index = echelles.findIndex(e => e.id === id);
+                    if (index !== -1) {
+                        echelles.splice(index, 1);
+                        localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
+                        afficherListeEchelles();
+                        document.getElementById('conteneurEditionEchelle').style.display = 'none';
+                        document.getElementById('optionsImportExportEchelles').style.display = 'none';
+                        document.getElementById('accueilEchelles').style.display = 'block';
+                        alert(`✅ Échelle supprimée avec succès !\n${nbMigrees} évaluation(s) ont été migrées vers "${nouvelleEchelle.nom}".`);
+                    }
+                } else {
+                    alert('Migration annulée. L\'échelle n\'a pas été supprimée.');
+                }
+            } else {
+                alert('Suppression annulée. Les évaluations existantes sont préservées.');
+            }
+        } else {
+            // Pas d'autres échelles disponibles
+            message += '⚠️ Impossible de supprimer : il n\'y a aucune autre échelle vers laquelle migrer les évaluations.\n\n';
+            message += 'Vous devez d\'abord créer une nouvelle échelle ou supprimer les évaluations existantes.';
+            alert(message);
+        }
+    } else {
+        // L'échelle n'est pas utilisée, suppression directe
+        if (!confirm('Supprimer cette échelle ?')) return;
+
+        const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+        const index = echelles.findIndex(e => e.id === id);
+
+        if (index !== -1) {
+            echelles.splice(index, 1);
+            localStorage.setItem('echellesTemplates', JSON.stringify(echelles));
+            afficherListeEchelles();
+            document.getElementById('conteneurEditionEchelle').style.display = 'none';
+            document.getElementById('optionsImportExportEchelles').style.display = 'none';
+            document.getElementById('accueilEchelles').style.display = 'block';
+            alert('Échelle supprimée avec succès !');
+        }
     }
 }
 
@@ -1748,3 +2144,12 @@ window.annulerEditionEchelle = annulerEditionEchelle;
 window.chargerEchellePourModif = chargerEchellePourModif;
 window.dupliquerEchelleDepuisSidebar = dupliquerEchelleDepuisSidebar;
 window.supprimerEchelleDepuisSidebar = supprimerEchelleDepuisSidebar;
+window.deplacerNiveauHaut = deplacerNiveauHaut;
+window.deplacerNiveauBas = deplacerNiveauBas;
+window.deplacerNiveauEchelleHaut = deplacerNiveauEchelleHaut;
+window.deplacerNiveauEchelleBas = deplacerNiveauEchelleBas;
+window.ajouterNiveauEchelle = ajouterNiveauEchelle;
+window.supprimerNiveauEchelle = supprimerNiveauEchelle;
+window.modifierNiveauEchelle = modifierNiveauEchelle;
+window.verifierUtilisationEchelle = verifierUtilisationEchelle;
+window.migrerEvaluationsVersNouvelleEchelle = migrerEvaluationsVersNouvelleEchelle;
