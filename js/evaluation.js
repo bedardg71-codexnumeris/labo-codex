@@ -243,42 +243,42 @@ function chargerGrillesDansSelect() {
 }
 
 /**
- * Charge l'échelle de performance dans le select
- * 
+ * Charge les échelles de performance disponibles dans le select
+ *
  * CLÉ LOCALSTORAGE:
- * - 'niveauxEchelle' : Array des niveaux de performance
+ * - 'echellesTemplates' : Array des échelles créées par l'utilisateur
  */
 function chargerEchellePerformance() {
-    const niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
     const select = document.getElementById('selectEchelle1');
 
     if (!select) return;
 
-    // SÉCURITÉ: Vérifier que l'échelle existe
-    if (!niveaux || niveaux.length === 0) {
+    // SÉCURITÉ: Vérifier qu'il existe au moins une échelle
+    if (!echelles || echelles.length === 0) {
         console.error('❌ Aucune échelle de performance configurée');
-        select.innerHTML = '<option value="">⚠️ Aucune échelle configurée - Aller dans Réglages › Échelle</option>';
+        select.innerHTML = '<option value="">⚠️ Aucune échelle configurée - Aller dans Matériel › Niveaux de performance</option>';
         document.getElementById('noteProduction1').textContent = '--';
         document.getElementById('niveauProduction1').textContent = '--';
         return;
     }
 
-    // Remplir le select avec l'échelle configurée
-    select.innerHTML = `
-        <option value="echelle-idme">Échelle IDME (${niveaux.length} niveaux)</option>
-    `;
-
-    // Sélectionner automatiquement l'échelle
-    select.value = 'echelle-idme';
-
-    // Utiliser les valeurs de calcul configurées par l'utilisateur
-    const valeurs = {};
-    niveaux.forEach(niveau => {
-        // Si valeurCalcul existe, l'utiliser, sinon calculer le milieu de la plage
-        valeurs[niveau.code] = niveau.valeurCalcul || (niveau.min + niveau.max) / 2;
+    // Remplir le select avec toutes les échelles disponibles
+    select.innerHTML = '<option value="">-- Choisir une échelle --</option>';
+    echelles.forEach(echelle => {
+        const nomEchappe = (echelle.nom || 'Échelle sans nom').replace(/[<>&"']/g, c => ({
+            '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+        const nbNiveaux = echelle.niveaux?.length || 0;
+        select.innerHTML += `<option value="${echelle.id}">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
     });
 
-    console.log('✅ Échelle de performance chargée:', niveaux.length, 'niveaux');
+    // Si une seule échelle, la sélectionner automatiquement
+    if (echelles.length === 1) {
+        select.value = echelles[0].id;
+    }
+
+    console.log('✅ Échelles de performance chargées:', echelles.length, 'échelle(s) disponible(s)');
 }
 
 /* ===============================
@@ -1761,8 +1761,7 @@ function genererDetailsEtudiant(etudiant) {
                     <th>Production</th>
                     <th>Grille</th>
                     <th>Cartouche</th>
-                    <th>Note (lettre)</th>
-                    <th>Note (%)</th>
+                    <th>Note</th>
                     <th>Date</th>
                     <th>Actions</th>
                     <th style="width: 60px;" title="Verrouillage">🔒/🔓</th>
@@ -1775,20 +1774,20 @@ function genererDetailsEtudiant(etudiant) {
             const estRemplacee = item.evaluation.remplaceeParId ? true : false;
             const estReprise = item.evaluation.repriseDeId ? true : false;
 
-            return `
+            // Formater la note combinée
+                                const noteLettre = item.evaluation.niveauFinal || '--';
+                                const notePourcent = item.evaluation.noteFinale !== null ? Math.round(item.evaluation.noteFinale) : 0;
+                                const noteAffichage = noteLettre !== '--' ? `${noteLettre} (${notePourcent}%)` : `-- (${notePourcent}%)`;
+
+                                return `
                             <tr ${estRemplacee ? 'style="opacity: 0.6; background: #f5f5f5;"' : ''}>
                                 <td>${echapperHtml(item.production.titre || item.production.nom || '—')}</td>
                                 <td>${echapperHtml(item.evaluation.grilleNom || '—')}</td>
                                 <td>${echapperHtml(obtenirNomCartouche(item.evaluation.cartoucheId, item.evaluation.grilleId) || '—')}</td>
-
                                 <td>
                                     <span ${obtenirClasseNote(item.evaluation.niveauFinal, item.evaluation.echelleId)}>
-
-                                        ${item.evaluation.niveauFinal || '—'}
+                                        ${noteAffichage}
                                     </span>
-                                </td>
-                                <td>
-                                    ${Math.round(item.evaluation.noteFinale) || '—'}%
                                     ${estRemplacee ? '<span class="badge-statut" style="margin-left: 6px;">Remplacée</span>' : ''}
                                     ${estReprise ? '<span style="color: #9c27b0; font-size: 1.2rem; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
                                     ${item.evaluation.jetonDelaiApplique ? '<span style="color: #ff6f00; font-size: 1.2rem; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
@@ -1797,11 +1796,11 @@ function genererDetailsEtudiant(etudiant) {
                                 <td>
                                     ${estRemplacee ? `
                                         <button class="btn btn-modifier btn-compact" onclick="modifierEvaluation('${item.evaluation.id}')">
-                                            Voir
+                                            Consulter
                                         </button>
                                     ` : `
                                         <button class="btn btn-modifier btn-compact" onclick="modifierEvaluation('${item.evaluation.id}')">
-                                            Voir
+                                            Consulter
                                         </button>
                                         <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${item.evaluation.id}')" ${item.evaluation.verrouillee ? 'disabled title="Déverrouillez d\'abord pour supprimer"' : ''}>
                                             Supprimer
@@ -1825,7 +1824,6 @@ function genererDetailsEtudiant(etudiant) {
             return `
                             <tr style="opacity: 0.7;">
                                 <td>${echapperHtml(item.production.titre || item.production.nom || '—')}</td>
-                                <td>—</td>
                                 <td>—</td>
                                 <td>—</td>
                                 <td>
@@ -1860,12 +1858,18 @@ function genererDetailsEtudiant(etudiant) {
     const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
     const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
 
-    const tauxCompletion = indicesCPEtudiant?.C ?? (nbAttendus > 0 ? Math.round((nbRemis / nbAttendus) * 100) : 0);
+    // 🔍 DÉTERMINER LA PRATIQUE ACTIVE (SOM ou PAN)
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
+
+    // Lire C et P depuis la branche appropriée
+    const brancheActive = indicesCPEtudiant?.[pratique];
+    const tauxCompletion = brancheActive?.C ?? (nbAttendus > 0 ? Math.round((nbRemis / nbAttendus) * 100) : 0);
 
     // Calcul de la performance moyenne avec fallback
     let performanceMoyenne = 0;
-    if (indicesCPEtudiant && typeof indicesCPEtudiant.P === 'number' && !isNaN(indicesCPEtudiant.P)) {
-        performanceMoyenne = Math.round(indicesCPEtudiant.P);
+    if (brancheActive && typeof brancheActive.P === 'number' && !isNaN(brancheActive.P)) {
+        performanceMoyenne = Math.round(brancheActive.P);
     } else if (evaluationsActives.length > 0) {
         // Fallback : calculer la moyenne des notes des évaluations actives
         const sommeNotes = evaluationsActives.reduce((sum, e) => sum + (e.noteFinale || 0), 0);
