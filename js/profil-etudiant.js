@@ -631,8 +631,8 @@ function genererSectionMobilisationEngagement(da) {
             titre: art.titre,
             description: art.description || art.titre, // Utiliser description ou fallback sur titre
             remis: !!evaluation,
-            note: evaluation?.noteFinale || null,
-            niveau: evaluation?.niveauFinal || null,
+            note: evaluation?.noteFinale ?? null,  // Utiliser ?? pour supporter la note 0
+            niveau: evaluation?.niveauFinal ?? null,
             jetonReprise: evaluation?.repriseDeId ? true : false,
             jetonDelai: evaluation?.jetonDelaiApplique ? true : false,
             retenu: false // Par défaut, sera mis à true pour les meilleurs
@@ -719,33 +719,15 @@ function genererSectionMobilisationEngagement(da) {
             </div>
         </div>
 
-        <!-- CARTES MÉTRIQUES EN HAUT -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Mobilisation</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.M}</strong>
-                </div>
-            </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Assiduité</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.A}%</strong>
-                </div>
-            </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Complétion</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.C}%</strong>
-                </div>
-            </div>
-        </div>
-
         <!-- GRILLE 2 COLONNES : ASSIDUITÉ ET COMPLÉTION -->
         <div class="profil-grid-2col">
 
             <!-- FICHE ASSIDUITÉ -->
             <div class="profil-carte">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Assiduité</h3>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.A}%</strong>
+                </div>
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
@@ -775,8 +757,8 @@ function genererSectionMobilisationEngagement(da) {
                                     </span>
                                     <span class="badge-absence-heures">
                                         ${estAbsenceComplete
-                                            ? `${abs.heuresManquees}/${abs.heuresPresence + abs.heuresManquees}`
-                                            : `${abs.heuresPresence}/${abs.heuresPresence + abs.heuresManquees}`
+                                            ? `${abs.heuresManquees}h`
+                                            : `${abs.heuresPresence}h`
                                         }
                                     </span>
                                 </div>
@@ -789,10 +771,61 @@ function genererSectionMobilisationEngagement(da) {
                         <div class="profil-message-succes-texte">Assiduité parfaite !</div>
                     </div>
                 `}
+
+                <!-- Interventions RàI -->
+                ${(() => {
+                    // Récupérer les interventions de l'étudiant (où il était présent)
+                    const interventions = typeof obtenirInterventionsEtudiant === 'function'
+                        ? obtenirInterventionsEtudiant(da)
+                        : [];
+
+                    // Filtrer seulement les interventions complétées où l'étudiant était participant
+                    const interventionsParticipees = interventions.filter(intervention => {
+                        return intervention.statut === 'completee' &&
+                               intervention.etudiants &&
+                               intervention.etudiants.includes(da);
+                    });
+
+                    if (interventionsParticipees.length === 0) {
+                        return '';
+                    }
+
+                    // Trier par date décroissante
+                    interventionsParticipees.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    return `
+                        <hr class="profil-separateur">
+                        <h4 class="profil-section-titre">
+                            ${interventionsParticipees.length} intervention${interventionsParticipees.length > 1 ? 's' : ''} RàI
+                        </h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                            ${interventionsParticipees.map(intervention => {
+                                const date = new Date(intervention.date + 'T12:00:00');
+                                const options = { weekday: 'short', day: 'numeric', month: 'short' };
+                                const dateFormatee = date.toLocaleDateString('fr-CA', options);
+                                const duree = intervention.duree || 2;
+                                const typeIcone = intervention.type === 'individuel' ? '👤' : '👥';
+
+                                return `
+                                    <span class="badge-intervention-vert" onclick="naviguerVersIntervention('${intervention.id}');">
+                                        ${typeIcone} ${dateFormatee}
+                                        <span class="badge-analyse-count">
+                                            ${duree}h
+                                        </span>
+                                    </span>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                })()}
             </div>
 
             <!-- FICHE COMPLÉTION -->
             <div class="profil-carte">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Complétion</h3>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.C}%</strong>
+                </div>
 
                 <!-- Gestion des jetons -->
                 ${totalJetonsUtilises > 0 ? `
@@ -861,32 +894,29 @@ function genererSectionMobilisationEngagement(da) {
                             const bordure = art.retenu ? '3px' : '2px';
 
                             return `
-                                <div style="display: inline-flex; align-items: center; gap: 8px;
-                                            background: ${couleurBadge}22;
-                                            border: ${bordure} solid ${couleurBadge};
-                                            border-radius: 8px; padding: 8px 12px;
-                                            opacity: ${opacite};
-                                            transition: all 0.2s ease;">
+                                <div class="badge-artefact"
+                                     style="background: ${couleurBadge}22; border-color: ${couleurBadge}; opacity: ${opacite}; border-width: ${bordure};"
+                                     onmouseover="this.style.opacity='1'"
+                                     onmouseout="this.style.opacity='${opacite}'">
                                     <input type="checkbox"
+                                           class="badge-artefact-checkbox"
                                            name="artefactRetenu"
                                            value="${art.id}"
                                            ${art.retenu ? 'checked' : ''}
                                            onchange="toggleArtefactPortfolio('${da}', '${portfolio?.id || ''}', ${portfolio?.regles?.nombreARetenir || 3})"
                                            onclick="event.stopPropagation()"
-                                           style="margin: 0; accent-color: ${couleurBadge}; cursor: pointer; width: 16px; height: 16px;">
-                                    <div onclick="evaluerProduction('${da}', '${art.id}')"
-                                         style="display: flex; align-items: center; gap: 8px; cursor: pointer;"
-                                         onmouseover="this.parentElement.style.opacity='1'; this.parentElement.style.transform='translateY(-2px)'; this.parentElement.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';"
-                                         onmouseout="this.parentElement.style.opacity='${opacite}'; this.parentElement.style.transform='translateY(0)'; this.parentElement.style.boxShadow='none';">
-                                        <span style="font-weight: 600; color: ${couleurBadge}; font-size: 0.9rem;">
+                                           style="accent-color: ${couleurBadge};">
+                                    <div class="badge-artefact-contenu"
+                                         onclick="evaluerProduction('${da}', '${art.id}')">
+                                        <span class="badge-artefact-titre" style="color: ${couleurBadge};">
                                             ${echapperHtml(art.description)}
                                         </span>
                                         ${art.jetonReprise ? '<span style="font-size: 0.8rem;" title="Jeton de reprise appliqué">⭐</span>' : ''}
                                         ${art.jetonDelai ? '<span style="font-size: 0.8rem;" title="Jeton de délai appliqué">⭐</span>' : ''}
-                                        <span style="color: ${couleurBadge}; font-weight: bold; font-size: 1rem;">
+                                        <span class="badge-artefact-note" style="background: ${couleurBadge};">
                                             ${art.niveau || '--'}
                                         </span>
-                                        <span style="color: #666; font-size: 0.85rem;">
+                                        <span style="color: #666; font-size: 0.8rem; font-weight: 500;">
                                             (${art.note})
                                         </span>
                                     </div>
@@ -907,21 +937,13 @@ function genererSectionMobilisationEngagement(da) {
                 ${artefactsNonRemis.length > 0 ? `
                     <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
                         ${artefactsNonRemis.map(art => `
-                            <div onclick="evaluerProduction('${da}', '${art.id}')"
-                                 style="display: inline-flex; align-items: center; gap: 8px;
-                                        background: #f5f5f5;
-                                        border: 2px solid #ccc;
-                                        border-radius: 8px; padding: 8px 12px;
-                                        opacity: 0.6;
-                                        cursor: pointer;
-                                        transition: all 0.2s ease;"
-                                 onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.1)';"
-                                 onmouseout="this.style.opacity='0.6'; this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+                            <div class="badge-artefact-non-remis"
+                                 onclick="evaluerProduction('${da}', '${art.id}')"
                                  title="Cliquer pour évaluer cet artefact">
-                                <span style="font-weight: 500; color: #666; font-size: 0.9rem;">
+                                <span style="font-weight: 500; color: #666; font-size: 0.85rem;">
                                     ⏳ ${echapperHtml(art.description)}
                                 </span>
-                                <span style="color: #999; font-size: 0.85rem; font-style: italic;">
+                                <span style="color: #999; font-size: 0.8rem; font-style: italic;">
                                     Non remis
                                 </span>
                             </div>
@@ -984,7 +1006,7 @@ function genererSectionAccompagnement(da) {
                     <div class="details-calculs-label">Utilisation :</div>
                     <div class="details-calculs-valeur">
                         • <strong>Nouvelle intervention :</strong> Cliquez sur le bouton en haut à droite pour créer une intervention<br>
-                        • <strong>Consulter une intervention :</strong> Cliquez sur «Ouvrir» pour voir les détails complets<br>
+                        • <strong>Consulter une intervention :</strong> Cliquez sur «Consulter» pour voir les détails complets<br>
                         • <strong>Notes individuelles :</strong> Visibles directement sous chaque intervention
                     </div>
                 </div>
@@ -1012,7 +1034,7 @@ function genererSectionAccompagnement(da) {
                     </p>
                 </div>
                 <div>
-                    <button class="btn btn-principal btn-large" onclick="naviguerVersNouvelleIntervention();">
+                    <button class="btn btn-principal" style="white-space: nowrap;" onclick="naviguerVersNouvelleIntervention();">
                         Nouvelle intervention
                     </button>
                 </div>
@@ -1039,53 +1061,52 @@ function genererSectionAccompagnement(da) {
         return new Date(b.date) - new Date(a.date);
     });
 
-    // Afficher chaque intervention
+    // Conteneur timeline
+    html += `<div class="carte" style="padding: 0; margin-bottom: 20px;">`;
+
+    // Afficher chaque intervention en format timeline compact (une seule ligne)
     interventionsTriees.forEach(intervention => {
-        const dateFormatee = formaterDateLisible(intervention.date);
-        const noteIndividuelle = intervention.notesIndividuelles?.[da] || null;
+        const date = new Date(intervention.date + 'T12:00:00');
+        const options = { weekday: 'short', day: 'numeric', month: 'short' };
+        const dateFormatee = date.toLocaleDateString('fr-CA', options);
+        const duree = intervention.duree || 2;
+        const typeIcone = intervention.type === 'individuel' ? '👤' : '👥';
+        const noteIndividuelle = intervention.notesIndividuelles?.[da] || '';
+        const niveauRai = intervention.niveauRai || 3;
 
-        html += `
-            <div class="carte" style="margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-                    <div style="flex: 1;">
-                        <h4 style="margin: 0 0 5px 0; color: var(--bleu-principal);">
-                            ${intervention.titre || intervention.type}
-                        </h4>
-                        <div class="text-muted" style="font-size: 0.9rem;">
-                            ${dateFormatee}
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <button class="btn btn-secondaire" onclick="naviguerVersIntervention('${intervention.id}');">
-                            Ouvrir
-                        </button>
-                    </div>
-                </div>
-        `;
-
-        // Afficher la note individuelle si elle existe
-        if (noteIndividuelle) {
-            html += `
-                <div style="background: #f0f8ff; border-left: 3px solid var(--bleu-principal);
-                            padding: 12px 15px; border-radius: 4px; margin-top: 15px;">
-                    <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 5px;">
-                        Note d'accompagnement
-                    </div>
-                    <div style="white-space: pre-wrap; color: #333;">
-                        ${noteIndividuelle}
-                    </div>
-                </div>
-            `;
+        // Déterminer le texte du badge (titre ou niveau)
+        let badgeTexte = '';
+        if (intervention.titre) {
+            badgeTexte = intervention.titre;
         } else {
-            html += `
-                <div class="text-muted" style="font-style: italic; font-size: 0.9rem; margin-top: 10px;">
-                    Aucune note spécifique pour cet·te étudiant·e
-                </div>
-            `;
+            badgeTexte = niveauRai === 1 ? 'Rattrapage (1)' : niveauRai === 2 ? 'Rattrapage (2)' : 'Intervention niveau 3';
         }
 
-        html += `</div>`;
+        html += `
+            <div class="intervention-timeline-item">
+                <div style="flex: 1; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <span class="badge-intervention-vert">
+                        ${typeIcone} ${badgeTexte}
+                    </span>
+                    <span style="color: var(--bleu-principal); font-weight: 600; font-size: 0.9rem;">
+                        ${dateFormatee}
+                    </span>
+                    ${noteIndividuelle ? `
+                        <span style="color: #666; font-size: 0.9rem; flex: 1;">
+                            ${noteIndividuelle}
+                        </span>
+                    ` : ''}
+                </div>
+                <div class="intervention-timeline-actions">
+                    <button class="btn btn-secondaire" onclick="naviguerVersIntervention('${intervention.id}');">
+                        Consulter
+                    </button>
+                </div>
+            </div>
+        `;
     });
+
+    html += `</div>`;
 
     return html;
 }
@@ -3209,8 +3230,8 @@ function genererSectionCompletion(da) {
             titre: art.titre,
             description: art.description || art.titre, // Utiliser description ou fallback sur titre
             remis: !!evaluation,
-            note: evaluation?.noteFinale || null,
-            niveau: evaluation?.niveauFinal || null,
+            note: evaluation?.noteFinale ?? null,  // Utiliser ?? pour supporter la note 0
+            niveau: evaluation?.niveauFinal ?? null,
             jetonReprise: evaluation?.repriseDeId ? true : false,
             jetonDelai: evaluation?.jetonDelaiApplique ? true : false
         };
@@ -4478,8 +4499,8 @@ function genererSectionPerformance(da) {
             titre: art.titre,
             description: art.description || art.titre, // Utiliser description ou fallback sur titre
             remis: !!evaluation,
-            note: evaluation?.noteFinale || null,
-            niveau: evaluation?.niveauFinal || null,
+            note: evaluation?.noteFinale ?? null,  // Utiliser ?? pour supporter la note 0
+            niveau: evaluation?.niveauFinal ?? null,
             retenu: selectionEleve.artefactsRetenus.includes(art.id)
         };
     }).sort((a, b) => {
@@ -4561,6 +4582,16 @@ function genererSectionPerformance(da) {
     // Interprétation Performance uniquement (C va dans Mobilisation)
     const interpP = interpreterPerformance(indices.P);
 
+    // Déterminer la lettre IDME selon le pourcentage P
+    let lettreIDME = 'I';
+    if (indices.P >= 85) {
+        lettreIDME = 'E';
+    } else if (indices.P >= 75) {
+        lettreIDME = 'M';
+    } else if (indices.P >= 65) {
+        lettreIDME = 'D';
+    }
+
     // Calculer moyennes des critères pour badges
     const moyennes = calculerMoyennesCriteres(da);
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
@@ -4634,10 +4665,13 @@ function genererSectionPerformance(da) {
         <!-- ENCADRÉ UNIQUE: DÉVELOPPEMENT DES HABILETÉS ET COMPÉTENCES -->
         <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
 
-            <!-- Badge performance avec interprétation -->
-            <div style="margin-bottom: 20px;">
-                <strong style="font-size: 1.1rem; color: ${interpP.couleur};">${interpP.niveau}</strong>
-                <span style="font-size: 1.3rem; font-weight: bold; color: ${interpP.couleur}; margin-left: 10px;">(${indices.P}%)</span>
+            <!-- En-tête avec indice P -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <div>
+                    <h3 style="margin: 0 0 5px 0; color: var(--bleu-principal); font-size: 1.1rem;">Développement des habiletés et compétences</h3>
+                    <strong style="font-size: 0.95rem; color: ${interpP.couleur};">${interpP.niveau}</strong>
+                </div>
+                <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${lettreIDME} (${indices.P})</strong>
             </div>
 
             <hr class="profil-separateur">
@@ -4992,3 +5026,69 @@ function naviguerVersIntervention(interventionId) {
 // car non encapsulées dans un module ES6
 window.naviguerVersNouvelleIntervention = naviguerVersNouvelleIntervention;
 window.naviguerVersIntervention = naviguerVersIntervention;
+
+/* ===============================
+   🔄 RECHARGEMENT AUTOMATIQUE
+   =============================== */
+
+/**
+ * Surveille l'activation de la sous-section 'tableau-bord-profil'
+ * et recharge automatiquement le profil pour refléter les changements
+ * faits depuis d'autres sections (ex: modifications d'interventions RàI)
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    const sectionProfil = document.getElementById('tableau-bord-profil');
+    if (!sectionProfil) return;
+
+    let dernierDARecharge = null;
+    let timeoutRechargement = null;
+
+    // Observer les changements de la classe 'active' sur la sous-section
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const estActif = sectionProfil.classList.contains('active');
+                const daActuel = window.profilActuelDA;
+
+                // Si la sous-section vient de devenir active ET qu'un profil est affiché
+                if (estActif && daActuel) {
+                    // Éviter les rechargements en cascade pour le même étudiant
+                    if (dernierDARecharge === daActuel) {
+                        return;
+                    }
+
+                    // Annuler tout rechargement en attente
+                    if (timeoutRechargement) {
+                        clearTimeout(timeoutRechargement);
+                    }
+
+                    // Recharger avec un court délai (debounce)
+                    timeoutRechargement = setTimeout(function() {
+                        console.log('🔄 Rechargement automatique du profil étudiant:', daActuel);
+                        dernierDARecharge = daActuel;
+
+                        // Vérifier que la fonction existe avant de l'appeler
+                        if (typeof afficherProfilComplet === 'function') {
+                            afficherProfilComplet(daActuel);
+                        }
+
+                        timeoutRechargement = null;
+                    }, 100); // Délai de 100ms
+                }
+
+                // Réinitialiser le flag quand la section devient inactive
+                if (!estActif) {
+                    dernierDARecharge = null;
+                }
+            }
+        });
+    });
+
+    // Commencer à observer
+    observer.observe(sectionProfil, {
+        attributes: true,
+        attributeFilter: ['class']
+    });
+
+    console.log('✅ Observer de rechargement automatique activé pour tableau-bord-profil');
+});

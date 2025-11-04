@@ -568,15 +568,20 @@ function calculerNote() {
 
     if (!grille) return;
 
-    const niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
+    // LECTURE DE L'ÉCHELLE SÉLECTIONNÉE (pas l'ancienne niveauxEchelle)
+    const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelleSelectionnee = echelles.find(e => e.id === echelleId);
 
     // SÉCURITÉ: Vérifier que l'échelle existe
-    if (!niveaux || niveaux.length === 0) {
-        console.error('❌ Aucune échelle de performance configurée');
+    if (!echelleSelectionnee || !echelleSelectionnee.niveaux || echelleSelectionnee.niveaux.length === 0) {
+        console.error('❌ Aucune échelle de performance sélectionnée');
         document.getElementById('noteProduction1').textContent = '--';
         document.getElementById('niveauProduction1').textContent = '--';
         return;
     }
+
+    const niveaux = echelleSelectionnee.niveaux;
 
     // Utiliser les valeurs ponctuelles configurées par l'utilisateur
     const valeurs = {};
@@ -642,18 +647,26 @@ function calculerNote() {
 
 /**
  * Récupère la couleur associée à un niveau de performance
- * 
+ *
  * PARAMÈTRES:
- * @param {string} codeNiveau - Code du niveau (I, D, M, E, etc.)
- * 
+ * @param {string} codeNiveau - Code du niveau (I, D, M, E, 0, etc.)
+ *
  * RETOUR:
  * @returns {string} - Couleur CSS (var(--...) ou #...)
  */
 function obtenirCouleurNiveau(codeNiveau) {
     if (!codeNiveau) return 'transparent';
 
-    const niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
-    const niveau = niveaux.find(n => n.code === codeNiveau);
+    // LECTURE DE L'ÉCHELLE SÉLECTIONNÉE (pas l'ancienne niveauxEchelle)
+    const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelleSelectionnee = echelles.find(e => e.id === echelleId);
+
+    if (!echelleSelectionnee || !echelleSelectionnee.niveaux) {
+        return 'transparent';
+    }
+
+    const niveau = echelleSelectionnee.niveaux.find(n => n.code === codeNiveau);
 
     return niveau ? niveau.couleur : 'transparent';
 }
