@@ -105,14 +105,16 @@ function calculerAssiduiteSommative(da) {
                 // Séance facultative où l'étudiant était absent
                 // Ne compte ni au numérateur ni au dénominateur
                 console.log(`   ⚪ ${date}: Séance facultative (absent) - non comptabilisée`);
+            } else if (estFacultatif && heuresPresence > 0) {
+                // Séance facultative où l'étudiant était PRÉSENT
+                // Utiliser la durée RÉELLE de l'intervention (pas 2h fixes)
+                totalHeuresDonnees += heuresPresence;
+                totalHeuresPresentes += heuresPresence;
+                console.log(`   ✅ ${date}: Intervention RàI (${heuresPresence}h) - ${heuresPresence}h/${heuresPresence}h comptabilisées`);
             } else {
-                // Séance normale OU séance facultative où l'étudiant était présent
+                // Séance normale (2h standard)
                 totalHeuresDonnees += 2;
                 totalHeuresPresentes += heuresPresence;
-
-                if (estFacultatif) {
-                    console.log(`   ✅ ${date}: Séance facultative (présent) - ${heuresPresence}h comptabilisées`);
-                }
             }
         } else {
             // L'étudiant n'a pas d'entrée pour cette date
@@ -198,8 +200,13 @@ function calculerAssiduiteAlternative(da) {
                 // Séance facultative où l'étudiant était absent
                 // Ne compte ni au numérateur ni au dénominateur
                 console.log(`   ⚪ ${date}: Séance facultative (absent) - non comptabilisée`);
+            } else if (estFacultatif && heuresPresence > 0) {
+                // Séance facultative où l'étudiant était PRÉSENT
+                // Utiliser la durée RÉELLE de l'intervention (pas 2h fixes)
+                totalHeuresDonnees += heuresPresence;
+                totalHeuresPresentes += heuresPresence;
             } else {
-                // Séance normale OU séance facultative où l'étudiant était présent
+                // Séance normale (2h standard)
                 totalHeuresDonnees += 2;
                 totalHeuresPresentes += heuresPresence;
             }
