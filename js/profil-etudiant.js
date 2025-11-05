@@ -5096,6 +5096,11 @@ document.addEventListener('DOMContentLoaded', function() {
  * @returns {string} - Rapport en texte brut
  */
 function genererRapportAPI(da) {
+    // 🔄 FORCER le recalcul des indices C et P avant génération du rapport
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+
     // Récupérer toutes les données nécessaires
     const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
     if (!etudiant) return 'Erreur : Étudiant non trouvé';

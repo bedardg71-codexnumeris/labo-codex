@@ -562,6 +562,11 @@ function filtrerEtudiants(etudiants) {
 function afficherListeEtudiantsConsultation() {
     console.log('🔵 Affichage de la liste des étudiants...');
 
+    // 🔄 FORCER le recalcul des indices C et P avant affichage
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+
     // NOUVEAU: Mettre à jour l'indicateur de tri visuel au chargement
     mettreAJourIndicateursTri();
 
