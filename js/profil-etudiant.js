@@ -5112,7 +5112,11 @@ function genererRapportAPI(da) {
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
     const pattern = determinerPattern(indices.A / 100, indices.C / 100, indices.P / 100, moyennes);
     const risque = indices.R;
-    const niveauRai = determinerNiveauRaI(risque);
+    const cibleInfo = determinerCibleIntervention(da);
+    const niveauRai = {
+        niveau: cibleInfo.niveau,
+        titre: cibleInfo.niveau === 1 ? 'Suivi universel' : cibleInfo.niveau === 2 ? 'Intervention préventive' : 'Intervention intensive'
+    };
     const progression = calculerProgressionEleve(da);
     const interventions = typeof obtenirInterventionsEtudiant === 'function'
         ? obtenirInterventionsEtudiant(da).filter(i => i.statut === 'completee')
