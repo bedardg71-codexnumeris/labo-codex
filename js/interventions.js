@@ -1395,11 +1395,22 @@ function transfererPresencesVersModule(interventionId) {
     let nbPresentsAjoutes = 0;
     let nbAbsentsAjoutes = 0;
 
+    // Obtenir la durée de l'intervention (par défaut 2h si non spécifiée)
+    const dureeIntervention = intervention.duree || 2;
+
+    // RÈGLE IMPORTANTE :
+    // - Niveau 2 (préventif en classe) : Créer entrée pour TOUS (absents = motivés)
+    // - Niveau 3 (intensif hors classe) : Créer entrée UNIQUEMENT pour participants
+    const estNiveau3 = intervention.niveauRai === 3;
+
     etudiants.forEach(etudiant => {
         const estPresent = intervention.etudiants.includes(etudiant.da);
 
-        // Obtenir la durée de l'intervention (par défaut 2h si non spécifiée)
-        const dureeIntervention = intervention.duree || 2;
+        // Pour interventions niveau 3 : ignorer les non-participants
+        if (estNiveau3 && !estPresent) {
+            console.log(`   ⊘ ${etudiant.prenom} ${etudiant.nom}: NON CONCERNÉ (intervention individuelle)`);
+            return; // Ne pas créer d'entrée de présence
+        }
 
         // Déterminer les heures et la note selon la présence
         let heures, note;
@@ -1410,7 +1421,7 @@ function transfererPresencesVersModule(interventionId) {
             nbPresentsAjoutes++;
             console.log(`   ✅ ${etudiant.prenom} ${etudiant.nom}: PRÉSENT (${heures}h)`);
         } else {
-            // Étudiant absent : 0 heures + note d'absence motivée
+            // Étudiant absent (niveau 2 seulement) : 0 heures + note d'absence motivée
             heures = 0;
             note = 'Absence motivée RàI';
             nbAbsentsAjoutes++;
@@ -1428,7 +1439,12 @@ function transfererPresencesVersModule(interventionId) {
     });
 
     console.log('   ───────────────────────────────────');
-    console.log(`   📊 Résumé: ${nbPresentsAjoutes} présents, ${nbAbsentsAjoutes} absents motivés`);
+    if (estNiveau3) {
+        console.log(`   📊 Résumé niveau 3 (hors classe): ${nbPresentsAjoutes} participant(s) ajouté(s)`);
+        console.log(`   ℹ️  Les autres étudiants ne sont PAS affectés (pas d'entrée de présence créée)`);
+    } else {
+        console.log(`   📊 Résumé niveau 2 (en classe): ${nbPresentsAjoutes} présents, ${nbAbsentsAjoutes} absents motivés`);
+    }
     console.log('   ───────────────────────────────────');
 
     // Sauvegarder les présences mises à jour
