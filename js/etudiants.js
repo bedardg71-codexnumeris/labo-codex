@@ -218,11 +218,15 @@ function calculerAssiduitéGlobale(da) {
 
     // Compter le nombre de séances RÉELLEMENT SAISIES pour cet élève
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    // IMPORTANT : Exclure les séances facultatives (interventions RàI) du décompte
     const presences = obtenirDonneesSelonMode('presences') || [];
     const datesSaisies = new Set();
     presences.forEach(p => {
         if (p.da === da && p.heures !== null && p.heures !== undefined) {
-            datesSaisies.add(p.date);
+            // Ne compter que les séances NON facultatives
+            if (p.facultatif !== true) {
+                datesSaisies.add(p.date);
+            }
         }
     });
 
