@@ -941,6 +941,9 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     if (btnReinit) btnReinit.disabled = estVerrouille;
     if (btnEnregistrer) btnEnregistrer.disabled = estVerrouille;
     calculerEtSauvegarderIndicesAssiduite();
+
+    // Mettre à jour le compteur présents/absents
+    mettreAJourCompteurPresences();
 }
 
 /**
@@ -1012,6 +1015,9 @@ function mettreAJourLigne(da, dateStr) {
     spanTaux.textContent = tauxAssiduiteActuel + '%';
     // Format simple et uniforme pour tous
     spanTaux.style.fontWeight = '500';
+
+    // Mettre à jour le compteur présents/absents
+    mettreAJourCompteurPresences();
 }
 
 /* ===============================
@@ -1536,6 +1542,54 @@ function filtrerTableauPresences() {
             ligne.style.display = 'none';
         }
     }
+
+    // Mettre à jour le compteur après filtrage
+    mettreAJourCompteurPresences();
+}
+
+/**
+ * Met à jour le compteur de présents/absents en temps réel
+ */
+function mettreAJourCompteurPresences() {
+    const tbody = document.getElementById('tbody-saisie-presences');
+    if (!tbody) return;
+
+    const lignes = tbody.getElementsByTagName('tr');
+    let nbPresents = 0;
+    let nbAbsents = 0;
+    let nbTotal = 0;
+
+    for (let ligne of lignes) {
+        // Ignorer les lignes de message (pas assez de cellules)
+        if (ligne.cells.length < 4) continue;
+
+        // Ignorer les lignes cachées par le filtre de recherche
+        if (ligne.style.display === 'none') continue;
+
+        nbTotal++;
+
+        // Récupérer le champ heures (4ème cellule, index 3)
+        const celluleHeures = ligne.cells[3];
+        const inputHeures = celluleHeures?.querySelector('input[type="number"]');
+
+        if (inputHeures) {
+            const heures = parseFloat(inputHeures.value) || 0;
+            if (heures > 0) {
+                nbPresents++;
+            } else {
+                nbAbsents++;
+            }
+        }
+    }
+
+    // Mettre à jour les compteurs dans le DOM
+    const spanPresents = document.getElementById('nb-presents');
+    const spanAbsents = document.getElementById('nb-absents');
+    const spanTotal = document.getElementById('nb-total');
+
+    if (spanPresents) spanPresents.textContent = nbPresents;
+    if (spanAbsents) spanAbsents.textContent = nbAbsents;
+    if (spanTotal) spanTotal.textContent = nbTotal;
 }
 
 window.tousPresents = tousPresents;
