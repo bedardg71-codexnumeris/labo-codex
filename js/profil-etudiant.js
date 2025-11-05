@@ -1929,18 +1929,7 @@ function changerSectionProfil(section) {
             break;
         case 'rapport':
             titre = 'Rapport';
-            contenu = `
-                <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
-                            padding: 40px 20px; text-align: center; color: var(--bleu-moyen);">
-                    <div style="font-size: 2rem; margin-bottom: 15px;"></div>
-                    <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
-                        Rapport pour l'API
-                    </div>
-                    <div style="font-style: italic; font-size: 0.95rem;">
-                        Outil de composition de rapport destiné à l'aide pédagogique individuel (à venir)
-                    </div>
-                </div>
-            `;
+            contenu = genererSectionRapport(da);
             break;
         case 'accompagnement':
             titre = 'Accompagnement';
@@ -5102,3 +5091,622 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('✅ Observer de rechargement automatique activé pour tableau-bord-profil');
 });
+
+/* ===============================
+   📄 GÉNÉRATION DE RAPPORTS
+   =============================== */
+
+/**
+ * Génère un rapport de bilan pour l'API (version directe et professionnelle)
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {string} - Rapport en texte brut
+ */
+function genererRapportAPI(da) {
+    // Récupérer toutes les données nécessaires
+    const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
+    if (!etudiant) return 'Erreur : Étudiant non trouvé';
+
+    const indices = calculerTousLesIndices(da);
+    const detailsA = obtenirDetailsAssiduite(da);
+    const moyennes = calculerMoyennesCriteres(da);
+    const diagnostic = diagnostiquerForcesChallenges(moyennes);
+    const pattern = determinerPattern(indices.A / 100, indices.C / 100, indices.P / 100, moyennes);
+    const risque = indices.R;
+    const niveauRai = determinerNiveauRaI(risque);
+    const progression = calculerProgression(da);
+    const interventions = typeof obtenirInterventionsEtudiant === 'function'
+        ? obtenirInterventionsEtudiant(da).filter(i => i.statut === 'completee')
+        : [];
+
+    // Date actuelle
+    const maintenant = new Date();
+    const dateRapport = maintenant.toLocaleDateString('fr-CA', {
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+
+    // Déterminer pratique
+    const pratique = indices.pratique === 'SOM' ? 'Sommative' : 'Alternative (PAN)';
+
+    // Construire le rapport
+    let rapport = '';
+    rapport += '==============================================\n';
+    rapport += 'RAPPORT DE BILAN PÉDAGOGIQUE - VERSION API\n';
+    rapport += '==============================================\n\n';
+
+    // SECTION A : Identification
+    rapport += 'IDENTIFICATION\n';
+    rapport += '----------------------------------------------\n';
+    rapport += `Nom : ${etudiant.nom}, ${etudiant.prenom}\n`;
+    rapport += `DA : ${etudiant.da}\n`;
+    rapport += `Groupe : ${etudiant.groupe || 'N/A'}\n`;
+    rapport += `Programme : ${etudiant.programme || 'N/A'}\n`;
+    if (etudiant.sa) {
+        rapport += `⚠️  SERVICES ADAPTÉS (SA)\n`;
+    }
+    rapport += `Pratique d'évaluation : ${pratique}\n`;
+    rapport += `Date du rapport : ${dateRapport}\n\n`;
+
+    // SECTION B : Synthèse des indices
+    rapport += 'SYNTHÈSE DES INDICES\n';
+    rapport += '----------------------------------------------\n';
+    rapport += `Assiduité (A) : ${indices.A}% - ${interpreterAssiduite(indices.A).niveau}\n`;
+    rapport += `  → ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes\n`;
+    rapport += `  → ${detailsA.absences.length} absence(s) ou retard(s)\n\n`;
+
+    rapport += `Complétion (C) : ${indices.C}% - ${interpreterCompletion(indices.C).niveau}\n`;
+    const productions = obtenirDonneesSelonMode('productions') || [];
+    const artefacts = productions.filter(p => p.type === 'artefact-portfolio');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const nbRemis = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId).length;
+    rapport += `  → ${nbRemis} artefact(s) remis / ${artefacts.length} total\n\n`;
+
+    rapport += `Performance (P) : ${indices.P}% - ${interpreterPerformance(indices.P).niveau}\n`;
+    if (moyennes) {
+        rapport += `  → Moyenne IDME : ${moyennes.idmeMoyen ? (moyennes.idmeMoyen * 100).toFixed(1) + '%' : 'N/A'}\n`;
+    }
+    rapport += `\n`;
+
+    rapport += `Mobilisation (M) : ${indices.M}% - ${interpreterMobilisation(indices.A / 100, indices.C / 100).niveau}\n`;
+    rapport += `  → Formule : (A + C) / 2\n\n`;
+
+    rapport += `Risque d'échec (R) : ${risque}% - ${niveauRai.titre}\n`;
+    rapport += `  → Formule : 1 - (A × C × P)\n`;
+    rapport += `  → NIVEAU D'ALERTE : ${risque >= 70 ? '🔴 CRITIQUE' : risque >= 40 ? '🟠 ÉLEVÉ' : risque >= 20 ? '🟡 MOYEN' : '🟢 FAIBLE'}\n\n`;
+
+    // SECTION C : Diagnostic pédagogique
+    rapport += 'DIAGNOSTIC PÉDAGOGIQUE\n';
+    rapport += '----------------------------------------------\n';
+    rapport += `Pattern identifié : ${pattern.pattern}\n`;
+    rapport += `  → ${pattern.description}\n\n`;
+
+    if (diagnostic.forces.length > 0) {
+        rapport += `Forces identifiées (${diagnostic.forces.length}) :\n`;
+        diagnostic.forces.forEach((force, index) => {
+            rapport += `  ${index + 1}. ${force.nom} : ${(force.score * 100).toFixed(1)}%\n`;
+        });
+        rapport += '\n';
+    }
+
+    if (diagnostic.defis.length > 0) {
+        rapport += `Défis identifiés (${diagnostic.defis.length}) :\n`;
+        diagnostic.defis.forEach((defi, index) => {
+            const priorite = index === 0 ? ' ← PRIORITAIRE' : '';
+            rapport += `  ${index + 1}. ${defi.nom} : ${(defi.score * 100).toFixed(1)}%${priorite}\n`;
+        });
+        rapport += '\n';
+    }
+
+    // SECTION D : Tendances et progression
+    rapport += 'TENDANCES ET PROGRESSION\n';
+    rapport += '----------------------------------------------\n';
+    if (progression) {
+        rapport += `Direction du risque : ${progression.direction} ${progression.interpretation}\n`;
+        rapport += `Performance récente : ${progression.AM} (vs ${progression.AL} antérieur)\n`;
+    } else {
+        rapport += `Données insuffisantes pour analyse de tendance\n`;
+    }
+    rapport += '\n';
+
+    // SECTION E : Interventions RàI
+    if (interventions.length > 0) {
+        rapport += `INTERVENTIONS RÀI COMPLÉTÉES (${interventions.length})\n`;
+        rapport += '----------------------------------------------\n';
+        interventions.forEach((intervention, index) => {
+            const date = new Date(intervention.date + 'T12:00:00');
+            const dateStr = date.toLocaleDateString('fr-CA', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+            const niveau = intervention.niveauRai || 'N/A';
+            const duree = intervention.duree || 2;
+            rapport += `${index + 1}. ${dateStr} - Niveau ${niveau} - ${duree}h\n`;
+            rapport += `   Titre : ${intervention.titre || 'Sans titre'}\n`;
+        });
+        rapport += '\n';
+    }
+
+    // SECTION F : Recommandations pour l'API
+    rapport += 'RECOMMANDATIONS POUR L\'API\n';
+    rapport += '----------------------------------------------\n';
+    rapport += `Niveau RàI suggéré : Niveau ${niveauRai.niveau} (${niveauRai.titre})\n\n`;
+
+    // Recommandations selon niveau de risque
+    if (risque >= 70) {
+        rapport += `⚠️  ALERTE CRITIQUE - INTERVENTION IMMÉDIATE REQUISE\n\n`;
+        rapport += `Actions urgentes :\n`;
+        rapport += `• Rencontre avec l'API dans les 48 heures\n`;
+        rapport += `• Évaluation besoin Services Adaptés (si non déjà en place)\n`;
+        rapport += `• Plan d'intervention individualisé (PII)\n`;
+        rapport += `• Suivi hebdomadaire obligatoire\n\n`;
+
+        if (indices.A < 70) rapport += `• PRIORITÉ : Assiduité défaillante (${indices.A}%) - Contact immédiat\n`;
+        if (indices.C < 70) rapport += `• PRIORITÉ : Complétion défaillante (${indices.C}%) - Échéancier de rattrapage\n`;
+        if (indices.P < 65) rapport += `• PRIORITÉ : Performance critique (${indices.P}%) - Tutorat intensif\n`;
+
+    } else if (risque >= 40) {
+        rapport += `⚠️  ALERTE ÉLEVÉE - SUIVI RAPPROCHÉ REQUIS\n\n`;
+        rapport += `Actions recommandées :\n`;
+        rapport += `• Rencontre avec l'API dans les 2 semaines\n`;
+        rapport += `• Interventions RàI Niveau 2-3 selon diagnostic\n`;
+        rapport += `• Suivi bihebdomadaire\n`;
+        rapport += `• Évaluation besoins additionnels (tutorat, SA)\n\n`;
+
+        if (diagnostic.principalDefi) {
+            rapport += `• Focus pédagogique : ${diagnostic.principalDefi.nom} (${(diagnostic.principalDefi.score * 100).toFixed(1)}%)\n`;
+        }
+
+    } else if (risque >= 20) {
+        rapport += `Actions recommandées :\n`;
+        rapport += `• Suivi pédagogique régulier (mensuel)\n`;
+        rapport += `• Interventions RàI Niveau 1-2 selon besoins\n`;
+        rapport += `• Encourager maintien mobilisation actuelle\n\n`;
+
+        if (diagnostic.principalDefi) {
+            rapport += `• Amélioration ciblée : ${diagnostic.principalDefi.nom}\n`;
+        }
+
+    } else {
+        rapport += `Situation favorable - Maintien du suivi régulier\n\n`;
+        rapport += `Actions recommandées :\n`;
+        rapport += `• Encourager poursuite efforts actuels\n`;
+        rapport += `• Offrir défis stimulants pour approfondir\n`;
+        rapport += `• Reconnaissance explicite des forces\n\n`;
+    }
+
+    // Commentaires additionnels selon pattern
+    if (pattern.pattern === 'Défi spécifique') {
+        rapport += `Approche suggérée : Pratique guidée en s'appuyant sur les forces\n`;
+        if (diagnostic.principaleForce && diagnostic.principalDefi) {
+            rapport += `  → Utiliser ${diagnostic.principaleForce.nom} (force) pour développer ${diagnostic.principalDefi.nom} (défi)\n`;
+        }
+    } else if (pattern.pattern === 'Plateau') {
+        rapport += `Approche suggérée : Activation cognitive pour relancer progression\n`;
+        rapport += `  → Varier stratégies pédagogiques, offrir nouveaux défis\n`;
+    } else if (pattern.pattern === 'Émergence') {
+        rapport += `Approche suggérée : Enseignement explicite et modelage\n`;
+        rapport += `  → Renforcer bases, structurer apprentissages, soutien intensif\n`;
+    }
+
+    rapport += '\n';
+    rapport += '==============================================\n';
+    rapport += 'FIN DU RAPPORT\n';
+    rapport += `Généré le ${dateRapport}\n`;
+    rapport += 'Application de monitorage pédagogique - Beta 0.90\n';
+    rapport += '==============================================';
+
+    return rapport;
+}
+
+/**
+ * Génère un rapport de bilan pour l'étudiant (version bienveillante et encadrante)
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {string} - Rapport en texte brut
+ */
+function genererRapportEtudiant(da) {
+    // Récupérer toutes les données nécessaires
+    const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
+    if (!etudiant) return 'Erreur : Étudiant non trouvé';
+
+    const indices = calculerTousLesIndices(da);
+    const detailsA = obtenirDetailsAssiduite(da);
+    const moyennes = calculerMoyennesCriteres(da);
+    const diagnostic = diagnostiquerForcesChallenges(moyennes);
+    const pattern = determinerPattern(indices.A / 100, indices.C / 100, indices.P / 100, moyennes);
+    const risque = indices.R;
+    const progression = calculerProgression(da);
+    const interventions = typeof obtenirInterventionsEtudiant === 'function'
+        ? obtenirInterventionsEtudiant(da).filter(i => i.statut === 'completee')
+        : [];
+
+    // Date actuelle
+    const maintenant = new Date();
+    const dateRapport = maintenant.toLocaleDateString('fr-CA', {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    // Construire le rapport
+    let rapport = '';
+    rapport += '==============================================\n';
+    rapport += 'BILAN DE MI-SESSION\n';
+    rapport += '==============================================\n\n';
+
+    rapport += `${etudiant.prenom} ${etudiant.nom}\n`;
+    rapport += `${dateRapport}\n\n`;
+
+    // Message d'accueil personnalisé selon situation
+    if (risque < 20) {
+        rapport += `Bonjour ${etudiant.prenom},\n\n`;
+        rapport += `Ton parcours dans ce cours se déroule très bien ! Ce bilan de mi-session te permet de voir où tu en es et comment continuer sur cette belle lancée.\n\n`;
+    } else if (risque < 40) {
+        rapport += `Bonjour ${etudiant.prenom},\n\n`;
+        rapport += `Ce bilan de mi-session te permet de faire le point sur ton parcours. Tu as développé certaines forces, et il y a quelques aspects à consolider pour assurer ta réussite.\n\n`;
+    } else {
+        rapport += `Bonjour ${etudiant.prenom},\n\n`;
+        rapport += `Ce bilan de mi-session est une occasion de faire le point ensemble sur ton parcours. Des défis se présentent, mais avec un plan d'action clair et du soutien, tu peux les surmonter.\n\n`;
+    }
+
+    // SECTION : Participation et engagement
+    rapport += 'TA PARTICIPATION ET TON ENGAGEMENT\n';
+    rapport += '----------------------------------------------\n';
+
+    if (indices.A >= 95) {
+        rapport += `Assiduité : Excellente ! (${indices.A}%)\n`;
+        rapport += `Tu es présent·e de façon très régulière. Cette constance est un atout majeur pour ta réussite.\n\n`;
+    } else if (indices.A >= 80) {
+        rapport += `Assiduité : Bonne (${indices.A}%)\n`;
+        rapport += `Ta présence est généralement régulière. Continue sur cette voie !\n\n`;
+    } else if (indices.A >= 70) {
+        rapport += `Assiduité : Acceptable (${indices.A}%)\n`;
+        rapport += `Tu as manqué quelques cours (${detailsA.absences.length} absence(s)). Essaie d'améliorer ta présence pour la suite.\n\n`;
+    } else {
+        rapport += `Assiduité : Attention requise (${indices.A}%)\n`;
+        rapport += `Tes absences répétées (${detailsA.absences.length}) compromettent tes apprentissages. Il est important d'améliorer ta présence rapidement. Si tu rencontres des difficultés, n'hésite pas à en parler.\n\n`;
+    }
+
+    if (indices.C >= 90) {
+        rapport += `Remise des travaux : Excellente ! (${indices.C}%)\n`;
+        rapport += `Tu remets tes travaux de façon très régulière. Continue ainsi !\n\n`;
+    } else if (indices.C >= 70) {
+        rapport += `Remise des travaux : Bonne (${indices.C}%)\n`;
+        rapport += `Tu remets la majorité de tes travaux. Assure-toi de compléter tous les artefacts restants.\n\n`;
+    } else {
+        rapport += `Remise des travaux : À améliorer (${indices.C}%)\n`;
+        rapport += `Plusieurs travaux n'ont pas été remis. Il est essentiel de compléter tous les artefacts pour démontrer tes apprentissages. Besoin d'aide pour rattraper ? Viens me voir.\n\n`;
+    }
+
+    // SECTION : Performance et développement
+    rapport += 'TON DÉVELOPPEMENT DES COMPÉTENCES\n';
+    rapport += '----------------------------------------------\n';
+
+    if (indices.P >= 75) {
+        rapport += `Performance globale : ${indices.P}% - Tu maîtrises bien les compétences !\n\n`;
+    } else if (indices.P >= 65) {
+        rapport += `Performance globale : ${indices.P}% - Tes compétences sont en développement.\n\n`;
+    } else {
+        rapport += `Performance globale : ${indices.P}% - Tes compétences nécessitent un travail approfondi.\n\n`;
+    }
+
+    // Forces
+    if (diagnostic.forces.length > 0) {
+        rapport += `Tes forces (critères maîtrisés) :\n`;
+        diagnostic.forces.forEach((force, index) => {
+            rapport += `  • ${force.nom} : ${(force.score * 100).toFixed(0)}%\n`;
+        });
+        rapport += `\nCes forces sont précieuses ! Continue de les cultiver et appuie-toi dessus pour développer les autres aspects.\n\n`;
+    }
+
+    // Défis
+    if (diagnostic.defis.length > 0) {
+        rapport += `Aspects à développer :\n`;
+        diagnostic.defis.forEach((defi, index) => {
+            rapport += `  • ${defi.nom} : ${(defi.score * 100).toFixed(0)}%\n`;
+        });
+
+        if (diagnostic.principalDefi) {
+            rapport += `\nTon défi principal : ${diagnostic.principalDefi.nom}\n`;
+            rapport += `C'est sur cet aspect que tu devrais concentrer tes efforts. Je suis là pour t'accompagner dans cette amélioration.\n\n`;
+        } else {
+            rapport += '\n';
+        }
+    }
+
+    // SECTION : Progression
+    if (progression) {
+        rapport += 'TON ÉVOLUTION\n';
+        rapport += '----------------------------------------------\n';
+
+        if (progression.direction === '↗') {
+            rapport += `Bonne nouvelle : ta performance s'améliore ! (${progression.interpretation})\n`;
+            rapport += `Continue sur cette lancée, tes efforts portent leurs fruits.\n\n`;
+        } else if (progression.direction === '→') {
+            rapport += `Ta performance est stable. (${progression.interpretation})\n`;
+            rapport += `Pour progresser davantage, essaie de nouvelles stratégies d'apprentissage ou viens chercher des conseils.\n\n`;
+        } else if (progression.direction === '↘') {
+            rapport += `Ta performance a baissé récemment. (${progression.interpretation})\n`;
+            rapport += `Il est important d'inverser cette tendance. Viens me voir pour qu'on identifie ensemble les ajustements nécessaires.\n\n`;
+        }
+    }
+
+    // SECTION : Soutien reçu
+    if (interventions.length > 0) {
+        rapport += `SOUTIEN PÉDAGOGIQUE REÇU (${interventions.length} rencontre(s))\n`;
+        rapport += '----------------------------------------------\n';
+        interventions.forEach((intervention, index) => {
+            const date = new Date(intervention.date + 'T12:00:00');
+            const dateStr = date.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' });
+            const duree = intervention.duree || 2;
+            rapport += `• ${dateStr} - ${duree}h : ${intervention.titre || 'Soutien pédagogique'}\n`;
+        });
+        rapport += '\n';
+    }
+
+    // SECTION : Recommandations et prochaines étapes
+    rapport += 'POUR LA SUITE\n';
+    rapport += '----------------------------------------------\n';
+
+    // Recommandations personnalisées selon situation
+    if (risque >= 70) {
+        rapport += `Ta situation actuelle nécessite un suivi rapproché. Voici ce qu'on va mettre en place ensemble :\n\n`;
+        rapport += `1. Rencontre obligatoire avec ton aide pédagogique individuel (API) dans les prochains jours\n`;
+        rapport += `2. Plan d'action personnalisé avec échéancier précis\n`;
+        rapport += `3. Rencontres hebdomadaires de suivi avec moi\n`;
+        rapport += `4. Ressources d'aide disponibles (tutorat, centre d'aide, etc.)\n\n`;
+        rapport += `N'oublie pas : demander de l'aide est un signe de force, pas de faiblesse. Je suis là pour t'accompagner.\n\n`;
+
+    } else if (risque >= 40) {
+        rapport += `Pour assurer ta réussite, voici ce que je te recommande :\n\n`;
+        rapport += `1. Venir me voir en disponibilité pour discuter de tes défis\n`;
+        rapport += `2. Participer aux séances de soutien pédagogique offertes\n`;
+
+        if (diagnostic.principalDefi) {
+            rapport += `3. Travailler particulièrement le critère ${diagnostic.principalDefi.nom}\n`;
+        }
+
+        rapport += `4. Maintenir ta présence et ta remise des travaux\n\n`;
+        rapport += `Tu as les capacités de réussir. Avec quelques ajustements, tu peux y arriver !\n\n`;
+
+    } else if (risque >= 20) {
+        rapport += `Tu es sur la bonne voie ! Pour consolider ta réussite :\n\n`;
+        rapport += `1. Continue tes efforts de présence et de remise des travaux\n`;
+
+        if (diagnostic.principalDefi) {
+            rapport += `2. Porte attention au critère ${diagnostic.principalDefi.nom} pour progresser\n`;
+        }
+
+        rapport += `3. N'hésite pas à venir me voir si tu as des questions\n\n`;
+        rapport += `Tu as tout ce qu'il faut pour bien réussir ce cours !\n\n`;
+
+    } else {
+        rapport += `Excellent travail ! Pour maintenir ce niveau :\n\n`;
+        rapport += `1. Continue de cultiver tes forces\n`;
+        rapport += `2. Vise l'excellence en approfondissant encore tes compétences\n`;
+        rapport += `3. N'hésite pas à aider tes collègues qui en ont besoin\n\n`;
+        rapport += `Bravo pour ton engagement et ta persévérance !\n\n`;
+    }
+
+    // Message de clôture
+    rapport += '----------------------------------------------\n\n';
+    rapport += `Je reste disponible pour discuter de ce bilan avec toi. N'hésite surtout pas à venir me voir si tu as des questions ou besoin de clarifications.\n\n`;
+    rapport += `Bonne continuation !\n\n`;
+
+    rapport += '==============================================';
+
+    return rapport;
+}
+
+/**
+ * Génère l'interface de la section Rapport avec toggle et bouton copier
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {string} - HTML de la section
+ */
+function genererSectionRapport(da) {
+    const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
+    if (!etudiant) return '<p>Erreur : Étudiant non trouvé</p>';
+
+    return `
+        <div style="max-width: 900px;">
+            <!-- En-tête -->
+            <div style="background: var(--bleu-tres-pale); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--bleu-principal);">
+                <h3 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Rapport de bilan pédagogique</h3>
+                <p style="margin: 0; color: var(--bleu-moyen); font-size: 0.95rem;">
+                    Générez un rapport de bilan pour ${etudiant.prenom} ${etudiant.nom}. Deux versions sont disponibles selon le destinataire.
+                </p>
+            </div>
+
+            <!-- Sélecteur de version -->
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
+                <label style="font-weight: 600; color: var(--bleu-principal);">Version :</label>
+                <div style="display: flex; gap: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 16px; border-radius: 6px; background: var(--bleu-tres-pale); border: 2px solid var(--bleu-principal);">
+                        <input type="radio" name="version-rapport-${da}" value="api" checked onchange="genererEtAfficherRapport('${da}')">
+                        <span style="font-weight: 500;">Pour l'API</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 16px; border-radius: 6px; background: var(--bleu-tres-pale); border: 1px solid var(--bleu-pale);">
+                        <input type="radio" name="version-rapport-${da}" value="etudiant" onchange="genererEtAfficherRapport('${da}')">
+                        <span style="font-weight: 500;">Pour l'étudiant</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Description de la version -->
+            <div id="description-version-${da}" style="padding: 12px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; margin-bottom: 15px; font-size: 0.9rem;">
+                Version professionnelle et directe, avec alertes et recommandations pour l'aide pédagogique individuel.
+            </div>
+
+            <!-- Zone de texte du rapport -->
+            <div style="position: relative;">
+                <textarea id="textarea-rapport-${da}"
+                          readonly
+                          style="width: 100%; height: 600px; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.9rem; border: 2px solid var(--bleu-pale); border-radius: 6px; resize: vertical; line-height: 1.6; background: #f8f9fa;">Cliquez sur "Générer le rapport" pour afficher le contenu...</textarea>
+
+                <!-- Bouton copier (positionné en haut à droite) -->
+                <button id="btn-copier-rapport-${da}"
+                        onclick="copierRapport('${da}')"
+                        class="btn btn-secondaire"
+                        style="position: absolute; top: 10px; right: 10px; padding: 8px 16px; font-size: 0.9rem;"
+                        disabled>
+                    📋 Copier
+                </button>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-start;">
+                <button onclick="genererEtAfficherRapport('${da}')" class="btn btn-principal">
+                    ✨ Générer le rapport
+                </button>
+                <button onclick="viderRapport('${da}')" class="btn btn-secondaire">
+                    🗑️ Effacer
+                </button>
+            </div>
+
+            <!-- Note informative -->
+            <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; font-size: 0.9rem; color: var(--bleu-moyen);">
+                <strong>Note :</strong> Le rapport est généré à la demande avec les données actuelles.
+                Il n'est pas sauvegardé automatiquement. Utilisez le bouton "Copier" pour transférer le contenu
+                vers votre destination (courriel, formulaire web, document, etc.).
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Génère et affiche le rapport dans la zone de texte
+ * @param {string} da - Numéro DA
+ */
+function genererEtAfficherRapport(da) {
+    const textarea = document.getElementById(`textarea-rapport-${da}`);
+    const btnCopier = document.getElementById(`btn-copier-rapport-${da}`);
+    const descriptionDiv = document.getElementById(`description-version-${da}`);
+
+    if (!textarea) {
+        console.error('Textarea non trouvé');
+        return;
+    }
+
+    // Déterminer la version sélectionnée
+    const radioAPI = document.querySelector(`input[name="version-rapport-${da}"][value="api"]`);
+    const radioEtudiant = document.querySelector(`input[name="version-rapport-${da}"][value="etudiant"]`);
+
+    const estVersionAPI = radioAPI && radioAPI.checked;
+
+    // Mettre à jour la description
+    if (descriptionDiv) {
+        if (estVersionAPI) {
+            descriptionDiv.style.background = '#fff3cd';
+            descriptionDiv.style.borderLeft = '4px solid #ffc107';
+            descriptionDiv.innerHTML = 'Version professionnelle et directe, avec alertes et recommandations pour l\'aide pédagogique individuel.';
+        } else {
+            descriptionDiv.style.background = '#d1ecf1';
+            descriptionDiv.style.borderLeft = '4px solid #17a2b8';
+            descriptionDiv.innerHTML = 'Version bienveillante et encadrante, adaptée pour communiquer avec l\'étudiant (rétroaction formative).';
+        }
+    }
+
+    // Générer le rapport
+    let rapport = '';
+    try {
+        if (estVersionAPI) {
+            rapport = genererRapportAPI(da);
+        } else {
+            rapport = genererRapportEtudiant(da);
+        }
+    } catch (error) {
+        rapport = `Erreur lors de la génération du rapport :\n\n${error.message}`;
+        console.error('Erreur génération rapport:', error);
+    }
+
+    // Afficher le rapport
+    textarea.value = rapport;
+
+    // Activer le bouton copier
+    if (btnCopier) {
+        btnCopier.disabled = false;
+    }
+
+    console.log(`✅ Rapport ${estVersionAPI ? 'API' : 'étudiant'} généré pour DA ${da}`);
+}
+
+/**
+ * Copie le contenu du rapport dans le presse-papiers
+ * @param {string} da - Numéro DA
+ */
+function copierRapport(da) {
+    const textarea = document.getElementById(`textarea-rapport-${da}`);
+
+    if (!textarea || !textarea.value || textarea.value === 'Cliquez sur "Générer le rapport" pour afficher le contenu...') {
+        alert('Veuillez d\'abord générer un rapport avant de le copier.');
+        return;
+    }
+
+    // Copier dans le presse-papiers
+    textarea.select();
+
+    try {
+        // Méthode moderne (Clipboard API)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                afficherNotificationCopiee();
+            }).catch(err => {
+                // Fallback vers ancienne méthode
+                const success = document.execCommand('copy');
+                if (success) {
+                    afficherNotificationCopiee();
+                } else {
+                    alert('Erreur lors de la copie. Veuillez sélectionner le texte manuellement (Ctrl+A puis Ctrl+C).');
+                }
+            });
+        } else {
+            // Ancienne méthode pour navigateurs plus vieux
+            const success = document.execCommand('copy');
+            if (success) {
+                afficherNotificationCopiee();
+            } else {
+                alert('Erreur lors de la copie. Veuillez sélectionner le texte manuellement (Ctrl+A puis Ctrl+C).');
+            }
+        }
+    } catch (err) {
+        console.error('Erreur copie:', err);
+        alert('Erreur lors de la copie. Veuillez sélectionner le texte manuellement (Ctrl+A puis Ctrl+C).');
+    }
+
+    function afficherNotificationCopiee() {
+        // Créer notification temporaire
+        const notification = document.createElement('div');
+        notification.textContent = '✅ Rapport copié dans le presse-papiers !';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 6px;
+            font-weight: 600;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+        `;
+        document.body.appendChild(notification);
+
+        // Retirer après 3 secondes
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+}
+
+/**
+ * Vide le contenu du rapport
+ * @param {string} da - Numéro DA
+ */
+function viderRapport(da) {
+    const textarea = document.getElementById(`textarea-rapport-${da}`);
+    const btnCopier = document.getElementById(`btn-copier-rapport-${da}`);
+
+    if (textarea) {
+        textarea.value = 'Cliquez sur "Générer le rapport" pour afficher le contenu...';
+    }
+
+    if (btnCopier) {
+        btnCopier.disabled = true;
+    }
+}
