@@ -5,6 +5,75 @@
 **Version cible** : Beta 0.90
 **Délai estimé** : 2-3 semaines (mi-novembre 2025)
 **Objectif principal** : Suivi longitudinal et consolidation fonctionnalités Phase 1
+**Nouvelle décision** : Intégration de Chart.js pour graphiques professionnels
+
+---
+
+## 📊 DÉCISION TECHNIQUE : Intégration de Chart.js
+
+### Contexte
+
+Après analyse des besoins de visualisation (graphiques évolution, aires empilées, trajectoires multiples), **la décision a été prise d'intégrer Chart.js** pour accélérer le développement et améliorer la qualité des graphiques.
+
+### Chart.js - Caractéristiques
+
+- **Licence** : MIT (gratuit, open source, compatible CC BY-NC-SA)
+- **Taille** : ~200 KB (chart.min.js minifié)
+- **Installation** : Fichier téléchargé localement (pas de CDN, fonctionne hors ligne)
+- **Communauté** : 41,000+ stars GitHub, 200+ contributeurs
+- **Site officiel** : https://www.chartjs.org/
+
+### Avantages pour le projet
+
+- ✅ **Gain de temps** : 10-15 jours de dev → 2-3 jours pour graphiques complexes
+- ✅ **Qualité professionnelle** : Graphiques similaires à Numbers/Excel
+- ✅ **Fonctionnalités incluses** : Tooltips, zoom, export PNG, animations, responsive
+- ✅ **Maintenance** : Bugs corrigés par la communauté (millions d'utilisateurs)
+- ✅ **Autonomie préservée** : Fichier local, aucune dépendance internet
+- ✅ **Open source** : Code source public, auditable, modifiable
+
+### Impact sur l'architecture
+
+**Avant (Beta 0.89)** :
+```
+index 89.html
+├── js/config.js
+├── js/navigation.js
+├── js/main.js
+└── ... (27 modules)
+```
+
+**Après (Beta 0.90)** :
+```
+index 90.html
+├── libs/chart.min.js  ← NOUVEAU (téléchargé une fois)
+├── js/config.js
+├── js/navigation.js
+├── js/main.js
+├── js/snapshots.js    ← NOUVEAU (gestion snapshots)
+├── js/graphiques.js   ← NOUVEAU (utilise Chart.js)
+└── ... (27 modules existants)
+```
+
+### Graphiques maintenant possibles
+
+Avec Chart.js, on peut reproduire **tous les graphiques** du tableur Numbers :
+
+1. ✅ **Évolution performance** : Zones colorées IDME + trajectoires multiples (spaghetti chart)
+2. ✅ **Évolution indices** : Aires empilées avec 7 indices (A, C, P, Mobilisation, etc.)
+3. ✅ **Comparaison SOM vs PAN** : Courbes simples avec lignes de tendance pointillées
+4. ✅ **Risque d'échec individuel** : Trajectoires individuelles à travers zones de risque
+5. ✅ **Export PNG** : Sauvegarder graphiques pour rapports/présentations
+
+### Calendrier révisé
+
+**Beta 0.90** (mi-novembre) :
+- Graphiques simples A-C-P avec Chart.js (2 jours au lieu de 5)
+- Temps gagné réinvesti dans snapshots et cartouches
+
+**Beta 0.95** (décembre) :
+- Graphiques avancés (aires empilées, zones colorées, trajectoires multiples)
+- Tous les graphiques Numbers reproduits
 
 ---
 
@@ -398,6 +467,61 @@ La Beta 0.90 marque une étape cruciale vers la version 1.0 en ajoutant la **dim
 
 ## 📂 Nouveaux fichiers à créer
 
+### libs/chart.min.js (librairie externe)
+
+**Source** : https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js
+
+**Installation** :
+1. Télécharger chart.min.js depuis le site officiel ou CDN
+2. Placer dans nouveau dossier `libs/` à la racine du projet
+3. Inclure dans index 90.html : `<script src="libs/chart.min.js"></script>`
+
+**Taille** : ~200 KB (minifié)
+**Licence** : MIT (open source)
+
+### js/graphiques.js (nouveau module)
+
+**Rôle** : Création et gestion de tous les graphiques de l'application avec Chart.js.
+
+**Fonctions principales** :
+- `creerGraphiqueEvolutionACP(da, conteneurId)` : Graphique évolution A-C-P (3 courbes)
+- `creerGraphiqueRisque(da, conteneurId)` : Courbe risque d'échec 1-(A×C×P)
+- `creerGraphiqueSRPNF(da, conteneurId)` : Barres performance par critère
+- `creerGraphiqueComparaisonSomPan(conteneurId)` : Comparaison groupe SOM vs PAN
+- `creerGraphiqueSpaghetti(conteneurId, type)` : Trajectoires multiples (performance/risque)
+- `creerGraphiqueAiresEmpilees(conteneurId)` : Aires empilées 7 indices
+- `ajouterMarqueurIntervention(chartInstance, date, label)` : Marqueur événement sur graphique
+- `exporterGraphiquePNG(chartInstance, filename)` : Export image PNG
+
+**Configuration Chart.js commune** :
+```javascript
+const configBase = {
+  responsive: true,
+  maintainAspectRatio: false,
+  locale: 'fr-CA',
+  plugins: {
+    legend: { display: true, position: 'top' },
+    tooltip: { enabled: true, mode: 'index', intersect: false },
+    title: { display: true, font: { size: 16 } }
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      max: 100,
+      ticks: { callback: (value) => value + '%' }
+    }
+  }
+};
+```
+
+**Exports** :
+```javascript
+window.creerGraphiqueEvolutionACP = creerGraphiqueEvolutionACP;
+window.creerGraphiqueRisque = creerGraphiqueRisque;
+window.exporterGraphiquePNG = exporterGraphiquePNG;
+// ... autres exports
+```
+
 ### js/snapshots.js (nouveau module)
 
 **Rôle** : Gestion centralisée de tous les snapshots (interventions et hebdomadaires).
@@ -517,6 +641,20 @@ window.obtenirSnapshotsEtudiant = obtenirSnapshotsEtudiant;
   - ✅ Vérifier : Pas de page blanche, message erreur explicite affiché
   - ✅ Vérifier : Bouton "Retour à la liste" fonctionnel
 
+### Tests graphiques Chart.js
+
+- [ ] **Test 15** : Visualiser profil étudiant avec 8 semaines de snapshots
+  - ✅ Vérifier : Graphique évolution A-C-P s'affiche correctement
+  - ✅ Vérifier : 3 courbes colorées (A bleu foncé, C bleu moyen, P vert)
+  - ✅ Vérifier : Tooltips affichent valeurs au survol
+  - ✅ Vérifier : Légende affichée avec labels clairs
+  - ✅ Vérifier : Axe Y en pourcentages (0-100%), axe X avec semaines
+
+- [ ] **Test 16** : Export graphique PNG
+  - ✅ Clic sur bouton "Exporter PNG"
+  - ✅ Vérifier : Fichier téléchargé avec nom approprié
+  - ✅ Vérifier : Image de qualité suffisante pour rapport
+
 ---
 
 ## 📅 Calendrier de développement
@@ -549,14 +687,17 @@ window.obtenirSnapshotsEtudiant = obtenirSnapshotsEtudiant;
 
 ### Semaine 3 (18-24 novembre)
 
-**Focus** : Correctifs bugs + Tests finaux + Documentation
+**Focus** : Graphiques Chart.js + Correctifs bugs + Documentation
 
-- [ ] **Jour 1** : Script migration anciennes évaluations
-- [ ] **Jour 2** : Correctif bug page blanche (try-catch + fallback)
-- [ ] **Jour 3-4** : Tests utilisateurs complets (tous scénarios)
+- [ ] **Jour 1** : Installation Chart.js + module graphiques.js (squelette)
+- [ ] **Jour 2** : Graphique évolution A-C-P dans profil étudiant
+- [ ] **Jour 3** : Script migration anciennes évaluations + correctif page blanche
+- [ ] **Jour 4** : Tests utilisateurs complets (tous scénarios)
 - [ ] **Jour 5** : Documentation (`NOTES_VERSION_0.90.md`, `GUIDE_TESTEURS.md`)
 
 **Livrables semaine 3** :
+- ✅ Chart.js intégré et opérationnel
+- ✅ Graphique évolution A-C-P fonctionnel
 - ✅ Tous bugs Beta 89 corrigés
 - ✅ Documentation complète Beta 90
 - ✅ Package distribution `Monitorage_Beta_0.90.zip`
@@ -567,25 +708,28 @@ window.obtenirSnapshotsEtudiant = obtenirSnapshotsEtudiant;
 
 ### Fonctionnalités essentielles (must-have)
 
-- ✅ **Snapshots interventions** : Capture automatique lors "Marquer comme terminée" ✅
-- ✅ **Analyse impact** : Tableau comparatif avant/après intervention ✅
-- ✅ **Snapshots hebdomadaires** : Capture manuelle fonctionnelle ✅
-- ✅ **Évolution temporelle** : Visualisation 8 dernières semaines dans profil étudiant ✅
-- ✅ **Reconstruction rétroactive** : Interface + logique de reconstruction ✅
-- ✅ **Bugs Beta 89 corrigés** : Migration niveaux + page blanche ✅
+- ✅ **Snapshots interventions** : Capture automatique lors "Marquer comme terminée"
+- ✅ **Analyse impact** : Tableau comparatif avant/après intervention
+- ✅ **Snapshots hebdomadaires** : Capture manuelle fonctionnelle
+- ✅ **Évolution temporelle** : Graphique Chart.js évolution A-C-P (8 dernières semaines)
+- ✅ **Reconstruction rétroactive** : Interface + logique de reconstruction
+- ✅ **Chart.js intégré** : Librairie installée et module graphiques.js opérationnel
+- ✅ **Bugs Beta 89 corrigés** : Migration niveaux + page blanche
 
 ### Fonctionnalités souhaitables (nice-to-have)
 
 - 🟡 **Cartouches contextuels** : Intégration dans formulaire évaluation
-- 🟡 **Détection patterns** : Décrochage, rebond, instabilité
+- 🟡 **Détection patterns** : Décrochage, rebond, instabilité (avec indicateurs visuels)
+- 🟡 **Export PNG** : Sauvegarder graphiques pour rapports
 - 🟡 **Recommandations SA** : Intégration statut SA dans recommandations
 
 ### Métriques de qualité
 
 - ⚡ **Performance** : Reconstruction 10 semaines < 5 secondes
+- ⚡ **Graphiques** : Rendu < 1 seconde pour 8 semaines de données
 - 🛡️ **Robustesse** : Aucune erreur console lors des tests
 - 📚 **Documentation** : Notes techniques complètes + guide testeurs
-- ✅ **Tests** : 14 scénarios validés avec succès
+- ✅ **Tests** : 16 scénarios validés avec succès (incluant 2 tests Chart.js)
 
 ---
 
@@ -617,15 +761,58 @@ window.obtenirSnapshotsEtudiant = obtenirSnapshotsEtudiant;
 ### Prochaine version (Beta 0.95 - décembre 2025)
 
 **Priorités PHASE 2** :
-1. **Matrice d'évaluation complète** : Formulaire évaluation avec grille SRPNF interactive
-2. **Graphiques évolution avancés** : SVG custom avec zoom, export PNG
-3. **Gestion présences avancée** : Statuts granulaires, motifs, justifications
+
+1. **Graphiques avancés Chart.js** (2-3 jours grâce à Chart.js)
+   - Aires empilées : Évolution des 7 indices (A, C, P, Mobilisation, Engagement, Rendement, Risque)
+   - Spaghetti chart : Trajectoires multiples performance/risque (tous étudiants sur un graphique)
+   - Zones colorées IDME : Background avec niveaux Insuffisant/Réussite/Étendu
+   - Comparaison SOM vs PAN : Courbes avec lignes de tendance pointillées
+   - Marqueurs d'événements : Interventions RàI, jetons utilisés sur timeline
+   - Export PNG haute qualité : Pour rapports et présentations
+
+2. **Matrice d'évaluation complète** (8-10 jours)
+   - Formulaire évaluation avec grille SRPNF interactive
+   - Sélection niveaux par clic (radio buttons visuels)
+   - Calcul automatique score pondéré en temps réel
+   - Intégration cartouches contextuels par critère
+
+3. **Gestion présences avancée** (4-5 jours)
+   - Statuts granulaires (Présent, Absent, Retard, Départ anticipé, Justifié)
+   - Motifs configurables et justifications
+   - Export PDF liste présences pour signature
+
+**Estimation PHASE 2** : 3-4 semaines (au lieu de 6-8 semaines grâce à Chart.js)
 
 Voir `PLAN_DE_MATCH_2025-10-30.md` pour roadmap complète vers version 1.0.
 
 ---
 
 **Plan créé par** : Claude Code
-**Date** : 4 novembre 2025
+**Date de création** : 4 novembre 2025
+**Date révision Chart.js** : 4 novembre 2025 (intégration Chart.js décidée)
 **Prochaine révision** : Fin Beta 0.90 (mi-novembre 2025)
 **Contact** : labo@codexnumeris.org
+
+---
+
+## 📌 Historique des révisions
+
+### 4 novembre 2025 - Révision 2 : Intégration Chart.js
+
+**Décision majeure** : Adoption de Chart.js pour graphiques professionnels
+
+**Changements** :
+- ✅ Ajout section "DÉCISION TECHNIQUE : Intégration de Chart.js"
+- ✅ Nouveau fichier : `libs/chart.min.js` (librairie MIT)
+- ✅ Nouveau module : `js/graphiques.js` (8 fonctions graphiques)
+- ✅ Calendrier révisé : Semaine 3 inclut développement graphiques
+- ✅ Tests ajoutés : Test 15 (graphique A-C-P), Test 16 (export PNG)
+- ✅ Critères succès mis à jour : Chart.js intégré comme critère essentiel
+- ✅ PHASE 2 accélérée : 3-4 semaines au lieu de 6-8 semaines
+
+**Gain estimé** : ~10 jours de développement sur l'ensemble du projet
+
+### 4 novembre 2025 - Révision 1 : Plan initial
+
+**Objectif** : Système de snapshots et suivi longitudinal
+**Priorités** : Snapshots interventions, snapshots hebdomadaires, reconstruction rétroactive, cartouches contextuels
