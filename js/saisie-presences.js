@@ -1582,14 +1582,19 @@ function mettreAJourCompteurPresences() {
         }
     }
 
+    // Calculer l'assiduité aujourd'hui
+    const tauxAssiduiteAujourdhui = nbTotal > 0 ? Math.round((nbPresents / nbTotal) * 100) : 0;
+
     // Mettre à jour les compteurs dans le DOM
     const spanPresents = document.getElementById('nb-presents');
     const spanAbsents = document.getElementById('nb-absents');
     const spanTotal = document.getElementById('nb-total');
+    const spanAssiduiteAujourdhui = document.getElementById('assiduite-aujourdhui');
 
     if (spanPresents) spanPresents.textContent = nbPresents;
     if (spanAbsents) spanAbsents.textContent = nbAbsents;
     if (spanTotal) spanTotal.textContent = nbTotal;
+    if (spanAssiduiteAujourdhui) spanAssiduiteAujourdhui.textContent = tauxAssiduiteAujourdhui + '%';
 }
 
 window.tousPresents = tousPresents;
