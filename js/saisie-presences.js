@@ -118,14 +118,16 @@ function calculerAssiduiteSommative(da) {
             }
         } else {
             // L'étudiant n'a pas d'entrée pour cette date
-            // Vérifier si c'était une séance facultative pour tout le monde
+            // Vérifier si cette date correspond à une séance facultative (intervention RàI)
             const presencesDate = presences.filter(p => p.date === date);
-            const tousAbsentsFacultatif = presencesDate.every(p => p.facultatif === true && (p.heures || 0) === 0);
+            const estSeanceFacultative = presencesDate.length > 0 &&
+                                         presencesDate.every(p => p.facultatif === true);
 
-            if (!tousAbsentsFacultatif) {
-                // Séance normale : compte au dénominateur (0 au numérateur)
+            if (!estSeanceFacultative) {
+                // Séance normale obligatoire : compte au dénominateur (0 au numérateur)
                 totalHeuresDonnees += 2;
             }
+            // Si séance facultative : on ne fait rien (ni numérateur ni dénominateur)
         }
     });
 
@@ -212,14 +214,16 @@ function calculerAssiduiteAlternative(da) {
             }
         } else {
             // L'étudiant n'a pas d'entrée pour cette date
-            // Vérifier si c'était une séance facultative pour tout le monde
+            // Vérifier si cette date correspond à une séance facultative (intervention RàI)
             const presencesDate = presences.filter(p => p.date === date);
-            const tousAbsentsFacultatif = presencesDate.every(p => p.facultatif === true && (p.heures || 0) === 0);
+            const estSeanceFacultative = presencesDate.length > 0 &&
+                                         presencesDate.every(p => p.facultatif === true);
 
-            if (!tousAbsentsFacultatif) {
-                // Séance normale : compte au dénominateur (0 au numérateur)
+            if (!estSeanceFacultative) {
+                // Séance normale obligatoire : compte au dénominateur (0 au numérateur)
                 totalHeuresDonnees += 2;
             }
+            // Si séance facultative : on ne fait rien (ni numérateur ni dénominateur)
         }
     });
 
