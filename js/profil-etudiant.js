@@ -1631,10 +1631,14 @@ function obtenirDetailsAssiduite(da) {
     const presences = obtenirDonneesSelonMode('presences') || [];
 
     // Obtenir toutes les dates uniques pour lesquelles une saisie a été faite
+    // IMPORTANT : Exclure les séances facultatives (interventions RàI) du décompte
     const datesSaisies = new Set();
     presences.forEach(p => {
         if (p.da === da && p.heures !== null && p.heures !== undefined) {
-            datesSaisies.add(p.date);
+            // Ne compter que les séances NON facultatives
+            if (p.facultatif !== true) {
+                datesSaisies.add(p.date);
+            }
         }
     });
 
@@ -1652,6 +1656,12 @@ function obtenirDetailsAssiduite(da) {
     // Pour chaque date avec saisie
     datesSaisies.forEach(dateCours => {
         const presenceEleve = presences.find(p => p.da === da && p.date === dateCours);
+
+        // IMPORTANT : Ignorer les séances facultatives (interventions RàI)
+        // Ces séances ne doivent JAMAIS apparaître comme absences, même si l'étudiant n'y a pas participé
+        if (presenceEleve && presenceEleve.facultatif === true) {
+            return; // Passer à la séance suivante
+        }
 
         if (!presenceEleve || presenceEleve.heures === null || presenceEleve.heures === undefined) {
             // Absence totale (aucun enregistrement ou heures null)
