@@ -5113,7 +5113,7 @@ function genererRapportAPI(da) {
     const pattern = determinerPattern(indices.A / 100, indices.C / 100, indices.P / 100, moyennes);
     const risque = indices.R;
     const niveauRai = determinerNiveauRaI(risque);
-    const progression = calculerProgression(da);
+    const progression = calculerProgressionEleve(da);
     const interventions = typeof obtenirInterventionsEtudiant === 'function'
         ? obtenirInterventionsEtudiant(da).filter(i => i.statut === 'completee')
         : [];
@@ -5311,7 +5311,7 @@ function genererRapportEtudiant(da) {
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
     const pattern = determinerPattern(indices.A / 100, indices.C / 100, indices.P / 100, moyennes);
     const risque = indices.R;
-    const progression = calculerProgression(da);
+    const progression = calculerProgressionEleve(da);
     const interventions = typeof obtenirInterventionsEtudiant === 'function'
         ? obtenirInterventionsEtudiant(da).filter(i => i.statut === 'completee')
         : [];
