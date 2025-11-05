@@ -42,7 +42,7 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 
 ```
 projet/
-├── index 89 (correctif échelles).html       # Point d'entrée actuel (Beta 89)
+├── index 90 (snapshots).html                # Point d'entrée actuel (Beta 90)
 ├── css/
 │   └── styles.css                        # Styles globaux + variables CSS pratiques
 ├── js/
@@ -609,7 +609,42 @@ localStorage.seancesCompletes             // horaire.js (futur)
   - Page blanche occasionnelle lors chargement depuis liste (en investigation)
 - ✅ **Documentation** : `NOTES_VERSION_0.89.md`
 
-### 🔴 Prochaines priorités (PHASE 1 : Consolidation)
+**CRÉATION BETA 0.90 ET INTÉGRATION CHART.JS** (Session 5 novembre - Beta 90)
+- ✅ **Fichier** : `index 90 (snapshots).html` - Version Beta 90
+- ✅ **Création par duplication** : Beta 89 → Beta 90
+  - Titre : "Snapshots et suivi longitudinal"
+  - Date : 5 novembre 2025
+  - Cache buster CSS mis à jour : v=2025110500
+  - Beta 89 archivée dans Archives/
+- ✅ **Décision technique majeure : Intégration Chart.js**
+  - Librairie MIT open source pour graphiques professionnels
+  - Taille : ~200 KB (chart.min.js)
+  - Installation locale (pas de CDN, fonctionne hors ligne)
+  - Gain estimé : ~10 jours de développement
+  - Permet reproduction graphiques Numbers (aires empilées, spaghetti charts, zones colorées)
+- ✅ **Plan de match Beta 90** : `PLAN_BETA_0.90.md` (819 lignes)
+  - Système de snapshots interventions (capture données à complétion)
+  - Snapshots hebdomadaires (portrait complet chaque semaine)
+  - Reconstruction rétroactive (recalcul semaines passées)
+  - Graphiques évolution A-C-P avec Chart.js
+  - Cartouches contextuels dans formulaire évaluation
+  - Correctifs bugs Beta 89 (migration niveaux "--", page blanche)
+- ✅ **Calendrier** : 3 semaines (5-24 novembre 2025)
+  - Semaine 1 : Snapshots interventions + hebdomadaires
+  - Semaine 2 : Reconstruction rétroactive + cartouches
+  - Semaine 3 : Chart.js + correctifs + documentation
+- ✅ **Nouveaux fichiers prévus** :
+  - libs/chart.min.js (librairie externe)
+  - js/snapshots.js (gestion snapshots)
+  - js/graphiques.js (8 fonctions Chart.js)
+- ✅ **Modifications terminologie RàI** :
+  - Niveau 1 (Universel) : "suivi régulier en classe"
+  - Niveau 2 (Préventif) : renommage "Ciblé" → "Préventif", "interventions préventives en classe"
+  - Niveau 3 (Intensif) : "interventions intensives individuelles hors classe"
+  - Fichiers modifiés : index 89, tableau-bord-apercu.js
+- ✅ **Impact PHASE 2 accélérée** : 3-4 semaines au lieu de 6-8 (grâce à Chart.js)
+
+### 🔴 Prochaines priorités (PHASE 1 : Consolidation - Beta 90)
 
 **Objectif PHASE 1** : Finaliser fonctionnalités partiellement implémentées
 **Score cible fin PHASE 1** : 82% de complétude
@@ -643,7 +678,7 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 ```bash
 # Test local
-open "index 89 (correctif échelles).html"   # macOS
+open "index 90 (snapshots).html"   # macOS
 
 # Voir localStorage dans console Safari
 localStorage.getItem('calendrierComplet')
