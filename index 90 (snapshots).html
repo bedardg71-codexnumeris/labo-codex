@@ -3197,15 +3197,18 @@
                             </div>
 
                             <!-- Compteur présents/absents -->
-                            <div id="compteur-presences" style="background: var(--bleu-tres-pale); padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; display: flex; justify-content: center; gap: 30px; font-size: 0.95rem; font-weight: 500; border-left: 4px solid var(--bleu-principal);">
-                                <span style="color: var(--btn-confirmer);">
-                                    ✓ Présents : <span id="nb-presents">0</span>
+                            <div id="compteur-presences" style="background: var(--bleu-tres-pale); padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; display: flex; justify-content: center; gap: 30px; font-size: 0.95rem; font-weight: 500; border-left: 4px solid var(--bleu-principal); color: var(--bleu-moyen);">
+                                <span>
+                                    Présents : <span id="nb-presents">0</span>
                                 </span>
-                                <span style="color: var(--btn-annuler);">
-                                    ✗ Absents : <span id="nb-absents">0</span>
+                                <span>
+                                    Absents : <span id="nb-absents">0</span>
                                 </span>
-                                <span style="color: var(--bleu-moyen);">
+                                <span>
                                     Total : <span id="nb-total">0</span>
+                                </span>
+                                <span>
+                                    Assiduité aujourd'hui : <span id="assiduite-aujourdhui">0%</span>
                                 </span>
                             </div>
 
@@ -8378,7 +8381,7 @@ Exemple :
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
     <script src="js/interpretation-config.js"></script>
     <script src="js/portfolio.js"></script>
-    <script src="js/saisie-presences.js?v=1762356908"></script>
+    <script src="js/saisie-presences.js?v=1762357433"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js"></script>
