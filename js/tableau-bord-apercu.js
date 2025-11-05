@@ -833,9 +833,9 @@ function afficherNiveauxRaI(etudiants) {
     // Générer les cartes avec valeurs colorées
     const html = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 15px;">
-            ${genererCarteRaI('Niveau 1 (Universel)', 'Suivi régulier', somPct1, panPct1, somNiveau1, panNiveau1, afficherSom, afficherPan, 'var(--alerte-fond-succes)', 'var(--btn-confirmer)')}
-            ${genererCarteRaI('Niveau 2 (Ciblé)', 'Interventions ciblées', somPct2, panPct2, somNiveau2, panNiveau2, afficherSom, afficherPan, '#fff9e6', '#f57c00')}
-            ${genererCarteRaI('Niveau 3 (Intensif)', 'Interventions intensives', somPct3, panPct3, somNiveau3, panNiveau3, afficherSom, afficherPan, 'var(--alerte-fond-attention)', 'var(--btn-annuler)')}
+            ${genererCarteRaI('Niveau 1 (Universel)', 'Suivi régulier en classe', somPct1, panPct1, somNiveau1, panNiveau1, afficherSom, afficherPan, 'var(--alerte-fond-succes)', 'var(--btn-confirmer)')}
+            ${genererCarteRaI('Niveau 2 (Préventif)', 'Interventions ciblées préventives en classe', somPct2, panPct2, somNiveau2, panNiveau2, afficherSom, afficherPan, '#fff9e6', '#f57c00')}
+            ${genererCarteRaI('Niveau 3 (Intensif)', 'Interventions intensives individuelles hors classe', somPct3, panPct3, somNiveau3, panNiveau3, afficherSom, afficherPan, 'var(--alerte-fond-attention)', 'var(--btn-annuler)')}
         </div>
     `;
 
