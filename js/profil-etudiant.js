@@ -5129,48 +5129,46 @@ function genererRapportAPI(da) {
     // Interprétation du risque
     const interpRisque = interpreterRisque(risque);
 
-    // Construire le rapport
+    // Construire le rapport (format narratif et compact)
     let rapport = '';
     rapport += `BILAN PÉDAGOGIQUE en ${nomCours}\n`;
     rapport += `En date du ${dateRapport}\n\n`;
 
-    // IDENTIFICATION (format compact)
-    rapport += 'IDENTIFICATION\n';
+    // SYNTHÈSE DES OBSERVATIONS
+    rapport += 'SYNTHÈSE DES OBSERVATIONS\n';
     rapport += `${etudiant.prenom}, ${etudiant.nom} (DA : ${etudiant.da})\n\n`;
 
-    // SECTION B : Synthèse des indices
-    rapport += 'SYNTHÈSE DES INDICES\n';
-    rapport += '----------------------------------------------\n';
-    rapport += `Assiduité (A) : ${indices.A}% - ${interpreterAssiduite(indices.A).niveau}\n`;
-    rapport += `  → ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes\n`;
-    rapport += `  → ${detailsA.absences.length} absence(s) ou retard(s)\n\n`;
+    // Assiduité (format narratif)
+    const interpA = interpreterAssiduite(indices.A);
+    rapport += `${interpA.niveau} (${indices.A}%) \n`;
+    rapport += `    → ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes\n`;
+    rapport += `    → ${detailsA.absences.length} absence(s) ou retard(s)\n\n`;
 
-    rapport += `Complétion (C) : ${indices.C}% - ${interpreterCompletion(indices.C).niveau}\n`;
+    // Complétion (format narratif)
+    const interpC = interpreterCompletion(indices.C);
     const productions = obtenirDonneesSelonMode('productions') || [];
     const artefacts = productions.filter(p => p.type === 'artefact-portfolio');
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const nbRemis = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId).length;
-    rapport += `  → ${nbRemis} artefact(s) remis / ${artefacts.length} total\n\n`;
+    rapport += `${interpC.niveau} (${indices.C}%)\n`;
+    rapport += `    → ${nbRemis} artefact(s) remis / ${artefacts.length} total\n\n`;
 
-    rapport += `Performance (P) : ${indices.P}% - ${interpreterPerformance(indices.P).niveau}\n\n`;
+    // Performance (format narratif avec mention PAN)
+    const interpP = interpreterPerformance(indices.P);
+    rapport += `Performance de niveau "${interpP.niveau}" : moyenne PAN ${indices.P}%\n\n`;
 
-    rapport += `Risque d'échec (R) : ${risque.toFixed(2)} - ${interpRisque.niveau}\n\n`;
+    // Risque d'échec
+    rapport += `Risque d'échec ${interpRisque.niveau} (${risque.toFixed(2)})\n\n`;
 
-    // TENDANCES ET PROGRESSION
-    rapport += 'TENDANCES ET PROGRESSION\n';
-    rapport += '----------------------------------------------\n';
+    // Tendances et progression (format compact)
     if (progression) {
         rapport += `Direction du risque : ${progression.direction} ${progression.interpretation}\n`;
-        rapport += `Performance récente : ${progression.AM} (vs ${progression.AL} antérieur)\n\n`;
-    } else {
-        rapport += `Données insuffisantes pour analyse de tendance\n\n`;
+        rapport += `  Performance récente : ${progression.AM} (vs ${progression.AL} antérieur)\n\n`;
     }
 
-    // INTERVENTIONS RÀI COMPLÉTÉES
+    // Interventions RàI avec observations
     if (interventions.length > 0) {
-        rapport += `INTERVENTIONS RÀI COMPLÉTÉES (${interventions.length})\n`;
-        rapport += '----------------------------------------------\n';
-        interventions.forEach((intervention, index) => {
+        interventions.forEach((intervention) => {
             const date = new Date(intervention.date + 'T12:00:00');
             const dateStr = date.toLocaleDateString('fr-CA', {
                 weekday: 'short',
@@ -5179,17 +5177,23 @@ function genererRapportAPI(da) {
                 year: 'numeric'
             });
             const niveau = intervention.niveauRai || 'N/A';
-            const duree = intervention.duree || 2;
-            rapport += `${index + 1}. ${dateStr} - Niveau ${niveau} - ${duree}h\n`;
-            rapport += `   Titre : ${intervention.titre || 'Sans titre'}\n`;
-        });
-        rapport += '\n';
-    }
 
-    // OBSERVATION DE L'ENSEIGNANT (zone vide pour notes manuelles)
-    rapport += 'OBSERVATION DE L\'ENSEIGNANT\n';
-    rapport += '----------------------------------------------\n';
-    rapport += '\n\n';
+            // Format simplifié sur une ligne
+            rapport += `Intervention niveau ${niveau} le ${dateStr}\n`;
+
+            // Observation : priorité à la note individuelle, sinon observation générale
+            let observation = '';
+            if (intervention.notesIndividuelles && intervention.notesIndividuelles[da]) {
+                observation = intervention.notesIndividuelles[da];
+            } else if (intervention.observations) {
+                observation = intervention.observations;
+            } else {
+                observation = '(aucune observation notée)';
+            }
+
+            rapport += `Observation de l'enseignant : ${observation}\n\n`;
+        });
+    }
 
     return rapport;
 }
