@@ -561,7 +561,8 @@ function interpreterAssiduite(valeur) {
 }
 
 /**
- * Génère le HTML de la section Mobilisation (fusion A + C, retrait E)
+ * Génère le HTML de la section Engagement (E = A × C × P)
+ * Structure en 3 colonnes: Assiduité, Complétion, Performance
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */
@@ -569,9 +570,9 @@ function genererSectionMobilisationEngagement(da) {
     const indices = calculerTousLesIndices(da);
     const A = indices.A / 100;
     const C = indices.C / 100;
-    const interpM = interpreterMobilisation(A, C);
+    const interpE = interpreterEngagement(indices.E);
 
-    // Récupérer les données pour les deux sections
+    // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
     const tauxA = detailsA.heuresOffertes > 0
         ? (detailsA.heuresPresentes / detailsA.heuresOffertes * 100).toFixed(1)
@@ -686,6 +687,13 @@ function genererSectionMobilisationEngagement(da) {
     const artefactsAvecJetonReprise = evaluationsAvecJetonReprise.map(e => e.productionNom || 'Artefact inconnu');
     const artefactsAvecJetonDelai = evaluationsAvecJetonDelai.map(e => e.productionNom || 'Artefact inconnu');
 
+    // Calculer la moyenne des 3 meilleurs pour affichage en P
+    const artefactsRetenus = artefacts.filter(a => a.retenu);
+    const moyenneP = artefactsRetenus.length > 0
+        ? Math.round(artefactsRetenus.reduce((sum, a) => sum + (a.note || 0), 0) / artefactsRetenus.length)
+        : 0;
+    const interpP = interpreterPerformance(moyenneP);
+
     return `
         <!-- Détails des calculs (masqué par défaut) -->
         <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle" style="display: none;">
@@ -704,17 +712,36 @@ function genererSectionMobilisationEngagement(da) {
                         ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
                     </div>
 
-                    <div class="details-calculs-label">Mobilisation (M):</div>
+                    <div class="details-calculs-label">Performance (P):</div>
                     <div class="details-calculs-valeur">
-                        Formule: M = (A + C) / 2<br>
-                        M = (${indices.A} + ${indices.C}) / 2 = <strong>${indices.M}</strong>
+                        Indice P = ${moyenneP}%<br>
+                        Moyenne des ${nbRetenus} meilleurs artefacts
+                    </div>
+
+                    <div class="details-calculs-label">Engagement (E):</div>
+                    <div class="details-calculs-valeur">
+                        Formule: E = A × C × P<br>
+                        E = ${(A).toFixed(2)} × ${(C).toFixed(2)} × ${(moyenneP / 100).toFixed(2)} = <strong>${(A * C * (moyenneP / 100)).toFixed(3)}</strong>
+                    </div>
+
+                    <div class="details-calculs-label">Risque (R):</div>
+                    <div class="details-calculs-valeur">
+                        Formule: R = 1 - E<br>
+                        R = 1 - ${(A * C * (moyenneP / 100)).toFixed(3)} = <strong>${(1 - A * C * (moyenneP / 100)).toFixed(3)}</strong><br>
+                        <br>
+                        Le risque d'échec est <strong>inversement proportionnel</strong> à l'engagement global.<br>
+                        Engagement actuel : <strong>${(() => {
+                            const E_calc = A * C * (moyenneP / 100);
+                            const interpE_calc = interpreterEngagement(E_calc);
+                            return `<span style="color: ${interpE_calc.couleur};">${interpE_calc.niveau}</span>`;
+                        })()}</strong>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- GRILLE 2 COLONNES : ASSIDUITÉ ET COMPLÉTION -->
-        <div class="profil-grid-2col">
+        <!-- GRILLE 3 COLONNES : ASSIDUITÉ, COMPLÉTION ET PERFORMANCE -->
+        <div class="profil-grid-3col">
 
             <!-- FICHE ASSIDUITÉ -->
             <div class="profil-carte">
@@ -821,6 +848,90 @@ function genererSectionMobilisationEngagement(da) {
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.C}%</strong>
                 </div>
 
+                <!-- Statistiques -->
+                <ul class="profil-liste-simple">
+                    <li><strong>• Productions remises :</strong> ${nbRemis}/${nbTotal}</li>
+                </ul>
+
+                <hr class="profil-separateur">
+
+                <!-- Artefacts remis (format badge comme Assiduité) -->
+                <h4 class="profil-section-titre">
+                    ${artefactsRemis.length} production${artefactsRemis.length > 1 ? 's' : ''} remise${artefactsRemis.length > 1 ? 's' : ''}
+                </h4>
+                ${artefactsRemis.length > 0 ? `
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                        ${artefactsRemis
+                            .map(art => {
+                                // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
+                                const indexOriginal = artefactsPortfolio.findIndex(p => p.id === art.id) + 1;
+                                return { ...art, indexOriginal };
+                            })
+                            .sort((a, b) => a.indexOriginal - b.indexOriginal) // Trier par numéro croissant
+                            .map(art => `
+                                <span class="badge-completion-remis"
+                                      onclick="evaluerProduction('${da}', '${art.id}')">
+                                    <span class="badge-completion-titre">
+                                        ${echapperHtml(art.description)}
+                                    </span>
+                                    <span class="badge-completion-numero">
+                                        A${art.indexOriginal}
+                                    </span>
+                                </span>
+                            `).join('')}
+                    </div>
+                ` : `
+                    <div class="profil-message-vide" style="margin-bottom: 15px;">
+                        Aucun artefact remis
+                    </div>
+                `}
+
+                <!-- Artefacts non remis (format badge comme Assiduité) -->
+                <h4 class="profil-section-titre">
+                    ${artefactsNonRemis.length} production${artefactsNonRemis.length > 1 ? 's' : ''} non remise${artefactsNonRemis.length > 1 ? 's' : ''}
+                </h4>
+                ${artefactsNonRemis.length > 0 ? `
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                        ${artefactsNonRemis
+                            .map(art => {
+                                // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
+                                const indexOriginal = artefactsPortfolio.findIndex(p => p.id === art.id) + 1;
+                                return { ...art, indexOriginal };
+                            })
+                            .sort((a, b) => a.indexOriginal - b.indexOriginal) // Trier par numéro croissant
+                            .map(art => `
+                                <span class="badge-completion-non-remis"
+                                      onclick="evaluerProduction('${da}', '${art.id}')">
+                                    <span class="badge-completion-titre">
+                                        ${echapperHtml(art.description)}
+                                    </span>
+                                    <span class="badge-completion-numero">
+                                        A${art.indexOriginal}
+                                    </span>
+                                </span>
+                            `).join('')}
+                    </div>
+                ` : `
+                    <div class="profil-message-tous-remis">
+                        Tous les artefacts remis !
+                    </div>
+                `}
+            </div>
+
+            <!-- FICHE PERFORMANCE -->
+            <div class="profil-carte">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Performance</h3>
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${moyenneP}%</strong>
+                </div>
+
+                <!-- Statistiques -->
+                <ul class="profil-liste-simple">
+                    <li><strong>• Performance du portfolio actuel</strong></li>
+                </ul>
+
+                <hr class="profil-separateur">
+
                 <!-- Gestion des jetons -->
                 ${totalJetonsUtilises > 0 ? `
                     <h4 class="profil-section-titre">
@@ -855,18 +966,16 @@ function genererSectionMobilisationEngagement(da) {
                     <hr class="profil-separateur">
                 ` : ''}
 
-                <!-- Artefacts remis avec checkboxes (badges colorés) -->
+                <!-- Artefacts sélectionnés avec notes (badges colorés avec checkboxes) -->
                 <h4 class="profil-section-titre">
-                    ${artefactsRemis.length} production${artefactsRemis.length > 1 ? 's' : ''} remise${artefactsRemis.length > 1 ? 's' : ''}
-                    ${artefactsRemis.length > 0 && portfolio?.regles?.nombreARetenir ? `
-                        <span style="font-weight: normal; color: #666; font-size: 0.85rem; margin-left: 8px;">
-                            · ${nbRetenus}/${artefactsRemis.length} sélectionnés (${portfolio.regles.nombreARetenir} meilleures productions à retenir)
-                        </span>
-                    ` : ''}
+                    ${nbRetenus} meilleurs artefacts actuels
                 </h4>
-                ${artefactsRemis.length > 0 ? `
+                ${artefactsRetenus.length > 0 ? `
                     <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-                        ${artefactsRemis.map(art => {
+                        ${artefactsRetenus.map(art => {
+                            // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
+                            const indexOriginal = artefactsPortfolio.findIndex(p => p.id === art.id) + 1;
+
                             // Récupérer les couleurs depuis l'échelle configurée
                             const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
                             const echelleActive = echelles.find(e => e.active) || echelles[0];
@@ -889,77 +998,104 @@ function genererSectionMobilisationEngagement(da) {
 
                             return `
                                 <div class="badge-artefact"
-                                     style="background: ${couleurBadge}22; border-color: ${couleurBadge}; opacity: ${opacite}; border-width: ${bordure};"
+                                     style="background: ${couleurBadge}22; border-color: ${couleurBadge}; opacity: ${opacite}; border-width: ${bordure}; cursor: pointer;"
                                      onmouseover="this.style.opacity='1'"
-                                     onmouseout="this.style.opacity='${opacite}'">
-                                    <input type="checkbox"
-                                           class="badge-artefact-checkbox"
-                                           name="artefactRetenu"
-                                           value="${art.id}"
-                                           ${art.retenu ? 'checked' : ''}
-                                           onchange="toggleArtefactPortfolio('${da}', '${portfolio?.id || ''}', ${portfolio?.regles?.nombreARetenir || 3})"
-                                           onclick="event.stopPropagation()"
-                                           style="accent-color: ${couleurBadge};">
-                                    <div class="badge-artefact-contenu"
-                                         onclick="evaluerProduction('${da}', '${art.id}')">
-                                        <span class="badge-artefact-titre" style="color: ${couleurBadge};">
-                                            ${echapperHtml(art.description)}
-                                        </span>
-                                        ${art.jetonReprise ? '<span style="font-size: 0.8rem;" title="Jeton de reprise appliqué">⭐</span>' : ''}
-                                        ${art.jetonDelai ? '<span style="font-size: 0.8rem;" title="Jeton de délai appliqué">⭐</span>' : ''}
-                                        <span class="badge-artefact-note" style="background: ${couleurBadge};">
-                                            ${art.niveau || '--'}
-                                        </span>
-                                        <span style="color: #666; font-size: 0.8rem; font-weight: 500;">
-                                            (${art.note})
-                                        </span>
-                                    </div>
+                                     onmouseout="this.style.opacity='${opacite}'"
+                                     onclick="evaluerProduction('${da}', '${art.id}')"
+                                     title="${echapperHtml(art.description)}">
+                                    <span class="badge-artefact-titre" style="color: ${couleurBadge};">
+                                        A${indexOriginal}
+                                    </span>
+                                    ${art.jetonReprise ? '<span style="font-size: 0.8rem;" title="Jeton de reprise appliqué">⭐</span>' : ''}
+                                    ${art.jetonDelai ? '<span style="font-size: 0.8rem;" title="Jeton de délai appliqué">⭐</span>' : ''}
+                                    <span class="badge-artefact-note" style="background: ${couleurBadge};">
+                                        ${art.niveau || '--'}
+                                    </span>
+                                    <span style="color: #666; font-size: 0.8rem; font-weight: 500;">
+                                        (${art.note})
+                                    </span>
                                 </div>
                             `;
                         }).join('')}
                     </div>
                 ` : `
                     <div class="profil-message-vide" style="margin-bottom: 15px;">
-                        Aucun artefact remis
-                    </div>
-                `}
-
-                <!-- Artefacts non remis (badges gris) -->
-                <h4 class="profil-section-titre">
-                    ${artefactsNonRemis.length} production${artefactsNonRemis.length > 1 ? 's' : ''} non remise${artefactsNonRemis.length > 1 ? 's' : ''}
-                </h4>
-                ${artefactsNonRemis.length > 0 ? `
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-                        ${artefactsNonRemis.map(art => `
-                            <div class="badge-artefact-non-remis"
-                                 onclick="evaluerProduction('${da}', '${art.id}')"
-                                 title="Cliquer pour évaluer cet artefact">
-                                <span style="font-weight: 500; color: #666; font-size: 0.85rem;">
-                                    ⏳ ${echapperHtml(art.description)}
-                                </span>
-                                <span style="color: #999; font-size: 0.8rem; font-style: italic;">
-                                    Non remis
-                                </span>
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : `
-                    <div class="profil-message-tous-remis">
-                        ✅ Tous les artefacts remis !
+                        Aucun artefact évalué
                     </div>
                 `}
             </div>
         </div>
 
-        <!-- Placeholder graphique unique (en bas des deux fiches) -->
-        <div class="profil-zone-avertissement" style="padding: 30px 20px;">
-            📈 Évolution temporelle A-C (à venir)
-        </div>
+        <!-- ÉCHELLE DE RISQUE (basée sur E = A × C × P) -->
+        ${(() => {
+            // Recalculer E et R avec le vrai moyenneP
+            const P_reel = moyenneP / 100;
+            const E_reel = A * C * P_reel;
+            const R_reel = 1 - E_reel;
+
+            // Interpréter E et R
+            const interpE_reel = interpreterEngagement(E_reel);
+            const interpR_reel = interpreterRisque(R_reel);
+
+            // Seuils d'alerte (en tant que proportion)
+            const seuilMinimal = 0.20;
+            const seuilModere = 0.35;
+            const seuilEleve = 0.50;
+
+            return `
+                <div class="profil-carte" style="margin-top: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Risque d'échec</h3>
+                        <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${Math.round(R_reel * 100)}%</strong>
+                    </div>
+
+                    <div class="profil-echelle-risque">
+                        <div class="profil-echelle-barre" style="background: linear-gradient(to right,
+                                    #2196F3 0%, #2196F3 18%,
+                                    #2196F3 18%, #28a745 22%,
+                                    #28a745 22%, #28a745 33%,
+                                    #28a745 33%, #ffc107 37%,
+                                    #ffc107 37%, #ffc107 48%,
+                                    #ffc107 48%, #ff9800 52%,
+                                    #ff9800 52%, #ff9800 68%,
+                                    #ff9800 68%, #dc3545 72%,
+                                    #dc3545 72%, #dc3545 100%);">
+                            <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(R_reel * 100, 100)}%;">▼</div>
+                            <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(R_reel * 100, 100)}%;">R = ${R_reel.toFixed(2)}</div>
+                        </div>
+
+                        <div class="legende-risque-container">
+                            <div class="legende-risque-item" style="left: 10%; color: #2196F3;">
+                                <span class="legende-risque-niveau">Minimal</span>
+                                <span class="legende-risque-seuil">0-0.19</span>
+                            </div>
+                            <div class="legende-risque-item" style="left: 27.5%; color: #28a745;">
+                                <span class="legende-risque-niveau">Faible</span>
+                                <span class="legende-risque-seuil">0.20-0.34</span>
+                            </div>
+                            <div class="legende-risque-item" style="left: 42.5%; color: #ffc107;">
+                                <span class="legende-risque-niveau">Modéré</span>
+                                <span class="legende-risque-seuil">0.35-0.49</span>
+                            </div>
+                            <div class="legende-risque-item" style="left: 60%; color: #ff9800;">
+                                <span class="legende-risque-niveau">Élevé</span>
+                                <span class="legende-risque-seuil">0.50-0.69</span>
+                            </div>
+                            <div class="legende-risque-item" style="left: 85%; color: #dc3545;">
+                                <span class="legende-risque-niveau">Critique</span>
+                                <span class="legende-risque-seuil">≥ 0.70</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        })()}
     `;
 }
 
 /**
  * Génère le HTML de la section Accompagnement (interventions RàI)
+ * Inclut: badge RàI, risque, pattern, progression, services, échelle, historique
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */
@@ -972,6 +1108,80 @@ function genererSectionAccompagnement(da) {
     const etudiant = etudiants.find(e => e.da === da);
     const nomComplet = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : `DA ${da}`;
 
+    // Calculer les données pour le suivi RàI
+    const indices = calculerTousLesIndices(da);
+    const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
+    const cibleInfo = determinerCibleIntervention(da);
+    const interpR = interpreterRisque(indices.R);
+    const progression = calculerProgressionEleve(da);
+    const defiSpecifique = identifierDefiSpecifique(da);
+    const directionRisque = calculerDirectionRisque(da);
+
+    // Récupérer le seuil de progression configurable
+    const seuilProgression = obtenirSeuil('progressionArtefacts');
+    const seuilPourcentage = (seuilProgression * 100).toFixed(0);
+
+    // Construire le texte de progression au format du rapport
+    let texteProgression = '';
+    if (progression.direction === '↗') {
+        texteProgression = `Apprentissage : présentement en amélioration (variation supérieure à ${seuilPourcentage}%)`;
+    } else if (progression.direction === '↘') {
+        texteProgression = `Apprentissage : présentement en baisse (variation supérieure à ${seuilPourcentage}%)`;
+    } else if (progression.direction === '—') {
+        texteProgression = `Apprentissage : présentement en plateau (variation inférieure à ${seuilPourcentage}%)`;
+    } else {
+        texteProgression = `Apprentissage : ${progression.interpretation}`;
+    }
+
+    // Analyser les forces et défis (critères SRPNF)
+    const moyennesCriteres = calculerMoyennesCriteres(da);
+    const seuilMaitrise = obtenirSeuil('idme.maitrise');
+    const seuilDeveloppement = obtenirSeuil('idme.developpement');
+
+    const criteresSRPNF = [
+        { nom: 'Structure', valeur: moyennesCriteres.Structure || 0 },
+        { nom: 'Rigueur', valeur: moyennesCriteres.Rigueur || 0 },
+        { nom: 'Plausibilité', valeur: moyennesCriteres.Plausibilité || 0 },
+        { nom: 'Nuance', valeur: moyennesCriteres.Nuance || 0 },
+        { nom: 'Français', valeur: moyennesCriteres.Français || 0 }
+    ];
+
+    const forces = criteresSRPNF.filter(c => c.valeur >= seuilMaitrise);
+    const defis = criteresSRPNF.filter(c => c.valeur < seuilDeveloppement);
+
+    console.log('Forces et défis pour DA', da, { forces, defis, seuilMaitrise, seuilDeveloppement, moyennesCriteres });
+
+    // Badge RàI avec classes CSS
+    let badgeClasse = '';
+    let badgeLabel = '';
+    if (cibleInfo.niveau === 3) {
+        badgeClasse = 'badge-sys badge-rai-3';
+        badgeLabel = 'Niveau 3';
+    } else if (cibleInfo.niveau === 2) {
+        badgeClasse = 'badge-sys badge-rai-2';
+        badgeLabel = 'Niveau 2';
+    } else {
+        badgeClasse = 'badge-sys badge-rai-1';
+        badgeLabel = 'Niveau 1';
+    }
+
+    // Construire le texte du pattern avec le défi intégré si applicable
+    const interpreterScoreIDME = (score) => {
+        const seuilInsuffisant = obtenirSeuil('idme.insuffisant');
+        const seuilDeveloppement = obtenirSeuil('idme.developpement');
+        const seuilMaitrise = obtenirSeuil('idme.maitrise');
+        if (score < seuilInsuffisant) return 'Un seul aspect traité, compréhension superficielle';
+        if (score < seuilDeveloppement) return 'Plusieurs aspects sans vision d\'ensemble';
+        if (score < seuilMaitrise) return 'Vision globale avec liens entre les aspects';
+        return 'Transfert à d\'autres contextes';
+    };
+
+    let patternTexte = cibleInfo.pattern;
+    if (cibleInfo.pattern === 'Défi spécifique' && defiSpecifique.defi !== 'Aucun') {
+        const niveauIDME = interpreterScoreIDME(defiSpecifique.score);
+        patternTexte = `${cibleInfo.pattern} (${defiSpecifique.defi} - ${niveauIDME})`;
+    }
+
     let html = `
         <!-- Détails de la section (masqué par défaut) -->
         <div id="details-calculs-accompagnement-${da}" class="carte-info-toggle" style="display: none;">
@@ -980,70 +1190,149 @@ function genererSectionAccompagnement(da) {
                 <div class="details-calculs-bloc">
                     <div class="details-calculs-label">Objectif :</div>
                     <div class="details-calculs-valeur">
-                        Cette section centralise l'historique complet des interventions RàI (Réponse à l'Intervention)
-                        auxquelles l'étudiant·e a participé. Elle permet de suivre l'évolution de l'accompagnement
-                        pédagogique dans le temps et de documenter les observations spécifiques.
+                        Cette section centralise les indicateurs de suivi et l'historique complet des interventions RàI
+                        (Réponse à l'Intervention). Elle permet d'orienter les décisions d'accompagnement pédagogique
+                        et de documenter les observations spécifiques.
                     </div>
                 </div>
 
                 <div class="details-calculs-bloc">
                     <div class="details-calculs-label">Contenu :</div>
                     <div class="details-calculs-valeur">
-                        • Liste chronologique des interventions (plus récentes en premier)<br>
-                        • Type et statut de chaque intervention (planifiée, en cours, complétée)<br>
-                        • Notes individuelles prises lors de chaque rencontre<br>
-                        • Accès rapide pour ouvrir ou créer une intervention
+                        • Niveau d'intervention RàI recommandé (1, 2 ou 3)<br>
+                        • Indicateurs de risque, pattern d'apprentissage et progression<br>
+                        • Services adaptés (SA, CAF) pour contextualiser l'accompagnement<br>
+                        • Échelle visuelle de positionnement du risque<br>
+                        • Liste chronologique des interventions documentées
                     </div>
                 </div>
 
                 <div class="details-calculs-bloc">
                     <div class="details-calculs-label">Utilisation :</div>
                     <div class="details-calculs-valeur">
-                        • <strong>Nouvelle intervention :</strong> Cliquez sur le bouton en haut à droite pour créer une intervention<br>
-                        • <strong>Consulter une intervention :</strong> Cliquez sur «Consulter» pour voir les détails complets<br>
+                        • <strong>Planifier intervention :</strong> Basez-vous sur le niveau RàI et les indicateurs affichés<br>
+                        • <strong>Nouvelle intervention :</strong> Cliquez sur le bouton «Nouvelle intervention»<br>
+                        • <strong>Consulter historique :</strong> Cliquez sur «Consulter» pour voir les détails complets<br>
                         • <strong>Notes individuelles :</strong> Visibles directement sous chaque intervention
-                    </div>
-                </div>
-
-                <div class="details-calculs-bloc">
-                    <div class="details-calculs-label">Intégration RàI :</div>
-                    <div class="details-calculs-valeur">
-                        Les interventions documentées ici s'inscrivent dans une approche proactive de soutien
-                        à l'apprentissage. Elles permettent d'ajuster les stratégies pédagogiques en fonction
-                        des besoins identifiés et de maintenir une trace longitudinale de l'accompagnement.
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="carte" style="margin-bottom: 20px; background: var(--bleu-tres-pale);">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-                <div>
-                    <h3 style="margin: 0 0 10px 0; color: var(--bleu-principal);">
-                        Historique des interventions pour ${nomComplet}
-                    </h3>
-                    <p class="text-muted" style="margin: 0;">
-                        Cette section présente les interventions RàI auxquelles l'étudiant·e a participé,
-                        ainsi que les notes individuelles prises lors de chaque rencontre.
-                    </p>
+        <!-- BLOC UNIQUE : Vue d'ensemble -->
+        <div class="profil-carte">
+            <!-- Rangée 1 : Badge + Pattern -->
+            <div style="display: grid; grid-template-columns: auto 1fr; gap: 30px; align-items: start; margin-bottom: 20px;">
+                <!-- Badge RàI -->
+                <div style="text-align: center;">
+                    <span class="${badgeClasse}" style="font-size: 1.3rem; padding: 12px 20px; display: block;">
+                        ${badgeLabel}
+                    </span>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 8px;">
+                        ${cibleInfo.niveau === 3 ? 'Intervention<br>intensive' : cibleInfo.niveau === 2 ? 'Intervention<br>préventive' : 'Suivi<br>universel'}
+                    </div>
                 </div>
-                <div>
-                    <button class="btn btn-principal" style="white-space: nowrap;" onclick="naviguerVersNouvelleIntervention();">
-                        Nouvelle intervention
+
+                <!-- Pattern -->
+                <div style="border-left: 3px solid ${(() => {
+                    if (cibleInfo.pattern === 'Blocage critique') return '#dc3545';
+                    if (cibleInfo.pattern === 'Blocage émergent') return '#ff9800';
+                    if (cibleInfo.pattern === 'Défi spécifique') return '#ffc107';
+                    return '#28a745';
+                })()}; padding-left: 15px;">
+                    <div style="font-size: 0.8rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Pattern</div>
+                    <div style="font-size: 1.1rem; font-weight: 600; color: #333; margin-top: 5px;">${cibleInfo.pattern}</div>
+                    ${defiSpecifique.defi !== 'Aucun' ? `<div style="font-size: 0.85rem; color: #666;">${defiSpecifique.defi} (${interpreterScoreIDME(defiSpecifique.score)})</div>` : ''}
+                </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;">
+
+            <!-- Rangée 2 : Contexte + Bouton réglages -->
+            <div style="display: flex; gap: 30px; font-size: 0.9rem; color: #666; align-items: center;">
+                <div><strong>${texteProgression}</strong></div>
+                <div><strong>Services adaptés :</strong> ${etudiant.caf === 'Oui' ? '✓ CAF' : ''} ${etudiant.sa === 'Oui' ? '✓ SA' : ''} ${etudiant.caf !== 'Oui' && etudiant.sa !== 'Oui' ? 'Aucun' : ''}</div>
+                <div style="margin-left: auto;">
+                    <button class="btn btn-secondaire" onclick="afficherSection('reglages'); setTimeout(() => { afficherSousSection('reglages-interpretation'); const elem = document.getElementById('seuils-interpretation'); if (elem) elem.scrollIntoView({behavior: 'smooth', block: 'start'}); }, 200);">
+                        Réglages
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Forces et défis qualitatifs -->
+        ${forces.length > 0 || defis.length > 0 ? `
+        <div class="profil-carte" style="margin-top: 15px;">
+            ${forces.length > 0 ? `
+            <div style="margin-bottom: ${defis.length > 0 ? '25px' : '0'};">
+                <h4 style="color: #16a34a; font-size: 0.95rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
+                    Forces ${forces.map(f => f.nom).join(', ')}
+                </h4>
+
+                ${forces.some(f => f.valeur >= 0.85) ? `
+                <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 15px; margin-bottom: 10px; border-radius: 4px;">
+                    <div style="font-weight: 600; color: #16a34a; margin-bottom: 5px; font-size: 0.9rem;">Maîtrisé et étendu (E)</div>
+                    <div style="font-size: 0.9rem; line-height: 1.5; color: #333;">
+                        ${forces.filter(f => f.valeur >= 0.85).map(f => f.nom).join(', ')} : À ce niveau abstrait étendu, un nouvel apprentissage en génère un autre ou ouvre la porte à une nouvelle exploration. L'élève a la capacité de généraliser la structure au-delà de l'information donnée. Il comprend parfaitement et il est capable de transférer ses apprentissages à des contextes proches. Il peut formuler des hypothèses et des théories qui pourront être analysées à leur tour.
+                    </div>
+                </div>
+                ` : ''}
+
+                ${forces.some(f => f.valeur >= seuilMaitrise && f.valeur < 0.85) ? `
+                <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 15px; border-radius: 4px;">
+                    <div style="font-weight: 600; color: #16a34a; margin-bottom: 5px; font-size: 0.9rem;">Maîtrisé (M)</div>
+                    <div style="font-size: 0.9rem; line-height: 1.5; color: #333;">
+                        ${forces.filter(f => f.valeur >= seuilMaitrise && f.valeur < 0.85).map(f => f.nom).join(', ')} : À ce niveau relationnel, l'élève peut maintenant comprendre, lier et intégrer plusieurs aspects d'une réponse dans un tout cohérent. L'élève relie les savoirs entre eux, il voit plusieurs aspects d'une situation et sait l'aborder de différentes façons. Il peut expliquer sa compréhension et les liens entre les savoirs. Il a une vue globale du problème et de sa réponse. Un élève peut avoir la capacité de comparer, mettre en relation, analyser, justifier, critiquer, évaluer, appliquer, expliquer des choses en matière de causes et d'effets.
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            ` : ''}
+
+            ${defis.length > 0 ? `
+            <div>
+                <h4 style="color: #dc2626; font-size: 0.95rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
+                    Défis ${defis.map(d => d.nom).join(', ')}
+                </h4>
+
+                ${defis.some(d => d.valeur < obtenirSeuil('idme.insuffisant')) ? `
+                <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 12px 15px; margin-bottom: 10px; border-radius: 4px;">
+                    <div style="font-weight: 600; color: #dc2626; margin-bottom: 5px; font-size: 0.9rem;">Insuffisant ou incomplet (I)</div>
+                    <div style="font-size: 0.9rem; line-height: 1.5; color: #333;">
+                        ${defis.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : À ce niveau unistructurel, l'élève ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois. Il ne se concentre que sur un seul point signifiant. L'élève fait des liens simples et évidents entre ses connaissances, mais n'a pas encore de réelle compréhension. Celle-ci reste essentiellement superficielle.
+                    </div>
+                </div>
+                ` : ''}
+
+                ${defis.some(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement) ? `
+                <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 12px 15px; border-radius: 4px;">
+                    <div style="font-weight: 600; color: #dc2626; margin-bottom: 5px; font-size: 0.9rem;">En développement (D)</div>
+                    <div style="font-size: 0.9rem; line-height: 1.5; color: #333;">
+                        ${defis.filter(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement).map(d => d.nom).join(', ')} : À ce niveau multistructurel, l'élève peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il les considère indépendamment. L'élève fait plus de liens entre ses connaissances, mais celles-ci restent compartimentées et séparées. Il n'a pas de compréhension globale de ce qu'il fait. Il est capable de classifier, de combiner, de décrire, ou d'énumérer les informations. L'élève peut traiter plusieurs aspects d'un problème, mais sans vision d'ensemble.
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            ` : ''}
+        </div>
+        ` : ''}
+
+        <!-- Historique compact -->
+        <div style="margin-top: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="color: var(--bleu-principal); font-size: 0.95rem; margin: 0; font-weight: 600;">
+                    HISTORIQUE ${interventions && interventions.length > 0 ? `(${interventions.length} intervention${interventions.length > 1 ? 's' : ''})` : ''}
+                </h4>
+                <button class="btn btn-principal" onclick="naviguerVersNouvelleIntervention();">+ Nouvelle intervention</button>
             </div>
         </div>
     `;
 
     if (!interventions || interventions.length === 0) {
         html += `
-            <div class="profil-zone-avertissement" style="text-align: center;">
-                <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; color: var(--bleu-moyen);">
-                    Aucune intervention enregistrée
-                </div>
-                <div style="font-style: italic; font-size: 0.95rem; color: var(--bleu-moyen);">
-                    Les interventions RàI auxquelles cet·te étudiant·e participe apparaîtront ici
+            <div class="carte" style="text-align: center; padding: 30px 20px; background: var(--bleu-tres-pale);">
+                <div style="font-size: 0.95rem; color: #666; font-style: italic;">
+                    Aucune intervention documentée. Les interventions RàI apparaîtront ici.
                 </div>
             </div>
         `;
@@ -1855,7 +2144,7 @@ window.profilActuelDA = null;
  * Variable globale pour mémoriser la section active du profil (Beta 85)
  * Permet de conserver la même section lors de la navigation entre étudiants
  */
-let sectionProfilActive = 'cible'; // Par défaut: Suivi de l'apprentissage
+let sectionProfilActive = 'mobilisation'; // Par défaut: Engagement
 
 /**
  * Change la section affichée dans la colonne droite du profil
@@ -1918,7 +2207,7 @@ function changerSectionProfil(section) {
             contenu = genererSectionPerformance(da);
             break;
         case 'mobilisation':
-            titre = 'Mobilisation';
+            titre = 'Engagement';
             contenu = genererSectionMobilisationEngagement(da);
             break;
         case 'rapport':
@@ -1966,6 +2255,11 @@ function changerSectionProfil(section) {
     setTimeout(() => {
         if (typeof reattacherEvenementsToggles === 'function') {
             reattacherEvenementsToggles();
+        }
+
+        // Restaurer les préférences du rapport si on vient de charger cette section
+        if (section === 'rapport') {
+            restaurerPreferencesRapport(da);
         }
     }, 100);
 
@@ -2237,423 +2531,6 @@ function genererHistoriqueInterventionsProfil(da) {
 }
 
 /**
- * Génère le contenu de la section Suivi de l'apprentissage
- * Structure épurée: 1 encadré blanc avec badge RàI, infos, message, graphique
- * @param {string} da - Numéro de DA
- * @returns {string} - HTML du contenu
- */
-function genererContenuCibleIntervention(da) {
-    const cibleInfo = determinerCibleIntervention(da);
-    const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
-    const indices = calculerTousLesIndices(da);
-    const interpR = interpreterRisque(indices.R);
-    const interpM = interpreterMobilisation(indices.A / 100, indices.C / 100);
-
-    // Récupérer infos élève pour CAF/SA
-    const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const etudiants = typeof filtrerEtudiantsParMode === 'function'
-        ? filtrerEtudiantsParMode(tousEtudiants)
-        : tousEtudiants.filter(e => e.groupe !== '9999');
-    const eleve = etudiants.find(e => e.da === da);
-
-    // Ne pas afficher si pas assez de données
-    if (indices3Derniers.nbArtefacts === 0) {
-        return `
-            <div style="text-align: center; padding: 60px 20px;">
-                <div style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></div>
-                <h3 style="color: #666; margin-bottom: 10px;">Données insuffisantes</h3>
-                <p style="color: #999;">
-                    Pas encore d'artefacts évalués pour cet étudiant.<br>
-                    Le suivi de l'apprentissage sera disponible après l'évaluation d'au moins un artefact.
-                </p>
-            </div>
-        `;
-    }
-
-    // Utiliser le même badge que dans Liste et Aperçu (défini plus haut : badgeLabel)
-    // const niveauTexte est maintenant badgeLabel
-
-    // Calculer les moyennes pour accéder aux scores des critères
-    const moyennes = calculerMoyennesCriteres(da);
-
-    // Calculer les directions des critères pour identifier les critères en détérioration
-    const directionsCriteres = calculerDirectionsCriteres(da);
-    const criteresEnDeterioration = [];
-    const criteresEnAmelioration = [];
-    const criteresAvecScores = [];
-
-    ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].forEach(cle => {
-        const nomCritere = cle === 'structure' ? 'Structure' :
-                         cle === 'rigueur' ? 'Rigueur' :
-                         cle === 'plausibilite' ? 'Plausibilité' :
-                         cle === 'nuance' ? 'Nuance' : 'Français';
-
-        if (directionsCriteres[cle] && directionsCriteres[cle].symbole === '←') {
-            criteresEnDeterioration.push(nomCritere);
-        } else if (directionsCriteres[cle] && directionsCriteres[cle].symbole === '→') {
-            criteresEnAmelioration.push(nomCritere);
-        }
-
-        // Garder trace des scores pour identifier le plus faible
-        if (moyennes && moyennes[cle] !== null) {
-            criteresAvecScores.push({
-                nom: nomCritere,
-                score: moyennes[cle],
-                pourcentage: Math.round(moyennes[cle] * 100),
-                niveau: moyennes[cle] < 0.64 ? 'I' : moyennes[cle] < 0.75 ? 'D' : moyennes[cle] < 0.85 ? 'M' : 'E'
-            });
-        }
-    });
-
-    // Trier par score croissant pour identifier le critère le plus faible
-    criteresAvecScores.sort((a, b) => a.score - b.score);
-
-    // Identifier le critère le plus faible parmi ceux en I ou D
-    const critereLesPlusFaibles = criteresAvecScores.filter(c => c.niveau === 'I' || c.niveau === 'D');
-
-    // Générer la description en fonction du niveau et des critères identifiés
-    let descriptionNiveau = '';
-
-    if (cibleInfo.niveau === 3) {
-        descriptionNiveau = '⚠️ <strong>Action immédiate requise</strong> - Intervention intensive pour prévenir un échec. Mobiliser les ressources d\'aide (CAF, aide à l\'apprentissage).';
-        if (criteresEnDeterioration.length > 0) {
-            descriptionNiveau += ` <strong>Critère(s) en détérioration :</strong> ${criteresEnDeterioration.join(', ')}.`;
-        } else if (critereLesPlusFaibles.length > 0) {
-            const plusFaible = critereLesPlusFaibles[0];
-            descriptionNiveau += ` <strong>Critère prioritaire à renforcer :</strong> ${plusFaible.nom} (${plusFaible.pourcentage}%, niveau ${plusFaible.niveau}).`;
-        }
-    } else if (cibleInfo.niveau === 2) {
-        descriptionNiveau = '<strong>Intervention ciblée recommandée</strong> - Soutien spécifique pour consolider les apprentissages';
-        if (criteresEnDeterioration.length > 0) {
-            descriptionNiveau += ` et prévenir l\'aggravation des difficultés en <strong>${criteresEnDeterioration.join(', ')}</strong>.`;
-        } else if (critereLesPlusFaibles.length > 0) {
-            const plusFaible = critereLesPlusFaibles[0];
-            descriptionNiveau += ` et renforcer <strong>${plusFaible.nom}</strong> (${plusFaible.pourcentage}%, niveau ${plusFaible.niveau}).`;
-        } else {
-            descriptionNiveau += ' et prévenir l\'aggravation des difficultés.';
-        }
-    } else if (cibleInfo.cible.includes('Pratique autonome')) {
-        descriptionNiveau = '✨ <strong>Enrichissement</strong> - L\'étudiant maîtrise les bases. Encourager l\'exploration, la créativité et le développement de l\'autonomie.';
-        if (criteresEnAmelioration.length > 0) {
-            descriptionNiveau += ` <strong>Progrès observés en :</strong> ${criteresEnAmelioration.join(', ')}.`;
-        }
-    } else {
-        descriptionNiveau = '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
-        if (criteresEnAmelioration.length > 0) {
-            descriptionNiveau += ` <strong>Progrès observés en :</strong> ${criteresEnAmelioration.join(', ')}.`;
-        }
-    }
-
-    // Calculer le blocage pour affichage dans le toggle
-    const resultBlocage = calculerIndiceBlocage(moyennes);
-    const interpBlocage = resultBlocage ? interpreterIndiceBlocage(resultBlocage.score) : null;
-
-    // Calculer la progression (AM vs AL)
-    const progression = calculerProgressionEleve(da);
-
-    // Ajuster l'interprétation de la progression selon le contexte de risque
-    const seuilRisqueModere = obtenirSeuil('risque.modere');
-    const seuilRisqueFaible = obtenirSeuil('risque.faible');
-
-    let interpretationProgression = progression.interpretation;
-    if (progression.direction === '—' && indices.R >= seuilRisqueModere) {
-        // Plateau en zone de risque élevé/critique = plateau problématique
-        interpretationProgression = 'Plateau (progression insuffisante)';
-    } else if (progression.direction === '—' && indices.R >= seuilRisqueFaible) {
-        // Plateau en zone de risque modéré = attention
-        interpretationProgression = 'Plateau fragile';
-    }
-
-    // Calculer la direction du risque (évolution temporelle)
-    const directionRisque = calculerDirectionRisque(da);
-
-    // Identifier le défi spécifique (critère SRPNF le plus faible sur 3 derniers artefacts)
-    const defiSpecifique = identifierDefiSpecifique(da);
-
-    // Interpréter le niveau IDME du défi avec description SOLO (seuils configurables)
-    const interpreterScoreIDME = (score) => {
-        const seuilInsuffisant = obtenirSeuil('idme.insuffisant');
-        const seuilDeveloppement = obtenirSeuil('idme.developpement');
-        const seuilMaitrise = obtenirSeuil('idme.maitrise');
-
-        if (score < seuilInsuffisant) return 'Un seul aspect traité, compréhension superficielle';
-        if (score < seuilDeveloppement) return 'Plusieurs aspects sans vision d\'ensemble';
-        if (score < seuilMaitrise) return 'Vision globale avec liens entre les aspects';
-        return 'Transfert à d\'autres contextes';
-    };
-
-    // Construire le texte du pattern avec le défi intégré si applicable
-    let patternTexte = cibleInfo.pattern;
-    if (cibleInfo.pattern === 'Défi spécifique' && defiSpecifique.defi !== 'Aucun') {
-        const niveauIDME = interpreterScoreIDME(defiSpecifique.score);
-        patternTexte = `${cibleInfo.pattern} (${defiSpecifique.defi} - ${niveauIDME})`;
-    }
-
-    // Badge RàI avec classes CSS (Beta 84)
-    let badgeClasse = '';
-    let badgeLabel = '';
-    if (cibleInfo.niveau === 3) {
-        badgeClasse = 'badge-sys badge-rai-3';
-        badgeLabel = 'Niveau 3';
-    } else if (cibleInfo.niveau === 2) {
-        badgeClasse = 'badge-sys badge-rai-2';
-        badgeLabel = 'Niveau 2';
-    } else {
-        badgeClasse = 'badge-sys badge-rai-1';
-        badgeLabel = 'Niveau 1';
-    }
-
-    return `
-        <!-- Détails des calculs (masqué par défaut) - AFFICHÉ EN HAUT -->
-        <div id="details-calculs-risque-${da}" class="carte-info-toggle" style="display: none;">
-            <div class="details-calculs-section">
-                <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
-                <!-- Grille 2 colonnes pour Risque et Blocage -->
-                <div class="details-calculs-grid">
-                    <!-- Calcul Risque -->
-                    <div>
-                        <div class="details-calculs-bloc">
-                            <div class="details-calculs-label">Risque (R):</div>
-                            <div class="details-calculs-valeur">R = (1 - A) × 0.50 + (1 - C) × 0.25 + (1 - P) × 0.25</div>
-
-                            <div class="details-calculs-label">Calcul détaillé:</div>
-                            <div class="details-calculs-valeur">
-                                R = (1 - ${(indices.A / 100).toFixed(2)}) × 0.50 + (1 - ${(indices.C / 100).toFixed(2)}) × 0.25 + (1 - ${(indices.P / 100).toFixed(2)}) × 0.25<br>
-                                R = ${((1 - indices.A / 100) * 0.50).toFixed(3)} + ${((1 - indices.C / 100) * 0.25).toFixed(3)} + ${((1 - indices.P / 100) * 0.25).toFixed(3)}<br>
-                                R = <strong>${indices.R}</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    ${interpBlocage ? `
-                        <!-- Calcul Blocage -->
-                        <div>
-                            <div class="details-calculs-bloc">
-                                <div class="details-calculs-label">Blocage${resultBlocage.partiel ? ' (ajusté)' : ''}:</div>
-                                <div class="details-calculs-valeur">
-                                    ${resultBlocage.partiel
-                                        ? `Blocage = (critères disponibles pondérés) / total pondération`
-                                        : `Blocage = 0.35 × Structure + 0.35 × Français + 0.30 × Rigueur`
-                                    }
-                                </div>
-
-                                ${resultBlocage.partiel ? `
-                                    <div class="details-calculs-alerte">
-                                        <strong>⚠️ Calcul partiel:</strong> ${resultBlocage.criteresManquants.join(', ')} non évalué(s)
-                                    </div>
-                                ` : ''}
-
-                                <div class="details-calculs-label">Calcul détaillé:</div>
-                                <div class="details-calculs-valeur">
-                                    ${moyennes.structure !== null ? `0.35 × ${Math.round(moyennes.structure * 100)}%<br>` : ''}
-                                    ${moyennes.francais !== null ? `0.35 × ${Math.round(moyennes.francais * 100)}%<br>` : ''}
-                                    ${moyennes.rigueur !== null ? `0.30 × ${Math.round(moyennes.rigueur * 100)}%<br>` : ''}
-                                    Blocage = <strong>${Math.round(resultBlocage.score * 100)}%</strong>
-                                </div>
-                            </div>
-                        </div>
-                        ` : ''}
-                </div>
-
-                <!-- Calcul de la Progression -->
-                ${progression.direction ? `
-                <div style="margin-top: 20px;">
-                    <div class="details-calculs-bloc">
-                        <div class="details-calculs-label">Progression (Direction):</div>
-                        <div class="details-calculs-valeur">
-                            Comparer la performance récente (AM) vs performance précédente (AL)<br>
-                            SI AM > AL + 0.1 → ↗ Progression<br>
-                            SI AM < AL - 0.1 → ↘ Régression<br>
-                            Sinon → — Plateau
-                        </div>
-
-                        <div class="details-calculs-label">Calcul détaillé:</div>
-                        <div class="details-calculs-valeur">
-                            AM (3 artefacts récents) = <strong>${progression.AM}%</strong><br>
-                            AL (3 artefacts suivants, avec chevauchement) = <strong>${progression.AL}%</strong><br>
-                            Différence = ${progression.difference > 0 ? '+' : ''}${progression.difference} points<br>
-                            <strong>${progression.direction} ${interpretationProgression}</strong>
-                        </div>
-                    </div>
-                </div>
-                ` : `
-                <div style="margin-top: 20px;">
-                    <div class="details-calculs-bloc">
-                        <div class="details-calculs-label">Progression (Direction):</div>
-                        <div class="details-calculs-valeur">
-                            ${progression.interpretation}<br>
-                            <span style="font-size: 0.9rem; opacity: 0.8;">La progression sera calculée après l'évaluation de 4 artefacts (actuellement: ${progression.nbArtefacts})</span>
-                        </div>
-                    </div>
-                </div>
-                `}
-
-                <!-- Identification du Défi spécifique -->
-                <div style="margin-top: 20px;">
-                    <div class="details-calculs-bloc">
-                        <div class="details-calculs-label">Défi spécifique:</div>
-                        <div class="details-calculs-valeur">
-                            Identifier le critère SRPNF le plus faible parmi les 3 derniers artefacts<br>
-                            Seuil d'identification: &lt; ${(obtenirSeuil('defiSpecifique') * 100).toFixed(2)}% (configurable)
-                        </div>
-
-                        <div class="details-calculs-label">Résultat:</div>
-                        <div class="details-calculs-valeur">
-                            ${defiSpecifique.defi !== 'Aucun' ? `
-                                Critère identifié: <strong>${defiSpecifique.defi}</strong><br>
-                                Score moyen: <strong>${(defiSpecifique.score * 100).toFixed(1)}%</strong> (${defiSpecifique.score.toFixed(4)})<br>
-                                <span style="font-size: 0.9rem; opacity: 0.8;">Ce critère nécessite une attention particulière dans les prochaines interventions</span>
-                            ` : `
-                                <strong>Aucun défi spécifique identifié</strong><br>
-                                <span style="font-size: 0.9rem; opacity: 0.8;">Tous les critères SRPNF sont ≥ ${(obtenirSeuil('defiSpecifique') * 100).toFixed(2)}% sur les 3 derniers artefacts</span>
-                            `}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Identification du Pattern d'apprentissage et niveau RàI -->
-                <div style="margin-top: 20px;">
-                    <div class="details-calculs-bloc">
-                        <div class="details-calculs-label">Pattern d'apprentissage:</div>
-                        <div class="details-calculs-valeur">
-                            Analyser la performance sur les 3 derniers artefacts et la présence d'un défi pour identifier le pattern actuel:<br><br>
-                            <strong>• Blocage critique:</strong> Performance ≤ 0.40 (40%)<br>
-                            <span style="font-size: 0.9rem; opacity: 0.8; margin-left: 20px;">→ Difficultés majeures nécessitant une intervention intensive</span><br><br>
-                            <strong>• Blocage émergent:</strong> Performance ≤ 0.50 (50%) ET un défi est identifié<br>
-                            <span style="font-size: 0.9rem; opacity: 0.8; margin-left: 20px;">→ Difficultés en développement dans un critère spécifique</span><br><br>
-                            <strong>• Défi spécifique:</strong> Performance ≤ 0.75 (75%) ET un défi est identifié<br>
-                            <span style="font-size: 0.9rem; opacity: 0.8; margin-left: 20px;">→ Compétence en développement avec une lacune ciblée</span><br><br>
-                            <strong>• Stable:</strong> Performance > 0.75 (75%) OU aucun défi identifié<br>
-                            <span style="font-size: 0.9rem; opacity: 0.8; margin-left: 20px;">→ Apprentissage consolidé sans difficulté majeure</span>
-                        </div>
-
-                        <div class="details-calculs-label">Calcul pour cet étudiant:</div>
-                        <div class="details-calculs-valeur">
-                            Performance (3 derniers artefacts) = <strong>${(indices3Derniers.performance * 100).toFixed(1)}%</strong><br>
-                            Défi identifié = <strong>${defiSpecifique.defi !== 'Aucun' ? 'Oui (' + defiSpecifique.defi + ')' : 'Non'}</strong><br>
-                            Pattern identifié = <strong>${cibleInfo.pattern}</strong>
-                        </div>
-
-                        <div class="details-calculs-label">Détermination du niveau RàI (Réponse à l'Intervention):</div>
-                        <div class="details-calculs-valeur">
-                            Le pattern identifié est combiné avec d'autres facteurs pour déterminer le niveau RàI:<br><br>
-                            <strong>• Mobilisation</strong> (A et C): ${interpM.niveau}<br>
-                            <strong>• Risque</strong> (R): ${interpR.niveau}<br>
-                            <strong>• Pattern</strong>: ${cibleInfo.pattern}<br>
-                            <strong>• Défi principal</strong>: ${defiSpecifique.defi !== 'Aucun' ? defiSpecifique.defi : 'Aucun'}<br>
-                            <strong>• Performance en français</strong> (3 derniers): ${indices3Derniers.francaisMoyen.toFixed(1)}%<br><br>
-                            → <strong>Niveau RàI déterminé: ${cibleInfo.niveau}</strong><br>
-                            <span style="font-size: 0.9rem; opacity: 0.8;">
-                                ${cibleInfo.niveau === 3 ? 'Niveau 3 - Intervention intensive ciblée requise' :
-                                  cibleInfo.niveau === 2 ? 'Niveau 2 - Intervention ciblée recommandée' :
-                                  'Niveau 1 - Surveillance universelle et prévention'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Direction du risque (symbole sur l'échelle) -->
-                ${directionRisque.symbole ? `
-                <div style="margin-top: 20px;">
-                    <div class="details-calculs-bloc">
-                        <div class="details-calculs-label">Direction du risque (symbole sur l'échelle):</div>
-                        <div class="details-calculs-valeur">
-                            Comparer le risque récent vs le risque précédent (fenêtre glissante):<br><br>
-                            <strong>→</strong> Si le risque augmente de plus de 5% → L'étudiant s'enfonce dans la difficulté<br>
-                            <strong>←</strong> Si le risque diminue de plus de 5% → L'étudiant s'améliore<br>
-                            <strong>—</strong> Si la variation est inférieure à 5% → Plateau (risque stable)
-                        </div>
-
-                        <div class="details-calculs-label">Calcul pour cet étudiant:</div>
-                        <div class="details-calculs-valeur">
-                            Risque récent (3 derniers artefacts) = <strong>${directionRisque.risqueRecent}%</strong><br>
-                            Risque précédent (3 suivants, avec chevauchement) = <strong>${directionRisque.risquePrecedent}%</strong><br>
-                            Différence = ${directionRisque.difference > 0 ? '+' : ''}${directionRisque.difference}% (points de risque)<br>
-                            Symbole affiché = <strong style="font-size: 1.2rem;">${directionRisque.symbole}</strong> → ${directionRisque.interpretation}
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
-            </div>
-            </div>
-        </div>
-        <!-- ENCADRÉ UNIQUE: SUIVI DE L'APPRENTISSAGE -->
-        <div class="profil-carte">
-
-            <!-- Badge RàI sobre -->
-            <span class="${badgeClasse}" style="display: inline-block; margin-bottom: 15px;">
-                ${badgeLabel}
-            </span>
-
-            <!-- Liste des informations -->
-            <ul class="info-liste">
-                <li><strong>Risque :</strong> ${genererBadgeRisqueProfil(indices.R)} (${indices.R})</li>
-                <li><strong>Pattern :</strong> ${genererBadgePatternProfil(cibleInfo.pattern)} ${defiSpecifique.defi !== 'Aucun' ? '(' + defiSpecifique.defi + ' - ' + interpreterScoreIDME(defiSpecifique.score) + ')' : ''}</li>
-                <li><strong>Progression :</strong> ${progression.direction ? `${progression.direction} ${interpretationProgression} (${progression.difference > 0 ? '+' : ''}${progression.difference} points)` : `${progression.interpretation} (${progression.nbArtefacts}/4 artefacts)`}</li>
-                <li><strong>Services :</strong> ${eleve.caf === 'Oui' ? '✓ CAF' : ''} ${eleve.sa === 'Oui' ? '✓ SA' : ''} ${eleve.caf !== 'Oui' && eleve.sa !== 'Oui' ? 'Aucun' : ''}</li>
-                ${genererHistoriqueInterventionsProfil(da)}
-            </ul>
-
-            <hr class="profil-separateur">
-
-            <div class="section-titre">Position sur l'échelle de risque</div>
-
-            <div class="profil-echelle-risque">
-                <div class="profil-echelle-barre" style="background: linear-gradient(to right,
-                            #2196F3 0%, #2196F3 20%,
-                            #28a745 20%, #28a745 35%,
-                            #ffc107 35%, #ffc107 50%,
-                            #ff9800 50%, #ff9800 70%,
-                            #dc3545 70%, #dc3545 100%);">
-                    ${directionRisque.symbole ? `<div style="position: absolute; left: ${Math.min(indices.R * 100, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: #333;">${directionRisque.symbole}</div>` : ''}
-                    <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(indices.R * 100, 100)}%;">▼</div>
-                    <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(indices.R * 100, 100)}%;">R = ${indices.R}</div>
-                </div>
-
-                <div class="legende-risque-container">
-                    <div class="legende-risque-item" style="left: 10%; color: #2196F3;">
-                        <span class="legende-risque-niveau">Minimal</span>
-                        <span class="legende-risque-seuil">0-0.19</span>
-                    </div>
-                    <div class="legende-risque-item" style="left: 27.5%; color: #28a745;">
-                        <span class="legende-risque-niveau">Faible</span>
-                        <span class="legende-risque-seuil">0.20-0.34</span>
-                    </div>
-                    <div class="legende-risque-item" style="left: 42.5%; color: #ffc107;">
-                        <span class="legende-risque-niveau">Modéré</span>
-                        <span class="legende-risque-seuil">0.35-0.49</span>
-                    </div>
-                    <div class="legende-risque-item" style="left: 60%; color: #ff9800;">
-                        <span class="legende-risque-niveau">Élevé</span>
-                        <span class="legende-risque-seuil">0.50-0.69</span>
-                    </div>
-                    <div class="legende-risque-item" style="left: 85%; color: #dc3545;">
-                        <span class="legende-risque-niveau">Critique</span>
-                        <span class="legende-risque-seuil">≥ 0.70</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section-titre">Pistes d'intervention</div>
-
-            <div style="border: 2px solid ${cibleInfo.niveau === 3 ? '#dc3545' : cibleInfo.niveau === 2 ? '#ffc107' : cibleInfo.cible.includes('Pratique autonome') ? '#2196F3' : '#28a745'}; border-left-width: 4px; padding: 12px 15px; border-radius: 4px; background: white;">
-                <div style="color: #333; line-height: 1.6; font-size: 0.95rem;">
-                    ${descriptionNiveau}
-                </div>
-            </div>
-
-            <hr class="profil-separateur">
-
-            <!-- Placeholder graphique (en conclusion) -->
-            <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
-                        padding: 30px 20px; text-align: center; color: var(--bleu-moyen); font-style: italic;">
-                📈 Évolution temporelle du risque (à venir)
-            </div>
-        </div>
-    `;
-}
-
-/**
  * Affiche le profil complet avec layout 2 colonnes
  * Inspiré de la page d'évaluation
  */
@@ -2707,36 +2584,22 @@ function afficherProfilComplet(da) {
     const etudiantPrecedent = indexActuel > 0 ? etudiants[indexActuel - 1] : null;
     const etudiantSuivant = indexActuel < etudiants.length - 1 ? etudiants[indexActuel + 1] : null;
 
-    // NOUVEAU (Beta 85): Déterminer quelle section afficher (section mémorisée ou 'cible' par défaut)
-    const sectionAffichee = sectionProfilActive || 'cible';
+    // NOUVEAU (Beta 85): Déterminer quelle section afficher (section mémorisée ou 'mobilisation' par défaut)
+    const sectionAffichee = sectionProfilActive || 'mobilisation';
 
     // Déterminer le titre et le contenu selon la section active
     let titreSection = '';
     let contenuSection = '';
 
-    if (sectionAffichee === 'cible') {
-        titreSection = 'Suivi de l\'apprentissage';
-        contenuSection = genererContenuCibleIntervention(da);
-    } else if (sectionAffichee === 'performance') {
+    if (sectionAffichee === 'performance') {
         titreSection = 'Développement des habiletés et compétences';
         contenuSection = genererSectionPerformance(da);
     } else if (sectionAffichee === 'mobilisation') {
-        titreSection = 'Mobilisation';
+        titreSection = 'Engagement';
         contenuSection = genererSectionMobilisationEngagement(da);
     } else if (sectionAffichee === 'rapport') {
         titreSection = 'Rapport';
-        contenuSection = `
-            <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
-                        padding: 40px 20px; text-align: center; color: var(--bleu-moyen);">
-                <div style="font-size: 2rem; margin-bottom: 15px;"></div>
-                <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">
-                    Rapport pour l'API
-                </div>
-                <div style="font-style: italic; font-size: 0.95rem;">
-                    Outil de composition de rapport destiné à l'aide pédagogique individuel (à venir)
-                </div>
-            </div>
-        `;
+        contenuSection = genererSectionRapport(da);
     } else if (sectionAffichee === 'accompagnement') {
         titreSection = 'Accompagnement';
         contenuSection = genererSectionAccompagnement(da);
@@ -2793,9 +2656,9 @@ function afficherProfilComplet(da) {
                 <div class="sidebar-liste">
                     <div class="sidebar-section-titre">OBSERVATIONS</div>
 
-                    <!-- 1. Suivi de l'apprentissage -->
-                    <div class="sidebar-item ${sectionAffichee === 'cible' ? 'active' : ''}" onclick="changerSectionProfil('cible')">
-                        <div class="sidebar-item-titre">Suivi de l'apprentissage</div>
+                    <!-- 1. Engagement -->
+                    <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" onclick="changerSectionProfil('mobilisation')">
+                        <div class="sidebar-item-titre">Engagement</div>
                     </div>
 
                     <!-- 2. Développement des habiletés -->
@@ -2803,17 +2666,12 @@ function afficherProfilComplet(da) {
                         <div class="sidebar-item-titre">Développement des habiletés</div>
                     </div>
 
-                    <!-- 3. Mobilisation -->
-                    <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" onclick="changerSectionProfil('mobilisation')">
-                        <div class="sidebar-item-titre">Mobilisation</div>
-                    </div>
-
-                    <!-- 4. Accompagnement -->
+                    <!-- 3. Accompagnement -->
                     <div class="sidebar-item ${sectionAffichee === 'accompagnement' ? 'active' : ''}" onclick="changerSectionProfil('accompagnement')">
                         <div class="sidebar-item-titre">Accompagnement</div>
                     </div>
 
-                    <!-- 5. Rapport -->
+                    <!-- 4. Rapport -->
                     <div class="sidebar-item ${sectionAffichee === 'rapport' ? 'active' : ''}" onclick="changerSectionProfil('rapport')">
                         <div class="sidebar-item-titre">Rapport</div>
                     </div>
@@ -2841,8 +2699,11 @@ function afficherProfilComplet(da) {
         if (typeof reattacherEvenementsToggles === 'function') {
             reattacherEvenementsToggles();
         }
-        // SUPPRIMÉ (Beta 85): Plus besoin de restaurer la section après coup,
-        // elle est maintenant générée directement avec la bonne section active
+
+        // Restaurer les préférences du rapport si on est sur cette section
+        if (sectionAffichee === 'rapport') {
+            restaurerPreferencesRapport(da);
+        }
     }, 100);
 
     console.log('✅ Profil affiché (layout 2 colonnes) pour:', eleve.prenom, eleve.nom);
@@ -3469,17 +3330,20 @@ function calculerMoyennesCriteres(da) {
 
     console.log('  Scores extraits:', scoresCriteres);
 
-    // Calculer les moyennes
+    // Calculer les moyennes avec clés en majuscule initiale pour cohérence
     const moyennes = {};
     let aucuneDonnee = true;
 
     Object.keys(scoresCriteres).forEach(critere => {
         const scores = scoresCriteres[critere];
+        // Convertir la clé en majuscule initiale (structure → Structure)
+        const cleFormatee = critere.charAt(0).toUpperCase() + critere.slice(1);
+
         if (scores.length > 0) {
-            moyennes[critere] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+            moyennes[cleFormatee] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
             aucuneDonnee = false;
         } else {
-            moyennes[critere] = null;
+            moyennes[cleFormatee] = null;
         }
     });
 
@@ -4698,12 +4562,31 @@ function genererSectionPerformance(da) {
                         }));
                     }
 
-                    // Générer le gradient CSS basé sur les niveaux
-                    const gradientStops = niveaux.map((niveau, i) => {
-                        return `${niveau.couleur} ${niveau.min}%, ${niveau.couleur} ${i < niveaux.length - 1 ? niveaux[i + 1].min : niveau.max}%`;
-                    }).join(', ');
+                    // Générer le gradient CSS basé sur les niveaux avec transitions douces
+                    const gradientStops = [];
+                    niveaux.forEach((niveau, i) => {
+                        if (i === 0) {
+                            // Premier niveau : début jusqu'à 2% avant la prochaine jonction
+                            gradientStops.push(`${niveau.couleur} ${niveau.min}%`);
+                            if (i < niveaux.length - 1) {
+                                const nextMin = niveaux[i + 1].min;
+                                gradientStops.push(`${niveau.couleur} ${nextMin - 2}%`);
+                            } else {
+                                gradientStops.push(`${niveau.couleur} ${niveau.max}%`);
+                            }
+                        } else if (i === niveaux.length - 1) {
+                            // Dernier niveau : 2% après la jonction précédente jusqu'à la fin
+                            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
+                            gradientStops.push(`${niveau.couleur} ${niveau.max}%`);
+                        } else {
+                            // Niveaux intermédiaires : 2% après jonction précédente, 2% avant jonction suivante
+                            gradientStops.push(`${niveau.couleur} ${niveau.min + 2}%`);
+                            const nextMin = niveaux[i + 1].min;
+                            gradientStops.push(`${niveau.couleur} ${nextMin - 2}%`);
+                        }
+                    });
 
-                    const gradientCSS = `linear-gradient(to right, ${gradientStops})`;
+                    const gradientCSS = `linear-gradient(to right, ${gradientStops.join(', ')})`;
 
                     // Calculer les directions pour chaque critère
                     const directions = calculerDirectionsCriteres(da);
@@ -5093,15 +4976,28 @@ document.addEventListener('DOMContentLoaded', function() {
 /**
  * Génère un rapport de bilan pour l'API (version directe et professionnelle)
  * @param {string} da - Numéro DA de l'étudiant
+ * @param {Object} options - Options de sections à inclure
  * @returns {string} - Rapport en texte brut
  */
-function genererRapportAPI(da) {
-    // 🔄 FORCER le recalcul des indices C et P avant génération du rapport
+function genererRapportAPI(da, options = {}) {
+    // Options par défaut
+    const opts = {
+        identification: true,
+        assiduite: true,
+        completion: true,
+        performance: true,
+        apprentissage: true,
+        interventions: true,
+        date: true,
+        afficherDetails: true,
+        ...options
+    };
+
+    // 🔄 FORCER le recalcul des indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
     }
 
-    // Récupérer toutes les données nécessaires
     const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
     if (!etudiant) return 'Erreur : Étudiant non trouvé';
 
@@ -5109,107 +5005,126 @@ function genererRapportAPI(da) {
     const detailsA = obtenirDetailsAssiduite(da);
     const moyennes = calculerMoyennesCriteres(da);
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
-    const pattern = determinerPattern(indices.A / 100, indices.C / 100, indices.P / 100, moyennes);
     const risque = indices.R;
-    const cibleInfo = determinerCibleIntervention(da);
-    const niveauRai = {
-        niveau: cibleInfo.niveau,
-        titre: cibleInfo.niveau === 1 ? 'Suivi universel' : cibleInfo.niveau === 2 ? 'Intervention préventive' : 'Intervention intensive'
-    };
-    const progression = calculerProgressionEleve(da);
-    const interventions = typeof obtenirInterventionsEtudiant === 'function'
-        ? obtenirInterventionsEtudiant(da).filter(i => i.statut === 'completee')
-        : [];
-
-    // Date actuelle (sans l'heure)
-    const maintenant = new Date();
-    const dateRapport = maintenant.toLocaleDateString('fr-CA', {
-        year: 'numeric', month: 'long', day: 'numeric'
-    });
-
-    // Récupérer le nom du cours depuis config
-    const config = JSON.parse(localStorage.getItem('informationsCours') || '{}');
-    const nomCours = config.titre || 'Cours';
-
-    // Interprétation du risque
     const interpRisque = interpreterRisque(risque);
-
-    // Construire le rapport (format narratif et compact)
-    let rapport = '';
-    rapport += `BILAN PÉDAGOGIQUE en ${nomCours}\n`;
-    rapport += `En date du ${dateRapport}\n\n`;
-
-    // SYNTHÈSE DES OBSERVATIONS
-    rapport += 'SYNTHÈSE DES OBSERVATIONS\n';
-    rapport += `${etudiant.prenom}, ${etudiant.nom} (DA : ${etudiant.da})\n\n`;
-
-    // Assiduité (format narratif)
     const interpA = interpreterAssiduite(indices.A);
-    rapport += `${interpA.niveau} (${indices.A}%) \n`;
-    rapport += `    → ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes\n`;
-    rapport += `    → ${detailsA.absences.length} absence(s) ou retard(s)\n\n`;
-
-    // Complétion (format narratif)
     const interpC = interpreterCompletion(indices.C);
+    const interpP = interpreterPerformance(indices.P);
+
     const productions = obtenirDonneesSelonMode('productions') || [];
     const artefacts = productions.filter(p => p.type === 'artefact-portfolio');
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const nbRemis = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId).length;
-    rapport += `${interpC.niveau} (${indices.C}%)\n`;
-    rapport += `    → ${nbRemis} artefact(s) remis / ${artefacts.length} total\n\n`;
+    const nbManquants = artefacts.length - nbRemis;
 
-    // Performance (format narratif avec mention PAN)
-    const interpP = interpreterPerformance(indices.P);
-    rapport += `Performance de niveau "${interpP.niveau}" : moyenne PAN ${indices.P}%\n\n`;
+    const maintenant = new Date();
+    const dateRapport = maintenant.toLocaleDateString('fr-CA');
 
-    // Risque d'échec
-    rapport += `Risque d'échec ${interpRisque.niveau} (${risque.toFixed(2)})\n\n`;
+    let rapport = '';
 
-    // Tendances et progression (format compact)
-    if (progression) {
-        rapport += `Direction du risque : ${progression.direction} ${progression.interpretation}\n`;
-        rapport += `  Performance récente : ${progression.AM} (vs ${progression.AL} antérieur)\n\n`;
+    // 1. IDENTIFICATION
+    if (opts.identification) {
+        rapport += `${etudiant.prenom} ${etudiant.nom} (DA: ${etudiant.da})\n`;
     }
 
-    // Interventions RàI avec observations
-    if (interventions.length > 0) {
-        interventions.forEach((intervention) => {
-            const date = new Date(intervention.date + 'T12:00:00');
-            const dateStr = date.toLocaleDateString('fr-CA', {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-            });
-            const niveau = intervention.niveauRai || 'N/A';
+    // 2. ASSIDUITÉ
+    if (opts.assiduite) {
+        rapport += `Taux de présence au cours : ${interpA.niveau.toLowerCase()} (${indices.A}%)`;
+        if (opts.afficherDetails) {
+            rapport += ` - ${detailsA.heuresPresentes}h/${detailsA.heuresOffertes}h, ${detailsA.absences.length} absence(s)`;
+        }
+        rapport += `\n`;
+    }
 
-            // Format simplifié sur une ligne
-            rapport += `Intervention niveau ${niveau} le ${dateStr}\n`;
+    // 3. COMPLÉTION
+    if (opts.completion) {
+        rapport += `Taux de complétion des travaux : ${interpC.niveau.toLowerCase()} (${indices.C}%)`;
+        if (opts.afficherDetails) {
+            rapport += ` - ${nbRemis}/${artefacts.length} artefacts remis`;
+            if (nbManquants > 0) rapport += `, ${nbManquants} manquant(s)`;
+        }
+        rapport += `\n`;
+    }
 
-            // Observation : priorité à la note individuelle, sinon observation générale
-            let observation = '';
-            if (intervention.notesIndividuelles && intervention.notesIndividuelles[da]) {
-                observation = intervention.notesIndividuelles[da];
-            } else if (intervention.observations) {
-                observation = intervention.observations;
-            } else {
-                observation = '(aucune observation notée)';
+    // 4. PERFORMANCE
+    if (opts.performance) {
+        rapport += `Performance : ${interpP.niveau.toLowerCase()} (${indices.P}%)`;
+        if (opts.afficherDetails) {
+            rapport += ` - Détails SRPNF disponibles`;
+        }
+        rapport += `\n`;
+    }
+
+    // 5. APPRENTISSAGE (incluant risque, évolution et défi)
+    if (opts.apprentissage) {
+        // Risque d'échec
+        rapport += `Risque d'échec : ${interpRisque.niveau} (${(risque * 100).toFixed(0)}%)`;
+        if (opts.afficherDetails) {
+            rapport += ` - Calculé selon 1 - (A × C × P)`;
+        }
+        rapport += `\n`;
+
+        // Évolution
+        const progression = calculerProgressionEleve(da);
+        if (progression) {
+            const tendance = progression.direction === '↗' ? 'en amélioration'
+                          : progression.direction === '↘' ? 'en baisse'
+                          : 'en plateau';
+            rapport += `Apprentissage : présentement ${tendance}`;
+            if (opts.afficherDetails) {
+                rapport += ` (${progression.AM}% vs ${progression.AL}%)`;
             }
+            rapport += `\n`;
+        }
 
-            rapport += `Observation de l'enseignant : ${observation}\n\n`;
-        });
+        // Défi principal
+        if (diagnostic.principalDefi) {
+            rapport += `Défi principal : ${diagnostic.principalDefi.nom}\n`;
+        }
     }
 
-    return rapport;
+    // 6. INTERVENTIONS
+    if (opts.interventions) {
+        const interventions = typeof obtenirInterventionsEtudiant === 'function'
+            ? obtenirInterventionsEtudiant(da).filter(i => i.statut === 'completee')
+            : [];
+
+        if (interventions.length > 0) {
+            rapport += `Interventions complétées : ${interventions.length}\n`;
+            interventions.slice(-2).forEach(inter => {
+                const date = new Date(inter.date + 'T12:00:00');
+                const dateStr = date.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' });
+                rapport += `- ${dateStr}: ${inter.titre || 'Soutien pédagogique'}\n`;
+            });
+        }
+    }
+
+    // 7. DATE
+    if (opts.date) {
+        rapport += `Date : ${dateRapport}\n`;
+    }
+
+    return rapport.trim();
 }
 
 /**
  * Génère un rapport de bilan pour l'étudiant (version bienveillante et encadrante)
  * @param {string} da - Numéro DA de l'étudiant
+ * @param {Object} options - Options de sections à inclure
  * @returns {string} - Rapport en texte brut
  */
-function genererRapportEtudiant(da) {
-    // Récupérer toutes les données nécessaires
+function genererRapportEtudiant(da, options = {}) {
+    // Options par défaut
+    const opts = {
+        identification: true,
+        synthese: true,
+        indicateurs: true,
+        progression: true,
+        interventions: true,
+        recommandations: true,
+        ...options
+    };
+
     const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
     if (!etudiant) return 'Erreur : Étudiant non trouvé';
 
@@ -5217,187 +5132,117 @@ function genererRapportEtudiant(da) {
     const detailsA = obtenirDetailsAssiduite(da);
     const moyennes = calculerMoyennesCriteres(da);
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
-    const pattern = determinerPattern(indices.A / 100, indices.C / 100, indices.P / 100, moyennes);
     const risque = indices.R;
-    const progression = calculerProgressionEleve(da);
-    const interventions = typeof obtenirInterventionsEtudiant === 'function'
-        ? obtenirInterventionsEtudiant(da).filter(i => i.statut === 'completee')
-        : [];
 
-    // Date actuelle
+    const productions = obtenirDonneesSelonMode('productions') || [];
+    const artefacts = productions.filter(p => p.type === 'artefact-portfolio');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const nbRemis = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId).length;
+    const nbManquants = artefacts.length - nbRemis;
+
     const maintenant = new Date();
-    const dateRapport = maintenant.toLocaleDateString('fr-CA', {
-        year: 'numeric', month: 'long', day: 'numeric'
-    });
+    const dateRapport = maintenant.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    // Construire le rapport
+    const config = JSON.parse(localStorage.getItem('informationsCours') || '{}');
+    const nomCours = config.titre || 'ce cours';
+
     let rapport = '';
-    rapport += '==============================================\n';
-    rapport += 'BILAN DE MI-SESSION\n';
-    rapport += '==============================================\n\n';
 
-    rapport += `${etudiant.prenom} ${etudiant.nom}\n`;
-    rapport += `${dateRapport}\n\n`;
-
-    // Message d'accueil personnalisé selon situation
-    if (risque < 20) {
-        rapport += `Bonjour ${etudiant.prenom},\n\n`;
-        rapport += `Ton parcours dans ce cours se déroule très bien ! Ce bilan de mi-session te permet de voir où tu en es et comment continuer sur cette belle lancée.\n\n`;
-    } else if (risque < 40) {
-        rapport += `Bonjour ${etudiant.prenom},\n\n`;
-        rapport += `Ce bilan de mi-session te permet de faire le point sur ton parcours. Tu as développé certaines forces, et il y a quelques aspects à consolider pour assurer ta réussite.\n\n`;
-    } else {
-        rapport += `Bonjour ${etudiant.prenom},\n\n`;
-        rapport += `Ce bilan de mi-session est une occasion de faire le point ensemble sur ton parcours. Des défis se présentent, mais avec un plan d'action clair et du soutien, tu peux les surmonter.\n\n`;
+    // IDENTIFICATION
+    if (opts.identification) {
+        rapport += `Bonjour ${etudiant.prenom},\n`;
+        rapport += `${dateRapport}\n\n`;
     }
 
-    // SECTION : Participation et engagement
-    rapport += 'TA PARTICIPATION ET TON ENGAGEMENT\n';
-    rapport += '----------------------------------------------\n';
-
-    if (indices.A >= 95) {
-        rapport += `Assiduité : Excellente ! (${indices.A}%)\n`;
-        rapport += `Tu es présent·e de façon très régulière. Cette constance est un atout majeur pour ta réussite.\n\n`;
-    } else if (indices.A >= 80) {
-        rapport += `Assiduité : Bonne (${indices.A}%)\n`;
-        rapport += `Ta présence est généralement régulière. Continue sur cette voie !\n\n`;
-    } else if (indices.A >= 70) {
-        rapport += `Assiduité : Acceptable (${indices.A}%)\n`;
-        rapport += `Tu as manqué quelques cours (${detailsA.absences.length} absence(s)). Essaie d'améliorer ta présence pour la suite.\n\n`;
-    } else {
-        rapport += `Assiduité : Attention requise (${indices.A}%)\n`;
-        rapport += `Tes absences répétées (${detailsA.absences.length}) compromettent tes apprentissages. Il est important d'améliorer ta présence rapidement. Si tu rencontres des difficultés, n'hésite pas à en parler.\n\n`;
-    }
-
-    if (indices.C >= 90) {
-        rapport += `Remise des travaux : Excellente ! (${indices.C}%)\n`;
-        rapport += `Tu remets tes travaux de façon très régulière. Continue ainsi !\n\n`;
-    } else if (indices.C >= 70) {
-        rapport += `Remise des travaux : Bonne (${indices.C}%)\n`;
-        rapport += `Tu remets la majorité de tes travaux. Assure-toi de compléter tous les artefacts restants.\n\n`;
-    } else {
-        rapport += `Remise des travaux : À améliorer (${indices.C}%)\n`;
-        rapport += `Plusieurs travaux n'ont pas été remis. Il est essentiel de compléter tous les artefacts pour démontrer tes apprentissages. Besoin d'aide pour rattraper ? Viens me voir.\n\n`;
-    }
-
-    // SECTION : Performance et développement
-    rapport += 'TON DÉVELOPPEMENT DES COMPÉTENCES\n';
-    rapport += '----------------------------------------------\n';
-
-    if (indices.P >= 75) {
-        rapport += `Performance globale : ${indices.P}% - Tu maîtrises bien les compétences !\n\n`;
-    } else if (indices.P >= 65) {
-        rapport += `Performance globale : ${indices.P}% - Tes compétences sont en développement.\n\n`;
-    } else {
-        rapport += `Performance globale : ${indices.P}% - Tes compétences nécessitent un travail approfondi.\n\n`;
-    }
-
-    // Forces
-    if (diagnostic.forces.length > 0) {
-        rapport += `Tes forces (critères maîtrisés) :\n`;
-        diagnostic.forces.forEach((force, index) => {
-            rapport += `  • ${force.nom} : ${(force.score * 100).toFixed(0)}%\n`;
-        });
-        rapport += `\nCes forces sont précieuses ! Continue de les cultiver et appuie-toi dessus pour développer les autres aspects.\n\n`;
-    }
-
-    // Défis
-    if (diagnostic.defis.length > 0) {
-        rapport += `Aspects à développer :\n`;
-        diagnostic.defis.forEach((defi, index) => {
-            rapport += `  • ${defi.nom} : ${(defi.score * 100).toFixed(0)}%\n`;
-        });
-
-        if (diagnostic.principalDefi) {
-            rapport += `\nTon défi principal : ${diagnostic.principalDefi.nom}\n`;
-            rapport += `C'est sur cet aspect que tu devrais concentrer tes efforts. Je suis là pour t'accompagner dans cette amélioration.\n\n`;
+    // SYNTHÈSE
+    if (opts.synthese) {
+        if (risque < 20) {
+            rapport += `Ton parcours dans ${nomCours} se déroule très bien !\n\n`;
+        } else if (risque < 40) {
+            rapport += `Ce bilan te permet de faire le point sur ton parcours dans ${nomCours}.\n\n`;
         } else {
-            rapport += '\n';
+            rapport += `Faisons le point ensemble sur ton parcours dans ${nomCours}.\n\n`;
         }
     }
 
-    // SECTION : Progression
-    if (progression) {
-        rapport += 'TON ÉVOLUTION\n';
-        rapport += '----------------------------------------------\n';
+    // INDICATEURS
+    if (opts.indicateurs) {
+        rapport += `Présence: ${indices.A}% (${detailsA.heuresPresentes}h/${detailsA.heuresOffertes}h)`;
+        if (detailsA.absences.length > 0) rapport += `, ${detailsA.absences.length} absence(s)`;
+        rapport += `\n\n`;
 
-        if (progression.direction === '↗') {
-            rapport += `Bonne nouvelle : ta performance s'améliore ! (${progression.interpretation})\n`;
-            rapport += `Continue sur cette lancée, tes efforts portent leurs fruits.\n\n`;
-        } else if (progression.direction === '→') {
-            rapport += `Ta performance est stable. (${progression.interpretation})\n`;
-            rapport += `Pour progresser davantage, essaie de nouvelles stratégies d'apprentissage ou viens chercher des conseils.\n\n`;
-        } else if (progression.direction === '↘') {
-            rapport += `Ta performance a baissé récemment. (${progression.interpretation})\n`;
-            rapport += `Il est important d'inverser cette tendance. Viens me voir pour qu'on identifie ensemble les ajustements nécessaires.\n\n`;
+        rapport += `Remise des travaux: ${indices.C}% (${nbRemis}/${artefacts.length} remis)`;
+        if (nbManquants > 0) rapport += `, ${nbManquants} à compléter`;
+        rapport += `\n\n`;
+
+        rapport += `Performance: ${indices.P}%`;
+        if (indices.P >= 85) rapport += ` - Excellente maîtrise !`;
+        else if (indices.P >= 75) rapport += ` - Très bien !`;
+        else if (indices.P >= 65) rapport += ` - En développement`;
+        else rapport += ` - À approfondir`;
+        rapport += `\n\n`;
+
+        if (diagnostic.forces.length > 0) {
+            rapport += `Points forts: `;
+            rapport += diagnostic.forces.map(f => f.nom).join(', ');
+            rapport += `\n\n`;
         }
-    }
-
-    // SECTION : Soutien reçu
-    if (interventions.length > 0) {
-        rapport += `SOUTIEN PÉDAGOGIQUE REÇU (${interventions.length} rencontre(s))\n`;
-        rapport += '----------------------------------------------\n';
-        interventions.forEach((intervention, index) => {
-            const date = new Date(intervention.date + 'T12:00:00');
-            const dateStr = date.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' });
-            const duree = intervention.duree || 2;
-            rapport += `• ${dateStr} - ${duree}h : ${intervention.titre || 'Soutien pédagogique'}\n`;
-        });
-        rapport += '\n';
-    }
-
-    // SECTION : Recommandations et prochaines étapes
-    rapport += 'POUR LA SUITE\n';
-    rapport += '----------------------------------------------\n';
-
-    // Recommandations personnalisées selon situation
-    if (risque >= 70) {
-        rapport += `Ta situation actuelle nécessite un suivi rapproché. Voici ce qu'on va mettre en place ensemble :\n\n`;
-        rapport += `1. Rencontre obligatoire avec ton aide pédagogique individuel (API) dans les prochains jours\n`;
-        rapport += `2. Plan d'action personnalisé avec échéancier précis\n`;
-        rapport += `3. Rencontres hebdomadaires de suivi avec moi\n`;
-        rapport += `4. Ressources d'aide disponibles (tutorat, centre d'aide, etc.)\n\n`;
-        rapport += `N'oublie pas : demander de l'aide est un signe de force, pas de faiblesse. Je suis là pour t'accompagner.\n\n`;
-
-    } else if (risque >= 40) {
-        rapport += `Pour assurer ta réussite, voici ce que je te recommande :\n\n`;
-        rapport += `1. Venir me voir en disponibilité pour discuter de tes défis\n`;
-        rapport += `2. Participer aux séances de soutien pédagogique offertes\n`;
 
         if (diagnostic.principalDefi) {
-            rapport += `3. Travailler particulièrement le critère ${diagnostic.principalDefi.nom}\n`;
+            rapport += `Principal défi: ${diagnostic.principalDefi.nom}\n\n`;
         }
-
-        rapport += `4. Maintenir ta présence et ta remise des travaux\n\n`;
-        rapport += `Tu as les capacités de réussir. Avec quelques ajustements, tu peux y arriver !\n\n`;
-
-    } else if (risque >= 20) {
-        rapport += `Tu es sur la bonne voie ! Pour consolider ta réussite :\n\n`;
-        rapport += `1. Continue tes efforts de présence et de remise des travaux\n`;
-
-        if (diagnostic.principalDefi) {
-            rapport += `2. Porte attention au critère ${diagnostic.principalDefi.nom} pour progresser\n`;
-        }
-
-        rapport += `3. N'hésite pas à venir me voir si tu as des questions\n\n`;
-        rapport += `Tu as tout ce qu'il faut pour bien réussir ce cours !\n\n`;
-
-    } else {
-        rapport += `Excellent travail ! Pour maintenir ce niveau :\n\n`;
-        rapport += `1. Continue de cultiver tes forces\n`;
-        rapport += `2. Vise l'excellence en approfondissant encore tes compétences\n`;
-        rapport += `3. N'hésite pas à aider tes collègues qui en ont besoin\n\n`;
-        rapport += `Bravo pour ton engagement et ta persévérance !\n\n`;
     }
 
-    // Message de clôture
-    rapport += '----------------------------------------------\n\n';
-    rapport += `Je reste disponible pour discuter de ce bilan avec toi. N'hésite surtout pas à venir me voir si tu as des questions ou besoin de clarifications.\n\n`;
-    rapport += `Bonne continuation !\n\n`;
+    // PROGRESSION
+    if (opts.progression) {
+        const progression = calculerProgressionEleve(da);
+        if (progression) {
+            const evolution = progression.AM - progression.AL;
+            if (progression.direction === '↗') {
+                rapport += `Ta performance s'améliore (+${evolution.toFixed(1)} points). Continue tes efforts !\n\n`;
+            } else if (progression.direction === '↘') {
+                rapport += `Ta performance a baissé (${evolution.toFixed(1)} points). Viens me voir pour qu'on en discute.\n\n`;
+            }
+        }
+    }
 
-    rapport += '==============================================';
+    // INTERVENTIONS
+    if (opts.interventions) {
+        const interventions = typeof obtenirInterventionsEtudiant === 'function'
+            ? obtenirInterventionsEtudiant(da).filter(i => i.statut === 'completee')
+            : [];
 
-    return rapport;
+        if (interventions.length > 0) {
+            rapport += `Rencontres de soutien: ${interventions.length}\n`;
+            interventions.slice(-2).forEach(inter => {
+                const date = new Date(inter.date + 'T12:00:00');
+                const dateStr = date.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' });
+                rapport += `- ${dateStr}: ${inter.titre || 'Soutien pédagogique'}\n`;
+            });
+            rapport += `\n`;
+        }
+    }
+
+    // RECOMMANDATIONS
+    if (opts.recommandations) {
+        if (risque >= 70) {
+            rapport += `Ta situation nécessite un suivi rapproché. Rencontre obligatoire avec ton API dans les prochains jours.\n`;
+            if (nbManquants > 0) rapport += `Priorité: compléter les ${nbManquants} travaux manquants.\n`;
+            rapport += `Demander de l'aide est un signe de maturité. Je suis là pour t'accompagner.\n`;
+        } else if (risque >= 40) {
+            rapport += `Pour assurer ta réussite, viens me voir en disponibilité.\n`;
+            if (nbManquants > 0) rapport += `Assure-toi de bien gérer ton temps pour compléter les ${nbManquants} travaux manquants.\n`;
+            if (detailsA.absences.length >= 3) rapport += `Améliore ta présence en classe.\n`;
+            rapport += `Tu as les capacités de réussir !\n`;
+        } else if (risque >= 20) {
+            rapport += `Tu es sur la bonne voie ! Continue tes efforts.\n`;
+            if (diagnostic.principalDefi) rapport += `Concentre-toi sur: ${diagnostic.principalDefi.nom}.\n`;
+        } else {
+            rapport += `Excellent travail ! Continue ainsi.\n`;
+        }
+    }
+
+    return rapport.trim();
 }
 
 /**
@@ -5411,68 +5256,80 @@ function genererSectionRapport(da) {
 
     return `
         <div style="max-width: 900px;">
-            <!-- En-tête -->
-            <div style="background: var(--bleu-tres-pale); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--bleu-principal);">
-                <h3 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Rapport de bilan pédagogique</h3>
-                <p style="margin: 0; color: var(--bleu-moyen); font-size: 0.95rem;">
-                    Générez un rapport de bilan pour ${etudiant.prenom} ${etudiant.nom}. Deux versions sont disponibles selon le destinataire.
-                </p>
-            </div>
+            <!-- Carte principale (Proposition 2) -->
+            <div class="profil-carte">
+                <!-- En-tête minimaliste -->
+                <h3 style="margin: 0 0 20px 0; color: var(--bleu-principal); font-size: 1.1rem; border-bottom: 2px solid var(--bleu-pale); padding-bottom: 10px;">
+                    Rapport de bilan pédagogique
+                </h3>
 
-                        <!-- Note informative -->
-            <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; font-size: 0.9rem; color: var(--bleu-moyen);">
-                <strong>Note :</strong> Le rapport est généré à la demande avec les données actuelles.
-                Il n'est pas sauvegardé automatiquement. Utilisez le bouton "Copier" pour transférer le contenu
-                vers votre destination (courriel, formulaire web, document, etc.).
-            </div>
+                <!-- Grid 2 colonnes : Paramètres + Actions -->
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: start;">
+                    <!-- Colonne gauche : Paramètres -->
+                    <div>
+                        <!-- Sections à inclure -->
+                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Sections à inclure
+                        </div>
+                        <div class="grille-checkboxes" style="margin-bottom: 10px;">
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="inclure-identification-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                Identification
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="inclure-assiduite-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                Assiduité
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="inclure-completion-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                Complétion
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="inclure-performance-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                Performance
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="inclure-apprentissage-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                Apprentissage
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="inclure-interventions-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                Interventions
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="inclure-date-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                Date
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="afficher-details-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                Précisions
+                            </label>
+                        </div>
 
-            <!-- Sélecteur de version -->
-            <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
-                <label style="font-weight: 600; color: var(--bleu-principal);">Version :</label>
-                <div style="display: flex; gap: 10px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 16px; border-radius: 6px; background: var(--bleu-tres-pale); border: 2px solid var(--bleu-principal);">
-                        <input type="radio" name="version-rapport-${da}" value="api" checked onchange="genererEtAfficherRapport('${da}')">
-                        <span style="font-weight: 500;">Pour l'API</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 16px; border-radius: 6px; background: var(--bleu-tres-pale); border: 1px solid var(--bleu-pale);">
-                        <input type="radio" name="version-rapport-${da}" value="etudiant" onchange="genererEtAfficherRapport('${da}')">
-                        <span style="font-weight: 500;">Pour l'étudiant</span>
-                    </label>
+                        <!-- Note discrète -->
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0; font-size: 0.85rem; color: #999;">
+                            Le rapport est généré à la demande avec les données actuelles et n'est pas sauvegardé automatiquement. Vous pouvez modifier le texte avant de le copier.
+                        </div>
+                    </div>
+
+                    <!-- Colonne droite : Actions -->
+                    <div style="display: flex; flex-direction: column; gap: 10px; min-width: 180px;">
+                        <button class="btn btn-principal" style="width: 100%;" onclick="genererEtAfficherRapport('${da}')">
+                            Rafraîchir
+                        </button>
+                        <button class="btn btn-secondaire" style="width: 100%;" onclick="copierRapport('${da}')">
+                            Copier
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Description de la version -->
-            <div id="description-version-${da}" style="padding: 12px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; margin-bottom: 15px; font-size: 0.9rem;">
-                Version professionnelle et directe, avec alertes et recommandations pour l'aide pédagogique individuel.
-            </div>
-
-            <!-- Actions -->
-            <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-start;">
-                <button onclick="genererEtAfficherRapport('${da}')" class="btn btn-principal">
-                    ✨ Générer le rapport
-                </button>
-                <button onclick="viderRapport('${da}')" class="btn btn-secondaire">
-                    🗑️ Effacer
-                </button>
-            </div>
-
-            <!-- Zone de texte du rapport -->
-            <div style="position: relative;">
+            <!-- Zone de texte du rapport (séparée et éditable) -->
+            <div style="position: relative; margin-top: 15px;">
                 <textarea id="textarea-rapport-${da}"
-                          readonly
-                          style="width: 100%; height: 600px; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.9rem; border: 2px solid var(--bleu-pale); border-radius: 6px; resize: vertical; line-height: 1.6; background: #f8f9fa;">Cliquez sur "Générer le rapport" pour afficher le contenu...</textarea>
-
-                <!-- Bouton copier (positionné en haut à droite) -->
-                <button id="btn-copier-rapport-${da}"
-                        onclick="copierRapport('${da}')"
-                        class="btn btn-secondaire"
-                        style="position: absolute; top: 10px; right: 10px; padding: 8px 16px; font-size: 0.9rem;"
-                        disabled>
-                    📋 Copier
-                </button>
+                          placeholder="Le rapport apparaîtra ici. Vous pourrez ensuite le modifier avant de le copier."
+                          style="width: 100%; height: 300px; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.9rem; border: 2px solid var(--bleu-pale); border-radius: 6px; resize: none; line-height: 1.6; background: white; overflow-y: auto;"></textarea>
             </div>
-
-            
         </div>
     `;
 }
@@ -5483,41 +5340,31 @@ function genererSectionRapport(da) {
  */
 function genererEtAfficherRapport(da) {
     const textarea = document.getElementById(`textarea-rapport-${da}`);
-    const btnCopier = document.getElementById(`btn-copier-rapport-${da}`);
-    const descriptionDiv = document.getElementById(`description-version-${da}`);
 
     if (!textarea) {
         console.error('Textarea non trouvé');
         return;
     }
 
-    // Déterminer la version sélectionnée
-    const radioAPI = document.querySelector(`input[name="version-rapport-${da}"][value="api"]`);
-    const radioEtudiant = document.querySelector(`input[name="version-rapport-${da}"][value="etudiant"]`);
+    // Sauvegarder les préférences
+    sauvegarderPreferencesRapport(da);
 
-    const estVersionAPI = radioAPI && radioAPI.checked;
+    // Lire les options de sections à inclure
+    const options = {
+        identification: document.getElementById(`inclure-identification-${da}`)?.checked ?? true,
+        assiduite: document.getElementById(`inclure-assiduite-${da}`)?.checked ?? true,
+        completion: document.getElementById(`inclure-completion-${da}`)?.checked ?? true,
+        performance: document.getElementById(`inclure-performance-${da}`)?.checked ?? true,
+        apprentissage: document.getElementById(`inclure-apprentissage-${da}`)?.checked ?? true,
+        interventions: document.getElementById(`inclure-interventions-${da}`)?.checked ?? true,
+        date: document.getElementById(`inclure-date-${da}`)?.checked ?? true,
+        afficherDetails: document.getElementById(`afficher-details-${da}`)?.checked ?? true
+    };
 
-    // Mettre à jour la description
-    if (descriptionDiv) {
-        if (estVersionAPI) {
-            descriptionDiv.style.background = '#fff3cd';
-            descriptionDiv.style.borderLeft = '4px solid #ffc107';
-            descriptionDiv.innerHTML = 'Version professionnelle et directe, avec alertes et recommandations pour l\'aide pédagogique individuel.';
-        } else {
-            descriptionDiv.style.background = '#d1ecf1';
-            descriptionDiv.style.borderLeft = '4px solid #17a2b8';
-            descriptionDiv.innerHTML = 'Version bienveillante et encadrante, adaptée pour communiquer avec l\'étudiant (rétroaction formative).';
-        }
-    }
-
-    // Générer le rapport
+    // Générer le rapport (toujours version API)
     let rapport = '';
     try {
-        if (estVersionAPI) {
-            rapport = genererRapportAPI(da);
-        } else {
-            rapport = genererRapportEtudiant(da);
-        }
+        rapport = genererRapportAPI(da, options);
     } catch (error) {
         rapport = `Erreur lors de la génération du rapport :\n\n${error.message}`;
         console.error('Erreur génération rapport:', error);
@@ -5526,12 +5373,7 @@ function genererEtAfficherRapport(da) {
     // Afficher le rapport
     textarea.value = rapport;
 
-    // Activer le bouton copier
-    if (btnCopier) {
-        btnCopier.disabled = false;
-    }
-
-    console.log(`✅ Rapport ${estVersionAPI ? 'API' : 'étudiant'} généré pour DA ${da}`);
+    console.log(`✅ Rapport généré pour DA ${da}`);
 }
 
 /**
@@ -5541,7 +5383,7 @@ function genererEtAfficherRapport(da) {
 function copierRapport(da) {
     const textarea = document.getElementById(`textarea-rapport-${da}`);
 
-    if (!textarea || !textarea.value || textarea.value === 'Cliquez sur "Générer le rapport" pour afficher le contenu...') {
+    if (!textarea || !textarea.value || textarea.value.trim() === '') {
         alert('Veuillez d\'abord générer un rapport avant de le copier.');
         return;
     }
@@ -5618,5 +5460,60 @@ function viderRapport(da) {
 
     if (btnCopier) {
         btnCopier.disabled = true;
+    }
+}
+
+/**
+ * Sauvegarde les préférences du rapport dans localStorage
+ * @param {string} da - Numéro DA
+ */
+function sauvegarderPreferencesRapport(da) {
+    const preferences = {
+        identification: document.getElementById(`inclure-identification-${da}`)?.checked ?? true,
+        assiduite: document.getElementById(`inclure-assiduite-${da}`)?.checked ?? true,
+        completion: document.getElementById(`inclure-completion-${da}`)?.checked ?? true,
+        performance: document.getElementById(`inclure-performance-${da}`)?.checked ?? true,
+        apprentissage: document.getElementById(`inclure-apprentissage-${da}`)?.checked ?? true,
+        interventions: document.getElementById(`inclure-interventions-${da}`)?.checked ?? true,
+        date: document.getElementById(`inclure-date-${da}`)?.checked ?? true,
+        afficherDetails: document.getElementById(`afficher-details-${da}`)?.checked ?? true
+    };
+
+    localStorage.setItem('preferencesRapport', JSON.stringify(preferences));
+}
+
+/**
+ * Restaure les préférences du rapport depuis localStorage
+ * @param {string} da - Numéro DA
+ */
+function restaurerPreferencesRapport(da) {
+    const preferencesJson = localStorage.getItem('preferencesRapport');
+
+    try {
+        let preferences = null;
+        if (preferencesJson) {
+            preferences = JSON.parse(preferencesJson);
+        }
+
+        // Restaurer les checkboxes de sections
+        const sections = ['identification', 'assiduite', 'completion', 'performance', 'apprentissage', 'interventions', 'date'];
+        sections.forEach(section => {
+            const checkbox = document.getElementById(`inclure-${section}-${da}`);
+            if (checkbox && preferences && preferences[section] !== undefined) {
+                checkbox.checked = preferences[section];
+            }
+        });
+
+        // Restaurer la checkbox de détails
+        const checkboxDetails = document.getElementById(`afficher-details-${da}`);
+        if (checkboxDetails && preferences && preferences.afficherDetails !== undefined) {
+            checkboxDetails.checked = preferences.afficherDetails;
+        }
+
+        // Générer automatiquement le rapport après restauration des préférences
+        genererEtAfficherRapport(da);
+
+    } catch (error) {
+        console.error('Erreur lors de la restauration des préférences:', error);
     }
 }

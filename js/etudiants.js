@@ -1179,5 +1179,5 @@ window.initialiserModuleListeEtudiants = initialiserModuleListeEtudiants;
 window.rechargerListeEtudiants = rechargerListeEtudiants;
 window.chargerListeEtudiants = chargerListeEtudiants;
 window.afficherListeEtudiantsConsultation = afficherListeEtudiantsConsultation;
-window.trierTableau = trierTableau;
+window.trierTableauPar = trierTableauPar;
 window.obtenirNomProgramme = obtenirNomProgramme;
