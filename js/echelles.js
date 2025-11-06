@@ -1553,7 +1553,7 @@ window.supprimerNiveau = supprimerNiveau;
 window.basculerVerrouillageNiveau = basculerVerrouillageNiveau;
 window.reinitialiserNiveauxDefaut = reinitialiserNiveauxDefaut;
 // window.afficherEchellesPerformance = afficherEchellesPerformance; // FIXME: fonction n'existe pas
-window.fermerModalEchelles = fermerModalEchelles;
+// window.fermerModalEchelles = fermerModalEchelles; // FIXME: fonction n'existe pas
 window.convertirNiveauVersNote = convertirNiveauVersNote;
 window.convertirNoteVersNiveau = convertirNoteVersNiveau;
 

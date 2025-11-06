@@ -3552,6 +3552,14 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 20px;
 }
 
+/* Grid 3 colonnes pour engagement (A, C, P) */
+.profil-grid-3col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
 /* Grid indicateurs */
 .profil-grid-indicateurs {
     display: grid;
@@ -4257,6 +4265,72 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     opacity: 0.9;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge completion pour colonne C (format comme Assiduité) */
+.badge-completion-remis {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #28a74522;
+    border: 2px solid #28a745;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+.badge-completion-remis:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+    opacity: 1;
+}
+
+.badge-completion-non-remis {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #99999922;
+    border: 2px solid #999;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.badge-completion-non-remis:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0.9;
+}
+
+.badge-completion-titre {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+.badge-completion-non-remis .badge-completion-titre {
+    color: #666;
+}
+
+.badge-completion-numero {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.badge-completion-remis .badge-completion-numero {
+    background: #28a745;
+    color: white;
+}
+
+.badge-completion-non-remis .badge-completion-numero {
+    background: #999;
+    color: white;
 }
 
 /* Timeline intervention (format compact pour Accompagnement) */
