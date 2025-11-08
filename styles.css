@@ -4674,6 +4674,40 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     background-color: var(--bleu-tres-pale);
 }
 
+/* Ligne grisée pour évaluations remplacées */
+#corps-tableau-evaluations tr.eval-remplacee {
+    background-color: #f5f5f5;
+    opacity: 0.7;
+}
+
+/* Alignement centré pour colonnes Niveau et Note */
+#corps-tableau-evaluations td.text-center {
+    text-align: center;
+}
+
+/* Actions sans retour à la ligne */
+#corps-tableau-evaluations td.actions {
+    white-space: nowrap;
+}
+
+/* Badges de jetons */
+.badge-jeton {
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    margin-left: 8px;
+}
+
+.badge-jeton-reprise {
+    background-color: #9c27b0;
+}
+
+.badge-jeton-delai {
+    background-color: #ff6f00;
+}
+
 /* ===============================
    ANIMATIONS
    =============================== */
