@@ -1558,7 +1558,8 @@ function chargerListeEvaluationsRefonte() {
     // Récupérer toutes les données
     const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
     const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const indicesA = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
+    // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : saisie-presences.js génère indicesAssiduiteDetailles
+    const indicesAssiduiteDetailles = JSON.parse(localStorage.getItem('indicesAssiduiteDetailles') || '{}');
     // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : portfolio.js génère indicesCP
     const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
 
@@ -1579,18 +1580,26 @@ function chargerListeEvaluationsRefonte() {
     donneesEvaluationsFiltrees = etudiants.map(etudiant => {
         const evalsEtudiant = evaluationsParEtudiant[etudiant.da] || [];
 
+        // 🎯 Lire l'indice A depuis saisie-presences.js (Single Source of Truth)
+        const indiceA = indicesAssiduiteDetailles[etudiant.da]?.actuel?.indice ?? 0;
+
         // 🎯 Lire les indices C et P depuis portfolio.js (Single Source of Truth)
         // Utiliser la pratique active (SOM ou PAN)
         const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel?.[pratique] || null;
         const indiceC = indicesCPEtudiant && typeof indicesCPEtudiant.C === 'number' ? indicesCPEtudiant.C / 100 : 0;
         const indiceP = indicesCPEtudiant && typeof indicesCPEtudiant.P === 'number' ? indicesCPEtudiant.P / 100 : 0;
 
+        // Calculer l'indice R (Risque) = 1 - (A × C × P)
+        const indiceR = 1 - (indiceA * indiceC * indiceP);
+
         return {
             ...etudiant,
             evaluations: evalsEtudiant,
             indices: {
+                assiduite: indiceA,
                 completion: indiceC,
-                performance: indiceP
+                performance: indiceP,
+                risque: indiceR
             }
         };
     });
@@ -2044,12 +2053,36 @@ function trierListeEvaluations() {
             });
             break;
 
+        case 'assiduite-asc':
+            donneesTries.sort((a, b) => a.indices.assiduite - b.indices.assiduite);
+            break;
+
+        case 'assiduite-desc':
+            donneesTries.sort((a, b) => b.indices.assiduite - a.indices.assiduite);
+            break;
+
         case 'completion-asc':
             donneesTries.sort((a, b) => a.indices.completion - b.indices.completion);
             break;
 
         case 'completion-desc':
             donneesTries.sort((a, b) => b.indices.completion - a.indices.completion);
+            break;
+
+        case 'performance-asc':
+            donneesTries.sort((a, b) => a.indices.performance - b.indices.performance);
+            break;
+
+        case 'performance-desc':
+            donneesTries.sort((a, b) => b.indices.performance - a.indices.performance);
+            break;
+
+        case 'risque-asc':
+            donneesTries.sort((a, b) => a.indices.risque - b.indices.risque);
+            break;
+
+        case 'risque-desc':
+            donneesTries.sort((a, b) => b.indices.risque - a.indices.risque);
             break;
     }
 
@@ -2216,20 +2249,21 @@ function echapperHtml(texte) {
 /**
  * Ajouter à la fonction d'initialisation existante
  */
-function initialiserListeEvaluations() {
-    console.log('Initialisation de la liste des évaluations');
-
-    const sousSection = document.getElementById('evaluations-liste');
-    if (!sousSection) {
-        console.log('⚠️ Sous-section liste évaluations non trouvée');
-        return;
-    }
-
-    // Charger la liste refaite
-    chargerListeEvaluationsRefonte();
-
-    console.log('✅ Liste des évaluations initialisée');
-}
+// DÉSACTIVÉ : Cette fonction est maintenant gérée par liste-evaluations.js (vue tableau)
+// function initialiserListeEvaluations() {
+//     console.log('Initialisation de la liste des évaluations');
+//
+//     const sousSection = document.getElementById('evaluations-liste');
+//     if (!sousSection) {
+//         console.log('⚠️ Sous-section liste évaluations non trouvée');
+//         return;
+//     }
+//
+//     // Charger la liste refaite
+//     chargerListeEvaluationsRefonte();
+//
+//     console.log('✅ Liste des évaluations initialisée');
+// }
 
 // Appeler lors du changement vers cette sous-section
 // Ou ajouter dans le module existant
@@ -4097,6 +4131,7 @@ function ouvrirBanqueAvecRecherche() {
 }
 
 // Exporter les fonctions
-window.filtrerListeEvaluations = filtrerListeEvaluations;
+// window.filtrerListeEvaluations = filtrerListeEvaluations; // DÉSACTIVÉ : Géré par liste-evaluations.js
 window.filtrerBanqueEvaluations = filtrerBanqueEvaluations;
 window.ouvrirBanqueAvecRecherche = ouvrirBanqueAvecRecherche;
+window.modifierEvaluationParId = modifierEvaluation; // Export sous un nom différent pour éviter conflit avec liste-evaluations.js
