@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 90 - Snapshots et suivi longitudinal</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=2025110809">
+    <link rel="stylesheet" href="styles.css?v=2025110810">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3369,23 +3369,9 @@
                             <label for="filtre-statut-eval">Filtrer par statut</label>
                             <select id="filtre-statut-eval" class="controle-form" onchange="filtrerListeEvaluations()">
                                 <option value="">Tous</option>
+                                <option value="actives">Actives</option>
                                 <option value="evalue">Évalués seulement</option>
                                 <option value="non-evalue">Non évalués</option>
-                                <option value="risque">À risque</option>
-                            </select>
-                        </div>
-                        <div class="groupe-form">
-                            <label for="tri-evaluations">Trier</label>
-                            <select id="tri-evaluations" class="controle-form" onchange="trierListeEvaluations()">
-                                <option value="nom-asc">Par ordre alphabétique de nom (A→Z)</option>
-                                <option value="assiduite-asc">Par assiduité croissante (↑)</option>
-                                <option value="assiduite-desc">Par assiduité décroissante (↓)</option>
-                                <option value="completion-asc">Par complétion croissante (↑)</option>
-                                <option value="completion-desc">Par complétion décroissante (↓)</option>
-                                <option value="performance-asc">Par performance croissante (↑)</option>
-                                <option value="performance-desc">Par performance décroissante (↓)</option>
-                                <option value="risque-asc">Par risque croissant (↑)</option>
-                                <option value="risque-desc">Par risque décroissant (↓)</option>
                             </select>
                         </div>
                         <button class="btn btn-principal btn-compact" onclick="reinitialiserFiltresEval()"
@@ -3413,6 +3399,11 @@
                         <div style="color: #666;" id="moyenne-evaluations"></div>
                         <div style="color: #666;" id="nb-productions"></div>
                     </div>
+                </div>
+
+                <!-- Note d'information -->
+                <div class="alerte-info" style="margin-bottom: 20px;">
+                    <strong>Actions disponibles :</strong> Vous pouvez consulter, verrouiller (🔒) ou supprimer (🗑️) chaque évaluation directement depuis le tableau ci-dessous.
                 </div>
 
                 <!-- Zone de chargement -->
@@ -3480,24 +3471,11 @@
                             <!-- Boutons de gestion des évaluations -->
                             <div class="groupe-boutons-colonne" class="mb-15">
                                 <div class="groupe-boutons-ligne">
-                                    <button class="btn btn-modifier btn-tres-compact btn-largeur-auto" onclick="ouvrirBanqueEvaluations()"
-                                        title="Parcourir les évaluations sauvegardées et en charger une">
-                                        Charger
-                                    </button>
-
                                     <button class="btn btn-modifier btn-tres-compact btn-largeur-auto" onclick="afficherModalReparationEvaluations()"
                                         title="Réparer les évaluations avec critères manquants"
                                         style="font-size: 1.2rem; padding: 4px 10px;">
                                         Réparer
                                     </button>
-                                </div>
-
-                                <!-- Champ de recherche rapide -->
-                                <div class="mt-10">
-                                    <input type="text" id="recherche-rapide-evaluation" class="controle-form"
-                                        placeholder="Rechercher une évaluation..."
-                                        onfocus="ouvrirBanqueAvecRecherche()"
-                                        class="text-09">
                                 </div>
 
                                 <div class="groupe-boutons-ligne" class="mt-10">
@@ -3683,76 +3661,6 @@
                 </div><!-- fin carte du layout évaluation -->
 
             </div><!-- fin sous-section evaluations-individuelles -->
-
-            <!-- MODAL: Banque d'évaluations (Charger une évaluation) -->
-            <div id="modalBanqueEvaluations" class="modal-overlay">
-                <div class="modal-contenu modal-large">
-                    <button onclick="fermerBanqueEvaluations()" class="modal-fermer">✕</button>
-
-                    <h2 class="modal-titre">Banque d'évaluations</h2>
-                    <p style="color: #666; margin-bottom: 20px;">Parcourez toutes les évaluations sauvegardées et sélectionnez-en une pour la charger dans le formulaire.</p>
-
-                    <div class="alerte-info" style="margin-bottom: 20px;">
-                        <strong>Note :</strong> C'est uniquement ici que vous pouvez supprimer des évaluations.
-                    </div>
-
-                    <!-- Filtres -->
-                    <div class="grille-4-colonnes" class="carte-mb20-grise">
-                        <div>
-                            <label class="label-formulaire">Groupe</label>
-                            <select id="filtreBanqueGroupe" onchange="filtrerBanqueEvaluations()" class="controle-form">
-                                <option value="">Tous les groupes</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="label-formulaire">Étudiant</label>
-                            <select id="filtreBanqueEtudiant" onchange="filtrerBanqueEvaluations()" class="controle-form">
-                                <option value="">Tous les étudiants</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="label-formulaire">Production</label>
-                            <select id="filtreBanqueProduction" onchange="filtrerBanqueEvaluations()" class="controle-form">
-                                <option value="">Toutes les productions</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="label-formulaire">Trier par</label>
-                            <select id="triBanqueEvaluation" onchange="filtrerBanqueEvaluations()" class="controle-form">
-                                <option value="date-desc">Date (plus récent)</option>
-                                <option value="date-asc">Date (plus ancien)</option>
-                                <option value="groupe-asc">Groupe (A-Z)</option>
-                                <option value="etudiant-asc">Étudiant (A-Z)</option>
-                                <option value="production-asc">Production (A-Z)</option>
-                                <option value="note-desc">Note (plus haute)</option>
-                                <option value="note-asc">Note (plus basse)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Actions globales -->
-                    <div class="d-flex-gap8-mb20">
-                        <button class="btn btn-principal btn-compact" onclick="verrouillerToutesEvaluations(true)">
-                            Verrouiller tout
-                        </button>
-                        <button class="btn btn-annuler btn-compact" onclick="verrouillerToutesEvaluations(false)">
-                            Déverrouiller tout
-                        </button>
-                    </div>
-
-                    <!-- Champ de recherche -->
-                    <div class="mb-15">
-                        <input type="text" id="recherche-banque-evaluations" class="controle-form"
-                            placeholder="Rechercher une évaluation (étudiant, production)..."
-                            oninput="filtrerBanqueEvaluations()">
-                    </div>
-
-                    <!-- Liste des évaluations -->
-                    <div id="listeBanqueEvaluations" class="overflow-y-500">
-                        <!-- Généré par JS -->
-                    </div>
-                </div>
-            </div>
 
             <!-- Modal Réparation des évaluations -->
             <div id="modalReparationEvaluations" class="modal-overlay">
@@ -8453,7 +8361,7 @@ Exemple :
     <!-- PRIORITÉ 6: Modules avancés -->
     <script src="js/import-export.js?v=1761387764"></script>
     <script src="js/statistiques.js"></script>
-    <script src="js/liste-evaluations.js?v=2025110819"></script>
+    <script src="js/liste-evaluations.js?v=2025110828"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation.js?v=2025110507"></script>

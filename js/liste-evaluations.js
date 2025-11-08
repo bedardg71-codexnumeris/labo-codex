@@ -443,29 +443,62 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
     // Pour chaque élève et chaque production, créer une ligne
     etudiants.forEach(etudiant => {
         productionsAEvaluer.forEach(production => {
-            // Chercher si une évaluation existe
-            const evaluation = evaluations.find(ev =>
+            // IMPORTANT : Chercher TOUTES les évaluations (pas seulement la première)
+            // Car avec les jetons, il peut y avoir l'originale + la nouvelle
+            const evaluationsTrouvees = evaluations.filter(ev =>
                 ev.etudiantDA === etudiant.da && ev.productionId === production.id
             );
 
-            if (evaluation) {
-                // Évaluation existante
-                lignes.push({
-                    da: etudiant.da,
-                    nom: etudiant.nom || '',
-                    prenom: etudiant.prenom || '',
-                    groupe: etudiant.groupe,
-                    productionId: production.id,
-                    productionNom: production.titre,
-                    grilleNom: evaluation.grilleNom || '-',
-                    cartoucheId: evaluation.cartoucheId || null,
-                    cartoucheNom: obtenirNomCartouche(evaluation.grilleId, evaluation.cartoucheId),
-                    note: obtenirNoteAffichee(evaluation, pratiqueNotation),
-                    noteChiffree: evaluation.noteFinale || null,
-                    niveauFinal: evaluation.niveauFinal || '-',
-                    statut: 'evalue',
-                    evaluationId: evaluation.id,
-                    verrouille: evaluation.verrouillee || false
+            if (evaluationsTrouvees.length > 0) {
+                // Créer une ligne pour CHAQUE évaluation trouvée
+                evaluationsTrouvees.forEach(evaluation => {
+                    // IMPORTANT : Trois cas distincts pour les jetons
+                    // 1. ORIGINALE remplacée : remplaceeParId existe → grisée, "Remplacée"
+                    // 2. NOUVELLE reprise : repriseDeId existe OU ID commence par EVAL_REPRISE_ → "Jeton de reprise appliqué"
+                    // 3. Délai : jetonDelaiApplique = true ET pas de repriseDeId → "Jeton de délai appliqué"
+
+                    const estOriginaleRemplacee = evaluation.remplaceeParId ? true : false;
+                    const estNouvelleReprise = evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
+                    const aJetonDelai = evaluation.jetonDelaiApplique && !evaluation.repriseDeId;
+
+                    // Déterminer le statut et le badge
+                    let statut = 'evalue';
+                    let badgeType = null;
+
+                    if (estOriginaleRemplacee) {
+                        // L'originale remplacée par une reprise
+                        statut = 'remplacee';
+                        badgeType = 'originale-reprise';
+                    } else if (estNouvelleReprise) {
+                        // La nouvelle évaluation de reprise
+                        statut = 'evalue';
+                        badgeType = 'nouvelle-reprise';
+                    } else if (aJetonDelai) {
+                        // Évaluation avec délai accordé
+                        statut = 'evalue';
+                        badgeType = 'delai';
+                    }
+
+                    // Évaluation existante
+                    lignes.push({
+                        da: etudiant.da,
+                        nom: etudiant.nom || '',
+                        prenom: etudiant.prenom || '',
+                        groupe: etudiant.groupe,
+                        productionId: production.id,
+                        productionNom: production.titre,
+                        grilleNom: evaluation.grilleNom || '-',
+                        cartoucheId: evaluation.cartoucheId || null,
+                        cartoucheNom: obtenirNomCartouche(evaluation.grilleId, evaluation.cartoucheId),
+                        note: obtenirNoteAffichee(evaluation, pratiqueNotation),
+                        noteChiffree: evaluation.noteFinale || null,
+                        niveauFinal: evaluation.niveauFinal || '-',
+                        statut: statut,
+                        evaluationId: evaluation.id,
+                        verrouille: evaluation.verrouillee || false,
+                        remplacee: estOriginaleRemplacee,
+                        badgeType: badgeType
+                    });
                 });
             } else {
                 // Évaluation manquante
@@ -546,7 +579,12 @@ function appliquerFiltresSurLignes(lignes) {
         if (filtreProduction && ligne.productionId !== filtreProduction) return false;
 
         // Filtre Statut
-        if (filtreStatut && ligne.statut !== filtreStatut) return false;
+        if (filtreStatut === 'actives') {
+            // "Actives" exclut les évaluations remplacées par jetons
+            if (ligne.statut === 'remplacee') return false;
+        } else if (filtreStatut && ligne.statut !== filtreStatut) {
+            return false;
+        }
 
         // Filtre Note
         if (filtreNote) {
@@ -612,26 +650,48 @@ function rechercherEvaluations() {
  * Génère le HTML d'une ligne du tableau
  */
 function genererLigneHTML(ligne) {
+    // Déterminer le style et le badge selon le type
+    let styleGrise = '';
+    let badgeJeton = '';
+
+    if (ligne.badgeType === 'originale-reprise') {
+        // Originale remplacée : grisée avec badge "Remplacée"
+        styleGrise = ' style="background-color: #f5f5f5; opacity: 0.7;"';
+        badgeJeton = ' <span style="background: #9c27b0; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; font-weight: 600;">Remplacée</span>';
+    } else if (ligne.badgeType === 'nouvelle-reprise') {
+        // Nouvelle de reprise : normale avec badge "Jeton de reprise appliqué"
+        badgeJeton = ' <span style="background: #9c27b0; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; font-weight: 600;">Jeton de reprise appliqué</span>';
+    } else if (ligne.badgeType === 'delai') {
+        // Délai : normale avec badge "Jeton de délai appliqué"
+        badgeJeton = ' <span style="background: #ff6f00; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; font-weight: 600;">Jeton de délai appliqué</span>';
+    }
+
     // Afficher le niveau IDME si évalué, sinon badge "Non remis"
-    const affichageNiveau = ligne.statut === 'evalue' && ligne.niveauFinal !== '-'
+    const affichageNiveau = (ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.niveauFinal !== '-'
         ? `<strong>${ligne.niveauFinal}</strong>`
         : '<span class="badge-statut non-evalue">Non remis</span>';
 
     // Afficher la note chiffrée (%) si évaluée
-    const affichageNoteChiffree = ligne.statut === 'evalue' && ligne.noteChiffree !== null
+    const affichageNoteChiffree = (ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.noteChiffree !== null
         ? `<strong>${ligne.noteChiffree}%</strong>`
         : '-';
 
-    const boutons = ligne.statut === 'evalue'
-        ? genererBoutonsActionsEvalue(ligne)
-        : genererBoutonsActionsNonEvalue(ligne);
+    // Choisir les boutons appropriés
+    let boutons;
+    if (ligne.statut === 'remplacee') {
+        boutons = genererBoutonsActionsRemplacee(ligne);
+    } else if (ligne.statut === 'evalue') {
+        boutons = genererBoutonsActionsEvalue(ligne);
+    } else {
+        boutons = genererBoutonsActionsNonEvalue(ligne);
+    }
 
     return `
-        <tr data-evaluation-id="${ligne.evaluationId || ''}" data-da="${ligne.da}" data-production-id="${ligne.productionId}">
+        <tr data-evaluation-id="${ligne.evaluationId || ''}" data-da="${ligne.da}" data-production-id="${ligne.productionId}"${styleGrise}>
             <td>${ligne.da}</td>
             <td>${echapperHtml(ligne.nom)}</td>
             <td>${echapperHtml(ligne.prenom)}</td>
-            <td>${echapperHtml(ligne.productionNom)}</td>
+            <td>${echapperHtml(ligne.productionNom)}${badgeJeton}</td>
             <td style="text-align: center;">${affichageNiveau}</td>
             <td style="text-align: center;">${affichageNoteChiffree}</td>
             <td style="white-space: nowrap;">${boutons}</td>
@@ -649,9 +709,39 @@ function genererBoutonsActionsEvalue(ligne) {
         return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
     }
 
+    const iconeVerrou = ligne.verrouille ? '🔒' : '🔓';
+    const titreVerrou = ligne.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+
     return `
         <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.da}', '${ligne.productionId}')" title="Consulter cette évaluation">
             Consulter
+        </button>
+        <button class="btn btn-modifier btn-compact" id="cadenas-liste-${ligne.evaluationId}" onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')" title="${titreVerrou}">
+            ${iconeVerrou}
+        </button>
+        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer cette évaluation">
+            🗑️
+        </button>
+    `;
+}
+
+/**
+ * Génère les boutons d'action pour une évaluation remplacée par un jeton
+ * (Consulter + Supprimer, SANS verrouiller)
+ */
+function genererBoutonsActionsRemplacee(ligne) {
+    const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+
+    if (lectureSeule) {
+        return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
+    }
+
+    return `
+        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.da}', '${ligne.productionId}')" title="Consulter cette évaluation remplacée">
+            Consulter
+        </button>
+        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer cette évaluation">
+            🗑️
         </button>
     `;
 }
