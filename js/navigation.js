@@ -312,8 +312,15 @@ function afficherSousSection(idSousSection) {
 
         case 'evaluations-liste':
             console.log('🔄 Rafraîchissement de la liste des évaluations...');
-            if (typeof chargerListeEvaluationsRefonte === 'function') {
-                setTimeout(() => chargerListeEvaluationsRefonte(), 100);
+            console.log('   Type de initialiserListeEvaluations:', typeof initialiserListeEvaluations);
+            if (typeof initialiserListeEvaluations === 'function') {
+                console.log('   ✅ Fonction trouvée, appel dans 100ms...');
+                setTimeout(() => {
+                    console.log('   🎯 Appel de initialiserListeEvaluations()');
+                    initialiserListeEvaluations();
+                }, 100);
+            } else {
+                console.error('   ❌ initialiserListeEvaluations n\'est pas une fonction!');
             }
             break;
 
