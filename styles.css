@@ -4657,6 +4657,24 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 /* ===============================
+   TABLEAU LISTE DES ÉVALUATIONS
+   =============================== */
+
+/* Plus d'espacement vertical dans les cellules */
+#corps-tableau-evaluations td {
+    padding: 16px 12px !important;
+}
+
+/* Effet hover sur les lignes */
+#corps-tableau-evaluations tr {
+    transition: background-color 0.2s ease;
+}
+
+#corps-tableau-evaluations tr:hover {
+    background-color: var(--bleu-tres-pale);
+}
+
+/* ===============================
    ANIMATIONS
    =============================== */
 
