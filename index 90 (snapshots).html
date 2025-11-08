@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 90 - Snapshots et suivi longitudinal</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=2025110520">
+    <link rel="stylesheet" href="styles.css?v=2025110809">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3369,8 +3369,8 @@
                             <label for="filtre-statut-eval">Filtrer par statut</label>
                             <select id="filtre-statut-eval" class="controle-form" onchange="filtrerListeEvaluations()">
                                 <option value="">Tous</option>
-                                <option value="evalues">Évalués seulement</option>
-                                <option value="non-evalues">Non évalués</option>
+                                <option value="evalue">Évalués seulement</option>
+                                <option value="non-evalue">Non évalués</option>
                                 <option value="risque">À risque</option>
                             </select>
                         </div>
@@ -3396,21 +3396,68 @@
                 </div>
 
                 <!-- Champ de recherche -->
-                <div class="carte" class="mb-15">
-                    <input type="text" id="recherche-liste-evaluations" class="controle-form"
-                        placeholder="Rechercher un étudiant (nom, prénom, DA)..."
-                        oninput="filtrerListeEvaluations()">
+                <div class="carte">
+                    <input type="text"
+                           id="recherche-evaluations"
+                           class="controle-form"
+                           placeholder="Rechercher par nom, prénom, DA, production..."
+                           oninput="rechercherEvaluations()">
                 </div>
 
-                <!-- Liste des étudiants avec évaluations -->
-                <div id="conteneur-evaluations-accordeon">
-                    <!-- Sera rempli dynamiquement par JavaScript -->
+                <!-- Statistiques globales -->
+                <div class="carte">
+                    <div id="stats-evaluations" style="display: flex; gap: 30px; flex-wrap: wrap; align-items: baseline;">
+                        <div style="font-weight: 600; color: var(--bleu-principal);" id="compteur-evaluations">
+                            Chargement...
+                        </div>
+                        <div style="color: #666;" id="moyenne-evaluations"></div>
+                        <div style="color: #666;" id="nb-productions"></div>
+                    </div>
                 </div>
 
-                <!-- Message si aucune évaluation -->
-                <div id="message-aucune-evaluation" class="carte" class="d-none">
-                    <p class="text-center-leger">
-                        <em>Aucune évaluation trouvée selon les filtres sélectionnés</em>
+                <!-- Zone de chargement -->
+                <div id="zone-chargement-evaluations" class="carte" style="text-align: center; padding: 40px;">
+                    <p style="color: #666;">Chargement des évaluations...</p>
+                </div>
+
+                <!-- Tableau des évaluations -->
+                <div id="conteneur-tableau-evaluations" style="display: none;">
+                    <div class="carte" style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--bleu-tres-pale); border-bottom: 2px solid var(--bleu-moyen);">
+                                    <th onclick="trierTableauParColonne('da')" style="padding: 12px; text-align: left; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
+                                        DA <span id="tri-da" style="font-size: 0.8em; color: #999;">↕</span>
+                                    </th>
+                                    <th onclick="trierTableauParColonne('nom')" style="padding: 12px; text-align: left; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
+                                        Nom <span id="tri-nom" style="font-size: 0.8em; color: #999;">↑</span>
+                                    </th>
+                                    <th onclick="trierTableauParColonne('prenom')" style="padding: 12px; text-align: left; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
+                                        Prénom <span id="tri-prenom" style="font-size: 0.8em; color: #999;">↕</span>
+                                    </th>
+                                    <th onclick="trierTableauParColonne('production')" style="padding: 12px; text-align: left; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
+                                        Production <span id="tri-production" style="font-size: 0.8em; color: #999;">↕</span>
+                                    </th>
+                                    <th onclick="trierTableauParColonne('niveau')" style="padding: 12px; text-align: center; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
+                                        Niveau <span id="tri-niveau" style="font-size: 0.8em; color: #999;">↕</span>
+                                    </th>
+                                    <th onclick="trierTableauParColonne('note')" style="padding: 12px; text-align: center; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
+                                        Note % <span id="tri-note" style="font-size: 0.8em; color: #999;">↕</span>
+                                    </th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corps-tableau-evaluations">
+                                <!-- Sera rempli dynamiquement par liste-evaluations.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Message si aucun résultat -->
+                <div id="message-aucun-resultat" class="carte" style="display: none; text-align: center; padding: 40px;">
+                    <p style="color: #999; font-style: italic;">
+                        Aucune évaluation ne correspond aux filtres sélectionnés
                     </p>
                 </div>
             </div>
@@ -3644,6 +3691,10 @@
 
                     <h2 class="modal-titre">Banque d'évaluations</h2>
                     <p style="color: #666; margin-bottom: 20px;">Parcourez toutes les évaluations sauvegardées et sélectionnez-en une pour la charger dans le formulaire.</p>
+
+                    <div class="alerte-info" style="margin-bottom: 20px;">
+                        <strong>Note :</strong> C'est uniquement ici que vous pouvez supprimer des évaluations.
+                    </div>
 
                     <!-- Filtres -->
                     <div class="grille-4-colonnes" class="carte-mb20-grise">
@@ -8369,7 +8420,7 @@ Exemple :
 
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>
-    <script src="js/navigation.js?v=1761397763"></script>
+    <script src="js/navigation.js?v=2025110813"></script>
     <script src="js/modes.js"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
@@ -8388,7 +8439,7 @@ Exemple :
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js"></script>
-    <script src="js/profil-etudiant.js?v=2025110550"></script>
+    <script src="js/profil-etudiant.js?v=2025110556"></script>
     <script src="js/presences-apercu.js"></script>
     <script src="js/evaluations-apercu.js"></script>
 
@@ -8402,10 +8453,10 @@ Exemple :
     <!-- PRIORITÉ 6: Modules avancés -->
     <script src="js/import-export.js?v=1761387764"></script>
     <script src="js/statistiques.js"></script>
-    <script src="js/liste-evaluations.js?v=1761391739"></script>
+    <script src="js/liste-evaluations.js?v=2025110819"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
-    <script src="js/evaluation.js?v=1762281435"></script>
+    <script src="js/evaluation.js?v=2025110507"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js"></script>
