@@ -582,6 +582,18 @@ function appliquerFiltresSurLignes(lignes) {
         if (filtreStatut === 'actives') {
             // "Actives" exclut les évaluations remplacées par jetons
             if (ligne.statut === 'remplacee') return false;
+        } else if (filtreStatut === 'jeton-delai') {
+            // Afficher seulement les évaluations avec jeton de délai
+            if (ligne.badgeType !== 'delai') return false;
+        } else if (filtreStatut === 'jeton-reprise') {
+            // Afficher seulement les nouvelles reprises (pas les originales remplacées)
+            if (ligne.badgeType !== 'nouvelle-reprise') return false;
+        } else if (filtreStatut === 'tous-jetons') {
+            // Afficher toutes les évaluations avec jetons (délai + reprises nouvelles, exclure originales)
+            if (!['delai', 'nouvelle-reprise'].includes(ligne.badgeType)) return false;
+        } else if (filtreStatut === 'remplacees') {
+            // Afficher seulement les évaluations originales remplacées
+            if (ligne.statut !== 'remplacee') return false;
         } else if (filtreStatut && ligne.statut !== filtreStatut) {
             return false;
         }
@@ -650,20 +662,20 @@ function rechercherEvaluations() {
  * Génère le HTML d'une ligne du tableau
  */
 function genererLigneHTML(ligne) {
-    // Déterminer le style et le badge selon le type
-    let styleGrise = '';
+    // Déterminer les classes CSS et le badge selon le type
+    let classeRemplacee = '';
     let badgeJeton = '';
 
     if (ligne.badgeType === 'originale-reprise') {
-        // Originale remplacée : grisée avec badge "Remplacée"
-        styleGrise = ' style="background-color: #f5f5f5; opacity: 0.7;"';
-        badgeJeton = ' <span style="background: #9c27b0; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; font-weight: 600;">Remplacée</span>';
+        // Originale remplacée : classe grisée + badge "Remplacée"
+        classeRemplacee = ' class="eval-remplacee"';
+        badgeJeton = ' <span class="badge-jeton badge-jeton-reprise">Remplacée</span>';
     } else if (ligne.badgeType === 'nouvelle-reprise') {
-        // Nouvelle de reprise : normale avec badge "Jeton de reprise appliqué"
-        badgeJeton = ' <span style="background: #9c27b0; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; font-weight: 600;">Jeton de reprise appliqué</span>';
+        // Nouvelle de reprise : badge "Jeton de reprise appliqué"
+        badgeJeton = ' <span class="badge-jeton badge-jeton-reprise">Jeton de reprise appliqué</span>';
     } else if (ligne.badgeType === 'delai') {
-        // Délai : normale avec badge "Jeton de délai appliqué"
-        badgeJeton = ' <span style="background: #ff6f00; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; font-weight: 600;">Jeton de délai appliqué</span>';
+        // Délai : badge "Jeton de délai appliqué"
+        badgeJeton = ' <span class="badge-jeton badge-jeton-delai">Jeton de délai appliqué</span>';
     }
 
     // Afficher le niveau IDME si évalué, sinon badge "Non remis"
@@ -687,14 +699,14 @@ function genererLigneHTML(ligne) {
     }
 
     return `
-        <tr data-evaluation-id="${ligne.evaluationId || ''}" data-da="${ligne.da}" data-production-id="${ligne.productionId}"${styleGrise}>
+        <tr data-evaluation-id="${ligne.evaluationId || ''}" data-da="${ligne.da}" data-production-id="${ligne.productionId}"${classeRemplacee}>
             <td>${ligne.da}</td>
             <td>${echapperHtml(ligne.nom)}</td>
             <td>${echapperHtml(ligne.prenom)}</td>
             <td>${echapperHtml(ligne.productionNom)}${badgeJeton}</td>
-            <td style="text-align: center;">${affichageNiveau}</td>
-            <td style="text-align: center;">${affichageNoteChiffree}</td>
-            <td style="white-space: nowrap;">${boutons}</td>
+            <td class="text-center">${affichageNiveau}</td>
+            <td class="text-center">${affichageNoteChiffree}</td>
+            <td class="actions">${boutons}</td>
         </tr>
     `;
 }
@@ -720,7 +732,7 @@ function genererBoutonsActionsEvalue(ligne) {
             ${iconeVerrou}
         </button>
         <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer cette évaluation">
-            🗑️
+            Supprimer
         </button>
     `;
 }
@@ -741,7 +753,7 @@ function genererBoutonsActionsRemplacee(ligne) {
             Consulter
         </button>
         <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer cette évaluation">
-            🗑️
+            Supprimer
         </button>
     `;
 }
@@ -786,17 +798,41 @@ function ouvrirCartouche(cartoucheId, productionId) {
 function consulterEvaluationDepuisListe(da, productionId) {
     console.log(`🔍 Recherche de l'évaluation: DA ${da}, Production ${productionId}`);
 
-    // Trouver l'évaluation correspondante
+    // CORRECTION: Utiliser filter() pour gérer les cas de jetons de reprise (multiples évaluations)
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const evaluation = evaluations.find(e => e.etudiantDA === da && e.productionId === productionId);
+    const evaluationsTrouvees = evaluations.filter(e => e.etudiantDA === da && e.productionId === productionId);
 
-    if (!evaluation) {
+    if (evaluationsTrouvees.length === 0) {
         alert('Évaluation non trouvée');
         console.error('❌ Aucune évaluation trouvée pour DA:', da, 'Production:', productionId);
         return;
     }
 
-    console.log('✅ Évaluation trouvée, ID:', evaluation.id);
+    // Appliquer la même logique de priorité que le tableau:
+    // PRIORITÉ 1 : Reprise active (a repriseDeId OU ID commence par EVAL_REPRISE_, mais pas remplaceeParId)
+    let evaluation = evaluationsTrouvees.find(e =>
+        (e.repriseDeId || e.id.startsWith('EVAL_REPRISE_')) && !e.remplaceeParId
+    );
+
+    // PRIORITÉ 2 : Jeton de délai actif (jetonDelaiApplique mais pas remplacée)
+    if (!evaluation) {
+        evaluation = evaluationsTrouvees.find(e => e.jetonDelaiApplique && !e.remplaceeParId);
+    }
+
+    // PRIORITÉ 3 : N'importe quelle évaluation active (non remplacée)
+    if (!evaluation) {
+        evaluation = evaluationsTrouvees.find(e => !e.remplaceeParId);
+    }
+
+    // PRIORITÉ 4 : Si toutes sont remplacées, prendre la plus récente
+    if (!evaluation) {
+        evaluation = evaluationsTrouvees[evaluationsTrouvees.length - 1];
+    }
+
+    console.log(`✅ Évaluation trouvée (${evaluationsTrouvees.length} au total), ID:`, evaluation.id);
+    console.log('   - repriseDeId:', evaluation.repriseDeId);
+    console.log('   - jetonDelaiApplique:', evaluation.jetonDelaiApplique);
+    console.log('   - remplaceeParId:', evaluation.remplaceeParId);
 
     // Naviguer vers la section Évaluations › Évaluer
     afficherSection('evaluations');

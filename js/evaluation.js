@@ -887,6 +887,11 @@ function sauvegarderEvaluation() {
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
     }
+
+    // 🔄 Rafraîchir le tableau des évaluations si affiché
+    if (typeof initialiserListeEvaluations === 'function') {
+        setTimeout(() => initialiserListeEvaluations(), 150);
+    }
 }
 
 /* ===============================
@@ -931,7 +936,8 @@ function gererDelaiAccorde() {
 
     // Pour les évaluations existantes, appliquer un vrai jeton
     const evaluationId = evaluationEnCours.idModification;
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    // CORRECTION: Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
+    let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
@@ -967,8 +973,12 @@ function gererDelaiAccorde() {
         console.log('❌ Jeton de délai retiré');
     }
 
-    // Sauvegarder
-    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+    // CORRECTION: Utiliser sauvegarderDonneesSelonMode pour respecter le mode actuel
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+        checkbox.checked = !checkbox.checked; // Rétablir l'état de la checkbox
+        return;
+    }
 
     // Recalculer les indices C et P
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -977,6 +987,11 @@ function gererDelaiAccorde() {
 
     // Rafraîchir l'affichage des badges
     afficherBadgesJetons();
+
+    // 🔄 Rafraîchir le tableau des évaluations si affiché
+    if (typeof initialiserListeEvaluations === 'function') {
+        setTimeout(() => initialiserListeEvaluations(), 150);
+    }
 }
 
 /**
@@ -986,14 +1001,29 @@ function afficherBadgesJetons() {
     const section = document.getElementById('gestionJetonsEvaluation');
     const conteneur = document.getElementById('infoJetonsAppliques');
 
+    console.log('🔍 afficherBadgesJetons() - section:', section ? 'TROUVÉ' : 'NON TROUVÉ');
+    console.log('🔍 afficherBadgesJetons() - conteneur:', conteneur ? 'TROUVÉ' : 'NON TROUVÉ');
+    console.log('🔍 afficherBadgesJetons() - evaluationEnCours.idModification:', window.evaluationEnCours?.idModification);
+
     if (!section || !conteneur || !window.evaluationEnCours?.idModification) {
+        console.log('❌ Sortie précoce de afficherBadgesJetons()');
         if (section) section.style.display = 'none';
         return;
     }
 
-    // Récupérer l'évaluation depuis localStorage
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    // CORRECTION: Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const evaluation = evaluations.find(e => e.id === window.evaluationEnCours.idModification);
+
+    console.log('🔍 Évaluation trouvée:', evaluation ? 'OUI' : 'NON');
+    if (evaluation) {
+        console.log('   - ID:', evaluation.id);
+        console.log('   - ID commence par EVAL_REPRISE_:', evaluation.id.startsWith('EVAL_REPRISE_'));
+        console.log('   - jetonRepriseApplique:', evaluation.jetonRepriseApplique);
+        console.log('   - repriseDeId:', evaluation.repriseDeId);
+        console.log('   - jetonDelaiApplique:', evaluation.jetonDelaiApplique);
+        console.log('   - delaiAccorde:', evaluation.delaiAccorde);
+    }
 
     if (!evaluation) {
         section.style.display = 'none';
@@ -1003,7 +1033,10 @@ function afficherBadgesJetons() {
     let badges = [];
 
     // Badge pour jeton de reprise (violet)
-    if (evaluation.jetonRepriseApplique || evaluation.repriseDeId) {
+    // CORRECTION: Vérifier aussi si l'ID commence par EVAL_REPRISE_ (même logique que le tableau)
+    const estNouvelleReprise = evaluation.jetonRepriseApplique || evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
+    if (estNouvelleReprise) {
+        console.log('✅ Ajout badge jeton de reprise');
         badges.push(`
             <span class="statut-badge" style="background: #9c27b0; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px;">
                 <span>⭐ Reprise</span>
@@ -1029,9 +1062,11 @@ function afficherBadgesJetons() {
 
     // Afficher ou masquer la section selon qu'il y a des badges
     if (badges.length > 0) {
+        console.log('✅ Affichage des badges (' + badges.length + ')');
         conteneur.innerHTML = badges.join('');
         section.style.display = 'block';
     } else {
+        console.log('⚠️ Aucun badge à afficher');
         section.style.display = 'none';
     }
 
@@ -1089,15 +1124,10 @@ function afficherGestionJetons(afficher) {
  * @param {string} typeJeton - Type de jeton à retirer ('reprise' ou 'delai')
  */
 function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
-    // Demander confirmation
-    const typeTexte = typeJeton === 'reprise' ? 'de reprise' : 'de délai';
-    const confirmation = confirm(`Voulez-vous vraiment retirer ce jeton ${typeTexte} ?\n\nCette action est irréversible.`);
+    console.log('🗑️ Retrait jeton:', typeJeton, 'pour évaluation:', evaluationId);
 
-    if (!confirmation) {
-        return; // Annulation
-    }
-
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    // CORRECTION: Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
+    let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
@@ -1108,19 +1138,121 @@ function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
     const evaluation = evaluations[index];
 
     if (typeJeton === 'reprise') {
-        // Retirer le jeton de reprise
-        delete evaluation.jetonRepriseApplique;
-        delete evaluation.dateApplicationJetonReprise;
-        delete evaluation.repriseDeId;
+        // NOUVEAU WORKFLOW SIMPLIFIÉ pour les jetons de reprise
+        const estRepriseAvecID = evaluation.id.startsWith('EVAL_REPRISE_');
+        const estRepriseAvecPropriete = evaluation.repriseDeId;
 
-        // Mettre à jour evaluationEnCours si c'est la même évaluation
+        if (estRepriseAvecID || estRepriseAvecPropriete) {
+            // Trouver l'évaluation originale (celle qui a remplaceeParId)
+            const evaluationOriginale = evaluations.find(e =>
+                e.etudiantDA === evaluation.etudiantDA &&
+                e.productionId === evaluation.productionId &&
+                e.remplaceeParId === evaluationId
+            );
+
+            if (evaluationOriginale) {
+                // Demander si l'utilisateur veut archiver l'originale
+                const noteOriginale = evaluationOriginale.noteFinale || 0;
+                const noteReprise = evaluation.noteFinale || 0;
+
+                const archiver = confirm(
+                    `Voulez-vous archiver l'évaluation originale (${noteOriginale}%) ?\n\n` +
+                    `• OUI : L'originale sera archivée et la reprise (${noteReprise}%) deviendra l'évaluation principale.\n` +
+                    `• NON : La reprise sera supprimée et l'originale (${noteOriginale}%) sera restaurée.`
+                );
+
+                if (archiver) {
+                    // Option 1: Archiver l'originale, nettoyer la reprise
+                    console.log('✅ Archivage de l\'originale, conservation de la reprise');
+
+                    // Marquer l'originale comme archivée
+                    evaluationOriginale.archivee = true;
+                    evaluationOriginale.dateArchivage = new Date().toISOString();
+                    delete evaluationOriginale.remplaceeParId; // Elle n'est plus "remplacée", juste archivée
+
+                    // Nettoyer la reprise pour en faire l'évaluation principale
+                    delete evaluation.repriseDeId;
+                    delete evaluation.jetonRepriseApplique;
+                    delete evaluation.dateApplicationJetonReprise;
+
+                    // Si l'ID commence par EVAL_REPRISE_, le renommer
+                    if (estRepriseAvecID) {
+                        const nouvelId = 'EVAL_' + Date.now();
+                        console.log(`🔄 Renommage ${evaluation.id} → ${nouvelId}`);
+                        evaluation.id = nouvelId;
+
+                        // Mettre à jour evaluationEnCours
+                        if (window.evaluationEnCours && window.evaluationEnCours.idModification === evaluationId) {
+                            window.evaluationEnCours.idModification = nouvelId;
+                        }
+                    }
+
+                    afficherNotificationSucces('Originale archivée, reprise conservée comme évaluation principale');
+                } else {
+                    // Option 2: Supprimer la reprise, restaurer l'originale
+                    console.log('✅ Suppression de la reprise, restauration de l\'originale');
+
+                    // Retirer le flag de remplacement de l'originale
+                    delete evaluationOriginale.remplaceeParId;
+                    delete evaluationOriginale.dateRemplacement;
+
+                    // Supprimer la reprise
+                    evaluations.splice(index, 1);
+
+                    console.log(`🗑️ Reprise supprimée, ${evaluations.length} évaluations restantes`);
+
+                    // IMPORTANT: Sauvegarder AVANT de recharger
+                    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
+                        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+                        return;
+                    }
+
+                    afficherNotificationSucces('Reprise supprimée, évaluation originale restaurée');
+
+                    // Recalculer les indices
+                    if (typeof calculerEtStockerIndicesCP === 'function') {
+                        calculerEtStockerIndicesCP();
+                    }
+
+                    // Rafraîchir le tableau
+                    if (typeof initialiserListeEvaluations === 'function') {
+                        setTimeout(() => initialiserListeEvaluations(), 150);
+                    }
+
+                    // Recharger l'originale
+                    setTimeout(() => {
+                        if (typeof modifierEvaluation === 'function') {
+                            modifierEvaluation(evaluationOriginale.id);
+                        }
+                    }, 500);
+
+                    // Ne pas continuer avec le code de sauvegarde en bas
+                    return;
+                }
+            } else {
+                // Pas d'originale trouvée, juste nettoyer les propriétés
+                console.log('⚠️ Aucune originale trouvée, nettoyage simple');
+                delete evaluation.repriseDeId;
+                delete evaluation.jetonRepriseApplique;
+                delete evaluation.dateApplicationJetonReprise;
+
+                afficherNotificationSucces('Jeton de reprise retiré');
+            }
+        } else {
+            // Cas simple: juste des propriétés de jeton à retirer
+            delete evaluation.jetonRepriseApplique;
+            delete evaluation.dateApplicationJetonReprise;
+            delete evaluation.repriseDeId;
+
+            afficherNotificationSucces('Jeton de reprise retiré');
+        }
+
+        // Mettre à jour evaluationEnCours
         if (window.evaluationEnCours && window.evaluationEnCours.idModification === evaluationId) {
             delete window.evaluationEnCours.jetonRepriseApplique;
             delete window.evaluationEnCours.dateApplicationJetonReprise;
             delete window.evaluationEnCours.repriseDeId;
         }
-
-        afficherNotificationSucces('Jeton de reprise retiré');
     } else if (typeJeton === 'delai') {
         // Retirer le jeton de délai
         delete evaluation.jetonDelaiApplique;
@@ -1161,6 +1293,11 @@ function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
+    }
+
+    // 🔄 Rafraîchir le tableau des évaluations si affiché
+    if (typeof initialiserListeEvaluations === 'function') {
+        setTimeout(() => initialiserListeEvaluations(), 150);
     }
 }
 
@@ -2885,8 +3022,8 @@ function reparer_evaluations_criteres_manquants() {
 function modifierEvaluation(evaluationId) {
     console.log('📝 Chargement de l\'évaluation:', evaluationId);
 
-    // Récupérer l'évaluation
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    // CORRECTION: Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
@@ -2948,6 +3085,11 @@ function modifierEvaluation(evaluationId) {
                         cartoucheId: evaluation.cartoucheId,
                         statutRemise: evaluation.statutRemise,
                         delaiAccorde: evaluation.delaiAccorde || false,
+                        jetonDelaiApplique: evaluation.jetonDelaiApplique || false,
+                        dateApplicationJetonDelai: evaluation.dateApplicationJetonDelai,
+                        jetonRepriseApplique: evaluation.jetonRepriseApplique || false,
+                        repriseDeId: evaluation.repriseDeId,
+                        dateApplicationJetonReprise: evaluation.dateApplicationJetonReprise,
                         criteres: {},
                         idModification: evaluationId
                     };
@@ -3014,11 +3156,11 @@ function modifierEvaluation(evaluationId) {
                         selectRemise.dispatchEvent(new Event('change', { bubbles: true }));
                     }
 
-                    // Délai accordé
+                    // Délai accordé - synchroniser avec jetonDelaiApplique
                     const checkboxDelai = document.getElementById('delaiAccordeCheck');
                     if (checkboxDelai) {
-                        checkboxDelai.checked = evaluation.delaiAccorde || false;
-                        console.log('✅ Délai accordé restauré:', checkboxDelai.checked);
+                        checkboxDelai.checked = evaluation.jetonDelaiApplique || evaluation.delaiAccorde || false;
+                        console.log('✅ Jeton de délai restauré:', checkboxDelai.checked);
                     }
 
                     // Afficher les badges des jetons appliqués
@@ -3156,8 +3298,8 @@ function sauvegarderEvaluationModifiee() {
         return;
     }
 
-    // Récupérer les évaluations
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    // CORRECTION: Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
+    let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const indexEval = evaluations.findIndex(e => e.id === evaluationId);
 
     if (indexEval === -1) {
@@ -3254,6 +3396,11 @@ function sauvegarderEvaluationModifiee() {
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
+    }
+
+    // 🔄 Rafraîchir le tableau des évaluations si affiché
+    if (typeof initialiserListeEvaluations === 'function') {
+        setTimeout(() => initialiserListeEvaluations(), 150);
     }
 }
 
@@ -3720,6 +3867,11 @@ function appliquerJetonRepriseDepuisBanque(evaluationId) {
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
+    }
+
+    // 🔄 Rafraîchir le tableau des évaluations si affiché
+    if (typeof initialiserListeEvaluations === 'function') {
+        setTimeout(() => initialiserListeEvaluations(), 150);
     }
 }
 

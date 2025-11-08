@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 90 - Snapshots et suivi longitudinal</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=2025110810">
+    <link rel="stylesheet" href="styles.css?v=2025110811">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3372,6 +3372,10 @@
                                 <option value="actives">Actives</option>
                                 <option value="evalue">Évalués seulement</option>
                                 <option value="non-evalue">Non évalués</option>
+                                <option value="jeton-delai">Jeton de délai</option>
+                                <option value="jeton-reprise">Jeton de reprise</option>
+                                <option value="tous-jetons">Tous les jetons</option>
+                                <option value="remplacees">Remplacées</option>
                             </select>
                         </div>
                         <button class="btn btn-principal btn-compact" onclick="reinitialiserFiltresEval()"
@@ -3584,7 +3588,7 @@
                             </div>
 
                             <!-- INFORMATION SUR LES JETONS APPLIQUÉS -->
-                            <div id="gestionJetonsEvaluation" class="groupe-form" class="hidden-mb-12">
+                            <div id="gestionJetonsEvaluation" class="groupe-form" style="display: none;">
                                 <label class="label-formulaire">Jetons appliqués :</label>
                                 <div id="infoJetonsAppliques" class="mt-8-flex-gap8-wrap"></div>
                             </div>
@@ -8361,10 +8365,10 @@ Exemple :
     <!-- PRIORITÉ 6: Modules avancés -->
     <script src="js/import-export.js?v=1761387764"></script>
     <script src="js/statistiques.js"></script>
-    <script src="js/liste-evaluations.js?v=2025110828"></script>
+    <script src="js/liste-evaluations.js?v=2025110831"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
-    <script src="js/evaluation.js?v=2025110507"></script>
+    <script src="js/evaluation.js?v=2025110814"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js"></script>
