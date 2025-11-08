@@ -2141,10 +2141,10 @@ let profilActuelDA = null;
 window.profilActuelDA = null;
 
 /**
- * Variable globale pour mémoriser la section active du profil (Beta 85)
+ * Variable globale pour mémoriser la section active du profil (Beta 90)
  * Permet de conserver la même section lors de la navigation entre étudiants
  */
-let sectionProfilActive = 'mobilisation'; // Par défaut: Engagement
+let sectionProfilActive = 'productions'; // Par défaut: Productions
 
 /**
  * Change la section affichée dans la colonne droite du profil
@@ -2198,6 +2198,10 @@ function changerSectionProfil(section) {
     let titre = '';
 
     switch (section) {
+        case 'productions':
+            titre = 'Productions et évaluations';
+            contenu = genererSectionProductions(da);
+            break;
         case 'cible':
             titre = 'Suivi de l\'apprentissage';
             contenu = genererContenuCibleIntervention(da);
@@ -2584,14 +2588,17 @@ function afficherProfilComplet(da) {
     const etudiantPrecedent = indexActuel > 0 ? etudiants[indexActuel - 1] : null;
     const etudiantSuivant = indexActuel < etudiants.length - 1 ? etudiants[indexActuel + 1] : null;
 
-    // NOUVEAU (Beta 85): Déterminer quelle section afficher (section mémorisée ou 'mobilisation' par défaut)
-    const sectionAffichee = sectionProfilActive || 'mobilisation';
+    // NOUVEAU (Beta 90): Déterminer quelle section afficher (section mémorisée ou 'productions' par défaut)
+    const sectionAffichee = sectionProfilActive || 'productions';
 
     // Déterminer le titre et le contenu selon la section active
     let titreSection = '';
     let contenuSection = '';
 
-    if (sectionAffichee === 'performance') {
+    if (sectionAffichee === 'productions') {
+        titreSection = 'Productions et évaluations';
+        contenuSection = genererSectionProductions(da);
+    } else if (sectionAffichee === 'performance') {
         titreSection = 'Développement des habiletés et compétences';
         contenuSection = genererSectionPerformance(da);
     } else if (sectionAffichee === 'mobilisation') {
@@ -2656,22 +2663,27 @@ function afficherProfilComplet(da) {
                 <div class="sidebar-liste">
                     <div class="sidebar-section-titre">OBSERVATIONS</div>
 
-                    <!-- 1. Engagement -->
+                    <!-- 1. Productions -->
+                    <div class="sidebar-item ${sectionAffichee === 'productions' ? 'active' : ''}" onclick="changerSectionProfil('productions')">
+                        <div class="sidebar-item-titre">Productions</div>
+                    </div>
+
+                    <!-- 2. Engagement -->
                     <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" onclick="changerSectionProfil('mobilisation')">
                         <div class="sidebar-item-titre">Engagement</div>
                     </div>
 
-                    <!-- 2. Développement des habiletés -->
+                    <!-- 3. Développement des habiletés -->
                     <div class="sidebar-item ${sectionAffichee === 'performance' ? 'active' : ''}" onclick="changerSectionProfil('performance')">
                         <div class="sidebar-item-titre">Développement des habiletés</div>
                     </div>
 
-                    <!-- 3. Accompagnement -->
+                    <!-- 4. Accompagnement -->
                     <div class="sidebar-item ${sectionAffichee === 'accompagnement' ? 'active' : ''}" onclick="changerSectionProfil('accompagnement')">
                         <div class="sidebar-item-titre">Accompagnement</div>
                     </div>
 
-                    <!-- 4. Rapport -->
+                    <!-- 5. Rapport -->
                     <div class="sidebar-item ${sectionAffichee === 'rapport' ? 'active' : ''}" onclick="changerSectionProfil('rapport')">
                         <div class="sidebar-item-titre">Rapport</div>
                     </div>
@@ -2823,6 +2835,121 @@ function genererSectionAssiduite(da) {
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */
+/**
+ * Génère la section Productions et évaluations pour un élève
+ * Affiche un tableau similaire à celui de la liste des évaluations
+ */
+function genererSectionProductions(da) {
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
+
+    if (!etudiant) {
+        return '<p style="text-align: center; color: #999;">Étudiant non trouvé</p>';
+    }
+
+    // Productions à évaluer (exclure portfolio lui-même)
+    const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
+
+    if (productionsAEvaluer.length === 0) {
+        return `
+            <div style="padding: 40px; text-align: center; background: var(--bleu-tres-pale); border-radius: 8px;">
+                <p style="color: #666; font-size: 1.1rem;">Aucune production configurée</p>
+                <p style="color: #999; margin-top: 10px;">Créez des productions dans la section Matériel → Productions</p>
+            </div>
+        `;
+    }
+
+    // Récupérer les évaluations de l'élève
+    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
+
+    // Construire les lignes du tableau
+    const lignes = productionsAEvaluer.map(production => {
+        const evaluation = evaluationsEleve.find(e => e.productionId === production.id);
+
+        if (evaluation) {
+            // Production évaluée
+            const dateEval = evaluation.dateEvaluation || evaluation.dateCreation || '';
+            const dateFormatee = dateEval ? new Date(dateEval).toLocaleDateString('fr-CA') : '—';
+
+            return {
+                production: production.titre,
+                description: production.description || production.titre,
+                note: `${evaluation.niveauFinal} (${evaluation.noteFinale}%)`,
+                date: dateFormatee,
+                statut: 'evalue',
+                verrouille: evaluation.verrouillee || false,
+                evaluationId: evaluation.id,
+                productionId: production.id
+            };
+        } else {
+            // Production non remise
+            return {
+                production: production.titre,
+                description: production.description || production.titre,
+                note: null,
+                date: '—',
+                statut: 'non-evalue',
+                verrouille: false,
+                evaluationId: null,
+                productionId: production.id
+            };
+        }
+    });
+
+    // Générer le HTML
+    return `
+        <!-- Tableau des productions -->
+        <div class="profil-carte">
+            <h3 style="color: var(--bleu-principal); margin: 0 0 15px 0;">Liste des productions</h3>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--bleu-tres-pale); border-bottom: 2px solid var(--bleu-moyen);">
+                            <th style="padding: 12px; text-align: left; font-weight: 600;">Production</th>
+                            <th style="padding: 12px; text-align: left; font-weight: 600;">Description</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 600;">Note</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 600;">Date</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 600;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${lignes.map(ligne => `
+                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                                <td style="padding: 12px;">${echapperHtml(ligne.production)}</td>
+                                <td style="padding: 12px; color: #666;">${echapperHtml(ligne.description)}</td>
+                                <td style="padding: 12px; text-align: center;">
+                                    ${ligne.statut === 'evalue'
+                                        ? `<strong>${ligne.note}</strong>`
+                                        : '<span style="background: #f0f0f0; padding: 4px 12px; border-radius: 4px; color: #666;">Non remis</span>'
+                                    }
+                                </td>
+                                <td style="padding: 12px; text-align: center; color: #666;">${ligne.date}</td>
+                                <td style="padding: 12px; text-align: center; white-space: nowrap;">
+                                    ${ligne.statut === 'evalue'
+                                        ? `
+                                        <button class="btn btn-secondaire btn-compact"
+                                                onclick="consulterEvaluation('${da}', '${ligne.productionId}')">
+                                            Consulter
+                                        </button>
+                                        `
+                                        : `
+                                        <button class="btn btn-principal btn-compact"
+                                                onclick="evaluerProduction('${da}', '${ligne.productionId}')">
+                                            Évaluer
+                                        </button>
+                                        `
+                                    }
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
 function genererSectionPerformance(da) {
     const meilleures = obtenirDetailsPerformance(da);
 
@@ -4597,7 +4724,9 @@ function genererSectionPerformance(da) {
                                          cle === 'rigueur' ? 'Rigueur' :
                                          cle === 'plausibilite' ? 'Plausibilité' :
                                          cle === 'nuance' ? 'Nuance' : 'Français';
-                        const score = moyennes[cle];
+                        // Mapper les clés avec accents aux clés sans accents dans moyennes
+                        const cleMoyennes = cle.charAt(0).toUpperCase() + cle.slice(1); // Structure, Rigueur, Plausibilite, Nuance, Francais
+                        const score = moyennes[cleMoyennes];
 
                         if (score === null) return '';
 
@@ -5515,5 +5644,85 @@ function restaurerPreferencesRapport(da) {
 
     } catch (error) {
         console.error('Erreur lors de la restauration des préférences:', error);
+    }
+}
+
+// ============================================
+// FONCTIONS HELPER POUR SECTION PRODUCTIONS
+// ============================================
+
+/**
+ * Consulte une évaluation existante (ouvre le formulaire d'évaluation en lecture)
+ */
+function consulterEvaluation(da, productionId) {
+    // Trouver l'évaluation
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const evaluation = evaluations.find(e => e.etudiantDA === da && e.productionId === productionId);
+
+    if (!evaluation) {
+        alert('Évaluation non trouvée');
+        return;
+    }
+
+    // Naviguer d'abord vers la section Évaluations
+    afficherSection('evaluations');
+
+    // Attendre que la section soit chargée, puis ouvrir l'évaluation
+    setTimeout(() => {
+        if (typeof modifierEvaluation === 'function') {
+            modifierEvaluation(evaluation.id);
+        } else {
+            alert('Module d\'évaluation non chargé');
+        }
+    }, 200);
+}
+
+/**
+ * Évalue une production (ouvre le formulaire d'évaluation pour création)
+ */
+function evaluerProduction(da, productionId) {
+    // Naviguer vers Évaluations avec préselection de l'élève et de la production
+    afficherSection('evaluations');
+
+    // Attendre que la section soit chargée
+    setTimeout(() => {
+        // Présélectionner l'élève dans le formulaire
+        const selectEleve = document.getElementById('select-eleve-evaluation');
+        if (selectEleve) {
+            selectEleve.value = da;
+            if (typeof selectEleve.onchange === 'function') {
+                selectEleve.onchange();
+            }
+        }
+
+        // Présélectionner la production
+        setTimeout(() => {
+            const selectProduction = document.getElementById('select-production-evaluation');
+            if (selectProduction) {
+                selectProduction.value = productionId;
+                if (typeof selectProduction.onchange === 'function') {
+                    selectProduction.onchange();
+                }
+            }
+        }, 100);
+    }, 200);
+}
+
+/**
+ * Supprime une évaluation depuis le profil élève
+ */
+function supprimerEvaluationDepuisProfil(evaluationId) {
+    // Appeler la fonction de suppression du module liste-evaluations.js
+    if (typeof supprimerEvaluation === 'function') {
+        supprimerEvaluation(evaluationId);
+
+        // Recharger la section Productions après suppression
+        setTimeout(() => {
+            if (profilActuelDA) {
+                changerSectionProfil('productions');
+            }
+        }, 500);
+    } else {
+        alert('Fonction de suppression non disponible');
     }
 }
