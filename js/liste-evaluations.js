@@ -5,6 +5,8 @@
  * Gestion de l'affichage et filtrage des évaluations
  */
 
+console.log('📦 Chargement du module liste-evaluations.js...');
+
 // ============================================
 // FONCTION UTILITAIRE
 // ============================================
@@ -20,6 +22,16 @@ function echapperHtml(texte) {
     div.textContent = texte;
     return div.innerHTML;
 }
+
+// ============================================
+// VARIABLES GLOBALES DE TRI
+// ============================================
+
+// État du tri actuel (tri par colonne cliquable)
+let triEvaluationsActuel = {
+    colonne: 'nom',  // Colonne par défaut: nom (ordre alphabétique)
+    ordre: 'asc'     // 'asc' ou 'desc'
+};
 
 // ============================================
 // INITIALISATION
@@ -145,19 +157,46 @@ function calculerCompletionAlternative(da) {
 function initialiserListeEvaluations() {
     console.log('🔄 Initialisation de la liste des évaluations...');
 
-        // 🆕 AJOUTER CETTE LIGNE
-    calculerEtSauvegarderIndiceCompletion();
+    try {
+        console.log('   Étape 1: Calcul des indices de complétion...');
+        // 🆕 Calculer les indices de complétion
+        calculerEtSauvegarderIndiceCompletion();
+        console.log('   ✅ Indices calculés');
 
-    // Charger et afficher les données
-    chargerDonneesEvaluations();
+        console.log('   Étape 2: Chargement des données...');
+        // Charger et afficher les données
+        chargerDonneesEvaluations();
+        console.log('   ✅ Données chargées');
 
-    // Initialiser les événements des filtres
-    initialiserEvenementsFilres();
+        console.log('   Étape 3: Initialisation des événements...');
+        // Initialiser les événements des filtres
+        initialiserEvenementsFilres();
+        console.log('   ✅ Événements initialisés');
 
-    // Initialiser le bouton de réinitialisation
-    const btnReinit = document.getElementById('btn-reinitialiser-filtres');
-    if (btnReinit) {
-        btnReinit.addEventListener('click', reinitialiserFiltres);
+        console.log('   Étape 4: Initialisation du bouton réinitialiser...');
+        // Initialiser le bouton de réinitialisation
+        const btnReinit = document.getElementById('btn-reinitialiser-filtres');
+        if (btnReinit) {
+            btnReinit.addEventListener('click', reinitialiserFiltres);
+        }
+        console.log('   ✅ Bouton initialisé');
+
+        console.log('✅ Liste des évaluations initialisée');
+    } catch (error) {
+        console.error('❌ Erreur lors de l\'initialisation de la liste des évaluations:', error);
+        console.error('Stack trace:', error.stack);
+
+        // Afficher un message d'erreur à l'utilisateur
+        const conteneur = document.getElementById('zone-chargement-evaluations');
+        if (conteneur) {
+            conteneur.innerHTML = `
+                <p style="color: #d32f2f;">
+                    <strong>Erreur de chargement</strong><br>
+                    ${error.message}<br>
+                    <small>Consultez la console pour plus de détails.</small>
+                </p>
+            `;
+        }
     }
 }
 
@@ -166,12 +205,14 @@ function initialiserListeEvaluations() {
  */
 function chargerDonneesEvaluations() {
     // Charger les données selon le mode actif (géré automatiquement par le module 17)
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const productions = obtenirDonneesSelonMode('productions');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
 
     // Extraire les groupes uniques depuis les étudiants
-    const groupes = [...new Set(etudiants.map(e => e.groupe))].sort().map(g => ({ numero: g }));
+    const groupes = etudiants.length > 0
+        ? [...new Set(etudiants.map(e => e.groupe))].sort().map(g => ({ numero: g }))
+        : [];
 
     console.log(`Donnees chargees: ${evaluations.length} evaluations, ${productions.length} productions, ${etudiants.length} etudiants`);
 
@@ -273,10 +314,19 @@ function initialiserEvenementsFilres() {
  * Réinitialise tous les filtres
  */
 function reinitialiserFiltres() {
-    document.getElementById('filtre-groupe-eval').value = '';
-    document.getElementById('filtre-production-eval').value = '';
-    document.getElementById('filtre-statut-eval').value = '';
-    document.getElementById('filtre-note-eval').value = '';
+    const filtreGroupe = document.getElementById('filtre-groupe-eval');
+    const filtreProduction = document.getElementById('filtre-production-eval');
+    const filtreStatut = document.getElementById('filtre-statut-eval');
+    const filtreNote = document.getElementById('filtre-note-eval');
+    const tri = document.getElementById('tri-evaluations');
+    const recherche = document.getElementById('recherche-evaluations');
+
+    if (filtreGroupe) filtreGroupe.value = '';
+    if (filtreProduction) filtreProduction.value = '';
+    if (filtreStatut) filtreStatut.value = '';
+    if (filtreNote) filtreNote.value = '';
+    if (tri) tri.value = 'nom-asc';
+    if (recherche) recherche.value = '';
 
     appliquerFiltres();
 }
@@ -289,38 +339,94 @@ function reinitialiserFiltres() {
  * Affiche le tableau des évaluations avec filtrage
  */
 function afficherTableauEvaluations(evaluations, productions, etudiants) {
+    console.log('📊 Affichage du tableau des évaluations...');
+
     const corpsTableau = document.getElementById('corps-tableau-evaluations');
     const zoneChargement = document.getElementById('zone-chargement-evaluations');
     const conteneurTableau = document.getElementById('conteneur-tableau-evaluations');
     const messageAucunResultat = document.getElementById('message-aucun-resultat');
     const compteur = document.getElementById('compteur-evaluations');
 
-    if (!corpsTableau) return;
+    if (!corpsTableau) {
+        console.error('❌ Élément #corps-tableau-evaluations introuvable');
+        return;
+    }
 
     // Masquer le chargement
-    if (zoneChargement) zoneChargement.style.display = 'none';
+    if (zoneChargement) {
+        zoneChargement.style.display = 'none';
+        console.log('✅ Zone de chargement masquée');
+    }
 
     // Construire la liste complète : évaluations existantes + non évaluées
     const lignes = construireLignesEvaluations(evaluations, productions, etudiants);
+    console.log(`📝 ${lignes.length} ligne(s) construite(s)`);
 
     // Appliquer les filtres
-    const lignesFiltrees = appliquerFiltresSurLignes(lignes);
+    let lignesFiltrees = appliquerFiltresSurLignes(lignes);
+    console.log(`🔍 ${lignesFiltrees.length} ligne(s) après filtres`);
+
+    // Appliquer la recherche par mot-clé
+    lignesFiltrees = appliquerRechercheTexte(lignesFiltrees);
+    console.log(`🔎 ${lignesFiltrees.length} ligne(s) après recherche`);
+
+    // Appliquer le tri par colonne cliquable
+    lignesFiltrees = trierLignesParColonne(lignesFiltrees);
+    console.log(`🔄 Tri par colonne: ${triEvaluationsActuel.colonne} (${triEvaluationsActuel.ordre})`);
+
+    // Mettre à jour les indicateurs de tri visuels
+    mettreAJourIndicateursTri();
 
     // Afficher les résultats
     if (lignesFiltrees.length === 0) {
         conteneurTableau.style.display = 'none';
-        messageAucunResultat.style.display = 'block';
+        if (messageAucunResultat) messageAucunResultat.style.display = 'block';
         if (compteur) compteur.textContent = '0 évaluation(s)';
+        console.log('📭 Aucune évaluation à afficher');
     } else {
-        messageAucunResultat.style.display = 'none';
+        if (messageAucunResultat) messageAucunResultat.style.display = 'none';
         conteneurTableau.style.display = 'block';
-        if (compteur) compteur.textContent = `${lignesFiltrees.length} évaluation(s)`;
+
+        // Calculer les statistiques
+        const evaluationsAvecNote = lignesFiltrees.filter(ligne =>
+            ligne.statut === 'evalue' && ligne.noteChiffree !== null
+        );
+
+        let moyenneAffichee = null;
+        if (evaluationsAvecNote.length > 0) {
+            const somme = evaluationsAvecNote.reduce((acc, ligne) => acc + ligne.noteChiffree, 0);
+            moyenneAffichee = somme / evaluationsAvecNote.length;
+        }
+
+        // Compter les productions uniques affichées
+        const productionsUniques = [...new Set(lignesFiltrees.map(l => l.productionId))];
+        const nbProductions = productionsUniques.length;
+
+        // Mettre à jour les statistiques en haut
+        if (compteur) {
+            compteur.textContent = `${lignesFiltrees.length} évaluation(s)`;
+        }
+
+        const elemMoyenne = document.getElementById('moyenne-evaluations');
+        if (elemMoyenne) {
+            elemMoyenne.textContent = moyenneAffichee !== null
+                ? `Moyenne : ${moyenneAffichee.toFixed(1)}%`
+                : '';
+        }
+
+        const elemNbProductions = document.getElementById('nb-productions');
+        if (elemNbProductions) {
+            elemNbProductions.textContent = `${nbProductions} production(s)`;
+        }
 
         // Générer les lignes HTML
         corpsTableau.innerHTML = lignesFiltrees.map(ligne => genererLigneHTML(ligne)).join('');
 
         // Attacher les événements aux boutons d'action
         attacherEvenementsActions();
+
+        const logMoyenne = moyenneAffichee !== null ? ` | Moyenne: ${moyenneAffichee.toFixed(1)}%` : '';
+        console.log(`✅ ${lignesFiltrees.length} évaluation(s) affichée(s)${logMoyenne}`);
     }
 }
 
@@ -346,7 +452,8 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                 // Évaluation existante
                 lignes.push({
                     da: etudiant.da,
-                    nom: etudiant.nom,
+                    nom: etudiant.nom || '',
+                    prenom: etudiant.prenom || '',
                     groupe: etudiant.groupe,
                     productionId: production.id,
                     productionNom: production.titre,
@@ -354,16 +461,18 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     cartoucheId: evaluation.cartoucheId || null,
                     cartoucheNom: obtenirNomCartouche(evaluation.grilleId, evaluation.cartoucheId),
                     note: obtenirNoteAffichee(evaluation, pratiqueNotation),
+                    noteChiffree: evaluation.noteFinale || null,
                     niveauFinal: evaluation.niveauFinal || '-',
                     statut: 'evalue',
                     evaluationId: evaluation.id,
-                    verrouille: evaluation.verrouillee || false // ✅ Lire "verrouillee" (cohérence)
+                    verrouille: evaluation.verrouillee || false
                 });
             } else {
                 // Évaluation manquante
                 lignes.push({
                     da: etudiant.da,
-                    nom: etudiant.nom,
+                    nom: etudiant.nom || '',
+                    prenom: etudiant.prenom || '',
                     groupe: etudiant.groupe,
                     productionId: production.id,
                     productionNom: production.titre,
@@ -371,6 +480,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     cartoucheId: null,
                     cartoucheNom: '-',
                     note: '-',
+                    noteChiffree: null,
                     niveauFinal: '-',
                     statut: 'non-evalue',
                     evaluationId: null,
@@ -423,10 +533,10 @@ function appliquerFiltres() {
  * Applique les filtres sur les lignes
  */
 function appliquerFiltresSurLignes(lignes) {
-    const filtreGroupe = document.getElementById('filtre-groupe-eval').value;
-    const filtreProduction = document.getElementById('filtre-production-eval').value;
-    const filtreStatut = document.getElementById('filtre-statut-eval').value;
-    const filtreNote = document.getElementById('filtre-note-eval').value;
+    const filtreGroupe = document.getElementById('filtre-groupe-eval')?.value || '';
+    const filtreProduction = document.getElementById('filtre-production-eval')?.value || '';
+    const filtreStatut = document.getElementById('filtre-statut-eval')?.value || '';
+    const filtreNote = document.getElementById('filtre-note-eval')?.value || '';
 
     return lignes.filter(ligne => {
         // Filtre Groupe
@@ -455,6 +565,45 @@ function appliquerFiltresSurLignes(lignes) {
     });
 }
 
+/**
+ * Applique une recherche textuelle sur les lignes
+ * Recherche dans : DA, nom, prénom, production, grille, cartouche, note
+ */
+function appliquerRechercheTexte(lignes) {
+    const champRecherche = document.getElementById('recherche-evaluations');
+    if (!champRecherche) return lignes;
+
+    const termeRecherche = champRecherche.value.toLowerCase().trim();
+
+    // Si pas de terme de recherche, retourner toutes les lignes
+    if (!termeRecherche) return lignes;
+
+    return lignes.filter(ligne => {
+        // Rechercher dans tous les champs pertinents
+        const da = ligne.da.toString().toLowerCase();
+        const nom = ligne.nom.toLowerCase();
+        const prenom = ligne.prenom.toLowerCase();
+        const production = ligne.productionNom.toLowerCase();
+        const noteChiffree = ligne.noteChiffree ? ligne.noteChiffree.toString() : '';
+
+        // Retourner true si le terme est trouvé dans au moins un champ
+        return da.includes(termeRecherche) ||
+               nom.includes(termeRecherche) ||
+               prenom.includes(termeRecherche) ||
+               production.includes(termeRecherche) ||
+               noteChiffree.includes(termeRecherche);
+    });
+}
+
+/**
+ * Fonction appelée par le champ de recherche (oninput)
+ * Recharge le tableau avec la recherche appliquée
+ */
+function rechercherEvaluations() {
+    // Recharger le tableau avec tous les filtres et la recherche
+    appliquerFiltres();
+}
+
 // ============================================
 // GÉNÉRATION HTML
 // ============================================
@@ -463,15 +612,14 @@ function appliquerFiltresSurLignes(lignes) {
  * Génère le HTML d'une ligne du tableau
  */
 function genererLigneHTML(ligne) {
-    // Afficher la note si elle existe, sinon afficher le badge "Non remis"
-    const affichageNote = ligne.statut === 'evalue' && ligne.note !== '-'
-        ? `<strong>${ligne.note}</strong>`
+    // Afficher le niveau IDME si évalué, sinon badge "Non remis"
+    const affichageNiveau = ligne.statut === 'evalue' && ligne.niveauFinal !== '-'
+        ? `<strong>${ligne.niveauFinal}</strong>`
         : '<span class="badge-statut non-evalue">Non remis</span>';
 
-    const lienCartouche = ligne.cartoucheNom && ligne.cartoucheNom !== '-'
-        ? `<button class="btn btn-secondaire" style="padding: 4px 10px; font-size: 0.85rem;" onclick="ouvrirCartouche('${ligne.cartoucheId}', '${ligne.productionId}'); return false;" title="Voir la cartouche">
-               ${echapperHtml(ligne.cartoucheNom)}
-           </button>`
+    // Afficher la note chiffrée (%) si évaluée
+    const affichageNoteChiffree = ligne.statut === 'evalue' && ligne.noteChiffree !== null
+        ? `<strong>${ligne.noteChiffree}%</strong>`
         : '-';
 
     const boutons = ligne.statut === 'evalue'
@@ -482,10 +630,10 @@ function genererLigneHTML(ligne) {
         <tr data-evaluation-id="${ligne.evaluationId || ''}" data-da="${ligne.da}" data-production-id="${ligne.productionId}">
             <td>${ligne.da}</td>
             <td>${echapperHtml(ligne.nom)}</td>
+            <td>${echapperHtml(ligne.prenom)}</td>
             <td>${echapperHtml(ligne.productionNom)}</td>
-            <td>${echapperHtml(ligne.grilleNom)}</td>
-            <td>${lienCartouche}</td>
-            <td style="text-align: center;">${affichageNote}</td>
+            <td style="text-align: center;">${affichageNiveau}</td>
+            <td style="text-align: center;">${affichageNoteChiffree}</td>
             <td style="white-space: nowrap;">${boutons}</td>
         </tr>
     `;
@@ -496,28 +644,15 @@ function genererLigneHTML(ligne) {
  */
 function genererBoutonsActionsEvalue(ligne) {
     const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
-    const disabled = lectureSeule ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '';
 
     if (lectureSeule) {
         return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
     }
 
     return `
-        <button class="btn btn-modifier btn-compact btn-marge-droite" onclick="modifierEvaluation('${ligne.da}', '${ligne.productionId}')" title="Modifier">
-            Modifier
+        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.da}', '${ligne.productionId}')" title="Consulter cette évaluation">
+            Consulter
         </button>
-        <button class="btn btn-annuler btn-compact btn-marge-droite" onclick="dupliquerEvaluation('${ligne.evaluationId}')" title="Dupliquer">
-            Dupliquer
-        </button>
-        <button class="btn btn-supprimer btn-compact btn-marge-droite" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer">
-            Supprimer
-        </button>
-        <span id="cadenas-liste-${ligne.evaluationId}"
-              onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')"
-              style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 10px;"
-              title="${ligne.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
-            ${ligne.verrouille ? '🔒' : '🔓'}
-        </span>
     `;
 }
 
@@ -526,7 +661,7 @@ function genererBoutonsActionsEvalue(ligne) {
  */
 function genererBoutonsActionsNonEvalue(ligne) {
     return `
-        <button class="btn btn-confirmer btn-compact" onclick="modifierEvaluation('${ligne.da}', '${ligne.productionId}')" title="Évaluer">
+        <button class="btn btn-confirmer btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.da}', '${ligne.productionId}')" title="Évaluer">
             Évaluer
         </button>
     `;
@@ -556,12 +691,36 @@ function ouvrirCartouche(cartoucheId, productionId) {
 
 /**
  * Ouvre la page d'évaluation pour modifier/créer une évaluation
+ * RENOMMÉ consulterEvaluationDepuisListe pour éviter conflit avec evaluation.js
  */
-function modifierEvaluation(da, productionId) {
-    // Naviguer vers Évaluations › Évaluer avec pré-sélection
-    // TODO: Implémenter la navigation et la pré-sélection
-    console.log(`Modification de l'évaluation: DA ${da}, Production ${productionId}`);
-    alert(`Navigation vers l'évaluation à implémenter:\nDA: ${da}\nProduction: ${productionId}`);
+function consulterEvaluationDepuisListe(da, productionId) {
+    console.log(`🔍 Recherche de l'évaluation: DA ${da}, Production ${productionId}`);
+
+    // Trouver l'évaluation correspondante
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const evaluation = evaluations.find(e => e.etudiantDA === da && e.productionId === productionId);
+
+    if (!evaluation) {
+        alert('Évaluation non trouvée');
+        console.error('❌ Aucune évaluation trouvée pour DA:', da, 'Production:', productionId);
+        return;
+    }
+
+    console.log('✅ Évaluation trouvée, ID:', evaluation.id);
+
+    // Naviguer vers la section Évaluations › Évaluer
+    afficherSection('evaluations');
+
+    // Attendre que la section soit chargée, puis appeler la fonction d'évaluation
+    setTimeout(() => {
+        // Appeler la fonction du module evaluation.js (qui attend un evaluationId)
+        if (typeof window.modifierEvaluationParId === 'function') {
+            window.modifierEvaluationParId(evaluation.id);
+        } else {
+            console.error('❌ Fonction modifierEvaluationParId non disponible');
+            alert('Erreur: Module d\'évaluation non chargé correctement');
+        }
+    }, 200);
 }
 
 /**
@@ -642,14 +801,258 @@ function toggleVerrouillerEvaluation(evaluationId) {
 }
 
 // ============================================
+// SYSTÈME DE TRI
+// ============================================
+
+/**
+ * Récupère les indices A-C-P-R pour un étudiant
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {Object} - Objet avec {A, C, P, R}
+ */
+function obtenirIndicesEtudiant(da) {
+    // Récupérer les indices selon la pratique active
+    const pratiqueNotation = JSON.parse(localStorage.getItem('pratiqueNotation') || '{}');
+    const pratique = pratiqueNotation.pratique === 'alternative' ? 'PAN' : 'SOM';
+
+    // Indice A (Assiduité)
+    const indicesAssiduiteDetailles = JSON.parse(localStorage.getItem('indicesAssiduiteDetailles') || '{}');
+    const A = indicesAssiduiteDetailles[da]?.actuel?.indice ?? 0;
+
+    // Indices C et P (Complétion et Performance)
+    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    const donneesCP = indicesCP[da]?.actuel?.[pratique] || {};
+    const C = donneesCP.C ?? 0;
+    const P = donneesCP.P ?? 0;
+
+    // Indice R (Risque) = 1 - (A × C × P)
+    const R = 1 - (A * C * P);
+
+    return { A, C, P, R };
+}
+
+/**
+ * Trie un tableau de lignes selon le critère spécifié
+ * @param {Array} lignes - Tableau de lignes à trier
+ * @param {string} critere - Critère de tri (ex: 'nom-asc', 'assiduite-desc')
+ * @returns {Array} - Tableau trié
+ */
+function trierLignes(lignes, critere) {
+    if (!critere || critere === '') return lignes;
+
+    // Créer une copie pour ne pas modifier l'original
+    const lignesTriees = [...lignes];
+
+    // Extraire le type et la direction
+    const [type, direction] = critere.split('-');
+    const asc = direction === 'asc';
+
+    // Fonction de comparaison
+    lignesTriees.sort((a, b) => {
+        let valeurA, valeurB;
+
+        switch (type) {
+            case 'nom':
+                // Tri alphabétique par nom
+                valeurA = a.nom.toLowerCase();
+                valeurB = b.nom.toLowerCase();
+                return asc
+                    ? valeurA.localeCompare(valeurB, 'fr')
+                    : valeurB.localeCompare(valeurA, 'fr');
+
+            case 'assiduite':
+                // Tri par indice A
+                const indicesA_A = obtenirIndicesEtudiant(a.da);
+                const indicesA_B = obtenirIndicesEtudiant(b.da);
+                valeurA = indicesA_A.A;
+                valeurB = indicesA_B.A;
+                break;
+
+            case 'completion':
+                // Tri par indice C
+                const indicesC_A = obtenirIndicesEtudiant(a.da);
+                const indicesC_B = obtenirIndicesEtudiant(b.da);
+                valeurA = indicesC_A.C;
+                valeurB = indicesC_B.C;
+                break;
+
+            case 'performance':
+                // Tri par indice P
+                const indicesP_A = obtenirIndicesEtudiant(a.da);
+                const indicesP_B = obtenirIndicesEtudiant(b.da);
+                valeurA = indicesP_A.P;
+                valeurB = indicesP_B.P;
+                break;
+
+            case 'risque':
+                // Tri par indice R
+                const indicesR_A = obtenirIndicesEtudiant(a.da);
+                const indicesR_B = obtenirIndicesEtudiant(b.da);
+                valeurA = indicesR_A.R;
+                valeurB = indicesR_B.R;
+                break;
+
+            default:
+                return 0;
+        }
+
+        // Comparaison numérique
+        if (asc) {
+            return valeurA - valeurB;
+        } else {
+            return valeurB - valeurA;
+        }
+    });
+
+    return lignesTriees;
+}
+
+/**
+ * Fonction appelée par le select de tri
+ * Recharge le tableau avec le tri appliqué
+ */
+function trierListeEvaluations() {
+    // Charger les données selon le mode actif
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const productions = obtenirDonneesSelonMode('productions');
+
+    // Afficher le tableau avec tri appliqué
+    afficherTableauEvaluations(evaluations, productions, etudiants);
+}
+
+// ============================================
+// TRI PAR COLONNE CLIQUABLE
+// ============================================
+
+/**
+ * Trie le tableau par une colonne donnée (au clic sur l'en-tête)
+ * @param {string} colonne - Nom de la colonne à trier
+ */
+function trierTableauParColonne(colonne) {
+    console.log(`📊 Tri par colonne: ${colonne}`);
+
+    // Si on clique sur la même colonne, inverser l'ordre
+    if (triEvaluationsActuel.colonne === colonne) {
+        triEvaluationsActuel.ordre = triEvaluationsActuel.ordre === 'asc' ? 'desc' : 'asc';
+    } else {
+        triEvaluationsActuel.colonne = colonne;
+        triEvaluationsActuel.ordre = 'asc';
+    }
+
+    // Mettre à jour les indicateurs visuels (flèches)
+    mettreAJourIndicateursTri();
+
+    // Réafficher le tableau avec le nouveau tri
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const productions = obtenirDonneesSelonMode('productions');
+    afficherTableauEvaluations(evaluations, productions, etudiants);
+}
+
+/**
+ * Met à jour les indicateurs visuels de tri (flèches ↑↓↕)
+ */
+function mettreAJourIndicateursTri() {
+    // Réinitialiser tous les indicateurs
+    ['da', 'nom', 'prenom', 'production', 'niveau', 'note'].forEach(col => {
+        const elem = document.getElementById(`tri-${col}`);
+        if (elem) elem.textContent = '↕';
+    });
+
+    // Mettre à jour l'indicateur actif
+    const elemActif = document.getElementById(`tri-${triEvaluationsActuel.colonne}`);
+    if (elemActif) {
+        elemActif.textContent = triEvaluationsActuel.ordre === 'asc' ? '↑' : '↓';
+    }
+}
+
+/**
+ * Trie un tableau de lignes selon la colonne et l'ordre actuel
+ * @param {Array} lignes - Tableau de lignes à trier
+ * @returns {Array} - Tableau trié
+ */
+function trierLignesParColonne(lignes) {
+    if (!lignes || lignes.length === 0) return lignes;
+
+    // Créer une copie pour ne pas modifier l'original
+    const lignesTriees = [...lignes];
+    const asc = triEvaluationsActuel.ordre === 'asc';
+
+    // Fonction de comparaison
+    lignesTriees.sort((a, b) => {
+        let valeurA, valeurB;
+
+        switch (triEvaluationsActuel.colonne) {
+            case 'da':
+                valeurA = (a.da || '').toString();
+                valeurB = (b.da || '').toString();
+                return asc
+                    ? valeurA.localeCompare(valeurB)
+                    : valeurB.localeCompare(valeurA);
+
+            case 'nom':
+                valeurA = (a.nom || '').toLowerCase();
+                valeurB = (b.nom || '').toLowerCase();
+                return asc
+                    ? valeurA.localeCompare(valeurB, 'fr')
+                    : valeurB.localeCompare(valeurA, 'fr');
+
+            case 'prenom':
+                valeurA = (a.prenom || '').toLowerCase();
+                valeurB = (b.prenom || '').toLowerCase();
+                return asc
+                    ? valeurA.localeCompare(valeurB, 'fr')
+                    : valeurB.localeCompare(valeurA, 'fr');
+
+            case 'production':
+                valeurA = (a.productionNom || '').toLowerCase();
+                valeurB = (b.productionNom || '').toLowerCase();
+                return asc
+                    ? valeurA.localeCompare(valeurB, 'fr')
+                    : valeurB.localeCompare(valeurA, 'fr');
+
+            case 'niveau':
+                valeurA = a.niveauFinal || '-';
+                valeurB = b.niveauFinal || '-';
+                // Ordre: -, I, D, M, E (ou 0)
+                const ordreNiveau = { '-': 0, '0': 0, 'I': 1, 'D': 2, 'M': 3, 'E': 4 };
+                const numA = ordreNiveau[valeurA] ?? 0;
+                const numB = ordreNiveau[valeurB] ?? 0;
+                return asc ? numA - numB : numB - numA;
+
+            case 'note':
+                valeurA = a.noteChiffree ?? -1;
+                valeurB = b.noteChiffree ?? -1;
+                return asc ? valeurA - valeurB : valeurB - valeurA;
+
+            default:
+                return 0;
+        }
+    });
+
+    return lignesTriees;
+}
+
+// ============================================
 // EXPORT
 // ============================================
+
+console.log('📤 Export des fonctions du module liste-evaluations.js...');
 
 // Rendre les fonctions accessibles globalement
 window.initialiserListeEvaluations = initialiserListeEvaluations;
 window.ouvrirCartouche = ouvrirCartouche;
-window.modifierEvaluation = modifierEvaluation;
+window.consulterEvaluationDepuisListe = consulterEvaluationDepuisListe;
 window.dupliquerEvaluation = dupliquerEvaluation;
 window.supprimerEvaluation = supprimerEvaluation;
 window.toggleVerrouillerEvaluation = toggleVerrouillerEvaluation;
 window.calculerEtSauvegarderIndiceCompletion = calculerEtSauvegarderIndiceCompletion;
+window.trierListeEvaluations = trierListeEvaluations;
+window.trierTableauParColonne = trierTableauParColonne;
+
+// Alias pour compatibilité avec le HTML
+window.filtrerListeEvaluations = appliquerFiltres;
+window.reinitialiserFiltresEval = reinitialiserFiltres;
+window.rechercherEvaluations = rechercherEvaluations;
+
+console.log('✅ Module liste-evaluations.js chargé - initialiserListeEvaluations disponible:', typeof window.initialiserListeEvaluations);
