@@ -564,7 +564,9 @@ function calculerEtStockerIndicesCP() {
         const evaluationsSOM = evaluations.filter(e =>
             e.etudiantDA === da &&
             productionsSOMDonnees.has(e.productionId) &&
-            !e.remplaceeParId  // Exclure les évaluations remplacées par des reprises
+            !e.remplaceeParId &&  // Exclure les évaluations remplacées par des reprises
+            e.statutIntegrite !== 'plagiat' &&  // Exclure les non recevables (plagiat)
+            e.statutIntegrite !== 'ia'  // Exclure les non recevables (IA non autorisée)
         );
         // Compter les productions DISTINCTES (pas le nombre total d'évaluations)
         // Un étudiant peut avoir plusieurs évaluations du même artefact (reprises, jetons)
@@ -607,7 +609,9 @@ function calculerEtStockerIndicesCP() {
         const evaluationsPAN = evaluations.filter(e =>
             e.etudiantDA === da &&
             artefactsPANDonnes.has(e.productionId) &&
-            !e.remplaceeParId  // Exclure les évaluations remplacées par des reprises
+            !e.remplaceeParId &&  // Exclure les évaluations remplacées par des reprises
+            e.statutIntegrite !== 'plagiat' &&  // Exclure les non recevables (plagiat)
+            e.statutIntegrite !== 'ia'  // Exclure les non recevables (IA non autorisée)
         );
         // Compter les artefacts DISTINCTS (pas le nombre total d'évaluations)
         // Un étudiant peut avoir plusieurs évaluations du même artefact (reprises, jetons)

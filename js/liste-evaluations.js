@@ -219,6 +219,9 @@ function chargerDonneesEvaluations() {
     // Générer les options des filtres
     genererOptionsFiltres(groupes, productions);
 
+    // Restaurer l'état des filtres sauvegardés
+    restaurerEtatFiltres();
+
     // Afficher le tableau
     afficherTableauEvaluations(evaluations, productions, etudiants);
 }
@@ -291,6 +294,60 @@ function genererOptionsFiltres(groupes, productions) {
     }
 }
 
+// ============================================
+// PERSISTANCE DES FILTRES
+// ============================================
+
+/**
+ * Sauvegarde l'état actuel des filtres dans localStorage
+ */
+function sauvegarderEtatFiltres() {
+    const etatFiltres = {
+        groupe: document.getElementById('filtre-groupe-eval')?.value || '',
+        production: document.getElementById('filtre-production-eval')?.value || '',
+        statut: document.getElementById('filtre-statut-eval')?.value || '',
+        note: document.getElementById('filtre-note-eval')?.value || '',
+        tri: document.getElementById('tri-evaluations')?.value || 'nom-asc'
+    };
+
+    localStorage.setItem('filtresListeEvaluations', JSON.stringify(etatFiltres));
+    console.log('💾 Filtres sauvegardés:', etatFiltres);
+}
+
+/**
+ * Restaure l'état des filtres depuis localStorage
+ */
+function restaurerEtatFiltres() {
+    const etatSauvegarde = localStorage.getItem('filtresListeEvaluations');
+
+    if (!etatSauvegarde) {
+        console.log('📂 Aucun filtre sauvegardé à restaurer');
+        return;
+    }
+
+    try {
+        const etat = JSON.parse(etatSauvegarde);
+        console.log('📂 Restauration des filtres:', etat);
+
+        // Restaurer chaque filtre
+        const filtreGroupe = document.getElementById('filtre-groupe-eval');
+        const filtreProduction = document.getElementById('filtre-production-eval');
+        const filtreStatut = document.getElementById('filtre-statut-eval');
+        const filtreNote = document.getElementById('filtre-note-eval');
+        const tri = document.getElementById('tri-evaluations');
+
+        if (filtreGroupe && etat.groupe) filtreGroupe.value = etat.groupe;
+        if (filtreProduction && etat.production) filtreProduction.value = etat.production;
+        if (filtreStatut && etat.statut) filtreStatut.value = etat.statut;
+        if (filtreNote && etat.note) filtreNote.value = etat.note;
+        if (tri && etat.tri) tri.value = etat.tri;
+
+        console.log('✅ Filtres restaurés avec succès');
+    } catch (error) {
+        console.error('❌ Erreur lors de la restauration des filtres:', error);
+    }
+}
+
 /**
  * Initialise les événements des filtres
  */
@@ -299,13 +356,17 @@ function initialiserEvenementsFilres() {
         'filtre-groupe-eval',
         'filtre-production-eval',
         'filtre-statut-eval',
-        'filtre-note-eval'
+        'filtre-note-eval',
+        'tri-evaluations'
     ];
 
     filtres.forEach(filtreId => {
         const filtre = document.getElementById(filtreId);
         if (filtre) {
-            filtre.addEventListener('change', appliquerFiltres);
+            filtre.addEventListener('change', () => {
+                sauvegarderEtatFiltres(); // Sauvegarder après chaque changement
+                appliquerFiltres();
+            });
         }
     });
 }
@@ -327,6 +388,10 @@ function reinitialiserFiltres() {
     if (filtreNote) filtreNote.value = '';
     if (tri) tri.value = 'nom-asc';
     if (recherche) recherche.value = '';
+
+    // Supprimer l'état sauvegardé dans localStorage
+    localStorage.removeItem('filtresListeEvaluations');
+    console.log('🗑️ Filtres sauvegardés supprimés');
 
     appliquerFiltres();
 }
@@ -388,14 +453,15 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         conteneurTableau.style.display = 'block';
 
         // Calculer les statistiques
-        const evaluationsAvecNote = lignesFiltrees.filter(ligne =>
-            ligne.statut === 'evalue' && ligne.noteChiffree !== null
+        // IMPORTANT : Exclure les non-recevables ET les non remis de la moyenne
+        const evaluationsRecevables = lignesFiltrees.filter(ligne =>
+            ligne.statut === 'evalue' && ligne.noteChiffree !== null && ligne.statutIntegrite !== 'plagiat' && ligne.statutIntegrite !== 'ia'
         );
 
         let moyenneAffichee = null;
-        if (evaluationsAvecNote.length > 0) {
-            const somme = evaluationsAvecNote.reduce((acc, ligne) => acc + ligne.noteChiffree, 0);
-            moyenneAffichee = somme / evaluationsAvecNote.length;
+        if (evaluationsRecevables.length > 0) {
+            const somme = evaluationsRecevables.reduce((acc, ligne) => acc + ligne.noteChiffree, 0);
+            moyenneAffichee = somme / evaluationsRecevables.length;
         }
 
         // Compter les productions uniques affichées
@@ -403,8 +469,9 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         const nbProductions = productionsUniques.length;
 
         // Mettre à jour les statistiques en haut
+        // Afficher seulement le nombre d'évaluations recevables (qui comptent dans la moyenne)
         if (compteur) {
-            compteur.textContent = `${lignesFiltrees.length} évaluation(s)`;
+            compteur.textContent = `${evaluationsRecevables.length} évaluation(s)`;
         }
 
         const elemMoyenne = document.getElementById('moyenne-evaluations');
@@ -452,10 +519,15 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
             if (evaluationsTrouvees.length > 0) {
                 // Créer une ligne pour CHAQUE évaluation trouvée
                 evaluationsTrouvees.forEach(evaluation => {
-                    // IMPORTANT : Trois cas distincts pour les jetons
-                    // 1. ORIGINALE remplacée : remplaceeParId existe → grisée, "Remplacée"
-                    // 2. NOUVELLE reprise : repriseDeId existe OU ID commence par EVAL_REPRISE_ → "Jeton de reprise appliqué"
-                    // 3. Délai : jetonDelaiApplique = true ET pas de repriseDeId → "Jeton de délai appliqué"
+                    // IMPORTANT : Quatre types de badges (par ordre de priorité)
+                    // 1. Intégrité académique : plagiat ou IA non autorisée (prioritaire)
+                    // 2. ORIGINALE remplacée : remplaceeParId existe → grisée, "Remplacée"
+                    // 3. NOUVELLE reprise : repriseDeId existe OU ID commence par EVAL_REPRISE_ → "Jeton de reprise appliqué"
+                    // 4. Délai : jetonDelaiApplique = true ET pas de repriseDeId → "Jeton de délai appliqué"
+
+                    const statutIntegrite = evaluation.statutIntegrite || 'recevable';
+                    const estNonRecevable = (statutIntegrite === 'plagiat' || statutIntegrite === 'ia');
+                    const estSoupcon = (statutIntegrite === 'soupcon');
 
                     const estOriginaleRemplacee = evaluation.remplaceeParId ? true : false;
                     const estNouvelleReprise = evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
@@ -465,7 +537,16 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     let statut = 'evalue';
                     let badgeType = null;
 
-                    if (estOriginaleRemplacee) {
+                    // Priorité 1 : Intégrité académique
+                    if (estNonRecevable) {
+                        statut = 'non-recevable';
+                        badgeType = statutIntegrite === 'plagiat' ? 'plagiat' : 'ia';
+                    } else if (estSoupcon) {
+                        statut = 'evalue';
+                        badgeType = 'soupcon';
+                    }
+                    // Priorité 2 : Jetons (seulement si pas de problème d'intégrité)
+                    else if (estOriginaleRemplacee) {
                         // L'originale remplacée par une reprise
                         statut = 'remplacee';
                         badgeType = 'originale-reprise';
@@ -479,6 +560,12 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         badgeType = 'delai';
                     }
 
+                    // Formater le nom de production avec description
+                    let productionNomComplet = production.titre;
+                    if (production.description && production.description.trim() !== '') {
+                        productionNomComplet = `${production.titre} - ${production.description}`;
+                    }
+
                     // Évaluation existante
                     lignes.push({
                         da: etudiant.da,
@@ -486,7 +573,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         prenom: etudiant.prenom || '',
                         groupe: etudiant.groupe,
                         productionId: production.id,
-                        productionNom: production.titre,
+                        productionNom: productionNomComplet,
                         grilleNom: evaluation.grilleNom || '-',
                         cartoucheId: evaluation.cartoucheId || null,
                         cartoucheNom: obtenirNomCartouche(evaluation.grilleId, evaluation.cartoucheId),
@@ -494,6 +581,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         noteChiffree: evaluation.noteFinale || null,
                         niveauFinal: evaluation.niveauFinal || '-',
                         statut: statut,
+                        statutIntegrite: statutIntegrite,
                         evaluationId: evaluation.id,
                         verrouille: evaluation.verrouillee || false,
                         remplacee: estOriginaleRemplacee,
@@ -501,6 +589,12 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     });
                 });
             } else {
+                // Formater le nom de production avec description pour les non évaluées aussi
+                let productionNomComplet = production.titre;
+                if (production.description && production.description.trim() !== '') {
+                    productionNomComplet = `${production.titre} - ${production.description}`;
+                }
+
                 // Évaluation manquante
                 lignes.push({
                     da: etudiant.da,
@@ -508,7 +602,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     prenom: etudiant.prenom || '',
                     groupe: etudiant.groupe,
                     productionId: production.id,
-                    productionNom: production.titre,
+                    productionNom: productionNomComplet,
                     grilleNom: '-',
                     cartoucheId: null,
                     cartoucheNom: '-',
@@ -666,7 +760,16 @@ function genererLigneHTML(ligne) {
     let classeRemplacee = '';
     let badgeJeton = '';
 
-    if (ligne.badgeType === 'originale-reprise') {
+    // Priorité aux badges d'intégrité
+    if (ligne.badgeType === 'plagiat') {
+        badgeJeton = ' <span class="badge-jeton badge-jeton-plagiat">Non recevable (Plagiat)</span>';
+    } else if (ligne.badgeType === 'ia') {
+        badgeJeton = ' <span class="badge-jeton badge-jeton-plagiat">Non recevable (IA)</span>';
+    } else if (ligne.badgeType === 'soupcon') {
+        badgeJeton = ' <span class="badge-jeton badge-jeton-soupcon">À vérifier</span>';
+    }
+    // Badges de jetons
+    else if (ligne.badgeType === 'originale-reprise') {
         // Originale remplacée : classe grisée + badge "Remplacée"
         classeRemplacee = ' class="eval-remplacee"';
         badgeJeton = ' <span class="badge-jeton badge-jeton-reprise">Remplacée</span>';
@@ -678,19 +781,33 @@ function genererLigneHTML(ligne) {
         badgeJeton = ' <span class="badge-jeton badge-jeton-delai">Jeton de délai appliqué</span>';
     }
 
-    // Afficher le niveau IDME si évalué, sinon badge "Non remis"
-    const affichageNiveau = (ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.niveauFinal !== '-'
-        ? `<strong>${ligne.niveauFinal}</strong>`
-        : '<span class="badge-statut non-evalue">Non remis</span>';
+    // Afficher le niveau IDME
+    let affichageNiveau;
+    if (ligne.statut === 'non-recevable') {
+        // Non recevable : afficher 0 ou --
+        affichageNiveau = '<strong style="color: #999;">0</strong>';
+    } else if ((ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.niveauFinal !== '-') {
+        affichageNiveau = `<strong>${ligne.niveauFinal}</strong>`;
+    } else {
+        affichageNiveau = '<span class="badge-statut non-evalue">Non remis</span>';
+    }
 
-    // Afficher la note chiffrée (%) si évaluée
-    const affichageNoteChiffree = (ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.noteChiffree !== null
-        ? `<strong>${ligne.noteChiffree}%</strong>`
-        : '-';
+    // Afficher la note chiffrée (%)
+    let affichageNoteChiffree;
+    if (ligne.statut === 'non-recevable') {
+        // Non recevable : afficher -- au lieu d'une note
+        affichageNoteChiffree = '<strong style="color: #999;">--</strong>';
+    } else if ((ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.noteChiffree !== null) {
+        affichageNoteChiffree = `<strong>${ligne.noteChiffree}%</strong>`;
+    } else {
+        affichageNoteChiffree = '-';
+    }
 
     // Choisir les boutons appropriés
     let boutons;
-    if (ligne.statut === 'remplacee') {
+    if (ligne.statut === 'non-recevable') {
+        boutons = genererBoutonsActionsNonRecevable(ligne);
+    } else if (ligne.statut === 'remplacee') {
         boutons = genererBoutonsActionsRemplacee(ligne);
     } else if (ligne.statut === 'evalue') {
         boutons = genererBoutonsActionsEvalue(ligne);
@@ -725,7 +842,7 @@ function genererBoutonsActionsEvalue(ligne) {
     const titreVerrou = ligne.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
 
     return `
-        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.da}', '${ligne.productionId}')" title="Consulter cette évaluation">
+        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="Consulter cette évaluation">
             Consulter
         </button>
         <button class="btn btn-modifier btn-compact" id="cadenas-liste-${ligne.evaluationId}" onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')" title="${titreVerrou}">
@@ -739,7 +856,7 @@ function genererBoutonsActionsEvalue(ligne) {
 
 /**
  * Génère les boutons d'action pour une évaluation remplacée par un jeton
- * (Consulter + Supprimer, SANS verrouiller)
+ * (Consulter + Verrouillage + Supprimer)
  */
 function genererBoutonsActionsRemplacee(ligne) {
     const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
@@ -748,9 +865,41 @@ function genererBoutonsActionsRemplacee(ligne) {
         return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
     }
 
+    const iconeVerrou = ligne.verrouille ? '🔒' : '🔓';
+    const titreVerrou = ligne.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+
     return `
-        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.da}', '${ligne.productionId}')" title="Consulter cette évaluation remplacée">
+        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="Consulter cette évaluation remplacée">
             Consulter
+        </button>
+        <button class="btn btn-modifier btn-compact" id="cadenas-liste-${ligne.evaluationId}" onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')" title="${titreVerrou}">
+            ${iconeVerrou}
+        </button>
+        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer cette évaluation">
+            Supprimer
+        </button>
+    `;
+}
+
+/**
+ * Génère les boutons d'action pour une évaluation non recevable (plagiat ou IA)
+ */
+function genererBoutonsActionsNonRecevable(ligne) {
+    const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+
+    if (lectureSeule) {
+        return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
+    }
+
+    const iconeVerrou = ligne.verrouille ? '🔒' : '🔓';
+    const titreVerrou = ligne.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+
+    return `
+        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="Consulter (lecture seule)">
+            Consulter
+        </button>
+        <button class="btn btn-modifier btn-compact" id="cadenas-liste-${ligne.evaluationId}" onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')" title="${titreVerrou}">
+            ${iconeVerrou}
         </button>
         <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer cette évaluation">
             Supprimer
@@ -795,41 +944,22 @@ function ouvrirCartouche(cartoucheId, productionId) {
  * Ouvre la page d'évaluation pour modifier/créer une évaluation
  * RENOMMÉ consulterEvaluationDepuisListe pour éviter conflit avec evaluation.js
  */
-function consulterEvaluationDepuisListe(da, productionId) {
-    console.log(`🔍 Recherche de l'évaluation: DA ${da}, Production ${productionId}`);
+function consulterEvaluationDepuisListe(evaluationId) {
+    console.log(`🔍 Consultation de l'évaluation ID:`, evaluationId);
 
-    // CORRECTION: Utiliser filter() pour gérer les cas de jetons de reprise (multiples évaluations)
+    // Charger directement l'évaluation par son ID exact
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const evaluationsTrouvees = evaluations.filter(e => e.etudiantDA === da && e.productionId === productionId);
+    const evaluation = evaluations.find(e => e.id === evaluationId);
 
-    if (evaluationsTrouvees.length === 0) {
+    if (!evaluation) {
         alert('Évaluation non trouvée');
-        console.error('❌ Aucune évaluation trouvée pour DA:', da, 'Production:', productionId);
+        console.error('❌ Évaluation introuvable, ID:', evaluationId);
         return;
     }
 
-    // Appliquer la même logique de priorité que le tableau:
-    // PRIORITÉ 1 : Reprise active (a repriseDeId OU ID commence par EVAL_REPRISE_, mais pas remplaceeParId)
-    let evaluation = evaluationsTrouvees.find(e =>
-        (e.repriseDeId || e.id.startsWith('EVAL_REPRISE_')) && !e.remplaceeParId
-    );
-
-    // PRIORITÉ 2 : Jeton de délai actif (jetonDelaiApplique mais pas remplacée)
-    if (!evaluation) {
-        evaluation = evaluationsTrouvees.find(e => e.jetonDelaiApplique && !e.remplaceeParId);
-    }
-
-    // PRIORITÉ 3 : N'importe quelle évaluation active (non remplacée)
-    if (!evaluation) {
-        evaluation = evaluationsTrouvees.find(e => !e.remplaceeParId);
-    }
-
-    // PRIORITÉ 4 : Si toutes sont remplacées, prendre la plus récente
-    if (!evaluation) {
-        evaluation = evaluationsTrouvees[evaluationsTrouvees.length - 1];
-    }
-
-    console.log(`✅ Évaluation trouvée (${evaluationsTrouvees.length} au total), ID:`, evaluation.id);
+    console.log(`✅ Évaluation trouvée:`, evaluation.id);
+    console.log('   - DA:', evaluation.etudiantDA);
+    console.log('   - Production:', evaluation.productionId);
     console.log('   - repriseDeId:', evaluation.repriseDeId);
     console.log('   - jetonDelaiApplique:', evaluation.jetonDelaiApplique);
     console.log('   - remplaceeParId:', evaluation.remplaceeParId);
@@ -867,20 +997,45 @@ function dupliquerEvaluation(evaluationId) {
  * Supprime une évaluation
  */
 function supprimerEvaluation(evaluationId) {
+    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    const evaluation = evaluations.find(ev => ev.id === evaluationId);
+
+    // Vérifier si l'évaluation est verrouillée
+    if (evaluation && evaluation.verrouillee) {
+        if (typeof afficherNotificationErreur === 'function') {
+            afficherNotificationErreur('Suppression impossible', 'Cette évaluation est verrouillée. Déverrouillez-la d\'abord.');
+        } else {
+            alert('Suppression impossible : cette évaluation est verrouillée. Déverrouillez-la d\'abord.');
+        }
+        return;
+    }
+
     if (!confirm('Voulez-vous vraiment supprimer cette évaluation ? Cette action est irréversible.')) {
         return;
     }
 
-    // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const evaluationsFiltered = evaluations.filter(ev => ev.id !== evaluationId);
 
-    sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsFiltered);
+    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluationsFiltered)) {
+        afficherNotificationErreur('Erreur', 'Impossible de supprimer en mode anonymisation');
+        return;
+    }
 
     console.log(`Évaluation ${evaluationId} supprimée`);
 
-    // Recharger le tableau
-    chargerDonneesEvaluations();
+    // Recalculer les indices C et P
+    if (typeof calculerEtStockerIndicesCP === 'function') {
+        calculerEtStockerIndicesCP();
+    }
+
+    // Rafraîchir complètement le tableau
+    initialiserListeEvaluations();
+
+    // Notification de succès
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Évaluation supprimée');
+    }
 }
 
 /**
