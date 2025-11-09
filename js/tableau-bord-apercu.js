@@ -322,14 +322,18 @@ function calculerIndicesEtudiant(da) {
     const indicesPAN = indicesCPEtudiant?.PAN || null;
 
     // Structure complète avec sommatif ET alternatif
+    // IMPORTANT: indicesA contient maintenant des objets { indice, heuresPresentes, heuresOffertes, nombreSeances }
+    const assiduiteSommatif = indicesA.sommatif?.[da];
+    const assiduiteAlternatif = indicesA.alternatif?.[da];
+
     const indices = {
         sommatif: {
-            assiduite: indicesA.sommatif?.[da] || 0,
+            assiduite: (typeof assiduiteSommatif === 'object') ? assiduiteSommatif.indice : (assiduiteSommatif || 0),
             completion: indicesSOM ? indicesSOM.C / 100 : 0,
             performance: indicesSOM ? indicesSOM.P / 100 : 0
         },
         alternatif: {
-            assiduite: indicesA.alternatif?.[da] || 0,
+            assiduite: (typeof assiduiteAlternatif === 'object') ? assiduiteAlternatif.indice : (assiduiteAlternatif || 0),
             completion: indicesPAN ? indicesPAN.C / 100 : 0,
             performance: indicesPAN ? indicesPAN.P / 100 : 0
         }

@@ -7200,6 +7200,52 @@ Exemple :
                             <p class="mb-0-only">Permettre de <strong>documenter les présences</strong> aux interventions tout en <strong>marquant les absences comme motivées</strong>, afin qu'elles ne pénalisent pas l'indice d'assiduité.</p>
                         </div>
 
+                        <div class="carte-gradient-bleu">
+                            <h4 class="titre-bleu-mb10">🔍 Distinction entre niveaux 2 et 3</h4>
+                            <p class="mb-10"><strong>Le système traite différemment les interventions selon leur nature :</strong></p>
+
+                            <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+                                <p class="mb-5"><strong style="color: var(--orange-accent);">Niveau 2 (Préventif - en classe ou en période de disponibilité)</strong></p>
+                                <ul class="lh-16">
+                                    <li><strong>Contexte :</strong> Intervention en classe pendant le cours régulier</li>
+                                    <li><strong>Participants</strong> (niveaux 2-3 qui ont besoin de soutien) :
+                                        <ul class="mt-5-text-95">
+                                            <li>2 heures enregistrées</li>
+                                            <li>Compte au numérateur ET au dénominateur de l'assiduité</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Non-participants</strong> (niveau 1 qui n'ont pas besoin de soutien) :
+                                        <ul class="mt-5-text-95">
+                                            <li>0 heures enregistrées (absence motivée)</li>
+                                            <li>Affichage en couleur ambre</li>
+                                            <li>Ne compte NI au numérateur NI au dénominateur</li>
+                                            <li><strong>Résultat :</strong> L'assiduité n'est pas pénalisée</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div style="background: white; padding: 12px; border-radius: 6px;">
+                                <p class="mb-5"><strong style="color: var(--bleu-moyen);">Niveau 3 (Intensif - hors classe, au bureau)</strong></p>
+                                <ul class="lh-16">
+                                    <li><strong>Contexte :</strong> Rencontre individuelle ou petit groupe à votre bureau</li>
+                                    <li><strong>Participants uniquement</strong> (étudiants convoqués) :
+                                        <ul class="mt-5-text-95">
+                                            <li>2 heures enregistrées</li>
+                                            <li>Compte au numérateur ET au dénominateur de l'assiduité</li>
+                                            <li><strong>Résultat :</strong> L'assiduité augmente (heures supplémentaires)</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Non-participants</strong> (autres étudiants) :
+                                        <ul class="mt-5-text-95">
+                                            <li>Aucune entrée créée (pas concernés par l'intervention)</li>
+                                            <li>Aucun impact sur leur assiduité</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
                         <div class="carte-orange-my15">
                             <h4 class="titre-orange-mb10">📝 Processus en 3 étapes</h4>
 
@@ -7228,21 +7274,35 @@ Exemple :
 
                             <p class="mb-5"><strong>ÉTAPE 3 : Transfert automatique des présences</strong></p>
                             <p class="text-095-lh-16">Dès que vous marquez l'intervention comme complétée, le système transfère automatiquement les données vers le module de saisie des présences :</p>
+
+                            <p class="mb-5-mt-10"><strong>Pour intervention niveau 2 (en classe) :</strong></p>
                             <ul class="lh-16">
-                                <li><strong>Étudiants présents</strong> :
+                                <li><strong>Participants</strong> :
                                     <ul class="mt-5-text-95">
                                         <li>2 heures enregistrées</li>
                                         <li>Note : « Intervention RàI : [titre de l'intervention] »</li>
                                         <li>Compte au numérateur ET au dénominateur de l'assiduité</li>
                                     </ul>
                                 </li>
-                                <li><strong>Étudiants absents</strong> :
+                                <li><strong>Non-participants</strong> :
                                     <ul class="mt-5-text-95">
                                         <li>0 heures enregistrées (affichage en couleur ambre)</li>
                                         <li>Note : « Absence motivée RàI »</li>
                                         <li>Ne compte NI au numérateur NI au dénominateur (absence justifiée)</li>
                                     </ul>
                                 </li>
+                            </ul>
+
+                            <p class="mb-5-mt-10"><strong>Pour intervention niveau 3 (hors classe) :</strong></p>
+                            <ul class="lh-16">
+                                <li><strong>Participants uniquement</strong> :
+                                    <ul class="mt-5-text-95">
+                                        <li>2 heures enregistrées</li>
+                                        <li>Note : « Intervention RàI : [titre de l'intervention] »</li>
+                                        <li>Compte au numérateur ET au dénominateur (augmente l'assiduité)</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Non-participants</strong> : Aucune entrée créée (pas concernés)</li>
                             </ul>
                         </div>
 
@@ -7260,11 +7320,21 @@ Exemple :
                                 <li>Sélectionner la date de l'intervention</li>
                                 <li>Vérifier dans le tableau :
                                     <ul class="mt-5-text-95">
-                                        <li>Les présents ont 2h (vert) avec la note d'intervention</li>
-                                        <li>Les absents ont 0h (ambre) avec la note « Absence motivée RàI »</li>
+                                        <li><strong>Pour niveau 2 (en classe) :</strong>
+                                            <ul style="margin-top: 5px;">
+                                                <li>Participants : 2h (vert) avec la note d'intervention</li>
+                                                <li>Non-participants : 0h (ambre) avec « Absence motivée RàI »</li>
+                                            </ul>
+                                        </li>
+                                        <li><strong>Pour niveau 3 (hors classe) :</strong>
+                                            <ul style="margin-top: 5px;">
+                                                <li>Participants : 2h (vert) avec la note d'intervention</li>
+                                                <li>Non-participants : 2h par défaut (affichage normal, pas concernés)</li>
+                                            </ul>
+                                        </li>
                                     </ul>
                                 </li>
-                                <li>Consulter un profil étudiant absent pour confirmer que l'assiduité n'a pas baissé</li>
+                                <li>Pour niveau 2, consulter un profil étudiant non-participant pour confirmer que l'assiduité n'a pas baissé</li>
                             </ol>
                         </div>
 
@@ -8547,11 +8617,11 @@ Exemple :
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
     <script src="js/interpretation-config.js"></script>
     <script src="js/portfolio.js?v=2025110909"></script>
-    <script src="js/saisie-presences.js?v=2025110504"></script>
+    <script src="js/saisie-presences.js?v=2025110909"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js"></script>
-    <script src="js/profil-etudiant.js?v=2025110556"></script>
+    <script src="js/tableau-bord-apercu.js?v=2025110907"></script>
+    <script src="js/profil-etudiant.js?v=2025110910"></script>
     <script src="js/presences-apercu.js"></script>
     <script src="js/evaluations-apercu.js"></script>
 
