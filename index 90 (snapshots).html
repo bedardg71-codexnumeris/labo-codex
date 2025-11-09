@@ -2408,6 +2408,57 @@
             justify-content: center;
             align-items: center;
         }
+
+        /* ===============================
+           BADGES D'INTÉGRITÉ ACADÉMIQUE
+           =============================== */
+
+        .badge-jeton {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-jeton-plagiat {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef5350;
+        }
+
+        .badge-jeton-soupcon {
+            background-color: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ff9800;
+        }
+
+        .badge-jeton-delai {
+            background-color: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ff9800;
+        }
+
+        .badge-jeton-reprise {
+            background-color: #f3e5f5;
+            color: #6a1b9a;
+            border: 1px solid #9c27b0;
+        }
+
+        .badge-statut {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-statut.non-evalue {
+            background-color: #f5f5f5;
+            color: #757575;
+            border: 1px solid #bdbdbd;
+        }
     </style>
 </head>
 
@@ -3405,11 +3456,6 @@
                     </div>
                 </div>
 
-                <!-- Note d'information -->
-                <div class="alerte-info" style="margin-bottom: 20px;">
-                    <strong>Actions disponibles :</strong> Vous pouvez consulter, verrouiller (🔒) ou supprimer (🗑️) chaque évaluation directement depuis le tableau ci-dessous.
-                </div>
-
                 <!-- Zone de chargement -->
                 <div id="zone-chargement-evaluations" class="carte" style="text-align: center; padding: 40px;">
                     <p style="color: #666;">Chargement des évaluations...</p>
@@ -3563,15 +3609,33 @@
                                 </select>
                             </div>
 
-                            <!-- DÉLAI DE REMISE ACCORDÉ -->
+                            <!-- STATUT D'INTÉGRITÉ ACADÉMIQUE -->
                             <div class="groupe-form" class="mb-12">
-                                <label class="d-flex-center-pointer">
-                                    <input type="checkbox" id="delaiAccordeCheck"
-                                           class="mr-10-icon-18"
-                                           onchange="gererDelaiAccorde()">
-                                    <span class="label-formulaire" class="m-0">Application de jeton de délai</span>
-                                </label>
+                                <label class="label-formulaire">Intégrité académique :</label>
+                                <select id="statutIntegrite" class="controle-form" onchange="changerStatutIntegrite()">
+                                    <option value="recevable">Recevable</option>
+                                    <option value="soupcon">Soupçon à vérifier</option>
+                                    <option value="plagiat">Non recevable - Plagiat</option>
+                                    <option value="ia">Non recevable - IA non autorisée</option>
+                                </select>
                                 <p class="text-085-muted-m5-0-0-28">
+                                    Les travaux non recevables sont exclus des calculs de moyenne.
+                                </p>
+                            </div>
+
+                            <!-- NOTES SUR L'INTÉGRITÉ (optionnel) -->
+                            <div id="divNotesIntegrite" class="groupe-form" style="display: none;">
+                                <label class="label-formulaire">Notes (optionnel) :</label>
+                                <textarea id="notesIntegrite" class="controle-form" rows="3" placeholder="Détails du cas, preuves, références..."></textarea>
+                            </div>
+
+                            <!-- BOUTON JETON DE DÉLAI -->
+                            <div id="boutonJetonDelai" class="groupe-form" class="hidden-mb-12">
+                                <button class="btn btn-special" onclick="appliquerJetonDelaiDepuisSidebar()"
+                                        style="background: linear-gradient(135deg, #ff6f00 0%, #ff8c00 100%); color: white;">
+                                    🕒 Appliquer jeton de délai
+                                </button>
+                                <p class="text-085-muted-m5-0-0-0">
                                     L'évaluation comptera dans les travaux remis sans pénalité de retard.
                                 </p>
                             </div>
@@ -6825,9 +6889,145 @@ Exemple :
                         </div>
                     </div>
 
+                    <!-- Carte: Gestion des travaux irrecevables et non-remis -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">4. Gestion des travaux irrecevables et non-remis</h3>
+                        <p><strong>Navigation :</strong> Portfolio → Évaluation</p>
+
+                        <p>Le système distingue clairement deux situations différentes qui affectent les calculs de manière distincte :</p>
+
+                        <div class="alerte-info-bleu">
+                            <h4 class="titre-bleu-mb10">Travail NON REMIS</h4>
+                            <p><strong>Définition :</strong> L'étudiant n'a pas soumis de travail.</p>
+                            <p><strong>Affichage :</strong> Badge «Non remis» dans le tableau des évaluations.</p>
+                            <p><strong>Impact sur les calculs :</strong></p>
+                            <ul class="m-10-0-0-0">
+                                <li><strong>Complétion (C)</strong> : Compte dans le dénominateur mais pas dans le numérateur</li>
+                                <li><strong>Performance (P)</strong> : Exclu du calcul de la moyenne</li>
+                                <li><strong>Moyenne</strong> : Exclu du calcul</li>
+                            </ul>
+                            <p><strong>Exemple :</strong> Si un étudiant a 7 productions remises sur 9 attendues, son indice C = 78%</p>
+                        </div>
+
+                        <div class="alerte alerte-attention">
+                            <h4 class="titre-bleu-mb10">Travail NON RECEVABLE (Plagiat ou IA)</h4>
+                            <p><strong>Définition :</strong> Le travail existe mais ne peut être évalué pour des raisons d'intégrité académique.</p>
+                            <p><strong>Affichage :</strong></p>
+                            <ul class="m-10-0-0-0">
+                                <li>Badge rouge «Non recevable (Plagiat)» ou «Non recevable (IA)»</li>
+                                <li>Niveau : 0</li>
+                                <li>Note : -- (deux tirets)</li>
+                            </ul>
+                            <p><strong>Impact sur les calculs :</strong></p>
+                            <ul class="m-10-0-0-0">
+                                <li><strong>Complétion (C)</strong> : Exclu du total attendu (comme si la production n'existait pas)</li>
+                                <li><strong>Performance (P)</strong> : Exclu du calcul de la moyenne</li>
+                                <li><strong>Moyenne</strong> : Complètement exclu</li>
+                            </ul>
+                            <p><strong>Exemple :</strong> Si un étudiant a 7 productions recevables + 1 plagiat sur 9 attendues, son indice C = 7/8 = 88% (le plagiat n'est pas compté dans le total)</p>
+                        </div>
+
+                        <div class="alerte-info-bleu">
+                            <h4 class="titre-bleu-mb10">Travail SOUPÇONNÉ (À vérifier)</h4>
+                            <p><strong>Définition :</strong> Cas en investigation, pas encore confirmé.</p>
+                            <p><strong>Affichage :</strong> Badge orange «À vérifier»</p>
+                            <p><strong>Impact sur les calculs :</strong> Aucun - le travail est évalué normalement en attendant la décision finale.</p>
+                            <p><strong>Usage :</strong> Permet de documenter un doute avant de prendre une décision définitive.</p>
+                        </div>
+
+                        <p><strong>Procédure d'application :</strong></p>
+                        <ol class="lh-relaxed">
+                            <li>Charger l'évaluation (existante ou nouvelle)</li>
+                            <li>Dans le champ «Intégrité académique», sélectionner :
+                                <ul class="mt-5">
+                                    <li><strong>Recevable</strong> : Travail normal (par défaut)</li>
+                                    <li><strong>Soupçon à vérifier</strong> : En investigation</li>
+                                    <li><strong>Non recevable - Plagiat</strong> : Copie confirmée</li>
+                                    <li><strong>Non recevable - IA non autorisée</strong> : Utilisation d'IA détectée</li>
+                                </ul>
+                            </li>
+                            <li>Optionnel : Ajouter des notes (preuves, références, contexte)</li>
+                            <li>Si non recevable : tous les critères passent automatiquement à «0 - Aucun»</li>
+                            <li>Sauvegarder l'évaluation</li>
+                        </ol>
+
+                        <div class="alerte alerte-succes">
+                            <strong>Jetons de reprise pour les non recevables :</strong> Un travail non recevable peut recevoir un jeton de reprise pour permettre à l'étudiant de soumettre un nouveau travail original. La nouvelle évaluation remplacera l'ancienne dans tous les calculs.
+                        </div>
+
+                        <p><strong>Exemple concret (Étudiant avec 9 artefacts) :</strong></p>
+                        <table class="tableau">
+                            <thead>
+                                <tr>
+                                    <th>Production</th>
+                                    <th>Statut</th>
+                                    <th class="text-center">Note</th>
+                                    <th>Compte dans C ?</th>
+                                    <th>Compte dans P ?</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Artefact 1</td>
+                                    <td>Recevable</td>
+                                    <td class="text-center">68.5%</td>
+                                    <td>Oui (remis)</td>
+                                    <td>Oui</td>
+                                </tr>
+                                <tr>
+                                    <td>Artefact 2</td>
+                                    <td>Non remis</td>
+                                    <td class="text-center">-</td>
+                                    <td>Non (manquant)</td>
+                                    <td>Non</td>
+                                </tr>
+                                <tr>
+                                    <td>Artefact 3</td>
+                                    <td>Non remis</td>
+                                    <td class="text-center">-</td>
+                                    <td>Non (manquant)</td>
+                                    <td>Non</td>
+                                </tr>
+                                <tr style="background-color: #ffebee;">
+                                    <td>Artefact 4</td>
+                                    <td>Non recevable (Plagiat)</td>
+                                    <td class="text-center">--</td>
+                                    <td>N/A (exclu du total)</td>
+                                    <td>Non</td>
+                                </tr>
+                                <tr>
+                                    <td>Artefact 5</td>
+                                    <td>Recevable</td>
+                                    <td class="text-center">78%</td>
+                                    <td>Oui (remis)</td>
+                                    <td>Oui</td>
+                                </tr>
+                                <tr>
+                                    <td>Artefacts 6-9</td>
+                                    <td>Non remis</td>
+                                    <td class="text-center">-</td>
+                                    <td>Non (manquant)</td>
+                                    <td>Non</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p><strong>Résultats des calculs :</strong></p>
+                        <ul>
+                            <li><strong>Évaluations comptées :</strong> 2 (Artefacts 1 et 5 seulement)</li>
+                            <li><strong>Moyenne affichée :</strong> (68.5 + 78) / 2 = 73.3%</li>
+                            <li><strong>Indice C :</strong> 2 remis / 8 attendus = 25% (Artefact 4 exclu du dénominateur)</li>
+                            <li><strong>Indice P :</strong> 73.3%</li>
+                        </ul>
+
+                        <div class="alerte alerte-info">
+                            <strong>Principe clé :</strong> Un travail non recevable n'est pas une note de 0%, c'est une absence d'évaluation. Le système fait comme si cette production n'avait jamais existé dans les attentes du cours.
+                        </div>
+                    </div>
+
                     <!-- Carte: Vérification hebdomadaire -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">4. Vérification hebdomadaire</h3>
+                        <h3 class="carte-titre-bleu">5. Vérification hebdomadaire</h3>
                         <p><strong>Navigation :</strong> Tableau de bord → Aperçu</p>
 
                         <p><strong>Indices à surveiller :</strong></p>
@@ -6878,7 +7078,7 @@ Exemple :
 
                     <!-- Carte: Collaboration entre collègues -->
                     <div class="carte" class="border-left-purple">
-                        <h3 class="carte-titre-bleu">5. Collaboration entre collègues</h3>
+                        <h3 class="carte-titre-bleu">6. Collaboration entre collègues</h3>
                         <p><strong>Partage de matériel pédagogique via Import/Export</strong></p>
 
                         <p>Le système permet de partager facilement du matériel pédagogique entre enseignant·es, favorisant la collaboration départementale et l'harmonisation des pratiques.</p>
@@ -8346,7 +8546,7 @@ Exemple :
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
     <script src="js/interpretation-config.js"></script>
-    <script src="js/portfolio.js"></script>
+    <script src="js/portfolio.js?v=2025110909"></script>
     <script src="js/saisie-presences.js?v=2025110504"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
@@ -8365,10 +8565,11 @@ Exemple :
     <!-- PRIORITÉ 6: Modules avancés -->
     <script src="js/import-export.js?v=1761387764"></script>
     <script src="js/statistiques.js"></script>
-    <script src="js/liste-evaluations.js?v=2025110831"></script>
+    <script src="js/liste-evaluations.js?v=2025110909"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
-    <script src="js/evaluation.js?v=2025110814"></script>
+    <script src="js/evaluation-jetons.js?v=2025110900"></script>
+    <script src="js/evaluation.js?v=2025110908"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js"></script>

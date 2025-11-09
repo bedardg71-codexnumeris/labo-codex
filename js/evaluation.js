@@ -848,6 +848,8 @@ function sauvegarderEvaluation() {
         dateEvaluation: maintenant.toISOString(),
         heureEvaluation: maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }),
         statutRemise: document.getElementById('remiseProduction1').value,
+        statutIntegrite: document.getElementById('statutIntegrite').value || 'recevable',
+        notesIntegrite: document.getElementById('notesIntegrite').value || '',
         criteres: criteres,
         noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
         niveauFinal: document.getElementById('niveauProduction1').textContent,
@@ -861,6 +863,9 @@ function sauvegarderEvaluation() {
         },
         verrouillee: true // Verrouiller par défaut toutes les nouvelles évaluations
     };
+
+    // Note : Les jetons de délai ne peuvent être appliqués que sur des évaluations existantes
+    // via le bouton "Appliquer jeton de délai" dans la sidebar
 
     // Sauvegarder
     let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
@@ -919,80 +924,83 @@ function changerStatutRemise(num) {
 }
 
 /**
- * Gère l'état de la checkbox "Délai de remise accordé"
- * Applique ou retire un jeton de délai
+ * Gère le changement de statut d'intégrité académique
  */
-function gererDelaiAccorde() {
-    const checkbox = document.getElementById('delaiAccordeCheck');
+function changerStatutIntegrite() {
+    const statut = document.getElementById('statutIntegrite').value;
+    const divNotes = document.getElementById('divNotesIntegrite');
+    const notes = document.getElementById('notesIntegrite');
 
-    if (!evaluationEnCours || !evaluationEnCours.idModification) {
-        // Pour les nouvelles évaluations, juste mettre la propriété
-        if (evaluationEnCours) {
-            evaluationEnCours.delaiAccorde = checkbox.checked;
-        }
-        console.log('📅 Délai accordé (nouvelle évaluation):', checkbox.checked);
-        return;
+    // Sauvegarder dans evaluationEnCours
+    if (evaluationEnCours) {
+        evaluationEnCours.statutIntegrite = statut;
+        evaluationEnCours.notesIntegrite = notes.value;
     }
 
-    // Pour les évaluations existantes, appliquer un vrai jeton
-    const evaluationId = evaluationEnCours.idModification;
-    // CORRECTION: Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
-    let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const index = evaluations.findIndex(e => e.id === evaluationId);
-
-    if (index === -1) {
-        console.error('Évaluation non trouvée');
-        return;
-    }
-
-    const evaluation = evaluations[index];
-
-    if (checkbox.checked) {
-        // Appliquer le jeton de délai
-        evaluation.jetonDelaiApplique = true;
-        evaluation.dateApplicationJetonDelai = new Date().toISOString();
-        evaluation.delaiAccorde = true;
-
-        // Mettre à jour evaluationEnCours
-        evaluationEnCours.jetonDelaiApplique = true;
-        evaluationEnCours.dateApplicationJetonDelai = evaluation.dateApplicationJetonDelai;
-        evaluationEnCours.delaiAccorde = true;
-
-        console.log('✅ Jeton de délai appliqué');
+    // Afficher le champ de notes seulement si ce n'est pas "recevable"
+    if (statut !== 'recevable') {
+        divNotes.style.display = 'block';
     } else {
-        // Retirer le jeton de délai
-        delete evaluation.jetonDelaiApplique;
-        delete evaluation.dateApplicationJetonDelai;
-        delete evaluation.delaiAccorde;
-
-        // Mettre à jour evaluationEnCours
-        delete evaluationEnCours.jetonDelaiApplique;
-        delete evaluationEnCours.dateApplicationJetonDelai;
-        delete evaluationEnCours.delaiAccorde;
-
-        console.log('❌ Jeton de délai retiré');
+        divNotes.style.display = 'none';
+        notes.value = ''; // Vider les notes si on repasse à recevable
+        if (evaluationEnCours) {
+            delete evaluationEnCours.notesIntegrite;
+        }
     }
 
-    // CORRECTION: Utiliser sauvegarderDonneesSelonMode pour respecter le mode actuel
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
-        checkbox.checked = !checkbox.checked; // Rétablir l'état de la checkbox
-        return;
-    }
+    // Si non recevable (plagiat ou IA), mettre tous les critères à 0 et désactiver
+    const estNonRecevable = (statut === 'plagiat' || statut === 'ia');
 
-    // Recalculer les indices C et P
-    if (typeof calculerEtStockerIndicesCP === 'function') {
-        calculerEtStockerIndicesCP();
-    }
+    if (estNonRecevable) {
+        // Récupérer tous les selects de critères
+        const listeCriteres = document.getElementById('listeCriteresGrille1');
+        const selectsCriteres = listeCriteres ? listeCriteres.querySelectorAll('select[id^="critere"]') : [];
 
-    // Rafraîchir l'affichage des badges
-    afficherBadgesJetons();
+        selectsCriteres.forEach(select => {
+            select.value = '0'; // Mettre à "0 - Aucun"
+            select.disabled = true; // Désactiver
+            select.style.opacity = '0.5';
+        });
 
-    // 🔄 Rafraîchir le tableau des évaluations si affiché
-    if (typeof initialiserListeEvaluations === 'function') {
-        setTimeout(() => initialiserListeEvaluations(), 150);
+        // Afficher un message d'avertissement
+        const messageExistant = document.getElementById('message-non-recevable');
+        if (!messageExistant && listeCriteres) {
+            const message = document.createElement('div');
+            message.id = 'message-non-recevable';
+            message.className = 'alerte alerte-info';
+            message.style.marginBottom = '15px';
+            message.innerHTML = `
+                <strong>Travail non recevable</strong><br>
+                Les critères sont automatiquement à 0. Cette évaluation sera exclue des calculs de moyenne.
+                ${statut === 'plagiat' ? 'Un jeton de reprise peut être appliqué pour permettre une nouvelle remise.' : ''}
+            `;
+            listeCriteres.insertBefore(message, listeCriteres.firstChild);
+        }
+
+        // Recalculer la note (qui sera 0)
+        calculerNote();
+    } else {
+        // Réactiver les selects de critères
+        const listeCriteres = document.getElementById('listeCriteresGrille1');
+        const selectsCriteres = listeCriteres ? listeCriteres.querySelectorAll('select[id^="critere"]') : [];
+
+        selectsCriteres.forEach(select => {
+            select.disabled = false;
+            select.style.opacity = '1';
+        });
+
+        // Retirer le message d'avertissement si présent
+        const message = document.getElementById('message-non-recevable');
+        if (message) {
+            message.remove();
+        }
+
+        // Recalculer la note avec les valeurs actuelles
+        calculerNote();
     }
 }
+
+// Fonction gererDelaiAccorde() supprimée - remplacée par appliquerJetonDelaiDepuisSidebar()
 
 /**
  * Affiche les badges des jetons appliqués sur l'évaluation courante
@@ -1069,23 +1077,6 @@ function afficherBadgesJetons() {
         console.log('⚠️ Aucun badge à afficher');
         section.style.display = 'none';
     }
-
-    // Désactiver la checkbox de délai si un jeton de délai est déjà appliqué
-    const checkboxDelai = document.getElementById('delaiAccordeCheck');
-    if (checkboxDelai) {
-        checkboxDelai.disabled = aDejaJetonDelai;
-        // Appliquer un style visuel pour indiquer que c'est désactivé
-        const labelParent = checkboxDelai.closest('.groupe-form');
-        if (labelParent) {
-            if (aDejaJetonDelai) {
-                labelParent.style.opacity = '0.5';
-                labelParent.style.pointerEvents = 'none';
-            } else {
-                labelParent.style.opacity = '1';
-                labelParent.style.pointerEvents = 'auto';
-            }
-        }
-    }
 }
 
 /**
@@ -1094,11 +1085,12 @@ function afficherBadgesJetons() {
  */
 function afficherGestionJetons(afficher) {
     const sectionBadges = document.getElementById('gestionJetonsEvaluation');
+    const boutonDelai = document.getElementById('boutonJetonDelai');
     const boutonReprise = document.getElementById('boutonJetonReprise');
 
     if (afficher && window.evaluationEnCours?.idModification) {
         // Récupérer l'évaluation pour vérifier si elle a déjà des jetons
-        const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
         const evaluation = evaluations.find(e => e.id === window.evaluationEnCours.idModification);
 
         // Afficher les badges si l'évaluation existe
@@ -1106,14 +1098,21 @@ function afficherGestionJetons(afficher) {
             afficherBadgesJetons();
         }
 
+        // Afficher le bouton de délai SEULEMENT si l'évaluation n'a PAS déjà un jeton de délai
+        if (boutonDelai && evaluation) {
+            const aDejaJetonDelai = evaluation.jetonDelaiApplique || evaluation.delaiAccorde;
+            boutonDelai.style.display = aDejaJetonDelai ? 'none' : 'block';
+        }
+
         // Afficher le bouton de reprise SEULEMENT si l'évaluation n'a PAS déjà un jeton de reprise
         if (boutonReprise && evaluation) {
-            const aDejaJetonReprise = evaluation.jetonRepriseApplique || evaluation.repriseDeId;
+            const aDejaJetonReprise = evaluation.jetonRepriseApplique || evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
             boutonReprise.style.display = aDejaJetonReprise ? 'none' : 'block';
         }
     } else {
         // Masquer tout
         if (sectionBadges) sectionBadges.style.display = 'none';
+        if (boutonDelai) boutonDelai.style.display = 'none';
         if (boutonReprise) boutonReprise.style.display = 'none';
     }
 }
@@ -1126,178 +1125,27 @@ function afficherGestionJetons(afficher) {
 function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
     console.log('🗑️ Retrait jeton:', typeJeton, 'pour évaluation:', evaluationId);
 
-    // CORRECTION: Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
-    let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const index = evaluations.findIndex(e => e.id === evaluationId);
-
-    if (index === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
-        return;
-    }
-
-    const evaluation = evaluations[index];
-
     if (typeJeton === 'reprise') {
-        // NOUVEAU WORKFLOW SIMPLIFIÉ pour les jetons de reprise
-        const estRepriseAvecID = evaluation.id.startsWith('EVAL_REPRISE_');
-        const estRepriseAvecPropriete = evaluation.repriseDeId;
-
-        if (estRepriseAvecID || estRepriseAvecPropriete) {
-            // Trouver l'évaluation originale (celle qui a remplaceeParId)
-            const evaluationOriginale = evaluations.find(e =>
-                e.etudiantDA === evaluation.etudiantDA &&
-                e.productionId === evaluation.productionId &&
-                e.remplaceeParId === evaluationId
-            );
-
-            if (evaluationOriginale) {
-                // Demander si l'utilisateur veut archiver l'originale
-                const noteOriginale = evaluationOriginale.noteFinale || 0;
-                const noteReprise = evaluation.noteFinale || 0;
-
-                const archiver = confirm(
-                    `Voulez-vous archiver l'évaluation originale (${noteOriginale}%) ?\n\n` +
-                    `• OUI : L'originale sera archivée et la reprise (${noteReprise}%) deviendra l'évaluation principale.\n` +
-                    `• NON : La reprise sera supprimée et l'originale (${noteOriginale}%) sera restaurée.`
-                );
-
-                if (archiver) {
-                    // Option 1: Archiver l'originale, nettoyer la reprise
-                    console.log('✅ Archivage de l\'originale, conservation de la reprise');
-
-                    // Marquer l'originale comme archivée
-                    evaluationOriginale.archivee = true;
-                    evaluationOriginale.dateArchivage = new Date().toISOString();
-                    delete evaluationOriginale.remplaceeParId; // Elle n'est plus "remplacée", juste archivée
-
-                    // Nettoyer la reprise pour en faire l'évaluation principale
-                    delete evaluation.repriseDeId;
-                    delete evaluation.jetonRepriseApplique;
-                    delete evaluation.dateApplicationJetonReprise;
-
-                    // Si l'ID commence par EVAL_REPRISE_, le renommer
-                    if (estRepriseAvecID) {
-                        const nouvelId = 'EVAL_' + Date.now();
-                        console.log(`🔄 Renommage ${evaluation.id} → ${nouvelId}`);
-                        evaluation.id = nouvelId;
-
-                        // Mettre à jour evaluationEnCours
-                        if (window.evaluationEnCours && window.evaluationEnCours.idModification === evaluationId) {
-                            window.evaluationEnCours.idModification = nouvelId;
-                        }
-                    }
-
-                    afficherNotificationSucces('Originale archivée, reprise conservée comme évaluation principale');
-                } else {
-                    // Option 2: Supprimer la reprise, restaurer l'originale
-                    console.log('✅ Suppression de la reprise, restauration de l\'originale');
-
-                    // Retirer le flag de remplacement de l'originale
-                    delete evaluationOriginale.remplaceeParId;
-                    delete evaluationOriginale.dateRemplacement;
-
-                    // Supprimer la reprise
-                    evaluations.splice(index, 1);
-
-                    console.log(`🗑️ Reprise supprimée, ${evaluations.length} évaluations restantes`);
-
-                    // IMPORTANT: Sauvegarder AVANT de recharger
-                    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-                        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
-                        return;
-                    }
-
-                    afficherNotificationSucces('Reprise supprimée, évaluation originale restaurée');
-
-                    // Recalculer les indices
-                    if (typeof calculerEtStockerIndicesCP === 'function') {
-                        calculerEtStockerIndicesCP();
-                    }
-
-                    // Rafraîchir le tableau
-                    if (typeof initialiserListeEvaluations === 'function') {
-                        setTimeout(() => initialiserListeEvaluations(), 150);
-                    }
-
-                    // Recharger l'originale
-                    setTimeout(() => {
-                        if (typeof modifierEvaluation === 'function') {
-                            modifierEvaluation(evaluationOriginale.id);
-                        }
-                    }, 500);
-
-                    // Ne pas continuer avec le code de sauvegarde en bas
-                    return;
-                }
-            } else {
-                // Pas d'originale trouvée, juste nettoyer les propriétés
-                console.log('⚠️ Aucune originale trouvée, nettoyage simple');
-                delete evaluation.repriseDeId;
-                delete evaluation.jetonRepriseApplique;
-                delete evaluation.dateApplicationJetonReprise;
-
-                afficherNotificationSucces('Jeton de reprise retiré');
-            }
+        // Utiliser le module evaluation-jetons.js pour retirer le jeton de reprise
+        if (typeof retirerJetonReprise === 'function') {
+            retirerJetonReprise(evaluationId);
         } else {
-            // Cas simple: juste des propriétés de jeton à retirer
-            delete evaluation.jetonRepriseApplique;
-            delete evaluation.dateApplicationJetonReprise;
-            delete evaluation.repriseDeId;
-
-            afficherNotificationSucces('Jeton de reprise retiré');
-        }
-
-        // Mettre à jour evaluationEnCours
-        if (window.evaluationEnCours && window.evaluationEnCours.idModification === evaluationId) {
-            delete window.evaluationEnCours.jetonRepriseApplique;
-            delete window.evaluationEnCours.dateApplicationJetonReprise;
-            delete window.evaluationEnCours.repriseDeId;
+            console.error('❌ Fonction retirerJetonReprise non disponible');
+            afficherNotificationErreur('Erreur', 'Module jetons non disponible');
         }
     } else if (typeJeton === 'delai') {
-        // Retirer le jeton de délai
-        delete evaluation.jetonDelaiApplique;
-        delete evaluation.dateApplicationJetonDelai;
-        delete evaluation.delaiAccorde;
-
-        // Mettre à jour evaluationEnCours si c'est la même évaluation
-        if (window.evaluationEnCours && window.evaluationEnCours.idModification === evaluationId) {
-            delete window.evaluationEnCours.jetonDelaiApplique;
-            delete window.evaluationEnCours.dateApplicationJetonDelai;
-            delete window.evaluationEnCours.delaiAccorde;
-        }
-
-        // Réactiver la checkbox de délai
-        const checkboxDelai = document.getElementById('delaiAccordeCheck');
-        if (checkboxDelai) {
-            checkboxDelai.checked = false;
-            checkboxDelai.disabled = false;
-            const labelParent = checkboxDelai.closest('.groupe-form');
-            if (labelParent) {
-                labelParent.style.opacity = '1';
-                labelParent.style.pointerEvents = 'auto';
+        // Utiliser le module evaluation-jetons.js pour retirer le jeton de délai
+        if (typeof retirerJetonDelai === 'function') {
+            const succes = retirerJetonDelai(evaluationId);
+            if (succes) {
+                // Réafficher le bouton pour permettre de réappliquer le jeton
+                const bouton = document.getElementById('boutonJetonDelai');
+                if (bouton) bouton.style.display = 'block';
             }
+        } else {
+            console.error('❌ Fonction retirerJetonDelai non disponible');
+            afficherNotificationErreur('Erreur', 'Module jetons non disponible');
         }
-
-        afficherNotificationSucces('Jeton de délai retiré');
-    }
-
-    // Sauvegarder
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
-        return;
-    }
-
-    // Rafraîchir l'affichage des badges
-    afficherBadgesJetons();
-
-    // Recalculer les indices
-    if (typeof calculerEtStockerIndicesCP === 'function') {
-        calculerEtStockerIndicesCP();
-    }
-
-    // 🔄 Rafraîchir le tableau des évaluations si affiché
-    if (typeof initialiserListeEvaluations === 'function') {
-        setTimeout(() => initialiserListeEvaluations(), 150);
     }
 }
 
@@ -1342,13 +1190,13 @@ function nouvelleEvaluation() {
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
 
-    // Réinitialiser la checkbox délai
-    const checkboxDelai = document.getElementById('delaiAccordeCheck');
-    if (checkboxDelai) checkboxDelai.checked = false;
-
-    // Masquer les badges de jetons
+    // Masquer les badges de jetons et boutons de jetons
     const section = document.getElementById('gestionJetonsEvaluation');
+    const boutonDelai = document.getElementById('boutonJetonDelai');
+    const boutonReprise = document.getElementById('boutonJetonReprise');
     if (section) section.style.display = 'none';
+    if (boutonDelai) boutonDelai.style.display = 'none';
+    if (boutonReprise) boutonReprise.style.display = 'none';
 
     cocherOptionsParDefaut();
 
@@ -3084,6 +2932,8 @@ function modifierEvaluation(evaluationId) {
                         echelleId: evaluation.echelleId,
                         cartoucheId: evaluation.cartoucheId,
                         statutRemise: evaluation.statutRemise,
+                        statutIntegrite: evaluation.statutIntegrite || 'recevable',
+                        notesIntegrite: evaluation.notesIntegrite || '',
                         delaiAccorde: evaluation.delaiAccorde || false,
                         jetonDelaiApplique: evaluation.jetonDelaiApplique || false,
                         dateApplicationJetonDelai: evaluation.dateApplicationJetonDelai,
@@ -3154,6 +3004,18 @@ function modifierEvaluation(evaluationId) {
                         selectRemise.value = evaluation.statutRemise;
                         console.log('Déclenchement de l\'événement change sur selectRemise...');
                         selectRemise.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+
+                    // Statut d'intégrité académique
+                    const selectIntegrite = document.getElementById('statutIntegrite');
+                    const notesIntegrite = document.getElementById('notesIntegrite');
+                    if (selectIntegrite) {
+                        selectIntegrite.value = evaluation.statutIntegrite || 'recevable';
+                        if (notesIntegrite) {
+                            notesIntegrite.value = evaluation.notesIntegrite || '';
+                        }
+                        console.log('Déclenchement de l\'événement change sur selectIntegrite...');
+                        selectIntegrite.dispatchEvent(new Event('change', { bubbles: true }));
                     }
 
                     // Délai accordé - synchroniser avec jetonDelaiApplique
@@ -3361,6 +3223,8 @@ function sauvegarderEvaluationModifiee() {
         dateModification: maintenant.toISOString(),
         heureModification: maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }),
         statutRemise: document.getElementById('remiseProduction1').value,
+        statutIntegrite: document.getElementById('statutIntegrite').value || 'recevable',
+        notesIntegrite: document.getElementById('notesIntegrite').value || '',
         criteres: criteres,
         noteFinale: parseFloat(document.getElementById('noteProduction1').textContent) || 0,
         niveauFinal: document.getElementById('niveauProduction1').textContent,
@@ -3816,69 +3680,64 @@ function chargerEvaluationDepuisBanque(evaluationId) {
  * @param {string} evaluationId - ID de l'évaluation originale
  */
 function appliquerJetonRepriseDepuisBanque(evaluationId) {
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const indexOriginal = evaluations.findIndex(e => e.id === evaluationId);
-
-    if (indexOriginal === -1) {
-        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+    // Utiliser le module evaluation-jetons.js pour appliquer le jeton
+    if (typeof appliquerJetonReprise !== 'function') {
+        afficherNotificationErreur('Erreur', 'Module jetons non disponible');
         return;
     }
 
-    const evaluationOriginale = evaluations[indexOriginal];
+    // Appliquer le jeton (archiver l'originale par défaut)
+    const nouvelleEvaluation = appliquerJetonReprise(evaluationId, true);
 
-    // Créer le duplicata avec un nouvel ID
-    const nouvelleEvaluation = {
-        ...evaluationOriginale,
-        id: 'EVAL_REPRISE_' + Date.now(),
-        dateEvaluation: new Date().toISOString(),
-        repriseDeId: evaluationOriginale.id, // Lien vers l'originale
-        jetonRepriseApplique: true,
-        dateApplicationJetonReprise: new Date().toISOString(),
-        verrouillee: false // Déverrouiller pour permettre la modification immédiate
-    };
-
-    // Marquer l'originale comme remplacée
-    evaluations[indexOriginal].remplaceeParId = nouvelleEvaluation.id;
-    evaluations[indexOriginal].dateRemplacement = new Date().toISOString();
-
-    // Ajouter la nouvelle évaluation
-    evaluations.push(nouvelleEvaluation);
-
-    // Sauvegarder
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
+    if (!nouvelleEvaluation) {
+        // L'erreur a déjà été affichée par le module
         return;
     }
-
-    afficherNotificationSucces(`Jeton de reprise appliqué pour ${evaluationOriginale.etudiantNom}`);
-    console.log('✅ Jeton de reprise appliqué:', {
-        original: evaluationOriginale.id,
-        nouveau: nouvelleEvaluation.id
-    });
 
     // Fermer la banque
-    fermerBanqueEvaluations();
+    if (typeof fermerBanqueEvaluations === 'function') {
+        fermerBanqueEvaluations();
+    }
 
     // Charger le duplicata pour modification immédiate
     setTimeout(() => {
-        modifierEvaluation(nouvelleEvaluation.id);
+        if (typeof modifierEvaluation === 'function') {
+            modifierEvaluation(nouvelleEvaluation.id);
+        }
     }, 500);
-
-    // Recalculer les indices
-    if (typeof calculerEtStockerIndicesCP === 'function') {
-        calculerEtStockerIndicesCP();
-    }
-
-    // 🔄 Rafraîchir le tableau des évaluations si affiché
-    if (typeof initialiserListeEvaluations === 'function') {
-        setTimeout(() => initialiserListeEvaluations(), 150);
-    }
 }
 
 /**
  * Applique un jeton de reprise depuis la sidebar (pendant l'édition)
  * Transforme l'évaluation en cours en reprise de l'évaluation précédente
  */
+/**
+ * Applique un jeton de délai depuis la sidebar (pendant l'édition)
+ */
+function appliquerJetonDelaiDepuisSidebar() {
+    // Vérifier qu'on est en train de modifier une évaluation
+    if (!window.evaluationEnCours || !window.evaluationEnCours.idModification) {
+        afficherNotificationErreur('Erreur', 'Vous devez charger une évaluation existante pour appliquer un jeton de délai');
+        return;
+    }
+
+    const evaluationId = window.evaluationEnCours.idModification;
+
+    // Appliquer le jeton via le module evaluation-jetons.js
+    if (typeof appliquerJetonDelai === 'function') {
+        const succes = appliquerJetonDelai(evaluationId);
+        if (succes) {
+            // Masquer le bouton et afficher le badge
+            const bouton = document.getElementById('boutonJetonDelai');
+            if (bouton) bouton.style.display = 'none';
+            afficherBadgesJetons();
+        }
+    } else {
+        console.error('❌ Fonction appliquerJetonDelai non disponible');
+        afficherNotificationErreur('Erreur', 'Module jetons non disponible');
+    }
+}
+
 function appliquerJetonRepriseDepuisSidebar() {
     // Vérifier qu'on est en train de modifier une évaluation
     if (!window.evaluationEnCours || !window.evaluationEnCours.idModification) {
@@ -3912,7 +3771,8 @@ function appliquerJetonRepriseDepuisSidebar() {
  * @param {string} evaluationId - ID de l'évaluation
  */
 function basculerVerrouillageEvaluation(evaluationId) {
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    // Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
+    let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
@@ -3940,10 +3800,12 @@ function basculerVerrouillageEvaluation(evaluationId) {
         cadenasElement.title = estVerrouillee ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
     }
 
-    // Rafraîchir la liste
-    filtrerBanqueEvaluations();
+    // Rafraîchir la liste de la banque (sans reload de page)
+    if (typeof filtrerBanqueEvaluations === 'function') {
+        filtrerBanqueEvaluations();
+    }
 
-    // Rafraîchir le profil étudiant si affiché (pour mettre à jour les autres éléments)
+    // Rafraîchir le profil étudiant si affiché (sans reload de page)
     if (typeof afficherProfilComplet === 'function' && window.profilActuelDA) {
         setTimeout(() => afficherProfilComplet(window.profilActuelDA), 100);
     }
@@ -4100,7 +3962,8 @@ function basculerVerrouillageEvaluationCourante() {
         return;
     }
 
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    // Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
+    let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
@@ -4118,8 +3981,15 @@ function basculerVerrouillageEvaluationCourante() {
         return;
     }
 
-    // Mettre à jour le bouton
-    mettreAJourBoutonVerrouillage(estVerrouillee);
+    // Mettre à jour evaluationEnCours pour refléter le changement
+    if (window.evaluationEnCours) {
+        window.evaluationEnCours.verrouillee = estVerrouillee;
+    }
+
+    // Mettre à jour l'icône de verrouillage
+    if (typeof mettreAJourBoutonVerrouillage === 'function') {
+        mettreAJourBoutonVerrouillage(estVerrouillee);
+    }
 
     // Notification
     const message = estVerrouillee
@@ -4127,8 +3997,10 @@ function basculerVerrouillageEvaluationCourante() {
         : `Évaluation déverrouillée - Modification autorisée`;
     afficherNotificationSucces(message);
 
-    // Si l'évaluation est verrouillée, désactiver tous les champs du formulaire
-    desactiverFormulaireEvaluation(estVerrouillee);
+    // Activer/désactiver tous les champs du formulaire (sans reload)
+    if (typeof desactiverFormulaireEvaluation === 'function') {
+        desactiverFormulaireEvaluation(estVerrouillee);
+    }
 }
 
 /**
