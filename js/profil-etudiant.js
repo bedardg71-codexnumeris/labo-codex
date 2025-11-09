@@ -186,8 +186,20 @@ function genererBadgePatternProfil(pattern) {
  * }
  */
 function calculerTousLesIndices(da, pratique = null) {
-    // INDICE A : Assiduité (universel - identique dans les deux pratiques)
-    const A = calculerAssiduitéGlobale(da) / 100; // Convertir en proportion 0-1
+    // ========================================
+    // INDICE A : SINGLE SOURCE OF TRUTH
+    // Lire depuis localStorage.indicesAssiduite (calculé par saisie-presences.js)
+    // ========================================
+    const indicesAssiduite = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
+    const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
+
+    // Extraire l'indice (gérer ancien format nombre et nouveau format objet)
+    let A = 0;
+    if (typeof assiduiteSommatif === 'object' && assiduiteSommatif.indice !== undefined) {
+        A = assiduiteSommatif.indice; // Déjà en proportion 0-1
+    } else if (typeof assiduiteSommatif === 'number') {
+        A = assiduiteSommatif; // Ancien format, déjà en proportion 0-1
+    }
 
     // 🔍 DÉTERMINER LA PRATIQUE À UTILISER
     if (!pratique) {
@@ -1907,14 +1919,33 @@ function obtenirEmojiIndice(taux) {
  * @returns {Object} - Détails d'assiduité
  */
 function obtenirDetailsAssiduite(da) {
-    // Utiliser les fonctions du module 09-2-saisie-presences.js
-    const heuresPresentes = calculerTotalHeuresPresence(da, null);
+    // ========================================
+    // SINGLE SOURCE OF TRUTH
+    // Lire depuis localStorage.indicesAssiduite calculé par saisie-presences.js
+    // ========================================
+    const indices = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
+    const detailsSommatif = indices.sommatif && indices.sommatif[da];
 
-    // Compter le nombre de séances RÉELLEMENT SAISIES (au moins un élève présent)
+    // Si les données n'existent pas, retourner des valeurs par défaut
+    if (!detailsSommatif || typeof detailsSommatif !== 'object') {
+        console.warn(`⚠️ Aucune donnée d'assiduité pour ${da}, valeurs par défaut`);
+        return {
+            heuresPresentes: 0,
+            heuresOffertes: 0,
+            nombreSeances: 0,
+            absences: []
+        };
+    }
+
+    // Extraire les données du calcul sommatif (source unique de vérité)
+    const heuresPresentes = detailsSommatif.heuresPresentes || 0;
+    const heuresOffertes = detailsSommatif.heuresOffertes || 0;
+    const nombreSeances = detailsSommatif.nombreSeances || 0;
+
+    // Récupérer les présences pour calculer la liste des absences
     const presences = obtenirDonneesSelonMode('presences') || [];
 
-    // Obtenir toutes les dates uniques pour lesquelles une saisie a été faite
-    // IMPORTANT : Exclure les séances facultatives (interventions RàI) du décompte
+    // Obtenir toutes les dates uniques pour lesquelles une saisie a été faite (séances non facultatives)
     const datesSaisies = new Set();
     presences.forEach(p => {
         if (p.da === da && p.heures !== null && p.heures !== undefined) {
@@ -1925,9 +1956,7 @@ function obtenirDetailsAssiduite(da) {
         }
     });
 
-    const nombreSeances = datesSaisies.size;
     const dureeSeance = obtenirDureeMaxSeance();
-    const heuresOffertes = nombreSeances * dureeSeance;
 
     // Récupérer les séances configurées
     // NOTE: seancesHoraire n'est pas mode-aware (configuration globale)
@@ -3478,6 +3507,116 @@ function calculerMoyennesCriteres(da) {
 }
 
 /**
+ * Calcule les moyennes des critères SRPNF sur les N derniers artefacts
+ * Spécifique à la PAN-maîtrise (regarde les artefacts récents, pas toutes les évaluations)
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {number} nombreArtefacts - Nombre d'artefacts récents à considérer (défaut: lire config.configPAN.nombreCours)
+ * @returns {Object|null} - { structure, rigueur, plausibilite, nuance, francais } ou null
+ */
+function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
+    // Lire le nombre d'artefacts depuis la config si non fourni
+    if (nombreArtefacts === null) {
+        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        nombreArtefacts = config.configPAN?.nombreCours || 3; // Par défaut 3 cours = 6 artefacts
+        nombreArtefacts = nombreArtefacts * 2; // 3 cours = 6 artefacts (2 par cours)
+    }
+
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+
+    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
+    const artefactsPortfolio = productions
+        .filter(p => p.type === 'artefact-portfolio')
+        .map(p => p.id);
+
+    const evaluationsEleve = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        artefactsPortfolio.includes(e.productionId) &&
+        e.retroactionFinale
+    );
+
+    if (evaluationsEleve.length === 0) {
+        return null;
+    }
+
+    // Trier par date (plus récent d'abord)
+    evaluationsEleve.sort((a, b) => {
+        const dateA = a.dateEvaluation || a.dateCreation || 0;
+        const dateB = b.dateEvaluation || b.dateCreation || 0;
+        return new Date(dateB) - new Date(dateA);
+    });
+
+    // Prendre les N derniers (ou moins si pas assez)
+    const derniersArtefacts = evaluationsEleve.slice(0, nombreArtefacts);
+
+    console.log(`calculerMoyennesCriteresRecents pour DA ${da}:`);
+    console.log(`  Nombre d'artefacts demandés: ${nombreArtefacts}`);
+    console.log(`  Nombre d'artefacts retenus: ${derniersArtefacts.length}`);
+
+    // Obtenir la table de conversion IDME
+    const tableConversion = obtenirTableConversionIDME();
+
+    // Accumuler les scores par critère
+    const scoresCriteres = {
+        structure: [],
+        rigueur: [],
+        plausibilite: [],
+        nuance: [],
+        francais: []
+    };
+
+    // Regex pour extraire: NOM_CRITERE (NIVEAU)
+    const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi;
+
+    derniersArtefacts.forEach(evaluation => {
+        const retroaction = evaluation.retroactionFinale || '';
+
+        // Extraire tous les critères avec leur niveau
+        let match;
+        while ((match = regexCritere.exec(retroaction)) !== null) {
+            const nomCritere = match[1].toUpperCase();
+            const niveauIDME = match[2].toUpperCase();
+            const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
+
+            if (score !== null) {
+                if (nomCritere === 'STRUCTURE') {
+                    scoresCriteres.structure.push(score);
+                } else if (nomCritere === 'RIGUEUR') {
+                    scoresCriteres.rigueur.push(score);
+                } else if (nomCritere.startsWith('PLAUSIBILIT')) {
+                    scoresCriteres.plausibilite.push(score);
+                } else if (nomCritere === 'NUANCE') {
+                    scoresCriteres.nuance.push(score);
+                } else if (nomCritere.startsWith('FRAN')) {
+                    scoresCriteres.francais.push(score);
+                }
+            }
+        }
+    });
+
+    console.log(`  Scores extraits (${derniersArtefacts.length} derniers):`, scoresCriteres);
+
+    // Calculer les moyennes
+    const moyennes = {};
+    let aucuneDonnee = true;
+
+    Object.keys(scoresCriteres).forEach(critere => {
+        const scores = scoresCriteres[critere];
+        const cleFormatee = critere.charAt(0).toUpperCase() + critere.slice(1);
+
+        if (scores.length > 0) {
+            moyennes[cleFormatee] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+            aucuneDonnee = false;
+        } else {
+            moyennes[cleFormatee] = null;
+        }
+    });
+
+    return aucuneDonnee ? null : moyennes;
+}
+
+/**
  * Calcule l'indice de Blocage (compétences transversales critiques)
  * Blocage = 0.35 × Structure + 0.35 × Français + 0.30 × Rigueur
  * @param {Object} moyennes - Moyennes par critère
@@ -3625,6 +3764,11 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
  * @returns {Object} - { performance, idmeMoyen, francaisMoyen, nbArtefacts }
  */
 function calculerIndicesTroisDerniersArtefacts(da) {
+    // Lire le nombre d'artefacts depuis la config PAN
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const nombreCours = config.configPAN?.nombreCours || 3; // Par défaut 3 cours
+    const nombreArtefacts = nombreCours * 2; // 3 cours = 6 artefacts (2 par cours)
+
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = JSON.parse(localStorage.getItem('productions') || '[]');
 
@@ -3652,8 +3796,8 @@ function calculerIndicesTroisDerniersArtefacts(da) {
         return new Date(dateB) - new Date(dateA);
     });
 
-    // Prendre les 3 derniers (ou moins si pas assez d'artefacts)
-    const troisDerniers = evaluationsEleve.slice(0, 3);
+    // Prendre les N derniers (selon config PAN, ou moins si pas assez d'artefacts)
+    const troisDerniers = evaluationsEleve.slice(0, nombreArtefacts);
 
     // Calculer la performance moyenne (notes)
     const performance = troisDerniers.reduce((sum, e) => sum + e.noteFinale, 0) / troisDerniers.length / 100;
@@ -3928,15 +4072,26 @@ function identifierDefiSpecifique(da) {
  * @returns {string} - Pattern: 'Blocage critique', 'Blocage émergent', 'Défi spécifique', 'Stable'
  */
 function identifierPatternActuel(performancePAN3, aUnDefi) {
-    if (performancePAN3 <= 0.4) {
+    // Utiliser les seuils configurables IDME
+    const seuilInsuffisant = obtenirSeuil('idme.insuffisant');      // Par défaut 0.64 (64%)
+    const seuilDeveloppement = obtenirSeuil('idme.developpement');  // Par défaut 0.75 (75%)
+
+    // Blocage critique : Performance < 64% (Insuffisant - unistructurel)
+    if (performancePAN3 < seuilInsuffisant) {
         return 'Blocage critique';
     }
-    if (performancePAN3 <= 0.5 && aUnDefi) {
+
+    // Blocage émergent : Performance < 75% (En développement - multistructurel) ET a un défi
+    if (performancePAN3 < seuilDeveloppement && aUnDefi) {
         return 'Blocage émergent';
     }
-    if (performancePAN3 <= 0.75 && aUnDefi) {
+
+    // Défi spécifique : Performance acceptable mais a un défi récurrent
+    if (aUnDefi) {
         return 'Défi spécifique';
     }
+
+    // Stable : Pas de défi ou performance maîtrisée
     return 'Stable';
 }
 
@@ -3949,8 +4104,19 @@ function identifierPatternActuel(performancePAN3, aUnDefi) {
 function determinerCibleIntervention(da) {
     // Récupérer tous les indices nécessaires
     const indices = calculerTousLesIndices(da);
-    const moyennes = calculerMoyennesCriteres(da);
-    const diagnostic = diagnostiquerForcesChallenges(moyennes, 0.7125);
+
+    // Déterminer quelle fonction utiliser selon la pratique
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const pratique = config.pratique || 'alternative';
+
+    // En PAN : utiliser les moyennes sur les N derniers artefacts (récurrence récente)
+    // En SOM : utiliser les moyennes globales (toutes les évaluations)
+    const moyennes = (pratique === 'alternative')
+        ? calculerMoyennesCriteresRecents(da)
+        : calculerMoyennesCriteres(da);
+
+    // Détecter les défis avec le seuil configurable
+    const diagnostic = diagnostiquerForcesChallenges(moyennes);
     const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
     const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100);
     const interpRisque = interpreterRisque(indices.R);

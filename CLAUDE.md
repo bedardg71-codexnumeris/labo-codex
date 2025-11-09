@@ -36,6 +36,37 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 
 **Règle d'or** : Les modules ne se parlent JAMAIS directement. Communication via localStorage uniquement.
 
+### Système de pratiques de notation
+
+**NOUVEAU (Beta 91)** : Architecture modulaire permettant de supporter plusieurs pratiques de notation.
+
+**Documentation complète** :
+- `ARCHITECTURE_PRATIQUES.md` : Document de référence (architecture, contrats, concepts)
+- `GUIDE_AJOUT_PRATIQUE.md` : Guide opérationnel pour ajouter une pratique
+- `FEUILLE_DE_ROUTE_PRATIQUES.md` : Roadmap d'implémentation
+
+**Principes** :
+- **Universel** : A-C-P-R, niveaux de risque, niveaux RàI → identiques pour toutes les pratiques
+- **Spécifique** : Calcul de P, détection défis, cibles RàI → propre à chaque pratique
+- **Interface** : Chaque pratique implémente le contrat `IPratique`
+
+**Pratiques implémentées** :
+- PAN-Maîtrise (Grégoire) : Échelle IDME, critères SRPNF, N derniers artefacts
+- Sommative : Moyenne pondérée, toutes évaluations, défis génériques
+
+**Pratiques futures** :
+- PAN-Spécifications : Pass/fail sur objectifs
+- Dénotation (Ungrading) : Sans notes chiffrées
+
+**Fichiers clés** :
+```
+js/pratiques/
+├── pratique-interface.js        # Documentation du contrat
+├── pratique-registry.js         # Registre et détection
+├── pratique-pan-maitrise.js     # PAN-Maîtrise (Grégoire)
+└── pratique-sommative.js        # Sommative traditionnelle
+```
+
 ---
 
 ## Structure des fichiers
@@ -50,6 +81,12 @@ projet/
 │   ├── navigation.js                     # ⚠️ PROTÉGÉ - Gestion navigation
 │   ├── main.js                           # Initialisation
 │   │
+│   ├── pratiques/                        # 🆕 SYSTÈME DE PRATIQUES (Beta 91)
+│   │   ├── pratique-interface.js         # Documentation contrat IPratique
+│   │   ├── pratique-registry.js          # Registre et sélection pratique
+│   │   ├── pratique-pan-maitrise.js      # PAN-Maîtrise (IDME + SRPNF)
+│   │   └── pratique-sommative.js         # Sommative traditionnelle
+│   │
 │   ├── trimestre.js                      # ✅ SOURCE - Calendrier complet
 │   ├── calendrier-vue.js                 # ✅ LECTEUR - Affichage calendrier
 │   ├── saisie-presences.js               # ✅ SOURCE - Indices assiduité (A)
@@ -57,15 +94,15 @@ projet/
 │   ├── profil-etudiant.js                # ✅ LECTEUR - Profil individuel complet
 │   │
 │   ├── etudiants.js                      # Gestion étudiants
-│   ├── productions.js                    # À créer - Productions/évaluations
-│   ├── portfolio.js                      # À créer - Indices C et P
+│   ├── productions.js                    # Productions/évaluations
+│   ├── portfolio.js                      # ✅ SOURCE - Indices C et P
 │   ├── grilles.js                        # Grilles de critères SRPNF
 │   ├── echelles.js                       # Échelle IDME (SOLO)
 │   ├── cartouches.js                     # Cartouches de rétroaction
 │   ├── horaire.js                        # Horaire des séances
 │   ├── groupe.js                         # Liste des étudiants
 │   ├── cours.js                          # Informations du cours
-│   ├── pratiques.js                      # Pratiques de notation (PAN)
+│   ├── pratiques.js                      # Configuration pratiques de notation
 │   ├── import-export.js                  # Import/export JSON
 │   └── statistiques.js                   # Calculs statistiques
 │
@@ -73,7 +110,11 @@ projet/
 ├── README_PROJET.md                      # Documentation projet
 ├── COLLAB_RULES.txt                      # Règles de collaboration
 ├── noms_stables.json                     # Registre des noms protégés
-└── structure-modulaire.txt               # Documentation architecture
+├── structure-modulaire.txt               # Documentation architecture
+│
+├── ARCHITECTURE_PRATIQUES.md             # 🆕 Architecture système pratiques (Beta 91)
+├── GUIDE_AJOUT_PRATIQUE.md               # 🆕 Guide pour ajouter une pratique
+└── FEUILLE_DE_ROUTE_PRATIQUES.md         # 🆕 Roadmap implémentation pratiques
 ```
 
 ---
