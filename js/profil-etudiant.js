@@ -772,7 +772,7 @@ function genererSectionMobilisationEngagement(da) {
             <div class="profil-carte">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                     <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Assiduité</h3>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.A}%</strong>
+                    ${genererValeursComparatives(indicesSOM.A, indicesPAN.A, modeComparatif)}
                 </div>
 
                 <!-- Statistiques -->
@@ -869,7 +869,7 @@ function genererSectionMobilisationEngagement(da) {
             <div class="profil-carte">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                     <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Complétion</h3>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.C}%</strong>
+                    ${genererValeursComparatives(indicesSOM.C, indicesPAN.C, modeComparatif)}
                 </div>
 
                 <!-- Statistiques -->
@@ -946,7 +946,7 @@ function genererSectionMobilisationEngagement(da) {
             <div class="profil-carte">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                     <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Performance</h3>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${moyenneP}%</strong>
+                    ${genererValeursComparatives(indicesSOM.P, indicesPAN.P, modeComparatif)}
                 </div>
 
                 <!-- Statistiques -->
@@ -2589,6 +2589,31 @@ function genererHistoriqueInterventionsProfil(da) {
 }
 
 /**
+ * Génère l'affichage des valeurs SOM/PAN pour le mode comparatif
+ * @param {number} valeurSOM - Valeur pour la pratique sommative
+ * @param {number} valeurPAN - Valeur pour la pratique PAN
+ * @param {boolean} modeComparatif - Mode comparatif actif
+ * @returns {string} HTML des valeurs colorées
+ */
+function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif) {
+    if (!modeComparatif) {
+        // Mode normal: afficher seulement la valeur de la pratique active
+        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const pratique = config.pratique || 'sommative';
+        const valeur = pratique === 'sommative' ? valeurSOM : valeurPAN;
+        return `<strong style="font-size: 1.8rem; color: var(--bleu-principal);">${valeur}%</strong>`;
+    }
+
+    // Mode comparatif: afficher les deux valeurs côte à côte
+    return `
+        <div style="display: flex; gap: 15px; align-items: baseline;">
+            <strong style="font-size: 1.8rem; color: var(--som-orange);">${valeurSOM}%</strong>
+            <strong style="font-size: 1.8rem; color: var(--pan-bleu);">${valeurPAN}%</strong>
+        </div>
+    `;
+}
+
+/**
  * Affiche le profil complet avec layout 2 colonnes
  * Inspiré de la page d'évaluation
  */
@@ -2639,6 +2664,17 @@ function afficherProfilComplet(da) {
     const interpM = interpreterMobilisation(A, C);
     const interpE = interpreterEngagement(indices.E);
     const interpR = interpreterRisque(indices.R);
+
+    // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif !== false;
+    const afficherPan = affichage.afficherAlternatif !== false;
+    const modeComparatif = afficherSom && afficherPan;
+
+    // Calculer indices pour les deux pratiques
+    const indicesSOM = calculerTousLesIndices(da, 'SOM');
+    const indicesPAN = calculerTousLesIndices(da, 'PAN');
 
     // Trouver l'index de l'élève dans la liste pour navigation
     const indexActuel = etudiants.findIndex(e => e.da === da);
