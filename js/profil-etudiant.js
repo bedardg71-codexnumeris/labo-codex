@@ -2059,13 +2059,30 @@ function formaterDate(dateISO) {
  * @returns {string} - HTML de la carte
  */
 function genererCarteCibleIntervention(da) {
-    const cibleInfo = determinerCibleIntervention(da);
-    const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
+    // NOUVEAU Beta 90 : Utiliser la pratique active
+    const pratique = typeof obtenirPratiqueActive === 'function' ? obtenirPratiqueActive() : null;
 
-    // Ne pas afficher si pas assez de données
-    if (indices3Derniers.nbArtefacts === 0) {
+    if (!pratique) {
+        console.error('[ProfilEtudiant] Aucune pratique active trouvée');
+        return `
+            <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107;">
+                <strong>⚠️ Configuration requise</strong><br>
+                Veuillez configurer une pratique de notation dans Réglages › Pratique de notation.
+            </div>
+        `;
+    }
+
+    // Utiliser la pratique active
+    const cibleInfo = pratique.genererCibleIntervention(da);
+    const patternInfo = pratique.identifierPattern(da);
+
+    // Ne pas afficher si pas de cible
+    if (!cibleInfo) {
         return '';
     }
+
+    // Obtenir nombre d'artefacts/évaluations pour affichage (si disponible)
+    const nbArtefacts = patternInfo.indices?.nbArtefacts || 0;
 
     // Badge cohérent avec Liste et Aperçu
     const niveauTexte = cibleInfo.niveau === 3 ? 'RàI 3' :
@@ -2097,8 +2114,8 @@ function genererCarteCibleIntervention(da) {
             </div>
 
             <div class="carte-cible-meta">
-                <strong>Pattern actuel :</strong> ${cibleInfo.pattern} ·
-                <strong>Basé sur :</strong> ${indices3Derniers.nbArtefacts} dernier${indices3Derniers.nbArtefacts > 1 ? 's' : ''} artefact${indices3Derniers.nbArtefacts > 1 ? 's' : ''}
+                <strong>Pattern actuel :</strong> ${patternInfo.type} ·
+                <strong>Basé sur :</strong> ${nbArtefacts} dernier${nbArtefacts > 1 ? 's' : ''} artefact${nbArtefacts > 1 ? 's' : ''}
             </div>
 
             <div class="carte-cible-description">
@@ -4480,17 +4497,49 @@ function determinerCibleIntervention(da) {
  * @returns {string} - HTML du diagnostic
  */
 function genererDiagnosticCriteres(da) {
-    const moyennes = calculerMoyennesCriteres(da);
+    // NOUVEAU Beta 90 : Utiliser la pratique active
+    const pratique = typeof obtenirPratiqueActive === 'function' ? obtenirPratiqueActive() : null;
 
-    console.log('🎯 Diagnostic critères pour DA:', da);
-    console.log('  Moyennes calculées:', moyennes);
-
-    if (!moyennes) {
-        console.log('  ⚠️ Pas de moyennes disponibles - diagnostic non affiché');
-        return ''; // Pas de données, pas de diagnostic
+    if (!pratique) {
+        console.error('[ProfilEtudiant] Aucune pratique active trouvée');
+        return '';
     }
 
-    const diagnostic = diagnostiquerForcesChallenges(moyennes, 0.7125);
+    // Obtenir les défis selon la pratique
+    const defisInfo = pratique.detecterDefis(da);
+
+    console.log('🎯 Diagnostic défis pour DA:', da);
+    console.log('  Type:', defisInfo.type);
+    console.log('  Nombre de défis:', defisInfo.defis?.length || 0);
+
+    // Si aucune donnée, ne rien afficher
+    if (!defisInfo || (!defisInfo.defis && !defisInfo.forces)) {
+        console.log('  ⚠️ Pas de données disponibles - diagnostic non affiché');
+        return '';
+    }
+
+    // Adapter l'affichage selon le type de pratique
+    if (defisInfo.type === 'srpnf') {
+        return genererDiagnosticSRPNF(da, defisInfo);
+    } else if (defisInfo.type === 'generique') {
+        return genererDiagnosticGenerique(da, defisInfo);
+    }
+
+    return '';
+}
+
+/**
+ * Génère le diagnostic SRPNF (PAN-Maîtrise)
+ */
+function genererDiagnosticSRPNF(da, defisInfo) {
+    // Recalculer moyennes pour l'affichage détaillé (compatibilité)
+    const moyennes = calculerMoyennesCriteres(da);
+
+    if (!moyennes) {
+        return '';
+    }
+
+    const diagnostic = defisInfo; // Utiliser les défis de la pratique
     console.log('  Forces:', diagnostic.forces.length);
     console.log('  Défis:', diagnostic.defis.length);
 
@@ -4646,6 +4695,143 @@ function genererDiagnosticCriteres(da) {
             </div>
         ` : ''}
     `;
+}
+
+/**
+ * Génère le diagnostic génériques (Sommative)
+ */
+function genererDiagnosticGenerique(da, defisInfo) {
+    console.log('  Défis génériques:', defisInfo.defis.length);
+
+    if (defisInfo.defis.length === 0 && !defisInfo.tendance) {
+        return `
+            <div style="background: linear-gradient(to right, #28a74522, #28a74511);
+                        border-left: 4px solid #28a745; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: #155724;">
+                    ✓ Aucun défi majeur identifié
+                </div>
+                <div style="color: #155724; font-size: 0.9rem; margin-top: 6px;">
+                    Performance satisfaisante. Continuer le suivi régulier et encourager la constance.
+                </div>
+            </div>
+        `;
+    }
+
+    let html = `
+        <!-- DIAGNOSTIC DÉFIS GÉNÉRIQUES -->
+        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem; margin-top: 20px;">
+            🎯 Défis identifiés
+        </h4>
+    `;
+
+    // Afficher les défis
+    defisInfo.defis.forEach(defi => {
+        let couleur, titre, contenu;
+
+        if (defi.type === 'note-faible') {
+            couleur = defi.priorite === 'haute' ? '#dc3545' : '#ff9800';
+            titre = `⚠️ Note faible : ${defi.production}`;
+            contenu = `
+                <div style="font-size: 0.9rem; color: #555; margin-bottom: 8px;">
+                    Note obtenue : <strong style="color: ${couleur};">${defi.note}%</strong> (seuil : ${defi.seuil}%)
+                </div>
+                <div style="font-size: 0.85rem; color: #666;">
+                    💡 Recommandation : Envisager une reprise avec jeton ou un rattrapage ciblé.
+                </div>
+            `;
+        } else if (defi.type === 'tendance-baisse') {
+            couleur = '#ff9800';
+            titre = '📉 Tendance à la baisse détectée';
+            contenu = `
+                <div style="font-size: 0.9rem; color: #555; margin-bottom: 8px;">
+                    Variation : <strong style="color: ${couleur};">${defi.variation.toFixed(1)}%</strong>
+                    <br>
+                    Moyenne récente : ${defi.moyenneRecente.toFixed(1)}%
+                    <br>
+                    Moyenne ancienne : ${defi.moyenneAncienne.toFixed(1)}%
+                </div>
+                <div style="font-size: 0.85rem; color: #666;">
+                    💡 Recommandation : Identifier les causes de la baisse et ajuster les stratégies d'apprentissage.
+                </div>
+            `;
+        } else if (defi.type === 'irregularite') {
+            couleur = '#ffc107';
+            titre = '📊 Irrégularité des résultats';
+            contenu = `
+                <div style="font-size: 0.9rem; color: #555; margin-bottom: 8px;">
+                    Écart-type : <strong style="color: ${couleur};">${defi.ecartType.toFixed(1)}</strong>
+                    <br>
+                    Moyenne : ${defi.moyenne.toFixed(1)}%
+                </div>
+                <div style="font-size: 0.85rem; color: #666;">
+                    💡 Recommandation : Travailler la régularité et la constance dans les efforts.
+                </div>
+            `;
+        }
+
+        html += `
+            <div style="background: linear-gradient(to right, ${couleur}22, ${couleur}11);
+                        border-left: 4px solid ${couleur}; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: ${couleur}; margin-bottom: 6px;">
+                    ${titre}
+                </div>
+                ${contenu}
+            </div>
+        `;
+    });
+
+    // Afficher tendance si disponible et pas déjà affichée
+    if (defisInfo.tendance && !defisInfo.defis.find(d => d.type === 'tendance-baisse')) {
+        const tendance = defisInfo.tendance;
+        let couleurTendance, iconeTendance, texteTendance;
+
+        if (tendance.direction === 'hausse') {
+            couleurTendance = '#28a745';
+            iconeTendance = '📈';
+            texteTendance = 'Tendance à la hausse';
+        } else if (tendance.direction === 'baisse') {
+            couleurTendance = '#ff9800';
+            iconeTendance = '📉';
+            texteTendance = 'Tendance légère à la baisse';
+        } else {
+            couleurTendance = '#2196f3';
+            iconeTendance = '→';
+            texteTendance = 'Tendance stable';
+        }
+
+        html += `
+            <div style="background: linear-gradient(to right, ${couleurTendance}22, ${couleurTendance}11);
+                        border-left: 4px solid ${couleurTendance}; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: ${couleurTendance}; margin-bottom: 6px;">
+                    ${iconeTendance} ${texteTendance}
+                </div>
+                <div style="font-size: 0.9rem; color: #555;">
+                    Variation : ${tendance.variation > 0 ? '+' : ''}${tendance.variation.toFixed(1)}%
+                    (${tendance.moyenneAncienne.toFixed(1)}% → ${tendance.moyenneRecente.toFixed(1)}%)
+                </div>
+            </div>
+        `;
+    }
+
+    // Afficher statistiques si disponibles
+    if (defisInfo.statistiques) {
+        const stats = defisInfo.statistiques;
+        html += `
+            <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 10px;">
+                <div style="font-weight: bold; color: var(--bleu-principal); margin-bottom: 8px;">
+                    📊 Statistiques descriptives
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.9rem;">
+                    <div>Moyenne : <strong>${stats.moyenne.toFixed(1)}%</strong></div>
+                    <div>Écart-type : <strong>${stats.ecartType.toFixed(1)}</strong></div>
+                    <div>Minimum : <strong>${stats.min}%</strong></div>
+                    <div>Maximum : <strong>${stats.max}%</strong></div>
+                </div>
+            </div>
+        `;
+    }
+
+    return html;
 }
 
 /**
