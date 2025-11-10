@@ -687,7 +687,7 @@ function genererSectionMobilisationEngagement(da) {
     const artefactsRemis = artefacts.filter(a => a.remis);
     const artefactsNonRemis = artefacts.filter(a => !a.remis);
 
-    // Comptabiliser les jetons utilisés et récupérer les noms des artefacts
+    // Comptabiliser les jetons utilisés et récupérer les informations des artefacts
     const evaluationsAvecJetonReprise = evaluationsEleve.filter(e => e.repriseDeId);
     const evaluationsAvecJetonDelai = evaluationsEleve.filter(e => e.jetonDelaiApplique && !e.remplaceeParId);
 
@@ -695,9 +695,22 @@ function genererSectionMobilisationEngagement(da) {
     const jetonsDelaiUtilises = evaluationsAvecJetonDelai.length;
     const totalJetonsUtilises = jetonsRepriseUtilises + jetonsDelaiUtilises;
 
-    // Lister les artefacts concernés
-    const artefactsAvecJetonReprise = evaluationsAvecJetonReprise.map(e => e.productionNom || 'Artefact inconnu');
-    const artefactsAvecJetonDelai = evaluationsAvecJetonDelai.map(e => e.productionNom || 'Artefact inconnu');
+    // Créer les objets avec index pour les badges
+    const jetonsDelaiAvecIndex = evaluationsAvecJetonDelai.map(e => {
+        const indexOriginal = artefactsPortfolio.findIndex(p => p.id === e.productionId) + 1;
+        return {
+            nom: e.productionNom || 'Artefact inconnu',
+            index: indexOriginal > 0 ? `A${indexOriginal}` : '?'
+        };
+    });
+
+    const jetonsRepriseAvecIndex = evaluationsAvecJetonReprise.map(e => {
+        const indexOriginal = artefactsPortfolio.findIndex(p => p.id === e.productionId) + 1;
+        return {
+            nom: e.productionNom || 'Artefact inconnu',
+            index: indexOriginal > 0 ? `A${indexOriginal}` : '?'
+        };
+    });
 
     // Calculer la moyenne des 3 meilleurs pour affichage en P
     const artefactsRetenus = artefacts.filter(a => a.retenu);
@@ -947,33 +960,29 @@ function genererSectionMobilisationEngagement(da) {
                 <!-- Gestion des jetons -->
                 ${totalJetonsUtilises > 0 ? `
                     <h4 class="profil-section-titre">
-                        🎫 JETONS UTILISÉS
+                        Jetons utilisés
                     </h4>
-                    <div class="profil-artefacts-liste" style="margin-bottom: 20px;">
-                        ${jetonsRepriseUtilises > 0 ? `
-                            <div class="profil-section-bordure-gauche profil-jetons-reprise">
-                                <div class="profil-jetons-reprise-titre">
-                                    <span class="profil-jetons-reprise-icone">⭐</span> Jetons de reprise : ${jetonsRepriseUtilises}
-                                </div>
-                                <div class="profil-jetons-details">
-                                    ${artefactsAvecJetonReprise.map(nom => `
-                                        <div>• ${echapperHtml(nom)}</div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-                        ${jetonsDelaiUtilises > 0 ? `
-                            <div class="profil-section-bordure-gauche profil-jetons-delai">
-                                <div class="profil-jetons-delai-titre">
-                                    <span class="profil-jetons-reprise-icone">⭐</span> Jetons de délai : ${jetonsDelaiUtilises}
-                                </div>
-                                <div class="profil-jetons-details">
-                                    ${artefactsAvecJetonDelai.map(nom => `
-                                        <div>• ${echapperHtml(nom)}</div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
+                    <div class="profil-jetons-badges">
+                        ${jetonsDelaiAvecIndex.map(jeton => `
+                            <span class="badge-jeton-delai-wrapper">
+                                <span class="badge-jeton-titre">
+                                    Délai
+                                </span>
+                                <span class="badge-jeton-numero badge-jeton-numero-delai">
+                                    ${jeton.index}
+                                </span>
+                            </span>
+                        `).join('')}
+                        ${jetonsRepriseAvecIndex.map(jeton => `
+                            <span class="badge-jeton-reprise-wrapper">
+                                <span class="badge-jeton-titre">
+                                    Reprise
+                                </span>
+                                <span class="badge-jeton-numero badge-jeton-numero-reprise">
+                                    ${jeton.index}
+                                </span>
+                            </span>
+                        `).join('')}
                     </div>
                     <hr class="profil-separateur">
                 ` : ''}
@@ -2869,9 +2878,11 @@ function genererSectionAssiduite(da) {
  * Affiche un tableau similaire à celui de la liste des évaluations
  */
 function genererSectionProductions(da) {
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const productions = JSON.parse(localStorage.getItem('productions') || '[]');
-    const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
+    const groupeEtudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    const etudiant = groupeEtudiants.find(e => e.da === da);
 
     if (!etudiant) {
         return '<p style="text-align: center; color: #999;">Étudiant non trouvé</p>';
@@ -2893,13 +2904,40 @@ function genererSectionProductions(da) {
     const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
 
     // Construire les lignes du tableau
-    const lignes = productionsAEvaluer.map(production => {
-        const evaluation = evaluationsEleve.find(e => e.productionId === production.id);
+    const lignes = productionsAEvaluer.map((production, index) => {
+        // Trouver l'évaluation ACTIVE (non remplacée) pour cette production
+        const evaluationsProduction = evaluationsEleve.filter(e => e.productionId === production.id);
+        let evaluation = null;
+        if (evaluationsProduction.length > 0) {
+            // PRIORITÉ 1 : Chercher une reprise active (repriseDeId ET non remplacée)
+            evaluation = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
+
+            // PRIORITÉ 2 : Chercher l'évaluation normale non remplacée
+            if (!evaluation) {
+                evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
+            }
+        }
+        const indexArtefact = index + 1; // A1, A2, A3, etc.
 
         if (evaluation) {
             // Production évaluée
             const dateEval = evaluation.dateEvaluation || evaluation.dateCreation || '';
             const dateFormatee = dateEval ? new Date(dateEval).toLocaleDateString('fr-CA') : '—';
+
+            // Détecter les jetons appliqués
+            const estOriginaleRemplacee = evaluation.remplaceeParId ? true : false;
+            const estNouvelleReprise = evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
+            const aJetonDelai = evaluation.jetonDelaiApplique && !evaluation.repriseDeId;
+
+            // Déterminer le type de badge
+            let badgeType = null;
+            if (estOriginaleRemplacee) {
+                badgeType = 'remplacee';
+            } else if (estNouvelleReprise) {
+                badgeType = 'nouvelle-reprise';
+            } else if (aJetonDelai) {
+                badgeType = 'delai';
+            }
 
             return {
                 production: production.titre,
@@ -2909,7 +2947,9 @@ function genererSectionProductions(da) {
                 statut: 'evalue',
                 verrouille: evaluation.verrouillee || false,
                 evaluationId: evaluation.id,
-                productionId: production.id
+                productionId: production.id,
+                badgeType: badgeType,
+                indexArtefact: `A${indexArtefact}`
             };
         } else {
             // Production non remise
@@ -2921,7 +2961,9 @@ function genererSectionProductions(da) {
                 statut: 'non-evalue',
                 verrouille: false,
                 evaluationId: null,
-                productionId: production.id
+                productionId: production.id,
+                badgeType: null,
+                indexArtefact: `A${indexArtefact}`
             };
         }
     });
@@ -2937,16 +2979,33 @@ function genererSectionProductions(da) {
                         <tr style="background: var(--bleu-tres-pale); border-bottom: 2px solid var(--bleu-moyen);">
                             <th style="padding: 12px; text-align: left; font-weight: 600;">Production</th>
                             <th style="padding: 12px; text-align: left; font-weight: 600;">Description</th>
+                            <th style="padding: 12px; text-align: left; font-weight: 600;">Jeton</th>
                             <th style="padding: 12px; text-align: center; font-weight: 600;">Note</th>
                             <th style="padding: 12px; text-align: center; font-weight: 600;">Date</th>
                             <th style="padding: 12px; text-align: center; font-weight: 600;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${lignes.map(ligne => `
+                        ${lignes.map(ligne => {
+                            // Générer le badge jeton si applicable
+                            let badgeJeton = '';
+                            if (ligne.badgeType === 'remplacee') {
+                                badgeJeton = '<span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Remplacée</span><span class="badge-jeton-numero badge-jeton-numero-reprise">' + ligne.indexArtefact + '</span></span>';
+                            } else if (ligne.badgeType === 'nouvelle-reprise') {
+                                badgeJeton = '<span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Reprise</span><span class="badge-jeton-numero badge-jeton-numero-reprise">' + ligne.indexArtefact + '</span></span>';
+                            } else if (ligne.badgeType === 'delai') {
+                                badgeJeton = '<span class="badge-jeton-delai-wrapper"><span class="badge-jeton-titre">Délai</span><span class="badge-jeton-numero badge-jeton-numero-delai">' + ligne.indexArtefact + '</span></span>';
+                            }
+
+                            return `
                             <tr style="border-bottom: 1px solid #e0e0e0;">
-                                <td style="padding: 12px;">${echapperHtml(ligne.production)}</td>
+                                <td style="padding: 12px;">
+                                    ${echapperHtml(ligne.production)}
+                                </td>
                                 <td style="padding: 12px; color: #666;">${echapperHtml(ligne.description)}</td>
+                                <td style="padding: 12px;">
+                                    ${badgeJeton}
+                                </td>
                                 <td style="padding: 12px; text-align: center;">
                                     ${ligne.statut === 'evalue'
                                         ? `<strong>${ligne.note}</strong>`
@@ -2971,7 +3030,8 @@ function genererSectionProductions(da) {
                                     }
                                 </td>
                             </tr>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>
