@@ -127,9 +127,9 @@ function chargerMaterielConfigure() {
     } else if (modalites.pratique === 'alternative') {
         pratique = 'Alternative (à préciser)';
     }
-    
-    setStatText('stat-pratique', pratique);
-    
+
+    // setStatText('stat-pratique', pratique); // RETIRÉ : Carte "Pratique de notation" supprimée de l'aperçu matériel
+
     // Productions
     const productions = JSON.parse(localStorage.getItem('productions') || '[]');
     setStatText('stat-productions', productions.length);
@@ -164,8 +164,41 @@ function chargerMaterielConfigure() {
  * Charge les informations système
  */
 function chargerInfosSysteme() {
+    // Version et date - Lues automatiquement depuis l'élément .meta dans l'en-tête
+    // Format attendu: "Beta 90 par Grégoire Bédard (5 novembre 2025)"
+    const metaElement = document.querySelector('.meta');
+    let versionBeta = 'β —';
+    let dateBeta = '—';
+
+    if (metaElement) {
+        const texte = metaElement.textContent;
+
+        // Extraire le numéro de beta (ex: "Beta 90" → "90")
+        const matchBeta = texte.match(/Beta\s+(\d+)/i);
+        if (matchBeta) {
+            versionBeta = `β ${matchBeta[1]}`;
+        }
+
+        // Extraire la date (ex: "(5 novembre 2025)" → "5 nov. 2025")
+        const matchDate = texte.match(/\((\d+)\s+(\w+)\s+(\d{4})\)/);
+        if (matchDate) {
+            const jour = matchDate[1];
+            const mois = matchDate[2];
+            const annee = matchDate[3];
+
+            // Abréger le mois
+            const moisAbreges = {
+                'janvier': 'jan.', 'février': 'fév.', 'mars': 'mars', 'avril': 'avr.',
+                'mai': 'mai', 'juin': 'juin', 'juillet': 'juil.', 'août': 'août',
+                'septembre': 'sept.', 'octobre': 'oct.', 'novembre': 'nov.', 'décembre': 'déc.'
+            };
+            const moisAbrege = moisAbreges[mois.toLowerCase()] || mois;
+            dateBeta = `${jour} ${moisAbrege} ${annee}`;
+        }
+    }
+
     // Version (β = lettre grecque beta)
-    setStatText('stat-version', 'β 88');
+    setStatText('stat-version', versionBeta);
 
     // Poids des données
     let poidsTotal = 0;
@@ -174,11 +207,14 @@ function chargerInfosSysteme() {
         const valeur = localStorage.getItem(cle);
         poidsTotal += (cle.length + valeur.length) * 2; // UTF-16 = 2 bytes par caractère
     }
-    
+
     const poidsKo = (poidsTotal / 1024).toFixed(2);
     const poidsMo = (poidsTotal / (1024 * 1024)).toFixed(2);
     const affichagePoids = poidsTotal < 1024 * 1024 ? `${poidsKo} Ko` : `${poidsMo} Mo`;
     setStatText('stat-poids', affichagePoids);
+
+    // Date de création de la beta
+    setStatText('stat-beta-date', dateBeta);
 }
 
 /* ===============================

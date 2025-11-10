@@ -56,54 +56,57 @@ function calculerStatistiquesEvaluations(etudiants, evaluations, productions) {
         return;
     }
 
-    // ÉTUDIANTS ÉVALUÉS (au moins 1 évaluation)
-    const etudiantsAvecEvaluations = new Set();
+    // Déterminer la pratique active
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif !== false;
+    const afficherPan = affichage.afficherAlternatif !== false;
+    const modeComparatif = afficherSom && afficherPan;
+
+    // TAUX DE COMPLÉTION MOYEN (lire depuis indicesCP - source unique de vérité)
+    let totalC = 0;
+    let nbAvecDonnees = 0;
+
+    if (typeof obtenirIndicesCP === 'function') {
+        etudiants.forEach(e => {
+            let C_etudiant = 0;
+
+            if (modeComparatif) {
+                // Moyenne des deux pratiques
+                const indicesSOM = obtenirIndicesCP(e.da, 'SOM');
+                const indicesPAN = obtenirIndicesCP(e.da, 'PAN');
+                C_etudiant = ((indicesSOM?.C || 0) + (indicesPAN?.C || 0)) / 2;
+            } else if (afficherSom) {
+                const indices = obtenirIndicesCP(e.da, 'SOM');
+                C_etudiant = indices?.C || 0;
+            } else if (afficherPan) {
+                const indices = obtenirIndicesCP(e.da, 'PAN');
+                C_etudiant = indices?.C || 0;
+            }
+
+            if (C_etudiant > 0) {
+                nbAvecDonnees++;
+            }
+            totalC += C_etudiant;
+        });
+    }
+
+    const tauxCompletion = nbAvecDonnees > 0 ? Math.round(totalC / nbTotal) : 0;
+    setStatText('ea-taux-completion', `${tauxCompletion}%`);
+
+    // PRODUCTIONS RÉALISÉES (compter les productions avec au moins une évaluation complétée)
+    const productionsRealisees = new Set();
     evaluations.forEach(ev => {
-        if (ev.etudiantId) {
-            etudiantsAvecEvaluations.add(ev.etudiantId);
+        // Vérifier si l'évaluation a une note valide (pas null, pas undefined, pas "--")
+        if (ev.productionId && ev.noteFinale !== undefined && ev.noteFinale !== null && ev.noteFinale !== '--') {
+            productionsRealisees.add(ev.productionId);
         }
     });
-    const nbEtudiantsEvalues = etudiantsAvecEvaluations.size;
-    setStatText('ea-etudiants-evalues', `${nbEtudiantsEvalues} / ${nbTotal}`);
-
-    // ARTEFACTS COMPLÉTÉS
-    const nbArtefactsTotal = productions.length * nbTotal;
-    const nbArtefactsCompletes = evaluations.filter(ev => ev.note !== undefined && ev.note !== null).length;
-    setStatText('ea-artefacts-completes', `${nbArtefactsCompletes} / ${nbArtefactsTotal}`);
-
-    // MOYENNE DU GROUPE (notes sur 100)
-    const evaluationsAvecNotes = evaluations.filter(ev => ev.note !== undefined && ev.note !== null);
-    let moyenneGroupe = 0;
-    if (evaluationsAvecNotes.length > 0) {
-        const sommeNotes = evaluationsAvecNotes.reduce((sum, ev) => sum + (ev.note || 0), 0);
-        moyenneGroupe = Math.round(sommeNotes / evaluationsAvecNotes.length);
-    }
-    setStatText('ea-moyenne-groupe', moyenneGroupe > 0 ? `${moyenneGroupe}%` : '—');
-
-    // TAUX DE COMPLÉTION MOYEN
-    let tauxCompletion = 0;
-    if (nbArtefactsTotal > 0) {
-        tauxCompletion = Math.round((nbArtefactsCompletes / nbArtefactsTotal) * 100);
-    }
-    setStatText('ea-taux-completion', `${tauxCompletion}%`);
+    const nbProductionsRealisees = productionsRealisees.size;
+    setStatText('ea-productions-realisees', nbProductionsRealisees);
 
     // PRODUCTIONS CONFIGURÉES
     setStatText('ea-productions-configurees', productions.length);
-
-    // DERNIÈRE ÉVALUATION (date la plus récente)
-    let derniereDate = '—';
-    if (evaluations.length > 0) {
-        // Trouver l'évaluation la plus récente
-        const evaluationsTriees = evaluations
-            .filter(ev => ev.dateEvaluation)
-            .sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
-
-        if (evaluationsTriees.length > 0) {
-            const date = new Date(evaluationsTriees[0].dateEvaluation);
-            derniereDate = formaterDateCourte(date);
-        }
-    }
-    setStatText('ea-derniere-evaluation', derniereDate);
 }
 
 /**
@@ -121,12 +124,9 @@ function formaterDateCourte(date) {
  * Affiche un message si aucune donnée disponible
  */
 function afficherMessageVideEvaluations() {
-    setStatText('ea-etudiants-evalues', '—');
-    setStatText('ea-artefacts-completes', '—');
-    setStatText('ea-moyenne-groupe', '—');
+    setStatText('ea-productions-realisees', '—');
     setStatText('ea-taux-completion', '—');
     setStatText('ea-productions-configurees', '—');
-    setStatText('ea-derniere-evaluation', '—');
 }
 
 /**

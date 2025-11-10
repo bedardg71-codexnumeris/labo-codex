@@ -494,15 +494,30 @@ function formaterDateLisible(dateStr) {
 function genererAffichageAnalyse(analyse) {
     if (!analyse || analyse.nbEtudiants === 0) return '';
 
+    // Structure en 3 cartes séparées similaires au profil Engagement
     let html = `
-        <div class="carte" style="background: var(--bleu-tres-pale); margin-top: 15px;">
-            <h4 style="margin-top: 0; color: var(--bleu-principal);">Aperçu du sous-groupe (${analyse.nbEtudiants} étudiant·e·s)</h4>
+        <div style="margin-top: 15px;">
+            <h4 style="margin: 0 0 15px 0; color: var(--bleu-principal);">Aperçu du sous-groupe (${analyse.nbEtudiants} étudiant·e·s)</h4>
+
+            <!-- Grille 3 colonnes avec cartes séparées -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
     `;
 
-    // Niveaux RàI
-    if (analyse.niveauxRai) {
-        html += '<h4 style="margin: 15px 0 10px 0; color: var(--bleu-principal); font-size: 0.95rem;">Répartition RàI :</h4>';
-        html += '<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">';
+    // COLONNE 1: Niveaux RàI (carte)
+    html += '<div class="profil-carte">';
+
+    // Calculer le nombre de niveaux distincts présents
+    const nbNiveauxRai = analyse.niveauxRai ? Object.values(analyse.niveauxRai).filter(c => c > 0).length : 0;
+
+    html += `
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <h4 style="margin: 0; color: var(--bleu-principal); font-size: 1rem;">Niveaux RàI</h4>
+            <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${nbNiveauxRai}</strong>
+        </div>
+    `;
+
+    if (analyse.niveauxRai && Object.values(analyse.niveauxRai).some(c => c > 0)) {
+        html += '<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">';
         Object.entries(analyse.niveauxRai)
             .filter(([niveau, count]) => count > 0)
             .forEach(([niveau, count]) => {
@@ -514,14 +529,28 @@ function genererAffichageAnalyse(analyse) {
                 `;
             });
         html += '</div>';
+    } else {
+        html += '<p class="text-muted" style="text-align: center;">Aucune donnée</p>';
     }
+    html += '</div>';
 
-    // Distribution du risque
+    // COLONNE 2: Répartition du risque (carte)
+    html += '<div class="profil-carte">';
+
+    // Afficher le risque moyen en pourcentage
+    const risqueMoyenPct = analyse.risqueMoyen ? `${(analyse.risqueMoyen * 100).toFixed(1)}%` : '—';
+
+    html += `
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <h4 style="margin: 0; color: var(--bleu-principal); font-size: 1rem;">Répartition du risque</h4>
+            <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${risqueMoyenPct}</strong>
+        </div>
+    `;
+
     if (analyse.risqueDistribution) {
         const risquesAvecCompte = Object.entries(analyse.risqueDistribution).filter(([niveau, count]) => count > 0);
         if (risquesAvecCompte.length > 0) {
-            html += '<h4 style="margin: 15px 0 10px 0; color: var(--bleu-principal); font-size: 0.95rem;">Répartition du risque :</h4>';
-            html += '<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">';
+            html += '<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 15px;">';
             risquesAvecCompte.forEach(([niveau, count]) => {
                 // Mapper le niveau de risque au nom de classe CSS
                 let classeRisque = 'badge-risque-analyse-defaut';
@@ -548,14 +577,29 @@ function genererAffichageAnalyse(analyse) {
                 `;
             });
             html += '</div>';
-            html += `<p style="margin: 5px 0 20px 0;"><strong>Risque moyen :</strong> ${(analyse.risqueMoyen * 100).toFixed(1)}%</p>`;
+        } else {
+            html += '<p class="text-muted" style="text-align: center;">Aucune donnée</p>';
         }
+    } else {
+        html += '<p class="text-muted" style="text-align: center;">Aucune donnée</p>';
     }
+    html += '</div>';
 
-    // Patterns d'apprentissage
+    // COLONNE 3: Patterns d'apprentissage (carte)
+    html += '<div class="profil-carte">';
+
+    // Calculer le nombre de patterns distincts
+    const nbPatterns = analyse.patternsCommuns ? Object.keys(analyse.patternsCommuns).length : 0;
+
+    html += `
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <h4 style="margin: 0; color: var(--bleu-principal); font-size: 1rem;">Patterns d'apprentissage</h4>
+            <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${nbPatterns}</strong>
+        </div>
+    `;
+
     if (analyse.patternsCommuns && Object.keys(analyse.patternsCommuns).length > 0) {
-        html += '<h4 style="margin: 15px 0 10px 0; color: var(--bleu-principal); font-size: 0.95rem;">Patterns d\'apprentissage :</h4>';
-        html += '<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">';
+        html += '<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">';
         Object.entries(analyse.patternsCommuns)
             .sort((a, b) => b[1] - a[1])
             .forEach(([pattern, count]) => {
@@ -567,9 +611,12 @@ function genererAffichageAnalyse(analyse) {
                 `;
             });
         html += '</div>';
+    } else {
+        html += '<p class="text-muted" style="text-align: center;">Aucune donnée</p>';
     }
-
     html += '</div>';
+
+    html += '</div></div></div>';
 
     return html;
 }
@@ -620,8 +667,8 @@ function afficherFormulaireIntervention() {
 
             <form onsubmit="sauvegarderNouvelleIntervention(event); return false;">
                 <!-- Layout 2 colonnes : formulaire | gestion absences -->
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <!-- Colonne gauche : Champs du formulaire -->
+                <div style="display: grid; grid-template-columns: 1fr 0.9fr; gap: 20px; margin-bottom: 20px;">
+                    <!-- Colonne gauche : Champs du formulaire (50%) -->
                     <div>
                         <!-- Ligne 1 : Titre, Niveau RàI, Type -->
                         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
@@ -761,8 +808,8 @@ function afficherFormulaireModification(interventionId) {
 
             <form onsubmit="sauvegarderModificationIntervention(event, '${interventionId}'); return false;">
                 <!-- Layout 2 colonnes : formulaire | gestion absences -->
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <!-- Colonne gauche : Champs du formulaire -->
+                <div style="display: grid; grid-template-columns: 1fr 0.9fr; gap: 20px; margin-bottom: 20px;">
+                    <!-- Colonne gauche : Champs du formulaire (50%) -->
                     <div>
                         <!-- Ligne 1 : Titre, Niveau RàI, Type -->
                         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
@@ -959,8 +1006,8 @@ function ouvrirIntervention(interventionId) {
             <h3 style="margin: 0 0 20px 0;">${intervention.titre}</h3>
 
             <!-- Section informations éditables -->
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <!-- Colonne gauche : Informations de base -->
+            <div style="display: grid; grid-template-columns: 1fr 0.9fr; gap: 20px; margin-bottom: 20px;">
+                <!-- Colonne gauche : Informations de base (50%) -->
                 <div>
                     <!-- Ligne 1 : Titre, Niveau RàI, Type -->
                     <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
@@ -1055,8 +1102,8 @@ function ouvrirIntervention(interventionId) {
 
             <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
 
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; margin-bottom: 20px;">
-                <!-- Colonne gauche: Liste des étudiants avec notes (66%) -->
+            <div style="display: grid; grid-template-columns: 1fr 0.9fr; gap: 20px; align-items: start; margin-bottom: 20px;">
+                <!-- Colonne gauche: Liste des étudiants avec notes (50%) -->
                 <div>
                     <h4>Marquer les présences et notes individuelles</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
@@ -1068,7 +1115,7 @@ function ouvrirIntervention(interventionId) {
                     </div>
                 </div>
 
-                <!-- Colonne droite: Analyse du sous-groupe -->
+                <!-- Colonne droite: Analyse du sous-groupe (45% = 3 × 15%) -->
                 <div>
                     <h4>Aperçu du sous-groupe</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
