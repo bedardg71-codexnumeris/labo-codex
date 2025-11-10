@@ -3479,6 +3479,9 @@
                                     <th onclick="trierTableauParColonne('production')" style="padding: 12px; text-align: left; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
                                         Production <span id="tri-production" style="font-size: 0.8em; color: #999;">↕</span>
                                     </th>
+                                    <th onclick="trierTableauParColonne('jetons')" style="padding: 12px; text-align: center; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
+                                        Jeton <span id="tri-jetons" style="font-size: 0.8em; color: #999;">↕</span>
+                                    </th>
                                     <th onclick="trierTableauParColonne('niveau')" style="padding: 12px; text-align: center; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
                                         Niveau <span id="tri-niveau" style="font-size: 0.8em; color: #999;">↕</span>
                                     </th>
@@ -5916,6 +5919,168 @@ Exemple :
 
                         </div>
                         <!-- FIN SECTION OPTIONS AFFICHAGE -->
+
+                        <!-- ==========================================
+             SECTION : CONFIGURATION PAN
+             ========================================== -->
+                        <div id="configurationPAN" style="display: none;">
+
+                            <!-- Configuration période et artefacts -->
+                            <div class="carte" style="margin-top: 20px;">
+                                <h3 class="carte-titre-bleu">📋 Configuration PAN-Maîtrise / Littérature</h3>
+                                <div class="carte-body">
+
+                                    <!-- Période d'évaluation -->
+                                    <div class="form-group">
+                                        <label style="font-weight: 600; margin-bottom: 10px; display: block;">
+                                            Période d'évaluation (fenêtre temporelle)
+                                        </label>
+                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                                            Combien de cours récents utiliser pour calculer les patterns et défis ?
+                                        </p>
+                                        <div style="margin-left: 20px;">
+                                            <div style="margin-bottom: 8px;">
+                                                <input type="radio" id="periode3" name="periodePAN" value="3">
+                                                <label for="periode3">3 derniers cours (6 artefacts)</label>
+                                            </div>
+                                            <div style="margin-bottom: 8px;">
+                                                <input type="radio" id="periode7" name="periodePAN" value="7" checked>
+                                                <label for="periode7">7 derniers cours (14 artefacts)</label>
+                                            </div>
+                                            <div style="margin-bottom: 8px;">
+                                                <input type="radio" id="periode12" name="periodePAN" value="12">
+                                                <label for="periode12">12 derniers cours (24 artefacts)</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nombre d'artefacts à retenir -->
+                                    <div class="form-group" style="margin-top: 25px;">
+                                        <label for="nombreARetenir" style="font-weight: 600; display: block; margin-bottom: 10px;">
+                                            Nombre d'artefacts à retenir pour note finale
+                                        </label>
+                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                                            En PAN-Maîtrise, on retient les N meilleurs artefacts (principe de maîtrise)
+                                        </p>
+                                        <select id="nombreARetenir" class="form-control" style="width: auto; display: inline-block;">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3" selected>3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+                                        <span style="margin-left: 8px;">meilleurs artefacts</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Système de jetons -->
+                            <div class="carte" style="margin-top: 20px;">
+                                <h3 class="carte-titre-bleu">🎟️ Système de jetons</h3>
+                                <div class="carte-body">
+
+                                    <!-- Activation -->
+                                    <div class="form-group">
+                                        <label style="cursor: pointer;">
+                                            <input type="checkbox" id="jetonsActif" checked>
+                                            <strong style="margin-left: 8px;">Activer les jetons</strong>
+                                        </label>
+                                    </div>
+
+                                    <!-- Jetons de délai -->
+                                    <div id="configJetonsDelai" style="margin-top: 25px;">
+                                        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 10px;">
+                                            Jetons de délai
+                                        </h4>
+                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                                            Permettent de prolonger l'échéance d'une évaluation
+                                        </p>
+                                        <div style="margin-left: 20px;">
+                                            <div class="form-group" style="margin-bottom: 12px;">
+                                                <label for="nombreJetonsDelai" style="display: inline-block; min-width: 180px;">Nombre par trimestre :</label>
+                                                <select id="nombreJetonsDelai" class="form-control" style="width: auto; display: inline-block;">
+                                                    <option value="0">0 (désactivé)</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2" selected>2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="dureeDelai" style="display: inline-block; min-width: 180px;">Durée du délai accordé :</label>
+                                                <select id="dureeDelai" class="form-control" style="width: auto; display: inline-block;">
+                                                    <option value="3">3 jours</option>
+                                                    <option value="5">5 jours</option>
+                                                    <option value="7" selected>7 jours</option>
+                                                    <option value="10">10 jours</option>
+                                                    <option value="14">14 jours</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Jetons de reprise -->
+                                    <div id="configJetonsReprise" style="margin-top: 25px;">
+                                        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 10px;">
+                                            Jetons de reprise
+                                        </h4>
+                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                                            Permettent de refaire une évaluation pour améliorer la maîtrise
+                                        </p>
+                                        <div style="margin-left: 20px;">
+                                            <div class="form-group" style="margin-bottom: 12px;">
+                                                <label for="nombreJetonsReprise" style="display: inline-block; min-width: 180px;">Nombre par trimestre :</label>
+                                                <select id="nombreJetonsReprise" class="form-control" style="width: auto; display: inline-block;">
+                                                    <option value="0">0 (désactivé)</option>
+                                                    <option value="1">1</option>
+                                                    <option value="2" selected>2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group" style="margin-bottom: 12px;">
+                                                <label for="maxRepriseParProduction" style="display: inline-block; min-width: 180px;">Maximum par production :</label>
+                                                <select id="maxRepriseParProduction" class="form-control" style="width: auto; display: inline-block;">
+                                                    <option value="1" selected>1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="999">Illimité</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label style="font-weight: 600; margin-bottom: 10px; display: block;">
+                                                    Que faire de l'évaluation originale ?
+                                                </label>
+                                                <div style="margin-left: 20px;">
+                                                    <div style="margin-bottom: 8px;">
+                                                        <input type="radio" id="archiverOriginale" name="gestionOriginale" value="archiver" checked>
+                                                        <label for="archiverOriginale">Archiver (garder historique)</label>
+                                                    </div>
+                                                    <div style="margin-bottom: 8px;">
+                                                        <input type="radio" id="supprimerOriginale" name="gestionOriginale" value="supprimer">
+                                                        <label for="supprimerOriginale">Supprimer (nettoyer historique)</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Info-bulle -->
+                                    <div class="alerte-info" style="margin-top: 25px;">
+                                        <strong>💡 À propos des jetons</strong><br>
+                                        Les jetons sont des mécanismes flexibles qui permettent de :<br>
+                                        • <strong>Prolonger une échéance</strong> pour donner plus de temps (jeton de délai)<br>
+                                        • <strong>Refaire une évaluation</strong> pour améliorer la maîtrise (jeton de reprise)<br>
+                                        <br>
+                                        Les jetons sont comptabilisés par trimestre et par étudiant.
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- FIN SECTION CONFIGURATION PAN -->
 
                         <!-- STATUT + BOUTON GROUPÉS EN BAS -->
                         <div style="margin-top: 30px; padding: 15px; background: var(--bleu-tres-pale); 
