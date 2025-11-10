@@ -772,13 +772,13 @@ function genererLigneHTML(ligne) {
     else if (ligne.badgeType === 'originale-reprise') {
         // Originale remplacée : classe grisée + badge "Remplacée"
         classeRemplacee = ' class="eval-remplacee"';
-        badgeJeton = ' <span class="badge-jeton badge-jeton-reprise">Remplacée</span>';
+        badgeJeton = ' <span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Remplacée</span></span>';
     } else if (ligne.badgeType === 'nouvelle-reprise') {
-        // Nouvelle de reprise : badge "Jeton de reprise appliqué"
-        badgeJeton = ' <span class="badge-jeton badge-jeton-reprise">Jeton de reprise appliqué</span>';
+        // Nouvelle de reprise : badge "Reprise"
+        badgeJeton = ' <span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Reprise</span></span>';
     } else if (ligne.badgeType === 'delai') {
-        // Délai : badge "Jeton de délai appliqué"
-        badgeJeton = ' <span class="badge-jeton badge-jeton-delai">Jeton de délai appliqué</span>';
+        // Délai : badge "Délai"
+        badgeJeton = ' <span class="badge-jeton-delai-wrapper"><span class="badge-jeton-titre">Délai</span></span>';
     }
 
     // Afficher le niveau IDME
@@ -820,7 +820,8 @@ function genererLigneHTML(ligne) {
             <td>${ligne.da}</td>
             <td>${echapperHtml(ligne.nom)}</td>
             <td>${echapperHtml(ligne.prenom)}</td>
-            <td>${echapperHtml(ligne.productionNom)}${badgeJeton}</td>
+            <td>${echapperHtml(ligne.productionNom)}</td>
+            <td class="text-center">${badgeJeton}</td>
             <td class="text-center">${affichageNiveau}</td>
             <td class="text-center">${affichageNoteChiffree}</td>
             <td class="actions">${boutons}</td>
@@ -1235,7 +1236,7 @@ function trierTableauParColonne(colonne) {
  */
 function mettreAJourIndicateursTri() {
     // Réinitialiser tous les indicateurs
-    ['da', 'nom', 'prenom', 'production', 'niveau', 'note'].forEach(col => {
+    ['da', 'nom', 'prenom', 'production', 'jetons', 'niveau', 'note'].forEach(col => {
         const elem = document.getElementById(`tri-${col}`);
         if (elem) elem.textContent = '↕';
     });
@@ -1292,6 +1293,21 @@ function trierLignesParColonne(lignes) {
                     ? valeurA.localeCompare(valeurB, 'fr')
                     : valeurB.localeCompare(valeurA, 'fr');
 
+            case 'jetons':
+                // Ordre: vide (0), délai (1), reprise (2), remplacée (3), non-recevable (4)
+                const ordreJeton = {
+                    '': 0,
+                    'delai': 1,
+                    'nouvelle-reprise': 2,
+                    'originale-reprise': 3,
+                    'plagiat': 4,
+                    'ia': 4,
+                    'soupcon': 4
+                };
+                const jetonA = ordreJeton[a.badgeType || ''] ?? 0;
+                const jetonB = ordreJeton[b.badgeType || ''] ?? 0;
+                return asc ? jetonA - jetonB : jetonB - jetonA;
+
             case 'niveau':
                 valeurA = a.niveauFinal || '-';
                 valeurB = b.niveauFinal || '-';
@@ -1332,6 +1348,7 @@ window.trierListeEvaluations = trierListeEvaluations;
 window.trierTableauParColonne = trierTableauParColonne;
 
 // Alias pour compatibilité avec le HTML
+window.appliquerFiltres = appliquerFiltres;
 window.filtrerListeEvaluations = appliquerFiltres;
 window.reinitialiserFiltresEval = reinitialiserFiltres;
 window.rechercherEvaluations = rechercherEvaluations;
