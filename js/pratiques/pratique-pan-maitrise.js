@@ -387,7 +387,8 @@ class PratiquePANMaitrise {
         };
 
         // Regex pour extraire: CRITÈRE (NIVEAU)
-        const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi;
+        // Support I/D/M/E + niveau "0" (Aucun) ajouté Beta 89
+        const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME0])\)/gi;
 
         derniersArtefacts.forEach(evaluation => {
             const retroaction = evaluation.retroactionFinale || '';
@@ -746,11 +747,30 @@ class PratiquePANMaitrise {
 
     /**
      * Convertit un niveau IDME en score (0-1)
+     * Supporte deux formats de table:
+     * - Format complet: {I: {min, max, valeur}, D: {...}, ...}
+     * - Format simple: {I: 0.4, D: 0.65, ...}
      * @private
      */
     _convertirNiveauIDMEEnScore(niveau, tableConversion) {
         niveau = niveau.trim().toUpperCase();
-        return tableConversion[niveau]?.valeur ?? null;
+        const entry = tableConversion[niveau];
+
+        if (entry === null || entry === undefined) {
+            return null;
+        }
+
+        // Format complet avec objet {min, max, valeur}
+        if (typeof entry === 'object' && entry.valeur !== undefined) {
+            return entry.valeur;
+        }
+
+        // Format simple: nombre direct
+        if (typeof entry === 'number') {
+            return entry;
+        }
+
+        return null;
     }
 
     /**
