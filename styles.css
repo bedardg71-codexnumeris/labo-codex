@@ -3795,6 +3795,19 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     background: #9c27b0;
 }
 
+/* Badge non remis (gris neutre) */
+.badge-non-remis-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f5f5f522;
+    border: 2px solid #999;
+    border-radius: 8px;
+    padding: 4px 6px;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+}
+
 /* Artefacts sélectionnés */
 .profil-artefacts-liste {
     display: flex;
