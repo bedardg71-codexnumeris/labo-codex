@@ -2008,13 +2008,13 @@ function filtrerListeEvaluations() {
 
 /**
  * Réinitialise tous les filtres
+ * OBSOLETE: Cette fonction est maintenant gérée par liste-evaluations.js
+ * Ne pas redéfinir ici pour éviter d'écraser la fonction moderne
  */
-function reinitialiserFiltresEval() {
-    document.getElementById('filtre-groupe-eval').value = '';
-    document.getElementById('filtre-production-eval').value = '';
-    document.getElementById('filtre-statut-eval').value = '';
-    afficherListeEvaluations(donneesEvaluationsFiltrees);
-}
+// function reinitialiserFiltresEval() {
+//     // FONCTION OBSOLÈTE - Voir liste-evaluations.js ligne 377
+//     // La fonction moderne reinitialiserFiltres() est exportée comme window.reinitialiserFiltresEval
+// }
 
 /**
  * Trie la liste des évaluations selon le critère sélectionné
