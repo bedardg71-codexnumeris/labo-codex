@@ -584,6 +584,17 @@ function genererSectionMobilisationEngagement(da) {
     const C = indices.C / 100;
     const interpE = interpreterEngagement(indices.E);
 
+    // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif !== false;
+    const afficherPan = affichage.afficherAlternatif !== false;
+    const modeComparatif = afficherSom && afficherPan;
+
+    // Calculer indices pour les deux pratiques
+    const indicesSOM = calculerTousLesIndices(da, 'SOM');
+    const indicesPAN = calculerTousLesIndices(da, 'PAN');
+
     // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
     const tauxA = detailsA.heuresOffertes > 0
