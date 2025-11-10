@@ -669,6 +669,8 @@ function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, af
  * Affiche les patterns d'apprentissage
  * En mode hybride, affiche SOM et PAN côte à côte
  *
+ * NOUVEAU Beta 90 : Utilise l'interface de pratiques au lieu du calcul hardcodé
+ *
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherPatternsApprentissage(etudiants) {
@@ -678,25 +680,39 @@ function afficherPatternsApprentissage(etudiants) {
     const afficherPan = affichage.afficherAlternatif !== false;
     const nbTotal = etudiants.length;
 
-    // Calculer les patterns pour SOM
-    let somStable = 0, somDefi = 0, somEmergent = 0, somCritique = 0;
-    etudiants.forEach(e => {
-        const pattern = determinerPattern(e.sommatif);
-        if (pattern === 'stable') somStable++;
-        else if (pattern === 'défi') somDefi++;
-        else if (pattern === 'émergent') somEmergent++;
-        else if (pattern === 'critique') somCritique++;
-    });
+    // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
+    const pratiqueSOM = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('sommative') : null;
+    const pratiquePAN = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('pan-maitrise') : null;
 
-    // Calculer les patterns pour PAN
-    let panStable = 0, panDefi = 0, panEmergent = 0, panCritique = 0;
-    etudiants.forEach(e => {
-        const pattern = determinerPattern(e.alternatif);
-        if (pattern === 'stable') panStable++;
-        else if (pattern === 'défi') panDefi++;
-        else if (pattern === 'émergent') panEmergent++;
-        else if (pattern === 'critique') panCritique++;
-    });
+    // Calculer les patterns pour SOM en utilisant la pratique sommative
+    let somStable = 0, somDefi = 0, somEmergent = 0, somCritique = 0, somProgression = 0;
+    if (pratiqueSOM) {
+        etudiants.forEach(e => {
+            const patternInfo = pratiqueSOM.identifierPattern(e.da);
+            const type = patternInfo ? patternInfo.type : null;
+
+            // Mapper les types de patterns aux compteurs
+            if (type === 'stable' || type === 'progression') somStable++;
+            else if (type === 'defi-specifique') somDefi++;
+            else if (type === 'blocage-emergent') somEmergent++;
+            else if (type === 'blocage-critique') somCritique++;
+        });
+    }
+
+    // Calculer les patterns pour PAN en utilisant la pratique PAN-Maîtrise
+    let panStable = 0, panDefi = 0, panEmergent = 0, panCritique = 0, panProgression = 0;
+    if (pratiquePAN) {
+        etudiants.forEach(e => {
+            const patternInfo = pratiquePAN.identifierPattern(e.da);
+            const type = patternInfo ? patternInfo.type : null;
+
+            // Mapper les types de patterns aux compteurs
+            if (type === 'stable' || type === 'progression') panStable++;
+            else if (type === 'defi-specifique') panDefi++;
+            else if (type === 'blocage-emergent') panEmergent++;
+            else if (type === 'blocage-critique') panCritique++;
+        });
+    }
 
     // Trouver le conteneur de la section Patterns
     const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
@@ -772,6 +788,8 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
  * Affiche les niveaux RàI (Réponse à l'intervention)
  * Valeurs colorées selon la pratique (orange=SOM, bleu=PAN)
  *
+ * NOUVEAU Beta 90 : Utilise l'interface de pratiques au lieu du calcul hardcodé
+ *
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherNiveauxRaI(etudiants) {
@@ -781,29 +799,35 @@ function afficherNiveauxRaI(etudiants) {
     const afficherPan = affichage.afficherAlternatif !== false;
     const nbTotal = etudiants.length;
 
-    // Calculer les niveaux RàI pour SOM et PAN
-    // Utiliser determinerCibleIntervention() pour assurer la cohérence avec la Liste
+    // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
+    const pratiqueSOM = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('sommative') : null;
+    const pratiquePAN = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('pan-maitrise') : null;
+
+    // Calculer les niveaux RàI pour SOM en utilisant la pratique sommative
     let somNiveau1 = 0, somNiveau2 = 0, somNiveau3 = 0;
+    if (pratiqueSOM) {
+        etudiants.forEach(e => {
+            const cibleInfo = pratiqueSOM.genererCibleIntervention(e.da);
+            const niveau = cibleInfo ? cibleInfo.niveau : null;
+
+            if (niveau === 1) somNiveau1++;
+            else if (niveau === 2) somNiveau2++;
+            else if (niveau === 3) somNiveau3++;
+        });
+    }
+
+    // Calculer les niveaux RàI pour PAN en utilisant la pratique PAN-Maîtrise
     let panNiveau1 = 0, panNiveau2 = 0, panNiveau3 = 0;
+    if (pratiquePAN) {
+        etudiants.forEach(e => {
+            const cibleInfo = pratiquePAN.genererCibleIntervention(e.da);
+            const niveau = cibleInfo ? cibleInfo.niveau : null;
 
-    etudiants.forEach(e => {
-        // Utiliser la même logique que dans la Liste des individus
-        if (typeof determinerCibleIntervention === 'function') {
-            const cibleInfo = determinerCibleIntervention(e.da);
-
-            // Compter pour les deux pratiques (SOM et PAN utilisent le même niveau RàI)
-            if (cibleInfo.niveau === 1) {
-                somNiveau1++;
-                panNiveau1++;
-            } else if (cibleInfo.niveau === 2) {
-                somNiveau2++;
-                panNiveau2++;
-            } else if (cibleInfo.niveau === 3) {
-                somNiveau3++;
-                panNiveau3++;
-            }
-        }
-    });
+            if (niveau === 1) panNiveau1++;
+            else if (niveau === 2) panNiveau2++;
+            else if (niveau === 3) panNiveau3++;
+        });
+    }
 
     // Calculer les pourcentages
     const somPct1 = nbTotal > 0 ? Math.round((somNiveau1 / nbTotal) * 100) : 0;
@@ -847,11 +871,17 @@ function afficherNiveauxRaI(etudiants) {
 }
 
 /**
- * Détermine le pattern d'apprentissage selon les indices A-C-P
+ * ANCIENNE FONCTION (Beta 89 et antérieur) - OBSOLÈTE depuis Beta 90
  *
- * @param {Object} indices - Indices {assiduite, completion, performance, risque, niveauRisque}
- * @returns {string} Pattern: 'stable', 'défi', 'émergent', 'critique'
+ * Cette fonction calculait les patterns directement selon les indices A-C-P.
+ * Elle est désormais remplacée par l'appel à pratique.identifierPattern(da)
+ * qui délègue la détection de pattern à la pratique active.
+ *
+ * Conservée en commentaire pour référence et compréhension de l'ancienne logique.
+ *
+ * @deprecated Utiliser pratique.identifierPattern(da) à la place
  */
+/*
 function determinerPattern(indices) {
     const {assiduite, completion, performance, niveauRisque} = indices;
 
@@ -873,6 +903,7 @@ function determinerPattern(indices) {
     // Défi: au moins un indice sous 0.75 mais pas de blocage critique
     return 'défi';
 }
+*/
 
 /**
  * Affiche les actions recommandées (Top 5)
