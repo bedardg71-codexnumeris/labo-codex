@@ -10,6 +10,81 @@
    =============================== */
 
 /* ===============================
+   FONCTIONS HELPER DE CONFIGURATION
+   =============================== */
+
+/**
+ * Obtient la configuration des jetons depuis modalitesEvaluation
+ * @returns {object} Configuration des jetons avec valeurs par défaut
+ */
+function obtenirConfigJetons() {
+    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const configPAN = modalites.configPAN || {};
+
+    // Valeurs par défaut si config PAN n'existe pas
+    const jetonsDefaut = {
+        actif: true,
+        delai: { nombre: 2, dureeJours: 7 },
+        reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true }
+    };
+
+    return configPAN.jetons || jetonsDefaut;
+}
+
+/**
+ * Compte le nombre de jetons utilisés par un étudiant pour un type donné
+ * @param {string} da - Code permanent de l'étudiant
+ * @param {string} type - Type de jeton ('delai' ou 'reprise')
+ * @returns {number} Nombre de jetons utilisés
+ */
+function compterJetonsUtilises(da, type) {
+    // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec obtenirDonneesSelonMode
+    // qui peut retourner les données de simulation au lieu des données réelles
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+
+    if (type === 'delai') {
+        return evaluations.filter(e =>
+            e.etudiantDA === da &&
+            e.jetonDelaiApplique === true
+        ).length;
+    } else if (type === 'reprise') {
+        return evaluations.filter(e =>
+            e.etudiantDA === da &&
+            e.jetonRepriseApplique === true
+        ).length;
+    }
+
+    return 0;
+}
+
+/**
+ * Vérifie si un étudiant a encore des jetons disponibles
+ * @param {string} da - Code permanent de l'étudiant
+ * @param {string} type - Type de jeton ('delai' ou 'reprise')
+ * @returns {boolean} true si des jetons sont disponibles
+ */
+function verifierDisponibiliteJeton(da, type) {
+    const config = obtenirConfigJetons();
+
+    // Vérifier que les jetons sont activés
+    if (!config.actif) {
+        return false;
+    }
+
+    // Compter les jetons utilisés
+    const utilises = compterJetonsUtilises(da, type);
+
+    // Comparer avec le nombre disponible
+    if (type === 'delai') {
+        return utilises < config.delai.nombre;
+    } else if (type === 'reprise') {
+        return utilises < config.reprise.nombre;
+    }
+
+    return false;
+}
+
+/* ===============================
    JETON DE DÉLAI
    =============================== */
 
@@ -21,11 +96,24 @@
 function appliquerJetonDelai(evaluationId) {
     console.log('⭐ Application jeton de délai:', evaluationId);
 
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
         afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return false;
+    }
+
+    // Vérifier la disponibilité des jetons de délai pour cet étudiant
+    const da = evaluation.etudiantDA;
+    if (!verifierDisponibiliteJeton(da, 'delai')) {
+        const config = obtenirConfigJetons();
+        const utilises = compterJetonsUtilises(da, 'delai');
+        afficherNotificationErreur(
+            'Jetons épuisés',
+            `Plus de jetons de délai disponibles (${utilises}/${config.delai.nombre} utilisés)`
+        );
         return false;
     }
 
@@ -35,16 +123,19 @@ function appliquerJetonDelai(evaluationId) {
         return false;
     }
 
+    // Obtenir la configuration pour la durée du délai
+    const config = obtenirConfigJetons();
+    const dureeDelai = config.delai.dureeJours;
+
     // Appliquer le jeton
     evaluation.jetonDelaiApplique = true;
     evaluation.dateApplicationJetonDelai = new Date().toISOString();
     evaluation.delaiAccorde = true;
+    evaluation.dureeDelaiJours = dureeDelai; // Stocker la durée appliquée
 
-    // Sauvegarder
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Erreur', 'Impossible de sauvegarder');
-        return false;
-    }
+    // Sauvegarder directement dans localStorage
+    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+    console.log('✅ Évaluations sauvegardées avec jeton de délai');
 
     console.log('✅ Jeton de délai appliqué');
 
@@ -82,7 +173,8 @@ function appliquerJetonDelai(evaluationId) {
 function retirerJetonDelai(evaluationId) {
     console.log('🗑️ Retrait jeton de délai:', evaluationId);
 
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
@@ -94,12 +186,11 @@ function retirerJetonDelai(evaluationId) {
     delete evaluation.jetonDelaiApplique;
     delete evaluation.dateApplicationJetonDelai;
     delete evaluation.delaiAccorde;
+    delete evaluation.dureeDelaiJours;
 
-    // Sauvegarder
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Erreur', 'Impossible de sauvegarder');
-        return false;
-    }
+    // Sauvegarder directement dans localStorage
+    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+    console.log('✅ Évaluations sauvegardées après retrait jeton de délai');
 
     console.log('✅ Jeton de délai retiré');
 
@@ -138,13 +229,14 @@ function retirerJetonDelai(evaluationId) {
  * Crée une nouvelle évaluation qui remplace l'originale
  *
  * @param {string} evaluationOriginaleId - ID de l'évaluation à remplacer
- * @param {boolean} archiverOriginale - Si true, archive l'originale; sinon la supprime
+ * @param {boolean} archiverOriginale - Si true, archive l'originale; sinon la supprime (optionnel, lit config si omis)
  * @returns {object|null} La nouvelle évaluation créée, ou null si échec
  */
-function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = true) {
-    console.log('⭐ Application jeton de reprise:', evaluationOriginaleId, 'archiver:', archiverOriginale);
+function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) {
+    console.log('⭐ Application jeton de reprise:', evaluationOriginaleId);
 
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const indexOriginal = evaluations.findIndex(e => e.id === evaluationOriginaleId);
 
     if (indexOriginal === -1) {
@@ -153,6 +245,45 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = true) 
     }
 
     const evaluationOriginale = evaluations[indexOriginal];
+    const da = evaluationOriginale.etudiantDA;
+
+    // Vérifier la disponibilité des jetons de reprise pour cet étudiant
+    if (!verifierDisponibiliteJeton(da, 'reprise')) {
+        const config = obtenirConfigJetons();
+        const utilises = compterJetonsUtilises(da, 'reprise');
+        afficherNotificationErreur(
+            'Jetons épuisés',
+            `Plus de jetons de reprise disponibles (${utilises}/${config.reprise.nombre} utilisés)`
+        );
+        return null;
+    }
+
+    // Vérifier le nombre maximum de reprises par production
+    const config = obtenirConfigJetons();
+    const productionId = evaluationOriginale.productionId;
+
+    // Compter combien de reprises existent déjà pour cette production et cet étudiant
+    const reprisesExistantes = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        e.productionId === productionId &&
+        e.jetonRepriseApplique === true
+    ).length;
+
+    if (reprisesExistantes >= config.reprise.maxParProduction) {
+        afficherNotificationErreur(
+            'Limite atteinte',
+            `Maximum de reprises atteint pour cette production (${reprisesExistantes}/${config.reprise.maxParProduction})`
+        );
+        return null;
+    }
+
+    // Utiliser la config pour déterminer si on archive ou supprime l'originale
+    // Si le paramètre n'est pas fourni, utiliser la valeur de la config
+    if (archiverOriginale === null) {
+        archiverOriginale = config.reprise.archiverOriginale;
+    }
+
+    console.log('Archivage:', archiverOriginale ? 'OUI' : 'NON (suppression)');
 
     // Créer la nouvelle évaluation (duplicata)
     const nouvelleEvaluation = {
@@ -184,12 +315,9 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = true) 
     // Ajouter la nouvelle évaluation
     evaluations.push(nouvelleEvaluation);
 
-    // Sauvegarder
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Erreur', 'Impossible de sauvegarder');
-        return null;
-    }
-
+    // Sauvegarder directement dans localStorage
+    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+    console.log('✅ Évaluations sauvegardées avec jeton de reprise');
     console.log('✅ Jeton de reprise appliqué, nouvelle évaluation:', nouvelleEvaluation.id);
 
     // Recalculer les indices
@@ -216,7 +344,8 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = true) 
 function retirerJetonReprise(evaluationId) {
     console.log('🗑️ Retrait jeton de reprise:', evaluationId);
 
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
+    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
     const indexReprise = evaluations.findIndex(e => e.id === evaluationId);
 
     if (indexReprise === -1) {
@@ -290,11 +419,9 @@ function retirerJetonReprise(evaluationId) {
         afficherNotificationSucces('Jeton de reprise retiré');
     }
 
-    // Sauvegarder
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Erreur', 'Impossible de sauvegarder');
-        return false;
-    }
+    // Sauvegarder directement dans localStorage
+    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+    console.log('✅ Évaluations sauvegardées après retrait jeton de reprise');
 
     // Recalculer les indices
     if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -321,6 +448,9 @@ function retirerJetonReprise(evaluationId) {
    =============================== */
 
 // Exporter les fonctions vers window pour qu'elles soient accessibles globalement
+window.obtenirConfigJetons = obtenirConfigJetons;
+window.compterJetonsUtilises = compterJetonsUtilises;
+window.verifierDisponibiliteJeton = verifierDisponibiliteJeton;
 window.appliquerJetonDelai = appliquerJetonDelai;
 window.retirerJetonDelai = retirerJetonDelai;
 window.appliquerJetonReprise = appliquerJetonReprise;

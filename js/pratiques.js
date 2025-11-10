@@ -97,6 +97,12 @@ function attacherEvenementsPratiques() {
         checkComparatif.addEventListener('change', sauvegarderOptionsAffichage);
     }
 
+    // Checkbox activation jetons
+    const checkJetonsActif = document.getElementById('jetonsActif');
+    if (checkJetonsActif) {
+        checkJetonsActif.addEventListener('change', toggleConfigJetons);
+    }
+
     // Bouton sauvegarder
     const btnSauvegarder = document.getElementById('btnSauvegarderPratiqueNotation');
     if (btnSauvegarder) {
@@ -144,6 +150,9 @@ function changerPratiqueNotation() {
 
     // Gérer l'affichage des options d'affichage
     afficherOptionsAffichage();
+
+    // Afficher/masquer la configuration PAN
+    afficherConfigurationPAN();
 
     mettreAJourStatutModalites();
 }
@@ -270,19 +279,193 @@ function sauvegarderOptionsAffichage() {
 }
 
 /* ===============================
+   CONFIGURATION PAN (PÉRIODE, ARTEFACTS, JETONS)
+   =============================== */
+
+/**
+ * Affiche/masque la configuration PAN selon la pratique sélectionnée
+ */
+function afficherConfigurationPAN() {
+    const pratique = document.getElementById('pratiqueNotation').value;
+    const configPAN = document.getElementById('configurationPAN');
+
+    if (!configPAN) return;
+
+    if (pratique === 'alternative') {
+        configPAN.style.display = 'block';
+        chargerConfigurationPAN();
+    } else {
+        configPAN.style.display = 'none';
+    }
+}
+
+/**
+ * Charge la configuration PAN depuis localStorage
+ */
+function chargerConfigurationPAN() {
+    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const configPAN = modalites.configPAN || {};
+
+    // Période d'évaluation
+    const nombreCours = configPAN.nombreCours || 7;
+    const radioPeriode = document.querySelector(`input[name="periodePAN"][value="${nombreCours}"]`);
+    if (radioPeriode) {
+        radioPeriode.checked = true;
+    }
+
+    // Nombre d'artefacts à retenir
+    const nombreARetenir = configPAN.nombreARetenir || 3;
+    const selectNombreARetenir = document.getElementById('nombreARetenir');
+    if (selectNombreARetenir) {
+        selectNombreARetenir.value = nombreARetenir;
+    }
+
+    // Jetons - valeurs par défaut
+    const jetons = configPAN.jetons || {
+        actif: true,
+        delai: { nombre: 2, dureeJours: 7 },
+        reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true }
+    };
+
+    const checkJetonsActif = document.getElementById('jetonsActif');
+    if (checkJetonsActif) {
+        checkJetonsActif.checked = jetons.actif;
+    }
+
+    const selectNombreJetonsDelai = document.getElementById('nombreJetonsDelai');
+    if (selectNombreJetonsDelai) {
+        selectNombreJetonsDelai.value = jetons.delai.nombre;
+    }
+
+    const selectDureeDelai = document.getElementById('dureeDelai');
+    if (selectDureeDelai) {
+        selectDureeDelai.value = jetons.delai.dureeJours;
+    }
+
+    const selectNombreJetonsReprise = document.getElementById('nombreJetonsReprise');
+    if (selectNombreJetonsReprise) {
+        selectNombreJetonsReprise.value = jetons.reprise.nombre;
+    }
+
+    const selectMaxRepriseParProduction = document.getElementById('maxRepriseParProduction');
+    if (selectMaxRepriseParProduction) {
+        selectMaxRepriseParProduction.value = jetons.reprise.maxParProduction;
+    }
+
+    const gestionOriginale = jetons.reprise.archiverOriginale ? 'archiver' : 'supprimer';
+    const radioGestion = document.querySelector(`input[name="gestionOriginale"][value="${gestionOriginale}"]`);
+    if (radioGestion) {
+        radioGestion.checked = true;
+    }
+
+    // Activer/désactiver sections jetons
+    toggleConfigJetons();
+}
+
+/**
+ * Active/désactive les sections de configuration des jetons
+ */
+function toggleConfigJetons() {
+    const checkJetonsActif = document.getElementById('jetonsActif');
+    if (!checkJetonsActif) return;
+
+    const jetonsActif = checkJetonsActif.checked;
+    const configDelai = document.getElementById('configJetonsDelai');
+    const configReprise = document.getElementById('configJetonsReprise');
+
+    if (configDelai) {
+        configDelai.style.opacity = jetonsActif ? '1' : '0.5';
+    }
+
+    if (configReprise) {
+        configReprise.style.opacity = jetonsActif ? '1' : '0.5';
+    }
+
+    // Désactiver les champs si jetons inactifs
+    if (configDelai) {
+        const champsDelai = configDelai.querySelectorAll('select');
+        champsDelai.forEach(champ => champ.disabled = !jetonsActif);
+    }
+
+    if (configReprise) {
+        const champsReprise = configReprise.querySelectorAll('select, input');
+        champsReprise.forEach(champ => champ.disabled = !jetonsActif);
+    }
+}
+
+/**
+ * Sauvegarde la configuration PAN
+ */
+function sauvegarderConfigurationPAN() {
+    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+
+    // Période d'évaluation
+    const radioPeriode = document.querySelector('input[name="periodePAN"]:checked');
+    const nombreCours = radioPeriode ? parseInt(radioPeriode.value) : 7;
+
+    // Nombre d'artefacts à retenir
+    const selectNombreARetenir = document.getElementById('nombreARetenir');
+    const nombreARetenir = selectNombreARetenir ? parseInt(selectNombreARetenir.value) : 3;
+
+    // Jetons
+    const checkJetonsActif = document.getElementById('jetonsActif');
+    const jetonsActif = checkJetonsActif ? checkJetonsActif.checked : true;
+
+    const selectNombreJetonsDelai = document.getElementById('nombreJetonsDelai');
+    const nombreJetonsDelai = selectNombreJetonsDelai ? parseInt(selectNombreJetonsDelai.value) : 2;
+
+    const selectDureeDelai = document.getElementById('dureeDelai');
+    const dureeDelai = selectDureeDelai ? parseInt(selectDureeDelai.value) : 7;
+
+    const selectNombreJetonsReprise = document.getElementById('nombreJetonsReprise');
+    const nombreJetonsReprise = selectNombreJetonsReprise ? parseInt(selectNombreJetonsReprise.value) : 2;
+
+    const selectMaxRepriseParProduction = document.getElementById('maxRepriseParProduction');
+    const maxRepriseParProduction = selectMaxRepriseParProduction ? parseInt(selectMaxRepriseParProduction.value) : 1;
+
+    const radioGestion = document.querySelector('input[name="gestionOriginale"]:checked');
+    const gestionOriginale = radioGestion ? radioGestion.value : 'archiver';
+
+    // Construire l'objet config
+    modalites.configPAN = {
+        nombreCours: nombreCours,
+        nombreARetenir: nombreARetenir,
+
+        jetons: {
+            actif: jetonsActif,
+
+            delai: {
+                nombre: nombreJetonsDelai,
+                dureeJours: dureeDelai
+            },
+
+            reprise: {
+                nombre: nombreJetonsReprise,
+                maxParProduction: maxRepriseParProduction,
+                archiverOriginale: gestionOriginale === 'archiver'
+            }
+        }
+    };
+
+    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    console.log('✅ Configuration PAN sauvegardée:', modalites.configPAN);
+}
+
+/* ===============================
    SAUVEGARDE ET CHARGEMENT
    =============================== */
 
 /**
  * Sauvegarde la configuration complète de la pratique de notation
  * Appelée par le bouton «Sauvegarder la configuration»
- * 
+ *
  * FONCTIONNEMENT:
  * 1. Récupère les valeurs des champs
  * 2. Valide les champs obligatoires
  * 3. Sauvegarde dans localStorage avec timestamp
- * 4. Affiche notification de succès
- * 5. Met à jour le statut
+ * 4. Sauvegarde la configuration PAN si pratique alternative
+ * 5. Affiche notification de succès
+ * 6. Met à jour le statut
  */
 function sauvegarderPratiqueNotation() {
     const pratique = document.getElementById('pratiqueNotation').value;
@@ -303,7 +486,7 @@ function sauvegarderPratiqueNotation() {
     modalites.pratique = pratique;
     modalites.typePAN = pratique === 'alternative' ? typePAN : null;
     modalites.dateConfiguration = new Date().toISOString();
-    
+
     // S'assurer que les options d'affichage sont incluses
     if (!modalites.affichageTableauBord) {
         const checkComparatif = document.getElementById('modeComparatif');
@@ -328,12 +511,17 @@ function sauvegarderPratiqueNotation() {
             }
         }
     }
-    
+
     localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+
+    // Sauvegarder la configuration PAN si pratique alternative
+    if (pratique === 'alternative') {
+        sauvegarderConfigurationPAN();
+    }
 
     afficherNotificationSucces('Configuration de la pratique de notation sauvegardée !');
     mettreAJourStatutModalites();
-    
+
     console.log('Configuration complète sauvegardée:', modalites);
 }
 
