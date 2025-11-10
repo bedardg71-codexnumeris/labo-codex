@@ -1250,7 +1250,7 @@ input[type="number"].controle-form {
     align-items: center;
     gap: 6px;
     border-radius: 8px;
-    padding: 6px 12px;
+    padding: 4px 6px;
     border: 2px solid;
     font-weight: 600;
     font-size: 0.85rem;
@@ -1387,6 +1387,31 @@ input[type="number"].controle-form {
 .badge-intervention-vert .badge-analyse-count {
     background: #4caf50;
     color: white;
+}
+
+/* === CARTES EN COLONNES (Interventions) === */
+.carte-header {
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-bottom: 2px solid var(--bleu-moyen);
+}
+
+.carte-colonne {
+    padding: 20px;
+}
+
+.carte-titre-colonne {
+    margin: 0 0 15px 0;
+    color: var(--bleu-principal);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.carte-info {
+    padding: 10px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
 }
 
 /* ===============================

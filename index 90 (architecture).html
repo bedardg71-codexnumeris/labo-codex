@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 90 - Architecture pratiques de notation</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=2025110812">
+    <link rel="stylesheet" href="styles.css?v=2025111015">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -2485,7 +2485,7 @@
                 <!-- Titre et description centrés -->
                 <div class="titre-section">
                     <h1>Système de suivi des apprentissages</h1>
-                    <p class="meta">Beta 90 par Grégoire Bédard (5 novembre 2025)</p>
+                    <p class="meta">Beta 90 par Grégoire Bédard (10 novembre 2025)</p>
 
                     <!-- Sélecteur de mode au centre (sera généré par 17-modes.js) -->
                     <div id="selecteur-mode" class="selecteur-mode-centre" style="margin-top: 10px;">
@@ -3109,51 +3109,35 @@
                         <h3>Statistiques du groupe</h3>
 
                         <div class="grille-cartes-metriques" class="mt-15">
-                            <!-- Taux moyen SOM -->
+                            <!-- Taux d'assiduité moyen du groupe -->
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Taux moyen (SOM)</span>
-                                    <strong id="pa-taux-som" class="carte-metrique-valeur">—</strong>
+                                    <span class="carte-metrique-label">Taux d'assiduité moyen du groupe</span>
+                                    <strong id="pa-taux-moyen" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
 
-                            <!-- Taux moyen PAN -->
+                            <!-- Séances données -->
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Taux moyen (PAN)</span>
-                                    <strong id="pa-taux-pan" class="carte-metrique-valeur">—</strong>
+                                    <span class="carte-metrique-label">Séances données</span>
+                                    <strong id="pa-seances-donnees" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
 
-                            <!-- Heures offertes -->
+                            <!-- Prochaine séance -->
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Heures offertes</span>
-                                    <strong id="pa-heures-offertes" class="carte-metrique-valeur">—</strong>
+                                    <span class="carte-metrique-label">Prochaine séance</span>
+                                    <strong id="pa-prochaine-seance" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
 
-                            <!-- Heures manquées (total) -->
+                            <!-- Élèves -->
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Heures manquées</span>
-                                    <strong id="pa-heures-manquees" class="carte-metrique-valeur">—</strong>
-                                </div>
-                            </div>
-
-                            <!-- Séances complétées -->
-                            <div class="carte-metrique-bleue">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Séances complétées</span>
-                                    <strong id="pa-seances-completees" class="carte-metrique-valeur">—</strong>
-                                </div>
-                            </div>
-
-                            <!-- Absences non justifiées -->
-                            <div class="carte-metrique-bleue">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Absences non justifiées</span>
-                                    <strong id="pa-absences-non-justifiees" class="carte-metrique-valeur">—</strong>
+                                    <span class="carte-metrique-label">Élèves</span>
+                                    <strong id="stat-nb-eleves" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
                         </div>
@@ -3343,30 +3327,6 @@
                         <h3>Statistiques du groupe</h3>
 
                         <div class="grille-cartes-metriques" class="mt-15">
-                            <!-- Étudiants évalués -->
-                            <div class="carte-metrique-bleue">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Étudiant·es évalué·es</span>
-                                    <strong id="ea-etudiants-evalues" class="carte-metrique-valeur">—</strong>
-                                </div>
-                            </div>
-
-                            <!-- Artefacts complétés -->
-                            <div class="carte-metrique-bleue">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Artefacts complétés</span>
-                                    <strong id="ea-artefacts-completes" class="carte-metrique-valeur">—</strong>
-                                </div>
-                            </div>
-
-                            <!-- Moyenne du groupe -->
-                            <div class="carte-metrique-bleue">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Moyenne du groupe</span>
-                                    <strong id="ea-moyenne-groupe" class="carte-metrique-valeur">—</strong>
-                                </div>
-                            </div>
-
                             <!-- Taux de complétion -->
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
@@ -3375,19 +3335,19 @@
                                 </div>
                             </div>
 
+                            <!-- Productions réalisées -->
+                            <div class="carte-metrique-bleue">
+                                <div class="carte-metrique-contenu">
+                                    <span class="carte-metrique-label">Productions réalisées</span>
+                                    <strong id="ea-productions-realisees" class="carte-metrique-valeur">—</strong>
+                                </div>
+                            </div>
+
                             <!-- Productions configurées -->
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
                                     <span class="carte-metrique-label">Productions configurées</span>
                                     <strong id="ea-productions-configurees" class="carte-metrique-valeur">—</strong>
-                                </div>
-                            </div>
-
-                            <!-- Dernière évaluation -->
-                            <div class="carte-metrique-bleue">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Dernière évaluation</span>
-                                    <strong id="ea-derniere-evaluation" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
                         </div>
@@ -3825,14 +3785,6 @@
                         <h3>Matériel configuré</h3>
 
                         <div class="grid-auto-200-mt15">
-                            <!-- Pratique de notation -->
-                            <div class="carte-bleu-encadree">
-                                <div class="d-flex-between">
-                                    <span class="text-muted">Pratique de notation</span>
-                                    <strong id="stat-pratique" class="titre-1-8">—</strong>
-                                </div>
-                            </div>
-
                             <!-- Productions -->
                             <div class="carte-bleu-encadree">
                                 <div class="d-flex-between">
@@ -4766,12 +4718,7 @@
 
                 <!-- Sous-section: Aperçu des réglages -->
                 <div id="reglages-apercu" class="sous-section">
-                    <h2 class="titre-avec-bouton-action">
-                        <span>Aperçu de la configuration</span>
-                        <button class="btn btn-principal" onclick="chargerStatistiquesApercu()">
-                            Rafraîchir
-                        </button>
-                    </h2>
+                    <h2>Aperçu de la configuration</h2>
                     <p class="text-muted">
                         Résumé de la configuration actuelle du système. Les statistiques sont calculées en temps réel depuis les données stockées localement.
                     </p>
@@ -4784,27 +4731,6 @@
                             <div class="carte-metrique-contenu">
                                 <span class="carte-metrique-label">Trimestre</span>
                                 <strong id="stat-trimestre" class="carte-metrique-valeur">—</strong>
-                            </div>
-                        </div>
-
-                        <div class="carte-metrique-bleue">
-                            <div class="carte-metrique-contenu">
-                                <span class="carte-metrique-label">Nombre de cours</span>
-                                <strong id="stat-nb-cours" class="carte-metrique-valeur">—</strong>
-                            </div>
-                        </div>
-
-                        <div class="carte-metrique-bleue">
-                            <div class="carte-metrique-contenu">
-                                <span class="carte-metrique-label">Groupes</span>
-                                <strong id="stat-nb-groupes" class="carte-metrique-valeur">—</strong>
-                            </div>
-                        </div>
-
-                        <div class="carte-metrique-bleue">
-                            <div class="carte-metrique-contenu">
-                                <span class="carte-metrique-label">Élèves</span>
-                                <strong id="stat-nb-eleves" class="carte-metrique-valeur">—</strong>
                             </div>
                         </div>
 
@@ -4823,6 +4749,13 @@
                             </div>
                         </div>
 
+                        <div class="carte-metrique-bleue">
+                            <div class="carte-metrique-contenu">
+                                <span class="carte-metrique-label">Développement</span>
+                                <strong id="stat-beta-date" class="carte-metrique-valeur">—</strong>
+                            </div>
+                        </div>
+
                     </div>
                     <!-- fin grille cartes métriques -->
 
@@ -4838,7 +4771,7 @@
                                 <li>Code source : AGPL v3.0 (<a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer">voir licence</a>)</li>
                                 <li>Contenu pédagogique : CC BY-SA 4.0 (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">voir licence</a>)</li>
                             </ul>
-                            <p><strong>Dernière modification :</strong> 3 novembre 2025</p>
+                            <p><strong>Dernière modification :</strong> 10 novembre 2025</p>
                             <p style="margin-top: 15px; font-size: 0.9rem; color: #777;">
                                 Pour plus de détails sur les licences, consultez le fichier LICENSE.md dans le répertoire du projet.
                             </p>
@@ -8794,20 +8727,20 @@ Exemple :
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025110907"></script>
-    <script src="js/profil-etudiant.js?v=2025110911"></script>
-    <script src="js/presences-apercu.js"></script>
-    <script src="js/evaluations-apercu.js"></script>
+    <script src="js/profil-etudiant.js?v=2025111008"></script>
+    <script src="js/presences-apercu.js?v=2025111029"></script>
+    <script src="js/evaluations-apercu.js?v=2025111026"></script>
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js"></script>
     <script src="js/horaire.js?v=1761391190"></script>
     <script src="js/groupe.js?v=2025110106"></script>
     <script src="js/pratiques.js"></script>
-    <script src="js/interventions.js?v=2025110501"></script>
+    <script src="js/interventions.js?v=2025111016"></script>
 
     <!-- PRIORITÉ 6: Modules avancés -->
     <script src="js/import-export.js?v=1761387764"></script>
-    <script src="js/statistiques.js"></script>
+    <script src="js/statistiques.js?v=2025111032"></script>
     <script src="js/liste-evaluations.js?v=2025110910"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->

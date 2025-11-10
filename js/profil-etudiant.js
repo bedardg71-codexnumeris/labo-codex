@@ -614,6 +614,18 @@ function genererSectionMobilisationEngagement(da) {
     const indicesSOM = calculerTousLesIndices(da, 'SOM');
     const indicesPAN = calculerTousLesIndices(da, 'PAN');
 
+    // Calculer risques pour les deux pratiques (R = 1 - A × C × P)
+    const A_pct = indicesSOM.A / 100; // A est identique pour les deux pratiques
+    const C_SOM = indicesSOM.C / 100;
+    const P_SOM = indicesSOM.P / 100;
+    const E_SOM = A_pct * C_SOM * P_SOM;
+    const R_SOM = 1 - E_SOM;
+
+    const C_PAN = indicesPAN.C / 100;
+    const P_PAN = indicesPAN.P / 100;
+    const E_PAN = A_pct * C_PAN * P_PAN;
+    const R_PAN = 1 - E_PAN;
+
     // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
     const tauxA = detailsA.heuresOffertes > 0
@@ -1096,7 +1108,7 @@ function genererSectionMobilisationEngagement(da) {
                 <div class="profil-carte" style="margin-top: 10px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                         <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Risque d'échec</h3>
-                        <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${Math.round(R_reel * 100)}%</strong>
+                        ${genererValeursComparatives(Math.round(R_SOM * 100), Math.round(R_PAN * 100), modeComparatif)}
                     </div>
 
                     <div class="profil-echelle-risque">
@@ -1110,8 +1122,15 @@ function genererSectionMobilisationEngagement(da) {
                                     #ff9800 52%, #ff9800 68%,
                                     #ff9800 68%, #dc3545 72%,
                                     #dc3545 72%, #dc3545 100%);">
-                            <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(R_reel * 100, 100)}%;">▼</div>
-                            <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(R_reel * 100, 100)}%;">R = ${R_reel.toFixed(2)}</div>
+                            ${modeComparatif ? `
+                                <!-- Indicateurs duaux: flèches colorées seulement (valeurs affichées dans l'en-tête) -->
+                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(R_SOM * 100, 100)}%; color: var(--som-orange);">▼</div>
+                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(R_PAN * 100, 100)}%; color: var(--pan-bleu); top: auto; bottom: -15px;">▲</div>
+                            ` : `
+                                <!-- Indicateur unique pratique courante -->
+                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(R_reel * 100, 100)}%;">▼</div>
+                                <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(R_reel * 100, 100)}%;">R = ${R_reel.toFixed(2)}</div>
+                            `}
                         </div>
 
                         <div class="legende-risque-container">
@@ -3026,7 +3045,7 @@ function genererSectionProductions(da) {
             return {
                 production: production.titre,
                 description: production.description || production.titre,
-                note: `${evaluation.niveauFinal} (${evaluation.noteFinale}%)`,
+                note: `${evaluation.niveauFinal} ${evaluation.noteFinale}%`,
                 date: dateFormatee,
                 statut: 'evalue',
                 verrouille: evaluation.verrouillee || false,
@@ -5009,7 +5028,20 @@ function genererSectionPerformance(da) {
     const nbTotal = artefacts.length;  // ✅ Maintenant basé sur les artefacts ÉVALUÉS
     const nbRemis = artefacts.filter(a => a.remis).length;
     const nbRetenus = selectionEleve.artefactsRetenus.length;
-    const indices = calculerTousLesIndices(da);
+
+    // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif !== false;
+    const afficherPan = affichage.afficherAlternatif !== false;
+    const modeComparatif = afficherSom && afficherPan;
+
+    // Calculer indices pour les deux pratiques
+    const indicesSOM = calculerTousLesIndices(da, 'SOM');
+    const indicesPAN = calculerTousLesIndices(da, 'PAN');
+
+    // Pour compatibilité avec le code existant, utiliser la pratique courante
+    const indices = modeComparatif ? indicesSOM : calculerTousLesIndices(da);
 
     // 🎯 UTILISER LES DONNÉES DE LA SOURCE UNIQUE (portfolio.js)
     let artefactsRetenus = [];
@@ -5045,15 +5077,19 @@ function genererSectionPerformance(da) {
     // Interprétation Performance uniquement (C va dans Mobilisation)
     const interpP = interpreterPerformance(indices.P);
 
-    // Déterminer la lettre IDME selon le pourcentage P
-    let lettreIDME = 'I';
-    if (indices.P >= 85) {
-        lettreIDME = 'E';
-    } else if (indices.P >= 75) {
-        lettreIDME = 'M';
-    } else if (indices.P >= 65) {
-        lettreIDME = 'D';
-    }
+    // Déterminer les lettres IDME pour SOM et PAN
+    const determinerLettreIDME = (P) => {
+        if (P >= 85) return 'E';
+        if (P >= 75) return 'M';
+        if (P >= 65) return 'D';
+        return 'I';
+    };
+
+    const lettreIDME_SOM = determinerLettreIDME(indicesSOM.P);
+    const lettreIDME_PAN = determinerLettreIDME(indicesPAN.P);
+
+    // Pour compatibilité avec le code existant
+    const lettreIDME = modeComparatif ? lettreIDME_SOM : determinerLettreIDME(indices.P);
 
     // Calculer moyennes des critères pour badges
     const moyennes = calculerMoyennesCriteres(da);
@@ -5134,7 +5170,14 @@ function genererSectionPerformance(da) {
                     <h3 style="margin: 0 0 5px 0; color: var(--bleu-principal); font-size: 1.1rem;">Développement des habiletés et compétences</h3>
                     <strong style="font-size: 0.95rem; color: ${interpP.couleur};">${interpP.niveau}</strong>
                 </div>
-                <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${lettreIDME} (${indices.P})</strong>
+                ${modeComparatif ? `
+                    <div style="display: flex; gap: 15px; align-items: baseline;">
+                        <strong style="font-size: 1.8rem; color: var(--som-orange);">${lettreIDME_SOM} ${indicesSOM.P}%</strong>
+                        <strong style="font-size: 1.8rem; color: var(--pan-bleu);">${lettreIDME_PAN} ${indicesPAN.P}%</strong>
+                    </div>
+                ` : `
+                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${lettreIDME} ${indices.P}%</strong>
+                `}
             </div>
 
             <hr class="profil-separateur">

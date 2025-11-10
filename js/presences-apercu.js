@@ -35,6 +35,12 @@ function chargerApercuPresences() {
         // Calculer les statistiques
         calculerStatistiquesPresences(etudiantsActifs, indicesAssiduite, presences);
 
+        // Charger les informations du cours (nb cours, groupes, élèves)
+        // depuis le module statistiques.js
+        if (typeof chargerInfosCours === 'function') {
+            chargerInfosCours();
+        }
+
         console.log('✅ Aperçu des présences chargé');
     } catch (error) {
         console.error('❌ Erreur chargement aperçu présences:', error);
@@ -56,62 +62,51 @@ function calculerStatistiquesPresences(etudiants, indicesAssiduite, presences) {
         return;
     }
 
-    // TAUX MOYENS (SOM et PAN)
-    let totalSOM = 0;
-    let totalPAN = 0;
+    // Déterminer la pratique active
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const affichage = config.affichageTableauBord || {};
+    const afficherSom = affichage.afficherSommatif !== false;
+    const afficherPan = affichage.afficherAlternatif !== false;
+    const modeComparatif = afficherSom && afficherPan;
+
+    // TAUX D'ASSIDUITÉ MOYEN DU GROUPE
+    // En mode comparatif, afficher la moyenne des deux pratiques
+    // Sinon, afficher la pratique active
+    let totalTaux = 0;
     let nbAvecDonnees = 0;
 
     etudiants.forEach(e => {
-        const tauxSOM = indicesAssiduite.sommatif?.[e.da] || 0;
-        const tauxPAN = indicesAssiduite.alternatif?.[e.da] || 0;
+        let tauxEtudiant = 0;
 
-        if (tauxSOM > 0 || tauxPAN > 0) {
+        if (modeComparatif) {
+            // Moyenne des deux pratiques
+            const tauxSOM = indicesAssiduite.sommatif?.[e.da] || 0;
+            const tauxPAN = indicesAssiduite.alternatif?.[e.da] || 0;
+            tauxEtudiant = (tauxSOM + tauxPAN) / 2;
+        } else if (afficherSom) {
+            tauxEtudiant = indicesAssiduite.sommatif?.[e.da] || 0;
+        } else if (afficherPan) {
+            tauxEtudiant = indicesAssiduite.alternatif?.[e.da] || 0;
+        }
+
+        if (tauxEtudiant > 0) {
             nbAvecDonnees++;
         }
 
-        totalSOM += tauxSOM;
-        totalPAN += tauxPAN;
+        totalTaux += tauxEtudiant;
     });
 
-    const tauxMoyenSOM = nbAvecDonnees > 0 ? Math.round((totalSOM / nbTotal) * 100) : 0;
-    const tauxMoyenPAN = nbAvecDonnees > 0 ? Math.round((totalPAN / nbTotal) * 100) : 0;
+    const tauxMoyen = nbAvecDonnees > 0 ? Math.round((totalTaux / nbTotal) * 100) : 0;
+    setStatText('pa-taux-moyen', `${tauxMoyen}%`);
 
-    setStatText('pa-taux-som', `${tauxMoyenSOM}%`);
-    setStatText('pa-taux-pan', `${tauxMoyenPAN}%`);
-
-    // HEURES OFFERTES (calculer depuis le calendrier)
-    const heuresOffertes = calculerHeuresOffertes();
-    setStatText('pa-heures-offertes', `${heuresOffertes}h`);
-
-    // HEURES MANQUÉES (total pour tous les étudiants)
-    const heuresManquees = calculerHeuresManquees(presences, etudiants);
-    setStatText('pa-heures-manquees', `${heuresManquees}h`);
-
-    // SÉANCES COMPLÉTÉES (nombre de dates différentes avec présences)
+    // SÉANCES DONNÉES (format X / Total)
     const seancesCompletees = calculerSeancesCompletees(presences);
     const totalSeances = calculerTotalSeances();
-    setStatText('pa-seances-completees', `${seancesCompletees} / ${totalSeances}`);
+    setStatText('pa-seances-donnees', `${seancesCompletees} / ${totalSeances}`);
 
-    // ABSENCES NON JUSTIFIÉES
-    const absencesNonJustifiees = calculerAbsencesNonJustifiees(presences);
-    setStatText('pa-absences-non-justifiees', absencesNonJustifiees);
-
-    // ALERTES ASSIDUITÉ
-    let alerte80 = 0;
-    let alerte70 = 0;
-
-    etudiants.forEach(e => {
-        const tauxSOM = (indicesAssiduite.sommatif?.[e.da] || 0) * 100;
-
-        if (tauxSOM < 80 && tauxSOM >= 70) {
-            alerte80++;
-        } else if (tauxSOM < 70) {
-            alerte70++;
-        }
-    });
-
-    setStatText('pa-alerte-80', alerte80);
-    setStatText('pa-alerte-70', alerte70);
+    // PROCHAINE SÉANCE
+    const prochaineSeance = calculerProchaineSeance();
+    setStatText('pa-prochaine-seance', prochaineSeance);
 }
 
 /**
@@ -178,15 +173,17 @@ function calculerSeancesCompletees(presences) {
 function calculerTotalSeances() {
     try {
         const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
-        let totalSeances = 0;
+        const semainesUniques = new Set();
 
         Object.values(calendrier).forEach(jour => {
-            if (jour.estJourCours && !jour.estConge) {
-                totalSeances++;
+            // Compter les semaines uniques avec cours ou reprises
+            if ((jour.statut === 'cours' || jour.statut === 'reprise') && jour.numeroSemaine) {
+                semainesUniques.add(jour.numeroSemaine);
             }
         });
 
-        return totalSeances;
+        // Retourner le nombre de semaines × 2 (2 séances par semaine)
+        return semainesUniques.size * 2;
     } catch (error) {
         console.warn('⚠️ Erreur calcul total séances:', error);
         return 0;
@@ -202,7 +199,7 @@ function calculerAbsencesNonJustifiees(presences) {
     let absencesNonJustifiees = 0;
 
     presences.forEach(p => {
-        if (p.statut === 'absent' && (!p.justifie || p.justifie === false)) {
+        if (p.statut === 'absent' && (!p.justifie || p.justifie === false) && (!p.facultatif || p.facultatif === false)) {
             absencesNonJustifiees++;
         }
     });
@@ -211,17 +208,89 @@ function calculerAbsencesNonJustifiees(presences) {
 }
 
 /**
+ * Calcule le nombre d'absences motivées (RàI)
+ * Les absences motivées sont marquées avec le flag facultatif: true
+ * @param {Array} presences - Liste des présences
+ * @returns {number} Nombre d'absences motivées
+ */
+function calculerAbsencesMotivees(presences) {
+    let absencesMotivees = 0;
+
+    presences.forEach(p => {
+        if (p.statut === 'absent' && p.facultatif === true) {
+            absencesMotivees++;
+        }
+    });
+
+    return absencesMotivees;
+}
+
+/**
+ * Calcule la date de la prochaine séance à partir du calendrier
+ * @returns {string} Date formatée ou message si aucune séance
+ */
+function calculerProchaineSeance() {
+    try {
+        const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+        const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+
+        // Obtenir la liste des jours de la semaine où il y a cours (ex: ["Lundi", "Mercredi"])
+        const joursCours = seancesHoraire.map(seance => seance.jour);
+
+        // Obtenir la date d'aujourd'hui au format YYYY-MM-DD
+        const aujourdhui = new Date();
+        const dateAujourdhui = `${aujourdhui.getFullYear()}-${String(aujourdhui.getMonth() + 1).padStart(2, '0')}-${String(aujourdhui.getDate()).padStart(2, '0')}`;
+
+        // Trouver la prochaine date de cours
+        // Doit avoir statut "cours" ou "reprise" ET correspondre à un jour de cours dans l'horaire
+        const prochaineSeance = Object.entries(calendrier)
+            .filter(([dateStr, jour]) => {
+                const estDateFuture = dateStr > dateAujourdhui;
+                const estJourCours = (jour.statut === 'cours' || jour.statut === 'reprise');
+                const estDansHoraire = joursCours.includes(jour.jourSemaine);
+
+                return estDateFuture && estJourCours && estDansHoraire;
+            })
+            .sort((a, b) => a[0].localeCompare(b[0]))[0];
+
+        if (!prochaineSeance) {
+            return 'Aucune';
+        }
+
+        // Extraire les infos de la prochaine séance
+        const [prochaineDateStr, infosJour] = prochaineSeance;
+        const [annee, mois, jour] = prochaineDateStr.split('-');
+        const moisAbrege = ['jan.', 'fév.', 'mars', 'avr.', 'mai', 'juin',
+                            'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'][parseInt(mois) - 1];
+
+        // Récupérer et abréger le jour de la semaine
+        const jourSemaine = infosJour.jourSemaine || '';
+        const joursAbreges = {
+            'Lundi': 'lun.',
+            'Mardi': 'mar.',
+            'Mercredi': 'mer.',
+            'Jeudi': 'jeu.',
+            'Vendredi': 'ven.',
+            'Samedi': 'sam.',
+            'Dimanche': 'dim.'
+        };
+        const jourAbrege = joursAbreges[jourSemaine] || jourSemaine;
+
+        return `${jourAbrege} ${parseInt(jour)} ${moisAbrege}`;
+
+    } catch (error) {
+        console.warn('⚠️ Erreur calcul prochaine séance:', error);
+        return '—';
+    }
+}
+
+/**
  * Affiche un message si aucune donnée disponible
  */
 function afficherMessageVide() {
-    setStatText('pa-taux-som', '—');
-    setStatText('pa-taux-pan', '—');
-    setStatText('pa-heures-offertes', '—');
-    setStatText('pa-heures-manquees', '—');
-    setStatText('pa-seances-completees', '—');
-    setStatText('pa-absences-non-justifiees', '—');
-    setStatText('pa-alerte-80', '—');
-    setStatText('pa-alerte-70', '—');
+    setStatText('pa-taux-moyen', '—');
+    setStatText('pa-seances-donnees', '—');
+    setStatText('pa-prochaine-seance', '—');
 }
 
 /**
