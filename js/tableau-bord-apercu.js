@@ -170,7 +170,12 @@ function chargerTableauBordApercu() {
         if (titre) {
             const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
             const affichage = config.affichageTableauBord || {};
-            const modeComparatif = affichage.afficherSommatif && affichage.afficherAlternatif;
+
+            // NOUVEAU Beta 90 : Détection automatique du mode comparatif
+            // Si les deux pratiques sont affichées (OU si le flag explicite est true), c'est comparatif
+            const afficherSom = affichage.afficherSommatif !== false;
+            const afficherPan = affichage.afficherAlternatif !== false;
+            const modeComparatif = (afficherSom && afficherPan) || affichage.modeComparatif === true;
 
             titre.innerHTML = '';
             const conteneurTitre = document.createElement('div');
@@ -216,9 +221,13 @@ function genererIndicateurPratiqueOuCheckboxes() {
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;
+
+    // NOUVEAU Beta 90 : Détection automatique du mode comparatif
+    // Si les deux pratiques sont affichées, c'est le mode comparatif
     const modeComparatif = afficherSom && afficherPan;
 
     // MODE COMPARATIF: Afficher les checkboxes interactives
+    // Les checkboxes restent visibles tant que les deux pratiques sont affichées
     if (modeComparatif) {
         return `
             <div style="display: flex; gap: 15px; align-items: center;">
