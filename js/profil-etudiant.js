@@ -2605,6 +2605,9 @@ function afficherProfilComplet(da) {
         ? filtrerEtudiantsParMode(tousEtudiants)
         : tousEtudiants.filter(e => e.groupe !== '9999');
 
+    // Trier par nom de famille (ordre alphabétique) pour navigation cohérente
+    etudiants.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
     // 🗂️ Cache la liste des étudiants pour la navigation cross-mode
     window.etudiantsListeCache = etudiants;
 
