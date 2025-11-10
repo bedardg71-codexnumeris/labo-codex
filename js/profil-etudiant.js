@@ -81,7 +81,26 @@ function initialiserModuleProfilEtudiant() {
  * @param {string} pratiqueUtilisee - 'SOM' ou 'PAN' (fourni par calculerTousLesIndices)
  * @returns {string} - HTML du badge
  */
-function genererBadgePratiqueProfil(pratiqueUtilisee) {
+function genererBadgePratiqueProfil(pratiqueUtilisee, modeComparatif = false) {
+    // Mode comparatif: afficher les deux badges
+    if (modeComparatif) {
+        return `
+            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+                         background: #ff6f0015; border: 1.5px solid #ff6f00; border-radius: 12px;
+                         font-size: 0.7rem; font-weight: 700; color: #ff6f00; margin-left: 8px;
+                         vertical-align: middle;">
+                SOM
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+                         background: #0277bd15; border: 1.5px solid #0277bd; border-radius: 12px;
+                         font-size: 0.7rem; font-weight: 700; color: #0277bd; margin-left: 4px;
+                         vertical-align: middle;">
+                PAN
+            </span>
+        `;
+    }
+
+    // Mode normal: un seul badge
     let texte = '';
     let couleur = '';
 
@@ -2799,7 +2818,7 @@ function afficherProfilComplet(da) {
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
                     <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 0 0 20px 0;">
-                        <span>${titreSection}${genererBadgePratiqueProfil(indices.pratique)}</span>
+                        <span>${titreSection}${genererBadgePratiqueProfil(indices.pratique, modeComparatif)}</span>
                         <span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span></span>
                     </h2>
                 </div>
