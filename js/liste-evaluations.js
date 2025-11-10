@@ -789,7 +789,7 @@ function genererLigneHTML(ligne) {
     } else if ((ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.niveauFinal !== '-') {
         affichageNiveau = `<strong>${ligne.niveauFinal}</strong>`;
     } else {
-        affichageNiveau = '<span class="badge-statut non-evalue">Non remis</span>';
+        affichageNiveau = '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>';
     }
 
     // Afficher la note chiffrée (%)

@@ -3009,7 +3009,7 @@ function genererSectionProductions(da) {
                                 <td style="padding: 12px; text-align: center;">
                                     ${ligne.statut === 'evalue'
                                         ? `<strong>${ligne.note}</strong>`
-                                        : '<span style="background: #f0f0f0; padding: 4px 12px; border-radius: 4px; color: #666;">Non remis</span>'
+                                        : '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>'
                                     }
                                 </td>
                                 <td style="padding: 12px; text-align: center; color: #666;">${ligne.date}</td>
