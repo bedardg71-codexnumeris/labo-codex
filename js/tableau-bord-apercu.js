@@ -700,11 +700,16 @@ function afficherPatternsApprentissage(etudiants) {
             const patternInfo = pratiqueSOM.identifierPattern(e.da);
             const type = patternInfo ? patternInfo.type : null;
 
+            // Normaliser le type pour gérer les deux formats (Beta 90 - PHASE 6.3)
+            // SOM retourne: "stable", "defi-specifique", etc. (lowercase-hyphen)
+            // PAN retourne: "Stable", "Défi spécifique", etc. (Capitalized with spaces)
+            const typeNormalise = type ? type.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-') : null;
+
             // Mapper les types de patterns aux compteurs
-            if (type === 'stable' || type === 'progression') somStable++;
-            else if (type === 'defi-specifique') somDefi++;
-            else if (type === 'blocage-emergent') somEmergent++;
-            else if (type === 'blocage-critique') somCritique++;
+            if (typeNormalise === 'stable' || typeNormalise === 'progression') somStable++;
+            else if (typeNormalise === 'defi-specifique') somDefi++;
+            else if (typeNormalise === 'blocage-emergent') somEmergent++;
+            else if (typeNormalise === 'blocage-critique') somCritique++;
         });
     }
 
@@ -715,11 +720,16 @@ function afficherPatternsApprentissage(etudiants) {
             const patternInfo = pratiquePAN.identifierPattern(e.da);
             const type = patternInfo ? patternInfo.type : null;
 
+            // Normaliser le type pour gérer les deux formats (Beta 90 - PHASE 6.3)
+            // SOM retourne: "stable", "defi-specifique", etc. (lowercase-hyphen)
+            // PAN retourne: "Stable", "Défi spécifique", etc. (Capitalized with spaces)
+            const typeNormalise = type ? type.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-') : null;
+
             // Mapper les types de patterns aux compteurs
-            if (type === 'stable' || type === 'progression') panStable++;
-            else if (type === 'defi-specifique') panDefi++;
-            else if (type === 'blocage-emergent') panEmergent++;
-            else if (type === 'blocage-critique') panCritique++;
+            if (typeNormalise === 'stable' || typeNormalise === 'progression') panStable++;
+            else if (typeNormalise === 'defi-specifique') panDefi++;
+            else if (typeNormalise === 'blocage-emergent') panEmergent++;
+            else if (typeNormalise === 'blocage-critique') panCritique++;
         });
     }
 
