@@ -812,9 +812,8 @@ function genererSectionMobilisationEngagement(da) {
                         }).join('')}
                     </div>
                 ` : `
-                    <div class="profil-message-succes">
-                        <div class="profil-message-succes-icone">✅</div>
-                        <div class="profil-message-succes-texte">Assiduité parfaite !</div>
+                    <div class="profil-message-tous-remis">
+                        Assiduité parfaite !
                     </div>
                 `}
 
@@ -2878,9 +2877,8 @@ function genererSectionAssiduite(da) {
                 }).join('')}
             </div>
         ` : `
-            <div style="text-align: center; padding: 20px; background: #d4edda; border-radius: 6px; color: #155724;">
-                <div style="font-size: 2rem;">✅</div>
-                <div style="font-weight: 500;">Assiduité parfaite !</div>
+            <div class="profil-message-tous-remis">
+                Assiduité parfaite !
             </div>
         `}
     `;
@@ -5258,9 +5256,8 @@ function genererSectionAssiduite(da) {
                     }).join('')}
                 </div>
             ` : `
-                <div style="text-align: center; padding: 20px; background: #d4edda; border-radius: 6px; color: #155724; margin-bottom: 20px;">
-                    <div style="font-size: 2rem;">✅</div>
-                    <div style="font-weight: 500;">Assiduité parfaite !</div>
+                <div class="profil-message-tous-remis" style="margin-bottom: 20px;">
+                    Assiduité parfaite !
                 </div>
             `}
 
