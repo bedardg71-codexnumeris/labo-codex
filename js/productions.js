@@ -1273,6 +1273,40 @@ function filtrerListeProductions() {
 }
 
 /**
+ * Charge une production pour modification dans le formulaire
+ * Appelée par le clic sur un item de la sidebar
+ */
+function chargerProductionPourModif(id) {
+    console.log('🔄 chargerProductionPourModif appelée avec ID:', id);
+
+    // Masquer le message d'accueil
+    const accueil = document.getElementById('accueilProductions');
+    if (accueil) accueil.style.display = 'none';
+
+    // Afficher le formulaire et les options
+    const formulaire = document.getElementById('formulaireProduction');
+    if (formulaire) formulaire.style.display = 'block';
+
+    const options = document.getElementById('optionsImportExportProductions');
+    if (options) options.style.display = 'block';
+
+    // Appeler afficherFormProduction pour charger les données
+    afficherFormProduction(id);
+
+    // Highlighter l'item actif
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    const itemActif = document.querySelector(`.sidebar-item[data-id="${id}"]`);
+    if (itemActif) {
+        itemActif.classList.add('active');
+    }
+
+    // Mettre à jour les métriques
+    mettreAJourMetriquesProduction(id);
+}
+
+/**
  * Crée une nouvelle production (formulaire vide)
  * Appelée par le bouton "+ Nouvelle production"
  */
