@@ -231,8 +231,18 @@ function afficherFormProduction(id) {
 
             // Si c'est un portfolio, charger les règles
             if (prod.type === 'portfolio' && prod.regles) {
+                console.log('📖 Chargement Portfolio - Règles lues:', JSON.stringify(prod.regles));
                 document.getElementById('portfolioNombreRetenir').value = prod.regles.nombreARetenir || 3;
                 document.getElementById('portfolioMinimumCompleter').value = prod.regles.minimumCompletion || 7;
+                const nombreTotal = document.getElementById('portfolioNombreTotal');
+                if (nombreTotal) {
+                    nombreTotal.value = prod.regles.nombreTotal || 9;
+                }
+                console.log('   - Champs remplis avec:', {
+                    nombreARetenir: document.getElementById('portfolioNombreRetenir').value,
+                    minimumCompletion: document.getElementById('portfolioMinimumCompleter').value,
+                    nombreTotal: nombreTotal?.value
+                });
             }
         } else {
             // Production non trouvée
@@ -334,33 +344,54 @@ function sauvegarderProduction() {
     if (type === 'portfolio') {
         const nombreRetenir = document.getElementById('portfolioNombreRetenir');
         const minimumCompleter = document.getElementById('portfolioMinimumCompleter');
-        const nombreTotal = document.getElementById('portfolioNombreTotal');  // ← NOUVEAU
-        
+        const nombreTotal = document.getElementById('portfolioNombreTotal');
+
+        // DEBUG: Afficher les valeurs lues
+        console.log('📊 Sauvegarde Portfolio - Valeurs lues:');
+        console.log('   - nombreRetenir.value:', nombreRetenir?.value);
+        console.log('   - minimumCompleter.value:', minimumCompleter?.value);
+        console.log('   - nombreTotal.value:', nombreTotal?.value);
+
         productionData.regles = {
             nombreARetenir: nombreRetenir ? parseInt(nombreRetenir.value) : 3,
             minimumCompletion: minimumCompleter ? parseInt(minimumCompleter.value) : 7,
-            nombreTotal: nombreTotal ? parseInt(nombreTotal.value) : 9  // ← NOUVEAU
+            nombreTotal: nombreTotal ? parseInt(nombreTotal.value) : 9
         };
+
+        console.log('   - regles.nombreARetenir:', productionData.regles.nombreARetenir);
+        console.log('   - regles.minimumCompletion:', productionData.regles.minimumCompletion);
+        console.log('   - regles.nombreTotal:', productionData.regles.nombreTotal);
+
         // Pas besoin de stocker artefactsIds - sera détecté dynamiquement
         productionData.modeCalcul = 'provisoire';
     }
 
     if (productionEnEdition) {
         // Modifier la production existante
+        console.log('✏️ MODE ÉDITION - ID:', productionEnEdition);
         const index = evaluations.findIndex(e => e.id === productionEnEdition);
         if (index !== -1) {
+            console.log('   - Index trouvé:', index);
+            console.log('   - Avant:', JSON.stringify(evaluations[index].regles));
             evaluations[index] = {
                 ...evaluations[index],
                 ...productionData
             };
+            console.log('   - Après:', JSON.stringify(evaluations[index].regles));
+        } else {
+            console.error('❌ Index non trouvé pour ID:', productionEnEdition);
         }
     } else {
         // Ajouter nouvelle production
+        console.log('➕ MODE AJOUT - Nouvelle production');
         productionData.id = 'PROD' + Date.now();
         evaluations.push(productionData);
+        console.log('   - Nouveau ID:', productionData.id);
     }
 
+    console.log('💾 Sauvegarde dans localStorage...');
     localStorage.setItem('productions', JSON.stringify(evaluations));
+    console.log('✅ Sauvegarde terminée');
 
     annulerFormProduction();
     afficherTableauProductions();
