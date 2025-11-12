@@ -247,7 +247,13 @@ function calculerProchaineSeance() {
             .filter(([dateStr, jour]) => {
                 const estDateFuture = dateStr > dateAujourdhui;
                 const estJourCours = (jour.statut === 'cours' || jour.statut === 'reprise');
-                const estDansHoraire = joursCours.includes(jour.jourSemaine);
+
+                // Pour les reprises, vérifier le jour remplacé (ex: cours du lundi → vendredi)
+                // Pour les cours normaux, vérifier le jour de la semaine
+                const jourAVerifier = (jour.statut === 'reprise' && jour.jourRemplace)
+                    ? jour.jourRemplace
+                    : jour.jourSemaine;
+                const estDansHoraire = joursCours.includes(jourAVerifier);
 
                 return estDateFuture && estJourCours && estDansHoraire;
             })
