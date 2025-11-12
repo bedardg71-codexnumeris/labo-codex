@@ -617,7 +617,7 @@ function filtrerParGroupe() {
                     <td class="td-left-100">${programmeEchappe}</td>
                     <td class="td-center-60">${s.sa === 'Oui' ? '✓' : ''}</td>
                     <td class="td-center-60">${s.caf === 'Oui' ? '✓' : ''}</td>
-                    <td class="td-center-160">
+                    <td class="td-center-200">
                         <button data-action="modifier" data-da="${s.da}" class="btn btn-modifier btn-tres-compact"
                                 style="margin-right: 4px;">
                             Modifier
