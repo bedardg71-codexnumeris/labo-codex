@@ -4831,6 +4831,17 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 /* ===============================
+   MEDIA QUERIES - RESPONSIVE
+   =============================== */
+
+/* Grille des seuils d'interprétation - Responsive */
+@media (max-width: 1200px) {
+    #reglages-interpretation > div[style*="grid-template-columns: repeat(2, 1fr)"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ===============================
    ANIMATIONS
    =============================== */
 
