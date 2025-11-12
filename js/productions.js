@@ -1144,6 +1144,13 @@ window.getTypeLabel = getTypeLabel;
 window.gererPortfolio = gererPortfolio;
 window.initialiserModuleProductions = initialiserModuleProductions;
 
+// Nouvelles fonctions sidebar (Beta 80.5+)
+window.afficherListeProductions = afficherListeProductions;
+window.filtrerListeProductions = filtrerListeProductions;
+window.chargerProductionPourModif = chargerProductionPourModif;
+window.creerNouvelleProduction = creerNouvelleProduction;
+window.dupliquerProduction = dupliquerProduction;
+
 /* ===============================
    📌 NOTES D'UTILISATION
    =============================== */
