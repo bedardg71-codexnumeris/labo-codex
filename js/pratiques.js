@@ -328,11 +328,15 @@ function chargerConfigurationPAN() {
         radioPeriode.checked = true;
     }
 
-    // Nombre d'artefacts à retenir
-    const nombreARetenir = configPAN.nombreARetenir || 3;
-    const selectNombreARetenir = document.getElementById('nombreARetenir');
-    if (selectNombreARetenir) {
-        selectNombreARetenir.value = nombreARetenir;
+    // ⚠️ SINGLE SOURCE OF TRUTH: nombreARetenir vient du portfolio dans productions
+    // Lire depuis productions (lecture seule)
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const portfolio = productions.find(p => p.type === 'portfolio');
+    const nombreARetenir = portfolio?.regles?.nombreARetenir || 3;
+
+    const affichageNombreARetenir = document.getElementById('affichageNombreARetenir');
+    if (affichageNombreARetenir) {
+        affichageNombreARetenir.textContent = `${nombreARetenir} meilleurs artefacts`;
     }
 
     // Jetons - valeurs par défaut
@@ -418,9 +422,8 @@ function sauvegarderConfigurationPAN() {
     const radioPeriode = document.querySelector('input[name="periodePAN"]:checked');
     const nombreCours = radioPeriode ? parseInt(radioPeriode.value) : 7;
 
-    // Nombre d'artefacts à retenir
-    const selectNombreARetenir = document.getElementById('nombreARetenir');
-    const nombreARetenir = selectNombreARetenir ? parseInt(selectNombreARetenir.value) : 3;
+    // ⚠️ SINGLE SOURCE OF TRUTH: nombreARetenir n'est PLUS sauvegardé ici
+    // Il est lu depuis productions (voir chargerConfigurationPAN)
 
     // Jetons
     const checkJetonsActif = document.getElementById('jetonsActif');
@@ -442,9 +445,9 @@ function sauvegarderConfigurationPAN() {
     const gestionOriginale = radioGestion ? radioGestion.value : 'archiver';
 
     // Construire l'objet config
+    // ⚠️ nombreARetenir n'est PLUS dans configPAN (lecture depuis productions)
     modalites.configPAN = {
         nombreCours: nombreCours,
-        nombreARetenir: nombreARetenir,
 
         jetons: {
             actif: jetonsActif,
