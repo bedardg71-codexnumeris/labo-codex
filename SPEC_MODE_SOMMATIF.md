@@ -449,7 +449,7 @@ Peu importe comment C et P sont calculés, la formule R reste la même.
     <option value="travail">Travail écrit</option>
     <option value="quiz">Quiz/Test</option>
     <option value="presentation">Présentation</option>
-    <option value="portfolio">📁 Portfolio (conteneur d'artefacts)</option>
+    <option value="portfolio">📁 Portfolio (conteneur)</option>
     <option value="artefact-portfolio">Artefact d'un portfolio</option>
     <option value="autre">Autre</option>
 </select>
@@ -474,7 +474,7 @@ Peu importe comment C et P sont calculés, la formule R reste la même.
         <option value="autre-formatif">Autre (formatif)</option>
     </optgroup>
     <optgroup label="Pratique Alternative de Notation (PAN)">
-        <option value="portfolio">📁 Portfolio (conteneur d'artefacts)</option>
+        <option value="portfolio">📁 Portfolio (conteneur)</option>
         <option value="artefact-portfolio">Artefact d'un portfolio</option>
     </optgroup>
 </select>
