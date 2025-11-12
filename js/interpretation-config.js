@@ -25,6 +25,10 @@ const SEUILS_PAR_DEFAUT = {
     // Seuil minimal pour détecter une augmentation ou diminution du risque
     directionRisque: 0.05,  // 5 points sur échelle 0-1
 
+    // Fenêtre d'analyse des patterns
+    // Nombre de productions récentes à analyser pour détecter les patterns
+    nombreProductionsAnalyse: 3,  // 3 dernières productions (recommandé pour détection précoce)
+
     // Taxonomie SOLO - Niveaux IDME
     // Seuils de passage entre les niveaux de compréhension
     idme: {
@@ -201,6 +205,12 @@ if (typeof window !== 'undefined') {
  */
 function chargerSeuilsInterpretationUI() {
     const seuils = chargerSeuilsInterpretation();
+
+    // Nombre de productions à analyser
+    const inputNombreProductions = document.getElementById('nombreProductionsAnalyse');
+    if (inputNombreProductions) {
+        inputNombreProductions.value = seuils.nombreProductionsAnalyse || 3;
+    }
 
     // Progression des artefacts
     const sliderProgression = document.getElementById('seuil-progression');

@@ -49,6 +49,16 @@
    =============================== */
 
 /**
+ * Obtient le nombre de productions à analyser pour les patterns
+ * depuis la configuration des seuils d'interprétation
+ * @returns {number} - Nombre de productions (défaut: 7)
+ */
+function obtenirNombreProductionsPourPatterns() {
+    const seuils = chargerSeuilsInterpretation();
+    return seuils.nombreProductionsAnalyse || 3;
+}
+
+/**
  * Initialise le module de profil étudiant
  * Appelée automatiquement par 99-main.js au chargement
  * 
@@ -2375,7 +2385,7 @@ function changerSectionProfil(section) {
 
 /**
  * Calcule la direction du risque (évolution temporelle)
- * Compare le risque sur les 3 artefacts récents vs les 3 suivants (fenêtre glissante)
+ * Compare le risque sur les N artefacts récents vs les N suivants (fenêtre glissante configurable)
  *
  * @param {string} da - Numéro de DA
  * @returns {Object} - { symbole: '→'|'←'|'—', interpretation: string }
@@ -2383,6 +2393,9 @@ function changerSectionProfil(section) {
 function calculerDirectionRisque(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+
+    // Obtenir le nombre de productions configuré pour l'analyse des patterns
+    const N = obtenirNombreProductionsPourPatterns() || 3;
 
     // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
     const artefactsPortfolio = productions
@@ -2396,8 +2409,8 @@ function calculerDirectionRisque(da) {
         e.noteFinale !== undefined
     );
 
-    // Pas assez de données pour calculer la direction du risque
-    if (evaluationsEleve.length < 4) {
+    // Pas assez de données pour calculer la direction du risque (besoin de N+1 minimum)
+    if (evaluationsEleve.length < N + 1) {
         return {
             symbole: '',
             interpretation: 'Données insuffisantes'
@@ -2411,14 +2424,14 @@ function calculerDirectionRisque(da) {
         return new Date(dateB) - new Date(dateA);
     });
 
-    // Calculer risque récent (3 plus récents: positions 0, 1, 2)
-    const troisRecents = evaluationsEleve.slice(0, 3);
-    const performanceRecente = troisRecents.reduce((sum, e) => sum + e.noteFinale, 0) / troisRecents.length / 100;
+    // Calculer risque récent (N plus récents)
+    const artefactsRecents = evaluationsEleve.slice(0, N);
+    const performanceRecente = artefactsRecents.reduce((sum, e) => sum + e.noteFinale, 0) / artefactsRecents.length / 100;
     const risqueRecent = 1 - performanceRecente;
 
-    // Calculer risque précédent (3 suivants avec chevauchement: positions 1, 2, 3)
-    const troisSuivants = evaluationsEleve.slice(1, 4);
-    const performancePrecedente = troisSuivants.reduce((sum, e) => sum + e.noteFinale, 0) / troisSuivants.length / 100;
+    // Calculer risque précédent (N suivants avec chevauchement)
+    const artefactsSuivants = evaluationsEleve.slice(1, N + 1);
+    const performancePrecedente = artefactsSuivants.reduce((sum, e) => sum + e.noteFinale, 0) / artefactsSuivants.length / 100;
     const risquePrecedent = 1 - performancePrecedente;
 
     const difference = risqueRecent - risquePrecedent;
@@ -2448,7 +2461,7 @@ function calculerDirectionRisque(da) {
 
 /**
  * Calcule la direction de chaque critère SRPNF (évolution temporelle)
- * Compare les scores sur les 3 artefacts récents vs les 3 suivants (fenêtre glissante)
+ * Compare les scores sur les N artefacts récents vs les N suivants (fenêtre glissante configurable)
  *
  * @param {string} da - Numéro de DA
  * @returns {Object} - { structure: {symbole, interpretation}, rigueur: {...}, ... }
@@ -2456,6 +2469,9 @@ function calculerDirectionRisque(da) {
 function calculerDirectionsCriteres(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+
+    // Obtenir le nombre de productions configuré pour l'analyse des patterns
+    const N = obtenirNombreProductionsPourPatterns() || 3;
 
     // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
     const artefactsPortfolio = productions
@@ -2474,8 +2490,8 @@ function calculerDirectionsCriteres(da) {
         interpretation: 'Données insuffisantes'
     };
 
-    // Pas assez de données pour calculer la direction
-    if (evaluationsEleve.length < 4) {
+    // Pas assez de données pour calculer la direction (besoin de N+1 minimum)
+    if (evaluationsEleve.length < N + 1) {
         return {
             structure: resultatParDefaut,
             rigueur: resultatParDefaut,
@@ -2534,13 +2550,13 @@ function calculerDirectionsCriteres(da) {
         return scoresCriteres;
     };
 
-    // Extraire les scores pour les 3 plus récents (positions 0, 1, 2)
-    const troisRecents = evaluationsEleve.slice(0, 3);
-    const scoresRecents = extraireScoresCriteres(troisRecents);
+    // Extraire les scores pour les N plus récents
+    const artefactsRecents = evaluationsEleve.slice(0, N);
+    const scoresRecents = extraireScoresCriteres(artefactsRecents);
 
-    // Extraire les scores pour les 3 suivants avec chevauchement (positions 1, 2, 3)
-    const troisSuivants = evaluationsEleve.slice(1, 4);
-    const scoresSuivants = extraireScoresCriteres(troisSuivants);
+    // Extraire les scores pour les N suivants avec chevauchement
+    const artefactsSuivants = evaluationsEleve.slice(1, N + 1);
+    const scoresSuivants = extraireScoresCriteres(artefactsSuivants);
 
     // Déterminer le seuil de direction (même seuil que pour le risque)
     const seuilDirection = obtenirSeuil('directionRisque');
@@ -4014,13 +4030,14 @@ function calculerIndicesTroisDerniersArtefacts(da) {
 
 /**
  * Calcule la progression (direction) selon le Guide de monitorage
- * Compare la performance des 3 artefacts les plus récents (AM) vs les 3 suivants avec chevauchement (AL)
+ * Compare la performance des N artefacts les plus récents (AM) vs les N suivants avec chevauchement (AL)
+ * Le nombre N est configurable via Réglages → Interprétation des données
  *
- * Fenêtre glissante: Si artefacts = A, B, C, D (du plus récent au plus ancien)
- * - AM = moyenne(A, B, C)
- * - AL = moyenne(B, C, D)
+ * Fenêtre glissante: Si artefacts = A, B, C, ..., N, N+1 (du plus récent au plus ancien)
+ * - AM = moyenne(A, B, ..., N)
+ * - AL = moyenne(B, C, ..., N+1)
  *
- * Formule: SI(AM > AL + 0.1; "↗"; SI(AM < AL - 0.1; "↘"; "→"))
+ * Formule: SI(AM > AL + seuil; "↗"; SI(AM < AL - seuil; "↘"; "→"))
  *
  * @param {string} da - Numéro de DA
  * @returns {Object} - { direction: '↗'|'→'|'↘', interpretation, AM, AL, difference }
@@ -4028,6 +4045,9 @@ function calculerIndicesTroisDerniersArtefacts(da) {
 function calculerProgressionEleve(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+
+    // Obtenir le nombre de productions configuré pour l'analyse des patterns
+    const N = obtenirNombreProductionsPourPatterns() || 3;
 
     // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
     const artefactsPortfolio = productions
@@ -4041,11 +4061,11 @@ function calculerProgressionEleve(da) {
         e.noteFinale !== undefined
     );
 
-    // Pas assez de données pour calculer la progression (besoin de 4 artefacts minimum)
-    if (evaluationsEleve.length < 4) {
+    // Pas assez de données pour calculer la progression (besoin de N+1 artefacts minimum)
+    if (evaluationsEleve.length < N + 1) {
         return {
             direction: null,
-            interpretation: 'Données insuffisantes (4 artefacts requis)',
+            interpretation: `Données insuffisantes (${N + 1} artefacts requis)`,
             AM: null,
             AL: null,
             difference: null,
@@ -4060,13 +4080,13 @@ function calculerProgressionEleve(da) {
         return new Date(dateB) - new Date(dateA);
     });
 
-    // AM: Moyenne des 3 plus récents (positions 0, 1, 2)
-    const troisRecents = evaluationsEleve.slice(0, 3);
-    const AM = troisRecents.reduce((sum, e) => sum + e.noteFinale, 0) / troisRecents.length / 100;
+    // AM: Moyenne des N plus récents
+    const artefactsRecents = evaluationsEleve.slice(0, N);
+    const AM = artefactsRecents.reduce((sum, e) => sum + e.noteFinale, 0) / artefactsRecents.length / 100;
 
-    // AL: Moyenne des 3 suivants avec chevauchement (positions 1, 2, 3)
-    const troisSuivants = evaluationsEleve.slice(1, 4);
-    const AL = troisSuivants.reduce((sum, e) => sum + e.noteFinale, 0) / troisSuivants.length / 100;
+    // AL: Moyenne des N suivants avec chevauchement
+    const artefactsSuivants = evaluationsEleve.slice(1, N + 1);
+    const AL = artefactsSuivants.reduce((sum, e) => sum + e.noteFinale, 0) / artefactsSuivants.length / 100;
 
     const difference = AM - AL;
 
@@ -4103,7 +4123,8 @@ function calculerProgressionEleve(da) {
 }
 
 /**
- * Identifie le défi spécifique (critère SRPNF le plus faible) sur les 3 derniers artefacts
+ * Identifie le défi spécifique (critère SRPNF le plus faible) sur les N derniers artefacts
+ * Le nombre N est configurable via Réglages → Interprétation des données
  * Seuil: Valeur configurable (défaut: 71.25%, ajustable via interpretation-config.js)
  *
  * @param {string} da - Numéro de DA
@@ -4112,6 +4133,9 @@ function calculerProgressionEleve(da) {
 function identifierDefiSpecifique(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+
+    // Obtenir le nombre de productions configuré pour l'analyse des patterns
+    const N = obtenirNombreProductionsPourPatterns() || 3;
 
     // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
     const artefactsPortfolio = productions
@@ -4135,8 +4159,8 @@ function identifierDefiSpecifique(da) {
         return new Date(dateB) - new Date(dateA);
     });
 
-    // Prendre les 3 derniers
-    const troisDerniers = evaluationsEleve.slice(0, 3);
+    // Prendre les N plus récents
+    const derniers = evaluationsEleve.slice(0, N);
 
     // Obtenir la table de conversion IDME
     const tableConversion = obtenirTableConversionIDME();
@@ -4153,7 +4177,7 @@ function identifierDefiSpecifique(da) {
     // Regex pour extraire: NOM_CRITERE (NIVEAU)
     const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi;
 
-    troisDerniers.forEach(evaluation => {
+    derniers.forEach(evaluation => {
         const retroaction = evaluation.retroactionFinale || '';
         let match;
         while ((match = regexCritere.exec(retroaction)) !== null) {
