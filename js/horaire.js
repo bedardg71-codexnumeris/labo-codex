@@ -43,13 +43,12 @@
 /**
  * Initialise le module de gestion de l'horaire
  * Appelée automatiquement par 99-main.js au chargement
- * 
+ *
  * FONCTIONNEMENT:
  * 1. Vérifie que les éléments DOM existent (section active)
- * 2. Restaure le format horaire sauvegardé
- * 3. Attache les événements aux radio buttons
- * 4. Affiche les séances existantes
- * 
+ * 2. Affiche les séances existantes
+ * 3. Génère les séances complètes du trimestre
+ *
  * RETOUR:
  * - Sortie silencieuse si les éléments n'existent pas
  */
@@ -57,34 +56,14 @@ function initialiserModuleHoraire() {
     console.log('🕐 Initialisation du module Horaire');
 
     // Vérifier que nous sommes dans la bonne section
-    const radios = document.querySelectorAll('input[name="formatHoraire"]');
-    if (radios.length === 0) {
+    const container = document.getElementById('seancesContainer');
+    if (!container) {
         console.log('   ⚠️  Section horaire non active, initialisation reportée');
         return;
     }
 
-    // Restaurer le format sauvegardé
-    const formatSauvegarde = localStorage.getItem('formatHoraire') || '';
-    if (formatSauvegarde) {
-        const radioToCheck = document.querySelector(`input[name="formatHoraire"][value="${formatSauvegarde}"]`);
-        if (radioToCheck) radioToCheck.checked = true;
-    }
-
-    // Attacher les événements
-    radios.forEach(radio => {
-        radio.addEventListener('change', function () {
-            if (this.checked) {
-                localStorage.setItem('formatHoraire', this.value);
-                mettreAJourInterfaceHoraire();
-            }
-        });
-    });
-
     // Afficher les séances existantes
     afficherSeancesExistantes();
-
-    // Mettre à jour l'interface selon le format sélectionné
-    mettreAJourInterfaceHoraire();
 
     // Générer les séances complètes du trimestre
     genererSeancesCompletes();
@@ -95,42 +74,6 @@ function initialiserModuleHoraire() {
 /* ===============================
    FONCTIONS UTILITAIRES
    =============================== */
-
-/**
- * Met à jour l'interface selon le format horaire sélectionné
- * Active/désactive les éléments en fonction du contexte
- * 
- * FONCTIONNEMENT:
- * - Si format sélectionné: active le bouton de configuration
- * - Sinon: désactive le bouton et affiche un message
- */
-function mettreAJourInterfaceHoraire() {
-    const formatChecked = document.querySelector('input[name="formatHoraire"]:checked');
-    const btnConfigurer = document.querySelector('.btn-ajouter[onclick="afficherFormulaireSeances()"]');
-    const messageAucunFormat = document.getElementById('messageAucunFormat');
-
-    if (formatChecked) {
-        // Format sélectionné: activer le bouton et cacher le message
-        if (btnConfigurer) {
-            btnConfigurer.disabled = false;
-            btnConfigurer.style.opacity = '1';
-            btnConfigurer.style.cursor = 'pointer';
-        }
-        if (messageAucunFormat) {
-            messageAucunFormat.style.display = 'none';
-        }
-    } else {
-        // Aucun format: désactiver le bouton et afficher le message
-        if (btnConfigurer) {
-            btnConfigurer.disabled = true;
-            btnConfigurer.style.opacity = '0.5';
-            btnConfigurer.style.cursor = 'not-allowed';
-        }
-        if (messageAucunFormat) {
-            messageAucunFormat.style.display = 'block';
-        }
-    }
-}
 
 /**
  * Génère les options pour le select d'heure de début
@@ -152,7 +95,7 @@ function genererOptionsHeureDebut() {
 /**
  * Génère les options pour le select d'heure de fin
  * De 8h50 à 22h50
- * 
+ *
  * RETOUR:
  * - HTML string avec les options
  */
@@ -164,6 +107,118 @@ function genererOptionsHeureFin() {
         options += `<option value="${heure}">${affichage}</option>`;
     }
     return options;
+}
+
+/**
+ * Génère les options pour le select de durée
+ * De 1h à 6h par paliers de 0.5h
+ *
+ * RETOUR:
+ * - HTML string avec les options
+ */
+function genererOptionsDuree() {
+    let options = '<option value="">Choisir...</option>';
+
+    // Générer de 1h à 6h par paliers de 0.5h
+    for (let h = 1.0; h <= 6.0; h += 0.5) {
+        const valeur = h.toFixed(1);
+        const affichage = h % 1 === 0 ? `${h}h` : `${Math.floor(h)}h30`;
+        options += `<option value="${valeur}">${affichage}</option>`;
+    }
+
+    return options;
+}
+
+/**
+ * Calcule l'heure de fin à partir d'une heure de début et d'une durée
+ *
+ * @param {string} debut - Heure de début au format "HH:MM" (ex: "13:00", "14:30")
+ * @param {number} duree - Durée en heures (ex: 2.0, 1.5, 3.5)
+ * @returns {string} Heure de fin au format "HH:MM" (ex: "15:00", "16:00")
+ */
+function calculerHeureFin(debut, duree) {
+    if (!debut || !duree) return '';
+
+    // Parser l'heure de début
+    const [heures, minutes] = debut.split(':').map(Number);
+
+    // Calculer les minutes totales
+    const minutesDebut = heures * 60 + minutes;
+    const minutesFin = minutesDebut + (duree * 60);
+
+    // Convertir en heures et minutes
+    const heuresFin = Math.floor(minutesFin / 60);
+    const minutesRestantes = minutesFin % 60;
+
+    // Formater en HH:MM
+    const heuresStr = String(heuresFin).padStart(2, '0');
+    const minutesStr = String(minutesRestantes).padStart(2, '0');
+
+    return `${heuresStr}:${minutesStr}`;
+}
+
+/* ===============================
+   MIGRATION DES DONNÉES
+   =============================== */
+
+/**
+ * Migre les anciennes séances vers le nouveau format
+ * ANCIEN: {nom: 'A', debut: '13:00', fin: '15:00'}
+ * NOUVEAU: {lettre: 'A', debut: '13:00', duree: 2.0}
+ *
+ * FONCTIONNEMENT:
+ * 1. Lit seancesHoraire depuis localStorage
+ * 2. Pour chaque séance:
+ *    - Ajoute 'lettre' si manquant (copie depuis 'nom')
+ *    - Calcule 'duree' depuis 'debut' et 'fin' si manquant
+ *    - Supprime 'fin' si 'duree' existe
+ * 3. Sauvegarde le nouveau format
+ *
+ * RETOUR:
+ * - true si migration effectuée, false sinon
+ */
+function migrerDonneesSeances() {
+    const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+
+    if (seancesHoraire.length === 0) {
+        return false;
+    }
+
+    let migrationNecessaire = false;
+
+    seancesHoraire.forEach(seance => {
+        // Ajouter 'lettre' si manquant (copier depuis 'nom')
+        if (!seance.lettre && seance.nom) {
+            seance.lettre = seance.nom;
+            migrationNecessaire = true;
+        }
+
+        // Calculer 'duree' si manquant mais 'fin' présent
+        if (!seance.duree && seance.debut && seance.fin) {
+            // Convertir heures en format numérique (ex: "13:00" -> 13.0)
+            const debutParts = seance.debut.split(':');
+            const finParts = seance.fin.split(':');
+
+            const debutHeures = parseInt(debutParts[0]) + parseInt(debutParts[1]) / 60;
+            const finHeures = parseInt(finParts[0]) + parseInt(finParts[1]) / 60;
+
+            seance.duree = parseFloat((finHeures - debutHeures).toFixed(1));
+            migrationNecessaire = true;
+        }
+
+        // Supprimer 'fin' si 'duree' existe (nettoyage)
+        if (seance.duree && seance.fin) {
+            delete seance.fin;
+            migrationNecessaire = true;
+        }
+    });
+
+    if (migrationNecessaire) {
+        localStorage.setItem('seancesHoraire', JSON.stringify(seancesHoraire));
+        console.log('   ✅ Migration des données séances effectuée');
+    }
+
+    return migrationNecessaire;
 }
 
 /* ===============================
@@ -204,6 +259,9 @@ function genererOptionsHeureFin() {
 function genererSeancesCompletes() {
     console.log('📚 Génération des séances complètes du trimestre...');
 
+    // Migrer les anciennes données si nécessaire
+    migrerDonneesSeances();
+
     // Lire les séances hebdomadaires configurées
     const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
 
@@ -231,14 +289,17 @@ function genererSeancesCompletes() {
         seancesParJour[seance.jour].push(seance);
     });
 
-    // Générer toutes les séances pour chaque jour de cours
-    const seancesCompletes = {};
-    let compteurSeances = 0;
-
+    // ÉTAPE 1 : Grouper les jours de cours par semaine
+    const joursParSemaine = {};
     Object.entries(calendrierComplet).forEach(([dateStr, infosJour]) => {
-        // Ne créer des séances QUE pour les jours de cours ou reprises
+        // Ne traiter QUE les jours de cours ou reprises
         if (infosJour.statut !== 'cours' && infosJour.statut !== 'reprise') {
             return;
+        }
+
+        const numSemaine = infosJour.numeroSemaine;
+        if (!joursParSemaine[numSemaine]) {
+            joursParSemaine[numSemaine] = [];
         }
 
         // Pour les reprises, utiliser le jour remplacé si disponible
@@ -247,26 +308,55 @@ function genererSeancesCompletes() {
             jourPourSeances = infosJour.jourRemplace;
         }
 
-        // Vérifier si ce jour a des séances configurées
+        // Vérifier si ce jour a des séances configurées dans l'horaire
         const seancesDuJour = seancesParJour[jourPourSeances] || [];
-
         if (seancesDuJour.length > 0) {
-            seancesCompletes[dateStr] = seancesDuJour.map(seance => {
+            joursParSemaine[numSemaine].push({
+                date: dateStr,
+                jourSemaine: infosJour.jourSemaine,
+                jourRemplace: jourPourSeances,
+                seancesHoraire: seancesDuJour
+            });
+        }
+    });
+
+    // ÉTAPE 2 : Pour chaque semaine, trier chronologiquement et assigner A, B, etc.
+    const seancesCompletes = {};
+    let compteurSeances = 0;
+    const nomsSeances = ['A', 'B', 'C', 'D', 'E']; // Support jusqu'à 5 séances/semaine
+
+    Object.entries(joursParSemaine).forEach(([numSemaine, jours]) => {
+        // Trier les jours chronologiquement
+        jours.sort((a, b) => a.date.localeCompare(b.date));
+
+        // Assigner A, B, C, etc. selon l'ordre chronologique
+        jours.forEach((jour, index) => {
+            const nomSeanceChronologique = nomsSeances[index] || `S${index + 1}`;
+
+            seancesCompletes[jour.date] = jour.seancesHoraire.map(seance => {
                 compteurSeances++;
                 return {
-                    id: `SEANCE-${dateStr}-${seance.nom}`,
+                    id: `SEANCE-${jour.date}-${nomSeanceChronologique}`,
                     seanceHoraireId: seance.id,
-                    nom: seance.nom,
-                    date: dateStr,
-                    jour: infosJour.jourSemaine,
+                    nom: nomSeanceChronologique, // Nom basé sur l'ordre chronologique, pas le jour fixe
+                    nomOriginal: seance.nom || seance.lettre, // Conserver le nom/lettre original pour référence
+                    groupe: seance.groupe || '', // Groupe associé à la séance
+                    date: jour.date,
+                    jour: jour.jourSemaine,
+                    jourRemplace: jour.jourRemplace !== jour.jourSemaine ? jour.jourRemplace : null,
                     debut: seance.debut,
-                    fin: seance.fin,
+                    fin: seance.fin || calculerHeureFin(seance.debut, seance.duree), // Calculer fin si manquant
+                    duree: seance.duree, // Ajouter durée pour compatibilité
                     local: seance.local,
-                    numeroSemaine: infosJour.numeroSemaine || null
+                    numeroSemaine: parseInt(numSemaine)
                 };
             });
-        } else {
-            // Jour de cours sans séance configurée (reste vide)
+        });
+    });
+
+    // ÉTAPE 3 : Ajouter les jours de cours sans séances configurées
+    Object.entries(calendrierComplet).forEach(([dateStr, infosJour]) => {
+        if ((infosJour.statut === 'cours' || infosJour.statut === 'reprise') && !seancesCompletes[dateStr]) {
             seancesCompletes[dateStr] = [];
         }
     });
@@ -305,153 +395,279 @@ function obtenirSeancesJour(dateStr) {
     return seancesCompletes[dateStr] || [];
 }
 
+/**
+ * API publique : Détermine le rang de la séance dans sa semaine (1ère, 2ème, etc.)
+ * 🎯 SOURCE UNIQUE DE VÉRITÉ pour le calcul du rang
+ *
+ * @param {string} dateStr - Date au format YYYY-MM-DD
+ * @returns {Object|null} - {rang: number, total: number, ordinal: string} ou null
+ *
+ * @example
+ * const rang = obtenirRangSeanceDansSemaine('2025-11-12');
+ * // => { rang: 1, total: 2, ordinal: '1ère' }
+ */
+function obtenirRangSeanceDansSemaine(dateStr) {
+    try {
+        const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+        const seancesCompletes = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
+
+        const infoJour = calendrier[dateStr];
+        if (!infoJour || !infoJour.numeroSemaine) return null;
+
+        const numSemaine = infoJour.numeroSemaine;
+
+        // Trouver tous les jours de cours de cette semaine qui ont des séances
+        const joursAvecSeances = Object.entries(calendrier)
+            .filter(([date, info]) =>
+                info.numeroSemaine === numSemaine &&
+                (info.statut === 'cours' || info.statut === 'reprise') &&
+                seancesCompletes[date] &&
+                seancesCompletes[date].length > 0
+            )
+            .map(([date]) => date)
+            .sort();
+
+        const rang = joursAvecSeances.indexOf(dateStr) + 1;
+        const total = joursAvecSeances.length;
+
+        // Générer l'ordinal en français
+        const ordinaux = ['', '1ère', '2ème', '3ème', '4ème', '5ème'];
+        const ordinal = ordinaux[rang] || `${rang}ème`;
+
+        return { rang, total, ordinal };
+    } catch (error) {
+        console.warn('⚠️ Erreur calcul rang séance:', error);
+        return null;
+    }
+}
+
 /* ===============================
    📝 GESTION DU FORMULAIRE
    =============================== */
 
 /**
- * Affiche le formulaire d'ajout de séances selon le format
- * Appelée lors du changement de format horaire
- * 
- * FONCTIONNEMENT:
- * 1. Vérifie qu'un format est sélectionné
- * 2. Génère le HTML adapté (2 séances ou 1 séance)
- * 3. Affiche le formulaire
- * 
- * FORMAT '2x2':
- * - Affiche 2 formulaires (Séance A et Séance B)
- * - Champs: jour, début, fin, local pour chaque séance
- * 
- * FORMAT '1x4':
- * - Affiche 1 formulaire (Séance unique)
- * - Champs: jour, début, fin, local
+ * Génère les options du select pour les groupes
+ * @returns {string} HTML des options
  */
-function afficherFormulaireSeances() {
-    const formatChecked = document.querySelector('input[name="formatHoraire"]:checked');
+function genererOptionsGroupes() {
+    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
 
-    if (!formatChecked) {
-        // Si aucun format sélectionné, afficher un message
-        alert('Veuillez d\'abord sélectionner un format horaire (2×2h ou 1×4h)');
-        return;
+    // Extraire les groupes uniques et les trier
+    const groupes = [...new Set(etudiants.map(e => e.groupe))].filter(g => g).sort();
+
+    let html = '<option value="">Sélectionner un groupe...</option>';
+    groupes.forEach(groupe => {
+        html += `<option value="${echapperHtml(groupe)}">${echapperHtml(groupe)}</option>`;
+    });
+
+    return html;
+}
+
+/**
+ * Variable temporaire pour stocker les séances en cours de configuration
+ * Utilisée pendant l'édition avant la sauvegarde finale
+ */
+let seancesEnCours = [];
+
+/**
+ * Affiche le formulaire dynamique de configuration des séances
+ * Système flexible permettant d'ajouter de 1 à 6 séances
+ *
+ * FONCTIONNEMENT:
+ * 1. Charge les séances existantes depuis localStorage (si édition)
+ * 2. Si nouveau, initialise avec 1 séance vide
+ * 3. Génère et affiche les formulaires
+ * 4. Active le bouton "+ Ajouter une séance" si < 6 séances
+ */
+function afficherFormulaireSeancesDynamique() {
+    // Charger les séances existantes ou initialiser avec une séance vide
+    const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+
+    if (seancesHoraire.length > 0) {
+        // Mode édition : charger les séances existantes
+        seancesEnCours = JSON.parse(JSON.stringify(seancesHoraire)); // Deep copy
+    } else {
+        // Mode création : initialiser avec une séance vide
+        seancesEnCours = [{
+            lettre: 'A',
+            groupe: '',
+            jour: '',
+            debut: '',
+            duree: '',
+            local: ''
+        }];
     }
 
-    const format = formatChecked.value;
-    const container = document.getElementById('seancesFormContainer');
-
-    // Afficher directement le formulaire
+    // Afficher le formulaire
     document.getElementById('formAjoutSeance').style.display = 'block';
+
+    // Générer l'affichage
+    rafraichirFormulairesSeances();
+}
+
+/**
+ * Génère le HTML pour le formulaire d'UNE séance
+ *
+ * @param {number} index - Index de la séance dans le tableau
+ * @param {object} seance - Objet séance avec ses propriétés
+ * @returns {string} HTML du formulaire de séance
+ */
+function genererFormulaireSeance(index, seance) {
+    const lettres = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const lettre = lettres[index] || `S${index + 1}`;
+
+    return `
+        <div class="seance-form-item" data-index="${index}" style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid var(--bleu-leger);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <strong style="color: var(--bleu-moyen); font-size: 1.05rem;">Séance ${lettre}</strong>
+                ${seancesEnCours.length > 1 ? `
+                    <button type="button" class="btn btn-supprimer btn-tres-compact" onclick="supprimerFormulaireSeance(${index})">
+                        Supprimer
+                    </button>
+                ` : ''}
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1.5fr 1fr 1fr 0.8fr; gap: 10px; align-items: end;">
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; font-weight: 500;">Groupe</label>
+                    <select class="controle-form" id="groupe_${index}" required>
+                        ${genererOptionsGroupes()}
+                    </select>
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; font-weight: 500;">Jour de la semaine</label>
+                    <select class="controle-form" id="jour_${index}" required>
+                        <option value="">Choisir...</option>
+                        <option value="Lundi">Lundi</option>
+                        <option value="Mardi">Mardi</option>
+                        <option value="Mercredi">Mercredi</option>
+                        <option value="Jeudi">Jeudi</option>
+                        <option value="Vendredi">Vendredi</option>
+                    </select>
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; font-weight: 500;">Heure début</label>
+                    <select class="controle-form" id="debut_${index}" required>
+                        ${genererOptionsHeureDebut()}
+                    </select>
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; font-weight: 500;">Durée</label>
+                    <select class="controle-form" id="duree_${index}" required>
+                        ${genererOptionsDuree()}
+                    </select>
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; font-weight: 500;">Local</label>
+                    <input type="text" class="controle-form" id="local_${index}" placeholder="Ex: 1709">
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Rafraîchit l'affichage de tous les formulaires de séances
+ * Génère le HTML, remplit les valeurs et active/désactive le bouton d'ajout
+ */
+function rafraichirFormulairesSeances() {
+    const container = document.getElementById('seancesFormContainer');
 
     let html = '';
 
-    if (format === '2x2') {
-        document.getElementById('btnConfirmerSeances').textContent = 'Ajouter les séances';
-        html = `
-            <div style="background: white; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
-                <strong style="color: var(--bleu-moyen);">Séance A</strong>
-                <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 0.8fr; gap: 10px; margin-top: 10px; align-items: end;">
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Jour de la semaine</label>
-                        <select class="controle-form" id="jourSeanceA">
-                            <option>Choisir...</option>
-                            <option>Lundi</option>
-                            <option>Mardi</option>
-                            <option>Mercredi</option>
-                            <option>Jeudi</option>
-                            <option>Vendredi</option>
-                        </select>
-                    </div>
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Heure début</label>
-                        <select class="controle-form" id="debutSeanceA">
-                            ${genererOptionsHeureDebut()}
-                        </select>
-                    </div>
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Heure fin</label>
-                        <select class="controle-form" id="finSeanceA">
-                            ${genererOptionsHeureFin()}
-                        </select>
-                    </div>
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Local</label>
-                        <input type="text" class="controle-form" id="localSeanceA" placeholder="Ex: 1709">
-                    </div>
-                </div>
-            </div>
-            
-            <div style="background: white; padding: 10px; border-radius: 6px;">
-                <strong style="color: var(--bleu-moyen);">Séance B</strong>
-                <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 0.8fr; gap: 10px; margin-top: 10px; align-items: end;">
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Jour de la semaine</label>
-                        <select class="controle-form" id="jourSeanceB">
-                            <option>Choisir...</option>
-                            <option>Lundi</option>
-                            <option>Mardi</option>
-                            <option>Mercredi</option>
-                            <option>Jeudi</option>
-                            <option>Vendredi</option>
-                        </select>
-                    </div>
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Heure début</label>
-                        <select class="controle-form" id="debutSeanceB">
-                            ${genererOptionsHeureDebut()}
-                        </select>
-                    </div>
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Heure fin</label>
-                        <select class="controle-form" id="finSeanceB">
-                            ${genererOptionsHeureFin()}
-                        </select>
-                    </div>
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Local</label>
-                        <input type="text" class="controle-form" id="localSeanceB" placeholder="Ex: 1709">
-                    </div>
-                </div>
-            </div>
+    // Générer tous les formulaires
+    seancesEnCours.forEach((seance, index) => {
+        html += genererFormulaireSeance(index, seance);
+    });
+
+    // Ajouter le bouton "+ Ajouter une séance" si < 6 séances
+    if (seancesEnCours.length < 6) {
+        html += `
+            <button type="button" class="btn" onclick="ajouterFormulaireSeance()"
+                    style="width: 100%; margin-top: 10px; background: var(--bleu-leger); color: var(--bleu-moyen);">
+                Ajouter une séance
+            </button>
         `;
-    } else if (format === '1x4') {
-        document.getElementById('btnConfirmerSeances').textContent = 'Ajouter la séance';
-        html = `
-            <div style="background: white; padding: 10px; border-radius: 6px;">
-                <strong style="color: var(--bleu-moyen);">Séance unique (4h)</strong>
-                <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 0.8fr; gap: 10px; margin-top: 10px; align-items: end;">
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Jour de la semaine</label>
-                        <select class="controle-form" id="jourSeanceUnique">
-                            <option>Choisir...</option>
-                            <option>Lundi</option>
-                            <option>Mardi</option>
-                            <option>Mercredi</option>
-                            <option>Jeudi</option>
-                            <option>Vendredi</option>
-                        </select>
-                    </div>
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Heure début</label>
-                        <select class="controle-form" id="debutSeanceUnique">
-                            ${genererOptionsHeureDebut()}
-                        </select>
-                    </div>
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Heure fin</label>
-                        <select class="controle-form" id="finSeanceUnique">
-                            ${genererOptionsHeureFin()}
-                        </select>
-                    </div>
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem;">Local</label>
-                        <input type="text" class="controle-form" id="localSeanceUnique" placeholder="Ex: 1709">
-                    </div>
-                </div>
+    } else {
+        html += `
+            <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 10px; margin-top: 10px; text-align: center;">
+                Maximum de 6 séances atteint
             </div>
         `;
     }
 
-    // Injecter le HTML dans le container
     container.innerHTML = html;
+
+    // Remplir les valeurs des champs depuis seancesEnCours
+    seancesEnCours.forEach((seance, index) => {
+        const groupeSelect = document.getElementById(`groupe_${index}`);
+        const jourSelect = document.getElementById(`jour_${index}`);
+        const debutSelect = document.getElementById(`debut_${index}`);
+        const dureeSelect = document.getElementById(`duree_${index}`);
+        const localInput = document.getElementById(`local_${index}`);
+
+        if (groupeSelect && seance.groupe) groupeSelect.value = seance.groupe;
+        if (jourSelect && seance.jour) jourSelect.value = seance.jour;
+        if (debutSelect && seance.debut) debutSelect.value = seance.debut;
+
+        // Convertir la durée en string avec le bon format pour correspondre aux options
+        if (dureeSelect && seance.duree) {
+            const dureeStr = typeof seance.duree === 'number' ? seance.duree.toFixed(1) : seance.duree;
+            dureeSelect.value = dureeStr;
+        }
+
+        if (localInput && seance.local) localInput.value = seance.local;
+    });
+}
+
+/**
+ * Ajoute un nouveau formulaire de séance vide
+ * Maximum 6 séances autorisées
+ */
+function ajouterFormulaireSeance() {
+    if (seancesEnCours.length >= 6) {
+        alert('Maximum de 6 séances atteint');
+        return;
+    }
+
+    const lettres = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const nouvelleLettre = lettres[seancesEnCours.length];
+
+    seancesEnCours.push({
+        lettre: nouvelleLettre,
+        groupe: '',
+        jour: '',
+        debut: '',
+        duree: '',
+        local: ''
+    });
+
+    rafraichirFormulairesSeances();
+}
+
+/**
+ * Supprime un formulaire de séance
+ *
+ * @param {number} index - Index de la séance à supprimer
+ */
+function supprimerFormulaireSeance(index) {
+    if (seancesEnCours.length <= 1) {
+        alert('Vous devez conserver au moins une séance');
+        return;
+    }
+
+    if (!confirm(`Supprimer la séance ${seancesEnCours[index].lettre} ?`)) {
+        return;
+    }
+
+    seancesEnCours.splice(index, 1);
+
+    // Réassigner les lettres A, B, C, etc.
+    const lettres = ['A', 'B', 'C', 'D', 'E', 'F'];
+    seancesEnCours.forEach((seance, i) => {
+        seance.lettre = lettres[i];
+    });
+
+    rafraichirFormulairesSeances();
 }
 
 /**
@@ -480,128 +696,102 @@ function annulerAjoutSeance() {
 }
 
 /**
- * Confirme et enregistre les séances
- * Appelée par le bouton «Ajouter» ou «Enregistrer les modifications»
- * 
+ * Confirme et enregistre toutes les séances configurées
+ * Appelée par le bouton «Sauvegarder l'horaire»
+ *
  * FONCTIONNEMENT:
- * 1. Vérifie le format horaire
- * 2. Récupère les valeurs des champs
- * 3. Valide les données
- * 4. Vérifie si mode édition ou ajout
- * 5. Crée/met à jour les objets séance(s)
- * 6. Sauvegarde dans localStorage
- * 7. Rafraîchit l'affichage
- * 8. Masque le formulaire
- * 
- * STRUCTURE DONNÉES:
+ * 1. Lit les valeurs depuis tous les formulaires dynamiques
+ * 2. Valide les données obligatoires
+ * 3. Crée les objets séance avec IDs uniques
+ * 4. Sauvegarde dans localStorage
+ * 5. Rafraîchit l'affichage
+ * 6. Masque le formulaire
+ *
+ * NOUVELLE STRUCTURE DONNÉES:
  * Séance = {
  *   id: timestamp,
- *   nom: 'A' | 'B' | 'Unique',
+ *   lettre: 'A' | 'B' | 'C' | 'D' | 'E' | 'F',
+ *   groupe: string,
  *   jour: string,
  *   debut: string (HH:MM),
- *   fin: string (HH:MM),
+ *   duree: number (en heures, ex: 2.0, 1.5),
  *   local: string,
  *   verrouille: boolean
  * }
  */
-function confirmerAjoutSeances() {
-    const formatChecked = document.querySelector('input[name="formatHoraire"]:checked');
-    if (!formatChecked) return;
+function confirmerSeances() {
+    // Lire les valeurs depuis les champs dynamiques
+    const seancesAEnregistrer = [];
 
-    const formatHoraire = formatChecked.value;
-    let seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    for (let i = 0; i < seancesEnCours.length; i++) {
+        const groupeSelect = document.getElementById(`groupe_${i}`);
+        const jourSelect = document.getElementById(`jour_${i}`);
+        const debutSelect = document.getElementById(`debut_${i}`);
+        const dureeSelect = document.getElementById(`duree_${i}`);
+        const localInput = document.getElementById(`local_${i}`);
 
-    // Vérifier si on est en mode édition
-    const btnConfirmer = document.getElementById('btnConfirmerSeances');
-    const modeEdition = btnConfirmer.getAttribute('data-mode-edition');
-
-    if (formatHoraire === '2x2') {
-        // Valider et sauvegarder les 2 séances
-        const seanceA = {
-            id: modeEdition ? parseInt(modeEdition) : Date.now(),
-            nom: 'A',
-            jour: document.getElementById('jourSeanceA').value,
-            debut: document.getElementById('debutSeanceA').value,
-            fin: document.getElementById('finSeanceA').value,
-            local: document.getElementById('localSeanceA').value,
-            verrouille: false
-        };
-
-        const seanceB = {
-            id: modeEdition ? parseInt(modeEdition) + 1 : Date.now() + 1,
-            nom: 'B',
-            jour: document.getElementById('jourSeanceB').value,
-            debut: document.getElementById('debutSeanceB').value,
-            fin: document.getElementById('finSeanceB').value,
-            local: document.getElementById('localSeanceB').value,
-            verrouille: false
-        };
-
-        // Validation simple
-        if (!seanceA.jour || !seanceA.debut || !seanceA.fin ||
-            !seanceB.jour || !seanceB.debut || !seanceB.fin) {
-            alert('Veuillez remplir tous les champs obligatoires (jour, heures)');
+        // Validation
+        if (!groupeSelect || !groupeSelect.value) {
+            alert(`Séance ${seancesEnCours[i].lettre}: Veuillez sélectionner un groupe`);
             return;
         }
 
-        if (modeEdition) {
-            // Mode édition : remplacer les séances existantes
-            seances = seances.filter(s => s.id !== parseInt(modeEdition) && s.id !== parseInt(modeEdition) + 1);
-        }
-
-        // Ajouter les séances
-        seances.push(seanceA);
-        seances.push(seanceB);
-
-    } else if (formatHoraire === '1x4') {
-        // Valider et sauvegarder la séance unique
-        const seanceUnique = {
-            id: modeEdition ? parseInt(modeEdition) : Date.now(),
-            nom: 'Unique',
-            jour: document.getElementById('jourSeanceUnique').value,
-            debut: document.getElementById('debutSeanceUnique').value,
-            fin: document.getElementById('finSeanceUnique').value,
-            local: document.getElementById('localSeanceUnique').value,
-            verrouille: false
-        };
-
-        // Validation simple
-        if (!seanceUnique.jour || !seanceUnique.debut || !seanceUnique.fin) {
-            alert('Veuillez remplir tous les champs obligatoires (jour, heures)');
+        if (!jourSelect || !jourSelect.value) {
+            alert(`Séance ${seancesEnCours[i].lettre}: Veuillez sélectionner un jour`);
             return;
         }
 
-        if (modeEdition) {
-            // Mode édition : remplacer la séance existante
-            seances = seances.filter(s => s.id !== parseInt(modeEdition));
+        if (!debutSelect || !debutSelect.value) {
+            alert(`Séance ${seancesEnCours[i].lettre}: Veuillez sélectionner une heure de début`);
+            return;
         }
 
-        // Ajouter la séance
-        seances.push(seanceUnique);
+        if (!dureeSelect || !dureeSelect.value) {
+            alert(`Séance ${seancesEnCours[i].lettre}: Veuillez sélectionner une durée`);
+            return;
+        }
+
+        // Créer l'objet séance
+        const seance = {
+            id: Date.now() + i, // ID unique basé sur timestamp + index
+            lettre: seancesEnCours[i].lettre,
+            groupe: groupeSelect.value,
+            jour: jourSelect.value,
+            debut: debutSelect.value,
+            duree: parseFloat(dureeSelect.value),
+            local: localInput ? localInput.value : ''
+        };
+
+        seancesAEnregistrer.push(seance);
     }
 
-    // Sauvegarder
-    localStorage.setItem('seancesHoraire', JSON.stringify(seances));
+    // Vérifier qu'au moins une séance est configurée
+    if (seancesAEnregistrer.length === 0) {
+        alert('Veuillez configurer au moins une séance');
+        return;
+    }
 
-    // Rafraîchir l'affichage
+    // Sauvegarder dans localStorage
+    localStorage.setItem('seancesHoraire', JSON.stringify(seancesAEnregistrer));
+
+    // Rafraîchir l'affichage des séances existantes
     afficherSeancesExistantes();
 
     // Régénérer les séances complètes du trimestre
     genererSeancesCompletes();
 
-    // Réinitialiser le bouton
-    btnConfirmer.textContent = formatHoraire === '2x2' ? 'Ajouter les séances' : 'Ajouter la séance';
-    btnConfirmer.removeAttribute('data-mode-edition');
-
     // Masquer le formulaire
     annulerAjoutSeance();
 
     // Notification
-    if (modeEdition) {
-        alert('Séances modifiées avec succès !');
-    } else {
-        alert('Séances ajoutées avec succès !');
-    }
+    const nbSeances = seancesAEnregistrer.length;
+    const message = nbSeances === 1
+        ? 'Séance sauvegardée avec succès'
+        : `${nbSeances} séances sauvegardées avec succès`;
+    afficherNotificationSucces(message);
+
+    // Réinitialiser seancesEnCours
+    seancesEnCours = [];
 }
 
 /* ===============================
@@ -627,63 +817,47 @@ function afficherSeancesExistantes() {
 
     if (seances.length === 0) {
         container.innerHTML = '<p class="text-muted" style="font-style: italic;">Aucune séance configurée.</p>';
-        mettreAJourInterfaceHoraire();
         return;
     }
 
     let html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
 
     seances.forEach(seance => {
-        const isVerrouille = seance.verrouille || false;
         const jourEchappe = echapperHtml(seance.jour);
+        const groupeEchappe = echapperHtml(seance.groupe || '');
         const debutEchappe = echapperHtml(seance.debut);
-        const finEchappe = echapperHtml(seance.fin);
+
+        // Calculer heure de fin (nouveau format avec durée OU ancien format avec fin)
+        const fin = seance.fin || calculerHeureFin(seance.debut, seance.duree);
+        const finEchappe = echapperHtml(fin);
+
         const localEchappe = echapperHtml(seance.local || '');
 
+        // Afficher la lettre (nouveau format) ou le nom (ancien format)
+        const nomSeance = seance.lettre || seance.nom || '?';
+
+        // Formater la durée pour affichage
+        const dureeAffichage = seance.duree
+            ? ` (${seance.duree % 1 === 0 ? seance.duree + 'h' : seance.duree.toString().replace('.', 'h')})`
+            : '';
+
         html += `
-            <div style="background: white; 
-                        border: 1px solid var(--bleu-leger); 
-                        border-radius: 6px; 
-                        padding: 15px; 
-                        display: flex; 
-                        justify-content: space-between; 
-                        align-items: center;
-                        opacity: ${isVerrouille ? '0.7' : '1'};">
+            <div style="background: white;
+                        border: 1px solid var(--bleu-leger);
+                        border-radius: 6px;
+                        padding: 15px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;">
                 <div style="flex: 1;">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                        <strong style="color: var(--bleu-moyen);">Séance ${seance.nom}</strong>
-                        <span onclick="basculerVerrouillageSeance(${seance.id})"
-                              style="font-size: 1.2rem; cursor: pointer; user-select: none;"
-                              title="${isVerrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
-                            ${isVerrouille ? '🔒' : '🔓'}
-                        </span>
+                        <strong style="color: var(--bleu-moyen);">Séance ${nomSeance}</strong>
+                        ${groupeEchappe ? `<span style="color: #888; font-size: 0.9rem;">Groupe ${groupeEchappe}</span>` : ''}
                     </div>
                     <div style="color: #666; font-size: 0.9rem;">
-                        ${jourEchappe} • ${debutEchappe} à ${finEchappe}
+                        ${jourEchappe} • ${debutEchappe} à ${finEchappe}${dureeAffichage}
                         ${localEchappe ? ` • Local ${localEchappe}` : ''}
                     </div>
-                </div>
-                <div class="btn-groupe" style="gap: 5px;">
-                    <button class="btn btn-modifier btn-sm" 
-                            onclick="modifierSeance(${seance.id})"
-                            ${isVerrouille ? 'disabled' : ''}
-                            title="Modifier"
-                            style="padding: 5px 10px; font-size: 0.85rem;">
-                        Modifier
-                    </button>
-                    <button class="btn btn-ajouter btn-sm" 
-                            onclick="dupliquerSeance(${seance.id})"
-                            title="Dupliquer"
-                            style="padding: 5px 10px; font-size: 0.85rem;">
-                        Dupliquer
-                    </button>
-                    <button class="btn btn-supprimer btn-sm" 
-                            onclick="supprimerSeance(${seance.id})"
-                            ${isVerrouille ? 'disabled' : ''}
-                            title="Supprimer"
-                            style="padding: 5px 10px; font-size: 0.85rem;">
-                        Supprimer
-                    </button>
                 </div>
             </div>
         `;
@@ -692,174 +866,39 @@ function afficherSeancesExistantes() {
     html += '</div>';
 
     container.innerHTML = html;
-    mettreAJourInterfaceHoraire();
-}
-
-/**
- * Supprime une séance
- * 
- * PARAMÈTRES:
- * @param {number} id - ID de la séance à supprimer
- * 
- * FONCTIONNEMENT:
- * 1. Vérifie que la séance n'est pas verrouillée
- * 2. Demande confirmation
- * 3. Filtre le tableau pour retirer la séance
- * 4. Sauvegarde dans localStorage
- * 5. Rafraîchit l'affichage
- */
-function supprimerSeance(id) {
-    let seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
-    const seance = seances.find(s => s.id === id);
-
-    if (seance && seance.verrouille) {
-        alert('Cette séance est verrouillée et ne peut pas être supprimée.');
-        return;
-    }
-
-    if (!confirm('Supprimer cette séance de l\'horaire ?')) return;
-
-    seances = seances.filter(s => s.id !== id);
-
-    localStorage.setItem('seancesHoraire', JSON.stringify(seances));
-
-    // Rafraîchir l'affichage
-    afficherSeancesExistantes();
-
-    // Régénérer les séances complètes du trimestre
-    genererSeancesCompletes();
 }
 
 /* ===============================
-   MODIFICATION
+   NOTIFICATIONS
    =============================== */
 
 /**
- * Ouvre le formulaire en mode édition pour modifier une séance
- * 
- * PARAMÈTRES:
- * @param {number} id - ID de la séance à modifier
- * 
+ * Affiche une notification de succès
+ *
  * FONCTIONNEMENT:
- * 1. Récupère la séance depuis localStorage
- * 2. Affiche le formulaire
- * 3. Pré-remplit les champs avec les valeurs existantes
- * 4. Change le mode du formulaire en "édition"
- * 
- * UTILISÉ PAR:
- * - Bouton «Modifier» dans l'affichage des séances
+ * 1. Crée un div avec le message
+ * 2. Ajoute au body avec la classe notification-succes
+ * 3. Supprime après 3 secondes
+ *
+ * PARAMÈTRES:
+ * @param {string} message - Message à afficher
+ *
+ * STYLE:
+ * - Classe CSS: notification-succes
+ * - Position fixe en haut à droite
+ * - Fond vert (succès)
+ * - Animation slideIn
+ * - Disparaît après 3s
  */
-function modifierSeance(id) {
-    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
-    const seance = seances.find(s => s.id === id);
+function afficherNotificationSucces(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification-succes';
+    notification.textContent = message;
+    document.body.appendChild(notification);
 
-    if (!seance) return;
-
-    // Afficher le formulaire
-    afficherFormulaireSeances();
-
-    // Attendre que le DOM soit mis à jour
     setTimeout(() => {
-        // Remplir les champs selon le format
-        if (seance.nom === 'A' || seance.nom === 'B') {
-            // Format 2x2
-            const prefixe = seance.nom === 'A' ? 'A' : 'B';
-            document.getElementById(`jourSeance${prefixe}`).value = seance.jour;
-            document.getElementById(`debutSeance${prefixe}`).value = seance.debut;
-            document.getElementById(`finSeance${prefixe}`).value = seance.fin;
-            document.getElementById(`localSeance${prefixe}`).value = seance.local || '';
-        } else {
-            // Format 1x4
-            document.getElementById('jourSeanceUnique').value = seance.jour;
-            document.getElementById('debutSeanceUnique').value = seance.debut;
-            document.getElementById('finSeanceUnique').value = seance.fin;
-            document.getElementById('localSeanceUnique').value = seance.local || '';
-        }
-
-        // Changer le texte du bouton
-        const btnConfirmer = document.getElementById('btnConfirmerSeances');
-        btnConfirmer.textContent = 'Enregistrer les modifications';
-        btnConfirmer.setAttribute('data-mode-edition', id);
-    }, 100);
-}
-
-/* ===============================
-   🔄 DUPLICATION
-   =============================== */
-
-/**
- * Duplique une séance existante
- * 
- * FONCTIONNEMENT:
- * 1. Trouve la séance originale
- * 2. Crée une copie complète
- * 3. Change l'ID et ajoute «(copie)» au nom
- * 4. Déverrouille la copie
- * 5. Ajoute aux séances
- * 6. Sauvegarde et rafraîchit
- * 
- * PARAMÈTRES:
- * @param {number} id - ID de la séance à dupliquer
- * 
- * UTILISÉ PAR:
- * - Bouton «Dupliquer» dans l'affichage des séances
- * 
- * RETOUR:
- * - Notification de succès
- */
-function dupliquerSeance(id) {
-    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
-    const seanceOriginal = seances.find(s => s.id === id);
-
-    if (seanceOriginal) {
-        const nouvelleSeance = {
-            ...seanceOriginal,
-            id: Date.now(),
-            nom: seanceOriginal.nom + ' (copie)',
-            verrouille: false
-        };
-
-        seances.push(nouvelleSeance);
-        localStorage.setItem('seancesHoraire', JSON.stringify(seances));
-        afficherSeancesExistantes();
-        alert('Séance dupliquée avec succès !');
-    }
-}
-
-/* ===============================
-   🔒 VERROUILLAGE
-   =============================== */
-
-/**
- * Bascule le verrouillage d'une séance
- * Une séance verrouillée ne peut pas être modifiée ou supprimée
- * 
- * FONCTIONNEMENT:
- * 1. Récupère les séances depuis localStorage
- * 2. Trouve la séance concernée
- * 3. Bascule l'état verrouille
- * 4. Sauvegarde
- * 5. Rafraîchit l'affichage
- * 
- * PARAMÈTRES:
- * @param {number} id - ID de la séance
- * 
- * UTILISÉ PAR:
- * - Checkbox dans l'affichage des séances
- * 
- * EFFET:
- * - Désactive/active les boutons Modifier et Supprimer
- * - Change l'opacité de la carte
- */
-function basculerVerrouillageSeance(id) {
-    let seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
-    const index = seances.findIndex(s => s.id === id);
-
-    if (index !== -1) {
-        seances[index].verrouille = document.getElementById(`verrou-seance-${id}`).checked;
-        localStorage.setItem('seancesHoraire', JSON.stringify(seances));
-        afficherSeancesExistantes();
-    }
+        notification.remove();
+    }, 3000);
 }
 
 /* ===============================
@@ -890,3 +929,23 @@ function basculerVerrouillageSeance(id) {
    - Fonctionne avec tous les navigateurs modernes
    - Pas de dépendances externes
    ===============================*/
+
+/* ===============================
+   EXPORTS GLOBAUX
+   =============================== */
+// API publiques (lecture seule)
+window.genererSeancesCompletes = genererSeancesCompletes;
+window.obtenirSeancesCompletes = obtenirSeancesCompletes;
+window.obtenirSeancesJour = obtenirSeancesJour;
+window.obtenirRangSeanceDansSemaine = obtenirRangSeanceDansSemaine;
+
+// Fonctions utilitaires
+window.calculerHeureFin = calculerHeureFin;
+
+// Fonctions appelées depuis le HTML (onclick, onchange)
+window.afficherFormulaireSeancesDynamique = afficherFormulaireSeancesDynamique;
+window.ajouterFormulaireSeance = ajouterFormulaireSeance;
+window.supprimerFormulaireSeance = supprimerFormulaireSeance;
+window.confirmerSeances = confirmerSeances;
+window.annulerAjoutSeance = annulerAjoutSeance;
+window.afficherSeancesExistantes = afficherSeancesExistantes;

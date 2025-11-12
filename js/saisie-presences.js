@@ -774,6 +774,9 @@ function initialiserSaisiePresences() {
 /**
  * Met à jour l'en-tête de la saisie avec tous les états visuels
  */
+// Note: obtenirRangSeanceDansSemaine() est maintenant définie dans horaire.js (source unique)
+// et exportée globalement via window.obtenirRangSeanceDansSemaine
+
 function mettreAJourEnteteDateSeance(dateStr) {
     const entete = document.getElementById('enteteDateSeance');
     const texte = document.getElementById('texteDateSeance');
@@ -796,6 +799,15 @@ function mettreAJourEnteteDateSeance(dateStr) {
     const heures = obtenirHeuresSeance(dateStr);
     const heuresFormatees = formaterHeuresAffichage(heures);
     const estVerrouille = estDateVerrouillee(dateStr);
+    const rangSeance = obtenirRangSeanceDansSemaine(dateStr);
+
+    // Récupérer le groupe depuis seancesCompletes
+    const seancesCompletes = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
+    const seancesDuJour = seancesCompletes[dateStr];
+    let groupePrefix = '';
+    if (seancesDuJour && seancesDuJour.length > 0 && seancesDuJour[0].groupe) {
+        groupePrefix = `Groupe ${seancesDuJour[0].groupe} : `;
+    }
 
     // Retirer toutes les classes d'état
     entete.classList.remove('etat-erreur', 'etat-valide', 'etat-verrouille');
@@ -803,23 +815,37 @@ function mettreAJourEnteteDateSeance(dateStr) {
     let message = '';
 
     if (infoJour.statut === 'cours') {
-        message = `Présences au cours du ${dateFr}`;
+        message = `${groupePrefix}Présences au cours du ${dateFr}`;
+
+        // Ajouter le rang de la séance
+        if (rangSeance && infoJour.numeroSemaine) {
+            message += ` - ${rangSeance.ordinal} séance de la semaine ${infoJour.numeroSemaine}`;
+        } else if (infoJour.numeroSemaine) {
+            message += ` - Semaine ${infoJour.numeroSemaine}`;
+        }
+
         if (heuresFormatees) {
             message += ` (${heuresFormatees})`;
         }
-        if (infoJour.numeroSemaine) {
-            message += ` - Semaine ${infoJour.numeroSemaine}`;
-        }
+
         entete.classList.add(estVerrouille ? 'etat-verrouille' : 'etat-valide');
 
     } else if (infoJour.statut === 'reprise') {
-        message = `Présences au cours du ${dateFr} - REPRISE`;
-        if (infoJour.jourRemplace) {
-            message += ` (horaire du ${infoJour.jourRemplace})`;
+        message = `${groupePrefix}Présences au cours du ${dateFr} - REPRISE`;
+
+        // Ajouter le rang de la séance
+        if (rangSeance && infoJour.numeroSemaine) {
+            message += ` - ${rangSeance.ordinal} séance de la semaine ${infoJour.numeroSemaine}`;
         }
+
+        if (infoJour.jourRemplace) {
+            message += ` (horaire du ${infoJour.jourRemplace.toLowerCase()})`;
+        }
+
         if (heuresFormatees) {
             message += ` - ${heuresFormatees}`;
         }
+
         entete.classList.add(estVerrouille ? 'etat-verrouille' : 'etat-valide');
 
     } else if (infoJour.statut === 'conge') {
@@ -837,8 +863,8 @@ function mettreAJourEnteteDateSeance(dateStr) {
     if (infoJour.statut === 'cours' || infoJour.statut === 'reprise') {
         const controleVerrou = `
             <span class="controle-verrouillage">
-                <input type="checkbox" 
-                       id="checkbox-verrouillage-${dateStr}" 
+                <input type="checkbox"
+                       id="checkbox-verrouillage-${dateStr}"
                        ${estVerrouille ? 'checked' : ''}
                        onchange="basculerVerrouillageDate('${dateStr}')">
                 <label for="checkbox-verrouillage-${dateStr}">
