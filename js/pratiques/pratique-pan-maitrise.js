@@ -306,9 +306,15 @@ class PratiquePANMaitrise {
         const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
         const configPAN = config.configPAN || {};
 
+        // ⚠️ SINGLE SOURCE OF TRUTH: nombreARetenir vient du portfolio dans productions
+        // Trouver le portfolio actif
+        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+        const portfolio = productions.find(p => p.type === 'portfolio');
+        const nombreARetenir = portfolio?.regles?.nombreARetenir || 3;
+
         return {
             nombreCours: configPAN.nombreCours || 3,  // 3, 7 ou 12 cours
-            nombreARetenir: configPAN.nombreARetenir || 3  // N meilleurs artefacts
+            nombreARetenir: nombreARetenir  // Lecture depuis productions (source unique)
         };
     }
 

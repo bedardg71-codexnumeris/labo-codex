@@ -5880,22 +5880,26 @@ Exemple :
                                         </div>
                                     </div>
 
-                                    <!-- Nombre d'artefacts à retenir -->
-                                    <div class="form-group" style="margin-top: 25px;">
-                                        <label for="nombreARetenir" style="font-weight: 600; display: block; margin-bottom: 10px;">
+                                    <!-- Nombre d'artefacts à retenir (LECTURE SEULE - Source: Productions) -->
+                                    <div class="form-group" style="margin-top: 25px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-moyen);">
+                                        <label style="font-weight: 600; display: block; margin-bottom: 10px;">
                                             Nombre d'artefacts à retenir pour note finale
                                         </label>
-                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 12px;">
                                             En PAN-Maîtrise, on retient les N meilleurs artefacts (principe de maîtrise)
                                         </p>
-                                        <select id="nombreARetenir" class="form-control" style="width: auto; display: inline-block;">
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3" selected>3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                        </select>
-                                        <span style="margin-left: 8px;">meilleurs artefacts</span>
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <strong id="affichageNombreARetenir" style="font-size: 1.1rem; color: var(--bleu-principal);">
+                                                3 meilleurs artefacts
+                                            </strong>
+                                            <span style="color: #888; font-size: 0.85rem;">
+                                                (défini dans
+                                                <a href="#" onclick="afficherSousSection('reglages-productions'); return false;"
+                                                   style="color: var(--bleu-principal); text-decoration: underline;">
+                                                    Matériel › Productions
+                                                </a>)
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -8713,7 +8717,7 @@ Exemple :
     <script src="js/pratiques/pratique-registry.js"></script>
     <script src="js/pratiques/migration-pratiques.js"></script>
     <script src="js/pratiques/pratique-test.js"></script>
-    <script src="js/pratiques/pratique-pan-maitrise.js"></script>
+    <script src="js/pratiques/pratique-pan-maitrise.js?v=2025111201"></script>
     <script src="js/pratiques/pratique-sommative.js"></script>
 
     <script src="js/portfolio.js?v=2025110909"></script>
@@ -8729,7 +8733,7 @@ Exemple :
     <script src="js/calendrier-vue.js"></script>
     <script src="js/horaire.js?v=2025111208"></script>
     <script src="js/groupe.js?v=2025111203"></script>
-    <script src="js/pratiques.js?v=2025111201"></script>
+    <script src="js/pratiques.js?v=2025111202"></script>
     <script src="js/interventions.js?v=2025111016"></script>
 
     <!-- PRIORITÉ 6: Modules avancés -->
