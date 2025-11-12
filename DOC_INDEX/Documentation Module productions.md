@@ -394,7 +394,7 @@ Je vais générer la documentation complète pour productions.js.
   Convertit un code de type en libellé lisible.
 
   getTypeLabel("travail")          // "Travail écrit"
-  getTypeLabel("portfolio")        // "📁 Portfolio (conteneur d'artefacts)"
+  getTypeLabel("portfolio")        // "📁 Portfolio (conteneur)"
   getTypeLabel("artefact-portfolio") // "Artefact d'un portfolio"
 
   Table de conversion :
