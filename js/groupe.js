@@ -610,14 +610,14 @@ function filtrerParGroupe() {
 
             return `
                 <tr style="cursor: pointer; transition: background-color 0.2s ease;">
-                    <td style="padding: 12px 8px;">${daEchappe}</td>
-                    <td style="text-align: center; padding: 12px 8px;"><strong>${groupeEchappe}</strong></td>
-                    <td style="padding: 12px 8px;">${nomEchappe}</td>
-                    <td style="padding: 12px 8px;">${prenomEchappe}</td>
-                    <td style="padding: 12px 8px;">${programmeEchappe}</td>
-                    <td style="text-align: center; padding: 12px 8px;">${s.sa === 'Oui' ? '✓' : ''}</td>
-                    <td style="text-align: center; padding: 12px 8px;">${s.caf === 'Oui' ? '✓' : ''}</td>
-                    <td style="text-align: center; padding: 12px 4px;">
+                    <td class="td-left-100">${daEchappe}</td>
+                    <td class="td-center-80"><strong>${groupeEchappe}</strong></td>
+                    <td class="td-left-auto">${nomEchappe}</td>
+                    <td class="td-left-auto">${prenomEchappe}</td>
+                    <td class="td-left-100">${programmeEchappe}</td>
+                    <td class="td-center-60">${s.sa === 'Oui' ? '✓' : ''}</td>
+                    <td class="td-center-60">${s.caf === 'Oui' ? '✓' : ''}</td>
+                    <td class="td-center-160">
                         <button data-action="modifier" data-da="${s.da}" class="btn btn-modifier btn-tres-compact"
                                 style="margin-right: 4px;">
                             Modifier
