@@ -3889,55 +3889,28 @@
                             <div class="sidebar-liste" id="sidebarListeProductions">
                                 <!-- Généré par afficherListeProductions() -->
                             </div>
-
-                            <!-- Bouton d'ajout -->
-                            <button class="sidebar-btn-ajouter" onclick="creerNouvelleProduction()">
-                                + Nouvelle production
-                            </button>
                         </div>
 
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
+                            <!-- Barre d'en-tête avec bouton Nouvelle production (toujours visible) -->
+                            <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                                <button onclick="creerNouvelleProduction()" class="btn btn-principal">
+                                    + Nouvelle production
+                                </button>
+                            </div>
+
                             <!-- Message d'accueil initial -->
                             <div class="zone-principale-accueil" id="accueilProductions">
-                                <p>Sélectionnez une production ou créez-en une nouvelle</p>
+                                <p>Sélectionnez une production dans la liste</p>
                             </div>
 
                             <!-- Formulaire d'édition -->
                             <div id="formulaireProduction" style="display: none;">
 
-                                <!-- Cartes métriques -->
-                                <div class="cartes-metriques">
-                                    <div class="carte-metrique">
-                                        <div class="label">Pondération</div>
-                                        <div class="valeur" id="ponderationProdMetrique">0%</div>
-                                    </div>
-                                    <div class="carte-metrique">
-                                        <div class="label">Type</div>
-                                        <div class="valeur" id="typeProdMetrique">-</div>
-                                    </div>
-                                    <div class="carte-metrique">
-                                        <div class="label">Grille</div>
-                                        <div class="valeur" id="grilleProdMetrique">Aucune</div>
-                                    </div>
-                                </div>
-
                                 <!-- Champs principaux -->
-                                <div class="grille-form-2col-desc-titre">
-                                    <div class="groupe-form">
-                                        <label>Description</label>
-                                        <input type="text" id="productionDescription" class="controle-form"
-                                            placeholder="Ex: Stratégies">
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Titre</label>
-                                        <input type="text" id="productionTitre" class="controle-form"
-                                            placeholder="Ex: Analyse #1">
-                                    </div>
-                                </div>
-
-                                <div class="grille-form-3col-type-pond-grille">
+                                <div id="champsStandard" style="display: grid; grid-template-columns: 1.5fr 1.5fr 1.5fr 1fr; gap: 15px; margin-bottom: 15px;">
                                     <div class="groupe-form">
                                         <label>Type</label>
                                         <select id="productionType" class="controle-form"
@@ -3964,16 +3937,34 @@
                                         </select>
                                     </div>
                                     <div class="groupe-form">
+                                        <label>Titre</label>
+                                        <input type="text" id="productionTitre" class="controle-form"
+                                            placeholder="Ex: Analyse #1">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Description</label>
+                                        <input type="text" id="productionDescription" class="controle-form"
+                                            placeholder="Ex: Stratégies">
+                                    </div>
+                                    <div class="groupe-form" id="champPonderation">
                                         <label>Pondération (%)</label>
                                         <input type="number" id="productionPonderation" class="controle-form" min="0"
                                             max="100" placeholder="Ex: 20">
                                     </div>
-                                    <div class="groupe-form">
-                                        <label>Grille</label>
-                                        <select id="productionGrille" class="controle-form">
+                                    <div class="groupe-form" id="champGrilleInline" style="display: none;">
+                                        <label>Grille de critères</label>
+                                        <select id="productionGrilleInline" class="controle-form">
                                             <option value="">Aucune</option>
                                         </select>
                                     </div>
+                                </div>
+
+                                <!-- Grille sur sa propre ligne (pour types standards) -->
+                                <div class="groupe-form" id="champGrilleSeparee" style="margin-bottom: 15px;">
+                                    <label>Grille de critères</label>
+                                    <select id="productionGrille" class="controle-form">
+                                        <option value="">Aucune</option>
+                                    </select>
                                 </div>
 
                                 <small id="msgPonderationArtefact" class="msg-info-artefact">
@@ -4024,11 +4015,23 @@
                                 </div>
 
                                 <!-- Boutons du formulaire -->
-                                <div class="btn-groupe" class="justify-end">
-                                    <button class="btn btn-annuler" onclick="annulerFormProduction()">Annuler</button>
-                                    <button class="btn btn-confirmer" onclick="sauvegarderProduction()">
-                                        <span id="btnTexteEvaluation">Ajouter</span>
-                                    </button>
+                                <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <!-- Boutons gauche (actions destructives) -->
+                                    <div style="display: flex; gap: 10px;">
+                                        <button id="btnDupliquerProduction" class="btn btn-secondaire" onclick="dupliquerProductionActive()" style="display: none;" title="Créer une copie de cette production">
+                                            Dupliquer
+                                        </button>
+                                        <button id="btnSupprimerProduction" class="btn btn-supprimer" onclick="supprimerProductionActive()" style="display: none;" title="Supprimer cette production">
+                                            Supprimer
+                                        </button>
+                                    </div>
+                                    <!-- Boutons droite (actions principales) -->
+                                    <div style="display: flex; gap: 10px;">
+                                        <button class="btn btn-annuler" onclick="annulerFormProduction()">Annuler</button>
+                                        <button class="btn btn-confirmer" onclick="sauvegarderProduction()">
+                                            <span id="btnTexteEvaluation">Ajouter</span>
+                                        </button>
+                                    </div>
                                 </div>
 
                             </div><!-- Fin du formulaireProduction -->
@@ -4110,35 +4113,25 @@
                             <div class="sidebar-liste" id="sidebarListeGrilles">
                                 <!-- Généré par afficherListeGrilles() -->
                             </div>
-
-                            <!-- Bouton d'ajout -->
-                            <button class="sidebar-btn-ajouter" onclick="creerNouvelleGrille()">
-                                + Nouvelle grille
-                            </button>
                         </div>
 
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
+                            <!-- Barre d'en-tête avec bouton Nouvelle grille (toujours visible) -->
+                            <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                                <button onclick="creerNouvelleGrille()" class="btn btn-principal">
+                                    + Nouvelle grille
+                                </button>
+                            </div>
+
                             <!-- Message d'accueil initial -->
                             <div class="zone-principale-accueil" id="accueilGrilles">
-                                <p>Sélectionnez une grille ou créez-en une nouvelle</p>
+                                <p>Sélectionnez une grille dans la liste</p>
                             </div>
 
                             <!-- Formulaire d'édition de grille -->
                             <div id="conteneurEditionGrille" style="display: none;">
-
-                                <!-- Cartes métriques -->
-                                <div class="cartes-metriques" id="metriquesGrille">
-                                    <div class="carte-metrique">
-                                        <div class="label">Critères</div>
-                                        <div class="valeur" id="nbCriteresGrille">0</div>
-                                    </div>
-                                    <div class="carte-metrique">
-                                        <div class="label">Pondération totale</div>
-                                        <div class="valeur" id="totalPondGrille">0%</div>
-                                    </div>
-                                </div>
 
                                 <!-- Nom de la grille -->
                                 <div class="groupe-form" class="max-w-500-mb-20">
@@ -4150,6 +4143,32 @@
                                 <!-- Liste des critères -->
                                 <div id="listeCriteres" class="mb-20">
                                     <!-- Critères générés dynamiquement -->
+                                </div>
+
+                                <!-- Total pondération -->
+                                <div style="margin-bottom: 15px; padding: 10px; background: var(--bleu-tres-pale); border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 500;">Pondération totale des critères :</span>
+                                    <span id="totalPonderationAffichage" style="font-size: 1.2rem; font-weight: 600; color: var(--bleu-fonce);">0%</span>
+                                </div>
+
+                                <!-- Boutons du formulaire -->
+                                <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <!-- Boutons gauche (actions destructives) -->
+                                    <div style="display: flex; gap: 10px;">
+                                        <button id="btnDupliquerGrille" class="btn btn-secondaire" onclick="dupliquerGrilleActive()" style="display: none;" title="Créer une copie de cette grille">
+                                            Dupliquer la grille
+                                        </button>
+                                        <button id="btnSupprimerGrille" class="btn btn-supprimer" onclick="supprimerGrilleActive()" style="display: none;" title="Supprimer cette grille">
+                                            Supprimer la grille
+                                        </button>
+                                    </div>
+                                    <!-- Boutons droite (actions principales) -->
+                                    <div style="display: flex; gap: 10px;">
+                                        <button class="btn btn-annuler" onclick="annulerFormGrille()">Annuler</button>
+                                        <button class="btn btn-confirmer" onclick="sauvegarderGrilleComplete()">
+                                            <span id="btnTexteGrille">Sauvegarder</span>
+                                        </button>
+                                    </div>
                                 </div>
 
                             </div><!-- Fin conteneurEditionGrille -->
@@ -4222,31 +4241,25 @@
                             <div class="sidebar-liste" id="sidebarListeEchelles">
                                 <!-- Généré par afficherListeEchelles() -->
                             </div>
-
-                            <!-- Bouton d'ajout -->
-                            <button class="sidebar-btn-ajouter" onclick="creerNouvelleEchelle()">
-                                + Nouvelle échelle
-                            </button>
                         </div>
 
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
+                            <!-- Barre d'en-tête avec bouton Nouvelle échelle (toujours visible) -->
+                            <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                                <button onclick="creerNouvelleEchelle()" class="btn btn-principal">
+                                    + Nouvelle échelle
+                                </button>
+                            </div>
+
                             <!-- Message d'accueil initial -->
                             <div class="zone-principale-accueil" id="accueilEchelles">
-                                <p>Sélectionnez une échelle ou créez-en une nouvelle</p>
+                                <p>Sélectionnez une échelle dans la liste</p>
                             </div>
 
                             <!-- Formulaire d'édition -->
                             <div id="conteneurEditionEchelle" style="display: none;">
-
-                                <!-- Cartes métriques -->
-                                <div class="cartes-metriques">
-                                    <div class="carte-metrique">
-                                        <div class="label">Niveaux</div>
-                                        <div class="valeur" id="nbNiveauxEchelle">0</div>
-                                    </div>
-                                </div>
 
                                 <!-- Nom de l'échelle -->
                                 <div class="groupe-form" class="max-w-500-mb-20">
@@ -4262,18 +4275,28 @@
 
                                 <!-- Aperçu visuel -->
                                 <div id="apercuEchelleNiveaux" style="display: flex; gap: 10px; flex-wrap: wrap;
-                     align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                     align-items: center; padding: 10px; background: white; border-radius: 4px; margin-bottom: 20px;">
                                     <!-- Généré par afficherApercuEchelle() -->
                                 </div>
 
-                                <!-- Boutons d'action -->
-                                <div class="d-flex-gap10-mt20">
-                                    <button class="btn btn-principal" onclick="enregistrerCommeEchelle()">
-                                        Sauvegarder l'échelle
-                                    </button>
-                                    <button class="btn btn-secondaire" onclick="annulerEditionEchelle()">
-                                        Annuler
-                                    </button>
+                                <!-- Boutons du formulaire -->
+                                <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <!-- Boutons gauche (actions destructives) -->
+                                    <div style="display: flex; gap: 10px;">
+                                        <button id="btnDupliquerEchelle" class="btn btn-secondaire" onclick="dupliquerEchelleActive()" style="display: none;" title="Créer une copie de cette échelle">
+                                            Dupliquer l'échelle
+                                        </button>
+                                        <button id="btnSupprimerEchelle" class="btn btn-supprimer" onclick="supprimerEchelleActive()" style="display: none;" title="Supprimer cette échelle">
+                                            Supprimer l'échelle
+                                        </button>
+                                    </div>
+                                    <!-- Boutons droite (actions principales) -->
+                                    <div style="display: flex; gap: 10px;">
+                                        <button class="btn btn-annuler" onclick="annulerFormEchelle()">Annuler</button>
+                                        <button class="btn btn-confirmer" onclick="sauvegarderEchelleComplete()">
+                                            <span id="btnTexteEchelle">Sauvegarder</span>
+                                        </button>
+                                    </div>
                                 </div>
 
                             </div><!-- Fin conteneurEditionEchelle -->
@@ -4528,19 +4551,21 @@
                                 <div class="sidebar-liste" id="listeCartouchesBanque">
                                     <p class="banque-vide">Chargement...</p>
                                 </div>
-
-                                <!-- Bouton nouvelle cartouche -->
-                                <button onclick="creerNouvelleCartouche()" class="sidebar-btn-ajouter">
-                                    + Nouvelle cartouche
-                                </button>
                             </div>
 
                             <!-- ZONE PRINCIPALE (centrale, scroll) -->
                             <div class="zone-principale">
 
+                                <!-- Barre d'en-tête avec bouton Nouvelle cartouche (toujours visible) -->
+                                <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                                    <button onclick="creerNouvelleCartouche()" class="btn btn-principal">
+                                        + Nouvelle cartouche
+                                    </button>
+                                </div>
+
                                 <!-- Message d'accueil initial -->
                                 <div class="zone-principale-accueil" id="messageAccueilCartouche">
-                                    <p>Sélectionnez une cartouche ou créez-en une nouvelle</p>
+                                    <p>Sélectionnez une cartouche dans la liste</p>
                                 </div>
 
                                 <!-- ANCIEN SYSTÈME (Caché, gardé pour compatibilité interne) -->
@@ -4552,25 +4577,6 @@
 
                                 <!-- Informations de la cartouche -->
                                 <div id="infoCartouche" class="hidden-mb-20">
-                                    <!-- Métriques de la cartouche (en haut) -->
-                                    <div class="cartes-metriques">
-                                <div class="carte-metrique">
-                                    <div class="label">Critères</div>
-                                    <div class="valeur" id="nbCriteres">0</div>
-                                </div>
-                                <div class="carte-metrique">
-                                    <div class="label">Niveaux</div>
-                                    <div class="valeur" id="nbNiveaux">0</div>
-                                </div>
-                                <div class="carte-metrique">
-                                    <div class="label">Commentaires à rédiger</div>
-                                    <div class="valeur" id="nbCommentaires">0</div>
-                                </div>
-                                <div class="carte-metrique">
-                                    <div class="label">Complété</div>
-                                    <div class="valeur" id="pctComplete">0%</div>
-                                </div>
-                            </div>
 
                                     <!-- Message de verrouillage -->
                                     <div id="alerteVerrouillage" class="hidden-my15-warning">
@@ -4598,6 +4604,26 @@
                                 <small style="color: #666; font-size: 0.85rem;">Ce texte apparaîtra au début de la
                                     rétroaction si
                                     l'option est cochée lors de la génération.</small>
+                            </div>
+
+                            <!-- Boutons du formulaire -->
+                            <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                                <!-- Boutons gauche (actions destructives) -->
+                                <div style="display: flex; gap: 10px;">
+                                    <button id="btnDupliquerCartouche" class="btn btn-secondaire" onclick="dupliquerCartoucheActive()" style="display: none;" title="Créer une copie de cette cartouche">
+                                        Dupliquer la cartouche
+                                    </button>
+                                    <button id="btnSupprimerCartouche" class="btn btn-supprimer" onclick="supprimerCartoucheActive()" style="display: none;" title="Supprimer cette cartouche">
+                                        Supprimer la cartouche
+                                    </button>
+                                </div>
+                                <!-- Boutons droite (actions principales) -->
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-annuler" onclick="annulerFormCartouche()">Annuler</button>
+                                    <button class="btn btn-confirmer" onclick="sauvegarderCartoucheComplete()">
+                                        Sauvegarder
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Liste des cartouches existantes (DÉSACTIVÉ - remplacé par sidebar) -->
@@ -4692,17 +4718,6 @@
 
                             <div id="matriceContainer" class="overflow-x-auto">
                                 <!-- La matrice sera générée dynamiquement ici par afficherMatriceRetroaction() -->
-                            </div>
-
-                            <!-- Boutons d'action de la matrice -->
-                            <div class="btn-groupe" class="mt-20">
-                                <button class="btn btn-confirmer" onclick="sauvegarderCartouche()">
-                                    Sauvegarder la cartouche
-                                </button>
-                                <button class="btn btn-supprimer" onclick="supprimerCartouche()"
-                                    class="ml-10">
-                                    Supprimer
-                                </button>
                             </div>
                                 </div>
 
@@ -8703,10 +8718,10 @@ Exemple :
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=1761390149"></script>
     <script src="js/etudiants.js?v=2025110513"></script>
-    <script src="js/productions.js?v=2025111207"></script>
-    <script src="js/grilles.js?v=1761730000"></script>
-    <script src="js/echelles.js?v=2025110513"></script>
-    <script src="js/cartouches.js?v=2025110106"></script>
+    <script src="js/productions.js?v=2025111212"></script>
+    <script src="js/grilles.js?v=2025111215"></script>
+    <script src="js/echelles.js?v=2025111202"></script>
+    <script src="js/cartouches.js?v=2025111201"></script>
     <script src="js/cours.js?v=1761391739"></script>
     <script src="js/contexte.js?v=2025111201"></script>
 

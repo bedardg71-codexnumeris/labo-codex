@@ -1517,10 +1517,6 @@ function afficherListeGrilles() {
             <div class="sidebar-item" data-id="${grille.id}" onclick="chargerGrillePourModif('${grille.id}')">
                 <div class="sidebar-item-titre">${nomGrille}</div>
                 <div class="sidebar-item-badge">${nbCriteres} critères</div>
-                <div class="sidebar-item-actions">
-                    <button class="btn-icone" onclick="event.stopPropagation(); dupliquerGrilleDepuisSidebar('${grille.id}')" title="Dupliquer">Dupliquer</button>
-                    <button class="btn-icone" onclick="event.stopPropagation(); supprimerGrilleDepuisSidebar('${grille.id}')" title="Supprimer">Supprimer</button>
-                </div>
             </div>
         `;
     }).join('');
@@ -1533,11 +1529,25 @@ function creerNouvelleGrille() {
     document.getElementById('conteneurEditionGrille').style.display = 'block';
     document.getElementById('optionsImportExportGrilles').style.display = 'block';
 
+    // Cacher les boutons Dupliquer et Supprimer (mode création)
+    const btnDupliquer = document.getElementById('btnDupliquerGrille');
+    const btnSupprimer = document.getElementById('btnSupprimerGrille');
+    if (btnDupliquer) btnDupliquer.style.display = 'none';
+    if (btnSupprimer) btnSupprimer.style.display = 'none';
+
+    // Réinitialiser grilleTemplateActuelle
+    grilleTemplateActuelle = null;
+
     // Réinitialiser le formulaire
     document.getElementById('nomGrilleTemplate').value = '';
     document.getElementById('listeCriteres').innerHTML = '<p style="color: #999; font-style: italic;">Utilisez les fonctions d\'édition existantes pour ajouter des critères</p>';
-    document.getElementById('nbCriteresGrille').textContent = '0';
-    document.getElementById('totalPondGrille').textContent = '0%';
+
+    // Réinitialiser le total de pondération
+    const totalElement = document.getElementById('totalPonderationAffichage');
+    if (totalElement) {
+        totalElement.textContent = '0%';
+        totalElement.style.color = 'var(--orange-accent)';
+    }
 
     // Retirer le highlight
     document.querySelectorAll('.sidebar-item').forEach(item => {
@@ -1557,18 +1567,17 @@ function chargerGrillePourModif(id) {
     document.getElementById('conteneurEditionGrille').style.display = 'block';
     document.getElementById('optionsImportExportGrilles').style.display = 'block';
 
+    // Afficher les boutons Dupliquer et Supprimer (mode édition)
+    const btnDupliquer = document.getElementById('btnDupliquerGrille');
+    const btnSupprimer = document.getElementById('btnSupprimerGrille');
+    if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
+    if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
+
+    // Définir la grille actuelle
+    grilleTemplateActuelle = id;
+
     // Remplir le formulaire
     document.getElementById('nomGrilleTemplate').value = grille.nom || '';
-
-    // Mettre à jour les métriques
-    document.getElementById('nbCriteresGrille').textContent = grille.criteres?.length || 0;
-
-    // Calculer la pondération totale
-    let totalPond = 0;
-    if (grille.criteres) {
-        totalPond = grille.criteres.reduce((sum, c) => sum + (c.ponderation || 0), 0);
-    }
-    document.getElementById('totalPondGrille').textContent = totalPond + '%';
 
     // Afficher les critères
     afficherCriteresGrille(grille);
@@ -1590,7 +1599,7 @@ function afficherCriteresGrille(grille) {
 
     const html = grille.criteres.map((critere, index) => `
         <div class="item-liste" style="padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
-            <div style="display: grid; grid-template-columns: 2fr 140px 90px 3fr; gap: 12px; align-items: end;">
+            <div style="display: grid; grid-template-columns: 2fr 140px 90px 3fr auto; gap: 12px; align-items: end;">
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: #666;">Nom du critère</label>
                     <input type="text"
@@ -1624,18 +1633,52 @@ function afficherCriteresGrille(grille) {
                            value="${critere.description || ''}"
                            onchange="modifierCritereGrille('${grille.id}', ${index}, 'description', this.value)">
                 </div>
+                <div style="padding-top: 20px;">
+                    <button class="btn btn-supprimer btn-tres-compact"
+                            onclick="supprimerCritereGrille('${grille.id}', ${index})"
+                            title="Supprimer ce critère">
+                        Supprimer
+                    </button>
+                </div>
             </div>
         </div>
     `).join('');
 
     // Ajouter un bouton pour ajouter un nouveau critère
     const btnAjouterCritere = `
-        <button class="sidebar-btn-ajouter" onclick="ajouterCritereGrille('${grille.id}')">
+        <button class="btn btn-principal" onclick="ajouterCritereGrille('${grille.id}')" style="margin-top: 10px;">
             + Ajouter un critère
         </button>
     `;
 
     container.innerHTML = html + btnAjouterCritere;
+
+    // Calculer et afficher le total de pondération
+    calculerEtAfficherTotalPonderation(grille);
+}
+
+/**
+ * Calcule et affiche le total de pondération des critères
+ */
+function calculerEtAfficherTotalPonderation(grille) {
+    const totalElement = document.getElementById('totalPonderationAffichage');
+    if (!totalElement) return;
+
+    let total = 0;
+    if (grille && grille.criteres) {
+        total = grille.criteres.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0);
+    }
+
+    totalElement.textContent = total + '%';
+
+    // Changer la couleur selon le total
+    if (total === 100) {
+        totalElement.style.color = 'var(--vert-moyen)';
+    } else if (total > 100) {
+        totalElement.style.color = 'var(--rouge)';
+    } else {
+        totalElement.style.color = 'var(--orange-accent)';
+    }
 }
 
 /**
@@ -1657,10 +1700,9 @@ function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
     // Sauvegarder dans localStorage
     localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
 
-    // Recalculer la pondération totale si nécessaire
+    // Recalculer et afficher la pondération totale
     if (champ === 'ponderation') {
-        const totalPond = grille.criteres.reduce((sum, c) => sum + (c.ponderation || 0), 0);
-        document.getElementById('totalPondGrille').textContent = totalPond + '%';
+        calculerEtAfficherTotalPonderation(grille);
     }
 
     console.log('Critère modifié:', champ, '=', valeur);
@@ -1695,17 +1737,37 @@ function ajouterCritereGrille(grilleId) {
     // Sauvegarder dans localStorage
     localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
 
-    // Réafficher la liste des critères
+    // Réafficher la liste des critères (calculera automatiquement le total)
     afficherCriteresGrille(grille);
 
-    // Mettre à jour les métriques
-    const nbCriteres = grille.criteres.length;
-    const totalPond = grille.criteres.reduce((sum, c) => sum + (c.ponderation || 0), 0);
-
-    document.getElementById('nbCriteresGrille').textContent = nbCriteres;
-    document.getElementById('totalPondGrille').textContent = totalPond + '%';
-
     console.log('Nouveau critère ajouté à la grille:', grilleId);
+}
+
+/**
+ * Supprime un critère d'une grille
+ * @param {string} grilleId - ID de la grille
+ * @param {number} critereIndex - Index du critère à supprimer
+ */
+function supprimerCritereGrille(grilleId, critereIndex) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce critère ?')) {
+        return;
+    }
+
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
+
+    // Supprimer le critère
+    grille.criteres.splice(critereIndex, 1);
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+
+    // Réafficher la liste des critères (calculera automatiquement le total)
+    afficherCriteresGrille(grille);
+
+    console.log('Critère supprimé de la grille:', grilleId);
 }
 
 function definirGrilleActive(id) {
@@ -1758,9 +1820,88 @@ function supprimerGrilleDepuisSidebar(id) {
     }
 }
 
+/**
+ * Annule l'édition de grille et retourne à l'accueil
+ */
+function annulerFormGrille() {
+    document.getElementById('conteneurEditionGrille').style.display = 'none';
+    document.getElementById('optionsImportExportGrilles').style.display = 'none';
+    document.getElementById('accueilGrilles').style.display = 'block';
+
+    // Retirer le highlight
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Réinitialiser la grille actuelle
+    grilleTemplateActuelle = null;
+}
+
+/**
+ * Duplique la grille actuellement en édition
+ */
+function dupliquerGrilleActive() {
+    if (!grilleTemplateActuelle) {
+        alert('Aucune grille en cours d\'édition');
+        return;
+    }
+    dupliquerGrilleDepuisSidebar(grilleTemplateActuelle);
+}
+
+/**
+ * Supprime la grille actuellement en édition
+ */
+function supprimerGrilleActive() {
+    if (!grilleTemplateActuelle) {
+        alert('Aucune grille en cours d\'édition');
+        return;
+    }
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette grille ?')) {
+        return;
+    }
+
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const index = grilles.findIndex(g => g.id === grilleTemplateActuelle);
+
+    if (index !== -1) {
+        grilles.splice(index, 1);
+        localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+
+        // Fermer le formulaire et retourner à l'accueil
+        annulerFormGrille();
+
+        // Recharger la liste
+        afficherListeGrilles();
+
+        alert('Grille supprimée avec succès');
+    }
+}
+
+/**
+ * Sauvegarde complète de la grille (nom + critères)
+ */
+function sauvegarderGrilleComplete() {
+    // Sauvegarder le nom si modifié
+    sauvegarderNomGrille();
+
+    // Message de confirmation
+    alert('Grille sauvegardée avec succès');
+
+    // Recharger la liste pour refléter les changements
+    afficherListeGrilles();
+}
+
 // Export global
 window.afficherListeGrilles = afficherListeGrilles;
 window.creerNouvelleGrille = creerNouvelleGrille;
 window.chargerGrillePourModif = chargerGrillePourModif;
 window.dupliquerGrilleDepuisSidebar = dupliquerGrilleDepuisSidebar;
 window.supprimerGrilleDepuisSidebar = supprimerGrilleDepuisSidebar;
+window.annulerFormGrille = annulerFormGrille;
+window.dupliquerGrilleActive = dupliquerGrilleActive;
+window.supprimerGrilleActive = supprimerGrilleActive;
+window.sauvegarderGrilleComplete = sauvegarderGrilleComplete;
+window.modifierCritereGrille = modifierCritereGrille;
+window.ajouterCritereGrille = ajouterCritereGrille;
+window.supprimerCritereGrille = supprimerCritereGrille;
