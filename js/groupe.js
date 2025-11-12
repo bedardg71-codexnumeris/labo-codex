@@ -617,13 +617,12 @@ function filtrerParGroupe() {
                     <td style="padding: 12px 8px;">${programmeEchappe}</td>
                     <td style="text-align: center; padding: 12px 8px;">${s.sa === 'Oui' ? '✓' : ''}</td>
                     <td style="text-align: center; padding: 12px 8px;">${s.caf === 'Oui' ? '✓' : ''}</td>
-                    <td style="text-align: center; padding: 12px 8px;">
-                        <button data-action="modifier" data-da="${s.da}" class="btn btn-modifier"
-                                style="padding: 5px 10px; margin-right: 5px;">
+                    <td style="text-align: center; padding: 12px 4px;">
+                        <button data-action="modifier" data-da="${s.da}" class="btn btn-modifier btn-tres-compact"
+                                style="margin-right: 4px;">
                             Modifier
                         </button>
-                        <button data-action="supprimer" data-da="${s.da}" class="btn btn-supprimer"
-                                style="padding: 5px 10px;">
+                        <button data-action="supprimer" data-da="${s.da}" class="btn btn-supprimer btn-tres-compact">
                             Supprimer
                         </button>
                     </td>

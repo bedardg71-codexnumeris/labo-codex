@@ -1287,6 +1287,11 @@
             cursor: pointer;
             user-select: none;
         }
+        .td-center-160 {
+            padding: 12px;
+            text-align: center;
+            width: 160px;
+        }
         .td-left-140-clickable {
             padding: 12px;
             text-align: left;
@@ -4763,7 +4768,6 @@
                     <div class="carte" style="margin-top: 25px;">
                         <h3>Informations légales et crédits</h3>
                         <div style="line-height: 1.8; color: #555;">
-                            <p><strong>Version :</strong> Beta 90</p>
                             <p><strong>Auteur :</strong> Grégoire Bédard</p>
                             <p><strong>Codé avec :</strong> Claude Code (Anthropic)</p>
                             <p><strong>Licences :</strong></p>
@@ -4771,7 +4775,6 @@
                                 <li>Code source : AGPL v3.0 (<a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer">voir licence</a>)</li>
                                 <li>Contenu pédagogique : CC BY-SA 4.0 (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">voir licence</a>)</li>
                             </ul>
-                            <p><strong>Dernière modification :</strong> 10 novembre 2025</p>
                             <p style="margin-top: 15px; font-size: 0.9rem; color: #777;">
                                 Pour plus de détails sur les licences, consultez le fichier LICENSE.md dans le répertoire du projet.
                             </p>
@@ -5269,36 +5272,12 @@
                     </div>
 
                     <!-- Sélecteur de format horaire -->
-                    <div class="carte" class="mb-20">
-                        <h3>Format des cours</h3>
-                        <div class="d-flex-gap30-mt15">
-                            <label class="d-flex-center-pointer">
-                                <input type="radio" name="formatHoraire" value="2x2" id="format2x2"
-                                    class="mr-8">
-                                <span>2 séances de 2h séparées</span>
-                            </label>
-                            <label class="d-flex-center-pointer">
-                                <input type="radio" name="formatHoraire" value="1x4" id="format1x4"
-                                    class="mr-8">
-                                <span>1 séance de 4h consécutives</span>
-                            </label>
-                        </div>
-                    </div><!-- FIN carte format -->
-
                     <!-- Configuration des séances -->
                     <div class="carte">
                         <h3>Horaire des séances</h3>
-                        <div id="messageAucunFormat" style="display: block; 
-     background: #fff3cd; 
-     border: 1px solid #ffc107; 
-     border-radius: 6px; 
-     padding: 12px; 
-     margin-bottom: 15px;
-     font-size: 0.9rem;">
-                            <strong class="text-warning-dark">📐 Étape 1 :</strong>
-                            <span class="text-warning-dark">Sélectionne d'abord un format horaire ci-dessus (2×2h ou
-                                1×4h)</span>
-                        </div>
+                        <p class="text-muted" style="margin-bottom: 15px;">
+                            Configure tes séances de cours de la semaine (de 1 à 6 séances). Chaque séance peut avoir une durée différente (de 1h à 6h).
+                        </p>
 
                         <!-- Conteneur pour les séances existantes -->
                         <div id="seancesContainer" class="mb-20">
@@ -5320,14 +5299,14 @@
                             <div class="btn-groupe" class="mt-15-justify-end">
                                 <button class="btn btn-annuler" onclick="annulerAjoutSeance()">Annuler</button>
                                 <button class="btn btn-confirmer" id="btnConfirmerSeances"
-                                    onclick="confirmerAjoutSeances()">
-                                    Ajouter les séances
+                                    onclick="confirmerSeances()">
+                                    Sauvegarder l'horaire
                                 </button>
                             </div>
                         </div><!-- FIN formulaire ajout -->
 
                         <!-- Bouton pour afficher le formulaire -->
-                        <button class="btn btn-confirmer" onclick="afficherFormulaireSeances()">
+                        <button class="btn btn-confirmer" onclick="afficherFormulaireSeancesDynamique()">
                             + Configurer l'horaire
                         </button>
                     </div><!-- FIN carte horaire -->
@@ -5578,7 +5557,7 @@ Exemple :
                                             <th class="td-left">Programme</th>
                                             <th class="td-center-60">SA</th>
                                             <th class="td-center-60">CAF</th>
-                                            <th class="td-center-120">Actions
+                                            <th class="td-center-160">Actions
                                             </th>
                                         </tr>
                                     </thead>
@@ -8711,6 +8690,7 @@ Exemple :
     <script src="js/echelles.js?v=2025110513"></script>
     <script src="js/cartouches.js?v=2025110106"></script>
     <script src="js/cours.js?v=1761391739"></script>
+    <script src="js/contexte.js?v=2025111201"></script>
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
     <script src="js/interpretation-config.js"></script>
@@ -8723,7 +8703,7 @@ Exemple :
     <script src="js/pratiques/pratique-sommative.js"></script>
 
     <script src="js/portfolio.js?v=2025110909"></script>
-    <script src="js/saisie-presences.js?v=2025110909"></script>
+    <script src="js/saisie-presences.js?v=2025111202"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025110907"></script>
@@ -8733,8 +8713,8 @@ Exemple :
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js"></script>
-    <script src="js/horaire.js?v=1761391190"></script>
-    <script src="js/groupe.js?v=2025110106"></script>
+    <script src="js/horaire.js?v=2025111208"></script>
+    <script src="js/groupe.js?v=2025111201"></script>
     <script src="js/pratiques.js"></script>
     <script src="js/interventions.js?v=2025111016"></script>
 
@@ -9531,23 +9511,29 @@ Exemple :
             const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
             const dateFormatee = new Date().toLocaleDateString('fr-CA', options);
 
-            // 4. Récupérer l'identification de la séance (A, B, ou Unique) si jour de cours
+            // 4. Récupérer le groupe et le rang de la séance
+            let groupeInfo = '';
             let seanceInfo = '';
-            const seancesCompletes = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
-            const seancesDuJour = seancesCompletes[aujourdhuiISO];
+            if (infoJour && (infoJour.statut === 'cours' || infoJour.statut === 'reprise')) {
+                const seancesCompletes = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
+                const seancesDuJour = seancesCompletes[aujourdhuiISO];
 
-            if (seancesDuJour && seancesDuJour.length > 0) {
-                // Extraire les noms de séances et les joindre
-                const nomsSeances = seancesDuJour.map(s => s.nom).filter(n => n);
-                if (nomsSeances.length > 0) {
-                    seanceInfo = ` · Séance ${nomsSeances.join(' et ')}`;
+                // Récupérer le groupe de la première séance du jour
+                if (seancesDuJour && seancesDuJour.length > 0 && seancesDuJour[0].groupe) {
+                    groupeInfo = `Groupe ${seancesDuJour[0].groupe} : `;
+                }
+
+                // Utiliser la fonction source unique définie dans horaire.js
+                const rangSeance = window.obtenirRangSeanceDansSemaine(aujourdhuiISO);
+                if (rangSeance && rangSeance.ordinal) {
+                    seanceInfo = ` · ${rangSeance.ordinal} séance`;
                 }
             }
 
-            // 5. Mettre à jour le HTML dans la navigation (sans labels)
+            // 5. Mettre à jour le HTML dans la navigation
             container.innerHTML = `
                 <br>${nomCours}
-                <br>${semaine} · ${dateFormatee}${seanceInfo}
+                <br>${groupeInfo}${semaine} · ${dateFormatee}${seanceInfo}
             `;
         }
 
