@@ -300,6 +300,21 @@ function afficherConfigurationPAN() {
 }
 
 /**
+ * Affiche les paramètres de configuration PAN
+ * Appelée par le bouton "Modifier les paramètres"
+ */
+function afficherParametresPAN() {
+    const configPAN = document.getElementById('configurationPAN');
+    if (!configPAN) return;
+
+    configPAN.style.display = 'block';
+    chargerConfigurationPAN();
+
+    // Scroller vers la section
+    configPAN.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/**
  * Charge la configuration PAN depuis localStorage
  */
 function chargerConfigurationPAN() {
@@ -596,6 +611,13 @@ function chargerModalites() {
     // Afficher la section options si nécessaire
     afficherOptionsAffichage();
 
+    // Masquer la section configurationPAN au chargement
+    // Elle sera affichée par le bouton "Modifier les paramètres"
+    const configPAN = document.getElementById('configurationPAN');
+    if (configPAN && modalites.pratique === 'alternative') {
+        configPAN.style.display = 'none';
+    }
+
     // Mettre à jour le statut
     mettreAJourStatutModalites();
 }
@@ -632,7 +654,12 @@ function mettreAJourStatutModalites() {
             'specifications': 'Spécifications',
             'denotation': 'Dénotation'
         };
-        statutDiv.innerHTML = `<span style="color: var(--vert-moyen);">✓ Alternative (${types[modalites.typePAN]})</span>`;
+        statutDiv.innerHTML = `
+            <span style="color: var(--vert-moyen);">✓ Alternative (${types[modalites.typePAN]})</span>
+            <button onclick="afficherParametresPAN()" class="btn btn-secondaire" style="margin-left: 15px; padding: 4px 12px; font-size: 0.85rem;">
+                Modifier les paramètres
+            </button>
+        `;
     } else if (modalites.pratique === 'alternative' && !modalites.typePAN) {
         statutDiv.innerHTML = '<span style="color: var(--orange-accent);">⚠ Choisir un type de PAN</span>';
     }
