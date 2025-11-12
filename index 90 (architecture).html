@@ -1292,6 +1292,16 @@
             text-align: center;
             width: 160px;
         }
+        .td-left-100 {
+            padding: 12px;
+            text-align: left;
+            width: 100px;
+        }
+        .td-left-auto {
+            padding: 12px;
+            text-align: left;
+            width: auto;
+        }
         .td-left-140-clickable {
             padding: 12px;
             text-align: left;
@@ -5546,15 +5556,14 @@ Exemple :
                             </div>
 
                             <div class="overflow-x-border">
-                                <table id="students-table" class="tableau-donnees"
-                                    class="tableau-blanc">
+                                <table id="students-table" class="tableau-blanc" style="width: 100%;">
                                     <thead class="thead-bleu-moyen">
                                         <tr>
-                                            <th class="td-left">DA</th>
+                                            <th class="td-left-100">DA</th>
                                             <th class="td-center-80">Groupe</th>
-                                            <th class="td-left">Nom</th>
-                                            <th class="td-left">Prénom</th>
-                                            <th class="td-left">Programme</th>
+                                            <th class="td-left-auto">Nom</th>
+                                            <th class="td-left-auto">Prénom</th>
+                                            <th class="td-left-100">Programme</th>
                                             <th class="td-center-60">SA</th>
                                             <th class="td-center-60">CAF</th>
                                             <th class="td-center-160">Actions
@@ -8714,7 +8723,7 @@ Exemple :
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js"></script>
     <script src="js/horaire.js?v=2025111208"></script>
-    <script src="js/groupe.js?v=2025111201"></script>
+    <script src="js/groupe.js?v=2025111202"></script>
     <script src="js/pratiques.js"></script>
     <script src="js/interventions.js?v=2025111016"></script>
 
