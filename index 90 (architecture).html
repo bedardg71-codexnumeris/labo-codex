@@ -5871,32 +5871,8 @@ Exemple :
                                 <h3 class="carte-titre-bleu">📋 Configuration PAN-Maîtrise / Littérature</h3>
                                 <div class="carte-body">
 
-                                    <!-- Période d'évaluation -->
-                                    <div class="form-group">
-                                        <label style="font-weight: 600; margin-bottom: 10px; display: block;">
-                                            Période d'évaluation (fenêtre temporelle)
-                                        </label>
-                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
-                                            Combien de cours récents utiliser pour calculer les patterns et défis ?
-                                        </p>
-                                        <div style="margin-left: 20px;">
-                                            <div style="margin-bottom: 8px;">
-                                                <input type="radio" id="periode3" name="periodePAN" value="3">
-                                                <label for="periode3">3 derniers cours (6 artefacts)</label>
-                                            </div>
-                                            <div style="margin-bottom: 8px;">
-                                                <input type="radio" id="periode7" name="periodePAN" value="7" checked>
-                                                <label for="periode7">7 derniers cours (14 artefacts)</label>
-                                            </div>
-                                            <div style="margin-bottom: 8px;">
-                                                <input type="radio" id="periode12" name="periodePAN" value="12">
-                                                <label for="periode12">12 derniers cours (24 artefacts)</label>
-                                            </div>
-                                        </div>
-                                    </div>
-
                                     <!-- Nombre d'artefacts à retenir (LECTURE SEULE - Source: Productions) -->
-                                    <div class="form-group" style="margin-top: 25px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-moyen);">
+                                    <div class="form-group" style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-moyen);">
                                         <label style="font-weight: 600; display: block; margin-bottom: 10px;">
                                             Nombre d'artefacts à retenir pour note finale
                                         </label>
@@ -5932,68 +5908,53 @@ Exemple :
                                         </label>
                                     </div>
 
+                                    <!-- Nombre total de jetons -->
+                                    <div id="configJetonsGlobal" style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 4px;">
+                                        <div class="form-group" style="margin-bottom: 0;">
+                                            <label for="nombreJetonsTotal" style="display: block; font-weight: 600; margin-bottom: 8px;">
+                                                Nombre total de jetons par trimestre :
+                                            </label>
+                                            <input type="number" id="nombreJetonsTotal" class="controle-form"
+                                                   min="0" max="20" value="6" style="width: 100px;">
+                                            <small style="display: block; color: #666; margin-top: 5px; font-size: 0.85rem;">
+                                                Chaque étudiant dispose de ce nombre de jetons pour le trimestre
+                                            </small>
+                                        </div>
+                                    </div>
+
                                     <!-- Jetons de délai -->
                                     <div id="configJetonsDelai" style="margin-top: 25px;">
-                                        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 10px;">
-                                            Jetons de délai
-                                        </h4>
+                                        <div class="form-group" style="margin-bottom: 15px;">
+                                            <label style="cursor: pointer;">
+                                                <input type="checkbox" id="jetonDelaiActif" checked>
+                                                <strong style="margin-left: 8px; font-size: 1rem;">Jetons de délai</strong>
+                                            </label>
+                                        </div>
                                         <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
                                             Permettent de prolonger l'échéance d'une évaluation
                                         </p>
                                         <div style="margin-left: 20px;">
-                                            <div class="form-group" style="margin-bottom: 12px;">
-                                                <label for="nombreJetonsDelai" style="display: inline-block; min-width: 180px;">Nombre par trimestre :</label>
-                                                <select id="nombreJetonsDelai" class="form-control" style="width: auto; display: inline-block;">
-                                                    <option value="0">0 (désactivé)</option>
-                                                    <option value="1">1</option>
-                                                    <option value="2" selected>2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                    <option value="5">5</option>
-                                                </select>
-                                            </div>
                                             <div class="form-group">
-                                                <label for="dureeDelai" style="display: inline-block; min-width: 180px;">Durée du délai accordé :</label>
-                                                <select id="dureeDelai" class="form-control" style="width: auto; display: inline-block;">
-                                                    <option value="3">3 jours</option>
-                                                    <option value="5">5 jours</option>
-                                                    <option value="7" selected>7 jours</option>
-                                                    <option value="10">10 jours</option>
-                                                    <option value="14">14 jours</option>
-                                                </select>
+                                                <label for="dureeDelai" style="display: inline-block; min-width: 200px;">Durée du délai accordé :</label>
+                                                <input type="number" id="dureeDelai" class="controle-form"
+                                                       min="1" max="30" value="7" style="width: 80px; display: inline-block;">
+                                                <span style="margin-left: 5px;">jours</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Jetons de reprise -->
                                     <div id="configJetonsReprise" style="margin-top: 25px;">
-                                        <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 10px;">
-                                            Jetons de reprise
-                                        </h4>
+                                        <div class="form-group" style="margin-bottom: 15px;">
+                                            <label style="cursor: pointer;">
+                                                <input type="checkbox" id="jetonRepriseActif" checked>
+                                                <strong style="margin-left: 8px; font-size: 1rem;">Jetons de reprise</strong>
+                                            </label>
+                                        </div>
                                         <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
                                             Permettent de refaire une évaluation pour améliorer la maîtrise
                                         </p>
                                         <div style="margin-left: 20px;">
-                                            <div class="form-group" style="margin-bottom: 12px;">
-                                                <label for="nombreJetonsReprise" style="display: inline-block; min-width: 180px;">Nombre par trimestre :</label>
-                                                <select id="nombreJetonsReprise" class="form-control" style="width: auto; display: inline-block;">
-                                                    <option value="0">0 (désactivé)</option>
-                                                    <option value="1">1</option>
-                                                    <option value="2" selected>2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                    <option value="5">5</option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group" style="margin-bottom: 12px;">
-                                                <label for="maxRepriseParProduction" style="display: inline-block; min-width: 180px;">Maximum par production :</label>
-                                                <select id="maxRepriseParProduction" class="form-control" style="width: auto; display: inline-block;">
-                                                    <option value="1" selected>1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="999">Illimité</option>
-                                                </select>
-                                            </div>
                                             <div class="form-group">
                                                 <label style="font-weight: 600; margin-bottom: 10px; display: block;">
                                                     Que faire de l'évaluation originale ?
@@ -6012,12 +5973,38 @@ Exemple :
                                         </div>
                                     </div>
 
+                                    <!-- Jeton personnalisé -->
+                                    <div id="configJetonPersonnalise" style="margin-top: 25px;">
+                                        <div class="form-group" style="margin-bottom: 15px;">
+                                            <label style="cursor: pointer;">
+                                                <input type="checkbox" id="jetonPersonnaliseActif">
+                                                <strong style="margin-left: 8px; font-size: 1rem;">Jeton personnalisé</strong>
+                                            </label>
+                                        </div>
+                                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                                            Créez votre propre type de jeton selon vos besoins
+                                        </p>
+                                        <div style="margin-left: 20px;">
+                                            <div class="form-group" style="margin-bottom: 12px;">
+                                                <label for="nomJetonPersonnalise" style="display: block; margin-bottom: 5px;">Nom du jeton :</label>
+                                                <input type="text" id="nomJetonPersonnalise" class="controle-form"
+                                                       placeholder="Ex: Jeton de collaboration" style="max-width: 300px;">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="descriptionJetonPersonnalise" style="display: block; margin-bottom: 5px;">Description :</label>
+                                                <textarea id="descriptionJetonPersonnalise" class="controle-form" rows="2"
+                                                          placeholder="Ex: Permet de travailler en équipe sur une évaluation individuelle"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <!-- Info-bulle -->
                                     <div class="alerte-info" style="margin-top: 25px;">
                                         <strong>💡 À propos des jetons</strong><br>
                                         Les jetons sont des mécanismes flexibles qui permettent de :<br>
                                         • <strong>Prolonger une échéance</strong> pour donner plus de temps (jeton de délai)<br>
                                         • <strong>Refaire une évaluation</strong> pour améliorer la maîtrise (jeton de reprise)<br>
+                                        • <strong>Créer un jeton personnalisé</strong> selon vos besoins pédagogiques<br>
                                         <br>
                                         Les jetons sont comptabilisés par trimestre et par étudiant.
                                     </div>
@@ -6082,6 +6069,37 @@ Exemple :
                             </li>
                             <li><strong>Impact :</strong> Les seuils influencent les diagnostics RàI, patterns et recommandations</li>
                         </ul>
+                    </div>
+
+                    <!-- Fenêtre d'analyse pour les patterns -->
+                    <div class="carte">
+                        <h3>Fenêtre d'analyse des patterns</h3>
+                        <p class="text-muted" class="mb-20">
+                            Nombre de productions récentes à analyser pour détecter les patterns d'apprentissage
+                            (progression, stagnation, difficulté croissante). Cette fenêtre s'applique à tous
+                            les algorithmes de détection de patterns.
+                        </p>
+
+                        <div class="groupe-form">
+                            <label for="nombreProductionsAnalyse" class="label-fw-600-block" style="margin-bottom: 8px;">
+                                Nombre de productions à analyser
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="number" id="nombreProductionsAnalyse" class="controle-form"
+                                       min="3" max="20" value="7" style="width: 100px;">
+                                <span style="color: #666; font-size: 0.9rem;">dernières productions</span>
+                            </div>
+                            <small style="display: block; color: #666; margin-top: 8px; font-size: 0.85rem;">
+                                Plus le nombre est élevé, plus l'analyse couvre une période longue (mais moins réactive aux changements récents)
+                            </small>
+                        </div>
+
+                        <div class="carte-bleu-pale">
+                            <p class="m-0-text-muted">
+                                <strong>Exemple :</strong> Avec 7 productions, le système analysera les 7 travaux les plus récents
+                                pour détecter si l'étudiant progresse, stagne ou rencontre des difficultés croissantes.
+                            </p>
+                        </div>
                     </div>
 
                     <!-- Progression des artefacts -->
