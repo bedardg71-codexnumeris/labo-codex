@@ -97,6 +97,12 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModuleCours();
     }
 
+    // MODULE CONTEXTE: Affichage informations contextuelles dans l'en-tête
+    if (typeof initialiserModuleContexte === 'function') {
+        console.log('   → Module Contexte détecté');
+        initialiserModuleContexte();
+    }
+
     // MODULE 11: Gestion du groupe
     if (typeof initialiserModuleGroupe === 'function') {
         console.log('   → Module 11-groupe détecté');
