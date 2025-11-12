@@ -186,9 +186,9 @@ function afficherFormProduction(id) {
     const titre = document.getElementById('titreFormEvaluation');
     const btnTexte = document.getElementById('btnTexteEvaluation');
 
-    // Afficher le formulaire et cacher le bouton d'ajout
-    form.style.display = 'block';
-    btnAjouter.style.display = 'none';
+    // Afficher le formulaire et cacher le bouton d'ajout (si les éléments existent)
+    if (form) form.style.display = 'block';
+    if (btnAjouter) btnAjouter.style.display = 'none';
 
     // Charger la liste des grilles dans le select (si l'élément existe)
     const selectGrille = document.getElementById('productionGrille');
@@ -215,8 +215,8 @@ function afficherFormProduction(id) {
 
         if (prod) {
             productionEnEdition = id;
-            titre.textContent = 'Modifier l\'évaluation';
-            btnTexte.textContent = 'Sauvegarder';
+            if (titre) titre.textContent = 'Modifier l\'évaluation';
+            if (btnTexte) btnTexte.textContent = 'Sauvegarder';
 
             document.getElementById('productionTitre').value = prod.titre;
             document.getElementById('productionDescription').value = prod.description || '';
@@ -259,8 +259,8 @@ function afficherFormProduction(id) {
     } else {
         // Mode ajout
         productionEnEdition = null;
-        titre.textContent = 'Nouvelle production';
-        btnTexte.textContent = 'Ajouter';
+        if (titre) titre.textContent = 'Nouvelle production';
+        if (btnTexte) btnTexte.textContent = 'Ajouter';
 
         // Réinitialiser les champs
         document.getElementById('productionTitre').value = '';
@@ -433,9 +433,13 @@ function sauvegarderProduction() {
  */
 function annulerFormProduction() {
     // Cacher le formulaire
-    document.getElementById('formulaireProduction').style.display = 'none';
-    // Réafficher le bouton d'ajout
-    document.getElementById('btnajouterProduction').style.display = 'inline-block';
+    const form = document.getElementById('formulaireProduction');
+    if (form) form.style.display = 'none';
+
+    // Réafficher le bouton d'ajout (si l'élément existe - pas présent dans layout sidebar)
+    const btnAjouter = document.getElementById('btnajouterProduction');
+    if (btnAjouter) btnAjouter.style.display = 'inline-block';
+
     // Réinitialiser la variable d'édition
     productionEnEdition = null;
 }
@@ -1309,8 +1313,10 @@ function chargerProductionPourModif(id) {
         itemActif.classList.add('active');
     }
 
-    // Mettre à jour les métriques
-    mettreAJourMetriquesProduction(id);
+    // Mettre à jour les métriques - passer l'objet production complet
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const production = productions.find(p => p.id === id);
+    mettreAJourMetriquesProduction(production);
 }
 
 /**
@@ -1357,71 +1363,9 @@ function creerNouvelleProduction() {
     chargerGrillesDisponibles();
 }
 
-/**
- * Charge une production existante pour modification
- *
- * @param {string} id - ID de la production à charger
- */
-function chargerProductionPourModif(id) {
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
-    const production = productions.find(p => p.id === id);
-
-    if (!production) return;
-
-    // Masquer le message d'accueil
-    const accueil = document.getElementById('accueilProductions');
-    if (accueil) accueil.style.display = 'none';
-
-    // Afficher le formulaire et les options
-    const formulaire = document.getElementById('formulaireProduction');
-    if (formulaire) formulaire.style.display = 'block';
-
-    const options = document.getElementById('optionsImportExportProductions');
-    if (options) options.style.display = 'block';
-
-    // Remplir le formulaire
-    document.getElementById('productionDescription').value = production.description || '';
-    document.getElementById('productionTitre').value = production.titre || '';
-    document.getElementById('productionType').value = production.type || '';
-    document.getElementById('productionPonderation').value = production.ponderation || 0;
-    document.getElementById('productionGrille').value = production.grilleId || '';
-    document.getElementById('productionObjectif').value = production.objectif || '';
-    document.getElementById('productionTache').value = production.tache || '';
-
-    // Gérer les champs spécifiques au portfolio
-    if (production.type === 'portfolio') {
-        document.getElementById('champsPortfolio').style.display = 'block';
-        document.getElementById('portfolioNombreRetenir').value = production.regles?.nombreRetenir || 3;
-        document.getElementById('portfolioMinimumCompleter').value = production.regles?.minimumCompleter || 7;
-        document.getElementById('portfolioNombreTotal').value = production.regles?.nombreTotal || 9;
-    } else {
-        document.getElementById('champsPortfolio').style.display = 'none';
-    }
-
-    // Gérer le message pour les artefacts
-    if (production.type === 'artefact-portfolio') {
-        document.getElementById('msgPonderationArtefact').style.display = 'block';
-        document.getElementById('productionPonderation').disabled = true;
-    } else {
-        document.getElementById('msgPonderationArtefact').style.display = 'none';
-        document.getElementById('productionPonderation').disabled = false;
-    }
-
-    // Changer le titre et le bouton
-    document.getElementById('btnTexteEvaluation').textContent = 'Sauvegarder';
-
-    // Mettre à jour les métriques
-    mettreAJourMetriquesProduction(production);
-
-    // Mettre le highlight sur l'item actif
-    definirProductionActive(id);
-
-    // Charger les grilles disponibles
-    chargerGrillesDisponibles();
-
-    // Stocker l'ID pour la sauvegarde
-    window.productionEnCoursEdition = id;
-}
+// SUPPRIMÉ: Définition dupliquée de chargerProductionPourModif
+// Cette fonction est maintenant définie une seule fois aux lignes 1286-1318
+// La duplication causait un bug où productionEnEdition n'était pas défini correctement
 
 /**
  * Met le highlight sur la production active dans la sidebar
