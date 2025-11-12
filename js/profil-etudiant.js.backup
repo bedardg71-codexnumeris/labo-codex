@@ -750,7 +750,7 @@ function genererSectionMobilisationEngagement(da) {
                 ` : `
                     <div style="text-align: center; padding: 10px; background: #d4edda; border-radius: 6px;
                                 color: #155724; font-size: 0.85rem;">
-                        ✅ Tous les artefacts remis !
+                        Tous les artefacts remis !
                     </div>
                 `}
             </div>
