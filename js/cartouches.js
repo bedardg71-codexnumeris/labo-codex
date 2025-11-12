@@ -805,11 +805,16 @@ function mettreAJourMetriques() {
     const nbCriteres = cartoucheActuel.criteres.length;
     const nbNiveaux = cartoucheActuel.niveaux.length;
     const nbTotal = nbCriteres * nbNiveaux;
-    
-    document.getElementById('nbCriteres').textContent = nbCriteres;
-    document.getElementById('nbNiveaux').textContent = nbNiveaux;
-    document.getElementById('nbCommentaires').textContent = nbTotal;
-    
+
+    // Mettre à jour les métriques (si les éléments existent)
+    const elemNbCriteres = document.getElementById('nbCriteres');
+    const elemNbNiveaux = document.getElementById('nbNiveaux');
+    const elemNbCommentaires = document.getElementById('nbCommentaires');
+
+    if (elemNbCriteres) elemNbCriteres.textContent = nbCriteres;
+    if (elemNbNiveaux) elemNbNiveaux.textContent = nbNiveaux;
+    if (elemNbCommentaires) elemNbCommentaires.textContent = nbTotal;
+
     calculerPourcentageComplete();
 }
 
@@ -1234,6 +1239,12 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
         const selectCartouche = document.getElementById('selectCartouche');
         if (selectGrille) selectGrille.value = grilleId;
         if (selectCartouche) selectCartouche.value = cartoucheId;
+
+        // Afficher les boutons Dupliquer et Supprimer (mode édition)
+        const btnDupliquer = document.getElementById('btnDupliquerCartouche');
+        const btnSupprimer = document.getElementById('btnSupprimerCartouche');
+        if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
+        if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
         // NOUVELLE INTERFACE (Beta 80.5+): Passer les paramètres directement
         chargerMatriceRetroaction(cartoucheId, grilleId);
@@ -1674,6 +1685,12 @@ function ajouterCartoucheAGrille(grilleId) {
         selectGrille.value = grilleId;
     }
 
+    // Masquer les boutons Dupliquer et Supprimer (mode création)
+    const btnDupliquer = document.getElementById('btnDupliquerCartouche');
+    const btnSupprimer = document.getElementById('btnSupprimerCartouche');
+    if (btnDupliquer) btnDupliquer.style.display = 'none';
+    if (btnSupprimer) btnSupprimer.style.display = 'none';
+
     // Initialiser une nouvelle cartouche pour cette grille
     initialiserNouveauCartouche(grilleId);
 
@@ -1693,6 +1710,61 @@ function ajouterCartoucheAGrille(grilleId) {
     genererChecklistCriteresImport();
 
     // NE PLUS faire de scroll - sidebar reste visible
+}
+
+/**
+ * Duplique la cartouche actuellement en cours d'édition
+ */
+function dupliquerCartoucheActive() {
+    if (!cartoucheActuel || !cartoucheActuel.id || !cartoucheActuel.grilleId) {
+        alert('Aucune cartouche à dupliquer');
+        return;
+    }
+    dupliquerCartouche(cartoucheActuel.id, cartoucheActuel.grilleId);
+}
+
+/**
+ * Supprime la cartouche actuellement en cours d'édition
+ */
+function supprimerCartoucheActive() {
+    if (!cartoucheActuel || !cartoucheActuel.id || !cartoucheActuel.grilleId) {
+        alert('Aucune cartouche à supprimer');
+        return;
+    }
+    supprimerCartoucheConfirm(cartoucheActuel.id, cartoucheActuel.grilleId);
+}
+
+/**
+ * Annule l'édition et retourne à l'accueil
+ */
+function annulerFormCartouche() {
+    // Masquer les zones d'édition
+    const infoCartouche = document.getElementById('infoCartouche');
+    const zoneImport = document.getElementById('zoneImportUnifiee');
+    const matriceRetroaction = document.getElementById('matriceRetroaction');
+    const messageAccueil = document.getElementById('messageAccueilCartouche');
+
+    if (infoCartouche) infoCartouche.style.display = 'none';
+    if (zoneImport) zoneImport.style.display = 'none';
+    if (matriceRetroaction) matriceRetroaction.style.display = 'none';
+    if (messageAccueil) messageAccueil.style.display = 'block';
+
+    // Réinitialiser les champs
+    document.getElementById('nomCartouche').value = '';
+    document.getElementById('contexteCartouche').value = '';
+
+    console.log('Édition annulée - Retour à l\'accueil');
+}
+
+/**
+ * Sauvegarde complète de la cartouche en cours d'édition
+ */
+function sauvegarderCartoucheComplete() {
+    // Sauvegarder avec la fonction existante
+    sauvegarderCartouche();
+
+    // Message de confirmation (déjà géré par sauvegarderCartouche)
+    console.log('Cartouche sauvegardée avec succès');
 }
 
 /* ===============================
@@ -1720,6 +1792,12 @@ window.importerPartiel = importerPartiel;
 window.exporterCartoucheActive = exporterCartoucheActive;
 window.importerCartoucheJSON = importerCartoucheJSON;
 window.importerCartoucheDepuisTxt = importerCartoucheDepuisTxt;
+
+// Nouvelles fonctions Beta 90 (boutons dans formulaire)
+window.dupliquerCartoucheActive = dupliquerCartoucheActive;
+window.supprimerCartoucheActive = supprimerCartoucheActive;
+window.annulerFormCartouche = annulerFormCartouche;
+window.sauvegarderCartoucheComplete = sauvegarderCartoucheComplete;
 
 /* ===============================
    📝 NOTES DE DOCUMENTATION
@@ -1848,12 +1926,6 @@ function afficherBanqueCartouches(grilleIdFiltre = '') {
                  onclick="chargerCartouchePourModif('${cart.id}', '${cart.grilleId}')">
                 <div class="nom-cartouche">${echapperHtml(cart.nom)}${verrouIcone}</div>
                 <div class="badge-grille">${echapperHtml(cart.grilleNom)}</div>
-                <div class="actions-cartouche">
-                    <button onclick="event.stopPropagation(); dupliquerCartouche('${cart.id}', '${cart.grilleId}')"
-                            class="btn-icone" title="Dupliquer">Dupliquer</button>
-                    <button onclick="event.stopPropagation(); supprimerCartoucheConfirm('${cart.id}', '${cart.grilleId}')"
-                            class="btn-icone" title="Supprimer">Supprimer</button>
-                </div>
             </div>
         `;
     }).join('');

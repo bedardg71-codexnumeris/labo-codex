@@ -229,6 +229,12 @@ function afficherFormProduction(id) {
             // Gérer l'affichage des champs spécifiques au type
             gererChangementTypeProduction();
 
+            // Synchroniser la grille inline si c'est un artefact de portfolio
+            const selectGrilleInline = document.getElementById('productionGrilleInline');
+            if (selectGrilleInline && prod.type === 'artefact-portfolio') {
+                selectGrilleInline.value = prod.grilleId || '';
+            }
+
             // Si c'est un portfolio, charger les règles
             if (prod.type === 'portfolio' && prod.regles) {
                 console.log('📖 Chargement Portfolio - Règles lues:', JSON.stringify(prod.regles));
@@ -317,8 +323,16 @@ function sauvegarderProduction() {
     const ponderation = parseInt(document.getElementById('productionPonderation').value) || 0;
     const objectif = document.getElementById('productionObjectif').value.trim();
     const tache = document.getElementById('productionTache').value.trim();
-    const grilleId = document.getElementById('productionGrille') ? 
-        document.getElementById('productionGrille').value : '';
+
+    // Lire la grille depuis le bon select selon le type
+    let grilleId = '';
+    if (type === 'artefact-portfolio') {
+        const grilleInline = document.getElementById('productionGrilleInline');
+        grilleId = grilleInline ? grilleInline.value : '';
+    } else {
+        const grille = document.getElementById('productionGrille');
+        grilleId = grille ? grille.value : '';
+    }
 
     // Validation : artefact-portfolio n'a pas besoin de pondération
     if (!titre || !type || (type !== 'artefact-portfolio' && ponderation === 0)) {
@@ -662,26 +676,49 @@ function descendreEvaluation(id) {
 function gererChangementTypeProduction() {
     const type = document.getElementById('productionType').value;
     const champsPortfolio = document.getElementById('champsPortfolio');
-    const divPonderation = document.getElementById('productionPonderation').parentElement;
-    const divGrille = document.getElementById('productionGrille') ? 
-        document.getElementById('productionGrille').parentElement : null;
+    const champPonderation = document.getElementById('champPonderation');
+    const champGrilleSeparee = document.getElementById('champGrilleSeparee');
+    const champGrilleInline = document.getElementById('champGrilleInline');
     const msgPonderation = document.getElementById('msgPonderationArtefact');
 
     // Réinitialiser tout d'abord
     if (champsPortfolio) champsPortfolio.style.display = 'none';
-    if (divPonderation) divPonderation.style.display = 'block';
-    if (divGrille) divGrille.style.display = 'block';
+    if (champPonderation) champPonderation.style.display = 'block';
+    if (champGrilleSeparee) champGrilleSeparee.style.display = 'block';
+    if (champGrilleInline) champGrilleInline.style.display = 'none';
     if (msgPonderation) msgPonderation.style.display = 'none';
 
     // Appliquer selon le type
     if (type === 'portfolio') {
         // Portfolio conteneur : afficher config, masquer grille
         if (champsPortfolio) champsPortfolio.style.display = 'block';
-        if (divGrille) divGrille.style.display = 'none';
+        if (champGrilleSeparee) champGrilleSeparee.style.display = 'none';
     } else if (type === 'artefact-portfolio') {
-        // Artefact individuel : masquer pondération, afficher message
-        if (divPonderation) divPonderation.style.display = 'none';
+        // Artefact individuel : masquer pondération, afficher grille inline, afficher message
+        if (champPonderation) champPonderation.style.display = 'none';
+        if (champGrilleSeparee) champGrilleSeparee.style.display = 'none';
+        if (champGrilleInline) champGrilleInline.style.display = 'block';
         if (msgPonderation) msgPonderation.style.display = 'block';
+
+        // Synchroniser les selects de grille
+        synchroniserGrilles();
+    }
+}
+
+/**
+ * Synchronise les deux selects de grille (inline et séparée)
+ */
+function synchroniserGrilles() {
+    const grilleStandard = document.getElementById('productionGrille');
+    const grilleInline = document.getElementById('productionGrilleInline');
+
+    if (grilleStandard && grilleInline) {
+        // Copier les options si nécessaire
+        if (grilleInline.options.length === 1) { // Seulement "Aucune"
+            grilleInline.innerHTML = grilleStandard.innerHTML;
+        }
+        // Synchroniser la valeur sélectionnée
+        grilleInline.value = grilleStandard.value;
     }
 }
 
@@ -825,7 +862,7 @@ function mettreAJourResumeTypes(evaluations) {
  * - travail : Travail écrit
  * - quiz : Quiz/Test
  * - presentation : Présentation
- * - portfolio : 📁 Portfolio (conteneur d'artefacts)
+ * - portfolio : 📁 Portfolio (conteneur)
  * - artefact-portfolio : Artefact d'un portfolio
  * - autre : Autre
  */
@@ -835,7 +872,7 @@ function getTypeLabel(type) {
         'travail': 'Travail écrit',
         'quiz': 'Quiz/Test',
         'presentation': 'Présentation',
-        'portfolio': '📁 Portfolio (conteneur d\'artefacts)',
+        'portfolio': '📁 Portfolio (conteneur)',
         'artefact-portfolio': 'Artefact d\'un portfolio',
         'autre': 'Autre'
     };
@@ -1154,6 +1191,8 @@ window.filtrerListeProductions = filtrerListeProductions;
 window.chargerProductionPourModif = chargerProductionPourModif;
 window.creerNouvelleProduction = creerNouvelleProduction;
 window.dupliquerProduction = dupliquerProduction;
+window.dupliquerProductionActive = dupliquerProductionActive;
+window.supprimerProductionActive = supprimerProductionActive;
 
 /* ===============================
    📌 NOTES D'UTILISATION
@@ -1251,19 +1290,12 @@ function afficherListeProductions(filtreType = '') {
     }
 
     const html = productionsFiltrees.map(prod => {
-        const grille = grilles.find(g => g.id === prod.grilleId);
-        const nomGrille = grille ? grille.nom : 'Aucune grille';
         const typeLabel = getTypeLabel(prod.type);
-        const ponderation = prod.type === 'artefact-portfolio' ? '-' : `${prod.ponderation || 0}%`;
 
         return `
             <div class="sidebar-item" data-id="${prod.id}" onclick="chargerProductionPourModif('${prod.id}')">
                 <div class="sidebar-item-titre">${echapperHtml(prod.description || 'Sans titre')}</div>
-                <div class="sidebar-item-badge">${typeLabel} · ${ponderation}</div>
-                <div class="sidebar-item-actions">
-                    <button class="btn-icone" onclick="event.stopPropagation(); dupliquerProduction('${prod.id}')" title="Dupliquer">Dupliquer</button>
-                    <button class="btn-icone" onclick="event.stopPropagation(); supprimerProduction('${prod.id}')" title="Supprimer">Supprimer</button>
-                </div>
+                <div class="sidebar-item-badge">${typeLabel}</div>
             </div>
         `;
     }).join('');
@@ -1301,6 +1333,12 @@ function chargerProductionPourModif(id) {
     const options = document.getElementById('optionsImportExportProductions');
     if (options) options.style.display = 'block';
 
+    // Afficher les boutons Dupliquer et Supprimer (mode édition)
+    const btnDupliquer = document.getElementById('btnDupliquerProduction');
+    const btnSupprimer = document.getElementById('btnSupprimerProduction');
+    if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
+    if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
+
     // Appeler afficherFormProduction pour charger les données
     afficherFormProduction(id);
 
@@ -1313,10 +1351,10 @@ function chargerProductionPourModif(id) {
         itemActif.classList.add('active');
     }
 
-    // Mettre à jour les métriques - passer l'objet production complet
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
-    const production = productions.find(p => p.id === id);
-    mettreAJourMetriquesProduction(production);
+    // Mettre à jour les métriques - DÉSACTIVÉ (cartes métriques supprimées)
+    // const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    // const production = productions.find(p => p.id === id);
+    // mettreAJourMetriquesProduction(production);
 }
 
 /**
@@ -1335,6 +1373,12 @@ function creerNouvelleProduction() {
     const options = document.getElementById('optionsImportExportProductions');
     if (options) options.style.display = 'block';
 
+    // Cacher les boutons Dupliquer et Supprimer (mode création)
+    const btnDupliquer = document.getElementById('btnDupliquerProduction');
+    const btnSupprimer = document.getElementById('btnSupprimerProduction');
+    if (btnDupliquer) btnDupliquer.style.display = 'none';
+    if (btnSupprimer) btnSupprimer.style.display = 'none';
+
     // Réinitialiser le formulaire
     document.getElementById('productionDescription').value = '';
     document.getElementById('productionTitre').value = '';
@@ -1351,8 +1395,11 @@ function creerNouvelleProduction() {
     // Changer le titre et le bouton
     document.getElementById('btnTexteEvaluation').textContent = 'Ajouter';
 
-    // Réinitialiser les métriques
-    mettreAJourMetriquesProduction(null);
+    // Réinitialiser productionEnEdition
+    productionEnEdition = null;
+
+    // Réinitialiser les métriques - DÉSACTIVÉ (cartes métriques supprimées)
+    // mettreAJourMetriquesProduction(null);
 
     // Retirer le highlight de tous les items
     document.querySelectorAll('.sidebar-item').forEach(item => {
@@ -1386,10 +1433,12 @@ function definirProductionActive(id) {
 }
 
 /**
- * Met à jour les cartes métriques avec les infos de la production
+ * DÉSACTIVÉ - Met à jour les cartes métriques avec les infos de la production
+ * Les cartes métriques ont été supprimées (redondantes avec le formulaire)
  *
  * @param {object|null} production - Production à afficher (ou null pour réinitialiser)
  */
+/*
 function mettreAJourMetriquesProduction(production) {
     const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
 
@@ -1413,6 +1462,7 @@ function mettreAJourMetriquesProduction(production) {
     const nomGrille = grille ? grille.nom : 'Aucune';
     document.getElementById('grilleProdMetrique').textContent = nomGrille;
 }
+*/
 
 /**
  * Charge les grilles disponibles dans le select
@@ -1463,6 +1513,53 @@ function dupliquerProduction(id) {
 }
 
 /**
+ * Duplique la production actuellement en édition
+ * Appelée par le bouton "Dupliquer" dans le formulaire
+ */
+function dupliquerProductionActive() {
+    if (!productionEnEdition) {
+        alert('Aucune production en cours d\'édition');
+        return;
+    }
+    dupliquerProduction(productionEnEdition);
+}
+
+/**
+ * Supprime la production actuellement en édition
+ * Appelée par le bouton "Supprimer" dans le formulaire
+ */
+function supprimerProductionActive() {
+    if (!productionEnEdition) {
+        alert('Aucune production en cours d\'édition');
+        return;
+    }
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette production ?')) {
+        return;
+    }
+
+    let productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    productions = productions.filter(e => e.id !== productionEnEdition);
+
+    localStorage.setItem('productions', JSON.stringify(productions));
+
+    // Fermer le formulaire et retourner à l'accueil
+    annulerFormProduction();
+
+    // Recharger la liste
+    afficherListeProductions();
+    afficherToutesLesProductionsParType();
+    mettreAJourPonderationTotale();
+
+    // Mettre à jour le statut des modalités si la fonction existe
+    if (typeof mettreAJourStatutModalites === 'function') {
+        mettreAJourStatutModalites();
+    }
+
+    alert('Production supprimée avec succès');
+}
+
+/**
  * Adapte la fonction sauvegarderProduction existante pour le nouveau layout
  * Cette fonction override la fonction originale pour ajouter le support sidebar
  */
@@ -1482,7 +1579,7 @@ window.sauvegarderProduction = function() {
         const productions = JSON.parse(localStorage.getItem('productions') || '[]');
         const production = productions.find(p => p.id === id);
         if (production) {
-            mettreAJourMetriquesProduction(production);
+            // mettreAJourMetriquesProduction(production); // DÉSACTIVÉ (cartes métriques supprimées)
             definirProductionActive(id);
         }
     }
