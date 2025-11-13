@@ -5118,147 +5118,154 @@
                     <div class="carte mt-3">
                         <h3>Aménagements</h3>
 
-                        <!-- SECTION: Congés prévus -->
-                        <h5 style="color: var(--bleu-moyen); margin-bottom: 15px; padding-bottom: 8px; 
-            border-bottom: 2px solid var(--bleu-leger);">
-                            Congés fériés et activités institutionnelles
-                        </h5>
-                        <p class="text-muted" class="text-085-mb15">
-                            Congés fériés, journées pédagogiques, journée Carrière, etc. avec leurs reprises
-                            éventuelles
-                        </p>
+                        <!-- Grille 2 colonnes : Événements prévus et Événements imprévus -->
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
 
-                        <!-- Container des événements prévus (généré par trimestre.js) -->
-                        <div id="congesPrevusContainer" class="mb-20">
-                            <p class="text-muted" class="text-italic">Aucun événement prévu déclaré.</p>
-                        </div>
+                            <!-- COLONNE GAUCHE: Congés prévus -->
+                            <div>
+                                <h5 style="color: var(--bleu-moyen); margin-bottom: 15px; padding-bottom: 8px;
+                    border-bottom: 2px solid var(--bleu-leger);">
+                                    Congés fériés et activités institutionnelles
+                                </h5>
+                                <p class="text-muted" style="margin-bottom: 15px; font-size: 0.85rem;">
+                                    Congés fériés, journées pédagogiques, journée Carrière, etc. avec leurs reprises
+                                    éventuelles
+                                </p>
 
-                        <!-- Bouton pour afficher le formulaire d'ajout -->
-                        <button id="btnAjouterPrevu" class="btn btn-confirmer" onclick="afficherFormEvenement()"
-                            class="mb-30">
-                            + Ajouter un événement prévu
-                        </button>
-
-                        <!-- FORMULAIRE D'AJOUT ÉVÉNEMENT PRÉVU (caché par défaut) -->
-                        <div id="formEvenementPrevu" style="display: none; margin-bottom: 30px; padding: 20px; background: var(--vert-pale); 
-    border: 1px solid var(--vert-leger); border-radius: 8px;">
-
-                            <h4 class="text-vert-leger-mb20">
-                                <span class="mr-10">✓</span>Nouvel événement prévu
-                            </h4>
-
-                            <div
-                                class="grid-4col-gap15-mb20">
-                                <div class="groupe-form">
-                                    <label>Date événement</label>
-                                    <input type="date" class="controle-form" id="dateEvenementPrevu">
+                                <!-- Container des événements prévus (généré par trimestre.js) -->
+                                <div id="congesPrevusContainer" class="mb-20">
+                                    <p class="text-muted" class="text-italic">Aucun événement prévu déclaré.</p>
                                 </div>
-                                <div class="groupe-form">
-                                    <label>Description</label>
-                                    <select class="controle-form" id="descriptionEvenementPrevu">
-                                        <option value="">Choisir...</option>
-                                        <option>Fête du travail (férié)</option>
-                                        <option>Action de grâce (férié)</option>
-                                        <option>Journée carrière</option>
-                                        <option>Vendredi saint (férié)</option>
-                                        <option>Lundi de Pâques (férié)</option>
-                                    </select>
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Reprise prévue</label>
-                                    <select class="controle-form" id="horaireReprisePrevu">
-                                        <option value="">Pas de reprise</option>
-                                        <option value="Horaire du lundi">Horaire du lundi</option>
-                                        <option value="Horaire du mardi">Horaire du mardi</option>
-                                        <option value="Horaire du mercredi">Horaire du mercredi</option>
-                                        <option value="Horaire du jeudi">Horaire du jeudi</option>
-                                        <option value="Horaire du vendredi">Horaire du vendredi</option>
-                                    </select>
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Date reprise</label>
-                                    <input type="date" class="controle-form" id="dateReprisePrevu">
-                                </div>
+
+                                <!-- Bouton pour afficher le formulaire d'ajout -->
+                                <button id="btnAjouterPrevu" class="btn btn-confirmer" onclick="afficherFormEvenement()"
+                                    style="margin-bottom: 30px;">
+                                    + Ajouter un événement prévu
+                                </button>
+
+                                <!-- FORMULAIRE D'AJOUT ÉVÉNEMENT PRÉVU (caché par défaut) -->
+                                <div id="formEvenementPrevu" style="display: none; margin-bottom: 30px; padding: 20px; background: var(--vert-pale);
+                    border: 1px solid var(--vert-leger); border-radius: 8px;">
+
+                                    <h4 class="text-vert-leger-mb20">
+                                        <span class="mr-10">✓</span>Nouvel événement prévu
+                                    </h4>
+
+                                    <div class="grid-4col-gap15-mb20">
+                                        <div class="groupe-form">
+                                            <label>Date événement</label>
+                                            <input type="date" class="controle-form" id="dateEvenementPrevu">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label>Description</label>
+                                            <select class="controle-form" id="descriptionEvenementPrevu">
+                                                <option value="">Choisir...</option>
+                                                <option>Fête du travail (férié)</option>
+                                                <option>Action de grâce (férié)</option>
+                                                <option>Journée carrière</option>
+                                                <option>Vendredi saint (férié)</option>
+                                                <option>Lundi de Pâques (férié)</option>
+                                            </select>
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label>Reprise prévue</label>
+                                            <select class="controle-form" id="horaireReprisePrevu">
+                                                <option value="">Pas de reprise</option>
+                                                <option value="Horaire du lundi">Horaire du lundi</option>
+                                                <option value="Horaire du mardi">Horaire du mardi</option>
+                                                <option value="Horaire du mercredi">Horaire du mercredi</option>
+                                                <option value="Horaire du jeudi">Horaire du jeudi</option>
+                                                <option value="Horaire du vendredi">Horaire du vendredi</option>
+                                            </select>
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label>Date reprise</label>
+                                            <input type="date" class="controle-form" id="dateReprisePrevu">
+                                        </div>
+                                    </div>
+
+                                    <div class="btn-groupe" class="justify-end">
+                                        <button class="btn btn-annuler" onclick="annulerFormEvenement()">Annuler</button>
+                                        <button class="btn btn-confirmer" onclick="confirmerAjoutEvenement()">Ajouter</button>
+                                    </div>
+                                </div><!-- FIN formulaire ajout prévu -->
                             </div>
 
-                            <div class="btn-groupe" class="justify-end">
-                                <button class="btn btn-annuler" onclick="annulerFormEvenement()">Annuler</button>
-                                <button class="btn btn-confirmer" onclick="confirmerAjoutEvenement()">Ajouter</button>
+                            <!-- COLONNE DROITE: Événements imprévus -->
+                            <div>
+                                <h5 style="color: var(--bleu-moyen); margin-bottom: 15px; padding-bottom: 8px;
+                    border-bottom: 2px solid var(--bleu-leger);">
+                                    Événements imprévus
+                                </h5>
+                                <p class="text-muted" style="margin-bottom: 15px; font-size: 0.85rem;">
+                                    Maladie, conditions météorologiques, urgence, autre, etc.
+                                </p>
+
+                                <!-- Container des événements imprévus (généré par trimestre.js) -->
+                                <div id="congesImprevusContainer" class="mb-20">
+                                    <p class="text-muted" class="text-italic">Aucun événement imprévu déclaré.</p>
+                                </div>
+
+                                <!-- Bouton pour afficher le formulaire d'ajout -->
+                                <button id="btnAjouterEvenementImprevu" class="btn btn-confirmer"
+                                    onclick="afficherFormEvenementImprevu()">
+                                    + Ajouter un événement imprévu
+                                </button>
+
+                                <!-- FORMULAIRE D'AJOUT ÉVÉNEMENT IMPRÉVU (caché par défaut) -->
+                                <div id="formEvenementImprevu" style="display: none; margin-top: 20px; padding: 20px; background: #fff4e6;
+                    border: 1px solid var(--orange-accent); border-radius: 8px;">
+
+                                    <h4 class="text-orange-accent-mb10">
+                                        <span class="mr-10">✗</span>Nouvel événement imprévu
+                                    </h4>
+
+                                    <p class="text-085-mb20-muted">
+                                        Pour les événements imprévus, la reprise peut être planifiée après coup selon les
+                                        circonstances.
+                                    </p>
+
+                                    <div class="grid-4col-gap15-mb20">
+                                        <div class="groupe-form">
+                                            <label>Date événement</label>
+                                            <input type="date" class="controle-form" id="dateEvenementImprevu">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label>Description</label>
+                                            <select class="controle-form" id="descriptionEvenementImprevu">
+                                                <option value="">Choisir...</option>
+                                                <option>Maladie</option>
+                                                <option>Météo</option>
+                                                <option>Urgence</option>
+                                                <option>Autre</option>
+                                            </select>
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label>Reprise prévue (optionnelle)</label>
+                                            <select class="controle-form" id="horaireRepriseImprevu">
+                                                <option value="">Pas de reprise</option>
+                                                <option value="Horaire du lundi">Horaire du lundi</option>
+                                                <option value="Horaire du mardi">Horaire du mardi</option>
+                                                <option value="Horaire du mercredi">Horaire du mercredi</option>
+                                                <option value="Horaire du jeudi">Horaire du jeudi</option>
+                                                <option value="Horaire du vendredi">Horaire du vendredi</option>
+                                            </select>
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label>Date reprise</label>
+                                            <input type="date" class="controle-form" id="dateRepriseImprevu">
+                                        </div>
+                                    </div>
+
+                                    <div class="btn-groupe" class="justify-end">
+                                        <button class="btn btn-annuler" onclick="annulerFormEvenementImprevu()">Annuler</button>
+                                        <button class="btn btn-confirmer"
+                                            onclick="confirmerAjoutEvenementImprevu()">Ajouter</button>
+                                    </div>
+                                </div><!-- FIN formulaire ajout imprévu -->
                             </div>
-                        </div><!-- FIN formulaire ajout prévu -->
 
-                        <!-- SECTION: Événements imprévus -->
-                        <h5 class="mt-3" style="color: var(--bleu-moyen); margin-bottom: 15px; padding-bottom: 8px; 
-            border-bottom: 2px solid var(--bleu-leger);">
-                            Événements imprévus
-                        </h5>
-                        <p class="text-muted" class="text-085-mb15">
-                            Maladie, conditions météorologiques, urgence, autre, etc.
-                        </p>
-
-                        <!-- Container des événements imprévus (généré par trimestre.js) -->
-                        <div id="congesImprevusContainer" class="mb-20">
-                            <p class="text-muted" class="text-italic">Aucun événement imprévu déclaré.</p>
-                        </div>
-
-                        <!-- Bouton pour afficher le formulaire d'ajout -->
-                        <button id="btnAjouterEvenementImprevu" class="btn btn-confirmer"
-                            onclick="afficherFormEvenementImprevu()">
-                            + Ajouter un événement imprévu
-                        </button>
-
-                        <!-- FORMULAIRE D'AJOUT ÉVÉNEMENT IMPRÉVU (caché par défaut) -->
-                        <div id="formEvenementImprevu" style="display: none; margin-top: 20px; padding: 20px; background: #fff4e6; 
-    border: 1px solid var(--orange-accent); border-radius: 8px;">
-
-                            <h4 class="text-orange-accent-mb10">
-                                <span class="mr-10">✗</span>Nouvel événement imprévu
-                            </h4>
-
-                            <p class="text-085-mb20-muted">
-                                Pour les événements imprévus, la reprise peut être planifiée après coup selon les
-                                circonstances.
-                            </p>
-
-                            <div
-                                class="grid-4col-gap15-mb20">
-                                <div class="groupe-form">
-                                    <label>Date événement</label>
-                                    <input type="date" class="controle-form" id="dateEvenementImprevu">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Description</label>
-                                    <select class="controle-form" id="descriptionEvenementImprevu">
-                                        <option value="">Choisir...</option>
-                                        <option>Maladie</option>
-                                        <option>Météo</option>
-                                        <option>Urgence</option>
-                                        <option>Autre</option>
-                                    </select>
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Reprise prévue (optionnelle)</label>
-                                    <select class="controle-form" id="horaireRepriseImprevu">
-                                        <option value="">Pas de reprise</option>
-                                        <option value="Horaire du lundi">Horaire du lundi</option>
-                                        <option value="Horaire du mardi">Horaire du mardi</option>
-                                        <option value="Horaire du mercredi">Horaire du mercredi</option>
-                                        <option value="Horaire du jeudi">Horaire du jeudi</option>
-                                        <option value="Horaire du vendredi">Horaire du vendredi</option>
-                                    </select>
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Date reprise</label>
-                                    <input type="date" class="controle-form" id="dateRepriseImprevu">
-                                </div>
-                            </div>
-
-                            <div class="btn-groupe" class="justify-end">
-                                <button class="btn btn-annuler" onclick="annulerFormEvenementImprevu()">Annuler</button>
-                                <button class="btn btn-confirmer"
-                                    onclick="confirmerAjoutEvenementImprevu()">Ajouter</button>
-                            </div>
-                        </div><!-- FIN formulaire ajout imprévu -->
+                        </div><!-- FIN grille 2 colonnes -->
 
                     </div><!-- FIN carte Aménagements -->
 
