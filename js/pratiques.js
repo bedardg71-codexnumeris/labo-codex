@@ -72,6 +72,101 @@ function initialiserModulePratiques() {
     chargerModalites();
     
     console.log('   ✅ Module Pratiques initialisé');
+
+    // 🔄 Migration automatique de la configuration (Phase 3)
+    migrerConfigurationPortfolio();
+}
+
+/* ===============================
+   🔄 MIGRATION CONFIGURATION (Phase 3)
+   =============================== */
+
+/**
+ * Migre la configuration du portfolio depuis productions vers modalitesEvaluation
+ *
+ * CONTEXTE Phase 3:
+ * Auparavant, la configuration (nombreARetenir, minimumCompletion, nombreTotal)
+ * était stockée dans productions[].regles. Nous la déplaçons vers
+ * modalitesEvaluation.configPAN.portfolio pour centraliser toute la config.
+ *
+ * Cette fonction s'exécute automatiquement au chargement et :
+ * 1. Vérifie si la migration est nécessaire
+ * 2. Lit l'ancienne configuration depuis productions
+ * 3. Crée la nouvelle structure dans modalitesEvaluation.configPAN.portfolio
+ * 4. Marque la migration comme complétée
+ * 5. Préserve l'ancienne config pour rétrocompatibilité
+ *
+ * @returns {boolean} True si migration effectuée, false si déjà faite ou rien à migrer
+ */
+function migrerConfigurationPortfolio() {
+    // Lire modalitésEvaluation
+    let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+
+    // Vérifier si migration déjà effectuée
+    if (modalites.configPAN && modalites.configPAN.portfolio && modalites.configPAN._migrationV1Complete) {
+        console.log('[Migration Phase 3] Déjà effectuée, skip');
+        return false;
+    }
+
+    console.log('[Migration Phase 3] 🔄 Début migration configuration portfolio...');
+
+    // Lire productions pour trouver le portfolio
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const portfolio = productions.find(p => p.type === 'portfolio');
+
+    if (!portfolio || !portfolio.regles) {
+        console.warn('[Migration Phase 3] ⚠️ Aucun portfolio avec règles trouvé, création config par défaut');
+
+        // Créer config par défaut
+        if (!modalites.configPAN) {
+            modalites.configPAN = {};
+        }
+
+        modalites.configPAN.portfolio = {
+            actif: true,
+            nombreARetenir: 5,
+            minimumCompletion: 7,
+            nombreTotal: 10,
+            methodeSelection: 'automatique'
+        };
+
+        modalites.configPAN._migrationV1Complete = true;
+        localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+
+        console.log('[Migration Phase 3] ✅ Configuration par défaut créée');
+        return true;
+    }
+
+    // Migrer depuis productions.regles
+    const anciennesRegles = portfolio.regles;
+
+    console.log('[Migration Phase 3] 📖 Anciennes règles lues:', JSON.stringify(anciennesRegles));
+
+    // Créer nouvelle structure
+    if (!modalites.configPAN) {
+        modalites.configPAN = {};
+    }
+
+    modalites.configPAN.portfolio = {
+        actif: true,
+        nombreARetenir: anciennesRegles.nombreARetenir || 5,
+        minimumCompletion: anciennesRegles.minimumCompletion || 7,
+        nombreTotal: anciennesRegles.nombreTotal || 10,
+        methodeSelection: 'automatique' // Default pour Phase 3
+    };
+
+    // Marquer migration comme complétée
+    modalites.configPAN._migrationV1Complete = true;
+    modalites.configPAN._migrationDate = new Date().toISOString();
+
+    // Sauvegarder
+    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+
+    console.log('[Migration Phase 3] ✅ Configuration migrée vers modalitesEvaluation.configPAN.portfolio');
+    console.log('[Migration Phase 3] 📊 Nouvelle config:', JSON.stringify(modalites.configPAN.portfolio));
+    console.log('[Migration Phase 3] ℹ️  Note: Ancienne config dans productions préservée pour rétrocompatibilité');
+
+    return true;
 }
 
 /**
@@ -328,15 +423,26 @@ function chargerConfigurationPAN() {
         radioPeriode.checked = true;
     }
 
-    // ⚠️ SINGLE SOURCE OF TRUTH: nombreARetenir vient du portfolio dans productions
-    // Lire depuis productions (lecture seule)
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
-    const portfolio = productions.find(p => p.type === 'portfolio');
-    const nombreARetenir = portfolio?.regles?.nombreARetenir || 3;
+    // ✅ CORRECTION Phase 3: Configuration du portfolio depuis modalitesEvaluation
+    const configPortfolio = configPAN.portfolio || {
+        nombreARetenir: 5,
+        minimumCompletion: 7,
+        nombreTotal: 10
+    };
 
-    const affichageNombreARetenir = document.getElementById('affichageNombreARetenir');
-    if (affichageNombreARetenir) {
-        affichageNombreARetenir.textContent = `${nombreARetenir} meilleurs artefacts`;
+    const selectNombreARetenir = document.getElementById('configNombreARetenir');
+    if (selectNombreARetenir) {
+        selectNombreARetenir.value = configPortfolio.nombreARetenir || 5;
+    }
+
+    const inputMinimumCompletion = document.getElementById('configMinimumCompletion');
+    if (inputMinimumCompletion) {
+        inputMinimumCompletion.value = configPortfolio.minimumCompletion || 7;
+    }
+
+    const inputNombreTotal = document.getElementById('configNombreTotal');
+    if (inputNombreTotal) {
+        inputNombreTotal.value = configPortfolio.nombreTotal || 10;
     }
 
     // Jetons - valeurs par défaut
@@ -422,8 +528,15 @@ function sauvegarderConfigurationPAN() {
     const radioPeriode = document.querySelector('input[name="periodePAN"]:checked');
     const nombreCours = radioPeriode ? parseInt(radioPeriode.value) : 7;
 
-    // ⚠️ SINGLE SOURCE OF TRUTH: nombreARetenir n'est PLUS sauvegardé ici
-    // Il est lu depuis productions (voir chargerConfigurationPAN)
+    // ✅ CORRECTION Phase 3: Configuration du portfolio
+    const selectNombreARetenir = document.getElementById('configNombreARetenir');
+    const nombreARetenir = selectNombreARetenir ? parseInt(selectNombreARetenir.value) : 5;
+
+    const inputMinimumCompletion = document.getElementById('configMinimumCompletion');
+    const minimumCompletion = inputMinimumCompletion ? parseInt(inputMinimumCompletion.value) : 7;
+
+    const inputNombreTotal = document.getElementById('configNombreTotal');
+    const nombreTotal = inputNombreTotal ? parseInt(inputNombreTotal.value) : 10;
 
     // Jetons
     const checkJetonsActif = document.getElementById('jetonsActif');
@@ -445,9 +558,17 @@ function sauvegarderConfigurationPAN() {
     const gestionOriginale = radioGestion ? radioGestion.value : 'archiver';
 
     // Construire l'objet config
-    // ⚠️ nombreARetenir n'est PLUS dans configPAN (lecture depuis productions)
+    // ✅ CORRECTION Phase 3: Inclure la configuration du portfolio
     modalites.configPAN = {
         nombreCours: nombreCours,
+
+        portfolio: {
+            actif: true,
+            nombreARetenir: nombreARetenir,
+            minimumCompletion: minimumCompletion,
+            nombreTotal: nombreTotal,
+            methodeSelection: 'automatique'
+        },
 
         jetons: {
             actif: jetonsActif,
