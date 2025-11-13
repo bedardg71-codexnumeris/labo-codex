@@ -4215,15 +4215,60 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-weight: bold;
 }
 
-/* Badge pratique inline */
+/* Badges pratiques de notation (SOM, PAN-Maîtrise, etc.) */
+.badge-pratique {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1.5px solid;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 12px;
+    vertical-align: middle;
+}
+
+/* Badge pratique compact (pour profil) */
+.badge-pratique-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1.5px solid;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+/* Variantes SOM */
+.badge-pratique.som,
+.badge-pratique-compact.som {
+    background: color-mix(in srgb, var(--som-orange) 9%, transparent);
+    border-color: var(--som-orange);
+    color: var(--som-orange);
+}
+
+/* Variantes PAN */
+.badge-pratique.pan,
+.badge-pratique-compact.pan {
+    background: color-mix(in srgb, var(--pan-bleu) 9%, transparent);
+    border-color: var(--pan-bleu);
+    color: var(--pan-bleu);
+}
+
+/* Ancienne classe pour rétrocompatibilité */
 .profil-badge-pratique {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    border-radius: 12px;
+    border: 1.5px solid;
+    font-size: 0.7rem;
+    font-weight: 700;
     margin-left: 8px;
     vertical-align: middle;
 }

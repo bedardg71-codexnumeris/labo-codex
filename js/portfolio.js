@@ -635,12 +635,24 @@ function calculerEtStockerIndicesCP() {
         const P_pan = P_pan_decimal !== null ? Math.round(P_pan_decimal * 100) : 0;
 
         // ========================================
-        // STRUCTURE À DEUX BRANCHES
+        // CALCUL P_RECENT POUR LE RISQUE (si découplage activé)
         // ========================================
 
-        // Lire la configuration PAN pour affichage explicite
+        // Lire la configuration PAN pour affichage explicite et découplage
         const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
         const configPortfolio = modalites.configPAN?.portfolio || {};
+        const decouplerPR = configPortfolio.decouplerPR || false;
+
+        // Calculer P_recent si découplage activé ET que la pratique supporte cette méthode
+        let P_recent = null;
+        if (decouplerPR && typeof pratiquePAN.calculerPerformanceRecente === 'function') {
+            const P_recent_decimal = pratiquePAN.calculerPerformanceRecente(da);
+            P_recent = P_recent_decimal !== null ? Math.round(P_recent_decimal * 100) : null;
+        }
+
+        // ========================================
+        // STRUCTURE À DEUX BRANCHES
+        // ========================================
 
         const entreeActuelle = {
             date: dateCalcul,
@@ -660,7 +672,9 @@ function calculerEtStockerIndicesCP() {
                     pratique: 'pan-maitrise',
                     portfolioActif: configPortfolio.actif !== false,
                     methodeSelection: configPortfolio.methodeSelection || 'meilleurs',
-                    nombreARetenir: configPortfolio.nombreARetenir || 5
+                    nombreARetenir: configPortfolio.nombreARetenir || 5,
+                    decouplerPR: decouplerPR,
+                    P_recent: P_recent  // Performance récente pour le calcul de R (si découplage activé)
                 }
             }
         };

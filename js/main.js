@@ -1,17 +1,54 @@
 /* ===============================
    MODULE 99: POINT D'ENTRÉE ET INITIALISATION
    Index: 50 10-10-2025a → Modularisation
-   
+
    ⚠️ AVERTISSEMENT CRITIQUE ⚠️
    Ce module doit être chargé EN DERNIER après tous les autres modules.
    Il initialise l'application et attache tous les événements globaux.
-   
+
    Contenu de ce module:
    - Initialisation au chargement du DOM
    - Événements de navigation principale
    - Démarrage de la section par défaut
    - Initialisations conditionnelles des modules
    =============================== */
+
+/* ===============================
+   FONCTION GLOBALE: Badge de pratique de notation
+   =============================== */
+/**
+ * Génère un badge HTML indiquant la pratique de notation
+ * Fonction globale unique utilisée partout dans l'application
+ * @param {string} type - 'SOM' ou 'PAN' (fourni par calculerTousLesIndices)
+ * @param {boolean} compact - true pour version compacte (profil), false pour version normale
+ * @returns {string} - HTML du badge avec classes CSS
+ */
+window.genererBadgePratique = function(type, compact = false) {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const typePAN = config.typePAN || 'maitrise';
+
+    let texte = '';
+    let classe = compact ? 'badge-pratique-compact' : 'badge-pratique';
+
+    if (type === 'SOM') {
+        texte = 'SOM';
+        classe += ' som';
+    } else {
+        // PAN : Identifier la pratique spécifique
+        if (typePAN === 'maitrise') {
+            texte = 'PAN-Maîtrise';
+        } else if (typePAN === 'specifications') {
+            texte = 'PAN-Spécifications';
+        } else if (typePAN === 'denotation') {
+            texte = 'PAN-Dénotation';
+        } else {
+            texte = 'PAN';
+        }
+        classe += ' pan';
+    }
+
+    return `<span class="${classe}">${texte}</span>`;
+};
 
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 Initialisation du système de monitorage v3.0');

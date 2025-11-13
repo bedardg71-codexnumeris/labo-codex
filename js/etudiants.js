@@ -427,12 +427,35 @@ function calculerNiveauRaI(da) {
         };
     }
 
-    // Fallback : calculer simplement avec R = 1 - (A × C × P)
+    // Fallback : calculer avec nouvelle formule R basée sur P uniquement
     const assiduite = calculerAssiduitéGlobale(da) / 100;
     const completion = calculerTauxCompletion(da) / 100;
-    const performance = calculerPerformance(da) / 100;
+    let performance = calculerPerformance(da) / 100;
 
-    const risque = 1 - (assiduite * completion * performance);
+    // ========================================
+    // DÉCOUPLAGE P/R : Lire P_recent si disponible
+    // ========================================
+    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
+    const donneesCP = indicesCP[da]?.actuel?.[pratique];
+
+    if (donneesCP && donneesCP.details && donneesCP.details.decouplerPR &&
+        donneesCP.details.P_recent !== null && donneesCP.details.P_recent !== undefined) {
+        performance = donneesCP.details.P_recent / 100; // Utiliser P_recent si découplage activé
+    }
+
+    // ========================================
+    // CALCUL DE R : Formule expérimentale basée sur P uniquement
+    // Seuil critique à 65% : P < 65% → échec probable (données empiriques)
+    // A et C servent de contexte diagnostique, pas de prédiction
+    // ========================================
+    let risque;
+    if (performance < 0.65) {
+        risque = 1.0;  // 100% - Risque critique
+    } else {
+        risque = Math.pow((1.0 - performance) / 0.35, 3);  // Décroissance cubique
+    }
     const risquePct = risque * 100;
 
     // Déterminer le niveau selon les seuils
