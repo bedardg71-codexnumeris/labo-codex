@@ -316,7 +316,7 @@ function viderRegistre() {
  * // Dans main.js
  * import './pratiques/pratique-pan-maitrise.js';
  * import './pratiques/pratique-sommative.js';
- * import { initialiserRegistrePratiques } from './pratiques/pratique-registry.js';
+ * import { initialiserRegistrePratiques } from './pratiques/pratique-registre.js';
  *
  * initialiserRegistrePratiques();
  */
@@ -371,4 +371,4 @@ window.invaliderCachePratique = invaliderCachePratique;
 window.desenregistrerPratique = desenregistrerPratique;
 window.viderRegistre = viderRegistre;
 
-console.log('✅ Module pratique-registry.js chargé');
+console.log('✅ Module pratique-registre.js chargé');

@@ -40,15 +40,23 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 
 **NOUVEAU (Beta 91)** : Architecture modulaire permettant de supporter plusieurs pratiques de notation.
 
+**✅ Phase 2 complétée (13 novembre 2025)** : Délégation des calculs vers le registre de pratiques
+- Élimination de 94% du code dupliqué dans `portfolio.js`
+- Tests automatiques : 30/30 étudiants validés (100% identiques)
+- Documentation : 8 documents créés (~200 pages)
+
 **Documentation complète** :
 - `ARCHITECTURE_PRATIQUES.md` : Document de référence (architecture, contrats, concepts)
 - `GUIDE_AJOUT_PRATIQUE.md` : Guide opérationnel pour ajouter une pratique
 - `FEUILLE_DE_ROUTE_PRATIQUES.md` : Roadmap d'implémentation
+- `PHASE_2_DELEGATION_COMPLETE.md` : Détails migration Phase 2
+- `VALIDATION_PHASE_2.md` : Rapport final tests
 
 **Principes** :
 - **Universel** : A-C-P-R, niveaux de risque, niveaux RàI → identiques pour toutes les pratiques
 - **Spécifique** : Calcul de P, détection défis, cibles RàI → propre à chaque pratique
 - **Interface** : Chaque pratique implémente le contrat `IPratique`
+- **Séparation** : portfolio.js orchestre, pratiques calculent (Single Source of Truth)
 
 **Pratiques implémentées** :
 - PAN-Maîtrise (Grégoire) : Échelle IDME, critères SRPNF, N derniers artefacts
@@ -61,10 +69,20 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 **Fichiers clés** :
 ```
 js/pratiques/
-├── pratique-interface.js        # Documentation du contrat
-├── pratique-registry.js         # Registre et détection
-├── pratique-pan-maitrise.js     # PAN-Maîtrise (Grégoire)
+├── pratique-interface.js        # Documentation du contrat IPratique
+├── pratique-registre.js         # Registre central (détection auto)
+├── pratique-pan-maitrise.js     # PAN-Maîtrise (IDME + SRPNF)
 └── pratique-sommative.js        # Sommative traditionnelle
+
+Flux de données (Phase 2) :
+portfolio.js
+    ↓ appelle
+obtenirPratiqueParId('sommative' | 'pan-maitrise')
+    ↓ retourne instance
+pratique.calculerPerformance(da)
+pratique.calculerCompletion(da)
+    ↓ retourne 0-1 (décimal)
+portfolio.js convertit 0-100 et stocke dans indicesCP
 ```
 
 ---
@@ -83,7 +101,7 @@ projet/
 │   │
 │   ├── pratiques/                        # 🆕 SYSTÈME DE PRATIQUES (Beta 91)
 │   │   ├── pratique-interface.js         # Documentation contrat IPratique
-│   │   ├── pratique-registry.js          # Registre et sélection pratique
+│   │   ├── pratique-registre.js          # Registre et sélection pratique
 │   │   ├── pratique-pan-maitrise.js      # PAN-Maîtrise (IDME + SRPNF)
 │   │   └── pratique-sommative.js         # Sommative traditionnelle
 │   │

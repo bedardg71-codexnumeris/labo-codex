@@ -503,48 +503,32 @@ function convertirNiveauEnPourcentage(niveau, echelleId = null) {
  * @returns {Object} - Structure complète avec indices SOM et PAN pour chaque étudiant
  */
 function calculerEtStockerIndicesCP() {
-    console.log('🔄 Calcul DUAL des indices C et P (SOM + PAN)...');
+    console.log('🔄 Calcul DUAL des indices C et P (SOM + PAN) via registre de pratiques...');
 
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const productions = obtenirDonneesSelonMode('productions');
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const selectionsPortfolios = obtenirDonneesSelonMode('portfoliosEleves');
 
     // Récupérer l'historique existant ou initialiser
     const indicesCP = obtenirDonneesSelonMode('indicesCP');
 
-    // 🎯 PRÉPARER LES FILTRES POUR LES DEUX PRATIQUES
+    // 🎯 OBTENIR LES PRATIQUES DEPUIS LE REGISTRE
+    const pratiqueSommative = obtenirPratiqueParId('sommative');
+    const pratiquePAN = obtenirPratiqueParId('pan-maitrise');
 
-    // Productions SOM : toutes les sommatives (exclut formatifs et conteneur portfolio)
+    if (!pratiqueSommative || !pratiquePAN) {
+        console.error('❌ Pratiques non disponibles dans le registre');
+        console.error('   Sommative:', !!pratiqueSommative);
+        console.error('   PAN-Maîtrise:', !!pratiquePAN);
+        return indicesCP;
+    }
+
+    // Préparer compteurs pour les logs
     const productionsSOM = productions.filter(p => comptesDansDepistage(p, 'SOM'));
-    const productionsSOMIds = new Set(productionsSOM.map(p => p.id));
+    const nbProductionsSOMDonnees = productionsSOM.length;
 
-    // Productions PAN : uniquement artefact-portfolio
     const productionsPAN = productions.filter(p => comptesDansDepistage(p, 'PAN'));
-    const productionsPANIds = new Set(productionsPAN.map(p => p.id));
-
-    // Identifier les productions SOM réellement données
-    const productionsSOMDonnees = new Set();
-    evaluations.forEach(evaluation => {
-        if (productionsSOMIds.has(evaluation.productionId)) {
-            productionsSOMDonnees.add(evaluation.productionId);
-        }
-    });
-
-    // Identifier les artefacts PAN réellement donnés
-    const artefactsPANDonnes = new Set();
-    evaluations.forEach(evaluation => {
-        if (productionsPANIds.has(evaluation.productionId)) {
-            artefactsPANDonnes.add(evaluation.productionId);
-        }
-    });
-
-    const nbProductionsSOMDonnees = productionsSOMDonnees.size;
-    const nbArtefactsPANDonnes = artefactsPANDonnes.size;
-
-    // Portfolio (pour PAN)
-    const portfolio = productions.find(p => p.type === 'portfolio');
+    const nbArtefactsPANDonnes = productionsPAN.length;
 
     // Filtrer les étudiants actifs
     const etudiantsActifs = etudiants.filter(e =>
@@ -558,98 +542,26 @@ function calculerEtStockerIndicesCP() {
         const da = etudiant.da;
 
         // ========================================
-        // CALCUL PRATIQUE SOM
+        // CALCUL PRATIQUE SOM (via registre)
         // ========================================
 
-        const evaluationsSOM = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            productionsSOMDonnees.has(e.productionId) &&
-            !e.remplaceeParId &&  // Exclure les évaluations remplacées par des reprises
-            e.statutIntegrite !== 'plagiat' &&  // Exclure les non recevables (plagiat)
-            e.statutIntegrite !== 'ia'  // Exclure les non recevables (IA non autorisée)
-        );
-        // Compter les productions DISTINCTES (pas le nombre total d'évaluations)
-        // Un étudiant peut avoir plusieurs évaluations du même artefact (reprises, jetons)
-        const productionsSOMRemises = new Set(evaluationsSOM.map(e => e.productionId));
-        const nbSOMRemises = productionsSOMRemises.size;
-        const C_som = nbProductionsSOMDonnees === 0 ? 0 : Math.round((nbSOMRemises / nbProductionsSOMDonnees) * 100);
+        const C_som_decimal = pratiqueSommative.calculerCompletion(da);
+        const P_som_decimal = pratiqueSommative.calculerPerformance(da);
 
-        let P_som = 0;
-        let notesSOM = [];
-        let productionsSOMRetenues = [];
-
-        const evaluationsSOMAvecNote = evaluationsSOM.filter(e => e.noteFinale !== null);
-        if (evaluationsSOMAvecNote.length > 0) {
-            let sommePonderee = 0;
-            let totalPonderation = 0;
-
-            evaluationsSOMAvecNote.forEach(evaluation => {
-                const production = productions.find(p => p.id === evaluation.productionId);
-                const ponderation = production?.ponderation || 0;
-                sommePonderee += evaluation.noteFinale * ponderation;
-                totalPonderation += ponderation;
-            });
-
-            if (totalPonderation > 0) {
-                P_som = Math.round(sommePonderee / totalPonderation);
-            } else {
-                // Fallback : moyenne simple si pondérations = 0
-                const somme = evaluationsSOMAvecNote.map(e => e.noteFinale).reduce((sum, note) => sum + note, 0);
-                P_som = Math.round(somme / evaluationsSOMAvecNote.length);
-            }
-
-            productionsSOMRetenues = evaluationsSOMAvecNote.map(e => e.productionId);
-            notesSOM = evaluationsSOMAvecNote.map(e => e.noteFinale);
-        }
+        // Convertir 0-1 → 0-100
+        const C_som = C_som_decimal !== null ? Math.round(C_som_decimal * 100) : 0;
+        const P_som = P_som_decimal !== null ? Math.round(P_som_decimal * 100) : 0;
 
         // ========================================
-        // CALCUL PRATIQUE PAN
+        // CALCUL PRATIQUE PAN (via registre)
         // ========================================
 
-        const evaluationsPAN = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            artefactsPANDonnes.has(e.productionId) &&
-            !e.remplaceeParId &&  // Exclure les évaluations remplacées par des reprises
-            e.statutIntegrite !== 'plagiat' &&  // Exclure les non recevables (plagiat)
-            e.statutIntegrite !== 'ia'  // Exclure les non recevables (IA non autorisée)
-        );
-        // Compter les artefacts DISTINCTS (pas le nombre total d'évaluations)
-        // Un étudiant peut avoir plusieurs évaluations du même artefact (reprises, jetons)
-        const artefactsPANRemis = new Set(evaluationsPAN.map(e => e.productionId));
-        const nbPANRemis = artefactsPANRemis.size;
-        const C_pan = nbArtefactsPANDonnes === 0 ? 0 : Math.round((nbPANRemis / nbArtefactsPANDonnes) * 100);
+        const C_pan_decimal = pratiquePAN.calculerCompletion(da);
+        const P_pan_decimal = pratiquePAN.calculerPerformance(da);
 
-        let P_pan = 0;
-        let notesPAN = [];
-        let artefactsPANRetenus = [];
-
-        if (portfolio && selectionsPortfolios[da]?.[portfolio.id]) {
-            // Utiliser les artefacts sélectionnés manuellement
-            artefactsPANRetenus = selectionsPortfolios[da][portfolio.id].artefactsRetenus || [];
-            const evaluationsRetenues = evaluationsPAN.filter(e =>
-                artefactsPANRetenus.includes(e.productionId) && e.noteFinale !== null
-            );
-
-            if (evaluationsRetenues.length > 0) {
-                notesPAN = evaluationsRetenues.map(e => e.noteFinale);
-                const somme = notesPAN.reduce((sum, note) => sum + note, 0);
-                P_pan = Math.round(somme / evaluationsRetenues.length);
-            }
-        } else {
-            // Sélection automatique des N meilleurs
-            const nombreARetenir = portfolio?.regles?.nombreARetenir || 3;
-            const evaluationsPANAvecNote = evaluationsPAN
-                .filter(e => e.noteFinale !== null)
-                .sort((a, b) => b.noteFinale - a.noteFinale)
-                .slice(0, nombreARetenir);
-
-            if (evaluationsPANAvecNote.length > 0) {
-                artefactsPANRetenus = evaluationsPANAvecNote.map(e => e.productionId);
-                notesPAN = evaluationsPANAvecNote.map(e => e.noteFinale);
-                const somme = notesPAN.reduce((sum, note) => sum + note, 0);
-                P_pan = Math.round(somme / evaluationsPANAvecNote.length);
-            }
-        }
+        // Convertir 0-1 → 0-100
+        const C_pan = C_pan_decimal !== null ? Math.round(C_pan_decimal * 100) : 0;
+        const P_pan = P_pan_decimal !== null ? Math.round(P_pan_decimal * 100) : 0;
 
         // ========================================
         // STRUCTURE À DEUX BRANCHES
@@ -661,20 +573,16 @@ function calculerEtStockerIndicesCP() {
                 C: C_som,
                 P: P_som,
                 details: {
-                    nbProductionsRemises: nbSOMRemises,
-                    nbProductionsDonnees: nbProductionsSOMDonnees,
-                    productionsRetenues: productionsSOMRetenues,
-                    notes: notesSOM
+                    calculViaPratique: true,
+                    pratique: 'sommative'
                 }
             },
             PAN: {
                 C: C_pan,
                 P: P_pan,
                 details: {
-                    nbArtefactsRemis: nbPANRemis,
-                    nbArtefactsDonnes: nbArtefactsPANDonnes,
-                    artefactsRetenus: artefactsPANRetenus,
-                    notes: notesPAN
+                    calculViaPratique: true,
+                    pratique: 'pan-maitrise'
                 }
             }
         };
