@@ -88,48 +88,19 @@ function initialiserModuleProfilEtudiant() {
 
 /**
  * Génère un badge compact indiquant la pratique de notation pour le profil
+ * DÉPRÉCIÉ: Utiliser genererBadgePratique() global à la place
  * @param {string} pratiqueUtilisee - 'SOM' ou 'PAN' (fourni par calculerTousLesIndices)
+ * @param {boolean} modeComparatif - true pour afficher les deux badges
  * @returns {string} - HTML du badge
  */
 function genererBadgePratiqueProfil(pratiqueUtilisee, modeComparatif = false) {
     // Mode comparatif: afficher les deux badges
     if (modeComparatif) {
-        return `
-            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
-                         background: #ff6f0015; border: 1.5px solid #ff6f00; border-radius: 12px;
-                         font-size: 0.7rem; font-weight: 700; color: #ff6f00; margin-left: 8px;
-                         vertical-align: middle;">
-                SOM
-            </span>
-            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
-                         background: #0277bd15; border: 1.5px solid #0277bd; border-radius: 12px;
-                         font-size: 0.7rem; font-weight: 700; color: #0277bd; margin-left: 4px;
-                         vertical-align: middle;">
-                PAN
-            </span>
-        `;
+        return genererBadgePratique('SOM', true) + genererBadgePratique('PAN', true);
     }
 
-    // Mode normal: un seul badge
-    let texte = '';
-    let couleur = '';
-
-    if (pratiqueUtilisee === 'SOM') {
-        texte = 'SOM';
-        couleur = '#ff6f00'; // Orange
-    } else {
-        texte = 'PAN';
-        couleur = '#0277bd'; // Bleu
-    }
-
-    return `
-        <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
-                     background: ${couleur}15; border: 1.5px solid ${couleur}; border-radius: 12px;
-                     font-size: 0.7rem; font-weight: 700; color: ${couleur}; margin-left: 8px;
-                     vertical-align: middle;">
-            ${texte}
-        </span>
-    `;
+    // Mode normal: un seul badge (utiliser la fonction globale)
+    return genererBadgePratique(pratiqueUtilisee, true);
 }
 
 /**
@@ -240,29 +211,54 @@ function calculerTousLesIndices(da, pratique = null) {
     // INDICES C et P : Lire depuis localStorage.indicesCP (Single Source of Truth)
     let C = 0;
     let P = 0;
+    let P_pourRisque = 0; // P à utiliser pour le calcul de R (peut être P_recent si découplage activé)
 
     if (typeof obtenirIndicesCP === 'function') {
         const indicesCP = obtenirIndicesCP(da, pratique); // Lire la branche spécifique
         if (indicesCP) {
             C = indicesCP.C / 100; // Convertir en proportion 0-1
             P = indicesCP.P / 100;
+            P_pourRisque = P; // Par défaut, P_pourRisque = P
+
+            // ========================================
+            // DÉCOUPLAGE P/R : Utiliser P_recent pour le calcul de R si activé
+            // ========================================
+            if (indicesCP.details && indicesCP.details.decouplerPR && indicesCP.details.P_recent !== null && indicesCP.details.P_recent !== undefined) {
+                P_pourRisque = indicesCP.details.P_recent / 100; // Convertir en proportion 0-1
+                console.log(`[Découplage P/R] DA ${da}: P=${Math.round(P*100)}% (notation), P_recent=${indicesCP.details.P_recent}% (risque)`);
+            }
         } else {
             // Fallback : calculer à la volée si pas encore généré
             console.warn(`⚠️ indicesCP non trouvé pour ${da} (${pratique}) - Calcul à la volée`);
             C = calculerTauxCompletion(da) / 100;
             P = calculerPerformancePAN(da);
+            P_pourRisque = P;
         }
     } else {
         // Fallback : fonctions anciennes si module portfolio.js pas chargé
         console.warn('⚠️ obtenirIndicesCP non disponible - Calcul à la volée');
         C = calculerTauxCompletion(da) / 100;
         P = calculerPerformancePAN(da);
+        P_pourRisque = P;
     }
 
     // INDICES COMPOSITES
-    const M = (A + C) / 2; // Mobilisation
-    const E = A * C * P;   // Engagement
-    const R = 1 - E;       // Risque
+    const M = (A + C) / 2;          // Mobilisation
+    const E = A * C * P_pourRisque; // Engagement (indicateur contextuel)
+
+    // ========================================
+    // CALCUL DE R : Formule expérimentale basée sur données empiriques
+    // Seuil critique à 65% : P < 65% → échec probable (cours 101→102)
+    // R basé sur P uniquement (prédicteur validé)
+    // A et C servent de contexte diagnostique (flags), pas de prédiction
+    // Décroissance cubique pour P ≥ 65%
+    // ========================================
+    let R;
+    if (P_pourRisque < 0.65) {
+        R = 1.0;  // 100% - Risque critique (données empiriques)
+    } else {
+        R = Math.pow((1.0 - P_pourRisque) / 0.35, 3);  // Décroissance cubique sur plage 65-100%
+    }
 
     return {
         // Indices primaires (en pourcentage pour compatibilité affichage)
@@ -1187,10 +1183,36 @@ function genererSectionMobilisationEngagement(da) {
             const seuilModere = 0.35;
             const seuilEleve = 0.50;
 
+            // ========================================
+            // Texte explicatif pour le calcul de R
+            // ========================================
+            const configPAN = config.configPAN?.portfolio || {};
+            const decouplerPR = configPAN.decouplerPR || false;
+            const nombreArtefacts = configPAN.nombreARetenir || 5;
+
+            let texteExplicatifR = '';
+            if (decouplerPR && !modeComparatif) {
+                // Mode découplage activé: R basé sur les N plus récents
+                texteExplicatifR = `<span style="font-size: 0.85rem; color: #666; font-weight: 400;"> (basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''})</span>`;
+            } else if (!decouplerPR && !modeComparatif && portfolioActif) {
+                // Mode normal: R basé sur P (selon modalité)
+                const textesModalites = {
+                    'meilleurs': `basé sur les ${nombreArtefacts} meilleur${nombreArtefacts > 1 ? 's' : ''}`,
+                    'recents': `basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''}`,
+                    'recents-meilleurs': `basé sur les ${nombreArtefacts} récent${nombreArtefacts > 1 ? 's' : ''} parmi les meilleurs`,
+                    'tous': 'basé sur tous les artefacts'
+                };
+                const texteModalite = textesModalites[methodeSelection] || textesModalites['meilleurs'];
+                texteExplicatifR = `<span style="font-size: 0.85rem; color: #666; font-weight: 400;"> (${texteModalite})</span>`;
+            }
+
             return `
                 <div class="profil-carte" style="margin-top: 10px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                        <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Risque d'échec</h3>
+                        <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">
+                            Risque d'échec${texteExplicatifR}
+                            <span style="font-size: 0.75rem; color: #999; font-weight: 400; margin-left: 8px;">exp.</span>
+                        </h3>
                         ${genererValeursComparatives(Math.round(R_SOM * 100), Math.round(R_PAN * 100), modeComparatif)}
                     </div>
 

@@ -215,6 +215,12 @@ function attacherEvenementsPratiques() {
     if (btnSauvegarder) {
         btnSauvegarder.addEventListener('click', sauvegarderPratiqueNotation);
     }
+
+    // NOUVEAU: Bouton pour ajouter un type de jeton personnalisé
+    const btnAjouterTypeJeton = document.getElementById('btnAjouterTypeJeton');
+    if (btnAjouterTypeJeton) {
+        btnAjouterTypeJeton.addEventListener('click', ajouterTypeJetonPersonnalise);
+    }
 }
 
 /* ===============================
@@ -318,19 +324,32 @@ function afficherInfoPAN() {
  */
 function afficherOptionsAffichage() {
     const pratique = document.getElementById('pratiqueNotation').value;
-    const optionsAffichage = document.getElementById('optionsAffichageIndices');
+    const sectionAffichageTableauBord = document.getElementById('sectionAffichageTableauBord');
     const checkComparatif = document.getElementById('modeComparatif');
-
-    if (!optionsAffichage) return;
+    const activationsExtras = document.getElementById('activationsExtras');
 
     if (pratique === 'alternative' || pratique === 'sommative') {
-        optionsAffichage.style.display = 'block';
-        // Par défaut : mode comparatif désactivé (affichage de la pratique principale uniquement)
-        if (checkComparatif) {
-            checkComparatif.checked = false;
+        // Afficher la section d'affichage au tableau de bord
+        if (sectionAffichageTableauBord) {
+            sectionAffichageTableauBord.style.display = 'block';
+        }
+
+        // Afficher les checkboxes d'activation pour PAN
+        if (pratique === 'alternative' && activationsExtras) {
+            activationsExtras.style.display = 'block';
+            // Initialiser l'affichage des cartes
+            afficherCartesExtras();
+        } else if (activationsExtras) {
+            activationsExtras.style.display = 'none';
         }
     } else {
-        optionsAffichage.style.display = 'none';
+        // Masquer tout si aucune pratique sélectionnée
+        if (sectionAffichageTableauBord) {
+            sectionAffichageTableauBord.style.display = 'none';
+        }
+        if (activationsExtras) {
+            activationsExtras.style.display = 'none';
+        }
     }
 
     sauvegarderOptionsAffichage();
@@ -469,6 +488,11 @@ function chargerConfigurationPAN() {
         inputNombreTotal.value = configPortfolio.nombreTotal || 10;
     }
 
+    const checkDecouplerPR = document.getElementById('decouplerPR');
+    if (checkDecouplerPR) {
+        checkDecouplerPR.checked = configPortfolio.decouplerPR || false; // Par défaut false (couplé)
+    }
+
     // Jetons - valeurs par défaut
     const jetons = configPAN.jetons || {
         actif: true,
@@ -507,6 +531,16 @@ function chargerConfigurationPAN() {
         radioGestion.checked = true;
     }
 
+    // Nombre de jetons par élève (NOUVEAU)
+    const inputNombreJetonsParEleve = document.getElementById('nombreJetonsParEleve');
+    if (inputNombreJetonsParEleve) {
+        inputNombreJetonsParEleve.value = jetons.nombreParEleve || 4;
+    }
+
+    // Charger les types de jetons personnalisés (NOUVEAU)
+    const jetonsPersonnalises = jetons.typesPersonnalises || [];
+    afficherJetonsPersonnalises(jetonsPersonnalises);
+
     // Activer/désactiver sections jetons
     toggleConfigJetons();
 
@@ -530,6 +564,9 @@ function toggleConfigPortfolio() {
     if (detailsConfig) {
         detailsConfig.style.display = portfolioActif ? 'block' : 'none';
     }
+
+    // Afficher/masquer la carte portfolio dans la colonne droite
+    afficherCartesExtras();
 }
 
 /**
@@ -614,6 +651,47 @@ function toggleConfigJetons() {
         const champsReprise = configReprise.querySelectorAll('select, input');
         champsReprise.forEach(champ => champ.disabled = !jetonsActif);
     }
+
+    // Afficher/masquer la carte jetons dans la colonne droite
+    afficherCartesExtras();
+}
+
+/**
+ * Gère l'affichage conditionnel des cartes Portfolio et Jetons dans la colonne droite
+ * Affiche la carte correspondante selon les checkboxes cochées
+ */
+function afficherCartesExtras() {
+    const checkPortfolio = document.getElementById('portfolioActif');
+    const checkJetons = document.getElementById('jetonsActif');
+    const colonneCartesExtras = document.getElementById('colonneCartesExtras');
+    const cartePortfolio = document.getElementById('cartePortfolio');
+    const carteJetons = document.getElementById('carteJetons');
+
+    if (!colonneCartesExtras || !cartePortfolio || !carteJetons) return;
+
+    // Gérer l'affichage de la carte Portfolio
+    if (checkPortfolio && checkPortfolio.checked) {
+        // Ajouter la carte si elle n'est pas déjà dans la colonne
+        if (!colonneCartesExtras.contains(cartePortfolio)) {
+            colonneCartesExtras.appendChild(cartePortfolio);
+        }
+        cartePortfolio.style.display = 'block';
+    } else {
+        // Masquer la carte sans la supprimer du DOM
+        cartePortfolio.style.display = 'none';
+    }
+
+    // Gérer l'affichage de la carte Jetons
+    if (checkJetons && checkJetons.checked) {
+        // Ajouter la carte si elle n'est pas déjà dans la colonne
+        if (!colonneCartesExtras.contains(carteJetons)) {
+            colonneCartesExtras.appendChild(carteJetons);
+        }
+        carteJetons.style.display = 'block';
+    } else {
+        // Masquer la carte sans la supprimer du DOM
+        carteJetons.style.display = 'none';
+    }
 }
 
 /**
@@ -642,9 +720,18 @@ function sauvegarderConfigurationPAN() {
     const inputNombreTotal = document.getElementById('configNombreTotal');
     const nombreTotal = inputNombreTotal ? parseInt(inputNombreTotal.value) : 10;
 
+    const checkDecouplerPR = document.getElementById('decouplerPR');
+    const decouplerPR = checkDecouplerPR ? checkDecouplerPR.checked : false;
+
     // Jetons
     const checkJetonsActif = document.getElementById('jetonsActif');
     const jetonsActif = checkJetonsActif ? checkJetonsActif.checked : true;
+
+    const checkJetonDelaiActif = document.getElementById('jetonDelaiActif');
+    const jetonDelaiActif = checkJetonDelaiActif ? checkJetonDelaiActif.checked : true;
+
+    const checkJetonRepriseActif = document.getElementById('jetonRepriseActif');
+    const jetonRepriseActif = checkJetonRepriseActif ? checkJetonRepriseActif.checked : true;
 
     const selectNombreJetonsDelai = document.getElementById('nombreJetonsDelai');
     const nombreJetonsDelai = selectNombreJetonsDelai ? parseInt(selectNombreJetonsDelai.value) : 2;
@@ -661,6 +748,13 @@ function sauvegarderConfigurationPAN() {
     const radioGestion = document.querySelector('input[name="gestionOriginale"]:checked');
     const gestionOriginale = radioGestion ? radioGestion.value : 'archiver';
 
+    // NOUVEAU: Nombre de jetons par élève
+    const inputNombreJetonsParEleve = document.getElementById('nombreJetonsParEleve');
+    const nombreParEleve = inputNombreJetonsParEleve ? parseInt(inputNombreJetonsParEleve.value) : 4;
+
+    // NOUVEAU: Récupérer les types personnalisés depuis localStorage temporaire
+    const typesPersonnalises = window.jetonsPersonnalisesTemporaire || [];
+
     // Construire l'objet config
     // ✅ CORRECTION Phase 3: Inclure la configuration du portfolio
     modalites.configPAN = {
@@ -671,22 +765,28 @@ function sauvegarderConfigurationPAN() {
             nombreARetenir: nombreARetenir,
             minimumCompletion: minimumCompletion,
             nombreTotal: nombreTotal,
-            methodeSelection: methodeSelection
+            methodeSelection: methodeSelection,
+            decouplerPR: decouplerPR
         },
 
         jetons: {
             actif: jetonsActif,
+            nombreParEleve: nombreParEleve,
 
             delai: {
+                actif: jetonDelaiActif,
                 nombre: nombreJetonsDelai,
                 dureeJours: dureeDelai
             },
 
             reprise: {
+                actif: jetonRepriseActif,
                 nombre: nombreJetonsReprise,
                 maxParProduction: maxRepriseParProduction,
                 archiverOriginale: gestionOriginale === 'archiver'
-            }
+            },
+
+            typesPersonnalises: typesPersonnalises
         }
     };
 
@@ -757,12 +857,10 @@ function sauvegarderPratiqueNotation() {
 
     localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
 
-    // Sauvegarder la configuration PAN si pratique alternative
-    if (pratique === 'alternative') {
-        sauvegarderConfigurationPAN();
-    }
+    // Sauvegarder toutes les configurations (portfolio et jetons)
+    sauvegarderConfigurationPAN();
 
-    afficherNotificationSucces('Configuration de la pratique de notation sauvegardée !');
+    afficherNotificationSucces('Toutes les configurations ont été sauvegardées !');
     mettreAJourStatutModalites();
 
     console.log('Configuration complète sauvegardée:', modalites);
@@ -839,6 +937,11 @@ function chargerModalites() {
     // Afficher la section options si nécessaire
     afficherOptionsAffichage();
 
+    // Charger la configuration PAN (portfolio et jetons)
+    if (modalites.configPAN) {
+        chargerConfigurationPAN(modalites.configPAN);
+    }
+
     // Masquer la section configurationPAN au chargement
     // Elle sera affichée par le bouton "Modifier les paramètres"
     const configPAN = document.getElementById('configurationPAN');
@@ -848,6 +951,103 @@ function chargerModalites() {
 
     // Mettre à jour le statut
     mettreAJourStatutModalites();
+}
+
+/**
+ * Charge la configuration PAN (portfolio et jetons) depuis l'objet configPAN
+ * @param {Object} configPAN - Configuration PAN depuis localStorage
+ */
+function chargerConfigurationPAN(configPAN) {
+    if (!configPAN) return;
+
+    // Charger configuration du portfolio
+    if (configPAN.portfolio) {
+        const checkPortfolio = document.getElementById('portfolioActif');
+        if (checkPortfolio) {
+            checkPortfolio.checked = configPAN.portfolio.actif !== false;
+        }
+
+        const selectMethode = document.getElementById('configMethodeSelection');
+        if (selectMethode && configPAN.portfolio.methodeSelection) {
+            selectMethode.value = configPAN.portfolio.methodeSelection;
+        }
+
+        const inputNombreARetenir = document.getElementById('configNombreARetenir');
+        if (inputNombreARetenir && configPAN.portfolio.nombreARetenir) {
+            inputNombreARetenir.value = configPAN.portfolio.nombreARetenir;
+        }
+
+        const inputMinimum = document.getElementById('configMinimumCompletion');
+        if (inputMinimum && configPAN.portfolio.minimumCompletion) {
+            inputMinimum.value = configPAN.portfolio.minimumCompletion;
+        }
+
+        const inputNombreTotal = document.getElementById('configNombreTotal');
+        if (inputNombreTotal && configPAN.portfolio.nombreTotal) {
+            inputNombreTotal.value = configPAN.portfolio.nombreTotal;
+        }
+
+        const checkDecoupler = document.getElementById('decouplerPR');
+        if (checkDecoupler) {
+            checkDecoupler.checked = configPAN.portfolio.decouplerPR === true;
+        }
+
+        // Mettre à jour l'affichage des détails
+        toggleConfigPortfolio();
+    }
+
+    // Charger configuration des jetons
+    if (configPAN.jetons) {
+        const checkJetons = document.getElementById('jetonsActif');
+        if (checkJetons) {
+            checkJetons.checked = configPAN.jetons.actif !== false;
+        }
+
+        const inputNombreJetons = document.getElementById('nombreJetonsParEleve');
+        if (inputNombreJetons && configPAN.jetons.nombreParEleve) {
+            inputNombreJetons.value = configPAN.jetons.nombreParEleve;
+        }
+
+        // Jetons de délai
+        if (configPAN.jetons.delai) {
+            const checkDelai = document.getElementById('jetonDelaiActif');
+            if (checkDelai) {
+                checkDelai.checked = configPAN.jetons.delai.actif !== false;
+            }
+
+            const inputDuree = document.getElementById('dureeDelai');
+            if (inputDuree && configPAN.jetons.delai.dureeJours) {
+                inputDuree.value = configPAN.jetons.delai.dureeJours;
+            }
+        }
+
+        // Jetons de reprise
+        if (configPAN.jetons.reprise) {
+            const checkReprise = document.getElementById('jetonRepriseActif');
+            if (checkReprise) {
+                checkReprise.checked = configPAN.jetons.reprise.actif !== false;
+            }
+
+            const radioArchiver = document.getElementById('archiverOriginale');
+            const radioSupprimer = document.getElementById('supprimerOriginale');
+            if (configPAN.jetons.reprise.archiverOriginale === true) {
+                if (radioArchiver) radioArchiver.checked = true;
+            } else {
+                if (radioSupprimer) radioSupprimer.checked = true;
+            }
+        }
+
+        // Types personnalisés
+        if (configPAN.jetons.typesPersonnalises) {
+            afficherJetonsPersonnalises(configPAN.jetons.typesPersonnalises);
+        }
+
+        // Mettre à jour l'affichage des jetons
+        toggleConfigJetons();
+    }
+
+    // Actualiser l'affichage des cartes
+    afficherCartesExtras();
 }
 
 /* ===============================
@@ -915,6 +1115,84 @@ function afficherNotificationSucces(message) {
         notification.remove();
     }, 3000);
 }
+
+/* ===============================
+   GESTION DES JETONS PERSONNALISÉS
+   =============================== */
+
+// Variable globale temporaire pour stocker les jetons personnalisés
+window.jetonsPersonnalisesTemporaire = [];
+
+/**
+ * Affiche la liste des types de jetons personnalisés
+ * @param {Array} jetonsPersonnalises - Liste des types personnalisés
+ */
+function afficherJetonsPersonnalises(jetonsPersonnalises) {
+    window.jetonsPersonnalisesTemporaire = jetonsPersonnalises || [];
+    const liste = document.getElementById('listeJetonsPersonnalises');
+    if (!liste) return;
+
+    if (jetonsPersonnalises.length === 0) {
+        liste.innerHTML = '';
+        return;
+    }
+
+    liste.innerHTML = jetonsPersonnalises.map((jeton, index) => `
+        <div style="padding: 10px; background: var(--bleu-tres-pale); border-radius: 6px; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <strong style="flex: 1;">${jeton.nom}</strong>
+                <button type="button" class="btn btn-danger" onclick="supprimerTypeJetonPersonnalise(${index})" style="margin-left: 8px;">
+                    Supprimer
+                </button>
+            </div>
+            <p class="text-muted" style="margin: 0; font-size: 0.85rem;">${jeton.description}</p>
+        </div>
+    `).join('');
+}
+
+/**
+ * Ajoute un nouveau type de jeton personnalisé
+ */
+function ajouterTypeJetonPersonnalise() {
+    const nom = prompt('Nom du type de jeton :', 'Jeton de...');
+    if (!nom || nom.trim() === '') {
+        alert('Le nom du jeton ne peut pas être vide.');
+        return;
+    }
+
+    const description = prompt('Description du jeton :', 'Permet de...');
+    if (!description || description.trim() === '') {
+        alert('La description du jeton ne peut pas être vide.');
+        return;
+    }
+
+    const nouveauJeton = {
+        id: 'jeton_' + Date.now(),
+        nom: nom.trim(),
+        description: description.trim()
+    };
+
+    window.jetonsPersonnalisesTemporaire.push(nouveauJeton);
+    afficherJetonsPersonnalises(window.jetonsPersonnalisesTemporaire);
+}
+
+/**
+ * Supprime un type de jeton personnalisé
+ * @param {number} index - Index du jeton à supprimer
+ */
+function supprimerTypeJetonPersonnalise(index) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce type de jeton ?')) {
+        return;
+    }
+
+    window.jetonsPersonnalisesTemporaire.splice(index, 1);
+    afficherJetonsPersonnalises(window.jetonsPersonnalisesTemporaire);
+}
+
+// Exporter les fonctions pour qu'elles soient accessibles globalement
+window.afficherJetonsPersonnalises = afficherJetonsPersonnalises;
+window.ajouterTypeJetonPersonnalise = ajouterTypeJetonPersonnalise;
+window.supprimerTypeJetonPersonnalise = supprimerTypeJetonPersonnalise;
 
 /* ===============================
    UTILITAIRES PUBLICS

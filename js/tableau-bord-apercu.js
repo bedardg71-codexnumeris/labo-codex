@@ -180,21 +180,12 @@ function chargerTableauBordApercu() {
             titre.innerHTML = '';
             const conteneurTitre = document.createElement('div');
 
-            if (modeComparatif) {
-                // Mode comparatif: checkboxes à droite
-                conteneurTitre.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;';
-                conteneurTitre.innerHTML = `
-                    <span>Vue d'ensemble</span>
-                    ${genererIndicateurPratiqueOuCheckboxes()}
-                `;
-            } else {
-                // Mode normal: badge inline après le titre
-                conteneurTitre.style.cssText = 'display: flex; align-items: center; margin-bottom: 10px;';
-                conteneurTitre.innerHTML = `
-                    <span>Vue d'ensemble</span>
-                    ${genererIndicateurPratiqueOuCheckboxes()}
-                `;
-            }
+            // Layout uniforme : titre à gauche, badges à droite
+            conteneurTitre.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;';
+            conteneurTitre.innerHTML = `
+                <span>Vue d'ensemble</span>
+                ${genererIndicateurPratiqueOuCheckboxes()}
+            `;
 
             titre.appendChild(conteneurTitre);
         }
@@ -226,80 +217,24 @@ function genererIndicateurPratiqueOuCheckboxes() {
     // Si les deux pratiques sont affichées, c'est le mode comparatif
     const modeComparatif = afficherSom && afficherPan;
 
-    // MODE COMPARATIF: Afficher les checkboxes interactives
-    // Les checkboxes restent visibles tant que les deux pratiques sont affichées
+    // MODE COMPARATIF: Afficher deux badges informatifs côte à côte
+    // (similaires aux badges utilisés dans le profil étudiant)
     if (modeComparatif) {
         return `
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;
-                              padding: 6px 12px; background: color-mix(in srgb, var(--som-orange) 9%, transparent);
-                              border: 1.5px solid var(--som-orange); border-radius: 6px; font-size: 0.9rem; font-weight: 600;">
-                    <input type="checkbox" id="checkbox-som" ${afficherSom ? 'checked' : ''}
-                           onchange="togglerAffichagePratique('som', this.checked)"
-                           style="cursor: pointer;">
-                    <span style="color: var(--som-orange);">SOM</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;
-                              padding: 6px 12px; background: color-mix(in srgb, var(--pan-bleu) 9%, transparent);
-                              border: 1.5px solid var(--pan-bleu); border-radius: 6px; font-size: 0.9rem; font-weight: 600;">
-                    <input type="checkbox" id="checkbox-pan" ${afficherPan ? 'checked' : ''}
-                           onchange="togglerAffichagePratique('pan', this.checked)"
-                           style="cursor: pointer;">
-                    <span style="color: var(--pan-bleu);">PAN</span>
-                </label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                ${genererBadgePratique('SOM', true)}
+                ${genererBadgePratique('PAN', true)}
             </div>
         `;
     }
 
     // MODE NORMAL: Afficher un simple badge identifiant la pratique
     const pratique = afficherSom ? 'SOM' : 'PAN';
-    const couleur = afficherSom ? 'var(--som-orange)' : 'var(--pan-bleu)';
 
-    return `
-        <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
-                     background: color-mix(in srgb, ${couleur} 9%, transparent);
-                     border: 1.5px solid ${couleur}; border-radius: 20px;
-                     font-size: 0.85rem; font-weight: 600; color: ${couleur}; margin-left: 12px;">
-            ${pratique}
-        </span>
-    `;
+    // Utiliser la fonction globale unique (compact = true)
+    return genererBadgePratique(pratique, true);
 }
 
-/**
- * Toggle l'affichage d'une pratique et met à jour les réglages
- * @param {string} pratique - 'som' ou 'pan'
- * @param {boolean} afficher - true pour afficher, false pour masquer
- */
-function togglerAffichagePratique(pratique, afficher) {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-
-    if (!config.affichageTableauBord) {
-        config.affichageTableauBord = {};
-    }
-
-    // Mettre à jour la pratique sélectionnée
-    if (pratique === 'som') {
-        config.affichageTableauBord.afficherSommatif = afficher;
-    } else if (pratique === 'pan') {
-        config.affichageTableauBord.afficherAlternatif = afficher;
-    }
-
-    // Validation: au moins une pratique doit rester affichée
-    if (!config.affichageTableauBord.afficherSommatif && !config.affichageTableauBord.afficherAlternatif) {
-        alert('Au moins une pratique doit rester affichée !');
-        // Recocher la pratique qu'on vient de décocher
-        if (pratique === 'som') {
-            config.affichageTableauBord.afficherSommatif = true;
-        } else if (pratique === 'pan') {
-            config.affichageTableauBord.afficherAlternatif = true;
-        }
-    }
-
-    localStorage.setItem('modalitesEvaluation', JSON.stringify(config));
-
-    // Recharger le tableau de bord
-    chargerTableauBordApercu();
-}
 
 /* ===============================
    🧮 CALCULS DES INDICES
@@ -348,6 +283,16 @@ function calculerIndicesEtudiant(da) {
         }
     };
 
+    // ========================================
+    // DÉCOUPLAGE P/R : Lire P_recent si activé pour PAN
+    // ========================================
+    let P_recent_PAN = null;
+    if (indicesPAN && indicesPAN.details && indicesPAN.details.decouplerPR &&
+        indicesPAN.details.P_recent !== null && indicesPAN.details.P_recent !== undefined) {
+        P_recent_PAN = indicesPAN.details.P_recent / 100; // Convertir en proportion 0-1
+        console.log(`[Découplage P/R] DA ${da}: P_recent=${indicesPAN.details.P_recent}% utilisé pour calcul risque PAN`);
+    }
+
     // Calculer les risques pour les deux
     indices.sommatif.risque = calculerRisque(
         indices.sommatif.assiduite,
@@ -356,10 +301,12 @@ function calculerIndicesEtudiant(da) {
     );
     indices.sommatif.niveauRisque = determinerNiveauRisque(indices.sommatif.risque);
 
+    // Pour PAN: utiliser P_recent si découplage activé, sinon P normal
+    const P_pour_risque_PAN = P_recent_PAN !== null ? P_recent_PAN : indices.alternatif.performance;
     indices.alternatif.risque = calculerRisque(
         indices.alternatif.assiduite,
         indices.alternatif.completion,
-        indices.alternatif.performance
+        P_pour_risque_PAN
     );
     indices.alternatif.niveauRisque = determinerNiveauRisque(indices.alternatif.risque);
 
@@ -368,20 +315,28 @@ function calculerIndicesEtudiant(da) {
 
 /**
  * Calcule le risque d'échec
- * Formule du Guide: 1 - (A × C × P)
- * 
- * @param {number} assiduite - Indice A
- * @param {number} completion - Indice C
- * @param {number} performance - Indice P
+ * NOUVELLE FORMULE (expérimentale): Basée sur P uniquement
+ * Données empiriques: P < 65% → échec probable
+ * A et C servent de contexte diagnostique, pas de prédiction
+ *
+ * @param {number} assiduite - Indice A (non utilisé pour R, contexte seulement)
+ * @param {number} completion - Indice C (non utilisé pour R, contexte seulement)
+ * @param {number} performance - Indice P (prédicteur validé)
  * @returns {number} Risque entre 0 et 1
  */
 function calculerRisque(assiduite, completion, performance) {
-    // Si un des indices est 0, risque = 1 (critique)
-    if (assiduite === 0 || completion === 0 || performance === 0) {
+    // Si P = 0, risque = 1 (critique)
+    if (performance === 0) {
         return 1;
     }
-    
-    return 1 - (assiduite * completion * performance);
+
+    // Seuil critique à 65% basé sur données empiriques
+    if (performance < 0.65) {
+        return 1.0;  // 100% - Risque critique
+    } else {
+        // Décroissance cubique pour P ≥ 65%
+        return Math.pow((1.0 - performance) / 0.35, 3);
+    }
 }
 
 /**
@@ -446,6 +401,23 @@ function afficherMetriquesGlobales(etudiants) {
         ? etudiants.reduce((sum, e) => sum + e.alternatif.performance, 0) / nbTotal
         : 0;
 
+    // Lire la configuration du portfolio pour la description de Performance
+    const configPortfolio = config.configPAN?.portfolio || {};
+    const portfolioActif = configPortfolio.actif !== false;
+    const nombreARetenir = configPortfolio.nombreARetenir || 5;
+    const methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
+
+    let descriptionPerformance = '';
+    if (portfolioActif) {
+        const textesDescription = {
+            'meilleurs': `${nombreARetenir} meilleur${nombreARetenir > 1 ? 's' : ''} artefact${nombreARetenir > 1 ? 's' : ''}`,
+            'recents': `${nombreARetenir} plus récent${nombreARetenir > 1 ? 's' : ''}`,
+            'recents-meilleurs': `${nombreARetenir} récent${nombreARetenir > 1 ? 's' : ''} parmi les meilleurs`,
+            'tous': `Tous les artefacts`
+        };
+        descriptionPerformance = textesDescription[methodeSelection] || textesDescription['meilleurs'];
+    }
+
     // Trouver la carte des indicateurs globaux
     const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
     let carteIndicateurs = null;
@@ -471,7 +443,7 @@ function afficherMetriquesGlobales(etudiants) {
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             ${genererCarteMetrique('Assiduité', assiduiteSommatif, assiduiteAlternatif, afficherSom, afficherPan)}
             ${genererCarteMetrique('Complétion', completionSommatif, completionAlternatif, afficherSom, afficherPan)}
-            ${genererCarteMetrique('Performance', performanceSommatif, performanceAlternatif, afficherSom, afficherPan)}
+            ${genererCarteMetrique('Performance', performanceSommatif, performanceAlternatif, afficherSom, afficherPan, descriptionPerformance)}
         </div>
     `;
 
@@ -489,7 +461,7 @@ function afficherMetriquesGlobales(etudiants) {
  * @param {boolean} afficherPan - Afficher PAN
  * @returns {string} HTML de la carte
  */
-function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficherPan) {
+function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficherPan, description = '') {
     const valeurs = [];
 
     if (afficherSom) {
@@ -500,9 +472,12 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
         valeurs.push(`<strong style="font-size: 1.8rem; color: var(--pan-bleu); font-weight: 700;">${formatPourcentage(valeurPan)}</strong>`);
     }
 
+    // Intégrer la description dans le label si présente
+    const labelComplet = description ? `${label} <span style="font-size: 0.75rem; color: #666;">(${description})</span>` : label;
+
     return `
         <div class="carte-metrique">
-            <span class="label">${label}</span>
+            <span class="label">${labelComplet}</span>
             <div style="display: flex; gap: 15px; align-items: baseline;">
                 ${valeurs.join('')}
             </div>

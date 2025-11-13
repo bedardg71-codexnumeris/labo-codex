@@ -1106,8 +1106,27 @@ function obtenirIndicesEtudiant(da) {
     const C = donneesCP.C ?? 0;
     const P = donneesCP.P ?? 0;
 
-    // Indice R (Risque) = 1 - (A × C × P)
-    const R = 1 - (A * C * P);
+    // ========================================
+    // DÉCOUPLAGE P/R : Utiliser P_recent pour le calcul de R si activé
+    // ========================================
+    let P_pourRisque = P;
+    if (donneesCP.details && donneesCP.details.decouplerPR &&
+        donneesCP.details.P_recent !== null && donneesCP.details.P_recent !== undefined) {
+        P_pourRisque = donneesCP.details.P_recent; // Déjà en pourcentage
+    }
+
+    // ========================================
+    // CALCUL DE R : Formule expérimentale basée sur P uniquement
+    // Seuil critique à 65% : P < 65% → échec probable (données empiriques)
+    // A et C servent de contexte diagnostique, pas de prédiction
+    // ========================================
+    let R;
+    const P_decimal = P_pourRisque / 100;  // Convertir en proportion 0-1
+    if (P_decimal < 0.65) {
+        R = 1.0;  // 100% - Risque critique
+    } else {
+        R = Math.pow((1.0 - P_decimal) / 0.35, 3);  // Décroissance cubique
+    }
 
     return { A, C, P, R };
 }

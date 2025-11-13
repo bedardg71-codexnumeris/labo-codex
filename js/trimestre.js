@@ -83,6 +83,56 @@
    🚀 INITIALISATION DU MODULE
    =============================== */
 
+/**
+ * Migration : Ajoute des IDs aux événements qui n'en ont pas
+ * Nécessaire pour les événements créés avant l'implémentation du système d'ID
+ */
+function migrerEvenementsAvecIDs() {
+    console.log('🔄 Migration des événements : ajout des IDs manquants...');
+
+    // Migrer les événements prévus
+    let evenementsPrevus = JSON.parse(localStorage.getItem('evenementsPrevus') || '[]');
+    let nbMigres = 0;
+
+    evenementsPrevus = evenementsPrevus.map((evt, index) => {
+        // Vérifier si l'ID est manquant ou invalide
+        if (!evt.id || evt.id === 'undefined' || evt.id === 'null' || evt.id === '') {
+            nbMigres++;
+            const nouvelId = 'evt_prevu_' + Date.now() + '_' + index;
+            console.log(`  → Ajout ID "${nouvelId}" pour: ${evt.description}`);
+            return { ...evt, id: nouvelId };
+        }
+        return evt;
+    });
+
+    if (nbMigres > 0) {
+        localStorage.setItem('evenementsPrevus', JSON.stringify(evenementsPrevus));
+        console.log(`✅ ${nbMigres} événement(s) prévu(s) migré(s)`);
+    }
+
+    // Migrer les événements imprévus
+    let evenementsImprevus = JSON.parse(localStorage.getItem('evenementsImprevus') || '[]');
+    nbMigres = 0;
+
+    evenementsImprevus = evenementsImprevus.map((evt, index) => {
+        // Vérifier si l'ID est manquant ou invalide
+        if (!evt.id || evt.id === 'undefined' || evt.id === 'null' || evt.id === '') {
+            nbMigres++;
+            const nouvelId = 'evt_imprevu_' + Date.now() + '_' + index;
+            console.log(`  → Ajout ID "${nouvelId}" pour: ${evt.description}`);
+            return { ...evt, id: nouvelId };
+        }
+        return evt;
+    });
+
+    if (nbMigres > 0) {
+        localStorage.setItem('evenementsImprevus', JSON.stringify(evenementsImprevus));
+        console.log(`✅ ${nbMigres} événement(s) imprévu(s) migré(s)`);
+    }
+
+    console.log('✅ Migration terminée');
+}
+
 function initialiserModuleTrimestre() {
     console.log('Initialisation du module Trimestre (refonte)');
 
@@ -92,8 +142,16 @@ function initialiserModuleTrimestre() {
         return;
     }
 
-    // Charger les données existantes
+    // Charger d'abord les données pour affichage initial
     chargerCadreCalendrier();
+    chargerEvenementsPrevus();
+    chargerEvenementsImprevus();
+
+    // Migration : S'assurer que tous les événements ont un ID
+    // IMPORTANT : Faire après le premier affichage pour capturer les événements existants
+    migrerEvenementsAvecIDs();
+
+    // Recharger l'affichage avec les IDs migrés
     chargerEvenementsPrevus();
     chargerEvenementsImprevus();
 
@@ -178,8 +236,6 @@ function chargerEvenementsPrevus() {
 
     let html = '';
     evenements.forEach((evt, index) => {
-        const verrouille = evt.verrouille ? 'checked' : '';
-        const disabled = evt.verrouille ? 'disabled' : '';
         const bgColor = 'var(--bleu-tres-pale)';
         const borderColor = 'var(--bleu-leger)';
 
@@ -188,15 +244,10 @@ function chargerEvenementsPrevus() {
     <div class="item-carte-header">
         <strong class="item-carte-titre">${evt.description}</strong>
         <div class="item-carte-actions">
-            <button onclick="modifierEvenement('${evt.id}', 'prevus')" 
-                    class="btn btn-modifier" ${disabled}>Modifier</button>
-            <button onclick="supprimerEvenement('${evt.id}', 'prevus')" 
-                    class="btn btn-supprimer" ${disabled}>Supprimer</button>
-            <span onclick="basculerVerrouillageEvenement('${evt.id}', 'prevus')"
-                  style="font-size: 1.2rem; cursor: pointer; user-select: none;"
-                  title="${evt.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
-                ${evt.verrouille ? '🔒' : '🔓'}
-            </span>
+            <button onclick="modifierEvenement('${evt.id}', 'prevus')"
+                    class="btn btn-modifier">Modifier</button>
+            <button onclick="supprimerEvenement('${evt.id}', 'prevus')"
+                    class="btn btn-supprimer">Supprimer</button>
         </div>
     </div>
     <div class="item-carte-grille ${evt.dateReprise ? 'item-carte-grille-custom' : ''}">
@@ -254,8 +305,7 @@ function confirmerAjoutEvenement() {
                 dateEvenement,
                 description,
                 horaireReprise: horaireReprise || '',
-                dateReprise: dateReprise || '',
-                verrouille: evenements[index].verrouille || false
+                dateReprise: dateReprise || ''
             };
         }
         form.removeAttribute('data-edit-id');
@@ -266,8 +316,7 @@ function confirmerAjoutEvenement() {
             dateEvenement,
             description,
             horaireReprise: horaireReprise || '',
-            dateReprise: dateReprise || '',
-            verrouille: false
+            dateReprise: dateReprise || ''
         });
     }
 
@@ -305,26 +354,6 @@ function supprimerEvenement(id, type) {
     afficherNotification('Événement supprimé');
 }
 
-function basculerVerrouillageEvenement(id, type) {
-    const cle = type === 'prevus' ? 'evenementsPrevus' : 'evenementsImprevus';
-    const evenements = JSON.parse(localStorage.getItem(cle) || '[]');
-    const evt = evenements.find(e => e.id === id);
-
-    if (evt) {
-        evt.verrouille = !evt.verrouille;
-        localStorage.setItem(cle, JSON.stringify(evenements));
-
-        // Afficher notification
-        const message = evt.verrouille ? 'Événement verrouillé' : 'Événement déverrouillé';
-        afficherNotification(message);
-
-        if (type === 'prevus') {
-            chargerEvenementsPrevus();
-        } else {
-            chargerEvenementsImprevus();
-        }
-    }
-}
 
 /* ===============================
    GESTION DES ÉVÉNEMENTS IMPRÉVUS
@@ -343,8 +372,6 @@ function chargerEvenementsImprevus() {
 
     let html = '';
     evenements.forEach((evt, index) => {
-        const verrouille = evt.verrouille ? 'checked' : '';
-        const disabled = evt.verrouille ? 'disabled' : '';
         const bgColor = 'var(--bleu-tres-pale)';
         const borderColor = 'var(--bleu-leger)';
 
@@ -353,15 +380,10 @@ function chargerEvenementsImprevus() {
             <div class="item-carte-header">
                 <strong class="item-carte-titre">${evt.description}</strong>
                 <div class="item-carte-actions">
-                    <button onclick="modifierEvenement('${evt.id}', 'imprevus')" 
-                            class="btn btn-modifier" ${disabled}>Modifier</button>
-                    <button onclick="supprimerEvenement('${evt.id}', 'imprevus')" 
-                            class="btn btn-supprimer" ${disabled}>Supprimer</button>
-                    <span onclick="basculerVerrouillageEvenement('${evt.id}', 'imprevus')"
-                          style="font-size: 1.2rem; cursor: pointer; user-select: none;"
-                          title="${evt.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
-                        ${evt.verrouille ? '🔒' : '🔓'}
-                    </span>
+                    <button onclick="modifierEvenement('${evt.id}', 'imprevus')"
+                            class="btn btn-modifier">Modifier</button>
+                    <button onclick="supprimerEvenement('${evt.id}', 'imprevus')"
+                            class="btn btn-supprimer">Supprimer</button>
                 </div>
             </div>
             <div class="item-carte-grille ${evt.dateReprise ? 'item-carte-grille-custom' : ''}">
@@ -392,6 +414,7 @@ function chargerEvenementsImprevus() {
 function confirmerAjoutEvenementImprevu() {
     const dateEvenement = document.getElementById('dateEvenementImprevu')?.value;
     const description = document.getElementById('descriptionEvenementImprevu')?.value;
+    const horaireReprise = document.getElementById('horaireRepriseImprevu')?.value;
     const dateReprise = document.getElementById('dateRepriseImprevu')?.value;
 
     if (!dateEvenement || !description) {
@@ -399,15 +422,39 @@ function confirmerAjoutEvenementImprevu() {
         return;
     }
 
+    if (dateReprise && !horaireReprise) {
+        alert('Veuillez indiquer quel jour de cours est remplacé (ex: Horaire du lundi)');
+        return;
+    }
+
+    const form = document.getElementById('formEvenementImprevu');
+    const editId = form.getAttribute('data-edit-id');
+
     const evenements = JSON.parse(localStorage.getItem('evenementsImprevus') || '[]');
 
-    evenements.push({
-        id: Date.now().toString(),
-        dateEvenement,
-        description,
-        dateReprise: dateReprise || null,
-        verrouille: false
-    });
+    if (editId) {
+        // MODE ÉDITION : Remplacer l'événement existant
+        const index = evenements.findIndex(e => e.id === editId);
+        if (index !== -1) {
+            evenements[index] = {
+                id: editId,
+                dateEvenement,
+                description,
+                horaireReprise: horaireReprise || '',
+                dateReprise: dateReprise || ''
+            };
+        }
+        form.removeAttribute('data-edit-id');
+    } else {
+        // MODE AJOUT : Créer un nouvel événement
+        evenements.push({
+            id: Date.now().toString(),
+            dateEvenement,
+            description,
+            horaireReprise: horaireReprise || '',
+            dateReprise: dateReprise || ''
+        });
+    }
 
     localStorage.setItem('evenementsImprevus', JSON.stringify(evenements));
 
@@ -417,7 +464,7 @@ function confirmerAjoutEvenementImprevu() {
     chargerEvenementsImprevus();
     afficherStatistiquesTrimestre();
     annulerFormEvenementImprevu();
-    afficherNotification('Événement imprévu ajouté');
+    afficherNotification(editId ? 'Événement imprévu modifié' : 'Événement imprévu ajouté');
 }
 
 /* ===============================
@@ -678,8 +725,10 @@ function annulerFormEvenement() {
     const form = document.getElementById('formEvenementPrevu');
     if (form) {
         form.style.display = 'none';
+        form.removeAttribute('data-edit-id');
         document.getElementById('dateEvenementPrevu').value = '';
         document.getElementById('descriptionEvenementPrevu').value = '';
+        document.getElementById('horaireReprisePrevu').value = '';
         document.getElementById('dateReprisePrevu').value = '';
     }
 }
@@ -693,8 +742,10 @@ function annulerFormEvenementImprevu() {
     const form = document.getElementById('formEvenementImprevu');
     if (form) {
         form.style.display = 'none';
+        form.removeAttribute('data-edit-id');
         document.getElementById('dateEvenementImprevu').value = '';
         document.getElementById('descriptionEvenementImprevu').value = '';
+        document.getElementById('horaireRepriseImprevu').value = '';
         document.getElementById('dateRepriseImprevu').value = '';
     }
 }
@@ -755,7 +806,7 @@ function obtenirCalendrierComplet() {
 
 /**
  * Obtient les infos d'une date spécifique
- * 
+ *
  * @param {string} date - Date au format YYYY-MM-DD
  * @returns {Object|null} Infos du jour ou null
  */
@@ -763,3 +814,10 @@ function obtenirInfosJour(date) {
     const calendrier = obtenirCalendrierComplet();
     return calendrier[date] || null;
 }
+
+/* ===============================
+   🌐 EXPORTS GLOBAUX
+   =============================== */
+
+// Export de la fonction d'initialisation pour main.js
+window.initialiserModuleTrimestre = initialiserModuleTrimestre;
