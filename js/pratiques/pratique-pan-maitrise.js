@@ -809,7 +809,7 @@ class PratiquePANMaitrise {
     if (typeof window.enregistrerPratique !== 'function') {
         console.error(
             '[PAN] Le registre n\'est pas chargé ! ' +
-            'Assurez-vous de charger pratique-registry.js avant pratique-pan-maitrise.js'
+            'Assurez-vous de charger pratique-registre.js avant pratique-pan-maitrise.js'
         );
         return;
     }

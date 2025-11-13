@@ -612,7 +612,7 @@ class PratiqueSommative {
     if (typeof window.enregistrerPratique !== 'function') {
         console.error(
             '[SOM] Le registre n\'est pas chargé ! ' +
-            'Assurez-vous de charger pratique-registry.js avant pratique-sommative.js'
+            'Assurez-vous de charger pratique-registre.js avant pratique-sommative.js'
         );
         return;
     }
