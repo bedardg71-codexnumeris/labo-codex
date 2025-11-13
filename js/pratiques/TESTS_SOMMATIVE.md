@@ -19,7 +19,7 @@ Valider que la pratique Sommative fonctionne correctement et produit des résult
 ### Vérifications attendues dans la console
 
 ```
-✅ Module pratique-registry.js chargé
+✅ Module pratique-registre.js chargé
 ✅ Module pratique-test.js chargé
 ✅ Module pratique-pan-maitrise.js chargé
 ✅ Module pratique-sommative.js chargé

@@ -21,7 +21,7 @@ Valider que l'infrastructure de base du système de pratiques fonctionne correct
 Vous devriez voir ces messages de confirmation :
 
 ```
-✅ Module pratique-registry.js chargé
+✅ Module pratique-registre.js chargé
 ✅ Module pratique-test.js chargé
 ✅ [PratiqueTest] Pratique de test enregistrée avec succès
 💡 Pour tester, exécutez : testerPratiqueTest()

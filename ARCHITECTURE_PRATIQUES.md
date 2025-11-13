@@ -59,7 +59,7 @@ Tout le code de détection des patterns et défis est **hardcodé** pour la prat
 js/
 ├── pratiques/
 │   ├── pratique-interface.js          # Documentation du contrat
-│   ├── pratique-registry.js           # Registre et sélection
+│   ├── pratique-registre.js           # Registre et sélection
 │   ├── pratique-pan-maitrise.js       # PAN-Maîtrise (Grégoire)
 │   ├── pratique-sommative.js          # Sommative traditionnelle
 │   ├── pratique-pan-specifications.js # PAN-Spécifications (futur)
@@ -298,7 +298,7 @@ Exemples génériques :
 
 ### Phase 2 : Extraction PAN-Maîtrise (1-2 jours)
 - [ ] Créer `js/pratiques/pratique-interface.js` (documentation)
-- [ ] Créer `js/pratiques/pratique-registry.js` (registre)
+- [ ] Créer `js/pratiques/pratique-registre.js` (registre)
 - [ ] Extraire code actuel → `js/pratiques/pratique-pan-maitrise.js`
 - [ ] Adapter `profil-etudiant.js` pour utiliser l'interface
 - [ ] Tester que PAN-Maîtrise fonctionne toujours
@@ -352,7 +352,7 @@ Exemples génériques :
 
 1. Créer `js/pratiques/pratique-[nom].js`
 2. Implémenter l'interface `IPratique`
-3. Enregistrer dans `pratique-registry.js`
+3. Enregistrer dans `pratique-registre.js`
 4. Tester avec données démo
 5. Documenter dans section Aide
 

@@ -111,7 +111,7 @@ PRATIQUE (source unique)           MODULE LECTEUR (affichage)
 │  └─ detecterDefis(da)            │  └─ affiche défis SRPNF
 │  └─ genererCibleIntervention(da) │  └─ affiche cibles critères
 │                                  │
-└─ pratique-registry.js            └─ tableau-bord-apercu.js
+└─ pratique-registre.js            └─ tableau-bord-apercu.js
    └─ obtenirPratiqueParId(id)        └─ compte patterns SOM+PAN
    └─ obtenirPratiqueActive()         └─ compte niveaux RàI SOM+PAN
 ```

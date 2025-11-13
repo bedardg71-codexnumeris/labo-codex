@@ -46,8 +46,7 @@ class PratiquePANMaitrise {
     /**
      * Calcule l'indice P (Performance) selon PAN-Maîtrise
      *
-     * Formule : Moyenne des N meilleurs artefacts de portfolio
-     * N est configurable dans modalitesEvaluation.configPAN.nombreARetenir
+     * Formule : Selon la modalité configurée dans modalitesEvaluation.configPAN.portfolio
      *
      * @param {string} da - Numéro de dossier d'admission
      * @returns {number} Indice P entre 0 et 1, ou null si pas de données
@@ -60,7 +59,15 @@ class PratiquePANMaitrise {
 
         // Lire configuration
         const config = this._lireConfiguration();
+        const portfolioActif = config.portfolioActif;
         const nombreARetenir = config.nombreARetenir;
+        const methodeSelection = config.methodeSelection;
+
+        // Si portfolio désactivé, retourner null (productions indépendantes)
+        if (!portfolioActif) {
+            console.log('[PAN] Portfolio désactivé - productions indépendantes');
+            return null;
+        }
 
         // Lire les évaluations et productions
         const evaluations = this._lireEvaluations();
@@ -80,20 +87,51 @@ class PratiquePANMaitrise {
             return null;
         }
 
-        // Trier par note décroissante (meilleures d'abord)
-        evaluationsEleve.sort((a, b) => b.noteFinale - a.noteFinale);
+        // Appliquer la logique de sélection selon la modalité
+        let artefactsRetenus = [];
 
-        // Prendre les N meilleurs
-        const meilleurs = evaluationsEleve.slice(0, nombreARetenir);
+        switch (methodeSelection) {
+            case 'meilleurs':
+                // Trier par note décroissante et prendre les N meilleurs
+                evaluationsEleve.sort((a, b) => b.noteFinale - a.noteFinale);
+                artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
+                break;
+
+            case 'recents':
+                // Trier par date décroissante et prendre les N plus récents
+                evaluationsEleve.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+                artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
+                break;
+
+            case 'recents-meilleurs':
+                // Filtrer top 50% par note, puis prendre les N plus récents
+                const nombreMeilleurs = Math.max(1, Math.ceil(evaluationsEleve.length * 0.5));
+                evaluationsEleve.sort((a, b) => b.noteFinale - a.noteFinale);
+                const topMeilleurs = evaluationsEleve.slice(0, nombreMeilleurs);
+                topMeilleurs.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+                artefactsRetenus = topMeilleurs.slice(0, nombreARetenir);
+                break;
+
+            case 'tous':
+                // Tous les artefacts
+                artefactsRetenus = evaluationsEleve;
+                break;
+
+            default:
+                console.warn(`[PAN] Modalité inconnue: ${methodeSelection}, utilisation de 'meilleurs' par défaut`);
+                evaluationsEleve.sort((a, b) => b.noteFinale - a.noteFinale);
+                artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
+                break;
+        }
 
         // Calculer la moyenne
-        const somme = meilleurs.reduce((acc, e) => acc + e.noteFinale, 0);
-        const moyenne = somme / meilleurs.length;
+        const somme = artefactsRetenus.reduce((acc, e) => acc + e.noteFinale, 0);
+        const moyenne = somme / artefactsRetenus.length;
 
         // Convertir en indice 0-1
         const indiceP = moyenne / 100;
 
-        console.log(`[PAN] Performance DA ${da}: ${(indiceP * 100).toFixed(1)}% (${meilleurs.length}/${nombreARetenir} artefacts)`);
+        console.log(`[PAN] Performance DA ${da}: ${(indiceP * 100).toFixed(1)}% (${artefactsRetenus.length} artefacts - modalité: ${methodeSelection})`);
 
         return indiceP;
     }
@@ -308,15 +346,19 @@ class PratiquePANMaitrise {
 
         // ✅ PHASE 3: SINGLE SOURCE OF TRUTH centralisé dans modalitesEvaluation.configPAN.portfolio
         // Lire depuis le nouvel emplacement avec fallback vers productions pour rétrocompatibilité
+        let portfolioActif = true;
         let nombreARetenir = 3;
         let minimumCompletion = 7;
         let nombreTotal = 10;
+        let methodeSelection = 'meilleurs';
 
         if (configPAN.portfolio) {
             // Nouveau format (Phase 3)
+            portfolioActif = configPAN.portfolio.actif !== false;
             nombreARetenir = configPAN.portfolio.nombreARetenir || 3;
             minimumCompletion = configPAN.portfolio.minimumCompletion || 7;
             nombreTotal = configPAN.portfolio.nombreTotal || 10;
+            methodeSelection = configPAN.portfolio.methodeSelection || 'meilleurs';
         } else {
             // Ancien format (fallback pour rétrocompatibilité)
             const productions = JSON.parse(localStorage.getItem('productions') || '[]');
@@ -331,9 +373,11 @@ class PratiquePANMaitrise {
 
         return {
             nombreCours: configPAN.nombreCours || 3,  // 3, 7 ou 12 cours
+            portfolioActif: portfolioActif,           // Portfolio activé ou non
             nombreARetenir: nombreARetenir,           // Lecture depuis modalitesEvaluation.configPAN.portfolio
             minimumCompletion: minimumCompletion,     // Nouvelle donnée disponible
-            nombreTotal: nombreTotal                   // Nouvelle donnée disponible
+            nombreTotal: nombreTotal,                 // Nouvelle donnée disponible
+            methodeSelection: methodeSelection        // Modalité de sélection des artefacts
         };
     }
 

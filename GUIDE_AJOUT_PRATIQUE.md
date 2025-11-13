@@ -332,7 +332,7 @@ if (typeof window !== 'undefined') {
 
 ### Modifier le registre
 
-Éditez `/js/pratiques/pratique-registry.js` et ajoutez votre pratique :
+Éditez `/js/pratiques/pratique-registre.js` et ajoutez votre pratique :
 
 ```javascript
 // Importer votre classe
@@ -355,7 +355,7 @@ Dans la section `<head>` ou avant `</body>` :
 <script src="js/pratiques/pratique-pan-maitrise.js"></script>
 <script src="js/pratiques/pratique-sommative.js"></script>
 <script src="js/pratiques/pratique-[votre-id].js"></script>  <!-- ← AJOUTER ICI -->
-<script src="js/pratiques/pratique-registry.js"></script>
+<script src="js/pratiques/pratique-registre.js"></script>
 ```
 
 ---
@@ -462,7 +462,7 @@ Avant de partager, testez avec :
 
 ### "Pratique non trouvée"
 
-**Cause** : ID incorrect ou non enregistré dans `pratique-registry.js`
+**Cause** : ID incorrect ou non enregistré dans `pratique-registre.js`
 
 **Solution** : Vérifier l'ID dans le registre et le localStorage
 

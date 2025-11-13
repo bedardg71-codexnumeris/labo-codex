@@ -127,7 +127,7 @@ function migrerConfigurationPortfolio() {
             nombreARetenir: 5,
             minimumCompletion: 7,
             nombreTotal: 10,
-            methodeSelection: 'automatique'
+            methodeSelection: 'meilleurs'
         };
 
         modalites.configPAN._migrationV1Complete = true;
@@ -152,7 +152,7 @@ function migrerConfigurationPortfolio() {
         nombreARetenir: anciennesRegles.nombreARetenir || 5,
         minimumCompletion: anciennesRegles.minimumCompletion || 7,
         nombreTotal: anciennesRegles.nombreTotal || 10,
-        methodeSelection: 'automatique' // Default pour Phase 3
+        methodeSelection: 'meilleurs' // Default: N meilleurs artefacts
     };
 
     // Marquer migration comme complétée
@@ -196,6 +196,18 @@ function attacherEvenementsPratiques() {
     const checkJetonsActif = document.getElementById('jetonsActif');
     if (checkJetonsActif) {
         checkJetonsActif.addEventListener('change', toggleConfigJetons);
+    }
+
+    // Checkbox activation portfolio
+    const checkPortfolioActif = document.getElementById('portfolioActif');
+    if (checkPortfolioActif) {
+        checkPortfolioActif.addEventListener('change', toggleConfigPortfolio);
+    }
+
+    // Dropdown modalité de sélection
+    const selectModalite = document.getElementById('configMethodeSelection');
+    if (selectModalite) {
+        selectModalite.addEventListener('change', updateDescriptionModalite);
     }
 
     // Bouton sauvegarder
@@ -425,10 +437,22 @@ function chargerConfigurationPAN() {
 
     // ✅ CORRECTION Phase 3: Configuration du portfolio depuis modalitesEvaluation
     const configPortfolio = configPAN.portfolio || {
+        actif: true,
         nombreARetenir: 5,
         minimumCompletion: 7,
-        nombreTotal: 10
+        nombreTotal: 10,
+        methodeSelection: 'meilleurs'
     };
+
+    const checkPortfolioActif = document.getElementById('portfolioActif');
+    if (checkPortfolioActif) {
+        checkPortfolioActif.checked = configPortfolio.actif !== false; // Par défaut true
+    }
+
+    const selectMethodeSelection = document.getElementById('configMethodeSelection');
+    if (selectMethodeSelection) {
+        selectMethodeSelection.value = configPortfolio.methodeSelection || 'meilleurs';
+    }
 
     const selectNombreARetenir = document.getElementById('configNombreARetenir');
     if (selectNombreARetenir) {
@@ -485,6 +509,80 @@ function chargerConfigurationPAN() {
 
     // Activer/désactiver sections jetons
     toggleConfigJetons();
+
+    // Mettre à jour description modalité
+    updateDescriptionModalite();
+
+    // Activer/désactiver configuration portfolio
+    toggleConfigPortfolio();
+}
+
+/**
+ * Active/désactive les détails de configuration du portfolio
+ */
+function toggleConfigPortfolio() {
+    const checkPortfolioActif = document.getElementById('portfolioActif');
+    if (!checkPortfolioActif) return;
+
+    const portfolioActif = checkPortfolioActif.checked;
+    const detailsConfig = document.getElementById('detailsConfigPortfolio');
+
+    if (detailsConfig) {
+        detailsConfig.style.display = portfolioActif ? 'block' : 'none';
+    }
+}
+
+/**
+ * Met à jour dynamiquement la description et les labels selon la modalité sélectionnée
+ */
+function updateDescriptionModalite() {
+    const selectModalite = document.getElementById('configMethodeSelection');
+    if (!selectModalite) return;
+
+    const modalite = selectModalite.value;
+    const descriptionElem = document.getElementById('descriptionModalite');
+    const labelNombreElem = document.getElementById('labelNombreARetenir');
+    const groupeNombreElem = document.getElementById('groupeNombreARetenir');
+
+    // Définir les textes selon la modalité (format HTML avec puces)
+    const textes = {
+        'meilleurs': {
+            description: "Dans ma pratique de notation basée sur la maîtrise de standards, le portfolio contient <strong>les N meilleures productions</strong> de l'apprenant·e.",
+            label: 'N meilleurs',
+            afficherNombre: true
+        },
+        'recents': {
+            description: "Dans ma pratique de notation basée sur la maîtrise de standards, le portfolio contient <strong>les N plus récentes productions</strong> de l'apprenant·e.",
+            label: 'N récents',
+            afficherNombre: true
+        },
+        'recents-meilleurs': {
+            description: "Dans ma pratique de notation basée sur la maîtrise de standards, le portfolio contient <strong>les N plus récentes productions parmi les 50% meilleures</strong> de l'apprenant·e (approche hybride).",
+            label: 'N récents (top 50%)',
+            afficherNombre: true
+        },
+        'tous': {
+            description: "Dans ma pratique de notation, le portfolio contient <strong>toutes les productions</strong> de l'apprenant·e (calcul de type sommative, utile pour comparaison).",
+            label: 'Tous',
+            afficherNombre: false
+        }
+    };
+
+    const config = textes[modalite] || textes['meilleurs'];
+
+    // Mettre à jour les éléments
+    if (descriptionElem) {
+        descriptionElem.innerHTML = config.description;
+    }
+
+    if (labelNombreElem) {
+        labelNombreElem.textContent = config.label;
+    }
+
+    // Afficher/cacher le champ "Artefacts à retenir" selon la modalité
+    if (groupeNombreElem) {
+        groupeNombreElem.style.display = config.afficherNombre ? 'block' : 'none';
+    }
 }
 
 /**
@@ -529,6 +627,12 @@ function sauvegarderConfigurationPAN() {
     const nombreCours = radioPeriode ? parseInt(radioPeriode.value) : 7;
 
     // ✅ CORRECTION Phase 3: Configuration du portfolio
+    const checkPortfolioActif = document.getElementById('portfolioActif');
+    const portfolioActif = checkPortfolioActif ? checkPortfolioActif.checked : true;
+
+    const selectMethodeSelection = document.getElementById('configMethodeSelection');
+    const methodeSelection = selectMethodeSelection ? selectMethodeSelection.value : 'meilleurs';
+
     const selectNombreARetenir = document.getElementById('configNombreARetenir');
     const nombreARetenir = selectNombreARetenir ? parseInt(selectNombreARetenir.value) : 5;
 
@@ -563,11 +667,11 @@ function sauvegarderConfigurationPAN() {
         nombreCours: nombreCours,
 
         portfolio: {
-            actif: true,
+            actif: portfolioActif,
             nombreARetenir: nombreARetenir,
             minimumCompletion: minimumCompletion,
             nombreTotal: nombreTotal,
-            methodeSelection: 'automatique'
+            methodeSelection: methodeSelection
         },
 
         jetons: {

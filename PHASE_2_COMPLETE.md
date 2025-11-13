@@ -50,7 +50,7 @@ Créer la fondation technique permettant l'enregistrement et la détection autom
 
 ---
 
-### 3. `/js/pratiques/pratique-registry.js` (11,6 KB)
+### 3. `/js/pratiques/pratique-registre.js` (11,6 KB)
 
 **Contenu** :
 - Registre central utilisant Map
@@ -123,7 +123,7 @@ Créer la fondation technique permettant l'enregistrement et la détection autom
 **Ajout** (lignes 8785-8787) :
 ```html
 <!-- Système de pratiques de notation (NOUVEAU - Beta 90) -->
-<script src="js/pratiques/pratique-registry.js"></script>
+<script src="js/pratiques/pratique-registre.js"></script>
 <script src="js/pratiques/pratique-test.js"></script>
 ```
 
@@ -143,7 +143,7 @@ Créer la fondation technique permettant l'enregistrement et la détection autom
 - ✅ HTML ouvert dans Safari
 - ✅ Aucune erreur JavaScript au chargement
 - ✅ Messages de confirmation dans la console :
-  - "✅ Module pratique-registry.js chargé"
+  - "✅ Module pratique-registre.js chargé"
   - "✅ Module pratique-test.js chargé"
   - "✅ [PratiqueTest] Pratique de test enregistrée"
 
@@ -245,7 +245,7 @@ Beta 90 - PHASE 2: Infrastructure système de pratiques
 Fichiers créés:
 - js/pratiques/README.md (3,2 KB)
 - js/pratiques/pratique-interface.js (13,2 KB)
-- js/pratiques/pratique-registry.js (11,6 KB)
+- js/pratiques/pratique-registre.js (11,6 KB)
 - js/pratiques/pratique-test.js (8,5 KB)
 - js/pratiques/TESTS_INFRASTRUCTURE.md (8,5 KB)
 

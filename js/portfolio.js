@@ -1,6 +1,6 @@
 /* ===============================
    MODULE PORTFOLIO: GESTION DES PORTFOLIOS ÉTUDIANTS
-   
+
    Contenu:
    - Affichage du portfolio d'un étudiant
    - Liste des artefacts (remis/non remis)
@@ -11,12 +11,70 @@
 
 /* ===============================
    DÉPENDANCES
-   
+
    LocalStorage lu:
    - 'productions' : Array des productions (inclut portfolio + artefacts)
    - 'evaluationsSauvegardees' : Array des évaluations par étudiant
    - 'portfoliosEleves' : Object {da: {portfolioId: {artefactsRetenus: [...]}}}
    =============================== */
+
+/* ===============================
+   FONCTION HELPER: SÉLECTION SELON MODALITÉ
+   =============================== */
+
+/**
+ * Sélectionne les artefacts selon la modalité configurée
+ *
+ * @param {Array} artefactsRemisAvecNote - Artefacts remis avec notes (non triés)
+ * @param {number} nombreARetenir - Nombre d'artefacts à retenir
+ * @param {string} modalite - 'meilleurs' | 'recents' | 'recents-meilleurs' | 'tous'
+ * @returns {Array} Artefacts sélectionnés
+ */
+function selectionnerArtefactsSelonModalite(artefactsRemisAvecNote, nombreARetenir, modalite) {
+    if (artefactsRemisAvecNote.length === 0) {
+        return [];
+    }
+
+    switch (modalite) {
+        case 'meilleurs':
+            // MODALITÉ 1: N meilleurs artefacts (note décroissante)
+            // Principe de maîtrise - évalue le plus haut niveau atteint
+            return artefactsRemisAvecNote
+                .sort((a, b) => b.note - a.note)
+                .slice(0, nombreARetenir);
+
+        case 'recents':
+            // MODALITÉ 2: N récents artefacts (date décroissante)
+            // Représentatif du niveau terminal/actuel
+            return artefactsRemisAvecNote
+                .sort((a, b) => new Date(b.dateRemise) - new Date(a.dateRemise))
+                .slice(0, nombreARetenir);
+
+        case 'recents-meilleurs':
+            // MODALITÉ 3: N récents parmi les meilleurs (hybride)
+            // Équilibre entre maîtrise maximale et représentativité actuelle
+            // Algorithme: Filtrer top 50% par note, puis prendre les N plus récents
+            const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRemisAvecNote.length * 0.5));
+            const topMeilleurs = artefactsRemisAvecNote
+                .sort((a, b) => b.note - a.note)
+                .slice(0, nombreMeilleurs);
+
+            return topMeilleurs
+                .sort((a, b) => new Date(b.dateRemise) - new Date(a.dateRemise))
+                .slice(0, nombreARetenir);
+
+        case 'tous':
+            // MODALITÉ 4: Tous les artefacts (moyenne complète)
+            // Calcul sommative - pour comparaison avec PAN
+            return artefactsRemisAvecNote;
+
+        default:
+            console.warn(`Modalité inconnue: ${modalite}, utilisation de 'meilleurs' par défaut`);
+            return artefactsRemisAvecNote
+                .sort((a, b) => b.note - a.note)
+                .slice(0, nombreARetenir);
+    }
+}
 
 /**
  * Charge et affiche le portfolio détaillé d'un étudiant
@@ -45,10 +103,15 @@ function chargerPortfolioEleveDetail(da) {
         const selectionsPortfolios = JSON.parse(localStorage.getItem('portfoliosEleves') || '{}');
         const selectionEleve = selectionsPortfolios[da]?.[portfolio.id] || { artefactsRetenus: [] };
 
-        // Nombre total prévu (nouveau champ)
-        const nombreTotal = portfolio.regles.nombreTotal || artefactsPortfolio.length;
-        const minimumRequis = portfolio.regles.minimumCompletion || 7;
-        const nombreARetenir = portfolio.regles.nombreARetenir || 3;
+        // ✅ Configuration depuis modalitesEvaluation (avec fallback sur portfolio.regles)
+        const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const configPortfolio = modalites.configPAN?.portfolio || {};
+
+        // Lire depuis nouvelle source (Phase 3), sinon ancienne source (rétrocompatibilité)
+        const nombreTotal = configPortfolio.nombreTotal || portfolio.regles?.nombreTotal || artefactsPortfolio.length;
+        const minimumRequis = configPortfolio.minimumCompletion || portfolio.regles?.minimumCompletion || 7;
+        const nombreARetenir = configPortfolio.nombreARetenir || portfolio.regles?.nombreARetenir || 3;
+        const methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
 
         // Construire la liste des artefacts avec leur statut
         const artefacts = [];
@@ -92,19 +155,26 @@ function chargerPortfolioEleveDetail(da) {
             return 0;
         });
 
-        // ✨ SÉLECTION AUTOMATIQUE des meilleurs artefacts si aucune sélection manuelle
+        // ✨ SÉLECTION AUTOMATIQUE selon la modalité configurée
         if (selectionEleve.artefactsRetenus.length === 0) {
-            // Récupérer les artefacts remis avec note, triés par note décroissante
+            // Récupérer les artefacts remis avec note (non triés - le tri se fait dans la fonction)
             const artefactsRemisAvecNote = artefacts
                 .filter(a => a.remis && a.note !== null)
-                .sort((a, b) => b.note - a.note);
+                .map(a => ({
+                    ...a,
+                    dateRemise: new Date().toISOString() // TODO: Ajouter vraie date de remise dans évaluations
+                }));
 
-            // Sélectionner automatiquement les N meilleurs (N = nombreARetenir)
-            const meilleurs = artefactsRemisAvecNote.slice(0, nombreARetenir);
+            // Sélectionner selon la modalité configurée
+            const artefactsSelectionnes = selectionnerArtefactsSelonModalite(
+                artefactsRemisAvecNote,
+                nombreARetenir,
+                methodeSelection
+            );
 
-            if (meilleurs.length > 0) {
+            if (artefactsSelectionnes.length > 0) {
                 // Mettre à jour la sélection
-                selectionEleve.artefactsRetenus = meilleurs.map(a => a.id);
+                selectionEleve.artefactsRetenus = artefactsSelectionnes.map(a => a.id);
 
                 // Sauvegarder dans localStorage
                 if (!selectionsPortfolios[da]) {
@@ -113,7 +183,8 @@ function chargerPortfolioEleveDetail(da) {
                 selectionsPortfolios[da][portfolio.id] = {
                     artefactsRetenus: selectionEleve.artefactsRetenus,
                     dateSelection: new Date().toISOString(),
-                    auto: true // Flag pour indiquer sélection automatique
+                    auto: true, // Flag pour indiquer sélection automatique
+                    modalite: methodeSelection // Tracer quelle modalité a été utilisée
                 };
                 localStorage.setItem('portfoliosEleves', JSON.stringify(selectionsPortfolios));
 
@@ -127,7 +198,7 @@ function chargerPortfolioEleveDetail(da) {
                     art.retenu = selectionEleve.artefactsRetenus.includes(art.id);
                 });
 
-                console.log(`✨ Sélection automatique : ${meilleurs.length} meilleur(s) artefact(s) sélectionné(s)`);
+                console.log(`✨ Sélection automatique (${methodeSelection}) : ${artefactsSelectionnes.length} artefact(s) sélectionné(s)`);
             }
         }
 
@@ -567,6 +638,10 @@ function calculerEtStockerIndicesCP() {
         // STRUCTURE À DEUX BRANCHES
         // ========================================
 
+        // Lire la configuration PAN pour affichage explicite
+        const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const configPortfolio = modalites.configPAN?.portfolio || {};
+
         const entreeActuelle = {
             date: dateCalcul,
             SOM: {
@@ -582,7 +657,10 @@ function calculerEtStockerIndicesCP() {
                 P: P_pan,
                 details: {
                     calculViaPratique: true,
-                    pratique: 'pan-maitrise'
+                    pratique: 'pan-maitrise',
+                    portfolioActif: configPortfolio.actif !== false,
+                    methodeSelection: configPortfolio.methodeSelection || 'meilleurs',
+                    nombreARetenir: configPortfolio.nombreARetenir || 5
                 }
             }
         };

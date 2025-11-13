@@ -49,7 +49,7 @@ Créer la fondation technique permettant l'enregistrement et la détection autom
 - [ ] Définir les structures de données
 
 #### 2.3 - Créer le registre de pratiques
-- [ ] Créer `/js/pratiques/pratique-registry.js`
+- [ ] Créer `/js/pratiques/pratique-registre.js`
 - [ ] Implémenter `enregistrerPratique(id, instance)`
 - [ ] Implémenter `obtenirPratiqueActive()`
 - [ ] Implémenter `listerPratiquesDisponibles()`
