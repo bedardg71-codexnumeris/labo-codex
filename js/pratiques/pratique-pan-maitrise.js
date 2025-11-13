@@ -306,15 +306,34 @@ class PratiquePANMaitrise {
         const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
         const configPAN = config.configPAN || {};
 
-        // ⚠️ SINGLE SOURCE OF TRUTH: nombreARetenir vient du portfolio dans productions
-        // Trouver le portfolio actif
-        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
-        const portfolio = productions.find(p => p.type === 'portfolio');
-        const nombreARetenir = portfolio?.regles?.nombreARetenir || 3;
+        // ✅ PHASE 3: SINGLE SOURCE OF TRUTH centralisé dans modalitesEvaluation.configPAN.portfolio
+        // Lire depuis le nouvel emplacement avec fallback vers productions pour rétrocompatibilité
+        let nombreARetenir = 3;
+        let minimumCompletion = 7;
+        let nombreTotal = 10;
+
+        if (configPAN.portfolio) {
+            // Nouveau format (Phase 3)
+            nombreARetenir = configPAN.portfolio.nombreARetenir || 3;
+            minimumCompletion = configPAN.portfolio.minimumCompletion || 7;
+            nombreTotal = configPAN.portfolio.nombreTotal || 10;
+        } else {
+            // Ancien format (fallback pour rétrocompatibilité)
+            const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+            const portfolio = productions.find(p => p.type === 'portfolio');
+
+            if (portfolio && portfolio.regles) {
+                nombreARetenir = portfolio.regles.nombreARetenir || 3;
+                minimumCompletion = portfolio.regles.minimumCompletion || 7;
+                nombreTotal = portfolio.regles.nombreTotal || 10;
+            }
+        }
 
         return {
             nombreCours: configPAN.nombreCours || 3,  // 3, 7 ou 12 cours
-            nombreARetenir: nombreARetenir  // Lecture depuis productions (source unique)
+            nombreARetenir: nombreARetenir,           // Lecture depuis modalitesEvaluation.configPAN.portfolio
+            minimumCompletion: minimumCompletion,     // Nouvelle donnée disponible
+            nombreTotal: nombreTotal                   // Nouvelle donnée disponible
         };
     }
 

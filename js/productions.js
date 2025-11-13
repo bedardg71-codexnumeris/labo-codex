@@ -235,20 +235,10 @@ function afficherFormProduction(id) {
                 selectGrilleInline.value = prod.grilleId || '';
             }
 
-            // Si c'est un portfolio, charger les règles
-            if (prod.type === 'portfolio' && prod.regles) {
-                console.log('📖 Chargement Portfolio - Règles lues:', JSON.stringify(prod.regles));
-                document.getElementById('portfolioNombreRetenir').value = prod.regles.nombreARetenir || 3;
-                document.getElementById('portfolioMinimumCompleter').value = prod.regles.minimumCompletion || 7;
-                const nombreTotal = document.getElementById('portfolioNombreTotal');
-                if (nombreTotal) {
-                    nombreTotal.value = prod.regles.nombreTotal || 9;
-                }
-                console.log('   - Champs remplis avec:', {
-                    nombreARetenir: document.getElementById('portfolioNombreRetenir').value,
-                    minimumCompletion: document.getElementById('portfolioMinimumCompleter').value,
-                    nombreTotal: nombreTotal?.value
-                });
+            // Si c'est un portfolio, pas de configuration supplémentaire
+            // Les règles de calcul (nombreARetenir, etc.) sont dans Réglages → Pratique de notation
+            if (prod.type === 'portfolio') {
+                console.log('📖 Chargement Portfolio - Les règles de calcul sont configurées dans Réglages › Pratique de notation');
             }
         } else {
             // Production non trouvée
@@ -356,25 +346,9 @@ function sauvegarderProduction() {
 
     // Si c'est un Portfolio, ajouter les données spécifiques
     if (type === 'portfolio') {
-        const nombreRetenir = document.getElementById('portfolioNombreRetenir');
-        const minimumCompleter = document.getElementById('portfolioMinimumCompleter');
-        const nombreTotal = document.getElementById('portfolioNombreTotal');
-
-        // DEBUG: Afficher les valeurs lues
-        console.log('📊 Sauvegarde Portfolio - Valeurs lues:');
-        console.log('   - nombreRetenir.value:', nombreRetenir?.value);
-        console.log('   - minimumCompleter.value:', minimumCompleter?.value);
-        console.log('   - nombreTotal.value:', nombreTotal?.value);
-
-        productionData.regles = {
-            nombreARetenir: nombreRetenir ? parseInt(nombreRetenir.value) : 3,
-            minimumCompletion: minimumCompleter ? parseInt(minimumCompleter.value) : 7,
-            nombreTotal: nombreTotal ? parseInt(nombreTotal.value) : 9
-        };
-
-        console.log('   - regles.nombreARetenir:', productionData.regles.nombreARetenir);
-        console.log('   - regles.minimumCompletion:', productionData.regles.minimumCompletion);
-        console.log('   - regles.nombreTotal:', productionData.regles.nombreTotal);
+        // ✅ CORRECTION Phase 3: Les règles de calcul ne sont PLUS sauvegardées ici
+        // Elles sont configurées dans Réglages → Pratique de notation → Configuration PAN
+        console.log('📊 Sauvegarde Portfolio - Les règles de calcul sont dans modalitesEvaluation.configPAN.portfolio');
 
         // Pas besoin de stocker artefactsIds - sera détecté dynamiquement
         productionData.modeCalcul = 'provisoire';
