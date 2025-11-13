@@ -52,7 +52,7 @@ Ce document liste **toutes les tâches** nécessaires pour implémenter le syst�
 
 #### 2.2 - Créer le registre de pratiques
 
-- [ ] Créer `/js/pratiques/pratique-registry.js`
+- [ ] Créer `/js/pratiques/pratique-registre.js`
   - [ ] Fonction `obtenirPratiqueActive()`
   - [ ] Fonction `enregistrerPratique(id, instance)`
   - [ ] Fonction `listerPratiquesDisponibles()`
@@ -169,7 +169,7 @@ Ce document liste **toutes les tâches** nécessaires pour implémenter le syst�
 
 #### 4.2 - Enregistrer la pratique
 
-- [ ] Ajouter dans `pratique-registry.js` :
+- [ ] Ajouter dans `pratique-registre.js` :
   ```javascript
   'sommative': new PratiqueSommative()
   ```

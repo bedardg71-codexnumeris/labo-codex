@@ -698,19 +698,64 @@ function genererSectionMobilisationEngagement(da) {
         };
     });
 
-    // Tri et sélection automatique des meilleurs artefacts
-    const nombreARetenir = portfolio?.regles?.nombreARetenir || 3;
+    // 🆕 LIRE LA CONFIGURATION DE LA PRATIQUE DE NOTATION (source unique)
+    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const configPortfolio = modalites.configPAN?.portfolio || {};
+    const portfolioActif = configPortfolio.actif !== false;
+    const nombreARetenir = configPortfolio.nombreARetenir || portfolio?.regles?.nombreARetenir || 3;
+    const methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
 
-    // Trier les artefacts remis par note décroissante
-    const artefactsRemisTriés = artefacts
-        .filter(a => a.remis)
-        .sort((a, b) => (b.note || 0) - (a.note || 0));
+    // Appliquer la logique de sélection selon la modalité configurée
+    let artefactsSelectionnes = [];
+    const artefactsRemis = artefacts.filter(a => a.remis);
 
-    // Marquer les N meilleurs comme retenus
-    artefactsRemisTriés.forEach((art, index) => {
-        if (index < nombreARetenir) {
-            art.retenu = true;
+    if (!portfolioActif) {
+        // Portfolio désactivé : aucun artefact retenu
+        artefactsSelectionnes = [];
+    } else {
+        // Appliquer la modalité de sélection
+        switch (methodeSelection) {
+            case 'meilleurs':
+                artefactsSelectionnes = artefactsRemis
+                    .sort((a, b) => (b.note || 0) - (a.note || 0))
+                    .slice(0, nombreARetenir);
+                break;
+
+            case 'recents':
+                // Trier par date (on utilise l'ordre d'évaluation comme proxy de la date)
+                artefactsSelectionnes = [...artefactsRemis]
+                    .reverse() // Les plus récents en premier
+                    .slice(0, nombreARetenir);
+                break;
+
+            case 'recents-meilleurs':
+                // 1. Garder les 50% meilleurs
+                const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRemis.length * 0.5));
+                const topMeilleurs = artefactsRemis
+                    .sort((a, b) => (b.note || 0) - (a.note || 0))
+                    .slice(0, nombreMeilleurs);
+                // 2. Parmi ceux-ci, prendre les N plus récents
+                artefactsSelectionnes = [...topMeilleurs]
+                    .reverse()
+                    .slice(0, nombreARetenir);
+                break;
+
+            case 'tous':
+                artefactsSelectionnes = artefactsRemis;
+                break;
+
+            default:
+                // Fallback sur meilleurs
+                artefactsSelectionnes = artefactsRemis
+                    .sort((a, b) => (b.note || 0) - (a.note || 0))
+                    .slice(0, nombreARetenir);
         }
+    }
+
+    // Marquer les artefacts sélectionnés comme retenus
+    const idsRetenus = new Set(artefactsSelectionnes.map(a => a.id));
+    artefacts.forEach(art => {
+        art.retenu = idsRetenus.has(art.id);
     });
 
     // Trier tous les artefacts : retenus d'abord, puis par note, puis remis/non remis
@@ -736,7 +781,7 @@ function genererSectionMobilisationEngagement(da) {
     const nbRemis = artefacts.filter(a => a.remis).length;
     const nbRetenus = artefacts.filter(a => a.retenu).length;
     const interpC = interpreterCompletion(indices.C);
-    const artefactsRemis = artefacts.filter(a => a.remis);
+    // artefactsRemis déjà déclaré à la ligne 710
     const artefactsNonRemis = artefacts.filter(a => !a.remis);
 
     // Comptabiliser les jetons utilisés et récupérer les informations des artefacts
@@ -1003,7 +1048,21 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Statistiques -->
                 <ul class="profil-liste-simple">
-                    <li><strong>• Performance du portfolio actuel</strong></li>
+                    <li><strong>• ${(() => {
+                        if (!portfolioActif) {
+                            return 'Performance des productions indépendantes';
+                        }
+
+                        // Textes selon la modalité de sélection
+                        const textesPerformance = {
+                            'meilleurs': `Performance du portfolio actuel (${nombreARetenir} meilleur${nombreARetenir > 1 ? 's' : ''}, maîtrise de standards)`,
+                            'recents': `Performance du portfolio actuel (${nombreARetenir} plus récent${nombreARetenir > 1 ? 's' : ''}, niveau terminal)`,
+                            'recents-meilleurs': `Performance du portfolio actuel (${nombreARetenir} récent${nombreARetenir > 1 ? 's' : ''} parmi les meilleurs, hybride)`,
+                            'tous': `Performance du portfolio actuel (tous les artefacts, moyenne complète)`
+                        };
+
+                        return textesPerformance[methodeSelection] || textesPerformance['meilleurs'];
+                    })()}</strong></li>
                 </ul>
 
                 <hr class="profil-separateur">
@@ -1040,7 +1099,21 @@ function genererSectionMobilisationEngagement(da) {
 
                 <!-- Artefacts sélectionnés avec notes (badges colorés avec checkboxes) -->
                 <h4 class="profil-section-titre">
-                    ${nbRetenus} meilleurs artefacts actuels
+                    ${(() => {
+                        if (!portfolioActif) {
+                            return 'Productions indépendantes';
+                        }
+
+                        // Textes selon la modalité de sélection
+                        const textesTitres = {
+                            'meilleurs': `${nbRetenus} meilleur${nbRetenus > 1 ? 's' : ''} artefact${nbRetenus > 1 ? 's' : ''}`,
+                            'recents': `${nbRetenus} plus récent${nbRetenus > 1 ? 's' : ''} artefact${nbRetenus > 1 ? 's' : ''}`,
+                            'recents-meilleurs': `${nbRetenus} récent${nbRetenus > 1 ? 's' : ''} parmi les meilleurs`,
+                            'tous': `Tous les artefacts (${nbRetenus})`
+                        };
+
+                        return textesTitres[methodeSelection] || textesTitres['meilleurs'];
+                    })()}
                 </h4>
                 ${artefactsRetenus.length > 0 ? `
                     <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
@@ -5071,12 +5144,20 @@ function genererSectionPerformance(da) {
     let artefactsRetenus = [];
     let notesRetenues = [];
     let noteTop3 = null;
+    let methodeSelection = 'meilleurs';  // Valeur par défaut
+    let portfolioActif = true;
+    let nombreARetenirConfig = nombreARetenir;  // Renommer pour éviter conflit avec ligne 5019
 
     if (typeof obtenirIndicesCP === 'function') {
         const indicesCP = obtenirIndicesCP(da, indices.pratique);
         if (indicesCP && indicesCP.details) {
             const idsRetenus = indicesCP.details.artefactsRetenus || [];
             notesRetenues = indicesCP.details.notes || [];
+
+            // 🆕 LIRE LA CONFIGURATION DE LA PRATIQUE DE NOTATION
+            methodeSelection = indicesCP.details.methodeSelection || 'meilleurs';
+            portfolioActif = indicesCP.details.portfolioActif !== false;
+            nombreARetenirConfig = indicesCP.details.nombreARetenir || nombreARetenir;
 
             // Récupérer les titres des artefacts retenus
             artefactsRetenus = idsRetenus.map(id => {
@@ -5140,7 +5221,21 @@ function genererSectionPerformance(da) {
 
                     <div class="details-calculs-label">Règle de sélection:</div>
                     <div class="details-calculs-valeur">
-                        Les <strong>${portfolio.regles.nombreARetenir}</strong> meilleures productions sont retenues pour le calcul de l'indice P
+                        ${(() => {
+                            if (!portfolioActif) {
+                                return 'Portfolio désactivé - Les productions sont évaluées de manière indépendante';
+                            }
+
+                            // Textes selon la modalité de sélection
+                            const textes = {
+                                'meilleurs': `Les <strong>${nombreARetenirConfig} meilleures productions</strong> sont retenues pour le calcul de l'indice P (note maximale atteinte)`,
+                                'recents': `Les <strong>${nombreARetenirConfig} plus récentes productions</strong> sont retenues pour le calcul de l'indice P (niveau terminal actuel)`,
+                                'recents-meilleurs': `Les <strong>${nombreARetenirConfig} plus récentes productions parmi les 50% meilleures</strong> sont retenues pour le calcul de l'indice P (approche hybride)`,
+                                'tous': `<strong>Toutes les productions</strong> sont retenues pour le calcul de l'indice P (calcul de type sommative)`
+                            };
+
+                            return textes[methodeSelection] || textes['meilleurs'];
+                        })()}
                     </div>
 
                     <div class="details-calculs-label">Artefacts retenus pour le calcul:</div>
@@ -5189,7 +5284,7 @@ function genererSectionPerformance(da) {
         <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
 
             <!-- En-tête avec indice P -->
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                 <div>
                     <h3 style="margin: 0 0 5px 0; color: var(--bleu-principal); font-size: 1.1rem;">Développement des habiletés et compétences</h3>
                     <strong style="font-size: 0.95rem; color: ${interpP.couleur};">${interpP.niveau}</strong>
@@ -5203,6 +5298,29 @@ function genererSectionPerformance(da) {
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${lettreIDME} ${indices.P}%</strong>
                 `}
             </div>
+
+            <!-- 🆕 MÉTHODE DE CALCUL EXPLICITE -->
+            ${indices.pratique === 'PAN' ? `
+                <div style="background: #f0f8ff; border-left: 4px solid var(--pan-bleu); padding: 10px 15px; margin-bottom: 15px; border-radius: 4px;">
+                    <div style="font-size: 0.85rem; color: #555; line-height: 1.5;">
+                        ${(() => {
+                            if (!portfolioActif) {
+                                return '📊 <strong>Productions indépendantes</strong> : Chaque production a sa propre pondération dans le calcul final';
+                            }
+
+                            // Textes explicites selon la modalité
+                            const textesExplicites = {
+                                'meilleurs': `📊 Note calculée sur <strong>les ${nombreARetenirConfig} meilleures productions</strong> (note maximale atteinte)`,
+                                'recents': `📊 Note calculée sur <strong>les ${nombreARetenirConfig} plus récentes productions</strong> (niveau terminal actuel)`,
+                                'recents-meilleurs': `📊 Note calculée sur <strong>les ${nombreARetenirConfig} plus récentes parmi les 50% meilleures</strong> (approche hybride)`,
+                                'tous': `📊 Note calculée sur <strong>toutes les productions</strong> (moyenne complète)`
+                            };
+
+                            return textesExplicites[methodeSelection] || textesExplicites['meilleurs'];
+                        })()}
+                    </div>
+                </div>
+            ` : ''}
 
             <hr class="profil-separateur">
 

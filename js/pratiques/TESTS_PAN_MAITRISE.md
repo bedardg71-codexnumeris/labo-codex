@@ -19,7 +19,7 @@ Valider que la pratique PAN-Maîtrise fonctionne correctement et produit des ré
 ### Vérifications attendues dans la console
 
 ```
-✅ Module pratique-registry.js chargé
+✅ Module pratique-registre.js chargé
 ✅ Module pratique-test.js chargé
 ✅ [PratiqueTest] Pratique de test enregistrée avec succès
 ✅ Module pratique-pan-maitrise.js chargé

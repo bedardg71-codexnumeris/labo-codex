@@ -14,7 +14,7 @@ Ce dossier contient l'architecture modulaire permettant de supporter **plusieurs
 js/pratiques/
 ├── README.md                    # Ce fichier
 ├── pratique-interface.js        # Documentation du contrat IPratique
-├── pratique-registry.js         # Registre et détection automatique
+├── pratique-registre.js         # Registre et détection automatique
 ├── pratique-pan-maitrise.js     # PAN-Maîtrise (Grégoire)
 ├── pratique-sommative.js        # Sommative traditionnelle
 └── [futures pratiques...]       # PAN-Spécifications, Dénotation, etc.
@@ -82,7 +82,7 @@ Voir le guide complet dans `/GUIDE_AJOUT_PRATIQUE.md`.
 **Résumé des étapes** :
 1. Créer `/js/pratiques/pratique-[id].js`
 2. Implémenter toutes les méthodes du contrat `IPratique`
-3. Enregistrer la pratique dans `pratique-registry.js`
+3. Enregistrer la pratique dans `pratique-registre.js`
 4. Ajouter l'option dans `pratiques.js` (interface utilisateur)
 5. Tester avec des données réelles
 

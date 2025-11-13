@@ -218,7 +218,7 @@ Une fois la présentation passée, retour au plan architectural :
 
 **Phase 2** : Infrastructure de base (5 jours)
 - Créer `/js/pratiques/pratique-interface.js`
-- Créer `/js/pratiques/pratique-registry.js`
+- Créer `/js/pratiques/pratique-registre.js`
 - Système de détection automatique
 
 **Phase 3** : Extraction PAN-Maîtrise (3 jours)

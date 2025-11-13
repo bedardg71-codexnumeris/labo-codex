@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 90 - Architecture pratiques de notation</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=2025111300">
+    <link rel="stylesheet" href="styles.css?v=2025111310">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -5859,23 +5859,47 @@ Exemple :
                                     <!-- Configuration du portfolio d'artefacts -->
                                     <div class="carte" style="margin-bottom: 0;">
                                         <h3>📦 Configuration du portfolio d'artefacts</h3>
-                                        <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
-                                            En PAN-Maîtrise, on retient les N meilleurs artefacts selon le principe de maîtrise
-                                        </p>
+
+                                        <!-- Activation du portfolio -->
+                                        <div class="form-group" style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                                <input type="checkbox" id="portfolioActif" checked>
+                                                <strong style="margin-left: 8px;">Activer le portfolio d'artefacts</strong>
+                                            </label>
+                                            <small style="display: block; color: #666; margin-top: 8px; margin-left: 28px; font-size: 0.85rem; line-height: 1.5;">
+                                                Un portfolio est un dossier d'apprentissage que l'apprenant·e monte tout au long du trimestre et qui a sa pondération propre dans la construction de la note finale. Si vous utilisez un portfolio (ex: ELLAC en littérature), cochez cette case. Sinon, les productions des apprenant·es demeurent indépendantes et ont leur propre pondération.
+                                            </small>
+                                        </div>
+
+                                        <!-- Configuration détaillée du portfolio -->
+                                        <div id="detailsConfigPortfolio">
+
+                                            <!-- Modalité de sélection -->
+                                            <div class="groupe-form" style="margin-bottom: 10px;">
+                                                <label for="configMethodeSelection" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                                    Modalité de sélection des artefacts
+                                                </label>
+                                                <select id="configMethodeSelection" class="controle-form" style="max-width: 100%;">
+                                                    <option value="meilleurs" selected>N meilleurs artefacts (note maximale atteinte)</option>
+                                                    <option value="recents">N récents artefacts (niveau terminal actuel)</option>
+                                                    <option value="recents-meilleurs">N récents parmi les meilleurs (hybride)</option>
+                                                    <option value="tous">Tous les artefacts (moyenne complète)</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Description dynamique -->
+                                            <div id="descriptionModalite" class="text-muted" style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
+                                                Dans ma pratique de notation basée sur la maîtrise de standards, le portfolio contient les N meilleures productions de l'apprenant·e.
+                                            </div>
 
                                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                            <div class="groupe-form">
+                                            <div class="groupe-form" id="groupeNombreARetenir">
                                                 <label for="configNombreARetenir" style="font-weight: 500; display: block; margin-bottom: 5px;">
                                                     Artefacts à retenir
                                                 </label>
-                                                <select id="configNombreARetenir" class="controle-form">
-                                                    <option value="3">3</option>
-                                                    <option value="5" selected>5</option>
-                                                    <option value="7">7</option>
-                                                    <option value="10">10</option>
-                                                    <option value="12">12</option>
-                                                </select>
-                                                <small style="display: block; color: #666; margin-top: 3px; font-size: 0.8rem;">
+                                                <input type="number" id="configNombreARetenir" class="controle-form"
+                                                       value="5" min="1" max="20">
+                                                <small id="labelNombreARetenir" style="display: block; color: #666; margin-top: 3px; font-size: 0.8rem;">
                                                     N meilleurs
                                                 </small>
                                             </div>
@@ -5902,6 +5926,9 @@ Exemple :
                                                 </small>
                                             </div>
                                         </div>
+                                        </div>
+                                        <!-- FIN détailsConfigPortfolio -->
+
                                     </div>
 
                                 </div>
@@ -8745,12 +8772,12 @@ Exemple :
     <script src="js/pratiques/pratique-pan-maitrise.js?v=2025111302"></script>
     <script src="js/pratiques/pratique-sommative.js"></script>
 
-    <script src="js/portfolio.js?v=2025111301"></script>
+    <script src="js/portfolio.js?v=2025111304"></script>
     <script src="js/saisie-presences.js?v=2025111202"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025110907"></script>
-    <script src="js/profil-etudiant.js?v=2025111008"></script>
+    <script src="js/profil-etudiant.js?v=2025111304"></script>
     <script src="js/presences-apercu.js?v=2025111029"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
 
@@ -8758,7 +8785,7 @@ Exemple :
     <script src="js/calendrier-vue.js"></script>
     <script src="js/horaire.js?v=2025111208"></script>
     <script src="js/groupe.js?v=2025111203"></script>
-    <script src="js/pratiques.js?v=2025111303"></script>
+    <script src="js/pratiques.js?v=2025111309"></script>
     <script src="js/interventions.js?v=2025111016"></script>
 
     <!-- PRIORITÉ 6: Modules avancés -->
