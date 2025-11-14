@@ -19,7 +19,7 @@
    NOUVELLES FONCTIONNALITÉS Beta 84:
    - Cartes de statistiques (Total, Engagement favorable, RàI 1/2/3)
    - Filtres avancés (Engagement, RàI, Pattern)
-   - Colonnes supplémentaires (Mobilisation M, Engagement, Pattern)
+   - Colonnes supplémentaires (Engagement E, Pattern, RàI)
    - Tri cliquable sur toutes les colonnes
    - Badges visuels améliorés avec couleurs système
    - Surlignage des cas critiques
@@ -708,10 +708,6 @@ function afficherListeEtudiantsConsultation() {
                 valeurA = a.indicesCalcules.P;
                 valeurB = b.indicesCalcules.P;
                 break;
-            case 'mobilisation':
-                valeurA = a.indicesCalcules.M;
-                valeurB = b.indicesCalcules.M;
-                break;
             case 'engagement':
                 // Calculer l'engagement E = (A × C × P)^(1/3)
                 const E_A = Math.pow((a.indicesCalcules.A / 100) * (a.indicesCalcules.C / 100) * (a.indicesCalcules.P / 100), 1/3);
@@ -767,20 +763,15 @@ function afficherListeEtudiantsConsultation() {
         const indices = etudiant.indicesCalcules;
         const cible = etudiant.cibleCalculee;
 
-        // Mobilisation (déjà calculée dans indices.M en 0-1)
-        const mobilisation = Math.round(indices.M * 100); // Convertir en pourcentage
-        const couleurMobilisation = obtenirCouleurMobilisation(indices.M);
+        // Calculer l'engagement E = (A × C × P)^(1/3)
+        const E_brut = (indices.A / 100) * (indices.C / 100) * (indices.P / 100);
+        const E = Math.pow(E_brut, 1/3);
 
         // Génération des badges
-        const badgeEngagement = genererBadgeEngagement(indices);
         const badgePattern = genererBadgePattern(cible.pattern);
         const badgeRai = genererBadgeRaI(cible.niveau);
 
         const tr = document.createElement('tr');
-
-        // Calculer l'engagement pour le surlignage
-        const E_brut = (indices.A / 100) * (indices.C / 100) * (indices.P / 100);
-        const E = Math.pow(E_brut, 1/3);
 
         // Déterminer le surlignage à appliquer (priorité: plus critique en premier)
         let bgColor = '';
@@ -869,11 +860,10 @@ function afficherListeEtudiantsConsultation() {
         html += '<td style="text-align: center;"><strong style="color: ' + couleurC + ';">' + Math.round(indices.C) + '%</strong></td>';
         html += '<td style="text-align: center;"><strong style="color: ' + couleurP + ';">' + Math.round(indices.P) + '%</strong></td>';
 
-        // NOUVEAU: Colonne Mobilisation (M = A × C)
-        html += '<td style="text-align: center;"><strong style="color: ' + couleurMobilisation + ';">' + mobilisation + '%</strong></td>';
-
-        // NOUVEAU: Colonne Engagement avec badge
-        html += '<td style="text-align: center;"><span class="' + badgeEngagement.classe + '">' + badgeEngagement.label + '</span></td>';
+        // NOUVEAU: Colonne Engagement E = (A × C × P)^(1/3) en pourcentage
+        const engagementPct = Math.round(E * 100);
+        const couleurE = obtenirCouleurEngagement(engagementPct);
+        html += '<td style="text-align: center;"><strong style="color: ' + couleurE + ';">' + engagementPct + '%</strong></td>';
 
         // NOUVEAU: Colonne Pattern avec badge
         html += '<td><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
@@ -1137,6 +1127,17 @@ function mettreAJourStatistiques(etudiants) {
  */
 function obtenirCouleurMobilisation(mobilisation) {
     return obtenirCouleurSelonSeuils(mobilisation * 100);
+}
+
+/**
+ * Obtient la couleur appropriée pour l'engagement
+ * Basé sur les seuils d'engagement : <30% insuffisant, 30-49% fragile, 50-64% modéré, 65-79% favorable, ≥80% très favorable
+ * @param {number} engagementPct - Valeur de l'engagement en pourcentage (0-100)
+ * @returns {string} - Code couleur hexadécimal
+ */
+function obtenirCouleurEngagement(engagementPct) {
+    // Utiliser les mêmes seuils que obtenirCouleurSelonSeuils pour cohérence
+    return obtenirCouleurSelonSeuils(engagementPct);
 }
 
 /**
