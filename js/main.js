@@ -152,6 +152,12 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModulePratiques();
     }
 
+    // REGISTRE DES PRATIQUES: Initialiser et vérifier les pratiques enregistrées
+    if (typeof initialiserRegistrePratiques === 'function') {
+        console.log('   → Registre de pratiques détecté');
+        initialiserRegistrePratiques();
+    }
+
     // ===============================
     // PRIORITÉ 3 : MODULES LECTEURS
     // Ces modules lisent les données générées par les modules sources
