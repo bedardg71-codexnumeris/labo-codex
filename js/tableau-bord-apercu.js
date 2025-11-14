@@ -5,20 +5,20 @@
 
 /**
  * MODULE: tableau-bord-apercu.js
- * 
+ *
  * RÔLE:
  * Calcule et affiche les statistiques pédagogiques du tableau de bord
  * - Métriques globales du groupe (indices A-C-P)
- * - Distribution des niveaux de risque
- * - Alertes prioritaires (étudiants à risque élevé)
- * 
+ * - Distribution des niveaux d'engagement
+ * - Alertes prioritaires (étudiants à engagement insuffisant)
+ *
  * FONDEMENTS THÉORIQUES:
  * Basé sur le Guide de monitorage - Section ROUGE (indices primaires)
  * - Assiduité (A) : proportion de présence
  * - Complétion (C) : proportion d'artefacts remis
  * - Performance (P) : performance moyenne (3 derniers artefacts)
- * - Risque : 1 - (A × C × P)
- * 
+ * - Engagement : E = (A × C × P)^(1/3) (racine cubique pour compenser décroissance multiplicative)
+ *
  * DÉPENDANCES:
  * - LocalStorage: groupeEtudiants, presences, evaluationsSauvegardees
  * - Modules: 09-2-saisie-presences.js (pour calculs assiduité)
@@ -293,73 +293,66 @@ function calculerIndicesEtudiant(da) {
         console.log(`[Découplage P/R] DA ${da}: P_recent=${indicesPAN.details.P_recent}% utilisé pour calcul risque PAN`);
     }
 
-    // Calculer les risques pour les deux
-    indices.sommatif.risque = calculerRisque(
+    // Calculer l'engagement pour les deux pratiques (E = racine cubique de A × C × P)
+    indices.sommatif.engagement = calculerEngagement(
         indices.sommatif.assiduite,
         indices.sommatif.completion,
         indices.sommatif.performance
     );
-    indices.sommatif.niveauRisque = determinerNiveauRisque(indices.sommatif.risque);
+    indices.sommatif.niveauEngagement = determinerNiveauEngagement(indices.sommatif.engagement);
 
     // Pour PAN: utiliser P_recent si découplage activé, sinon P normal
-    const P_pour_risque_PAN = P_recent_PAN !== null ? P_recent_PAN : indices.alternatif.performance;
-    indices.alternatif.risque = calculerRisque(
+    const P_pour_engagement_PAN = P_recent_PAN !== null ? P_recent_PAN : indices.alternatif.performance;
+    indices.alternatif.engagement = calculerEngagement(
         indices.alternatif.assiduite,
         indices.alternatif.completion,
-        P_pour_risque_PAN
+        P_pour_engagement_PAN
     );
-    indices.alternatif.niveauRisque = determinerNiveauRisque(indices.alternatif.risque);
+    indices.alternatif.niveauEngagement = determinerNiveauEngagement(indices.alternatif.engagement);
 
     return indices;
 }
 
 /**
- * Calcule le risque d'échec
- * NOUVELLE FORMULE (expérimentale): Basée sur P uniquement
- * Données empiriques: P < 65% → échec probable
- * A et C servent de contexte diagnostique, pas de prédiction
+ * Calcule le niveau d'engagement
+ * FORMULE: E = (A × C × P)^(1/3) (racine cubique)
+ * La racine cubique compense la décroissance multiplicative
+ * Exemple: 80% × 80% × 80% = 51.2% → racine cubique → 80%
  *
- * @param {number} assiduite - Indice A (non utilisé pour R, contexte seulement)
- * @param {number} completion - Indice C (non utilisé pour R, contexte seulement)
- * @param {number} performance - Indice P (prédicteur validé)
- * @returns {number} Risque entre 0 et 1
+ * @param {number} assiduite - Indice A (0-1)
+ * @param {number} completion - Indice C (0-1)
+ * @param {number} performance - Indice P (0-1)
+ * @returns {number} Engagement entre 0 et 1
  */
-function calculerRisque(assiduite, completion, performance) {
-    // Si P = 0, risque = 1 (critique)
-    if (performance === 0) {
-        return 1;
-    }
+function calculerEngagement(assiduite, completion, performance) {
+    // Calcul du produit A × C × P
+    const E_brut = assiduite * completion * performance;
 
-    // Seuil critique à 65% basé sur données empiriques
-    if (performance < 0.65) {
-        return 1.0;  // 100% - Risque critique
-    } else {
-        // Décroissance cubique pour P ≥ 65%
-        return Math.pow((1.0 - performance) / 0.35, 3);
-    }
+    // Appliquer la racine cubique pour compenser la décroissance multiplicative
+    const E_ajuste = Math.pow(E_brut, 1/3);
+
+    return E_ajuste;
 }
 
 /**
- * Détermine le niveau de risque selon les seuils du Guide
- * 
- * Seuils:
- * - Critique: > 0.7
- * - Très élevé: 0.5 - 0.7
- * - Élevé: 0.4 - 0.5
- * - Modéré: 0.3 - 0.4
- * - Faible: 0.2 - 0.3
- * - Minimal: ≤ 0.2
- * 
- * @param {number} risque - Indice de risque
- * @returns {string} Niveau de risque
+ * Détermine le niveau d'engagement selon les seuils
+ *
+ * Seuils (échelle positive, inversée par rapport au risque):
+ * - Très favorable: ≥ 0.80
+ * - Favorable: 0.65 - 0.79
+ * - Modéré: 0.50 - 0.64
+ * - Fragile: 0.30 - 0.49
+ * - Insuffisant: < 0.30
+ *
+ * @param {number} engagement - Indice d'engagement (0-1)
+ * @returns {string} Niveau d'engagement
  */
-function determinerNiveauRisque(risque) {
-    if (risque > 0.7) return 'critique';
-    if (risque > 0.5) return 'très élevé';
-    if (risque > 0.4) return 'élevé';
-    if (risque > 0.3) return 'modéré';
-    if (risque > 0.2) return 'faible';
-    return 'minimal';
+function determinerNiveauEngagement(engagement) {
+    if (engagement >= 0.80) return 'très favorable';
+    if (engagement >= 0.65) return 'favorable';
+    if (engagement >= 0.50) return 'modéré';
+    if (engagement >= 0.30) return 'fragile';
+    return 'insuffisant';
 }
 
 /* ===============================
@@ -486,7 +479,7 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
 }
 
 /**
- * Affiche les compteurs d'alertes prioritaires (Risque d'échec)
+ * Affiche les compteurs de niveaux d'engagement
  * Valeurs colorées selon la pratique (orange=SOM, bleu=PAN)
  *
  * @param {Array} etudiants - Étudiants avec indices calculés
@@ -499,62 +492,64 @@ function afficherAlertesPrioritairesCompteurs(etudiants) {
     const nbTotal = etudiants.length;
 
     // Calculer les statistiques pour SOM
-    let somCritique = 0, somTresEleve = 0, somEleve = 0, somFaibles = 0;
+    let somTresFavorable = 0, somFavorable = 0, somModere = 0, somFragile = 0, somInsuffisant = 0;
     etudiants.forEach(e => {
-        const niveau = e.sommatif.niveauRisque;
-        if (niveau === 'critique') somCritique++;
-        else if (niveau === 'très élevé') somTresEleve++;
-        else if (niveau === 'élevé') somEleve++;
-        else somFaibles++;
+        const niveau = e.sommatif.niveauEngagement;
+        if (niveau === 'très favorable') somTresFavorable++;
+        else if (niveau === 'favorable') somFavorable++;
+        else if (niveau === 'modéré') somModere++;
+        else if (niveau === 'fragile') somFragile++;
+        else if (niveau === 'insuffisant') somInsuffisant++;
     });
 
     // Calculer les statistiques pour PAN
-    let panCritique = 0, panTresEleve = 0, panEleve = 0, panFaibles = 0;
+    let panTresFavorable = 0, panFavorable = 0, panModere = 0, panFragile = 0, panInsuffisant = 0;
     etudiants.forEach(e => {
-        const niveau = e.alternatif.niveauRisque;
-        if (niveau === 'critique') panCritique++;
-        else if (niveau === 'très élevé') panTresEleve++;
-        else if (niveau === 'élevé') panEleve++;
-        else panFaibles++;
+        const niveau = e.alternatif.niveauEngagement;
+        if (niveau === 'très favorable') panTresFavorable++;
+        else if (niveau === 'favorable') panFavorable++;
+        else if (niveau === 'modéré') panModere++;
+        else if (niveau === 'fragile') panFragile++;
+        else if (niveau === 'insuffisant') panInsuffisant++;
     });
 
-    // Trouver la carte Risque d'échec
+    // Trouver la carte Niveau d'engagement
     const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
-    let carteRisque = null;
+    let carteEngagement = null;
     cartes.forEach(carte => {
         const h3 = carte.querySelector('h3 span');
-        if (h3 && h3.textContent.includes("Risque d'échec")) {
-            carteRisque = carte;
+        if (h3 && h3.textContent.includes("Niveau d'engagement") || h3.textContent.includes("Risque d'échec")) {
+            carteEngagement = carte;
         }
     });
 
-    if (!carteRisque) return;
+    if (!carteEngagement) return;
 
     // Conserver le header et la note toggle
-    const noteToggle = carteRisque.querySelector('.carte-info-toggle');
-    const header = carteRisque.querySelector('h3');
+    const noteToggle = carteEngagement.querySelector('.carte-info-toggle');
+    const header = carteEngagement.querySelector('h3');
 
-    carteRisque.innerHTML = '';
-    carteRisque.appendChild(header);
-    if (noteToggle) carteRisque.appendChild(noteToggle);
+    carteEngagement.innerHTML = '';
+    carteEngagement.appendChild(header);
+    if (noteToggle) carteEngagement.appendChild(noteToggle);
 
-    // Générer les cartes
+    // Générer les cartes (ordre inversé : favorable en haut, insuffisant en bas)
     const html = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            ${genererCarteRisque('Risques faibles', somFaibles, panFaibles, nbTotal, afficherSom, afficherPan, 'var(--alerte-fond-succes)', 'var(--btn-confirmer)')}
-            ${genererCarteRisque('Risque élevé', somEleve, panEleve, nbTotal, afficherSom, afficherPan, '#fffbf0', 'var(--risque-eleve)')}
-            ${genererCarteRisque('Risque très élevé', somTresEleve, panTresEleve, nbTotal, afficherSom, afficherPan, '#fff8f0', 'var(--risque-tres-eleve)')}
-            ${genererCarteRisque('Risque critique', somCritique, panCritique, nbTotal, afficherSom, afficherPan, '#fff5f5', 'var(--risque-critique)')}
+            ${genererCarteEngagement('Engagement favorable', somTresFavorable + somFavorable, panTresFavorable + panFavorable, nbTotal, afficherSom, afficherPan, 'var(--alerte-fond-succes)', 'var(--btn-confirmer)')}
+            ${genererCarteEngagement('Engagement modéré', somModere, panModere, nbTotal, afficherSom, afficherPan, '#fffbf0', '#fbc02d')}
+            ${genererCarteEngagement('Engagement fragile', somFragile, panFragile, nbTotal, afficherSom, afficherPan, '#fff8f0', 'var(--risque-tres-eleve)')}
+            ${genererCarteEngagement('Engagement insuffisant', somInsuffisant, panInsuffisant, nbTotal, afficherSom, afficherPan, '#fff5f5', 'var(--risque-critique)')}
         </div>
     `;
 
-    carteRisque.insertAdjacentHTML('beforeend', html);
+    carteEngagement.insertAdjacentHTML('beforeend', html);
 }
 
 /**
- * Génère une carte de risque avec les valeurs SOM et PAN colorées
+ * Génère une carte d'engagement avec les valeurs SOM et PAN colorées
  */
-function genererCarteRisque(label, valeurSom, valeurPan, total, afficherSom, afficherPan, bgColor, borderColor) {
+function genererCarteEngagement(label, valeurSom, valeurPan, total, afficherSom, afficherPan, bgColor, borderColor) {
     const valeurs = [];
 
     if (afficherSom) {
@@ -1216,13 +1211,12 @@ function setBarre(id, pourcentage) {
  * - Assiduité (A) : SOMME(heures présent) / TOTAL(heures cours)
  * - Complétion (C) : NOMBRE(remis) / NOMBRE(attendus)
  * - Performance (P) : MOYENNE(3 derniers IDME) / 4
- * - Risque : 1 - (A × C × P)
- * 
- * SEUILS DE RISQUE:
- * - Critique: > 0.7
- * - Très élevé: 0.5 - 0.7
- * - Élevé: 0.4 - 0.5
- * - Modéré: 0.3 - 0.4
- * - Faible: 0.2 - 0.3
- * - Minimal: ≤ 0.2
+ * - Engagement : E = (A × C × P)^(1/3) (racine cubique)
+ *
+ * SEUILS D'ENGAGEMENT:
+ * - Très favorable: ≥ 0.80
+ * - Favorable: 0.65 - 0.79
+ * - Modéré: 0.50 - 0.64
+ * - Fragile: 0.30 - 0.49
+ * - Insuffisant: < 0.30
  */
