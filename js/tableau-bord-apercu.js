@@ -513,18 +513,13 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
  * @returns {string} HTML de la barre de distribution
  */
 function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan) {
-    // Gradient de couleurs selon les seuils d'engagement
-    // Rouge (0-30%) → Orange (30-50%) → Jaune (50-65%) → Vert (65-80%) → Bleu (80-100%)
+    // Gradient de couleurs selon les seuils d'engagement (4 zones, sans Insuffisant)
+    // Orange (30-49%) → Jaune (50-64%) → Vert (65-79%) → Bleu (≥80%)
     const gradient = `linear-gradient(to right,
-        #dc3545 0%, #dc3545 28%,
-        #dc3545 28%, #ff9800 32%,
-        #ff9800 32%, #ff9800 48%,
-        #ff9800 48%, #ffc107 52%,
-        #ffc107 52%, #ffc107 63%,
-        #ffc107 63%, #28a745 67%,
-        #28a745 67%, #28a745 78%,
-        #28a745 78%, #2196F3 82%,
-        #2196F3 82%, #2196F3 100%)`;
+        #ff9800 0%, #ff9800 25%,
+        #ffc107 25%, #ffc107 50%,
+        #28a745 50%, #28a745 75%,
+        #2196F3 75%, #2196F3 100%)`;
 
     // Générer les points pour SOM avec jitter aléatoire
     let lignesSOM = '';
@@ -543,7 +538,8 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         Object.keys(groupesSOM).forEach(score => {
             const etudiants = groupesSOM[score];
             etudiants.forEach((e, index) => {
-                const position = Math.min(e.valeur * 100, 100);
+                // Mapper 30-100% sur 0-100% de la barre
+                const position = Math.max(0, Math.min((e.valeur - 0.30) / 0.70 * 100, 100));
                 // Jitter léger : ±0.3% horizontal, ±8px vertical
                 const jitterH = (Math.random() - 0.5) * 0.6; // -0.3% à +0.3%
                 const jitterV = (Math.random() - 0.5) * 16; // -8px à +8px
@@ -574,7 +570,8 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         Object.keys(groupesPAN).forEach(score => {
             const etudiants = groupesPAN[score];
             etudiants.forEach((e, index) => {
-                const position = Math.min(e.valeur * 100, 100);
+                // Mapper 30-100% sur 0-100% de la barre
+                const position = Math.max(0, Math.min((e.valeur - 0.30) / 0.70 * 100, 100));
                 // Jitter léger : ±0.3% horizontal, ±8px vertical
                 const jitterH = (Math.random() - 0.5) * 0.6; // -0.3% à +0.3%
                 const jitterV = (Math.random() - 0.5) * 16; // -8px à +8px
@@ -596,11 +593,10 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 ${lignesPAN}
             </div>
             <div class="distribution-legende" style="position: relative; height: 30px; font-size: 0.75rem; color: #666;">
-                <span style="position: absolute; left: 15%; transform: translateX(-50%); color: #dc3545; text-align: center;">Insuffisant<br>&lt; 30%</span>
-                <span style="position: absolute; left: 40%; transform: translateX(-50%); color: #ff9800; text-align: center;">Fragile<br>30-49%</span>
-                <span style="position: absolute; left: 57.5%; transform: translateX(-50%); color: #ffc107; text-align: center;">Modéré<br>50-64%</span>
-                <span style="position: absolute; left: 72.5%; transform: translateX(-50%); color: #28a745; text-align: center;">Favorable<br>65-79%</span>
-                <span style="position: absolute; left: 90%; transform: translateX(-50%); color: #2196F3; text-align: center;">Très favorable<br>≥ 80%</span>
+                <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #ff9800; text-align: center;">Fragile<br>30-49%</span>
+                <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #ffc107; text-align: center;">Modéré<br>50-64%</span>
+                <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #28a745; text-align: center;">Favorable<br>65-79%</span>
+                <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #2196F3; text-align: center;">Très favorable<br>≥ 80%</span>
             </div>
         </div>
     `;
