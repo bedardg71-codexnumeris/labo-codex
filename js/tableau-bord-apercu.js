@@ -528,11 +528,12 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
 function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan) {
     // Gradient de couleurs selon les seuils d'engagement (4 zones, sans Insuffisant)
     // Orange (30-49%) → Jaune (50-64%) → Vert (65-79%) → Bleu (≥80%)
+    // Transitions douces entre les couleurs
     const gradient = `linear-gradient(to right,
-        #ff9800 0%, #ff9800 25%,
-        #ffc107 25%, #ffc107 50%,
-        #28a745 50%, #28a745 75%,
-        #2196F3 75%, #2196F3 100%)`;
+        #ff9800 0%,
+        #ffc107 25%,
+        #28a745 50%,
+        #2196F3 75%)`;
 
     // Générer les points pour SOM avec jitter aléatoire
     let lignesSOM = '';
