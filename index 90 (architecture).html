@@ -2965,14 +2965,6 @@
                                         <option value="progression">En progression</option>
                                     </select>
                                 </div>
-                                <div class="groupe-form">
-                                    <label for="filtre-statut-liste">Statut</label>
-                                    <select id="filtre-statut-liste" class="controle-form"
-                                        onchange="afficherListeEtudiantsConsultation()">
-                                        <option value="actifs">Actifs seulement</option>
-                                        <option value="tous">Tous</option>
-                                    </select>
-                                </div>
                             </div>
                             <div class="grid-1fr-auto-end">
                                 <div class="groupe-form">
@@ -2983,11 +2975,11 @@
                                 <div class="d-flex-wrap-gap10">
                                     <label class="checkbox-danger-light">
                                         <input type="checkbox" id="surligner-critique" onchange="afficherListeEtudiantsConsultation()" class="cursor-pointer">
-                                        <span class="text-08-fw600-danger-dark">Critique (&gt;70%)</span>
+                                        <span class="text-08-fw600-danger-dark">Engagement insuffisant (&lt;30%)</span>
                                     </label>
                                     <label class="checkbox-danger-medium">
                                         <input type="checkbox" id="surligner-tres-eleve" onchange="afficherListeEtudiantsConsultation()" class="cursor-pointer">
-                                        <span class="text-08-fw600-danger">Très élevé (60-70%)</span>
+                                        <span class="text-08-fw600-danger">Engagement fragile (30-49%)</span>
                                     </label>
                                     <label class="checkbox-danger-medium">
                                         <input type="checkbox" id="surligner-niveau3" onchange="afficherListeEtudiantsConsultation()" class="cursor-pointer">
@@ -8817,7 +8809,7 @@ Exemple :
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025111325"></script>
-    <script src="js/etudiants.js?v=2025111441"></script>
+    <script src="js/etudiants.js?v=2025111442"></script>
     <script src="js/productions.js?v=2025111303"></script>
     <script src="js/grilles.js?v=2025111215"></script>
     <script src="js/echelles.js?v=2025111202"></script>
