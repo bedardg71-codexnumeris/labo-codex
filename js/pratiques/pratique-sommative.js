@@ -241,7 +241,7 @@ class PratiqueSommative {
      * Identifie le pattern d'apprentissage de l'étudiant
      *
      * Patterns universels (basés sur A-C-P) :
-     * - Blocage critique : P < 60% OU Risque > 70%
+     * - Blocage critique : P < 60% OU Engagement < 30%
      * - Blocage émergent : A ≥ 75% mais C ou P < 65%
      * - Défi spécifique : P entre 70-80% avec défis identifiés
      * - Stable : P entre 80-85% sans défis majeurs
@@ -283,8 +283,8 @@ class PratiqueSommative {
             console.warn('[SOM] Erreur lecture assiduité:', error);
         }
 
-        // Calculer risque (1 - A×C×P)
-        const risque = 1 - (indiceA * indiceC * indiceP);
+        // Calculer engagement E = (A × C × P)^(1/3)
+        const engagement = Math.pow(indiceA * indiceC * indiceP, 1/3);
 
         // Détecter défis
         const defis = this.detecterDefis(da);
@@ -293,9 +293,9 @@ class PratiqueSommative {
         // Identifier pattern
         let patternType, description, couleur, recommandation;
 
-        if (indiceP < 0.60 || risque > 0.70) {
+        if (indiceP < 0.60 || engagement < 0.30) {
             patternType = 'blocage-critique';
-            description = 'Blocage critique - Risque d\'échec élevé';
+            description = 'Blocage critique - Engagement insuffisant';
             couleur = '#dc3545';
             recommandation = 'Intervention intensive immédiate (Niveau 3 RàI)';
         } else if (indiceA >= 0.75 && (indiceC < 0.65 || indiceP < 0.65)) {
