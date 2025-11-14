@@ -57,7 +57,6 @@ let donneesTableauCache = [];
    - #compteur-etudiants-liste : Compteur
    - #filtre-groupe-liste : Select de filtrage par groupe
    - #filtre-programme-liste : Select de filtrage par programme
-   - #filtre-statut-liste : Select de filtrage par statut
    - #recherche-nom-liste : Input de recherche
    - #message-aucun-etudiant : Message si liste vide
    - #tableEtudiantsListe : Conteneur du tableau
@@ -492,13 +491,10 @@ function calculerNiveauRaI(da) {
 function filtrerEtudiants(etudiants) {
     let resultats = etudiants.slice(); // Copie
 
-    // Filtrer par statut (actifs seulement par défaut)
-    const filtreStatut = document.getElementById('filtre-statut-liste');
-    if (filtreStatut && filtreStatut.value !== 'tous') {
-        resultats = resultats.filter(function (e) {
-            return e.statut === 'actif' || !e.statut;
-        });
-    }
+    // Filtrer pour afficher uniquement les étudiants actifs
+    resultats = resultats.filter(function (e) {
+        return e.statut === 'actif' || !e.statut;
+    });
 
     // Filtrer par groupe
     const filtreGroupe = document.getElementById('filtre-groupe-liste');
@@ -952,7 +948,6 @@ function obtenirNomProgramme(code) {
 function resetFiltresListe() {
     const filtreGroupe = document.getElementById('filtre-groupe-liste');
     const filtreProgramme = document.getElementById('filtre-programme-liste');
-    const filtreStatut = document.getElementById('filtre-statut-liste');
     const rechercheNom = document.getElementById('recherche-nom-liste');
 
     if (filtreGroupe) {
@@ -960,9 +955,6 @@ function resetFiltresListe() {
     }
     if (filtreProgramme) {
         filtreProgramme.value = '';
-    }
-    if (filtreStatut) {
-        filtreStatut.value = 'actifs';
     }
     if (rechercheNom) {
         rechercheNom.value = '';
