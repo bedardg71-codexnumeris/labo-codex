@@ -526,31 +526,61 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         #28a745 78%, #2196F3 82%,
         #2196F3 82%, #2196F3 100%)`;
 
-    // Générer les lignes verticales pour SOM (au-dessus)
+    // Générer les triangles pour SOM (▼ en haut) avec juxtaposition
     let lignesSOM = '';
     if (afficherSom && etudiantsSOM.length > 0) {
+        // Grouper par score pour juxtaposer les étudiants au même score
+        const groupesSOM = {};
         etudiantsSOM.forEach(e => {
-            const position = Math.min(e.valeur * 100, 100);
-            lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${position}%;"
-                data-da="${e.da}"
-                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                data-valeur="${Math.round(e.valeur * 100)}%"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${Math.round(e.valeur * 100)}%"></div>`;
+            const scoreArrondi = Math.round(e.valeur * 100);
+            if (!groupesSOM[scoreArrondi]) {
+                groupesSOM[scoreArrondi] = [];
+            }
+            groupesSOM[scoreArrondi].push(e);
+        });
+
+        // Générer les triangles avec décalage vertical pour ceux au même score
+        Object.keys(groupesSOM).forEach(score => {
+            const etudiants = groupesSOM[score];
+            etudiants.forEach((e, index) => {
+                const position = Math.min(e.valeur * 100, 100);
+                const decalageVertical = index * 4; // 4px entre chaque triangle au même score
+                lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
+                    style="left: ${position}%; margin-top: ${decalageVertical}px;"
+                    data-da="${e.da}"
+                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                    data-valeur="${Math.round(e.valeur * 100)}%"
+                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${Math.round(e.valeur * 100)}%"></div>`;
+            });
         });
     }
 
-    // Générer les lignes verticales pour PAN (en dessous)
+    // Générer les triangles pour PAN (▲ en bas) avec juxtaposition
     let lignesPAN = '';
     if (afficherPan && etudiantsPAN.length > 0) {
+        // Grouper par score pour juxtaposer les étudiants au même score
+        const groupesPAN = {};
         etudiantsPAN.forEach(e => {
-            const position = Math.min(e.valeur * 100, 100);
-            lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                style="left: ${position}%;"
-                data-da="${e.da}"
-                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                data-valeur="${Math.round(e.valeur * 100)}%"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${Math.round(e.valeur * 100)}%"></div>`;
+            const scoreArrondi = Math.round(e.valeur * 100);
+            if (!groupesPAN[scoreArrondi]) {
+                groupesPAN[scoreArrondi] = [];
+            }
+            groupesPAN[scoreArrondi].push(e);
+        });
+
+        // Générer les triangles avec décalage vertical pour ceux au même score
+        Object.keys(groupesPAN).forEach(score => {
+            const etudiants = groupesPAN[score];
+            etudiants.forEach((e, index) => {
+                const position = Math.min(e.valeur * 100, 100);
+                const decalageVertical = index * 4; // 4px entre chaque triangle au même score
+                lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
+                    style="left: ${position}%; margin-bottom: ${decalageVertical}px;"
+                    data-da="${e.da}"
+                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                    data-valeur="${Math.round(e.valeur * 100)}%"
+                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${Math.round(e.valeur * 100)}%"></div>`;
+            });
         });
     }
 
@@ -561,12 +591,12 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
-            <div class="distribution-legende" style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #666; padding: 0 5px;">
-                <span style="color: #dc3545;">Insuffisant<br>&lt; 30%</span>
-                <span style="color: #ff9800;">Fragile<br>30-49%</span>
-                <span style="color: #ffc107;">Modéré<br>50-64%</span>
-                <span style="color: #28a745;">Favorable<br>65-79%</span>
-                <span style="color: #2196F3;">Très favorable<br>≥ 80%</span>
+            <div class="distribution-legende" style="position: relative; height: 30px; font-size: 0.75rem; color: #666;">
+                <span style="position: absolute; left: 15%; transform: translateX(-50%); color: #dc3545; text-align: center;">Insuffisant<br>&lt; 30%</span>
+                <span style="position: absolute; left: 40%; transform: translateX(-50%); color: #ff9800; text-align: center;">Fragile<br>30-49%</span>
+                <span style="position: absolute; left: 57.5%; transform: translateX(-50%); color: #ffc107; text-align: center;">Modéré<br>50-64%</span>
+                <span style="position: absolute; left: 72.5%; transform: translateX(-50%); color: #28a745; text-align: center;">Favorable<br>65-79%</span>
+                <span style="position: absolute; left: 90%; transform: translateX(-50%); color: #2196F3; text-align: center;">Très favorable<br>≥ 80%</span>
             </div>
         </div>
     `;
@@ -599,31 +629,59 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
         'blocage-critique': 87.5 // Centre de 75-100%
     };
 
-    // Générer les lignes pour SOM
+    // Générer les triangles pour SOM avec juxtaposition
     let lignesSOM = '';
     if (afficherSom && etudiantsSOM.length > 0) {
+        // Grouper par pattern pour juxtaposer les étudiants au même pattern
+        const groupesSOM = {};
         etudiantsSOM.forEach(e => {
-            const position = positionPattern[e.pattern] || 50;
-            lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${position}%;"
-                data-da="${e.da}"
-                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                data-pattern="${e.pattern}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${e.pattern}"></div>`;
+            if (!groupesSOM[e.pattern]) {
+                groupesSOM[e.pattern] = [];
+            }
+            groupesSOM[e.pattern].push(e);
+        });
+
+        // Générer les triangles avec décalage pour ceux au même pattern
+        Object.keys(groupesSOM).forEach(pattern => {
+            const etudiants = groupesSOM[pattern];
+            etudiants.forEach((e, index) => {
+                const position = positionPattern[e.pattern] || 50;
+                const decalageVertical = index * 4;
+                lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
+                    style="left: ${position}%; margin-top: ${decalageVertical}px;"
+                    data-da="${e.da}"
+                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                    data-pattern="${e.pattern}"
+                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${e.pattern}"></div>`;
+            });
         });
     }
 
-    // Générer les lignes pour PAN
+    // Générer les triangles pour PAN avec juxtaposition
     let lignesPAN = '';
     if (afficherPan && etudiantsPAN.length > 0) {
+        // Grouper par pattern pour juxtaposer les étudiants au même pattern
+        const groupesPAN = {};
         etudiantsPAN.forEach(e => {
-            const position = positionPattern[e.pattern] || 50;
-            lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                style="left: ${position}%;"
-                data-da="${e.da}"
-                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                data-pattern="${e.pattern}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${e.pattern}"></div>`;
+            if (!groupesPAN[e.pattern]) {
+                groupesPAN[e.pattern] = [];
+            }
+            groupesPAN[e.pattern].push(e);
+        });
+
+        // Générer les triangles avec décalage pour ceux au même pattern
+        Object.keys(groupesPAN).forEach(pattern => {
+            const etudiants = groupesPAN[pattern];
+            etudiants.forEach((e, index) => {
+                const position = positionPattern[e.pattern] || 50;
+                const decalageVertical = index * 4;
+                lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
+                    style="left: ${position}%; margin-bottom: ${decalageVertical}px;"
+                    data-da="${e.da}"
+                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                    data-pattern="${e.pattern}"
+                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${e.pattern}"></div>`;
+            });
         });
     }
 
@@ -634,11 +692,11 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
-            <div class="distribution-legende" style="display: flex; justify-content: space-around; font-size: 0.75rem; color: #666; padding: 0 5px;">
-                <span style="color: #4caf50; text-align: center;">Progression<br>stable</span>
-                <span style="color: #9c27b0; text-align: center;">Défi<br>spécifique</span>
-                <span style="color: #ffc107; text-align: center;">Blocage<br>émergent</span>
-                <span style="color: #ff9800; text-align: center;">Blocage<br>critique</span>
+            <div class="distribution-legende" style="position: relative; height: 30px; font-size: 0.75rem; color: #666;">
+                <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #4caf50; text-align: center;">Progression<br>stable</span>
+                <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #9c27b0; text-align: center;">Défi<br>spécifique</span>
+                <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #ffc107; text-align: center;">Blocage<br>émergent</span>
+                <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #ff9800; text-align: center;">Blocage<br>critique</span>
             </div>
         </div>
     `;
@@ -668,31 +726,59 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
         3: 83     // Centre de 66-100%
     };
 
-    // Générer les lignes pour SOM
+    // Générer les triangles pour SOM avec juxtaposition
     let lignesSOM = '';
     if (afficherSom && etudiantsSOM.length > 0) {
+        // Grouper par niveau pour juxtaposer les étudiants au même niveau
+        const groupesSOM = {};
         etudiantsSOM.forEach(e => {
-            const position = positionNiveau[e.niveau] || 50;
-            lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${position}%;"
-                data-da="${e.da}"
-                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                data-niveau="${e.niveau}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${e.niveau}"></div>`;
+            if (!groupesSOM[e.niveau]) {
+                groupesSOM[e.niveau] = [];
+            }
+            groupesSOM[e.niveau].push(e);
+        });
+
+        // Générer les triangles avec décalage pour ceux au même niveau
+        Object.keys(groupesSOM).forEach(niveau => {
+            const etudiants = groupesSOM[niveau];
+            etudiants.forEach((e, index) => {
+                const position = positionNiveau[e.niveau] || 50;
+                const decalageVertical = index * 4;
+                lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
+                    style="left: ${position}%; margin-top: ${decalageVertical}px;"
+                    data-da="${e.da}"
+                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                    data-niveau="${e.niveau}"
+                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${e.niveau}"></div>`;
+            });
         });
     }
 
-    // Générer les lignes pour PAN
+    // Générer les triangles pour PAN avec juxtaposition
     let lignesPAN = '';
     if (afficherPan && etudiantsPAN.length > 0) {
+        // Grouper par niveau pour juxtaposer les étudiants au même niveau
+        const groupesPAN = {};
         etudiantsPAN.forEach(e => {
-            const position = positionNiveau[e.niveau] || 50;
-            lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                style="left: ${position}%;"
-                data-da="${e.da}"
-                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                data-niveau="${e.niveau}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${e.niveau}"></div>`;
+            if (!groupesPAN[e.niveau]) {
+                groupesPAN[e.niveau] = [];
+            }
+            groupesPAN[e.niveau].push(e);
+        });
+
+        // Générer les triangles avec décalage pour ceux au même niveau
+        Object.keys(groupesPAN).forEach(niveau => {
+            const etudiants = groupesPAN[niveau];
+            etudiants.forEach((e, index) => {
+                const position = positionNiveau[e.niveau] || 50;
+                const decalageVertical = index * 4;
+                lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
+                    style="left: ${position}%; margin-bottom: ${decalageVertical}px;"
+                    data-da="${e.da}"
+                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                    data-niveau="${e.niveau}"
+                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${e.niveau}"></div>`;
+            });
         });
     }
 
@@ -703,10 +789,10 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
-            <div class="distribution-legende" style="display: flex; justify-content: space-around; font-size: 0.75rem; color: #666; padding: 0 5px;">
-                <span style="color: #4caf50; text-align: center;">Niveau 1<br>Universel</span>
-                <span style="color: #ffc107; text-align: center;">Niveau 2<br>Préventif</span>
-                <span style="color: #ff9800; text-align: center;">Niveau 3<br>Intensif</span>
+            <div class="distribution-legende" style="position: relative; height: 30px; font-size: 0.75rem; color: #666;">
+                <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: #4caf50; text-align: center;">Niveau 1<br>Universel</span>
+                <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #ffc107; text-align: center;">Niveau 2<br>Préventif</span>
+                <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #ff9800; text-align: center;">Niveau 3<br>Intensif</span>
             </div>
         </div>
     `;

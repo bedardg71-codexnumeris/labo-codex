@@ -5047,46 +5047,52 @@ label:has(+ textarea:disabled) {
     height: 60px;
     border-radius: 6px;
     overflow: visible;
+    opacity: 0.65;
 }
 
-/* Ligne verticale représentant un étudiant */
+/* Triangle représentant un étudiant */
 .barre-etudiant {
     position: absolute;
-    width: 2px;
-    height: 100%;
-    top: 0;
     cursor: pointer;
     transition: all 0.2s ease;
     z-index: 10;
+    font-size: 16px;
+    line-height: 1;
+    transform: translateX(-50%);
 }
 
-/* Ligne pour SOM (orange, en haut) */
+/* Triangle pour SOM (▼ orange, en haut) */
 .barre-etudiant-som {
-    background: var(--som-orange);
-    height: 50%;
-    top: 0;
+    color: var(--som-orange);
+    top: -2px;
+}
+
+.barre-etudiant-som::before {
+    content: '▼';
 }
 
 .barre-etudiant-som:hover {
-    width: 3px;
-    height: 55%;
-    background: #ff8c00;
+    font-size: 20px;
+    color: #ff8c00;
     z-index: 20;
+    top: -4px;
 }
 
-/* Ligne pour PAN (bleu, en bas) */
+/* Triangle pour PAN (▲ bleu, en bas) */
 .barre-etudiant-pan {
-    background: var(--pan-bleu);
-    height: 50%;
-    top: 50%;
+    color: var(--pan-bleu);
+    bottom: -2px;
+}
+
+.barre-etudiant-pan::before {
+    content: '▲';
 }
 
 .barre-etudiant-pan:hover {
-    width: 3px;
-    height: 55%;
-    top: 45%;
-    background: #0288d1;
+    font-size: 20px;
+    color: #0288d1;
     z-index: 20;
+    bottom: -4px;
 }
 
 /* Conteneur de distribution */
