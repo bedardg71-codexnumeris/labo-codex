@@ -674,50 +674,112 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
         'blocage-critique': 87.5 // Centre de 75-100%
     };
 
+    // Calculer les compteurs par pattern pour SOM et PAN
+    const compteursSOM = { 'stable': 0, 'progression': 0, 'defi-specifique': 0, 'blocage-emergent': 0, 'blocage-critique': 0 };
+    const compteursPAN = { 'stable': 0, 'progression': 0, 'defi-specifique': 0, 'blocage-emergent': 0, 'blocage-critique': 0 };
+
     // Générer les points pour SOM avec jitter (nuage de points)
+    // SOM = GAUCHE de chaque zone (position - 2%)
     let lignesSOM = '';
     if (afficherSom && etudiantsSOM.length > 0) {
         etudiantsSOM.forEach(e => {
-            const position = positionPattern[e.pattern] || 50;
+            const pattern = e.pattern || 'stable';
+            compteursSOM[pattern] = (compteursSOM[pattern] || 0) + 1;
+
+            const position = positionPattern[pattern] || 50;
+            const decalageH = -2; // SOM à gauche
             const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
-            const jitterV = (Math.random() - 0.5) * 16; // ±8px
+            const jitterV = (Math.random() - 0.5) * 16; // ±8px autour du centre
             lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                style="left: calc(${position}% + ${decalageH}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                data-pattern="${e.pattern}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${e.pattern}"></div>`;
+                data-pattern="${pattern}"
+                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${pattern}"></div>`;
         });
     }
 
     // Générer les points pour PAN avec jitter (nuage de points)
+    // PAN = DROITE de chaque zone (position + 2%)
     let lignesPAN = '';
     if (afficherPan && etudiantsPAN.length > 0) {
         etudiantsPAN.forEach(e => {
-            const position = positionPattern[e.pattern] || 50;
+            const pattern = e.pattern || 'stable';
+            compteursPAN[pattern] = (compteursPAN[pattern] || 0) + 1;
+
+            const position = positionPattern[pattern] || 50;
+            const decalageH = 2; // PAN à droite
             const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
-            const jitterV = (Math.random() - 0.5) * 16; // ±8px
+            const jitterV = (Math.random() - 0.5) * 16; // ±8px autour du centre
             lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                style="left: calc(${position}% + ${decalageH}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                data-pattern="${e.pattern}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${e.pattern}"></div>`;
+                data-pattern="${pattern}"
+                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${pattern}"></div>`;
         });
     }
 
+    // Calculer les pourcentages pour chaque zone
+    const totalSOM = etudiantsSOM.length || 1;
+    const totalPAN = etudiantsPAN.length || 1;
+
+    // Regrouper stable + progression
+    const stableSOM = (compteursSOM['stable'] || 0) + (compteursSOM['progression'] || 0);
+    const stablePAN = (compteursPAN['stable'] || 0) + (compteursPAN['progression'] || 0);
+    const stablePctSOM = Math.round((stableSOM / totalSOM) * 100);
+    const stablePctPAN = Math.round((stablePAN / totalPAN) * 100);
+
+    const defiSOM = compteursSOM['defi-specifique'] || 0;
+    const defiPAN = compteursPAN['defi-specifique'] || 0;
+    const defiPctSOM = Math.round((defiSOM / totalSOM) * 100);
+    const defiPctPAN = Math.round((defiPAN / totalPAN) * 100);
+
+    const emergentSOM = compteursSOM['blocage-emergent'] || 0;
+    const emergentPAN = compteursPAN['blocage-emergent'] || 0;
+    const emergentPctSOM = Math.round((emergentSOM / totalSOM) * 100);
+    const emergentPctPAN = Math.round((emergentPAN / totalPAN) * 100);
+
+    const critiqueSOM = compteursSOM['blocage-critique'] || 0;
+    const critiquePAN = compteursPAN['blocage-critique'] || 0;
+    const critiquePctSOM = Math.round((critiqueSOM / totalSOM) * 100);
+    const critiquePctPAN = Math.round((critiquePAN / totalPAN) * 100);
+
+    // Générer labels avec compteurs et pourcentages
+    let labelStable = 'Progression<br>stable';
+    let labelDefi = 'Défi<br>spécifique';
+    let labelEmergent = 'Blocage<br>émergent';
+    let labelCritique = 'Blocage<br>critique';
+
+    if (afficherSom && afficherPan) {
+        labelStable += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${stableSOM} (${stablePctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${stablePAN} (${stablePctPAN}%)</span>`;
+        labelDefi += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${defiSOM} (${defiPctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${defiPAN} (${defiPctPAN}%)</span>`;
+        labelEmergent += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${emergentSOM} (${emergentPctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${emergentPAN} (${emergentPctPAN}%)</span>`;
+        labelCritique += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${critiqueSOM} (${critiquePctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${critiquePAN} (${critiquePctPAN}%)</span>`;
+    } else if (afficherSom) {
+        labelStable += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${stableSOM} (${stablePctSOM}%)</span>`;
+        labelDefi += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${defiSOM} (${defiPctSOM}%)</span>`;
+        labelEmergent += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${emergentSOM} (${emergentPctSOM}%)</span>`;
+        labelCritique += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${critiqueSOM} (${critiquePctSOM}%)</span>`;
+    } else if (afficherPan) {
+        labelStable += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${stablePAN} (${stablePctPAN}%)</span>`;
+        labelDefi += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${defiPAN} (${defiPctPAN}%)</span>`;
+        labelEmergent += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${emergentPAN} (${emergentPctPAN}%)</span>`;
+        labelCritique += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${critiquePAN} (${critiquePctPAN}%)</span>`;
+    }
+
     return `
-        <div class="distribution-container" style="margin-bottom: 30px;">
-            <h4 style="margin-bottom: 10px; font-size: 0.95rem; color: #333;">Répartition des patterns d'apprentissage</h4>
-            <div class="distribution-barre-container" style="position: relative; height: 60px; background: ${gradient}; border-radius: 6px; margin-bottom: 10px;">
+        <div class="distribution-container" style="margin-bottom: 15px;">
+            <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">Répartition des patterns d'apprentissage</h4>
+            <div class="distribution-barre-container" style="position: relative; height: 30px; background: ${gradient}; border-radius: 6px; margin-bottom: 8px;">
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
-            <div class="distribution-legende" style="position: relative; height: 30px; font-size: 0.75rem; color: #666;">
-                <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #4caf50; font-weight: 600; text-align: center;">Progression<br>stable</span>
-                <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #00bcd4; font-weight: 600; text-align: center;">Défi<br>spécifique</span>
-                <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #2196f3; font-weight: 600; text-align: center;">Blocage<br>émergent</span>
-                <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #3f51b5; font-weight: 600; text-align: center;">Blocage<br>critique</span>
+            <div class="distribution-legende" style="position: relative; height: 50px; font-size: 0.75rem; color: #666;">
+                <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #4caf50; font-weight: 600; text-align: center;">${labelStable}</span>
+                <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #00bcd4; font-weight: 600; text-align: center;">${labelDefi}</span>
+                <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #2196f3; font-weight: 600; text-align: center;">${labelEmergent}</span>
+                <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #3f51b5; font-weight: 600; text-align: center;">${labelCritique}</span>
             </div>
         </div>
     `;
@@ -748,49 +810,101 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
         3: 83     // Centre de 66-100%
     };
 
+    // Calculer les compteurs par niveau pour SOM et PAN
+    const compteursSOM = { 1: 0, 2: 0, 3: 0 };
+    const compteursPAN = { 1: 0, 2: 0, 3: 0 };
+
     // Générer les points pour SOM avec jitter (nuage de points)
+    // SOM = GAUCHE de chaque zone (position - 2%)
     let lignesSOM = '';
     if (afficherSom && etudiantsSOM.length > 0) {
         etudiantsSOM.forEach(e => {
-            const position = positionNiveau[e.niveau] || 50;
+            const niveau = e.niveau || 1;
+            compteursSOM[niveau] = (compteursSOM[niveau] || 0) + 1;
+
+            const position = positionNiveau[niveau] || 50;
+            const decalageH = -2; // SOM à gauche
             const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
-            const jitterV = (Math.random() - 0.5) * 16; // ±8px
+            const jitterV = (Math.random() - 0.5) * 16; // ±8px autour du centre
             lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                style="left: calc(${position}% + ${decalageH}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                data-niveau="${e.niveau}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${e.niveau}"></div>`;
+                data-niveau="${niveau}"
+                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${niveau}"></div>`;
         });
     }
 
     // Générer les points pour PAN avec jitter (nuage de points)
+    // PAN = DROITE de chaque zone (position + 2%)
     let lignesPAN = '';
     if (afficherPan && etudiantsPAN.length > 0) {
         etudiantsPAN.forEach(e => {
-            const position = positionNiveau[e.niveau] || 50;
+            const niveau = e.niveau || 1;
+            compteursPAN[niveau] = (compteursPAN[niveau] || 0) + 1;
+
+            const position = positionNiveau[niveau] || 50;
+            const decalageH = 2; // PAN à droite
             const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
-            const jitterV = (Math.random() - 0.5) * 16; // ±8px
+            const jitterV = (Math.random() - 0.5) * 16; // ±8px autour du centre
             lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                style="left: calc(${position}% + ${decalageH}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                data-niveau="${e.niveau}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${e.niveau}"></div>`;
+                data-niveau="${niveau}"
+                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${niveau}"></div>`;
         });
     }
 
+    // Calculer les pourcentages pour chaque niveau
+    const totalSOM = etudiantsSOM.length || 1;
+    const totalPAN = etudiantsPAN.length || 1;
+
+    const niveau1SOM = compteursSOM[1] || 0;
+    const niveau1PAN = compteursPAN[1] || 0;
+    const niveau1PctSOM = Math.round((niveau1SOM / totalSOM) * 100);
+    const niveau1PctPAN = Math.round((niveau1PAN / totalPAN) * 100);
+
+    const niveau2SOM = compteursSOM[2] || 0;
+    const niveau2PAN = compteursPAN[2] || 0;
+    const niveau2PctSOM = Math.round((niveau2SOM / totalSOM) * 100);
+    const niveau2PctPAN = Math.round((niveau2PAN / totalPAN) * 100);
+
+    const niveau3SOM = compteursSOM[3] || 0;
+    const niveau3PAN = compteursPAN[3] || 0;
+    const niveau3PctSOM = Math.round((niveau3SOM / totalSOM) * 100);
+    const niveau3PctPAN = Math.round((niveau3PAN / totalPAN) * 100);
+
+    // Générer labels avec compteurs et pourcentages
+    let labelNiveau1 = 'Niveau 1<br>Universel';
+    let labelNiveau2 = 'Niveau 2<br>Préventif';
+    let labelNiveau3 = 'Niveau 3<br>Intensif';
+
+    if (afficherSom && afficherPan) {
+        labelNiveau1 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau1SOM} (${niveau1PctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
+        labelNiveau2 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau2SOM} (${niveau2PctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
+        labelNiveau3 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau3SOM} (${niveau3PctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
+    } else if (afficherSom) {
+        labelNiveau1 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau1SOM} (${niveau1PctSOM}%)</span>`;
+        labelNiveau2 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau2SOM} (${niveau2PctSOM}%)</span>`;
+        labelNiveau3 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau3SOM} (${niveau3PctSOM}%)</span>`;
+    } else if (afficherPan) {
+        labelNiveau1 += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
+        labelNiveau2 += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
+        labelNiveau3 += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
+    }
+
     return `
-        <div class="distribution-container" style="margin-bottom: 30px;">
-            <h4 style="margin-bottom: 10px; font-size: 0.95rem; color: #333;">Modèle de la Réponse à l'intervention (RàI)</h4>
-            <div class="distribution-barre-container" style="position: relative; height: 60px; background: ${gradient}; border-radius: 6px; margin-bottom: 10px;">
+        <div class="distribution-container" style="margin-bottom: 15px;">
+            <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">Modèle de la Réponse à l'intervention (RàI)</h4>
+            <div class="distribution-barre-container" style="position: relative; height: 30px; background: ${gradient}; border-radius: 6px; margin-bottom: 8px;">
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
-            <div class="distribution-legende" style="position: relative; height: 30px; font-size: 0.75rem; color: #666;">
-                <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: #2196f3; font-weight: 600; text-align: center;">Niveau 1<br>Universel</span>
-                <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #9c27b0; font-weight: 600; text-align: center;">Niveau 2<br>Préventif</span>
-                <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #6a1b9a; font-weight: 600; text-align: center;">Niveau 3<br>Intensif</span>
+            <div class="distribution-legende" style="position: relative; height: 50px; font-size: 0.75rem; color: #666;">
+                <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: #2196f3; font-weight: 600; text-align: center;">${labelNiveau1}</span>
+                <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #9c27b0; font-weight: 600; text-align: center;">${labelNiveau2}</span>
+                <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #6a1b9a; font-weight: 600; text-align: center;">${labelNiveau3}</span>
             </div>
         </div>
     `;
@@ -1022,34 +1136,35 @@ function afficherPatternsApprentissage(etudiants) {
         });
     }
 
-    // Trouver le conteneur de la section Patterns
+    // Trouver la carte "Indicateurs globaux du groupe"
     const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
-    let cartePatterns = null;
+    let carteIndicateurs = null;
     cartes.forEach(carte => {
         const h3 = carte.querySelector('h3 span');
-        if (h3 && h3.textContent.includes("patterns")) {
-            cartePatterns = carte;
+        if (h3 && h3.textContent.toLowerCase().includes("indicateurs globaux")) {
+            carteIndicateurs = carte;
         }
     });
 
-    if (!cartePatterns) return;
+    if (!carteIndicateurs) {
+        console.warn('⚠️ [Patterns] Carte Indicateurs globaux non trouvée dans le DOM');
+        return;
+    }
 
-    // Conserver le header et les notes
-    const noteToggle = cartePatterns.querySelector('.carte-info-toggle');
-    const header = cartePatterns.querySelector('h3');
+    // Vérifier si la barre Patterns existe déjà pour éviter les doublons
+    const barreExistante = carteIndicateurs.querySelector('.barre-patterns-container');
+    if (barreExistante) {
+        barreExistante.remove();
+    }
 
-    cartePatterns.innerHTML = '';
-    cartePatterns.appendChild(header);
-    if (noteToggle) cartePatterns.appendChild(noteToggle);
-
-    // Générer la barre de distribution
+    // Générer la barre de distribution et l'ajouter à la fin de la carte
     const html = `
-        <div style="padding: 20px;">
+        <div class="barre-patterns-container" style="padding: 20px 20px 0 20px; margin-top: 10px;">
             ${genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan)}
         </div>
     `;
 
-    cartePatterns.insertAdjacentHTML('beforeend', html);
+    carteIndicateurs.insertAdjacentHTML('beforeend', html);
 }
 
 /**
@@ -1143,34 +1258,35 @@ function afficherNiveauxRaI(etudiants) {
         });
     }
 
-    // Trouver le conteneur de la section RàI
+    // Trouver la carte "Indicateurs globaux du groupe"
     const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
-    let carteRaI = null;
+    let carteIndicateurs = null;
     cartes.forEach(carte => {
         const h3 = carte.querySelector('h3 span');
-        if (h3 && h3.textContent.includes("Réponse à l'intervention")) {
-            carteRaI = carte;
+        if (h3 && h3.textContent.toLowerCase().includes("indicateurs globaux")) {
+            carteIndicateurs = carte;
         }
     });
 
-    if (!carteRaI) return;
+    if (!carteIndicateurs) {
+        console.warn('⚠️ [RàI] Carte Indicateurs globaux non trouvée dans le DOM');
+        return;
+    }
 
-    // Conserver le header et les notes
-    const noteToggle = carteRaI.querySelector('.carte-info-toggle');
-    const header = carteRaI.querySelector('h3');
+    // Vérifier si la barre RàI existe déjà pour éviter les doublons
+    const barreExistante = carteIndicateurs.querySelector('.barre-rai-container');
+    if (barreExistante) {
+        barreExistante.remove();
+    }
 
-    carteRaI.innerHTML = '';
-    carteRaI.appendChild(header);
-    if (noteToggle) carteRaI.appendChild(noteToggle);
-
-    // Générer la barre de distribution
+    // Générer la barre de distribution et l'ajouter à la fin de la carte
     const html = `
-        <div style="padding: 20px;">
+        <div class="barre-rai-container" style="padding: 20px 20px 20px 20px; margin-top: 0;">
             ${genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan)}
         </div>
     `;
 
-    carteRaI.insertAdjacentHTML('beforeend', html);
+    carteIndicateurs.insertAdjacentHTML('beforeend', html);
 }
 
 /**
