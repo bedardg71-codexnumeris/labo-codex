@@ -535,6 +535,39 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         #28a745 50%,
         #2196F3 75%)`;
 
+    // Calculer les moyennes pour affichage
+    let moyenneSOM = null;
+    let moyennePAN = null;
+
+    if (afficherSom && etudiantsSOM.length > 0) {
+        const somme = etudiantsSOM.reduce((acc, e) => acc + e.valeur, 0);
+        moyenneSOM = Math.round((somme / etudiantsSOM.length) * 100);
+    }
+
+    if (afficherPan && etudiantsPAN.length > 0) {
+        const somme = etudiantsPAN.reduce((acc, e) => acc + e.valeur, 0);
+        moyennePAN = Math.round((somme / etudiantsPAN.length) * 100);
+    }
+
+    // Générer l'affichage dual des valeurs moyennes
+    let valeursHTML = '';
+    if (moyenneSOM !== null && moyennePAN !== null) {
+        // Mode comparatif : afficher les deux valeurs
+        valeursHTML = `
+            <span style="display: flex; gap: 8px; align-items: center; font-size: 0.9rem; font-weight: 600; margin-left: 10px;">
+                <span style="color: var(--som-orange);">${moyenneSOM}%</span>
+                <span style="color: #999;">|</span>
+                <span style="color: var(--pan-bleu);">${moyennePAN}%</span>
+            </span>
+        `;
+    } else if (moyenneSOM !== null) {
+        // Mode SOM uniquement
+        valeursHTML = `<span style="font-size: 0.9rem; font-weight: 600; color: var(--som-orange); margin-left: 10px;">${moyenneSOM}%</span>`;
+    } else if (moyennePAN !== null) {
+        // Mode PAN uniquement
+        valeursHTML = `<span style="font-size: 0.9rem; font-weight: 600; color: var(--pan-bleu); margin-left: 10px;">${moyennePAN}%</span>`;
+    }
+
     // Générer les points pour SOM avec jitter aléatoire
     let lignesSOM = '';
     if (afficherSom && etudiantsSOM.length > 0) {
@@ -601,7 +634,10 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
     return `
         <div class="distribution-container" style="margin-bottom: 20px;">
-            <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">${label}</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="margin: 0; font-size: 0.95rem; color: #333;">${label}</h4>
+                ${valeursHTML}
+            </div>
             <div class="distribution-barre-container" style="position: relative; height: 30px; background: ${gradient}; border-radius: 6px;">
                 ${lignesSOM}
                 ${lignesPAN}
