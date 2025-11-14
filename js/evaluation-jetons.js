@@ -444,6 +444,172 @@ function retirerJetonReprise(evaluationId) {
 }
 
 /* ===============================
+   JETONS PERSONNALISÉS
+   =============================== */
+
+/**
+ * Récupère tous les types de jetons (prédéfinis + personnalisés)
+ * @returns {Array} Liste de tous les types de jetons
+ */
+function obtenirTousTypesJetons() {
+    const config = obtenirConfigJetons();
+    const typesJetons = [];
+
+    // Jetons prédéfinis (toujours présents)
+    typesJetons.push({
+        id: 'delai',
+        nom: 'Jeton de délai',
+        description: 'Prolonge l\'échéance d\'une production',
+        nombreTotal: config.delai?.nombre || 2,
+        predefini: true
+    });
+
+    typesJetons.push({
+        id: 'reprise',
+        nom: 'Jeton de reprise',
+        description: 'Permet de refaire une évaluation',
+        nombreTotal: config.reprise?.nombre || 2,
+        predefini: true
+    });
+
+    // Jetons personnalisés
+    const typesPersonnalises = config.typesPersonnalises || [];
+    typesPersonnalises.forEach(jeton => {
+        typesJetons.push({
+            id: jeton.id,
+            nom: jeton.nom,
+            description: jeton.description,
+            nombreTotal: config.nombreParEleve || 2,
+            predefini: false
+        });
+    });
+
+    return typesJetons;
+}
+
+/**
+ * Initialise la structure de suivi des jetons pour un étudiant
+ * @param {string} da - Code permanent de l'étudiant
+ */
+function initialiserJetonsEtudiant(da) {
+    const jetons = JSON.parse(localStorage.getItem('jetonsEtudiants') || '{}');
+
+    if (!jetons[da]) {
+        jetons[da] = {};
+        localStorage.setItem('jetonsEtudiants', JSON.stringify(jetons));
+    }
+}
+
+/**
+ * Obtient le statut de tous les jetons pour un étudiant
+ * @param {string} da - Code permanent de l'étudiant
+ * @returns {Object} Statut des jetons { typeId: { utilises, total, restants } }
+ */
+function obtenirStatutJetonsEtudiant(da) {
+    initialiserJetonsEtudiant(da);
+
+    const tousTypes = obtenirTousTypesJetons();
+    const statut = {};
+
+    tousTypes.forEach(type => {
+        if (type.predefini) {
+            // Pour les jetons prédéfinis, compter depuis les évaluations
+            const utilises = compterJetonsUtilises(da, type.id);
+            statut[type.id] = {
+                nom: type.nom,
+                utilises: utilises,
+                total: type.nombreTotal,
+                restants: Math.max(0, type.nombreTotal - utilises)
+            };
+        } else {
+            // Pour les jetons personnalisés, lire depuis jetonsEtudiants
+            const jetons = JSON.parse(localStorage.getItem('jetonsEtudiants') || '{}');
+            const utilises = jetons[da]?.[type.id] || 0;
+            statut[type.id] = {
+                nom: type.nom,
+                utilises: utilises,
+                total: type.nombreTotal,
+                restants: Math.max(0, type.nombreTotal - utilises)
+            };
+        }
+    });
+
+    return statut;
+}
+
+/**
+ * Attribue (utilise) un jeton personnalisé à un étudiant
+ * @param {string} da - Code permanent de l'étudiant
+ * @param {string} jetonId - ID du type de jeton
+ * @param {string} motif - Motif de l'utilisation (optionnel)
+ * @returns {boolean} Succès ou échec
+ */
+function attribuerJetonPersonnalise(da, jetonId, motif = '') {
+    const statut = obtenirStatutJetonsEtudiant(da);
+
+    // Vérifier que le jeton existe et qu'il en reste
+    if (!statut[jetonId]) {
+        console.error('Type de jeton introuvable:', jetonId);
+        return false;
+    }
+
+    if (statut[jetonId].restants <= 0) {
+        alert(`Plus de jetons "${statut[jetonId].nom}" disponibles pour cet·te étudiant·e.`);
+        return false;
+    }
+
+    // Incrémenter le compteur
+    const jetons = JSON.parse(localStorage.getItem('jetonsEtudiants') || '{}');
+    if (!jetons[da]) jetons[da] = {};
+    jetons[da][jetonId] = (jetons[da][jetonId] || 0) + 1;
+
+    // Ajouter l'historique (optionnel)
+    if (!jetons[da]._historique) jetons[da]._historique = [];
+    jetons[da]._historique.push({
+        jetonId: jetonId,
+        action: 'attribue',
+        motif: motif,
+        date: new Date().toISOString()
+    });
+
+    localStorage.setItem('jetonsEtudiants', JSON.stringify(jetons));
+    console.log(`✅ Jeton personnalisé "${jetonId}" attribué à ${da}`);
+
+    return true;
+}
+
+/**
+ * Retire (annule l'utilisation de) un jeton personnalisé d'un étudiant
+ * @param {string} da - Code permanent de l'étudiant
+ * @param {string} jetonId - ID du type de jeton
+ * @returns {boolean} Succès ou échec
+ */
+function retirerJetonPersonnalise(da, jetonId) {
+    const jetons = JSON.parse(localStorage.getItem('jetonsEtudiants') || '{}');
+
+    if (!jetons[da] || !jetons[da][jetonId] || jetons[da][jetonId] <= 0) {
+        console.error('Aucun jeton à retirer pour:', da, jetonId);
+        return false;
+    }
+
+    // Décrémenter le compteur
+    jetons[da][jetonId] = Math.max(0, jetons[da][jetonId] - 1);
+
+    // Ajouter à l'historique
+    if (!jetons[da]._historique) jetons[da]._historique = [];
+    jetons[da]._historique.push({
+        jetonId: jetonId,
+        action: 'retire',
+        date: new Date().toISOString()
+    });
+
+    localStorage.setItem('jetonsEtudiants', JSON.stringify(jetons));
+    console.log(`✅ Jeton personnalisé "${jetonId}" retiré de ${da}`);
+
+    return true;
+}
+
+/* ===============================
    EXPORTS
    =============================== */
 
@@ -455,5 +621,11 @@ window.appliquerJetonDelai = appliquerJetonDelai;
 window.retirerJetonDelai = retirerJetonDelai;
 window.appliquerJetonReprise = appliquerJetonReprise;
 window.retirerJetonReprise = retirerJetonReprise;
+
+// Jetons personnalisés
+window.obtenirTousTypesJetons = obtenirTousTypesJetons;
+window.obtenirStatutJetonsEtudiant = obtenirStatutJetonsEtudiant;
+window.attribuerJetonPersonnalise = attribuerJetonPersonnalise;
+window.retirerJetonPersonnalise = retirerJetonPersonnalise;
 
 console.log('✅ Module evaluation-jetons.js chargé');

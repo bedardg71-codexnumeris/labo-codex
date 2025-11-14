@@ -4990,3 +4990,23 @@ body[data-mode="anonymisation"] .sidebar-navigation {
         opacity: 1;
     }
 }
+
+/* ===============================
+   SECTIONS DÉSACTIVÉES (Pratiques de notation)
+   =============================== */
+
+/* Amélioration visuelle des champs désactivés dans les sections avec opacité réduite */
+select:disabled,
+input:disabled,
+textarea:disabled {
+    cursor: not-allowed;
+    background-color: #f5f5f5;
+    color: #999;
+}
+
+/* Labels associés aux champs désactivés */
+label:has(+ select:disabled),
+label:has(+ input:disabled),
+label:has(+ textarea:disabled) {
+    color: #999;
+}

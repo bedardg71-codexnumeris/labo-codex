@@ -620,17 +620,17 @@ function genererSectionMobilisationEngagement(da) {
     const indicesSOM = calculerTousLesIndices(da, 'SOM');
     const indicesPAN = calculerTousLesIndices(da, 'PAN');
 
-    // Calculer risques pour les deux pratiques (R = 1 - A × C × P)
+    // Calculer engagement pour les deux pratiques (E = racine cubique de A × C × P)
     const A_pct = indicesSOM.A / 100; // A est identique pour les deux pratiques
     const C_SOM = indicesSOM.C / 100;
     const P_SOM = indicesSOM.P / 100;
-    const E_SOM = A_pct * C_SOM * P_SOM;
-    const R_SOM = 1 - E_SOM;
+    const E_brut_SOM = A_pct * C_SOM * P_SOM;
+    const E_SOM = Math.pow(E_brut_SOM, 1/3); // Racine cubique
 
     const C_PAN = indicesPAN.C / 100;
     const P_PAN = indicesPAN.P / 100;
-    const E_PAN = A_pct * C_PAN * P_PAN;
-    const R_PAN = 1 - E_PAN;
+    const E_brut_PAN = A_pct * C_PAN * P_PAN;
+    const E_PAN = Math.pow(E_brut_PAN, 1/3); // Racine cubique
 
     // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
@@ -788,6 +788,11 @@ function genererSectionMobilisationEngagement(da) {
     const jetonsDelaiUtilises = evaluationsAvecJetonDelai.length;
     const totalJetonsUtilises = jetonsRepriseUtilises + jetonsDelaiUtilises;
 
+    // Récupérer le statut de tous les jetons (prédéfinis + personnalisés)
+    const statutJetons = typeof obtenirStatutJetonsEtudiant === 'function'
+        ? obtenirStatutJetonsEtudiant(da)
+        : {};
+
     // Créer les objets avec index pour les badges
     const jetonsDelaiAvecIndex = evaluationsAvecJetonDelai.map(e => {
         const indexOriginal = artefactsPortfolio.findIndex(p => p.id === e.productionId) + 1;
@@ -838,19 +843,16 @@ function genererSectionMobilisationEngagement(da) {
 
                     <div class="details-calculs-label">Engagement (E):</div>
                     <div class="details-calculs-valeur">
-                        Formule: E = A × C × P<br>
-                        E = ${(A).toFixed(2)} × ${(C).toFixed(2)} × ${(moyenneP / 100).toFixed(2)} = <strong>${(A * C * (moyenneP / 100)).toFixed(3)}</strong>
-                    </div>
-
-                    <div class="details-calculs-label">Risque (R):</div>
-                    <div class="details-calculs-valeur">
-                        Formule: R = 1 - E<br>
-                        R = 1 - ${(A * C * (moyenneP / 100)).toFixed(3)} = <strong>${(1 - A * C * (moyenneP / 100)).toFixed(3)}</strong><br>
+                        Formule: E = (A × C × P)^(1/3) (racine cubique)<br>
+                        E_brut = ${(A).toFixed(2)} × ${(C).toFixed(2)} × ${(moyenneP / 100).toFixed(2)} = ${(A * C * (moyenneP / 100)).toFixed(3)}<br>
+                        E_ajusté = (${(A * C * (moyenneP / 100)).toFixed(3)})^(1/3) = <strong>${Math.pow(A * C * (moyenneP / 100), 1/3).toFixed(3)}</strong><br>
                         <br>
-                        Le risque d'échec est <strong>inversement proportionnel</strong> à l'engagement global.<br>
-                        Engagement actuel : <strong>${(() => {
-                            const E_calc = A * C * (moyenneP / 100);
-                            const interpE_calc = interpreterEngagement(E_calc);
+                        L'engagement combine assiduité, complétion et performance.<br>
+                        La racine cubique compense la décroissance multiplicative.<br>
+                        Niveau d'engagement : <strong>${(() => {
+                            const E_brut_calc = A * C * (moyenneP / 100);
+                            const E_ajuste = Math.pow(E_brut_calc, 1/3);
+                            const interpE_calc = interpreterEngagement(E_ajuste);
                             return `<span style="color: ${interpE_calc.couleur};">${interpE_calc.niveau}</span>`;
                         })()}</strong>
                     </div>
@@ -1063,35 +1065,79 @@ function genererSectionMobilisationEngagement(da) {
 
                 <hr class="profil-separateur">
 
-                <!-- Gestion des jetons -->
-                ${totalJetonsUtilises > 0 ? `
-                    <h4 class="profil-section-titre">
-                        Jetons utilisés
-                    </h4>
-                    <div class="profil-jetons-badges">
-                        ${jetonsDelaiAvecIndex.map(jeton => `
-                            <span class="badge-jeton-delai-wrapper">
-                                <span class="badge-jeton-titre">
-                                    Délai
-                                </span>
-                                <span class="badge-jeton-numero badge-jeton-numero-delai">
-                                    ${jeton.index}
-                                </span>
+                <!-- Gestion des jetons (prédéfinis + personnalisés) -->
+                ${typeof obtenirStatutJetonsEtudiant === 'function' ? (() => {
+                    // Calculer le total de jetons utilisés tous types confondus
+                    const totalJetonsUtilisesTousTypes = Object.values(statutJetons).reduce((sum, info) => sum + info.utilises, 0);
+
+                    // Récupérer le quota global depuis la configuration
+                    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+                    const quotaGlobal = config.configPAN?.jetons?.nombreParEleve || 4;
+
+                    // Déterminer si le quota global est atteint
+                    const quotaGlobalAtteint = totalJetonsUtilisesTousTypes >= quotaGlobal;
+
+                    return `
+                        <h4 class="profil-section-titre">
+                            Gestion des jetons
+                            <span style="color: #666; font-size: 0.8rem; font-weight: normal; margin-left: 10px;">
+                                (${totalJetonsUtilisesTousTypes} / ${quotaGlobal} utilisés au total)
                             </span>
-                        `).join('')}
-                        ${jetonsRepriseAvecIndex.map(jeton => `
-                            <span class="badge-jeton-reprise-wrapper">
-                                <span class="badge-jeton-titre">
-                                    Reprise
-                                </span>
-                                <span class="badge-jeton-numero badge-jeton-numero-reprise">
-                                    ${jeton.index}
-                                </span>
-                            </span>
-                        `).join('')}
-                    </div>
-                    <hr class="profil-separateur">
-                ` : ''}
+                        </h4>
+                        <div style="display: grid; gap: 10px; margin-bottom: 15px;">
+                            ${Object.entries(statutJetons).map(([jetonId, info]) => {
+                                const estPredefini = jetonId === 'delai' || jetonId === 'reprise';
+                                const jetonNonUtilise = info.utilises === 0;
+                                const estGrise = quotaGlobalAtteint && jetonNonUtilise;
+
+                                const couleurFond = estPredefini
+                                    ? (jetonId === 'delai' ? '#fff3e0' : '#f3e5f5')
+                                    : '#e8f5e9';
+                                const couleurBordure = estPredefini
+                                    ? (jetonId === 'delai' ? '#ff9800' : '#9c27b0')
+                                    : '#4caf50';
+
+                                return `
+                                    <div style="background: ${couleurFond}; border: 2px solid ${couleurBordure}; border-radius: 8px; padding: 12px; ${estGrise ? 'opacity: 0.4; filter: grayscale(0.7);' : ''}">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                            <strong style="color: ${couleurBordure}; font-size: 0.9rem;">
+                                                ${echapperHtml(info.nom)}
+                                            </strong>
+                                            <span style="color: #666; font-size: 0.85rem;">
+                                                ${info.utilises} / ${info.total} utilisé${info.utilises > 1 ? 's' : ''}
+                                            </span>
+                                        </div>
+                                        <div style="background: white; height: 8px; border-radius: 4px; overflow: hidden;">
+                                            <div style="background: ${couleurBordure}; height: 100%; width: ${(info.utilises / info.total * 100)}%; transition: width 0.3s ease;"></div>
+                                        </div>
+                                        ${estGrise ? `
+                                            <div style="margin-top: 8px; padding: 6px; background: #f5f5f5; border-radius: 4px; text-align: center; font-size: 0.75rem; color: #999;">
+                                                Quota global atteint
+                                            </div>
+                                        ` : ''}
+                                        ${!estPredefini && info.restants > 0 && !estGrise ? `
+                                            <button
+                                                onclick="attribuerJetonPersonnaliseAvecPrompt('${da}', '${jetonId}', '${echapperHtml(info.nom)}')"
+                                                class="btn btn-sm btn-secondaire"
+                                                style="margin-top: 8px; width: 100%; padding: 4px 8px; font-size: 0.8rem;">
+                                                + Attribuer ce jeton
+                                            </button>
+                                        ` : ''}
+                                        ${!estPredefini && info.utilises > 0 ? `
+                                            <button
+                                                onclick="retirerJetonPersonnaliseAvecConfirmation('${da}', '${jetonId}', '${echapperHtml(info.nom)}')"
+                                                class="btn btn-sm btn-danger"
+                                                style="margin-top: 4px; width: 100%; padding: 4px 8px; font-size: 0.8rem;">
+                                                − Retirer un jeton
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <hr class="profil-separateur">
+                    `;
+                })() : ''}
 
                 <!-- Artefacts sélectionnés avec notes (badges colorés avec checkboxes) -->
                 <h4 class="profil-section-titre">
@@ -1167,97 +1213,86 @@ function genererSectionMobilisationEngagement(da) {
             </div>
         </div>
 
-        <!-- ÉCHELLE DE RISQUE (basée sur E = A × C × P) -->
+        <!-- ÉCHELLE D'ENGAGEMENT (basée sur E = racine cubique de A × C × P) -->
         ${(() => {
-            // Recalculer E et R avec le vrai moyenneP
+            // Recalculer E avec racine cubique
             const P_reel = moyenneP / 100;
-            const E_reel = A * C * P_reel;
-            const R_reel = 1 - E_reel;
+            const E_brut_reel = A * C * P_reel;
+            const E_reel = Math.pow(E_brut_reel, 1/3); // Racine cubique
 
-            // Interpréter E et R
+            // Interpréter E
             const interpE_reel = interpreterEngagement(E_reel);
-            const interpR_reel = interpreterRisque(R_reel);
 
-            // Seuils d'alerte (en tant que proportion)
-            const seuilMinimal = 0.20;
-            const seuilModere = 0.35;
-            const seuilEleve = 0.50;
-
-            // ========================================
-            // Texte explicatif pour le calcul de R
-            // ========================================
+            // Texte explicatif pour le calcul de E (basé sur P)
             const configPAN = config.configPAN?.portfolio || {};
             const decouplerPR = configPAN.decouplerPR || false;
             const nombreArtefacts = configPAN.nombreARetenir || 5;
 
-            let texteExplicatifR = '';
+            let texteExplicatifE = '';
             if (decouplerPR && !modeComparatif) {
-                // Mode découplage activé: R basé sur les N plus récents
-                texteExplicatifR = `<span style="font-size: 0.85rem; color: #666; font-weight: 400;"> (basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''})</span>`;
+                texteExplicatifE = `<span style="font-size: 0.85rem; color: #666; font-weight: 400;"> (P basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''})</span>`;
             } else if (!decouplerPR && !modeComparatif && portfolioActif) {
-                // Mode normal: R basé sur P (selon modalité)
                 const textesModalites = {
-                    'meilleurs': `basé sur les ${nombreArtefacts} meilleur${nombreArtefacts > 1 ? 's' : ''}`,
-                    'recents': `basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''}`,
-                    'recents-meilleurs': `basé sur les ${nombreArtefacts} récent${nombreArtefacts > 1 ? 's' : ''} parmi les meilleurs`,
-                    'tous': 'basé sur tous les artefacts'
+                    'meilleurs': `P basé sur les ${nombreArtefacts} meilleur${nombreArtefacts > 1 ? 's' : ''}`,
+                    'recents': `P basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''}`,
+                    'recents-meilleurs': `P basé sur les ${nombreArtefacts} récent${nombreArtefacts > 1 ? 's' : ''} parmi les meilleurs`,
+                    'tous': 'P basé sur tous les artefacts'
                 };
                 const texteModalite = textesModalites[methodeSelection] || textesModalites['meilleurs'];
-                texteExplicatifR = `<span style="font-size: 0.85rem; color: #666; font-weight: 400;"> (${texteModalite})</span>`;
+                texteExplicatifE = `<span style="font-size: 0.85rem; color: #666; font-weight: 400;"> (${texteModalite})</span>`;
             }
 
             return `
                 <div class="profil-carte" style="margin-top: 10px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                         <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">
-                            Risque d'échec${texteExplicatifR}
-                            <span style="font-size: 0.75rem; color: #999; font-weight: 400; margin-left: 8px;">exp.</span>
+                            Niveau d'engagement${texteExplicatifE}
                         </h3>
-                        ${genererValeursComparatives(Math.round(R_SOM * 100), Math.round(R_PAN * 100), modeComparatif)}
+                        ${genererValeursComparatives(Math.round(E_SOM * 100), Math.round(E_PAN * 100), modeComparatif)}
                     </div>
 
                     <div class="profil-echelle-risque">
                         <div class="profil-echelle-barre" style="background: linear-gradient(to right,
-                                    #2196F3 0%, #2196F3 18%,
-                                    #2196F3 18%, #28a745 22%,
-                                    #28a745 22%, #28a745 33%,
-                                    #28a745 33%, #ffc107 37%,
-                                    #ffc107 37%, #ffc107 48%,
-                                    #ffc107 48%, #ff9800 52%,
-                                    #ff9800 52%, #ff9800 68%,
-                                    #ff9800 68%, #dc3545 72%,
-                                    #dc3545 72%, #dc3545 100%);">
+                                    #dc3545 0%, #dc3545 28%,
+                                    #dc3545 28%, #ff9800 32%,
+                                    #ff9800 32%, #ff9800 48%,
+                                    #ff9800 48%, #ffc107 52%,
+                                    #ffc107 52%, #ffc107 63%,
+                                    #ffc107 63%, #28a745 67%,
+                                    #28a745 67%, #28a745 78%,
+                                    #28a745 78%, #2196F3 82%,
+                                    #2196F3 82%, #2196F3 100%);">
                             ${modeComparatif ? `
                                 <!-- Indicateurs duaux: flèches colorées seulement (valeurs affichées dans l'en-tête) -->
-                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(R_SOM * 100, 100)}%; color: var(--som-orange);">▼</div>
-                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(R_PAN * 100, 100)}%; color: var(--pan-bleu); top: auto; bottom: -15px;">▲</div>
+                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(E_SOM * 100, 100)}%; color: var(--som-orange);">▼</div>
+                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(E_PAN * 100, 100)}%; color: var(--pan-bleu); top: auto; bottom: -15px;">▲</div>
                             ` : `
                                 <!-- Indicateur unique pratique courante -->
-                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(R_reel * 100, 100)}%;">▼</div>
-                                <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(R_reel * 100, 100)}%;">R = ${R_reel.toFixed(2)}</div>
+                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(E_reel * 100, 100)}%;">▼</div>
+                                <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(E_reel * 100, 100)}%;">E = ${E_reel.toFixed(2)}</div>
                             `}
                         </div>
 
                         <div class="legende-risque-container">
-                            <div class="legende-risque-item" style="left: 10%; color: #2196F3;">
-                                <span class="legende-risque-niveau">Minimal</span>
-                                <span class="legende-risque-seuil">0-0.19</span>
+                            <div class="legende-risque-item" style="left: 15%; color: #dc3545;">
+                                <span class="legende-risque-niveau">Insuffisant</span>
+                                <span class="legende-risque-seuil">< 0.30</span>
                             </div>
-                            <div class="legende-risque-item" style="left: 27.5%; color: #28a745;">
-                                <span class="legende-risque-niveau">Faible</span>
-                                <span class="legende-risque-seuil">0.20-0.34</span>
+                            <div class="legende-risque-item" style="left: 40%; color: #ff9800;">
+                                <span class="legende-risque-niveau">Fragile</span>
+                                <span class="legende-risque-seuil">0.30-0.49</span>
                             </div>
-                            <div class="legende-risque-item" style="left: 42.5%; color: #ffc107;">
+                            <div class="legende-risque-item" style="left: 57.5%; color: #ffc107;">
                                 <span class="legende-risque-niveau">Modéré</span>
-                                <span class="legende-risque-seuil">0.35-0.49</span>
+                                <span class="legende-risque-seuil">0.50-0.64</span>
                             </div>
-                            <div class="legende-risque-item" style="left: 60%; color: #ff9800;">
-                                <span class="legende-risque-niveau">Élevé</span>
-                                <span class="legende-risque-seuil">0.50-0.69</span>
+                            <div class="legende-risque-item" style="left: 72.5%; color: #28a745;">
+                                <span class="legende-risque-niveau">Favorable</span>
+                                <span class="legende-risque-seuil">0.65-0.79</span>
                             </div>
-                            <div class="legende-risque-item" style="left: 85%; color: #dc3545;">
-                                <span class="legende-risque-niveau">Critique</span>
-                                <span class="legende-risque-seuil">≥ 0.70</span>
+                            <div class="legende-risque-item" style="left: 90%; color: #2196F3;">
+                                <span class="legende-risque-niveau">Très favorable</span>
+                                <span class="legende-risque-seuil">≥ 0.80</span>
                             </div>
                         </div>
                     </div>
@@ -6411,3 +6446,62 @@ function supprimerEvaluationDepuisProfil(evaluationId) {
         alert('Fonction de suppression non disponible');
     }
 }
+
+/* ===============================
+   GESTION DES JETONS PERSONNALISÉS
+   =============================== */
+
+/**
+ * Attribue un jeton personnalisé avec demande de motif
+ * @param {string} da - Code permanent de l'étudiant
+ * @param {string} jetonId - ID du type de jeton
+ * @param {string} nomJeton - Nom du jeton (pour affichage)
+ */
+function attribuerJetonPersonnaliseAvecPrompt(da, jetonId, nomJeton) {
+    const motif = prompt(`Motif d'utilisation du jeton "${nomJeton}" (optionnel) :`);
+
+    if (motif === null) {
+        // L'utilisateur a annulé
+        return;
+    }
+
+    if (typeof attribuerJetonPersonnalise === 'function') {
+        const succes = attribuerJetonPersonnalise(da, jetonId, motif || '');
+
+        if (succes) {
+            // Recharger la section Mobilisation pour mettre à jour l'affichage
+            changerSectionProfil('mobilisation');
+        }
+    } else {
+        console.error('Fonction attribuerJetonPersonnalise non disponible');
+        alert('Erreur : La fonction de gestion des jetons n\'est pas disponible.');
+    }
+}
+
+/**
+ * Retire un jeton personnalisé avec confirmation
+ * @param {string} da - Code permanent de l'étudiant
+ * @param {string} jetonId - ID du type de jeton
+ * @param {string} nomJeton - Nom du jeton (pour affichage)
+ */
+function retirerJetonPersonnaliseAvecConfirmation(da, jetonId, nomJeton) {
+    if (!confirm(`Êtes-vous sûr de vouloir retirer un jeton "${nomJeton}" à cet·te étudiant·e ?`)) {
+        return;
+    }
+
+    if (typeof retirerJetonPersonnalise === 'function') {
+        const succes = retirerJetonPersonnalise(da, jetonId);
+
+        if (succes) {
+            // Recharger la section Mobilisation pour mettre à jour l'affichage
+            changerSectionProfil('mobilisation');
+        }
+    } else {
+        console.error('Fonction retirerJetonPersonnalise non disponible');
+        alert('Erreur : La fonction de gestion des jetons n\'est pas disponible.');
+    }
+}
+
+// Exporter les fonctions vers window
+window.attribuerJetonPersonnaliseAvecPrompt = attribuerJetonPersonnaliseAvecPrompt;
+window.retirerJetonPersonnaliseAvecConfirmation = retirerJetonPersonnaliseAvecConfirmation;

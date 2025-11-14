@@ -562,7 +562,12 @@ function toggleConfigPortfolio() {
     const detailsConfig = document.getElementById('detailsConfigPortfolio');
 
     if (detailsConfig) {
-        detailsConfig.style.display = portfolioActif ? 'block' : 'none';
+        // Appliquer l'opacité réduite au lieu de masquer
+        detailsConfig.style.opacity = portfolioActif ? '1' : '0.5';
+
+        // Désactiver tous les champs si portfolio inactif
+        const champs = detailsConfig.querySelectorAll('select, input');
+        champs.forEach(champ => champ.disabled = !portfolioActif);
     }
 
     // Afficher/masquer la carte portfolio dans la colonne droite
@@ -669,28 +674,29 @@ function afficherCartesExtras() {
 
     if (!colonneCartesExtras || !cartePortfolio || !carteJetons) return;
 
-    // Gérer l'affichage de la carte Portfolio
-    if (checkPortfolio && checkPortfolio.checked) {
-        // Ajouter la carte si elle n'est pas déjà dans la colonne
-        if (!colonneCartesExtras.contains(cartePortfolio)) {
-            colonneCartesExtras.appendChild(cartePortfolio);
-        }
-        cartePortfolio.style.display = 'block';
-    } else {
-        // Masquer la carte sans la supprimer du DOM
-        cartePortfolio.style.display = 'none';
+    // Toujours afficher les cartes, mais ajuster l'opacité et désactiver
+    // Ajouter les cartes si elles ne sont pas déjà dans la colonne
+    if (!colonneCartesExtras.contains(cartePortfolio)) {
+        colonneCartesExtras.appendChild(cartePortfolio);
+    }
+    if (!colonneCartesExtras.contains(carteJetons)) {
+        colonneCartesExtras.appendChild(carteJetons);
     }
 
-    // Gérer l'affichage de la carte Jetons
-    if (checkJetons && checkJetons.checked) {
-        // Ajouter la carte si elle n'est pas déjà dans la colonne
-        if (!colonneCartesExtras.contains(carteJetons)) {
-            colonneCartesExtras.appendChild(carteJetons);
-        }
-        carteJetons.style.display = 'block';
+    // Gérer l'apparence de la carte Portfolio
+    cartePortfolio.style.display = 'block';
+    if (checkPortfolio && checkPortfolio.checked) {
+        cartePortfolio.style.opacity = '1';
     } else {
-        // Masquer la carte sans la supprimer du DOM
-        carteJetons.style.display = 'none';
+        cartePortfolio.style.opacity = '0.5';
+    }
+
+    // Gérer l'apparence de la carte Jetons
+    carteJetons.style.display = 'block';
+    if (checkJetons && checkJetons.checked) {
+        carteJetons.style.opacity = '1';
+    } else {
+        carteJetons.style.opacity = '0.5';
     }
 }
 
