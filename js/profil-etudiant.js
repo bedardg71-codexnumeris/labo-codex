@@ -3730,13 +3730,40 @@ function convertirNiveauIDMEEnScore(niveau, tableConversion) {
  * @param {string} da - Numéro de DA
  * @returns {Object} - { structure, rigueur, plausibilite, nuance, francais } (scores 0-1)
  */
-function calculerMoyennesCriteres(da) {
+/**
+ * Calcule les moyennes des critères SRPNF pour une pratique spécifique (SOM ou PAN)
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {string} pratique - 'SOM' ou 'PAN' (optionnel, par défaut toutes les évaluations)
+ * @returns {Object|null} - Moyennes par critère ou null
+ */
+function calculerMoyennesCriteres(da, pratique = null) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.retroactionFinale);
+    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
 
-    console.log('calculerMoyennesCriteres pour DA:', da);
+    // Filtrer les évaluations selon la pratique si spécifiée
+    let evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.retroactionFinale);
+
+    if (pratique) {
+        // Filtrer par type de production selon la pratique
+        evaluationsEleve = evaluationsEleve.filter(e => {
+            const production = productions.find(p => p.id === e.productionId);
+            if (!production) return false;
+
+            if (pratique === 'SOM') {
+                // SOM : évaluations sommatives (examen, travail, quiz, etc.)
+                return ['examen', 'travail', 'quiz', 'presentation', 'autre',
+                        'examen-formatif', 'travail-formatif', 'quiz-formatif'].includes(production.type);
+            } else if (pratique === 'PAN') {
+                // PAN : artefacts de portfolio uniquement
+                return production.type === 'artefact-portfolio';
+            }
+            return false;
+        });
+    }
+
+    console.log('calculerMoyennesCriteres pour DA:', da, 'Pratique:', pratique || 'toutes');
     console.log('  Total évaluations dans système:', evaluations.length);
-    console.log('  Évaluations pour cet élève avec rétroaction:', evaluationsEleve.length);
+    console.log('  Évaluations filtrées pour cet élève:', evaluationsEleve.length);
 
     if (evaluationsEleve.length === 0) {
         return null;
@@ -5441,23 +5468,9 @@ function genererSectionPerformance(da) {
                     let moyennesSOM = moyennes;
                     let moyennesPAN = moyennes;
                     if (modeComparatif) {
-                        // Calculer moyennes pour chaque pratique
-                        const pratiqueCourante = config.pratiqueActive || 'sommative';
-
-                        // Sauvegarder pratique courante et calculer pour SOM
-                        const pratiqueOriginale = config.pratiqueActive;
-                        config.pratiqueActive = 'sommative';
-                        localStorage.setItem('modalitesEvaluation', JSON.stringify(config));
-                        moyennesSOM = calculerMoyennesCriteres(da) || moyennes;
-
-                        // Calculer pour PAN
-                        config.pratiqueActive = 'alternative';
-                        localStorage.setItem('modalitesEvaluation', JSON.stringify(config));
-                        moyennesPAN = calculerMoyennesCriteres(da) || moyennes;
-
-                        // Restaurer pratique originale
-                        config.pratiqueActive = pratiqueOriginale;
-                        localStorage.setItem('modalitesEvaluation', JSON.stringify(config));
+                        // Calculer moyennes pour chaque pratique en passant le paramètre pratique
+                        moyennesSOM = calculerMoyennesCriteres(da, 'SOM') || moyennes;
+                        moyennesPAN = calculerMoyennesCriteres(da, 'PAN') || moyennes;
                     }
 
                     // Générer les barres pour chaque critère
