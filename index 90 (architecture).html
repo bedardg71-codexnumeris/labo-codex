@@ -978,6 +978,88 @@
             font-weight: bold;
         }
 
+        /* ===============================
+           BULLES FLOTTANTES EN-TÊTE
+           =============================== */
+        .bulles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bulle {
+            position: absolute;
+            border-radius: 50%;
+            animation: floatUp 30s infinite linear;
+            opacity: 0.35;
+        }
+
+        /* Tailles variées */
+        .bulle.petite {
+            width: 8px;
+            height: 8px;
+        }
+
+        .bulle.moyenne {
+            width: 12px;
+            height: 12px;
+        }
+
+        .bulle.grande {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Couleurs des pratiques */
+        .bulle.som {
+            background: #ff6f00;
+        }
+
+        .bulle.pan-maitrise {
+            background: #0277bd;
+        }
+
+        .bulle.pan-spec {
+            background: #9c27b0;
+        }
+
+        .bulle.pan-denotation {
+            background: #ffc107;
+        }
+
+        /* Animation organique comme du pollen - mouvement fluide continu avec courbes */
+        @keyframes floatUp {
+            0% { transform: translateX(calc(0vw + var(--start-x))) translateY(calc(0vh + var(--start-y))); opacity: 0; }
+            5% { transform: translateX(calc(4vw + var(--start-x))) translateY(calc(-2vh + var(--drift-y) * 0.05 + var(--start-y))); opacity: 0.3; }
+            10% { transform: translateX(calc(8vw + var(--start-x))) translateY(calc(-4vh + var(--drift-y) * 0.10 + var(--start-y))); opacity: 0.4; }
+            15% { transform: translateX(calc(12vw + var(--start-x))) translateY(calc(-5vh + var(--drift-y) * 0.15 + var(--start-y))); }
+            20% { transform: translateX(calc(16vw + var(--start-x))) translateY(calc(-4vh + var(--drift-y) * 0.18 + var(--start-y))); }
+            25% { transform: translateX(calc(20vw + var(--start-x))) translateY(calc(-2vh + var(--drift-y) * 0.17 + var(--start-y))); }
+            30% { transform: translateX(calc(24vw + var(--start-x))) translateY(calc(-1vh + var(--drift-y) * 0.12 + var(--start-y))); }
+            35% { transform: translateX(calc(28vw + var(--start-x))) translateY(calc(-3vh + var(--drift-y) * 0.08 + var(--start-y))); }
+            40% { transform: translateX(calc(32vw + var(--start-x))) translateY(calc(-6vh + var(--drift-y) * 0.15 + var(--start-y))); }
+            45% { transform: translateX(calc(36vw + var(--start-x))) translateY(calc(-8vh + var(--drift-y) * 0.25 + var(--start-y))); opacity: 0.4; }
+            50% { transform: translateX(calc(40vw + var(--start-x))) translateY(calc(-9vh + var(--drift-y) * 0.35 + var(--start-y))); }
+            55% { transform: translateX(calc(44vw + var(--start-x))) translateY(calc(-8vh + var(--drift-y) * 0.40 + var(--start-y))); }
+            60% { transform: translateX(calc(48vw + var(--start-x))) translateY(calc(-7vh + var(--drift-y) * 0.42 + var(--start-y))); }
+            65% { transform: translateX(calc(52vw + var(--start-x))) translateY(calc(-10vh + var(--drift-y) * 0.50 + var(--start-y))); }
+            70% { transform: translateX(calc(56vw + var(--start-x))) translateY(calc(-14vh + var(--drift-y) * 0.62 + var(--start-y))); }
+            75% { transform: translateX(calc(60vw + var(--start-x))) translateY(calc(-17vh + var(--drift-y) * 0.75 + var(--start-y))); opacity: 0.4; }
+            80% { transform: translateX(calc(64vw + var(--start-x))) translateY(calc(-15vh + var(--drift-y) * 0.80 + var(--start-y))); }
+            85% { transform: translateX(calc(68vw + var(--start-x))) translateY(calc(-18vh + var(--drift-y) * 0.88 + var(--start-y))); }
+            90% { transform: translateX(calc(72vw + var(--start-x))) translateY(calc(-22vh + var(--drift-y) * 0.95 + var(--start-y))); }
+            95% { transform: translateX(calc(76vw + var(--start-x))) translateY(calc(-24vh + var(--drift-y) * 0.98 + var(--start-y))); opacity: 0.3; }
+            100% { transform: translateX(calc(80vw + var(--start-x))) translateY(calc(-25vh + var(--start-y))); opacity: 0; }
+        }
+
+        /* Les positions, délais et durées sont générés dynamiquement par JavaScript
+           selon le nombre d'étudiants dans le groupe (voir main.js) */
+
         /* Toggles */
         .hidden-mb-20 {
             display: none;
@@ -2485,6 +2567,11 @@
 <body>
         <!-- EN-TÊTE -->
         <header class="entete">
+            <!-- Bulles flottantes animées (générées dynamiquement par JS) -->
+            <div id="bulles-container" class="bulles-container">
+                <!-- Les bulles seront créées dynamiquement selon le nombre d'étudiants -->
+            </div>
+
             <div class="entete-conteneur">
                 <!-- Logo et métadonnées -->
                 <div class="logo-section">
@@ -5638,13 +5725,27 @@ Exemple :
                                 </p>
 
                                 <!-- Option : Mode comparatif -->
-                                <div class="form-group">
+                                <div class="form-group" style="margin-bottom: 15px;">
                                     <label style="cursor: pointer; display: flex; align-items: center;">
                                         <input type="checkbox" id="modeComparatif">
                                         <strong style="margin-left: 8px;">Activer le mode comparatif (expérimental)</strong>
                                     </label>
                                     <small style="display: block; color: #666; margin-top: 5px; margin-left: 28px; font-size: 0.8rem;">
                                         Affiche les indices SOM et PAN côte à côte pour comparer les deux approches
+                                    </small>
+                                </div>
+
+                                <!-- Option : Détection des patterns -->
+                                <div class="form-group">
+                                    <label style="cursor: pointer; display: flex; align-items: center;">
+                                        <input type="checkbox" id="detectionPatternsActive" checked>
+                                        <strong style="margin-left: 8px;">Activer la détection des patterns d'apprentissage</strong>
+                                    </label>
+                                    <small style="display: block; color: #666; margin-top: 5px; margin-left: 28px; font-size: 0.8rem; line-height: 1.5;">
+                                        <strong>Prérequis :</strong> Pour détecter les patterns (progression stable, défi spécifique, blocages),
+                                        vous devez utiliser la <strong>même grille de critères</strong> et la <strong>même échelle de performance</strong>
+                                        pour tous les artefacts du trimestre. Sans cette cohérence méthodologique, l'algorithme ne peut pas
+                                        suivre l'évolution et les patterns ne seront pas détectables.
                                     </small>
                                 </div>
                             </div>
@@ -5882,6 +5983,19 @@ Exemple :
                     <p class="text-muted">
                         Ajuste les seuils utilisés pour interpréter les données pédagogiques et détecter les patterns d'apprentissage
                     </p>
+
+                    <!-- RAPPEL PATTERNS -->
+                    <div style="margin-bottom: 20px; padding: 15px; background: #fff8e1; border-radius: 6px; border-left: 4px solid #ffc107;">
+                        <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 600; color: #333;">
+                            💡 Rappel : Conditions pour la détection des patterns
+                        </p>
+                        <p style="margin: 0; font-size: 0.85rem; line-height: 1.5; color: #666;">
+                            Les <strong>patterns d'apprentissage</strong> (progression stable, défi spécifique, blocages) sont identifiés en analysant l'évolution des performances sur chaque critère d'évaluation au fil du temps. Cette analyse longitudinale n'est possible que si vous utilisez <strong>les mêmes critères et la même échelle de performance</strong> pour tous les artefacts évalués durant le trimestre.
+                        </p>
+                        <p style="margin: 8px 0 0 0; font-size: 0.85rem; line-height: 1.5; color: #666;">
+                            Si vous variez les critères ou les échelles entre les productions, le système ne pourra pas établir de comparaisons valides et les patterns ne seront pas détectables. Dans ce cas, concentrez-vous sur les indices A-C-P et les niveaux RàI pour le dépistage.
+                        </p>
+                    </div>
 
                     <!-- Option avancée : Découplage P et R -->
                     <div class="form-group" style="margin-bottom: 20px; padding: 12px; background: #fffef0; border-left: 3px solid #ffc107; border-radius: 4px;">
