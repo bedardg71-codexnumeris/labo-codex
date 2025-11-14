@@ -5047,7 +5047,7 @@ label:has(+ textarea:disabled) {
     height: 60px;
     border-radius: 6px;
     overflow: visible;
-    opacity: 0.35;
+    opacity: 1; /* Opacité maximale pour fond dégradé visible */
 }
 
 /* Point représentant un étudiant (scatter plot) */
