@@ -5036,3 +5036,75 @@ label:has(+ input:disabled),
 label:has(+ textarea:disabled) {
     color: #999;
 }
+
+/* ===============================
+   BARRES DE DISTRIBUTION (Tableau de bord)
+   =============================== */
+
+/* Conteneur de barre de distribution */
+.distribution-barre-container {
+    position: relative;
+    height: 60px;
+    border-radius: 6px;
+    overflow: visible;
+}
+
+/* Ligne verticale représentant un étudiant */
+.barre-etudiant {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    top: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+/* Ligne pour SOM (orange, en haut) */
+.barre-etudiant-som {
+    background: var(--som-orange);
+    height: 50%;
+    top: 0;
+}
+
+.barre-etudiant-som:hover {
+    width: 3px;
+    height: 55%;
+    background: #ff8c00;
+    z-index: 20;
+}
+
+/* Ligne pour PAN (bleu, en bas) */
+.barre-etudiant-pan {
+    background: var(--pan-bleu);
+    height: 50%;
+    top: 50%;
+}
+
+.barre-etudiant-pan:hover {
+    width: 3px;
+    height: 55%;
+    top: 45%;
+    background: #0288d1;
+    z-index: 20;
+}
+
+/* Conteneur de distribution */
+.distribution-container {
+    margin-bottom: 30px;
+}
+
+/* Légende sous la barre */
+.distribution-legende {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #666;
+    padding: 0 5px;
+    margin-top: 10px;
+}
+
+.distribution-legende span {
+    text-align: center;
+    line-height: 1.3;
+}
