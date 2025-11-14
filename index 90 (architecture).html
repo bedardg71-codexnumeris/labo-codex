@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 90 - Architecture pratiques de notation</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=2025111306">
+    <link rel="stylesheet" href="styles.css?v=2025111326">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4830,27 +4830,6 @@
                     <div class="carte">
                         <h3>Cours configurés</h3>
 
-                        <!-- VUE D'ENSEMBLE -->
-                        <div class="grille-cartes-metriques" class="mb-20">
-                            <div class="carte-metrique-bleue">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Configurations</span>
-                                    <strong id="nombreCours" class="carte-metrique-valeur">0</strong>
-                                </div>
-                            </div>
-                            <div class="carte-metrique-bleue">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Session active</span>
-                                    <strong id="sessionActive" class="carte-metrique-valeur">H2025</strong>
-                                </div>
-                            </div>
-                            <div class="carte-metrique-bleue" class="grid-col-span">
-                                <div id="resumeCours" class="carte-metrique-label" class="text-center">
-                                    Aucune configuration de cours
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- TABLEAU/CONTENEUR DES COURS -->
                         <div id="tableauCoursContainer" class="mb-20">
                             <p class="text-muted" class="text-italic">
@@ -4865,108 +4844,98 @@
                         </button>
 
                         <!-- FORMULAIRE D'AJOUT/MODIFICATION (caché par défaut) -->
-                        <div id="formulaireCours" style="display: none; margin-top: 20px; padding: 20px; 
-             background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px;">
+                        <div id="formulaireCours" class="form-cache-mt"
+                             style="padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px;">
 
                             <h4 id="titreFormCours" class="titre-bleu-mb-20">
                                 Nouvelle configuration de cours
                             </h4>
 
                             <!-- Informations générales -->
-                            <h5 style="color: var(--bleu-moyen); margin-bottom: 15px; padding-bottom: 8px; 
-                border-bottom: 2px solid var(--bleu-leger);">
+                            <h5 class="sous-titre-section">
                                 Informations générales
                             </h5>
-                            <div
-                                class="grid-3-gap15-mb20">
+                            <div class="grille-4col-form" style="margin-bottom: 20px;">
                                 <div class="groupe-form">
                                     <label>Code du cours</label>
-                                    <input type="text" id="codeCours" class="controle-form"
+                                    <input type="text" id="codeCours" class="controle-form controle-form-compact"
                                         placeholder="Ex: 601-101-MQ">
                                 </div>
                                 <div class="groupe-form">
                                     <label>Nom du cours</label>
-                                    <input type="text" id="nomCours" class="controle-form"
+                                    <input type="text" id="nomCours" class="controle-form controle-form-compact"
                                         placeholder="Ex: Écriture et littérature">
                                 </div>
-                            </div>
-
-                            <div class="grid-1fr-3fr-mb20">
                                 <div class="groupe-form">
                                     <label>N° de la compétence</label>
-                                    <input type="text" id="numeroCompetence" class="controle-form"
+                                    <input type="text" id="numeroCompetence" class="controle-form controle-form-compact"
                                         placeholder="Ex: 4EF0">
                                 </div>
                                 <div class="groupe-form">
                                     <label>Compétence</label>
-                                    <input type="text" id="competence" class="controle-form"
+                                    <input type="text" id="competence" class="controle-form controle-form-compact"
                                         placeholder="Ex: Analyser des textes littéraires">
                                 </div>
                             </div>
 
                             <div class="groupe-form" class="mb-20">
                                 <label>Éléments de compétence</label>
-                                <textarea id="elementsCompetence" class="controle-form" rows="4"
+                                <textarea id="elementsCompetence" class="controle-form controle-form-compact" rows="4"
                                     placeholder="• Reconnaître le propos du texte&#10;• Repérer et classer des thèmes et procédés stylistiques&#10;• Choisir les éléments de l'analyse"></textarea>
                             </div>
 
                             <!-- Enseignant·e -->
-                            <h5 style="color: var(--bleu-moyen); margin-bottom: 15px; margin-top: 25px; padding-bottom: 8px; 
-                border-bottom: 2px solid var(--bleu-leger);">
+                            <h5 class="sous-titre-section" style="margin-top: 25px;">
                                 Enseignant·e
                             </h5>
-                            <div class="grid-2-gap15-mb20">
+                            <div class="grille-4col-form" style="margin-bottom: 20px;">
                                 <div class="groupe-form">
                                     <label>Prénom</label>
-                                    <input type="text" id="prenomEnseignant" class="controle-form"
+                                    <input type="text" id="prenomEnseignant" class="controle-form controle-form-compact"
                                         placeholder="Ex: Grégoire">
                                 </div>
                                 <div class="groupe-form">
                                     <label>Nom</label>
-                                    <input type="text" id="nomEnseignant" class="controle-form"
+                                    <input type="text" id="nomEnseignant" class="controle-form controle-form-compact"
                                         placeholder="Ex: Bédard">
                                 </div>
-                            </div>
-
-                            <div class="grid-2fr-1fr-mb20">
                                 <div class="groupe-form">
                                     <label>Département</label>
-                                    <input type="text" id="departement" class="controle-form"
+                                    <input type="text" id="departement" class="controle-form controle-form-compact"
                                         placeholder="Ex: Littérature et communication">
                                 </div>
                                 <div class="groupe-form">
                                     <label>Local</label>
-                                    <input type="text" id="local" class="controle-form" placeholder="Ex: 2314">
+                                    <input type="text" id="local" class="controle-form controle-form-compact" placeholder="Ex: 2314">
                                 </div>
                             </div>
 
                             <!-- Session et horaire -->
-                            <h5 style="color: var(--bleu-moyen); margin-bottom: 15px; margin-top: 25px; padding-bottom: 8px; 
-                border-bottom: 2px solid var(--bleu-leger);">
+                            <h5 class="sous-titre-section" style="margin-top: 25px;">
                                 Session et horaire
                             </h5>
                             <div
                                 class="grid-4-gap15-mb20">
                                 <div class="groupe-form">
                                     <label>Session</label>
-                                    <select id="session" class="controle-form">
+                                    <select id="session" class="controle-form controle-form-compact">
                                         <option value="H">Hiver</option>
                                         <option value="A">Automne</option>
                                     </select>
                                 </div>
                                 <div class="groupe-form">
                                     <label>Année</label>
-                                    <input type="number" id="annee" class="controle-form" value="2025" min="2020"
+                                    <input type="number" id="annee" class="controle-form controle-form-compact" value="2025" min="2020"
                                         max="2030">
                                 </div>
                                 <div class="groupe-form">
                                     <label>Heures/semaine</label>
-                                    <input type="number" id="heuresParSemaine" class="controle-form" value="4" min="1"
+                                    <input type="number" id="heuresParSemaine" class="controle-form controle-form-compact" value="4" min="1"
                                         max="10">
                                 </div>
                                 <div class="groupe-form">
                                     <label>Format horaire</label>
-                                    <select id="formatHoraire" class="controle-form">
+                                    <select id="formatHoraire" class="controle-form controle-form-compact">
                                         <option value="1x4">1 période de 4h</option>
                                         <option value="2x2" selected>2 périodes de 2h</option>
                                         <option value="4x1">4 périodes de 1h</option>
@@ -4975,8 +4944,8 @@
                             </div>
 
                             <!-- Boutons d'action -->
-                            <div class="btn-groupe" style="justify-content: flex-end; margin-top: 25px; padding-top: 20px; 
-                 border-top: 2px solid var(--bleu-leger);">
+                            <div class="btn-groupe btn-groupe-droite"
+                                 style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--bleu-leger);">
                                 <button class="btn btn-annuler" onclick="annulerFormCours()">
                                     Annuler
                                 </button>
@@ -5004,38 +4973,15 @@
                     <div class="carte">
                         <h3>Cadre régulier</h3>
 
-                        <!-- Statistiques (calculées automatiquement) -->
-                        <div class="grille-cartes-metriques" class="mb-20">
-                            <div class="carte-metrique-bleue">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Semaines</span>
-                                    <strong id="nombreSemaines" class="carte-metrique-valeur">0</strong>
-                                </div>
-                            </div>
-                            <div class="carte-metrique-bleue">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Jours de cours</span>
-                                    <strong id="nombreJoursCours" class="carte-metrique-valeur">0</strong>
-                                </div>
-                            </div>
-                            <div class="carte-metrique-bleue">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Congés</span>
-                                    <strong id="totalConges" class="carte-metrique-valeur">0</strong>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Grille 2 colonnes : Bornes et Semaines spéciales -->
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
+                        <div class="grille-2col">
 
                             <!-- COLONNE GAUCHE: Bornes du trimestre -->
                             <div>
-                                <h5 style="color: var(--bleu-moyen); margin-bottom: 15px; padding-bottom: 8px;
-                    border-bottom: 2px solid var(--bleu-leger);">
+                                <h5 class="sous-titre-section">
                                     Bornes du trimestre
                                 </h5>
-                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                <div class="grille-2col-gap15">
                                     <div class="groupe-form">
                                         <label>Début du trimestre :</label>
                                         <input type="date" class="controle-form" id="debutTrimestre"
@@ -5061,12 +5007,11 @@
 
                             <!-- COLONNE DROITE: Semaines spéciales -->
                             <div>
-                                <h5 style="color: var(--bleu-moyen); margin-bottom: 15px; padding-bottom: 8px;
-                    border-bottom: 2px solid var(--bleu-leger);">
+                                <h5 class="sous-titre-section">
                                     Semaines spéciales
                                 </h5>
 
-                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                <div class="grille-2col-gap15">
                                     <!-- Semaine de planification -->
                                     <div>
                                         <h6>Semaine de planification et de mise à jour</h6>
@@ -5103,13 +5048,23 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Statistiques calculées (texte simple) -->
+                                <div class="info-box">
+                                    <p>
+                                        <strong>Trimestre :</strong>
+                                        <span id="nombreSemaines">0</span> semaines •
+                                        <span id="nombreJoursCours">0</span> jours de cours •
+                                        <span id="totalConges">0</span> congés
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Bouton de sauvegarde -->
                         <div class="btn-groupe" class="justify-end">
                             <button class="btn btn-confirmer" onclick="sauvegarderCadreCalendrier()">
-                                Sauvegarder les bornes
+                                Sauvegarder le cadre
                             </button>
                         </div>
                     </div><!-- FIN carte Cadre régulier -->
@@ -5119,15 +5074,14 @@
                         <h3>Aménagements</h3>
 
                         <!-- Grille 2 colonnes : Événements prévus et Événements imprévus -->
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <div class="grille-2col">
 
                             <!-- COLONNE GAUCHE: Congés prévus -->
                             <div>
-                                <h5 style="color: var(--bleu-moyen); margin-bottom: 15px; padding-bottom: 8px;
-                    border-bottom: 2px solid var(--bleu-leger);">
+                                <h5 class="sous-titre-section">
                                     Congés fériés et activités institutionnelles
                                 </h5>
-                                <p class="text-muted" style="margin-bottom: 15px; font-size: 0.85rem;">
+                                <p class="text-muted texte-desc">
                                     Congés fériés, journées pédagogiques, journée Carrière, etc. avec leurs reprises
                                     éventuelles
                                 </p>
@@ -5138,27 +5092,25 @@
                                 </div>
 
                                 <!-- Bouton pour afficher le formulaire d'ajout -->
-                                <button id="btnAjouterPrevu" class="btn btn-confirmer" onclick="afficherFormEvenement()"
-                                    style="margin-bottom: 30px;">
+                                <button id="btnAjouterPrevu" class="btn btn-confirmer mb-30" onclick="afficherFormEvenement()">
                                     + Ajouter un événement prévu
                                 </button>
 
                                 <!-- FORMULAIRE D'AJOUT ÉVÉNEMENT PRÉVU (caché par défaut) -->
-                                <div id="formEvenementPrevu" style="display: none; margin-bottom: 30px; padding: 20px; background: var(--vert-pale);
-                    border: 1px solid var(--vert-leger); border-radius: 8px;">
-
-                                    <h4 class="text-vert-leger-mb20">
-                                        <span class="mr-10">✓</span>Nouvel événement prévu
-                                    </h4>
-
-                                    <div class="grid-4col-gap15-mb20">
+                                <div id="formEvenementPrevu" class="item-carte form-cache">
+                                    <div class="item-carte-header">
+                                        <strong class="item-carte-titre titre-vert">
+                                            <span id="texteFormPrevu">Nouvel événement prévu</span>
+                                        </strong>
+                                    </div>
+                                    <div class="grille-4col-form">
                                         <div class="groupe-form">
                                             <label>Date événement</label>
-                                            <input type="date" class="controle-form" id="dateEvenementPrevu">
+                                            <input type="date" class="controle-form controle-form-compact" id="dateEvenementPrevu">
                                         </div>
                                         <div class="groupe-form">
                                             <label>Description</label>
-                                            <select class="controle-form" id="descriptionEvenementPrevu">
+                                            <select class="controle-form controle-form-compact" id="descriptionEvenementPrevu">
                                                 <option value="">Choisir...</option>
                                                 <option>Fête du travail (férié)</option>
                                                 <option>Action de grâce (férié)</option>
@@ -5169,7 +5121,7 @@
                                         </div>
                                         <div class="groupe-form">
                                             <label>Reprise prévue</label>
-                                            <select class="controle-form" id="horaireReprisePrevu">
+                                            <select class="controle-form controle-form-compact" id="horaireReprisePrevu">
                                                 <option value="">Pas de reprise</option>
                                                 <option value="Horaire du lundi">Horaire du lundi</option>
                                                 <option value="Horaire du mardi">Horaire du mardi</option>
@@ -5180,25 +5132,23 @@
                                         </div>
                                         <div class="groupe-form">
                                             <label>Date reprise</label>
-                                            <input type="date" class="controle-form" id="dateReprisePrevu">
+                                            <input type="date" class="controle-form controle-form-compact" id="dateReprisePrevu">
                                         </div>
                                     </div>
-
-                                    <div class="btn-groupe" class="justify-end">
-                                        <button class="btn btn-annuler" onclick="annulerFormEvenement()">Annuler</button>
-                                        <button class="btn btn-confirmer" onclick="confirmerAjoutEvenement()">Ajouter</button>
+                                    <div class="btn-groupe btn-groupe-droite">
+                                        <button class="btn btn-annuler btn-sm" onclick="annulerFormEvenement()">Annuler</button>
+                                        <button id="btnConfirmerPrevu" class="btn btn-confirmer btn-sm" onclick="confirmerAjoutEvenement()">Ajouter</button>
                                     </div>
                                 </div><!-- FIN formulaire ajout prévu -->
                             </div>
 
                             <!-- COLONNE DROITE: Événements imprévus -->
                             <div>
-                                <h5 style="color: var(--bleu-moyen); margin-bottom: 15px; padding-bottom: 8px;
-                    border-bottom: 2px solid var(--bleu-leger);">
+                                <h5 class="sous-titre-section">
                                     Événements imprévus
                                 </h5>
-                                <p class="text-muted" style="margin-bottom: 15px; font-size: 0.85rem;">
-                                    Maladie, conditions météorologiques, urgence, autre, etc.
+                                <p class="text-muted texte-desc">
+                                    Pour les événements imprévus (maladie, conditions météorologiques, urgence, autre, etc.), la reprise peut être planifiée après coup selon les circonstances.
                                 </p>
 
                                 <!-- Container des événements imprévus (généré par trimestre.js) -->
@@ -5213,26 +5163,20 @@
                                 </button>
 
                                 <!-- FORMULAIRE D'AJOUT ÉVÉNEMENT IMPRÉVU (caché par défaut) -->
-                                <div id="formEvenementImprevu" style="display: none; margin-top: 20px; padding: 20px; background: #fff4e6;
-                    border: 1px solid var(--orange-accent); border-radius: 8px;">
-
-                                    <h4 class="text-orange-accent-mb10">
-                                        <span class="mr-10">✗</span>Nouvel événement imprévu
-                                    </h4>
-
-                                    <p class="text-085-mb20-muted">
-                                        Pour les événements imprévus, la reprise peut être planifiée après coup selon les
-                                        circonstances.
-                                    </p>
-
-                                    <div class="grid-4col-gap15-mb20">
+                                <div id="formEvenementImprevu" class="item-carte form-cache-mt">
+                                    <div class="item-carte-header">
+                                        <strong class="item-carte-titre titre-orange">
+                                            <span id="texteFormImprevu">Nouvel événement imprévu</span>
+                                        </strong>
+                                    </div>
+                                    <div class="grille-4col-form">
                                         <div class="groupe-form">
                                             <label>Date événement</label>
-                                            <input type="date" class="controle-form" id="dateEvenementImprevu">
+                                            <input type="date" class="controle-form controle-form-compact" id="dateEvenementImprevu">
                                         </div>
                                         <div class="groupe-form">
                                             <label>Description</label>
-                                            <select class="controle-form" id="descriptionEvenementImprevu">
+                                            <select class="controle-form controle-form-compact" id="descriptionEvenementImprevu">
                                                 <option value="">Choisir...</option>
                                                 <option>Maladie</option>
                                                 <option>Météo</option>
@@ -5241,8 +5185,8 @@
                                             </select>
                                         </div>
                                         <div class="groupe-form">
-                                            <label>Reprise prévue (optionnelle)</label>
-                                            <select class="controle-form" id="horaireRepriseImprevu">
+                                            <label>Reprise optionnelle</label>
+                                            <select class="controle-form controle-form-compact" id="horaireRepriseImprevu">
                                                 <option value="">Pas de reprise</option>
                                                 <option value="Horaire du lundi">Horaire du lundi</option>
                                                 <option value="Horaire du mardi">Horaire du mardi</option>
@@ -5253,13 +5197,12 @@
                                         </div>
                                         <div class="groupe-form">
                                             <label>Date reprise</label>
-                                            <input type="date" class="controle-form" id="dateRepriseImprevu">
+                                            <input type="date" class="controle-form controle-form-compact" id="dateRepriseImprevu">
                                         </div>
                                     </div>
-
-                                    <div class="btn-groupe" class="justify-end">
-                                        <button class="btn btn-annuler" onclick="annulerFormEvenementImprevu()">Annuler</button>
-                                        <button class="btn btn-confirmer"
+                                    <div class="btn-groupe btn-groupe-droite">
+                                        <button class="btn btn-annuler btn-sm" onclick="annulerFormEvenementImprevu()">Annuler</button>
+                                        <button id="btnConfirmerImprevu" class="btn btn-confirmer btn-sm"
                                             onclick="confirmerAjoutEvenementImprevu()">Ajouter</button>
                                     </div>
                                 </div><!-- FIN formulaire ajout imprévu -->
@@ -5313,31 +5256,77 @@
                             <p class="text-muted" class="text-italic">Aucune séance configurée.</p>
                         </div>
 
-                        <!-- Formulaire d'ajout (caché par défaut) -->
-                        <div id="formAjoutSeance" style="display: none; 
-             background: var(--bleu-tres-pale); 
-             padding: 20px; 
-             border-radius: 6px; 
-             border: 1px solid var(--bleu-leger);
-             margin-bottom: 20px;">
-                            <h4 class="mt-0-bleu">Configurer les séances</h4>
-
-                            <!-- Le contenu dynamique sera inséré ici par afficherFormulaireSeances() -->
-                            <div id="seancesFormContainer"></div>
-
-                            <div class="btn-groupe" class="mt-15-justify-end">
-                                <button class="btn btn-annuler" onclick="annulerAjoutSeance()">Annuler</button>
-                                <button class="btn btn-confirmer" id="btnConfirmerSeances"
-                                    onclick="confirmerSeances()">
-                                    Sauvegarder l'horaire
-                                </button>
-                            </div>
-                        </div><!-- FIN formulaire ajout -->
-
                         <!-- Bouton pour afficher le formulaire -->
-                        <button class="btn btn-confirmer" onclick="afficherFormulaireSeancesDynamique()">
-                            + Configurer l'horaire
+                        <button id="btnAjouterSeance" class="btn btn-confirmer mb-30" onclick="afficherFormAjoutSeance()">
+                            + Ajouter une séance
                         </button>
+
+                        <!-- FORMULAIRE D'AJOUT SÉANCE (caché par défaut) -->
+                        <div id="formAjoutSeance" class="item-carte form-cache">
+                            <div class="item-carte-header">
+                                <strong class="item-carte-titre titre-vert">
+                                    Nouvelle séance
+                                </strong>
+                            </div>
+                            <div class="grille-4col-form">
+                                <div class="groupe-form">
+                                    <label>Jour</label>
+                                    <select class="controle-form controle-form-compact" id="jourSeance">
+                                        <option value="">Choisir...</option>
+                                        <option value="Lundi">Lundi</option>
+                                        <option value="Mardi">Mardi</option>
+                                        <option value="Mercredi">Mercredi</option>
+                                        <option value="Jeudi">Jeudi</option>
+                                        <option value="Vendredi">Vendredi</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Heure début</label>
+                                    <select class="controle-form controle-form-compact" id="debutSeance">
+                                        <option value="">Choisir...</option>
+                                        <option value="08:00">8h00</option>
+                                        <option value="09:00">9h00</option>
+                                        <option value="10:00">10h00</option>
+                                        <option value="11:00">11h00</option>
+                                        <option value="12:00">12h00</option>
+                                        <option value="13:00">13h00</option>
+                                        <option value="14:00">14h00</option>
+                                        <option value="15:00">15h00</option>
+                                        <option value="16:00">16h00</option>
+                                        <option value="17:00">17h00</option>
+                                        <option value="18:00">18h00</option>
+                                        <option value="19:00">19h00</option>
+                                        <option value="20:00">20h00</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Durée</label>
+                                    <select class="controle-form controle-form-compact" id="dureeSeance">
+                                        <option value="">Choisir...</option>
+                                        <option value="1.0">1h</option>
+                                        <option value="1.5">1h30</option>
+                                        <option value="2.0">2h</option>
+                                        <option value="2.5">2h30</option>
+                                        <option value="3.0">3h</option>
+                                        <option value="3.5">3h30</option>
+                                        <option value="4.0">4h</option>
+                                        <option value="4.5">4h30</option>
+                                        <option value="5.0">5h</option>
+                                        <option value="5.5">5h30</option>
+                                        <option value="6.0">6h</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Local</label>
+                                    <input type="text" class="controle-form controle-form-compact" id="localSeance"
+                                           placeholder="Ex: 1709">
+                                </div>
+                            </div>
+                            <div class="btn-groupe btn-groupe-droite">
+                                <button class="btn btn-annuler btn-sm" onclick="annulerFormAjoutSeance()">Annuler</button>
+                                <button id="btnConfirmerSeance" class="btn btn-confirmer btn-sm" onclick="confirmerAjoutSeance()">Ajouter</button>
+                            </div>
+                        </div><!-- FIN formulaire ajout séance -->
                     </div><!-- FIN carte horaire -->
 
                 </div><!-- FIN sous-section reglages-horaire -->
@@ -5757,6 +5746,9 @@ Exemple :
                         document.addEventListener('click', function (e) {
                             if (e.target.matches('[data-sous-onglet="reglages-groupe"]')) {
                                 setTimeout(function () {
+                                    // Note: initialiserModuleGroupe() est maintenant appelé automatiquement par navigation.js
+
+                                    // Clonage anonymisé (section avancée)
                                     if (typeof obtenirEtudiantsGroupe1 === 'function') {
                                         mettreAJourStatistiquesClonage();
                                         afficherTableauMapping();
@@ -8823,11 +8815,11 @@ Exemple :
 
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>
-    <script src="js/navigation.js?v=2025110813"></script>
+    <script src="js/navigation.js?v=2025111431"></script>
     <script src="js/modes.js"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
-    <script src="js/trimestre.js?v=2025111318"></script>
+    <script src="js/trimestre.js?v=2025111325"></script>
     <script src="js/etudiants.js?v=2025111312"></script>
     <script src="js/productions.js?v=2025111303"></script>
     <script src="js/grilles.js?v=2025111215"></script>
@@ -8857,9 +8849,9 @@ Exemple :
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js"></script>
-    <script src="js/horaire.js?v=2025111208"></script>
-    <script src="js/groupe.js?v=2025111203"></script>
-    <script src="js/pratiques.js?v=2025111320"></script>
+    <script src="js/horaire.js?v=2025111328"></script>
+    <script src="js/groupe.js?v=2025111332"></script>
+    <script src="js/pratiques.js?v=2025111431"></script>
     <script src="js/interventions.js?v=2025111016"></script>
 
     <!-- PRIORITÉ 6: Modules avancés -->

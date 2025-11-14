@@ -303,6 +303,20 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
+        case 'reglages-groupe':
+            console.log('🔄 Initialisation du module Groupe...');
+            if (typeof initialiserModuleGroupe === 'function') {
+                setTimeout(initialiserModuleGroupe, 100);
+            }
+            break;
+
+        case 'reglages-pratique-notation':
+            console.log('🔄 Initialisation du module Pratiques...');
+            if (typeof initialiserModulePratiques === 'function') {
+                setTimeout(initialiserModulePratiques, 100);
+            }
+            break;
+
         case 'evaluations-apercu':
             console.log('🔄 Rafraîchissement de l\'aperçu des évaluations...');
             if (typeof chargerApercuEvaluations === 'function') {

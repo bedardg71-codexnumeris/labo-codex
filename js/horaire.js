@@ -798,9 +798,241 @@ function confirmerSeances() {
    AFFICHAGE DES SÉANCES
    =============================== */
 
+/* ===============================
+   GÉNÉRATION DE CARTES (LECTURE ET ÉDITION)
+   =============================== */
+
+/**
+ * Génère le HTML d'une carte de séance en MODE LECTURE
+ * Affiche les informations avec boutons Modifier/Supprimer
+ *
+ * @param {object} seance - Objet séance
+ * @param {number} index - Index dans le tableau seancesHoraire
+ * @returns {string} HTML de la carte en mode lecture
+ */
+function genererCarteSeance(seance, index) {
+    const jourEchappe = echapperHtml(seance.jour);
+    const groupeEchappe = echapperHtml(seance.groupe || '');
+    const debutEchappe = echapperHtml(seance.debut);
+
+    // Calculer heure de fin (nouveau format avec durée OU ancien format avec fin)
+    const fin = seance.fin || calculerHeureFin(seance.debut, seance.duree);
+    const finEchappe = echapperHtml(fin);
+
+    const localEchappe = echapperHtml(seance.local || '');
+
+    // Afficher la lettre (nouveau format) ou le nom (ancien format)
+    const nomSeance = seance.lettre || seance.nom || '?';
+
+    // Formater la durée pour affichage
+    const dureeAffichage = seance.duree
+        ? ` (${seance.duree % 1 === 0 ? seance.duree + 'h' : seance.duree.toString().replace('.', 'h')})`
+        : '';
+
+    return `
+<div class="item-carte" id="carte-seance-${index}">
+    <div class="item-carte-header">
+        <strong class="item-carte-titre">Séance ${nomSeance}${groupeEchappe ? ` - Groupe ${groupeEchappe}` : ''}</strong>
+        <div class="item-carte-actions">
+            <button onclick="modifierSeanceEnPlace(${index})"
+                    class="btn btn-modifier btn-sm">Modifier</button>
+            <button onclick="supprimerSeance(${index})"
+                    class="btn btn-supprimer btn-sm">Supprimer</button>
+        </div>
+    </div>
+    <div style="padding: 15px 20px; color: var(--texte-principal); font-size: 0.95rem;">
+        ${jourEchappe} • ${debutEchappe} à ${finEchappe}${dureeAffichage}${localEchappe ? ` • Local ${localEchappe}` : ''}
+    </div>
+</div>
+`;
+}
+
+/**
+ * Génère le HTML d'une carte de séance en MODE ÉDITION
+ * Affiche les champs éditables avec boutons Annuler/Sauvegarder
+ *
+ * @param {object} seance - Objet séance
+ * @param {number} index - Index dans le tableau seancesHoraire
+ * @returns {string} HTML de la carte en mode édition
+ */
+function genererCarteSeanceEdition(seance, index) {
+    const nomSeance = seance.lettre || seance.nom || '?';
+    const groupeEchappe = echapperHtml(seance.groupe || '');
+
+    return `
+<div class="item-carte" id="carte-seance-${index}">
+    <div class="item-carte-header">
+        <strong class="item-carte-titre">Séance ${nomSeance}${groupeEchappe ? ` - Groupe ${groupeEchappe}` : ''}</strong>
+        <div class="item-carte-actions">
+            <button class="btn btn-annuler btn-sm" onclick="annulerEditionSeanceEnPlace()">Annuler</button>
+            <button class="btn btn-confirmer btn-sm" onclick="sauvegarderEditionSeanceEnPlace(${index})">Sauvegarder</button>
+        </div>
+    </div>
+    <div class="grille-4col-form">
+        <div class="groupe-form">
+            <label>Jour</label>
+            <select class="controle-form controle-form-compact" id="edit-jour-${index}">
+                <option value="">Choisir...</option>
+                <option value="Lundi" ${seance.jour === 'Lundi' ? 'selected' : ''}>Lundi</option>
+                <option value="Mardi" ${seance.jour === 'Mardi' ? 'selected' : ''}>Mardi</option>
+                <option value="Mercredi" ${seance.jour === 'Mercredi' ? 'selected' : ''}>Mercredi</option>
+                <option value="Jeudi" ${seance.jour === 'Jeudi' ? 'selected' : ''}>Jeudi</option>
+                <option value="Vendredi" ${seance.jour === 'Vendredi' ? 'selected' : ''}>Vendredi</option>
+            </select>
+        </div>
+        <div class="groupe-form">
+            <label>Heure début</label>
+            <select class="controle-form controle-form-compact" id="edit-debut-${index}">
+                ${genererOptionsHeureDebut()}
+            </select>
+        </div>
+        <div class="groupe-form">
+            <label>Durée</label>
+            <select class="controle-form controle-form-compact" id="edit-duree-${index}">
+                ${genererOptionsDuree()}
+            </select>
+        </div>
+        <div class="groupe-form">
+            <label>Local</label>
+            <input type="text" class="controle-form controle-form-compact" id="edit-local-${index}"
+                   value="${echapperHtml(seance.local || '')}" placeholder="Ex: 1709">
+        </div>
+    </div>
+    <input type="hidden" id="edit-lettre-${index}" value="${seance.lettre || ''}">
+    <input type="hidden" id="edit-groupe-${index}" value="${seance.groupe || ''}">
+</div>
+`;
+}
+
+/* ===============================
+   GESTION DE L'ÉDITION EN PLACE
+   =============================== */
+
+/**
+ * Bascule une carte de séance en mode édition
+ * Remplace l'affichage par un formulaire éditable
+ *
+ * @param {number} index - Index de la séance dans seancesHoraire
+ */
+function modifierSeanceEnPlace(index) {
+    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seance = seances[index];
+
+    if (!seance) {
+        alert('Séance introuvable');
+        return;
+    }
+
+    // Remplacer la carte par sa version éditable
+    const carte = document.getElementById(`carte-seance-${index}`);
+    if (carte) {
+        carte.outerHTML = genererCarteSeanceEdition(seance, index);
+
+        // Sélectionner les valeurs après insertion dans le DOM
+        const debutSelect = document.getElementById(`edit-debut-${index}`);
+        const dureeSelect = document.getElementById(`edit-duree-${index}`);
+
+        if (debutSelect && seance.debut) {
+            debutSelect.value = seance.debut;
+        }
+
+        if (dureeSelect && seance.duree) {
+            const dureeStr = typeof seance.duree === 'number' ? seance.duree.toFixed(1) : seance.duree;
+            dureeSelect.value = dureeStr;
+        }
+    }
+}
+
+/**
+ * Annule l'édition et revient au mode lecture
+ * Recharge toutes les séances depuis localStorage
+ */
+function annulerEditionSeanceEnPlace() {
+    afficherSeancesExistantes();
+}
+
+/**
+ * Sauvegarde les modifications d'une séance
+ * Valide les champs, met à jour localStorage et régénère tout
+ *
+ * @param {number} index - Index de la séance dans seancesHoraire
+ */
+function sauvegarderEditionSeanceEnPlace(index) {
+    const jour = document.getElementById(`edit-jour-${index}`)?.value;
+    const debut = document.getElementById(`edit-debut-${index}`)?.value;
+    const duree = document.getElementById(`edit-duree-${index}`)?.value;
+    const local = document.getElementById(`edit-local-${index}`)?.value;
+    const lettre = document.getElementById(`edit-lettre-${index}`)?.value;
+    const groupe = document.getElementById(`edit-groupe-${index}`)?.value;
+
+    if (!jour || !debut || !duree) {
+        alert('Veuillez remplir tous les champs obligatoires');
+        return;
+    }
+
+    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+
+    if (index < 0 || index >= seances.length) {
+        alert('Index de séance invalide');
+        return;
+    }
+
+    // Mettre à jour la séance
+    seances[index] = {
+        lettre: lettre || seances[index].lettre,
+        groupe: groupe || seances[index].groupe || '',
+        jour: jour,
+        debut: debut,
+        duree: parseFloat(duree),
+        local: local || ''
+    };
+
+    localStorage.setItem('seancesHoraire', JSON.stringify(seances));
+
+    // Régénérer les séances complètes du trimestre
+    genererSeancesCompletes();
+
+    // Recharger l'affichage
+    afficherSeancesExistantes();
+
+    afficherNotificationSucces('Séance modifiée');
+}
+
+/**
+ * Supprime une séance de l'horaire
+ *
+ * @param {number} index - Index de la séance à supprimer
+ */
+function supprimerSeance(index) {
+    if (!confirm('Voulez-vous vraiment supprimer cette séance ?')) {
+        return;
+    }
+
+    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+
+    // Supprimer la séance
+    seances.splice(index, 1);
+
+    // Recalculer les lettres pour les séances restantes
+    const lettres = ['A', 'B', 'C', 'D', 'E', 'F'];
+    seances.forEach((seance, i) => {
+        seance.lettre = lettres[i] || `S${i + 1}`;
+    });
+
+    localStorage.setItem('seancesHoraire', JSON.stringify(seances));
+
+    // Régénérer les séances complètes du trimestre
+    genererSeancesCompletes();
+
+    // Recharger l'affichage
+    afficherSeancesExistantes();
+
+    afficherNotificationSucces('Séance supprimée');
+}
+
 /**
  * Affiche les séances existantes
- * 
+ *
  * FONCTIONNEMENT:
  * 1. Récupère les séances depuis localStorage
  * 2. Si vide: affiche message
@@ -816,56 +1048,113 @@ function afficherSeancesExistantes() {
     const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
 
     if (seances.length === 0) {
-        container.innerHTML = '<p class="text-muted" style="font-style: italic;">Aucune séance configurée.</p>';
+        container.innerHTML = '<p class="text-muted text-italic">Aucune séance configurée.</p>';
         return;
     }
 
     let html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
 
-    seances.forEach(seance => {
-        const jourEchappe = echapperHtml(seance.jour);
-        const groupeEchappe = echapperHtml(seance.groupe || '');
-        const debutEchappe = echapperHtml(seance.debut);
-
-        // Calculer heure de fin (nouveau format avec durée OU ancien format avec fin)
-        const fin = seance.fin || calculerHeureFin(seance.debut, seance.duree);
-        const finEchappe = echapperHtml(fin);
-
-        const localEchappe = echapperHtml(seance.local || '');
-
-        // Afficher la lettre (nouveau format) ou le nom (ancien format)
-        const nomSeance = seance.lettre || seance.nom || '?';
-
-        // Formater la durée pour affichage
-        const dureeAffichage = seance.duree
-            ? ` (${seance.duree % 1 === 0 ? seance.duree + 'h' : seance.duree.toString().replace('.', 'h')})`
-            : '';
-
-        html += `
-            <div style="background: white;
-                        border: 1px solid var(--bleu-leger);
-                        border-radius: 6px;
-                        padding: 15px;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;">
-                <div style="flex: 1;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                        <strong style="color: var(--bleu-moyen);">Séance ${nomSeance}</strong>
-                        ${groupeEchappe ? `<span style="color: #888; font-size: 0.9rem;">Groupe ${groupeEchappe}</span>` : ''}
-                    </div>
-                    <div style="color: #666; font-size: 0.9rem;">
-                        ${jourEchappe} • ${debutEchappe} à ${finEchappe}${dureeAffichage}
-                        ${localEchappe ? ` • Local ${localEchappe}` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
+    seances.forEach((seance, index) => {
+        html += genererCarteSeance(seance, index);
     });
 
     html += '</div>';
 
     container.innerHTML = html;
+}
+
+/* ===============================
+   FORMULAIRE D'AJOUT SIMPLE
+   =============================== */
+
+/**
+ * Affiche le formulaire d'ajout d'une nouvelle séance
+ * Cache le bouton d'ajout et affiche le formulaire
+ */
+function afficherFormAjoutSeance() {
+    const form = document.getElementById('formAjoutSeance');
+    const btn = document.getElementById('btnAjouterSeance');
+
+    if (form && btn) {
+        form.style.display = 'block';
+        btn.style.display = 'none';
+    }
+}
+
+/**
+ * Annule l'ajout d'une séance
+ * Réinitialise le formulaire, le cache et réaffiche le bouton
+ */
+function annulerFormAjoutSeance() {
+    // Réinitialiser les champs
+    document.getElementById('jourSeance').value = '';
+    document.getElementById('debutSeance').value = '';
+    document.getElementById('dureeSeance').value = '';
+    document.getElementById('localSeance').value = '';
+
+    // Cacher le formulaire et réafficher le bouton
+    const form = document.getElementById('formAjoutSeance');
+    const btn = document.getElementById('btnAjouterSeance');
+
+    if (form && btn) {
+        form.style.display = 'none';
+        btn.style.display = 'block';
+    }
+}
+
+/**
+ * Confirme l'ajout d'une nouvelle séance
+ * Valide les champs, ajoute la séance à localStorage et régénère tout
+ */
+function confirmerAjoutSeance() {
+    const jour = document.getElementById('jourSeance')?.value;
+    const debut = document.getElementById('debutSeance')?.value;
+    const duree = document.getElementById('dureeSeance')?.value;
+    const local = document.getElementById('localSeance')?.value;
+
+    // Validation
+    if (!jour || !debut || !duree) {
+        alert('Veuillez remplir tous les champs obligatoires (jour, heure début, durée)');
+        return;
+    }
+
+    // Récupérer les séances existantes
+    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+
+    // Vérifier le nombre maximum de séances
+    if (seances.length >= 6) {
+        alert('Maximum de 6 séances atteint');
+        return;
+    }
+
+    // Calculer la lettre pour la nouvelle séance
+    const lettres = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const lettre = lettres[seances.length] || `S${seances.length + 1}`;
+
+    // Créer la nouvelle séance
+    const nouvelleSeance = {
+        lettre: lettre,
+        groupe: '', // Vide par défaut, peut être configuré plus tard
+        jour: jour,
+        debut: debut,
+        duree: parseFloat(duree),
+        local: local || ''
+    };
+
+    // Ajouter la séance
+    seances.push(nouvelleSeance);
+    localStorage.setItem('seancesHoraire', JSON.stringify(seances));
+
+    // Régénérer les séances complètes du trimestre
+    genererSeancesCompletes();
+
+    // Réinitialiser et cacher le formulaire
+    annulerFormAjoutSeance();
+
+    // Recharger l'affichage
+    afficherSeancesExistantes();
+
+    afficherNotificationSucces('Séance ajoutée');
 }
 
 /* ===============================

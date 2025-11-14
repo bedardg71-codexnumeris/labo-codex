@@ -81,6 +81,46 @@ function afficherNotificationErreur(titre, details = '') {
 let tempImportData = [];
 
 /**
+ * Obtient les données depuis localStorage selon la clé spécifiée
+ * @param {string} cle - Clé localStorage (ex: 'groupeEtudiants')
+ * @returns {Array} - Tableau des données ou tableau vide
+ */
+function obtenirDonneesSelonMode(cle) {
+    try {
+        return JSON.parse(localStorage.getItem(cle) || '[]');
+    } catch (error) {
+        console.error(`Erreur lecture ${cle}:`, error);
+        return [];
+    }
+}
+
+/**
+ * Sauvegarde les données dans localStorage selon la clé spécifiée
+ * @param {string} cle - Clé localStorage (ex: 'groupeEtudiants')
+ * @param {Array} donnees - Données à sauvegarder
+ * @returns {boolean} - true si succès, false sinon
+ */
+function sauvegarderDonneesSelonMode(cle, donnees) {
+    try {
+        localStorage.setItem(cle, JSON.stringify(donnees));
+        return true;
+    } catch (error) {
+        console.error(`Erreur sauvegarde ${cle}:`, error);
+        return false;
+    }
+}
+
+/**
+ * Filtre les étudiants selon le mode (exclut le groupe 9999 par défaut)
+ * @param {Array} etudiants - Tableau des étudiants
+ * @returns {Array} - Étudiants filtrés
+ */
+function filtrerEtudiantsParMode(etudiants) {
+    // Exclure le groupe 9999 (groupe de démonstration/anonyme)
+    return etudiants.filter(e => e.groupe !== '9999');
+}
+
+/**
  * Initialise le module
  */
 function initialiserModuleGroupe() {
@@ -88,8 +128,15 @@ function initialiserModuleGroupe() {
 
     const tbody = document.getElementById('students-tbody');
     if (!tbody) {
-        console.log('   ⚠️  Section groupe non active');
+        console.log('   ⚠️  Section groupe non active - tbody introuvable');
         return;
+    }
+
+    // DEBUG: Vérifier les données
+    const donnees = obtenirDonneesSelonMode('groupeEtudiants');
+    console.log(`   📊 Nombre d'étudiants dans localStorage: ${donnees.length}`);
+    if (donnees.length > 0) {
+        console.log(`   👤 Premier étudiant:`, donnees[0]);
     }
 
     afficherListeEtudiants();
@@ -528,15 +575,22 @@ function filtrerParGroupe() {
         const groupeSelectionné = selectFiltre ? selectFiltre.value : '';
 
         const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        console.log(`🔍 filtrerParGroupe - Tous étudiants: ${tousEtudiants.length}`);
+
         const students = typeof filtrerEtudiantsParMode === 'function'
             ? filtrerEtudiantsParMode(tousEtudiants)
             : tousEtudiants.filter(e => e.groupe !== '9999');
+        console.log(`🔍 filtrerParGroupe - Après filtrage: ${students.length}`);
+
         const tbody = document.getElementById('students-tbody');
         const container = document.getElementById('students-list-container');
         const noMsg = document.getElementById('no-students-msg');
         const compteurFiltres = document.getElementById('compteurFiltres');
 
-        if (!tbody) return;
+        if (!tbody) {
+            console.log('⚠️ filtrerParGroupe - tbody introuvable');
+            return;
+        }
 
         // Filtrer
         const etudiantsFiltres = groupeSelectionné
@@ -908,6 +962,7 @@ function deleteStudent(id) {
 // EXPORT DES FONCTIONS GLOBALES
 // ============================================
 
+window.initialiserModuleGroupe = initialiserModuleGroupe;
 window.supprimerEtudiant = supprimerEtudiant;
 window.modifierEtudiant = modifierEtudiant;
 // window.ajouterEtudiant = ajouterEtudiant; // FIXME: fonction n'existe pas - utiliser addStudent() à la place

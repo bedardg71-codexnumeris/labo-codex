@@ -236,18 +236,27 @@ function chargerEvenementsPrevus() {
 
     let html = '';
     evenements.forEach((evt, index) => {
-        const bgColor = 'var(--bleu-tres-pale)';
-        const borderColor = 'var(--bleu-leger)';
+        html += genererCarteEvenementPrevu(evt);
+    });
 
-        html += `
-<div class="item-carte">
+    conteneur.innerHTML = html;
+}
+
+/**
+ * Génère le HTML d'une carte événement prévu (mode lecture)
+ */
+function genererCarteEvenementPrevu(evt) {
+    return `
+<div class="item-carte" id="carte-prevu-${evt.id}">
     <div class="item-carte-header">
         <strong class="item-carte-titre">${evt.description}</strong>
         <div class="item-carte-actions">
-            <button onclick="modifierEvenement('${evt.id}', 'prevus')"
-                    class="btn btn-modifier">Modifier</button>
+            <button onclick="modifierEvenementEnPlace('${evt.id}', 'prevus')"
+                    class="btn btn-modifier btn-sm"
+                    style="padding: 5px 10px; font-size: 0.85rem;">Modifier</button>
             <button onclick="supprimerEvenement('${evt.id}', 'prevus')"
-                    class="btn btn-supprimer">Supprimer</button>
+                    class="btn btn-supprimer btn-sm"
+                    style="padding: 5px 10px; font-size: 0.85rem;">Supprimer</button>
         </div>
     </div>
     <div class="item-carte-grille ${evt.dateReprise ? 'item-carte-grille-custom' : ''}">
@@ -270,9 +279,54 @@ function chargerEvenementsPrevus() {
     </div>
 </div>
 `;
-    });
+}
 
-    conteneur.innerHTML = html;
+/**
+ * Génère le HTML d'une carte événement prévu en mode édition
+ */
+function genererCarteEvenementPrevuEdition(evt) {
+    return `
+<div class="item-carte" id="carte-prevu-${evt.id}">
+    <div class="item-carte-header">
+        <strong class="item-carte-titre">
+            ${evt.description}
+        </strong>
+        <div class="item-carte-actions">
+            <button class="btn btn-annuler btn-sm" onclick="annulerEditionEnPlace('${evt.id}', 'prevus')"
+                    style="padding: 5px 10px; font-size: 0.85rem;">Annuler</button>
+            <button class="btn btn-confirmer btn-sm" onclick="sauvegarderEditionEnPlace('${evt.id}', 'prevus')"
+                    style="padding: 5px 10px; font-size: 0.85rem;">Sauvegarder</button>
+        </div>
+    </div>
+    <div class="item-carte-grille ${evt.dateReprise ? 'item-carte-grille-custom' : ''}">
+        <div class="item-carte-champ">
+            <label class="item-carte-label">Date de l'événement</label>
+            <input type="date" class="controle-form" id="edit-date-${evt.id}" value="${evt.dateEvenement}"
+                   style="padding: 4px 8px; font-size: 0.9rem;">
+        </div>
+        ${evt.dateReprise || evt.horaireReprise ? `
+        <div class="item-carte-champ">
+            <label class="item-carte-label">Horaire remplacé</label>
+            <select class="controle-form" id="edit-horaire-${evt.id}"
+                    style="padding: 4px 8px; font-size: 0.9rem;">
+                <option value="">Pas de reprise</option>
+                <option value="Horaire du lundi" ${evt.horaireReprise === 'Horaire du lundi' ? 'selected' : ''}>Horaire du lundi</option>
+                <option value="Horaire du mardi" ${evt.horaireReprise === 'Horaire du mardi' ? 'selected' : ''}>Horaire du mardi</option>
+                <option value="Horaire du mercredi" ${evt.horaireReprise === 'Horaire du mercredi' ? 'selected' : ''}>Horaire du mercredi</option>
+                <option value="Horaire du jeudi" ${evt.horaireReprise === 'Horaire du jeudi' ? 'selected' : ''}>Horaire du jeudi</option>
+                <option value="Horaire du vendredi" ${evt.horaireReprise === 'Horaire du vendredi' ? 'selected' : ''}>Horaire du vendredi</option>
+            </select>
+        </div>
+        <div class="item-carte-champ">
+            <label class="item-carte-label">Date de reprise</label>
+            <input type="date" class="controle-form" id="edit-reprise-${evt.id}" value="${evt.dateReprise || ''}"
+                   style="padding: 4px 8px; font-size: 0.9rem;">
+        </div>
+        ` : ''}
+    </div>
+    <input type="hidden" id="edit-desc-${evt.id}" value="${evt.description}">
+</div>
+`;
 }
 
 function confirmerAjoutEvenement() {
@@ -354,6 +408,90 @@ function supprimerEvenement(id, type) {
     afficherNotification('Événement supprimé');
 }
 
+/**
+ * Passe une carte en mode édition en place
+ */
+function modifierEvenementEnPlace(id, type) {
+    const cle = type === 'prevus' ? 'evenementsPrevus' : 'evenementsImprevus';
+    const evenements = JSON.parse(localStorage.getItem(cle) || '[]');
+    const evt = evenements.find(e => e.id === id);
+
+    if (!evt) {
+        alert('Événement introuvable');
+        return;
+    }
+
+    // Remplacer la carte par sa version éditable
+    const carte = document.getElementById(`carte-${type === 'prevus' ? 'prevu' : 'imprevu'}-${id}`);
+    if (carte) {
+        if (type === 'prevus') {
+            carte.outerHTML = genererCarteEvenementPrevuEdition(evt);
+        } else {
+            carte.outerHTML = genererCarteEvenementImprevuEdition(evt);
+        }
+    }
+}
+
+/**
+ * Annule l'édition et restaure la carte normale
+ */
+function annulerEditionEnPlace(id, type) {
+    if (type === 'prevus') {
+        chargerEvenementsPrevus();
+    } else {
+        chargerEvenementsImprevus();
+    }
+}
+
+/**
+ * Sauvegarde les modifications faites en place
+ */
+function sauvegarderEditionEnPlace(id, type) {
+    const dateEvenement = document.getElementById(`edit-date-${id}`)?.value;
+    const description = document.getElementById(`edit-desc-${id}`)?.value;
+    const horaireReprise = document.getElementById(`edit-horaire-${id}`)?.value;
+    const dateReprise = document.getElementById(`edit-reprise-${id}`)?.value;
+
+    if (!dateEvenement || !description) {
+        alert('Veuillez remplir tous les champs obligatoires');
+        return;
+    }
+
+    if (dateReprise && !horaireReprise) {
+        alert('Veuillez indiquer quel jour de cours est remplacé (ex: Horaire du lundi)');
+        return;
+    }
+
+    const cle = type === 'prevus' ? 'evenementsPrevus' : 'evenementsImprevus';
+    const evenements = JSON.parse(localStorage.getItem(cle) || '[]');
+    const index = evenements.findIndex(e => e.id === id);
+
+    if (index !== -1) {
+        evenements[index] = {
+            id: id,
+            dateEvenement,
+            description,
+            horaireReprise: horaireReprise || '',
+            dateReprise: dateReprise || ''
+        };
+        localStorage.setItem(cle, JSON.stringify(evenements));
+
+        // Régénérer tout
+        genererCalendrierComplet();
+        if (typeof genererSeancesCompletes === 'function') {
+            genererSeancesCompletes();
+        }
+
+        if (type === 'prevus') {
+            chargerEvenementsPrevus();
+        } else {
+            chargerEvenementsImprevus();
+        }
+        afficherStatistiquesTrimestre();
+        afficherNotification('Événement modifié');
+    }
+}
+
 
 /* ===============================
    GESTION DES ÉVÉNEMENTS IMPRÉVUS
@@ -372,43 +510,97 @@ function chargerEvenementsImprevus() {
 
     let html = '';
     evenements.forEach((evt, index) => {
-        const bgColor = 'var(--bleu-tres-pale)';
-        const borderColor = 'var(--bleu-leger)';
-
-        html += `
-        <div class="item-carte">
-            <div class="item-carte-header">
-                <strong class="item-carte-titre">${evt.description}</strong>
-                <div class="item-carte-actions">
-                    <button onclick="modifierEvenement('${evt.id}', 'imprevus')"
-                            class="btn btn-modifier">Modifier</button>
-                    <button onclick="supprimerEvenement('${evt.id}', 'imprevus')"
-                            class="btn btn-supprimer">Supprimer</button>
-                </div>
-            </div>
-            <div class="item-carte-grille ${evt.dateReprise ? 'item-carte-grille-custom' : ''}">
-                <div class="item-carte-champ">
-                    <label class="item-carte-label">Date de l'événement</label>
-                    <div class="item-carte-valeur">${evt.dateEvenement}</div>
-                </div>
-                ${evt.dateReprise ? `
-                <div class="item-carte-champ">
-                    <label class="item-carte-label">Horaire remplacé</label>
-                    <div class="item-carte-valeur ${!evt.horaireReprise ? 'manquant' : ''}">
-                        ${evt.horaireReprise || 'Non spécifié'}
-                    </div>
-                </div>
-                <div class="item-carte-champ">
-                    <label class="item-carte-label">Date de reprise</label>
-                    <div class="item-carte-valeur important">${evt.dateReprise}</div>
-                </div>
-                ` : ''}
-            </div>
-        </div>
-        `;
+        html += genererCarteEvenementImprevu(evt);
     });
 
     conteneur.innerHTML = html;
+}
+
+/**
+ * Génère le HTML d'une carte événement imprévu (mode lecture)
+ */
+function genererCarteEvenementImprevu(evt) {
+    return `
+<div class="item-carte" id="carte-imprevu-${evt.id}">
+    <div class="item-carte-header">
+        <strong class="item-carte-titre">${evt.description}</strong>
+        <div class="item-carte-actions">
+            <button onclick="modifierEvenementEnPlace('${evt.id}', 'imprevus')"
+                    class="btn btn-modifier btn-sm"
+                    style="padding: 5px 10px; font-size: 0.85rem;">Modifier</button>
+            <button onclick="supprimerEvenement('${evt.id}', 'imprevus')"
+                    class="btn btn-supprimer btn-sm"
+                    style="padding: 5px 10px; font-size: 0.85rem;">Supprimer</button>
+        </div>
+    </div>
+    <div class="item-carte-grille ${evt.dateReprise ? 'item-carte-grille-custom' : ''}">
+        <div class="item-carte-champ">
+            <label class="item-carte-label">Date de l'événement</label>
+            <div class="item-carte-valeur">${evt.dateEvenement}</div>
+        </div>
+        ${evt.dateReprise ? `
+        <div class="item-carte-champ">
+            <label class="item-carte-label">Horaire remplacé</label>
+            <div class="item-carte-valeur ${!evt.horaireReprise ? 'manquant' : ''}">
+                ${evt.horaireReprise || 'Non spécifié'}
+            </div>
+        </div>
+        <div class="item-carte-champ">
+            <label class="item-carte-label">Date de reprise</label>
+            <div class="item-carte-valeur important">${evt.dateReprise}</div>
+        </div>
+        ` : ''}
+    </div>
+</div>
+`;
+}
+
+/**
+ * Génère le HTML d'une carte événement imprévu en mode édition
+ */
+function genererCarteEvenementImprevuEdition(evt) {
+    return `
+<div class="item-carte" id="carte-imprevu-${evt.id}">
+    <div class="item-carte-header">
+        <strong class="item-carte-titre">
+            ${evt.description}
+        </strong>
+        <div class="item-carte-actions">
+            <button class="btn btn-annuler btn-sm" onclick="annulerEditionEnPlace('${evt.id}', 'imprevus')"
+                    style="padding: 5px 10px; font-size: 0.85rem;">Annuler</button>
+            <button class="btn btn-confirmer btn-sm" onclick="sauvegarderEditionEnPlace('${evt.id}', 'imprevus')"
+                    style="padding: 5px 10px; font-size: 0.85rem;">Sauvegarder</button>
+        </div>
+    </div>
+    <div class="item-carte-grille ${evt.dateReprise ? 'item-carte-grille-custom' : ''}">
+        <div class="item-carte-champ">
+            <label class="item-carte-label">Date de l'événement</label>
+            <input type="date" class="controle-form" id="edit-date-${evt.id}" value="${evt.dateEvenement}"
+                   style="padding: 4px 8px; font-size: 0.9rem;">
+        </div>
+        ${evt.dateReprise || evt.horaireReprise ? `
+        <div class="item-carte-champ">
+            <label class="item-carte-label">Horaire remplacé</label>
+            <select class="controle-form" id="edit-horaire-${evt.id}"
+                    style="padding: 4px 8px; font-size: 0.9rem;">
+                <option value="">Pas de reprise</option>
+                <option value="Horaire du lundi" ${evt.horaireReprise === 'Horaire du lundi' ? 'selected' : ''}>Horaire du lundi</option>
+                <option value="Horaire du mardi" ${evt.horaireReprise === 'Horaire du mardi' ? 'selected' : ''}>Horaire du mardi</option>
+                <option value="Horaire du mercredi" ${evt.horaireReprise === 'Horaire du mercredi' ? 'selected' : ''}>Horaire du mercredi</option>
+                <option value="Horaire du jeudi" ${evt.horaireReprise === 'Horaire du jeudi' ? 'selected' : ''}>Horaire du jeudi</option>
+                <option value="Horaire du vendredi" ${evt.horaireReprise === 'Horaire du vendredi' ? 'selected' : ''}>Horaire du vendredi</option>
+            </select>
+        </div>
+        <div class="item-carte-champ">
+            <label class="item-carte-label">Date de reprise</label>
+            <input type="date" class="controle-form" id="edit-reprise-${evt.id}" value="${evt.dateReprise || ''}"
+                   style="padding: 4px 8px; font-size: 0.9rem;">
+        </div>
+        ` : ''}
+    </div>
+    <input type="hidden" id="edit-desc-${evt.id}" value="${evt.description}">
+</div>
+`;
 }
 
 function confirmerAjoutEvenementImprevu() {
@@ -718,7 +910,14 @@ function afficherNotification(message, details = '') {
 
 function afficherFormEvenement() {
     const form = document.getElementById('formEvenementPrevu');
-    if (form) form.style.display = 'block';
+    if (form) {
+        form.style.display = 'block';
+        // S'assurer qu'on est en mode création (pas édition)
+        if (!form.getAttribute('data-edit-id')) {
+            document.getElementById('texteFormPrevu').textContent = 'Nouvel événement prévu';
+            document.getElementById('btnConfirmerPrevu').textContent = 'Ajouter';
+        }
+    }
 }
 
 function annulerFormEvenement() {
@@ -730,12 +929,23 @@ function annulerFormEvenement() {
         document.getElementById('descriptionEvenementPrevu').value = '';
         document.getElementById('horaireReprisePrevu').value = '';
         document.getElementById('dateReprisePrevu').value = '';
+
+        // Réinitialiser le titre et le bouton en mode création
+        document.getElementById('texteFormPrevu').textContent = 'Nouvel événement prévu';
+        document.getElementById('btnConfirmerPrevu').textContent = 'Ajouter';
     }
 }
 
 function afficherFormEvenementImprevu() {
     const form = document.getElementById('formEvenementImprevu');
-    if (form) form.style.display = 'block';
+    if (form) {
+        form.style.display = 'block';
+        // S'assurer qu'on est en mode création (pas édition)
+        if (!form.getAttribute('data-edit-id')) {
+            document.getElementById('texteFormImprevu').textContent = 'Nouvel événement imprévu';
+            document.getElementById('btnConfirmerImprevu').textContent = 'Ajouter';
+        }
+    }
 }
 
 function annulerFormEvenementImprevu() {
@@ -747,6 +957,10 @@ function annulerFormEvenementImprevu() {
         document.getElementById('descriptionEvenementImprevu').value = '';
         document.getElementById('horaireRepriseImprevu').value = '';
         document.getElementById('dateRepriseImprevu').value = '';
+
+        // Réinitialiser le titre et le bouton en mode création
+        document.getElementById('texteFormImprevu').textContent = 'Nouvel événement imprévu';
+        document.getElementById('btnConfirmerImprevu').textContent = 'Ajouter';
     }
 }
 
@@ -772,6 +986,10 @@ function modifierEvenement(id, type) {
         const form = document.getElementById('formEvenementPrevu');
         form.setAttribute('data-edit-id', id);
 
+        // Changer le titre et le bouton en mode édition
+        document.getElementById('texteFormPrevu').textContent = 'Modifier l\'événement';
+        document.getElementById('btnConfirmerPrevu').textContent = 'Sauvegarder les modifications';
+
         // Afficher le formulaire
         afficherFormEvenement();
     } else {
@@ -784,6 +1002,10 @@ function modifierEvenement(id, type) {
         // Stocker l'ID en mode édition
         const form = document.getElementById('formEvenementImprevu');
         form.setAttribute('data-edit-id', id);
+
+        // Changer le titre et le bouton en mode édition
+        document.getElementById('texteFormImprevu').textContent = 'Modifier l\'événement';
+        document.getElementById('btnConfirmerImprevu').textContent = 'Sauvegarder les modifications';
 
         // Afficher le formulaire
         afficherFormEvenementImprevu();
