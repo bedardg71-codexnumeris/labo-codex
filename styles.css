@@ -1170,7 +1170,7 @@ input[type="number"].controle-form {
     font-weight: 500;
 }
 
-/* === BADGES DE RISQUE (sans émojis) === */
+/* === BADGES DE RISQUE (sans émojis) - OBSOLÈTE - Gardé pour compatibilité === */
 .badge-risque-minimal {
     background: #eff6ff;
     color: #2563eb;
@@ -1197,6 +1197,32 @@ input[type="number"].controle-form {
 }
 
 .badge-risque-critique {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+/* === BADGES D'ENGAGEMENT (remplace les badges de risque) === */
+.badge-engagement-tres-favorable {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.badge-engagement-favorable {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.badge-engagement-modere {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.badge-engagement-fragile {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+.badge-engagement-insuffisant {
     background: #fef2f2;
     color: #991b1b;
 }

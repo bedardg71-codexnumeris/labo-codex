@@ -17,9 +17,9 @@
    - Navigation vers les portfolios
 
    NOUVELLES FONCTIONNALITÉS Beta 84:
-   - Cartes de statistiques (Total, Risques faibles, RàI 1/2/3)
-   - Filtres avancés (Risque, RàI, Pattern)
-   - Colonnes supplémentaires (Mobilisation M, Risque, Pattern)
+   - Cartes de statistiques (Total, Engagement favorable, RàI 1/2/3)
+   - Filtres avancés (Engagement, RàI, Pattern)
+   - Colonnes supplémentaires (Mobilisation M, Engagement, Pattern)
    - Tri cliquable sur toutes les colonnes
    - Badges visuels améliorés avec couleurs système
    - Surlignage des cas critiques
@@ -712,9 +712,12 @@ function afficherListeEtudiantsConsultation() {
                 valeurA = a.indicesCalcules.M;
                 valeurB = b.indicesCalcules.M;
                 break;
-            case 'risque':
-                valeurA = a.indicesCalcules.R;
-                valeurB = b.indicesCalcules.R;
+            case 'engagement':
+                // Calculer l'engagement E = (A × C × P)^(1/3)
+                const E_A = Math.pow((a.indicesCalcules.A / 100) * (a.indicesCalcules.C / 100) * (a.indicesCalcules.P / 100), 1/3);
+                const E_B = Math.pow((b.indicesCalcules.A / 100) * (b.indicesCalcules.C / 100) * (b.indicesCalcules.P / 100), 1/3);
+                valeurA = E_A;
+                valeurB = E_B;
                 break;
             case 'pattern':
                 valeurA = a.cibleCalculee.pattern;
@@ -769,25 +772,29 @@ function afficherListeEtudiantsConsultation() {
         const couleurMobilisation = obtenirCouleurMobilisation(indices.M);
 
         // Génération des badges
-        const badgeRisque = genererBadgeRisque(indices.R);
+        const badgeEngagement = genererBadgeEngagement(indices);
         const badgePattern = genererBadgePattern(cible.pattern);
         const badgeRai = genererBadgeRaI(cible.niveau);
 
         const tr = document.createElement('tr');
+
+        // Calculer l'engagement pour le surlignage
+        const E_brut = (indices.A / 100) * (indices.C / 100) * (indices.P / 100);
+        const E = Math.pow(E_brut, 1/3);
 
         // Déterminer le surlignage à appliquer (priorité: plus critique en premier)
         let bgColor = '';
         let borderColor = '';
         let bgHover = '';
 
-        // Priorité 1: Risque critique (>70%)
-        if (surlignerCritique && surlignerCritique.checked && indices.R > 0.70) {
+        // Priorité 1: Engagement insuffisant (< 30%)
+        if (surlignerCritique && surlignerCritique.checked && E < 0.30) {
             bgColor = '#fff5f5';
             borderColor = '#dc2626';
             bgHover = '#fee2e2';
         }
-        // Priorité 2: Risque très élevé (60-70%)
-        else if (surlignerTresEleve && surlignerTresEleve.checked && indices.R >= 0.60 && indices.R <= 0.70) {
+        // Priorité 2: Engagement fragile (30-49%)
+        else if (surlignerTresEleve && surlignerTresEleve.checked && E >= 0.30 && E < 0.50) {
             bgColor = '#fff7ed';
             borderColor = '#ea580c';
             bgHover = '#ffedd5';
@@ -865,8 +872,8 @@ function afficherListeEtudiantsConsultation() {
         // NOUVEAU: Colonne Mobilisation (M = A × C)
         html += '<td style="text-align: center;"><strong style="color: ' + couleurMobilisation + ';">' + mobilisation + '%</strong></td>';
 
-        // NOUVEAU: Colonne Risque avec badge
-        html += '<td style="text-align: center;"><span class="' + badgeRisque.classe + '">' + badgeRisque.label + '</span></td>';
+        // NOUVEAU: Colonne Engagement avec badge
+        html += '<td style="text-align: center;"><span class="' + badgeEngagement.classe + '">' + badgeEngagement.label + '</span></td>';
 
         // NOUVEAU: Colonne Pattern avec badge
         html += '<td><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
@@ -1133,23 +1140,32 @@ function obtenirCouleurMobilisation(mobilisation) {
 }
 
 /**
- * Génère un badge de risque avec classe CSS appropriée
- * @param {number} risque - Valeur du risque (0-1)
+ * Génère un badge d'engagement avec classe CSS appropriée
+ * Calcule l'engagement avec la formule E = (A × C × P)^(1/3)
+ * @param {Object} indices - Objet contenant A, C et P (en pourcentages 0-100)
  * @returns {Object} - {label, classe}
  */
-function genererBadgeRisque(risque) {
-    if (risque <= 0.20) {
-        return { label: 'Minimal', classe: 'badge-sys badge-risque-minimal' };
-    } else if (risque <= 0.30) {
-        return { label: 'Faible', classe: 'badge-sys badge-risque-faible' };
-    } else if (risque <= 0.40) {
-        return { label: 'Modéré', classe: 'badge-sys badge-risque-modere' };
-    } else if (risque <= 0.50) {
-        return { label: 'Élevé', classe: 'badge-sys badge-risque-eleve' };
-    } else if (risque <= 0.70) {
-        return { label: 'Très élevé', classe: 'badge-sys badge-risque-tres-eleve' };
+function genererBadgeEngagement(indices) {
+    // Convertir les pourcentages en proportions (0-1)
+    const A = indices.A / 100;
+    const C = indices.C / 100;
+    const P = indices.P / 100;
+
+    // Calculer l'engagement avec racine cubique
+    const E_brut = A * C * P;
+    const E = Math.pow(E_brut, 1/3);
+
+    // Déterminer le niveau selon les seuils
+    if (E >= 0.80) {
+        return { label: 'Très favorable', classe: 'badge-sys badge-engagement-tres-favorable' };
+    } else if (E >= 0.65) {
+        return { label: 'Favorable', classe: 'badge-sys badge-engagement-favorable' };
+    } else if (E >= 0.50) {
+        return { label: 'Modéré', classe: 'badge-sys badge-engagement-modere' };
+    } else if (E >= 0.30) {
+        return { label: 'Fragile', classe: 'badge-sys badge-engagement-fragile' };
     } else {
-        return { label: 'Critique', classe: 'badge-sys badge-risque-critique' };
+        return { label: 'Insuffisant', classe: 'badge-sys badge-engagement-insuffisant' };
     }
 }
 
