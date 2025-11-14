@@ -2587,23 +2587,34 @@ function calculerDirectionRisque(da) {
  * @param {string} da - Numéro de DA
  * @returns {Object} - { structure: {symbole, interpretation}, rigueur: {...}, ... }
  */
-function calculerDirectionsCriteres(da) {
+function calculerDirectionsCriteres(da, pratique = 'PAN') {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = JSON.parse(localStorage.getItem('productions') || '[]');
 
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
 
-    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
-    const artefactsPortfolio = productions
-        .filter(p => p.type === 'artefact-portfolio')
-        .map(p => p.id);
+    // Filtrer les évaluations selon la pratique
+    let evaluationsEleve;
 
-    const evaluationsEleve = evaluations.filter(e =>
-        e.etudiantDA === da &&
-        artefactsPortfolio.includes(e.productionId) &&
-        e.retroactionFinale
-    );
+    if (pratique === 'SOM') {
+        // SOM : TOUTES les évaluations avec rétroaction finale
+        evaluationsEleve = evaluations.filter(e =>
+            e.etudiantDA === da &&
+            e.retroactionFinale
+        );
+    } else {
+        // PAN : Uniquement les artefacts de portfolio évalués
+        const artefactsPortfolio = productions
+            .filter(p => p.type === 'artefact-portfolio')
+            .map(p => p.id);
+
+        evaluationsEleve = evaluations.filter(e =>
+            e.etudiantDA === da &&
+            artefactsPortfolio.includes(e.productionId) &&
+            e.retroactionFinale
+        );
+    }
 
     // Résultat par défaut si données insuffisantes
     const resultatParDefaut = {
@@ -3731,39 +3742,20 @@ function convertirNiveauIDMEEnScore(niveau, tableConversion) {
  * @returns {Object} - { structure, rigueur, plausibilite, nuance, francais } (scores 0-1)
  */
 /**
- * Calcule les moyennes des critères SRPNF pour une pratique spécifique (SOM ou PAN)
+ * Calcule les moyennes des critères SRPNF sur TOUTES les évaluations de l'étudiant
+ * Utilisé pour la pratique sommative (SOM) qui considère toutes les évaluations
  * @param {string} da - Numéro DA de l'étudiant
- * @param {string} pratique - 'SOM' ou 'PAN' (optionnel, par défaut toutes les évaluations)
  * @returns {Object|null} - Moyennes par critère ou null
  */
-function calculerMoyennesCriteres(da, pratique = null) {
+function calculerMoyennesCriteres(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
 
-    // Filtrer les évaluations selon la pratique si spécifiée
-    let evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.retroactionFinale);
+    // Filtrer toutes les évaluations de l'étudiant avec rétroaction finale
+    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && e.retroactionFinale);
 
-    if (pratique) {
-        // Filtrer par type de production selon la pratique
-        evaluationsEleve = evaluationsEleve.filter(e => {
-            const production = productions.find(p => p.id === e.productionId);
-            if (!production) return false;
-
-            if (pratique === 'SOM') {
-                // SOM : évaluations sommatives (examen, travail, quiz, etc.)
-                return ['examen', 'travail', 'quiz', 'presentation', 'autre',
-                        'examen-formatif', 'travail-formatif', 'quiz-formatif'].includes(production.type);
-            } else if (pratique === 'PAN') {
-                // PAN : artefacts de portfolio uniquement
-                return production.type === 'artefact-portfolio';
-            }
-            return false;
-        });
-    }
-
-    console.log('calculerMoyennesCriteres pour DA:', da, 'Pratique:', pratique || 'toutes');
+    console.log('calculerMoyennesCriteres (TOUTES) pour DA:', da);
     console.log('  Total évaluations dans système:', evaluations.length);
-    console.log('  Évaluations filtrées pour cet élève:', evaluationsEleve.length);
+    console.log('  Évaluations de cet élève:', evaluationsEleve.length);
 
     if (evaluationsEleve.length === 0) {
         return null;
@@ -5454,9 +5446,6 @@ function genererSectionPerformance(da) {
 
                     const gradientCSS = `linear-gradient(to right, ${gradientStops.join(', ')})`;
 
-                    // Calculer les directions pour chaque critère
-                    const directions = calculerDirectionsCriteres(da);
-
                     // Détecter le mode comparatif
                     const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
                     const affichage = config.affichageTableauBord || {};
@@ -5464,13 +5453,44 @@ function genererSectionPerformance(da) {
                     const afficherPan = affichage.afficherAlternatif !== false;
                     const modeComparatif = afficherSom && afficherPan;
 
-                    // Calculer moyennes pour SOM et PAN si en mode comparatif
-                    let moyennesSOM = moyennes;
-                    let moyennesPAN = moyennes;
+                    console.log('🔍 DEBUG BARRES SRPNF - Mode comparatif');
+                    console.log('  config:', config);
+                    console.log('  affichage:', affichage);
+                    console.log('  afficherSom:', afficherSom);
+                    console.log('  afficherPan:', afficherPan);
+                    console.log('  modeComparatif:', modeComparatif);
+
+                    // Calculer moyennes et directions pour SOM et PAN si en mode comparatif
+                    let moyennesSOM = null;
+                    let moyennesPAN = null;
+                    let directionsSOM = null;
+                    let directionsPAN = null;
+
                     if (modeComparatif) {
-                        // Calculer moyennes pour chaque pratique en passant le paramètre pratique
-                        moyennesSOM = calculerMoyennesCriteres(da, 'SOM') || moyennes;
-                        moyennesPAN = calculerMoyennesCriteres(da, 'PAN') || moyennes;
+                        console.log('  ✅ Mode comparatif activé - calcul des deux pratiques');
+
+                        // SOM : Calculer sur TOUTES les évaluations (sans filtre)
+                        moyennesSOM = calculerMoyennesCriteres(da);
+                        directionsSOM = calculerDirectionsCriteres(da, 'SOM');
+
+                        // PAN : Utiliser la méthode de la pratique PAN (N derniers artefacts)
+                        const pratiquePAN = obtenirPratiqueParId('pan-maitrise');
+                        if (pratiquePAN && typeof pratiquePAN._calculerMoyennesCriteresRecents === 'function') {
+                            moyennesPAN = pratiquePAN._calculerMoyennesCriteresRecents(da);
+                        } else {
+                            console.warn('  ⚠️ Pratique PAN non disponible ou méthode _calculerMoyennesCriteresRecents absente');
+                            moyennesPAN = null;
+                        }
+                        directionsPAN = calculerDirectionsCriteres(da, 'PAN');
+
+                        console.log('  moyennesSOM (toutes):', moyennesSOM);
+                        console.log('  moyennesPAN (N derniers):', moyennesPAN);
+                        console.log('  directionsSOM:', directionsSOM);
+                        console.log('  directionsPAN:', directionsPAN);
+                    } else {
+                        console.log('  ❌ Mode comparatif NON activé');
+                        // Mode normal : utiliser les directions PAN par défaut
+                        directionsPAN = calculerDirectionsCriteres(da, 'PAN');
                     }
 
                     // Générer les barres pour chaque critère
@@ -5487,24 +5507,52 @@ function genererSectionPerformance(da) {
 
                         const pourcentage = Math.round(score * 100);
 
-                        // Obtenir la direction pour ce critère
-                        const direction = directions[cle];
-                        const symboleDirection = direction && direction.symbole ? direction.symbole : '';
-
                         // En mode comparatif, afficher deux points
                         let pointsHTML = '';
-                        if (modeComparatif) {
-                            const scoreSOM = moyennesSOM[cleMoyennes];
-                            const scorePAN = moyennesPAN[cleMoyennes];
-                            const pourcentageSOM = scoreSOM !== null ? Math.round(scoreSOM * 100) : 0;
-                            const pourcentagePAN = scorePAN !== null ? Math.round(scorePAN * 100) : 0;
+                        let valeursHTML = '';
+                        let symbolesHTML = '';
 
+                        if (modeComparatif) {
+                            // Vérifier si les moyennes existent avant d'accéder à leurs propriétés
+                            const scoreSOM = moyennesSOM ? moyennesSOM[cleMoyennes] : null;
+                            const scorePAN = moyennesPAN ? moyennesPAN[cleMoyennes] : null;
+                            const pourcentageSOM = scoreSOM !== null && scoreSOM !== undefined ? Math.round(scoreSOM * 100) : null;
+                            const pourcentagePAN = scorePAN !== null && scorePAN !== undefined ? Math.round(scorePAN * 100) : null;
+
+                            // Obtenir les directions pour SOM et PAN
+                            const directionSOM = directionsSOM ? directionsSOM[cle] : null;
+                            const directionPAN = directionsPAN ? directionsPAN[cle] : null;
+                            const symboleSOM = directionSOM && directionSOM.symbole ? directionSOM.symbole : '';
+                            const symbolePAN = directionPAN && directionPAN.symbole ? directionPAN.symbole : '';
+
+                            // Points colorés
                             pointsHTML = `
-                                ${scoreSOM !== null ? `<div class="critere-point critere-point-som" style="left: ${Math.min(pourcentageSOM, 100)}%;"></div>` : ''}
-                                ${scorePAN !== null ? `<div class="critere-point critere-point-pan" style="left: ${Math.min(pourcentagePAN, 100)}%;"></div>` : ''}
+                                ${scoreSOM !== null && scoreSOM !== undefined ? `<div class="critere-point critere-point-som" style="left: ${Math.min(pourcentageSOM, 100)}%;"></div>` : ''}
+                                ${scorePAN !== null && scorePAN !== undefined ? `<div class="critere-point critere-point-pan" style="left: ${Math.min(pourcentagePAN, 100)}%;"></div>` : ''}
+                            `;
+
+                            // Symboles de direction au-dessus des points
+                            symbolesHTML = `
+                                ${symboleSOM && scoreSOM !== null && scoreSOM !== undefined ? `<div style="position: absolute; left: ${Math.min(pourcentageSOM, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${symboleSOM}</div>` : ''}
+                                ${symbolePAN && scorePAN !== null && scorePAN !== undefined ? `<div style="position: absolute; left: ${Math.min(pourcentagePAN, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--pan-bleu);" title="PAN: ${directionPAN.interpretation}">${symbolePAN}</div>` : ''}
+                            `;
+
+                            // Affichage des valeurs duales
+                            valeursHTML = `
+                                <span style="display: flex; gap: 8px; align-items: center;">
+                                    ${pourcentageSOM !== null ? `<span style="color: var(--som-orange); font-weight: 600;">${pourcentageSOM}%</span>` : ''}
+                                    ${pourcentageSOM !== null && pourcentagePAN !== null ? `<span style="color: #999;">|</span>` : ''}
+                                    ${pourcentagePAN !== null ? `<span style="color: var(--pan-bleu); font-weight: 600;">${pourcentagePAN}%</span>` : ''}
+                                </span>
                             `;
                         } else {
+                            // Mode normal : utiliser les directions PAN
+                            const direction = directionsPAN ? directionsPAN[cle] : null;
+                            const symboleDirection = direction && direction.symbole ? direction.symbole : '';
+
                             pointsHTML = `<div class="critere-point" style="left: ${Math.min(pourcentage, 100)}%;"></div>`;
+                            valeursHTML = `${pourcentage}%`;
+                            symbolesHTML = symboleDirection ? `<div style="position: absolute; left: ${Math.min(pourcentage, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: #333;" title="${direction.interpretation}">${symboleDirection}</div>` : '';
                         }
 
                         return `
@@ -5512,11 +5560,11 @@ function genererSectionPerformance(da) {
                                 <div class="critere-header">
                                     <span class="critere-nom" style="min-width: 120px;">${nomCritere}</span>
                                     <span class="critere-valeur" style="margin-left: auto; font-weight: 600;">
-                                        ${pourcentage}%
+                                        ${valeursHTML}
                                     </span>
                                 </div>
                                 <div class="critere-barre-gradient" style="background: ${gradientCSS};">
-                                    ${symboleDirection ? `<div style="position: absolute; left: ${Math.min(pourcentage, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: #333;" title="${direction.interpretation}">${symboleDirection}</div>` : ''}
+                                    ${symbolesHTML}
                                     ${pointsHTML}
                                 </div>
                             </div>
