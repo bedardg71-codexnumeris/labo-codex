@@ -526,10 +526,10 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         #28a745 78%, #2196F3 82%,
         #2196F3 82%, #2196F3 100%)`;
 
-    // Générer les triangles pour SOM (▼ en haut) avec juxtaposition
+    // Générer les points pour SOM avec jitter aléatoire
     let lignesSOM = '';
     if (afficherSom && etudiantsSOM.length > 0) {
-        // Grouper par score pour juxtaposer les étudiants au même score
+        // Grouper par score pour appliquer un jitter aux étudiants au même score
         const groupesSOM = {};
         etudiantsSOM.forEach(e => {
             const scoreArrondi = Math.round(e.valeur * 100);
@@ -539,14 +539,16 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             groupesSOM[scoreArrondi].push(e);
         });
 
-        // Générer les triangles avec décalage vertical pour ceux au même score
+        // Générer les points avec jitter aléatoire pour éviter superposition parfaite
         Object.keys(groupesSOM).forEach(score => {
             const etudiants = groupesSOM[score];
             etudiants.forEach((e, index) => {
                 const position = Math.min(e.valeur * 100, 100);
-                const decalageVertical = index * 4; // 4px entre chaque triangle au même score
+                // Jitter léger : ±0.3% horizontal, ±8px vertical
+                const jitterH = (Math.random() - 0.5) * 0.6; // -0.3% à +0.3%
+                const jitterV = (Math.random() - 0.5) * 16; // -8px à +8px
                 lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                    style="left: ${position}%; margin-top: ${decalageVertical}px;"
+                    style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
@@ -555,10 +557,10 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         });
     }
 
-    // Générer les triangles pour PAN (▲ en bas) avec juxtaposition
+    // Générer les points pour PAN avec jitter aléatoire
     let lignesPAN = '';
     if (afficherPan && etudiantsPAN.length > 0) {
-        // Grouper par score pour juxtaposer les étudiants au même score
+        // Grouper par score pour appliquer un jitter aux étudiants au même score
         const groupesPAN = {};
         etudiantsPAN.forEach(e => {
             const scoreArrondi = Math.round(e.valeur * 100);
@@ -568,14 +570,16 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             groupesPAN[scoreArrondi].push(e);
         });
 
-        // Générer les triangles avec décalage vertical pour ceux au même score
+        // Générer les points avec jitter aléatoire pour éviter superposition parfaite
         Object.keys(groupesPAN).forEach(score => {
             const etudiants = groupesPAN[score];
             etudiants.forEach((e, index) => {
                 const position = Math.min(e.valeur * 100, 100);
-                const decalageVertical = index * 4; // 4px entre chaque triangle au même score
+                // Jitter léger : ±0.3% horizontal, ±8px vertical
+                const jitterH = (Math.random() - 0.5) * 0.6; // -0.3% à +0.3%
+                const jitterV = (Math.random() - 0.5) * 16; // -8px à +8px
                 lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                    style="left: ${position}%; margin-bottom: ${decalageVertical}px;"
+                    style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
@@ -629,59 +633,35 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
         'blocage-critique': 87.5 // Centre de 75-100%
     };
 
-    // Générer les triangles pour SOM avec juxtaposition
+    // Générer les points pour SOM avec jitter (nuage de points)
     let lignesSOM = '';
     if (afficherSom && etudiantsSOM.length > 0) {
-        // Grouper par pattern pour juxtaposer les étudiants au même pattern
-        const groupesSOM = {};
         etudiantsSOM.forEach(e => {
-            if (!groupesSOM[e.pattern]) {
-                groupesSOM[e.pattern] = [];
-            }
-            groupesSOM[e.pattern].push(e);
-        });
-
-        // Générer les triangles avec décalage pour ceux au même pattern
-        Object.keys(groupesSOM).forEach(pattern => {
-            const etudiants = groupesSOM[pattern];
-            etudiants.forEach((e, index) => {
-                const position = positionPattern[e.pattern] || 50;
-                const decalageVertical = index * 4;
-                lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                    style="left: ${position}%; margin-top: ${decalageVertical}px;"
-                    data-da="${e.da}"
-                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                    data-pattern="${e.pattern}"
-                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${e.pattern}"></div>`;
-            });
+            const position = positionPattern[e.pattern] || 50;
+            const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
+            const jitterV = (Math.random() - 0.5) * 16; // ±8px
+            lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
+                style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                data-da="${e.da}"
+                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                data-pattern="${e.pattern}"
+                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${e.pattern}"></div>`;
         });
     }
 
-    // Générer les triangles pour PAN avec juxtaposition
+    // Générer les points pour PAN avec jitter (nuage de points)
     let lignesPAN = '';
     if (afficherPan && etudiantsPAN.length > 0) {
-        // Grouper par pattern pour juxtaposer les étudiants au même pattern
-        const groupesPAN = {};
         etudiantsPAN.forEach(e => {
-            if (!groupesPAN[e.pattern]) {
-                groupesPAN[e.pattern] = [];
-            }
-            groupesPAN[e.pattern].push(e);
-        });
-
-        // Générer les triangles avec décalage pour ceux au même pattern
-        Object.keys(groupesPAN).forEach(pattern => {
-            const etudiants = groupesPAN[pattern];
-            etudiants.forEach((e, index) => {
-                const position = positionPattern[e.pattern] || 50;
-                const decalageVertical = index * 4;
-                lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                    style="left: ${position}%; margin-bottom: ${decalageVertical}px;"
-                    data-da="${e.da}"
-                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                    data-pattern="${e.pattern}"
-                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${e.pattern}"></div>`;
-            });
+            const position = positionPattern[e.pattern] || 50;
+            const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
+            const jitterV = (Math.random() - 0.5) * 16; // ±8px
+            lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
+                style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                data-da="${e.da}"
+                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                data-pattern="${e.pattern}"
+                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${e.pattern}"></div>`;
         });
     }
 
@@ -726,59 +706,35 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
         3: 83     // Centre de 66-100%
     };
 
-    // Générer les triangles pour SOM avec juxtaposition
+    // Générer les points pour SOM avec jitter (nuage de points)
     let lignesSOM = '';
     if (afficherSom && etudiantsSOM.length > 0) {
-        // Grouper par niveau pour juxtaposer les étudiants au même niveau
-        const groupesSOM = {};
         etudiantsSOM.forEach(e => {
-            if (!groupesSOM[e.niveau]) {
-                groupesSOM[e.niveau] = [];
-            }
-            groupesSOM[e.niveau].push(e);
-        });
-
-        // Générer les triangles avec décalage pour ceux au même niveau
-        Object.keys(groupesSOM).forEach(niveau => {
-            const etudiants = groupesSOM[niveau];
-            etudiants.forEach((e, index) => {
-                const position = positionNiveau[e.niveau] || 50;
-                const decalageVertical = index * 4;
-                lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                    style="left: ${position}%; margin-top: ${decalageVertical}px;"
-                    data-da="${e.da}"
-                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                    data-niveau="${e.niveau}"
-                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${e.niveau}"></div>`;
-            });
+            const position = positionNiveau[e.niveau] || 50;
+            const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
+            const jitterV = (Math.random() - 0.5) * 16; // ±8px
+            lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
+                style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                data-da="${e.da}"
+                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                data-niveau="${e.niveau}"
+                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${e.niveau}"></div>`;
         });
     }
 
-    // Générer les triangles pour PAN avec juxtaposition
+    // Générer les points pour PAN avec jitter (nuage de points)
     let lignesPAN = '';
     if (afficherPan && etudiantsPAN.length > 0) {
-        // Grouper par niveau pour juxtaposer les étudiants au même niveau
-        const groupesPAN = {};
         etudiantsPAN.forEach(e => {
-            if (!groupesPAN[e.niveau]) {
-                groupesPAN[e.niveau] = [];
-            }
-            groupesPAN[e.niveau].push(e);
-        });
-
-        // Générer les triangles avec décalage pour ceux au même niveau
-        Object.keys(groupesPAN).forEach(niveau => {
-            const etudiants = groupesPAN[niveau];
-            etudiants.forEach((e, index) => {
-                const position = positionNiveau[e.niveau] || 50;
-                const decalageVertical = index * 4;
-                lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                    style="left: ${position}%; margin-bottom: ${decalageVertical}px;"
-                    data-da="${e.da}"
-                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
-                    data-niveau="${e.niveau}"
-                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${e.niveau}"></div>`;
-            });
+            const position = positionNiveau[e.niveau] || 50;
+            const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
+            const jitterV = (Math.random() - 0.5) * 16; // ±8px
+            lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
+                style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                data-da="${e.da}"
+                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                data-niveau="${e.niveau}"
+                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${e.niveau}"></div>`;
         });
     }
 

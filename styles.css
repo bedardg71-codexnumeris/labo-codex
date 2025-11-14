@@ -5047,52 +5047,52 @@ label:has(+ textarea:disabled) {
     height: 60px;
     border-radius: 6px;
     overflow: visible;
-    opacity: 0.65;
+    opacity: 0.35;
 }
 
-/* Triangle représentant un étudiant */
+/* Point représentant un étudiant (scatter plot) */
 .barre-etudiant {
     position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
     z-index: 10;
-    font-size: 16px;
-    line-height: 1;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
+    top: 50%;
+    border: 1px solid white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
-/* Triangle pour SOM (▼ orange, en haut) */
+/* Point pour SOM (orange) */
 .barre-etudiant-som {
-    color: var(--som-orange);
-    top: -2px;
-}
-
-.barre-etudiant-som::before {
-    content: '▼';
+    background: var(--som-orange);
+    opacity: 0.85;
 }
 
 .barre-etudiant-som:hover {
-    font-size: 20px;
-    color: #ff8c00;
+    width: 12px;
+    height: 12px;
+    opacity: 1;
     z-index: 20;
-    top: -4px;
+    border-width: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
 }
 
-/* Triangle pour PAN (▲ bleu, en bas) */
+/* Point pour PAN (bleu) */
 .barre-etudiant-pan {
-    color: var(--pan-bleu);
-    bottom: -2px;
-}
-
-.barre-etudiant-pan::before {
-    content: '▲';
+    background: var(--pan-bleu);
+    opacity: 0.85;
 }
 
 .barre-etudiant-pan:hover {
-    font-size: 20px;
-    color: #0288d1;
+    width: 12px;
+    height: 12px;
+    opacity: 1;
     z-index: 20;
-    bottom: -4px;
+    border-width: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
 }
 
 /* Conteneur de distribution */
