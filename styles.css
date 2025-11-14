@@ -4706,6 +4706,29 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: #333;
 }
 
+/* Point circulaire pour barres de critères SRPNF */
+.critere-point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    background: #333;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.critere-point:hover {
+    width: 16px;
+    height: 16px;
+    z-index: 20;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+}
+
 /* Légende IDME alignée avec zones */
 .legende-idme-container {
     position: relative;
