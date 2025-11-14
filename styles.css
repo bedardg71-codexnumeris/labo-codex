@@ -5068,13 +5068,12 @@ label:has(+ textarea:disabled) {
 /* Point pour SOM (orange) */
 .barre-etudiant-som {
     background: var(--som-orange);
-    opacity: 0.85;
+    opacity: 1; /* Opacité maximale pour meilleure visibilité */
 }
 
 .barre-etudiant-som:hover {
     width: 12px;
     height: 12px;
-    opacity: 1;
     z-index: 20;
     border-width: 2px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.25);
@@ -5083,13 +5082,12 @@ label:has(+ textarea:disabled) {
 /* Point pour PAN (bleu) */
 .barre-etudiant-pan {
     background: var(--pan-bleu);
-    opacity: 0.85;
+    opacity: 1; /* Opacité maximale pour meilleure visibilité */
 }
 
 .barre-etudiant-pan:hover {
     width: 12px;
     height: 12px;
-    opacity: 1;
     z-index: 20;
     border-width: 2px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.25);
