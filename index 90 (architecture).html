@@ -2645,18 +2645,18 @@
                         </div>
                     </div>
 
-                    <!-- ========== RISQUE D'ÉCHEC ========== -->
+                    <!-- ========== NIVEAU D'ENGAGEMENT ========== -->
                     <div class="carte">
                         <h3 class="carte-titre-avec-toggle">
-                            <span>Risque d'échec</span>
+                            <span>Niveau d'engagement</span>
                             <span class="emoji-container">
-                                <span class="emoji-toggle" data-target="note-risque">📐</span>
+                                <span class="emoji-toggle" data-target="note-engagement">📐</span>
                             </span>
                         </h3>
 
                         <!-- Carte Note -->
-                        <div id="note-risque" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Note :</strong> Le risque d'échec est calculé à partir des indices A-C-P (Assiduité, Complétion, Performance). Les risques faibles regroupent les niveaux minimal, faible et modéré, indiquant une situation stable.
+                        <div id="note-engagement" class="carte-info-toggle carte-info-note" style="display: none;">
+                            <strong>Note :</strong> Le niveau d'engagement est calculé avec la formule E = (A × C × P)^(1/3) qui combine assiduité, complétion et performance. La racine cubique compense la décroissance multiplicative. L'engagement favorable regroupe les niveaux très favorable et favorable.
                         </div>
 
                         <div class="grille-cartes-metriques">
@@ -7734,7 +7734,7 @@ Exemple :
 
                         <div class="alerte-danger-dark">
                             <h4 class="text-white-mb10">Blocage critique</h4>
-                            <p><strong>Critères :</strong> Risque d'échec &gt; 70% (formule: 1 - A×C×P)</p>
+                            <p><strong>Critères :</strong> Engagement insuffisant (E &lt; 30%, formule: E = (A×C×P)^(1/3))</p>
                             <p><strong>Intervention :</strong> RàI Niveau 3 - Intervention très intensive ou spécialisée</p>
                             <p><strong>Action :</strong> Rencontre individuelle + CAF + Dépistage + Services adaptés si nécessaire</p>
                         </div>
@@ -8842,7 +8842,7 @@ Exemple :
     <script src="js/saisie-presences.js?v=2025111202"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=2025111313"></script>
+    <script src="js/tableau-bord-apercu.js?v=2025111437"></script>
     <script src="js/profil-etudiant.js?v=2025111436"></script>
     <script src="js/presences-apercu.js?v=2025111029"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
