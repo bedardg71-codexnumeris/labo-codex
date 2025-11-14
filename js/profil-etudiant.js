@@ -5458,7 +5458,7 @@ function genererSectionPerformance(da) {
                                 </div>
                                 <div class="critere-barre-gradient" style="background: ${gradientCSS};">
                                     ${symboleDirection ? `<div style="position: absolute; left: ${Math.min(pourcentage, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: #333;" title="${direction.interpretation}">${symboleDirection}</div>` : ''}
-                                    <div class="critere-indicateur" style="left: ${Math.min(pourcentage, 100)}%;">▼</div>
+                                    <div class="critere-point" style="left: ${Math.min(pourcentage, 100)}%;"></div>
                                 </div>
                             </div>
                         `;
