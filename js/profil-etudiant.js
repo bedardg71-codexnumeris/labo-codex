@@ -5430,6 +5430,36 @@ function genererSectionPerformance(da) {
                     // Calculer les directions pour chaque critère
                     const directions = calculerDirectionsCriteres(da);
 
+                    // Détecter le mode comparatif
+                    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+                    const affichage = config.affichageTableauBord || {};
+                    const afficherSom = affichage.afficherSommatif !== false;
+                    const afficherPan = affichage.afficherAlternatif !== false;
+                    const modeComparatif = afficherSom && afficherPan;
+
+                    // Calculer moyennes pour SOM et PAN si en mode comparatif
+                    let moyennesSOM = moyennes;
+                    let moyennesPAN = moyennes;
+                    if (modeComparatif) {
+                        // Calculer moyennes pour chaque pratique
+                        const pratiqueCourante = config.pratiqueActive || 'sommative';
+
+                        // Sauvegarder pratique courante et calculer pour SOM
+                        const pratiqueOriginale = config.pratiqueActive;
+                        config.pratiqueActive = 'sommative';
+                        localStorage.setItem('modalitesEvaluation', JSON.stringify(config));
+                        moyennesSOM = calculerMoyennesCriteres(da) || moyennes;
+
+                        // Calculer pour PAN
+                        config.pratiqueActive = 'alternative';
+                        localStorage.setItem('modalitesEvaluation', JSON.stringify(config));
+                        moyennesPAN = calculerMoyennesCriteres(da) || moyennes;
+
+                        // Restaurer pratique originale
+                        config.pratiqueActive = pratiqueOriginale;
+                        localStorage.setItem('modalitesEvaluation', JSON.stringify(config));
+                    }
+
                     // Générer les barres pour chaque critère
                     const barresHTML = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
                         const nomCritere = cle === 'structure' ? 'Structure' :
@@ -5438,8 +5468,8 @@ function genererSectionPerformance(da) {
                                          cle === 'nuance' ? 'Nuance' : 'Français';
                         // Mapper les clés avec accents aux clés sans accents dans moyennes
                         const cleMoyennes = cle.charAt(0).toUpperCase() + cle.slice(1); // Structure, Rigueur, Plausibilite, Nuance, Francais
-                        const score = moyennes[cleMoyennes];
 
+                        const score = moyennes[cleMoyennes];
                         if (score === null) return '';
 
                         const pourcentage = Math.round(score * 100);
@@ -5447,6 +5477,22 @@ function genererSectionPerformance(da) {
                         // Obtenir la direction pour ce critère
                         const direction = directions[cle];
                         const symboleDirection = direction && direction.symbole ? direction.symbole : '';
+
+                        // En mode comparatif, afficher deux points
+                        let pointsHTML = '';
+                        if (modeComparatif) {
+                            const scoreSOM = moyennesSOM[cleMoyennes];
+                            const scorePAN = moyennesPAN[cleMoyennes];
+                            const pourcentageSOM = scoreSOM !== null ? Math.round(scoreSOM * 100) : 0;
+                            const pourcentagePAN = scorePAN !== null ? Math.round(scorePAN * 100) : 0;
+
+                            pointsHTML = `
+                                ${scoreSOM !== null ? `<div class="critere-point critere-point-som" style="left: ${Math.min(pourcentageSOM, 100)}%;"></div>` : ''}
+                                ${scorePAN !== null ? `<div class="critere-point critere-point-pan" style="left: ${Math.min(pourcentagePAN, 100)}%;"></div>` : ''}
+                            `;
+                        } else {
+                            pointsHTML = `<div class="critere-point" style="left: ${Math.min(pourcentage, 100)}%;"></div>`;
+                        }
 
                         return `
                             <div class="critere-container">
@@ -5458,7 +5504,7 @@ function genererSectionPerformance(da) {
                                 </div>
                                 <div class="critere-barre-gradient" style="background: ${gradientCSS};">
                                     ${symboleDirection ? `<div style="position: absolute; left: ${Math.min(pourcentage, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: #333;" title="${direction.interpretation}">${symboleDirection}</div>` : ''}
-                                    <div class="critere-point" style="left: ${Math.min(pourcentage, 100)}%;"></div>
+                                    ${pointsHTML}
                                 </div>
                             </div>
                         `;

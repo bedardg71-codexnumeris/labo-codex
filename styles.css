@@ -4729,6 +4729,15 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     box-shadow: 0 3px 6px rgba(0,0,0,0.4);
 }
 
+/* Points colorés pour mode comparatif SOM/PAN */
+.critere-point-som {
+    background: var(--som-orange);
+}
+
+.critere-point-pan {
+    background: var(--pan-bleu);
+}
+
 /* Légende IDME alignée avec zones */
 .legende-idme-container {
     position: relative;
