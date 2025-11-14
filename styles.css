@@ -4887,6 +4887,96 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 /* ===============================
+   PAGE TRIMESTRE - CLASSES UTILITAIRES
+   =============================== */
+
+/* Grilles responsives */
+.grille-2col {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.grille-2col-gap15 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.grille-4col-form {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 15px 20px;
+}
+
+/* Titres de sous-sections */
+.sous-titre-section {
+    color: var(--bleu-moyen);
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--bleu-leger);
+}
+
+/* Textes descriptifs */
+.texte-desc {
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+}
+
+/* Boîte d'information */
+.info-box {
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 4px;
+}
+
+.info-box p {
+    margin: 0;
+    color: var(--texte-principal);
+    font-size: 0.95rem;
+}
+
+/* Formulaires cachés */
+.form-cache {
+    display: none;
+    margin-bottom: 30px;
+}
+
+.form-cache-mt {
+    display: none;
+    margin-top: 20px;
+}
+
+/* Groupes de boutons avec alignement */
+.btn-groupe-droite {
+    justify-content: flex-end;
+    padding: 0 20px 15px;
+}
+
+/* Champs de formulaire compacts */
+.controle-form-compact {
+    padding: 4px 8px;
+    font-size: 0.9rem;
+}
+
+/* Couleurs de titres spécifiques */
+.titre-vert {
+    color: var(--vert-leger);
+}
+
+.titre-orange {
+    color: var(--orange-accent);
+}
+
+/* Marges utilitaires supplémentaires */
+.mb-30 {
+    margin-bottom: 30px;
+}
+
+/* ===============================
    ANIMATIONS
    =============================== */
 

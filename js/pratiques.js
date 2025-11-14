@@ -1239,3 +1239,11 @@ function obtenirConfigurationNotation() {
  * - Fonctionne avec tous les navigateurs modernes
  * - Pas de dépendances externes
  */
+
+// ============================================
+// EXPORT DES FONCTIONS GLOBALES
+// ============================================
+
+window.initialiserModulePratiques = initialiserModulePratiques;
+window.sauvegarderPratiqueNotation = sauvegarderPratiqueNotation;
+window.obtenirConfigurationNotation = obtenirConfigurationNotation;
