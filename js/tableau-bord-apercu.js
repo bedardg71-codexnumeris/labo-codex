@@ -448,9 +448,22 @@ function afficherMetriquesGlobales(etudiants) {
     carteIndicateurs.appendChild(header);
     if (noteToggle) carteIndicateurs.appendChild(noteToggle);
 
+    // Générer la légende unique en haut
+    const legendeUnique = `
+        <div class="distribution-legende-commune" style="position: relative; height: 40px; font-size: 0.8rem; color: #666; margin-bottom: 20px; padding: 0 20px;">
+            <div style="display: flex; justify-content: space-around; align-items: center; height: 100%;">
+                <span style="color: #ff9800; text-align: center; font-weight: 600;">Fragile<br><span style="font-size: 0.7rem; font-weight: 400;">30-49%</span></span>
+                <span style="color: #ffc107; text-align: center; font-weight: 600;">Modéré<br><span style="font-size: 0.7rem; font-weight: 400;">50-64%</span></span>
+                <span style="color: #28a745; text-align: center; font-weight: 600;">Favorable<br><span style="font-size: 0.7rem; font-weight: 400;">65-79%</span></span>
+                <span style="color: #2196F3; text-align: center; font-weight: 600;">Très favorable<br><span style="font-size: 0.7rem; font-weight: 400;">≥ 80%</span></span>
+            </div>
+        </div>
+    `;
+
     // Générer les 4 barres de distribution
     const html = `
         <div style="padding: 20px;">
+            ${legendeUnique}
             ${genererBarreDistribution('Assiduité (A)', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan)}
             ${genererBarreDistribution('Complétion (C)', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan)}
             ${genererBarreDistribution('Performance (P)', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan)}
@@ -586,17 +599,11 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     }
 
     return `
-        <div class="distribution-container" style="margin-bottom: 30px;">
-            <h4 style="margin-bottom: 10px; font-size: 0.95rem; color: #333;">${label}</h4>
-            <div class="distribution-barre-container" style="position: relative; height: 60px; background: ${gradient}; border-radius: 6px; margin-bottom: 10px;">
+        <div class="distribution-container" style="margin-bottom: 20px;">
+            <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">${label}</h4>
+            <div class="distribution-barre-container" style="position: relative; height: 30px; background: ${gradient}; border-radius: 6px;">
                 ${lignesSOM}
                 ${lignesPAN}
-            </div>
-            <div class="distribution-legende" style="position: relative; height: 30px; font-size: 0.75rem; color: #666;">
-                <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #ff9800; text-align: center;">Fragile<br>30-49%</span>
-                <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #ffc107; text-align: center;">Modéré<br>50-64%</span>
-                <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #28a745; text-align: center;">Favorable<br>65-79%</span>
-                <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #2196F3; text-align: center;">Très favorable<br>≥ 80%</span>
             </div>
         </div>
     `;
