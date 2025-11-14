@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 90 - Architecture pratiques de notation</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=2025111409">
+    <link rel="stylesheet" href="styles.css?v=2025111415">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -2642,210 +2642,6 @@
                                     <strong id="tb-performance-pan" class="carte-metrique-valeur">—</strong>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- ========== NIVEAU D'ENGAGEMENT ========== -->
-                    <div class="carte">
-                        <h3 class="carte-titre-avec-toggle">
-                            <span>Niveau d'engagement</span>
-                            <span class="emoji-container">
-                                <span class="emoji-toggle" data-target="note-engagement">📐</span>
-                            </span>
-                        </h3>
-
-                        <!-- Carte Note -->
-                        <div id="note-engagement" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Note :</strong> Le niveau d'engagement est calculé avec la formule E = (A × C × P)^(1/3) qui combine assiduité, complétion et performance. La racine cubique compense la décroissance multiplicative. L'engagement favorable regroupe les niveaux très favorable et favorable.
-                        </div>
-
-                        <div class="grille-cartes-metriques">
-                            <!-- Risques faibles combinés -->
-                            <div class="carte-metrique-verte">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Risques faibles</span>
-                                    <strong id="tb-risque-faibles" class="carte-metrique-valeur-verte">0</strong>
-                                </div>
-                            </div>
-
-                            <!-- Risque élevé -->
-                            <div class="carte-metrique-jaune">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Risque élevé</span>
-                                    <strong id="tb-risque-eleve" class="carte-metrique-valeur-jaune">0</strong>
-                                </div>
-                            </div>
-
-                            <!-- Risque très élevé -->
-                            <div class="carte-metrique-orange">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Risque très élevé</span>
-                                    <strong id="tb-risque-tres-eleve" class="carte-metrique-valeur-orange">0</strong>
-                                </div>
-                            </div>
-
-                            <!-- Risque critique -->
-                            <div class="carte-metrique-rouge">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Risque critique</span>
-                                    <strong id="tb-risque-critique" class="carte-metrique-valeur-rouge">0</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ========== DISTRIBUTION DES PATTERNS ========== -->
-                    <div class="carte">
-                        <h3 class="carte-titre-avec-toggle">
-                            <span>Répartition des patterns d'apprentissage</span>
-                            <span class="emoji-container">
-                                <span class="emoji-toggle" data-target="note-patterns">📐</span>
-                            </span>
-                        </h3>
-
-                        <!-- Carte Note -->
-                        <div id="note-patterns" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Note :</strong> Les patterns identifient les trajectoires d'apprentissage selon l'évolution des indices A-C-P. Une progression stable indique une amélioration constante, tandis que les blocages signalent des difficultés nécessitant un accompagnement ciblé.
-                        </div>
-
-                        <div class="grille-cartes-metriques">
-                            <!-- Stable -->
-                            <div class="carte-metrique-verte">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Progression stable</span>
-                                    <strong id="tb-pattern-stable" class="carte-metrique-valeur-verte">0</strong>
-                                </div>
-                                <div class="barre-progression-container">
-                                    <div id="tb-barre-stable" class="barre-progression barre-progression-verte"></div>
-                                </div>
-                            </div>
-
-                            <!-- Défi spécifique -->
-                            <div class="carte-metrique-violette">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Défi spécifique</span>
-                                    <strong id="tb-pattern-defi" class="carte-metrique-valeur-violette">0</strong>
-                                </div>
-                                <div class="barre-progression-container">
-                                    <div id="tb-barre-defi" class="barre-progression barre-progression-violette"></div>
-                                </div>
-                            </div>
-
-                            <!-- Blocage émergent -->
-                            <div class="carte-metrique-jaune-pale">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Blocage émergent</span>
-                                    <strong id="tb-pattern-emergent" class="carte-metrique-valeur-jaune">0</strong>
-                                </div>
-                                <div class="barre-progression-container">
-                                    <div id="tb-barre-emergent" class="barre-progression barre-progression-jaune"></div>
-                                </div>
-                            </div>
-
-                            <!-- Blocage critique -->
-                            <div class="carte-metrique-rouge-attention">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Blocage critique</span>
-                                    <strong id="tb-pattern-critique" class="carte-metrique-valeur-rouge">0</strong>
-                                </div>
-                                <div class="barre-progression-container">
-                                    <div id="tb-barre-critique" class="barre-progression barre-progression-rouge"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ========== SYSTÈME RÀI ========== -->
-                    <div class="carte">
-                        <h3 class="carte-titre-avec-toggle">
-                            <span>Modèle de la Réponse à l'intervention (RàI)</span>
-                            <span class="emoji-container">
-                                <span class="emoji-toggle" data-target="note-rai">📐</span>
-                            </span>
-                        </h3>
-
-                        <!-- Carte Note -->
-                        <div id="note-rai" class="carte-info-toggle carte-info-note" style="display: none;">
-                            <strong>Note :</strong> Le système RàI répartit les étudiants en 3 niveaux d'intervention selon leur risque d'échec. Niveau 1 (vert) : suivi régulier en classe. Niveau 2 (violet) : interventions ciblées recommandées. Niveau 3 (terracotta) : Interventions intensives individuelles hors classe.
-                        </div>
-
-                        <div class="grille-cartes-metriques">
-                            <!-- Niveau 1 -->
-                            <div class="carte-metrique-verte">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Niveau 1</span>
-                                    <strong id="tb-rai-niveau1-pct" class="carte-metrique-valeur-verte">0%</strong>
-                                </div>
-                            </div>
-
-                            <!-- Niveau 2 -->
-                            <div class="carte-metrique-violette">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Niveau 2</span>
-                                    <strong id="tb-rai-niveau2-pct" class="carte-metrique-valeur-violette">0%</strong>
-                                </div>
-                            </div>
-
-                            <!-- Niveau 3 -->
-                            <div class="carte-metrique-rouge-attention">
-                                <div class="carte-metrique-contenu">
-                                    <span class="carte-metrique-label">Niveau 3</span>
-                                    <strong id="tb-rai-niveau3-pct" class="carte-metrique-valeur-rouge">0%</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ========== RACCOURCIS RAPIDES ========== -->
-                    <div class="carte">
-                        <h3>Raccourcis rapides</h3>
-
-                        <div
-                            class="grid-auto-250">
-                            <!-- Voir la liste complète -->
-                            <button onclick="afficherSousSection('tableau-bord-liste')" style="padding: 20px; background: white; border: 2px solid var(--bleu-principal); 
-                               border-radius: 8px; cursor: pointer; text-align: left; transition: all 0.2s;"
-                                onmouseover="this.style.background='var(--bleu-tres-pale)'"
-                                onmouseout="this.style.background='white'">
-                                <div class="titre-bleu-lg-mb8">
-                                </div>
-                                <div class="label-fw-600-bleu">
-                                    Liste complète
-                                </div>
-                                <div class="text-sm-muted">
-                                    Consulter tous les étudiants avec filtres et recherche
-                                </div>
-                            </button>
-
-                            <!-- Saisir présences -->
-                            <button onclick="afficherSection('presences')" style="padding: 20px; background: white; border: 2px solid var(--bleu-principal); 
-                               border-radius: 8px; cursor: pointer; text-align: left; transition: all 0.2s;"
-                                onmouseover="this.style.background='var(--bleu-tres-pale)'"
-                                onmouseout="this.style.background='white'">
-                                <div class="titre-bleu-lg-mb8">
-                                </div>
-                                <div class="label-fw-600-bleu">
-                                    Saisir présences
-                                </div>
-                                <div class="text-sm-muted">
-                                    Enregistrer l'assiduité au cours d'aujourd'hui
-                                </div>
-                            </button>
-
-                            <!-- Évaluer productions -->
-                            <button onclick="afficherSection('evaluations')" style="padding: 20px; background: white; border: 2px solid var(--bleu-principal); 
-                               border-radius: 8px; cursor: pointer; text-align: left; transition: all 0.2s;"
-                                onmouseover="this.style.background='var(--bleu-tres-pale)'"
-                                onmouseout="this.style.background='white'">
-                                <div class="titre-bleu-lg-mb8">
-                                </div>
-                                <div class="label-fw-600-bleu">
-                                    Évaluer productions
-                                </div>
-                                <div class="text-sm-muted">
-                                    Corriger et évaluer les artefacts du portfolio
-                                </div>
-                            </button>
                         </div>
                     </div>
 
@@ -8825,13 +8621,13 @@ Exemple :
     <script src="js/pratiques/migration-pratiques.js"></script>
     <script src="js/pratiques/pratique-test.js"></script>
     <script src="js/pratiques/pratique-pan-maitrise.js?v=2025111302"></script>
-    <script src="js/pratiques/pratique-sommative.js?v=2025111440"></script>
+    <script src="js/pratiques/pratique-sommative.js?v=2025111441"></script>
 
     <script src="js/portfolio.js?v=2025111310"></script>
     <script src="js/saisie-presences.js?v=2025111202"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=2025111408"></script>
+    <script src="js/tableau-bord-apercu.js?v=2025111415"></script>
     <script src="js/profil-etudiant.js?v=2025111416"></script>
     <script src="js/presences-apercu.js?v=2025111029"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
