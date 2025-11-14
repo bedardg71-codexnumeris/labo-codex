@@ -55,6 +55,121 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('📦 Modules chargés : 01-config, 02-navigation');
 
     // ===============================
+    // 0. GÉNÉRATION DYNAMIQUE DES BULLES D'APPRENTISSAGE
+    // ===============================
+    console.log('🎨 Génération des bulles d\'apprentissage...');
+
+    function creerUneBulle(couleurs, tailles, durees) {
+        const bulle = document.createElement('div');
+
+        // Classes aléatoires
+        const couleur = couleurs[Math.floor(Math.random() * couleurs.length)];
+        const taille = tailles[Math.floor(Math.random() * tailles.length)];
+        bulle.className = `bulle ${taille} ${couleur}`;
+
+        // Position de départ randomisée - PARTOUT sur l'écran
+        const left = `${Math.random() * 100}%`; // 0% à 100% de la largeur
+        const bottom = `${Math.random() * 100}%`; // 0% à 100% de la hauteur
+
+        // Variables CSS pour trajectoire unique
+        const startX = `${(Math.random() - 0.5) * 60}px`; // -30px à +30px
+        const startY = `${(Math.random() - 0.5) * 60}px`; // -30px à +30px
+
+        // Dérive verticale avec possibilité de descente (apprentissage non-linéaire)
+        // 70% chance de monter, 30% chance de descendre
+        const directionY = Math.random() < 0.7 ? -1 : 1;
+        const amplitudeY = 30 + Math.random() * 40; // 30px à 70px
+        const driftY = `${directionY * amplitudeY}px`;
+
+        const duree = durees[Math.floor(Math.random() * durees.length)];
+
+        bulle.style.cssText = `
+            left: ${left};
+            bottom: ${bottom};
+            --start-x: ${startX};
+            --start-y: ${startY};
+            --drift-y: ${driftY};
+            animation-duration: ${duree}s;
+            animation-delay: 0s;
+        `;
+
+        // Écouter la fin de l'animation pour régénérer la bulle
+        bulle.addEventListener('animationiteration', function() {
+            // Régénérer position et propriétés aléatoires
+            const newLeft = `${Math.random() * 100}%`;
+            const newBottom = `${Math.random() * 100}%`;
+            const newStartX = `${(Math.random() - 0.5) * 60}px`;
+            const newStartY = `${(Math.random() - 0.5) * 60}px`;
+            const newDirectionY = Math.random() < 0.7 ? -1 : 1;
+            const newAmplitudeY = 30 + Math.random() * 40;
+            const newDriftY = `${newDirectionY * newAmplitudeY}px`;
+            const newDuree = durees[Math.floor(Math.random() * durees.length)];
+
+            // Forcer la réinitialisation de l'animation pour avoir le fade in
+            this.style.animation = 'none';
+            this.offsetHeight; // Force reflow
+
+            this.style.left = newLeft;
+            this.style.bottom = newBottom;
+            this.style.setProperty('--start-x', newStartX);
+            this.style.setProperty('--start-y', newStartY);
+            this.style.setProperty('--drift-y', newDriftY);
+            this.style.animation = `floatUp ${newDuree}s infinite linear`;
+        });
+
+        return bulle;
+    }
+
+    function genererBullesApprentissage() {
+        const container = document.getElementById('bulles-container');
+        if (!container) return;
+
+        // Récupérer le nombre d'étudiants (groupeEtudiants est la clé correcte)
+        const listeEtudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+        const nbEtudiants = listeEtudiants.length || 10; // Par défaut 10 si pas d'étudiants
+
+        console.log(`   → Création de ${nbEtudiants} bulles (1 par étudiant)`);
+
+        // Couleurs des pratiques
+        const couleurs = ['som', 'pan-maitrise', 'pan-spec', 'pan-denotation'];
+        const tailles = ['petite', 'moyenne', 'grande'];
+
+        // Durées d'animation variées (35s à 60s) - ralenti pour moins de distraction
+        const durees = [35, 38, 40, 42, 45, 48, 50, 52, 55, 58, 60];
+
+        // Générer les bulles - toutes présentes dès le début
+        for (let i = 0; i < nbEtudiants; i++) {
+            const bulle = creerUneBulle(couleurs, tailles, durees);
+
+            // Délai négatif pour que les bulles commencent à différents points de leur parcours
+            // Si durée = 30s et 30 étudiants, chaque bulle commence à -1s, -2s, -3s...
+            // Cela les place à des positions différentes dans leur animation
+            const dureeAnimation = parseFloat(bulle.style.animationDuration);
+            const delaiNegatif = -(i / nbEtudiants) * dureeAnimation;
+            bulle.style.animationDelay = `${delaiNegatif}s`;
+
+            container.appendChild(bulle);
+        }
+
+        console.log(`   ✅ ${nbEtudiants} bulles créées (toutes visibles immédiatement, cycle continu)`);
+    }
+
+    // Générer les bulles au chargement
+    genererBullesApprentissage();
+
+    // Régénérer si la liste d'étudiants change
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'groupeEtudiants') {
+            console.log('   → Mise à jour du nombre de bulles');
+            const container = document.getElementById('bulles-container');
+            if (container) {
+                container.innerHTML = '';
+                genererBullesApprentissage();
+            }
+        }
+    });
+
+    // ===============================
     // 1. NAVIGATION PRINCIPALE
     // ===============================
     console.log(' Initialisation de la navigation...');
