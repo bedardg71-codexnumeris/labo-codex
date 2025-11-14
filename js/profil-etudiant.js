@@ -1253,44 +1253,35 @@ function genererSectionMobilisationEngagement(da) {
 
                     <div class="profil-echelle-risque">
                         <div class="profil-echelle-barre" style="background: linear-gradient(to right,
-                                    #dc3545 0%, #dc3545 28%,
-                                    #dc3545 28%, #ff9800 32%,
-                                    #ff9800 32%, #ff9800 48%,
-                                    #ff9800 48%, #ffc107 52%,
-                                    #ffc107 52%, #ffc107 63%,
-                                    #ffc107 63%, #28a745 67%,
-                                    #28a745 67%, #28a745 78%,
-                                    #28a745 78%, #2196F3 82%,
-                                    #2196F3 82%, #2196F3 100%);">
+                                    #ff9800 0%,
+                                    #ffc107 25%,
+                                    #28a745 50%,
+                                    #2196F3 75%);">
                             ${modeComparatif ? `
-                                <!-- Indicateurs duaux: flèches colorées seulement (valeurs affichées dans l'en-tête) -->
-                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(E_SOM * 100, 100)}%; color: var(--som-orange);">▼</div>
-                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(E_PAN * 100, 100)}%; color: var(--pan-bleu); top: auto; bottom: -15px;">▲</div>
+                                <!-- Indicateurs duaux: points colorés (valeurs affichées dans l'en-tête) -->
+                                <div class="profil-echelle-point profil-echelle-point-som" style="left: ${Math.max(0, Math.min((E_SOM - 0.30) / 0.70 * 100, 100))}%;"></div>
+                                <div class="profil-echelle-point profil-echelle-point-pan" style="left: ${Math.max(0, Math.min((E_PAN - 0.30) / 0.70 * 100, 100))}%;"></div>
                             ` : `
                                 <!-- Indicateur unique pratique courante -->
-                                <div class="profil-echelle-indicateur-haut" style="left: ${Math.min(E_reel * 100, 100)}%;">▼</div>
-                                <div class="profil-echelle-indicateur-bas" style="left: ${Math.min(E_reel * 100, 100)}%;">E = ${E_reel.toFixed(2)}</div>
+                                <div class="profil-echelle-point profil-echelle-point-unique" style="left: ${Math.max(0, Math.min((E_reel - 0.30) / 0.70 * 100, 100))}%;"></div>
+                                <div class="profil-echelle-indicateur-bas" style="left: ${Math.max(0, Math.min((E_reel - 0.30) / 0.70 * 100, 100))}%;">E = ${E_reel.toFixed(2)}</div>
                             `}
                         </div>
 
                         <div class="legende-risque-container">
-                            <div class="legende-risque-item" style="left: 15%; color: #dc3545;">
-                                <span class="legende-risque-niveau">Insuffisant</span>
-                                <span class="legende-risque-seuil">< 0.30</span>
-                            </div>
-                            <div class="legende-risque-item" style="left: 40%; color: #ff9800;">
+                            <div class="legende-risque-item" style="left: 12.5%; color: #ff9800;">
                                 <span class="legende-risque-niveau">Fragile</span>
                                 <span class="legende-risque-seuil">0.30-0.49</span>
                             </div>
-                            <div class="legende-risque-item" style="left: 57.5%; color: #ffc107;">
+                            <div class="legende-risque-item" style="left: 37.5%; color: #ffc107;">
                                 <span class="legende-risque-niveau">Modéré</span>
                                 <span class="legende-risque-seuil">0.50-0.64</span>
                             </div>
-                            <div class="legende-risque-item" style="left: 72.5%; color: #28a745;">
+                            <div class="legende-risque-item" style="left: 62.5%; color: #28a745;">
                                 <span class="legende-risque-niveau">Favorable</span>
                                 <span class="legende-risque-seuil">0.65-0.79</span>
                             </div>
-                            <div class="legende-risque-item" style="left: 90%; color: #2196F3;">
+                            <div class="legende-risque-item" style="left: 87.5%; color: #2196F3;">
                                 <span class="legende-risque-niveau">Très favorable</span>
                                 <span class="legende-risque-seuil">≥ 0.80</span>
                             </div>
