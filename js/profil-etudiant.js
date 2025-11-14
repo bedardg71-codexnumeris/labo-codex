@@ -632,6 +632,10 @@ function genererSectionMobilisationEngagement(da) {
     const E_brut_PAN = A_pct * C_PAN * P_PAN;
     const E_PAN = Math.pow(E_brut_PAN, 1/3); // Racine cubique
 
+    // Calculer les directions d'engagement (tendance de mobilisation)
+    const directionSOM = calculerDirectionEngagement(da, 'SOM');
+    const directionPAN = calculerDirectionEngagement(da, 'PAN');
+
     // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
     const tauxA = detailsA.heuresOffertes > 0
@@ -1258,7 +1262,10 @@ function genererSectionMobilisationEngagement(da) {
                                     #28a745 50%,
                                     #2196F3 75%);">
                             ${modeComparatif ? `
-                                <!-- Indicateurs duaux: points colorés (valeurs affichées dans l'en-tête) -->
+                                <!-- Indicateurs duaux: symboles de direction -->
+                                ${directionSOM.symbole ? `<div style="position: absolute; left: ${Math.max(0, Math.min((E_SOM - 0.30) / 0.70 * 100, 100))}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${directionSOM.symbole}</div>` : ''}
+                                ${directionPAN.symbole ? `<div style="position: absolute; left: ${Math.max(0, Math.min((E_PAN - 0.30) / 0.70 * 100, 100))}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--pan-bleu);" title="PAN: ${directionPAN.interpretation}">${directionPAN.symbole}</div>` : ''}
+                                <!-- Points colorés (valeurs affichées dans l'en-tête) -->
                                 <div class="profil-echelle-point profil-echelle-point-som" style="left: ${Math.max(0, Math.min((E_SOM - 0.30) / 0.70 * 100, 100))}%;"></div>
                                 <div class="profil-echelle-point profil-echelle-point-pan" style="left: ${Math.max(0, Math.min((E_PAN - 0.30) / 0.70 * 100, 100))}%;"></div>
                             ` : `
@@ -1291,6 +1298,71 @@ function genererSectionMobilisationEngagement(da) {
             `;
         })()}
     `;
+}
+
+/**
+ * Calcule la direction de l'engagement (tendance récente)
+ * Basé sur l'historique des indices C et P (mobilisation)
+ * @param {string} da - Numéro de DA
+ * @param {string} pratique - 'SOM' ou 'PAN'
+ * @returns {Object} - { symbole: '→'|'←'|'—', interpretation: string }
+ */
+function calculerDirectionEngagement(da, pratique) {
+    const historiqueCP = obtenirHistoriqueIndicesCP(da, pratique);
+
+    // Résultat par défaut
+    const resultatParDefaut = {
+        symbole: '',
+        interpretation: 'Données insuffisantes'
+    };
+
+    // Besoin d'au moins 4 entrées pour calculer une tendance (2 récentes vs 2 précédentes)
+    if (!historiqueCP || historiqueCP.length < 4) {
+        return resultatParDefaut;
+    }
+
+    // Prendre les N dernières entrées (N=2 pour simplifier)
+    const N = 2;
+    const entrees = historiqueCP.slice(-N * 2); // 4 dernières entrées
+
+    // Calculer la moyenne de mobilisation (C × P) pour chaque groupe
+    const calculerMobilisation = (entries) => {
+        let somme = 0;
+        let count = 0;
+        entries.forEach(e => {
+            const C = e.C / 100; // Convertir en décimal
+            const P = e.P / 100;
+            somme += C * P;
+            count++;
+        });
+        return count > 0 ? somme / count : 0;
+    };
+
+    const groupe1 = entrees.slice(0, N); // 2 anciennes
+    const groupe2 = entrees.slice(N); // 2 récentes
+
+    const mobilisation1 = calculerMobilisation(groupe1);
+    const mobilisation2 = calculerMobilisation(groupe2);
+
+    const difference = mobilisation2 - mobilisation1;
+    const seuilStabilite = 0.05; // 5% de différence = stabilité
+
+    if (Math.abs(difference) < seuilStabilite) {
+        return {
+            symbole: '—',
+            interpretation: 'Mobilisation stable'
+        };
+    } else if (difference > 0) {
+        return {
+            symbole: '→',
+            interpretation: 'Mobilisation en hausse'
+        };
+    } else {
+        return {
+            symbole: '←',
+            interpretation: 'Mobilisation en baisse'
+        };
+    }
 }
 
 /**
