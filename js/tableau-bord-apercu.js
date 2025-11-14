@@ -657,12 +657,13 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
  * @returns {string} HTML de la barre
  */
 function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
-    // 4 zones égales de 25% chacune
+    // 4 zones du spectre lumineux avec transitions douces
+    // Vert → Cyan → Bleu → Indigo (bon → critique)
     const gradient = `linear-gradient(to right,
-        #4caf50 0%, #4caf50 25%,
-        #9c27b0 25%, #9c27b0 50%,
-        #ffc107 50%, #ffc107 75%,
-        #ff9800 75%, #ff9800 100%)`;
+        #4caf50 0%,
+        #00bcd4 25%,
+        #2196f3 50%,
+        #3f51b5 75%)`;
 
     // Mapper les patterns aux positions (centre de chaque zone)
     const positionPattern = {
@@ -713,10 +714,10 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 ${lignesPAN}
             </div>
             <div class="distribution-legende" style="position: relative; height: 30px; font-size: 0.75rem; color: #666;">
-                <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #4caf50; text-align: center;">Progression<br>stable</span>
-                <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #9c27b0; text-align: center;">Défi<br>spécifique</span>
-                <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #ffc107; text-align: center;">Blocage<br>émergent</span>
-                <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #ff9800; text-align: center;">Blocage<br>critique</span>
+                <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #4caf50; font-weight: 600; text-align: center;">Progression<br>stable</span>
+                <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #00bcd4; font-weight: 600; text-align: center;">Défi<br>spécifique</span>
+                <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #2196f3; font-weight: 600; text-align: center;">Blocage<br>émergent</span>
+                <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #3f51b5; font-weight: 600; text-align: center;">Blocage<br>critique</span>
             </div>
         </div>
     `;
@@ -733,11 +734,12 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
  * @returns {string} HTML de la barre
  */
 function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
-    // 3 zones : 0-33% vert, 33-66% jaune, 66-100% orange
+    // 3 zones du spectre lumineux avec transitions douces
+    // Bleu → Mauve → Violet (niveau 1 → niveau 3)
     const gradient = `linear-gradient(to right,
-        #4caf50 0%, #4caf50 33%,
-        #ffc107 33%, #ffc107 66%,
-        #ff9800 66%, #ff9800 100%)`;
+        #2196f3 0%,
+        #9c27b0 33%,
+        #6a1b9a 66%)`;
 
     // Mapper les niveaux aux positions (centre de chaque zone)
     const positionNiveau = {
@@ -786,9 +788,9 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
                 ${lignesPAN}
             </div>
             <div class="distribution-legende" style="position: relative; height: 30px; font-size: 0.75rem; color: #666;">
-                <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: #4caf50; text-align: center;">Niveau 1<br>Universel</span>
-                <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #ffc107; text-align: center;">Niveau 2<br>Préventif</span>
-                <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #ff9800; text-align: center;">Niveau 3<br>Intensif</span>
+                <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: #2196f3; font-weight: 600; text-align: center;">Niveau 1<br>Universel</span>
+                <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #9c27b0; font-weight: 600; text-align: center;">Niveau 2<br>Préventif</span>
+                <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #6a1b9a; font-weight: 600; text-align: center;">Niveau 3<br>Intensif</span>
             </div>
         </div>
     `;
