@@ -518,7 +518,7 @@ function afficherAlertesPrioritairesCompteurs(etudiants) {
     let carteEngagement = null;
     cartes.forEach(carte => {
         const h3 = carte.querySelector('h3 span');
-        if (h3 && h3.textContent.includes("Niveau d'engagement") || h3.textContent.includes("Risque d'échec")) {
+        if (h3 && (h3.textContent.includes("Niveau d'engagement") || h3.textContent.includes("Risque d'échec"))) {
             carteEngagement = carte;
         }
     });
@@ -573,7 +573,7 @@ function genererCarteEngagement(label, valeurSom, valeurPan, total, afficherSom,
 }
 
 /**
- * Affiche la liste des étudiants à risque critique
+ * Affiche la liste des étudiants à engagement insuffisant
  *
  * @param {Array} etudiants - Étudiants avec indices calculés
  * @param {boolean} afficherSommatif - Utiliser les indices sommatifs
@@ -584,13 +584,13 @@ function afficherListeEtudiantsCritiques(etudiants, afficherSommatif) {
 
     const etudiantsCritiques = etudiants
         .filter(e => {
-            const niveau = afficherSommatif ? e.sommatif.niveauRisque : e.alternatif.niveauRisque;
-            return niveau === 'critique';
+            const niveau = afficherSommatif ? e.sommatif.niveauEngagement : e.alternatif.niveauEngagement;
+            return niveau === 'insuffisant';
         })
         .sort((a, b) => {
-            const risqueA = afficherSommatif ? a.sommatif.risque : a.alternatif.risque;
-            const risqueB = afficherSommatif ? b.sommatif.risque : b.alternatif.risque;
-            return risqueB - risqueA;
+            const engagementA = afficherSommatif ? a.sommatif.engagement : a.alternatif.engagement;
+            const engagementB = afficherSommatif ? b.sommatif.engagement : b.alternatif.engagement;
+            return engagementA - engagementB; // Tri croissant (engagement le plus faible en premier)
         });
 
     container.innerHTML = etudiantsCritiques.map(e => {
@@ -908,20 +908,20 @@ function afficherActionsRecommandees(etudiants) {
     const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
     const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
 
-    // Filtrer étudiants à risque et trier par priorité (risque décroissant)
-    const etudiantsARisque = etudiants
+    // Filtrer étudiants à engagement faible et trier par priorité (engagement croissant)
+    const etudiantsAEngagementFaible = etudiants
         .filter(e => {
-            const risque = afficherSommatif ? e.sommatif.risque : e.alternatif.risque;
-            return risque >= 0.4; // Seuil: élevé ou plus
+            const engagement = afficherSommatif ? e.sommatif.engagement : e.alternatif.engagement;
+            return engagement < 0.50; // Seuil: modéré ou moins
         })
         .sort((a, b) => {
-            const risqueA = afficherSommatif ? a.sommatif.risque : a.alternatif.risque;
-            const risqueB = afficherSommatif ? b.sommatif.risque : b.alternatif.risque;
-            return risqueB - risqueA;
+            const engagementA = afficherSommatif ? a.sommatif.engagement : a.alternatif.engagement;
+            const engagementB = afficherSommatif ? b.sommatif.engagement : b.alternatif.engagement;
+            return engagementA - engagementB; // Tri croissant (engagement le plus faible en premier)
         })
         .slice(0, 5); // Top 5
 
-    if (etudiantsARisque.length === 0) {
+    if (etudiantsAEngagementFaible.length === 0) {
         container.style.display = 'none';
         if (messageVide) messageVide.style.display = 'block';
         return;
@@ -930,17 +930,17 @@ function afficherActionsRecommandees(etudiants) {
     container.style.display = 'flex';
     if (messageVide) messageVide.style.display = 'none';
 
-    container.innerHTML = etudiantsARisque.map((e, index) => {
+    container.innerHTML = etudiantsAEngagementFaible.map((e, index) => {
         const indices = afficherSommatif ? e.sommatif : e.alternatif;
         const recommendation = genererRecommandation(indices);
 
         return `
             <div style="padding: 15px; background: white; border-radius: 8px;
-                        border-left: 4px solid ${getCouleurRisque(indices.niveauRisque)};">
+                        border-left: 4px solid ${getCouleurEngagement(indices.niveauEngagement)};">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                     <div>
                         <span style="display: inline-block; width: 24px; height: 24px;
-                                     background: ${getCouleurRisque(indices.niveauRisque)};
+                                     background: ${getCouleurEngagement(indices.niveauEngagement)};
                                      color: white; border-radius: 50%; text-align: center;
                                      line-height: 24px; font-weight: bold; margin-right: 10px;">
                             ${index + 1}
@@ -948,9 +948,9 @@ function afficherActionsRecommandees(etudiants) {
                         <strong>${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}</strong>
                         <span style="color: #666; margin-left: 8px;">(${echapperHtml(e.groupe || '—')})</span>
                     </div>
-                    <span class="badge-risque risque-${indices.niveauRisque.replace(' ', '-')}"
+                    <span class="badge-engagement engagement-${indices.niveauEngagement.replace(' ', '-')}"
                           style="text-transform: capitalize;">
-                        ${indices.niveauRisque}
+                        ${indices.niveauEngagement}
                     </span>
                 </div>
                 <div style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">
@@ -999,19 +999,18 @@ function genererRecommandation(indices) {
 }
 
 /**
- * Retourne la couleur CSS selon le niveau de risque
+ * Retourne la couleur CSS selon le niveau d'engagement
  *
- * @param {string} niveau - Niveau de risque
+ * @param {string} niveau - Niveau d'engagement
  * @returns {string} Couleur CSS
  */
-function getCouleurRisque(niveau) {
+function getCouleurEngagement(niveau) {
     const couleurs = {
-        'critique': '#d32f2f',
-        'très élevé': '#f57c00',
-        'élevé': '#fbc02d',
-        'modéré': '#fdd835',
-        'faible': '#7cb342',
-        'minimal': '#388e3c'
+        'très favorable': '#2196F3',  // Bleu - Très bon
+        'favorable': '#388e3c',        // Vert - Bon
+        'modéré': '#fbc02d',           // Jaune - Attention
+        'fragile': '#f57c00',          // Orange - Préoccupant
+        'insuffisant': '#d32f2f'       // Rouge - Critique
     };
     return couleurs[niveau] || '#999';
 }
