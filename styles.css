@@ -4172,6 +4172,40 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     white-space: nowrap;
 }
 
+/* Point circulaire pour barre d'engagement (profil étudiant) */
+.profil-echelle-point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.profil-echelle-point-som {
+    background: var(--som-orange);
+}
+
+.profil-echelle-point-pan {
+    background: var(--pan-bleu);
+}
+
+.profil-echelle-point-unique {
+    background: var(--bleu-principal);
+}
+
+.profil-echelle-point:hover {
+    width: 16px;
+    height: 16px;
+    z-index: 20;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
 /* Légende échelle de risque (alignée avec zones) */
 .legende-risque-container {
     position: relative;
