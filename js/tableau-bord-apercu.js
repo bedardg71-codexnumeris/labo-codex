@@ -899,8 +899,8 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
             </div>
             <div class="distribution-legende" style="position: relative; height: 50px; font-size: 0.75rem; color: #666;">
                 <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: #2196f3; font-weight: 600; text-align: center;">${labelNiveau1}</span>
-                <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #9c27b0; font-weight: 600; text-align: center;">${labelNiveau2}</span>
-                <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #6a1b9a; font-weight: 600; text-align: center;">${labelNiveau3}</span>
+                <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #6366f1; font-weight: 600; text-align: center;">${labelNiveau2}</span>
+                <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #7c3aed; font-weight: 600; text-align: center;">${labelNiveau3}</span>
             </div>
         </div>
     `;

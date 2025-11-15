@@ -1254,19 +1254,20 @@ input[type="number"].controle-form {
 }
 
 /* === BADGES DE NIVEAU RÀI === */
+/* Couleurs alignées sur le gradient de la barre RàI */
 .badge-rai-1 {
-    background: #f0f9ff;
-    color: #0ea5e9;
+    background: #dbeafe;
+    color: #2196f3;
 }
 
 .badge-rai-2 {
-    background: #fef3c7;
-    color: #f59e0b;
+    background: #e0e7ff;
+    color: #6366f1;
 }
 
 .badge-rai-3 {
-    background: #fee2e2;
-    color: #dc2626;
+    background: #ede9fe;
+    color: #7c3aed;
 }
 
 /* === BADGES D'ANALYSE (Aperçu du sous-groupe) === */
