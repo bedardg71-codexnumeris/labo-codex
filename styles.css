@@ -3792,7 +3792,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     background: #ff6f0022;
     border: 2px solid #ff6f00;
     border-radius: 8px;
-    padding: 4px 6px;
+    padding: 2px 6px;
     transition: all 0.2s ease;
     opacity: 0.9;
 }
@@ -3811,7 +3811,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     background: #9c27b022;
     border: 2px solid #9c27b0;
     border-radius: 8px;
-    padding: 4px 6px;
+    padding: 2px 6px;
     transition: all 0.2s ease;
     opacity: 0.9;
 }
@@ -3825,7 +3825,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 /* Texte du badge jeton */
 .badge-jeton-titre {
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     color: #333;
 }
 
@@ -3834,7 +3834,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     padding: 2px 8px;
     border-radius: 4px;
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: white;
 }
 
@@ -3854,7 +3854,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     background: #f5f5f522;
     border: 2px solid #999;
     border-radius: 8px;
-    padding: 4px 6px;
+    padding: 2px 6px;
     transition: all 0.2s ease;
     opacity: 0.8;
 }
@@ -4336,7 +4336,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 /* Badge sobre (général) */
 .badge {
     display: inline-block;
-    padding: 4px 12px;
+    padding: 4px 6px;
     border-radius: 4px;
     font-size: 0.85rem;
     font-weight: 500;
@@ -4953,7 +4953,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .badge-jeton {
     padding: 2px 8px;
     border-radius: 3px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     color: white;
     margin-left: 8px;
@@ -5177,4 +5177,115 @@ label:has(+ textarea:disabled) {
 .distribution-legende span {
     text-align: center;
     line-height: 1.3;
+}
+
+/* ===============================
+   BARRES DE PROGRESSION - Beta 90
+   Spectres lumineux avec overlays "Nuit Élégante"
+   Référence: GUIDE_BARRES_PROGRESSION 14 nov.html
+   =============================== */
+
+/* === INDICATEURS A-C-P-E (Overlay 20%) === */
+
+.barre-indicateur {
+    height: 40px;
+    border-radius: 20px;
+    position: relative;
+    background: linear-gradient(to right, 
+        #ff8c00 0%,   /* Orange foncé */
+        #ffa500 10%,  /* Orange */
+        #98d025 30%,  /* Vert citron */
+        #22c55e 50%,  /* Vert */
+        #14b8a6 65%,  /* Cyan/Sarcelle */
+        #06b6d4 80%,  /* Bleu ciel clair */
+        #0ea5e9 100%  /* Bleu ciel */
+    );
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.barre-indicateur-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 30, 58, 0.2);
+    border-radius: 20px;
+    pointer-events: none;
+}
+
+/* === PATTERNS D'APPRENTISSAGE (Overlay 35%) === */
+
+.barre-patterns {
+    height: 40px;
+    border-radius: 20px;
+    position: relative;
+    background: linear-gradient(to right, 
+        #22c55e 0%,   /* Vert */
+        #14b8a6 25%,  /* Cyan/Sarcelle */
+        #0ea5e9 50%,  /* Bleu ciel */
+        #3b82f6 75%,  /* Bleu */
+        #6366f1 100%  /* Indigo */
+    );
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.barre-patterns-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 30, 58, 0.35);
+    border-radius: 20px;
+    pointer-events: none;
+}
+
+/* === MODÈLE RàI (Overlay 40%) === */
+
+.barre-rai {
+    height: 40px;
+    border-radius: 20px;
+    position: relative;
+    background: linear-gradient(to right, 
+        #0ea5e9 0%,   /* Bleu ciel */
+        #3b82f6 25%,  /* Bleu */
+        #6366f1 50%,  /* Indigo */
+        #8b5cf6 75%,  /* Violet */
+        #6b21a8 100%  /* Mauve foncé */
+    );
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.barre-rai-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 30, 58, 0.4);
+    border-radius: 20px;
+    pointer-events: none;
+}
+
+/* === DOTS (Points blancs sur les barres) === */
+
+.barre-dots {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    padding: 0 20px;
+    display: flex;
+    gap: 15px;
+    pointer-events: none;
+}
+
+.barre-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
