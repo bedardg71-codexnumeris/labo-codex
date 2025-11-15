@@ -1382,7 +1382,7 @@ function genererSectionAccompagnement(da) {
 
     // Calculer les données pour le suivi RàI
     const indices = calculerTousLesIndices(da);
-    const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
+    const indices3Derniers = calculerIndicesNDerniersArtefacts(da);
     const cibleInfo = determinerCibleIntervention(da);
     const interpR = interpreterRisque(indices.R);
     const progression = calculerProgressionEleve(da);
@@ -4148,17 +4148,17 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
    =============================== */
 
 /**
- * Calcule les indices sur les 3 DERNIERS artefacts (chronologiquement)
+ * Calcule les indices sur les N DERNIERS artefacts (chronologiquement)
  * Utilisé pour identifier le pattern actuel et les cibles d'intervention
+ * N est configurable via Réglages › Pratique de notation › Portfolio › Artefacts à retenir
  *
  * @param {string} da - Numéro de DA
  * @returns {Object} - { performance, idmeMoyen, francaisMoyen, nbArtefacts }
  */
-function calculerIndicesTroisDerniersArtefacts(da) {
-    // Lire le nombre d'artefacts depuis la config PAN
+function calculerIndicesNDerniersArtefacts(da) {
+    // Lire le nombre d'artefacts depuis la config portfolio PAN
     const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-    const nombreCours = config.configPAN?.nombreCours || 3; // Par défaut 3 cours
-    const nombreArtefacts = nombreCours * 2; // 3 cours = 6 artefacts (2 par cours)
+    const nombreArtefacts = config.configPAN?.portfolio?.nombreARetenir || 4; // Par défaut 4 artefacts
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = JSON.parse(localStorage.getItem('productions') || '[]');
@@ -4225,7 +4225,7 @@ function calculerIndicesTroisDerniersArtefacts(da) {
         ? scoresFrancais.reduce((sum, s) => sum + s, 0) / scoresFrancais.length
         : 0;
 
-    console.log(`Indices 3 derniers artefacts pour DA ${da}:`, {
+    console.log(`Indices ${nombreArtefacts} derniers artefacts pour DA ${da}:`, {
         nbArtefacts: troisDerniers.length,
         performance: (performance * 100).toFixed(1) + '%',
         idmeMoyen: (idmeMoyen * 100).toFixed(1) + '%',
@@ -4516,7 +4516,7 @@ function determinerCibleIntervention(da) {
 
     // Détecter les défis avec le seuil configurable
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
-    const indices3Derniers = calculerIndicesTroisDerniersArtefacts(da);
+    const indices3Derniers = calculerIndicesNDerniersArtefacts(da);
     const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100);
     const interpRisque = interpreterRisque(indices.R);
 
@@ -4524,7 +4524,7 @@ function determinerCibleIntervention(da) {
     const E = interpMobilisation.niveau; // Mobilisation
     const F = interpRisque.niveau; // Risque sommatif (1-ACP)
     const G = interpRisque.niveau; // Risque PAN (simplifié pour l'instant)
-    const I = indices3Derniers.francaisMoyen; // Moyenne français 3 derniers
+    const I = indices3Derniers.francaisMoyen; // Moyenne français N derniers artefacts
     const M = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null); // Pattern actuel
     const N = diagnostic.principalDefi ? diagnostic.principalDefi.nom : 'Aucun'; // Défi principal
     const performancePAN3 = indices3Derniers.performance;

@@ -39,7 +39,7 @@ const SEUILS_PAR_DEFAUT = {
 
     // Identification des défis SRPNF
     // Score en dessous duquel un critère est considéré comme un défi
-    defiSpecifique: 0.7125,  // 71.25%
+    defiSpecifique: 0.70,  // 70% - Seuil d'autonomie empirique (validation 101→102)
 
     // Niveaux de risque (échelle visuelle)
     // Seuils de transition entre les zones de risque
@@ -88,7 +88,7 @@ const DESCRIPTIONS_SEUILS = {
         unite: '%',
         min: 0.60,
         max: 0.80,
-        pas: 0.0125
+        pas: 0.01
     }
 };
 
@@ -283,7 +283,7 @@ function restaurerValeursParDefaut() {
         'Valeurs par défaut :\n' +
         '• Progression : 10 points\n' +
         '• Direction risque : 5 points\n' +
-        '• Défi SRPNF : 71.25%'
+        '• Défi SRPNF : 70%'
     );
 
     if (confirmation) {
