@@ -1382,7 +1382,7 @@ function genererSectionAccompagnement(da) {
 
     // Calculer les données pour le suivi RàI
     const indices = calculerTousLesIndices(da);
-    const indices3Derniers = calculerIndicesNDerniersArtefacts(da);
+    const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
     const cibleInfo = determinerCibleIntervention(da);
     const interpR = interpreterRisque(indices.R);
     const progression = calculerProgressionEleve(da);
@@ -4149,16 +4149,28 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
 
 /**
  * Calcule les indices sur les N DERNIERS artefacts (chronologiquement)
- * Utilisé pour identifier le pattern actuel et les cibles d'intervention
- * N est configurable via Réglages › Pratique de notation › Portfolio › Artefacts à retenir
+ *
+ * DISTINCTION IMPORTANTE :
+ * - Dépistage (pourDepistage=true) : Utilise nombreProductionsAnalyse (défaut 3)
+ *   → Détection précoce des patterns pour intervenir à temps
+ * - Performance finale (pourDepistage=false) : Utilise nombreARetenir (défaut 4)
+ *   → Calcul de la note finale du portfolio
  *
  * @param {string} da - Numéro de DA
+ * @param {boolean} pourDepistage - Si true, utilise fenêtre de dépistage (3). Si false, utilise N pour note finale (4)
  * @returns {Object} - { performance, idmeMoyen, francaisMoyen, nbArtefacts }
  */
-function calculerIndicesNDerniersArtefacts(da) {
-    // Lire le nombre d'artefacts depuis la config portfolio PAN
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-    const nombreArtefacts = config.configPAN?.portfolio?.nombreARetenir || 4; // Par défaut 4 artefacts
+function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
+    // Déterminer le nombre d'artefacts selon l'usage
+    let nombreArtefacts;
+    if (pourDepistage) {
+        // Pour dépistage : fenêtre glissante configurable (Réglages › Interprétation)
+        nombreArtefacts = obtenirNombreProductionsPourPatterns(); // Défaut 3
+    } else {
+        // Pour performance finale : N meilleurs artefacts (Réglages › Portfolio)
+        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        nombreArtefacts = config.configPAN?.portfolio?.nombreARetenir || 4; // Défaut 4
+    }
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = JSON.parse(localStorage.getItem('productions') || '[]');
@@ -4516,7 +4528,7 @@ function determinerCibleIntervention(da) {
 
     // Détecter les défis avec le seuil configurable
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
-    const indices3Derniers = calculerIndicesNDerniersArtefacts(da);
+    const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
     const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100);
     const interpRisque = interpreterRisque(indices.R);
 
