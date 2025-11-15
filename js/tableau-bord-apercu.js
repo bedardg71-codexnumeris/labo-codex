@@ -774,10 +774,10 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                 ${lignesPAN}
             </div>
             <div class="distribution-legende" style="position: relative; height: 50px; font-size: 0.75rem; color: #666;">
-                <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #4caf50; font-weight: 600; text-align: center;">${labelStable}</span>
-                <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #00bcd4; font-weight: 600; text-align: center;">${labelDefi}</span>
-                <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #2196f3; font-weight: 600; text-align: center;">${labelEmergent}</span>
-                <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #3f51b5; font-weight: 600; text-align: center;">${labelCritique}</span>
+                <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #1bbd7e; font-weight: 600; text-align: center;">${labelStable}</span>
+                <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #11aec5; font-weight: 600; text-align: center;">${labelDefi}</span>
+                <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #2994ee; font-weight: 600; text-align: center;">${labelEmergent}</span>
+                <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: #4f74f3; font-weight: 600; text-align: center;">${labelCritique}</span>
             </div>
         </div>
     `;

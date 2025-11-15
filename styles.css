@@ -1228,29 +1228,30 @@ input[type="number"].controle-form {
 }
 
 /* === BADGES DE PATTERN D'APPRENTISSAGE === */
+/* Couleurs alignées sur le gradient de la barre patterns */
 .badge-pattern-blocage-critique {
-    background: #fef2f2;
-    color: #991b1b;
+    background: #dbeafe;
+    color: #4f74f3;
 }
 
 .badge-pattern-blocage-emergent {
-    background: #ffedd5;
-    color: #ea580c;
+    background: #dbeafe;
+    color: #2994ee;
 }
 
 .badge-pattern-defi-specifique {
-    background: #fef3c7;
-    color: #ca8a04;
+    background: #cffafe;
+    color: #11aec5;
 }
 
 .badge-pattern-stable {
-    background: #e0f2fe;
-    color: #0891b2;
+    background: #d1fae5;
+    color: #1bbd7e;
 }
 
 .badge-pattern-progression {
-    background: #dcfce7;
-    color: #16a34a;
+    background: #d1fae5;
+    color: #1bbd7e;
 }
 
 /* === BADGES DE NIVEAU RÀI === */
