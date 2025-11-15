@@ -11,35 +11,148 @@
     <style>
         /* Les styles embarqués restent ici */
         /* ===============================
-           VARIABLES CSS
+           VARIABLES CSS - DESIGN SYSTÈME Beta 0.60
+           Synchronisé avec styles.css
            =============================== */
         :root {
-            /* Palette de couleurs bleues */
+            /* === PALETTE DE COULEURS === */
+
+            /* Bleus - Couleurs principales */
             --bleu-principal: #032e5c;
-            --bleu-moyen: #0a4d8c;
-            --bleu-fonce: #021d3a;
-            --bleu-pale: #e8f1f8;
-            --bleu-tres-pale: #f4f8fc;
-            --bleu-leger: #b8d4e8;
-            --bleu-carte: #d0e4f5;
+            --bleu-fonce: #0f1e3a;
+            --bleu-moyen: #2a4a8a;
+            --bleu-clair: #065dbb;
+            --bleu-leger: #6b85b3;
+            --bleu-carte: #9fc5e8;
+            --bleu-pale: #e8f2fd;
+            --bleu-tres-pale: #f0f8ff;
+            --bleu-simulation: #1a5266;
+            --bleu-anonymisation: #0f1e3a;
 
-            /* Navigation */
-            --sous-nav-bg: #f0f6fb;
-            --sous-nav-normal: #0a4d8c;
-            --sous-nav-hover: #032e5c;
-            --sous-nav-actif: #032e5c;
-
-            /* Accents */
+            /* Couleurs d'accent */
             --orange-accent: #ff6b35;
+            --vert-pale: #f8fef8;
+            --vert-doux: #b8d4b8;
+            --vert-leger: #2a8a6a;
+            --vert-succes: #28a745;
 
-            /* Statuts et alertes */
-            --risque-critique: #dc3545;
-            --succes: #28a745;
+            /* Couleurs pratiques d'évaluation */
+            --som-orange: #ff6f00;
+            --pan-bleu: #0277bd;
+            --hybride-violet: #9c27b0;
 
-            /* Espacement */
-            --espacement-petit: 8px;
-            --espacement-moyen: 15px;
-            --espacement-grand: 25px;
+            /* === NAVIGATION === */
+            --nav-bg: #f8f9fa;
+            --nav-normal: #04376f;
+            --nav-hover: #3e98f9;
+            --nav-actif: #054a95;
+            --nav-bordure-actif: var(--orange-accent);
+
+            /* Navigation - États actifs par mode */
+            --nav-actif-normal: #2a4a8a;
+            --nav-actif-simulation: #2a6a7a;
+            --nav-actif-anonymisation: #2a3d5a;
+
+            /* === SOUS-NAVIGATION === */
+            --sous-nav-bg: #e8f2fd;
+            --sous-nav-normal: #054a95;
+            --sous-nav-hover: #3e98f9;
+            --sous-nav-actif: #065dbb;
+
+            /* Sous-navigation - Fonds par mode */
+            --sous-nav-bg-normal: #e8f2fd;
+            --sous-nav-bg-simulation: #e0f0f0;
+            --sous-nav-bg-anonymisation: #dce8f5;
+
+            /* === BOUTONS D'ACTION - Palette Nuit Élégante === */
+            --btn-principal: #032e5c;
+            --btn-principal-hover: #054a95;
+            --btn-ajouter: #1e5a4a;
+            --btn-ajouter-hover: #165040;
+            --btn-modifier: #4a3a6a;
+            --btn-modifier-hover: #3a2a5a;
+            --btn-confirmer: #1e5a4a;
+            --btn-confirmer-hover: #165040;
+            --btn-annuler: #d97706;
+            --btn-annuler-hover: #b45309;
+            --btn-supprimer: #8a2a2a;
+            --btn-supprimer-hover: #7a1a1a;
+
+            /* === INDICATEURS DE RISQUE === */
+            --risque-nul: #065dbb;
+            --risque-minimal: #28a745;
+            --risque-faible: #90EE90;
+            --risque-modere: #ffc107;
+            --risque-eleve: #fd7e14;
+            --risque-tres-eleve: #dc3545;
+            --risque-critique: #721c24;
+
+            /* === COULEURS GRISES === */
+            --gris-tres-fonce: #222222;
+            --gris-fonce: #333333;
+            --gris-moyen: #666666;
+            --gris-clair: #999999;
+            --gris-tres-clair: #cccccc;
+            --gris-tres-pale: #f9f9f9;
+
+            /* === BORDURES === */
+            --bordure-claire: #dddddd;
+            --bordure-moyenne: #cccccc;
+
+            /* === ALERTES - Attention (orange/terracotta) === */
+            --alerte-fond-attention: #fff8f0;
+            --alerte-bordure-attention: #ff6b35;
+            --alerte-texte-attention: #8a4a2a;
+
+            /* === ALERTES - Information (bleue) === */
+            --alerte-fond-information: #e8f2fd;
+            --alerte-bordure-information: #032e5c;
+            --alerte-texte-information: #032e5c;
+
+            /* === ALERTES - Succès (sarcelle) === */
+            --alerte-fond-succes: #e8f5f2;
+            --alerte-bordure-succes: #1e5a4a;
+            --alerte-texte-succes: #165040;
+
+            /* === ALERTES - Erreur (rouge) === */
+            --alerte-fond-erreur: #f8e8e8;
+            --alerte-bordure-erreur: #8a2a2a;
+            --alerte-texte-erreur: #7a1a1a;
+
+            /* === ÉTATS FORMULAIRES === */
+            --etat-erreur-fond: #fff8f0;
+            --etat-erreur-bordure: #ff6b35;
+            --etat-erreur-texte: #8a4a2a;
+            --etat-valide-fond: #e8f5f2;
+            --etat-valide-bordure: #1e5a4a;
+            --etat-valide-texte: #165040;
+            --etat-verrouille-fond: #e9ecef;
+            --etat-verrouille-bordure: #6c757d;
+            --etat-verrouille-texte: #495057;
+
+            /* === BADGES - Statuts d'évaluation === */
+            --badge-evalue-fond: #e8f5f2;
+            --badge-evalue-texte: #165040;
+            --badge-evalue-bordure: #b3d9cf;
+            --badge-non-evalue-fond: #f8f9fa;
+            --badge-non-evalue-texte: #6c757d;
+            --badge-non-evalue-bordure: #dee2e6;
+
+            /* === ESPACEMENT === */
+            --espacement-petit: 10px;
+            --espacement-moyen: 20px;
+            --espacement-grand: 30px;
+
+            /* === CALENDRIER === */
+            --jour-cours-reel-bg: #e3f2fd;
+            --reprise-bg: #fff3e0;
+            --conge-bg: #ffebee;
+            --planification-bg: #f3e5f5;
+            --examens-bg: #fce4ec;
+            --weekend-bg: #f5f5f5;
+
+            /* === COMPATIBILITÉ (anciennes variables) === */
+            --succes: var(--vert-succes);
         }
 
         /* ===============================
@@ -98,21 +211,21 @@
         .sous-navigation {
             background:
                 linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)),
-                linear-gradient(135deg, #021d3a 100%, #032e5c 0%) !important;
+                linear-gradient(135deg, var(--bleu-fonce) 100%, var(--bleu-principal) 0%) !important;
         }
 
         /* Mode Anonymisé (plus foncé) */
         body[data-mode="anonymisation"] .sous-navigation {
             background:
                 linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)),
-                linear-gradient(135deg, #0a1428 100%, #0f1e3a 0%) !important;
+                linear-gradient(135deg, var(--bleu-anonymisation) 100%, var(--bleu-fonce) 0%) !important;
         }
 
         /* Mode Simulé (teal/sarcelle) */
         body[data-mode="simulation"] .sous-navigation {
             background:
                 linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)),
-                linear-gradient(135deg, #0f3a44 100%, #1a5266 0%) !important;
+                linear-gradient(135deg, var(--bleu-simulation) 100%, var(--bleu-simulation) 0%) !important;
         }
 
         /* ===============================
@@ -187,7 +300,7 @@
         .controle-form {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--bordure-claire);
             border-radius: 4px;
             font-size: 0.95rem;
             transition: border-color 0.2s;
@@ -223,14 +336,14 @@
             background: var(--bleu-pale);
             padding: 10px;
             text-align: left;
-            border: 1px solid #ddd;
+            border: 1px solid var(--bordure-claire);
             font-weight: 600;
             color: var(--bleu-principal);
         }
 
         .tableau td {
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--bordure-claire);
         }
 
         .tableau tr:hover {
@@ -241,7 +354,7 @@
            UTILITAIRES
            =============================== */
         .text-muted {
-            color: #6c757d;
+            color: var(--gris-moyen);
         }
 
         .mt-3 {
@@ -274,7 +387,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #28a745;
+            background: var(--vert-succes);
             color: white;
             padding: 15px 20px;
             border-radius: 8px;
@@ -294,7 +407,7 @@
            ZONE DE DEBUG
            =============================== */
         .debug-zone {
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             border: 2px dashed #6c757d;
             border-radius: 8px;
             padding: 15px;
@@ -304,7 +417,7 @@
         }
 
         .debug-zone h4 {
-            color: #6c757d;
+            color: var(--gris-moyen);
             margin-bottom: 10px;
         }
 
@@ -384,21 +497,21 @@
         }
 
         .carte-metrique-jaune {
-            background: #fffbf0;
+            background: var(--alerte-fond-attention);
             padding: 15px;
             border-radius: 8px;
             border: 2px solid var(--risque-eleve);
         }
 
         .carte-metrique-orange {
-            background: #fff8f0;
+            background: var(--alerte-fond-attention);
             padding: 15px;
             border-radius: 8px;
             border: 2px solid var(--risque-tres-eleve);
         }
 
         .carte-metrique-rouge {
-            background: #fff5f5;
+            background: var(--alerte-fond-erreur);
             padding: 15px;
             border-radius: 8px;
             border: 2px solid var(--risque-critique);
@@ -413,7 +526,7 @@
 
         .carte-metrique-label {
             font-size: 0.9rem;
-            color: #666;
+            color: var(--gris-moyen);
         }
 
         .carte-metrique-valeur {
@@ -478,7 +591,7 @@
 
         /* Carte métrique violette pour défi spécifique */
         .carte-metrique-violette {
-            background: #f3eeff;
+            background: var(--alerte-fond-information);
             padding: 15px;
             border-radius: 8px;
             border: 2px solid var(--btn-modifier);
@@ -486,7 +599,7 @@
 
         /* Carte métrique jaune-pale pour blocage émergent */
         .carte-metrique-jaune-pale {
-            background: #fffbea;
+            background: var(--alerte-fond-attention);
             padding: 15px;
             border-radius: 8px;
             border: 2px solid var(--risque-modere);
@@ -656,11 +769,11 @@
         .text-bleu-principal { color: var(--bleu-principal); }
         .text-muted {
             font-size: 0.9rem;
-            color: #666;
+            color: var(--gris-moyen);
         }
         .text-muted-sm {
             font-size: 0.9em;
-            color: #666;
+            color: var(--gris-moyen);
         }
         .lh-relaxed { line-height: 1.8; }
 
@@ -713,13 +826,13 @@
         /* Éléments de contenu */
         .ligne-separee {
             padding: 10px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--bordure-claire);
         }
 
         .carte-grise-info {
             margin: 15px 0;
             padding: 15px;
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             border-radius: 6px;
         }
 
@@ -766,7 +879,7 @@
         .alerte-info-grise {
             margin: 15px 0;
             padding: 15px;
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             border-left: 4px solid var(--bleu-moyen);
             border-radius: 4px;
         }
@@ -788,25 +901,25 @@
 
         .ligne-separee-danger {
             padding: 10px;
-            border-bottom: 1px solid #ddd;
-            color: #dc3545;
+            border-bottom: 1px solid var(--bordure-claire);
+            color: var(--risque-tres-eleve);
         }
 
         .ligne-separee-success {
             padding: 10px;
-            color: #28a745;
+            color: var(--vert-succes);
         }
 
         .ligne-separee-warning {
             padding: 10px;
-            border-bottom: 1px solid #ddd;
-            color: #ffc107;
+            border-bottom: 1px solid var(--bordure-claire);
+            color: var(--risque-modere);
         }
 
         .ligne-separee-info {
             padding: 10px;
-            border-bottom: 1px solid #ddd;
-            color: #17a2b8;
+            border-bottom: 1px solid var(--bordure-claire);
+            color: var(--risque-faible);
         }
 
         .ligne-separee-bleu {
@@ -822,7 +935,7 @@
 
         .text-sm-muted {
             font-size: 0.85rem;
-            color: #666;
+            color: var(--gris-moyen);
         }
 
         .text-xs-normal {
@@ -832,8 +945,8 @@
 
         .text-italic { font-style: italic; }
 
-        .text-warning-dark { color: #856404; }
-        .text-secondary { color: #6c757d; }
+        .text-warning-dark { color: var(--alerte-texte-attention); }
+        .text-secondary { color: var(--gris-moyen); }
 
         /* Cellules de tableau */
         .td-left {
@@ -893,7 +1006,7 @@
         .m-0-text-muted {
             margin: 0;
             font-size: 0.9rem;
-            color: #666;
+            color: var(--gris-moyen);
         }
         .mb-15-lh {
             margin-bottom: 15px;
@@ -920,7 +1033,7 @@
         .alerte-warning-jaune {
             margin: 15px 0;
             padding: 15px;
-            background: #fff3cd;
+            background: var(--alerte-fond-attention);
             border-left: 4px solid #ffc107;
             border-radius: 4px;
         }
@@ -958,7 +1071,7 @@
             display: flex;
             justify-content: space-between;
             font-size: 0.85rem;
-            color: #666;
+            color: var(--gris-moyen);
             margin-top: 5px;
         }
         .d-flex-between-center {
@@ -1017,19 +1130,19 @@
 
         /* Couleurs des pratiques */
         .bulle.som {
-            background: #ff6f00;
+            background: var(--som-orange);
         }
 
         .bulle.pan-maitrise {
-            background: #0277bd;
+            background: var(--pan-bleu);
         }
 
         .bulle.pan-spec {
-            background: #9c27b0;
+            background: var(--hybride-violet);
         }
 
         .bulle.pan-denotation {
-            background: #ffc107;
+            background: var(--risque-modere);
         }
 
         /* Animation organique comme du pollen - mouvement fluide continu avec courbes */
@@ -1118,14 +1231,14 @@
         .alerte-danger-rouge {
             margin: 15px 0;
             padding: 15px;
-            background: #f8d7da;
+            background: var(--alerte-fond-erreur);
             border-left: 4px solid #dc3545;
             border-radius: 4px;
         }
         .alerte-warning-or {
             margin: 20px 0;
             padding: 15px;
-            background: #fffacd;
+            background: var(--alerte-fond-attention);
             border-left: 4px solid #ffd700;
             border-radius: 4px;
         }
@@ -1172,7 +1285,7 @@
         .m-0-pl-20-gray-lh {
             margin: 0;
             padding-left: 20px;
-            color: #666;
+            color: var(--gris-moyen);
             line-height: 1.8;
         }
 
@@ -1259,17 +1372,17 @@
             margin-bottom: 10px;
         }
         .text-warning-bold {
-            color: #ffc107;
+            color: var(--risque-modere);
             font-weight: bold;
         }
         .text-danger { color: #e74c3c; }
-        .text-danger-bs { color: #dc3545; }
+        .text-danger-bs { color: var(--risque-tres-eleve); }
         .text-warning-856-mt0 {
-            color: #856404;
+            color: var(--alerte-texte-attention);
             margin-top: 0;
         }
         .text-warning-856-mb10 {
-            color: #856404;
+            color: var(--alerte-texte-attention);
             margin-bottom: 10px;
         }
         .text-purple-mb10 {
@@ -1305,11 +1418,11 @@
             margin-bottom: 10px;
         }
         .text-success-mb10 {
-            color: #28a745;
+            color: var(--vert-succes);
             margin-bottom: 10px;
         }
         .text-success-bold {
-            color: #28a745;
+            color: var(--vert-succes);
             font-weight: bold;
         }
 
@@ -1413,13 +1526,13 @@
         .td-sm-muted-lh {
             padding: 12px;
             font-size: 0.85rem;
-            color: #666;
+            color: var(--gris-moyen);
             line-height: 1.6;
         }
         .td-orange {
             padding: 10px;
-            border-bottom: 1px solid #ddd;
-            color: #fd7e14;
+            border-bottom: 1px solid var(--bordure-claire);
+            color: var(--risque-eleve);
         }
         .td-nowrap-bold {
             padding: 10px 20px;
@@ -1453,7 +1566,7 @@
         }
         .carte-info-bleu-clair {
             padding: 15px;
-            background: #f0f8ff;
+            background: var(--bleu-tres-pale);
             border-radius: 6px;
             border-left: 4px solid #2196f3;
         }
@@ -1463,7 +1576,7 @@
         }
         .carte-purple-header {
             width: 100%;
-            background: #9c27b0;
+            background: var(--hybride-violet);
             color: white;
             padding: 10px;
             font-size: 0.9rem;
@@ -1473,14 +1586,14 @@
         .overflow-x-auto { overflow-x: auto; }
         .overflow-x-border {
             overflow-x: auto;
-            border: 1px solid #ddd;
+            border: 1px solid var(--bordure-claire);
             border-radius: 4px;
         }
         .overflow-xy-600 {
             max-height: 600px;
             overflow-x: auto;
             overflow-y: auto;
-            border: 1px solid #ddd;
+            border: 1px solid var(--bordure-claire);
             border-radius: 4px;
         }
         .overflow-y-500 {
@@ -1521,7 +1634,7 @@
             width: 80px;
             padding: 6px 10px;
             border-radius: 4px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--bordure-moyenne);
             font-size: 0.95rem;
             margin-right: 10px;
         }
@@ -1544,12 +1657,12 @@
         .empty-state-center-30 {
             text-align: center;
             padding: 30px;
-            color: #999;
+            color: var(--gris-clair);
         }
         .empty-state-center-20 {
             text-align: center;
             padding: 20px;
-            color: #999;
+            color: var(--gris-clair);
         }
 
         /* Headers et footers spéciaux */
@@ -1577,7 +1690,7 @@
             transform: translateY(-50%);
             background: transparent;
             border: none;
-            color: #999;
+            color: var(--gris-clair);
             font-size: 1.2rem;
             cursor: pointer;
             padding: 5px 10px;
@@ -1640,7 +1753,7 @@
         .alerte-warning-orange-fonce {
             margin: 15px 0;
             padding: 15px;
-            background: #fff8e1;
+            background: var(--alerte-fond-attention);
             border-left: 4px solid #ff6f00;
             border-radius: 4px;
         }
@@ -1654,7 +1767,7 @@
         .alerte-info-grise-my20 {
             margin: 20px 0;
             padding: 15px;
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             border-left: 4px solid var(--bleu-moyen);
             border-radius: 4px;
         }
@@ -1684,12 +1797,12 @@
         /* Textes avec marges et couleurs */
         .text-warning-856-sm-mt5 {
             margin: 5px 0 0 0;
-            color: #856404;
+            color: var(--alerte-texte-attention);
             font-size: 0.9rem;
         }
         .text-muted-sm-mt5 {
             margin: 5px 0 0 0;
-            color: #666;
+            color: var(--gris-moyen);
             font-size: 0.9rem;
         }
 
@@ -1743,11 +1856,11 @@
         }
         .m-0-success {
             margin: 0;
-            color: #28a745;
+            color: var(--vert-succes);
         }
         .m-0-muted-lh16 {
             margin: 0;
-            color: #666;
+            color: var(--gris-moyen);
             line-height: 1.6;
         }
 
@@ -1791,18 +1904,18 @@
         .carte-grise-mt20-sm-muted {
             margin-top: 20px;
             padding: 15px;
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             border-radius: 6px;
             font-size: 0.85rem;
-            color: #666;
+            color: var(--gris-moyen);
         }
         .carte-grise-mt10-sm-muted {
             margin-top: 10px;
             padding: 10px;
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             border-radius: 6px;
             font-size: 0.85rem;
-            color: #666;
+            color: var(--gris-moyen);
         }
 
         /* Texte taille et couleur */
@@ -1824,7 +1937,7 @@
         }
         .mt-0-warning {
             margin-top: 0;
-            color: #856404;
+            color: var(--alerte-texte-attention);
         }
         .ml-10-fw-bold {
             margin-left: 10px;
@@ -1872,7 +1985,7 @@
         .carte-mb15-grise {
             margin-bottom: 15px;
             padding: 12px;
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             border-radius: 6px;
         }
 
@@ -2066,7 +2179,7 @@
             gap: 10px;
             margin-bottom: 20px;
             padding: 15px;
-            background: #f0f8ff;
+            background: var(--bleu-tres-pale);
             border-radius: 6px;
             border-left: 4px solid #2196f3;
         }
@@ -2121,19 +2234,19 @@
             margin-top: 10px;
         }
         .carte-grise-mb20 {
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
         }
         .carte-grise-my15 {
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             padding: 15px;
             border-radius: 6px;
             margin: 15px 0;
         }
         .carte-grise-mt20 {
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             padding: 20px;
             border-radius: 8px;
             margin-top: 10px;
@@ -2168,7 +2281,7 @@
             margin-top: 15px;
         }
         .carte-code-light {
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             padding: 15px;
             border-radius: 6px;
             margin-top: 15px;
@@ -2176,7 +2289,7 @@
             font-size: 0.9em;
         }
         .carte-code-light-sm {
-            background: #f8f9fa;
+            background: var(--gris-tres-pale);
             padding: 10px;
             border-radius: 4px;
             margin-top: 10px;
@@ -2223,7 +2336,7 @@
             border-radius: 8px;
             margin-bottom: 20px;
         }
-        .bg-f0f8ff { background: #f0f8ff; }
+        .bg-f0f8ff { background: var(--bleu-tres-pale); }
         .bg-fff9e6 { background: #fff9e6; }
 
         /* Textes avec tailles et marges */
@@ -2237,17 +2350,17 @@
         }
         .text-085-mb15-muted {
             font-size: 0.85rem;
-            color: #666;
+            color: var(--gris-moyen);
             margin-bottom: 15px;
         }
         .text-085-mb20-muted {
             font-size: 0.85rem;
-            color: #666;
+            color: var(--gris-moyen);
             margin-bottom: 20px;
         }
         .text-09-muted-mb10 {
             font-size: 0.9rem;
-            color: #666;
+            color: var(--gris-moyen);
             margin-bottom: 10px;
         }
 
@@ -2283,7 +2396,7 @@
         }
 
         /* Autres couleurs */
-        .text-warning { color: #ffc107; }
+        .text-warning { color: var(--risque-modere); }
         .text-orange-bold {
             color: #ff9800;
             font-weight: bold;
@@ -2292,13 +2405,13 @@
             color: #f44336;
             font-weight: bold;
         }
-        .text-info { color: #17a2b8; }
+        .text-info { color: var(--risque-faible); }
         .text-info-bold {
-            color: #17a2b8;
+            color: var(--risque-faible);
             font-weight: bold;
         }
         .text-success-green { color: #5cb85c; }
-        .text-success-28 { color: #28a745; }
+        .text-success-28 { color: var(--vert-succes); }
 
         /* Curseurs */
         .cursor-pointer-user-select {
@@ -2361,7 +2474,7 @@
             display: none;
             margin: 15px 0;
             padding: 12px 15px;
-            background: #fff3cd;
+            background: var(--alerte-fond-attention);
             border-left: 4px solid #ffc107;
             border-radius: 4px;
         }
@@ -2395,13 +2508,13 @@
         /* Textes petits avec marges complexes */
         .text-085-muted-m5-0-0-28 {
             font-size: 0.85rem;
-            color: #666;
+            color: var(--gris-moyen);
             margin: 5px 0 0 28px;
             line-height: 1.4;
         }
         .text-085-muted-m5-0-0-0 {
             font-size: 0.85rem;
-            color: #666;
+            color: var(--gris-moyen);
             margin: 5px 0 0 0;
             line-height: 1.4;
         }
@@ -2415,7 +2528,7 @@
         }
         .label-block-085-muted-center-mb8 {
             font-size: 0.85rem;
-            color: #666;
+            color: var(--gris-moyen);
             text-align: center;
             margin-bottom: 8px;
         }
@@ -2423,7 +2536,7 @@
         /* Textes cachés mais avec style */
         .text-09-muted-center-hidden {
             font-size: 0.9rem;
-            color: #666;
+            color: var(--gris-moyen);
             text-align: center;
             display: none;
         }
@@ -2517,7 +2630,7 @@
 
         .badge-jeton {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 2px 4px;
             border-radius: 4px;
             font-size: 0.75rem;
             font-weight: 600;
@@ -2525,7 +2638,7 @@
         }
 
         .badge-jeton-plagiat {
-            background-color: #ffebee;
+            background-color: var(--conge-bg);
             color: #c62828;
             border: 1px solid #ef5350;
         }
@@ -2550,7 +2663,7 @@
 
         .badge-statut {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 2px 4px;
             border-radius: 4px;
             font-size: 0.75rem;
             font-weight: 600;
@@ -2660,7 +2773,7 @@
             <!-- ===================================
      SECTION: TABLEAU DE BORD
      =================================== -->
-            <section id="section-tableau-bord" class="section">
+            <section id="section-tableau-bord" class="section active">
 
                 <!-- Sous-section: Aperçu -->
                 <div id="tableau-bord-apercu" class="sous-section">
@@ -2743,7 +2856,7 @@
                     <div class="carte">
                         <h3>Étudiant·es inscrit·es
                             <span id="compteur-tableau-bord-liste"
-                                style="color: #666; font-size: 0.9rem; font-weight: normal;">
+                                style="color: var(--gris-moyen); font-size: 0.9rem; font-weight: normal;">
                                 (0 étudiant·e)
                             </span>
                         </h3>
@@ -2870,7 +2983,7 @@
                                     </label>
                                     <label class="checkbox-warning">
                                         <input type="checkbox" id="surligner-niveau2" onchange="afficherListeEtudiantsConsultation()" class="cursor-pointer">
-                                        <span style="font-size: 0.8rem; font-weight: 600; color: #f59e0b;">Niveau 2</span>
+                                        <span style="font-size: 0.8rem; font-weight: 600; color: var(--risque-modere);">Niveau 2</span>
                                     </label>
                                     <label class="checkbox-danger-light">
                                         <input type="checkbox" id="surligner-blocage" onchange="afficherListeEtudiantsConsultation()" class="cursor-pointer">
@@ -2933,7 +3046,7 @@
 
                         <!-- MESSAGE SI AUCUN ÉTUDIANT -->
                         <div id="message-aucun-etudiant" style="display: none; text-align: center; padding: 40px; 
-                background: #f8f9fa; border-radius: 8px; color: #666;">
+                background: var(--gris-tres-pale); border-radius: 8px; color: var(--gris-moyen);">
                             <p class="text-11-mb10">📭 Aucun·e étudiant·e trouvé·e</p>
                             <p class="text-09-mb15">
                                 <span id="message-filtre-actif">
@@ -3303,44 +3416,44 @@
                         <div style="font-weight: 600; color: var(--bleu-principal);" id="compteur-evaluations">
                             Chargement...
                         </div>
-                        <div style="color: #666;" id="moyenne-evaluations"></div>
-                        <div style="color: #666;" id="nb-productions"></div>
+                        <div style="color: var(--gris-moyen);" id="moyenne-evaluations"></div>
+                        <div style="color: var(--gris-moyen);" id="nb-productions"></div>
                     </div>
                 </div>
 
                 <!-- Zone de chargement -->
                 <div id="zone-chargement-evaluations" class="carte" style="text-align: center; padding: 40px;">
-                    <p style="color: #666;">Chargement des évaluations...</p>
+                    <p style="color: var(--gris-moyen);">Chargement des évaluations...</p>
                 </div>
 
                 <!-- Tableau des évaluations -->
                 <div id="conteneur-tableau-evaluations" style="display: none;">
                     <div class="carte" style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: var(--bleu-tres-pale); border-bottom: 2px solid var(--bleu-moyen);">
-                                    <th onclick="trierTableauParColonne('da')" style="padding: 12px; text-align: left; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
-                                        DA <span id="tri-da" style="font-size: 0.8em; color: #999;">↕</span>
+                        <table class="tableau">
+                            <thead class="thead-sticky-bleu">
+                                <tr>
+                                    <th class="td-left-clickable" onclick="trierTableauParColonne('da')" title="Cliquer pour trier">
+                                        DA <span id="tri-da" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th onclick="trierTableauParColonne('nom')" style="padding: 12px; text-align: left; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
-                                        Nom <span id="tri-nom" style="font-size: 0.8em; color: #999;">↑</span>
+                                    <th class="td-left-clickable" onclick="trierTableauParColonne('nom')" title="Cliquer pour trier">
+                                        Nom <span id="tri-nom" style="font-size: 0.8em; color: var(--gris-clair);">↑</span>
                                     </th>
-                                    <th onclick="trierTableauParColonne('prenom')" style="padding: 12px; text-align: left; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
-                                        Prénom <span id="tri-prenom" style="font-size: 0.8em; color: #999;">↕</span>
+                                    <th class="td-left-clickable" onclick="trierTableauParColonne('prenom')" title="Cliquer pour trier">
+                                        Prénom <span id="tri-prenom" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th onclick="trierTableauParColonne('production')" style="padding: 12px; text-align: left; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
-                                        Production <span id="tri-production" style="font-size: 0.8em; color: #999;">↕</span>
+                                    <th class="td-left-clickable" onclick="trierTableauParColonne('production')" title="Cliquer pour trier">
+                                        Production <span id="tri-production" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th onclick="trierTableauParColonne('jetons')" style="padding: 12px; text-align: center; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
-                                        Jeton <span id="tri-jetons" style="font-size: 0.8em; color: #999;">↕</span>
+                                    <th class="td-center-clickable" onclick="trierTableauParColonne('jetons')" title="Cliquer pour trier">
+                                        Jeton <span id="tri-jetons" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th onclick="trierTableauParColonne('niveau')" style="padding: 12px; text-align: center; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
-                                        Niveau <span id="tri-niveau" style="font-size: 0.8em; color: #999;">↕</span>
+                                    <th class="td-center-clickable" onclick="trierTableauParColonne('niveau')" title="Cliquer pour trier">
+                                        Niveau <span id="tri-niveau" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th onclick="trierTableauParColonne('note')" style="padding: 12px; text-align: center; font-weight: 600; cursor: pointer;" title="Cliquer pour trier">
-                                        Note % <span id="tri-note" style="font-size: 0.8em; color: #999;">↕</span>
+                                    <th class="td-center-clickable" onclick="trierTableauParColonne('note')" title="Cliquer pour trier">
+                                        Note % <span id="tri-note" style="font-size: 0.8em; color: var(--gris-clair);">↕</span>
                                     </th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600;">Actions</th>
+                                    <th class="td-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="corps-tableau-evaluations">
@@ -3352,7 +3465,7 @@
 
                 <!-- Message si aucun résultat -->
                 <div id="message-aucun-resultat" class="carte" style="display: none; text-align: center; padding: 40px;">
-                    <p style="color: #999; font-style: italic;">
+                    <p style="color: var(--gris-clair); font-style: italic;">
                         Aucune évaluation ne correspond aux filtres sélectionnés
                     </p>
                 </div>
@@ -3404,7 +3517,7 @@
                                 <!-- Indicateur de verrouillage -->
                                 <div id="indicateurVerrouillageEval" style="display: none;">
                                     <span id="iconeVerrouEval" onclick="basculerVerrouillageEvaluationCourante()"
-                                        style="font-size: 1.2rem; cursor: pointer; user-select: none; color: #4caf50;"
+                                        style="font-size: 1.2rem; cursor: pointer; user-select: none; color: var(--vert-succes);"
                                         title="Évaluation modifiable - Cliquez pour verrouiller">🔓</span>
                                 </div>
                             </div>
@@ -3529,7 +3642,7 @@
                             <h4>Évaluation et prévisualisation de la rétroaction</h4>
 
                             <div id="listeCriteresGrille1" class="conteneur-liste">
-                                <p style="color: #999; font-style: italic; font-size: 0.85rem;">
+                                <p style="color: var(--gris-clair); font-style: italic; font-size: 0.85rem;">
                                     Sélectionnez une grille et une cartouche
                                 </p>
                             </div>
@@ -3571,7 +3684,7 @@
                         <textarea id="retroactionFinale1" class="controle-form" rows="12"
                             placeholder="La rétroaction sera générée automatiquement ici selon vos évaluations et les options cochées. Vous pouvez modifier le texte avant de le copier."
                             style="width: 100%; height: 200px; padding: 12px; border-radius: 5px;
-    border: 1px solid #ddd; font-family: inherit; resize: vertical;
+    border: 1px solid var(--bordure-claire); font-family: inherit; resize: vertical;
     font-size: 0.85rem; line-height: 1.5; background: white;">
 </textarea>
 
@@ -3594,7 +3707,7 @@
 
                     <div class="mb-25">
                         <h3 style="color: var(--bleu-principal); font-size: 1rem; margin-bottom: 10px;">Qu'est-ce que cette fonction ?</h3>
-                        <p style="color: #666; line-height: 1.6;">
+                        <p style="color: var(--gris-moyen); line-height: 1.6;">
                             Cette fonction permet de <strong>réparer automatiquement</strong> les évaluations dont les critères n'ont pas été correctement sauvegardés.
                             Elle extrait les niveaux (I, D, M, E) depuis la rétroaction finale et reconstruit le tableau des critères manquants.
                         </p>
@@ -3611,7 +3724,7 @@
                     </div>
 
                     <div class="carte-mb25-bleu-clair">
-                        <h3 style="color: #1565c0; font-size: 1rem; margin-top: 0; margin-bottom: 10px;">Comment ça fonctionne ?</h3>
+                        <h3 style="color: var(--bleu-clair); font-size: 1rem; margin-top: 0; margin-bottom: 10px;">Comment ça fonctionne ?</h3>
                         <ol class="m-0-pl-20-gray-lh">
                             <li>Analyse toutes les évaluations sauvegardées</li>
                             <li>Détecte celles avec un tableau <code>criteres</code> vide</li>
@@ -4227,7 +4340,7 @@
                         </div>
 
                         <!-- Note explicative -->
-                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 20px; padding: 12px;
+                        <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-bottom: 20px; padding: 12px;
              background: var(--bleu-pale); border-radius: 6px; border-left: 3px solid var(--bleu-moyen);">
                             <strong>Note :</strong> Cette échelle s'applique uniquement aux pratiques alternatives
                             de
@@ -4457,7 +4570,7 @@
                                 <label>Contexte de la rétroaction (optionnel) :</label>
                                 <textarea id="contexteCartouche" class="controle-form" rows="3"
                                     placeholder="Ex: Cette production porte sur l'analyse d'un texte argumentatif. L'étudiant·e devait démontrer sa capacité à..."></textarea>
-                                <small style="color: #666; font-size: 0.85rem;">Ce texte apparaîtra au début de la
+                                <small style="color: var(--gris-moyen); font-size: 0.85rem;">Ce texte apparaîtra au début de la
                                     rétroaction si
                                     l'option est cochée lors de la génération.</small>
                             </div>
@@ -4552,7 +4665,7 @@
                                     <p class="text-09-mb10">Cochez les critères à importer :</p>
                                     <div id="checklistCriteresImport" class="checkboxes-import-partiel">
                                         <!-- Généré dynamiquement -->
-                                        <p style="color: #999; font-style: italic;">Chargez d'abord une cartouche pour voir les critères</p>
+                                        <p style="color: var(--gris-clair); font-style: italic;">Chargez d'abord une cartouche pour voir les critères</p>
                                     </div>
                                     <textarea id="markdownImportPartiel" rows="8" placeholder="Collez vos commentaires ici (même format que ci-dessus)"></textarea>
                                     <button class="btn btn-confirmer" onclick="importerPartiel()" disabled id="btnImportPartiel">
@@ -5361,7 +5474,7 @@
                         <!-- ZONE D'IMPORT -->
                         <details class="mb-20">
                             <summary style="cursor: pointer; font-weight: 600; color: var(--bleu-principal); 
-                           padding: 12px; background: #f8f9fa; border-radius: 6px; 
+                           padding: 12px; background: var(--gris-tres-pale); border-radius: 6px; 
                            user-select: none;">
                                 Importer des étudiants (CSV/TSV ou copier-coller)
                             </summary>
@@ -5373,7 +5486,7 @@
                                     </label>
                                     <input type="file" id="fichierCsvEntree" accept=".csv,.tsv,.txt"
                                         onchange="handleFileImport(event)" class="controle-form">
-                                    <small style="color: #666; display: block; margin-top: 5px;">
+                                    <small style="color: var(--gris-moyen); display: block; margin-top: 5px;">
                                         Format attendu : DA, Groupe, Nom, Prénom, Programme, Nom du programme, SA
                                     </small>
                                 </div>
@@ -5396,14 +5509,14 @@ Exemple :
                         </details>
 
                         <!-- ZONE DE PRÉVISUALISATION (cachée par défaut) -->
-                        <div id="previewZone" style="display: none; margin-bottom: 20px; background: #fff3cd; 
+                        <div id="previewZone" style="display: none; margin-bottom: 20px; background: var(--alerte-fond-attention); 
                                      padding: 15px; border-radius: 8px; border: 2px solid #ffc107;">
                             <h4 class="mt-0-warning">📐 Prévisualisation de l'import</h4>
-                            <p style="color: #856404; margin-bottom: 15px;">
+                            <p style="color: var(--alerte-texte-attention); margin-bottom: 15px;">
                                 Vérifiez les données avant de les importer définitivement.
                             </p>
                             <div id="previewTable" style="overflow-x: auto; max-height: 300px; 
-                                          border: 1px solid #ddd; border-radius: 4px; background: white;">
+                                          border: 1px solid var(--bordure-claire); border-radius: 4px; background: white;">
                                 <!-- Le tableau sera généré ici -->
                             </div>
                             <div class="d-flex-gap10-mt15">
@@ -5459,7 +5572,7 @@ Exemple :
 
                         <!-- MESSAGE SI AUCUN ÉTUDIANT -->
                         <div id="no-students-msg" style="display: block; text-align: center; padding: 40px;
-                                         background: #f8f9fa; border-radius: 8px; color: #666;">
+                                         background: var(--gris-tres-pale); border-radius: 8px; color: var(--gris-moyen);">
                             <p class="text-11-mb10">📭 Aucun·e étudiant·e dans le groupe
                             </p>
                             <p class="text-09">
@@ -5473,7 +5586,7 @@ Exemple :
                     <div class="carte">
                         <h3 class="cursor-pointer-user-select" onclick="toggleSection('section-clonage-anonymise')">
                             <span id="icone-clonage-anonymise">▶</span> 🔒 Clonage anonymisé (Groupe 9999 → Démo)
-                            <span style="font-size: 0.8em; color: #666; font-weight: normal;">(Section avancée)</span>
+                            <span style="font-size: 0.8em; color: var(--gris-moyen); font-weight: normal;">(Section avancée)</span>
                         </h3>
 
                         <div id="section-clonage-anonymise" style="display: none;">
@@ -5687,7 +5800,7 @@ Exemple :
 
                             <!-- INFO PAN -->
                             <div id="infoPAN" style="display: none; margin-top: 15px; padding: 10px;
-                 background: white; border-radius: 4px; font-size: 0.85rem; color: #666;">
+                 background: white; border-radius: 4px; font-size: 0.85rem; color: var(--gris-moyen);">
                             </div>
 
                             <!-- Activation portfolio et jetons -->
@@ -5730,7 +5843,7 @@ Exemple :
                                         <input type="checkbox" id="modeComparatif">
                                         <strong style="margin-left: 8px;">Activer le mode comparatif (expérimental)</strong>
                                     </label>
-                                    <small style="display: block; color: #666; margin-top: 5px; margin-left: 28px; font-size: 0.8rem;">
+                                    <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.8rem;">
                                         Affiche les indices SOM et PAN côte à côte pour comparer les deux approches
                                     </small>
                                 </div>
@@ -5741,7 +5854,7 @@ Exemple :
                                         <input type="checkbox" id="detectionPatternsActive" checked>
                                         <strong style="margin-left: 8px;">Activer la détection des patterns d'apprentissage</strong>
                                     </label>
-                                    <small style="display: block; color: #666; margin-top: 5px; margin-left: 28px; font-size: 0.8rem; line-height: 1.5;">
+                                    <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.8rem; line-height: 1.5;">
                                         <strong>Prérequis :</strong> Pour détecter les patterns (progression stable, défi spécifique, blocages),
                                         vous devez utiliser la <strong>même grille de critères</strong> et la <strong>même échelle de performance</strong>
                                         pour tous les artefacts du trimestre. Sans cette cohérence méthodologique, l'algorithme ne peut pas
@@ -5806,7 +5919,7 @@ Exemple :
                                             </div>
 
                                             <!-- Description dynamique -->
-                                            <div id="descriptionModalite" class="text-muted" style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
+                                            <div id="descriptionModalite" class="text-muted" style="margin-bottom: 20px; padding: 12px; background: var(--gris-tres-pale); border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
                                                 Dans ma pratique de notation basée sur la maîtrise de standards, le portfolio contient les N meilleures productions de l'apprenant·e.
                                             </div>
 
@@ -5817,7 +5930,7 @@ Exemple :
                                                 </label>
                                                 <input type="number" id="configNombreARetenir" class="controle-form"
                                                        value="5" min="1" max="20">
-                                                <small id="labelNombreARetenir" style="display: block; color: #666; margin-top: 3px; font-size: 0.8rem;">
+                                                <small id="labelNombreARetenir" style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
                                                     N meilleurs
                                                 </small>
                                             </div>
@@ -5828,7 +5941,7 @@ Exemple :
                                                 </label>
                                                 <input type="number" id="configMinimumCompletion" class="controle-form"
                                                        value="7" min="1" max="20">
-                                                <small style="display: block; color: #666; margin-top: 3px; font-size: 0.8rem;">
+                                                <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
                                                     Seuil complétion
                                                 </small>
                                             </div>
@@ -5839,7 +5952,7 @@ Exemple :
                                                 </label>
                                                 <input type="number" id="configNombreTotal" class="controle-form"
                                                        value="10" min="1" max="50">
-                                                <small style="display: block; color: #666; margin-top: 3px; font-size: 0.8rem;">
+                                                <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
                                                     Nombre artefacts
                                                 </small>
                                             </div>
@@ -5875,7 +5988,7 @@ Exemple :
                                                 </label>
                                                 <input type="number" id="nombreJetonsParEleve" class="controle-form"
                                                        min="0" max="20" value="4">
-                                                <small style="display: block; color: #666; margin-top: 3px; font-size: 0.8rem;">
+                                                <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
                                                     Chaque élève peut utiliser ses jetons comme il le souhaite (délai, reprise, ou autres types que vous créez)
                                                 </small>
                                             </div>
@@ -5985,25 +6098,25 @@ Exemple :
                     </p>
 
                     <!-- RAPPEL PATTERNS -->
-                    <div style="margin-bottom: 20px; padding: 15px; background: #fff8e1; border-radius: 6px; border-left: 4px solid #ffc107;">
+                    <div style="margin-bottom: 20px; padding: 15px; background: var(--alerte-fond-attention); border-radius: 6px; border-left: 4px solid #ffc107;">
                         <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 600; color: #333;">
                             💡 Rappel : Conditions pour la détection des patterns
                         </p>
-                        <p style="margin: 0; font-size: 0.85rem; line-height: 1.5; color: #666;">
+                        <p style="margin: 0; font-size: 0.85rem; line-height: 1.5; color: var(--gris-moyen);">
                             Les <strong>patterns d'apprentissage</strong> (progression stable, défi spécifique, blocages) sont identifiés en analysant l'évolution des performances sur chaque critère d'évaluation au fil du temps. Cette analyse longitudinale n'est possible que si vous utilisez <strong>les mêmes critères et la même échelle de performance</strong> pour tous les artefacts évalués durant le trimestre.
                         </p>
-                        <p style="margin: 8px 0 0 0; font-size: 0.85rem; line-height: 1.5; color: #666;">
+                        <p style="margin: 8px 0 0 0; font-size: 0.85rem; line-height: 1.5; color: var(--gris-moyen);">
                             Si vous variez les critères ou les échelles entre les productions, le système ne pourra pas établir de comparaisons valides et les patterns ne seront pas détectables. Dans ce cas, concentrez-vous sur les indices A-C-P et les niveaux RàI pour le dépistage.
                         </p>
                     </div>
 
                     <!-- Option avancée : Découplage P et R -->
-                    <div class="form-group" style="margin-bottom: 20px; padding: 12px; background: #fffef0; border-left: 3px solid #ffc107; border-radius: 4px;">
+                    <div class="form-group" style="margin-bottom: 20px; padding: 12px; background: var(--alerte-fond-attention); border-left: 3px solid #ffc107; border-radius: 4px;">
                         <label style="cursor: pointer; display: flex; align-items: center;">
                             <input type="checkbox" id="decouplerPR">
                             <strong style="margin-left: 8px;">Découpler Performance (P) et Risque (R)</strong>
                         </label>
-                        <small style="display: block; color: #666; margin-top: 8px; margin-left: 28px; font-size: 0.85rem; line-height: 1.5;">
+                        <small style="display: block; color: var(--gris-moyen); margin-top: 8px; margin-left: 28px; font-size: 0.85rem; line-height: 1.5;">
                             <strong>P (notation)</strong> : Utilise la modalité choisie ci-dessus pour calculer la note finale.<br>
                             <strong>R (dépistage)</strong> : Toujours basé sur les N dernières productions pour détecter les tendances et intervenir au bon moment.<br>
                             <em>Recommandé avec modalité "N meilleurs" pour valoriser le progrès tout en détectant les décrochages.</em>
@@ -6054,9 +6167,9 @@ Exemple :
                                         <input type="number" id="nombreProductionsAnalyse" class="controle-form"
                                                min="3" max="20" value="3" style="width: 100px;"
                                                onchange="sauvegarderSeuil('nombreProductionsAnalyse', parseInt(this.value))">
-                                        <span style="color: #666; font-size: 0.9rem;">dernières productions</span>
+                                        <span style="color: var(--gris-moyen); font-size: 0.9rem;">dernières productions</span>
                                     </div>
-                                    <small style="display: block; color: #666; margin-top: 8px; font-size: 0.85rem;">
+                                    <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
                                         <strong>Compromis réactivité vs fiabilité :</strong>
                                         Valeur basse = détection précoce (temps d'intervenir) •
                                         Valeur élevée = détection tardive (plus de recul)
@@ -6064,15 +6177,15 @@ Exemple :
                                 </div>
 
                                 <div class="carte-bleu-pale" style="margin-top: 15px;">
-                                    <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: #666;">
+                                    <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: var(--gris-moyen);">
                                         <strong>Artefacts nécessaires avant détection :</strong>
                                     </p>
-                                    <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #666; line-height: 1.6;">
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: var(--gris-moyen); line-height: 1.6;">
                                         <li><strong>3 productions</strong> → Détection dès 4 artefacts (recommandé)</li>
                                         <li><strong>5 productions</strong> → Détection dès 6 artefacts</li>
                                         <li><strong>7 productions</strong> → Détection dès 8 artefacts</li>
                                     </ul>
-                                    <p style="margin: 10px 0 0 0; font-size: 0.85rem; color: #666;">
+                                    <p style="margin: 10px 0 0 0; font-size: 0.85rem; color: var(--gris-moyen);">
                                         <strong>Exemple :</strong> Avec 9 artefacts dans la session et une fenêtre de 3,
                                         les patterns seront détectables dès le 4<sup>e</sup> artefact (semaine 6 environ),
                                         laissant le temps d'intervenir avant la fin de la session.
@@ -6247,7 +6360,7 @@ Exemple :
                     <div class="carte">
                         <h3>À propos des sauvegardes</h3>
                         <div class="carte-info-bleu-clair">
-                            <h4 style="color: #1565c0; margin-bottom: 10px;"> Backup complet vs Import/Export partiel</h4>
+                            <h4 style="color: var(--bleu-clair); margin-bottom: 10px;"> Backup complet vs Import/Export partiel</h4>
                             <p class="mb-15">
                                 <strong>Les boutons ci-dessus</strong> permettent de faire un <strong>backup complet</strong>
                                 de toutes tes données d'application (cours, trimestre, étudiants, évaluations, présences, etc.).
@@ -7100,7 +7213,7 @@ Exemple :
                                     <td>Non (manquant)</td>
                                     <td>Non</td>
                                 </tr>
-                                <tr style="background-color: #ffebee;">
+                                <tr style="background-color: var(--conge-bg);">
                                     <td>Artefact 4</td>
                                     <td>Non recevable (Plagiat)</td>
                                     <td class="text-center">--</td>
@@ -7625,7 +7738,7 @@ Exemple :
                         </div>
 
                         <div class="alerte-danger-rouge">
-                            <h4 style="color: #dc3545; margin-bottom: 10px;">Blocage émergent</h4>
+                            <h4 style="color: var(--risque-tres-eleve); margin-bottom: 10px;">Blocage émergent</h4>
                             <p><strong>Critères :</strong> Assiduité ≥ 75% mais Complétion ou Performance &lt; 65%</p>
                             <p><strong>Intervention :</strong> RàI Niveau 2 - Intervention intensive personnalisée</p>
                             <p><strong>Action :</strong> Remédiation ciblée sur le critère en difficulté</p>
@@ -7882,7 +7995,7 @@ Exemple :
                                     <tr>
                                         <td>&lt; 70%</td>
                                         <td>Insuffisant</td>
-                                        <td style="color: #dc3545; font-weight: bold;">Rouge</td>
+                                        <td style="color: var(--risque-tres-eleve); font-weight: bold;">Rouge</td>
                                         <td>Mobilisation problématique, intervention</td>
                                     </tr>
                                 </tbody>

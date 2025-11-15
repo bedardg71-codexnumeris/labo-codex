@@ -638,7 +638,8 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 <h4 style="margin: 0; font-size: 0.95rem; color: #333;">${label}</h4>
                 ${valeursHTML}
             </div>
-            <div class="distribution-barre-container" style="position: relative; height: 30px; background: ${gradient}; border-radius: 6px;">
+            <div class="barre-indicateur" style="position: relative; height: 30px;">
+                <div class="barre-indicateur-overlay"></div>
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
@@ -659,11 +660,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
     // 4 zones du spectre lumineux avec transitions douces
     // Vert → Cyan → Bleu → Indigo (bon → critique)
-    const gradient = `linear-gradient(to right,
-        #4caf50 0%,
-        #00bcd4 25%,
-        #2196f3 50%,
-        #3f51b5 75%)`;
+    // Gradient maintenant défini dans styles.css (.barre-patterns)
 
     // Mapper les patterns aux positions (centre de chaque zone)
     const positionPattern = {
@@ -771,7 +768,8 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     return `
         <div class="distribution-container" style="margin-bottom: 15px;">
             <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">Répartition des patterns d'apprentissage</h4>
-            <div class="distribution-barre-container" style="position: relative; height: 30px; background: ${gradient}; border-radius: 6px; margin-bottom: 8px;">
+            <div class="barre-patterns" style="position: relative; height: 30px;">
+                <div class="barre-patterns-overlay"></div>
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
@@ -798,10 +796,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
 function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
     // 3 zones du spectre lumineux avec transitions douces
     // Bleu → Mauve → Violet (niveau 1 → niveau 3)
-    const gradient = `linear-gradient(to right,
-        #2196f3 0%,
-        #9c27b0 33%,
-        #6a1b9a 66%)`;
+    // Gradient maintenant défini dans styles.css (.barre-rai)
 
     // Mapper les niveaux aux positions (centre de chaque zone)
     const positionNiveau = {
@@ -897,7 +892,8 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
     return `
         <div class="distribution-container" style="margin-bottom: 15px;">
             <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">Modèle de la Réponse à l'intervention (RàI)</h4>
-            <div class="distribution-barre-container" style="position: relative; height: 30px; background: ${gradient}; border-radius: 6px; margin-bottom: 8px;">
+            <div class="barre-rai" style="position: relative; height: 30px;">
+                <div class="barre-rai-overlay"></div>
                 ${lignesSOM}
                 ${lignesPAN}
             </div>

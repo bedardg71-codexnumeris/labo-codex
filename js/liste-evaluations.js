@@ -817,14 +817,14 @@ function genererLigneHTML(ligne) {
 
     return `
         <tr data-evaluation-id="${ligne.evaluationId || ''}" data-da="${ligne.da}" data-production-id="${ligne.productionId}"${classeRemplacee}>
-            <td>${ligne.da}</td>
-            <td>${echapperHtml(ligne.nom)}</td>
-            <td>${echapperHtml(ligne.prenom)}</td>
-            <td>${echapperHtml(ligne.productionNom)}</td>
-            <td class="text-center">${badgeJeton}</td>
-            <td class="text-center">${affichageNiveau}</td>
-            <td class="text-center">${affichageNoteChiffree}</td>
-            <td class="actions">${boutons}</td>
+            <td class="td-left">${ligne.da}</td>
+            <td class="td-left">${echapperHtml(ligne.nom)}</td>
+            <td class="td-left">${echapperHtml(ligne.prenom)}</td>
+            <td class="td-left">${echapperHtml(ligne.productionNom)}</td>
+            <td class="td-center">${badgeJeton}</td>
+            <td class="td-center">${affichageNiveau}</td>
+            <td class="td-center">${affichageNoteChiffree}</td>
+            <td class="td-center">${boutons}</td>
         </tr>
     `;
 }
