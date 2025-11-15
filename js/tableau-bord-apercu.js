@@ -1087,50 +1087,38 @@ function afficherPatternsApprentissage(etudiants) {
     const afficherPan = affichage.afficherAlternatif !== false;
 
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
-    const pratiqueSOM = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('sommative') : null;
-    const pratiquePAN = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('pan-maitrise') : null;
+    // IMPORTANT : Utiliser determinerCibleIntervention() pour garantir la cohérence
+    // avec le tableau de liste des étudiants. Les patterns doivent être identiques
+    // partout car ils sont basés sur la même logique (N derniers artefacts).
 
-    // Préparer les données pour SOM
+    // Préparer les données pour SOM et PAN
+    // Note : determinerCibleIntervention() retourne le pattern basé sur les N derniers artefacts
+    // ce qui garantit la cohérence méthodologique nécessaire pour détecter les patterns
     const etudiantsSOM = [];
-    if (pratiqueSOM) {
-        etudiants.forEach(e => {
-            const patternInfo = pratiqueSOM.identifierPattern(e.da);
-            const type = patternInfo ? patternInfo.type : null;
-
-            // Normaliser le type
-            const typeNormalise = type ? type.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-') : null;
-
-            if (typeNormalise) {
-                etudiantsSOM.push({
-                    da: e.da,
-                    nom: e.nom,
-                    prenom: e.prenom,
-                    pattern: typeNormalise
-                });
-            }
-        });
-    }
-
-    // Préparer les données pour PAN
     const etudiantsPAN = [];
-    if (pratiquePAN) {
-        etudiants.forEach(e => {
-            const patternInfo = pratiquePAN.identifierPattern(e.da);
-            const type = patternInfo ? patternInfo.type : null;
 
-            // Normaliser le type
-            const typeNormalise = type ? type.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-') : null;
+    etudiants.forEach(e => {
+        if (typeof determinerCibleIntervention === 'function') {
+            const cibleInfo = determinerCibleIntervention(e.da);
+            const pattern = cibleInfo ? cibleInfo.pattern : null;
 
-            if (typeNormalise) {
-                etudiantsPAN.push({
+            // Normaliser le pattern
+            const patternNormalise = pattern ? pattern.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-') : null;
+
+            if (patternNormalise) {
+                const etudiantData = {
                     da: e.da,
                     nom: e.nom,
                     prenom: e.prenom,
-                    pattern: typeNormalise
-                });
+                    pattern: patternNormalise
+                };
+
+                // Ajouter à SOM et PAN (même pattern pour les deux car basé sur les mêmes données)
+                etudiantsSOM.push(etudiantData);
+                etudiantsPAN.push({...etudiantData});
             }
-        });
-    }
+        }
+    });
 
     // Trouver la carte "Indicateurs globaux du groupe"
     const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
