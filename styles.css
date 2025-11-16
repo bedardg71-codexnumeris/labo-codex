@@ -5118,19 +5118,19 @@ label:has(+ textarea:disabled) {
     opacity: 1; /* Opacité maximale pour fond dégradé visible */
 }
 
-/* Animation de flottement subtil pour les points */
+/* Animation de flottement subtil pour les points (au hover seulement) */
 @keyframes float-subtle {
     0%, 100% {
-        transform: translate(-50%, -50%) translateX(0px) translateY(0px);
+        transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1.5);
     }
     25% {
-        transform: translate(-50%, -50%) translateX(2px) translateY(-1.5px);
+        transform: translate(-50%, -50%) translateX(1px) translateY(-1px) scale(1.5);
     }
     50% {
-        transform: translate(-50%, -50%) translateX(0px) translateY(-3px);
+        transform: translate(-50%, -50%) translateX(0px) translateY(-2px) scale(1.5);
     }
     75% {
-        transform: translate(-50%, -50%) translateX(-2px) translateY(-1.5px);
+        transform: translate(-50%, -50%) translateX(-1px) translateY(-1px) scale(1.5);
     }
 }
 
@@ -5147,7 +5147,15 @@ label:has(+ textarea:disabled) {
     top: 50%;
     border: 1px solid white;
     box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-    animation: float-subtle 5s ease-in-out infinite;
+    /* Pas d'animation par défaut - seulement au hover */
+}
+
+/* Animation et grossissement au hover */
+.barre-etudiant:hover {
+    z-index: 20;
+    border-width: 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    animation: float-subtle 7s ease-in-out infinite;
 }
 
 /* Point pour SOM (orange) */
@@ -5156,26 +5164,10 @@ label:has(+ textarea:disabled) {
     opacity: 1; /* Opacité maximale pour meilleure visibilité */
 }
 
-.barre-etudiant-som:hover {
-    width: 12px;
-    height: 12px;
-    z-index: 20;
-    border-width: 2px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
-}
-
 /* Point pour PAN (bleu) */
 .barre-etudiant-pan {
     background: var(--pan-bleu);
     opacity: 1; /* Opacité maximale pour meilleure visibilité */
-}
-
-.barre-etudiant-pan:hover {
-    width: 12px;
-    height: 12px;
-    z-index: 20;
-    border-width: 2px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
 }
 
 /* Conteneur de distribution */
