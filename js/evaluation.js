@@ -2867,10 +2867,15 @@ function reparer_evaluations_criteres_manquants() {
     };
 }
 
+/**
+ * Charge une évaluation existante pour modification
+ * Refactorisé le 16 novembre 2025 pour corriger bug timing chargement
+ *
+ * @param {string} evaluationId - ID de l'évaluation à charger
+ */
 function modifierEvaluation(evaluationId) {
     console.log('📝 Chargement de l\'évaluation:', evaluationId);
 
-    // CORRECTION: Utiliser obtenirDonneesSelonMode au lieu de localStorage direct
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
@@ -2879,271 +2884,294 @@ function modifierEvaluation(evaluationId) {
         return;
     }
 
-    // DEBUG: Afficher la structure de l'évaluation
     console.log('🔍 Évaluation trouvée:', {
         id: evaluation.id,
         etudiant: evaluation.etudiantNom,
         production: evaluation.productionNom,
-        nbCriteres: evaluation.criteres?.length || 0,
-        criteres: evaluation.criteres
+        nbCriteres: evaluation.criteres?.length || 0
     });
 
-    // Note: On permet le chargement même si l'évaluation est verrouillée
-    // Le formulaire sera simplement désactivé en mode lecture seule
     const estVerrouillee = evaluation.verrouillee || false;
 
     // Naviguer vers la section d'évaluation
     afficherSousSection('evaluations-individuelles');
 
-    // Attendre que la section soit chargée
-    setTimeout(() => {
-        // Charger l'étudiant
-        const selectEtudiant = document.getElementById('selectEtudiantEval');
-        if (selectEtudiant) {
-            selectEtudiant.value = evaluation.etudiantDA;
-            selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
-        }
+    // ========== FONCTIONS HELPER ==========
 
-        // Charger les sélections avec délais pour respecter les dépendances
-        setTimeout(() => {
-            // Production
-            const selectProduction = document.getElementById('selectProduction1');
-            if (selectProduction) {
-                selectProduction.value = evaluation.productionId;
-                selectProduction.dispatchEvent(new Event('change', { bubbles: true }));
+    /**
+     * Attend qu'une option spécifique apparaisse dans un select
+     * Utilise un polling actif au lieu de délais fixes
+     */
+    const attendreOption = (selectId, valeurCherchee, maxTentatives = 20, delai = 100) => {
+        return new Promise((resolve, reject) => {
+            let tentatives = 0;
+            const intervalle = setInterval(() => {
+                tentatives++;
+                const select = document.getElementById(selectId);
+                const optionTrouvee = select ? Array.from(select.options).find(opt => opt.value === valeurCherchee) : null;
+
+                if (optionTrouvee) {
+                    clearInterval(intervalle);
+                    console.log(`✅ #${selectId} option "${valeurCherchee}" trouvée après ${tentatives} tentatives`);
+                    resolve(select);
+                } else if (tentatives >= maxTentatives) {
+                    clearInterval(intervalle);
+                    reject(new Error(`Timeout: option "${valeurCherchee}" introuvable dans #${selectId}`));
+                }
+            }, delai);
+        });
+    };
+
+    /**
+     * Trouve le numéro de groupe d'un étudiant
+     */
+    const trouverGroupeEtudiant = (da) => {
+        const etudiants = obtenirDonneesSelonMode('etudiants') || [];
+        const etudiant = etudiants.find(e => e.numeroDA === da);
+        return etudiant ? etudiant.groupe : null;
+    };
+
+    /**
+     * Attend que les selects de critères soient générés dans le DOM
+     */
+    const attendreSelectsCriteres = (evaluation) => {
+        return new Promise((resolve, reject) => {
+            if (!evaluation.criteres || evaluation.criteres.length === 0) {
+                console.warn('⚠️ Aucun critère à charger');
+                resolve(false); // Pas de critères, mais pas une erreur
+                return;
             }
 
-            setTimeout(() => {
-                // Grille
-                const selectGrille = document.getElementById('selectGrille1');
-                if (selectGrille) {
-                    selectGrille.value = evaluation.grilleId;
-                    selectGrille.dispatchEvent(new Event('change', { bubbles: true }));
+            let tentatives = 0;
+            const maxTentatives = 30; // 3 secondes max
+            const premierCritereId = `eval_${evaluation.criteres[0].critereId}`;
+
+            const intervalle = setInterval(() => {
+                tentatives++;
+                const premierSelect = document.getElementById(premierCritereId);
+
+                if (premierSelect) {
+                    clearInterval(intervalle);
+                    console.log(`✅ Selects de critères générés après ${tentatives} tentatives`);
+                    resolve(true);
+                } else if (tentatives >= maxTentatives) {
+                    clearInterval(intervalle);
+                    console.error('❌ Timeout: selects de critères non générés');
+                    console.error('Contenu listeCriteresGrille1:', document.getElementById('listeCriteresGrille1')?.innerHTML.substring(0, 200));
+                    reject(new Error('Timeout génération selects critères'));
                 }
+            }, 100);
+        });
+    };
 
+    // ========== CHARGEMENT SÉQUENTIEL ==========
+
+    setTimeout(async () => {
+        try {
+            // ÉTAPE 1: Charger le groupe (CRITIQUE - manquait dans l'ancienne version!)
+            const numeroGroupe = trouverGroupeEtudiant(evaluation.etudiantDA);
+            if (!numeroGroupe) {
+                throw new Error(`Groupe introuvable pour étudiant DA ${evaluation.etudiantDA}`);
+            }
+
+            console.log(`1️⃣ Chargement groupe: ${numeroGroupe}`);
+            const selectGroupe = document.getElementById('selectGroupeEval');
+            if (selectGroupe) {
+                selectGroupe.value = numeroGroupe;
+                selectGroupe.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            // ÉTAPE 2: Attendre et charger l'étudiant
+            console.log(`2️⃣ Attente option étudiant: ${evaluation.etudiantDA}`);
+            await attendreOption('selectEtudiantEval', evaluation.etudiantDA);
+            const selectEtudiant = document.getElementById('selectEtudiantEval');
+            selectEtudiant.value = evaluation.etudiantDA;
+            selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
+            console.log('✅ Étudiant chargé');
+
+            // ÉTAPE 3: Attendre et charger la production
+            console.log(`3️⃣ Attente option production: ${evaluation.productionId}`);
+            await attendreOption('selectProduction1', evaluation.productionId);
+            const selectProduction = document.getElementById('selectProduction1');
+            selectProduction.value = evaluation.productionId;
+            selectProduction.dispatchEvent(new Event('change', { bubbles: true }));
+            console.log('✅ Production chargée');
+
+            // ÉTAPE 4: Attendre et charger la grille
+            console.log(`4️⃣ Attente option grille: ${evaluation.grilleId}`);
+            await attendreOption('selectGrille1', evaluation.grilleId);
+            const selectGrille = document.getElementById('selectGrille1');
+            selectGrille.value = evaluation.grilleId;
+            selectGrille.dispatchEvent(new Event('change', { bubbles: true }));
+            console.log('✅ Grille chargée');
+
+            // ÉTAPE 5: Initialiser evaluationEnCours (AVANT cartouche/échelle)
+            console.log('5️⃣ Initialisation evaluationEnCours');
+            window.evaluationEnCours = {
+                etudiantDA: evaluation.etudiantDA,
+                productionId: evaluation.productionId,
+                grilleId: evaluation.grilleId,
+                echelleId: evaluation.echelleId,
+                cartoucheId: evaluation.cartoucheId,
+                statutRemise: evaluation.statutRemise,
+                statutIntegrite: evaluation.statutIntegrite || 'recevable',
+                notesIntegrite: evaluation.notesIntegrite || '',
+                delaiAccorde: evaluation.delaiAccorde || false,
+                jetonDelaiApplique: evaluation.jetonDelaiApplique || false,
+                dateApplicationJetonDelai: evaluation.dateApplicationJetonDelai,
+                jetonRepriseApplique: evaluation.jetonRepriseApplique || false,
+                repriseDeId: evaluation.repriseDeId,
+                dateApplicationJetonReprise: evaluation.dateApplicationJetonReprise,
+                criteres: {},
+                idModification: evaluationId
+            };
+
+            // Pré-remplir les critères depuis l'évaluation
+            if (evaluation.criteres && Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0) {
+                evaluation.criteres.forEach(critere => {
+                    window.evaluationEnCours.criteres[critere.critereId] = critere.niveauSelectionne;
+                });
+                console.log(`✅ ${evaluation.criteres.length} critères pré-remplis`);
+            } else {
+                // FALLBACK : Extraire depuis rétroaction si criteres[] vide
+                console.warn('⚠️ Extraction niveaux depuis rétroaction...');
+                const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+                const grille = grilles.find(g => g.id === evaluation.grilleId);
+
+                if (grille && evaluation.retroactionFinale) {
+                    const niveauxExtrait = extraireNiveauxDepuisRetroaction(evaluation.retroactionFinale, grille);
+                    if (Object.keys(niveauxExtrait).length > 0) {
+                        window.evaluationEnCours.criteres = niveauxExtrait;
+                        evaluation.criteres = Object.keys(niveauxExtrait).map(critereId => ({
+                            critereId,
+                            critereNom: grille.criteres.find(c => c.id === critereId)?.nom || critereId,
+                            niveauSelectionne: niveauxExtrait[critereId]
+                        }));
+                        console.log(`✅ ${Object.keys(niveauxExtrait).length} niveaux extraits`);
+                    }
+                }
+            }
+
+            // ÉTAPE 6: Charger échelle
+            console.log('6️⃣ Chargement échelle');
+            const selectEchelle = document.getElementById('selectEchelle1');
+            if (selectEchelle) {
+                selectEchelle.value = evaluation.echelleId;
+                selectEchelle.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            // ÉTAPE 7: Charger cartouche
+            console.log('7️⃣ Chargement cartouche');
+            const selectCartouche = document.getElementById('selectCartoucheEval');
+            if (selectCartouche) {
+                selectCartouche.value = evaluation.cartoucheId;
+                selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            // ÉTAPE 8: Charger statut de remise
+            console.log('8️⃣ Chargement statut remise');
+            const selectRemise = document.getElementById('remiseProduction1');
+            if (selectRemise) {
+                selectRemise.value = evaluation.statutRemise;
+                selectRemise.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            // Charger statut d'intégrité académique
+            const selectIntegrite = document.getElementById('statutIntegrite');
+            const notesIntegrite = document.getElementById('notesIntegrite');
+            if (selectIntegrite) {
+                selectIntegrite.value = evaluation.statutIntegrite || 'recevable';
+                if (notesIntegrite) notesIntegrite.value = evaluation.notesIntegrite || '';
+                selectIntegrite.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            // Charger jeton de délai
+            const checkboxDelai = document.getElementById('delaiAccordeCheck');
+            if (checkboxDelai) {
+                checkboxDelai.checked = evaluation.jetonDelaiApplique || evaluation.delaiAccorde || false;
+            }
+
+            // Afficher badges jetons
+            afficherBadgesJetons();
+
+            // ÉTAPE 9: Attendre que les selects de critères soient générés
+            console.log('9️⃣ Attente génération selects de critères');
+            const criteresGeneres = await attendreSelectsCriteres(evaluation);
+
+            // ÉTAPE 10: Charger les valeurs des critères
+            if (criteresGeneres && evaluation.criteres && Array.isArray(evaluation.criteres)) {
+                console.log('🔟 Chargement des valeurs des critères');
+                let criteresCharges = 0;
+
+                evaluation.criteres.forEach(critere => {
+                    const selectId = `eval_${critere.critereId}`;
+                    const selectCritere = document.getElementById(selectId);
+
+                    if (selectCritere) {
+                        selectCritere.value = critere.niveauSelectionne;
+                        selectCritere.dispatchEvent(new Event('change', { bubbles: true }));
+                        criteresCharges++;
+                        console.log(`  ✓ ${critere.critereNom}: ${critere.niveauSelectionne}`);
+                    } else {
+                        console.warn(`  ⚠️ Select non trouvé pour critère ${critere.critereId}`);
+                    }
+                });
+
+                console.log(`✅ ${criteresCharges}/${evaluation.criteres.length} critères chargés`);
+
+                // Forcer le recalcul de la note
                 setTimeout(() => {
-                    // ⚠️ IMPORTANT : Initialiser evaluationEnCours AVANT de déclencher les événements
-                    // Sinon cartoucheSelectionnee() retourne immédiatement car evaluationEnCours n'existe pas
-                    console.log('Initialisation de evaluationEnCours AVANT les événements...');
-                    window.evaluationEnCours = {
-                        etudiantDA: evaluation.etudiantDA,
-                        productionId: evaluation.productionId,
-                        grilleId: evaluation.grilleId,
-                        echelleId: evaluation.echelleId,
-                        cartoucheId: evaluation.cartoucheId,
-                        statutRemise: evaluation.statutRemise,
-                        statutIntegrite: evaluation.statutIntegrite || 'recevable',
-                        notesIntegrite: evaluation.notesIntegrite || '',
-                        delaiAccorde: evaluation.delaiAccorde || false,
-                        jetonDelaiApplique: evaluation.jetonDelaiApplique || false,
-                        dateApplicationJetonDelai: evaluation.dateApplicationJetonDelai,
-                        jetonRepriseApplique: evaluation.jetonRepriseApplique || false,
-                        repriseDeId: evaluation.repriseDeId,
-                        dateApplicationJetonReprise: evaluation.dateApplicationJetonReprise,
-                        criteres: {},
-                        idModification: evaluationId
-                    };
-
-                    // Pré-remplir les critères depuis l'évaluation chargée
-                    if (evaluation.criteres && Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0) {
-                        evaluation.criteres.forEach(critere => {
-                            window.evaluationEnCours.criteres[critere.critereId] = critere.niveauSelectionne;
-                        });
-                        console.log(`✅ ${evaluation.criteres.length} critères chargés depuis evaluation.criteres`);
-                    } else {
-                        // ✨ FALLBACK : Extraire les niveaux depuis la rétroaction
-                        console.warn('⚠️ Aucun critère dans evaluation.criteres, tentative d\'extraction depuis la rétroaction...');
-
-                        const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
-                        const grille = grilles.find(g => g.id === evaluation.grilleId);
-
-                        if (grille && evaluation.retroactionFinale) {
-                            const niveauxExtrait = extraireNiveauxDepuisRetroaction(evaluation.retroactionFinale, grille);
-                            const nbExtrait = Object.keys(niveauxExtrait).length;
-
-                            if (nbExtrait > 0) {
-                                window.evaluationEnCours.criteres = niveauxExtrait;
-                                console.log(`✅ ${nbExtrait} niveau(x) extrait(s) depuis la rétroaction`);
-
-                                // Créer un tableau evaluation.criteres temporaire pour le chargement
-                                evaluation.criteres = Object.keys(niveauxExtrait).map(critereId => {
-                                    const critere = grille.criteres.find(c => c.id === critereId);
-                                    return {
-                                        critereId: critereId,
-                                        critereNom: critere ? critere.nom : critereId,
-                                        niveauSelectionne: niveauxExtrait[critereId]
-                                    };
-                                });
-                            } else {
-                                console.warn('❌ Aucun niveau trouvé dans la rétroaction');
-                            }
-                        }
+                    if (typeof calculerNoteTotale === 'function') {
+                        calculerNoteTotale();
+                        console.log('✅ Note finale recalculée');
                     }
+                }, 200);
+            }
 
-                    console.log('✅ evaluationEnCours initialisé:', window.evaluationEnCours);
+            // ÉTAPE 11: Charger les options d'affichage
+            console.log('1️⃣1️⃣ Chargement options d\'affichage');
+            if (evaluation.optionsAffichage) {
+                document.getElementById('afficherDescription1').checked = evaluation.optionsAffichage.description;
+                document.getElementById('afficherObjectif1').checked = evaluation.optionsAffichage.objectif;
+                document.getElementById('afficherTache1').checked = evaluation.optionsAffichage.tache;
+                document.getElementById('afficherAdresse1').checked = evaluation.optionsAffichage.adresse;
+                document.getElementById('afficherContexte1').checked = evaluation.optionsAffichage.contexte;
+            }
 
-                    // Échelle
-                    const selectEchelle = document.getElementById('selectEchelle1');
-                    if (selectEchelle) {
-                        selectEchelle.value = evaluation.echelleId;
-                        console.log('Déclenchement de l\'événement change sur selectEchelle...');
-                        selectEchelle.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
+            // ÉTAPE 12: Charger la rétroaction finale
+            console.log('1️⃣2️⃣ Chargement rétroaction finale');
+            const retroaction = document.getElementById('retroactionFinale1');
+            if (retroaction) {
+                retroaction.value = evaluation.retroactionFinale || '';
+            }
 
-                    // Cartouche - maintenant evaluationEnCours existe, cartoucheSelectionnee() va fonctionner
-                    const selectCartouche = document.getElementById('selectCartoucheEval');
-                    if (selectCartouche) {
-                        selectCartouche.value = evaluation.cartoucheId;
-                        console.log('Déclenchement de l\'événement change sur selectCartouche...');
-                        selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
+            // ÉTAPE 13: Afficher indicateur de mode modification
+            console.log('1️⃣3️⃣ Affichage indicateur modification');
+            afficherIndicateurModeModification(evaluation);
 
-                    // Statut de remise
-                    const selectRemise = document.getElementById('remiseProduction1');
-                    if (selectRemise) {
-                        selectRemise.value = evaluation.statutRemise;
-                        console.log('Déclenchement de l\'événement change sur selectRemise...');
-                        selectRemise.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
+            // ÉTAPE 14: Gérer le verrouillage
+            console.log('1️⃣4️⃣ Gestion verrouillage');
+            afficherOuMasquerBoutonVerrouillage(true, estVerrouillee);
+            if (estVerrouillee) {
+                desactiverFormulaireEvaluation(true);
+                afficherNotificationSucces('Évaluation chargée en lecture seule (verrouillée)');
+            } else {
+                afficherNotificationSucces('Évaluation chargée - Vous pouvez maintenant la modifier');
+            }
 
-                    // Statut d'intégrité académique
-                    const selectIntegrite = document.getElementById('statutIntegrite');
-                    const notesIntegrite = document.getElementById('notesIntegrite');
-                    if (selectIntegrite) {
-                        selectIntegrite.value = evaluation.statutIntegrite || 'recevable';
-                        if (notesIntegrite) {
-                            notesIntegrite.value = evaluation.notesIntegrite || '';
-                        }
-                        console.log('Déclenchement de l\'événement change sur selectIntegrite...');
-                        selectIntegrite.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
+            // ÉTAPE 15: Afficher la section de gestion des jetons
+            console.log('1️⃣5️⃣ Affichage gestion jetons');
+            afficherGestionJetons(true);
 
-                    // Délai accordé - synchroniser avec jetonDelaiApplique
-                    const checkboxDelai = document.getElementById('delaiAccordeCheck');
-                    if (checkboxDelai) {
-                        checkboxDelai.checked = evaluation.jetonDelaiApplique || evaluation.delaiAccorde || false;
-                        console.log('✅ Jeton de délai restauré:', checkboxDelai.checked);
-                    }
+            console.log('✅ Évaluation chargée avec succès');
 
-                    // Afficher les badges des jetons appliqués
-                    afficherBadgesJetons();
-
-                    // Attendre que la cartouche et le statut de remise génèrent les critères
-                    // Utiliser une vérification active au lieu d'un délai fixe
-                    const attendreEtChargerCriteres = () => {
-                        console.log('🔄 Démarrage de l\'attente des selects de critères...');
-
-                        // ✅ Vérifier si l'évaluation a des critères à charger
-                        if (!evaluation.criteres || !Array.isArray(evaluation.criteres) || evaluation.criteres.length === 0) {
-                            console.warn('⚠️ Aucun critère à charger (tableau vide ou undefined). Le formulaire sera affiché vide.');
-                            console.log('💡 Vous pouvez maintenant remplir les critères manuellement.');
-                            return;
-                        }
-
-                        console.log('Critères à charger:', evaluation.criteres.map(c => ({
-                            id: c.critereId,
-                            nom: c.critereNom,
-                            niveau: c.niveauSelectionne
-                        })));
-
-                        let tentatives = 0;
-                        const maxTentatives = 20; // Max 2 secondes (20 x 100ms)
-
-                        const intervalle = setInterval(() => {
-                            tentatives++;
-
-                            // Vérifier si au moins un select de critère existe
-                            // ⚠️ Les selects sont générés avec l'ID "eval_" et non "niveau_"
-                            const premierCritere = evaluation.criteres[0];
-                            const premierSelectId = premierCritere ? `eval_${premierCritere.critereId}` : null;
-                            const premierSelect = premierSelectId ? document.getElementById(premierSelectId) : null;
-
-                            console.log(`🔍 Tentative ${tentatives}/${maxTentatives} - Recherche de #${premierSelectId}:`, premierSelect ? 'TROUVÉ ✅' : 'NON TROUVÉ ❌');
-
-                            if (premierSelect || tentatives >= maxTentatives) {
-                                clearInterval(intervalle);
-
-                                if (!premierSelect && tentatives >= maxTentatives) {
-                                    console.error('❌ Timeout: Les selects de critères n\'ont pas été générés après 2 secondes');
-                                    console.error('🔍 Contenu de listeCriteresGrille1:', document.getElementById('listeCriteresGrille1')?.innerHTML.substring(0, 200));
-                                    return;
-                                }
-
-                                // Les selects existent, les remplir maintenant
-                                console.log(`📝 Chargement des critères (trouvé après ${tentatives} tentatives)...`);
-                                let criteresCharges = 0;
-
-                                if (evaluation.criteres && Array.isArray(evaluation.criteres)) {
-                                    evaluation.criteres.forEach(critere => {
-                                        // ⚠️ Utiliser "eval_" comme préfixe, pas "niveau_"
-                                        const selectId = `eval_${critere.critereId}`;
-                                        const selectCritere = document.getElementById(selectId);
-                                        console.log(`  → Critère ${critere.critereNom} (ID: ${selectId}):`, selectCritere ? 'EXISTS' : 'MISSING');
-
-                                        if (selectCritere) {
-                                            const valeurAvant = selectCritere.value;
-                                            selectCritere.value = critere.niveauSelectionne;
-                                            const valeurApres = selectCritere.value;
-                                            console.log(`    Valeur: "${valeurAvant}" → "${valeurApres}"`);
-                                            selectCritere.dispatchEvent(new Event('change', { bubbles: true }));
-                                            criteresCharges++;
-                                        } else {
-                                            console.warn(`⚠️ Select non trouvé pour critère ${critere.critereId}`);
-                                        }
-                                    });
-
-                                    console.log(`✅ ${criteresCharges}/${evaluation.criteres.length} critères chargés`);
-                                } else {
-                                    console.error('❌ evaluation.criteres est undefined ou n\'est pas un tableau');
-                                }
-
-                                // Forcer le recalcul de la note après avoir chargé tous les critères
-                                setTimeout(() => {
-                                    if (typeof calculerNoteTotale === 'function') {
-                                        calculerNoteTotale();
-                                        console.log('✅ Note finale recalculée');
-                                    }
-                                }, 200);
-                            }
-                        }, 100); // Vérifier toutes les 100ms
-                    };
-
-                    // Charger les options d'affichage
-                    if (evaluation.optionsAffichage) {
-                        document.getElementById('afficherDescription1').checked = evaluation.optionsAffichage.description;
-                        document.getElementById('afficherObjectif1').checked = evaluation.optionsAffichage.objectif;
-                        document.getElementById('afficherTache1').checked = evaluation.optionsAffichage.tache;
-                        document.getElementById('afficherAdresse1').checked = evaluation.optionsAffichage.adresse;
-                        document.getElementById('afficherContexte1').checked = evaluation.optionsAffichage.contexte;
-                    }
-
-                    // Charger la rétroaction finale
-                    const retroaction = document.getElementById('retroactionFinale1');
-                    if (retroaction) {
-                        retroaction.value = evaluation.retroactionFinale || '';
-                    }
-
-                    // evaluationEnCours a déjà été initialisé plus haut (avant les événements)
-                    // Afficher l'indicateur de mode modification
-                    afficherIndicateurModeModification(evaluation);
-
-                    // Lancer le chargement des critères avec vérification active
-                    attendreEtChargerCriteres();
-
-                    // Afficher le bouton de verrouillage et désactiver le formulaire si nécessaire
-                    afficherOuMasquerBoutonVerrouillage(true, estVerrouillee);
-                    if (estVerrouillee) {
-                        desactiverFormulaireEvaluation(true);
-                        afficherNotificationSucces('Évaluation chargée en lecture seule (verrouillée)');
-                    } else {
-                        afficherNotificationSucces('Évaluation chargée - Vous pouvez maintenant la modifier');
-                    }
-
-                    // Afficher la section de gestion des jetons
-                    afficherGestionJetons(true);
-                }, 300);
-            }, 300);
-        }, 300);
+        } catch (erreur) {
+            console.error('❌ Erreur lors du chargement de l\'évaluation:', erreur);
+            afficherNotificationErreur(
+                'Erreur de chargement',
+                `Impossible de charger l'évaluation: ${erreur.message}`
+            );
+        }
     }, 200);
 }
 
