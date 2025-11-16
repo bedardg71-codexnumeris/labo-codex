@@ -558,6 +558,23 @@ function filtrerEtudiants(etudiants) {
    =============================== */
 
 /**
+ * Masque ou affiche les colonnes Pattern et RàI selon le paramètre activerRai
+ * @param {boolean} activerRai - true pour afficher, false pour masquer
+ */
+function masquerColonnesRaiSiDesactive(activerRai) {
+    // Sélectionner les headers de colonnes Pattern et RàI
+    const headers = document.querySelectorAll('th[onclick="trierTableauPar(\'pattern\')"], th[onclick="trierTableauPar(\'rai\')"]');
+
+    headers.forEach(header => {
+        if (activerRai) {
+            header.style.display = '';  // Afficher
+        } else {
+            header.style.display = 'none';  // Masquer
+        }
+    });
+}
+
+/**
  * Affiche la liste des étudiants avec l'assiduité
  * FONCTION PRINCIPALE D'AFFICHAGE
  */
@@ -569,6 +586,13 @@ function afficherListeEtudiantsConsultation() {
     if (typeof calculerEtStockerIndicesCP === 'function') {
         calculerEtStockerIndicesCP();
     }
+
+    // Vérifier si le modèle RàI est activé
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const activerRai = config.activerRai !== false; // Par défaut true (rétrocompatibilité)
+
+    // Afficher/masquer les colonnes Pattern et RàI dans les headers
+    masquerColonnesRaiSiDesactive(activerRai);
 
     // NOUVEAU: Mettre à jour l'indicateur de tri visuel au chargement
     mettreAJourIndicateursTri();
@@ -790,11 +814,14 @@ function afficherListeEtudiantsConsultation() {
         const couleurE = obtenirCouleurEngagement(engagementPct);
         html += '<td style="text-align: center;"><strong style="color: ' + couleurE + ';">' + engagementPct + '%</strong></td>';
 
-        // NOUVEAU: Colonne Pattern avec badge
-        html += '<td><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
+        // Colonnes Pattern et RàI (affichées uniquement si RàI activé)
+        if (activerRai) {
+            // NOUVEAU: Colonne Pattern avec badge
+            html += '<td><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
 
-        // NOUVEAU: Colonne RàI avec badge amélioré
-        html += '<td style="text-align: center;"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
+            // NOUVEAU: Colonne RàI avec badge amélioré
+            html += '<td style="text-align: center;"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
+        }
 
         // NOUVEAU (Beta 85): Colonne Interventions
         const nbInterventions = (typeof obtenirInterventionsEtudiant === 'function')

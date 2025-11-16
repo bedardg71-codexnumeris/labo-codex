@@ -3052,6 +3052,9 @@ function afficherProfilComplet(da) {
     const afficherPan = affichage.afficherAlternatif !== false;
     const modeComparatif = afficherSom && afficherPan;
 
+    // Vérifier si le modèle RàI est activé
+    const activerRai = config.activerRai !== false; // Par défaut true (rétrocompatibilité)
+
     // Calculer indices pour les deux pratiques
     const indicesSOM = calculerTousLesIndices(da, 'SOM');
     const indicesPAN = calculerTousLesIndices(da, 'PAN');
@@ -3080,9 +3083,13 @@ function afficherProfilComplet(da) {
     } else if (sectionAffichee === 'rapport') {
         titreSection = 'Rapport';
         contenuSection = genererSectionRapport(da);
-    } else if (sectionAffichee === 'accompagnement') {
+    } else if (sectionAffichee === 'accompagnement' && activerRai) {
         titreSection = 'Accompagnement';
         contenuSection = genererSectionAccompagnement(da);
+    } else if (sectionAffichee === 'accompagnement' && !activerRai) {
+        // Si RàI désactivé, rediriger vers productions
+        titreSection = 'Productions et évaluations';
+        contenuSection = genererSectionProductions(da);
     }
 
     // Générer le HTML avec layout sidebar matériel
@@ -3151,10 +3158,12 @@ function afficherProfilComplet(da) {
                         <div class="sidebar-item-titre">Développement des habiletés</div>
                     </div>
 
-                    <!-- 4. Accompagnement -->
+                    <!-- 4. Accompagnement (affiché uniquement si RàI activé) -->
+                    ${activerRai ? `
                     <div class="sidebar-item ${sectionAffichee === 'accompagnement' ? 'active' : ''}" onclick="changerSectionProfil('accompagnement')">
                         <div class="sidebar-item-titre">Accompagnement</div>
                     </div>
+                    ` : ''}
 
                     <!-- 5. Rapport -->
                     <div class="sidebar-item ${sectionAffichee === 'rapport' ? 'active' : ''}" onclick="changerSectionProfil('rapport')">
