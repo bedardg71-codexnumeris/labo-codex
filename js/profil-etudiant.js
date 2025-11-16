@@ -51,11 +51,40 @@
 /**
  * Obtient le nombre de productions à analyser pour les patterns
  * depuis la configuration des seuils d'interprétation
- * @returns {number} - Nombre de productions (défaut: 7)
+ * @returns {number} - Nombre de productions (défaut: 3)
  */
 function obtenirNombreProductionsPourPatterns() {
     const seuils = chargerSeuilsInterpretation();
     return seuils.nombreProductionsAnalyse || 3;
+}
+
+/**
+ * Obtient la grille de référence configurée pour le dépistage
+ * Cette grille définit les critères utilisés pour identifier forces/défis
+ *
+ * @returns {Object|null} - Grille complète avec {id, nom, criteres[], ...} ou null si non configurée
+ */
+function obtenirGrilleReferenceDepistage() {
+    // Lire la configuration
+    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const grilleId = modalites.grilleReferenceDepistage;
+
+    if (!grilleId) {
+        console.warn('⚠️ Aucune grille de référence configurée pour le dépistage');
+        return null;
+    }
+
+    // Lire toutes les grilles
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!grille) {
+        console.error(`❌ Grille de référence "${grilleId}" introuvable`);
+        return null;
+    }
+
+    console.log(`✅ Grille de référence: "${grille.nom}" (${grille.criteres.length} critères)`);
+    return grille;
 }
 
 /**
@@ -3833,21 +3862,42 @@ function calculerMoyennesCriteres(da) {
         return null;
     }
 
+    // Lire la grille de référence configurée
+    const grille = obtenirGrilleReferenceDepistage();
+    if (!grille || !grille.criteres || grille.criteres.length === 0) {
+        console.warn('⚠️ Pas de grille de référence - calcul moyennes impossible');
+        return null;
+    }
+
     // Obtenir la table de conversion IDME depuis l'échelle configurée
     const tableConversion = obtenirTableConversionIDME();
 
-    // Accumuler les scores par critère
-    const scoresCriteres = {
-        structure: [],
-        rigueur: [],
-        plausibilite: [],
-        nuance: [],
-        francais: []
-    };
+    // Initialiser accumulateurs dynamiquement selon critères de la grille
+    const scoresCriteres = {};
+    grille.criteres.forEach(c => {
+        const cleNormalisee = c.nom.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, '');
+        scoresCriteres[cleNormalisee] = [];
+    });
 
-    // Regex pour extraire: NOM_CRITERE (NIVEAU)
-    // Accepte les variantes avec/sans accents et casse mixte
-    const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi;
+    // Construire regex dynamique pour capturer tous les critères
+    // Ex: (STRUCTURE|RIGUEUR|ANALYSE) \s*\(([IDME])\)
+    const nomsRegex = grille.criteres.map(c => {
+        // Échapper caractères spéciaux et gérer variantes accents
+        const nom = c.nom.toUpperCase()
+            .replace(/É/g, '[ÉE]')
+            .replace(/È/g, '[ÈE]')
+            .replace(/Ç/g, '[ÇC]')
+            .replace(/À/g, '[ÀA]')
+            .replace(/\s+/g, '\\s+'); // Espaces multiples acceptés
+        return nom;
+    }).join('|');
+
+    const regexCritere = new RegExp(`(${nomsRegex})\\s*\\(([IDME0])\\)`, 'gi');
+
+    console.log(`✅ Regex dynamique pour ${grille.criteres.length} critères:`, regexCritere);
 
     evaluationsEleve.forEach(evaluation => {
         const retroaction = evaluation.retroactionFinale || '';
@@ -3855,21 +3905,32 @@ function calculerMoyennesCriteres(da) {
         // Extraire tous les critères avec leur niveau
         let match;
         while ((match = regexCritere.exec(retroaction)) !== null) {
-            const nomCritere = match[1].toUpperCase();
+            const nomCritereTrouve = match[1].toUpperCase();
             const niveauIDME = match[2].toUpperCase();
             const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
 
             if (score !== null) {
-                if (nomCritere === 'STRUCTURE') {
-                    scoresCriteres.structure.push(score);
-                } else if (nomCritere === 'RIGUEUR') {
-                    scoresCriteres.rigueur.push(score);
-                } else if (nomCritere.startsWith('PLAUSIBILIT')) {
-                    scoresCriteres.plausibilite.push(score);
-                } else if (nomCritere === 'NUANCE') {
-                    scoresCriteres.nuance.push(score);
-                } else if (nomCritere.startsWith('FRAN')) {
-                    scoresCriteres.francais.push(score);
+                // Trouver quel critère de la grille correspond
+                const critereCorrespondant = grille.criteres.find(c => {
+                    const nomAttendu = c.nom.toUpperCase()
+                        .replace(/[ÉÈÊË]/g, 'E')
+                        .replace(/[ÇC]/g, 'C')
+                        .replace(/[ÀÂ]/g, 'A')
+                        .replace(/\s+/g, '');
+                    const nomTrouve = nomCritereTrouve
+                        .replace(/[ÉÈÊË]/g, 'E')
+                        .replace(/[ÇC]/g, 'C')
+                        .replace(/[ÀÂ]/g, 'A')
+                        .replace(/\s+/g, '');
+                    return nomAttendu === nomTrouve;
+                });
+
+                if (critereCorrespondant) {
+                    const cleNormalisee = critereCorrespondant.nom.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .replace(/\s+/g, '');
+                    scoresCriteres[cleNormalisee].push(score);
                 }
             }
         }
@@ -3877,20 +3938,17 @@ function calculerMoyennesCriteres(da) {
 
     console.log('  Scores extraits:', scoresCriteres);
 
-    // Calculer les moyennes avec clés en majuscule initiale pour cohérence
+    // Calculer les moyennes
     const moyennes = {};
     let aucuneDonnee = true;
 
-    Object.keys(scoresCriteres).forEach(critere => {
-        const scores = scoresCriteres[critere];
-        // Convertir la clé en majuscule initiale (structure → Structure)
-        const cleFormatee = critere.charAt(0).toUpperCase() + critere.slice(1);
-
+    Object.keys(scoresCriteres).forEach(cle => {
+        const scores = scoresCriteres[cle];
         if (scores.length > 0) {
-            moyennes[cleFormatee] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+            moyennes[cle] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
             aucuneDonnee = false;
         } else {
-            moyennes[cleFormatee] = null;
+            moyennes[cle] = null;
         }
     });
 
@@ -3898,12 +3956,13 @@ function calculerMoyennesCriteres(da) {
 }
 
 /**
- * Calcule les moyennes des critères SRPNF sur les N derniers artefacts
+ * Calcule les moyennes des critères sur les N derniers artefacts
  * Spécifique à la PAN-maîtrise (regarde les artefacts récents, pas toutes les évaluations)
+ * Utilise la grille de référence configurée pour les critères.
  *
  * @param {string} da - Numéro DA de l'étudiant
  * @param {number} nombreArtefacts - Nombre d'artefacts récents à considérer (défaut: lire config.configPAN.nombreCours)
- * @returns {Object|null} - { structure, rigueur, plausibilite, nuance, francais } ou null
+ * @returns {Object|null} - Moyennes par critère (clés normalisées) ou null
  */
 function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
     // Lire le nombre d'artefacts depuis la config si non fourni
@@ -3945,20 +4004,39 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
     console.log(`  Nombre d'artefacts demandés: ${nombreArtefacts}`);
     console.log(`  Nombre d'artefacts retenus: ${derniersArtefacts.length}`);
 
+    // Lire la grille de référence configurée
+    const grille = obtenirGrilleReferenceDepistage();
+
+    if (!grille || !grille.criteres || grille.criteres.length === 0) {
+        console.warn('⚠️ Pas de grille de référence - calcul moyennes critères récents impossible');
+        return null;
+    }
+
     // Obtenir la table de conversion IDME
     const tableConversion = obtenirTableConversionIDME();
 
-    // Accumuler les scores par critère
-    const scoresCriteres = {
-        structure: [],
-        rigueur: [],
-        plausibilite: [],
-        nuance: [],
-        francais: []
-    };
+    // Initialiser accumulateurs dynamiquement selon critères de la grille
+    const scoresCriteres = {};
+    grille.criteres.forEach(c => {
+        const cleNormalisee = c.nom.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, '');
+        scoresCriteres[cleNormalisee] = [];
+    });
 
-    // Regex pour extraire: NOM_CRITERE (NIVEAU)
-    const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME])\)/gi;
+    // Construire regex dynamique pour capturer tous les critères
+    const nomsRegex = grille.criteres.map(c => {
+        const nom = c.nom.toUpperCase()
+            .replace(/É/g, '[ÉE]')
+            .replace(/È/g, '[ÈE]')
+            .replace(/Ç/g, '[ÇC]')
+            .replace(/À/g, '[ÀA]')
+            .replace(/\s+/g, '\\s+');
+        return nom;
+    }).join('|');
+
+    const regexCritere = new RegExp(`(${nomsRegex})\\s*\\(([IDME0])\\)`, 'gi');
 
     derniersArtefacts.forEach(evaluation => {
         const retroaction = evaluation.retroactionFinale || '';
@@ -3966,21 +4044,32 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
         // Extraire tous les critères avec leur niveau
         let match;
         while ((match = regexCritere.exec(retroaction)) !== null) {
-            const nomCritere = match[1].toUpperCase();
+            const nomCritereTrouve = match[1].toUpperCase();
             const niveauIDME = match[2].toUpperCase();
             const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
 
             if (score !== null) {
-                if (nomCritere === 'STRUCTURE') {
-                    scoresCriteres.structure.push(score);
-                } else if (nomCritere === 'RIGUEUR') {
-                    scoresCriteres.rigueur.push(score);
-                } else if (nomCritere.startsWith('PLAUSIBILIT')) {
-                    scoresCriteres.plausibilite.push(score);
-                } else if (nomCritere === 'NUANCE') {
-                    scoresCriteres.nuance.push(score);
-                } else if (nomCritere.startsWith('FRAN')) {
-                    scoresCriteres.francais.push(score);
+                // Trouver le critère correspondant dans la grille
+                const critereCorrespondant = grille.criteres.find(c => {
+                    const nomAttendu = c.nom.toUpperCase()
+                        .replace(/[ÉÈÊË]/g, 'E')
+                        .replace(/[ÇC]/g, 'C')
+                        .replace(/[ÀÂ]/g, 'A')
+                        .replace(/\s+/g, '');
+                    const nomTrouve = nomCritereTrouve
+                        .replace(/[ÉÈÊË]/g, 'E')
+                        .replace(/[ÇC]/g, 'C')
+                        .replace(/[ÀÂ]/g, 'A')
+                        .replace(/\s+/g, '');
+                    return nomAttendu === nomTrouve;
+                });
+
+                if (critereCorrespondant) {
+                    const cleNormalisee = critereCorrespondant.nom.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .replace(/\s+/g, '');
+                    scoresCriteres[cleNormalisee].push(score);
                 }
             }
         }
@@ -3992,9 +4081,9 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
     const moyennes = {};
     let aucuneDonnee = true;
 
-    Object.keys(scoresCriteres).forEach(critere => {
-        const scores = scoresCriteres[critere];
-        const cleFormatee = critere.charAt(0).toUpperCase() + critere.slice(1);
+    Object.keys(scoresCriteres).forEach(cle => {
+        const scores = scoresCriteres[cle];
+        const cleFormatee = cle.charAt(0).toUpperCase() + cle.slice(1);
 
         if (scores.length > 0) {
             moyennes[cleFormatee] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
@@ -4122,16 +4211,45 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
         return { forces: [], defis: [], principaleForce: null, principalDefi: null };
     }
 
-    const criteres = [
-        { nom: 'Structure', cle: 'structure', score: moyennes.structure },
-        { nom: 'Rigueur', cle: 'rigueur', score: moyennes.rigueur },
-        { nom: 'Plausibilité', cle: 'plausibilite', score: moyennes.plausibilite },
-        { nom: 'Nuance', cle: 'nuance', score: moyennes.nuance },
-        { nom: 'Français', cle: 'francais', score: moyennes.francais }
-    ].filter(c => c.score !== null);
+    // Lire la grille de référence configurée
+    const grille = obtenirGrilleReferenceDepistage();
 
-    const forces = criteres.filter(c => c.score >= seuil).sort((a, b) => b.score - a.score);
-    const defis = criteres.filter(c => c.score < seuil).sort((a, b) => a.score - b.score);
+    if (!grille || !grille.criteres || grille.criteres.length === 0) {
+        console.warn('⚠️ Pas de grille de référence - diagnostic forces/défis impossible');
+        return { forces: [], defis: [], principaleForce: null, principalDefi: null };
+    }
+
+    // Construire dynamiquement le tableau des critères depuis la grille
+    const criteres = grille.criteres.map(c => {
+        // Normaliser le nom du critère pour trouver sa clé dans moyennes
+        // Ex: "Structure" → "structure", "Plausibilité" → "plausibilite"
+        const cleNormalisee = c.nom.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Enlever accents
+            .replace(/\s+/g, '');  // Enlever espaces
+
+        return {
+            nom: c.nom,
+            cle: cleNormalisee,
+            score: moyennes[cleNormalisee] ?? null,
+            ponderation: c.ponderation || 0
+        };
+    }).filter(c => c.score !== null); // Garder seulement critères avec score
+
+    // Trier forces et défis (considérer pondération pour importance)
+    const forces = criteres.filter(c => c.score >= seuil).sort((a, b) => {
+        // Tri primaire : par score descendant
+        if (Math.abs(b.score - a.score) > 0.01) return b.score - a.score;
+        // Tri secondaire : par pondération (critères importants en premier)
+        return b.ponderation - a.ponderation;
+    });
+
+    const defis = criteres.filter(c => c.score < seuil).sort((a, b) => {
+        // Tri primaire : par score ascendant (pire défi en premier)
+        if (Math.abs(a.score - b.score) > 0.01) return a.score - b.score;
+        // Tri secondaire : par pondération (défis importants en premier)
+        return b.ponderation - a.ponderation;
+    });
 
     return {
         forces: forces,
