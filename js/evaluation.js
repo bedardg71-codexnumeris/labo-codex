@@ -2924,11 +2924,38 @@ function modifierEvaluation(evaluationId) {
 
     /**
      * Trouve le numéro de groupe d'un étudiant
+     * Cherche d'abord dans les étudiants, puis en fallback dans l'évaluation elle-même
      */
     const trouverGroupeEtudiant = (da) => {
-        const etudiants = obtenirDonneesSelonMode('etudiants') || [];
-        const etudiant = etudiants.find(e => e.numeroDA === da);
-        return etudiant ? etudiant.groupe : null;
+        // Méthode 1: Chercher dans la liste des étudiants
+        // NOTE: La clé est 'groupeEtudiants', pas 'etudiants' (cohérence avec reste du code)
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
+        const etudiant = etudiants.find(e => e.da === da);
+        if (etudiant && etudiant.groupe) {
+            return etudiant.groupe;
+        }
+
+        // Méthode 2 (fallback): Si l'étudiant n'est pas trouvé, chercher le groupe
+        // depuis l'évaluation elle-même (peut arriver si mode données différent)
+        console.warn(`⚠️ Étudiant DA ${da} non trouvé dans liste étudiants, utilisation fallback`);
+
+        // L'évaluation contient déjà le groupe via etudiantNom qui peut être parsé
+        // OU on peut chercher dans d'autres évaluations du même étudiant
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        const autreEval = evaluations.find(e => e.etudiantDA === da && e.id !== evaluationId);
+
+        if (autreEval && autreEval.groupe) {
+            console.log(`✅ Groupe trouvé via autre évaluation: ${autreEval.groupe}`);
+            return autreEval.groupe;
+        }
+
+        // Si l'évaluation actuelle contient le groupe, l'utiliser
+        if (evaluation.groupe) {
+            console.log(`✅ Groupe trouvé dans évaluation actuelle: ${evaluation.groupe}`);
+            return evaluation.groupe;
+        }
+
+        return null;
     };
 
     /**
