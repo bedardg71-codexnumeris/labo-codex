@@ -1,7 +1,17 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Backups
+*.backup-*
+*.old
 *.bak
 
-# Dossier de distribution (packages ZIP)
-dist/
+# Temporary
+*.tmp
+*.temp
+~*
 
-# Fichiers système macOS
-.DS_Store
+# Node modules (si on en ajoute plus tard)
+node_modules/
