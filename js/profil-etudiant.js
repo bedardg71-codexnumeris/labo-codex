@@ -1440,11 +1440,11 @@ function genererSectionAccompagnement(da) {
     const seuilDeveloppement = obtenirSeuil('idme.developpement');
 
     const criteresSRPNF = [
-        { nom: 'Structure', valeur: moyennesCriteres.Structure || 0 },
-        { nom: 'Rigueur', valeur: moyennesCriteres.Rigueur || 0 },
-        { nom: 'Plausibilité', valeur: moyennesCriteres.Plausibilité || 0 },
-        { nom: 'Nuance', valeur: moyennesCriteres.Nuance || 0 },
-        { nom: 'Français', valeur: moyennesCriteres.Français || 0 }
+        { nom: 'Structure', valeur: moyennesCriteres?.structure ?? 0 },
+        { nom: 'Rigueur', valeur: moyennesCriteres?.rigueur ?? 0 },
+        { nom: 'Plausibilité', valeur: moyennesCriteres?.plausibilite ?? 0 },
+        { nom: 'Nuance', valeur: moyennesCriteres?.nuance ?? 0 },
+        { nom: 'Français', valeur: moyennesCriteres?.francais ?? 0 }
     ];
 
     const forces = criteresSRPNF.filter(c => c.valeur >= seuilMaitrise);
