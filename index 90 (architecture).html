@@ -6751,6 +6751,64 @@ Exemple :
                         </div>
                     </div>
 
+                    <!-- Carte: 5b. Grille de référence pour dépistage -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">5b. Configurer la grille de critères pour le dépistage</h3>
+                        <p><strong>Navigation :</strong> Réglages → Pratique de notation (section «Grille de critères pour le dépistage»)</p>
+
+                        <p><strong>Pourquoi configurer une grille de référence ?</strong></p>
+                        <p>Le système de dépistage identifie automatiquement les <strong>forces et défis</strong> de chaque étudiant en analysant leurs performances sur vos critères d'évaluation. Pour fonctionner, il doit savoir quels critères vous utilisez dans votre discipline.</p>
+
+                        <p><strong>Étape 1 : Créer votre grille de critères</strong></p>
+                        <ol>
+                            <li>Aller dans <strong>Matériel → Critères d'évaluation</strong></li>
+                            <li>Cliquer sur «➕ Créer une nouvelle grille»</li>
+                            <li>Nommer votre grille (ex: «Grille SRPNF Littérature», «Rapport de labo - Chimie»)</li>
+                            <li>Ajouter vos critères d'évaluation :
+                                <ul class="mt-5">
+                                    <li><strong>Nom</strong> : Nom du critère (ex: Structure, Hypothèse, Analyse)</li>
+                                    <li><strong>Pondération</strong> : Importance relative (ex: 20%, 30%)</li>
+                                    <li><strong>Description</strong> : Définition du critère (optionnel)</li>
+                                </ul>
+                            </li>
+                            <li>Vérifier que la pondération totale = 100%</li>
+                            <li>Sauvegarder la grille</li>
+                        </ol>
+
+                        <p><strong>Étape 2 : Définir la grille comme référence</strong></p>
+                        <ol>
+                            <li>Retourner dans <strong>Réglages → Pratique de notation</strong></li>
+                            <li>Section «Grille de critères pour le dépistage»</li>
+                            <li>Sélectionner votre grille dans le menu déroulant</li>
+                            <li>Cliquer sur «Sauvegarder les réglages»</li>
+                        </ol>
+
+                        <div class="alerte alerte-attention">
+                            <strong>Important :</strong> Vous devez utiliser cette même grille pour toutes vos évaluations. Le dépistage fonctionne en analysant vos rétroactions écrites (ex: «STRUCTURE (M) RIGUEUR (D)»).
+                        </div>
+
+                        <p><strong>Exemples de grilles par discipline :</strong></p>
+                        <ul>
+                            <li><strong>Littérature</strong> : Structure, Rigueur, Plausibilité, Nuance, Français</li>
+                            <li><strong>Chimie</strong> : Hypothèse, Protocole, Analyse, Conclusion</li>
+                            <li><strong>Anthropologie</strong> : Contextualisation, Méthodologie, Analyse comparative, Réflexivité</li>
+                            <li><strong>Mathématiques</strong> : Compréhension, Démarche, Calculs, Communication</li>
+                            <li><strong>Histoire</strong> : Contextualisation, Analyse de sources, Argumentation, Synthèse</li>
+                        </ul>
+
+                        <p><strong>Comment le système utilise la grille :</strong></p>
+                        <ul>
+                            <li><strong>Diagnostic forces/défis</strong> : Identifie automatiquement les critères maîtrisés (≥70%) et les défis (&lt;70%)</li>
+                            <li><strong>Patterns d'apprentissage</strong> : Détecte progression, blocages émergents, blocages critiques</li>
+                            <li><strong>Priorisation</strong> : Les critères avec pondération élevée sont priorisés dans les recommandations</li>
+                            <li><strong>Suivi longitudinal</strong> : Calcule l'évolution de chaque critère au fil du temps</li>
+                        </ul>
+
+                        <div class="alerte alerte-succes">
+                            <strong>Validation rapide :</strong> Après configuration, ouvrez le profil d'un étudiant évalué et vérifiez que la section «Développement des habiletés et compétences» affiche les forces/défis basés sur vos critères.
+                        </div>
+                    </div>
+
                     <!-- Carte: Checklist -->
                     <div class="carte" class="bg-bleu-tres-pale">
                         <h3 class="carte-titre-bleu">Checklist de configuration</h3>
@@ -6761,6 +6819,7 @@ Exemple :
                             <li class="py-8">[ ] Liste des étudiants importée/saisie</li>
                             <li class="py-8">[ ] Horaire défini (si disponible)</li>
                             <li class="py-8">[ ] Pratiques PAN paramétrées</li>
+                            <li class="py-8">[ ] Grille de critères créée et définie comme référence</li>
                         </ul>
                         <p class="titre-mt15-fw-bold-bleu">→ Vous êtes prêt à commencer le suivi hebdomadaire !</p>
                     </div>
@@ -7011,6 +7070,130 @@ Exemple :
 
                         <div class="alerte alerte-succes" class="mt-15">
                             <strong>Principe directeur :</strong> Le Groupe 9999 est votre terrain de jeu pédagogique. Explorez, expérimentez, apprenez sans risque !
+                        </div>
+                    </div>
+
+                    <!-- Carte: Validation configuration grille de référence -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">✅ Valider votre configuration : Tests de la grille de référence</h3>
+                        <p><strong>Objectif :</strong> S'assurer que votre grille de critères fonctionne correctement avec le système de dépistage</p>
+
+                        <p class="text-105-mt15"><strong>Pourquoi tester ?</strong></p>
+                        <p>Le système de dépistage analyse vos rétroactions pour identifier automatiquement les forces et défis de chaque étudiant. Il est important de valider que :</p>
+                        <ul>
+                            <li>Votre grille est correctement configurée</li>
+                            <li>Le système reconnaît vos critères dans les rétroactions</li>
+                            <li>Les diagnostics sont pertinents pour votre discipline</li>
+                        </ul>
+
+                        <div class="alerte-success-green">
+                            <h4 class="text-success-dark-mb10">Test 1 : Vérifier l'interface</h4>
+                            <p><strong>Étapes :</strong></p>
+                            <ol class="lh-relaxed">
+                                <li>Aller dans <strong>Réglages → Pratique de notation</strong></li>
+                                <li>Localiser la section «Grille de critères pour le dépistage»</li>
+                                <li>Vérifier que le menu déroulant affiche vos grilles créées</li>
+                                <li>Vérifier que le message d'aide s'affiche correctement</li>
+                            </ol>
+                            <p><strong>✅ Résultat attendu :</strong> Le select contient au minimum l'option «-- Sélectionner une grille --» et vos grilles personnalisées.</p>
+                        </div>
+
+                        <div class="alerte-info-bleu">
+                            <h4 class="titre-bleu-mb10">Test 2 : Créer une grille pour votre discipline</h4>
+                            <p><strong>Étapes :</strong></p>
+                            <ol class="lh-relaxed">
+                                <li>Aller dans <strong>Matériel → Critères d'évaluation</strong></li>
+                                <li>Cliquer sur «➕ Créer une nouvelle grille»</li>
+                                <li>Nommer votre grille (ex: «Grille SRPNF Littérature», «Rapport de labo - Chimie»)</li>
+                                <li>Ajouter vos critères avec pondérations :
+                                    <ul class="mt-5">
+                                        <li><strong>Littérature :</strong> Structure (15%), Rigueur (20%), Plausibilité (10%), Nuance (25%), Français (30%)</li>
+                                        <li><strong>Chimie :</strong> Hypothèse (20%), Protocole (30%), Analyse (30%), Conclusion (20%)</li>
+                                        <li><strong>Anthropologie :</strong> Contextualisation (25%), Méthodologie (25%), Analyse comparative (30%), Réflexivité (20%)</li>
+                                    </ul>
+                                </li>
+                                <li>Vérifier que la pondération totale = 100%</li>
+                                <li>Sauvegarder la grille</li>
+                            </ol>
+                            <p><strong>✅ Résultat attendu :</strong> Grille créée avec succès, message de confirmation affiché.</p>
+                        </div>
+
+                        <div class="alerte-warning-orange-clair">
+                            <h4 class="titre-orange-mb10">Test 3 : Définir comme grille de référence</h4>
+                            <p><strong>Étapes :</strong></p>
+                            <ol class="lh-relaxed">
+                                <li>Retourner dans <strong>Réglages → Pratique de notation</strong></li>
+                                <li>Section «Grille de critères pour le dépistage»</li>
+                                <li>Sélectionner votre grille dans le menu déroulant</li>
+                                <li>Cliquer sur «Sauvegarder les réglages»</li>
+                                <li>Ouvrir la <strong>console du navigateur</strong> (Safari: Cmd+Alt+C, Chrome: Cmd+Alt+J)</li>
+                                <li>Recharger la page (Cmd+R)</li>
+                                <li>Observer les messages dans la console</li>
+                            </ol>
+                            <p><strong>✅ Messages attendus dans la console :</strong></p>
+                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 0.85rem;">✅ Module Interprétation initialisé
+✅ 1 grille(s) chargée(s) dans le sélecteur de référence
+✅ Grille de référence: "Grille SRPNF Littérature" (5 critères)</pre>
+                        </div>
+
+                        <div class="alerte-purple">
+                            <h4 class="text-purple-mb10">Test 4 : Diagnostic forces/défis (avec données)</h4>
+                            <p><strong>Prérequis :</strong> Avoir des étudiants avec au moins une évaluation</p>
+                            <p><strong>Étapes :</strong></p>
+                            <ol class="lh-relaxed">
+                                <li>Aller dans <strong>Consultation → Profils individuels</strong></li>
+                                <li>Ouvrir le profil d'un étudiant évalué</li>
+                                <li>Section «Développement des habiletés et compétences»</li>
+                                <li>Vérifier l'affichage des forces et défis</li>
+                                <li>Ouvrir la console et observer les logs</li>
+                            </ol>
+                            <p><strong>✅ Résultat attendu :</strong></p>
+                            <ul>
+                                <li>Forces affichées avec pourcentages (ex: Nuance 82%, Rigueur 78%)</li>
+                                <li>Défis affichés avec pourcentages (ex: Structure 65%, Plausibilité 68%)</li>
+                                <li>Console : <code>✅ Grille de référence: "Votre grille" (X critères)</code></li>
+                                <li>Console : <code>✅ Regex dynamique pour X critères: /(...)/gi</code></li>
+                            </ul>
+                        </div>
+
+                        <div class="alerte-info-cyan">
+                            <h4 style="color: #0c5460; margin-bottom: 10px;">Test 5 : Tester avec grille alternative (optionnel)</h4>
+                            <p><strong>Objectif :</strong> Valider que le changement de grille fonctionne sans erreur</p>
+                            <p><strong>Étapes :</strong></p>
+                            <ol class="lh-relaxed">
+                                <li>Créer une seconde grille pour une autre discipline (ex: Chimie si vous aviez créé Littérature)</li>
+                                <li>Dans <strong>Réglages → Pratique de notation</strong>, basculer vers la nouvelle grille</li>
+                                <li>Sauvegarder</li>
+                                <li>Ouvrir un profil étudiant et observer la console</li>
+                                <li>Vérifier que les nouveaux critères apparaissent</li>
+                            </ol>
+                            <p><strong>✅ Résultat attendu :</strong></p>
+                            <ul>
+                                <li>Console : Confirmation de la nouvelle grille (ex: «4 critères» au lieu de «5 critères»)</li>
+                                <li>Si l'étudiant n'a pas d'évaluations avec ces critères : affichage «Aucune donnée disponible» (normal)</li>
+                                <li><strong>Aucune erreur JavaScript</strong> dans la console</li>
+                            </ul>
+                        </div>
+
+                        <div class="carte-gradient-bleu">
+                            <p class="titre-11-bold-bleu-mb10">
+                                🔍 Messages de la console à surveiller :
+                            </p>
+                            <p><strong>Messages normaux (OK) :</strong></p>
+                            <pre style="background: rgba(255,255,255,0.3); padding: 8px; border-radius: 4px; font-size: 0.8rem;">✅ Module Interprétation initialisé
+✅ Grille de référence: "Nom grille" (X critères)
+✅ Regex dynamique pour X critères: /(CRITÈRE1|CRITÈRE2...)/gi
+⚠️ Pas de grille de référence (si non configurée - normal au 1er démarrage)</pre>
+
+                            <p class="mt-12"><strong>Erreurs interdites (PROBLÈME) :</strong></p>
+                            <pre style="background: rgba(255,0,0,0.1); padding: 8px; border-radius: 4px; font-size: 0.8rem; color: #d32f2f;">❌ TypeError: Cannot read property 'criteres' of null
+❌ ReferenceError: obtenirGrilleReferenceDepistage is not defined
+❌ Grille de référence "xxx" introuvable</pre>
+                            <p style="margin-top: 8px;"><strong>→ Si vous voyez ces erreurs</strong> : Vérifier que la grille existe bien et qu'elle est correctement sélectionnée dans les réglages.</p>
+                        </div>
+
+                        <div class="alerte alerte-succes" class="mt-15">
+                            <strong>💡 Conseil :</strong> Gardez la console ouverte lors des premiers tests. Elle affiche des informations précieuses sur le fonctionnement du système et aide à diagnostiquer rapidement tout problème de configuration.
                         </div>
                     </div>
                 </div>
