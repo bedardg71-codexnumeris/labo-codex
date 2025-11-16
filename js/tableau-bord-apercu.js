@@ -1206,40 +1206,34 @@ function afficherNiveauxRaI(etudiants) {
     const pratiqueSOM = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('sommative') : null;
     const pratiquePAN = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('pan-maitrise') : null;
 
-    // Préparer les données pour SOM
+    // 🆕 NOUVEAU Beta 90+ : Utiliser determinerNiveauRaiPedagogique() pour cohérence
+    // Cette fonction calcule le niveau RàI basé UNIQUEMENT sur P + SRPNF (sans A-C)
+    // Garantit la cohérence avec la section Accompagnement (Single Source of Truth)
+
     const etudiantsSOM = [];
-    if (pratiqueSOM) {
-        etudiants.forEach(e => {
-            const cibleInfo = pratiqueSOM.genererCibleIntervention(e.da);
-            const niveau = cibleInfo ? cibleInfo.niveau : null;
-
-            if (niveau) {
-                etudiantsSOM.push({
-                    da: e.da,
-                    nom: e.nom,
-                    prenom: e.prenom,
-                    niveau: niveau
-                });
-            }
-        });
-    }
-
-    // Préparer les données pour PAN
     const etudiantsPAN = [];
-    if (pratiquePAN) {
+
+    // Utiliser la même fonction pour SOM et PAN (niveau RàI pédagogique identique)
+    if (typeof determinerNiveauRaiPedagogique === 'function') {
         etudiants.forEach(e => {
-            const cibleInfo = pratiquePAN.genererCibleIntervention(e.da);
-            const niveau = cibleInfo ? cibleInfo.niveau : null;
+            const niveauInfo = determinerNiveauRaiPedagogique(e.da);
+            const niveau = niveauInfo ? niveauInfo.niveau : null;
 
             if (niveau) {
-                etudiantsPAN.push({
+                const etudiantData = {
                     da: e.da,
                     nom: e.nom,
                     prenom: e.prenom,
                     niveau: niveau
-                });
+                };
+
+                // Ajouter aux deux listes (même niveau pour SOM et PAN car basé sur les mêmes critères pédagogiques)
+                etudiantsSOM.push({...etudiantData});
+                etudiantsPAN.push({...etudiantData});
             }
         });
+    } else {
+        console.warn('⚠️ [RàI] Fonction determinerNiveauRaiPedagogique non disponible');
     }
 
     // Trouver la carte "Indicateurs globaux du groupe"

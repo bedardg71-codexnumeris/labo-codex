@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démo - Séparation Niveau RàI et Contexte</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .intro {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #1e3a8a;
+        }
+
+        .intro h2 {
+            color: #1e3a8a;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .intro p {
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .comparaison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .colonne {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .colonne h3 {
+            color: #dc3545;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dc3545;
+        }
+
+        .colonne.nouvelle h3 {
+            color: #16a34a;
+            border-bottom-color: #16a34a;
+        }
+
+        .cas {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .cas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .cas-titre {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+
+        .cas-donnees {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .donnee {
+            background: #f3f4f6;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* ANCIENNE VERSION */
+        .ancienne-version {
+            background: #fef2f2;
+            border: 2px solid #dc3545;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .ancienne-version .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .ancienne-version .emoji {
+            font-size: 3rem;
+        }
+
+        .ancienne-version .titre-niveau {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .ancienne-version .niveau {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #dc3545;
+        }
+
+        .ancienne-version .cible {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .ancienne-version .probleme {
+            background: #fee;
+            border-left: 4px solid #dc3545;
+            padding: 12px 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .ancienne-version .probleme-titre {
+            font-weight: 600;
+            color: #dc3545;
+            margin-bottom: 5px;
+        }
+
+        /* NOUVELLE VERSION */
+        .nouvelle-version {
+            display: grid;
+            gap: 20px;
+        }
+
+        .carte-rai, .carte-contexte {
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .carte-rai {
+            background: #f0fdf4;
+            border: 2px solid #16a34a;
+        }
+
+        .carte-rai.niveau-2 {
+            background: #fff7ed;
+            border-color: #ff9800;
+        }
+
+        .carte-rai.niveau-3 {
+            background: #fef2f2;
+            border-color: #dc3545;
+        }
+
+        .carte-contexte {
+            background: #f9fafb;
+            border: 2px solid #16a34a;
+        }
+
+        .carte-contexte.alerte-legere {
+            background: #fffbeb;
+            border-color: #ffc107;
+        }
+
+        .carte-contexte.alerte-moderee {
+            background: #fff7ed;
+            border-color: #ff9800;
+        }
+
+        .carte-contexte.alerte-critique {
+            background: #fef2f2;
+            border-color: #dc3545;
+        }
+
+        .carte-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .carte-emoji {
+            font-size: 3rem;
+        }
+
+        .carte-titre-section {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .carte-titre-principal {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .carte-rai .carte-titre-principal {
+            color: #16a34a;
+        }
+
+        .carte-rai.niveau-2 .carte-titre-principal {
+            color: #ff9800;
+        }
+
+        .carte-rai.niveau-3 .carte-titre-principal {
+            color: #dc3545;
+        }
+
+        .carte-contexte .carte-titre-principal {
+            color: #16a34a;
+        }
+
+        .carte-contexte.alerte-legere .carte-titre-principal {
+            color: #ffc107;
+        }
+
+        .carte-contexte.alerte-moderee .carte-titre-principal {
+            color: #ff9800;
+        }
+
+        .carte-contexte.alerte-critique .carte-titre-principal {
+            color: #dc3545;
+        }
+
+        .carte-cible {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .carte-details {
+            background: white;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .carte-details-titre {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .carte-details-contenu {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .metriques-mobilisation {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .metrique {
+            flex: 1;
+            background: white;
+            border-radius: 4px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .metrique-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .metrique-valeur {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .metrique-valeur.bon {
+            color: #16a34a;
+        }
+
+        .metrique-valeur.moyen {
+            color: #ffc107;
+        }
+
+        .metrique-valeur.faible {
+            color: #ff9800;
+        }
+
+        .metrique-valeur.critique {
+            color: #dc3545;
+        }
+
+        .recommandation {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+            padding: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 4px;
+        }
+
+        .avantages {
+            background: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .avantages-titre {
+            font-weight: 600;
+            color: #16a34a;
+            margin-bottom: 8px;
+        }
+
+        .avantages ul {
+            margin-left: 20px;
+            color: #333;
+        }
+
+        .avantages li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .comparaison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Démonstration: Séparation Niveau RàI et Contexte</h1>
+
+        <div class="intro">
+            <h2>Principe de la séparation</h2>
+            <p><strong>Niveau RàI pédagogique</strong> : Basé uniquement sur les données d'évaluation (Performance P + Critères SRPNF)</p>
+            <p><strong>Alerte contextuelle</strong> : Basée uniquement sur les données de mobilisation (Assiduité A + Complétion C)</p>
+            <p><strong>Jugement professionnel</strong> : Prend en compte les DEUX informations distinctes pour décider de l'intervention appropriée</p>
+        </div>
+
+        <div class="comparaison">
+            <div class="colonne">
+                <h3>❌ Ancienne version (amalgamée)</h3>
+                <ul style="color: #666; line-height: 1.8;">
+                    <li>Niveau RàI influence par A et C</li>
+                    <li>Élève performant + absent → Niveau 3</li>
+                    <li>Confusion pédagogie vs contexte</li>
+                    <li>Interventions mal ciblées</li>
+                </ul>
+            </div>
+            <div class="colonne nouvelle">
+                <h3>✅ Nouvelle version (séparée)</h3>
+                <ul style="color: #666; line-height: 1.8;">
+                    <li>Niveau RàI basé sur évaluation seulement</li>
+                    <li>Alerte contextuelle séparée</li>
+                    <li>Clarté conceptuelle</li>
+                    <li>Actions ciblées et cohérentes</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- CAS 1: LOÏC -->
+        <div class="cas">
+            <div class="cas-header">
+                <div class="cas-titre">Cas 1: Loïc B. (DA 9000157)</div>
+                <div class="cas-donnees">
+                    <span class="donnee">P: 74%</span>
+                    <span class="donnee">A: 95%</span>
+                    <span class="donnee">C: 88%</span>
+                </div>
+            </div>
+
+            <!-- Ancienne version -->
+            <div class="ancienne-version">
+                <div style="font-weight: 600; color: #dc3545; margin-bottom: 15px;">❌ ANCIENNE VERSION</div>
+                <div class="header">
+                    <div class="emoji">🟡</div>
+                    <div>
+                        <div class="titre-niveau">Niveau RàI</div>
+                        <div class="niveau">Niveau 1</div>
+                        <div class="cible">Suivi régulier en classe</div>
+                    </div>
+                </div>
+                <div class="probleme">
+                    <div class="probleme-titre">⚠️ Problème conceptuel</div>
+                    <div style="font-size: 0.9rem; color: #333;">
+                        Le niveau est correct par chance (A et C bons), mais il est déterminé en tenant compte de A et C.
+                        Si Loïc avait A=60%, il passerait à Niveau 3 même avec P=74% stable!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nouvelle version -->
+            <div class="nouvelle-version">
+                <div style="font-weight: 600; color: #16a34a; margin-bottom: 15px;">✅ NOUVELLE VERSION</div>
+
+                <!-- Niveau RàI pédagogique -->
+                <div class="carte-rai">
+                    <div class="carte-header">
+                        <div class="carte-emoji">🟢</div>
+                        <div>
+                            <div class="carte-titre-section">Niveau RàI pédagogique</div>
+                            <div class="carte-titre-principal">Niveau 1</div>
+                            <div class="carte-cible">Suivi régulier en classe</div>
+                        </div>
+                    </div>
+
+                    <div class="carte-details">
+                        <div class="carte-details-titre">📊 Critères pédagogiques</div>
+                        <div class="carte-details-contenu">
+                            • Performance (3 derniers artefacts): <strong>74% (D)</strong><br>
+                            • Pattern: <strong>Stable</strong><br>
+                            • Défis identifiés: Structure (70%), Rigueur (70%), Nuance (68%) - en consolidation normale<br>
+                            • Force principale: <strong>Français (100%)</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerte contextuelle -->
+                <div class="carte-contexte">
+                    <div class="carte-header">
+                        <div class="carte-emoji">✅</div>
+                        <div>
+                            <div class="carte-titre-section">Contexte d'apprentissage</div>
+                            <div class="carte-titre-principal">Mobilisation favorable</div>
+                        </div>
+                    </div>
+
+                    <div class="metriques-mobilisation">
+                        <div class="metrique">
+                            <div class="metrique-label">Assiduité</div>
+                            <div class="metrique-valeur bon">95%</div>
+                        </div>
+                        <div class="metrique">
+                            <div class="metrique-label">Complétion</div>
+                            <div class="metrique-valeur bon">88%</div>
+                        </div>
+                    </div>
+
+                    <div class="recommandation">
+                        ✅ Aucune action requise - Contexte propice à l'apprentissage
+                    </div>
+                </div>
+
+                <div class="avantages">
+                    <div class="avantages-titre">✨ Avantages de cette présentation</div>
+                    <ul>
+                        <li>Clarté: Loïc a un développement pédagogique stable ET un contexte favorable</li>
+                        <li>Pas de confusion: Les défis SRPNF sont en consolidation normale (65-74%)</li>
+                        <li>Action ciblée: Suivi régulier en classe, pas d'intervention intensive nécessaire</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAS 2: ÉLÈVE PERFORMANT MAIS ABSENT -->
+        <div class="cas">
+            <div class="cas-header">
+                <div class="cas-titre">Cas 2: Élise Martin (fictif)</div>
+                <div class="cas-donnees">
+                    <span class="donnee">P: 85%</span>
+                    <span class="donnee">A: 60%</span>
+                    <span class="donnee">C: 95%</span>
+                </div>
+            </div>
+
+            <!-- Ancienne version -->
+            <div class="ancienne-version">
+                <div style="font-weight: 600; color: #dc3545; margin-bottom: 15px;">❌ ANCIENNE VERSION</div>
+                <div class="header">
+                    <div class="emoji">🔴</div>
+                    <div>
+                        <div class="titre-niveau">Niveau RàI</div>
+                        <div class="niveau">Niveau 3 (Décrochage)</div>
+                        <div class="cible">Contact immédiat requis</div>
+                    </div>
+                </div>
+                <div class="probleme">
+                    <div class="probleme-titre">❌ PROBLÈME MAJEUR</div>
+                    <div style="font-size: 0.9rem; color: #333;">
+                        Élise maîtrise le contenu (P=85%) mais a des absences (maladie, obligations familiales).
+                        Le système la classe en "Décrochage pédagogique" alors qu'elle n'a AUCUN besoin d'intervention RàI!
+                        Elle a besoin de soutien contextuel (rattrapage, flexibilité), pas d'intervention pédagogique intensive.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nouvelle version -->
+            <div class="nouvelle-version">
+                <div style="font-weight: 600; color: #16a34a; margin-bottom: 15px;">✅ NOUVELLE VERSION</div>
+
+                <!-- Niveau RàI pédagogique -->
+                <div class="carte-rai">
+                    <div class="carte-header">
+                        <div class="carte-emoji">🟢</div>
+                        <div>
+                            <div class="carte-titre-section">Niveau RàI pédagogique</div>
+                            <div class="carte-titre-principal">Niveau 1</div>
+                            <div class="carte-cible">Suivi régulier en classe</div>
+                        </div>
+                    </div>
+
+                    <div class="carte-details">
+                        <div class="carte-details-titre">📊 Critères pédagogiques</div>
+                        <div class="carte-details-contenu">
+                            • Performance (3 derniers artefacts): <strong>85% (E - Étendu)</strong><br>
+                            • Pattern: <strong>Stable et maîtrisé</strong><br>
+                            • Défis identifiés: <strong>Aucun</strong><br>
+                            • Forces: Tous les critères SRPNF ≥ 75%
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerte contextuelle -->
+                <div class="carte-contexte alerte-moderee">
+                    <div class="carte-header">
+                        <div class="carte-emoji">🟠</div>
+                        <div>
+                            <div class="carte-titre-section">Contexte d'apprentissage</div>
+                            <div class="carte-titre-principal">Assiduité critique</div>
+                        </div>
+                    </div>
+
+                    <div class="metriques-mobilisation">
+                        <div class="metrique">
+                            <div class="metrique-label">Assiduité</div>
+                            <div class="metrique-valeur critique">60%</div>
+                        </div>
+                        <div class="metrique">
+                            <div class="metrique-label">Complétion</div>
+                            <div class="metrique-valeur bon">95%</div>
+                        </div>
+                    </div>
+
+                    <div class="recommandation">
+                        🟠 Vérifier obstacles contextuels (santé, transport, famille) lors du prochain cours. Offrir rattrapage et flexibilité si besoin.
+                    </div>
+                </div>
+
+                <div class="avantages">
+                    <div class="avantages-titre">✨ Avantages de cette présentation</div>
+                    <ul>
+                        <li><strong>Clarté totale</strong>: Élise n'a PAS de problème pédagogique (RàI Niveau 1)</li>
+                        <li><strong>Action appropriée</strong>: Soutien contextuel (rattrapage), pas d'intervention RàI intensive</li>
+                        <li><strong>Respect réalité</strong>: Absences ≠ difficultés d'apprentissage</li>
+                        <li><strong>Économie ressources</strong>: Pas de convocation CAF inutile</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAS 3: BLOCAGE PÉDAGOGIQUE + CONTEXTE FAVORABLE -->
+        <div class="cas">
+            <div class="cas-header">
+                <div class="cas-titre">Cas 3: Thomas Dubois (fictif)</div>
+                <div class="cas-donnees">
+                    <span class="donnee">P: 55%</span>
+                    <span class="donnee">A: 92%</span>
+                    <span class="donnee">C: 85%</span>
+                </div>
+            </div>
+
+            <!-- Ancienne version -->
+            <div class="ancienne-version">
+                <div style="font-weight: 600; color: #dc3545; margin-bottom: 15px;">❌ ANCIENNE VERSION</div>
+                <div class="header">
+                    <div class="emoji">🔴</div>
+                    <div>
+                        <div class="titre-niveau">Niveau RàI</div>
+                        <div class="niveau">Niveau 3 (Blocage critique)</div>
+                        <div class="cible">Remédiation en Rigueur | CAF</div>
+                    </div>
+                </div>
+                <div class="probleme">
+                    <div class="probleme-titre">⚠️ Manque de nuance</div>
+                    <div style="font-size: 0.9rem; color: #333;">
+                        Le niveau est correct (Niveau 3), mais on ne voit pas que le contexte est favorable.
+                        Thomas est assidu et remet ses travaux → il a probablement une difficulté d'apprentissage spécifique,
+                        pas un problème de motivation ou d'organisation.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nouvelle version -->
+            <div class="nouvelle-version">
+                <div style="font-weight: 600; color: #16a34a; margin-bottom: 15px;">✅ NOUVELLE VERSION</div>
+
+                <!-- Niveau RàI pédagogique -->
+                <div class="carte-rai niveau-3">
+                    <div class="carte-header">
+                        <div class="carte-emoji">🔴</div>
+                        <div>
+                            <div class="carte-titre-section">Niveau RàI pédagogique</div>
+                            <div class="carte-titre-principal">Niveau 3</div>
+                            <div class="carte-cible">Remédiation intensive en Rigueur | CAF recommandé</div>
+                        </div>
+                    </div>
+
+                    <div class="carte-details">
+                        <div class="carte-details-titre">📊 Critères pédagogiques</div>
+                        <div class="carte-details-contenu">
+                            • Performance (3 derniers artefacts): <strong>55% (I - Insuffisant)</strong><br>
+                            • Pattern: <strong>Blocage critique</strong><br>
+                            • Défi principal: <strong>Rigueur (45%)</strong><br>
+                            • Autres défis: Structure (52%), Plausibilité (58%)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerte contextuelle -->
+                <div class="carte-contexte">
+                    <div class="carte-header">
+                        <div class="carte-emoji">✅</div>
+                        <div>
+                            <div class="carte-titre-section">Contexte d'apprentissage</div>
+                            <div class="carte-titre-principal">Mobilisation favorable</div>
+                        </div>
+                    </div>
+
+                    <div class="metriques-mobilisation">
+                        <div class="metrique">
+                            <div class="metrique-label">Assiduité</div>
+                            <div class="metrique-valeur bon">92%</div>
+                        </div>
+                        <div class="metrique">
+                            <div class="metrique-label">Complétion</div>
+                            <div class="metrique-valeur bon">85%</div>
+                        </div>
+                    </div>
+
+                    <div class="recommandation">
+                        ✅ Mobilisation forte - Le contexte n'est PAS la cause des difficultés. Concentrer l'intervention sur les stratégies d'apprentissage et la méthodologie.
+                    </div>
+                </div>
+
+                <div class="avantages">
+                    <div class="avantages-titre">✨ Avantages de cette présentation</div>
+                    <ul>
+                        <li><strong>Diagnostic précis</strong>: Blocage pédagogique réel (P=55%), pas contextuel</li>
+                        <li><strong>Intervention ciblée</strong>: Rigueur méthodologique, pas gestion du temps ou motivation</li>
+                        <li><strong>Valorisation effort</strong>: On reconnaît que Thomas s'investit (A=92%, C=85%)</li>
+                        <li><strong>Piste SA</strong>: Mobilisation forte + blocage persistant = possibilité trouble d'apprentissage</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAS 4: DOUBLE ALERTE -->
+        <div class="cas">
+            <div class="cas-header">
+                <div class="cas-titre">Cas 4: Sarah Tremblay (fictif)</div>
+                <div class="cas-donnees">
+                    <span class="donnee">P: 58%</span>
+                    <span class="donnee">A: 65%</span>
+                    <span class="donnee">C: 62%</span>
+                </div>
+            </div>
+
+            <!-- Ancienne version -->
+            <div class="ancienne-version">
+                <div style="font-weight: 600; color: #dc3545; margin-bottom: 15px;">❌ ANCIENNE VERSION</div>
+                <div class="header">
+                    <div class="emoji">🔴</div>
+                    <div>
+                        <div class="titre-niveau">Niveau RàI</div>
+                        <div class="niveau">Niveau 3 (Décrochage)</div>
+                        <div class="cible">Rencontre individuelle | CAF | Dépistage</div>
+                    </div>
+                </div>
+                <div class="probleme">
+                    <div class="probleme-titre">⚠️ Information amalgamée</div>
+                    <div style="font-size: 0.9rem; color: #333;">
+                        On sait que c'est urgent, mais on ne distingue pas clairement:
+                        - Le blocage pédagogique (P=58%)
+                        - Le contexte défavorable (A=65%, C=62%)
+                        Difficile de prioriser les actions et de comprendre la causalité.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nouvelle version -->
+            <div class="nouvelle-version">
+                <div style="font-weight: 600; color: #16a34a; margin-bottom: 15px;">✅ NOUVELLE VERSION</div>
+
+                <!-- Niveau RàI pédagogique -->
+                <div class="carte-rai niveau-3">
+                    <div class="carte-header">
+                        <div class="carte-emoji">🔴</div>
+                        <div>
+                            <div class="carte-titre-section">Niveau RàI pédagogique</div>
+                            <div class="carte-titre-principal">Niveau 3</div>
+                            <div class="carte-cible">Remédiation intensive | CAF | Dépistage</div>
+                        </div>
+                    </div>
+
+                    <div class="carte-details">
+                        <div class="carte-details-titre">📊 Critères pédagogiques</div>
+                        <div class="carte-details-contenu">
+                            • Performance (3 derniers artefacts): <strong>58% (I - Insuffisant)</strong><br>
+                            • Pattern: <strong>Blocage critique</strong><br>
+                            • Défi principal: <strong>Structure (48%)</strong><br>
+                            • Autres défis: Tous les critères SRPNF < 64%
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerte contextuelle -->
+                <div class="carte-contexte alerte-critique">
+                    <div class="carte-header">
+                        <div class="carte-emoji">🔴</div>
+                        <div>
+                            <div class="carte-titre-section">Contexte d'apprentissage</div>
+                            <div class="carte-titre-principal">Assiduité ET complétion critiques</div>
+                        </div>
+                    </div>
+
+                    <div class="metriques-mobilisation">
+                        <div class="metrique">
+                            <div class="metrique-label">Assiduité</div>
+                            <div class="metrique-valeur critique">65%</div>
+                        </div>
+                        <div class="metrique">
+                            <div class="metrique-label">Complétion</div>
+                            <div class="metrique-valeur critique">62%</div>
+                        </div>
+                    </div>
+
+                    <div class="recommandation">
+                        🔴 Rencontre individuelle urgente pour identifier obstacles contextuels (santé, famille, emploi, finances). Référence API et Services adaptés si nécessaire.
+                    </div>
+                </div>
+
+                <div class="avantages">
+                    <div class="avantages-titre">✨ Avantages de cette présentation</div>
+                    <ul>
+                        <li><strong>Double diagnostic clair</strong>: Blocage pédagogique ET contexte défavorable</li>
+                        <li><strong>Priorisation</strong>: Commencer par le contexte (obstacles à lever) avant la remédiation intensive</li>
+                        <li><strong>Causalité</strong>: Le contexte défavorable peut CAUSER ou AGGRAVER le blocage pédagogique</li>
+                        <li><strong>Action globale</strong>: Soutien contextuel (API, SA) + soutien pédagogique (CAF, remédiation)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

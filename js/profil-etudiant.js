@@ -1409,10 +1409,14 @@ function genererSectionAccompagnement(da) {
     const etudiant = etudiants.find(e => e.da === da);
     const nomComplet = etudiant ? `${etudiant.prenom} ${etudiant.nom}` : `DA ${da}`;
 
-    // Calculer les données pour le suivi RàI
+    // 🆕 NOUVEAU : Utiliser les fonctions séparées pour RàI pédagogique et contexte
+    const niveauRai = determinerNiveauRaiPedagogique(da);
+    const alerteContexte = determinerAlerteContextuelle(da);
+
+    // Récupérer les données pour le suivi (conservé pour forces/défis)
     const indices = calculerTousLesIndices(da);
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
-    const cibleInfo = determinerCibleIntervention(da);
+    const cibleInfo = determinerCibleIntervention(da); // Conservé pour compatibilité (sera retiré plus tard)
     const interpR = interpreterRisque(indices.R);
     const progression = calculerProgressionEleve(da);
     const defiSpecifique = identifierDefiSpecifique(da);
@@ -1520,103 +1524,181 @@ function genererSectionAccompagnement(da) {
             </div>
         </div>
 
-        <!-- BLOC UNIQUE : Vue d'ensemble -->
-        <div class="profil-carte">
-            <!-- Rangée 1 : Badge + Pattern -->
-            <div style="display: grid; grid-template-columns: auto 1fr; gap: 30px; align-items: start; margin-bottom: 20px;">
-                <!-- Badge RàI -->
-                <div style="text-align: center;">
-                    <span class="${badgeClasse}" style="font-size: 1.3rem; padding: 12px 20px; display: block;">
-                        ${badgeLabel}
-                    </span>
-                    <div style="font-size: 0.75rem; color: #666; margin-top: 8px;">
-                        ${cibleInfo.niveau === 3 ? 'Intervention<br>intensive' : cibleInfo.niveau === 2 ? 'Intervention<br>préventive' : 'Suivi<br>universel'}
+        <!-- 🆕 NOUVEAU : Trois cartes côte à côte (RàI pédagogique + Contexte + Observation SOLO) -->
+        <div class="${(() => {
+            const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+            const afficherSOLO = config.afficherDescriptionsSOLO !== false;
+            return afficherSOLO ? 'profil-grid-3col' : 'profil-grid-2col';
+        })()}">
+            <!-- Carte 1 : Modèle de la Réponse à l'intervention (RàI) -->
+            <div class="profil-carte">
+                <h2 style="font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">Modèle de la Réponse à l'intervention (RàI)</h2>
+
+                <div class="badge-sys ${niveauRai.badgeClasse}" style="font-size: 1.1rem; padding: 8px 16px; margin-bottom: 12px;">
+                    ${niveauRai.label}
+                </div>
+
+                <p style="margin: 10px 0; color: #495057; font-size: 0.95rem;">
+                    <strong>Performance (P) :</strong> ${(() => {
+                        const pct = indices.P;
+                        const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
+                        return `${niveau} ${pct.toFixed(0)}%`;
+                    })()}
+                </p>
+
+                <p style="margin: 10px 0; color: #495057; font-size: 0.95rem;"><strong>Critères SRPNF :</strong></p>
+                <ul style="margin-left: 20px; color: #495057; font-size: 0.9rem;">
+                    ${criteresSRPNF.map(c => {
+                        const pct = c.valeur * 100;
+                        const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
+                        return `<li>${c.nom} : ${niveau} ${pct.toFixed(0)}%</li>`;
+                    }).join('')}
+                </ul>
+
+                <div style="border-top: 1px solid #e9ecef; margin: 15px 0; padding-top: 15px;"></div>
+
+                <div class="badge-sys ${niveauRai.patternBadge}" style="font-size: 0.9rem; padding: 6px 12px; margin-bottom: 10px;">
+                    ${niveauRai.pattern}
+                </div>
+
+                <p style="font-size: 0.9rem; color: #666;">${niveauRai.description}</p>
+                ${niveauRai.defi !== 'Aucun' ? `<p style="font-size: 0.9rem; color: #666; margin-top: 8px;"><strong>Défi principal :</strong> ${niveauRai.defi}</p>` : ''}
+            </div>
+
+            <!-- Carte 2 : Contexte d'apprentissage -->
+            <div class="profil-carte">
+                <h2 style="font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">Contexte d'apprentissage</h2>
+
+                <div class="badge-sys ${alerteContexte.badgeClasse}" style="font-size: 1.1rem; padding: 8px 16px; margin-bottom: 12px;">
+                    ${alerteContexte.label}
+                </div>
+
+                <p style="margin: 10px 0; color: #495057; font-size: 0.95rem;">
+                    <strong>Assiduité (A) :</strong> ${alerteContexte.A}
+                </p>
+
+                <p style="margin: 10px 0; color: #495057; font-size: 0.95rem;">
+                    <strong>Complétion (C) :</strong> ${alerteContexte.C}
+                </p>
+
+                <div style="border-top: 1px solid #e9ecef; margin: 15px 0; padding-top: 15px;"></div>
+
+                <p style="font-size: 0.9rem; color: ${alerteContexte.niveau === 'tres-favorable' || alerteContexte.niveau === 'favorable' ? '#16a34a' : alerteContexte.niveau === 'modere' ? '#ca8a04' : '#ea580c'}; font-weight: 600; margin-bottom: 8px;">
+                    ${alerteContexte.description}
+                </p>
+
+                <p style="font-size: 0.9rem; color: #666; line-height: 1.5;">
+                    ${alerteContexte.recommandation}
+                </p>
+
+                <div style="border-top: 1px solid #e9ecef; margin: 15px 0; padding-top: 15px;"></div>
+
+                <p style="font-size: 0.85rem; color: #666;">
+                    <strong>Services adaptés :</strong> ${etudiant.caf === 'Oui' ? '✓ CAF' : ''} ${etudiant.sa === 'Oui' ? '✓ SA' : ''} ${etudiant.caf !== 'Oui' && etudiant.sa !== 'Oui' ? 'Aucun' : ''}
+                </p>
+            </div>
+
+            <!-- Carte 3 : Observation de la structure des résultats d'apprentissage (SOLO) - Optionnelle -->
+            ${(() => {
+                const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+                const afficherSOLO = config.afficherDescriptionsSOLO !== false;
+
+                if (!afficherSOLO) {
+                    return ''; // Ne rien afficher si désactivé
+                }
+
+                // Filtrer "Français" des forces et défis (critère linguistique, pas cognitif SOLO)
+                const forcesSolo = forces.filter(f => f.nom !== 'Français');
+                const defisSolo = defis.filter(d => d.nom !== 'Français');
+
+                // Vérifier s'il y a des forces ou défis à afficher (hors Français)
+                if (forcesSolo.length === 0 && defisSolo.length === 0) {
+                    return `
+            <div class="profil-carte">
+                <h2 style="font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">Observation de la structure des résultats d'apprentissage</h2>
+                <p style="font-size: 0.9rem; color: #666; font-style: italic;">
+                    Aucune force ni défi identifié selon la taxonomie SOLO.
+                </p>
+                <div style="border-top: 1px solid #e9ecef; margin: 15px 0; padding-top: 15px;"></div>
+                <p style="font-size: 0.85rem; color: #999;">
+                    Basé sur les travaux de Biggs & Collis (taxonomie SOLO)
+                </p>
+            </div>
+                    `;
+                }
+
+                return `
+            <div class="profil-carte">
+                <h2 style="font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">Observation de la structure des résultats d'apprentissage</h2>
+
+                ${forcesSolo.length > 0 ? `
+                <div style="margin-bottom: ${defisSolo.length > 0 ? '20px' : '0'};">
+                    <h4 style="color: #16a34a; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
+                        Forces
+                    </h4>
+
+                    ${forcesSolo.some(f => f.valeur >= 0.85) ? `
+                    <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px; margin-bottom: 8px; border-radius: 4px;">
+                        <div style="font-weight: 600; color: #16a34a; margin-bottom: 4px; font-size: 0.85rem;">
+                            ${forcesSolo.filter(f => f.valeur >= 0.85).map(f => f.nom).join(', ')} : Maîtrisé et étendu (E)
+                        </div>
+                        <div style="font-size: 0.85rem; line-height: 1.5; color: #333;">
+                            À ce niveau abstrait étendu, un nouvel apprentissage en génère un autre ou ouvre la porte à une nouvelle exploration. L'élève a la capacité de généraliser la structure au-delà de l'information donnée. Il comprend parfaitement et il est capable de transférer ses apprentissages à des contextes proches.
+                        </div>
                     </div>
-                </div>
+                    ` : ''}
 
-                <!-- Pattern -->
-                <div style="border-left: 3px solid ${(() => {
-                    if (cibleInfo.pattern === 'Blocage critique') return '#dc3545';
-                    if (cibleInfo.pattern === 'Blocage émergent') return '#ff9800';
-                    if (cibleInfo.pattern === 'Défi spécifique') return '#ffc107';
-                    return '#28a745';
-                })()}; padding-left: 15px;">
-                    <div style="font-size: 0.8rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Pattern</div>
-                    <div style="font-size: 1.1rem; font-weight: 600; color: #333; margin-top: 5px;">${cibleInfo.pattern}</div>
-                    ${defiSpecifique.defi !== 'Aucun' ? `<div style="font-size: 0.85rem; color: #666;">${defiSpecifique.defi} (${interpreterScoreIDME(defiSpecifique.score)})</div>` : ''}
+                    ${forcesSolo.some(f => f.valeur >= seuilMaitrise && f.valeur < 0.85) ? `
+                    <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px; border-radius: 4px;">
+                        <div style="font-weight: 600; color: #16a34a; margin-bottom: 4px; font-size: 0.85rem;">
+                            ${forcesSolo.filter(f => f.valeur >= seuilMaitrise && f.valeur < 0.85).map(f => f.nom).join(', ')} : Maîtrisé (M)
+                        </div>
+                        <div style="font-size: 0.85rem; line-height: 1.5; color: #333;">
+                            À ce niveau relationnel, l'élève peut maintenant comprendre, lier et intégrer plusieurs aspects d'une réponse dans un tout cohérent. L'élève relie les savoirs entre eux, il voit plusieurs aspects d'une situation et sait l'aborder de différentes façons.
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
+                ` : ''}
+
+                ${defisSolo.length > 0 ? `
+                <div>
+                    <h4 style="color: #dc2626; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
+                        Défis
+                    </h4>
+
+                    ${defisSolo.some(d => d.valeur < obtenirSeuil('idme.insuffisant')) ? `
+                    <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px; margin-bottom: 8px; border-radius: 4px;">
+                        <div style="font-weight: 600; color: #dc2626; margin-bottom: 4px; font-size: 0.85rem;">
+                            ${defisSolo.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : Insuffisant ou incomplet (I)
+                        </div>
+                        <div style="font-size: 0.85rem; line-height: 1.5; color: #333;">
+                            À ce niveau unistructurel, l'élève ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois. L'élève fait des liens simples et évidents entre ses connaissances, mais n'a pas encore de réelle compréhension.
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${defisSolo.some(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement) ? `
+                    <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px; border-radius: 4px;">
+                        <div style="font-weight: 600; color: #dc2626; margin-bottom: 4px; font-size: 0.85rem;">
+                            ${defisSolo.filter(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement).map(d => d.nom).join(', ')} : En développement (D)
+                        </div>
+                        <div style="font-size: 0.85rem; line-height: 1.5; color: #333;">
+                            À ce niveau multistructurel, l'élève peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il les considère indépendamment. L'élève fait plus de liens entre ses connaissances, mais celles-ci restent compartimentées et séparées.
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+                ` : ''}
+
+                <div style="border-top: 1px solid #e9ecef; margin: 15px 0; padding-top: 15px;"></div>
+                <p style="font-size: 0.85rem; color: #999;">
+                    Basé sur les travaux de Biggs & Collis (taxonomie SOLO)
+                </p>
             </div>
-
-            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;">
-
-            <!-- Rangée 2 : Contexte + Bouton réglages -->
-            <div style="display: flex; gap: 30px; font-size: 0.9rem; color: #666; align-items: center;">
-                <div><strong>${texteProgression}</strong></div>
-                <div><strong>Services adaptés :</strong> ${etudiant.caf === 'Oui' ? '✓ CAF' : ''} ${etudiant.sa === 'Oui' ? '✓ SA' : ''} ${etudiant.caf !== 'Oui' && etudiant.sa !== 'Oui' ? 'Aucun' : ''}</div>
-                <div style="margin-left: auto;">
-                    <button class="btn btn-secondaire" onclick="afficherSection('reglages'); setTimeout(() => { afficherSousSection('reglages-interpretation'); const elem = document.getElementById('seuils-interpretation'); if (elem) elem.scrollIntoView({behavior: 'smooth', block: 'start'}); }, 200);">
-                        Réglages
-                    </button>
-                </div>
-            </div>
+                `;
+            })()}
         </div>
-
-        <!-- Forces et défis qualitatifs -->
-        ${forces.length > 0 || defis.length > 0 ? `
-        <div class="profil-carte" style="margin-top: 15px;">
-            ${forces.length > 0 ? `
-            <div style="margin-bottom: ${defis.length > 0 ? '25px' : '0'};">
-                <h4 style="color: #16a34a; font-size: 0.95rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
-                    Forces ${forces.map(f => f.nom).join(', ')}
-                </h4>
-
-                ${forces.some(f => f.valeur >= 0.85) ? `
-                <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 15px; margin-bottom: 10px; border-radius: 4px;">
-                    <div style="font-weight: 600; color: #16a34a; margin-bottom: 5px; font-size: 0.9rem;">Maîtrisé et étendu (E)</div>
-                    <div style="font-size: 0.9rem; line-height: 1.5; color: #333;">
-                        ${forces.filter(f => f.valeur >= 0.85).map(f => f.nom).join(', ')} : À ce niveau abstrait étendu, un nouvel apprentissage en génère un autre ou ouvre la porte à une nouvelle exploration. L'élève a la capacité de généraliser la structure au-delà de l'information donnée. Il comprend parfaitement et il est capable de transférer ses apprentissages à des contextes proches. Il peut formuler des hypothèses et des théories qui pourront être analysées à leur tour.
-                    </div>
-                </div>
-                ` : ''}
-
-                ${forces.some(f => f.valeur >= seuilMaitrise && f.valeur < 0.85) ? `
-                <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 15px; border-radius: 4px;">
-                    <div style="font-weight: 600; color: #16a34a; margin-bottom: 5px; font-size: 0.9rem;">Maîtrisé (M)</div>
-                    <div style="font-size: 0.9rem; line-height: 1.5; color: #333;">
-                        ${forces.filter(f => f.valeur >= seuilMaitrise && f.valeur < 0.85).map(f => f.nom).join(', ')} : À ce niveau relationnel, l'élève peut maintenant comprendre, lier et intégrer plusieurs aspects d'une réponse dans un tout cohérent. L'élève relie les savoirs entre eux, il voit plusieurs aspects d'une situation et sait l'aborder de différentes façons. Il peut expliquer sa compréhension et les liens entre les savoirs. Il a une vue globale du problème et de sa réponse. Un élève peut avoir la capacité de comparer, mettre en relation, analyser, justifier, critiquer, évaluer, appliquer, expliquer des choses en matière de causes et d'effets.
-                    </div>
-                </div>
-                ` : ''}
-            </div>
-            ` : ''}
-
-            ${defis.length > 0 ? `
-            <div>
-                <h4 style="color: #dc2626; font-size: 0.95rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
-                    Défis ${defis.map(d => d.nom).join(', ')}
-                </h4>
-
-                ${defis.some(d => d.valeur < obtenirSeuil('idme.insuffisant')) ? `
-                <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 12px 15px; margin-bottom: 10px; border-radius: 4px;">
-                    <div style="font-weight: 600; color: #dc2626; margin-bottom: 5px; font-size: 0.9rem;">Insuffisant ou incomplet (I)</div>
-                    <div style="font-size: 0.9rem; line-height: 1.5; color: #333;">
-                        ${defis.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : À ce niveau unistructurel, l'élève ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois. Il ne se concentre que sur un seul point signifiant. L'élève fait des liens simples et évidents entre ses connaissances, mais n'a pas encore de réelle compréhension. Celle-ci reste essentiellement superficielle.
-                    </div>
-                </div>
-                ` : ''}
-
-                ${defis.some(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement) ? `
-                <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 12px 15px; border-radius: 4px;">
-                    <div style="font-weight: 600; color: #dc2626; margin-bottom: 5px; font-size: 0.9rem;">En développement (D)</div>
-                    <div style="font-size: 0.9rem; line-height: 1.5; color: #333;">
-                        ${defis.filter(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement).map(d => d.nom).join(', ')} : À ce niveau multistructurel, l'élève peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il les considère indépendamment. L'élève fait plus de liens entre ses connaissances, mais celles-ci restent compartimentées et séparées. Il n'a pas de compréhension globale de ce qu'il fait. Il est capable de classifier, de combiner, de décrire, ou d'énumérer les informations. L'élève peut traiter plusieurs aspects d'un problème, mais sans vision d'ensemble.
-                    </div>
-                </div>
-                ` : ''}
-            </div>
-            ` : ''}
-        </div>
-        ` : ''}
 
         <!-- Historique compact -->
         <div style="margin-top: 15px;">
@@ -4647,6 +4729,187 @@ function identifierPatternActuel(performancePAN3, aUnDefi) {
  * @param {string} da - Numéro de DA
  * @returns {Object} - { cible, pattern, niveau, couleur, emoji }
  */
+/**
+ * Détermine le Modèle de la Réponse à l'intervention (RàI) basé UNIQUEMENT sur P et SRPNF
+ * (sans tenir compte de la mobilisation A-C)
+ * @param {string} da - Numéro de DA
+ * @returns {Object} - Modèle de la Réponse à l'intervention (RàI) avec pattern et descriptif
+ */
+function determinerNiveauRaiPedagogique(da) {
+    // Récupérer les indices de performance
+    const indices = calculerTousLesIndices(da);
+    const P = indices.P / 100; // Convertir en décimal 0-1
+
+    // Déterminer quelle fonction utiliser selon la pratique
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const pratique = config.pratique || 'alternative';
+
+    // Calculer moyennes SRPNF
+    const moyennes = (pratique === 'alternative')
+        ? calculerMoyennesCriteresRecents(da)
+        : calculerMoyennesCriteres(da);
+
+    // Détecter les défis
+    const diagnostic = diagnostiquerForcesChallenges(moyennes);
+    const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
+
+    // Déterminer le pattern basé uniquement sur la performance
+    const pattern = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
+
+    // Seuils configurables
+    const seuilMaitrise = obtenirSeuil('idme.maitrise');
+    const seuilDeveloppement = obtenirSeuil('idme.developpement');
+    const seuilInsuffisant = obtenirSeuil('idme.insuffisant');
+
+    console.log('🎓 Modèle de la Réponse à l\'intervention (RàI) pour DA', da, {
+        P: (P * 100).toFixed(1) + '%',
+        pattern,
+        defiPrincipal: diagnostic.principalDefi?.nom || 'Aucun'
+    });
+
+    // LOGIQUE PÉDAGOGIQUE (basée uniquement sur P et SRPNF)
+
+    // Niveau 3 - Intensif : Blocage critique (P < insuffisant OU plusieurs critères < développement)
+    if (pattern === 'Blocage critique' || P < seuilInsuffisant) {
+        return {
+            niveau: 3,
+            label: 'Niveau 3 - Intensif',
+            pattern: pattern,
+            defi: diagnostic.principalDefi?.nom || 'Aucun',
+            description: 'Difficultés pédagogiques majeures nécessitant un soutien intensif.',
+            badgeClasse: 'badge-rai-3',
+            patternBadge: 'badge-pattern-blocage-critique'
+        };
+    }
+
+    // Niveau 2 - Préventif : Performance en développement (<75%) OU Blocage émergent OU Défi spécifique
+    // Un élève avec P en zone "Développement" (65-74%) nécessite un accompagnement préventif,
+    // même si son pattern est "Stable" (pas de défi identifié).
+    if (P < seuilDeveloppement || pattern === 'Blocage émergent' || pattern === 'Défi spécifique') {
+        // Déterminer la description selon le contexte
+        let description;
+        if (P < seuilDeveloppement && pattern === 'Stable') {
+            description = 'Performance en développement nécessitant un accompagnement préventif.';
+        } else if (pattern === 'Blocage émergent') {
+            description = 'Difficultés émergentes nécessitant une intervention préventive ciblée.';
+        } else {
+            description = 'Défi spécifique identifié nécessitant un accompagnement ciblé.';
+        }
+
+        return {
+            niveau: 2,
+            label: 'Niveau 2 - Préventif',
+            pattern: pattern,
+            defi: diagnostic.principalDefi?.nom || 'Aucun',
+            description: description,
+            badgeClasse: 'badge-rai-2',
+            patternBadge: pattern === 'Blocage émergent'
+                ? 'badge-pattern-blocage-emergent'
+                : pattern === 'Défi spécifique'
+                    ? 'badge-pattern-defi-specifique'
+                    : 'badge-pattern-stable'
+        };
+    }
+
+    // Niveau 1 - Universel : Performance maîtrisée (≥75%) et stable
+    return {
+        niveau: 1,
+        label: 'Niveau 1 - Universel',
+        pattern: pattern,
+        defi: diagnostic.principalDefi?.nom || 'Aucun',
+        description: 'Performance stable. Suivi régulier en classe.',
+        badgeClasse: 'badge-rai-1',
+        patternBadge: 'badge-pattern-stable'
+    };
+}
+
+/**
+ * Détermine l'alerte contextuelle basée UNIQUEMENT sur A et C
+ * (sans tenir compte de la performance P)
+ * @param {string} da - Numéro de DA
+ * @returns {Object} - Alerte contextuelle avec niveau d'engagement
+ */
+function determinerAlerteContextuelle(da) {
+    // Récupérer les indices de mobilisation
+    const indices = calculerTousLesIndices(da);
+    const A = indices.A / 100; // Convertir en décimal 0-1
+    const C = indices.C / 100; // Convertir en décimal 0-1
+
+    // Interpréter la mobilisation
+    const interpMobilisation = interpreterMobilisation(A, C);
+
+    console.log('📊 Contexte d\'apprentissage pour DA', da, {
+        A: (A * 100).toFixed(1) + '%',
+        C: (C * 100).toFixed(1) + '%',
+        mobilisation: interpMobilisation.niveau
+    });
+
+    // LOGIQUE CONTEXTUELLE (basée uniquement sur A et C)
+
+    // Contexte très favorable : A ≥ 85% ET C ≥ 85%
+    if (A >= 0.85 && C >= 0.85) {
+        return {
+            niveau: 'tres-favorable',
+            label: 'Très favorable',
+            description: 'Contexte très favorable. L\'élève est assidu et mobilisé.',
+            badgeClasse: 'badge-engagement-tres-favorable',
+            A: (A * 100).toFixed(0) + '%',
+            C: (C * 100).toFixed(0) + '%',
+            recommandation: 'Les interventions peuvent se concentrer sur le développement des habiletés et compétences.'
+        };
+    }
+
+    // Contexte favorable : A ≥ 75% ET C ≥ 75%
+    if (A >= 0.75 && C >= 0.75) {
+        return {
+            niveau: 'favorable',
+            label: 'Favorable',
+            description: 'Contexte favorable. L\'élève est présent et mobilisé.',
+            badgeClasse: 'badge-engagement-favorable',
+            A: (A * 100).toFixed(0) + '%',
+            C: (C * 100).toFixed(0) + '%',
+            recommandation: 'Les interventions peuvent se concentrer sur le développement des habiletés et compétences.'
+        };
+    }
+
+    // Contexte modéré : A ≥ 65% ET C ≥ 65%
+    if (A >= 0.65 && C >= 0.65) {
+        return {
+            niveau: 'modere',
+            label: 'Modéré',
+            description: 'Contexte modéré. Performance adéquate mais mobilisation pourrait être améliorée.',
+            badgeClasse: 'badge-engagement-modere',
+            A: (A * 100).toFixed(0) + '%',
+            C: (C * 100).toFixed(0) + '%',
+            recommandation: 'Suivi régulier recommandé pour maintenir l\'engagement et éviter une baisse de performance.'
+        };
+    }
+
+    // Contexte fragile : A < 65% OU C < 65%
+    if (A < 0.65 || C < 0.65) {
+        return {
+            niveau: 'fragile',
+            label: 'Fragile',
+            description: 'Alerte : Contexte fragile. Risque de décrochage si la tendance se maintient.',
+            badgeClasse: 'badge-engagement-fragile',
+            A: (A * 100).toFixed(0) + '%',
+            C: (C * 100).toFixed(0) + '%',
+            recommandation: 'Interventions recommandées : Rencontrer l\'élève pour comprendre les absences/non-remises, encourager la mobilisation, vérifier s\'il y a des obstacles (emploi, santé, etc.).'
+        };
+    }
+
+    // Contexte insuffisant : A < 50% OU C < 50%
+    return {
+        niveau: 'insuffisant',
+        label: 'Insuffisant',
+        description: 'Alerte critique : Contexte insuffisant. Décrochage imminent.',
+        badgeClasse: 'badge-engagement-insuffisant',
+        A: (A * 100).toFixed(0) + '%',
+        C: (C * 100).toFixed(0) + '%',
+        recommandation: 'Intervention urgente requise : Rencontre individuelle, contact avec aide pédagogique, vérifier situation personnelle.'
+    };
+}
+
 function determinerCibleIntervention(da) {
     // Récupérer tous les indices nécessaires
     const indices = calculerTousLesIndices(da);
@@ -6826,3 +7089,7 @@ function retirerJetonPersonnaliseAvecConfirmation(da, jetonId, nomJeton) {
 // Exporter les fonctions vers window
 window.attribuerJetonPersonnaliseAvecPrompt = attribuerJetonPersonnaliseAvecPrompt;
 window.retirerJetonPersonnaliseAvecConfirmation = retirerJetonPersonnaliseAvecConfirmation;
+
+// 🆕 Exporter les nouvelles fonctions de niveau RàI (Beta 90+)
+window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
+window.determinerAlerteContextuelle = determinerAlerteContextuelle;

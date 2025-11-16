@@ -867,6 +867,15 @@ function sauvegarderPratiqueNotation() {
         }
     }
 
+    // Sauvegarder l'option d'affichage des descriptions SOLO
+    const checkSOLO = document.getElementById('afficherDescriptionsSOLO');
+    if (checkSOLO) {
+        modalites.afficherDescriptionsSOLO = checkSOLO.checked;
+    } else {
+        // Par défaut activé si l'élément n'existe pas (rétrocompatibilité)
+        modalites.afficherDescriptionsSOLO = true;
+    }
+
     localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
 
     // Sauvegarder toutes les configurations (portfolio et jetons)
@@ -945,7 +954,14 @@ function chargerModalites() {
             checkComparatif.checked = modeComparatif;
         }
     }
-    
+
+    // Charger l'option d'affichage des descriptions SOLO
+    const checkSOLO = document.getElementById('afficherDescriptionsSOLO');
+    if (checkSOLO) {
+        // Par défaut activé si non défini (rétrocompatibilité)
+        checkSOLO.checked = modalites.afficherDescriptionsSOLO !== false;
+    }
+
     // Afficher la section options si nécessaire
     afficherOptionsAffichage();
 

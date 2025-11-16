@@ -397,18 +397,20 @@ function obtenirCouleurPerformance(performance) {
  * @returns {Object} - { niveau: number (1|2|3), label: string, couleurFond: string, couleurTexte: string }
  */
 function calculerNiveauRaI(da) {
-    // Utiliser la fonction du profil étudiant si disponible
-    if (typeof determinerCibleIntervention === 'function') {
-        const cibleInfo = determinerCibleIntervention(da);
+    // 🆕 BETA 90+ : Utiliser determinerNiveauRaiPedagogique (Single Source of Truth)
+    // Cette fonction calcule le niveau RàI basé UNIQUEMENT sur P + SRPNF (sans A-C)
+    // Garantit la cohérence avec Aperçu et Profil individuel
+    if (typeof determinerNiveauRaiPedagogique === 'function') {
+        const niveauInfo = determinerNiveauRaiPedagogique(da);
 
         // Convertir le niveau en badge RàI avec les bonnes couleurs
         let label, couleurFond, couleurTexte;
 
-        if (cibleInfo.niveau === 1) {
+        if (niveauInfo.niveau === 1) {
             label = 'RàI 1';
             couleurFond = '#e8f5e9'; // Vert pâle
             couleurTexte = '#2e7d32'; // Vert foncé
-        } else if (cibleInfo.niveau === 2) {
+        } else if (niveauInfo.niveau === 2) {
             label = 'RàI 2';
             couleurFond = '#fff9e6'; // Jaune pâle
             couleurTexte = '#f57c00'; // Orange/jaune foncé
@@ -419,7 +421,7 @@ function calculerNiveauRaI(da) {
         }
 
         return {
-            niveau: cibleInfo.niveau,
+            niveau: niveauInfo.niveau,
             label: label,
             couleurFond: couleurFond,
             couleurTexte: couleurTexte
@@ -514,33 +516,14 @@ function filtrerEtudiants(etudiants) {
         });
     }
 
-    // NOUVEAU: Filtre par niveau de risque
-    const filtreRisque = document.getElementById('filtre-risque-liste');
-    if (filtreRisque && filtreRisque.value) {
-        const niveauRisque = filtreRisque.value;
-        resultats = resultats.filter(function (e) {
-            const indices = calculerTousLesIndices(e.da);
-            const risque = indices.R;
-
-            switch(niveauRisque) {
-                case 'minimal': return risque <= 0.20;
-                case 'faible': return risque > 0.20 && risque <= 0.30;
-                case 'modere': return risque > 0.30 && risque <= 0.40;
-                case 'eleve': return risque > 0.40 && risque <= 0.50;
-                case 'tres-eleve': return risque > 0.50 && risque <= 0.70;
-                case 'critique': return risque > 0.70;
-                default: return true;
-            }
-        });
-    }
-
     // NOUVEAU: Filtre par niveau RàI
     const filtreRai = document.getElementById('filtre-rai-liste');
     if (filtreRai && filtreRai.value) {
         const niveauRai = parseInt(filtreRai.value);
         resultats = resultats.filter(function (e) {
-            const cible = determinerCibleIntervention(e.da);
-            return cible.niveau === niveauRai;
+            // 🆕 BETA 90+ : Utiliser determinerNiveauRaiPedagogique (Single Source of Truth)
+            const niveauInfo = determinerNiveauRaiPedagogique(e.da);
+            return niveauInfo.niveau === niveauRai;
         });
     }
 
@@ -549,8 +532,9 @@ function filtrerEtudiants(etudiants) {
     if (filtrePattern && filtrePattern.value) {
         const patternFiltre = filtrePattern.value;
         resultats = resultats.filter(function (e) {
-            const cible = determinerCibleIntervention(e.da);
-            const pattern = cible.pattern.toLowerCase().replace(/\s+/g, '-');
+            // 🆕 BETA 90+ : Utiliser determinerNiveauRaiPedagogique (Single Source of Truth)
+            const niveauInfo = determinerNiveauRaiPedagogique(e.da);
+            const pattern = niveauInfo.pattern.toLowerCase().replace(/\s+/g, '-');
             return pattern === patternFiltre;
         });
     }
@@ -659,11 +643,12 @@ function afficherListeEtudiantsConsultation() {
     // NOUVEAU: Enrichir les données pour le tri (sans assigner les numéros encore)
     etudiantsFiltres = etudiantsFiltres.map((e) => {
         const indices = calculerTousLesIndices(e.da);
-        const cible = determinerCibleIntervention(e.da);
+        // 🆕 BETA 90+ : Utiliser determinerNiveauRaiPedagogique (Single Source of Truth)
+        const niveauInfo = determinerNiveauRaiPedagogique(e.da);
         return {
             ...e,
             indicesCalcules: indices,
-            cibleCalculee: cible
+            cibleCalculee: niveauInfo
         };
     });
 
@@ -747,69 +732,16 @@ function afficherListeEtudiantsConsultation() {
     // Générer le HTML
     tbody.innerHTML = '';
 
-    // Récupérer les options de surlignage
-    const surlignerCritique = document.getElementById('surligner-critique');
-    const surlignerTresEleve = document.getElementById('surligner-tres-eleve');
-    const surlignerNiveau3 = document.getElementById('surligner-niveau3');
-    const surlignerNiveau2 = document.getElementById('surligner-niveau2');
-    const surlignerBlocage = document.getElementById('surligner-blocage');
-
     etudiantsFiltres.forEach(function (etudiant) {
         // Utiliser les indices précalculés
         const indices = etudiant.indicesCalcules;
         const cible = etudiant.cibleCalculee;
-
-        // Calculer l'engagement E = (A × C × P)^(1/3)
-        const E_brut = (indices.A / 100) * (indices.C / 100) * (indices.P / 100);
-        const E = Math.pow(E_brut, 1/3);
 
         // Génération des badges
         const badgePattern = genererBadgePattern(cible.pattern);
         const badgeRai = genererBadgeRaI(cible.niveau);
 
         const tr = document.createElement('tr');
-
-        // Déterminer le surlignage à appliquer (priorité: plus critique en premier)
-        let bgColor = '';
-        let borderColor = '';
-        let bgHover = '';
-
-        // Priorité 1: Engagement insuffisant (< 30%)
-        if (surlignerCritique && surlignerCritique.checked && E < 0.30) {
-            bgColor = '#fff5f5';
-            borderColor = '#dc2626';
-            bgHover = '#fee2e2';
-        }
-        // Priorité 2: Engagement fragile (30-49%)
-        else if (surlignerTresEleve && surlignerTresEleve.checked && E >= 0.30 && E < 0.50) {
-            bgColor = '#fff7ed';
-            borderColor = '#ea580c';
-            bgHover = '#ffedd5';
-        }
-        // Priorité 3: Blocage/Résistance
-        else if (surlignerBlocage && surlignerBlocage.checked && (cible.pattern === 'Blocage' || cible.pattern === 'Résistance')) {
-            bgColor = '#fef2f2';
-            borderColor = '#f87171';
-            bgHover = '#fee2e2';
-        }
-        // Priorité 4: Niveau 3 RàI
-        else if (surlignerNiveau3 && surlignerNiveau3.checked && cible.niveau === 3) {
-            bgColor = '#eff6ff';
-            borderColor = '#2563eb';
-            bgHover = '#dbeafe';
-        }
-        // Priorité 5: Niveau 2 RàI
-        else if (surlignerNiveau2 && surlignerNiveau2.checked && cible.niveau === 2) {
-            bgColor = '#f0f9ff';
-            borderColor = '#0284c7';
-            bgHover = '#e0f2fe';
-        }
-
-        // Appliquer le surlignage
-        if (bgColor) {
-            tr.style.backgroundColor = bgColor;
-            tr.style.borderLeft = '4px solid ' + borderColor;
-        }
 
         // Rendre la ligne cliquable
         tr.style.cursor = 'pointer';
@@ -818,16 +750,11 @@ function afficherListeEtudiantsConsultation() {
         };
 
         // Effet de survol
-        const bgOriginal = tr.style.backgroundColor || '';
         tr.onmouseenter = function () {
-            if (bgHover) {
-                this.style.backgroundColor = bgHover;
-            } else {
-                this.style.backgroundColor = 'var(--bleu-tres-pale)';
-            }
+            this.style.backgroundColor = 'var(--bleu-tres-pale)';
         };
         tr.onmouseleave = function () {
-            this.style.backgroundColor = bgOriginal;
+            this.style.backgroundColor = '';
         };
 
         // Échapper les valeurs pour sécurité
@@ -857,6 +784,8 @@ function afficherListeEtudiantsConsultation() {
         html += '<td style="text-align: center;"><strong style="color: ' + couleurP + ';">' + Math.round(indices.P) + '%</strong></td>';
 
         // NOUVEAU: Colonne Engagement E = (A × C × P)^(1/3) en pourcentage
+        const E_brut = (indices.A / 100) * (indices.C / 100) * (indices.P / 100);
+        const E = Math.pow(E_brut, 1/3);
         const engagementPct = Math.round(E * 100);
         const couleurE = obtenirCouleurEngagement(engagementPct);
         html += '<td style="text-align: center;"><strong style="color: ' + couleurE + ';">' + engagementPct + '%</strong></td>';
@@ -1064,52 +993,9 @@ function mettreAJourIndicateursTri() {
  * @param {Array} etudiants - Liste des étudiants après filtrage
  */
 function mettreAJourStatistiques(etudiants) {
-    if (etudiants.length === 0) {
-        // Mettre à jour seulement les éléments qui existent
-        const elemStatTotal = document.getElementById('stat-total-etudiants');
-        if (elemStatTotal) elemStatTotal.textContent = '0';
-
-        document.getElementById('stat-risques-faibles').textContent = '—';
-        document.getElementById('stat-risques-faibles-pct').textContent = '—';
-        document.getElementById('stat-rai-1').textContent = '—';
-        document.getElementById('stat-rai-1-pct').textContent = '—';
-        document.getElementById('stat-rai-2').textContent = '—';
-        document.getElementById('stat-rai-2-pct').textContent = '—';
-        document.getElementById('stat-rai-3').textContent = '—';
-        document.getElementById('stat-rai-3-pct').textContent = '—';
-        return;
-    }
-
-    const total = etudiants.length;
-
-    // Compter les risques faibles (≤ 30%)
-    let risquesFaibles = 0;
-    let rai1 = 0, rai2 = 0, rai3 = 0;
-
-    etudiants.forEach(e => {
-        const indices = calculerTousLesIndices(e.da);
-        const risque = indices.R;
-        const cible = determinerCibleIntervention(e.da);
-
-        if (risque <= 0.30) risquesFaibles++;
-
-        if (cible.niveau === 1) rai1++;
-        else if (cible.niveau === 2) rai2++;
-        else if (cible.niveau === 3) rai3++;
-    });
-
-    // Mettre à jour les cartes (seulement si l'élément existe)
-    const elemStatTotal = document.getElementById('stat-total-etudiants');
-    if (elemStatTotal) elemStatTotal.textContent = total;
-
-    document.getElementById('stat-risques-faibles').textContent = risquesFaibles;
-    document.getElementById('stat-risques-faibles-pct').textContent = `(${Math.round(risquesFaibles/total*100)}%)`;
-    document.getElementById('stat-rai-1').textContent = rai1;
-    document.getElementById('stat-rai-1-pct').textContent = `(${Math.round(rai1/total*100)}%)`;
-    document.getElementById('stat-rai-2').textContent = rai2;
-    document.getElementById('stat-rai-2-pct').textContent = `(${Math.round(rai2/total*100)}%)`;
-    document.getElementById('stat-rai-3').textContent = rai3;
-    document.getElementById('stat-rai-3-pct').textContent = `(${Math.round(rai3/total*100)}%)`;
+    // Cette fonction ne fait plus rien car les cartes métriques ont été retirées (Beta 90)
+    // Elle est conservée pour éviter les erreurs si appelée ailleurs dans le code
+    return;
 }
 
 /**
