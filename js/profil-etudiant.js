@@ -3936,17 +3936,25 @@ function calculerMoyennesCriteres(da) {
 
     console.log('  Scores extraits:', scoresCriteres);
 
-    // Calculer les moyennes
+    // Calculer les moyennes avec clés standardisées
     const moyennes = {};
     let aucuneDonnee = true;
 
     Object.keys(scoresCriteres).forEach(cle => {
         const scores = scoresCriteres[cle];
+
+        // Standardiser la clé pour compatibilité avec l'interface
+        // "francaisecrit" → "francais" (pour éviter NaN)
+        let cleStandard = cle;
+        if (cle.startsWith('francais')) {
+            cleStandard = 'francais';
+        }
+
         if (scores.length > 0) {
-            moyennes[cle] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+            moyennes[cleStandard] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
             aucuneDonnee = false;
         } else {
-            moyennes[cle] = null;
+            moyennes[cleStandard] = null;
         }
     });
 
@@ -4077,13 +4085,22 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
 
     console.log(`  Scores extraits (${derniersArtefacts.length} derniers):`, scoresCriteres);
 
-    // Calculer les moyennes
+    // Calculer les moyennes avec clés standardisées
     const moyennes = {};
     let aucuneDonnee = true;
 
     Object.keys(scoresCriteres).forEach(cle => {
         const scores = scoresCriteres[cle];
-        const cleFormatee = cle.charAt(0).toUpperCase() + cle.slice(1);
+
+        // Standardiser la clé pour compatibilité avec l'interface
+        // "francaisecrit" → "francais" (pour éviter NaN)
+        let cleStandard = cle;
+        if (cle.startsWith('francais')) {
+            cleStandard = 'francais';
+        }
+
+        // Capitaliser la première lettre (Structure, Rigueur, etc.)
+        const cleFormatee = cleStandard.charAt(0).toUpperCase() + cleStandard.slice(1);
 
         if (scores.length > 0) {
             moyennes[cleFormatee] = scores.reduce((sum, score) => sum + score, 0) / scores.length;
