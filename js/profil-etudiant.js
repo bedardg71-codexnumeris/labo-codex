@@ -5708,9 +5708,13 @@ function genererSectionPerformance(da) {
                         console.log('  directionsPAN:', directionsPAN);
                     } else {
                         console.log('  ❌ Mode comparatif NON activé');
-                        // Mode normal : utiliser les directions PAN par défaut
+                        // Mode normal : calculer les moyennes et utiliser les directions PAN par défaut
+                        moyennesPAN = calculerMoyennesCriteres(da);
                         directionsPAN = calculerDirectionsCriteres(da, 'PAN');
                     }
+
+                    // Utiliser les moyennes appropriées selon le mode
+                    const moyennes = modeComparatif ? moyennesSOM : moyennesPAN;
 
                     // Générer les barres pour chaque critère
                     const barresHTML = ['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
@@ -5718,10 +5722,9 @@ function genererSectionPerformance(da) {
                                          cle === 'rigueur' ? 'Rigueur' :
                                          cle === 'plausibilite' ? 'Plausibilité' :
                                          cle === 'nuance' ? 'Nuance' : 'Français';
-                        // Mapper les clés avec accents aux clés sans accents dans moyennes
-                        const cleMoyennes = cle.charAt(0).toUpperCase() + cle.slice(1); // Structure, Rigueur, Plausibilite, Nuance, Francais
 
-                        const score = moyennes[cleMoyennes];
+                        // ✅ CORRECTIF: Utiliser la clé en minuscules (structure, rigueur, etc.)
+                        const score = moyennes?.[cle];
                         if (score === null) return '';
 
                         const pourcentage = Math.round(score * 100);
@@ -5733,8 +5736,9 @@ function genererSectionPerformance(da) {
 
                         if (modeComparatif) {
                             // Vérifier si les moyennes existent avant d'accéder à leurs propriétés
-                            const scoreSOM = moyennesSOM ? moyennesSOM[cleMoyennes] : null;
-                            const scorePAN = moyennesPAN ? moyennesPAN[cleMoyennes] : null;
+                            // ✅ CORRECTIF: Utiliser la clé en minuscules (cle au lieu de cleMoyennes)
+                            const scoreSOM = moyennesSOM ? moyennesSOM[cle] : null;
+                            const scorePAN = moyennesPAN ? moyennesPAN[cle] : null;
                             const pourcentageSOM = scoreSOM !== null && scoreSOM !== undefined ? Math.round(scoreSOM * 100) : null;
                             const pourcentagePAN = scorePAN !== null && scorePAN !== undefined ? Math.round(scorePAN * 100) : null;
 
