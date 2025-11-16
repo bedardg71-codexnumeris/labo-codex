@@ -599,14 +599,26 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
                 // Contraindre la position finale pour ne pas dépasser les bords
                 const positionFinale = Math.max(0, Math.min(position + jitterH, 100));
-                // Délai d'animation aléatoire pour effet organique (0-5s)
-                const animDelay = Math.random() * 5;
+                // Anonymiser le nom si en mode anonymisation
+                const modeActif = localStorage.getItem('modeApplication') || 'normal';
+                let nomAffiche;
+                if (modeActif === 'anonymisation') {
+                    // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
+                    if (e.prenom && e.prenom.startsWith('Élève')) {
+                        nomAffiche = e.prenom;
+                    } else {
+                        // Sinon, utiliser la fonction d'anonymisation
+                        nomAffiche = (typeof anonymiserNom === 'function' && anonymiserNom(e.da)) || 'Étudiant Anonyme';
+                    }
+                } else {
+                    nomAffiche = `${e.nom}, ${e.prenom}`;
+                }
                 lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                    style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
+                    style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
                     data-da="${e.da}"
-                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                    data-nom="${echapperHtml(nomAffiche)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
-                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${Math.round(e.valeur * 100)}%"></div>`;
+                    title="${echapperHtml(nomAffiche)} : ${Math.round(e.valeur * 100)}%"></div>`;
             });
         });
     }
@@ -635,14 +647,26 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
                 // Contraindre la position finale pour ne pas dépasser les bords
                 const positionFinale = Math.max(0, Math.min(position + jitterH, 100));
-                // Délai d'animation aléatoire pour effet organique (0-5s)
-                const animDelay = Math.random() * 5;
+                // Anonymiser le nom si en mode anonymisation
+                const modeActif = localStorage.getItem('modeApplication') || 'normal';
+                let nomAffiche;
+                if (modeActif === 'anonymisation') {
+                    // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
+                    if (e.prenom && e.prenom.startsWith('Élève')) {
+                        nomAffiche = e.prenom;
+                    } else {
+                        // Sinon, utiliser la fonction d'anonymisation
+                        nomAffiche = (typeof anonymiserNom === 'function' && anonymiserNom(e.da)) || 'Étudiant Anonyme';
+                    }
+                } else {
+                    nomAffiche = `${e.nom}, ${e.prenom}`;
+                }
                 lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                    style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
+                    style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
                     data-da="${e.da}"
-                    data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                    data-nom="${echapperHtml(nomAffiche)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
-                    title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${Math.round(e.valeur * 100)}%"></div>`;
+                    title="${echapperHtml(nomAffiche)} : ${Math.round(e.valeur * 100)}%"></div>`;
             });
         });
     }
@@ -704,14 +728,26 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
             const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
-            // Délai d'animation aléatoire pour effet organique (0-5s)
-            const animDelay = Math.random() * 5;
+            // Anonymiser le nom si en mode anonymisation
+            const modeActif = localStorage.getItem('modeApplication') || 'normal';
+            let nomAffiche;
+            if (modeActif === 'anonymisation') {
+                // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
+                if (e.prenom && e.prenom.startsWith('Élève')) {
+                    nomAffiche = e.prenom;
+                } else {
+                    // Sinon, utiliser la fonction d'anonymisation
+                    nomAffiche = (typeof anonymiserNom === 'function' && anonymiserNom(e.da)) || 'Étudiant Anonyme';
+                }
+            } else {
+                nomAffiche = `${e.nom}, ${e.prenom}`;
+            }
             lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
+                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
                 data-da="${e.da}"
-                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                data-nom="${echapperHtml(nomAffiche)}"
                 data-pattern="${pattern}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${pattern}"></div>`;
+                title="${echapperHtml(nomAffiche)} : ${pattern}"></div>`;
         });
     }
 
@@ -729,14 +765,26 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
             const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
-            // Délai d'animation aléatoire pour effet organique (0-5s)
-            const animDelay = Math.random() * 5;
+            // Anonymiser le nom si en mode anonymisation
+            const modeActif = localStorage.getItem('modeApplication') || 'normal';
+            let nomAffiche;
+            if (modeActif === 'anonymisation') {
+                // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
+                if (e.prenom && e.prenom.startsWith('Élève')) {
+                    nomAffiche = e.prenom;
+                } else {
+                    // Sinon, utiliser la fonction d'anonymisation
+                    nomAffiche = (typeof anonymiserNom === 'function' && anonymiserNom(e.da)) || 'Étudiant Anonyme';
+                }
+            } else {
+                nomAffiche = `${e.nom}, ${e.prenom}`;
+            }
             lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
+                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
                 data-da="${e.da}"
-                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                data-nom="${echapperHtml(nomAffiche)}"
                 data-pattern="${pattern}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : ${pattern}"></div>`;
+                title="${echapperHtml(nomAffiche)} : ${pattern}"></div>`;
         });
     }
 
@@ -846,14 +894,26 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
             const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
-            // Délai d'animation aléatoire pour effet organique (0-5s)
-            const animDelay = Math.random() * 5;
+            // Anonymiser le nom si en mode anonymisation
+            const modeActif = localStorage.getItem('modeApplication') || 'normal';
+            let nomAffiche;
+            if (modeActif === 'anonymisation') {
+                // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
+                if (e.prenom && e.prenom.startsWith('Élève')) {
+                    nomAffiche = e.prenom;
+                } else {
+                    // Sinon, utiliser la fonction d'anonymisation
+                    nomAffiche = (typeof anonymiserNom === 'function' && anonymiserNom(e.da)) || 'Étudiant Anonyme';
+                }
+            } else {
+                nomAffiche = `${e.nom}, ${e.prenom}`;
+            }
             lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
+                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
                 data-da="${e.da}"
-                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                data-nom="${echapperHtml(nomAffiche)}"
                 data-niveau="${niveau}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${niveau}"></div>`;
+                title="${echapperHtml(nomAffiche)} : Niveau ${niveau}"></div>`;
         });
     }
 
@@ -871,14 +931,26 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
             const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
-            // Délai d'animation aléatoire pour effet organique (0-5s)
-            const animDelay = Math.random() * 5;
+            // Anonymiser le nom si en mode anonymisation
+            const modeActif = localStorage.getItem('modeApplication') || 'normal';
+            let nomAffiche;
+            if (modeActif === 'anonymisation') {
+                // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
+                if (e.prenom && e.prenom.startsWith('Élève')) {
+                    nomAffiche = e.prenom;
+                } else {
+                    // Sinon, utiliser la fonction d'anonymisation
+                    nomAffiche = (typeof anonymiserNom === 'function' && anonymiserNom(e.da)) || 'Étudiant Anonyme';
+                }
+            } else {
+                nomAffiche = `${e.nom}, ${e.prenom}`;
+            }
             lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
+                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
                 data-da="${e.da}"
-                data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
+                data-nom="${echapperHtml(nomAffiche)}"
                 data-niveau="${niveau}"
-                title="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} : Niveau ${niveau}"></div>`;
+                title="${echapperHtml(nomAffiche)} : Niveau ${niveau}"></div>`;
         });
     }
 
