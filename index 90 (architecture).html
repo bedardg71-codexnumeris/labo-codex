@@ -2861,45 +2861,6 @@
                             </span>
                         </h3>
 
-                        <!-- CARTES DE STATISTIQUES DU GROUPE -->
-                        <div class="grille-metriques">
-                            <!-- Risques faibles -->
-                            <div class="carte-metrique-standard carte-metrique-bleue">
-                                <div class="label">Risques faibles</div>
-                                <div class="valeur">
-                                    <span id="stat-risques-faibles">—</span>
-                                    <span id="stat-risques-faibles-pct"></span>
-                                </div>
-                            </div>
-
-                            <!-- RàI Niveau 1 -->
-                            <div class="carte-metrique-standard carte-metrique-bleue">
-                                <div class="label">RàI Niveau 1</div>
-                                <div class="valeur">
-                                    <span id="stat-rai-1">—</span>
-                                    <span id="stat-rai-1-pct"></span>
-                                </div>
-                            </div>
-
-                            <!-- RàI Niveau 2 -->
-                            <div class="carte-metrique-standard carte-metrique-bleue">
-                                <div class="label">RàI Niveau 2</div>
-                                <div class="valeur">
-                                    <span id="stat-rai-2">—</span>
-                                    <span id="stat-rai-2-pct"></span>
-                                </div>
-                            </div>
-
-                            <!-- RàI Niveau 3 -->
-                            <div class="carte-metrique-standard carte-metrique-bleue">
-                                <div class="label">RàI Niveau 3</div>
-                                <div class="valeur">
-                                    <span id="stat-rai-3">—</span>
-                                    <span id="stat-rai-3-pct"></span>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- ZONE INFO: Lien vers configuration -->
                         <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px;
                 margin-bottom: 20px; border-left: 4px solid var(--bleu-principal);">
@@ -2927,19 +2888,6 @@
                                     </select>
                                 </div>
                                 <div class="groupe-form">
-                                    <label for="filtre-risque-liste">Niveau de risque</label>
-                                    <select id="filtre-risque-liste" class="controle-form"
-                                        onchange="afficherListeEtudiantsConsultation()">
-                                        <option value="">Tous les niveaux</option>
-                                        <option value="minimal">🔵 Minimal (≤ 20%)</option>
-                                        <option value="faible">🟢 Faible (20-30%)</option>
-                                        <option value="modere">🟡 Modéré (30-40%)</option>
-                                        <option value="eleve">🟠 Élevé (40-50%)</option>
-                                        <option value="tres-eleve">🔴 Très élevé (50-70%)</option>
-                                        <option value="critique">⚫ Critique (> 70%)</option>
-                                    </select>
-                                </div>
-                                <div class="groupe-form">
                                     <label for="filtre-rai-liste">Niveau RàI</label>
                                     <select id="filtre-rai-liste" class="controle-form"
                                         onchange="afficherListeEtudiantsConsultation()">
@@ -2962,34 +2910,10 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="grid-1fr-auto-end">
-                                <div class="groupe-form">
-                                    <label for="recherche-nom-liste">Recherche (nom/prénom/DA)</label>
-                                    <input type="text" id="recherche-nom-liste" class="controle-form"
-                                        placeholder="Rechercher par nom, prénom ou DA..." oninput="afficherListeEtudiantsConsultation()">
-                                </div>
-                                <div class="d-flex-wrap-gap10">
-                                    <label class="checkbox-danger-light">
-                                        <input type="checkbox" id="surligner-critique" onchange="afficherListeEtudiantsConsultation()" class="cursor-pointer">
-                                        <span class="text-08-fw600-danger-dark">Engagement insuffisant (&lt;30%)</span>
-                                    </label>
-                                    <label class="checkbox-danger-medium">
-                                        <input type="checkbox" id="surligner-tres-eleve" onchange="afficherListeEtudiantsConsultation()" class="cursor-pointer">
-                                        <span class="text-08-fw600-danger">Engagement fragile (30-49%)</span>
-                                    </label>
-                                    <label class="checkbox-danger-medium">
-                                        <input type="checkbox" id="surligner-niveau3" onchange="afficherListeEtudiantsConsultation()" class="cursor-pointer">
-                                        <span class="text-08-fw600-danger">Niveau 3</span>
-                                    </label>
-                                    <label class="checkbox-warning">
-                                        <input type="checkbox" id="surligner-niveau2" onchange="afficherListeEtudiantsConsultation()" class="cursor-pointer">
-                                        <span style="font-size: 0.8rem; font-weight: 600; color: var(--risque-modere);">Niveau 2</span>
-                                    </label>
-                                    <label class="checkbox-danger-light">
-                                        <input type="checkbox" id="surligner-blocage" onchange="afficherListeEtudiantsConsultation()" class="cursor-pointer">
-                                        <span class="text-08-fw600-danger-dark">Blocage</span>
-                                    </label>
-                                </div>
+                            <div class="groupe-form">
+                                <label for="recherche-nom-liste">Recherche (nom/prénom/DA)</label>
+                                <input type="text" id="recherche-nom-liste" class="controle-form"
+                                    placeholder="Rechercher par nom, prénom ou DA..." oninput="afficherListeEtudiantsConsultation()">
                             </div>
                         </div>
 
@@ -5845,6 +5769,17 @@ Exemple :
                                     </label>
                                     <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.8rem;">
                                         Affiche les indices SOM et PAN côte à côte pour comparer les deux approches
+                                    </small>
+                                </div>
+
+                                <!-- Option : Analyse SOLO des acquis -->
+                                <div class="form-group" style="margin-bottom: 15px;">
+                                    <label style="cursor: pointer; display: flex; align-items: center;">
+                                        <input type="checkbox" id="afficherDescriptionsSOLO" checked>
+                                        <strong style="margin-left: 8px;">Afficher l'observation de la structure des résultats d'apprentissage (SOLO)</strong>
+                                    </label>
+                                    <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.8rem; line-height: 1.5;">
+                                        Affiche une 3<sup>e</sup> carte dans Accompagnement avec les descriptions détaillées basées sur la taxonomie SOLO de Biggs & Collis (unistructurel, multistructurel, relationnel, abstrait étendu). Désactivez cette option si votre pratique ne s'appuie pas sur la taxonomie pas SOLO.
                                     </small>
                                 </div>
 
