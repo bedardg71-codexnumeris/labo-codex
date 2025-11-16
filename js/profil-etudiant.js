@@ -3782,11 +3782,11 @@ function obtenirTableConversionIDME(echelleId = null) {
     let niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
 
     // Si on a des niveaux IDME actifs, les utiliser
-    if (niveaux.length > 0 && niveaux.some(n => ['I', 'D', 'M', 'E'].includes(n.code))) {
+    if (niveaux.length > 0 && niveaux.some(n => ['0', 'I', 'D', 'M', 'E'].includes(n.code))) {
         const table = {};
         niveaux.forEach(niveau => {
             const code = niveau.code.toUpperCase();
-            if (['I', 'D', 'M', 'E'].includes(code)) {
+            if (['0', 'I', 'D', 'M', 'E'].includes(code)) {
                 // valeurCalcul peut être string ou number, on convertit en 0-1
                 const valeur = parseFloat(niveau.valeurCalcul || niveau.valeurPonctuelle || 0) / 100;
                 table[code] = valeur;
@@ -3802,10 +3802,10 @@ function obtenirTableConversionIDME(echelleId = null) {
     if (echelleId) {
         echelle = echelles.find(e => e.id === echelleId);
     } else {
-        // Chercher une échelle avec les codes I, D, M, E
+        // Chercher une échelle avec les codes I, D, M, E (ou 0)
         echelle = echelles.find(e =>
             e.niveaux &&
-            e.niveaux.some(n => ['I', 'D', 'M', 'E'].includes(n.code))
+            e.niveaux.some(n => ['0', 'I', 'D', 'M', 'E'].includes(n.code))
         );
     }
 
@@ -3813,7 +3813,7 @@ function obtenirTableConversionIDME(echelleId = null) {
         const table = {};
         echelle.niveaux.forEach(niveau => {
             const code = niveau.code.toUpperCase();
-            if (['I', 'D', 'M', 'E'].includes(code)) {
+            if (['0', 'I', 'D', 'M', 'E'].includes(code)) {
                 const valeur = parseFloat(niveau.valeurCalcul || niveau.valeurPonctuelle || 0) / 100;
                 table[code] = valeur;
             }
@@ -3821,8 +3821,8 @@ function obtenirTableConversionIDME(echelleId = null) {
         return table;
     }
 
-    // FALLBACK : Valeurs par défaut si aucune échelle trouvée
-    return { I: 0.40, D: 0.65, M: 0.75, E: 1.00 };
+    // FALLBACK : Valeurs par défaut si aucune échelle trouvée (avec niveau 0)
+    return { '0': 0.00, I: 0.40, D: 0.65, M: 0.75, E: 1.00 };
 }
 
 /**
