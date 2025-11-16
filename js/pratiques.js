@@ -836,6 +836,12 @@ function sauvegarderPratiqueNotation() {
     modalites.typePAN = pratique === 'alternative' ? typePAN : null;
     modalites.dateConfiguration = new Date().toISOString();
 
+    // Sauvegarder la grille de référence pour le dépistage
+    const selectGrilleRef = document.getElementById('grilleReferenceDepistage');
+    if (selectGrilleRef) {
+        modalites.grilleReferenceDepistage = selectGrilleRef.value || null;
+    }
+
     // S'assurer que les options d'affichage sont incluses
     if (!modalites.affichageTableauBord) {
         const checkComparatif = document.getElementById('modeComparatif');
@@ -946,6 +952,13 @@ function chargerModalites() {
     // Charger la configuration PAN (portfolio et jetons)
     if (modalites.configPAN) {
         chargerConfigurationPAN(modalites.configPAN);
+    }
+
+    // Charger les grilles disponibles et sélectionner la grille de référence
+    chargerGrillesDisponibles();
+    const selectGrilleRef = document.getElementById('grilleReferenceDepistage');
+    if (selectGrilleRef && modalites.grilleReferenceDepistage) {
+        selectGrilleRef.value = modalites.grilleReferenceDepistage;
     }
 
     // Masquer la section configurationPAN au chargement
@@ -1245,6 +1258,35 @@ function obtenirConfigurationNotation() {
  * - Fonctionne avec tous les navigateurs modernes
  * - Pas de dépendances externes
  */
+
+/* ===============================
+   GRILLE DE RÉFÉRENCE POUR DÉPISTAGE
+   =============================== */
+
+/**
+ * Charge les grilles disponibles dans le sélecteur de grille de référence
+ * Appelée au chargement et après sauvegarde
+ */
+function chargerGrillesDisponibles() {
+    const select = document.getElementById('grilleReferenceDepistage');
+    if (!select) return;
+
+    // Lire les grilles depuis localStorage
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+
+    // Vider le select
+    select.innerHTML = '<option value="">-- Sélectionner une grille --</option>';
+
+    // Ajouter chaque grille comme option
+    grilles.forEach(grille => {
+        const option = document.createElement('option');
+        option.value = grille.id;
+        option.textContent = grille.nom;
+        select.appendChild(option);
+    });
+
+    console.log(`✅ ${grilles.length} grille(s) chargée(s) dans le sélecteur de référence`);
+}
 
 // ============================================
 // EXPORT DES FONCTIONS GLOBALES
