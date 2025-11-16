@@ -594,11 +594,15 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             etudiants.forEach((e, index) => {
                 // Mapper 30-100% sur 0-100% de la barre
                 const position = Math.max(0, Math.min((e.valeur - 0.30) / 0.70 * 100, 100));
-                // Jitter léger : ±0.3% horizontal, ±8px vertical
-                const jitterH = (Math.random() - 0.5) * 0.6; // -0.3% à +0.3%
-                const jitterV = (Math.random() - 0.5) * 16; // -8px à +8px
+                // Jitter pour dilater les agglomérations : ±1.5% horizontal, ±12px vertical
+                const jitterH = (Math.random() - 0.5) * 3.0; // -1.5% à +1.5%
+                const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
+                // Contraindre la position finale pour ne pas dépasser les bords
+                const positionFinale = Math.max(0, Math.min(position + jitterH, 100));
+                // Délai d'animation aléatoire pour effet organique (0-5s)
+                const animDelay = Math.random() * 5;
                 lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                    style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                    style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
@@ -626,11 +630,15 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             etudiants.forEach((e, index) => {
                 // Mapper 30-100% sur 0-100% de la barre
                 const position = Math.max(0, Math.min((e.valeur - 0.30) / 0.70 * 100, 100));
-                // Jitter léger : ±0.3% horizontal, ±8px vertical
-                const jitterH = (Math.random() - 0.5) * 0.6; // -0.3% à +0.3%
-                const jitterV = (Math.random() - 0.5) * 16; // -8px à +8px
+                // Jitter pour dilater les agglomérations : ±1.5% horizontal, ±12px vertical
+                const jitterH = (Math.random() - 0.5) * 3.0; // -1.5% à +1.5%
+                const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
+                // Contraindre la position finale pour ne pas dépasser les bords
+                const positionFinale = Math.max(0, Math.min(position + jitterH, 100));
+                // Délai d'animation aléatoire pour effet organique (0-5s)
+                const animDelay = Math.random() * 5;
                 lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                    style="left: calc(${position}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                    style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
                     data-valeur="${Math.round(e.valeur * 100)}%"
@@ -692,10 +700,14 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
 
             const position = positionPattern[pattern] || 50;
             const decalageH = -2; // SOM à gauche
-            const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
-            const jitterV = (Math.random() - 0.5) * 16; // ±8px autour du centre
+            const jitterH = (Math.random() - 0.5) * 3.0; // ±1.5% pour dilater agglomérations
+            const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
+            // Contraindre la position finale pour ne pas dépasser les bords
+            const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
+            // Délai d'animation aléatoire pour effet organique (0-5s)
+            const animDelay = Math.random() * 5;
             lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: calc(${position}% + ${decalageH}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
                 data-pattern="${pattern}"
@@ -713,10 +725,14 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
 
             const position = positionPattern[pattern] || 50;
             const decalageH = 2; // PAN à droite
-            const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
-            const jitterV = (Math.random() - 0.5) * 16; // ±8px autour du centre
+            const jitterH = (Math.random() - 0.5) * 3.0; // ±1.5% pour dilater agglomérations
+            const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
+            // Contraindre la position finale pour ne pas dépasser les bords
+            const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
+            // Délai d'animation aléatoire pour effet organique (0-5s)
+            const animDelay = Math.random() * 5;
             lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                style="left: calc(${position}% + ${decalageH}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
                 data-pattern="${pattern}"
@@ -826,10 +842,14 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
 
             const position = positionNiveau[niveau] || 50;
             const decalageH = -2; // SOM à gauche
-            const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
-            const jitterV = (Math.random() - 0.5) * 16; // ±8px autour du centre
+            const jitterH = (Math.random() - 0.5) * 3.0; // ±1.5% pour dilater agglomérations
+            const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
+            // Contraindre la position finale pour ne pas dépasser les bords
+            const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
+            // Délai d'animation aléatoire pour effet organique (0-5s)
+            const animDelay = Math.random() * 5;
             lignesSOM += `<div class="barre-etudiant barre-etudiant-som"
-                style="left: calc(${position}% + ${decalageH}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
                 data-niveau="${niveau}"
@@ -847,10 +867,14 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
 
             const position = positionNiveau[niveau] || 50;
             const decalageH = 2; // PAN à droite
-            const jitterH = (Math.random() - 0.5) * 0.6; // ±0.3%
-            const jitterV = (Math.random() - 0.5) * 16; // ±8px autour du centre
+            const jitterH = (Math.random() - 0.5) * 3.0; // ±1.5% pour dilater agglomérations
+            const jitterV = (Math.random() - 0.5) * 24; // ±12px pour dilater agglomérations
+            // Contraindre la position finale pour ne pas dépasser les bords
+            const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
+            // Délai d'animation aléatoire pour effet organique (0-5s)
+            const animDelay = Math.random() * 5;
             lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
-                style="left: calc(${position}% + ${decalageH}% + ${jitterH}%); top: calc(50% + ${jitterV}px);"
+                style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px); animation-delay: ${animDelay}s;"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}"
                 data-niveau="${niveau}"

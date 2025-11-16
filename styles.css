@@ -5118,6 +5118,22 @@ label:has(+ textarea:disabled) {
     opacity: 1; /* Opacité maximale pour fond dégradé visible */
 }
 
+/* Animation de flottement subtil pour les points */
+@keyframes float-subtle {
+    0%, 100% {
+        transform: translate(-50%, -50%) translateX(0px) translateY(0px);
+    }
+    25% {
+        transform: translate(-50%, -50%) translateX(2px) translateY(-1.5px);
+    }
+    50% {
+        transform: translate(-50%, -50%) translateX(0px) translateY(-3px);
+    }
+    75% {
+        transform: translate(-50%, -50%) translateX(-2px) translateY(-1.5px);
+    }
+}
+
 /* Point représentant un étudiant (scatter plot) */
 .barre-etudiant {
     position: absolute;
@@ -5131,6 +5147,7 @@ label:has(+ textarea:disabled) {
     top: 50%;
     border: 1px solid white;
     box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    animation: float-subtle 5s ease-in-out infinite;
 }
 
 /* Point pour SOM (orange) */
