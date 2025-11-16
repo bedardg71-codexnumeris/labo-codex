@@ -876,6 +876,15 @@ function sauvegarderPratiqueNotation() {
         modalites.afficherDescriptionsSOLO = true;
     }
 
+    // Sauvegarder l'option d'activation du modèle RàI et détection des patterns
+    const checkRai = document.getElementById('activerRai');
+    if (checkRai) {
+        modalites.activerRai = checkRai.checked;
+    } else {
+        // Par défaut activé si l'élément n'existe pas (rétrocompatibilité)
+        modalites.activerRai = true;
+    }
+
     localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
 
     // Sauvegarder toutes les configurations (portfolio et jetons)
@@ -960,6 +969,13 @@ function chargerModalites() {
     if (checkSOLO) {
         // Par défaut activé si non défini (rétrocompatibilité)
         checkSOLO.checked = modalites.afficherDescriptionsSOLO !== false;
+    }
+
+    // Charger l'option d'activation du modèle RàI et détection des patterns
+    const checkRai = document.getElementById('activerRai');
+    if (checkRai) {
+        // Par défaut activé si non défini (rétrocompatibilité)
+        checkRai.checked = modalites.activerRai !== false;
     }
 
     // Afficher la section options si nécessaire

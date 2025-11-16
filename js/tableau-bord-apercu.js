@@ -193,8 +193,15 @@ function chargerTableauBordApercu() {
         // Afficher tout (sans noms d'étudiants dans l'aperçu)
         afficherMetriquesGlobales(etudiantsAvecIndices);
         afficherAlertesPrioritairesCompteurs(etudiantsAvecIndices);
-        afficherPatternsApprentissage(etudiantsAvecIndices);
-        afficherNiveauxRaI(etudiantsAvecIndices);
+
+        // Afficher RàI et Patterns uniquement si activé dans les réglages
+        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const activerRai = config.activerRai !== false; // Par défaut true (rétrocompatibilité)
+
+        if (activerRai) {
+            afficherPatternsApprentissage(etudiantsAvecIndices);
+            afficherNiveauxRaI(etudiantsAvecIndices);
+        }
 
         console.log('✅ Tableau de bord chargé (aperçu anonyme)');
 
