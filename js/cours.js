@@ -182,16 +182,25 @@ function afficherTableauCours() {
     
     html += '</tbody></table>';
     container.innerHTML = html;
-    
-    // Mettre à jour les statistiques
-    document.getElementById('nombreCours').textContent = cours.length;
-    
+
+    // Mettre à jour les statistiques (vérifier existence élément DOM)
+    const elemNombreCours = document.getElementById('nombreCours');
+    if (elemNombreCours) {
+        elemNombreCours.textContent = cours.length;
+    }
+
     // Trouver le cours actif
     const coursActif = cours.find(c => c.actif) || cours[0];
     if (coursActif) {
-        document.getElementById('sessionActive').textContent = coursActif.session + coursActif.annee;
-        document.getElementById('resumeCours').textContent =
-            `${coursActif.codeCours} - ${coursActif.nomCours}`;
+        const elemSessionActive = document.getElementById('sessionActive');
+        const elemResumeCours = document.getElementById('resumeCours');
+
+        if (elemSessionActive) {
+            elemSessionActive.textContent = coursActif.session + coursActif.annee;
+        }
+        if (elemResumeCours) {
+            elemResumeCours.textContent = `${coursActif.codeCours} - ${coursActif.nomCours}`;
+        }
     }
 }
 

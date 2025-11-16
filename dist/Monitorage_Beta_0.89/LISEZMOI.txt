@@ -1,0 +1,330 @@
+================================================================================
+SYSTÈME DE SUIVI DES APPRENTISSAGES - Beta 74
+Guide d'installation rapide
+================================================================================
+
+Auteur : Grégoire Bédard
+Contact : labo@codexnumeris.org
+Site web : https://codexnumeris.org
+Date : 27 octobre 2025
+
+================================================================================
+INSTALLATION EN 3 MINUTES
+================================================================================
+
+1. DÉCOMPRESSER LE FICHIER ZIP
+   - Extraire tous les fichiers dans un dossier de votre choix
+   - Ex: Documents/Monitorage_v6/
+
+2. OUVRIR L'APPLICATION
+   - Double-cliquer sur "index 74 (moteur recherche Aide).html"
+   - L'application s'ouvre dans votre navigateur par défaut
+
+3. IMPORTER LES DONNÉES DE DÉMONSTRATION
+   - Aller dans Réglages → Import/Export
+   - Cliquer sur "Importer les données"
+   - Sélectionner le fichier "donnees-demo.json"
+   - Cliquer sur "Importer"
+
+C'EST PRÊT ! Vous pouvez maintenant explorer l'application.
+
+================================================================================
+CONTENU DU PACKAGE
+================================================================================
+
+Monitorage_v6/
+│
+├── index 74 (moteur recherche Aide).html  ← FICHIER PRINCIPAL À OUVRIR
+│
+├── js/                                     ← Modules JavaScript (NE PAS MODIFIER)
+│   ├── config.js
+│   ├── navigation.js
+│   ├── main.js
+│   ├── modes.js
+│   ├── [... tous les autres modules]
+│   └── profil-etudiant.js
+│
+├── styles.css                              ← Feuille de styles (NE PAS MODIFIER)
+│
+├── donnees-demo.json                       ← Données de démonstration
+│
+├── LISEZMOI.txt                            ← Ce fichier
+│
+├── GUIDE_TESTEURS.pdf                      ← Guide détaillé pour testeurs
+│
+└── LICENSE.md                              ← Informations de licence
+
+================================================================================
+DONNÉES DE DÉMONSTRATION INCLUSES
+================================================================================
+
+Le fichier "donnees-demo.json" contient :
+
+✅ Groupe TEST : 30 étudiants fictifs
+✅ Calendrier : Trimestre complet (124 jours)
+✅ Horaire : 5 séances par semaine configurées
+✅ Évaluations sommatives : 5 évaluations complètes avec notes SRPNF
+✅ Artefacts portfolio : 4 artefacts notés selon l'échelle IDME
+✅ Présences : Données réalistes sur 8 semaines
+✅ Modalités : Configuration SOM + PAN (mode comparatif activé)
+
+Ces données vous permettent de tester immédiatement toutes les fonctionnalités
+sans avoir à créer un groupe et saisir des données manuellement.
+
+================================================================================
+PREMIERS PAS APRÈS L'IMPORTATION
+================================================================================
+
+1. EXPLORER LE TABLEAU DE BORD
+   → Cliquer sur "Tableau de bord" dans le menu principal
+   → Voir l'aperçu des 30 étudiants avec leurs indices A-C-P-R
+   → Observer les différences entre mode sommatif (orange) et alternatif (bleu)
+
+2. CONSULTER UN PROFIL ÉTUDIANT
+   → Cliquer sur le nom d'un étudiant dans le tableau de bord
+   → Explorer les 3 sections : Suivi, Développement, Mobilisation
+   → Tester les boutons Précédent/Suivant pour naviguer
+
+3. TESTER LES TROIS MODES
+   → Cliquer sur le badge du mode en haut à droite (ex: "Normal")
+   → Essayer : Mode Normal, Mode Anonymisé, Mode Simulé
+   → Observer comment les données changent
+
+4. UTILISER LA SECTION AIDE
+   → Cliquer sur "Aide" dans le menu principal
+   → Utiliser le moteur de recherche (tapez "risque" ou "SRPNF")
+   → Explorer les 6 sous-sections
+
+5. MODIFIER DES DONNÉES
+   → Aller dans Évaluations → Liste des évaluations
+   → Cliquer sur une évaluation pour modifier les notes
+   → Retourner au tableau de bord pour voir les indices recalculés
+
+================================================================================
+CONFIGURATION REQUISE
+================================================================================
+
+NAVIGATEURS SUPPORTÉS :
+✅ Safari (macOS, iOS)
+✅ Chrome (macOS, Windows)
+✅ Firefox (macOS, Windows)
+✅ Edge (Windows)
+
+SYSTÈME D'EXPLOITATION :
+✅ macOS 10.15 ou plus récent
+✅ Windows 10 ou plus récent
+✅ iOS 14 ou plus récent (iPad)
+
+STOCKAGE :
+✅ 10 Mo d'espace disque pour les fichiers
+✅ localStorage du navigateur pour les données (aucune limite pratique)
+
+CONNEXION INTERNET :
+❌ NON REQUISE - L'application fonctionne 100% hors-ligne
+
+================================================================================
+UTILISATION AVEC VOS PROPRES DONNÉES
+================================================================================
+
+Une fois que vous avez exploré les données de démonstration, vous pouvez
+créer votre propre groupe :
+
+1. EFFACER LES DONNÉES DE DÉMONSTRATION (optionnel)
+   → Réglages → Import/Export
+   → Cliquer sur "Effacer toutes les données"
+   → Confirmer
+
+2. CONFIGURER VOTRE COURS
+   → Réglages → Cours
+   → Entrer : Code, Titre, Session, Pondération
+
+3. DÉFINIR LE TRIMESTRE
+   → Réglages → Trimestre
+   → Dates de début et fin
+   → Congés prévus (ex: semaine de lecture)
+   → Cliquer sur "Générer le calendrier"
+
+4. CRÉER VOTRE GROUPE
+   → Réglages → Groupe
+   → Ajouter vos étudiants (un par ligne : DA, Prénom, Nom)
+   → Ou importer depuis un CSV
+
+5. CONFIGURER L'HORAIRE
+   → Réglages → Horaire
+   → Définir les séances (ex: Lundi 8h-11h, Mercredi 13h-16h)
+
+6. PARAMÉTRER LES PRATIQUES
+   → Réglages → Pratiques
+   → Choisir : Sommative, Alternative, ou Comparatif
+
+7. CRÉER VOS ÉVALUATIONS
+   → Évaluations → Productions
+   → Ajouter vos évaluations (examens, travaux, artefacts)
+
+8. COMMENCER À SAISIR
+   → Présences → Saisie
+   → Évaluations → Liste des évaluations
+
+================================================================================
+SAUVEGARDE ET EXPORT
+================================================================================
+
+IMPORTANT : Vos données sont stockées dans le navigateur (localStorage).
+
+Pour sauvegarder vos données :
+1. Réglages → Import/Export
+2. Cliquer sur "Exporter les données"
+3. Sélectionner toutes les clés (ou seulement celles souhaitées)
+4. Cliquer sur "Exporter"
+5. Un fichier JSON sera téléchargé
+
+RECOMMANDATION : Exportez vos données régulièrement (ex: chaque semaine)
+
+Pour restaurer vos données :
+1. Réglages → Import/Export
+2. Cliquer sur "Importer les données"
+3. Sélectionner votre fichier JSON de sauvegarde
+4. Cliquer sur "Importer"
+
+================================================================================
+FONCTIONNALITÉS PRINCIPALES
+================================================================================
+
+TABLEAU DE BORD
+- Vue d'ensemble des étudiants avec indices A-C-P-R
+- Identification des étudiants à risque
+- Comparaison SOM vs PAN (si mode comparatif activé)
+- Recommandations d'intervention (RàI)
+
+PROFILS ÉTUDIANTS
+- Suivi de l'apprentissage (indices R, RàI, échelle de risque)
+- Développement des habiletés (performance SRPNF)
+- Mobilisation (assiduité, complétion, artefacts)
+- Navigation entre étudiants (Précédent/Suivant)
+
+TROIS MODES
+- Normal : Données réelles avec vrais noms
+- Anonymisé : Données réelles avec pseudonymes
+- Simulé : Groupe fictif (9999) pour expérimentation
+
+ÉVALUATIONS
+- Support SOM (sommative) : Examens, travaux, quiz
+- Support PAN (alternative) : Portfolio d'artefacts
+- Critères SRPNF : Structure, Rigueur, Plausibilité, Nuance, Français
+- Échelle IDME : Insuffisant, Développement, Maîtrisé, Étendu
+
+PRÉSENCES
+- Saisie par séance
+- Calcul automatique de l'indice A (Assiduité)
+- Historique des présences
+
+AIDE INTÉGRÉE
+- 6 sous-sections : Introduction, Configuration, Formation, Utilisation,
+  Consultation, Référence
+- Moteur de recherche avec surlignage
+- 14 références bibliographiques
+- FAQ et glossaire
+
+================================================================================
+PROBLÈMES COURANTS ET SOLUTIONS
+================================================================================
+
+❌ "L'application ne s'ouvre pas"
+✅ Assurez-vous d'avoir extrait TOUS les fichiers du ZIP
+✅ Vérifiez que le dossier js/ est présent à côté du fichier HTML
+✅ Essayez avec un autre navigateur (Chrome recommandé)
+
+❌ "Les données de démonstration ne s'importent pas"
+✅ Vérifiez que le fichier donnees-demo.json est dans le même dossier
+✅ Essayez de l'ouvrir avec un éditeur de texte pour vérifier qu'il n'est pas corrompu
+✅ Dans la console du navigateur (F12), vérifiez les erreurs
+
+❌ "J'ai perdu mes données"
+✅ Si vous utilisez la navigation privée, les données sont effacées à la fermeture
+✅ Si vous nettoyez le cache/cookies du navigateur, les données sont perdues
+✅ SOLUTION : Exportez régulièrement vos données en JSON
+
+❌ "Le calendrier est vide"
+✅ Aller dans Réglages → Trimestre
+✅ Cliquer sur "Régénérer le calendrier"
+
+❌ "Les indices ne se calculent pas"
+✅ Vérifiez que vous avez bien saisi des présences
+✅ Vérifiez que vous avez bien créé et noté des évaluations
+✅ Les indices nécessitent des données pour être calculés
+
+❌ "Je ne vois pas tous les étudiants"
+✅ Vérifiez le mode actuel (badge en haut à droite)
+✅ En mode Normal/Anonymisé : exclut le Groupe 9999
+✅ En mode Simulé : affiche SEULEMENT le Groupe 9999
+
+================================================================================
+OBTENIR DE L'AIDE
+================================================================================
+
+DOCUMENTATION :
+📖 Section Aide intégrée dans l'application
+📖 GUIDE_TESTEURS.pdf (guide détaillé)
+📖 LICENSE.md (informations de licence)
+
+CONTACT :
+📧 Email : labo@codexnumeris.org
+🌐 Site web : https://codexnumeris.org/apropos
+
+RETOURS ET BUGS :
+📝 Formulaire de feedback : [lien vers le formulaire Microsoft Forms]
+📝 Ou par email à labo@codexnumeris.org
+
+COMMUNAUTÉ :
+- Partagez votre expérience avec vos collègues
+- Suggérez des améliorations
+- Contribuez à l'amélioration de l'outil
+
+================================================================================
+LICENCE
+================================================================================
+
+Ce projet utilise une DOUBLE LICENCE :
+
+CODE SOURCE (HTML, CSS, JavaScript)
+→ GNU General Public License v3.0
+→ Le code doit rester libre et open source
+
+CONTENU PÉDAGOGIQUE (Documentation, concepts, aide)
+→ Creative Commons BY-SA 4.0
+→ Partage et adaptation autorisés avec attribution
+
+Détails complets dans LICENSE.md
+
+Vous POUVEZ :
+✅ Utiliser l'application dans votre établissement
+✅ Modifier pour l'adapter à vos besoins
+✅ Partager avec vos collègues
+✅ Adapter les concepts pédagogiques
+
+Vous DEVEZ :
+⚠️ Conserver les mentions de licence
+⚠️ Attribuer à l'auteur original (Grégoire Bédard)
+⚠️ Redistribuer les modifications sous même licence
+
+================================================================================
+REMERCIEMENTS
+================================================================================
+
+Merci de tester cette application et de contribuer à son amélioration !
+
+Votre expertise pédagogique et vos retours sont précieux pour faire évoluer
+cet outil et le rendre plus utile pour la communauté enseignante.
+
+L'objectif du monitorage pédagogique est de FAIRE MENTIR les prédictions
+de risque par des interventions proactives.
+
+Bons tests !
+
+Grégoire Bédard
+Labo Codex
+https://codexnumeris.org
+
+================================================================================
+FIN DU GUIDE
+================================================================================
