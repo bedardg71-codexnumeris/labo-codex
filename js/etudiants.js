@@ -816,8 +816,8 @@ function afficherListeEtudiantsConsultation() {
 
         // Colonnes Pattern et RàI (affichées uniquement si RàI activé)
         if (activerRai) {
-            // NOUVEAU: Colonne Pattern avec badge
-            html += '<td><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
+            // NOUVEAU: Colonne Pattern avec badge (centré)
+            html += '<td style="text-align: center;"><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
 
             // NOUVEAU: Colonne RàI avec badge amélioré
             html += '<td style="text-align: center;"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
