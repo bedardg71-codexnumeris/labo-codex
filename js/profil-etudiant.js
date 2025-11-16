@@ -3882,58 +3882,51 @@ function calculerMoyennesCriteres(da) {
         scoresCriteres[cleNormalisee] = [];
     });
 
-    // Construire regex dynamique pour capturer tous les critères
-    // Ex: (STRUCTURE|RIGUEUR|ANALYSE) \s*\(([IDME])\)
-    const nomsRegex = grille.criteres.map(c => {
-        // Échapper caractères spéciaux et gérer variantes accents
-        const nom = c.nom.toUpperCase()
-            .replace(/É/g, '[ÉE]')
-            .replace(/È/g, '[ÈE]')
-            .replace(/Ç/g, '[ÇC]')
-            .replace(/À/g, '[ÀA]')
-            .replace(/\s+/g, '\\s+'); // Espaces multiples acceptés
-        return nom;
-    }).join('|');
-
-    const regexCritere = new RegExp(`(${nomsRegex})\\s*\\(([IDME0])\\)`, 'gi');
-
-    console.log(`✅ Regex dynamique pour ${grille.criteres.length} critères:`, regexCritere);
+    // NOUVELLE APPROCHE: Lire directement depuis evaluation.criteres[]
+    // Plus fiable que de parser la rétroaction (qui peut avoir des formats variables)
+    console.log(`✅ Extraction depuis evaluation.criteres[] pour ${grille.criteres.length} critères de référence`);
 
     evaluationsEleve.forEach(evaluation => {
-        const retroaction = evaluation.retroactionFinale || '';
+        // Vérifier si cette évaluation a un tableau criteres[]
+        if (!evaluation.criteres || !Array.isArray(evaluation.criteres)) {
+            console.warn(`  ⚠️ ${evaluation.productionNom}: pas de tableau criteres[], ignorée`);
+            return;
+        }
 
-        // Extraire tous les critères avec leur niveau
-        let match;
-        while ((match = regexCritere.exec(retroaction)) !== null) {
-            const nomCritereTrouve = match[1].toUpperCase();
-            const niveauIDME = match[2].toUpperCase();
+        // Pour chaque critère de l'évaluation
+        evaluation.criteres.forEach(critereSauvegarde => {
+            const niveauIDME = critereSauvegarde.niveauSelectionne;
+            const nomCritere = critereSauvegarde.critereNom;
+
+            // Convertir le niveau IDME en score numérique
             const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
 
             if (score !== null) {
-                // Trouver quel critère de la grille correspond
-                const critereCorrespondant = grille.criteres.find(c => {
-                    const nomAttendu = c.nom.toUpperCase()
-                        .replace(/[ÉÈÊË]/g, 'E')
-                        .replace(/[ÇC]/g, 'C')
-                        .replace(/[ÀÂ]/g, 'A')
+                // Trouver le critère correspondant dans la grille de référence
+                const critereReference = grille.criteres.find(c => {
+                    // Normaliser les deux noms pour comparaison insensible aux accents/espaces
+                    const nomRef = c.nom.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
                         .replace(/\s+/g, '');
-                    const nomTrouve = nomCritereTrouve
-                        .replace(/[ÉÈÊË]/g, 'E')
-                        .replace(/[ÇC]/g, 'C')
-                        .replace(/[ÀÂ]/g, 'A')
+                    const nomEval = nomCritere.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
                         .replace(/\s+/g, '');
-                    return nomAttendu === nomTrouve;
+                    return nomRef === nomEval;
                 });
 
-                if (critereCorrespondant) {
-                    const cleNormalisee = critereCorrespondant.nom.toLowerCase()
+                if (critereReference) {
+                    const cleNormalisee = critereReference.nom.toLowerCase()
                         .normalize('NFD')
                         .replace(/[\u0300-\u036f]/g, '')
                         .replace(/\s+/g, '');
                     scoresCriteres[cleNormalisee].push(score);
+                } else {
+                    console.warn(`  ⚠️ Critère "${nomCritere}" non trouvé dans grille de référence`);
                 }
             }
-        }
+        });
     });
 
     console.log('  Scores extraits:', scoresCriteres);
@@ -4025,54 +4018,51 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
         scoresCriteres[cleNormalisee] = [];
     });
 
-    // Construire regex dynamique pour capturer tous les critères
-    const nomsRegex = grille.criteres.map(c => {
-        const nom = c.nom.toUpperCase()
-            .replace(/É/g, '[ÉE]')
-            .replace(/È/g, '[ÈE]')
-            .replace(/Ç/g, '[ÇC]')
-            .replace(/À/g, '[ÀA]')
-            .replace(/\s+/g, '\\s+');
-        return nom;
-    }).join('|');
-
-    const regexCritere = new RegExp(`(${nomsRegex})\\s*\\(([IDME0])\\)`, 'gi');
+    // NOUVELLE APPROCHE: Lire directement depuis evaluation.criteres[]
+    // Plus fiable que de parser la rétroaction (qui peut avoir des formats variables)
+    console.log(`✅ Extraction depuis evaluation.criteres[] pour ${grille.criteres.length} critères de référence`);
 
     derniersArtefacts.forEach(evaluation => {
-        const retroaction = evaluation.retroactionFinale || '';
+        // Vérifier si cette évaluation a un tableau criteres[]
+        if (!evaluation.criteres || !Array.isArray(evaluation.criteres)) {
+            console.warn(`  ⚠️ ${evaluation.productionNom}: pas de tableau criteres[], ignorée`);
+            return;
+        }
 
-        // Extraire tous les critères avec leur niveau
-        let match;
-        while ((match = regexCritere.exec(retroaction)) !== null) {
-            const nomCritereTrouve = match[1].toUpperCase();
-            const niveauIDME = match[2].toUpperCase();
+        // Pour chaque critère de l'évaluation
+        evaluation.criteres.forEach(critereSauvegarde => {
+            const niveauIDME = critereSauvegarde.niveauSelectionne;
+            const nomCritere = critereSauvegarde.critereNom;
+
+            // Convertir le niveau IDME en score numérique
             const score = convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
 
             if (score !== null) {
-                // Trouver le critère correspondant dans la grille
-                const critereCorrespondant = grille.criteres.find(c => {
-                    const nomAttendu = c.nom.toUpperCase()
-                        .replace(/[ÉÈÊË]/g, 'E')
-                        .replace(/[ÇC]/g, 'C')
-                        .replace(/[ÀÂ]/g, 'A')
+                // Trouver le critère correspondant dans la grille de référence
+                const critereReference = grille.criteres.find(c => {
+                    // Normaliser les deux noms pour comparaison insensible aux accents/espaces
+                    const nomRef = c.nom.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
                         .replace(/\s+/g, '');
-                    const nomTrouve = nomCritereTrouve
-                        .replace(/[ÉÈÊË]/g, 'E')
-                        .replace(/[ÇC]/g, 'C')
-                        .replace(/[ÀÂ]/g, 'A')
+                    const nomEval = nomCritere.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
                         .replace(/\s+/g, '');
-                    return nomAttendu === nomTrouve;
+                    return nomRef === nomEval;
                 });
 
-                if (critereCorrespondant) {
-                    const cleNormalisee = critereCorrespondant.nom.toLowerCase()
+                if (critereReference) {
+                    const cleNormalisee = critereReference.nom.toLowerCase()
                         .normalize('NFD')
                         .replace(/[\u0300-\u036f]/g, '')
                         .replace(/\s+/g, '');
                     scoresCriteres[cleNormalisee].push(score);
+                } else {
+                    console.warn(`  ⚠️ Critère "${nomCritere}" non trouvé dans grille de référence`);
                 }
             }
-        }
+        });
     });
 
     console.log(`  Scores extraits (${derniersArtefacts.length} derniers):`, scoresCriteres);
