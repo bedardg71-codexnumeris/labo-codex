@@ -5300,3 +5300,21 @@ label:has(+ textarea:disabled) {
     border: 2px solid rgba(0, 0, 0, 0.2);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
+
+/* ===============================
+   TABLEAU DES ÉTUDIANTS - COLONNES CENTRÉES
+   =============================== */
+
+/* En-têtes des colonnes A, C, P, E, RàI centrés */
+.td-center-clickable,
+.td-center-100-clickable,
+.td-center-70,
+.td-center-40,
+.td-center-80 {
+    text-align: center !important;
+}
+
+/* Colonne Pattern centrée */
+.td-left-140-clickable {
+    text-align: center !important;
+}
