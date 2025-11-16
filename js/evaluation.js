@@ -3024,6 +3024,14 @@ function modifierEvaluation(evaluationId) {
             selectProduction.dispatchEvent(new Event('change', { bubbles: true }));
             console.log('✅ Production chargée');
 
+            // ÉTAPE 3.5: S'assurer que toutes les grilles sont chargées dans le select
+            // NOTE: chargerProduction() pré-sélectionne la grille de la production,
+            // mais on doit s'assurer que TOUTES les grilles sont disponibles dans le select
+            console.log('3️⃣.5️⃣ Chargement de toutes les grilles dans le select');
+            if (typeof chargerGrillesDansSelect === 'function') {
+                chargerGrillesDansSelect();
+            }
+
             // ÉTAPE 4: Attendre et charger la grille
             console.log(`4️⃣ Attente option grille: ${evaluation.grilleId}`);
             await attendreOption('selectGrille1', evaluation.grilleId);
