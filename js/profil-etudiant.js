@@ -3913,7 +3913,12 @@ function calculerMoyennesCriteres(da) {
                         .normalize('NFD')
                         .replace(/[\u0300-\u036f]/g, '')
                         .replace(/\s+/g, '');
-                    return nomRef === nomEval;
+
+                    // Correspondance exacte OU l'un commence par l'autre
+                    // Ex: "francais" match "francaisecrit" OU "francaisecrit" match "francais"
+                    return nomRef === nomEval ||
+                           nomRef.startsWith(nomEval) ||
+                           nomEval.startsWith(nomRef);
                 });
 
                 if (critereReference) {
@@ -4049,7 +4054,12 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
                         .normalize('NFD')
                         .replace(/[\u0300-\u036f]/g, '')
                         .replace(/\s+/g, '');
-                    return nomRef === nomEval;
+
+                    // Correspondance exacte OU l'un commence par l'autre
+                    // Ex: "francais" match "francaisecrit" OU "francaisecrit" match "francais"
+                    return nomRef === nomEval ||
+                           nomRef.startsWith(nomEval) ||
+                           nomEval.startsWith(nomRef);
                 });
 
                 if (critereReference) {
