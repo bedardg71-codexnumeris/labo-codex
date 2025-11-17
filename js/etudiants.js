@@ -783,11 +783,12 @@ function afficherListeEtudiantsConsultation() {
 
         // Échapper les valeurs pour sécurité
         // IMPORTANT: Utiliser daAffichage pour l'affichage, mais garder da pour les calculs
+        // En mode anonymisé, etudiant.nom et etudiant.prenom sont déjà anonymisés par modes.js
         const daAfficher = etudiant.daAffichage || etudiant.da; // Utiliser daAffichage si disponible
         const da = echapperHtml(daAfficher || '');
         const groupe = echapperHtml(etudiant.groupe || '');
-        const nom = echapperHtml(etudiant.nom || '');
-        const prenom = echapperHtml(etudiant.prenom || '');
+        const nom = echapperHtml(etudiant.nom || '');  // Déjà anonymisé si mode anonymisation
+        const prenom = echapperHtml(etudiant.prenom || '');  // Déjà anonymisé si mode anonymisation
 
         // NOUVEAU: Construire le HTML avec toutes les colonnes
         let html = '';
