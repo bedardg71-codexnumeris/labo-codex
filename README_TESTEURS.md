@@ -1,14 +1,16 @@
-# Guide de test - Monitorage Beta 79
+# Guide de test - Monitorage Beta 90.5
 
 Merci de participer aux tests de l'application de monitorage pédagogique ! 🙏
+
+**Nouveautés Beta 90.5** : Architecture modulaire, système de jetons, visualisations avancées (nuages de points), engagement vs risque
 
 ---
 
 ## 🚀 Démarrage rapide
 
 ### 1. Installation (2 minutes)
-1. Décompressez le fichier `Monitorage_Beta_0.79.zip`
-2. Ouvrez le fichier `index 78 (bouton soutien).html` dans votre navigateur
+1. Décompressez le fichier `Monitorage_Beta_90.5.zip`
+2. Ouvrez le fichier `index 90 (architecture).html` dans votre navigateur
    - **Recommandé** : Safari, Chrome ou Edge
    - Astuce : Ajoutez-le à vos favoris pour y accéder rapidement
 
@@ -20,9 +22,10 @@ Merci de participer aux tests de l'application de monitorage pédagogique ! 🙏
    - Confirmez l'import
 
 2. **Explorer les nouveautés** :
-   - **Matériel → Critères d'évaluation** : Nouveau design compact
-   - **Matériel → Productions** : Affichage optimisé
-   - Cliquez sur «✏️ Éditer» pour tester le mode édition
+   - **Tableau de bord → Aperçu** : Nuages de points avec gradients lumineux
+   - **Réglages → Pratique de notation** : Système de jetons personnalisés
+   - **Profil étudiant** : Affichage dual Sommative/PAN-Maîtrise
+   - Survolez les points dans les barres (animation et grossissement)
 
 ---
 
@@ -30,44 +33,52 @@ Merci de participer aux tests de l'application de monitorage pédagogique ! 🙏
 
 ### ⚠️ PRIORITÉ HAUTE (15 minutes)
 
-#### Test 1 : Grilles de critères
-1. Allez dans **Matériel → Critères d'évaluation**
-2. Observez la vue d'ensemble des grilles
-3. Cliquez sur «✏️ Éditer la grille» sur une grille existante
-4. Essayez de modifier un critère (bouton «Modifier»)
-5. Ajoutez un nouveau critère
-6. Cliquez sur «← Retour à la vue d'ensemble»
-7. Vérifiez que vos modifications sont sauvegardées
+#### Test 1 : Visualisations nuages de points
+1. Allez dans **Tableau de bord → Aperçu**
+2. Observez les barres de distribution des indices (A-C-P-E)
+3. Survolez les points individuels (animation hover)
+4. Observez les gradients de couleur (rouge → jaune → vert pour Patterns)
+5. Activez le mode comparatif (Réglages → Pratique de notation)
+6. Comparez les points oranges (Sommative) vs bleus (PAN-Maîtrise)
 
 **Questions à vous poser** :
-- Le format compact facilite-t-il la vue d'ensemble ?
-- Les descriptions repliables sont-elles pratiques ?
-- La navigation vue/édition est-elle claire ?
+- Les nuages de points facilitent-ils la visualisation de la densité ?
+- L'animation au hover est-elle utile ou distrayante ?
+- Les gradients de couleur sont-ils intuitifs ?
 
-#### Test 2 : Productions
-1. Allez dans **Matériel → Productions**
-2. Créez une nouvelle production (examen, travail, etc.)
-3. Observez l'affichage compact
-4. Testez les boutons ↑ ↓ pour réorganiser
-5. Modifiez une production existante
+#### Test 2 : Système de jetons
+1. Allez dans **Réglages → Pratique de notation**
+2. Configurez les jetons (délai, reprise, aide, bonus)
+3. Ouvrez un **profil étudiant**
+4. Section Accompagnement : Attribuer un jeton
+5. Retournez aux évaluations : vérifiez le badge jeton
 
 **Questions à vous poser** :
-- Les codes couleur aident-ils à distinguer les types ?
-- Les informations essentielles sont-elles visibles d'un coup d'œil ?
-- Les icônes (📌 ✏️ 📦) sont-elles utiles ?
+- La configuration des jetons est-elle claire ?
+- L'attribution dans le profil est-elle intuitive ?
+- Les badges sont-ils visibles et distincts ?
 
 ### 📊 PRIORITÉ MOYENNE (10 minutes)
 
-#### Test 3 : Workflow complet
-1. Créez une grille de critères complète (5 critères)
-2. Créez 3 productions liées à cette grille
-3. Naviguez entre les sections
-4. Vérifiez que tout se sauvegarde correctement
+#### Test 3 : Engagement vs Risque
+1. Notez que "Risque d'échec" est maintenant "Engagement"
+2. Observez les barres vertes (engagement faible nécessite intervention)
+3. Dans un profil, section "Engagement dans l'apprentissage"
+4. Comparez avec l'ancienne formulation (si connue)
 
-#### Test 4 : Affichage
-- Testez sur différentes tailles de fenêtre
-- Vérifiez la lisibilité des textes
-- Observez le comportement du scroll
+**Questions à vous poser** :
+- La reformulation positive est-elle plus claire ?
+- L'interprétation est-elle intuitive ?
+
+#### Test 4 : RàI optionnel
+1. Allez dans **Réglages → Pratique de notation**
+2. Décochez "Activer RàI et détection des patterns"
+3. Retournez au tableau de bord : colonnes Pattern/RàI disparues ?
+4. Réactivez pour retrouver ces fonctionnalités
+
+**Questions à vous poser** :
+- L'option est-elle clairement expliquée ?
+- Le masquage fonctionne-t-il partout ?
 
 ---
 
@@ -96,21 +107,23 @@ Pour chaque bug :
 
 ---
 
-## 🔍 Points de vigilance spécifiques à Beta 79
+## 🔍 Points de vigilance spécifiques à Beta 90.5
 
 ### Nouveautés à valider
-- [ ] Le format compact des critères est-il trop dense ?
-- [ ] Les descriptions repliables : utiles ou frustrantes ?
-- [ ] Le bouton «← Retour à la vue d'ensemble» est-il bien placé ?
-- [ ] Les codes couleur des productions sont-ils cohérents ?
-- [ ] Les métadonnées inline (Type • 25% • Grille) sont-elles lisibles ?
+- [ ] Les nuages de points sont-ils plus clairs que les barres empilées ?
+- [ ] L'animation au hover est-elle utile ou distrayante ?
+- [ ] Les gradients de couleur sont-ils intuitifs ?
+- [ ] Le concept "Engagement" est-il plus clair que "Risque" ?
+- [ ] Le système de jetons est-il facile à configurer et utiliser ?
+- [ ] Le mode comparatif (orange vs bleu) aide-t-il à comparer SOM/PAN ?
 
 ### Problèmes potentiels à surveiller
-- [ ] Boutons trop petits (difficiles à cliquer) ?
-- [ ] Textes trop compacts (difficiles à lire) ?
-- [ ] Navigation confuse entre vue et édition ?
-- [ ] Informations manquantes dans le format compact ?
-- [ ] Problèmes de sauvegarde après édition ?
+- [ ] Points trop petits ou difficiles à cliquer ?
+- [ ] Animations trop lentes ou saccadées ?
+- [ ] Gradients peu lisibles ou confus ?
+- [ ] Terminologie "Engagement" mal interprétée ?
+- [ ] Jetons non sauvegardés ou perdus ?
+- [ ] Données corrompues après activation/désactivation RàI ?
 
 ---
 
@@ -176,6 +189,6 @@ Vos retours permettront de :
 
 ---
 
-**Version du package** : Beta 79
-**Date de publication** : 29 octobre 2025
-**Statut** : Phase de tests - Retours attendus
+**Version du package** : Beta 90.5
+**Date de publication** : 16 novembre 2025
+**Statut** : Phase de tests - Retours attendus avant présentation du 19 novembre
