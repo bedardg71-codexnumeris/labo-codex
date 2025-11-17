@@ -1,4 +1,4 @@
-# Guide pour testeurs - Système de Monitorage Pédagogique Beta 74
+# Guide pour testeurs - Système de Monitorage Pédagogique Beta 90.5
 
 **Merci de participer aux tests de cette application !**
 
@@ -24,17 +24,20 @@ Vos retours sont essentiels pour améliorer l'outil et le rendre plus utile pour
 
 Une application web de **monitorage pédagogique** qui aide les enseignants à :
 - ✅ Identifier précocement les étudiants à risque d'échec
-- ✅ Calculer automatiquement des indices prédictifs (A-C-P-R)
-- ✅ Comparer deux pratiques de notation (sommative vs alternative)
+- ✅ Calculer automatiquement des indices prédictifs (A-C-P-E : Assiduité, Complétion, Performance, Engagement)
+- ✅ Comparer deux pratiques de notation (Sommative vs PAN-Maîtrise)
 - ✅ Générer des recommandations d'intervention (RàI)
 
 ### Version testée
 
-**Beta 74** - Fonctionnalités principales :
-- Système hybride SOM-PAN (notation sommative + portfolio alternatif)
-- Refonte du système de jetons
-- Moteur de recherche dans la section Aide
-- Navigation cross-mode intelligente (Normal/Anonymisé/Simulé)
+**Beta 90.5** (16 novembre 2025) - Fonctionnalités principales :
+- **Architecture modulaire** : Système de pratiques de notation (Sommative, PAN-Maîtrise)
+- **Système de jetons personnalisés** : Délai, reprise, aide, bonus configurables
+- **Visualisation avancée** : Barres de distribution avec nuages de points, gradients lumineux
+- **Engagement vs Risque** : Reformulation positive (Engagement = A × C × P)
+- **Dépistage universel** : Grille de référence configurable (pas seulement SRPNF)
+- **Patterns et RàI optionnels** : Activation/désactivation selon besoins
+- **Mode comparatif** : Affichage dual Sommative (orange) vs PAN (bleu)
 
 ### Durée du test
 
@@ -73,7 +76,7 @@ Mais même **1 semaine d'exploration** est utile !
 ### Installation (2 minutes)
 
 1. **Décompresser** le fichier ZIP dans un dossier
-2. **Ouvrir** le fichier `index 74 (moteur recherche Aide).html`
+2. **Ouvrir** le fichier `index 90 (architecture).html`
 3. **Importer** les données de démonstration :
    - Réglages → Import/Export
    - Sélectionner `donnees-demo.json`
@@ -85,9 +88,9 @@ Mais même **1 semaine d'exploration** est utile !
 
 **1. Tableau de bord**
 - Cliquer sur "Tableau de bord" dans le menu
-- Observer les indices A-C-P-R des étudiants
-- Remarquer les couleurs : Orange (SOM) vs Bleu (PAN)
-- Identifier les étudiants à risque (barres rouges)
+- Observer les indices A-C-P-E des étudiants
+- Remarquer les **nuages de points** avec gradients lumineux
+- Identifier les étudiants à faible engagement (barres vertes)
 
 **2. Profil d'un étudiant**
 - Cliquer sur un nom d'étudiant
@@ -97,15 +100,15 @@ Mais même **1 semaine d'exploration** est utile !
   * Mobilisation
 - Tester les boutons Précédent/Suivant
 
-**3. Section Aide**
-- Cliquer sur "Aide" dans le menu
-- Utiliser le moteur de recherche : tapez "risque"
-- Observer le surlignage des résultats
+**3. Système de jetons**
+- Dans un profil étudiant, section "Accompagnement"
+- Observer les compteurs de jetons disponibles/utilisés
+- Cliquer sur "Attribuer un jeton" pour tester
 
 **4. Les trois modes**
 - Cliquer sur le badge "Normal" en haut à droite
-- Essayer : Normal → Anonymisé → Simulé
-- Observer les changements de données
+- Essayer : Normal → Anonymisation → Simulation
+- Observer les changements de données (noms anonymisés, données simulées)
 
 ---
 
@@ -119,19 +122,19 @@ Mais même **1 semaine d'exploration** est utile !
 - [ ] Naviguer entre les sections principales
 - [ ] Ouvrir 3-4 profils d'étudiants différents
 - [ ] Utiliser Précédent/Suivant dans les profils
-- [ ] Changer de mode (Normal/Anonymisé/Simulé)
+- [ ] Changer de mode (Normal/Anonymisation/Simulation)
 
-**Scénario 2 : Recherche dans l'Aide**
-- [ ] Chercher "assiduité"
-- [ ] Chercher "SRPNF"
-- [ ] Chercher "risque"
-- [ ] Effacer la recherche (cliquer X)
+**Scénario 2 : Visualisations**
+- [ ] Observer les nuages de points dans le tableau de bord
+- [ ] Survoler des points (animation et grossissement)
+- [ ] Comparer les gradients de couleur (Patterns, RàI)
+- [ ] Activer/désactiver le mode comparatif (Réglages → Pratique)
 
 **Scénario 3 : Lecture des données**
 - [ ] Comprendre l'indice A (Assiduité)
 - [ ] Comprendre l'indice C (Complétion)
 - [ ] Comprendre l'indice P (Performance)
-- [ ] Comprendre l'indice R (Risque d'échec)
+- [ ] Comprendre l'indice E (Engagement = A × C × P)
 
 **Questions à vous poser :**
 - Est-ce que tout s'affiche correctement ?
@@ -192,11 +195,11 @@ Mais même **1 semaine d'exploration** est utile !
 - [ ] Consulter le tableau de bord chaque semaine
 - [ ] Utiliser les profils pour identifier les élèves à risque
 
-**Scénario 9 : Mode comparatif (si vous utilisez PAN)**
-- [ ] Activer le mode comparatif dans Réglages → Pratiques
-- [ ] Créer des évaluations sommatives ET des artefacts
-- [ ] Comparer les indices SOM (orange) vs PAN (bleu)
-- [ ] Observer les différences de recommandations
+**Scénario 9 : Mode comparatif**
+- [ ] Activer le mode comparatif dans Réglages → Pratique de notation
+- [ ] Créer des évaluations sommatives ET des artefacts portfolio
+- [ ] Comparer les indices Sommative (orange) vs PAN-Maîtrise (bleu)
+- [ ] Observer les différences de patterns et recommandations RàI
 
 **Questions à vous poser :**
 - L'outil vous aide-t-il vraiment à détecter les élèves à risque ?
@@ -222,13 +225,13 @@ Si vous préférez un retour plus personnel ou détaillé :
 
 **📧 labo@codexnumeris.org**
 
-**Objet :** [Test Monitorage Beta 74] Vos retours
+**Objet :** [Test Monitorage Beta 90.5] Vos retours
 
 **Informations utiles à inclure :**
-- Navigateur utilisé (ex: Chrome 118)
-- Système d'exploitation (ex: macOS 14.1)
-- Version testée (Beta 74)
-- Mode de notation testé (SOM, PAN, ou les deux)
+- Navigateur utilisé (ex: Chrome 131, Safari 18)
+- Système d'exploitation (ex: macOS 15.1, Windows 11)
+- Version testée (Beta 90.5)
+- Mode de notation testé (Sommative, PAN-Maîtrise, ou comparatif)
 - Durée du test (1 semaine, 1 mois, etc.)
 
 ### Ce qui nous intéresse particulièrement
@@ -322,20 +325,23 @@ R : Réglages → Import/Export → "Effacer toutes les données"
 **Q : Puis-je modifier le code de l'application ?**
 R : Oui ! L'application est sous double licence (AGPL v3 pour le code, CC BY-SA 4.0 pour le contenu). Voir LICENSE.md
 
-**Q : Que signifient les indices A-C-P-R ?**
-R : 
+**Q : Que signifient les indices A-C-P-E ?**
+R :
 - **A = Assiduité** (présence en classe)
 - **C = Complétion** (remise des travaux)
 - **P = Performance** (qualité des productions)
-- **R = Risque d'échec** (formule : 1 - A×C×P)
+- **E = Engagement** (formule : A × C × P, remplace l'ancien "Risque")
 
-**Q : C'est quoi la différence entre SOM et PAN ?**
+**Q : Pourquoi "Engagement" au lieu de "Risque d'échec" ?**
+R : Reformulation positive pour favoriser la motivation. Un engagement élevé (85%+) indique un bon engagement, un engagement faible (<65%) nécessite une intervention.
+
+**Q : C'est quoi la différence entre Sommative et PAN-Maîtrise ?**
 R :
-- **SOM (Sommatif)** : Pratique traditionnelle (examens, travaux notés)
-- **PAN (Portfolio Alternatif)** : Pratique alternative (sélection des N meilleurs artefacts)
+- **Sommative** : Pratique traditionnelle (examens, travaux notés, moyenne pondérée)
+- **PAN-Maîtrise** : Pratique alternative (sélection des N meilleurs artefacts, échelle IDME)
 
 **Q : Le mode comparatif, c'est pour quoi ?**
-R : Pour comparer les deux pratiques (SOM vs PAN) avec les mêmes étudiants et voir les différences dans les prédictions de risque.
+R : Pour comparer les deux pratiques (Sommative vs PAN-Maîtrise) avec les mêmes étudiants et voir les différences dans les diagnostics et recommandations.
 
 ---
 
@@ -361,6 +367,7 @@ Bons tests ! 🎓
 
 ---
 
-**Fichier créé le :** 27 octobre 2025  
-**Version du guide :** 1.0  
-**Version de l'app testée :** Beta 74
+**Fichier créé le :** 27 octobre 2025
+**Dernière mise à jour :** 16 novembre 2025
+**Version du guide :** 2.0
+**Version de l'app testée :** Beta 90.5
