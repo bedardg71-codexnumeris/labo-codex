@@ -264,7 +264,7 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 ---
 
-## État actuel du projet (octobre 2025)
+## État actuel du projet (octobre-novembre 2025)
 
 ### ✅ Fonctionnalités complétées
 
@@ -703,33 +703,329 @@ localStorage.seancesCompletes             // horaire.js (futur)
   - Fichiers modifiés : index 89, tableau-bord-apercu.js
 - ✅ **Impact PHASE 2 accélérée** : 3-4 semaines au lieu de 6-8 (grâce à Chart.js)
 
-### 🔴 Prochaines priorités (PHASE 1 : Consolidation - Beta 90)
+---
 
-**Objectif PHASE 1** : Finaliser fonctionnalités partiellement implémentées
-**Score cible fin PHASE 1** : 82% de complétude
+**DÉVELOPPEMENTS NOVEMBRE 2025** (5-16 novembre - 109 commits)
 
-1. **Système de jetons complet** (Priorité HAUTE - 5-6 jours)
-   - Jetons délai : Calcul automatique échéances prolongées
-   - Jetons reprise : Remplacement automatique évaluations
-   - Compteurs visuels jetons disponibles/utilisés
-   - Interface attribution jetons dans profil étudiant
-   - **Fichiers** : `portfolio.js`, `productions.js`, `profil-etudiant.js`
+**Contexte**: Sprint intensif de 11 jours en préparation de la présentation du 19 novembre 2025 (Communauté de pratique PAN, 400 personnes inscrites). Objectif: Beta 90.5 fonctionnelle et inspirante.
 
-2. **Cartouches de rétroaction contextuels** (Priorité HAUTE - 4-5 jours)
-   - Boutons "Insérer cartouche" dans formulaire évaluation
-   - Suggestions automatiques selon niveau IDME et défi identifié
-   - Personnalisation avant insertion
-   - Historique cartouches utilisées par étudiant
-   - **Fichiers** : `cartouches.js`, nouveau `evaluation.js`
+#### 1. **Système de pratiques modulaire - Phases 2-6 complétées** (6-13 nov)
 
-3. **Recommandations personnalisées** (Priorité MOYENNE - 3-4 jours)
-   - Intégration statut SA dans recommandations
-   - Liens vers ressources concrètes (capsules vidéo, exercices)
-   - Timeline d'intervention détaillée (JOUR 1-2-3, SEMAINE 1-2)
-   - Critères de réévaluation mesurables
-   - **Fichiers** : `profil-etudiant.js`, nouveau `interventions.js`
+**✅ PHASE 2**: Délégation calculs vers registre (7 nov)
+- Élimination 94% code dupliqué dans `portfolio.js`
+- Tests: 30/30 étudiants validés (100% identiques)
 
-**Voir** : `PLAN_DE_MATCH_2025-10-30.md` pour roadmap complète
+**✅ PHASE 3**: Extraction PAN-Maîtrise (8 nov)
+- Création `js/pratiques/pratique-pan-maitrise.js` (548 lignes)
+- Migration logique IDME + SRPNF + N artefacts
+- Tests: Calculs identiques avant/après migration
+
+**✅ PHASE 4**: Implémentation Sommative (8 nov)
+- Création `js/pratiques/pratique-sommative.js` (312 lignes)
+- Moyenne pondérée de toutes les évaluations
+- Détection défis génériques (< 65%)
+
+**✅ PHASE 5**: Migration lecteurs vers interface (9-10 nov)
+- `profil-etudiant.js`: Utilise `pratique.obtenirDonneesProfil()`
+- `tableau-bord-apercu.js`: Utilise `pratique.identifierPattern()`, `pratique.calculerNiveauRai()`
+- Migration automatique "alternative" → "pan-maitrise"
+
+**✅ PHASE 6**: Tests et corrections (10-13 nov)
+- Session tests #1: Détection 5 bugs critiques
+- Corrections: Extraction SRPNF, format patterns, ordre navigation
+- Documentation: `PHASE_6_TESTS_SESSION1.md`
+
+**Fichiers clés**:
+- `js/pratiques/pratique-registre.js` (détection auto)
+- `js/pratiques/pratique-pan-maitrise.js` (548 lignes)
+- `js/pratiques/pratique-sommative.js` (312 lignes)
+
+#### 2. **Remplacement Risque d'échec → Engagement** (8-10 nov)
+
+**Reformulation complète du concept pédagogique**:
+- **Ancien**: Risque d'échec (R) = 1 - (A × C × P)  [0-100%, plus élevé = pire]
+- **Nouveau**: Engagement (E) = A × C × P  [0-100%, plus élevé = meilleur]
+
+**Justification**:
+- Perspective positive vs punitive
+- Cohérence avec indices A-C-P (tous positifs)
+- Formulation plus motivante pour étudiants
+
+**Impact**: 16 fichiers modifiés
+- Liste étudiants: Colonne "Risque" → "Engagement"
+- Profil: "Risque d'échec" → "Engagement dans l'apprentissage"
+- Tableau de bord: Reformulation complète section
+- Surlignement: Rouge (risque élevé) → Vert (engagement faible)
+
+#### 3. **Système de jetons personnalisés** (7-9 nov)
+
+**Implémentation complète**:
+- ✅ Configuration jetons (Réglages → Pratique de notation)
+- ✅ Types de jetons configurables: délai, reprise, aide, bonus
+- ✅ Attribution jetons dans profil étudiant
+- ✅ Compteurs visuels: disponibles/utilisés
+- ✅ Calcul automatique échéances prolongées (jetons délai)
+- ✅ Remplacement évaluation (jetons reprise)
+- ✅ Badges dans liste évaluations avec couleurs distinctes
+
+**Fichiers modifiés**:
+- `js/pratiques.js`: Configuration système jetons
+- `js/profil-etudiant.js`: Interface attribution
+- `js/portfolio.js`: Logique jetons délai/reprise
+- `js/evaluation.js`: Affichage badges
+
+#### 4. **Barres de distribution - Refonte majeure** (10-13 nov + 15-16 nov)
+
+**Évolution design**:
+
+**Phase 1** (10-11 nov): Transformation barres → nuages de points
+- Scatter plots avec jitter (±1.5% horizontal, ±12px vertical)
+- Points circulaires remplacent barres empilées
+- Visualisation densité par agglomération
+
+**Phase 2** (11-12 nov): Gradients spectre lumineux
+- Patterns: Rouge → Jaune → Vert (zones Défi → Stable → Excellence)
+- RàI: Vert → Jaune → Orange (Niveau 1 → 2 → 3)
+- Suppression zone "Insuffisant" (opacité maximale partout)
+
+**Phase 3** (12 nov): Affichage dual SOM/PAN
+- Mode comparatif: Points oranges (SOM) + points bleus (PAN)
+- Moyennes affichées pour chaque pratique
+- Transitions dégradées entre zones
+
+**Phase 4** (13 nov): Profil étudiant
+- Barres SRPNF avec points circulaires
+- Barre d'engagement avec gradient optimisé
+- Affichage dual SOM/PAN en mode comparatif
+
+**Phase 5** (15-16 nov): Animation et contraintes
+- Dilatation points (jitter augmenté pour visibilité)
+- Contraintes: points ne dépassent pas gradient
+- Animation subtile au hover (±1px horizontal, −2px vertical, 7s)
+- Grossissement au hover (scale 1.5)
+- Anonymisation tooltips en mode Anonymisation
+
+**Impact**: Visualisation transformée, densité visible
+
+#### 5. **Découplage critères SRPNF** (11-12 nov)
+
+**Objectif**: Rendre le dépistage universel (applicable à toute grille)
+
+**Changements**:
+- ✅ Ajout sélecteur "Grille de référence pour le dépistage"
+- ✅ Séparation patterns (3 artefacts récents) vs performance finale (4)
+- ✅ Support grilles personnalisées (pas seulement SRPNF)
+- ✅ Configuration: choix grille, nombre artefacts, fenêtre patterns
+
+**Bénéfice**:
+- Enseignants peuvent utiliser leurs propres critères
+- Système patterns/RàI fonctionne avec n'importe quelle grille
+- SRPNF n'est plus codé en dur
+
+**Documentation**: `ARCHITECTURE_PRATIQUES.md` section Universel vs Spécifique
+
+#### 6. **Détection patterns et RàI** (9-16 nov)
+
+**Corrections bugs critiques** (9-10 nov):
+- ✅ Bug #1: Patterns incorrects - Tout le monde "Stable" malgré défis
+  - Cause: Moyennes globales au lieu de N artefacts récents
+  - Fix: Création `calculerMoyennesCriteresRecents(da, n)`
+- ✅ Bug #2: Défis non détectés sur critères individuels
+  - Cause: Seuils IDME non utilisés (seuils fixes 70/80/85)
+  - Fix: Modification `identifierPatternActuel()` pour seuils configurables
+- ✅ Bug #3: Incohérence pattern/RàI/recommandations
+  - Cause: Logique RàI pas alignée avec patterns
+  - Fix: `determinerCibleIntervention()` distinction PAN vs SOM
+
+**Amélioration seuils** (11 nov):
+- Seuils IDME configurables utilisés partout
+- Fenêtre patterns configurable (défaut: 3 artefacts)
+- Support N artefacts configurable (PAN: 3, 7, 12)
+
+**RàI optionnel** (15-16 nov):
+- ✅ Checkbox "Activer RàI et détection des patterns"
+- ✅ Masquage sections si désactivé (tableau de bord, profil)
+- ✅ Masquage colonnes Pattern/RàI dans liste étudiants
+- ✅ Sauvegarde préférence dans localStorage
+
+**Fichiers modifiés**:
+- `js/profil-etudiant.js`: Logique patterns/défis corrigée
+- `js/pratiques.js`: Checkbox RàI optionnel
+- `js/tableau-bord-apercu.js`: Affichage conditionnel
+- `js/etudiants.js`: Colonnes conditionnelles
+
+#### 7. **Profil étudiant - Améliorations** (7-13 nov)
+
+**Section Productions ajoutée** (7 nov):
+- Tableau productions évaluées avec notes
+- Liens directs vers évaluations
+- Séparation SOM vs PAN
+
+**Affichage dual SOM/PAN** (9-10 nov):
+- Badges dual dans titre ("SOM 67%" / "PAN 82%")
+- Variables `indicesSOM` et `indicesPAN` partout
+- Section Mobilisation avec données duales
+- Correctifs bugs (variables manquantes, format)
+
+**Navigation améliorée** (10 nov):
+- Ordre alphabétique Précédent/Suivant corrigé
+- Uniformisation messages succès
+
+**Forces et défis dynamiques** (6 nov):
+- Calcul dynamique depuis évaluations réelles
+- Plus de valeurs codées en dur
+- Cohérence avec moyennes SRPNF
+
+#### 8. **Optimisations UX** (7-10 nov)
+
+**Interface matériel pédagogique** (8 nov):
+- Refonte complète: 4 onglets → interface unifiée
+- Productions, Grilles, Échelles, Cartouches dans une seule page
+- Navigation par cartes au lieu d'onglets
+- Optimisation espace vertical
+
+**Simplification aperçus** (10 nov):
+- Aperçus présences/évaluations automatiquement générés
+- Suppression boutons "Recalculer" redondants
+- Rechargement automatique lors de modifications
+
+**Optimisation espace** (8 nov):
+- Page Trimestre: Aménagements en deux colonnes
+- Suppression systèmes verrouillage (complexité inutile)
+- Tableau étudiants: Pleine largeur
+- Boutons d'action: Largeur optimisée (200px)
+
+**Module contexte** (8 nov):
+- Nouveau `js/contexte.js` pour affichage en-tête
+- Informations cours, session, groupe centralisées
+
+#### 9. **Corrections critiques** (13-15 nov)
+
+**Calcul moyennes SRPNF** (14 nov):
+- Bug: Barres SRPNF affichaient NaN%
+- Cause: Lecture directe `criteres[]` au lieu de moyennes calculées
+- Fix: Ajout calcul moyennes avec support variantes noms critères
+
+**Standardisation clés** (14 nov):
+- Bug: `francaisecrit` vs `francais` causait moyennes manquantes
+- Fix: Standardisation toutes clés en minuscules
+- Impact: 6 commits correctifs progressifs
+
+**Support niveau '0'** (14 nov):
+- Ajout niveau "0" dans table conversion IDME
+- Cas d'usage: Plagiat, IA non autorisée
+- Matching critères: Support variantes de noms
+
+**Erreurs console** (14 nov):
+- Fonctions inexistantes exportées (window.ajouterEtudiant)
+- Éléments DOM manquants
+- 3 correctifs critiques
+
+**Barres SRPNF** (14 nov):
+- Calcul moyennes manquant
+- Clés minuscules non supportées
+- 2 correctifs successifs
+
+#### 10. **Documentation et organisation** (16 nov)
+
+**Nettoyage répertoire principal**:
+- ✅ Création structure `Archives/` (Plans, Phases, Analyses, Versions)
+- ✅ 31 fichiers historiques archivés
+- ✅ 11 fichiers obsolètes supprimés
+- ✅ 52 documents → 15 documents actifs
+
+**Documents actifs conservés**:
+- CLAUDE.md (ce fichier)
+- PLAN_NOV19_2025.md (plan actif présentation)
+- MIGRATION_INDEXEDDB.md (plan migration future)
+- ROADMAP_V1_AQPC2026.md (vision long terme)
+- ARCHITECTURE_PRATIQUES.md, GUIDE_AJOUT_PRATIQUE.md, FEUILLE_DE_ROUTE_PRATIQUES.md
+- GUIDE_TESTEURS.md, README_TESTEURS.md, README_DONNEES_DEMO.md
+- LICENSE.md, NOMS_STABLES.json, donnees-demo.json
+
+**Bénéfices**:
+- Clarté navigation
+- Onboarding facilité
+- Recherches plus rapides
+- Histoire préservée dans Archives/
+
+---
+
+**Fichier actuel: Beta 90 (architecture)**
+
+**Nom**: `index 90 (architecture).html`
+**Date**: 5 novembre 2025 → 16 novembre 2025
+**Version**: Beta 90.5 (sprint présentation 19 nov)
+**Statut**: En développement actif
+
+**Renommage** (7 nov): `index 90 (snapshots).html` → `index 90 (architecture).html`
+- Reflet mieux du contenu (système pratiques modulaire)
+- Snapshots reportés à Beta 91
+
+**Statistiques période 5-16 novembre 2025**:
+- **Commits**: 109
+- **Jours**: 11 (travail quotidien)
+- **Fichiers modifiés**: ~50 fichiers JS/CSS/HTML
+- **Lignes ajoutées**: ~15,000
+- **Lignes supprimées**: ~8,000
+- **Bugs corrigés**: 20+ bugs critiques
+- **Fonctionnalités complétées**: 10 thèmes majeurs
+- **Documentation**: 31 fichiers archivés, 11 supprimés
+
+---
+
+### 🔴 Prochaines priorités (Sprint présentation 19 novembre 2025)
+
+**Contexte**: Sprint de 10 jours (9-19 novembre)
+**Date actuelle**: 16 novembre (Jour 8/10)
+**Présentation**: 19 novembre après-midi (Communauté de pratique PAN, 400 personnes)
+**Objectif**: Beta 90.5 fonctionnelle et inspirante
+
+**Statut actuel** (selon PLAN_NOV19_2025.md):
+- ✅ **Jours 1-2** (9-10 nov): Corrections bugs patterns/défis - COMPLÉTÉ
+  - Fonctions `calculerMoyennesCriteresRecents()`, `identifierPatternActuel()`, `determinerCibleIntervention()` créées
+  - Tests en cours sur données Maïka
+- ⏳ **Jours 3-4** (11-12 nov): Package de démonstration - REPORTING
+  - Créer `Monitorage_Beta_90.5_Demo.zip`
+  - Données démo réalistes (30 étudiants, 10 artefacts)
+  - `LISEZMOI_DEMO.txt` + `DEMARRAGE_5MIN.pdf`
+- ⏳ **Jours 5-6** (13-14 nov): Documentation publique - REPORTING
+  - `GUIDE_UTILISATEUR_SIMPLE.pdf` (20-30 pages max)
+  - `FAQ_PRATIQUES_PAN.md` (10 questions essentielles)
+  - [Optionnel] Vidéo courte 8-10 min
+- ⏳ **Jours 7-8** (16-17 nov): Préparation présentation - EN COURS (JOUR 8)
+  - Diaporama (max 10 slides)
+  - Script talking points
+  - Démo live (max 2 minutes)
+- ⏳ **Jour 9** (18 nov): Tests utilisateurs - À VENIR
+  - Faire tester package démo à 2-3 collègues
+  - Répéter présentation (chronométrer)
+- ⏳ **Jour 10** (19 nov matin): Polissage final - À VENIR
+  - Checklist finale (package, docs, démo, backup)
+  - **Présentation l'après-midi** 🎤
+
+**Ce qu'on NE fait PAS avant le 19 novembre**:
+- ❌ Refactoring complet architecture (reporté post-19 nov)
+- ❌ Implémentation nouvelles pratiques (Sommative OK, autres post-19 nov)
+- ❌ Système de snapshots (Beta 91)
+- ❌ Fonctionnalités avancées (import/export avancé, API, etc.)
+- ❌ Optimisations performance (cache, indexation)
+
+**Critères de succès**:
+1. **Application fonctionne**: Zéro bug bloquant
+2. **Démo claire**: "Je vois comment ça m'aide" (< 2 min)
+3. **Documentation simple**: "Je peux essayer chez moi" (< 30 min)
+4. **Inspiration**: "Je veux me lancer dans une PAN"
+
+**Après le 19 novembre - Beta 91 : Architecture modulaire (Décembre 2025)**:
+- Migration IndexedDB (support multi-groupes)
+- Système de snapshots (suivi longitudinal)
+- Graphiques Chart.js (évolution A-C-P)
+- Cartouches contextuels dans formulaire évaluation
+
+**Voir**: `PLAN_NOV19_2025.md` pour plan détaillé présentation
+**Voir**: `MIGRATION_INDEXEDDB.md` pour plan migration post-19 nov
+**Voir**: `ROADMAP_V1_AQPC2026.md` pour vision long terme (Version 1.0 printemps 2026)
 
 ---
 
@@ -737,7 +1033,7 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 ```bash
 # Test local
-open "index 90 (snapshots).html"   # macOS
+open "index 90 (architecture).html"   # macOS
 
 # Voir localStorage dans console Safari
 localStorage.getItem('calendrierComplet')
