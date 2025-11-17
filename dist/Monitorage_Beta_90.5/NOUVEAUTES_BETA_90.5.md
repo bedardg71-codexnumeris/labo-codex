@@ -71,23 +71,6 @@ Créez vos propres types de jetons pour accompagner vos étudiant·es :
 
 **Jetons personnalisés** (nouveauté!):
 
-Exemples de jetons que vous pouvez créer :
-
-**Jeton Aide** 💬
-- «Rencontre de 30 minutes avec l'enseignant»
-- Couleur : Bleu (#2196F3)
-- 2 jetons disponibles par étudiant·e
-
-**Jeton Bonus** ⭐
-- «+5% sur un artefact au choix»
-- Couleur : Orange (#FFC107)
-- 1 jeton disponible par étudiant·e
-
-**Jeton Tutorat** 👥
-- «Séance de tutorat entre pairs»
-- Couleur : Violet (#9C27B0)
-- 3 jetons disponibles
-
 **Comment créer un jeton personnalisé** :
 1. Allez dans Réglages › Pratique de notation
 2. Section «Jetons personnalisés»
@@ -547,34 +530,46 @@ Si vous enseignez un cours difficile où 75% est excellent :
 - **GitHub** : https://github.com/bedardg71-codexnumeris/Monitorage_v6/issues
 
 ### Communauté
-- **Présentation** : 19 novembre 2025, Communauté de pratique PAN
-- **Site web** : https://codexnumeris.org
+- **Présentation** : 19 novembre 2025, Communauté de pratique PAN AQPC
+- **Site web** : https://www.aqpc.qc.ca/fr/cop-pratiques_notation
 
 ---
 
-## 🎯 Prochaines étapes
+## 🔮 Prochaines versions
 
-**Après Beta 90.5** (Post-19 novembre) :
+### Développement guidé par vos pratiques
 
-### Beta 91 : Snapshots et suivi longitudinal
-- Capture automatique données chaque semaine
-- Graphiques d'évolution A-C-P avec Chart.js
-- Reconstruction historique
-- Visualisation progression dans le temps
+Les prochaines versions intégreront d'autres pratiques PAN :
+- **PAN-Spécifications** : Évaluation par objectifs (Pass/Fail)
+- **PAN-Dénotation** (Ungrading) : Sans notes chiffrées
 
-### Beta 95 : Migration IndexedDB
-- Support multi-groupes (plusieurs cours)
-- Performance améliorée (grandes cohortes)
-- Export/import avancé
-- Synchronisation données
+### Migration technique prévue
 
-### Version 1.0 : Printemps 2026
-- Stabilité complète
-- Documentation exhaustive
-- Formations offertes
-- Présentation AQPC 2026
+L'application passera du **localStorage** vers **IndexedDB** pour :
+- Support de multiples groupes (plusieurs cours simultanés)
+- Performance améliorée avec grandes cohortes
+- Gestion de données plus robuste
 
-**Voir** : `ROADMAP_V1_AQPC2026.md` pour la vision long terme
+### 📋 Aidez-nous à développer selon VOS besoins !
+
+**Vous pratiquez déjà une PAN ?** Vos observations sont précieuses pour orienter le développement de l'application.
+
+**Remplissez notre questionnaire sur les pratiques PAN** (5-10 minutes) :
+
+🔗 **https://forms.office.com/r/Y1EgL1i6MP**
+
+**Ce formulaire nous aide à comprendre** :
+- Quels types de PAN vous utilisez (Spécifications, Dénotation, Maîtrise, autres)
+- Comment vous gérez les évaluations formatives
+- Quels outils ou fonctionnalités vous manquent actuellement
+- Vos besoins spécifiques en suivi des apprentissages
+
+**Vos réponses influencent directement** :
+- Les fonctionnalités prioritaires des prochaines versions
+- L'adaptation de l'interface à différentes pratiques
+- La création d'outils vraiment utiles sur le terrain
+
+**Merci d'avance pour votre contribution !** 🙏
 
 ---
 
@@ -594,5 +589,5 @@ Merci de tester cette version Beta 90.5 ! Vos retours sont **essentiels** pour a
 
 **Version du document** : 1.0
 **Dernière mise à jour** : 17 novembre 2025
-**Auteur** : Grégoire Bédard (Labo Codex Numeris)
+**Auteur** : Grégoire Bédard (Labo Codex Numeris) - Écriture par Claude Code (Anthropic)
 **Licence** : CC BY-NC-SA 4.0
