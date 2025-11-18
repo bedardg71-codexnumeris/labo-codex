@@ -3059,6 +3059,132 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     border: 2px solid #e8e8e8;
 }
 
+/* 🆕 BETA 91: Styles des cellules de jours selon statut */
+/* Base commune pour tous les jours */
+.calendrier-jour {
+    text-align: center;
+    padding: 8px 4px;
+    position: relative;
+    transition: opacity 0.15s ease;
+    min-height: 50px;
+    vertical-align: top;
+    cursor: default;
+    font-weight: 400;
+    font-size: 0.85rem;
+}
+
+/* Weekend */
+.calendrier-jour-weekend {
+    background: var(--weekend-bg);
+    color: #757575;
+    border: 2px solid #e8e8e8;
+}
+
+/* Semaine d'examens */
+.calendrier-jour-examens {
+    background: var(--examens-bg);
+    color: var(--bleu-principal);
+    border: 2px solid #f06292;
+    font-weight: 400;
+}
+
+/* Semaine de planification */
+.calendrier-jour-planification {
+    background: var(--planification-bg);
+    color: var(--bleu-principal);
+    border: 2px solid #ba68c8;
+    font-weight: 400;
+}
+
+/* Congé prévu au calendrier */
+.calendrier-jour-conge {
+    background: var(--conge-bg);
+    color: #c62828;
+    border: 2px solid #ef5350;
+    font-weight: 600;
+}
+
+/* Reprise */
+.calendrier-jour-reprise {
+    background: var(--reprise-bg);
+    color: #e65100;
+    border: 2px solid #ff9800;
+    font-weight: 600;
+}
+
+/* Cours régulier (jour avec horaire) */
+.calendrier-jour-cours-reel {
+    background: var(--jour-cours-reel-bg);
+    color: var(--bleu-principal);
+    border: 2px solid var(--bleu-moyen);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.calendrier-jour-cours-reel:hover {
+    background: var(--bleu-pale);
+}
+
+/* Jour ouvrable (sans horaire planifié) */
+.calendrier-jour-ouvrable {
+    background: white;
+    color: var(--bleu-principal);
+    border: 2px solid var(--bleu-carte);
+    font-weight: 400;
+}
+
+/* 🆕 BETA 91: En-têtes des jours de la semaine */
+.calendrier-jour-header {
+    padding: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* 🆕 BETA 91: Légende du calendrier */
+.calendrier-legende {
+    margin-top: 30px;
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 8px;
+    border: 2px solid var(--bleu-pale);
+}
+
+.calendrier-legende-titre {
+    margin: 0 0 15px 0;
+    color: var(--bleu-principal);
+}
+
+.calendrier-legende-grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.calendrier-legende-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.calendrier-legende-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.calendrier-legende-label {
+    color: var(--bleu-principal);
+}
+
+.calendrier-legende-astuce {
+    margin-top: 15px;
+    color: var(--bleu-moyen);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
 
 /* ===============================================
    SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)

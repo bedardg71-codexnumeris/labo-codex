@@ -215,7 +215,7 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
         const jour = nomsJours[i];
         const estWeekendHeader = (jour === 'DIM' || jour === 'SAM');
         const couleur = estWeekendHeader ? 'var(--gris-moyen)' : 'var(--bleu-principal)';
-        html += '<th style="padding: 8px; color: ' + couleur + '; font-size: 0.85rem; font-weight: 600;">' + jour + '</th>';
+        html += '<th class="calendrier-jour-header" style="color: ' + couleur + ';">' + jour + '</th>';
     }
 
     html += '</tr></thead><tbody><tr>';
@@ -237,59 +237,37 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
         const jourSemaine = (jourSemaineDebut + jour - 1) % 7;
 
         // Couleurs selon le statut
-        let bgColor = 'white';
-        let textColor = 'var(--bleu-principal)';
-        let borderColor = '#e8e8e8';
-        let fontWeight = '400';
+        // 🆕 BETA 91: Déterminer la classe CSS selon le statut
+        let classeJour = 'calendrier-jour';
         let estCliquable = false;
 
         if (statut.type === 'weekend') {
-            bgColor = 'var(--weekend-bg)';
-            textColor = '#757575';
+            classeJour += ' calendrier-jour-weekend';
         } else if (statut.type === 'examens') {
-            bgColor = 'var(--examens-bg)';
-            textColor = 'var(--bleu-principal)';
-            borderColor = '#f06292';
+            classeJour += ' calendrier-jour-examens';
         } else if (statut.type === 'planification') {
-            bgColor = 'var(--planification-bg)';
-            textColor = 'var(--bleu-principal)';
-            borderColor = '#ba68c8';
+            classeJour += ' calendrier-jour-planification';
         } else if (statut.type === 'conge') {
-            bgColor = 'var(--conge-bg)';
-            textColor = '#c62828';
-            borderColor = '#ef5350';
-            fontWeight = '600';
+            classeJour += ' calendrier-jour-conge';
         } else if (statut.type === 'reprise') {
-            bgColor = 'var(--reprise-bg)';
-            textColor = '#e65100';
-            borderColor = '#ff9800';
-            fontWeight = '600';
+            classeJour += ' calendrier-jour-reprise';
         } else if (statut.type === 'cours-reel') {
-            bgColor = 'var(--jour-cours-reel-bg)';
-            textColor = 'var(--bleu-principal)';
-            borderColor = 'var(--bleu-moyen)';
-            fontWeight = '600';
+            classeJour += ' calendrier-jour-cours-reel';
             estCliquable = true;
         } else if (statut.type === 'cours') {
-            bgColor = 'white';
-            borderColor = 'var(--bleu-carte)';
+            classeJour += ' calendrier-jour-ouvrable';
         }
 
         const numSemaine = statut.numeroSemaine || '';
-        const cursorStyle = estCliquable ? 'pointer' : 'default';
         const onclickAttr = estCliquable ? 'onclick="ouvrirSaisiePresence(\'' + dateStr + '\')"' : '';
-        const hoverStyle = estCliquable ? 'onmouseover="this.style.opacity=\'0.8\'" onmouseout="this.style.opacity=\'1\'"' : '';
 
-        html += '<td class="jour-calendrier" ';
+        html += '<td class="' + classeJour + '" ';
         html += 'data-date="' + dateStr + '" ';
         html += 'data-semaine="' + numSemaine + '" ';
         html += 'data-type="' + statut.type + '" ';
         html += 'onmouseenter="illuminerSemaineAmelioree(\'' + dateStr + '\')" ';
         html += 'onmouseleave="desilluminerSemaines()" ';
-        html += onclickAttr + ' ';
-        html += hoverStyle + ' ';
-        html += 'style="background: ' + bgColor + '; color: ' + textColor + '; ';
-        html += 'border-color: ' + borderColor + '; cursor: ' + cursorStyle + '; font-weight: ' + fontWeight + ';">';
+        html += onclickAttr + '>';
         html += '<div style="font-size: 0.95rem;">' + jour + '</div>';
 
         if (statut.label) {
@@ -346,7 +324,7 @@ function illuminerSemaineAmelioree(dateStr) {
  * Désillumne toutes les semaines
  */
 function desilluminerSemaines() {
-    const tousLesJours = document.querySelectorAll('.jour-calendrier');
+    const tousLesJours = document.querySelectorAll('td[data-semaine]');
     tousLesJours.forEach(function (jour) {
         jour.style.outline = '';
         jour.style.outlineOffset = '';
@@ -435,47 +413,47 @@ function afficherCalendrierScolaire() {
     htmlCalendrier += '</div>';
 
     // Ajouter la légende
-    htmlCalendrier += '<div style="margin-top: 30px; padding: 20px; background: var(--bleu-tres-pale); border-radius: 8px; border: 2px solid var(--bleu-pale);">';
-    htmlCalendrier += '<h4 style="margin: 0 0 15px 0; color: var(--bleu-principal);">📍 Légende</h4>';
-    htmlCalendrier += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+    htmlCalendrier += '<div class="calendrier-legende">';
+    htmlCalendrier += '<h4 class="calendrier-legende-titre">📍 Légende</h4>';
+    htmlCalendrier += '<div class="calendrier-legende-grille">';
 
-    htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
-    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--jour-cours-reel-bg); border: 2px solid var(--bleu-moyen); border-radius: 4px;"></div>';
-    htmlCalendrier += '<span style="color: var(--bleu-principal);"><strong>Jour de cours régulier</strong></span>';
+    htmlCalendrier += '<div class="calendrier-legende-item">';
+    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--jour-cours-reel-bg); border: 2px solid var(--bleu-moyen);"></div>';
+    htmlCalendrier += '<span class="calendrier-legende-label"><strong>Jour de cours régulier</strong></span>';
     htmlCalendrier += '</div>';
 
-    htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
-    htmlCalendrier += '<div style="width: 28px; height: 28px; background: white; border: 2px solid var(--bleu-carte); border-radius: 4px;"></div>';
-    htmlCalendrier += '<span style="color: var(--bleu-principal);">Jour ouvrable</span>';
+    htmlCalendrier += '<div class="calendrier-legende-item">';
+    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: white; border: 2px solid var(--bleu-carte);"></div>';
+    htmlCalendrier += '<span class="calendrier-legende-label">Jour ouvrable</span>';
     htmlCalendrier += '</div>';
 
-    htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
-    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--weekend-bg); border-radius: 4px;"></div>';
-    htmlCalendrier += '<span style="color: var(--bleu-principal);">Weekend</span>';
+    htmlCalendrier += '<div class="calendrier-legende-item">';
+    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--weekend-bg);"></div>';
+    htmlCalendrier += '<span class="calendrier-legende-label">Weekend</span>';
     htmlCalendrier += '</div>';
 
-    htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
-    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--conge-bg); border: 2px solid #ef5350; border-radius: 4px;"></div>';
-    htmlCalendrier += '<span style="color: var(--bleu-principal);">Congé prévu au calendrier</span>';
+    htmlCalendrier += '<div class="calendrier-legende-item">';
+    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--conge-bg); border: 2px solid #ef5350;"></div>';
+    htmlCalendrier += '<span class="calendrier-legende-label">Congé prévu au calendrier</span>';
     htmlCalendrier += '</div>';
 
-    htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
-    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--reprise-bg); border: 2px solid #ff9800; border-radius: 4px;"></div>';
-    htmlCalendrier += '<span style="color: var(--bleu-principal);">Reprise</span>';
+    htmlCalendrier += '<div class="calendrier-legende-item">';
+    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--reprise-bg); border: 2px solid #ff9800;"></div>';
+    htmlCalendrier += '<span class="calendrier-legende-label">Reprise</span>';
     htmlCalendrier += '</div>';
 
-    htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
-    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--examens-bg); border: 2px solid #f06292; border-radius: 4px;"></div>';
-    htmlCalendrier += '<span style="color: var(--bleu-principal);">Semaine d\'examens</span>';
+    htmlCalendrier += '<div class="calendrier-legende-item">';
+    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--examens-bg); border: 2px solid #f06292;"></div>';
+    htmlCalendrier += '<span class="calendrier-legende-label">Semaine d\'examens</span>';
     htmlCalendrier += '</div>';
 
-    htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
-    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--planification-bg); border: 2px solid #ba68c8; border-radius: 4px;"></div>';
-    htmlCalendrier += '<span style="color: var(--bleu-principal);">Semaine de planification</span>';
+    htmlCalendrier += '<div class="calendrier-legende-item">';
+    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: var(--planification-bg); border: 2px solid #ba68c8;"></div>';
+    htmlCalendrier += '<span class="calendrier-legende-label">Semaine de planification</span>';
     htmlCalendrier += '</div>';
 
     htmlCalendrier += '</div>';
-    htmlCalendrier += '<p style="margin-top: 15px; color: var(--bleu-moyen); font-size: 0.9rem; font-style: italic;">';
+    htmlCalendrier += '<p class="calendrier-legende-astuce">';
     htmlCalendrier += '💡 <strong>Astuce :</strong> Survole un jour pour illuminer toute sa semaine.';
     htmlCalendrier += '</p>';
     htmlCalendrier += '</div>';
