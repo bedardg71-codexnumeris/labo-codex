@@ -91,7 +91,8 @@ portfolio.js convertit 0-100 et stocke dans indicesCP
 
 ```
 projet/
-├── index 90 (snapshots).html                # Point d'entrée actuel (Beta 90)
+├── index 91.html                            # Point d'entrée actuel (Beta 91)
+├── index 90 (architecture).html             # Beta 90.5 (archivé - présentation 19 nov 2025)
 ├── css/
 │   └── styles.css                        # Styles globaux + variables CSS pratiques
 ├── js/
@@ -951,16 +952,29 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 ---
 
-**Fichier actuel: Beta 90 (architecture)**
+**Fichier actuel: Beta 91 (Développement avancé)**
 
-**Nom**: `index 90 (architecture).html`
-**Date**: 5 novembre 2025 → 16 novembre 2025
-**Version**: Beta 90.5 (sprint présentation 19 nov)
+**Nom**: `index 91.html`
+**Date de création**: 18 novembre 2025
+**Version**: Beta 91.0
 **Statut**: En développement actif
 
-**Renommage** (7 nov): `index 90 (snapshots).html` → `index 90 (architecture).html`
-- Reflet mieux du contenu (système pratiques modulaire)
-- Snapshots reportés à Beta 91
+**Créée à partir de**: Beta 90.5 (`index 90 (architecture).html`)
+**Provenance**: Beta 90.5 stable après présentation 19 novembre 2025
+**Changelog**: Voir `BETA_91_CHANGELOG.md` pour détails complets
+
+**Changements initiaux Beta 91.0**:
+- ✅ Titre mis à jour: "Beta 91 - Développement avancé"
+- ✅ Date: 18 novembre 2025
+- ✅ Cache buster CSS: `v=2025111801`
+- ✅ Cache busters pratiques: `v=2025111801`
+- ✅ Documentation: `BETA_91_CHANGELOG.md` créé
+
+---
+
+### ✅ Beta 90.5 - Résumé historique (5-16 novembre 2025)
+
+**Contexte**: Sprint présentation 19 novembre 2025 (Communauté AQPC, 400 personnes)
 
 **Statistiques période 5-16 novembre 2025**:
 - **Commits**: 109
@@ -972,60 +986,74 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - **Fonctionnalités complétées**: 10 thèmes majeurs
 - **Documentation**: 31 fichiers archivés, 11 supprimés
 
+**Résultat**: Beta 90.5 stable et fonctionnelle pour présentation
+
 ---
 
-### 🔴 Prochaines priorités (Sprint présentation 19 novembre 2025)
+### 🔴 Prochaines priorités (Beta 91 - Développement avancé)
 
-**Contexte**: Sprint de 10 jours (9-19 novembre)
-**Date actuelle**: 16 novembre (Jour 8/10)
-**Présentation**: 19 novembre après-midi (Communauté de pratique PAN, 400 personnes)
-**Objectif**: Beta 90.5 fonctionnelle et inspirante
+**Date de démarrage**: 18 novembre 2025 (post-présentation)
+**Objectif**: Intégration feedback communauté et développement nouvelles fonctionnalités
 
-**Statut actuel** (selon PLAN_NOV19_2025.md):
-- ✅ **Jours 1-2** (9-10 nov): Corrections bugs patterns/défis - COMPLÉTÉ
-  - Fonctions `calculerMoyennesCriteresRecents()`, `identifierPatternActuel()`, `determinerCibleIntervention()` créées
-  - Tests en cours sur données Maïka
-- ⏳ **Jours 3-4** (11-12 nov): Package de démonstration - REPORTING
-  - Créer `Monitorage_Beta_90.5_Demo.zip`
-  - Données démo réalistes (30 étudiants, 10 artefacts)
-  - `LISEZMOI_DEMO.txt` + `DEMARRAGE_5MIN.pdf`
-- ⏳ **Jours 5-6** (13-14 nov): Documentation publique - REPORTING
-  - `GUIDE_UTILISATEUR_SIMPLE.pdf` (20-30 pages max)
-  - `FAQ_PRATIQUES_PAN.md` (10 questions essentielles)
-  - [Optionnel] Vidéo courte 8-10 min
-- ⏳ **Jours 7-8** (16-17 nov): Préparation présentation - EN COURS (JOUR 8)
-  - Diaporama (max 10 slides)
-  - Script talking points
-  - Démo live (max 2 minutes)
-- ⏳ **Jour 9** (18 nov): Tests utilisateurs - À VENIR
-  - Faire tester package démo à 2-3 collègues
-  - Répéter présentation (chronométrer)
-- ⏳ **Jour 10** (19 nov matin): Polissage final - À VENIR
-  - Checklist finale (package, docs, démo, backup)
-  - **Présentation l'après-midi** 🎤
+**Phase 1 - Court terme (novembre-décembre 2025)**:
 
-**Ce qu'on NE fait PAS avant le 19 novembre**:
-- ❌ Refactoring complet architecture (reporté post-19 nov)
-- ❌ Implémentation nouvelles pratiques (Sommative OK, autres post-19 nov)
-- ❌ Système de snapshots (Beta 91)
-- ❌ Fonctionnalités avancées (import/export avancé, API, etc.)
-- ❌ Optimisations performance (cache, indexation)
+1. **Intégration feedback communauté** (post-présentation 19 nov)
+   - [ ] Collecte et analyse feedback présentation
+   - [ ] Corrections bugs rapportés par utilisateurs
+   - [ ] Améliorations UX suggérées
+   - [ ] Priorisation demandes fonctionnalités
 
-**Critères de succès**:
-1. **Application fonctionne**: Zéro bug bloquant
-2. **Démo claire**: "Je vois comment ça m'aide" (< 2 min)
-3. **Documentation simple**: "Je peux essayer chez moi" (< 30 min)
-4. **Inspiration**: "Je veux me lancer dans une PAN"
+2. **Optimisations performance**
+   - [ ] Réduction temps chargement initial
+   - [ ] Optimisation calculs indices A-C-P
+   - [ ] Amélioration responsive mobile
+   - [ ] Cache intelligent pour données calculées
 
-**Après le 19 novembre - Beta 91 : Architecture modulaire (Décembre 2025)**:
-- Migration IndexedDB (support multi-groupes)
-- Système de snapshots (suivi longitudinal)
-- Graphiques Chart.js (évolution A-C-P)
-- Cartouches contextuels dans formulaire évaluation
+3. **Documentation enrichie**
+   - [ ] Guide utilisateur simplifié (version publique)
+   - [ ] FAQ étendue (questions communauté)
+   - [ ] Tutoriels vidéo courts (< 5 min chacun)
+   - [ ] Documentation technique développeurs
 
-**Voir**: `PLAN_NOV19_2025.md` pour plan détaillé présentation
-**Voir**: `MIGRATION_INDEXEDDB.md` pour plan migration post-19 nov
-**Voir**: `ROADMAP_V1_AQPC2026.md` pour vision long terme (Version 1.0 printemps 2026)
+**Phase 2 - Moyen terme (janvier-février 2026)**:
+
+1. **Migration IndexedDB** (support multi-groupes)
+   - [ ] Remplacement localStorage → IndexedDB
+   - [ ] Support plusieurs groupes simultanés
+   - [ ] Amélioration capacité stockage (> 10 MB)
+   - [ ] API unifiée accès données
+
+2. **Système de snapshots**
+   - [ ] Snapshots interventions RàI (capture à complétion)
+   - [ ] Snapshots hebdomadaires (portrait complet chaque semaine)
+   - [ ] Reconstruction rétroactive (recalcul semaines passées)
+   - [ ] Export snapshots (analyse longitudinale)
+
+3. **Graphiques évolution A-C-P** (Chart.js)
+   - [ ] Graphiques aires empilées (évolution temporelle)
+   - [ ] Spaghetti charts (trajectoires individuelles)
+   - [ ] Zones colorées RàI (contexte visuel)
+   - [ ] Export graphiques (PNG, PDF)
+
+**Phase 3 - Long terme (mars-juin 2026)**:
+
+1. **Préparation Version 1.0**
+   - [ ] Consolidation toutes fonctionnalités
+   - [ ] Tests utilisateurs extensifs (20+ testeurs)
+   - [ ] Documentation complète (utilisateur + technique)
+   - [ ] Package distribution professionnel
+
+2. **Présentation AQPC 2026**
+   - [ ] Version 1.0 stable et robuste
+   - [ ] Package complet démonstration
+   - [ ] Communication publique large
+   - [ ] Ateliers formation (si demande)
+
+**Voir**:
+- `BETA_91_CHANGELOG.md` pour suivi détaillé développements Beta 91
+- `MIGRATION_INDEXEDDB.md` pour plan migration technique
+- `ROADMAP_V1_AQPC2026.md` pour vision long terme Version 1.0
+- `PLAN_NOV19_2025.md` pour référence historique présentation (archivé)
 
 ---
 
@@ -1033,7 +1061,8 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 ```bash
 # Test local
-open "index 90 (architecture).html"   # macOS
+open "index 91.html"   # macOS - Beta 91 (actuel)
+open "index 90 (architecture).html"   # macOS - Beta 90.5 (archivé)
 
 # Voir localStorage dans console Safari
 localStorage.getItem('calendrierComplet')

@@ -836,7 +836,12 @@ function genererBoutonsActionsEvalue(ligne) {
     const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
 
     if (lectureSeule) {
-        return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
+        // Mode anonymisation : Afficher uniquement le bouton Consulter (lecture seule)
+        return `
+            <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="Consulter cette évaluation (lecture seule)">
+                Consulter
+            </button>
+        `;
     }
 
     const iconeVerrou = ligne.verrouille ? '🔒' : '🔓';
@@ -863,7 +868,12 @@ function genererBoutonsActionsRemplacee(ligne) {
     const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
 
     if (lectureSeule) {
-        return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
+        // Mode anonymisation : Afficher uniquement le bouton Consulter (lecture seule)
+        return `
+            <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="Consulter cette évaluation remplacée (lecture seule)">
+                Consulter
+            </button>
+        `;
     }
 
     const iconeVerrou = ligne.verrouille ? '🔒' : '🔓';
@@ -889,7 +899,12 @@ function genererBoutonsActionsNonRecevable(ligne) {
     const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
 
     if (lectureSeule) {
-        return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
+        // Mode anonymisation : Afficher uniquement le bouton Consulter (lecture seule)
+        return `
+            <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="Consulter cette évaluation non recevable (lecture seule)">
+                Consulter
+            </button>
+        `;
     }
 
     const iconeVerrou = ligne.verrouille ? '🔒' : '🔓';

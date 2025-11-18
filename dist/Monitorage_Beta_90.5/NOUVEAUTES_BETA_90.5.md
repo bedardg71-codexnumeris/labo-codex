@@ -569,6 +569,10 @@ L'application passera du **localStorage** vers **IndexedDB** pour :
 - L'adaptation de l'interface à différentes pratiques
 - La création d'outils vraiment utiles sur le terrain
 
+Décrivez votre utilisation, ce qui marche, ce qui ne marche pas, ce qui marche moins, ce qui pourrait marcher. Faites vos suggestions dans le formulaire suivant :
+
+🔗 **https://forms.office.com/r/c2MBEzES32**
+
 **Merci d'avance pour votre contribution !** 🙏
 
 ---

@@ -392,6 +392,277 @@ function obtenirCouleurPerformance(performance) {
 }
 
 /**
+ * Calcule le coefficient de corrélation de Pearson entre deux séries de données
+ * @param {number[]} x - Première série de données
+ * @param {number[]} y - Deuxième série de données
+ * @returns {number|null} - Coefficient r (-1 à 1), ou null si calcul impossible
+ *
+ * INTERPRÉTATION:
+ * - r proche de 1 : corrélation positive forte (quand x ↑, y ↑)
+ * - r proche de 0 : aucune corrélation linéaire
+ * - r proche de -1 : corrélation négative forte (quand x ↑, y ↓)
+ *
+ * SEUILS CONVENTIONNELS (valeur absolue):
+ * - |r| < 0.3 : Très faible
+ * - 0.3 ≤ |r| < 0.5 : Faible
+ * - 0.5 ≤ |r| < 0.7 : Modérée
+ * - 0.7 ≤ |r| < 0.9 : Forte
+ * - |r| ≥ 0.9 : Très forte
+ */
+function calculerCorrelationPearson(x, y) {
+    const n = x.length;
+    if (n === 0 || n !== y.length) {
+        return null;
+    }
+
+    // Calculer les moyennes
+    const moyX = x.reduce((a, b) => a + b, 0) / n;
+    const moyY = y.reduce((a, b) => a + b, 0) / n;
+
+    // Calculer numérateur et dénominateurs
+    let numerateur = 0;
+    let denomX = 0;
+    let denomY = 0;
+
+    for (let i = 0; i < n; i++) {
+        const diffX = x[i] - moyX;
+        const diffY = y[i] - moyY;
+        numerateur += diffX * diffY;
+        denomX += diffX * diffX;
+        denomY += diffY * diffY;
+    }
+
+    // Éviter division par zéro
+    if (denomX === 0 || denomY === 0) {
+        return null;
+    }
+
+    // Retourner le coefficient de Pearson
+    return numerateur / Math.sqrt(denomX * denomY);
+}
+
+/**
+ * Génère le contenu de la carte explicative sur le calcul des indices A-C-P
+ * Affiche les détails selon la pratique active (PAN-Maîtrise ou Sommative)
+ *
+ * RETOUR:
+ * - HTML formaté expliquant comment A, C et P sont calculés
+ */
+function genererExplicationCalculIndices() {
+    // Récupérer la configuration de la pratique active
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const pratique = config.pratique || 'pan-maitrise';
+    const isPAN = pratique === 'pan-maitrise';
+
+    // Récupérer les paramètres de configuration
+    const nbArtefacts = config.nombreArtefacts || 7;
+
+    let html = '<strong>Méthodes de calcul des indices (pratique active : ' + (isPAN ? 'PAN-Maîtrise' : 'Sommative') + ')</strong><br><br>';
+
+    // A - Assiduité (TOUJOURS DYNAMIQUE - comportement cumulatif)
+    html += '<strong style="color: var(--bleu-principal);">A (Assiduité)</strong> : ';
+    html += 'Proportion des heures de présence parmi les heures de cours <strong>effectivement données jusqu\'à maintenant</strong>. ';
+    html += '<br>Formule : <code>A = (heures présentes / heures données) × 100</code>';
+    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Calculé uniquement sur les séances passées (pas sur le total prévu pour la session)</em>';
+    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Exemple : Si 8 séances données sur 15 prévues, un étudiant présent 8/8 a A = 100% (pas 53%)</em>';
+    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Indépendant de la pratique de notation (fait observable)</em>';
+
+    html += '<br><br>';
+
+    // C - Complétion (TOUJOURS DYNAMIQUE - mobilisation cumulée)
+    html += '<strong style="color: var(--bleu-principal);">C (Complétion)</strong> : ';
+    html += 'Proportion de travaux remis parmi les travaux <strong>effectivement réalisés jusqu\'à maintenant</strong>. ';
+    html += '<br>Formule : <code>C = (travaux remis / travaux réalisés) × 100</code>';
+    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Un artefact devient "réalisé" dès qu\'une première évaluation existe pour celui-ci</em>';
+    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Exemple : Si 8 artefacts réalisés sur 10 prévus, un étudiant ayant remis 8/8 a C = 100% (pas 80%)</em>';
+    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Indépendant de la pratique de notation (mobilisation observable)</em>';
+
+    html += '<br><br>';
+
+    // P - Performance (DÉPEND TOUJOURS DE LA PRATIQUE - résultat pédagogique)
+    html += '<strong style="color: var(--bleu-principal);">P (Performance)</strong> : ';
+    html += '<strong>Calculé selon la pratique de notation en vigueur</strong>. ';
+
+    if (isPAN) {
+        html += '<br>→ <strong>PAN-Maîtrise</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs artefacts</strong> selon l\'échelle IDME. ';
+        html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">&nbsp;&nbsp;&nbsp;Les niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu) sont convertis en pourcentages.</em>';
+        html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">&nbsp;&nbsp;&nbsp;Seuls les ' + nbArtefacts + ' meilleurs artefacts comptent dans le calcul de P</em>';
+    } else {
+        html += '<br>→ <strong>Sommative</strong> : Moyenne pondérée de <strong>toutes les évaluations</strong>. ';
+        html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">&nbsp;&nbsp;&nbsp;Formule : <code>P = Σ(note × pondération) / Σ(pondérations)</code></em>';
+        html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">&nbsp;&nbsp;&nbsp;Toutes les évaluations comptent selon leur pondération</em>';
+    }
+
+    html += '<br><br>';
+    html += '<strong style="color: var(--bleu-principal);">Résumé</strong> : ';
+    html += '<strong>A et C</strong> mesurent le <strong>comportement cumulatif observable</strong> (contexte d\'apprentissage favorable ou non). ';
+    html += '<strong>P</strong> mesure la <strong>qualité de l\'apprentissage</strong> selon la pratique pédagogique choisie (Sommative, PAN-Maîtrise, ou autre).';
+
+    html += '<br><br>';
+    html += '<em style="color: var(--gris-moyen); font-size: 0.9rem;">💡 La pratique de notation et ses paramètres peuvent être modifiés dans <strong>Réglages › Pratique de notation</strong></em>';
+
+    return html;
+}
+
+/**
+ * Met à jour le contenu de la carte explicative sur le calcul des indices
+ * Appelée lors de l'affichage du tableau
+ */
+function mettreAJourExplicationCalculIndices() {
+    const carteNote = document.getElementById('note-calcul-indices-liste');
+    if (!carteNote) {
+        return;
+    }
+
+    const contenuHTML = genererExplicationCalculIndices();
+    carteNote.innerHTML = contenuHTML;
+}
+
+/**
+ * Génère le badge de pratique de notation (SOM ou PAN-Maîtrise)
+ * Affiche la pratique choisie par l'utilisateur (pas de mode "Hybride")
+ * Le mode comparatif est juste un affichage dual des calculs, pas une pratique distincte
+ * Utilise les classes CSS .badge-pratique-compact.som ou .badge-pratique-compact.pan
+ * @returns {string} - HTML du badge
+ */
+function genererBadgePratiqueListeEtudiants() {
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const pratique = config.pratique || 'pan-maitrise';
+
+    let texte = '';
+    let classePratique = '';
+    let description = '';
+
+    if (pratique === 'sommative') {
+        texte = 'SOM';
+        classePratique = 'som';
+        description = 'Pratique sommative : moyenne pondérée provisoire';
+    } else {
+        // PAN-Maîtrise (par défaut)
+        texte = 'PAN-Maîtrise';
+        classePratique = 'pan';
+        description = 'Pratique alternative : N meilleurs artefacts selon IDME';
+    }
+
+    return `<span class="badge-pratique-compact ${classePratique}" title="${description}">${texte}</span>`;
+}
+
+/**
+ * Met à jour le titre de la liste des étudiants avec toggle et badge pratique
+ * Similaire au format de l'Aperçu du Tableau de bord
+ */
+function mettreAJourTitreListeEtudiants() {
+    const titre = document.getElementById('titre-liste-etudiants');
+    if (!titre) {
+        console.warn('⚠️ Élément #titre-liste-etudiants introuvable');
+        return;
+    }
+
+    // Vider le titre et créer le conteneur avec layout flex
+    titre.innerHTML = '';
+    const conteneurTitre = document.createElement('div');
+    conteneurTitre.style.cssText = 'display: flex; justify-content: space-between; align-items: center;';
+
+    // Partie gauche : titre + badge pratique
+    const partieGauche = document.createElement('div');
+    partieGauche.style.cssText = 'display: flex; align-items: center; gap: 12px;';
+    partieGauche.innerHTML = `
+        <span>Liste des étudiant·es</span>
+        ${genererBadgePratiqueListeEtudiants()}
+    `;
+
+    // Partie droite : toggle 📐
+    const partieDroite = document.createElement('div');
+    partieDroite.innerHTML = `
+        <span class="emoji-toggle" data-target="note-calcul-indices-liste"
+              title="Afficher les détails de calcul des indices">📐</span>
+    `;
+
+    conteneurTitre.appendChild(partieGauche);
+    conteneurTitre.appendChild(partieDroite);
+    titre.appendChild(conteneurTitre);
+}
+
+/**
+ * Met à jour les en-têtes des colonnes A, C et E avec les statistiques calculées
+ * @param {number|null} r_AP - Corrélation entre Assiduité et Performance
+ * @param {number|null} r_CP - Corrélation entre Complétion et Performance
+ * @param {number|null} moyenneE - Moyenne de l'engagement du groupe (0-100)
+ *
+ * AFFICHAGE DANS L'EN-TÊTE:
+ * - A et C : Corrélations r=0.XX avec couleur selon force
+ * - E : Moyenne du groupe (%)
+ * - Si données manquantes: affiche "—"
+ */
+function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneE) {
+    // Chercher les en-têtes dans le HTML
+    const enteteLigneA = document.querySelector('th[onclick*="assiduite"]');
+    const enteteLigneC = document.querySelector('th[onclick*="completion"]');
+    const enteteLigneE = document.querySelector('th[onclick*="engagement"]');
+
+    if (!enteteLigneA || !enteteLigneC) {
+        console.warn('⚠️ En-têtes A ou C introuvables pour afficher les corrélations');
+        return;
+    }
+
+    // Fonction helper pour formater la corrélation
+    function formaterCorrelation(r) {
+        if (r === null || isNaN(r)) {
+            return '<span style="color: #999; font-size: 0.75rem;">—</span>';
+        }
+
+        const absR = Math.abs(r);
+        let couleur;
+
+        // Déterminer la couleur selon la force de corrélation
+        if (absR >= 0.7) {
+            couleur = '#2e7d32'; // Vert foncé (forte)
+        } else if (absR >= 0.5) {
+            couleur = '#f57c00'; // Orange (modérée)
+        } else {
+            couleur = '#c62828'; // Rouge (faible)
+        }
+
+        return `<span style="color: ${couleur}; font-size: 0.75rem; font-weight: 600;">r=${r.toFixed(2)}</span>`;
+    }
+
+    // Fonction helper pour formater la moyenne
+    function formaterMoyenne(valeur) {
+        if (valeur === null || isNaN(valeur)) {
+            return '<span style="color: #999; font-size: 0.75rem;">—</span>';
+        }
+
+        // Couleur selon la valeur de l'engagement moyen
+        let couleur;
+        if (valeur >= 70) {
+            couleur = '#2e7d32'; // Vert (contexte favorable)
+        } else if (valeur >= 55) {
+            couleur = '#f57c00'; // Orange (contexte modéré)
+        } else {
+            couleur = '#c62828'; // Rouge (contexte difficile)
+        }
+
+        return `<span style="color: ${couleur}; font-size: 0.75rem; font-weight: 600;">moy=${Math.round(valeur)}%</span>`;
+    }
+
+    // Mettre à jour l'en-tête A (assiduité)
+    const htmlA = `A<br><span class="text-xs-normal">(assiduité)</span><br>${formaterCorrelation(r_AP)}<span id="tri-assiduite" class="ml-4">↕</span>`;
+    enteteLigneA.innerHTML = htmlA;
+
+    // Mettre à jour l'en-tête C (complétion)
+    const htmlC = `C<br><span class="text-xs-normal">(complétion)</span><br>${formaterCorrelation(r_CP)}<span id="tri-completion" class="ml-4">↕</span>`;
+    enteteLigneC.innerHTML = htmlC;
+
+    // Mettre à jour l'en-tête E (engagement) avec la moyenne
+    if (enteteLigneE) {
+        const htmlE = `E<br><span class="text-xs-normal">(engagement)</span><br>${formaterMoyenne(moyenneE)}<span id="tri-engagement" class="ml-4">↕</span>`;
+        enteteLigneE.innerHTML = htmlE;
+    }
+
+    console.log(`📊 Statistiques affichées: A↔P r=${r_AP !== null ? r_AP.toFixed(3) : 'N/A'}, C↔P r=${r_CP !== null ? r_CP.toFixed(3) : 'N/A'}, E moy=${moyenneE !== null ? moyenneE.toFixed(1) : 'N/A'}%`);
+}
+
+/**
  * Calcule le niveau de risque à l'échec (RàI) pour un étudiant
  * @param {string} da - Numéro de DA
  * @returns {Object} - { niveau: number (1|2|3), label: string, couleurFond: string, couleurTexte: string }
@@ -675,6 +946,39 @@ function afficherListeEtudiantsConsultation() {
             cibleCalculee: niveauInfo
         };
     });
+
+    // 🆕 BETA 91: Calculer les corrélations A-P et C-P pour afficher dans l'en-tête
+    const valeursA = etudiantsFiltres.map(e => e.indicesCalcules.A);
+    const valeursC = etudiantsFiltres.map(e => e.indicesCalcules.C);
+    const valeursP = etudiantsFiltres.map(e => e.indicesCalcules.P);
+
+    const r_AP = calculerCorrelationPearson(valeursA, valeursP);
+    const r_CP = calculerCorrelationPearson(valeursC, valeursP);
+
+    // 🆕 BETA 91: Calculer la moyenne de l'engagement E pour afficher dans l'en-tête
+    const valeursE = etudiantsFiltres.map(e => {
+        const A = e.indicesCalcules.A / 100;
+        const C = e.indicesCalcules.C / 100;
+        const P = e.indicesCalcules.P / 100;
+        const E_brut = A * C * P;
+        const E = Math.pow(E_brut, 1/3);
+        return E * 100; // Retourner en pourcentage
+    });
+    const moyenneE = valeursE.length > 0 ? valeursE.reduce((sum, val) => sum + val, 0) / valeursE.length : null;
+
+    // Mettre à jour les en-têtes avec les corrélations et la moyenne de E
+    mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneE);
+
+    // 🆕 BETA 91: Mettre à jour la carte explicative sur le calcul des indices
+    mettreAJourExplicationCalculIndices();
+
+    // 🆕 BETA 91: Mettre à jour le titre avec toggle et badge pratique
+    mettreAJourTitreListeEtudiants();
+
+    // Réattacher les événements des toggles emoji (pour le toggle 📐)
+    if (typeof reattacherEvenementsToggles === 'function') {
+        reattacherEvenementsToggles();
+    }
 
     // NOUVEAU: Trier selon la colonne active
     etudiantsFiltres.sort(function (a, b) {

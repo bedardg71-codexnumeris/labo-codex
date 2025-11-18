@@ -835,75 +835,55 @@ function genererLigneHTML(ligne) {
 function genererBoutonsActionsEvalue(ligne) {
     const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
 
-    if (lectureSeule) {
-        return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
-    }
-
-    const iconeVerrou = ligne.verrouille ? '🔒' : '🔓';
-    const titreVerrou = ligne.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+    // Toujours afficher uniquement le bouton Consulter
+    // La suppression et le verrouillage se font depuis l'évaluation elle-même (plus sécuritaire)
+    const titreConsulter = lectureSeule
+        ? 'Consulter cette évaluation (lecture seule)'
+        : 'Consulter cette évaluation';
 
     return `
-        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="Consulter cette évaluation">
+        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="${titreConsulter}">
             Consulter
-        </button>
-        <button class="btn btn-modifier btn-compact" id="cadenas-liste-${ligne.evaluationId}" onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')" title="${titreVerrou}">
-            ${iconeVerrou}
-        </button>
-        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer cette évaluation">
-            Supprimer
         </button>
     `;
 }
 
 /**
  * Génère les boutons d'action pour une évaluation remplacée par un jeton
- * (Consulter + Verrouillage + Supprimer)
+ * (Consulter uniquement)
  */
 function genererBoutonsActionsRemplacee(ligne) {
     const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
 
-    if (lectureSeule) {
-        return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
-    }
-
-    const iconeVerrou = ligne.verrouille ? '🔒' : '🔓';
-    const titreVerrou = ligne.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+    // Toujours afficher uniquement le bouton Consulter
+    // La suppression et le verrouillage se font depuis l'évaluation elle-même (plus sécuritaire)
+    const titreConsulter = lectureSeule
+        ? 'Consulter cette évaluation remplacée (lecture seule)'
+        : 'Consulter cette évaluation remplacée';
 
     return `
-        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="Consulter cette évaluation remplacée">
+        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="${titreConsulter}">
             Consulter
-        </button>
-        <button class="btn btn-modifier btn-compact" id="cadenas-liste-${ligne.evaluationId}" onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')" title="${titreVerrou}">
-            ${iconeVerrou}
-        </button>
-        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer cette évaluation">
-            Supprimer
         </button>
     `;
 }
 
 /**
  * Génère les boutons d'action pour une évaluation non recevable (plagiat ou IA)
+ * (Consulter uniquement)
  */
 function genererBoutonsActionsNonRecevable(ligne) {
     const lectureSeule = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
 
-    if (lectureSeule) {
-        return `<span style="color: #999; font-size: 0.85rem; font-style: italic;">Lecture seule</span>`;
-    }
-
-    const iconeVerrou = ligne.verrouille ? '🔒' : '🔓';
-    const titreVerrou = ligne.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller';
+    // Toujours afficher uniquement le bouton Consulter
+    // La suppression et le verrouillage se font depuis l'évaluation elle-même (plus sécuritaire)
+    const titreConsulter = lectureSeule
+        ? 'Consulter cette évaluation non recevable (lecture seule)'
+        : 'Consulter cette évaluation non recevable';
 
     return `
-        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="Consulter (lecture seule)">
+        <button class="btn btn-secondaire btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.evaluationId}')" title="${titreConsulter}">
             Consulter
-        </button>
-        <button class="btn btn-modifier btn-compact" id="cadenas-liste-${ligne.evaluationId}" onclick="toggleVerrouillerEvaluation('${ligne.evaluationId}')" title="${titreVerrou}">
-            ${iconeVerrou}
-        </button>
-        <button class="btn btn-supprimer btn-compact" onclick="supprimerEvaluation('${ligne.evaluationId}')" title="Supprimer cette évaluation">
-            Supprimer
         </button>
     `;
 }

@@ -586,6 +586,7 @@ function anonymiserNom(da) {
  */
 function obtenirDonneesSelonMode(cle) {
     const mode = modeActuel;
+    console.log(`🔍 [obtenirDonneesSelonMode] cle="${cle}", modeActuel="${modeActuel}", mode="${mode}"`);
 
     // ===================================
     // MODE SIMULATION : Données fictives
@@ -619,7 +620,9 @@ function obtenirDonneesSelonMode(cle) {
 
     // Si mode anonymisation, anonymiser selon le type de données
     if (mode === MODES.ANONYMISATION) {
+        console.log(`🎭 [ANONYMISATION] Mode actif, anonymisation de "${cle}"...`);
         donnees = anonymiserDonnees(cle, donnees);
+        console.log(`🎭 [ANONYMISATION] ${cle} anonymisé:`, Array.isArray(donnees) ? `${donnees.length} éléments` : 'objet');
     }
 
     return donnees;
@@ -701,12 +704,16 @@ function reinitialiserMappingAnonyme() {
  * @returns {Array|Object} - Données anonymisées
  */
 function anonymiserDonnees(cle, donnees) {
+    console.log(`🎭 [anonymiserDonnees] Appelé pour clé: "${cle}", type:`, Array.isArray(donnees) ? 'tableau' : typeof donnees);
+
     if (!Array.isArray(donnees)) {
+        console.log(`🎭 [anonymiserDonnees] Pas un tableau, retour sans modification`);
         return donnees; // Si ce n'est pas un tableau, retourner tel quel
     }
 
     const mapping = genererMappingAnonyme();
     const afficherDAReel = obtenirOptionAffichageDA();
+    console.log(`🎭 [anonymiserDonnees] Mapping généré:`, Object.keys(mapping).length, 'étudiants, afficherDAReel:', afficherDAReel);
 
     // Anonymiser selon le type de clé
     switch (cle) {
@@ -724,7 +731,9 @@ function anonymiserDonnees(cle, donnees) {
             }));
 
             // Trier selon l'ordre d'affichage aléatoire pour éviter de reconnaître par la position
-            return etudiantsAnonymes.sort((a, b) => a.ordreAffichage - b.ordreAffichage);
+            const etudiantsTries = etudiantsAnonymes.sort((a, b) => a.ordreAffichage - b.ordreAffichage);
+            console.log(`🎭 [anonymiserDonnees] Étudiants anonymisés:`, etudiantsTries.length, 'étudiants. Exemple:', etudiantsTries[0] ? {da: etudiantsTries[0].daAffichage, nom: etudiantsTries[0].nom, prenom: etudiantsTries[0].prenom} : 'aucun');
+            return etudiantsTries;
 
         case 'evaluationsSauvegardees':
             return donnees.map(evaluation => {
@@ -1887,7 +1896,7 @@ window.filtrerEtudiantsParMode = filtrerEtudiantsParMode;
  * Initialisation immédiate du système de modes
  * S'exécute dès que modes.js est chargé (AVANT tous les autres modules)
  */
-console.log('🎭 Chargement de modes.js...');
+console.log('🎭 Chargement de modes.js VERSION 2025-11-17 08:42...');
 
 // Attendre que le DOM soit prêt
 if (document.readyState === 'loading') {

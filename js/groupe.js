@@ -81,18 +81,11 @@ function afficherNotificationErreur(titre, details = '') {
 let tempImportData = [];
 
 /**
- * Obtient les données depuis localStorage selon la clé spécifiée
- * @param {string} cle - Clé localStorage (ex: 'groupeEtudiants')
- * @returns {Array} - Tableau des données ou tableau vide
+ * SUPPRIMÉ : Cette fonction écrasait celle de modes.js et empêchait l'anonymisation
+ * La vraie fonction obtenirDonneesSelonMode() est définie dans modes.js
+ * et gère correctement les modes Normal/Simulation/Anonymisation
  */
-function obtenirDonneesSelonMode(cle) {
-    try {
-        return JSON.parse(localStorage.getItem(cle) || '[]');
-    } catch (error) {
-        console.error(`Erreur lecture ${cle}:`, error);
-        return [];
-    }
-}
+// function obtenirDonneesSelonMode(cle) - SUPPRIMÉE, utiliser celle de modes.js
 
 /**
  * Sauvegarde les données dans localStorage selon la clé spécifiée

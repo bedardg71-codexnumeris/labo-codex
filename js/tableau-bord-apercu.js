@@ -29,6 +29,256 @@
    =============================== */
 
 /**
+ * Calcule le coefficient de corrélation de Pearson entre deux séries de données
+ * @param {Array<number>} x - Première série de valeurs (0-1 decimal)
+ * @param {Array<number>} y - Deuxième série de valeurs (0-1 decimal)
+ * @returns {number|null} - Coefficient r entre -1 et 1, ou null si calcul impossible
+ *
+ * FORMULE: r = Σ[(xi - x̄)(yi - ȳ)] / √[Σ(xi - x̄)² × Σ(yi - ȳ)²]
+ * INTERPRÉTATION (Cohen, 1988):
+ * - |r| < 0.3 : Très faible
+ * - 0.3 ≤ |r| < 0.5 : Faible
+ * - 0.5 ≤ |r| < 0.7 : Modérée
+ * - 0.7 ≤ |r| < 0.9 : Forte
+ * - |r| ≥ 0.9 : Très forte
+ */
+function calculerCorrelationPearson(x, y) {
+    const n = x.length;
+
+    // Vérifications de base
+    if (n === 0 || n !== y.length) {
+        return null;
+    }
+
+    // Calculer les moyennes
+    const moyX = x.reduce((a, b) => a + b, 0) / n;
+    const moyY = y.reduce((a, b) => a + b, 0) / n;
+
+    // Calculer les écarts et produits
+    let numerateur = 0;
+    let denomX = 0;
+    let denomY = 0;
+
+    for (let i = 0; i < n; i++) {
+        const diffX = x[i] - moyX;
+        const diffY = y[i] - moyY;
+        numerateur += diffX * diffY;
+        denomX += diffX * diffX;
+        denomY += diffY * diffY;
+    }
+
+    // Vérifier variance nulle (tous identiques)
+    if (denomX === 0 || denomY === 0) {
+        return null;
+    }
+
+    // Calculer r
+    return numerateur / Math.sqrt(denomX * denomY);
+}
+
+/**
+ * 🆕 BETA 91: Génère un diagnostic basique basé sur la note de passage (60%)
+ * Utilisé quand SOLO et RàI sont désactivés
+ * @param {Array} etudiants - [{da, valeur: 0-1}, ...] étudiants avec leur performance
+ * @returns {string} - Message de diagnostic basique
+ */
+function genererDiagnosticNotePassage(etudiants) {
+    if (!etudiants || etudiants.length === 0) {
+        return '';
+    }
+
+    const notePassage = 0.60; // 60%
+    const total = etudiants.length;
+
+    const enReussite = etudiants.filter(e => e.valeur >= notePassage).length;
+    const enDifficulte = total - enReussite;
+
+    const pctReussite = Math.round((enReussite / total) * 100);
+    const pctDifficulte = Math.round((enDifficulte / total) * 100);
+
+    const messages = [];
+
+    if (enReussite > 0) {
+        messages.push(`${enReussite} étudiants (${pctReussite}%) ont une performance égale ou supérieure à la note de passage (60%)`);
+    }
+
+    if (enDifficulte > 0) {
+        messages.push(`${enDifficulte} étudiants (${pctDifficulte}%) sont en difficulté avec une performance inférieure à 60%`);
+    }
+
+    return messages.length > 0 ? messages.join('. ') + '.' : '';
+}
+
+/**
+ * 🆕 BETA 91: Génère une interprétation pédagogique de la performance du groupe
+ * Analyse les niveaux IDME et les patterns pour identifier progression et difficultés
+ * @param {Array} etudiants - [{da, valeur: 0-1}, ...] étudiants avec leur performance
+ * @param {Object} echelle - Échelle IDME active
+ * @returns {string} - Message d'interprétation pédagogique
+ */
+function genererInterpretationPerformance(etudiants, echelle) {
+    if (!etudiants || etudiants.length === 0 || !echelle) {
+        return '';
+    }
+
+    // Lire les patterns stockés
+    const patterns = JSON.parse(localStorage.getItem('indicesPatternsRaI') || '{}');
+
+    // Classifier les étudiants par niveau IDME
+    const niveaux = echelle.niveaux.filter(n => n.code !== '0' && n.code !== 0);
+    const parNiveau = {};
+
+    niveaux.forEach(niveau => {
+        parNiveau[niveau.code] = [];
+    });
+
+    etudiants.forEach(etudiant => {
+        const valeurPct = etudiant.valeur * 100;
+        for (let i = niveaux.length - 1; i >= 0; i--) {
+            const niveau = niveaux[i];
+            const min = niveau.min || 0;
+            const max = niveau.max || 100;
+            if (valeurPct >= min && valeurPct <= max) {
+                parNiveau[niveau.code].push(etudiant);
+                break;
+            }
+        }
+    });
+
+    // Analyser selon les objectifs pédagogiques
+    const messages = [];
+    const total = etudiants.length;
+
+    // 1. Combien ont atteint M ou E (objectif atteint)
+    const niveauM = parNiveau['M'] || [];
+    const niveauE = parNiveau['E'] || [];
+    const objectifAtteint = niveauM.length + niveauE.length;
+
+    if (objectifAtteint > 0) {
+        const pct = Math.round((objectifAtteint / total) * 100);
+        messages.push(`${objectifAtteint} étudiants (${pct}%) ont atteint ou dépassé le niveau de maîtrise`);
+    }
+
+    // 2. Parmi les D, combien en progression (pattern favorable)
+    const niveauD = parNiveau['D'] || [];
+    const dEnProgression = niveauD.filter(etudiant => {
+        const pattern = patterns[etudiant.da];
+        return pattern && (pattern.pattern === 'Stable' || pattern.niveauRai === 1);
+    });
+
+    if (dEnProgression.length > 0) {
+        messages.push(`${dEnProgression.length} étudiants en Développement montrent une progression favorable et pourraient atteindre la maîtrise prochainement`);
+    }
+
+    // 3. Parmi les I, combien montrent des progrès (pattern pas blocage critique)
+    const niveauI = parNiveau['I'] || [];
+    const iAvecProgres = niveauI.filter(etudiant => {
+        const pattern = patterns[etudiant.da];
+        return pattern && pattern.pattern !== 'Blocage critique';
+    });
+
+    if (niveauI.length > 0) {
+        if (iAvecProgres.length > 0) {
+            messages.push(`Parmi les ${niveauI.length} étudiants en difficulté, ${iAvecProgres.length} montrent des signes de progrès`);
+        } else {
+            messages.push(`${niveauI.length} étudiants en difficulté nécessitent un accompagnement intensif`);
+        }
+    }
+
+    // Générer le message final
+    if (messages.length === 0) {
+        return '';
+    }
+
+    return messages.join('. ') + '.';
+}
+
+/**
+ * Calcule la distribution des étudiants selon les niveaux de l'échelle de performance
+ * Lit l'échelle active depuis localStorage et compte les étudiants dans chaque plage
+ * Exclut le niveau "0" (Aucun/plagiat)
+ * @param {Array} etudiants - [{da, valeur: 0-1}, ...] valeurs de performance avec DA
+ * @returns {string|null} - HTML compact "I : 5 • D : 8 • M : 12 • E : 3" ou null si erreur
+ */
+function calculerDistributionPerformance(etudiants) {
+    if (!etudiants || etudiants.length === 0) {
+        console.warn('📊 Distribution P : Aucun étudiant');
+        return null;
+    }
+
+    // Lire l'échelle de performance active depuis localStorage
+    // Essayer d'abord echellesTemplates (utilisé par echelles.js), puis echellesPerformance (fallback)
+    let echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    let echelleId = localStorage.getItem('echellePerformanceActive') || 'idme-5niv';
+
+    console.log('📊 Distribution P : echelleId =', echelleId, 'echellesTemplates.length =', echelles.length);
+
+    // Trouver l'échelle active (par ID ou par défaut)
+    let echelle = echelles.find(e => e.id === echelleId);
+
+    if (!echelle) {
+        // Fallback : chercher l'échelle par défaut
+        echelle = echelles.find(e => e.parDefaut === true) || echelles[0];
+        console.log('📊 Distribution P : Échelle non trouvée par ID, utilisation échelle par défaut:', echelle?.id);
+    }
+
+    console.log('📊 Distribution P : echelle finale =', echelle);
+
+    if (!echelle || !echelle.niveaux) {
+        console.warn('📊 Distribution P : Échelle ou niveaux introuvables');
+        return null;
+    }
+
+    // Trier les niveaux par valeur min croissante et exclure le niveau "0"
+    const niveaux = echelle.niveaux
+        .filter(n => n.code !== '0' && n.code !== 0) // Exclure niveau 0 (plagiat)
+        .sort((a, b) => (a.min || 0) - (b.min || 0));
+
+    console.log('📊 Distribution P : niveaux filtrés =', niveaux);
+
+    if (niveaux.length === 0) {
+        console.warn('📊 Distribution P : Aucun niveau après filtrage');
+        return null;
+    }
+
+    // Compter les étudiants dans chaque plage
+    const compteurs = {};
+    niveaux.forEach(niveau => {
+        compteurs[niveau.code] = 0;
+    });
+
+    etudiants.forEach(etudiant => {
+        const valeurPct = etudiant.valeur * 100; // Convertir 0-1 en 0-100%
+
+        // Trouver le niveau correspondant
+        for (let i = niveaux.length - 1; i >= 0; i--) {
+            const niveau = niveaux[i];
+            const min = niveau.min || 0;
+            const max = niveau.max || 100;
+
+            if (valeurPct >= min && valeurPct <= max) {
+                compteurs[niveau.code]++;
+                break;
+            }
+        }
+    });
+
+    console.log('📊 Distribution P : compteurs =', compteurs);
+
+    // Générer le HTML compact avec noms complets : "Incomplet ou insuffisant : 5 • En Développement : 11 • etc."
+    const parts = niveaux.map(niveau => {
+        const count = compteurs[niveau.code] || 0;
+        // Utiliser le nom complet du niveau au lieu du code
+        return `${niveau.nom} : ${count}`;
+    });
+
+    const result = parts.join(' <span style="margin: 0 6px;">•</span> ');
+    console.log('📊 Distribution P : résultat =', result);
+
+    return result;
+}
+
+/**
  * Génère un badge HTML indiquant la pratique de notation active
  * @returns {string} - HTML du badge avec icône et texte
  */
@@ -146,6 +396,18 @@ function chargerTableauBordApercu() {
         console.warn('⚠️ calculerEtStockerIndicesCP non disponible - Module portfolio.js non chargé ?');
     }
 
+    // 🆕 BETA 91: Calculer et stocker les patterns + RàI pour tout le groupe (si RàI activé)
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const raiActive = config.activerRai !== false; // Par défaut true
+
+    if (raiActive && typeof calculerEtStockerPatternsGroupe === 'function') {
+        calculerEtStockerPatternsGroupe();
+    } else if (!raiActive) {
+        console.log('ℹ️ RàI désactivé, patterns non calculés');
+    } else {
+        console.warn('⚠️ calculerEtStockerPatternsGroupe non disponible - Module profil-etudiant.js non chargé ?');
+    }
+
     try {
         const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const etudiants = typeof filtrerEtudiantsParMode === 'function'
@@ -205,9 +467,154 @@ function chargerTableauBordApercu() {
 
         console.log('✅ Tableau de bord chargé (aperçu anonyme)');
 
+        // 🆕 BETA 91: Initialiser les événements toggle après génération du HTML
+        initialiserEvenementsToggle();
+
     } catch (error) {
         console.error('❌ Erreur chargement tableau de bord:', error);
     }
+}
+
+/**
+ * 🆕 BETA 91: Génère une interprétation des patterns d'apprentissage du groupe
+ * Ton réaliste équilibré : présente forces et défis sans jugement
+ * Format : nombres absolus ET pourcentages (ex: "17 étudiants, 68%")
+ * @param {Array} patterns - Distribution des patterns [{pattern, count}, ...]
+ * @param {number} totalEtudiants - Nombre total d'étudiants
+ * @returns {string} Message d'interprétation HTML
+ */
+function genererInterpretationPatterns(patterns, totalEtudiants) {
+    if (!patterns || totalEtudiants === 0) return '';
+
+    // Classifier les patterns par catégories
+    const favorables = ['Progression', 'Stable', 'Excellence émergente'];
+    const difficultesEmergentes = ['Blocage émergent', 'Défi spécifique'];
+    const critiques = ['Blocage critique'];
+
+    let nbFavorables = 0;
+    let nbDifficultesEmergentes = 0;
+    let nbCritiques = 0;
+
+    patterns.forEach(p => {
+        if (favorables.includes(p.pattern)) {
+            nbFavorables += p.count;
+        } else if (difficultesEmergentes.includes(p.pattern)) {
+            nbDifficultesEmergentes += p.count;
+        } else if (critiques.includes(p.pattern)) {
+            nbCritiques += p.count;
+        }
+    });
+
+    const pctFavorables = Math.round((nbFavorables / totalEtudiants) * 100);
+    const pctDifficultesEmergentes = Math.round((nbDifficultesEmergentes / totalEtudiants) * 100);
+    const pctCritiques = Math.round((nbCritiques / totalEtudiants) * 100);
+
+    // Construction du message équilibré
+    const messages = [];
+
+    // 1. Trajectoires favorables
+    if (nbFavorables > 0) {
+        messages.push(`${nbFavorables} étudiants (${pctFavorables}%) montrent une trajectoire d'apprentissage favorable (Progression, Stable, Excellence émergente)`);
+    }
+
+    // 2. Difficultés émergentes
+    if (nbDifficultesEmergentes > 0) {
+        messages.push(`${nbDifficultesEmergentes} étudiants (${pctDifficultesEmergentes}%) rencontrent des difficultés émergentes et nécessitent un soutien préventif`);
+    }
+
+    // 3. Blocages critiques
+    if (nbCritiques > 0) {
+        messages.push(`${nbCritiques} étudiants (${pctCritiques}%) sont en blocage critique et nécessitent un accompagnement différencié immédiat`);
+    }
+
+    if (messages.length === 0) {
+        return '';
+    }
+
+    return messages.join('. ') + '.';
+}
+
+/**
+ * 🆕 BETA 91: Génère une interprétation du modèle RàI du groupe
+ * Focus : efficacité pédagogique (taux Niveau 1 indique si enseignement universel fonctionne)
+ * Format : nombres absolus ET pourcentages (ex: "17 étudiants, 68%")
+ * @param {Array} rai - Distribution RàI [{niveau, count}, ...]
+ * @param {number} totalEtudiants - Nombre total d'étudiants
+ * @returns {string} Message d'interprétation HTML
+ */
+function genererInterpretationRai(rai, totalEtudiants) {
+    if (!rai || totalEtudiants === 0) return '';
+
+    let niveau1 = 0;
+    let niveau2 = 0;
+    let niveau3 = 0;
+
+    rai.forEach(r => {
+        if (r.niveau === 1) niveau1 = r.count;
+        if (r.niveau === 2) niveau2 = r.count;
+        if (r.niveau === 3) niveau3 = r.count;
+    });
+
+    const pctNiveau1 = Math.round((niveau1 / totalEtudiants) * 100);
+    const pctNiveau2 = Math.round((niveau2 / totalEtudiants) * 100);
+    const pctNiveau3 = Math.round((niveau3 / totalEtudiants) * 100);
+
+    // Analyse de l'efficacité pédagogique (seuils recommandés : 70-80% N1, 15-20% N2, 5-10% N3)
+    let interpretation = '';
+
+    if (pctNiveau1 >= 70) {
+        interpretation = `La répartition RàI indique une efficacité satisfaisante de l'enseignement universel (${niveau1} étudiants, ${pctNiveau1}% au Niveau 1). `;
+    } else if (pctNiveau1 >= 60) {
+        interpretation = `La répartition RàI indique une efficacité acceptable de l'enseignement universel (${niveau1} étudiants, ${pctNiveau1}% au Niveau 1). `;
+    } else {
+        interpretation = `La répartition RàI suggère que l'enseignement universel pourrait être renforcé (${niveau1} étudiants, ${pctNiveau1}% au Niveau 1). `;
+    }
+
+    // Compléter avec Niveau 2 et 3
+    if (niveau2 > 0) {
+        interpretation += `${niveau2} étudiants (${pctNiveau2}%) nécessitent des interventions préventives ciblées. `;
+    }
+
+    if (niveau3 > 0) {
+        interpretation += `${niveau3} étudiants (${pctNiveau3}%) requièrent un accompagnement intensif individualisé.`;
+    }
+
+    return interpretation;
+}
+
+/**
+ * 🆕 BETA 91: Attache les événements de toggle pour les notes explicatives
+ * Gère le clic sur les emojis 📐 pour afficher/masquer les cartes d'information
+ * Utilise la classe CSS .ouvert pour l'animation de rotation (180deg)
+ */
+function initialiserEvenementsToggle() {
+    document.querySelectorAll('.emoji-toggle').forEach(toggle => {
+        // Retirer les anciens événements pour éviter les doublons
+        const nouveauToggle = toggle.cloneNode(true);
+        toggle.parentNode.replaceChild(nouveauToggle, toggle);
+
+        // Attacher le nouvel événement
+        nouveauToggle.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetElement = document.getElementById(targetId);
+
+            if (targetElement) {
+                const isVisible = targetElement.style.display !== 'none';
+                targetElement.style.display = isVisible ? 'none' : 'block';
+
+                // 🎨 Animation de rotation via classe CSS (transition gérée par styles.css)
+                if (isVisible) {
+                    this.classList.remove('ouvert');
+                } else {
+                    this.classList.add('ouvert');
+                }
+            } else {
+                console.warn('⚠️ Élément cible introuvable:', targetId);
+            }
+        });
+    });
+
+    console.log('✅ Événements toggle initialisés');
 }
 
 /**
@@ -435,6 +842,19 @@ function afficherMetriquesGlobales(etudiants) {
         valeur: e.alternatif.engagement
     }));
 
+    // 🆕 BETA 91: Calculer les corrélations A-P et C-P pour interprétation
+    // Utiliser la pratique active (SOM ou PAN) pour les corrélations
+    const valeursA = afficherPan ? etudiantsPAN_A.map(e => e.valeur) : etudiantsSOM_A.map(e => e.valeur);
+    const valeursC = afficherPan ? etudiantsPAN_C.map(e => e.valeur) : etudiantsSOM_C.map(e => e.valeur);
+    const valeursP = afficherPan ? etudiantsPAN_P.map(e => e.valeur) : etudiantsSOM_P.map(e => e.valeur);
+    const valeursE = afficherPan ? etudiantsPAN_E.map(e => e.valeur) : etudiantsSOM_E.map(e => e.valeur);
+
+    const r_AP = calculerCorrelationPearson(valeursA, valeursP);
+    const r_CP = calculerCorrelationPearson(valeursC, valeursP);
+
+    // Calculer la moyenne de E pour le groupe
+    const moyenneE = valeursE.length > 0 ? valeursE.reduce((sum, val) => sum + val, 0) / valeursE.length : null;
+
     // Trouver la carte des indicateurs globaux
     const cartes = document.querySelectorAll('#tableau-bord-apercu .carte');
     let carteIndicateurs = null;
@@ -467,14 +887,14 @@ function afficherMetriquesGlobales(etudiants) {
         </div>
     `;
 
-    // Générer les 4 barres de distribution
+    // Générer les 4 barres de distribution avec interprétations
     const html = `
         <div style="padding: 20px;">
             ${legendeUnique}
-            ${genererBarreDistribution('Assiduité (A)', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan)}
-            ${genererBarreDistribution('Complétion (C)', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan)}
-            ${genererBarreDistribution('Performance (P)', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan)}
-            ${genererBarreDistribution('Engagement (E)', etudiantsSOM_E, etudiantsPAN_E, 'E', afficherSom, afficherPan)}
+            ${genererBarreDistribution('Assiduité (A)', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP)}
+            ${genererBarreDistribution('Complétion (C)', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP)}
+            ${genererBarreDistribution('Performance (P)', etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null)}
+            ${genererBarreDistribution('Engagement (E)', etudiantsSOM_E, etudiantsPAN_E, 'E', afficherSom, afficherPan, null, moyenneE)}
         </div>
     `;
 
@@ -532,7 +952,10 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
  * @param {boolean} afficherPan - Afficher la couche PAN
  * @returns {string} HTML de la barre de distribution
  */
-function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan) {
+function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan, correlation = null, moyenneEngagement = null) {
+    console.log(`🎯 genererBarreDistribution appelée: type="${type}", afficherSom=${afficherSom}, afficherPan=${afficherPan}, correlation=${correlation}, moyenneEngagement=${moyenneEngagement}`);
+    console.log(`   etudiantsSOM.length=${etudiantsSOM?.length || 0}, etudiantsPAN.length=${etudiantsPAN?.length || 0}`);
+
     // Gradient de couleurs selon les seuils d'engagement (4 zones, sans Insuffisant)
     // Orange (30-49%) → Jaune (50-64%) → Vert (65-79%) → Bleu (≥80%)
     // Transitions douces entre les couleurs
@@ -554,6 +977,123 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     if (afficherPan && etudiantsPAN.length > 0) {
         const somme = etudiantsPAN.reduce((acc, e) => acc + e.valeur, 0);
         moyennePAN = Math.round((somme / etudiantsPAN.length) * 100);
+    }
+
+    // 🆕 BETA 91: Générer l'interprétation de la corrélation ou de la moyenne E ou distribution P
+    let interpretationHTML = '';
+
+    // PRIORITÉ 1: Distribution P ou diagnostic note de passage
+    if (type === 'P' && (etudiantsSOM.length > 0 || etudiantsPAN.length > 0)) {
+        const etudiants = afficherPan ? etudiantsPAN : etudiantsSOM;
+        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const soloActive = config.afficherDescriptionsSOLO !== false; // Par défaut true
+        const raiActive = config.activerRai !== false; // Par défaut true
+
+        console.log('📊 Type P détecté, soloActive =', soloActive, 'raiActive =', raiActive);
+
+        if (soloActive) {
+            // 🆕 BETA 91: Distribution IDME + interprétation (si RàI activé)
+            console.log('📊 Appel calculerDistributionPerformance avec', etudiants.length, 'étudiants');
+
+            const distribution = calculerDistributionPerformance(etudiants);
+            console.log('📊 Distribution retournée:', distribution);
+
+            let interpretation = '';
+
+            if (raiActive) {
+                // Interprétation pédagogique avancée avec patterns
+                const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+                const echelleId = localStorage.getItem('echellePerformanceActive') || 'idme-5niv';
+                let echelle = echelles.find(e => e.id === echelleId);
+                if (!echelle) {
+                    echelle = echelles.find(e => e.parDefaut === true) || echelles[0];
+                }
+
+                interpretation = echelle ? genererInterpretationPerformance(etudiants, echelle) : '';
+                console.log('📊 Interprétation IDME+patterns retournée:', interpretation);
+            }
+
+            if (distribution) {
+                interpretationHTML = `
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px; line-height: 1.4;">
+                        <div><span style="font-weight: 600;">Distribution : </span>${distribution}</div>
+                        ${interpretation ? `<div style="margin-top: 6px;">${interpretation}</div>` : ''}
+                    </div>
+                `;
+            } else {
+                console.log('⚠️ Distribution est null/undefined, pas d\'affichage');
+            }
+        } else {
+            // 🆕 BETA 91: Diagnostic basique note de passage (SOLO désactivé)
+            console.log('📊 SOLO désactivé, génération diagnostic note de passage');
+            const diagnostic = genererDiagnosticNotePassage(etudiants);
+            console.log('📊 Diagnostic note de passage retourné:', diagnostic);
+
+            if (diagnostic) {
+                interpretationHTML = `
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px; line-height: 1.4;">
+                        ${diagnostic}
+                    </div>
+                `;
+            }
+        }
+    }
+    // PRIORITÉ 2: Corrélations A-P et C-P
+    else if (correlation !== null && !isNaN(correlation)) {
+        // Interprétation des corrélations A-P ou C-P avec force intégrée dans la phrase
+        const absR = Math.abs(correlation);
+        let forceAdjectif = '';
+        let explication = '';
+
+        // Déterminer la force de la corrélation (adjectif)
+        if (absR >= 0.9) {
+            forceAdjectif = 'très forte';
+        } else if (absR >= 0.7) {
+            forceAdjectif = 'forte';
+        } else if (absR >= 0.5) {
+            forceAdjectif = 'modérée';
+        } else if (absR >= 0.3) {
+            forceAdjectif = 'faible';
+        } else {
+            forceAdjectif = 'très faible';
+        }
+
+        // Explication pédagogique avec force intégrée et corrélation à la fin
+        if (type === 'A') {
+            explication = `Les étudiants assidus en classe ont une tendance ${forceAdjectif} à obtenir de meilleures performances. (r(${type}↔P) = ${correlation.toFixed(3)})`;
+        } else if (type === 'C') {
+            explication = `Les étudiants qui remettent plus de travaux ont une tendance ${forceAdjectif} à avoir de meilleures notes. (r(${type}↔P) = ${correlation.toFixed(3)})`;
+        }
+
+        interpretationHTML = `
+            <div style="font-size: 0.75rem; color: #666; margin-top: 4px; line-height: 1.4;">
+                ${explication}
+            </div>
+        `;
+    }
+    // PRIORITÉ 3: Moyenne E
+    else if (type === 'E' && moyenneEngagement !== null && !isNaN(moyenneEngagement)) {
+        // Interprétation de la moyenne E avec qualification du niveau et impact sur contexte
+        const moyE = moyenneEngagement * 100; // Convertir en pourcentage
+        let niveauAdjectif = '';
+        let impactContexte = '';
+
+        if (moyE >= 70) {
+            niveauAdjectif = 'bon';
+            impactContexte = 'rend favorable le contexte d\'apprentissage';
+        } else if (moyE >= 55) {
+            niveauAdjectif = 'modéré';
+            impactContexte = 'offre un contexte d\'apprentissage acceptable, mais améliorable';
+        } else {
+            niveauAdjectif = 'faible';
+            impactContexte = 'fragilise le contexte d\'apprentissage et nécessite des interventions';
+        }
+
+        interpretationHTML = `
+            <div style="font-size: 0.75rem; color: #666; margin-top: 4px; line-height: 1.4;">
+                Le ${niveauAdjectif} niveau d'engagement global du groupe (moy. ${Math.round(moyE)}%) ${impactContexte}.
+            </div>
+        `;
     }
 
     // Générer l'affichage dual des valeurs moyennes
@@ -677,7 +1217,8 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 <h4 style="margin: 0; font-size: 0.95rem; color: #333;">${label}</h4>
                 ${valeursHTML}
             </div>
-            <div class="barre-indicateur" style="position: relative; height: 30px;">
+            ${interpretationHTML}
+            <div class="barre-indicateur" style="position: relative; height: 30px; margin-top: ${interpretationHTML ? '8px' : '0'};">
                 <div class="barre-indicateur-overlay"></div>
                 ${lignesSOM}
                 ${lignesPAN}
@@ -836,9 +1377,50 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
         labelCritique += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${critiquePAN} (${critiquePctPAN}%)</span>`;
     }
 
+    // 🆕 BETA 91: Générer l'interprétation des patterns
+    let interpretation = '';
+    const etudiants = afficherSom ? etudiantsSOM : etudiantsPAN;
+    if (etudiants && etudiants.length > 0) {
+        // Note: stableSOM inclut déjà stable + progression (ligne 1337)
+        // Si mode comparatif, utiliser les données de la pratique affichée
+        if (afficherSom && afficherPan) {
+            // Mode comparatif : utiliser les données de SOM uniquement (car les deux sont affichés)
+            const patternsDistributionSOM = [
+                { pattern: 'Progression', count: stableSOM },  // stable + progression regroupés
+                { pattern: 'Stable', count: 0 },
+                { pattern: 'Excellence émergente', count: 0 },
+                { pattern: 'Défi spécifique', count: defiSOM },
+                { pattern: 'Blocage émergent', count: emergentSOM },
+                { pattern: 'Blocage critique', count: critiqueSOM }
+            ];
+            interpretation = genererInterpretationPatterns(patternsDistributionSOM, etudiantsSOM.length);
+        } else if (afficherSom) {
+            const patternsDistributionSOM = [
+                { pattern: 'Progression', count: stableSOM },  // stable + progression regroupés
+                { pattern: 'Stable', count: 0 },
+                { pattern: 'Excellence émergente', count: 0 },
+                { pattern: 'Défi spécifique', count: defiSOM },
+                { pattern: 'Blocage émergent', count: emergentSOM },
+                { pattern: 'Blocage critique', count: critiqueSOM }
+            ];
+            interpretation = genererInterpretationPatterns(patternsDistributionSOM, etudiantsSOM.length);
+        } else if (afficherPan) {
+            const patternsDistributionPAN = [
+                { pattern: 'Progression', count: stablePAN },  // stable + progression regroupés
+                { pattern: 'Stable', count: 0 },
+                { pattern: 'Excellence émergente', count: 0 },
+                { pattern: 'Défi spécifique', count: defiPAN },
+                { pattern: 'Blocage émergent', count: emergentPAN },
+                { pattern: 'Blocage critique', count: critiquePAN }
+            ];
+            interpretation = genererInterpretationPatterns(patternsDistributionPAN, etudiantsPAN.length);
+        }
+    }
+
     return `
         <div class="distribution-container" style="margin-bottom: 15px;">
             <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">Répartition des patterns d'apprentissage</h4>
+            ${interpretation ? `<div class="interpretation-barre">${interpretation}</div>` : ''}
             <div class="barre-patterns" style="position: relative; height: 30px;">
                 <div class="barre-patterns-overlay"></div>
                 ${lignesSOM}
@@ -992,9 +1574,40 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
         labelNiveau3 += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
     }
 
+    // 🆕 BETA 91: Générer l'interprétation RàI
+    let interpretation = '';
+    const etudiants = afficherSom ? etudiantsSOM : etudiantsPAN;
+    if (etudiants && etudiants.length > 0) {
+        // Si mode comparatif, utiliser les données de la pratique affichée
+        if (afficherSom && afficherPan) {
+            // Mode comparatif : utiliser les données combinées
+            const raiDistribution = [
+                { niveau: 1, count: niveau1SOM + niveau1PAN },
+                { niveau: 2, count: niveau2SOM + niveau2PAN },
+                { niveau: 3, count: niveau3SOM + niveau3PAN }
+            ];
+            interpretation = genererInterpretationRai(raiDistribution, etudiantsSOM.length);
+        } else if (afficherSom) {
+            const raiDistributionSOM = [
+                { niveau: 1, count: niveau1SOM },
+                { niveau: 2, count: niveau2SOM },
+                { niveau: 3, count: niveau3SOM }
+            ];
+            interpretation = genererInterpretationRai(raiDistributionSOM, etudiantsSOM.length);
+        } else if (afficherPan) {
+            const raiDistributionPAN = [
+                { niveau: 1, count: niveau1PAN },
+                { niveau: 2, count: niveau2PAN },
+                { niveau: 3, count: niveau3PAN }
+            ];
+            interpretation = genererInterpretationRai(raiDistributionPAN, etudiantsPAN.length);
+        }
+    }
+
     return `
         <div class="distribution-container" style="margin-bottom: 15px;">
             <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">Modèle de la Réponse à l'intervention (RàI)</h4>
+            ${interpretation ? `<div class="interpretation-barre">${interpretation}</div>` : ''}
             <div class="barre-rai" style="position: relative; height: 30px;">
                 <div class="barre-rai-overlay"></div>
                 ${lignesSOM}

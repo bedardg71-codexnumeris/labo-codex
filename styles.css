@@ -2884,9 +2884,10 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .emoji-toggle {
     cursor: pointer;
     margin-left: 10px;
-    transition: transform 0.2s ease, opacity 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
     display: inline-block;
     user-select: none;
+    font-size: 1.2rem;
 }
 
 .emoji-toggle:hover {
@@ -2896,6 +2897,11 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .emoji-toggle:active {
     transform: scale(0.95);
+}
+
+/* 🆕 BETA 91: État "ouvert" avec rotation de 180deg */
+.emoji-toggle.ouvert {
+    transform: rotate(180deg);
 }
 
 /* Animation keyframes pour slide-down */
@@ -5175,6 +5181,15 @@ label:has(+ textarea:disabled) {
     margin-bottom: 30px;
 }
 
+/* 🆕 BETA 91: Interprétation textuelle au-dessus des barres Patterns et RàI */
+.interpretation-barre {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
 /* Légende sous la barre */
 .distribution-legende {
     display: flex;
@@ -5317,4 +5332,27 @@ label:has(+ textarea:disabled) {
 /* Colonne Pattern centrée */
 .td-left-140-clickable {
     text-align: center !important;
+}
+
+/* Badge jeton personnalisé (neutre - bleu clair) */
+.badge-jeton-personnalise-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2196f322;
+    border: 2px solid #2196f3;
+    border-radius: 8px;
+    padding: 2px 6px;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+.badge-jeton-personnalise-wrapper:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
+    opacity: 1;
+}
+
+.badge-jeton-numero-personnalise {
+    background: #2196f3;
 }

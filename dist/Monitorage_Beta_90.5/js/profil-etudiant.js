@@ -3321,10 +3321,10 @@ function genererSectionAssiduite(da) {
  * Affiche un tableau similaire à celui de la liste des évaluations
  */
 function genererSectionProductions(da) {
-    // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
-    const groupeEtudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    // IMPORTANT: Utiliser obtenirDonneesSelonMode pour respecter le mode actif (anonymisation, simulation, normal)
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    const productions = obtenirDonneesSelonMode('productions');
+    const groupeEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiant = groupeEtudiants.find(e => e.da === da);
 
     if (!etudiant) {
