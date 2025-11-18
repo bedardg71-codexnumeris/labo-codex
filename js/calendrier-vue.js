@@ -440,23 +440,38 @@ function afficherCalendrierScolaire() {
     htmlCalendrier += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
 
     htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
-    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--bleu-leger); border-radius: 4px;"></div>';
+    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--jour-cours-reel-bg); border: 2px solid var(--bleu-moyen); border-radius: 4px;"></div>';
     htmlCalendrier += '<span style="color: var(--bleu-principal);"><strong>Jour de cours régulier</strong></span>';
     htmlCalendrier += '</div>';
 
     htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
-    htmlCalendrier += '<div style="width: 28px; height: 28px; background: white; border-radius: 4px; border: 2px solid #e8e8e8;"></div>';
+    htmlCalendrier += '<div style="width: 28px; height: 28px; background: white; border: 2px solid var(--bleu-carte); border-radius: 4px;"></div>';
     htmlCalendrier += '<span style="color: var(--bleu-principal);">Jour ouvrable</span>';
     htmlCalendrier += '</div>';
 
     htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
-    htmlCalendrier += '<div style="width: 28px; height: 28px; background: #9370DB; border-radius: 4px;"></div>';
+    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--weekend-bg); border-radius: 4px;"></div>';
+    htmlCalendrier += '<span style="color: var(--bleu-principal);">Weekend</span>';
+    htmlCalendrier += '</div>';
+
+    htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
+    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--conge-bg); border: 2px solid #ef5350; border-radius: 4px;"></div>';
+    htmlCalendrier += '<span style="color: var(--bleu-principal);">Congé prévu au calendrier</span>';
+    htmlCalendrier += '</div>';
+
+    htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
+    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--reprise-bg); border: 2px solid #ff9800; border-radius: 4px;"></div>';
     htmlCalendrier += '<span style="color: var(--bleu-principal);">Reprise</span>';
     htmlCalendrier += '</div>';
 
     htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
-    htmlCalendrier += '<div style="width: 28px; height: 28px; background: #dc3545; border-radius: 4px;"></div>';
-    htmlCalendrier += '<span style="color: var(--bleu-principal);">Congé prévu au calendrier</span>';
+    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--examens-bg); border: 2px solid #f06292; border-radius: 4px;"></div>';
+    htmlCalendrier += '<span style="color: var(--bleu-principal);">Semaine d\'examens</span>';
+    htmlCalendrier += '</div>';
+
+    htmlCalendrier += '<div style="display: flex; align-items: center; gap: 10px;">';
+    htmlCalendrier += '<div style="width: 28px; height: 28px; background: var(--planification-bg); border: 2px solid #ba68c8; border-radius: 4px;"></div>';
+    htmlCalendrier += '<span style="color: var(--bleu-principal);">Semaine de planification</span>';
     htmlCalendrier += '</div>';
 
     htmlCalendrier += '</div>';
