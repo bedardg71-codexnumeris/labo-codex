@@ -384,7 +384,7 @@ function afficherListeInterventions() {
 
     // Bouton pour planifier une nouvelle intervention
     let html = `
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+        <div class="actions-principales">
             <button onclick="afficherFormulaireIntervention()" class="btn btn-principal">
                 Planifier une intervention
             </button>
@@ -393,9 +393,9 @@ function afficherListeInterventions() {
 
     if (interventions.length === 0) {
         html += `
-            <div style="text-align: center; padding: 40px; color: #666;">
+            <div class="message-vide">
                 <p>Aucune intervention planifiée ou complétée.</p>
-                <p style="font-size: 0.9rem; margin-top: 10px;">Cliquez sur «Planifier une intervention» pour commencer.</p>
+                <p class="message-vide-aide">Cliquez sur «Planifier une intervention» pour commencer.</p>
             </div>
         `;
         container.innerHTML = html;
@@ -409,10 +409,10 @@ function afficherListeInterventions() {
 
         html += `
             <div class="carte intervention-item" style="margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                <div class="intervention-header">
                     <div>
-                        <h4 style="margin: 0 0 8px 0; color: var(--bleu-principal);">${intervention.titre}</h4>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.85rem;">
+                        <h4 class="intervention-titre">${intervention.titre}</h4>
+                        <div class="intervention-badges">
                             <span>${badgeStatut}</span>
                             <span class="badge-sys" style="background: var(--bleu-tres-pale); color: var(--bleu-principal);">${badgeType}</span>
                             <span class="badge-sys badge-rai-${intervention.niveauRai}">${badgeNiveau}</span>
@@ -420,7 +420,7 @@ function afficherListeInterventions() {
                             ${intervention.heure ? `<span class="text-muted">${intervention.heure}</span>` : ''}
                         </div>
                     </div>
-                    <div style="display: flex; gap: 8px;">
+                    <div class="intervention-actions">
                         ${intervention.statut !== 'completee' ? `
                             <button onclick="ouvrirIntervention('${intervention.id}')" class="btn btn-principal">
                                 Ouvrir
@@ -435,7 +435,7 @@ function afficherListeInterventions() {
                 </div>
 
                 ${intervention.description ? `
-                    <p style="margin: 10px 0; color: #666; font-size: 0.9rem;">${intervention.description}</p>
+                    <p class="intervention-description">${intervention.description}</p>
                 ` : ''}
 
                 ${intervention.etudiants && intervention.etudiants.length > 0 ? `
@@ -445,9 +445,9 @@ function afficherListeInterventions() {
                 ${intervention.analyse ? genererAffichageAnalyse(intervention.analyse) : ''}
 
                 ${intervention.observations ? `
-                    <div class="carte" style="margin-top: 10px; background: #fffef7;">
-                        <h5 style="margin: 0 0 8px 0; color: var(--bleu-principal);">Observations générales</h5>
-                        <p style="margin: 0; white-space: pre-wrap; color: #555;">${intervention.observations}</p>
+                    <div class="carte intervention-observations">
+                        <h5>Observations générales</h5>
+                        <p>${intervention.observations}</p>
                     </div>
                 ` : ''}
 
@@ -497,10 +497,10 @@ function genererAffichageAnalyse(analyse) {
     // Structure en 3 cartes séparées similaires au profil Engagement
     let html = `
         <div style="margin-top: 15px;">
-            <h4 style="margin: 0 0 15px 0; color: var(--bleu-principal);">Aperçu du sous-groupe (${analyse.nbEtudiants} étudiant·e·s)</h4>
+            <h4 class="intervention-titre" style="margin-bottom: 15px;">Aperçu du sous-groupe (${analyse.nbEtudiants} étudiant·e·s)</h4>
 
             <!-- Grille 3 colonnes avec cartes séparées -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+            <div class="grille-metriques-3col">
     `;
 
     // COLONNE 1: Niveaux RàI (carte)
@@ -510,14 +510,14 @@ function genererAffichageAnalyse(analyse) {
     const nbNiveauxRai = analyse.niveauxRai ? Object.values(analyse.niveauxRai).filter(c => c > 0).length : 0;
 
     html += `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-            <h4 style="margin: 0; color: var(--bleu-principal); font-size: 1rem;">Niveaux RàI</h4>
-            <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${nbNiveauxRai}</strong>
+        <div class="carte-metrique-header">
+            <h4>Niveaux RàI</h4>
+            <strong>${nbNiveauxRai}</strong>
         </div>
     `;
 
     if (analyse.niveauxRai && Object.values(analyse.niveauxRai).some(c => c > 0)) {
-        html += '<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">';
+        html += '<div class="badges-centres">';
         Object.entries(analyse.niveauxRai)
             .filter(([niveau, count]) => count > 0)
             .forEach(([niveau, count]) => {
@@ -541,16 +541,16 @@ function genererAffichageAnalyse(analyse) {
     const risqueMoyenPct = analyse.risqueMoyen ? `${(analyse.risqueMoyen * 100).toFixed(1)}%` : '—';
 
     html += `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-            <h4 style="margin: 0; color: var(--bleu-principal); font-size: 1rem;">Répartition du risque</h4>
-            <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${risqueMoyenPct}</strong>
+        <div class="carte-metrique-header">
+            <h4>Répartition du risque</h4>
+            <strong>${risqueMoyenPct}</strong>
         </div>
     `;
 
     if (analyse.risqueDistribution) {
         const risquesAvecCompte = Object.entries(analyse.risqueDistribution).filter(([niveau, count]) => count > 0);
         if (risquesAvecCompte.length > 0) {
-            html += '<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 15px;">';
+            html += '<div class="badges-centres" style="margin-bottom: 15px;">';
             risquesAvecCompte.forEach(([niveau, count]) => {
                 // Mapper le niveau de risque au nom de classe CSS
                 let classeRisque = 'badge-risque-analyse-defaut';
@@ -592,14 +592,14 @@ function genererAffichageAnalyse(analyse) {
     const nbPatterns = analyse.patternsCommuns ? Object.keys(analyse.patternsCommuns).length : 0;
 
     html += `
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-            <h4 style="margin: 0; color: var(--bleu-principal); font-size: 1rem;">Patterns d'apprentissage</h4>
-            <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${nbPatterns}</strong>
+        <div class="carte-metrique-header">
+            <h4>Patterns d'apprentissage</h4>
+            <strong>${nbPatterns}</strong>
         </div>
     `;
 
     if (analyse.patternsCommuns && Object.keys(analyse.patternsCommuns).length > 0) {
-        html += '<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">';
+        html += '<div class="badges-centres">';
         Object.entries(analyse.patternsCommuns)
             .sort((a, b) => b[1] - a[1])
             .forEach(([pattern, count]) => {
@@ -631,8 +631,8 @@ function genererAffichageNotesIndividuelles(notesIndividuelles) {
 
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     let html = `
-        <div class="carte" style="margin-top: 10px; background: #f0f8ff;">
-            <h5 style="margin: 0 0 8px 0; color: var(--bleu-principal);">Notes individuelles</h5>
+        <div class="carte intervention-notes-individuelles">
+            <h5>Notes individuelles</h5>
     `;
 
     Object.entries(notesIndividuelles).forEach(([da, note]) => {

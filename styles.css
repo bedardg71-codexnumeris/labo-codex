@@ -3185,6 +3185,141 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-style: italic;
 }
 
+/* 🆕 BETA 91: Module interventions RàI */
+/* En-tête d'intervention avec titre et badges */
+.intervention-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 10px;
+}
+
+/* Titre d'intervention */
+.intervention-titre {
+    margin: 0 0 8px 0;
+    color: var(--bleu-principal);
+}
+
+/* Container pour badges (statut, type, niveau, date) */
+.intervention-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+}
+
+/* Groupe de boutons d'action */
+.intervention-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Description de l'intervention */
+.intervention-description {
+    margin: 10px 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Carte d'observations avec fond distinct */
+.intervention-observations {
+    margin-top: 10px;
+    background: #fffef7;
+}
+
+.intervention-observations h5 {
+    margin: 0 0 8px 0;
+    color: var(--bleu-principal);
+}
+
+.intervention-observations p {
+    margin: 0;
+    white-space: pre-wrap;
+    color: #555;
+}
+
+/* Message vide centré */
+.message-vide {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.message-vide p {
+    margin: 0;
+}
+
+.message-vide-aide {
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+/* Container pour bouton d'action principal (en haut à droite) */
+.actions-principales {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+/* Grilles pour métriques d'analyse */
+.grille-metriques-3col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.grille-metriques-pondérée {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.grille-metriques-2col {
+    display: grid;
+    grid-template-columns: 1fr 0.9fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* En-tête de carte métrique (label + valeur) */
+.carte-metrique-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.carte-metrique-header h4 {
+    margin: 0;
+    color: var(--bleu-principal);
+    font-size: 1rem;
+}
+
+.carte-metrique-header strong {
+    font-size: 1.8rem;
+    color: var(--bleu-principal);
+}
+
+/* Container pour badges/éléments centrés */
+.badges-centres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* Carte notes individuelles avec fond bleu pâle */
+.intervention-notes-individuelles {
+    margin-top: 10px;
+    background: #f0f8ff;
+}
+
+.intervention-notes-individuelles h5 {
+    margin: 0 0 8px 0;
+    color: var(--bleu-principal);
+}
+
 
 /* ===============================================
    SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)
