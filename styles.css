@@ -759,13 +759,6 @@ body {
     transition: transform 0.2s;
 }
 
-.badge-note {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-
 .note-maitrise { background: var(--risque-minimal); color: white; }
 .note-intermediaire { background: var(--risque-faible); color: #1a5f1a; }
 .note-developpement { background: var(--risque-modere); color: #7a5900; }
@@ -803,37 +796,6 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: var(--espacement-moyen);
     margin-bottom: var(--espacement-grand);
-}
-
-.carte-statistique {
-    background: var(--bleu-pale);
-    border: 1px solid var(--bleu-leger);
-    border-radius: 8px;
-    padding: var(--espacement-moyen);
-    text-align: center;
-    box-shadow: 0 3px 6px rgba(3, 46, 92, 0.1);
-    transition: all 0.2s ease;
-    margin-bottom: var(--espacement-moyen);
-}
-
-.carte-statistique:hover {
-    box-shadow: 0 4px 8px rgba(3, 46, 92, 0.15);
-    background: white;
-    transform: translateY(-2px);
-}
-
-.carte-statistique .valeur {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: var(--bleu-principal);
-    margin-bottom: 8px;
-}
-
-.carte-statistique .label {
-    font-size: 0.9rem;
-    color: var(--bleu-leger);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 /* ===============================
@@ -883,50 +845,6 @@ body {
     font-size: 0.9rem;
     color: #666;
     font-weight: 500;
-}
-
-/* ===============================
-   VARIANTES COLORÉES (selon echelles.js)
-   =============================== */
-
-.carte-metrique-critique {
-    background: white;
-    border: 2px solid var(--risque-critique);
-}
-
-.carte-metrique-critique .valeur,
-.carte-metrique-critique strong {
-    color: var(--risque-critique);
-}
-
-.carte-metrique-modere {
-    background: white;
-    border: 2px solid var(--risque-modere);
-}
-
-.carte-metrique-modere .valeur,
-.carte-metrique-modere strong {
-    color: var(--risque-modere);
-}
-
-.carte-metrique-minimal {
-    background: white;
-    border: 2px solid var(--risque-minimal);
-}
-
-.carte-metrique-minimal .valeur,
-.carte-metrique-minimal strong {
-    color: var(--risque-minimal);
-}
-
-.carte-metrique-nul {
-    background: white;
-    border: 2px solid var(--risque-nul);
-}
-
-.carte-metrique-nul .valeur,
-.carte-metrique-nul strong {
-    color: var(--risque-nul);
 }
 
 /* ===============================
@@ -1121,49 +1039,6 @@ input[type="number"].controle-form {
     display: inline-block;
     background: var(--bleu-pale);
     color: var(--bleu-principal);
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.badge-succes {
-    display: inline-block;
-    background: #d4edda;
-    color: #155724;
-    padding: 4px 12px;
-    border: 1px solid #c3e6cb;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.badge-avertissement {
-    display: inline-block;
-    background: #fff3cd;
-    color: #856404;
-    padding: 4px 12px;
-    border: 1px solid #ffeaa7;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.badge-danger {
-    display: inline-block;
-    background: #f8d7da;
-    color: #721c24;
-    padding: 4px 12px;
-    border: 1px solid #f5c6cb;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-
-.badge-neutre {
-    display: inline-block;
-    background: #e2e8f0;
-    color: #475569;
     padding: 4px 12px;
     border-radius: 12px;
     font-size: 0.85rem;
@@ -1692,11 +1567,6 @@ input[type="number"].controle-form {
     font-size: 0.8rem;
 }
 
-.btn-large {
-    padding: 12px 24px;
-    font-size: 1rem;
-}
-
 /* ===============================
    RÈGLE ÉPURÉE: TAILLE CONTEXTUELLE
    Approche simple et maintenable
@@ -1715,31 +1585,6 @@ input[type="number"].controle-form {
 .item-liste .btn {
     padding: 6px 12px;
     font-size: 0.85rem;
-}
-
-/* Exception: forcer taille normale si besoin */
-.item-liste .btn-large {
-    padding: 10px 20px;
-    font-size: 0.95rem;
-}
-
-/* Largeur */
-.btn-pleine-largeur {
-    width: 100%;
-}
-
-.btn-largeur-auto {
-    width: auto;
-    flex: 1;
-}
-
-/* Espacement */
-.btn-sans-marge {
-    margin: 0;
-}
-
-.btn-marge-droite {
-    margin-right: 10px;
 }
 
 /* ===============================
@@ -1920,12 +1765,6 @@ input[type="number"].controle-form {
 /* ===============================
    GRILLES RÉUTILISABLES
    =============================== */
-
-.grille-2-colonnes {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-}
 
 .grille-3-colonnes {
     display: grid;
@@ -2181,29 +2020,6 @@ input[type="number"].controle-form {
 }
 
 /* ===============================
-   CALENDRIER (styles spéciaux)
-   =============================== */
-
-.cal-jour-cours {
-    background: var(--bleu-pale);
-}
-
-.cal-jour-cours-reel {
-    background: var(--bleu-clair);
-    color: white;
-    font-weight: bold;
-}
-
-.cal-jour-conge {
-    background: var(--vert-pale);
-}
-
-.cal-jour-evaluation {
-    background: var(--orange-accent);
-    color: white;
-}
-
-/* ===============================
    IMPRESSION
    =============================== */
 
@@ -2359,15 +2175,6 @@ input[type="number"].controle-form {
     margin: 15px 0;
 }
 
-.profil-sidebar-metriques-titre {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--bleu-principal);
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
 .profil-sidebar-metriques-grille {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2404,15 +2211,6 @@ input[type="number"].controle-form {
 /* Navigation sections sidebar avec indices intégrés */
 .profil-sidebar-nav {
     margin-top: 15px;
-}
-
-.profil-sidebar-nav-titre {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--bleu-principal);
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .profil-nav-item {
