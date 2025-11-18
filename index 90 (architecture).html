@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 90 - Architecture pratiques de notation</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=2025111502">
+    <link rel="stylesheet" href="styles.css?v=2025111701">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3412,23 +3412,32 @@
                         <div class="carte-bleu-fonce">
                             <!-- Boutons de gestion des évaluations -->
                             <div class="groupe-boutons-colonne" class="mb-15">
+                                <!-- Ligne 1: Nouvelle évaluation -->
                                 <div class="groupe-boutons-ligne">
-                                    <button class="btn btn-modifier btn-tres-compact btn-largeur-auto" onclick="afficherModalReparationEvaluations()"
-                                        title="Réparer les évaluations avec critères manquants"
-                                        style="font-size: 1.2rem; padding: 4px 10px;">
-                                        Réparer
+                                    <button class="btn btn-secondaire btn-tres-compact" onclick="nouvelleEvaluation()" style="width: 100%;"
+                                        title="Commencer une nouvelle évaluation (formulaire vierge)">
+                                        Nouvelle évaluation
                                     </button>
                                 </div>
 
-                                <div class="groupe-boutons-ligne" class="mt-10">
-                                    <button class="btn btn-principal btn-tres-compact btn-largeur-auto" onclick="sauvegarderEvaluation()"
+                                <!-- Ligne 2: Sauvegarder et Réinitialiser -->
+                                <div class="groupe-boutons-ligne">
+                                    <button class="btn btn-principal btn-tres-compact" onclick="sauvegarderEvaluation()" style="flex: 1;"
                                         title="Sauvegarder l'évaluation">
                                         Sauvegarder
                                     </button>
 
-                                    <button class="btn btn-annuler btn-tres-compact btn-largeur-auto" onclick="nouvelleEvaluation()"
-                                        title="Réinitialiser tous les paramètres et commencer une nouvelle évaluation">
+                                    <button class="btn btn-annuler btn-tres-compact" onclick="reinitialiserFormulaire()" style="flex: 1;"
+                                        title="Réinitialiser le formulaire en conservant les sélections">
                                         Réinitialiser
+                                    </button>
+                                </div>
+
+                                <!-- Ligne 3: Supprimer cette évaluation (visible seulement en mode modification) -->
+                                <div class="groupe-boutons-ligne" id="ligneSupprimerEvaluation" style="display: none;">
+                                    <button class="btn btn-supprimer btn-tres-compact" onclick="confirmerSuppressionEvaluationSidebar()" style="width: 100%;"
+                                        title="Supprimer définitivement cette évaluation">
+                                        Supprimer cette évaluation
                                     </button>
                                 </div>
                             </div>
@@ -3521,32 +3530,42 @@
                                 <textarea id="notesIntegrite" class="controle-form" rows="3" placeholder="Détails du cas, preuves, références..."></textarea>
                             </div>
 
-                            <!-- BOUTON JETON DE DÉLAI -->
-                            <div id="boutonJetonDelai" class="groupe-form" class="hidden-mb-12">
-                                <button class="btn btn-special" onclick="appliquerJetonDelaiDepuisSidebar()"
-                                        style="background: linear-gradient(135deg, #ff6f00 0%, #ff8c00 100%); color: white;">
-                                    🕒 Appliquer jeton de délai
-                                </button>
-                                <p class="text-085-muted-m5-0-0-0">
-                                    L'évaluation comptera dans les travaux remis sans pénalité de retard.
-                                </p>
-                            </div>
+                            <!-- OPTIONS DE JETONS -->
+                            <div id="optionsJetons" class="groupe-form" style="display: none;">
+                                <label class="label-formulaire">Appliquer un jeton :</label>
 
-                            <!-- BOUTON JETON DE REPRISE -->
-                            <div id="boutonJetonReprise" class="groupe-form" class="hidden-mb-12">
-                                <button class="btn btn-special" onclick="appliquerJetonRepriseDepuisSidebar()"
-                                        class="carte-purple-header">
-                                    ⭐ Appliquer jeton de reprise
-                                </button>
-                                <p class="text-085-muted-m5-0-0-0">
-                                    Remplace l'évaluation précédente. L'ancienne note sera archivée.
-                                </p>
-                            </div>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <!-- Jeton de délai -->
+                                    <div id="badgeJetonDelaiOption" style="display: flex; align-items: flex-start; gap: 10px;">
+                                        <input type="checkbox" id="checkboxJetonDelai" style="margin-top: 6px;">
+                                        <div style="flex: 1;">
+                                            <span class="badge-jeton-delai-wrapper">
+                                                <span class="badge-jeton-titre">Délai</span>
+                                            </span>
+                                            <p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">
+                                                L'évaluation comptera dans les travaux remis sans pénalité de retard.
+                                            </p>
+                                        </div>
+                                    </div>
 
-                            <!-- INFORMATION SUR LES JETONS APPLIQUÉS -->
-                            <div id="gestionJetonsEvaluation" class="groupe-form" style="display: none;">
-                                <label class="label-formulaire">Jetons appliqués :</label>
-                                <div id="infoJetonsAppliques" class="mt-8-flex-gap8-wrap"></div>
+                                    <!-- Jeton de reprise -->
+                                    <div id="badgeJetonRepriseOption" style="display: flex; align-items: flex-start; gap: 10px;">
+                                        <input type="checkbox" id="checkboxJetonReprise" style="margin-top: 6px;">
+                                        <div style="flex: 1;">
+                                            <span class="badge-jeton-reprise-wrapper">
+                                                <span class="badge-jeton-titre">Reprise</span>
+                                            </span>
+                                            <p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">
+                                                Remplace l'évaluation précédente. L'ancienne note sera archivée.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Jetons personnalisés (sera rempli dynamiquement) -->
+                                    <div id="jetonsPersonnalisesOptions" style="display: flex; flex-direction: column; gap: 10px;">
+                                        <!-- Rempli par afficherJetonsPersonnalisesEvaluation() -->
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- NOTE ET NIVEAU -->
@@ -3570,52 +3589,52 @@
                                     Sélectionnez une grille et une cartouche
                                 </p>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- PARTIE BASSE : RÉTROACTION FINALE -->
-                    <div class="zone-retroaction">
-                        <div class="zone-retroaction-header">
-                            <h4>Rétroaction finale</h4>
-                        </div>
+                            <!-- RÉTROACTION FINALE (déplacée sous la prévisualisation) -->
+                            <div class="zone-retroaction" style="margin-top: 20px;">
+                                <div class="zone-retroaction-header">
+                                    <h4>Rétroaction finale</h4>
+                                </div>
 
-                        <!-- Options à inclure (TOUTES COCHÉES PAR DÉFAUT) -->
-                        <div class="grille-checkboxes" class="mb-15">
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)"
-                                    checked>
-                                Description
-                            </label>
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="afficherObjectif1" onchange="genererRetroaction(1)" checked>
-                                Objectif
-                            </label>
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)" checked>
-                                Tâche
-                            </label>
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="afficherAdresse1" onchange="genererRetroaction(1)" checked>
-                                Adresse
-                            </label>
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="afficherContexte1" onchange="genererRetroaction(1)" checked>
-                                Contexte
-                            </label>
-                        </div>
+                                <!-- Options à inclure (TOUTES COCHÉES PAR DÉFAUT) -->
+                                <div class="grille-checkboxes" class="mb-15">
+                                    <label class="text-sm-pointer">
+                                        <input type="checkbox" id="afficherDescription1" onchange="genererRetroaction(1)"
+                                            checked>
+                                        Description
+                                    </label>
+                                    <label class="text-sm-pointer">
+                                        <input type="checkbox" id="afficherObjectif1" onchange="genererRetroaction(1)" checked>
+                                        Objectif
+                                    </label>
+                                    <label class="text-sm-pointer">
+                                        <input type="checkbox" id="afficherTache1" onchange="genererRetroaction(1)" checked>
+                                        Tâche
+                                    </label>
+                                    <label class="text-sm-pointer">
+                                        <input type="checkbox" id="afficherAdresse1" onchange="genererRetroaction(1)" checked>
+                                        Adresse
+                                    </label>
+                                    <label class="text-sm-pointer">
+                                        <input type="checkbox" id="afficherContexte1" onchange="genererRetroaction(1)" checked>
+                                        Contexte
+                                    </label>
+                                </div>
 
-                        <!-- Zone de texte pour la rétroaction finale -->
-                        <textarea id="retroactionFinale1" class="controle-form" rows="12"
-                            placeholder="La rétroaction sera générée automatiquement ici selon vos évaluations et les options cochées. Vous pouvez modifier le texte avant de le copier."
-                            style="width: 100%; height: 200px; padding: 12px; border-radius: 5px;
-    border: 1px solid var(--bordure-claire); font-family: inherit; resize: vertical;
-    font-size: 0.85rem; line-height: 1.5; background: white;">
+                                <!-- Zone de texte pour la rétroaction finale -->
+                                <textarea id="retroactionFinale1" class="controle-form" rows="12"
+                                    placeholder="La rétroaction sera générée automatiquement ici selon vos évaluations et les options cochées. Vous pouvez modifier le texte avant de le copier."
+                                    style="width: 100%; height: 200px; padding: 12px; border-radius: 5px;
+        border: 1px solid var(--bordure-claire); font-family: inherit; resize: vertical;
+        font-size: 0.85rem; line-height: 1.5; background: white;">
 </textarea>
 
-                        <button class="btn btn-confirmer btn-compact" onclick="copierRetroaction(1)"
-                            class="mt-10">
-                            Copier dans le presse-papier
-                        </button>
+                                <button class="btn btn-confirmer btn-compact" onclick="copierRetroaction(1)"
+                                    class="mt-10">
+                                    Copier dans le presse-papier
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                 </div><!-- fin carte du layout évaluation -->
@@ -8961,7 +8980,7 @@ Exemple :
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>
     <script src="js/navigation.js?v=2025111431"></script>
-    <script src="js/modes.js"></script>
+    <script src="js/modes.js?v=2025111702"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025111325"></script>
@@ -8988,25 +9007,25 @@ Exemple :
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025111503"></script>
-    <script src="js/profil-etudiant.js?v=2025111502"></script>
+    <script src="js/profil-etudiant.js?v=2025111700"></script>
     <script src="js/presences-apercu.js?v=2025111029"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js"></script>
     <script src="js/horaire.js?v=2025111328"></script>
-    <script src="js/groupe.js?v=2025111332"></script>
+    <script src="js/groupe.js?v=2025111703"></script>
     <script src="js/pratiques.js?v=2025111433"></script>
     <script src="js/interventions.js?v=2025111016"></script>
 
     <!-- PRIORITÉ 6: Modules avancés -->
     <script src="js/import-export.js?v=1761387764"></script>
     <script src="js/statistiques.js?v=2025111032"></script>
-    <script src="js/liste-evaluations.js?v=2025111312"></script>
+    <script src="js/liste-evaluations.js?v=2025111716"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2025111435"></script>
-    <script src="js/evaluation.js?v=2025110908"></script>
+    <script src="js/evaluation.js?v=2025111715"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2025111400"></script>

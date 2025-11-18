@@ -2648,16 +2648,16 @@ function changerSectionProfil(section) {
     const indices = calculerTousLesIndices(da);
     const badgePratique = genererBadgePratiqueProfil(indices.pratique);
 
-    // Générer le toggle info selon la section
+    // Générer le toggle info selon la section (styles gérés par CSS)
     let toggleInfo = '';
     if (section === 'cible') {
-        toggleInfo = `<span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span></span>`;
+        toggleInfo = `<span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span>`;
     } else if (section === 'performance') {
-        toggleInfo = `<span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-performance-${da}">ℹ️</span></span>`;
+        toggleInfo = `<span class="emoji-toggle" data-target="details-calculs-performance-${da}">ℹ️</span>`;
     } else if (section === 'mobilisation') {
-        toggleInfo = `<span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-mobilisation-${da}">ℹ️</span></span>`;
+        toggleInfo = `<span class="emoji-toggle" data-target="details-calculs-mobilisation-${da}">ℹ️</span>`;
     } else if (section === 'accompagnement') {
-        toggleInfo = `<span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-accompagnement-${da}">ℹ️</span></span>`;
+        toggleInfo = `<span class="emoji-toggle" data-target="details-calculs-accompagnement-${da}">ℹ️</span>`;
     }
 
     contenuContainer.innerHTML = `
@@ -3178,7 +3178,7 @@ function afficherProfilComplet(da) {
                 <div class="profil-contenu-header">
                     <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 0 0 20px 0;">
                         <span>${titreSection}${genererBadgePratiqueProfil(indices.pratique, modeComparatif)}</span>
-                        <span style="font-size: 1.2rem;"><span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span></span>
+                        <span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span>
                     </h2>
                 </div>
                 <div class="profil-contenu-body">
@@ -3321,10 +3321,10 @@ function genererSectionAssiduite(da) {
  * Affiche un tableau similaire à celui de la liste des évaluations
  */
 function genererSectionProductions(da) {
-    // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
-    const groupeEtudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    // IMPORTANT: Utiliser obtenirDonneesSelonMode pour respecter le mode actif (anonymisation, simulation, normal)
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    const productions = obtenirDonneesSelonMode('productions');
+    const groupeEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiant = groupeEtudiants.find(e => e.da === da);
 
     if (!etudiant) {
@@ -7102,3 +7102,68 @@ window.retirerJetonPersonnaliseAvecConfirmation = retirerJetonPersonnaliseAvecCo
 // 🆕 Exporter les nouvelles fonctions de niveau RàI (Beta 90+)
 window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
 window.determinerAlerteContextuelle = determinerAlerteContextuelle;
+
+/**
+ * 🆕 BETA 91: Calcule et stocke les patterns + RàI pour TOUT le groupe
+ * Cette fonction est appelée par tableau-bord-apercu.js au chargement
+ * pour avoir des données à jour pour tous les étudiants
+ *
+ * @returns {Object} - Patterns et RàI de tous les étudiants
+ */
+function calculerEtStockerPatternsGroupe() {
+    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    const patternsGroupe = {};
+
+    console.log('📊 Calcul des patterns pour', etudiants.length, 'étudiants...');
+
+    etudiants.forEach(etudiant => {
+        const da = etudiant.da;
+
+        try {
+            // Récupérer le modèle RàI (contient pattern et niveau)
+            const modelRai = determinerNiveauRaiPedagogique(da);
+
+            // Récupérer les indices pour avoir la performance
+            const indices = calculerTousLesIndices(da);
+
+            // Stocker les informations essentielles
+            patternsGroupe[da] = {
+                pattern: modelRai.pattern,
+                niveauRai: modelRai.niveau,
+                defi: modelRai.defi,
+                performancePct: indices.P, // 0-100
+                dateCalcul: new Date().toISOString()
+            };
+        } catch (error) {
+            console.warn('⚠️ Erreur calcul pattern pour DA', da, error);
+            patternsGroupe[da] = {
+                pattern: 'Inconnu',
+                niveauRai: null,
+                defi: null,
+                performancePct: 0,
+                dateCalcul: new Date().toISOString()
+            };
+        }
+    });
+
+    // Stocker dans localStorage
+    localStorage.setItem('indicesPatternsRaI', JSON.stringify(patternsGroupe));
+
+    console.log('✅ Patterns stockés pour', Object.keys(patternsGroupe).length, 'étudiants');
+
+    return patternsGroupe;
+}
+
+/**
+ * 🆕 BETA 91: Récupère les patterns stockés pour un étudiant
+ * @param {string} da - Numéro de DA
+ * @returns {Object|null} - Pattern et RàI de l'étudiant, ou null si non trouvé
+ */
+function obtenirPatternEtudiant(da) {
+    const patterns = JSON.parse(localStorage.getItem('indicesPatternsRaI') || '{}');
+    return patterns[da] || null;
+}
+
+// 🆕 BETA 91: Exporter les fonctions de patterns de groupe
+window.calculerEtStockerPatternsGroupe = calculerEtStockerPatternsGroupe;
+window.obtenirPatternEtudiant = obtenirPatternEtudiant;

@@ -725,6 +725,8 @@ function genererRetroaction(num) {
         const etudiant = etudiants.find(e => e.da === etudiantDA);
 
         if (etudiant) {
+            // Utiliser prenom qui sera soit le vrai nom en mode normal, soit "Élève X" en mode anonymisation
+            console.log(`📝 [genererRetroaction] Mode actuel: ${localStorage.getItem('modeApplication')}, Nom utilisé: ${etudiant.prenom}`);
             texte += `\nBonjour ${etudiant.prenom} !\n\n`;
         }
     }
@@ -1085,35 +1087,83 @@ function afficherBadgesJetons() {
  */
 function afficherGestionJetons(afficher) {
     const sectionBadges = document.getElementById('gestionJetonsEvaluation');
-    const boutonDelai = document.getElementById('boutonJetonDelai');
-    const boutonReprise = document.getElementById('boutonJetonReprise');
+    const sectionOptions = document.getElementById('optionsJetons');
+    const badgeDelai = document.getElementById('badgeJetonDelaiOption');
+    const badgeReprise = document.getElementById('badgeJetonRepriseOption');
+    const checkboxDelai = document.getElementById('checkboxJetonDelai');
+    const checkboxReprise = document.getElementById('checkboxJetonReprise');
 
     if (afficher && window.evaluationEnCours?.idModification) {
+        // MODE MODIFICATION : Évaluation existante
         // Récupérer l'évaluation pour vérifier si elle a déjà des jetons
         const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
         const evaluation = evaluations.find(e => e.id === window.evaluationEnCours.idModification);
 
-        // Afficher les badges si l'évaluation existe
-        if (sectionBadges && evaluation) {
-            afficherBadgesJetons();
-        }
-
-        // Afficher le bouton de délai SEULEMENT si l'évaluation n'a PAS déjà un jeton de délai
-        if (boutonDelai && evaluation) {
-            const aDejaJetonDelai = evaluation.jetonDelaiApplique || evaluation.delaiAccorde;
-            boutonDelai.style.display = aDejaJetonDelai ? 'none' : 'block';
-        }
-
-        // Afficher le bouton de reprise SEULEMENT si l'évaluation n'a PAS déjà un jeton de reprise
-        if (boutonReprise && evaluation) {
-            const aDejaJetonReprise = evaluation.jetonRepriseApplique || evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
-            boutonReprise.style.display = aDejaJetonReprise ? 'none' : 'block';
-        }
-    } else {
-        // Masquer tout
+        // Masquer complètement la section des badges (on utilise les checkboxes à la place)
         if (sectionBadges) sectionBadges.style.display = 'none';
-        if (boutonDelai) boutonDelai.style.display = 'none';
-        if (boutonReprise) boutonReprise.style.display = 'none';
+
+        // Afficher la section des options de jetons
+        if (sectionOptions) sectionOptions.style.display = 'block';
+
+        if (evaluation) {
+            // Vérifier si l'évaluation a déjà des jetons
+            const aDejaJetonDelai = evaluation.jetonDelaiApplique || evaluation.delaiAccorde;
+            const aDejaJetonReprise = evaluation.jetonRepriseApplique || evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
+
+            // Toujours afficher les options
+            if (badgeDelai) badgeDelai.style.display = 'flex';
+            if (badgeReprise) badgeReprise.style.display = 'flex';
+
+            // Cocher les checkboxes si les jetons sont déjà appliqués
+            if (checkboxDelai) checkboxDelai.checked = aDejaJetonDelai;
+            if (checkboxReprise) checkboxReprise.checked = aDejaJetonReprise;
+        }
+
+        // Afficher les jetons personnalisés
+        afficherJetonsPersonnalisesEvaluation();
+    } else if (afficher) {
+        // MODE NOUVELLE ÉVALUATION : Afficher les options seulement (pas les badges)
+        if (sectionBadges) sectionBadges.style.display = 'none';
+        if (sectionOptions) sectionOptions.style.display = 'block';
+
+        // Afficher tous les badges de jetons (aucun n'est encore appliqué)
+        if (badgeDelai) badgeDelai.style.display = 'flex';
+        if (badgeReprise) badgeReprise.style.display = 'flex';
+
+        // Décocher les checkboxes
+        if (checkboxDelai) checkboxDelai.checked = false;
+        if (checkboxReprise) checkboxReprise.checked = false;
+
+        // Afficher les jetons personnalisés
+        afficherJetonsPersonnalisesEvaluation();
+    } else {
+        // MODE MASQUÉ : Tout masquer
+        if (sectionBadges) sectionBadges.style.display = 'none';
+        if (sectionOptions) sectionOptions.style.display = 'none';
+    }
+}
+
+/**
+ * Gère le changement de la checkbox jeton de délai
+ * @param {HTMLInputElement} checkbox - La checkbox
+ */
+function gererCheckboxJetonDelai(checkbox) {
+    if (checkbox.checked) {
+        appliquerJetonDelaiDepuisSidebar();
+        // Désactiver la checkbox après application
+        checkbox.checked = false;
+    }
+}
+
+/**
+ * Gère le changement de la checkbox jeton de reprise
+ * @param {HTMLInputElement} checkbox - La checkbox
+ */
+function gererCheckboxJetonReprise(checkbox) {
+    if (checkbox.checked) {
+        appliquerJetonRepriseDepuisSidebar();
+        // Désactiver la checkbox après application
+        checkbox.checked = false;
     }
 }
 
@@ -1200,18 +1250,15 @@ function nouvelleEvaluation() {
 
     cocherOptionsParDefaut();
 
-    evaluationEnCours = null;
+    // 🔄 Réinitialiser evaluationEnCours à un objet vide (pas null) pour permettre l'affichage des jetons
+    window.evaluationEnCours = {
+        criteres: {}
+    };
     filtrerEtudiantsParGroupe();
 
     // 🔄 Effacer les sélections mémorisées du mode évaluation en série
     localStorage.removeItem('dernieresSelectionsEvaluation');
-    console.log('✅ Sélections mémorisées effacées');
-
-    // 🔄 Réinitialiser le mode modification
-    if (window.evaluationEnCours?.idModification) {
-        delete window.evaluationEnCours.idModification;
-        console.log('✅ Mode modification réinitialisé');
-    }
+    console.log('✅ Sélections mémorisées effacées et mode nouvelle évaluation activé');
 
     // Masquer l'indicateur de progression
     const indicateur = document.getElementById('indicateurProgressionEval');
@@ -1225,10 +1272,39 @@ function nouvelleEvaluation() {
     afficherOuMasquerBoutonVerrouillage(false);
     desactiverFormulaireEvaluation(false);
 
-    // Masquer la section de gestion des jetons (seulement pour les évaluations existantes)
-    afficherGestionJetons(false);
+    // Afficher les options de jetons pour nouvelle évaluation
+    afficherGestionJetons(true);
+
+    // Masquer la ligne Supprimer cette évaluation (seulement pour évaluations existantes)
+    const ligneSupprimer = document.getElementById('ligneSupprimerEvaluation');
+    if (ligneSupprimer) {
+        ligneSupprimer.style.display = 'none';
+    }
 
     afficherNotificationSucces('Paramètres réinitialisés - Prêt pour une nouvelle série d\'évaluations');
+}
+
+/**
+ * Réinitialise uniquement le formulaire (critères, notes) sans effacer les sélections
+ */
+function reinitialiserFormulaire() {
+    // Réinitialiser uniquement les éléments du formulaire de notation
+    document.getElementById('listeCriteresGrille1').innerHTML = '<p style="color: #999; font-style: italic; font-size: 0.85rem;">Sélectionnez une grille et une cartouche</p>';
+    document.getElementById('retroactionFinale1').value = '';
+    document.getElementById('noteProduction1').textContent = '0.0';
+    document.getElementById('niveauProduction1').textContent = '--';
+
+    // Réinitialiser les checkboxes jetons
+    const checkboxDelai = document.getElementById('checkboxJetonDelai');
+    const checkboxReprise = document.getElementById('checkboxJetonReprise');
+    if (checkboxDelai) checkboxDelai.checked = false;
+    if (checkboxReprise) checkboxReprise.checked = false;
+
+    // Réinitialiser la rétroaction finale
+    const retroactionFinale = document.getElementById('retroactionFinale1');
+    if (retroactionFinale) retroactionFinale.value = '';
+
+    afficherNotificationSucces('Formulaire réinitialisé - Les sélections sont conservées');
 }
 
 /**
@@ -2459,11 +2535,8 @@ function verifierEtChargerEvaluationExistante() {
                 window.evaluationEnCours.criteres[c.critereId] = c.niveauSelectionne;
             });
 
-            // Restaurer la checkbox délai
-            const checkboxDelai = document.getElementById('delaiAccordeCheck');
-            if (checkboxDelai) {
-                checkboxDelai.checked = evaluationExistante.delaiAccorde || false;
-            }
+            // Note: Jetons de délai sont maintenant gérés par les badges cliquables
+            // Plus besoin de restaurer une checkbox
 
             // Afficher l'indicateur de verrouillage si l'évaluation existe
             afficherOuMasquerBoutonVerrouillage(true, evaluationExistante.verrouillee || false);
@@ -3127,11 +3200,8 @@ function modifierEvaluation(evaluationId) {
                 selectIntegrite.dispatchEvent(new Event('change', { bubbles: true }));
             }
 
-            // Charger jeton de délai
-            const checkboxDelai = document.getElementById('delaiAccordeCheck');
-            if (checkboxDelai) {
-                checkboxDelai.checked = evaluation.jetonDelaiApplique || evaluation.delaiAccorde || false;
-            }
+            // Note: Jetons de délai sont maintenant gérés par les badges cliquables
+            // Plus besoin de charger une checkbox
 
             // Afficher badges jetons
             afficherBadgesJetons();
@@ -3204,6 +3274,13 @@ function modifierEvaluation(evaluationId) {
             // ÉTAPE 15: Afficher la section de gestion des jetons
             console.log('1️⃣5️⃣ Affichage gestion jetons');
             afficherGestionJetons(true);
+
+            // ÉTAPE 16: Afficher la ligne Supprimer cette évaluation
+            console.log('1️⃣6️⃣ Affichage ligne suppression');
+            const ligneSupprimer = document.getElementById('ligneSupprimerEvaluation');
+            if (ligneSupprimer) {
+                ligneSupprimer.style.display = 'flex';
+            }
 
             console.log('✅ Évaluation chargée avec succès');
 
@@ -4229,3 +4306,154 @@ function ouvrirBanqueAvecRecherche() {
 window.filtrerBanqueEvaluations = filtrerBanqueEvaluations;
 window.ouvrirBanqueAvecRecherche = ouvrirBanqueAvecRecherche;
 window.modifierEvaluationParId = modifierEvaluation; // Export sous un nom différent pour éviter conflit avec liste-evaluations.js
+window.gererCheckboxJetonDelai = gererCheckboxJetonDelai;
+window.gererCheckboxJetonReprise = gererCheckboxJetonReprise;
+
+// ============================================
+// FONCTIONS POUR JETONS PERSONNALISÉS
+// ============================================
+
+/**
+ * Affiche les jetons personnalisés disponibles dans le sidebar d'évaluation
+ */
+function afficherJetonsPersonnalisesEvaluation() {
+    const conteneur = document.getElementById('jetonsPersonnalisesOptions');
+    if (!conteneur) {
+        console.log('⚠️ Conteneur jetonsPersonnalisesOptions non trouvé');
+        return;
+    }
+
+    // Récupérer les jetons personnalisés depuis la configuration
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const jetonsPersonnalises = config.jetons?.typesPersonnalises || [];
+
+    console.log('🎯 Jetons personnalisés configurés:', jetonsPersonnalises.length, jetonsPersonnalises);
+
+    if (jetonsPersonnalises.length === 0) {
+        conteneur.innerHTML = '';
+        conteneur.style.display = 'none';
+        return;
+    }
+
+    // Afficher le conteneur
+    conteneur.style.display = 'flex';
+
+    // Générer un badge avec checkbox pour chaque jeton personnalisé
+    conteneur.innerHTML = jetonsPersonnalises.map(jeton => `
+        <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <input type="checkbox" id="checkboxJetonPerso_${jeton.id}" style="margin-top: 6px;">
+            <div style="flex: 1;">
+                <span class="badge-jeton-personnalise-wrapper">
+                    <span class="badge-jeton-titre">${echapperHtml(jeton.nom)}</span>
+                </span>
+                <p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">
+                    ${echapperHtml(jeton.description)}
+                </p>
+            </div>
+        </div>
+    `).join('');
+}
+
+/**
+ * Applique un jeton personnalisé à l'évaluation
+ * @param {string} jetonId - ID du jeton à appliquer
+ */
+function appliquerJetonPersonnalise(jetonId) {
+    if (!window.evaluationEnCours?.idModification) {
+        afficherNotificationErreur('Erreur', 'Vous devez charger une évaluation existante pour appliquer un jeton');
+        return;
+    }
+
+    // Récupérer les informations du jeton
+    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const jeton = config.jetons?.typesPersonnalises?.find(j => j.id === jetonId);
+
+    if (!jeton) {
+        afficherNotificationErreur('Erreur', 'Jeton personnalisé introuvable');
+        return;
+    }
+
+    // Confirmer l'application
+    if (!confirm(`Voulez-vous appliquer le jeton «${jeton.nom}» à cette évaluation ?\n\n${jeton.description}`)) {
+        return;
+    }
+
+    // Récupérer l'évaluation
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    const evaluation = evaluations.find(e => e.id === window.evaluationEnCours.idModification);
+
+    if (!evaluation) {
+        afficherNotificationErreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    // Ajouter le jeton personnalisé à l'évaluation
+    if (!evaluation.jetonsPersonnalises) {
+        evaluation.jetonsPersonnalises = [];
+    }
+
+    // Vérifier si ce jeton n'est pas déjà appliqué
+    if (evaluation.jetonsPersonnalises.some(j => j.id === jetonId)) {
+        afficherNotificationErreur('Erreur', 'Ce jeton est déjà appliqué à cette évaluation');
+        return;
+    }
+
+    evaluation.jetonsPersonnalises.push({
+        id: jetonId,
+        nom: jeton.nom,
+        description: jeton.description,
+        dateApplication: new Date().toISOString()
+    });
+
+    // Sauvegarder
+    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+
+    // Rafraîchir l'affichage
+    afficherBadgesJetons();
+    afficherJetonsPersonnalisesEvaluation();
+
+    afficherNotificationSucces('Succès', `Jeton «${jeton.nom}» appliqué avec succès`);
+}
+
+/**
+ * Confirme et supprime l'évaluation en cours depuis le sidebar
+ */
+function confirmerSuppressionEvaluationSidebar() {
+    if (!window.evaluationEnCours?.idModification) {
+        afficherNotificationErreur('Erreur', 'Aucune évaluation en cours de modification');
+        return;
+    }
+
+    const evaluationId = window.evaluationEnCours.idModification;
+
+    // Appeler la fonction existante de suppression (qui inclut déjà la confirmation)
+    supprimerEvaluation(evaluationId);
+
+    // Si la suppression réussit, réinitialiser le formulaire
+    setTimeout(() => {
+        const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+        const evalExiste = evaluations.find(e => e.id === evaluationId);
+
+        if (!evalExiste) {
+            // L'évaluation a été supprimée, réinitialiser le formulaire
+            nouvelleEvaluation();
+        }
+    }, 100);
+}
+
+// Écouter les changements de mode pour régénérer la rétroaction avec les noms anonymisés/réels
+window.addEventListener('modeChanged', (event) => {
+    console.log(`🔄 [evaluation.js] Mode changé détecté, régénération de la rétroaction si nécessaire`);
+
+    // Si une évaluation est en cours et que la checkbox d'adresse est cochée, régénérer la rétroaction
+    if (window.evaluationEnCours && document.getElementById('afficherAdresse1')?.checked) {
+        console.log(`📝 [evaluation.js] Régénération de la rétroaction avec le nouveau mode: ${event.detail.mode}`);
+        genererRetroaction(1);
+    }
+});
+
+// Exporter les fonctions
+window.afficherJetonsPersonnalisesEvaluation = afficherJetonsPersonnalisesEvaluation;
+window.appliquerJetonPersonnalise = appliquerJetonPersonnalise;
+window.confirmerSuppressionEvaluationSidebar = confirmerSuppressionEvaluationSidebar;
+window.reinitialiserFormulaire = reinitialiserFormulaire;

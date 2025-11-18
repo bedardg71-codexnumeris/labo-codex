@@ -5318,3 +5318,26 @@ label:has(+ textarea:disabled) {
 .td-left-140-clickable {
     text-align: center !important;
 }
+
+/* Badge jeton personnalisé (neutre - bleu clair) */
+.badge-jeton-personnalise-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2196f322;
+    border: 2px solid #2196f3;
+    border-radius: 8px;
+    padding: 2px 6px;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+.badge-jeton-personnalise-wrapper:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
+    opacity: 1;
+}
+
+.badge-jeton-numero-personnalise {
+    background: #2196f3;
+}
