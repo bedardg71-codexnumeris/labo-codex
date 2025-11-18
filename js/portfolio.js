@@ -221,46 +221,39 @@ function chargerPortfolioEleveDetail(da) {
         const container = document.getElementById('portfolioEleveDetail');
         container.innerHTML = `
             <!-- Barre de progression -->
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <div class="portfolio-progression">
+                <div class="portfolio-progression-header">
                     <span><strong>Progression :</strong> ${nbRemis}/${minimumRequis} remis ${nombreTotal > minimumRequis ? `(${nombreTotal} artefacts prévus)` : ''}</span>
                     <span style="color: ${nbRemis >= minimumRequis ? 'green' : 'orange'};">
                         ${nbRemis >= minimumRequis ? '✓ Minimum atteint' : 'Minimum requis'}
                     </span>
                 </div>
-                <div style="background: #ddd; height: 10px; border-radius: 5px; overflow: hidden;">
-                    <div style="background: var(--bleu-principal); height: 100%; width: ${Math.min((nbRemis / minimumRequis) * 100, 100)}%; 
-                                transition: width 0.3s ease;"></div>
+                <div class="portfolio-barre-progression">
+                    <div class="portfolio-barre-remplissage" style="width: ${Math.min((nbRemis / minimumRequis) * 100, 100)}%;"></div>
                 </div>
-                <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                <p class="portfolio-progression-aide">
                     <strong>${nombreARetenir}</strong> artefacts à retenir pour la note finale
                 </p>
             </div>
 
             <!-- Liste des artefacts -->
-            <div style="margin-bottom: 20px;">
-                <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">📑 Artefacts du portfolio (${artefacts.length})</h4>
+            <div class="portfolio-artefacts-section">
+                <h4 class="portfolio-artefacts-titre">📑 Artefacts du portfolio (${artefacts.length})</h4>
                 ${artefacts.map((art, index) => `
-                    <div style="padding: 15px; margin-bottom: 10px;
-                                background: ${art.retenu ? 'linear-gradient(to right, #d4edda, #e8f5e9)' : (!art.existe ? '#f8f9fa' : 'white')};
-                                border: ${art.retenu ? '3px' : '2px'} solid ${art.retenu ? '#28a745' : (art.existe ? '#ddd' : '#e0e0e0')};
-                                border-radius: 8px; ${!art.remis ? 'opacity: 0.7;' : ''}
-                                ${art.retenu ? 'box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);' : ''}
-                                transition: all 0.3s ease;">
+                    <div class="portfolio-artefact-carte ${art.retenu ? 'portfolio-artefact-retenu' : (art.existe ? 'portfolio-artefact-disponible' : 'portfolio-artefact-avenir')}">
                         ${art.existe ? `
-                        <label style="display: flex; align-items: start; cursor: ${art.remis ? 'pointer' : 'not-allowed'};">
+                        <label class="portfolio-artefact-label" style="cursor: ${art.remis ? 'pointer' : 'not-allowed'};">
                             <input type="checkbox"
                                    name="artefactRetenu"
                                    value="${art.id}"
                                    ${art.retenu ? 'checked' : ''}
                                    ${!art.remis ? 'disabled' : ''}
-                                   onchange="toggleArtefactPortfolio('${da}', '${portfolio.id}', ${nombreARetenir})"
-                                   style="margin-right: 15px; margin-top: 3px; transform: scale(1.4); accent-color: #28a745;">
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600; color: ${art.retenu ? '#155724' : 'var(--bleu-principal)'}; margin-bottom: 5px;">
+                                   onchange="toggleArtefactPortfolio('${da}', '${portfolio.id}', ${nombreARetenir})">
+                            <div class="portfolio-artefact-contenu">
+                                <div class="portfolio-artefact-titre ${art.retenu ? 'portfolio-artefact-titre-retenu' : 'portfolio-artefact-titre-normal'}">
                                     ${echapperHtml(art.description || art.titre)}
                                 </div>
-                                <div style="display: flex; gap: 15px; font-size: 0.85rem;">
+                                <div class="portfolio-artefact-meta">
                                     ${art.remis
                                         ? `<span style="color: green;">✓ Remis</span>
                                            <span><strong>Note :</strong> ${art.note}/100</span>
@@ -270,13 +263,13 @@ function chargerPortfolioEleveDetail(da) {
                             </div>
                         </label>
                         ` : `
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <div style="width: 18px; height: 18px; border: 2px dashed #ccc; border-radius: 3px;"></div>
-                            <div style="flex: 1;">
-                                <div style="font-weight: 500; color: #999; margin-bottom: 3px;">
+                        <div class="portfolio-artefact-placeholder">
+                            <div class="portfolio-artefact-checkbox-vide"></div>
+                            <div class="portfolio-artefact-contenu">
+                                <div class="portfolio-artefact-avenir-titre">
                                     ${echapperHtml(art.description || art.titre)}
                                 </div>
-                                <div style="font-size: 0.85rem; color: #999; font-style: italic;">
+                                <div class="portfolio-artefact-avenir-info">
                                     Artefact à venir (non encore créé dans Réglages › Productions)
                                 </div>
                             </div>
@@ -287,25 +280,23 @@ function chargerPortfolioEleveDetail(da) {
             </div>
 
             <!-- Calcul de la note -->
-            <div style="padding: 20px; background: ${nbRetenus === nombreARetenir ? '#d4edda' : '#fff3cd'}; 
-                        border-left: 4px solid ${nbRetenus === nombreARetenir ? '#28a745' : '#ffc107'}; 
-                        border-radius: 8px;">
-                <h4 style="margin-top: 0; color: ${nbRetenus === nombreARetenir ? '#155724' : '#856404'};">
+            <div class="portfolio-note-carte ${nbRetenus === nombreARetenir ? 'portfolio-note-finale' : 'portfolio-note-provisoire'}">
+                <h4>
                     ${nbRetenus === nombreARetenir ? '✓ Mode FINAL actif' : '⚠️ Mode PROVISOIRE'}
                 </h4>
-                
-                ${noteProvisoire !== null 
-                    ? `<p><strong>Note provisoire :</strong> ${noteProvisoire.toFixed(2)}/100 
-                       <span style="font-size: 0.9rem; color: #666;">(moyenne de ${artefactsAvecNote.length} artefact${artefactsAvecNote.length > 1 ? 's' : ''})</span></p>` 
+
+                ${noteProvisoire !== null
+                    ? `<p><strong>Note provisoire :</strong> ${noteProvisoire.toFixed(2)}/100
+                       <span class="portfolio-note-detail">(moyenne de ${artefactsAvecNote.length} artefact${artefactsAvecNote.length > 1 ? 's' : ''})</span></p>`
                     : ''}
-                
-                ${noteFinale !== null 
-                    ? `<p style="font-size: 1.2rem;"><strong>Note finale :</strong> 
-                       <span style="color: #28a745; font-size: 1.3rem;">${noteFinale.toFixed(2)}/100</span>
-                       <span style="font-size: 0.9rem; color: #666;">(moyenne des ${nombreARetenir} retenus)</span></p>` 
+
+                ${noteFinale !== null
+                    ? `<p style="font-size: 1.2rem;"><strong>Note finale :</strong>
+                       <span class="portfolio-note-valeur">${noteFinale.toFixed(2)}/100</span>
+                       <span class="portfolio-note-detail">(moyenne des ${nombreARetenir} retenus)</span></p>`
                     : ''}
-                
-                <p style="margin-bottom: 0; color: ${nbRetenus === nombreARetenir ? '#155724' : '#856404'};">
+
+                <p>
                     ${nbRetenus === nombreARetenir
                         ? `Les ${nombreARetenir} artefacts sélectionnés déterminent la note finale`
                         : `Sélectionne ${nombreARetenir - nbRetenus} artefact${nombreARetenir - nbRetenus > 1 ? 's' : ''} supplémentaire${nombreARetenir - nbRetenus > 1 ? 's' : ''} pour activer le mode FINAL`}

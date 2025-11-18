@@ -3320,6 +3320,192 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--bleu-principal);
 }
 
+/* 🆕 BETA 91: Module portfolio (sélection artefacts) */
+/* Barre de progression du portfolio */
+.portfolio-progression {
+    background: var(--bleu-tres-pale);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.portfolio-progression-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.portfolio-barre-progression {
+    background: #ddd;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.portfolio-barre-remplissage {
+    background: var(--bleu-principal);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.portfolio-progression-aide {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Liste des artefacts du portfolio */
+.portfolio-artefacts-section {
+    margin-bottom: 20px;
+}
+
+.portfolio-artefacts-titre {
+    color: var(--bleu-principal);
+    margin-bottom: 15px;
+}
+
+/* Carte d'artefact */
+.portfolio-artefact-carte {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+/* Artefact retenu (sélectionné) */
+.portfolio-artefact-retenu {
+    background: linear-gradient(to right, #d4edda, #e8f5e9);
+    border: 3px solid #28a745;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+/* Artefact disponible (non retenu) */
+.portfolio-artefact-disponible {
+    background: white;
+    border: 2px solid #ddd;
+}
+
+/* Artefact à venir (non créé) */
+.portfolio-artefact-avenir {
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    opacity: 0.7;
+}
+
+/* Label d'artefact avec checkbox */
+.portfolio-artefact-label {
+    display: flex;
+    align-items: start;
+}
+
+.portfolio-artefact-label input[type="checkbox"] {
+    margin-right: 15px;
+    margin-top: 3px;
+    transform: scale(1.4);
+    accent-color: #28a745;
+}
+
+.portfolio-artefact-contenu {
+    flex: 1;
+}
+
+.portfolio-artefact-titre {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.portfolio-artefact-titre-retenu {
+    color: #155724;
+}
+
+.portfolio-artefact-titre-normal {
+    color: var(--bleu-principal);
+}
+
+.portfolio-artefact-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+}
+
+/* Artefact placeholder (à venir) */
+.portfolio-artefact-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.portfolio-artefact-checkbox-vide {
+    width: 18px;
+    height: 18px;
+    border: 2px dashed #ccc;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.portfolio-artefact-avenir-titre {
+    font-weight: 500;
+    color: #999;
+    margin-bottom: 3px;
+}
+
+.portfolio-artefact-avenir-info {
+    font-size: 0.85rem;
+    color: #999;
+    font-style: italic;
+}
+
+/* Carte de calcul de note (finale/provisoire) */
+.portfolio-note-carte {
+    padding: 20px;
+    border-left: 4px solid;
+    border-radius: 8px;
+}
+
+.portfolio-note-finale {
+    background: #d4edda;
+    border-left-color: #28a745;
+}
+
+.portfolio-note-provisoire {
+    background: #fff3cd;
+    border-left-color: #ffc107;
+}
+
+.portfolio-note-carte h4 {
+    margin-top: 0;
+}
+
+.portfolio-note-finale h4 {
+    color: #155724;
+}
+
+.portfolio-note-provisoire h4 {
+    color: #856404;
+}
+
+.portfolio-note-carte p:last-child {
+    margin-bottom: 0;
+}
+
+.portfolio-note-finale p:last-child {
+    color: #155724;
+}
+
+.portfolio-note-provisoire p:last-child {
+    color: #856404;
+}
+
+.portfolio-note-detail {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.portfolio-note-valeur {
+    color: #28a745;
+    font-size: 1.3rem;
+}
+
 
 /* ===============================================
    SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)
