@@ -94,11 +94,11 @@ function afficherTableauProductions() {
 
         return `
         <div class="item-liste" style="background: ${bgColor}; border-color: ${borderColor}; border-width: 2px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <strong style="color: var(--bleu-principal);">
+            <div class="production-header">
+                <strong class="production-titre">
                     ${estPortfolio ? '📁 ' : ''}${prod.titre}${prod.description ? ' - ' + prod.description : ''}
                 </strong>
-                <div style="white-space: nowrap;">
+                <div class="production-actions">
                     ${index > 0 ?
                 `<button onclick="monterEvaluation('${prod.id}')" class="btn btn-principal">↑</button>` : ''}
                     ${index < evaluations.length - 1 ?
@@ -107,40 +107,37 @@ function afficherTableauProductions() {
                     <button onclick="supprimerProduction('${prod.id}')" class="btn btn-supprimer">Supprimer</button>
                 </div>
             </div>
-            <div style="display: grid; grid-template-columns: ${prod.type === 'artefact-portfolio' ? '1fr 1fr' : '1fr 1fr 1fr'}; gap: 10px;">
+            <div class="production-champs-grille ${prod.type === 'artefact-portfolio' ? 'production-champs-grille-2col' : 'production-champs-grille-3col'}">
                 <div>
-                    <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Type</label>
-                    <input type="text" value="${getTypeLabel(prod.type)}" class="controle-form" 
-                           readonly style="font-size: 0.85rem;">
+                    <label class="production-champ-label">Type</label>
+                    <input type="text" value="${getTypeLabel(prod.type)}" class="controle-form production-champ-input" readonly>
                 </div>
                 ${prod.type !== 'artefact-portfolio' ? `
                 <div>
-                    <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Pondération</label>
-                    <input type="text" value="${prod.ponderation}%" class="controle-form" 
-                           readonly style="font-size: 0.85rem; font-weight: bold;">
+                    <label class="production-champ-label">Pondération</label>
+                    <input type="text" value="${prod.ponderation}%" class="controle-form production-champ-input-bold" readonly>
                 </div>
                 ` : ''}
                 ${!estPortfolio ? `
                 <div>
-                    <label style="font-size: 0.75rem; color: var(--bleu-moyen);">Grilles de critères</label>
-                    <input type="text" value="${nomGrille}" class="controle-form" 
-                           readonly style="font-size: 0.85rem; ${!grilleAssociee ? 'color: var(--bleu-leger); font-style: italic;' : ''}">
+                    <label class="production-champ-label">Grilles de critères</label>
+                    <input type="text" value="${nomGrille}" class="controle-form ${!grilleAssociee ? 'production-champ-input-placeholder' : 'production-champ-input'}" readonly>
                 </div>
                 ` : ''}
             </div>
             ${estPortfolio && prod.artefactsIds && prod.artefactsIds.length > 0 ? `
-                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px;">
-                    <strong style="font-size: 0.85rem; color: var(--bleu-principal);">
+                <div class="production-portfolio-info">
+                    <strong>
                         ${prod.artefactsIds.length} artefacts sélectionnés
-                    </strong> · 
-                    ${prod.regles.nombreARetenir} à retenir pour note finale · 
+                    </strong> ·
+                    ${prod.regles.nombreARetenir} à retenir pour note finale ·
                     Min. ${prod.regles.minimumCompletion} complétés requis
                 </div>
             ` : ''}
             ${prod.objectif || prod.tache ? `
-                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--bleu-tres-pale);">
-                    ${prod.objectif ? `<p style="font-size: 0.85rem; margin-bottom: 5px;"><strong>Objectif:</strong> ${prod.objectif}</p>` : ''}
-                    ${prod.tache ? `<p style="font-size: 0.85rem; margin-bottom: 0;"><strong>Tâche:</strong> ${prod.tache}</p>` : ''}
+                <div class="production-details">
+                    ${prod.objectif ? `<p><strong>Objectif:</strong> ${prod.objectif}</p>` : ''}
+                    ${prod.tache ? `<p><strong>Tâche:</strong> ${prod.tache}</p>` : ''}
                 </div>
             ` : ''}
         </div>
@@ -902,8 +899,8 @@ function afficherToutesLesProductionsParType() {
 
     if (productions.length === 0) {
         container.innerHTML = `
-            <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
-                <p style="color: var(--bleu-leger);">Aucune production définie</p>
+            <div class="production-vide">
+                <p>Aucune production définie</p>
                 <small>Ajoutez une production en utilisant les boutons ci-dessous</small>
             </div>
         `;
@@ -941,25 +938,25 @@ function afficherToutesLesProductionsParType() {
         return `
             <div class="item-liste" style="background: ${bgColor}; margin-bottom: 8px; padding: 12px 15px;
                  border-left: 4px solid ${borderColor};">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <div class="production-compact-header">
                     <div style="flex: 1;">
-                        <div style="font-weight: 600; color: var(--bleu-principal);">
+                        <div class="production-compact-titre">
                             ${estPortfolio ? '📁 ' : ''}${echapperHtml(prod.titre)}${prod.description ? ' - ' + echapperHtml(prod.description) : ''}
                         </div>
-                        <div style="color: #666; font-size: 0.85rem; margin-top: 2px;">
+                        <div class="production-compact-meta">
                             ${getTypeLabel(prod.type)}
-                            ${!estArtefact ? `<span style="margin: 0 8px; color: #ccc;">•</span>
-                            <strong style="color: var(--orange-accent);">${prod.ponderation}%</strong>` : ''}
-                            ${!estPortfolio && nomGrille !== 'Aucune grille' ? `<span style="margin: 0 8px; color: #ccc;">•</span>
+                            ${!estArtefact ? `<span class="production-separateur">•</span>
+                            <strong class="production-ponderation">${prod.ponderation}%</strong>` : ''}
+                            ${!estPortfolio && nomGrille !== 'Aucune grille' ? `<span class="production-separateur">•</span>
                             ${echapperHtml(nomGrille)}` : ''}
                         </div>
                         ${estPortfolio && prod.artefactsIds && prod.artefactsIds.length > 0 ? `
-                            <div style="font-size: 0.85rem; color: #666; margin-top: 6px;">
+                            <div class="production-compact-meta" style="margin-top: 6px;">
                                 📦 ${prod.artefactsIds.length} artefacts • ${prod.regles.nombreARetenir} à retenir • Min. ${prod.regles.minimumCompletion} complétés
                             </div>
                         ` : ''}
                         ${prod.objectif || prod.tache ? `
-                            <div style="font-size: 0.85rem; color: #666; margin-top: 6px;">
+                            <div class="production-compact-meta" style="margin-top: 6px;">
                                 ${prod.objectif ? `📌 ${echapperHtml(prod.objectif)}` : ''}
                                 ${prod.objectif && prod.tache ? ' • ' : ''}
                                 ${prod.tache ? `✏️ ${echapperHtml(prod.tache)}` : ''}

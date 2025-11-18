@@ -3506,6 +3506,126 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-size: 1.3rem;
 }
 
+/* 🆕 BETA 91: Module productions (liste évaluations) */
+/* En-tête de production avec titre et boutons */
+.production-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.production-titre {
+    color: var(--bleu-principal);
+}
+
+.production-actions {
+    white-space: nowrap;
+}
+
+/* Grille de champs (type, pondération, grilles) */
+.production-champs-grille {
+    display: grid;
+    gap: 10px;
+}
+
+.production-champs-grille-2col {
+    grid-template-columns: 1fr 1fr;
+}
+
+.production-champs-grille-3col {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.production-champ-label {
+    font-size: 0.75rem;
+    color: var(--bleu-moyen);
+}
+
+.production-champ-input {
+    font-size: 0.85rem;
+}
+
+.production-champ-input-bold {
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.production-champ-input-placeholder {
+    font-size: 0.85rem;
+    color: var(--bleu-leger);
+    font-style: italic;
+}
+
+/* Info artefacts portfolio */
+.production-portfolio-info {
+    margin-top: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+}
+
+.production-portfolio-info strong {
+    font-size: 0.85rem;
+    color: var(--bleu-principal);
+}
+
+/* Section objectif/tâche */
+.production-details {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--bleu-tres-pale);
+}
+
+.production-details p {
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.production-details p:last-child {
+    margin-bottom: 0;
+}
+
+/* Message vide productions */
+.production-vide {
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+}
+
+.production-vide p {
+    color: var(--bleu-leger);
+}
+
+/* Compact display (sidebar/modal) */
+.production-compact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.production-compact-titre {
+    font-weight: 600;
+    color: var(--bleu-principal);
+}
+
+.production-compact-meta {
+    color: #666;
+    font-size: 0.85rem;
+    margin-top: 2px;
+}
+
+.production-separateur {
+    margin: 0 8px;
+    color: #ccc;
+}
+
+.production-ponderation {
+    color: var(--orange-accent);
+}
+
 
 /* ===============================================
    SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)
