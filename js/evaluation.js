@@ -463,7 +463,7 @@ function cartoucheSelectionnee() {
         <div class="eval-grid-critere">
             <div>
     <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
-        <strong class="eval-texte-09">${echapperHtml(critere.nom)}</strong>
+        <strong class="u-texte-09">${echapperHtml(critere.nom)}</strong>
         <small style="color: #666;">(${ponderation}%)</small>
     </div>
     ${critereGrille?.description ?
@@ -1849,7 +1849,7 @@ function genererDetailsEtudiant(etudiant) {
 
     // Générer le tableau HTML
     const tableauHTML = `
-        <table class="tableau" class="eval-mt-15">
+        <table class="tableau u-mt-15">
             <thead>
                 <tr>
                     <th>Production</th>
@@ -1882,7 +1882,7 @@ function genererDetailsEtudiant(etudiant) {
                                     <span ${obtenirClasseNote(item.evaluation.niveauFinal, item.evaluation.echelleId)}>
                                         ${noteAffichage}
                                     </span>
-                                    ${estRemplacee ? '<span class="badge-statut" class="eval-ml-6">Remplacée</span>' : ''}
+                                    ${estRemplacee ? '<span class="badge-statut eval-ml-6">Remplacée</span>' : ''}
                                     ${estReprise ? '<span style="color: #9c27b0; font-size: 1.2rem; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
                                     ${item.evaluation.jetonDelaiApplique ? '<span style="color: #ff6f00; font-size: 1.2rem; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
                                 </td>

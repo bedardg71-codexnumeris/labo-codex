@@ -877,7 +877,7 @@ function afficherMetriquesGlobales(etudiants) {
 
     // Générer la légende unique en haut
     const legendeUnique = `
-        <div class="distribution-legende-commune" class="tb-barre-rai">
+        <div class="distribution-legende-commune tb-barre-rai">
             <div class="tb-flex-center-around">
                 <span style="color: #ff9800; text-align: center; font-weight: 600;">Fragile<br><span class="tb-texte-mini">30-49%</span></span>
                 <span style="color: #ffc107; text-align: center; font-weight: 600;">Modéré<br><span class="tb-texte-mini">50-64%</span></span>
@@ -1016,8 +1016,8 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             if (distribution) {
                 interpretationHTML = `
                     <div class="tb-texte-description">
-                        <div><span class="tb-texte-gras">Distribution : </span>${distribution}</div>
-                        ${interpretation ? `<div class="tb-mt-6">${interpretation}</div>` : ''}
+                        <div><span class="u-texte-gras">Distribution : </span>${distribution}</div>
+                        ${interpretation ? `<div class="u-mt-6">${interpretation}</div>` : ''}
                     </div>
                 `;
             } else {
@@ -1212,7 +1212,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     }
 
     return `
-        <div class="distribution-container" class="tb-mb-20">
+        <div class="distribution-container u-mb-20">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <h4 class="tb-titre-simple">${label}</h4>
                 ${valeursHTML}
@@ -1418,15 +1418,15 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     }
 
     return `
-        <div class="distribution-container" class="tb-mb-15">
+        <div class="distribution-container u-mb-15">
             <h4 class="tb-titre-metrique">Répartition des patterns d'apprentissage</h4>
             ${interpretation ? `<div class="interpretation-barre">${interpretation}</div>` : ''}
-            <div class="barre-patterns" class="tb-barre-simple">
+            <div class="barre-patterns tb-barre-simple">
                 <div class="barre-patterns-overlay"></div>
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
-            <div class="distribution-legende" class="tb-barre-distribution">
+            <div class="distribution-legende tb-barre-distribution">
                 <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #1bbd7e; font-weight: 600; text-align: center;">${labelStable}</span>
                 <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #11aec5; font-weight: 600; text-align: center;">${labelDefi}</span>
                 <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #2994ee; font-weight: 600; text-align: center;">${labelEmergent}</span>
@@ -1605,15 +1605,15 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
     }
 
     return `
-        <div class="distribution-container" class="tb-mb-15">
+        <div class="distribution-container u-mb-15">
             <h4 class="tb-titre-metrique">Modèle de la Réponse à l'intervention (RàI)</h4>
             ${interpretation ? `<div class="interpretation-barre">${interpretation}</div>` : ''}
-            <div class="barre-rai" class="tb-barre-simple">
+            <div class="barre-rai tb-barre-simple">
                 <div class="barre-rai-overlay"></div>
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
-            <div class="distribution-legende" class="tb-barre-distribution">
+            <div class="distribution-legende tb-barre-distribution">
                 <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: #2196f3; font-weight: 600; text-align: center;">${labelNiveau1}</span>
                 <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #6366f1; font-weight: 600; text-align: center;">${labelNiveau2}</span>
                 <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #7c3aed; font-weight: 600; text-align: center;">${labelNiveau3}</span>
@@ -1706,7 +1706,7 @@ function genererCarteEngagement(label, valeurSom, valeurPan, total, afficherSom,
 
     return `
         <div style="background: ${bgColor}; padding: 12px; border-radius: 6px; border: 2px solid ${borderColor};">
-            <div class="tb-flex-between">
+            <div class="u-flex-between">
                 <span class="tb-texte-moyen-gris">${label}</span>
                 <div class="tb-flex-gap15-baseline">
                     ${valeurs.join('')}
@@ -1778,7 +1778,7 @@ function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, af
 
     return `
         <div style="background: ${bgColor}; padding: 12px; border-radius: 6px; border: 2px solid ${borderColor};">
-            <div class="tb-flex-between">
+            <div class="u-flex-between">
                 <span class="tb-texte-moyen-gris">${label}</span>
                 <div class="tb-flex-gap15-baseline">
                     ${valeurs.join('')}
@@ -1859,7 +1859,7 @@ function afficherPatternsApprentissage(etudiants) {
 
     // Générer la barre de distribution et l'ajouter à la fin de la carte
     const html = `
-        <div class="barre-patterns-container" class="tb-padding-top-espacé">
+        <div class="barre-patterns-container tb-padding-top-espacé">
             ${genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan)}
         </div>
     `;
@@ -1893,7 +1893,7 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
 
     return `
         <div style="background: ${bgColor}; padding: 12px; border-radius: 6px; border: 2px solid ${borderColor};">
-            <div class="tb-flex-between">
+            <div class="u-flex-between">
                 <span class="tb-texte-moyen-gris">${label}</span>
                 <div class="tb-flex-gap15-baseline">
                     ${valeurs.join('')}
@@ -1975,7 +1975,7 @@ function afficherNiveauxRaI(etudiants) {
 
     // Générer la barre de distribution et l'ajouter à la fin de la carte
     const html = `
-        <div class="barre-rai-container" class="tb-padding-top">
+        <div class="barre-rai-container tb-padding-top">
             ${genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan)}
         </div>
     `;
@@ -2211,7 +2211,7 @@ function afficherAlertesPrioritaires(etudiants) {
     
     // Générer le tableau
     container.innerHTML = `
-        <table class="tableau" class="tb-mt-15">
+        <table class="tableau u-mt-15">
             <thead>
                 <tr>
                     <th>Nom</th>
