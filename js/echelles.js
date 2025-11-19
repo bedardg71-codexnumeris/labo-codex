@@ -173,7 +173,7 @@ function afficherToutesLesEchellesNiveaux() {
 
     if (echelles.length === 0) {
         container.innerHTML = `
-            <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
+            <div class="echelle-zone-bleu-pale">
                 <p style="color: var(--bleu-leger);">Aucune échelle définie</p>
                 <small>Créez une échelle en utilisant le formulaire ci-dessous</small>
             </div>
@@ -255,7 +255,7 @@ function afficherToutesLesEchellesNiveaux() {
                                     }).join('')}
                                 </div>
                                 <div style="display: flex; margin-top: 5px; font-size: 0.7rem; color: #666; position: relative;">
-                                    <span style="position: absolute; left: 0;">0%</span>
+                                    <span class="echelle-position-left">0%</span>
                                     ${niveaux.map((n, idx) => {
                                         // Calculer la position de chaque séparateur
                                         const position = ((n.max + 1) / 100) * 100; // Position en %
@@ -265,7 +265,7 @@ function afficherToutesLesEchellesNiveaux() {
                                             </span>
                                         ` : '';
                                     }).join('')}
-                                    <span style="position: absolute; right: 0;">100%</span>
+                                    <span class="echelle-position-right">100%</span>
                                 </div>
                             </div>
                         </div>
@@ -863,15 +863,15 @@ function afficherTableauNiveaux(niveaux) {
         <table class="tableau">
 <thead>
     <tr>
-        <th style="width: 80px;">Ordre</th>
-        <th style="width: 80px;">Code</th>
-        <th style="width: 180px;">Nom</th>
+        <th class="echelle-w-80">Ordre</th>
+        <th class="echelle-w-80">Code</th>
+        <th class="echelle-w-180">Nom</th>
         <th>Description</th>
-        <th style="width: 80px;">Min (%)</th>
-        <th style="width: 80px;">Max (%)</th>
-        <th style="width: 100px;">Valeur ponctuelle</th>
-        <th style="width: 150px;">Couleur</th>
-        <th style="width: 120px;">Actions</th>
+        <th class="echelle-w-80">Min (%)</th>
+        <th class="echelle-w-80">Max (%)</th>
+        <th class="echelle-w-100">Valeur ponctuelle</th>
+        <th class="echelle-w-150">Couleur</th>
+        <th class="echelle-w-120">Actions</th>
     </tr>
 </thead>
             <tbody>
@@ -883,14 +883,14 @@ function afficherTableauNiveaux(niveaux) {
                                         class="btn btn-compact"
                                         ${index === 0 ? 'disabled' : ''}
                                         title="Déplacer vers le haut"
-                                        style="padding: 4px 8px; font-size: 0.8rem;">
+                                        class="echelle-padding-compact">
                                     ↑
                                 </button>
                                 <button onclick="deplacerNiveauBas(${index})"
                                         class="btn btn-compact"
                                         ${index === niveaux.length - 1 ? 'disabled' : ''}
                                         title="Déplacer vers le bas"
-                                        style="padding: 4px 8px; font-size: 0.8rem;">
+                                        class="echelle-padding-compact">
                                     ↓
                                 </button>
                             </div>
@@ -900,7 +900,7 @@ function afficherTableauNiveaux(niveaux) {
                                    value="${echapperHtml(niveau.code)}"
                                    onchange="modifierNiveau(${index}, 'code', this.value)"
                                    class="controle-form"
-                                   style="width: 60px; padding: 4px;"
+                                   class="echelle-w-60-p4"
                                    >
                         </td>
                         <td>
@@ -908,7 +908,7 @@ function afficherTableauNiveaux(niveaux) {
                                    value="${echapperHtml(niveau.nom)}"
                                    onchange="modifierNiveau(${index}, 'nom', this.value)"
                                    class="controle-form"
-                                   style="width: 100%; padding: 4px;"
+                                   class="echelle-w-full-p4"
                                    >
                         </td>
                         <td>
@@ -916,7 +916,7 @@ function afficherTableauNiveaux(niveaux) {
                                    value="${echapperHtml(niveau.description || '')}"
                                    onchange="modifierNiveau(${index}, 'description', this.value)"
                                    class="controle-form"
-                                   style="width: 100%; padding: 4px;"
+                                   class="echelle-w-full-p4"
                                    >
                         </td>
                         <td>
@@ -924,7 +924,7 @@ function afficherTableauNiveaux(niveaux) {
                                    value="${niveau.min}"
                                    onchange="modifierNiveau(${index}, 'min', this.value)"
                                    class="controle-form"
-                                   style="width: 60px; padding: 4px;"
+                                   class="echelle-w-60-p4"
                                    min="0" max="100"
                                    >
                         </td>
@@ -932,20 +932,20 @@ function afficherTableauNiveaux(niveaux) {
     <input type="number"
            value="${niveau.max}"
            onchange="modifierNiveau(${index}, 'max', this.value)"
-           style="width: 60px;" min="0" max="100"
+           class="echelle-w-60" min="0" max="100"
            >
 </td>
 <td>
                             <input type="number"
                                    value="${niveau.valeurCalcul || ''}"
                                    onchange="modifierNiveau(${index}, 'valeurCalcul', this.value)"
-                                   style="width: 80px;" min="0" max="100" step="0.1"
+                                   class="echelle-w-80" min="0" max="100" step="0.1"
                                    placeholder="Ex: 32"
                                    >
                         </td>
                         <td>
     <select onchange="modifierNiveau(${index}, 'couleur', this.value)"
-            style="width: 100%; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"
+            class="echelle-input-full"
             >
         ${paletteCouleurs.map(c => `
             <option value="${c.valeur}" ${niveau.couleur === c.valeur ? 'selected' : ''}>
@@ -1307,7 +1307,7 @@ function afficherApercuEchelle(niveaux) {
         <div style="text-align: center; flex: 1; padding: 10px; 
              background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
             <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${echapperHtml(niveau.code)}</strong>
-            <div style="font-size: 0.75rem; margin-top: 5px;">${niveau.min}%-${niveau.max}%</div>
+            <div class="echelle-texte-petit-mt5">${niveau.min}%-${niveau.max}%</div>
         </div>
     `).join('');
 }
@@ -1691,14 +1691,14 @@ function afficherNiveauxEchelle(echelle) {
                                 class="btn btn-compact"
                                 ${index === 0 ? 'disabled' : ''}
                                 title="Déplacer vers le haut"
-                                style="padding: 4px 8px; font-size: 0.8rem;">
+                                class="echelle-padding-compact">
                             ↑
                         </button>
                         <button onclick="deplacerNiveauEchelleBas('${echelle.id}', ${index})"
                                 class="btn btn-compact"
                                 ${index === echelle.niveaux.length - 1 ? 'disabled' : ''}
                                 title="Déplacer vers le bas"
-                                style="padding: 4px 8px; font-size: 0.8rem;">
+                                class="echelle-padding-compact">
                             ↓
                         </button>
                     </div>
@@ -1762,7 +1762,7 @@ function afficherNiveauxEchelle(echelle) {
                         <button onclick="supprimerNiveauEchelle('${echelle.id}', ${index})"
                                 class="btn btn-supprimer btn-compact"
                                 title="Supprimer ce niveau"
-                                style="width: 100%;">
+                                class="u-w-100">
                             Supprimer
                         </button>
                     ` : `
@@ -1789,7 +1789,7 @@ function afficherNiveauxEchelle(echelle) {
         const apercuHtml = echelle.niveaux.map(niveau => `
             <div style="text-align: center; flex: 1; padding: 10px; background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
                 <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${niveau.code}</strong>
-                <div style="font-size: 0.75rem; margin-top: 5px;">${niveau.min}%-${niveau.max}%</div>
+                <div class="echelle-texte-petit-mt5">${niveau.min}%-${niveau.max}%</div>
             </div>
         `).join('');
         apercuContainer.innerHTML = apercuHtml;
