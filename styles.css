@@ -4440,6 +4440,75 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     height: 40px;
 }
 
+/* Nouveaux patterns Phase B (suite - 18 nov 2025) */
+.echelle-w-80 {
+    width: 80px;
+}
+
+.echelle-w-60 {
+    width: 60px;
+}
+
+.echelle-w-100 {
+    width: 100px;
+}
+
+.echelle-w-120 {
+    width: 120px;
+}
+
+.echelle-w-150 {
+    width: 150px;
+}
+
+.echelle-w-180 {
+    width: 180px;
+}
+
+.echelle-padding-compact {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+}
+
+.echelle-w-60-p4 {
+    width: 60px;
+    padding: 4px;
+}
+
+.echelle-w-full-p4 {
+    width: 100%;
+    padding: 4px;
+}
+
+.echelle-texte-petit-mt5 {
+    font-size: 0.75rem;
+    margin-top: 5px;
+}
+
+.echelle-input-full {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.echelle-position-right {
+    position: absolute;
+    right: 0;
+}
+
+.echelle-position-left {
+    position: absolute;
+    left: 0;
+}
+
+.echelle-zone-bleu-pale {
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+}
+
 /* 🆕 BETA 91: Module evaluation (optimisations Phase B) */
 .eval-texte-placeholder {
     color: #999;
