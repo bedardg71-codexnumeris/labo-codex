@@ -408,7 +408,7 @@ function afficherListeInterventions() {
         const badgeNiveau = `Niveau ${intervention.niveauRai}`;
 
         html += `
-            <div class="carte intervention-item" style="margin-bottom: 15px;">
+            <div class="carte intervention-item" class="intervention-mb-15">
                 <div class="intervention-header">
                     <div>
                         <h4 class="intervention-titre">${intervention.titre}</h4>
@@ -496,8 +496,8 @@ function genererAffichageAnalyse(analyse) {
 
     // Structure en 3 cartes séparées similaires au profil Engagement
     let html = `
-        <div style="margin-top: 15px;">
-            <h4 class="intervention-titre" style="margin-bottom: 15px;">Aperçu du sous-groupe (${analyse.nbEtudiants} étudiant·e·s)</h4>
+        <div class="intervention-mt-15">
+            <h4 class="intervention-titre" class="intervention-mb-15">Aperçu du sous-groupe (${analyse.nbEtudiants} étudiant·e·s)</h4>
 
             <!-- Grille 3 colonnes avec cartes séparées -->
             <div class="grille-metriques-3col">
@@ -530,7 +530,7 @@ function genererAffichageAnalyse(analyse) {
             });
         html += '</div>';
     } else {
-        html += '<p class="text-muted" style="text-align: center;">Aucune donnée</p>';
+        html += '<p class="text-muted" class="intervention-text-center">Aucune donnée</p>';
     }
     html += '</div>';
 
@@ -550,7 +550,7 @@ function genererAffichageAnalyse(analyse) {
     if (analyse.risqueDistribution) {
         const risquesAvecCompte = Object.entries(analyse.risqueDistribution).filter(([niveau, count]) => count > 0);
         if (risquesAvecCompte.length > 0) {
-            html += '<div class="badges-centres" style="margin-bottom: 15px;">';
+            html += '<div class="badges-centres" class="intervention-mb-15">';
             risquesAvecCompte.forEach(([niveau, count]) => {
                 // Mapper le niveau de risque au nom de classe CSS
                 let classeRisque = 'badge-risque-analyse-defaut';
@@ -578,10 +578,10 @@ function genererAffichageAnalyse(analyse) {
             });
             html += '</div>';
         } else {
-            html += '<p class="text-muted" style="text-align: center;">Aucune donnée</p>';
+            html += '<p class="text-muted" class="intervention-text-center">Aucune donnée</p>';
         }
     } else {
-        html += '<p class="text-muted" style="text-align: center;">Aucune donnée</p>';
+        html += '<p class="text-muted" class="intervention-text-center">Aucune donnée</p>';
     }
     html += '</div>';
 
@@ -612,7 +612,7 @@ function genererAffichageAnalyse(analyse) {
             });
         html += '</div>';
     } else {
-        html += '<p class="text-muted" style="text-align: center;">Aucune donnée</p>';
+        html += '<p class="text-muted" class="intervention-text-center">Aucune donnée</p>';
     }
     html += '</div>';
 
@@ -663,22 +663,22 @@ function afficherFormulaireIntervention() {
 
     container.innerHTML = `
         <div class="carte">
-            <h3 style="margin-top: 0;">Planifier une intervention</h3>
+            <h3 class="intervention-mt-0">Planifier une intervention</h3>
 
             <form onsubmit="sauvegarderNouvelleIntervention(event); return false;">
                 <!-- Layout 2 colonnes : formulaire | gestion absences -->
-                <div style="display: grid; grid-template-columns: 1fr 0.9fr; gap: 20px; margin-bottom: 20px;">
+                <div class="intervention-grid-1-09">
                     <!-- Colonne gauche : Champs du formulaire (50%) -->
                     <div>
                         <!-- Ligne 1 : Titre, Niveau RàI, Type -->
-                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                            <div class="champ-formulaire" style="margin: 0;">
+                        <div class="intervention-grid-2-1-1">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionTitre" class="label-formulaire">Titre :</label>
                                 <input type="text" id="interventionTitre" class="controle-form" required
                                        placeholder="Ex: Intervention Rigueur et Nuance">
                             </div>
 
-                            <div class="champ-formulaire" style="margin: 0;">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionNiveau" class="label-formulaire">Niveau RàI :</label>
                                 <select id="interventionNiveau" class="controle-form" required>
                                     <option value="2">Niveau 2 (Groupe ciblé)</option>
@@ -686,7 +686,7 @@ function afficherFormulaireIntervention() {
                                 </select>
                             </div>
 
-                            <div class="champ-formulaire" style="margin: 0;">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionType" class="label-formulaire">Type :</label>
                                 <select id="interventionType" class="controle-form" required>
                                     <option value="groupe">Groupe (séance en classe)</option>
@@ -696,25 +696,25 @@ function afficherFormulaireIntervention() {
                         </div>
 
                         <!-- Ligne 2 : Date, Heure, Durée -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                            <div class="champ-formulaire" style="margin: 0;">
+                        <div class="intervention-grid-3col">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionDate" class="label-formulaire">Date :</label>
                                 <input type="date" id="interventionDate" class="controle-form" required value="${aujourdhui}">
                             </div>
 
-                            <div class="champ-formulaire" style="margin: 0;">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionHeure" class="label-formulaire">Heure :</label>
                                 <input type="time" id="interventionHeure" class="controle-form">
                             </div>
 
-                            <div class="champ-formulaire" style="margin: 0;">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionDuree" class="label-formulaire">Durée (heures) :</label>
                                 <input type="number" id="interventionDuree" class="controle-form" min="0.5" max="4" step="0.5" value="2" required>
                             </div>
                         </div>
 
                         <!-- Ligne 3 : Description -->
-                        <div class="champ-formulaire" style="margin: 0;">
+                        <div class="champ-formulaire" class="intervention-m-0">
                             <label for="interventionDescription" class="label-formulaire">Description (optionnel) :</label>
                             <textarea id="interventionDescription" class="controle-form" rows="3"
                                       placeholder="Objectifs de l'intervention, sujets abordés..."></textarea>
@@ -733,10 +733,10 @@ function afficherFormulaireIntervention() {
                             <input type="date" id="interventionSeance" class="controle-form">
                         </div>
 
-                        <div class="champ-formulaire" style="margin: 0;">
+                        <div class="champ-formulaire" class="intervention-m-0">
                             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 5px;">
                                 <input type="checkbox" id="interventionMarquerMotivees" style="width: auto;">
-                                <span style="font-size: 0.9rem;">Marquer les non-participants comme absents motivés</span>
+                                <span class="intervention-texte-09">Marquer les non-participants comme absents motivés</span>
                             </label>
                             <small class="text-muted" style="font-size: 0.85rem;">
                                 Les élèves non sélectionnés bénéficieront d'un «congé» pour cette séance.
@@ -745,7 +745,7 @@ function afficherFormulaireIntervention() {
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <div class="intervention-flex-end">
                     <button type="button" onclick="afficherListeInterventions()" class="btn btn-secondaire">
                         Annuler
                     </button>
@@ -804,22 +804,22 @@ function afficherFormulaireModification(interventionId) {
 
     container.innerHTML = `
         <div class="carte">
-            <h3 style="margin-top: 0;">Modifier l'intervention</h3>
+            <h3 class="intervention-mt-0">Modifier l'intervention</h3>
 
             <form onsubmit="sauvegarderModificationIntervention(event, '${interventionId}'); return false;">
                 <!-- Layout 2 colonnes : formulaire | gestion absences -->
-                <div style="display: grid; grid-template-columns: 1fr 0.9fr; gap: 20px; margin-bottom: 20px;">
+                <div class="intervention-grid-1-09">
                     <!-- Colonne gauche : Champs du formulaire (50%) -->
                     <div>
                         <!-- Ligne 1 : Titre, Niveau RàI, Type -->
-                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                            <div class="champ-formulaire" style="margin: 0;">
+                        <div class="intervention-grid-2-1-1">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionTitre" class="label-formulaire">Titre :</label>
                                 <input type="text" id="interventionTitre" class="controle-form" required
                                        value="${intervention.titre}" placeholder="Ex: Intervention Rigueur et Nuance">
                             </div>
 
-                            <div class="champ-formulaire" style="margin: 0;">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionNiveau" class="label-formulaire">Niveau RàI :</label>
                                 <select id="interventionNiveau" class="controle-form" required>
                                     <option value="2" ${intervention.niveauRai === 2 ? 'selected' : ''}>Niveau 2 (Groupe ciblé)</option>
@@ -827,7 +827,7 @@ function afficherFormulaireModification(interventionId) {
                                 </select>
                             </div>
 
-                            <div class="champ-formulaire" style="margin: 0;">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionType" class="label-formulaire">Type :</label>
                                 <select id="interventionType" class="controle-form" required>
                                     <option value="groupe" ${intervention.type === 'groupe' ? 'selected' : ''}>Groupe (séance en classe)</option>
@@ -837,25 +837,25 @@ function afficherFormulaireModification(interventionId) {
                         </div>
 
                         <!-- Ligne 2 : Date, Heure, Durée -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                            <div class="champ-formulaire" style="margin: 0;">
+                        <div class="intervention-grid-3col">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionDate" class="label-formulaire">Date :</label>
                                 <input type="date" id="interventionDate" class="controle-form" required value="${intervention.date}">
                             </div>
 
-                            <div class="champ-formulaire" style="margin: 0;">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionHeure" class="label-formulaire">Heure :</label>
                                 <input type="time" id="interventionHeure" class="controle-form" value="${intervention.heure || ''}">
                             </div>
 
-                            <div class="champ-formulaire" style="margin: 0;">
+                            <div class="champ-formulaire" class="intervention-m-0">
                                 <label for="interventionDuree" class="label-formulaire">Durée (heures) :</label>
                                 <input type="number" id="interventionDuree" class="controle-form" min="0.5" max="4" step="0.5" value="${intervention.duree || 2}" required>
                             </div>
                         </div>
 
                         <!-- Ligne 3 : Description -->
-                        <div class="champ-formulaire" style="margin: 0;">
+                        <div class="champ-formulaire" class="intervention-m-0">
                             <label for="interventionDescription" class="label-formulaire">Description (optionnel) :</label>
                             <textarea id="interventionDescription" class="controle-form" rows="3"
                                       placeholder="Objectifs de l'intervention, sujets abordés...">${intervention.description || ''}</textarea>
@@ -874,10 +874,10 @@ function afficherFormulaireModification(interventionId) {
                             <input type="date" id="interventionSeance" class="controle-form" value="${intervention.seanceConcernee || ''}">
                         </div>
 
-                        <div class="champ-formulaire" style="margin: 0;">
+                        <div class="champ-formulaire" class="intervention-m-0">
                             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 5px;">
                                 <input type="checkbox" id="interventionMarquerMotivees" style="width: auto;" ${intervention.marquerNonParticipantsMotives ? 'checked' : ''}>
-                                <span style="font-size: 0.9rem;">Marquer les non-participants comme absents motivés</span>
+                                <span class="intervention-texte-09">Marquer les non-participants comme absents motivés</span>
                             </label>
                             <small class="text-muted" style="font-size: 0.85rem;">
                                 Les élèves non sélectionnés bénéficieront d'un «congé» pour cette séance.
@@ -886,7 +886,7 @@ function afficherFormulaireModification(interventionId) {
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <div class="intervention-flex-end">
                     <button type="button" onclick="afficherListeInterventions()" class="btn btn-secondaire">
                         Annuler
                     </button>
@@ -1006,18 +1006,18 @@ function ouvrirIntervention(interventionId) {
             <h3 style="margin: 0 0 20px 0;">${intervention.titre}</h3>
 
             <!-- Section informations éditables -->
-            <div style="display: grid; grid-template-columns: 1fr 0.9fr; gap: 20px; margin-bottom: 20px;">
+            <div class="intervention-grid-1-09">
                 <!-- Colonne gauche : Informations de base (50%) -->
                 <div>
                     <!-- Ligne 1 : Titre, Niveau RàI, Type -->
-                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div class="champ-formulaire" style="margin: 0;">
+                    <div class="intervention-grid-2-1-1">
+                        <div class="champ-formulaire" class="intervention-m-0">
                             <label for="interventionTitre" class="label-formulaire">Titre :</label>
                             <input type="text" id="interventionTitre" class="controle-form" required
                                    value="${intervention.titre}" placeholder="Ex: Intervention Rigueur et Nuance">
                         </div>
 
-                        <div class="champ-formulaire" style="margin: 0;">
+                        <div class="champ-formulaire" class="intervention-m-0">
                             <label for="interventionNiveau" class="label-formulaire">Niveau RàI :</label>
                             <select id="interventionNiveau" class="controle-form" required>
                                 <option value="2" ${intervention.niveauRai === 2 ? 'selected' : ''}>Niveau 2 (Groupe ciblé)</option>
@@ -1025,7 +1025,7 @@ function ouvrirIntervention(interventionId) {
                             </select>
                         </div>
 
-                        <div class="champ-formulaire" style="margin: 0;">
+                        <div class="champ-formulaire" class="intervention-m-0">
                             <label for="interventionType" class="label-formulaire">Type :</label>
                             <select id="interventionType" class="controle-form" required>
                                 <option value="groupe" ${intervention.type === 'groupe' ? 'selected' : ''}>Groupe (séance en classe)</option>
@@ -1035,25 +1035,25 @@ function ouvrirIntervention(interventionId) {
                     </div>
 
                     <!-- Ligne 2 : Date, Heure, Durée -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <div class="champ-formulaire" style="margin: 0;">
+                    <div class="intervention-grid-3col">
+                        <div class="champ-formulaire" class="intervention-m-0">
                             <label for="interventionDate" class="label-formulaire">Date :</label>
                             <input type="date" id="interventionDate" class="controle-form" required value="${intervention.date}">
                         </div>
 
-                        <div class="champ-formulaire" style="margin: 0;">
+                        <div class="champ-formulaire" class="intervention-m-0">
                             <label for="interventionHeure" class="label-formulaire">Heure :</label>
                             <input type="time" id="interventionHeure" class="controle-form" value="${intervention.heure || ''}">
                         </div>
 
-                        <div class="champ-formulaire" style="margin: 0;">
+                        <div class="champ-formulaire" class="intervention-m-0">
                             <label for="interventionDuree" class="label-formulaire">Durée (heures) :</label>
                             <input type="number" id="interventionDuree" class="controle-form" min="0.5" max="4" step="0.5" value="${intervention.duree || 2}" required>
                         </div>
                     </div>
 
                     <!-- Ligne 3 : Description -->
-                    <div class="champ-formulaire" style="margin: 0;">
+                    <div class="champ-formulaire" class="intervention-m-0">
                         <label for="interventionDescription" class="label-formulaire">Description (optionnel) :</label>
                         <textarea id="interventionDescription" class="controle-form" rows="3"
                                   placeholder="Objectifs de l'intervention, sujets abordés...">${intervention.description || ''}</textarea>
@@ -1067,11 +1067,11 @@ function ouvrirIntervention(interventionId) {
                         <div style="display: flex; gap: 15px;">
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                 <input type="radio" name="interventionStatut" value="en-cours" ${intervention.statut !== 'completee' ? 'checked' : ''} style="width: auto; margin: 0;">
-                                <span style="font-size: 0.9rem;">En préparation</span>
+                                <span class="intervention-texte-09">En préparation</span>
                             </label>
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                 <input type="radio" name="interventionStatut" value="completee" ${intervention.statut === 'completee' ? 'checked' : ''} style="width: auto; margin: 0;">
-                                <span style="font-size: 0.9rem;">Complétée</span>
+                                <span class="intervention-texte-09">Complétée</span>
                             </label>
                         </div>
                     </div>
@@ -1088,10 +1088,10 @@ function ouvrirIntervention(interventionId) {
                         <input type="date" id="interventionSeance" class="controle-form" value="${intervention.seanceConcernee || ''}">
                     </div>
 
-                    <div class="champ-formulaire" style="margin: 0;">
+                    <div class="champ-formulaire" class="intervention-m-0">
                         <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 5px;">
                             <input type="checkbox" id="interventionMarquerMotivees" style="width: auto;" ${intervention.marquerNonParticipantsMotives ? 'checked' : ''}>
-                            <span style="font-size: 0.9rem;">Marquer les non-participants comme absents motivés</span>
+                            <span class="intervention-texte-09">Marquer les non-participants comme absents motivés</span>
                         </label>
                         <small class="text-muted" style="font-size: 0.85rem;">
                             Les élèves non sélectionnés bénéficieront d'un «congé» pour cette séance.
@@ -1127,7 +1127,7 @@ function ouvrirIntervention(interventionId) {
 
             <!-- Observations générales (pleine largeur) -->
             <div class="carte" style="margin-bottom: 20px;">
-                <h4 style="margin-top: 0;">Observations générales</h4>
+                <h4 class="intervention-mt-0">Observations générales</h4>
                 <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 10px;">
                     Notez vos observations durant l'intervention (stratégies à nouveau enseignées, réception du groupe...)
                 </p>
@@ -1191,7 +1191,7 @@ function afficherNotesIndividuelles(interventionId, dasSelectionnes) {
 
     let html = `
         <div class="carte" style="margin-top: 20px;">
-            <h4 style="margin-top: 0;">Notes individuelles</h4>
+            <h4 class="intervention-mt-0">Notes individuelles</h4>
             <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
                 Documentez vos observations spécifiques pour chaque étudiant·e (participation, compréhension, besoins identifiés...)
             </p>
@@ -1213,7 +1213,7 @@ function afficherNotesIndividuelles(interventionId, dasSelectionnes) {
                     class="controle-form"
                     rows="2"
                     placeholder="Ex: Excellente participation, a bien saisi la stratégie enseignée..."
-                    style="font-size: 0.9rem;">${noteExistante}</textarea>
+                    class="intervention-texte-09">${noteExistante}</textarea>
             </div>
         `;
     });
