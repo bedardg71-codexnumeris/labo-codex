@@ -460,7 +460,7 @@ function genererExplicationCalculIndices() {
     let html = '<strong>Méthodes de calcul des indices (pratique active : ' + (isPAN ? 'PAN-Maîtrise' : 'Sommative') + ')</strong><br><br>';
 
     // A - Assiduité (TOUJOURS DYNAMIQUE - comportement cumulatif)
-    html += '<strong class="etud-texte-bleu">A (Assiduité)</strong> : ';
+    html += '<strong class="u-texte-bleu">A (Assiduité)</strong> : ';
     html += 'Proportion des heures de présence parmi les heures de cours <strong>effectivement données jusqu\'à maintenant</strong>. ';
     html += '<br>Formule : <code>A = (heures présentes / heures données) × 100</code>';
     html += '<br><em class="etud-texte-gris-petit">→ Calculé uniquement sur les séances passées (pas sur le total prévu pour la session)</em>';
@@ -470,7 +470,7 @@ function genererExplicationCalculIndices() {
     html += '<br><br>';
 
     // C - Complétion (TOUJOURS DYNAMIQUE - mobilisation cumulée)
-    html += '<strong class="etud-texte-bleu">C (Complétion)</strong> : ';
+    html += '<strong class="u-texte-bleu">C (Complétion)</strong> : ';
     html += 'Proportion de travaux remis parmi les travaux <strong>effectivement réalisés jusqu\'à maintenant</strong>. ';
     html += '<br>Formule : <code>C = (travaux remis / travaux réalisés) × 100</code>';
     html += '<br><em class="etud-texte-gris-petit">→ Un artefact devient "réalisé" dès qu\'une première évaluation existe pour celui-ci</em>';
@@ -480,7 +480,7 @@ function genererExplicationCalculIndices() {
     html += '<br><br>';
 
     // P - Performance (DÉPEND TOUJOURS DE LA PRATIQUE - résultat pédagogique)
-    html += '<strong class="etud-texte-bleu">P (Performance)</strong> : ';
+    html += '<strong class="u-texte-bleu">P (Performance)</strong> : ';
     html += '<strong>Calculé selon la pratique de notation en vigueur</strong>. ';
 
     if (isPAN) {
@@ -494,7 +494,7 @@ function genererExplicationCalculIndices() {
     }
 
     html += '<br><br>';
-    html += '<strong class="etud-texte-bleu">Résumé</strong> : ';
+    html += '<strong class="u-texte-bleu">Résumé</strong> : ';
     html += '<strong>A et C</strong> mesurent le <strong>comportement cumulatif observable</strong> (contexte d\'apprentissage favorable ou non). ';
     html += '<strong>P</strong> mesure la <strong>qualité de l\'apprentissage</strong> selon la pratique pédagogique choisie (Sommative, PAN-Maîtrise, ou autre).';
 

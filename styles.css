@@ -149,6 +149,95 @@
 }
 
 /* ===============================
+   CLASSES UTILITAIRES GLOBALES (Phase C)
+   Préfixe: u- (utility)
+   =============================== */
+
+/* === MARGES === */
+.u-m-0 { margin: 0; }
+.u-mb-8 { margin-bottom: 8px; }
+.u-mb-10 { margin-bottom: 10px; }
+.u-mb-15 { margin-bottom: 15px; }
+.u-mb-20 { margin-bottom: 20px; }
+.u-mt-6 { margin-top: 6px; }
+.u-mt-10 { margin-top: 10px; }
+.u-mt-15 { margin-top: 15px; }
+.u-mt-20 { margin-top: 20px; }
+.u-mt-25 { margin-top: 25px; }
+.u-mr-10 { margin-right: 10px; }
+.u-mr-20 { margin-right: 20px; }
+.u-ml-6 { margin-left: 6px; }
+.u-ml-10 { margin-left: 10px; }
+
+/* === PADDING === */
+.u-p-15 { padding: 15px; }
+.u-p-20 { padding: 20px; }
+
+/* === TEXTE - TAILLES === */
+.u-texte-mini { font-size: 0.7rem; }
+.u-texte-petit { font-size: 0.85rem; }
+.u-texte-09 { font-size: 0.9rem; }
+.u-texte-moyen { font-size: 0.95rem; }
+.u-texte-11 { font-size: 1.1rem; }
+.u-texte-grand { font-size: 1.2rem; }
+
+/* === TEXTE - COULEURS === */
+.u-texte-bleu { color: var(--bleu-principal); }
+.u-texte-gris { color: #666; }
+.u-texte-gris-clair { color: #999; }
+.u-texte-danger { color: #dc2626; }
+.u-texte-succes { color: #16a34a; }
+.u-texte-warning { color: #ffc107; }
+
+/* === TEXTE - ALIGNEMENT === */
+.u-text-center { text-align: center; }
+.u-text-right { text-align: right; }
+.u-text-left { text-align: left; }
+
+/* === TEXTE - FONT-WEIGHT === */
+.u-texte-gras { font-weight: 600; }
+.u-texte-bold { font-weight: bold; }
+.u-texte-medium { font-weight: 500; }
+.u-texte-normal { font-weight: 400; }
+
+/* === TEXTE - STYLE === */
+.u-texte-italic { font-style: italic; }
+.u-texte-capitalize { text-transform: capitalize; }
+.u-texte-uppercase { text-transform: uppercase; }
+
+/* === WIDTHS === */
+.u-w-100 { width: 100%; }
+.u-w-80 { width: 80px; }
+
+/* === DISPLAY === */
+.u-hide { display: none; }
+.u-block { display: block; }
+.u-inline-block { display: inline-block; }
+
+/* === FLEX === */
+.u-flex { display: flex; }
+.u-flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.u-flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.u-flex-end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* === DIVERS === */
+.u-nowrap { white-space: nowrap; }
+.u-overflow-auto { overflow: auto; }
+.u-overflow-x-auto { overflow-x: auto; }
+
+/* ===============================
    RESET ET BASE
    =============================== */
 
@@ -6674,8 +6763,8 @@ label:has(+ textarea:disabled) {
 /* === PATTERNS D'APPRENTISSAGE (Overlay 35%) === */
 
 .barre-patterns {
-    height: 40px;
-    border-radius: 20px;
+    height: 30px;
+    border-radius: 15px;
     position: relative;
     background: linear-gradient(to right, 
         #22c55e 0%,   /* Vert */
@@ -6694,15 +6783,15 @@ label:has(+ textarea:disabled) {
     right: 0;
     bottom: 0;
     background: rgba(15, 30, 58, 0.35);
-    border-radius: 20px;
+    border-radius: 15px;
     pointer-events: none;
 }
 
 /* === MODÈLE RàI (Overlay 40%) === */
 
 .barre-rai {
-    height: 40px;
-    border-radius: 20px;
+    height: 30px;
+    border-radius: 15px;
     position: relative;
     background: linear-gradient(to right, 
         #0ea5e9 0%,   /* Bleu ciel */
@@ -6721,7 +6810,7 @@ label:has(+ textarea:disabled) {
     right: 0;
     bottom: 0;
     background: rgba(15, 30, 58, 0.4);
-    border-radius: 20px;
+    border-radius: 15px;
     pointer-events: none;
 }
 

@@ -750,7 +750,7 @@ function importerCommentaires() {
 function genererApercuAleatoire() {
     if (!cartoucheActuel) return;
     
-    let html = '<h6 class="cartouche-texte-bleu-mb15">Rétroaction générée automatiquement :</h6>';
+    let html = '<h6 class="u-texte-bleu-mb15">Rétroaction générée automatiquement :</h6>';
     
     cartoucheActuel.criteres.forEach(critere => {
         // Choisir un niveau aléatoire
@@ -962,18 +962,18 @@ function afficherListeCartouches(cartouches, grilleId) {
         const nbTotal = (cartouche.criteres?.length || 0) * (cartouche.niveaux?.length || 0);
 
         return `
-        <div class="item-liste" class="cartouche-fond-bleu-pale">
-            <div class="cartouche-flex-between">
+        <div class="item-liste cartouche-fond-bleu-pale">
+            <div class="u-flex-between">
                 <div>
-                    <strong class="cartouche-texte-bleu">${nomEchappe}</strong>
-                    <small class="cartouche-texte-bleu-leger-ml10">
+                    <strong class="u-texte-bleu">${nomEchappe}</strong>
+                    <small class="u-texte-bleu-leger-ml10">
                         ${nbRemplis} / ${nbTotal} commentaires remplis
                     </small>
                 </div>
                 <div>
                     <button onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grilleId}')"
                           class="btn btn-tres-compact"
-                          class="cartouche-mr-10"
+                          class="u-mr-10"
                           title="${cartouche.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
                         ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
                     </button>
@@ -1027,7 +1027,7 @@ function afficherToutesLesGrillesEtCartouches() {
     if (grilles.length === 0) {
         container.innerHTML = `
             <div class="cartouche-zone-bleu-pale">
-                <p class="cartouche-texte-bleu-leger">Aucune grille de critères disponible</p>
+                <p class="u-texte-bleu-leger">Aucune grille de critères disponible</p>
                 <small>Créez d'abord une grille dans <strong>Réglages → Grilles de critères</strong></small>
             </div>
         `;
@@ -1052,7 +1052,7 @@ function afficherToutesLesGrillesEtCartouches() {
 
                 <div class="cartouche-p-15">
                     ${cartouches.length > 0 ? `
-                        <div class="cartouche-mb-15">
+                        <div class="u-mb-15">
                             ${cartouches.map(cartouche => {
                                 const nomCartoucheEchappe = echapperHtml(cartouche.nom);
                                 const nbRemplis = Object.keys(cartouche.commentaires || {})
@@ -1061,18 +1061,18 @@ function afficherToutesLesGrillesEtCartouches() {
                                 const nbTotal = (cartouche.criteres?.length || 0) * (cartouche.niveaux?.length || 0);
 
                                 return `
-                                    <div class="item-liste" class="cartouche-fond-bleu-pale">
-                                        <div class="cartouche-flex-between">
+                                    <div class="item-liste cartouche-fond-bleu-pale">
+                                        <div class="u-flex-between">
                                             <div>
-                                                <strong class="cartouche-texte-bleu">${nomCartoucheEchappe}</strong>
-                                                <small class="cartouche-texte-bleu-leger-ml10">
+                                                <strong class="u-texte-bleu">${nomCartoucheEchappe}</strong>
+                                                <small class="u-texte-bleu-leger-ml10">
                                                     ${nbRemplis} / ${nbTotal} commentaires
                                                 </small>
                                             </div>
-                                            <div class="cartouche-nowrap">
+                                            <div class="u-nowrap">
                                                 <button onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grille.id}')"
                                                       class="btn btn-tres-compact"
-                                                      class="cartouche-mr-10"
+                                                      class="u-mr-10"
                                                       title="${cartouche.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
                                                     ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
                                                 </button>

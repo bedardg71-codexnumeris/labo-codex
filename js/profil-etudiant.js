@@ -852,7 +852,7 @@ function genererSectionMobilisationEngagement(da) {
 
     return `
         <!-- Détails des calculs (masqué par défaut) -->
-        <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle" class="carte-info-toggle" class="profil-hide">
+        <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle u-hide">
             <div class="details-calculs-section">
                 <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
                 <div class="details-calculs-bloc">
@@ -898,7 +898,7 @@ function genererSectionMobilisationEngagement(da) {
 
             <!-- FICHE ASSIDUITÉ -->
             <div class="profil-carte">
-                <div class="profil-flex-between-mb15">
+                <div class="u-flex-between-mb15">
                     <h3 class="profil-section-titre-seul">Assiduité</h3>
                     ${genererValeursComparatives(indicesSOM.A, indicesPAN.A, modeComparatif)}
                 </div>
@@ -915,7 +915,7 @@ function genererSectionMobilisationEngagement(da) {
                     ${detailsA.absences.length} absence${detailsA.absences.length > 1 ? 's' : ''} ou retard${detailsA.absences.length > 1 ? 's' : ''}
                 </h4>
                 ${detailsA.absences.length > 0 ? `
-                    <div class="badges-centres" class="profil-mb-20">
+                    <div class="badges-centres u-mb-20">
                         ${detailsA.absences.map(abs => {
                             const date = new Date(abs.date + 'T12:00:00');
                             const options = { weekday: 'short', day: 'numeric', month: 'short' };
@@ -971,7 +971,7 @@ function genererSectionMobilisationEngagement(da) {
                         <h4 class="profil-section-titre">
                             ${interventionsParticipees.length} intervention${interventionsParticipees.length > 1 ? 's' : ''} RàI
                         </h4>
-                        <div class="badges-centres" class="profil-mb-20">
+                        <div class="badges-centres u-mb-20">
                             ${interventionsParticipees.map(intervention => {
                                 const date = new Date(intervention.date + 'T12:00:00');
                                 const options = { weekday: 'short', day: 'numeric', month: 'short' };
@@ -995,7 +995,7 @@ function genererSectionMobilisationEngagement(da) {
 
             <!-- FICHE COMPLÉTION -->
             <div class="profil-carte">
-                <div class="profil-flex-between-mb15">
+                <div class="u-flex-between-mb15">
                     <h3 class="profil-section-titre-seul">Complétion</h3>
                     ${genererValeursComparatives(indicesSOM.C, indicesPAN.C, modeComparatif)}
                 </div>
@@ -1012,7 +1012,7 @@ function genererSectionMobilisationEngagement(da) {
                     ${artefactsRemis.length} production${artefactsRemis.length > 1 ? 's' : ''} remise${artefactsRemis.length > 1 ? 's' : ''}
                 </h4>
                 ${artefactsRemis.length > 0 ? `
-                    <div class="badges-centres" class="profil-mb-20">
+                    <div class="badges-centres u-mb-20">
                         ${artefactsRemis
                             .map(art => {
                                 // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
@@ -1033,7 +1033,7 @@ function genererSectionMobilisationEngagement(da) {
                             `).join('')}
                     </div>
                 ` : `
-                    <div class="profil-message-vide" class="profil-mb-15">
+                    <div class="profil-message-vide u-mb-15">
                         Aucun artefact remis
                     </div>
                 `}
@@ -1043,7 +1043,7 @@ function genererSectionMobilisationEngagement(da) {
                     ${artefactsNonRemis.length} production${artefactsNonRemis.length > 1 ? 's' : ''} non remise${artefactsNonRemis.length > 1 ? 's' : ''}
                 </h4>
                 ${artefactsNonRemis.length > 0 ? `
-                    <div class="badges-centres" class="profil-mb-20">
+                    <div class="badges-centres u-mb-20">
                         ${artefactsNonRemis
                             .map(art => {
                                 // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
@@ -1072,7 +1072,7 @@ function genererSectionMobilisationEngagement(da) {
 
             <!-- FICHE PERFORMANCE -->
             <div class="profil-carte">
-                <div class="profil-flex-between-mb15">
+                <div class="u-flex-between-mb15">
                     <h3 class="profil-section-titre-seul">Performance</h3>
                     ${genererValeursComparatives(indicesSOM.P, indicesPAN.P, modeComparatif)}
                 </div>
@@ -1132,7 +1132,7 @@ function genererSectionMobilisationEngagement(da) {
 
                                 return `
                                     <div style="background: ${couleurFond}; border: 2px solid ${couleurBordure}; border-radius: 8px; padding: 12px; ${estGrise ? 'opacity: 0.4; filter: grayscale(0.7);' : ''}">
-                                        <div class="profil-flex-between-mb8">
+                                        <div class="u-flex-between-mb8">
                                             <strong style="color: ${couleurBordure}; font-size: 0.9rem;">
                                                 ${echapperHtml(info.nom)}
                                             </strong>
@@ -1191,7 +1191,7 @@ function genererSectionMobilisationEngagement(da) {
                     })()}
                 </h4>
                 ${artefactsRetenus.length > 0 ? `
-                    <div class="badges-centres" class="profil-mb-20">
+                    <div class="badges-centres u-mb-20">
                         ${artefactsRetenus.map(art => {
                             // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
                             const indexOriginal = artefactsPortfolio.findIndex(p => p.id === art.id) + 1;
@@ -1239,7 +1239,7 @@ function genererSectionMobilisationEngagement(da) {
                         }).join('')}
                     </div>
                 ` : `
-                    <div class="profil-message-vide" class="profil-mb-15">
+                    <div class="profil-message-vide u-mb-15">
                         Aucun artefact évalué
                     </div>
                 `}
@@ -1276,8 +1276,8 @@ function genererSectionMobilisationEngagement(da) {
             }
 
             return `
-                <div class="profil-carte" class="profil-mt-10">
-                    <div class="profil-flex-between-mb15">
+                <div class="profil-carte u-mt-10">
+                    <div class="u-flex-between-mb15">
                         <h3 class="profil-section-titre-seul">
                             Niveau d'engagement${texteExplicatifE}
                         </h3>
@@ -1489,7 +1489,7 @@ function genererSectionAccompagnement(da) {
 
     let html = `
         <!-- Détails de la section (masqué par défaut) -->
-        <div id="details-calculs-accompagnement-${da}" class="carte-info-toggle" class="carte-info-toggle" class="profil-hide">
+        <div id="details-calculs-accompagnement-${da}" class="carte-info-toggle u-hide">
             <div class="details-calculs-section">
                 <h5 class="details-calculs-titre">À PROPOS DE CETTE SECTION</h5>
                 <div class="details-calculs-bloc">
@@ -1639,7 +1639,7 @@ function genererSectionAccompagnement(da) {
 
                     ${forcesSolo.some(f => f.valeur >= 0.85) ? `
                     <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px; margin-bottom: 8px;">
-                        <div class="profil-texte-succes-gras">
+                        <div class="u-texte-succes-gras">
                             ${forcesSolo.filter(f => f.valeur >= 0.85).map(f => f.nom).join(', ')} : Maîtrisé et étendu (E)
                         </div>
                         <div class="profil-texte-explicatif">
@@ -1650,7 +1650,7 @@ function genererSectionAccompagnement(da) {
 
                     ${forcesSolo.some(f => f.valeur >= seuilMaitrise && f.valeur < 0.85) ? `
                     <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px;">
-                        <div class="profil-texte-succes-gras">
+                        <div class="u-texte-succes-gras">
                             ${forcesSolo.filter(f => f.valeur >= seuilMaitrise && f.valeur < 0.85).map(f => f.nom).join(', ')} : Maîtrisé (M)
                         </div>
                         <div class="profil-texte-explicatif">
@@ -1669,7 +1669,7 @@ function genererSectionAccompagnement(da) {
 
                     ${defisSolo.some(d => d.valeur < obtenirSeuil('idme.insuffisant')) ? `
                     <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px; margin-bottom: 8px;">
-                        <div class="profil-texte-danger-gras">
+                        <div class="u-texte-danger-gras">
                             ${defisSolo.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : Insuffisant ou incomplet (I)
                         </div>
                         <div class="profil-texte-explicatif">
@@ -1680,7 +1680,7 @@ function genererSectionAccompagnement(da) {
 
                     ${defisSolo.some(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement) ? `
                     <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px;">
-                        <div class="profil-texte-danger-gras">
+                        <div class="u-texte-danger-gras">
                             ${defisSolo.filter(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement).map(d => d.nom).join(', ')} : En développement (D)
                         </div>
                         <div class="profil-texte-explicatif">
@@ -1702,7 +1702,7 @@ function genererSectionAccompagnement(da) {
 
         <!-- Historique compact -->
         <div style="margin-top: 15px;">
-            <div class="profil-flex-between-mb10">
+            <div class="u-flex-between-mb10">
                 <h4 style="color: var(--bleu-principal); font-size: 0.95rem; margin: 0; font-weight: 600;">
                     HISTORIQUE ${interventions && interventions.length > 0 ? `(${interventions.length} intervention${interventions.length > 1 ? 's' : ''})` : ''}
                 </h4>
@@ -1713,7 +1713,7 @@ function genererSectionAccompagnement(da) {
 
     if (!interventions || interventions.length === 0) {
         html += `
-            <div class="carte" class="profil-zone-centre-fond-bleu">
+            <div class="carte profil-zone-centre-fond-bleu">
                 <div style="font-size: 0.95rem; color: #666; font-style: italic;">
                     Aucune intervention documentée. Les interventions RàI apparaîtront ici.
                 </div>
@@ -2098,7 +2098,7 @@ function genererSectionRisque(da) {
             <li><strong>Urgence :</strong> <span style="color: ${couleurUrgence};">${urgence}</span></li>
         </ul>
 
-        <div class="section-titre" class="profil-mt-25">Position sur l'échelle de risque</div>
+        <div class="section-titre u-mt-25">Position sur l'échelle de risque</div>
 
         <div class="profil-echelle-risque">
             <div class="profil-echelle-barre" style="background: linear-gradient(to right,
@@ -2144,7 +2144,7 @@ function genererSectionRisque(da) {
             <br>Engagement actuel : <strong style="color: ${interpE.couleur};">${interpE.niveau}</strong>
         </div>
 
-        <div class="section-titre" class="profil-mt-25">Indicateurs clés</div>
+        <div class="section-titre u-mt-25">Indicateurs clés</div>
 
         <div class="profil-grid-indicateurs">
             <div class="profil-indicateur">
@@ -2168,11 +2168,11 @@ function genererSectionRisque(da) {
         </div>
 
         ${indices.R >= seuilMinimal ? `
-            <div class="profil-recommandations ${indices.R >= seuilEleve ? 'profil-recommandations-danger' : indices.R >= seuilModere ? 'profil-recommandations-avertissement' : 'profil-recommandations-info'}" class="profil-mt-20">
-                <h4 class="profil-recommandations-titre ${indices.R >= seuilEleve ? 'profil-texte-danger' : indices.R >= seuilModere ? 'profil-texte-avertissement' : 'profil-texte-info'}">
+            <div class="profil-recommandations ${indices.R >= seuilEleve ? 'profil-recommandations-danger' : indices.R >= seuilModere ? 'profil-recommandations-avertissement' : 'profil-recommandations-info'} u-mt-20">
+                <h4 class="profil-recommandations-titre ${indices.R >= seuilEleve ? 'u-texte-danger' : indices.R >= seuilModere ? 'profil-texte-avertissement' : 'profil-texte-info'}">
                     Intervention ciblée recommandée
                 </h4>
-                <ol class="profil-recommandations-liste ${indices.R >= seuilEleve ? 'profil-texte-danger' : indices.R >= seuilModere ? 'profil-texte-avertissement' : 'profil-texte-info'}">
+                <ol class="profil-recommandations-liste ${indices.R >= seuilEleve ? 'u-texte-danger' : indices.R >= seuilModere ? 'profil-texte-avertissement' : 'profil-texte-info'}">
                     ${indices.R >= seuilEleve ? `
                         <li><strong>JOUR 1 :</strong> Rencontre individuelle urgente avec l'étudiant et conseiller pédagogique</li>
                         <li><strong>JOUR 2-3 :</strong> Établir un plan d'intervention personnalisé (PIP) avec objectifs mesurables</li>
@@ -2194,9 +2194,9 @@ function genererSectionRisque(da) {
                 </ol>
             </div>
         ` : `
-            <div class="profil-recommandations profil-recommandations-succes" class="profil-mt-20">
-                <h4 class="profil-recommandations-titre profil-texte-succes">Maintien de l'engagement</h4>
-                <ul class="profil-recommandations-liste profil-texte-succes">
+            <div class="profil-recommandations profil-recommandations-succes u-mt-20">
+                <h4 class="profil-recommandations-titre u-texte-succes">Maintien de l'engagement</h4>
+                <ul class="profil-recommandations-liste u-texte-succes">
                     <li>Continuer la surveillance universelle (Niveau RàI 1)</li>
                     <li>Fournir rétroaction positive régulière</li>
                     <li>Encourager l'autonomie et l'autorégulation</li>
@@ -2662,7 +2662,7 @@ function changerSectionProfil(section) {
 
     contenuContainer.innerHTML = `
         <div class="profil-contenu-header">
-            <h2 class="profil-flex-between-mb20">
+            <h2 class="u-flex-between-mb20">
                 <span>${titre}${badgePratique}</span>
                 ${toggleInfo}
             </h2>
@@ -3134,8 +3134,8 @@ function afficherProfilComplet(da) {
                         <div><strong>DA:</strong> ${echapperHtml(eleve.daAffichage || eleve.da)}</div>
                         ${eleve.groupe ? `<div><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</div>` : ''}
                         ${eleve.programme ? `<div><strong>Programme:</strong> ${typeof obtenirNomProgramme === 'function' ? echapperHtml(obtenirNomProgramme(eleve.programme)) : echapperHtml(eleve.programme)}</div>` : ''}
-                        ${eleve.sa === 'Oui' ? '<div class="profil-texte-bleu">✓ Services adaptés</div>' : ''}
-                        ${eleve.caf === 'Oui' ? '<div class="profil-texte-bleu">✓ CAF</div>' : ''}
+                        ${eleve.sa === 'Oui' ? '<div class="u-texte-bleu">✓ Services adaptés</div>' : ''}
+                        ${eleve.caf === 'Oui' ? '<div class="u-texte-bleu">✓ CAF</div>' : ''}
                     </div>
                 </div>
 
@@ -3176,7 +3176,7 @@ function afficherProfilComplet(da) {
             <div class="zone-principale" id="profil-contenu-dynamique">
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
-                    <h2 class="profil-flex-between-mb20">
+                    <h2 class="u-flex-between-mb20">
                         <span>${titreSection}${genererBadgePratiqueProfil(indices.pratique, modeComparatif)}</span>
                         <span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span>
                     </h2>
@@ -3328,7 +3328,7 @@ function genererSectionProductions(da) {
     const etudiant = groupeEtudiants.find(e => e.da === da);
 
     if (!etudiant) {
-        return '<p class="profil-texte-centre-gris">Étudiant non trouvé</p>';
+        return '<p class="u-text-center-gris">Étudiant non trouvé</p>';
     }
 
     // Productions à évaluer (exclure portfolio lui-même)
@@ -3521,7 +3521,7 @@ function genererSectionPerformance(da) {
                                 Évalué le ${formaterDate(art.dateEvaluation)}
                             </div>
                         </div>
-                        <div class="profil-texte-droite">
+                        <div class="u-text-right">
                             <div style="font-size: 1.8rem; font-weight: bold; color: ${obtenirCouleurIndice(art.note)};">
                                 ${art.note}/100
                             </div>
@@ -3774,7 +3774,7 @@ function genererSectionCompletion(da) {
             </h3>
 
             <!-- Badge avec interprétation -->
-            <div class="profil-mb-15">
+            <div class="u-mb-15">
                 <span class="profil-valeur-moyenne">${interpC.emoji}</span>
                 <strong style="font-size: 1.1rem; color: ${interpC.couleur};">${interpC.niveau}</strong>
                 <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(${indices.C}%)</span>
@@ -3808,7 +3808,7 @@ function genererSectionCompletion(da) {
                 ✅ ARTEFACTS REMIS (${artefactsRemis.length})
             </h4>
             ${artefactsRemis.length > 0 ? `
-                <div class="badges-centres" class="profil-mb-20">
+                <div class="badges-centres u-mb-20">
                     ${artefactsRemis.map(art => `
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
                                     background: #d4edda; border-left: 3px solid #28a745;">
@@ -3834,7 +3834,7 @@ function genererSectionCompletion(da) {
                 ⏳ ARTEFACTS NON REMIS (${artefactsNonRemis.length})
             </h4>
             ${artefactsNonRemis.length > 0 ? `
-                <div class="badges-centres" class="profil-mb-20">
+                <div class="badges-centres u-mb-20">
                     ${artefactsNonRemis.map(art => `
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
                                     background: #f5f5f5; border-left: 3px solid #ddd; opacity: 0.6;">
@@ -5318,7 +5318,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
 
                     return `
                         <div style="font-weight: 500; color: #555;">${nomCritere}</div>
-                        <div class="profil-texte-centre">
+                        <div class="u-text-center">
                             <span style="display: inline-block; min-width: 50px; padding: 4px 10px;
                                          background: ${couleur}22; color: ${couleur};
                                          border-radius: 4px; font-weight: bold;">
@@ -5365,7 +5365,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                 <div style="background: linear-gradient(to right, ${interpBlocage.couleur}22, ${interpBlocage.couleur}11);
                             border-left: 4px solid ${interpBlocage.couleur};
                             padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                    <div class="profil-flex-between-mb10">
+                    <div class="u-flex-between-mb10">
                         <h4 style="color: ${interpBlocage.couleur}; margin: 0; font-size: 1rem;">
                             Indice de Blocage ${resultBlocage.partiel ? '(partiel)' : ''}
                         </h4>
@@ -5594,7 +5594,7 @@ function genererSectionPerformance(da) {
 
     if (!portfolio) {
         return `
-            <div class="text-muted" class="profil-zone-centre-p30">
+            <div class="text-muted profil-zone-centre-p30">
                 <p>Aucun portfolio configuré</p>
             </div>
         `;
@@ -5605,7 +5605,7 @@ function genererSectionPerformance(da) {
     
     if (tousLesArtefactsPortfolio.length === 0) {
         return `
-            <div class="text-muted" class="profil-zone-centre-p30">
+            <div class="text-muted profil-zone-centre-p30">
                 <p>📝 Aucun artefact de portfolio créé</p>
             </div>
         `;
@@ -5768,7 +5768,7 @@ function genererSectionPerformance(da) {
 
     return `
         <!-- Détails des calculs (masqué par défaut) - AFFICHÉ EN HAUT -->
-        <div id="details-calculs-performance-${da}" class="carte-info-toggle" class="carte-info-toggle" class="profil-hide">
+        <div id="details-calculs-performance-${da}" class="carte-info-toggle u-hide">
             <div class="details-calculs-section">
                 <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
                 <div class="details-calculs-bloc">
@@ -5842,7 +5842,7 @@ function genererSectionPerformance(da) {
         <div class="profil-carte-bordure-blanche">
 
             <!-- En-tête avec indice P -->
-            <div class="profil-flex-between-mb15">
+            <div class="u-flex-between-mb15">
                 <div>
                     <h3 style="margin: 0 0 5px 0; color: var(--bleu-principal); font-size: 1.1rem;">Développement des habiletés et compétences</h3>
                     <strong style="font-size: 0.95rem; color: ${interpP.couleur};">${interpP.niveau}</strong>
@@ -6114,7 +6114,7 @@ function genererSectionAssiduite(da) {
             </h3>
 
             <!-- Badge avec interprétation -->
-            <div class="profil-mb-15">
+            <div class="u-mb-15">
                 <span class="profil-valeur-moyenne">${interpA.emoji}</span>
                 <strong style="font-size: 1.1rem; color: ${interpA.couleur};">${interpA.niveau}</strong>
                 <span style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur}; margin-left: 10px;">(${taux}%)</span>
@@ -6132,7 +6132,7 @@ function genererSectionAssiduite(da) {
                 ${details.absences.length} ABSENCE${details.absences.length > 1 ? 'S' : ''} OU RETARD${details.absences.length > 1 ? 'S' : ''}
             </h4>
             ${details.absences.length > 0 ? `
-                <div class="badges-centres" class="profil-mb-20">
+                <div class="badges-centres u-mb-20">
                     ${details.absences.map(abs => {
                         const date = new Date(abs.date + 'T12:00:00');
                         const options = { weekday: 'short', day: 'numeric', month: 'short' };
@@ -6157,7 +6157,7 @@ function genererSectionAssiduite(da) {
                     }).join('')}
                 </div>
             ` : `
-                <div class="profil-message-tous-remis" class="profil-mb-20">
+                <div class="profil-message-tous-remis u-mb-20">
                     Assiduité parfaite !
                 </div>
             `}
@@ -6713,7 +6713,7 @@ function genererSectionRapport(da) {
                         <div style="font-size: 0.85rem; color: #666; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
                             Sections à inclure
                         </div>
-                        <div class="grille-checkboxes" class="profil-mb-10">
+                        <div class="grille-checkboxes u-mb-10">
                             <label class="text-sm-pointer">
                                 <input type="checkbox" id="inclure-identification-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
                                 Identification
@@ -6756,10 +6756,10 @@ function genererSectionRapport(da) {
 
                     <!-- Colonne droite : Actions -->
                     <div style="display: flex; flex-direction: column; gap: 10px; min-width: 180px;">
-                        <button class="btn btn-principal" class="profil-w-100" onclick="genererEtAfficherRapport('${da}')">
+                        <button class="btn btn-principal u-w-100" onclick="genererEtAfficherRapport('${da}')">
                             Rafraîchir
                         </button>
-                        <button class="btn btn-secondaire" class="profil-w-100" onclick="copierRapport('${da}')">
+                        <button class="btn btn-secondaire u-w-100" onclick="copierRapport('${da}')">
                             Copier
                         </button>
                     </div>

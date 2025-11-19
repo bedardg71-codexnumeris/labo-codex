@@ -255,7 +255,7 @@ function chargerPortfolioEleveDetail(da) {
                                 </div>
                                 <div class="portfolio-artefact-meta">
                                     ${art.remis
-                                        ? `<span class="portfolio-texte-succes">✓ Remis</span>
+                                        ? `<span class="u-texte-succes">✓ Remis</span>
                                            <span><strong>Note :</strong> ${art.note}/100</span>
                                            <span><strong>Niveau :</strong> ${echapperHtml(art.niveau)}</span>`
                                         : '<span class="portfolio-texte-gris-fade">— Non remis</span>'}
@@ -291,7 +291,7 @@ function chargerPortfolioEleveDetail(da) {
                     : ''}
 
                 ${noteFinale !== null
-                    ? `<p class="portfolio-texte-grand"><strong>Note finale :</strong>
+                    ? `<p class="u-texte-grand"><strong>Note finale :</strong>
                        <span class="portfolio-note-valeur">${noteFinale.toFixed(2)}/100</span>
                        <span class="portfolio-note-detail">(moyenne des ${nombreARetenir} retenus)</span></p>`
                     : ''}
@@ -307,7 +307,7 @@ function chargerPortfolioEleveDetail(da) {
     } catch (error) {
         console.error('Erreur chargement portfolio:', error);
         document.getElementById('portfolioEleveDetail').innerHTML =
-            '<p class="portfolio-texte-danger">Erreur lors du chargement du portfolio.</p>';
+            '<p class="u-texte-danger">Erreur lors du chargement du portfolio.</p>';
     }
 }
 

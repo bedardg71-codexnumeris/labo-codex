@@ -76,7 +76,7 @@ function afficherTableauProductions() {
     const container = document.getElementById('tableauEvaluationsContainer');
 
     if (evaluations.length === 0) {
-        container.innerHTML = '<p class="text-muted" class="prod-italic">Aucune évaluation définie.</p>';
+        container.innerHTML = '<p class="text-muted prod-italic">Aucune évaluation définie.</p>';
         document.getElementById('typesEvaluations').innerHTML =
             '<span class="prod-texte-bleu-leger">Aucune évaluation configurée</span>';
         document.getElementById('nombreEvaluations').textContent = '0';
@@ -719,7 +719,7 @@ function chargerArtefactsDisponibles() {
     if (!container) return;
 
     if (artefacts.length === 0) {
-        container.innerHTML = '<p class="text-muted" class="prod-italic">Aucun artefact de type "Artefact d\'un portfolio" n\'existe encore. Crée-les d\'abord.</p>';
+        container.innerHTML = '<p class="text-muted prod-italic">Aucun artefact de type "Artefact d\'un portfolio" n\'existe encore. Crée-les d\'abord.</p>';
         return;
     }
 
@@ -727,7 +727,7 @@ function chargerArtefactsDisponibles() {
         <label style="display: block; padding: 8px; margin-bottom: 5px; 
                background: var(--bleu-tres-pale); border-radius: 4px; cursor: pointer;">
             <input type="checkbox" name="artefactPortfolio" value="${art.id}"
-                   class="prod-mr-10">
+                   class="u-mr-10">
             <strong>${art.description || art.titre}</strong>
         </label>
     `).join('');
@@ -951,12 +951,12 @@ function afficherToutesLesProductionsParType() {
                             ${echapperHtml(nomGrille)}` : ''}
                         </div>
                         ${estPortfolio && prod.artefactsIds && prod.artefactsIds.length > 0 ? `
-                            <div class="production-compact-meta" class="prod-mt-6">
+                            <div class="production-compact-meta u-mt-6">
                                 📦 ${prod.artefactsIds.length} artefacts • ${prod.regles.nombreARetenir} à retenir • Min. ${prod.regles.minimumCompletion} complétés
                             </div>
                         ` : ''}
                         ${prod.objectif || prod.tache ? `
-                            <div class="production-compact-meta" class="prod-mt-6">
+                            <div class="production-compact-meta u-mt-6">
                                 ${prod.objectif ? `📌 ${echapperHtml(prod.objectif)}` : ''}
                                 ${prod.objectif && prod.tache ? ' • ' : ''}
                                 ${prod.tache ? `✏️ ${echapperHtml(prod.tache)}` : ''}
@@ -1000,7 +1000,7 @@ function afficherToutesLesProductionsParType() {
                     ${portfolio ? genererHtmlProduction(portfolio, 0, 1) : ''}
                     ${artefacts.map((art, idx) => genererHtmlProduction(art, idx, artefacts.length)).join('')}
                     ${!portfolio ? `
-                        <button class="btn btn-confirmer" onclick="ajouterProductionAuType('portfolio')" class="prod-mt-10">
+                        <button class="btn btn-confirmer" onclick="ajouterProductionAuType('portfolio')" class="u-mt-10">
                             + Ajouter un portfolio
                         </button>
                     ` : ''}
@@ -1027,7 +1027,7 @@ function afficherToutesLesProductionsParType() {
                 </summary>
                 <div class="prod-p-15">
                     ${sommatives.map((prod, idx) => genererHtmlProduction(prod, idx, sommatives.length)).join('')}
-                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen')" class="prod-mt-10">
+                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen')" class="u-mt-10">
                         + Ajouter une évaluation sommative
                     </button>
                 </div>
@@ -1050,7 +1050,7 @@ function afficherToutesLesProductionsParType() {
                 </summary>
                 <div class="prod-p-15">
                     ${formatives.map((prod, idx) => genererHtmlProduction(prod, idx, formatives.length)).join('')}
-                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen-formatif')" class="prod-mt-10">
+                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen-formatif')" class="u-mt-10">
                         + Ajouter une évaluation formative
                     </button>
                 </div>

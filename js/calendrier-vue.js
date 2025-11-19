@@ -423,7 +423,7 @@ function afficherCalendrierScolaire() {
     htmlCalendrier += '</div>';
 
     htmlCalendrier += '<div class="calendrier-legende-item">';
-    htmlCalendrier += '<div class="calendrier-legende-badge" class="cal-carte-blanche"></div>';
+    htmlCalendrier += '<div class="calendrier-legende-badge cal-carte-blanche"></div>';
     htmlCalendrier += '<span class="calendrier-legende-label">Jour ouvrable</span>';
     htmlCalendrier += '</div>';
 
@@ -459,12 +459,12 @@ function afficherCalendrierScolaire() {
     htmlCalendrier += '</div>';
 
     // Statistiques - FORMAT HARMONISÉ (texte gauche / chiffre droite)
-    let htmlStats = '<div class="cal-mb-20">';
+    let htmlStats = '<div class="u-mb-20">';
     htmlStats += '<div class="cal-grid-auto-200">';
 
     // Carte 1 : Semaines scolaires
     htmlStats += '<div class="cal-carte-importante">';
-    htmlStats += '<div class="cal-flex-between">';
+    htmlStats += '<div class="u-flex-between">';
     htmlStats += '<span class="cal-texte-gris">Semaines scolaires</span>';
     htmlStats += '<strong class="cal-valeur-grande-bleu">' + nombreSemainesReel + '</strong>';
     htmlStats += '</div>';
@@ -472,7 +472,7 @@ function afficherCalendrierScolaire() {
 
     // Carte 2 : Jours de cours
     htmlStats += '<div class="cal-carte-importante">';
-    htmlStats += '<div class="cal-flex-between">';
+    htmlStats += '<div class="u-flex-between">';
     htmlStats += '<span class="cal-texte-gris">Jours de cours</span>';
     htmlStats += '<strong class="cal-valeur-grande-bleu">' + nombreJoursReel + '</strong>';
     htmlStats += '</div>';
@@ -485,7 +485,7 @@ function afficherCalendrierScolaire() {
 
     // Carte 3 : Congés avec reprises
     htmlStats += '<div class="cal-carte-importante">';
-    htmlStats += '<div class="cal-flex-between">';
+    htmlStats += '<div class="u-flex-between">';
     htmlStats += '<span class="cal-texte-gris">Congés avec reprises</span>';
     htmlStats += '<strong class="cal-valeur-grande-bleu">' + congesAvecReprise + '</strong>';
     htmlStats += '</div>';

@@ -492,7 +492,7 @@ function afficherListeCriteres(criteres, grilleId) {
     if (!container) return;
 
     if (!criteres || criteres.length === 0) {
-        container.innerHTML = '<p class="text-muted" class="grille-italic">Aucun critère défini pour cette grille.</p>';
+        container.innerHTML = '<p class="text-muted grille-italic">Aucun critère défini pour cette grille.</p>';
         const totalSpan = document.getElementById('totalPonderationCriteres');
         const statutSpan = document.getElementById('statutPonderationCriteres');
         if (totalSpan) totalSpan.textContent = '0%';
@@ -728,7 +728,7 @@ function afficherGrillesCriteres() {
                     <span class="grille-mr-20">${grille.criteres?.length || 0} critères</span>
                     <span>Pondération totale : ${grille.criteres?.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0) || 0}%</span>
                 </div>
-                <details class="grille-mt-10">
+                <details class="u-mt-10">
                     <summary style="cursor: pointer; color: var(--bleu-moyen); font-size: 0.9rem;">
                         Voir les critères
                     </summary>
@@ -1646,7 +1646,7 @@ function afficherCriteresGrille(grille) {
 
     // Ajouter un bouton pour ajouter un nouveau critère
     const btnAjouterCritere = `
-        <button class="btn btn-principal" onclick="ajouterCritereGrille('${grille.id}')" class="grille-mt-10">
+        <button class="btn btn-principal" onclick="ajouterCritereGrille('${grille.id}')" class="u-mt-10">
             + Ajouter un critère
         </button>
     `;

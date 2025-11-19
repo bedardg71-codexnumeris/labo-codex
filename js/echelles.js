@@ -194,7 +194,7 @@ function afficherToutesLesEchellesNiveaux() {
                     </div>
                     <div>
                         <label class="echelle-texte-mini-bleu">Nom</label>
-                        <span class="echelle-texte-09">${echapperHtml(niveau.nom)}</span>
+                        <span class="u-texte-09">${echapperHtml(niveau.nom)}</span>
                     </div>
                     <div>
                         <label class="echelle-texte-mini-bleu">Description</label>
@@ -202,11 +202,11 @@ function afficherToutesLesEchellesNiveaux() {
                     </div>
                     <div>
                         <label class="echelle-texte-mini-bleu">Min</label>
-                        <span class="echelle-texte-09">${niveau.min}%</span>
+                        <span class="u-texte-09">${niveau.min}%</span>
                     </div>
                     <div>
                         <label class="echelle-texte-mini-bleu">Max</label>
-                        <span class="echelle-texte-09">${niveau.max}%</span>
+                        <span class="u-texte-09">${niveau.max}%</span>
                     </div>
                     <div class="echelle-text-center">
                         <div style="width: 30px; height: 30px; background: ${niveau.couleur};
@@ -234,7 +234,7 @@ function afficherToutesLesEchellesNiveaux() {
                 </summary>
                 <div class="echelle-p-15">
                     ${niveaux.length > 0 ? `
-                        <div class="echelle-mb-15">
+                        <div class="u-mb-15">
                             ${niveaux.map(n => genererHtmlNiveau(n, echelle.id)).join('')}
                         </div>
 
@@ -1684,7 +1684,7 @@ function afficherNiveauxEchelle(echelle) {
     const html = echelle.niveaux.map((niveau, index) => `
         <div class="item-liste" style="padding: 15px; background: white; border-left: 4px solid ${niveau.couleur}; margin-bottom: 10px;">
             <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px 100px; gap: 12px; align-items: end;">
-                <div class="groupe-form" class="echelle-text-center">
+                <div class="groupe-form echelle-text-center">
                     <label class="echelle-texte-detail">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
                         <button onclick="deplacerNiveauEchelleHaut('${echelle.id}', ${index})"
