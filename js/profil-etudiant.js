@@ -1534,7 +1534,7 @@ function genererSectionAccompagnement(da) {
             <div class="profil-carte">
                 <h2 style="font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">Modèle de la Réponse à l'intervention (RàI)</h2>
 
-                <div class="badge-sys ${niveauRai.badgeClasse}" style="font-size: 1.1rem; padding: 8px 16px; margin-bottom: 12px;">
+                <div class="badge-sys ${niveauRai.badgeClasse}">
                     ${niveauRai.label}
                 </div>
 
@@ -1557,7 +1557,7 @@ function genererSectionAccompagnement(da) {
 
                 <div class="profil-separateur-section"></div>
 
-                <div class="badge-sys ${niveauRai.patternBadge}" style="font-size: 0.9rem; padding: 6px 12px; margin-bottom: 10px;">
+                <div class="badge-sys ${niveauRai.patternBadge}">
                     ${niveauRai.pattern}
                 </div>
 
@@ -1569,7 +1569,7 @@ function genererSectionAccompagnement(da) {
             <div class="profil-carte">
                 <h2 style="font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">Contexte d'apprentissage</h2>
 
-                <div class="badge-sys ${alerteContexte.badgeClasse}" style="font-size: 1.1rem; padding: 8px 16px; margin-bottom: 12px;">
+                <div class="badge-sys ${alerteContexte.badgeClasse}">
                     ${alerteContexte.label}
                 </div>
 
@@ -1638,7 +1638,7 @@ function genererSectionAccompagnement(da) {
                     </h4>
 
                     ${forcesSolo.some(f => f.valeur >= 0.85) ? `
-                    <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px; margin-bottom: 8px; border-radius: 4px;">
+                    <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px; margin-bottom: 8px;">
                         <div style="font-weight: 600; color: #16a34a; margin-bottom: 4px; font-size: 0.85rem;">
                             ${forcesSolo.filter(f => f.valeur >= 0.85).map(f => f.nom).join(', ')} : Maîtrisé et étendu (E)
                         </div>
@@ -1649,7 +1649,7 @@ function genererSectionAccompagnement(da) {
                     ` : ''}
 
                     ${forcesSolo.some(f => f.valeur >= seuilMaitrise && f.valeur < 0.85) ? `
-                    <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px; border-radius: 4px;">
+                    <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px;">
                         <div style="font-weight: 600; color: #16a34a; margin-bottom: 4px; font-size: 0.85rem;">
                             ${forcesSolo.filter(f => f.valeur >= seuilMaitrise && f.valeur < 0.85).map(f => f.nom).join(', ')} : Maîtrisé (M)
                         </div>
@@ -1668,7 +1668,7 @@ function genererSectionAccompagnement(da) {
                     </h4>
 
                     ${defisSolo.some(d => d.valeur < obtenirSeuil('idme.insuffisant')) ? `
-                    <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px; margin-bottom: 8px; border-radius: 4px;">
+                    <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px; margin-bottom: 8px;">
                         <div style="font-weight: 600; color: #dc2626; margin-bottom: 4px; font-size: 0.85rem;">
                             ${defisSolo.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : Insuffisant ou incomplet (I)
                         </div>
@@ -1679,7 +1679,7 @@ function genererSectionAccompagnement(da) {
                     ` : ''}
 
                     ${defisSolo.some(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement) ? `
-                    <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px; border-radius: 4px;">
+                    <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px;">
                         <div style="font-weight: 600; color: #dc2626; margin-bottom: 4px; font-size: 0.85rem;">
                             ${defisSolo.filter(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement).map(d => d.nom).join(', ')} : En développement (D)
                         </div>
@@ -1853,7 +1853,7 @@ function genererSectionMobilisation(da) {
 
         <!-- RECOMMANDATIONS SELON LE NIVEAU -->
         ${interpM.niveau === 'Décrochage' ? `
-            <div style="background: #f5f5f5; border-left: 4px solid #9e9e9e; padding: 15px; border-radius: 6px;">
+            <div style="background: #f5f5f5; border-left: 4px solid #9e9e9e; padding: 15px;">
                 <h4 style="color: #616161; margin-bottom: 10px;">⚫ Actions requises</h4>
                 <ul style="margin: 0; padding-left: 20px; color: #616161; line-height: 1.6;">
                     <li>Contact immédiat avec l'aide pédagogique individuelle (API)</li>
@@ -1882,7 +1882,7 @@ function genererSectionMobilisation(da) {
                 </ul>
             </div>
         ` : (A < 0.8 || C < 0.8) ? `
-            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 6px;">
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px;">
                 <h4 style="color: #856404; margin-bottom: 10px;">💡 Recommandations préventives (niveau fragile)</h4>
                 <ul style="margin: 0; padding-left: 20px; color: #856404; line-height: 1.6;">
                     ${A < 0.8 && C < 0.8 ?
@@ -1956,7 +1956,7 @@ function genererSectionEngagement(da) {
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.P}%</strong>
                 </div>
             </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${interpE.couleur};">
+            <div style="background: var(--bleu-tres-pale); padding: 15px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${interpE.couleur};">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Engagement (E)</span>
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.E}</strong>
@@ -1966,7 +1966,7 @@ function genererSectionEngagement(da) {
 
         <!-- INTERPRÉTATION QUALITATIVE -->
         <div style="padding: 15px; background: linear-gradient(to right, ${interpE.couleur}22, ${interpE.couleur}11);
-                    border-left: 4px solid ${interpE.couleur}; border-radius: 6px; margin-bottom: 15px;">
+                    border-left: 4px solid ${interpE.couleur}; margin-bottom: 15px;">
             <div style="font-size: 1.1rem; font-weight: bold; color: ${interpE.couleur}; margin-bottom: 8px;">
                 ${interpE.emoji} ${interpE.niveau}
             </div>
@@ -2012,7 +2012,7 @@ function genererSectionEngagement(da) {
                 </div>
             </div>
         ` : `
-            <div style="background: linear-gradient(to right, #2196F322, #2196F311); border-left: 4px solid #2196F3; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+            <div style="background: linear-gradient(to right, #2196F322, #2196F311); border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 15px;">
                 <div style="color: #1976d2; font-weight: bold;">
                     🏆 Seuil maximum atteint ! Maintenir cet excellent engagement.
                 </div>
@@ -2427,7 +2427,7 @@ function genererCarteCibleIntervention(da) {
     if (!pratique) {
         console.error('[ProfilEtudiant] Aucune pratique active trouvée');
         return `
-            <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107;">
+            <div style="background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107;">
                 <strong>⚠️ Configuration requise</strong><br>
                 Veuillez configurer une pratique de notation dans Réglages › Pratique de notation.
             </div>
@@ -3511,7 +3511,7 @@ function genererSectionPerformance(da) {
             </h4>
             
             ${meilleures.map((art, index) => `
-                <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid ${obtenirCouleurIndice(art.note)};">
+                <div style="background: white; padding: 15px; margin-bottom: 10px; border-left: 4px solid ${obtenirCouleurIndice(art.note)};">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                         <div style="flex: 1;">
                             <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">
@@ -3811,7 +3811,7 @@ function genererSectionCompletion(da) {
                 <div class="badges-centres" class="profil-mb-20">
                     ${artefactsRemis.map(art => `
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
-                                    background: #d4edda; border-left: 3px solid #28a745; border-radius: 4px;">
+                                    background: #d4edda; border-left: 3px solid #28a745;">
                             <div style="color: #155724; font-weight: 500; margin-bottom: 5px;">
                                 ✅ ${echapperHtml(art.description)}
                                 ${art.jetonReprise ? '<span style="color: #9c27b0; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
@@ -3837,7 +3837,7 @@ function genererSectionCompletion(da) {
                 <div class="badges-centres" class="profil-mb-20">
                     ${artefactsNonRemis.map(art => `
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
-                                    background: #f5f5f5; border-left: 3px solid #ddd; border-radius: 4px; opacity: 0.6;">
+                                    background: #f5f5f5; border-left: 3px solid #ddd; opacity: 0.6;">
                             <div style="color: #666; font-weight: 500; margin-bottom: 5px;">
                                 ⏳ ${echapperHtml(art.description)}
                             </div>
@@ -5374,7 +5374,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                         </div>
                     </div>
                     ${resultBlocage.partiel ? `
-                        <div style="background: #fff3cd; padding: 8px; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid #ffc107;">
+                        <div style="background: #fff3cd; padding: 8px; margin-bottom: 10px; border-left: 3px solid #ffc107;">
                             <div style="font-size: 0.85rem; color: #856404;">
                                 ⚠️ <strong>Calcul partiel :</strong> ${resultBlocage.criteresManquants.join(', ')} non évalué(s).
                                 La pondération a été ajustée automatiquement.
@@ -5402,7 +5402,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
         <!-- Résumé forces -->
         ${diagnostic.forces.length > 0 ? `
             <div style="background: linear-gradient(to right, #28a74522, #28a74511);
-                        border-left: 4px solid #28a745; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        border-left: 4px solid #28a745; padding: 12px; margin-bottom: 10px;">
                 <div style="font-weight: bold; color: #155724; margin-bottom: 6px;">
                     ✓ ${diagnostic.forces.length > 1 ? 'Forces identifiées' : 'Force identifiée'}
                     ${diagnostic.forces.length > 1 ? ` (${diagnostic.forces.length})` : ''}
@@ -5412,7 +5412,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                 </div>
             </div>
         ` : `
-            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 10px;">
                 <div style="font-weight: bold; color: #856404;">
                     ⚠️ Aucune force identifiée (aucun critère ≥ 71.25%)
                 </div>
@@ -5421,7 +5421,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
 
         <!-- Résumé défis -->
         ${diagnostic.defis.length > 0 ? `
-            <div style="background: #fff3cd; border-left: 4px solid #ff9800; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+            <div style="background: #fff3cd; border-left: 4px solid #ff9800; padding: 12px; margin-bottom: 15px;">
                 <div style="font-weight: bold; color: #856404; margin-bottom: 6px;">
                     🎯 ${diagnostic.defis.length > 1 ? 'Défis identifiés' : 'Défi identifié'}
                     ${diagnostic.defis.length > 1 ? ` (${diagnostic.defis.length})` : ''}
@@ -5447,7 +5447,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
     if (defisInfo.defis.length === 0 && !defisInfo.tendance) {
         return `
             <div style="background: linear-gradient(to right, #28a74522, #28a74511);
-                        border-left: 4px solid #28a745; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        border-left: 4px solid #28a745; padding: 12px; margin-bottom: 10px;">
                 <div style="font-weight: bold; color: #155724;">
                     ✓ Aucun défi majeur identifié
                 </div>
@@ -5512,7 +5512,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
 
         html += `
             <div style="background: linear-gradient(to right, ${couleur}22, ${couleur}11);
-                        border-left: 4px solid ${couleur}; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        border-left: 4px solid ${couleur}; padding: 12px; margin-bottom: 10px;">
                 <div style="font-weight: bold; color: ${couleur}; margin-bottom: 6px;">
                     ${titre}
                 </div>
@@ -5542,7 +5542,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
 
         html += `
             <div style="background: linear-gradient(to right, ${couleurTendance}22, ${couleurTendance}11);
-                        border-left: 4px solid ${couleurTendance}; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        border-left: 4px solid ${couleurTendance}; padding: 12px; margin-bottom: 10px;">
                 <div style="font-weight: bold; color: ${couleurTendance}; margin-bottom: 6px;">
                     ${iconeTendance} ${texteTendance}
                 </div>
@@ -5859,7 +5859,7 @@ function genererSectionPerformance(da) {
 
             <!-- 🆕 MÉTHODE DE CALCUL EXPLICITE -->
             ${indices.pratique === 'PAN' ? `
-                <div style="background: #f0f8ff; border-left: 4px solid var(--pan-bleu); padding: 10px 15px; margin-bottom: 15px; border-radius: 4px;">
+                <div style="background: #f0f8ff; border-left: 4px solid var(--pan-bleu); padding: 10px 15px; margin-bottom: 15px;">
                     <div style="font-size: 0.85rem; color: #555; line-height: 1.5;">
                         ${(() => {
                             if (!portfolioActif) {

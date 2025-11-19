@@ -1682,7 +1682,7 @@ function afficherNiveauxEchelle(echelle) {
 
     // Afficher le tableau des niveaux en mode édition
     const html = echelle.niveaux.map((niveau, index) => `
-        <div class="item-liste" style="padding: 15px; background: white; border-left: 4px solid ${niveau.couleur}; border-radius: 6px; margin-bottom: 10px;">
+        <div class="item-liste" style="padding: 15px; background: white; border-left: 4px solid ${niveau.couleur}; margin-bottom: 10px;">
             <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px 100px; gap: 12px; align-items: end;">
                 <div class="groupe-form" style="text-align: center;">
                     <label style="font-size: 0.85rem; color: #666;">Ordre</label>
