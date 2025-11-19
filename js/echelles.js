@@ -186,7 +186,7 @@ function afficherToutesLesEchellesNiveaux() {
      */
     function genererHtmlNiveau(niveau, echelleId) {
         return `
-            <div class="item-liste" style="margin-bottom: 10px; border-left: 4px solid ${niveau.couleur};">
+            <div class="item-liste" style="margin-bottom: 10px;">
                 <div class="echelle-grid-niveaux">
                     <div>
                         <label class="echelle-texte-mini-bleu">Code</label>
@@ -1682,7 +1682,7 @@ function afficherNiveauxEchelle(echelle) {
 
     // Afficher le tableau des niveaux en mode édition
     const html = echelle.niveaux.map((niveau, index) => `
-        <div class="item-liste" style="padding: 15px; background: white; border-left: 4px solid ${niveau.couleur}; margin-bottom: 10px;">
+        <div class="item-liste" style="padding: 15px; background: white; margin-bottom: 10px;">
             <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px 100px; gap: 12px; align-items: end;">
                 <div class="groupe-form echelle-text-center">
                     <label class="echelle-texte-detail">Ordre</label>
