@@ -3832,6 +3832,242 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-size: 0.8rem;
 }
 
+/* Nouveaux patterns Phase B (suite - 18 nov 2025) */
+.profil-valeur-grande-bleu {
+    font-size: 1.8rem;
+    color: var(--bleu-principal);
+}
+
+.profil-valeur-grande-orange {
+    font-size: 1.8rem;
+    color: var(--som-orange);
+}
+
+.profil-valeur-grande-bleu-pan {
+    font-size: 1.8rem;
+    color: var(--pan-bleu);
+}
+
+.profil-valeur-moyenne {
+    font-size: 1.5rem;
+}
+
+.profil-texte-detail-gris {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.profil-texte-italique-gris {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+}
+
+.profil-texte-mini-gris {
+    font-size: 0.85rem;
+    color: #999;
+}
+
+.profil-texte-normal-gris {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 400;
+}
+
+.profil-titre-bleu-compact {
+    color: var(--bleu-principal);
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.profil-titre-bleu-large-pr40 {
+    color: var(--bleu-principal);
+    margin-bottom: 15px;
+    padding-right: 40px;
+}
+
+.profil-titre-sous-section {
+    color: var(--bleu-principal);
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.profil-carte-bordure-blanche {
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.profil-grid-auto-200 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.profil-texte-mono-centre-bleu {
+    font-family: monospace;
+    font-size: 1rem;
+    text-align: center;
+    color: var(--bleu-principal);
+    margin-bottom: 10px;
+}
+
+.profil-zone-centre-p30 {
+    text-align: center;
+    padding: 30px;
+}
+
+.profil-tableau-header-gauche-p12 {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.profil-tableau-header-centre-p12 {
+    padding: 12px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.profil-tableau-cellule-p12 {
+    padding: 12px;
+}
+
+.profil-texte-danger-gras {
+    font-weight: 600;
+    color: #dc2626;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+}
+
+.profil-texte-succes-gras {
+    font-weight: 600;
+    color: #16a34a;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+}
+
+.profil-w-100 {
+    width: 100%;
+}
+
+.profil-mt-25 {
+    margin-top: 25px;
+}
+
+.profil-mb-8 {
+    margin-bottom: 8px;
+}
+
+.profil-hide {
+    display: none;
+}
+
+.profil-flex-between-mb20 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 20px 0;
+}
+
+.profil-flex-between-mb10 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.profil-flex-gap15-baseline {
+    display: flex;
+    gap: 15px;
+    align-items: baseline;
+}
+
+.profil-titre-section-majeur {
+    color: var(--bleu-principal);
+    margin: 0 0 20px 0;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.profil-titre-bleu-mt20 {
+    color: var(--bleu-principal);
+    margin-bottom: 12px;
+    font-size: 1rem;
+    margin-top: 20px;
+}
+
+.profil-texte-bleu {
+    color: var(--bleu-principal);
+}
+
+.profil-zone-centre-fond-bleu {
+    text-align: center;
+    padding: 30px 20px;
+    background: var(--bleu-tres-pale);
+}
+
+.profil-zone-centre-grise {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.profil-zone-centre-verte {
+    text-align: center;
+    padding: 15px;
+    background: #d4edda;
+    border-radius: 6px;
+    color: #155724;
+    margin-bottom: 20px;
+}
+
+.profil-texte-centre {
+    text-align: center;
+}
+
+.profil-texte-droite {
+    text-align: right;
+}
+
+.profil-texte-centre-gris {
+    text-align: center;
+    color: #999;
+}
+
+.profil-tableau-full {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.profil-position-relative-mt15 {
+    position: relative;
+    margin-top: 15px;
+}
+
+.profil-zone-grande-bleu {
+    padding: 40px;
+    text-align: center;
+    background: var(--bleu-tres-pale);
+    border-radius: 8px;
+}
+
+.profil-zone-moyenne-bleu {
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+}
+
 /* 🆕 BETA 91: Module tableau-bord-apercu (optimisations Phase B) */
 .tb-texte-mini {
     font-size: 0.7rem;
