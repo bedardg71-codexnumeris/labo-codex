@@ -4042,6 +4042,54 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     background: #f5f5f5;
 }
 
+/* 🆕 BETA 91: Module grilles (optimisations Phase B) */
+.grille-texte-bleu-leger {
+    color: var(--bleu-leger);
+}
+
+.grille-nowrap {
+    white-space: nowrap;
+}
+
+.grille-mt-10 {
+    margin-top: 10px;
+}
+
+.grille-mt-4 {
+    margin-top: 4px;
+}
+
+.grille-italic {
+    font-style: italic;
+}
+
+.grille-flex-1 {
+    flex: 1;
+}
+
+.grille-flex-between-mb10 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.grille-mr-20 {
+    margin-right: 20px;
+}
+
+.grille-texte-critique {
+    color: var(--risque-critique);
+}
+
+.grille-texte-modere {
+    color: var(--risque-modere);
+}
+
+.grille-texte-minimal {
+    color: var(--risque-minimal);
+}
+
 
 /* ===============================================
    SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)
