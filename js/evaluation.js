@@ -459,7 +459,7 @@ function cartoucheSelectionnee() {
         const ponderation = critereGrille ? critereGrille.ponderation : '?';
 
         return `
-    <div style="margin-bottom: 15px; padding: 12px; background: white; border-radius: 4px; border-left: 3px solid var(--bleu-moyen);">
+    <div style="margin-bottom: 15px; padding: 12px; background: white; border-left: 3px solid var(--bleu-moyen);">
         <div style="display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start;">
             <div>
     <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">

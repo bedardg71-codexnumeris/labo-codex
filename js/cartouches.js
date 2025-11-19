@@ -766,7 +766,7 @@ function genererApercuAleatoire() {
         
         html += `
             <div style="margin-bottom: 15px; padding: 10px; background: var(--bleu-tres-pale); 
-                 border-left: 3px solid var(--bleu-moyen); border-radius: 4px;">
+                 border-left: 3px solid var(--bleu-moyen);">
                 <strong>${nomCritereEchappe}</strong> - Niveau : ${nomNiveauEchappe} (${codeNiveauEchappe})
                 <p style="margin-top: 5px; margin-bottom: 0;">${commentaireEchappe}</p>
             </div>
