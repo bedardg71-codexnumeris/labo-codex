@@ -492,7 +492,7 @@ function afficherListeCriteres(criteres, grilleId) {
     if (!container) return;
 
     if (!criteres || criteres.length === 0) {
-        container.innerHTML = '<p class="text-muted" style="font-style: italic;">Aucun critère défini pour cette grille.</p>';
+        container.innerHTML = '<p class="text-muted" class="grille-italic">Aucun critère défini pour cette grille.</p>';
         const totalSpan = document.getElementById('totalPonderationCriteres');
         const statutSpan = document.getElementById('statutPonderationCriteres');
         if (totalSpan) totalSpan.textContent = '0%';
@@ -504,12 +504,12 @@ function afficherListeCriteres(criteres, grilleId) {
         <div class="item-liste" style="margin-bottom: 8px; padding: 12px 15px;
              border-left: 4px solid var(--bleu-principal);
              display: flex; justify-content: space-between; align-items: center;">
-            <div style="flex: 1;">
+            <div class="grille-flex-1">
                 <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 2px;">
                     ${critere.nom} (${critere.ponderation || 0}%) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${critere.formule}` : ''}
                 </div>
                 ${critere.description ? `
-                    <details style="margin-top: 4px;">
+                    <details class="grille-mt-4">
                         <summary style="cursor: pointer; color: var(--bleu-moyen); font-size: 0.85rem; padding: 4px 0;">
                             Voir la description
                         </summary>
@@ -704,15 +704,15 @@ function afficherGrillesCriteres() {
     } else {
         listeDiv.innerHTML = grilles.map(grille => `
             <div class="item-liste" style="background: var(--bleu-tres-pale); padding: 15px; margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div class="grille-flex-between-mb10">
                     <div>
                         <strong style="color: var(--bleu-principal);">${grille.nom}</strong>
                         <small style="color: var(--bleu-leger); margin-left: 10px;">
                             ${new Date(grille.dateCreation).toLocaleDateString()}
                         </small>
-                        ${grille.baseSur ? `<br><small style="color: var(--bleu-leger);">(basé sur ${grille.baseSur})</small>` : ''}
+                        ${grille.baseSur ? `<br><small class="grille-texte-bleu-leger">(basé sur ${grille.baseSur})</small>` : ''}
                     </div>
-                    <div style="white-space: nowrap;">
+                    <div class="grille-nowrap">
                         <button class="btn btn-principal" onclick="chargerGrilleEnEdition('${grille.id}')">
                             Charger
                         </button>
@@ -725,10 +725,10 @@ function afficherGrillesCriteres() {
                     </div>
                 </div>
                 <div style="color: #666; font-size: 0.85rem;">
-                    <span style="margin-right: 20px;">${grille.criteres?.length || 0} critères</span>
+                    <span class="grille-mr-20">${grille.criteres?.length || 0} critères</span>
                     <span>Pondération totale : ${grille.criteres?.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0) || 0}%</span>
                 </div>
-                <details style="margin-top: 10px;">
+                <details class="grille-mt-10">
                     <summary style="cursor: pointer; color: var(--bleu-moyen); font-size: 0.9rem;">
                         Voir les critères
                     </summary>
@@ -1094,13 +1094,13 @@ function calculerTotalPonderationCriteres(criteres) {
 
     if (total === 100) {
         totalSpan.style.color = 'var(--risque-minimal)';
-        statutSpan.innerHTML = '<span style="color: var(--risque-minimal);">✓ Pondération complète</span>';
+        statutSpan.innerHTML = '<span class="grille-texte-minimal">✓ Pondération complète</span>';
     } else if (total < 100) {
         totalSpan.style.color = 'var(--risque-modere)';
-        statutSpan.innerHTML = `<span style="color: var(--risque-modere);">${100 - total}% manquant</span>`;
+        statutSpan.innerHTML = `<span class="grille-texte-modere">${100 - total}% manquant</span>`;
     } else {
         totalSpan.style.color = 'var(--risque-critique)';
-        statutSpan.innerHTML = `<span style="color: var(--risque-critique);">${total - 100}% en trop</span>`;
+        statutSpan.innerHTML = `<span class="grille-texte-critique">${total - 100}% en trop</span>`;
     }
 }
 
@@ -1154,7 +1154,7 @@ function afficherToutesLesGrillesCriteres() {
     if (grilles.length === 0) {
         container.innerHTML = `
             <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
-                <p style="color: var(--bleu-leger);">Aucune grille définie</p>
+                <p class="grille-texte-bleu-leger">Aucune grille définie</p>
                 <small>Créez une grille en utilisant le formulaire ci-dessous</small>
             </div>
         `;
@@ -1170,12 +1170,12 @@ function afficherToutesLesGrillesCriteres() {
                  border-left: 4px solid var(--bleu-principal);
                  display: flex; justify-content: space-between; align-items: center;
                  transition: background 0.2s;">
-                <div style="flex: 1;">
+                <div class="grille-flex-1">
                     <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 2px;">
                         ${echapperHtml(critere.nom)} (${critere.ponderation || 0}%) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${echapperHtml(critere.formule)}` : ''}
                     </div>
                     ${critere.description ? `
-                        <details style="margin-top: 4px;">
+                        <details class="grille-mt-4">
                             <summary style="cursor: pointer; color: var(--bleu-moyen); font-size: 0.85rem; padding: 4px 0;">
                                 Voir la description
                             </summary>
@@ -1646,7 +1646,7 @@ function afficherCriteresGrille(grille) {
 
     // Ajouter un bouton pour ajouter un nouveau critère
     const btnAjouterCritere = `
-        <button class="btn btn-principal" onclick="ajouterCritereGrille('${grille.id}')" style="margin-top: 10px;">
+        <button class="btn btn-principal" onclick="ajouterCritereGrille('${grille.id}')" class="grille-mt-10">
             + Ajouter un critère
         </button>
     `;
