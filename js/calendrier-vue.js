@@ -268,10 +268,10 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
         html += 'onmouseenter="illuminerSemaineAmelioree(\'' + dateStr + '\')" ';
         html += 'onmouseleave="desilluminerSemaines()" ';
         html += onclickAttr + '>';
-        html += '<div style="font-size: 0.95rem;">' + jour + '</div>';
+        html += '<div class="cal-texte-moyen">' + jour + '</div>';
 
         if (statut.label) {
-            html += '<div style="font-size: 0.7rem; margin-top: 2px; opacity: 0.9;">' + statut.label + '</div>';
+            html += '<div class="cal-texte-mini-fade">' + statut.label + '</div>';
         }
 
         html += '</td>';
@@ -404,7 +404,7 @@ function afficherCalendrierScolaire() {
     const moisAAfficher = (session === 'A') ? [8, 9, 10, 11, 12] : [1, 2, 3, 4, 5];
 
     // Générer le HTML du calendrier complet
-    let htmlCalendrier = '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 16px 0;">';
+    let htmlCalendrier = '<div class="cal-grid-2col">';
 
     for (let i = 0; i < moisAAfficher.length; i++) {
         htmlCalendrier += genererHtmlMois(annee, moisAAfficher[i], calendrierComplet);
@@ -423,7 +423,7 @@ function afficherCalendrierScolaire() {
     htmlCalendrier += '</div>';
 
     htmlCalendrier += '<div class="calendrier-legende-item">';
-    htmlCalendrier += '<div class="calendrier-legende-badge" style="background: white; border: 2px solid var(--bleu-carte);"></div>';
+    htmlCalendrier += '<div class="calendrier-legende-badge" class="cal-carte-blanche"></div>';
     htmlCalendrier += '<span class="calendrier-legende-label">Jour ouvrable</span>';
     htmlCalendrier += '</div>';
 
@@ -459,22 +459,22 @@ function afficherCalendrierScolaire() {
     htmlCalendrier += '</div>';
 
     // Statistiques - FORMAT HARMONISÉ (texte gauche / chiffre droite)
-    let htmlStats = '<div style="margin-bottom: 20px;">';
-    htmlStats += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">';
+    let htmlStats = '<div class="cal-mb-20">';
+    htmlStats += '<div class="cal-grid-auto-200">';
 
     // Carte 1 : Semaines scolaires
-    htmlStats += '<div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">';
-    htmlStats += '<div style="display: flex; align-items: center; justify-content: space-between;">';
-    htmlStats += '<span style="font-size: 0.9rem; color: #666;">Semaines scolaires</span>';
-    htmlStats += '<strong style="font-size: 1.8rem; color: var(--bleu-principal);">' + nombreSemainesReel + '</strong>';
+    htmlStats += '<div class="cal-carte-importante">';
+    htmlStats += '<div class="cal-flex-between">';
+    htmlStats += '<span class="cal-texte-gris">Semaines scolaires</span>';
+    htmlStats += '<strong class="cal-valeur-grande-bleu">' + nombreSemainesReel + '</strong>';
     htmlStats += '</div>';
     htmlStats += '</div>';
 
     // Carte 2 : Jours de cours
-    htmlStats += '<div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">';
-    htmlStats += '<div style="display: flex; align-items: center; justify-content: space-between;">';
-    htmlStats += '<span style="font-size: 0.9rem; color: #666;">Jours de cours</span>';
-    htmlStats += '<strong style="font-size: 1.8rem; color: var(--bleu-principal);">' + nombreJoursReel + '</strong>';
+    htmlStats += '<div class="cal-carte-importante">';
+    htmlStats += '<div class="cal-flex-between">';
+    htmlStats += '<span class="cal-texte-gris">Jours de cours</span>';
+    htmlStats += '<strong class="cal-valeur-grande-bleu">' + nombreJoursReel + '</strong>';
     htmlStats += '</div>';
     htmlStats += '</div>';
 
@@ -484,10 +484,10 @@ function afficherCalendrierScolaire() {
     }).length;
 
     // Carte 3 : Congés avec reprises
-    htmlStats += '<div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">';
-    htmlStats += '<div style="display: flex; align-items: center; justify-content: space-between;">';
-    htmlStats += '<span style="font-size: 0.9rem; color: #666;">Congés avec reprises</span>';
-    htmlStats += '<strong style="font-size: 1.8rem; color: var(--bleu-principal);">' + congesAvecReprise + '</strong>';
+    htmlStats += '<div class="cal-carte-importante">';
+    htmlStats += '<div class="cal-flex-between">';
+    htmlStats += '<span class="cal-texte-gris">Congés avec reprises</span>';
+    htmlStats += '<strong class="cal-valeur-grande-bleu">' + congesAvecReprise + '</strong>';
     htmlStats += '</div>';
     htmlStats += '</div>';
 

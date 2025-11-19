@@ -6450,6 +6450,192 @@ label:has(+ textarea:disabled) {
     line-height: 1.3;
 }
 
+/* 🆕 BETA 91: Module cartouches (optimisations Phase B) */
+.cartouche-mr-10 {
+    margin-right: 10px;
+}
+
+.cartouche-flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cartouche-texte-bleu {
+    color: var(--bleu-principal);
+}
+
+.cartouche-texte-bleu-leger {
+    color: var(--bleu-leger);
+}
+
+.cartouche-texte-bleu-leger-ml10 {
+    color: var(--bleu-leger);
+    margin-left: 10px;
+}
+
+.cartouche-texte-bleu-mb15 {
+    color: var(--bleu-principal);
+    margin-bottom: 15px;
+}
+
+.cartouche-texte-italique-bleu-leger {
+    color: var(--bleu-leger);
+    font-style: italic;
+    margin-bottom: 15px;
+}
+
+.cartouche-fond-bleu-pale {
+    background: var(--bleu-tres-pale);
+}
+
+.cartouche-zone-bleu-pale {
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+}
+
+.cartouche-texte-secondaire {
+    font-size: 0.9rem;
+    font-weight: normal;
+    opacity: 0.9;
+}
+
+.cartouche-texte-warning {
+    color: #ffc107;
+    font-size: 0.9rem;
+}
+
+.cartouche-texte-gris-italique {
+    color: #999;
+    font-style: italic;
+}
+
+.cartouche-p-15 {
+    padding: 15px;
+}
+
+.cartouche-mb-15 {
+    margin-bottom: 15px;
+}
+
+.cartouche-mt5-mb0 {
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+.cartouche-nowrap {
+    white-space: nowrap;
+}
+
+.cartouche-gradient-bleu {
+    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);
+}
+
+/* 🆕 BETA 91: Module calendrier-vue (optimisations Phase B) */
+.cal-valeur-grande-bleu {
+    font-size: 1.8rem;
+    color: var(--bleu-principal);
+}
+
+.cal-texte-gris {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.cal-flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cal-carte-importante {
+    background: var(--bleu-tres-pale);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid var(--bleu-principal);
+}
+
+.cal-mb-20 {
+    margin-bottom: 20px;
+}
+
+.cal-texte-moyen {
+    font-size: 0.95rem;
+}
+
+.cal-texte-mini-fade {
+    font-size: 0.7rem;
+    margin-top: 2px;
+    opacity: 0.9;
+}
+
+.cal-grid-auto-200 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.cal-grid-2col {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.cal-carte-blanche {
+    background: white;
+    border: 2px solid var(--bleu-carte);
+}
+
+/* 🆕 BETA 91: Module portfolio (optimisations Phase B) */
+.portfolio-texte-grand {
+    font-size: 1.2rem;
+}
+
+.portfolio-texte-danger {
+    color: red;
+}
+
+.portfolio-texte-succes {
+    color: green;
+}
+
+.portfolio-texte-gris-fade {
+    color: #999;
+}
+
+/* 🆕 BETA 91: Module saisie-presences (optimisations Phase B) */
+.presences-texte-gras {
+    font-weight: bold;
+}
+
+.presences-texte-gris {
+    color: #666;
+}
+
+.presences-texte-petit {
+    font-size: 0.9rem;
+}
+
+.presences-w-80 {
+    width: 80px;
+}
+
+.presences-text-center {
+    text-align: center;
+}
+
+.presences-text-center-erreur {
+    text-align: center;
+    color: var(--rouge-erreur);
+}
+
+.presences-texte-medium {
+    font-weight: 500;
+}
+
 /* ===============================
    BARRES DE PROGRESSION - Beta 90
    Spectres lumineux avec overlays "Nuit Élégante"

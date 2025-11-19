@@ -413,7 +413,7 @@ function afficherMatriceRetroaction() {
         <table class="matrice-tableau">
             <thead>
                 <tr>
-                    <th style="background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);">Critère / Niveau</th>
+                    <th class="cartouche-gradient-bleu">Critère / Niveau</th>
     `;
 
     // En-têtes des niveaux avec code et label + couleur de l'échelle
@@ -750,7 +750,7 @@ function importerCommentaires() {
 function genererApercuAleatoire() {
     if (!cartoucheActuel) return;
     
-    let html = '<h6 style="color: var(--bleu-principal); margin-bottom: 15px;">Rétroaction générée automatiquement :</h6>';
+    let html = '<h6 class="cartouche-texte-bleu-mb15">Rétroaction générée automatiquement :</h6>';
     
     cartoucheActuel.criteres.forEach(critere => {
         // Choisir un niveau aléatoire
@@ -768,7 +768,7 @@ function genererApercuAleatoire() {
             <div style="margin-bottom: 15px; padding: 10px; background: var(--bleu-tres-pale); 
                  border-left: 3px solid var(--bleu-moyen);">
                 <strong>${nomCritereEchappe}</strong> - Niveau : ${nomNiveauEchappe} (${codeNiveauEchappe})
-                <p style="margin-top: 5px; margin-bottom: 0;">${commentaireEchappe}</p>
+                <p class="cartouche-mt5-mb0">${commentaireEchappe}</p>
             </div>
         `;
     });
@@ -962,18 +962,18 @@ function afficherListeCartouches(cartouches, grilleId) {
         const nbTotal = (cartouche.criteres?.length || 0) * (cartouche.niveaux?.length || 0);
 
         return `
-        <div class="item-liste" style="background: var(--bleu-tres-pale);">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="item-liste" class="cartouche-fond-bleu-pale">
+            <div class="cartouche-flex-between">
                 <div>
-                    <strong style="color: var(--bleu-principal);">${nomEchappe}</strong>
-                    <small style="color: var(--bleu-leger); margin-left: 10px;">
+                    <strong class="cartouche-texte-bleu">${nomEchappe}</strong>
+                    <small class="cartouche-texte-bleu-leger-ml10">
                         ${nbRemplis} / ${nbTotal} commentaires remplis
                     </small>
                 </div>
                 <div>
                     <button onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grilleId}')"
                           class="btn btn-tres-compact"
-                          style="margin-right: 10px;"
+                          class="cartouche-mr-10"
                           title="${cartouche.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
                         ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
                     </button>
@@ -1026,8 +1026,8 @@ function afficherToutesLesGrillesEtCartouches() {
 
     if (grilles.length === 0) {
         container.innerHTML = `
-            <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
-                <p style="color: var(--bleu-leger);">Aucune grille de critères disponible</p>
+            <div class="cartouche-zone-bleu-pale">
+                <p class="cartouche-texte-bleu-leger">Aucune grille de critères disponible</p>
                 <small>Créez d'abord une grille dans <strong>Réglages → Grilles de critères</strong></small>
             </div>
         `;
@@ -1045,14 +1045,14 @@ function afficherToutesLesGrillesEtCartouches() {
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
                     <span>${nomGrilleEchappe}</span>
-                    <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
+                    <span class="cartouche-texte-secondaire">
                         ${cartouches.length} cartouche${cartouches.length > 1 ? 's' : ''}
                     </span>
                 </summary>
 
-                <div style="padding: 15px;">
+                <div class="cartouche-p-15">
                     ${cartouches.length > 0 ? `
-                        <div style="margin-bottom: 15px;">
+                        <div class="cartouche-mb-15">
                             ${cartouches.map(cartouche => {
                                 const nomCartoucheEchappe = echapperHtml(cartouche.nom);
                                 const nbRemplis = Object.keys(cartouche.commentaires || {})
@@ -1061,18 +1061,18 @@ function afficherToutesLesGrillesEtCartouches() {
                                 const nbTotal = (cartouche.criteres?.length || 0) * (cartouche.niveaux?.length || 0);
 
                                 return `
-                                    <div class="item-liste" style="background: var(--bleu-tres-pale);">
-                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div class="item-liste" class="cartouche-fond-bleu-pale">
+                                        <div class="cartouche-flex-between">
                                             <div>
-                                                <strong style="color: var(--bleu-principal);">${nomCartoucheEchappe}</strong>
-                                                <small style="color: var(--bleu-leger); margin-left: 10px;">
+                                                <strong class="cartouche-texte-bleu">${nomCartoucheEchappe}</strong>
+                                                <small class="cartouche-texte-bleu-leger-ml10">
                                                     ${nbRemplis} / ${nbTotal} commentaires
                                                 </small>
                                             </div>
-                                            <div style="white-space: nowrap;">
+                                            <div class="cartouche-nowrap">
                                                 <button onclick="basculerVerrouillageCartouche('${cartouche.id}', '${grille.id}')"
                                                       class="btn btn-tres-compact"
-                                                      style="margin-right: 10px;"
+                                                      class="cartouche-mr-10"
                                                       title="${cartouche.verrouille ? 'Verrouillée - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
                                                     ${cartouche.verrouille ? 'Verrouillée' : 'Modifiable'}
                                                 </button>
@@ -1095,7 +1095,7 @@ function afficherToutesLesGrillesEtCartouches() {
                             }).join('')}
                         </div>
                     ` : `
-                        <p style="color: var(--bleu-leger); font-style: italic; margin-bottom: 15px;">
+                        <p class="cartouche-texte-italique-bleu-leger">
                             Aucune cartouche pour cette grille
                         </p>
                     `}
@@ -1917,7 +1917,7 @@ function afficherBanqueCartouches(grilleIdFiltre = '') {
 
     const html = toutesLesCartouches.map(cart => {
         const estActive = window.cartoucheActuel?.id === cart.id;
-        const verrouIcone = cart.verrouille ? ' <span style="color: #ffc107; font-size: 0.9rem;" title="Verrouillée">🔒</span>' : '';
+        const verrouIcone = cart.verrouille ? ' <span class="cartouche-texte-warning" title="Verrouillée">🔒</span>' : '';
 
         return `
             <div class="item-cartouche-banque ${estActive ? 'active' : ''}"
@@ -2236,7 +2236,7 @@ function genererChecklistCriteresImport() {
     const criteres = window.cartoucheActuel.criteres || [];
 
     if (criteres.length === 0) {
-        container.innerHTML = '<p style="color: #999; font-style: italic;">Aucun critère disponible</p>';
+        container.innerHTML = '<p class="cartouche-texte-gris-italique">Aucun critère disponible</p>';
         if (btnImport) btnImport.disabled = true;
         return;
     }
