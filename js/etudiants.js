@@ -460,46 +460,46 @@ function genererExplicationCalculIndices() {
     let html = '<strong>Méthodes de calcul des indices (pratique active : ' + (isPAN ? 'PAN-Maîtrise' : 'Sommative') + ')</strong><br><br>';
 
     // A - Assiduité (TOUJOURS DYNAMIQUE - comportement cumulatif)
-    html += '<strong style="color: var(--bleu-principal);">A (Assiduité)</strong> : ';
+    html += '<strong class="etud-texte-bleu">A (Assiduité)</strong> : ';
     html += 'Proportion des heures de présence parmi les heures de cours <strong>effectivement données jusqu\'à maintenant</strong>. ';
     html += '<br>Formule : <code>A = (heures présentes / heures données) × 100</code>';
-    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Calculé uniquement sur les séances passées (pas sur le total prévu pour la session)</em>';
-    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Exemple : Si 8 séances données sur 15 prévues, un étudiant présent 8/8 a A = 100% (pas 53%)</em>';
-    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Indépendant de la pratique de notation (fait observable)</em>';
+    html += '<br><em class="etud-texte-gris-petit">→ Calculé uniquement sur les séances passées (pas sur le total prévu pour la session)</em>';
+    html += '<br><em class="etud-texte-gris-petit">→ Exemple : Si 8 séances données sur 15 prévues, un étudiant présent 8/8 a A = 100% (pas 53%)</em>';
+    html += '<br><em class="etud-texte-gris-petit">→ Indépendant de la pratique de notation (fait observable)</em>';
 
     html += '<br><br>';
 
     // C - Complétion (TOUJOURS DYNAMIQUE - mobilisation cumulée)
-    html += '<strong style="color: var(--bleu-principal);">C (Complétion)</strong> : ';
+    html += '<strong class="etud-texte-bleu">C (Complétion)</strong> : ';
     html += 'Proportion de travaux remis parmi les travaux <strong>effectivement réalisés jusqu\'à maintenant</strong>. ';
     html += '<br>Formule : <code>C = (travaux remis / travaux réalisés) × 100</code>';
-    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Un artefact devient "réalisé" dès qu\'une première évaluation existe pour celui-ci</em>';
-    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Exemple : Si 8 artefacts réalisés sur 10 prévus, un étudiant ayant remis 8/8 a C = 100% (pas 80%)</em>';
-    html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">→ Indépendant de la pratique de notation (mobilisation observable)</em>';
+    html += '<br><em class="etud-texte-gris-petit">→ Un artefact devient "réalisé" dès qu\'une première évaluation existe pour celui-ci</em>';
+    html += '<br><em class="etud-texte-gris-petit">→ Exemple : Si 8 artefacts réalisés sur 10 prévus, un étudiant ayant remis 8/8 a C = 100% (pas 80%)</em>';
+    html += '<br><em class="etud-texte-gris-petit">→ Indépendant de la pratique de notation (mobilisation observable)</em>';
 
     html += '<br><br>';
 
     // P - Performance (DÉPEND TOUJOURS DE LA PRATIQUE - résultat pédagogique)
-    html += '<strong style="color: var(--bleu-principal);">P (Performance)</strong> : ';
+    html += '<strong class="etud-texte-bleu">P (Performance)</strong> : ';
     html += '<strong>Calculé selon la pratique de notation en vigueur</strong>. ';
 
     if (isPAN) {
         html += '<br>→ <strong>PAN-Maîtrise</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs artefacts</strong> selon l\'échelle IDME. ';
-        html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">&nbsp;&nbsp;&nbsp;Les niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu) sont convertis en pourcentages.</em>';
-        html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">&nbsp;&nbsp;&nbsp;Seuls les ' + nbArtefacts + ' meilleurs artefacts comptent dans le calcul de P</em>';
+        html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Les niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu) sont convertis en pourcentages.</em>';
+        html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Seuls les ' + nbArtefacts + ' meilleurs artefacts comptent dans le calcul de P</em>';
     } else {
         html += '<br>→ <strong>Sommative</strong> : Moyenne pondérée de <strong>toutes les évaluations</strong>. ';
-        html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">&nbsp;&nbsp;&nbsp;Formule : <code>P = Σ(note × pondération) / Σ(pondérations)</code></em>';
-        html += '<br><em style="color: var(--gris-moyen); font-size: 0.85rem;">&nbsp;&nbsp;&nbsp;Toutes les évaluations comptent selon leur pondération</em>';
+        html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Formule : <code>P = Σ(note × pondération) / Σ(pondérations)</code></em>';
+        html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Toutes les évaluations comptent selon leur pondération</em>';
     }
 
     html += '<br><br>';
-    html += '<strong style="color: var(--bleu-principal);">Résumé</strong> : ';
+    html += '<strong class="etud-texte-bleu">Résumé</strong> : ';
     html += '<strong>A et C</strong> mesurent le <strong>comportement cumulatif observable</strong> (contexte d\'apprentissage favorable ou non). ';
     html += '<strong>P</strong> mesure la <strong>qualité de l\'apprentissage</strong> selon la pratique pédagogique choisie (Sommative, PAN-Maîtrise, ou autre).';
 
     html += '<br><br>';
-    html += '<em style="color: var(--gris-moyen); font-size: 0.9rem;">💡 La pratique de notation et ses paramètres peuvent être modifiés dans <strong>Réglages › Pratique de notation</strong></em>';
+    html += '<em class="etud-texte-gris-moyen">💡 La pratique de notation et ses paramètres peuvent être modifiés dans <strong>Réglages › Pratique de notation</strong></em>';
 
     return html;
 }
@@ -608,7 +608,7 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneE) {
     // Fonction helper pour formater la corrélation
     function formaterCorrelation(r) {
         if (r === null || isNaN(r)) {
-            return '<span style="color: #999; font-size: 0.75rem;">—</span>';
+            return '<span class="etud-texte-gris-mini">—</span>';
         }
 
         const absR = Math.abs(r);
@@ -629,7 +629,7 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneE) {
     // Fonction helper pour formater la moyenne
     function formaterMoyenne(valeur) {
         if (valeur === null || isNaN(valeur)) {
-            return '<span style="color: #999; font-size: 0.75rem;">—</span>';
+            return '<span class="etud-texte-gris-mini">—</span>';
         }
 
         // Couleur selon la valeur de l'engagement moyen
@@ -1098,34 +1098,34 @@ function afficherListeEtudiantsConsultation() {
         let html = '';
         html += '<td style="text-align: center; color: #64748b; font-weight: 600;">' + etudiant.num + '</td>';
         html += '<td>' + da + '</td>';
-        html += '<td style="text-align: center;"><strong>' + groupe + '</strong></td>';
+        html += '<td class="etud-text-center"><strong>' + groupe + '</strong></td>';
         html += '<td>' + nom + '</td>';
         html += '<td>' + prenom + '</td>';
-        html += '<td style="text-align: center;">' + (etudiant.sa === 'Oui' ? '✓' : '') + '</td>';
+        html += '<td class="etud-text-center">' + (etudiant.sa === 'Oui' ? '✓' : '') + '</td>';
 
         // Colonnes A-C-P avec couleurs
         const couleurA = obtenirCouleurAssiduite(Math.round(indices.A));
         const couleurC = obtenirCouleurCompletion(Math.round(indices.C));
         const couleurP = obtenirCouleurPerformance(Math.round(indices.P));
 
-        html += '<td style="text-align: center;"><strong style="color: ' + couleurA + ';">' + Math.round(indices.A) + '%</strong></td>';
-        html += '<td style="text-align: center;"><strong style="color: ' + couleurC + ';">' + Math.round(indices.C) + '%</strong></td>';
-        html += '<td style="text-align: center;"><strong style="color: ' + couleurP + ';">' + Math.round(indices.P) + '%</strong></td>';
+        html += '<td class="etud-text-center"><strong style="color: ' + couleurA + ';">' + Math.round(indices.A) + '%</strong></td>';
+        html += '<td class="etud-text-center"><strong style="color: ' + couleurC + ';">' + Math.round(indices.C) + '%</strong></td>';
+        html += '<td class="etud-text-center"><strong style="color: ' + couleurP + ';">' + Math.round(indices.P) + '%</strong></td>';
 
         // NOUVEAU: Colonne Engagement E = (A × C × P)^(1/3) en pourcentage
         const E_brut = (indices.A / 100) * (indices.C / 100) * (indices.P / 100);
         const E = Math.pow(E_brut, 1/3);
         const engagementPct = Math.round(E * 100);
         const couleurE = obtenirCouleurEngagement(engagementPct);
-        html += '<td style="text-align: center;"><strong style="color: ' + couleurE + ';">' + engagementPct + '%</strong></td>';
+        html += '<td class="etud-text-center"><strong style="color: ' + couleurE + ';">' + engagementPct + '%</strong></td>';
 
         // Colonnes Pattern et RàI (affichées uniquement si RàI activé)
         if (activerRai) {
             // NOUVEAU: Colonne Pattern avec badge (centré)
-            html += '<td style="text-align: center;"><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
+            html += '<td class="etud-text-center"><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
 
             // NOUVEAU: Colonne RàI avec badge amélioré
-            html += '<td style="text-align: center;"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
+            html += '<td class="etud-text-center"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
         }
 
         // NOUVEAU (Beta 85): Colonne Interventions
@@ -1134,9 +1134,9 @@ function afficherListeEtudiantsConsultation() {
             : 0;
 
         if (nbInterventions > 0) {
-            html += '<td style="text-align: center;"><span style="color: var(--bleu-principal); font-weight: 600;">📋 ' + nbInterventions + '</span></td>';
+            html += '<td class="etud-text-center"><span style="color: var(--bleu-principal); font-weight: 600;">📋 ' + nbInterventions + '</span></td>';
         } else {
-            html += '<td style="text-align: center;"><span style="color: #ccc;">—</span></td>';
+            html += '<td class="etud-text-center"><span class="etud-texte-gris-clair">—</span></td>';
         }
 
         tr.innerHTML = html;

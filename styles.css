@@ -4125,6 +4125,34 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--bleu-leger);
 }
 
+/* 🆕 BETA 91: Module etudiants (optimisations Phase B) */
+.etud-texte-gris-petit {
+    color: var(--gris-moyen);
+    font-size: 0.85rem;
+}
+
+.etud-text-center {
+    text-align: center;
+}
+
+.etud-texte-bleu {
+    color: var(--bleu-principal);
+}
+
+.etud-texte-gris-mini {
+    color: #999;
+    font-size: 0.75rem;
+}
+
+.etud-texte-gris-moyen {
+    color: var(--gris-moyen);
+    font-size: 0.9rem;
+}
+
+.etud-texte-gris-clair {
+    color: #ccc;
+}
+
 
 /* ===============================================
    SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)
