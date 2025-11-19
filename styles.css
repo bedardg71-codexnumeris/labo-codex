@@ -4090,6 +4090,41 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--risque-minimal);
 }
 
+/* 🆕 BETA 91: Module productions (optimisations Phase B) */
+.prod-p-15 {
+    padding: 15px;
+}
+
+.prod-texte-secondaire {
+    font-size: 0.9rem;
+    font-weight: normal;
+    opacity: 0.9;
+}
+
+.prod-mt-6 {
+    margin-top: 6px;
+}
+
+.prod-mt-10 {
+    margin-top: 10px;
+}
+
+.prod-italic {
+    font-style: italic;
+}
+
+.prod-flex-1 {
+    flex: 1;
+}
+
+.prod-mr-10 {
+    margin-right: 10px;
+}
+
+.prod-texte-bleu-leger {
+    color: var(--bleu-leger);
+}
+
 
 /* ===============================================
    SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)

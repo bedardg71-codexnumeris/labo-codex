@@ -76,9 +76,9 @@ function afficherTableauProductions() {
     const container = document.getElementById('tableauEvaluationsContainer');
 
     if (evaluations.length === 0) {
-        container.innerHTML = '<p class="text-muted" style="font-style: italic;">Aucune évaluation définie.</p>';
+        container.innerHTML = '<p class="text-muted" class="prod-italic">Aucune évaluation définie.</p>';
         document.getElementById('typesEvaluations').innerHTML =
-            '<span style="color: var(--bleu-leger);">Aucune évaluation configurée</span>';
+            '<span class="prod-texte-bleu-leger">Aucune évaluation configurée</span>';
         document.getElementById('nombreEvaluations').textContent = '0';
         return;
     }
@@ -719,7 +719,7 @@ function chargerArtefactsDisponibles() {
     if (!container) return;
 
     if (artefacts.length === 0) {
-        container.innerHTML = '<p class="text-muted" style="font-style: italic;">Aucun artefact de type "Artefact d\'un portfolio" n\'existe encore. Crée-les d\'abord.</p>';
+        container.innerHTML = '<p class="text-muted" class="prod-italic">Aucun artefact de type "Artefact d\'un portfolio" n\'existe encore. Crée-les d\'abord.</p>';
         return;
     }
 
@@ -727,7 +727,7 @@ function chargerArtefactsDisponibles() {
         <label style="display: block; padding: 8px; margin-bottom: 5px; 
                background: var(--bleu-tres-pale); border-radius: 4px; cursor: pointer;">
             <input type="checkbox" name="artefactPortfolio" value="${art.id}"
-                   style="margin-right: 10px;">
+                   class="prod-mr-10">
             <strong>${art.description || art.titre}</strong>
         </label>
     `).join('');
@@ -939,7 +939,7 @@ function afficherToutesLesProductionsParType() {
             <div class="item-liste" style="background: ${bgColor}; margin-bottom: 8px; padding: 12px 15px;
                  border-left: 4px solid ${borderColor};">
                 <div class="production-compact-header">
-                    <div style="flex: 1;">
+                    <div class="prod-flex-1">
                         <div class="production-compact-titre">
                             ${estPortfolio ? '📁 ' : ''}${echapperHtml(prod.titre)}${prod.description ? ' - ' + echapperHtml(prod.description) : ''}
                         </div>
@@ -951,12 +951,12 @@ function afficherToutesLesProductionsParType() {
                             ${echapperHtml(nomGrille)}` : ''}
                         </div>
                         ${estPortfolio && prod.artefactsIds && prod.artefactsIds.length > 0 ? `
-                            <div class="production-compact-meta" style="margin-top: 6px;">
+                            <div class="production-compact-meta" class="prod-mt-6">
                                 📦 ${prod.artefactsIds.length} artefacts • ${prod.regles.nombreARetenir} à retenir • Min. ${prod.regles.minimumCompletion} complétés
                             </div>
                         ` : ''}
                         ${prod.objectif || prod.tache ? `
-                            <div class="production-compact-meta" style="margin-top: 6px;">
+                            <div class="production-compact-meta" class="prod-mt-6">
                                 ${prod.objectif ? `📌 ${echapperHtml(prod.objectif)}` : ''}
                                 ${prod.objectif && prod.tache ? ' • ' : ''}
                                 ${prod.tache ? `✏️ ${echapperHtml(prod.tache)}` : ''}
@@ -992,15 +992,15 @@ function afficherToutesLesProductionsParType() {
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
                     <span>📁 Portfolio et artefacts</span>
-                    <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
+                    <span class="prod-texte-secondaire">
                         ${portfolio ? '1 portfolio' : ''}${portfolio && artefacts.length > 0 ? ' · ' : ''}${artefacts.length > 0 ? `${artefacts.length} artefact${artefacts.length > 1 ? 's' : ''}` : ''}
                     </span>
                 </summary>
-                <div style="padding: 15px;">
+                <div class="prod-p-15">
                     ${portfolio ? genererHtmlProduction(portfolio, 0, 1) : ''}
                     ${artefacts.map((art, idx) => genererHtmlProduction(art, idx, artefacts.length)).join('')}
                     ${!portfolio ? `
-                        <button class="btn btn-confirmer" onclick="ajouterProductionAuType('portfolio')" style="margin-top: 10px;">
+                        <button class="btn btn-confirmer" onclick="ajouterProductionAuType('portfolio')" class="prod-mt-10">
                             + Ajouter un portfolio
                         </button>
                     ` : ''}
@@ -1021,13 +1021,13 @@ function afficherToutesLesProductionsParType() {
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
                     <span>📝 Évaluations sommatives</span>
-                    <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
+                    <span class="prod-texte-secondaire">
                         ${sommatives.length} évaluation${sommatives.length > 1 ? 's' : ''}
                     </span>
                 </summary>
-                <div style="padding: 15px;">
+                <div class="prod-p-15">
                     ${sommatives.map((prod, idx) => genererHtmlProduction(prod, idx, sommatives.length)).join('')}
-                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen')" style="margin-top: 10px;">
+                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen')" class="prod-mt-10">
                         + Ajouter une évaluation sommative
                     </button>
                 </div>
@@ -1044,13 +1044,13 @@ function afficherToutesLesProductionsParType() {
                          color: white; font-weight: 600; font-size: 1.05rem; cursor: pointer;
                          user-select: none; display: flex; justify-content: space-between; align-items: center;">
                     <span>📝 Évaluations formatives</span>
-                    <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
+                    <span class="prod-texte-secondaire">
                         ${formatives.length} évaluation${formatives.length > 1 ? 's' : ''}
                     </span>
                 </summary>
-                <div style="padding: 15px;">
+                <div class="prod-p-15">
                     ${formatives.map((prod, idx) => genererHtmlProduction(prod, idx, formatives.length)).join('')}
-                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen-formatif')" style="margin-top: 10px;">
+                    <button class="btn btn-confirmer" onclick="ajouterProductionAuType('examen-formatif')" class="prod-mt-10">
                         + Ajouter une évaluation formative
                     </button>
                 </div>
