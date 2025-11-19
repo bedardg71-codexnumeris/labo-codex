@@ -3998,6 +3998,50 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     height: 40px;
 }
 
+/* 🆕 BETA 91: Module evaluation (optimisations Phase B) */
+.eval-texte-placeholder {
+    color: #999;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+.eval-texte-italic-gris {
+    color: #999;
+    font-style: italic;
+}
+
+.eval-texte-09 {
+    font-size: 0.9rem;
+}
+
+.eval-mt-15 {
+    margin-top: 15px;
+}
+
+.eval-grid-critere {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.eval-texte-11 {
+    font-size: 1.1rem;
+}
+
+.eval-width-60 {
+    width: 60px;
+}
+
+.eval-ml-6 {
+    margin-left: 6px;
+}
+
+.eval-desactive {
+    opacity: 0.6;
+    background: #f5f5f5;
+}
+
 
 /* ===============================================
    SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)

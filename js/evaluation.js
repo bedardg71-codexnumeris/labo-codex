@@ -427,7 +427,7 @@ function cartoucheSelectionnee() {
     const statut = document.getElementById('remiseProduction1').value;
     if (statut !== 'remis') {
         document.getElementById('listeCriteresGrille1').innerHTML =
-            '<p style="color: #999; font-style: italic;">Le travail doit être remis avant évaluation</p>';
+            '<p class="eval-texte-italic-gris">Le travail doit être remis avant évaluation</p>';
         return;
     }
 
@@ -460,10 +460,10 @@ function cartoucheSelectionnee() {
 
         return `
     <div style="margin-bottom: 15px; padding: 12px; background: white; border-left: 3px solid var(--bleu-moyen);">
-        <div style="display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start;">
+        <div class="eval-grid-critere">
             <div>
     <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
-        <strong style="font-size: 0.9rem;">${echapperHtml(critere.nom)}</strong>
+        <strong class="eval-texte-09">${echapperHtml(critere.nom)}</strong>
         <small style="color: #666;">(${ponderation}%)</small>
     </div>
     ${critereGrille?.description ?
@@ -918,7 +918,7 @@ function changerStatutRemise(num) {
     // Si non remis, masquer les critères
     if (statut !== 'remis') {
         document.getElementById('listeCriteresGrille1').innerHTML =
-            '<p style="color: #999; font-style: italic;">Le travail doit être remis avant évaluation</p>';
+            '<p class="eval-texte-italic-gris">Le travail doit être remis avant évaluation</p>';
     } else if (evaluationEnCours?.cartoucheId) {
         // Si remis et cartouche sélectionnée, afficher les critères
         cartoucheSelectionnee();
@@ -1235,7 +1235,7 @@ function nouvelleEvaluation() {
     document.getElementById('selectEchelle1').value = '';
     document.getElementById('selectCartoucheEval').value = '';
     document.getElementById('remiseProduction1').value = 'non-remis';
-    document.getElementById('listeCriteresGrille1').innerHTML = '<p style="color: #999; font-style: italic; font-size: 0.85rem;">Sélectionnez une grille et une cartouche</p>';
+    document.getElementById('listeCriteresGrille1').innerHTML = '<p class="eval-texte-placeholder">Sélectionnez une grille et une cartouche</p>';
     document.getElementById('retroactionFinale1').value = '';
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
@@ -1289,7 +1289,7 @@ function nouvelleEvaluation() {
  */
 function reinitialiserFormulaire() {
     // Réinitialiser uniquement les éléments du formulaire de notation
-    document.getElementById('listeCriteresGrille1').innerHTML = '<p style="color: #999; font-style: italic; font-size: 0.85rem;">Sélectionnez une grille et une cartouche</p>';
+    document.getElementById('listeCriteresGrille1').innerHTML = '<p class="eval-texte-placeholder">Sélectionnez une grille et une cartouche</p>';
     document.getElementById('retroactionFinale1').value = '';
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
@@ -1740,7 +1740,7 @@ function genererBadgeCompletion(etudiant) {
     // Affichage unique (les indices C et P n'ont pas de modalité sommatif/alternatif)
     return `
         <span class="carte-metrique" style="padding:8px 15px; background: ${couleurFond}; border-radius: 6px;">
-            <strong style="font-size: 1.1rem;">C</strong>
+            <strong class="eval-texte-11">C</strong>
             <span style="font-size: 1.1rem; font-weight: 600; margin-left: 8px;">
                 ${Math.round(completion * 100)}%
             </span>
@@ -1849,7 +1849,7 @@ function genererDetailsEtudiant(etudiant) {
 
     // Générer le tableau HTML
     const tableauHTML = `
-        <table class="tableau" style="margin-top: 15px;">
+        <table class="tableau" class="eval-mt-15">
             <thead>
                 <tr>
                     <th>Production</th>
@@ -1858,7 +1858,7 @@ function genererDetailsEtudiant(etudiant) {
                     <th>Note</th>
                     <th>Date</th>
                     <th>Actions</th>
-                    <th style="width: 60px;" title="Verrouillage">🔒/🔓</th>
+                    <th class="eval-width-60" title="Verrouillage">🔒/🔓</th>
                 </tr>
             </thead>
             <tbody>
@@ -1874,7 +1874,7 @@ function genererDetailsEtudiant(etudiant) {
                                 const noteAffichage = noteLettre !== '--' ? `${noteLettre} (${notePourcent}%)` : `-- (${notePourcent}%)`;
 
                                 return `
-                            <tr ${estRemplacee ? 'style="opacity: 0.6; background: #f5f5f5;"' : ''}>
+                            <tr ${estRemplacee ? 'class="eval-desactive"' : ''}>
                                 <td>${echapperHtml(item.production.titre || item.production.nom || '—')}</td>
                                 <td>${echapperHtml(item.evaluation.grilleNom || '—')}</td>
                                 <td>${echapperHtml(obtenirNomCartouche(item.evaluation.cartoucheId, item.evaluation.grilleId) || '—')}</td>
@@ -1882,7 +1882,7 @@ function genererDetailsEtudiant(etudiant) {
                                     <span ${obtenirClasseNote(item.evaluation.niveauFinal, item.evaluation.echelleId)}>
                                         ${noteAffichage}
                                     </span>
-                                    ${estRemplacee ? '<span class="badge-statut" style="margin-left: 6px;">Remplacée</span>' : ''}
+                                    ${estRemplacee ? '<span class="badge-statut" class="eval-ml-6">Remplacée</span>' : ''}
                                     ${estReprise ? '<span style="color: #9c27b0; font-size: 1.2rem; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
                                     ${item.evaluation.jetonDelaiApplique ? '<span style="color: #ff6f00; font-size: 1.2rem; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
                                 </td>
