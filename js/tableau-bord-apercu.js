@@ -877,7 +877,7 @@ function afficherMetriquesGlobales(etudiants) {
 
     // Générer la légende unique en haut
     const legendeUnique = `
-        <div class="distribution-legende-commune" style="position: relative; height: 40px; font-size: 0.8rem; color: #666; margin-bottom: 20px; padding: 0 20px;">
+        <div class="distribution-legende-commune" class="tb-barre-rai">
             <div class="tb-flex-center-around">
                 <span style="color: #ff9800; text-align: center; font-weight: 600;">Fragile<br><span class="tb-texte-mini">30-49%</span></span>
                 <span style="color: #ffc107; text-align: center; font-weight: 600;">Modéré<br><span class="tb-texte-mini">50-64%</span></span>
@@ -916,11 +916,11 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
     const valeurs = [];
 
     if (afficherSom) {
-        valeurs.push(`<strong style="font-size: 1.8rem; color: var(--som-orange); font-weight: 700;">${formatPourcentage(valeurSom)}</strong>`);
+        valeurs.push(`<strong class="tb-valeur-tres-grande-orange">${formatPourcentage(valeurSom)}</strong>`);
     }
 
     if (afficherPan) {
-        valeurs.push(`<strong style="font-size: 1.8rem; color: var(--pan-bleu); font-weight: 700;">${formatPourcentage(valeurPan)}</strong>`);
+        valeurs.push(`<strong class="tb-valeur-tres-grande-bleu-pan">${formatPourcentage(valeurPan)}</strong>`);
     }
 
     // Intégrer la description dans le label si présente
@@ -1109,10 +1109,10 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         `;
     } else if (moyenneSOM !== null) {
         // Mode SOM uniquement
-        valeursHTML = `<span style="font-size: 0.9rem; font-weight: 600; color: var(--som-orange); margin-left: 10px;">${moyenneSOM}%</span>`;
+        valeursHTML = `<span class="tb-texte-moyen-orange">${moyenneSOM}%</span>`;
     } else if (moyennePAN !== null) {
         // Mode PAN uniquement
-        valeursHTML = `<span style="font-size: 0.9rem; font-weight: 600; color: var(--pan-bleu); margin-left: 10px;">${moyennePAN}%</span>`;
+        valeursHTML = `<span class="tb-texte-moyen-bleu-pan">${moyennePAN}%</span>`;
     }
 
     // Générer les points pour SOM avec jitter aléatoire
@@ -1214,7 +1214,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     return `
         <div class="distribution-container" class="tb-mb-20">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h4 style="margin: 0; font-size: 0.95rem; color: #333;">${label}</h4>
+                <h4 class="tb-titre-simple">${label}</h4>
                 ${valeursHTML}
             </div>
             ${interpretationHTML}
@@ -1361,20 +1361,20 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     let labelCritique = 'Blocage<br>critique';
 
     if (afficherSom && afficherPan) {
-        labelStable += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${stableSOM} (${stablePctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${stablePAN} (${stablePctPAN}%)</span>`;
-        labelDefi += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${defiSOM} (${defiPctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${defiPAN} (${defiPctPAN}%)</span>`;
-        labelEmergent += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${emergentSOM} (${emergentPctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${emergentPAN} (${emergentPctPAN}%)</span>`;
-        labelCritique += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${critiqueSOM} (${critiquePctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${critiquePAN} (${critiquePctPAN}%)</span>`;
+        labelStable += `<br><span class="tb-texte-mini-orange">${stableSOM} (${stablePctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${stablePAN} (${stablePctPAN}%)</span>`;
+        labelDefi += `<br><span class="tb-texte-mini-orange">${defiSOM} (${defiPctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${defiPAN} (${defiPctPAN}%)</span>`;
+        labelEmergent += `<br><span class="tb-texte-mini-orange">${emergentSOM} (${emergentPctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${emergentPAN} (${emergentPctPAN}%)</span>`;
+        labelCritique += `<br><span class="tb-texte-mini-orange">${critiqueSOM} (${critiquePctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${critiquePAN} (${critiquePctPAN}%)</span>`;
     } else if (afficherSom) {
-        labelStable += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${stableSOM} (${stablePctSOM}%)</span>`;
-        labelDefi += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${defiSOM} (${defiPctSOM}%)</span>`;
-        labelEmergent += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${emergentSOM} (${emergentPctSOM}%)</span>`;
-        labelCritique += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${critiqueSOM} (${critiquePctSOM}%)</span>`;
+        labelStable += `<br><span class="tb-texte-mini-orange">${stableSOM} (${stablePctSOM}%)</span>`;
+        labelDefi += `<br><span class="tb-texte-mini-orange">${defiSOM} (${defiPctSOM}%)</span>`;
+        labelEmergent += `<br><span class="tb-texte-mini-orange">${emergentSOM} (${emergentPctSOM}%)</span>`;
+        labelCritique += `<br><span class="tb-texte-mini-orange">${critiqueSOM} (${critiquePctSOM}%)</span>`;
     } else if (afficherPan) {
-        labelStable += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${stablePAN} (${stablePctPAN}%)</span>`;
-        labelDefi += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${defiPAN} (${defiPctPAN}%)</span>`;
-        labelEmergent += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${emergentPAN} (${emergentPctPAN}%)</span>`;
-        labelCritique += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${critiquePAN} (${critiquePctPAN}%)</span>`;
+        labelStable += `<br><span class="tb-texte-mini-bleu-pan">${stablePAN} (${stablePctPAN}%)</span>`;
+        labelDefi += `<br><span class="tb-texte-mini-bleu-pan">${defiPAN} (${defiPctPAN}%)</span>`;
+        labelEmergent += `<br><span class="tb-texte-mini-bleu-pan">${emergentPAN} (${emergentPctPAN}%)</span>`;
+        labelCritique += `<br><span class="tb-texte-mini-bleu-pan">${critiquePAN} (${critiquePctPAN}%)</span>`;
     }
 
     // 🆕 BETA 91: Générer l'interprétation des patterns
@@ -1419,14 +1419,14 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
 
     return `
         <div class="distribution-container" class="tb-mb-15">
-            <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">Répartition des patterns d'apprentissage</h4>
+            <h4 class="tb-titre-metrique">Répartition des patterns d'apprentissage</h4>
             ${interpretation ? `<div class="interpretation-barre">${interpretation}</div>` : ''}
-            <div class="barre-patterns" style="position: relative; height: 30px;">
+            <div class="barre-patterns" class="tb-barre-simple">
                 <div class="barre-patterns-overlay"></div>
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
-            <div class="distribution-legende" style="position: relative; height: 50px; font-size: 0.75rem; color: #666;">
+            <div class="distribution-legende" class="tb-barre-distribution">
                 <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: #1bbd7e; font-weight: 600; text-align: center;">${labelStable}</span>
                 <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: #11aec5; font-weight: 600; text-align: center;">${labelDefi}</span>
                 <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: #2994ee; font-weight: 600; text-align: center;">${labelEmergent}</span>
@@ -1561,17 +1561,17 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
     let labelNiveau3 = 'Niveau 3<br>Intensif';
 
     if (afficherSom && afficherPan) {
-        labelNiveau1 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau1SOM} (${niveau1PctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
-        labelNiveau2 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau2SOM} (${niveau2PctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
-        labelNiveau3 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau3SOM} (${niveau3PctSOM}%)</span> <span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
+        labelNiveau1 += `<br><span class="tb-texte-mini-orange">${niveau1SOM} (${niveau1PctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
+        labelNiveau2 += `<br><span class="tb-texte-mini-orange">${niveau2SOM} (${niveau2PctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
+        labelNiveau3 += `<br><span class="tb-texte-mini-orange">${niveau3SOM} (${niveau3PctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
     } else if (afficherSom) {
-        labelNiveau1 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau1SOM} (${niveau1PctSOM}%)</span>`;
-        labelNiveau2 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau2SOM} (${niveau2PctSOM}%)</span>`;
-        labelNiveau3 += `<br><span style="font-size: 0.7rem; color: var(--som-orange);">${niveau3SOM} (${niveau3PctSOM}%)</span>`;
+        labelNiveau1 += `<br><span class="tb-texte-mini-orange">${niveau1SOM} (${niveau1PctSOM}%)</span>`;
+        labelNiveau2 += `<br><span class="tb-texte-mini-orange">${niveau2SOM} (${niveau2PctSOM}%)</span>`;
+        labelNiveau3 += `<br><span class="tb-texte-mini-orange">${niveau3SOM} (${niveau3PctSOM}%)</span>`;
     } else if (afficherPan) {
-        labelNiveau1 += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
-        labelNiveau2 += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
-        labelNiveau3 += `<br><span style="font-size: 0.7rem; color: var(--pan-bleu);">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
+        labelNiveau1 += `<br><span class="tb-texte-mini-bleu-pan">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
+        labelNiveau2 += `<br><span class="tb-texte-mini-bleu-pan">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
+        labelNiveau3 += `<br><span class="tb-texte-mini-bleu-pan">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
     }
 
     // 🆕 BETA 91: Générer l'interprétation RàI
@@ -1606,14 +1606,14 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
 
     return `
         <div class="distribution-container" class="tb-mb-15">
-            <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">Modèle de la Réponse à l'intervention (RàI)</h4>
+            <h4 class="tb-titre-metrique">Modèle de la Réponse à l'intervention (RàI)</h4>
             ${interpretation ? `<div class="interpretation-barre">${interpretation}</div>` : ''}
-            <div class="barre-rai" style="position: relative; height: 30px;">
+            <div class="barre-rai" class="tb-barre-simple">
                 <div class="barre-rai-overlay"></div>
                 ${lignesSOM}
                 ${lignesPAN}
             </div>
-            <div class="distribution-legende" style="position: relative; height: 50px; font-size: 0.75rem; color: #666;">
+            <div class="distribution-legende" class="tb-barre-distribution">
                 <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: #2196f3; font-weight: 600; text-align: center;">${labelNiveau1}</span>
                 <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: #6366f1; font-weight: 600; text-align: center;">${labelNiveau2}</span>
                 <span style="position: absolute; left: 83%; transform: translateX(-50%); color: #7c3aed; font-weight: 600; text-align: center;">${labelNiveau3}</span>
@@ -1697,11 +1697,11 @@ function genererCarteEngagement(label, valeurSom, valeurPan, total, afficherSom,
     const valeurs = [];
 
     if (afficherSom) {
-        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--som-orange); font-weight: 700;">${valeurSom}</strong>`);
+        valeurs.push(`<strong class="tb-valeur-grande-orange">${valeurSom}</strong>`);
     }
 
     if (afficherPan) {
-        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--pan-bleu); font-weight: 700;">${valeurPan}</strong>`);
+        valeurs.push(`<strong class="tb-valeur-grande-bleu-pan">${valeurPan}</strong>`);
     }
 
     return `
@@ -1754,7 +1754,7 @@ function afficherListeEtudiantsCritiques(etudiants, afficherSommatif) {
                 </div>
                 <button class="btn btn-principal"
                         onclick="afficherSection('etudiants'); setTimeout(() => { afficherSousSection('profil-etudiant'); chargerProfilEtudiant('${e.da}'); }, 100);"
-                        style="padding: 6px 12px; font-size: 0.9rem;">
+                        class="tb-padding-compact">
                     Voir profil
                 </button>
             </div>
@@ -1769,11 +1769,11 @@ function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, af
     const valeurs = [];
 
     if (afficherSom) {
-        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--som-orange); font-weight: 700;">${valeurSom}</strong>`);
+        valeurs.push(`<strong class="tb-valeur-grande-orange">${valeurSom}</strong>`);
     }
 
     if (afficherPan) {
-        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--pan-bleu); font-weight: 700;">${valeurPan}</strong>`);
+        valeurs.push(`<strong class="tb-valeur-grande-bleu-pan">${valeurPan}</strong>`);
     }
 
     return `
@@ -1859,7 +1859,7 @@ function afficherPatternsApprentissage(etudiants) {
 
     // Générer la barre de distribution et l'ajouter à la fin de la carte
     const html = `
-        <div class="barre-patterns-container" style="padding: 20px 20px 0 20px; margin-top: 10px;">
+        <div class="barre-patterns-container" class="tb-padding-top-espacé">
             ${genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan)}
         </div>
     `;
@@ -1874,11 +1874,11 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
     const valeurs = [];
 
     if (afficherSom) {
-        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--som-orange); font-weight: 700;">${valeurSomPct}%</strong>`);
+        valeurs.push(`<strong class="tb-valeur-grande-orange">${valeurSomPct}%</strong>`);
     }
 
     if (afficherPan) {
-        valeurs.push(`<strong style="font-size: 1.5rem; color: var(--pan-bleu); font-weight: 700;">${valeurPanPct}%</strong>`);
+        valeurs.push(`<strong class="tb-valeur-grande-bleu-pan">${valeurPanPct}%</strong>`);
     }
 
     // Générer le texte du nombre d'étudiants
@@ -1975,7 +1975,7 @@ function afficherNiveauxRaI(etudiants) {
 
     // Générer la barre de distribution et l'ajouter à la fin de la carte
     const html = `
-        <div class="barre-rai-container" style="padding: 20px 20px 20px 20px; margin-top: 0;">
+        <div class="barre-rai-container" class="tb-padding-top">
             ${genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan)}
         </div>
     `;
@@ -2077,7 +2077,7 @@ function afficherActionsRecommandees(etudiants) {
                         ${indices.niveauEngagement}
                     </span>
                 </div>
-                <div style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">
+                <div class="tb-texte-gris-mb10">
                     ${recommendation}
                 </div>
                 <div style="display: flex; gap: 8px; font-size: 0.85rem;">
@@ -2202,7 +2202,7 @@ function afficherAlertesPrioritaires(etudiants) {
     
     if (etudiantsARisque.length === 0) {
         container.innerHTML = `
-            <p style="text-align: center; padding: 30px; color: green;">
+            <p class="tb-zone-succes">
                 ✅ Aucune intervention urgente requise
             </p>
         `;
@@ -2211,7 +2211,7 @@ function afficherAlertesPrioritaires(etudiants) {
     
     // Générer le tableau
     container.innerHTML = `
-        <table class="tableau" style="margin-top: 15px;">
+        <table class="tableau" class="tb-mt-15">
             <thead>
                 <tr>
                     <th>Nom</th>
@@ -2242,7 +2242,7 @@ function afficherAlertesPrioritaires(etudiants) {
                         <td>
                             <button class="btn btn-principal" 
                                     onclick="afficherSousSection('tableau-bord-profil'); chargerProfilEtudiant('${e.da}')"
-                                    style="padding: 6px 12px; font-size: 0.9rem;">
+                                    class="tb-padding-compact">
                                 Voir profil
                             </button>
                         </td>

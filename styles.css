@@ -4138,6 +4138,123 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 15px;
 }
 
+/* Nouveaux patterns Phase B (suite - 18 nov 2025) */
+.tb-texte-mini-orange {
+    font-size: 0.7rem;
+    color: var(--som-orange);
+}
+
+.tb-texte-mini-bleu-pan {
+    font-size: 0.7rem;
+    color: var(--pan-bleu);
+}
+
+.tb-valeur-grande-orange {
+    font-size: 1.5rem;
+    color: var(--som-orange);
+    font-weight: 700;
+}
+
+.tb-valeur-grande-bleu-pan {
+    font-size: 1.5rem;
+    color: var(--pan-bleu);
+    font-weight: 700;
+}
+
+.tb-valeur-tres-grande-orange {
+    font-size: 1.8rem;
+    color: var(--som-orange);
+    font-weight: 700;
+}
+
+.tb-barre-distribution {
+    position: relative;
+    height: 50px;
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.tb-barre-simple {
+    position: relative;
+    height: 30px;
+}
+
+.tb-barre-rai {
+    position: relative;
+    height: 40px;
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 20px;
+    padding: 0 20px;
+}
+
+.tb-padding-compact {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+.tb-titre-metrique {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.tb-titre-simple {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.tb-zone-succes {
+    text-align: center;
+    padding: 30px;
+    color: green;
+}
+
+.tb-padding-top {
+    padding: 20px 20px 20px 20px;
+    margin-top: 0;
+}
+
+.tb-padding-top-espacé {
+    padding: 20px 20px 0 20px;
+    margin-top: 10px;
+}
+
+.tb-mt-15 {
+    margin-top: 15px;
+}
+
+.tb-mb-8 {
+    margin-bottom: 8px;
+}
+
+.tb-valeur-tres-grande-bleu-pan {
+    font-size: 1.8rem;
+    color: var(--pan-bleu);
+    font-weight: 700;
+}
+
+.tb-texte-moyen-orange {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--som-orange);
+    margin-left: 10px;
+}
+
+.tb-texte-moyen-bleu-pan {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--pan-bleu);
+    margin-left: 10px;
+}
+
+.tb-texte-gris-mb10 {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
 /* 🆕 BETA 91: Module interventions (optimisations Phase B) */
 .intervention-m-0 {
     margin: 0;
