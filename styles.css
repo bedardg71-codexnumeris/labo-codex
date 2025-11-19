@@ -3626,6 +3626,212 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--orange-accent);
 }
 
+/* 🆕 BETA 91: Module profil-etudiant (optimisations) */
+/* Section header avec titre et valeur (réutilise .carte-metrique-header existant mais ajoute variantes) */
+.profil-section-titre-seul {
+    margin: 0;
+    color: var(--bleu-principal);
+    font-size: 1.1rem;
+}
+
+.profil-section-titre-large {
+    color: var(--bleu-principal);
+    margin-bottom: 15px;
+    padding-right: 40px;
+}
+
+.profil-section-titre-compact {
+    color: var(--bleu-principal);
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.profil-section-titre-sous {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* Texte descriptif */
+.profil-texte-detail {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.profil-texte-detail-compact {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.profil-texte-paragraphe {
+    margin: 10px 0;
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.profil-texte-explicatif {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #333;
+}
+
+/* Séparateurs */
+.profil-separateur {
+    border: none;
+    border-top: 1px solid #dee2e6;
+    margin: 20px 0;
+}
+
+.profil-separateur-section {
+    border-top: 1px solid #e9ecef;
+    margin: 15px 0;
+    padding-top: 15px;
+}
+
+/* Carte simple (alternative à profil-carte) */
+.profil-carte-simple {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.profil-carte-bordure {
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* Zone vide centrée */
+.profil-zone-vide {
+    text-align: center;
+    padding: 30px;
+}
+
+/* Tableau headers */
+.profil-tableau-header-gauche {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.profil-tableau-header-centre {
+    padding: 12px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.profil-tableau-cellule {
+    padding: 12px;
+}
+
+/* Liste sans puces */
+.profil-liste-simple {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    line-height: 2;
+}
+
+/* Espacement utilitaires */
+.profil-mb-15 {
+    margin-bottom: 15px;
+}
+
+.profil-mt-10 {
+    margin-top: 10px;
+}
+
+.profil-mt-20 {
+    margin-top: 20px;
+}
+
+.profil-mt-25 {
+    margin-top: 25px;
+}
+
+/* Nouveaux patterns (Phase B Beta 91) */
+.profil-section-titre-large {
+    color: var(--bleu-principal);
+    margin-bottom: 15px;
+}
+
+.profil-carte-importante {
+    background: var(--bleu-tres-pale);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid var(--bleu-principal);
+}
+
+.profil-valeur-grande {
+    font-size: 1.8rem;
+    color: var(--bleu-principal);
+    font-weight: bold;
+}
+
+.profil-mt-20 {
+    margin-top: 20px;
+}
+
+.profil-carte-grise {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.profil-flex-gap {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.profil-texte-fort {
+    font-weight: bold;
+    color: var(--bleu-principal);
+}
+
+.profil-mb-10 {
+    margin-bottom: 10px;
+}
+
+.profil-flex-between-mb15 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.profil-grid-gap10-mb15 {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.profil-texte-petit-ml10 {
+    color: #666;
+    font-size: 0.8rem;
+    font-weight: normal;
+    margin-left: 10px;
+}
+
+.profil-flex-between-mb8 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.profil-mb-20 {
+    margin-bottom: 20px;
+}
+
+.profil-texte-petit {
+    font-size: 0.8rem;
+}
+
 
 /* ===============================================
    SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)
