@@ -723,7 +723,7 @@ function initialiserSaisiePresences() {
     if (!dateInput || !dateInput.value) {
         const tbody = document.getElementById('tbody-saisie-presences');
         if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Sélectionnez une date</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="presences-text-center">Sélectionnez une date</td></tr>';
         }
         return;
     }
@@ -751,7 +751,7 @@ function initialiserSaisiePresences() {
 
         const tbody = document.getElementById('tbody-saisie-presences');
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--rouge-erreur);">${message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="presences-text-center-erreur">${message}</td></tr>`;
         }
 
         mettreAJourEnteteDateSeance('');
@@ -967,7 +967,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
             <td>${echapperHtml(etudiant.da)}</td>
             <td>${echapperHtml(etudiant.prenom)}</td>
             <td>${echapperHtml(etudiant.nom)}</td>
-            <td style="width: 80px;">${inputHeuresHTML}</td>
+            <td class="presences-w-80">${inputHeuresHTML}</td>
             <td>
                 <input type="text"
                        class="controle-form input-notes"
@@ -978,7 +978,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
             </td>
             <td><span id="heuresHisto_${etudiant.da}">${totalHeuresAvecSeanceActuelle.toFixed(1)}h</span></td>
             <td>
-                <span id="taux_${etudiant.da}" style="font-weight: 500;">
+                <span id="taux_${etudiant.da}" class="presences-texte-medium">
                     ${tauxAssiduiteActuel}%
                 </span>
             </td>`;
