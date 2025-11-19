@@ -236,6 +236,9 @@
 .u-nowrap { white-space: nowrap; }
 .u-overflow-auto { overflow: auto; }
 .u-overflow-x-auto { overflow-x: auto; }
+.u-opacity-07 { opacity: 0.7; }
+.u-flex-1 { flex: 1; }
+.u-flex-gap-10 { display: flex; gap: 10px; }
 
 /* ===============================
    RESET ET BASE
