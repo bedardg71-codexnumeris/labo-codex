@@ -852,7 +852,7 @@ function genererSectionMobilisationEngagement(da) {
 
     return `
         <!-- Détails des calculs (masqué par défaut) -->
-        <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle" class="carte-info-toggle" style="display: none;">
+        <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle" class="carte-info-toggle" class="profil-hide">
             <div class="details-calculs-section">
                 <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
                 <div class="details-calculs-bloc">
@@ -1263,7 +1263,7 @@ function genererSectionMobilisationEngagement(da) {
 
             let texteExplicatifE = '';
             if (decouplerPR && !modeComparatif) {
-                texteExplicatifE = `<span style="font-size: 0.85rem; color: #666; font-weight: 400;"> (P basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''})</span>`;
+                texteExplicatifE = `<span class="profil-texte-normal-gris"> (P basé sur les ${nombreArtefacts} plus récent${nombreArtefacts > 1 ? 's' : ''})</span>`;
             } else if (!decouplerPR && !modeComparatif && portfolioActif) {
                 const textesModalites = {
                     'meilleurs': `P basé sur les ${nombreArtefacts} meilleur${nombreArtefacts > 1 ? 's' : ''}`,
@@ -1272,7 +1272,7 @@ function genererSectionMobilisationEngagement(da) {
                     'tous': 'P basé sur tous les artefacts'
                 };
                 const texteModalite = textesModalites[methodeSelection] || textesModalites['meilleurs'];
-                texteExplicatifE = `<span style="font-size: 0.85rem; color: #666; font-weight: 400;"> (${texteModalite})</span>`;
+                texteExplicatifE = `<span class="profil-texte-normal-gris"> (${texteModalite})</span>`;
             }
 
             return `
@@ -1489,7 +1489,7 @@ function genererSectionAccompagnement(da) {
 
     let html = `
         <!-- Détails de la section (masqué par défaut) -->
-        <div id="details-calculs-accompagnement-${da}" class="carte-info-toggle" class="carte-info-toggle" style="display: none;">
+        <div id="details-calculs-accompagnement-${da}" class="carte-info-toggle" class="carte-info-toggle" class="profil-hide">
             <div class="details-calculs-section">
                 <h5 class="details-calculs-titre">À PROPOS DE CETTE SECTION</h5>
                 <div class="details-calculs-bloc">
@@ -1532,7 +1532,7 @@ function genererSectionAccompagnement(da) {
         })()}">
             <!-- Carte 1 : Modèle de la Réponse à l'intervention (RàI) -->
             <div class="profil-carte">
-                <h2 style="font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">Modèle de la Réponse à l'intervention (RàI)</h2>
+                <h2 class="profil-section-titre-sous">Modèle de la Réponse à l'intervention (RàI)</h2>
 
                 <div class="badge-sys ${niveauRai.badgeClasse}">
                     ${niveauRai.label}
@@ -1567,7 +1567,7 @@ function genererSectionAccompagnement(da) {
 
             <!-- Carte 2 : Contexte d'apprentissage -->
             <div class="profil-carte">
-                <h2 style="font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">Contexte d'apprentissage</h2>
+                <h2 class="profil-section-titre-sous">Contexte d'apprentissage</h2>
 
                 <div class="badge-sys ${alerteContexte.badgeClasse}">
                     ${alerteContexte.label}
@@ -1615,12 +1615,12 @@ function genererSectionAccompagnement(da) {
                 if (forcesSolo.length === 0 && defisSolo.length === 0) {
                     return `
             <div class="profil-carte">
-                <h2 style="font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">Observation de la structure des résultats d'apprentissage</h2>
-                <p style="font-size: 0.9rem; color: #666; font-style: italic;">
+                <h2 class="profil-section-titre-sous">Observation de la structure des résultats d'apprentissage</h2>
+                <p class="profil-texte-italique-gris">
                     Aucune force ni défi identifié selon la taxonomie SOLO.
                 </p>
                 <div class="profil-separateur-section"></div>
-                <p style="font-size: 0.85rem; color: #999;">
+                <p class="profil-texte-mini-gris">
                     Basé sur les travaux de Biggs & Collis (taxonomie SOLO)
                 </p>
             </div>
@@ -1629,7 +1629,7 @@ function genererSectionAccompagnement(da) {
 
                 return `
             <div class="profil-carte">
-                <h2 style="font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">Observation de la structure des résultats d'apprentissage</h2>
+                <h2 class="profil-section-titre-sous">Observation de la structure des résultats d'apprentissage</h2>
 
                 ${forcesSolo.length > 0 ? `
                 <div style="margin-bottom: ${defisSolo.length > 0 ? '20px' : '0'};">
@@ -1639,10 +1639,10 @@ function genererSectionAccompagnement(da) {
 
                     ${forcesSolo.some(f => f.valeur >= 0.85) ? `
                     <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px; margin-bottom: 8px;">
-                        <div style="font-weight: 600; color: #16a34a; margin-bottom: 4px; font-size: 0.85rem;">
+                        <div class="profil-texte-succes-gras">
                             ${forcesSolo.filter(f => f.valeur >= 0.85).map(f => f.nom).join(', ')} : Maîtrisé et étendu (E)
                         </div>
-                        <div style="font-size: 0.85rem; line-height: 1.5; color: #333;">
+                        <div class="profil-texte-explicatif">
                             À ce niveau abstrait étendu, un nouvel apprentissage en génère un autre ou ouvre la porte à une nouvelle exploration. L'élève a la capacité de généraliser la structure au-delà de l'information donnée. Il comprend parfaitement et il est capable de transférer ses apprentissages à des contextes proches.
                         </div>
                     </div>
@@ -1650,10 +1650,10 @@ function genererSectionAccompagnement(da) {
 
                     ${forcesSolo.some(f => f.valeur >= seuilMaitrise && f.valeur < 0.85) ? `
                     <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px;">
-                        <div style="font-weight: 600; color: #16a34a; margin-bottom: 4px; font-size: 0.85rem;">
+                        <div class="profil-texte-succes-gras">
                             ${forcesSolo.filter(f => f.valeur >= seuilMaitrise && f.valeur < 0.85).map(f => f.nom).join(', ')} : Maîtrisé (M)
                         </div>
-                        <div style="font-size: 0.85rem; line-height: 1.5; color: #333;">
+                        <div class="profil-texte-explicatif">
                             À ce niveau relationnel, l'élève peut maintenant comprendre, lier et intégrer plusieurs aspects d'une réponse dans un tout cohérent. L'élève relie les savoirs entre eux, il voit plusieurs aspects d'une situation et sait l'aborder de différentes façons.
                         </div>
                     </div>
@@ -1669,10 +1669,10 @@ function genererSectionAccompagnement(da) {
 
                     ${defisSolo.some(d => d.valeur < obtenirSeuil('idme.insuffisant')) ? `
                     <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px; margin-bottom: 8px;">
-                        <div style="font-weight: 600; color: #dc2626; margin-bottom: 4px; font-size: 0.85rem;">
+                        <div class="profil-texte-danger-gras">
                             ${defisSolo.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : Insuffisant ou incomplet (I)
                         </div>
-                        <div style="font-size: 0.85rem; line-height: 1.5; color: #333;">
+                        <div class="profil-texte-explicatif">
                             À ce niveau unistructurel, l'élève ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois. L'élève fait des liens simples et évidents entre ses connaissances, mais n'a pas encore de réelle compréhension.
                         </div>
                     </div>
@@ -1680,10 +1680,10 @@ function genererSectionAccompagnement(da) {
 
                     ${defisSolo.some(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement) ? `
                     <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px;">
-                        <div style="font-weight: 600; color: #dc2626; margin-bottom: 4px; font-size: 0.85rem;">
+                        <div class="profil-texte-danger-gras">
                             ${defisSolo.filter(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement).map(d => d.nom).join(', ')} : En développement (D)
                         </div>
-                        <div style="font-size: 0.85rem; line-height: 1.5; color: #333;">
+                        <div class="profil-texte-explicatif">
                             À ce niveau multistructurel, l'élève peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il les considère indépendamment. L'élève fait plus de liens entre ses connaissances, mais celles-ci restent compartimentées et séparées.
                         </div>
                     </div>
@@ -1692,7 +1692,7 @@ function genererSectionAccompagnement(da) {
                 ` : ''}
 
                 <div class="profil-separateur-section"></div>
-                <p style="font-size: 0.85rem; color: #999;">
+                <p class="profil-texte-mini-gris">
                     Basé sur les travaux de Biggs & Collis (taxonomie SOLO)
                 </p>
             </div>
@@ -1702,7 +1702,7 @@ function genererSectionAccompagnement(da) {
 
         <!-- Historique compact -->
         <div style="margin-top: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div class="profil-flex-between-mb10">
                 <h4 style="color: var(--bleu-principal); font-size: 0.95rem; margin: 0; font-weight: 600;">
                     HISTORIQUE ${interventions && interventions.length > 0 ? `(${interventions.length} intervention${interventions.length > 1 ? 's' : ''})` : ''}
                 </h4>
@@ -1713,7 +1713,7 @@ function genererSectionAccompagnement(da) {
 
     if (!interventions || interventions.length === 0) {
         html += `
-            <div class="carte" style="text-align: center; padding: 30px 20px; background: var(--bleu-tres-pale);">
+            <div class="carte" class="profil-zone-centre-fond-bleu">
                 <div style="font-size: 0.95rem; color: #666; font-style: italic;">
                     Aucune intervention documentée. Les interventions RàI apparaîtront ici.
                 </div>
@@ -1842,10 +1842,10 @@ function genererSectionMobilisation(da) {
         </div>
 
         <!-- DÉCOMPOSITION VISUELLE -->
-        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
+        <h4 class="profil-titre-bleu-compact">
             Décomposition de l'indice M
         </h4>
-        <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+        <div class="profil-carte-simple">
             <div style="font-family: monospace; font-size: 1.1rem; text-align: center; color: var(--bleu-principal);">
                 M = (A + C) / 2 = (${indices.A}% + ${indices.C}%) / 2 = ${indices.M}
             </div>
@@ -1937,29 +1937,29 @@ function genererSectionEngagement(da) {
 
     return `
         <!-- STATISTIQUES -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+        <div class="profil-grid-auto-200">
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Assiduité (A)</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.A}%</strong>
+                    <strong class="profil-valeur-grande-bleu">${indices.A}%</strong>
                 </div>
             </div>
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Complétion (C)</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.C}%</strong>
+                    <strong class="profil-valeur-grande-bleu">${indices.C}%</strong>
                 </div>
             </div>
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Performance (P)</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.P}%</strong>
+                    <strong class="profil-valeur-grande-bleu">${indices.P}%</strong>
                 </div>
             </div>
             <div style="background: var(--bleu-tres-pale); padding: 15px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${interpE.couleur};">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Engagement (E)</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.E}</strong>
+                    <strong class="profil-valeur-grande-bleu">${indices.E}</strong>
                 </div>
             </div>
         </div>
@@ -1984,14 +1984,14 @@ function genererSectionEngagement(da) {
         </div>
 
         <!-- DÉCOMPOSITION VISUELLE -->
-        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
+        <h4 class="profil-titre-bleu-compact">
             Décomposition de l'indice E (effet multiplicatif)
         </h4>
-        <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-            <div style="font-family: monospace; font-size: 1rem; text-align: center; color: var(--bleu-principal); margin-bottom: 10px;">
+        <div class="profil-carte-simple">
+            <div class="profil-texte-mono-centre-bleu">
                 E = A × C × P
             </div>
-            <div style="font-family: monospace; font-size: 1rem; text-align: center; color: var(--bleu-principal); margin-bottom: 10px;">
+            <div class="profil-texte-mono-centre-bleu">
                 E = ${A.toFixed(2)} × ${C.toFixed(2)} × ${P.toFixed(2)} = ${indices.E}
             </div>
             <div style="background: #f0f7ff; padding: 12px; border-radius: 4px; font-size: 0.9rem; color: #555; line-height: 1.6;">
@@ -2098,7 +2098,7 @@ function genererSectionRisque(da) {
             <li><strong>Urgence :</strong> <span style="color: ${couleurUrgence};">${urgence}</span></li>
         </ul>
 
-        <div class="section-titre" style="margin-top: 25px;">Position sur l'échelle de risque</div>
+        <div class="section-titre" class="profil-mt-25">Position sur l'échelle de risque</div>
 
         <div class="profil-echelle-risque">
             <div class="profil-echelle-barre" style="background: linear-gradient(to right,
@@ -2144,7 +2144,7 @@ function genererSectionRisque(da) {
             <br>Engagement actuel : <strong style="color: ${interpE.couleur};">${interpE.niveau}</strong>
         </div>
 
-        <div class="section-titre" style="margin-top: 25px;">Indicateurs clés</div>
+        <div class="section-titre" class="profil-mt-25">Indicateurs clés</div>
 
         <div class="profil-grid-indicateurs">
             <div class="profil-indicateur">
@@ -2662,7 +2662,7 @@ function changerSectionProfil(section) {
 
     contenuContainer.innerHTML = `
         <div class="profil-contenu-header">
-            <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 0 0 20px 0;">
+            <h2 class="profil-flex-between-mb20">
                 <span>${titre}${badgePratique}</span>
                 ${toggleInfo}
             </h2>
@@ -2981,14 +2981,14 @@ function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif) {
         const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
         const pratique = config.pratique || 'sommative';
         const valeur = pratique === 'sommative' ? valeurSOM : valeurPAN;
-        return `<strong style="font-size: 1.8rem; color: var(--bleu-principal);">${valeur}%</strong>`;
+        return `<strong class="profil-valeur-grande-bleu">${valeur}%</strong>`;
     }
 
     // Mode comparatif: afficher les deux valeurs côte à côte
     return `
-        <div style="display: flex; gap: 15px; align-items: baseline;">
-            <strong style="font-size: 1.8rem; color: var(--som-orange);">${valeurSOM}%</strong>
-            <strong style="font-size: 1.8rem; color: var(--pan-bleu);">${valeurPAN}%</strong>
+        <div class="profil-flex-gap15-baseline">
+            <strong class="profil-valeur-grande-orange">${valeurSOM}%</strong>
+            <strong class="profil-valeur-grande-bleu-pan">${valeurPAN}%</strong>
         </div>
     `;
 }
@@ -3134,8 +3134,8 @@ function afficherProfilComplet(da) {
                         <div><strong>DA:</strong> ${echapperHtml(eleve.daAffichage || eleve.da)}</div>
                         ${eleve.groupe ? `<div><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</div>` : ''}
                         ${eleve.programme ? `<div><strong>Programme:</strong> ${typeof obtenirNomProgramme === 'function' ? echapperHtml(obtenirNomProgramme(eleve.programme)) : echapperHtml(eleve.programme)}</div>` : ''}
-                        ${eleve.sa === 'Oui' ? '<div style="color: var(--bleu-principal);">✓ Services adaptés</div>' : ''}
-                        ${eleve.caf === 'Oui' ? '<div style="color: var(--bleu-principal);">✓ CAF</div>' : ''}
+                        ${eleve.sa === 'Oui' ? '<div class="profil-texte-bleu">✓ Services adaptés</div>' : ''}
+                        ${eleve.caf === 'Oui' ? '<div class="profil-texte-bleu">✓ CAF</div>' : ''}
                     </div>
                 </div>
 
@@ -3176,7 +3176,7 @@ function afficherProfilComplet(da) {
             <div class="zone-principale" id="profil-contenu-dynamique">
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
-                    <h2 style="display: flex; justify-content: space-between; align-items: center; margin: 0 0 20px 0;">
+                    <h2 class="profil-flex-between-mb20">
                         <span>${titreSection}${genererBadgePratiqueProfil(indices.pratique, modeComparatif)}</span>
                         <span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span>
                     </h2>
@@ -3245,36 +3245,36 @@ function genererSectionAssiduite(da) {
 
     return `
         <!-- STATISTIQUES avec classes CSS natives -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+        <div class="profil-grid-auto-200">
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Heures présentes</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${details.heuresPresentes}h</strong>
+                    <strong class="profil-valeur-grande-bleu">${details.heuresPresentes}h</strong>
                 </div>
             </div>
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Heures offertes</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${details.heuresOffertes}h</strong>
+                    <strong class="profil-valeur-grande-bleu">${details.heuresOffertes}h</strong>
                 </div>
             </div>
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Taux d'assiduité</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${taux}%</strong>
+                    <strong class="profil-valeur-grande-bleu">${taux}%</strong>
                 </div>
             </div>
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Séances</span>
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${details.nombreSeances}</strong>
+                    <strong class="profil-valeur-grande-bleu">${details.nombreSeances}</strong>
                 </div>
             </div>
         </div>
         
         <!-- LISTE DES ABSENCES -->
         ${details.absences.length > 0 ? `
-            <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem;">
+            <h4 class="profil-titre-bleu-compact">
                 Absences et retards
             </h4>
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
@@ -3328,7 +3328,7 @@ function genererSectionProductions(da) {
     const etudiant = groupeEtudiants.find(e => e.da === da);
 
     if (!etudiant) {
-        return '<p style="text-align: center; color: #999;">Étudiant non trouvé</p>';
+        return '<p class="profil-texte-centre-gris">Étudiant non trouvé</p>';
     }
 
     // Productions à évaluer (exclure portfolio lui-même)
@@ -3336,7 +3336,7 @@ function genererSectionProductions(da) {
 
     if (productionsAEvaluer.length === 0) {
         return `
-            <div style="padding: 40px; text-align: center; background: var(--bleu-tres-pale); border-radius: 8px;">
+            <div class="profil-zone-grande-bleu">
                 <p style="color: #666; font-size: 1.1rem;">Aucune production configurée</p>
                 <p style="color: #999; margin-top: 10px;">Créez des productions dans la section Matériel → Productions</p>
             </div>
@@ -3417,15 +3417,15 @@ function genererSectionProductions(da) {
         <div class="profil-carte">
             <h3 style="color: var(--bleu-principal); margin: 0 0 15px 0;">Liste des productions</h3>
             <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
+                <table class="profil-tableau-full">
                     <thead>
                         <tr style="background: var(--bleu-tres-pale); border-bottom: 2px solid var(--bleu-moyen);">
-                            <th style="padding: 12px; text-align: left; font-weight: 600;">Production</th>
-                            <th style="padding: 12px; text-align: left; font-weight: 600;">Description</th>
-                            <th style="padding: 12px; text-align: left; font-weight: 600;">Jeton</th>
-                            <th style="padding: 12px; text-align: center; font-weight: 600;">Note</th>
-                            <th style="padding: 12px; text-align: center; font-weight: 600;">Date</th>
-                            <th style="padding: 12px; text-align: center; font-weight: 600;">Actions</th>
+                            <th class="profil-tableau-header-gauche-p12">Production</th>
+                            <th class="profil-tableau-header-gauche-p12">Description</th>
+                            <th class="profil-tableau-header-gauche-p12">Jeton</th>
+                            <th class="profil-tableau-header-centre-p12">Note</th>
+                            <th class="profil-tableau-header-centre-p12">Date</th>
+                            <th class="profil-tableau-header-centre-p12">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -3442,11 +3442,11 @@ function genererSectionProductions(da) {
 
                             return `
                             <tr style="border-bottom: 1px solid #e0e0e0;">
-                                <td style="padding: 12px;">
+                                <td class="profil-tableau-cellule-p12">
                                     ${echapperHtml(ligne.production)}
                                 </td>
                                 <td style="padding: 12px; color: #666;">${echapperHtml(ligne.description)}</td>
-                                <td style="padding: 12px;">
+                                <td class="profil-tableau-cellule-p12">
                                     ${badgeJeton}
                                 </td>
                                 <td style="padding: 12px; text-align: center;">
@@ -3487,7 +3487,7 @@ function genererSectionPerformance(da) {
 
     if (meilleures.length === 0) {
         return `
-            <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
+            <div class="profil-zone-moyenne-bleu">
                 <p style="color: #666;">Aucune évaluation disponible pour le moment</p>
             </div>
         `;
@@ -3521,7 +3521,7 @@ function genererSectionPerformance(da) {
                                 Évalué le ${formaterDate(art.dateEvaluation)}
                             </div>
                         </div>
-                        <div style="text-align: right;">
+                        <div class="profil-texte-droite">
                             <div style="font-size: 1.8rem; font-weight: bold; color: ${obtenirCouleurIndice(art.note)};">
                                 ${art.note}/100
                             </div>
@@ -3604,7 +3604,7 @@ function toggleDetailIndice(indice, da) {
     switch (indice) {
         case 'A':
             html = `
-                <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
+                <h3 class="profil-titre-bleu-large-pr40">
                     Assiduité détaillée
                 </h3>
                 ${genererSectionAssiduite(da)}
@@ -3612,7 +3612,7 @@ function toggleDetailIndice(indice, da) {
             break;
         case 'C':
             html = `
-                <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
+                <h3 class="profil-titre-bleu-large-pr40">
                     ✅ Complétion détaillée
                 </h3>
                 ${genererSectionCompletion(da)}
@@ -3620,7 +3620,7 @@ function toggleDetailIndice(indice, da) {
             break;
         case 'P':
             html = `
-                <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
+                <h3 class="profil-titre-bleu-large-pr40">
                     📝 Développement des habiletés et compétences
                 </h3>
                 ${genererSectionPerformance(da)}
@@ -3628,7 +3628,7 @@ function toggleDetailIndice(indice, da) {
             break;
         case 'M':
             html = `
-                <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
+                <h3 class="profil-titre-bleu-large-pr40">
                     🎯 Mobilisation détaillée
                 </h3>
                 ${genererSectionMobilisation(da)}
@@ -3636,7 +3636,7 @@ function toggleDetailIndice(indice, da) {
             break;
         case 'E':
             html = `
-                <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
+                <h3 class="profil-titre-bleu-large-pr40">
                     ⚡ Engagement détaillé
                 </h3>
                 ${genererSectionEngagement(da)}
@@ -3644,7 +3644,7 @@ function toggleDetailIndice(indice, da) {
             break;
         case 'R':
             html = `
-                <h3 style="color: var(--bleu-principal); margin-bottom: 15px; padding-right: 40px;">
+                <h3 class="profil-titre-bleu-large-pr40">
                     ⚠️ Risque d'échec détaillé
                 </h3>
                 ${genererSectionRisque(da)}
@@ -3767,21 +3767,21 @@ function genererSectionCompletion(da) {
 
     return `
         <!-- ENCADRÉ UNIQUE: COMPLÉTION -->
-        <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <div class="profil-carte-bordure-blanche">
 
-            <h3 style="color: var(--bleu-principal); margin: 0 0 20px 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">
+            <h3 class="profil-titre-section-majeur">
                 📝 COMPLÉTION
             </h3>
 
             <!-- Badge avec interprétation -->
             <div class="profil-mb-15">
-                <span style="font-size: 1.5rem;">${interpC.emoji}</span>
+                <span class="profil-valeur-moyenne">${interpC.emoji}</span>
                 <strong style="font-size: 1.1rem; color: ${interpC.couleur};">${interpC.niveau}</strong>
                 <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(${indices.C}%)</span>
             </div>
 
             <!-- Statistiques -->
-            <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
+            <ul class="profil-liste-simple">
                 <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
                 <li><strong>• Indice C :</strong> ${indices.C}%</li>
             </ul>
@@ -3789,14 +3789,14 @@ function genererSectionCompletion(da) {
             <hr class="profil-separateur">
 
             <!-- Gestion des jetons (placeholder) -->
-            <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+            <h4 class="profil-titre-sous-section">
                 GESTION DES JETONS
             </h4>
             <div style="background: #fff3cd; border: 2px dashed #ffc107; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
                 <div style="font-size: 1.2rem; color: #856404; margin-bottom: 10px;">
                     <strong>Jetons disponibles :</strong> 2 / 2
                 </div>
-                <div style="font-size: 0.9rem; color: #666; font-style: italic;">
+                <div class="profil-texte-italique-gris">
                     Système de jetons (reprise/délai) à implémenter
                 </div>
             </div>
@@ -3804,7 +3804,7 @@ function genererSectionCompletion(da) {
             <hr class="profil-separateur">
 
             <!-- Artefacts remis -->
-            <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+            <h4 class="profil-titre-sous-section">
                 ✅ ARTEFACTS REMIS (${artefactsRemis.length})
             </h4>
             ${artefactsRemis.length > 0 ? `
@@ -3824,13 +3824,13 @@ function genererSectionCompletion(da) {
                     `).join('')}
                 </div>
             ` : `
-                <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px; color: #666; margin-bottom: 20px;">
+                <div class="profil-zone-centre-grise">
                     Aucun artefact remis
                 </div>
             `}
 
             <!-- Artefacts non remis -->
-            <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+            <h4 class="profil-titre-sous-section">
                 ⏳ ARTEFACTS NON REMIS (${artefactsNonRemis.length})
             </h4>
             ${artefactsNonRemis.length > 0 ? `
@@ -3846,7 +3846,7 @@ function genererSectionCompletion(da) {
                     `).join('')}
                 </div>
             ` : `
-                <div style="text-align: center; padding: 15px; background: #d4edda; border-radius: 6px; color: #155724; margin-bottom: 20px;">
+                <div class="profil-zone-centre-verte">
                     ✅ Tous les artefacts ont été remis !
                 </div>
             `}
@@ -5295,12 +5295,12 @@ function genererDiagnosticSRPNF(da, defisInfo) {
 
     return `
         <!-- DIAGNOSTIC CRITÈRES SRPNF -->
-        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem; margin-top: 20px;">
+        <h4 class="profil-titre-bleu-mt20">
             🎯 Diagnostic par critère (seuil force: 0.7125)
         </h4>
 
         <!-- Tableau des scores par critère -->
-        <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+        <div class="profil-carte-simple">
             <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 10px; font-size: 0.9rem;">
                 ${['structure', 'rigueur', 'plausibilite', 'nuance', 'francais'].map(cle => {
                     const nomCritere = cle === 'structure' ? 'Structure' :
@@ -5318,7 +5318,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
 
                     return `
                         <div style="font-weight: 500; color: #555;">${nomCritere}</div>
-                        <div style="text-align: center;">
+                        <div class="profil-texte-centre">
                             <span style="display: inline-block; min-width: 50px; padding: 4px 10px;
                                          background: ${couleur}22; color: ${couleur};
                                          border-radius: 4px; font-weight: bold;">
@@ -5365,7 +5365,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                 <div style="background: linear-gradient(to right, ${interpBlocage.couleur}22, ${interpBlocage.couleur}11);
                             border-left: 4px solid ${interpBlocage.couleur};
                             padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div class="profil-flex-between-mb10">
                         <h4 style="color: ${interpBlocage.couleur}; margin: 0; font-size: 1rem;">
                             Indice de Blocage ${resultBlocage.partiel ? '(partiel)' : ''}
                         </h4>
@@ -5460,7 +5460,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
 
     let html = `
         <!-- DIAGNOSTIC DÉFIS GÉNÉRIQUES -->
-        <h4 style="color: var(--bleu-principal); margin-bottom: 12px; font-size: 1rem; margin-top: 20px;">
+        <h4 class="profil-titre-bleu-mt20">
             🎯 Défis identifiés
         </h4>
     `;
@@ -5473,7 +5473,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
             couleur = defi.priorite === 'haute' ? '#dc3545' : '#ff9800';
             titre = `⚠️ Note faible : ${defi.production}`;
             contenu = `
-                <div style="font-size: 0.9rem; color: #555; margin-bottom: 8px;">
+                <div class="profil-texte-detail-gris">
                     Note obtenue : <strong style="color: ${couleur};">${defi.note}%</strong> (seuil : ${defi.seuil}%)
                 </div>
                 <div class="profil-texte-detail-compact">
@@ -5484,7 +5484,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
             couleur = '#ff9800';
             titre = '📉 Tendance à la baisse détectée';
             contenu = `
-                <div style="font-size: 0.9rem; color: #555; margin-bottom: 8px;">
+                <div class="profil-texte-detail-gris">
                     Variation : <strong style="color: ${couleur};">${defi.variation.toFixed(1)}%</strong>
                     <br>
                     Moyenne récente : ${defi.moyenneRecente.toFixed(1)}%
@@ -5499,7 +5499,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
             couleur = '#ffc107';
             titre = '📊 Irrégularité des résultats';
             contenu = `
-                <div style="font-size: 0.9rem; color: #555; margin-bottom: 8px;">
+                <div class="profil-texte-detail-gris">
                     Écart-type : <strong style="color: ${couleur};">${defi.ecartType.toFixed(1)}</strong>
                     <br>
                     Moyenne : ${defi.moyenne.toFixed(1)}%
@@ -5594,7 +5594,7 @@ function genererSectionPerformance(da) {
 
     if (!portfolio) {
         return `
-            <div class="text-muted" style="text-align: center; padding: 30px;">
+            <div class="text-muted" class="profil-zone-centre-p30">
                 <p>Aucun portfolio configuré</p>
             </div>
         `;
@@ -5605,7 +5605,7 @@ function genererSectionPerformance(da) {
     
     if (tousLesArtefactsPortfolio.length === 0) {
         return `
-            <div class="text-muted" style="text-align: center; padding: 30px;">
+            <div class="text-muted" class="profil-zone-centre-p30">
                 <p>📝 Aucun artefact de portfolio créé</p>
             </div>
         `;
@@ -5768,7 +5768,7 @@ function genererSectionPerformance(da) {
 
     return `
         <!-- Détails des calculs (masqué par défaut) - AFFICHÉ EN HAUT -->
-        <div id="details-calculs-performance-${da}" class="carte-info-toggle" class="carte-info-toggle" style="display: none;">
+        <div id="details-calculs-performance-${da}" class="carte-info-toggle" class="carte-info-toggle" class="profil-hide">
             <div class="details-calculs-section">
                 <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
                 <div class="details-calculs-bloc">
@@ -5839,7 +5839,7 @@ function genererSectionPerformance(da) {
         </div>
 
         <!-- ENCADRÉ UNIQUE: DÉVELOPPEMENT DES HABILETÉS ET COMPÉTENCES -->
-        <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <div class="profil-carte-bordure-blanche">
 
             <!-- En-tête avec indice P -->
             <div class="profil-flex-between-mb15">
@@ -5848,12 +5848,12 @@ function genererSectionPerformance(da) {
                     <strong style="font-size: 0.95rem; color: ${interpP.couleur};">${interpP.niveau}</strong>
                 </div>
                 ${modeComparatif ? `
-                    <div style="display: flex; gap: 15px; align-items: baseline;">
-                        <strong style="font-size: 1.8rem; color: var(--som-orange);">${lettreIDME_SOM} ${indicesSOM.P}%</strong>
-                        <strong style="font-size: 1.8rem; color: var(--pan-bleu);">${lettreIDME_PAN} ${indicesPAN.P}%</strong>
+                    <div class="profil-flex-gap15-baseline">
+                        <strong class="profil-valeur-grande-orange">${lettreIDME_SOM} ${indicesSOM.P}%</strong>
+                        <strong class="profil-valeur-grande-bleu-pan">${lettreIDME_PAN} ${indicesPAN.P}%</strong>
                     </div>
                 ` : `
-                    <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${lettreIDME} ${indices.P}%</strong>
+                    <strong class="profil-valeur-grande-bleu">${lettreIDME} ${indices.P}%</strong>
                 `}
             </div>
 
@@ -6107,28 +6107,28 @@ function genererSectionAssiduite(da) {
 
     return `
         <!-- ENCADRÉ UNIQUE: ASSIDUITÉ -->
-        <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <div class="profil-carte-bordure-blanche">
 
-            <h3 style="color: var(--bleu-principal); margin: 0 0 20px 0; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">
+            <h3 class="profil-titre-section-majeur">
                 👥 ASSIDUITÉ
             </h3>
 
             <!-- Badge avec interprétation -->
             <div class="profil-mb-15">
-                <span style="font-size: 1.5rem;">${interpA.emoji}</span>
+                <span class="profil-valeur-moyenne">${interpA.emoji}</span>
                 <strong style="font-size: 1.1rem; color: ${interpA.couleur};">${interpA.niveau}</strong>
                 <span style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur}; margin-left: 10px;">(${taux}%)</span>
             </div>
 
             <!-- Statistiques -->
-            <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; line-height: 2;">
+            <ul class="profil-liste-simple">
                 <li><strong>• Heures présentes :</strong> ${details.heuresPresentes}h / ${details.heuresOffertes}h</li>
             </ul>
 
             <hr class="profil-separateur">
 
             <!-- Liste des absences et retards -->
-            <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
+            <h4 class="profil-titre-sous-section">
                 ${details.absences.length} ABSENCE${details.absences.length > 1 ? 'S' : ''} OU RETARD${details.absences.length > 1 ? 'S' : ''}
             </h4>
             ${details.absences.length > 0 ? `
@@ -6756,10 +6756,10 @@ function genererSectionRapport(da) {
 
                     <!-- Colonne droite : Actions -->
                     <div style="display: flex; flex-direction: column; gap: 10px; min-width: 180px;">
-                        <button class="btn btn-principal" style="width: 100%;" onclick="genererEtAfficherRapport('${da}')">
+                        <button class="btn btn-principal" class="profil-w-100" onclick="genererEtAfficherRapport('${da}')">
                             Rafraîchir
                         </button>
-                        <button class="btn btn-secondaire" style="width: 100%;" onclick="copierRapport('${da}')">
+                        <button class="btn btn-secondaire" class="profil-w-100" onclick="copierRapport('${da}')">
                             Copier
                         </button>
                     </div>
@@ -6767,7 +6767,7 @@ function genererSectionRapport(da) {
             </div>
 
             <!-- Zone de texte du rapport (séparée et éditable) -->
-            <div style="position: relative; margin-top: 15px;">
+            <div class="profil-position-relative-mt15">
                 <textarea id="textarea-rapport-${da}"
                           placeholder="Le rapport apparaîtra ici. Vous pourrez ensuite le modifier avant de le copier."
                           style="width: 100%; height: 300px; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.9rem; border: 2px solid var(--bleu-pale); border-radius: 6px; resize: none; line-height: 1.6; background: white; overflow-y: auto;"></textarea>
