@@ -272,7 +272,7 @@ function calculerDistributionPerformance(etudiants) {
         return `${niveau.nom} : ${count}`;
     });
 
-    const result = parts.join(' <span style="margin: 0 6px;">•</span> ');
+    const result = parts.join(' <span class="tb-m-horizontal-6">•</span> ');
     console.log('📊 Distribution P : résultat =', result);
 
     return result;
@@ -878,18 +878,18 @@ function afficherMetriquesGlobales(etudiants) {
     // Générer la légende unique en haut
     const legendeUnique = `
         <div class="distribution-legende-commune" style="position: relative; height: 40px; font-size: 0.8rem; color: #666; margin-bottom: 20px; padding: 0 20px;">
-            <div style="display: flex; justify-content: space-around; align-items: center; height: 100%;">
-                <span style="color: #ff9800; text-align: center; font-weight: 600;">Fragile<br><span style="font-size: 0.7rem; font-weight: 400;">30-49%</span></span>
-                <span style="color: #ffc107; text-align: center; font-weight: 600;">Modéré<br><span style="font-size: 0.7rem; font-weight: 400;">50-64%</span></span>
-                <span style="color: #28a745; text-align: center; font-weight: 600;">Favorable<br><span style="font-size: 0.7rem; font-weight: 400;">65-79%</span></span>
-                <span style="color: #2196F3; text-align: center; font-weight: 600;">Très favorable<br><span style="font-size: 0.7rem; font-weight: 400;">≥ 80%</span></span>
+            <div class="tb-flex-center-around">
+                <span style="color: #ff9800; text-align: center; font-weight: 600;">Fragile<br><span class="tb-texte-mini">30-49%</span></span>
+                <span style="color: #ffc107; text-align: center; font-weight: 600;">Modéré<br><span class="tb-texte-mini">50-64%</span></span>
+                <span style="color: #28a745; text-align: center; font-weight: 600;">Favorable<br><span class="tb-texte-mini">65-79%</span></span>
+                <span style="color: #2196F3; text-align: center; font-weight: 600;">Très favorable<br><span class="tb-texte-mini">≥ 80%</span></span>
             </div>
         </div>
     `;
 
     // Générer les 4 barres de distribution avec interprétations
     const html = `
-        <div style="padding: 20px;">
+        <div class="tb-p-20">
             ${legendeUnique}
             ${genererBarreDistribution('Assiduité (A)', etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP)}
             ${genererBarreDistribution('Complétion (C)', etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP)}
@@ -924,12 +924,12 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
     }
 
     // Intégrer la description dans le label si présente
-    const labelComplet = description ? `${label} <span style="font-size: 0.75rem; color: #666;">(${description})</span>` : label;
+    const labelComplet = description ? `${label} <span class="tb-texte-petit-gris">(${description})</span>` : label;
 
     return `
         <div class="carte-metrique">
             <span class="label">${labelComplet}</span>
-            <div style="display: flex; gap: 15px; align-items: baseline;">
+            <div class="tb-flex-gap15-baseline">
                 ${valeurs.join('')}
             </div>
         </div>
@@ -1015,9 +1015,9 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
             if (distribution) {
                 interpretationHTML = `
-                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px; line-height: 1.4;">
-                        <div><span style="font-weight: 600;">Distribution : </span>${distribution}</div>
-                        ${interpretation ? `<div style="margin-top: 6px;">${interpretation}</div>` : ''}
+                    <div class="tb-texte-description">
+                        <div><span class="tb-texte-gras">Distribution : </span>${distribution}</div>
+                        ${interpretation ? `<div class="tb-mt-6">${interpretation}</div>` : ''}
                     </div>
                 `;
             } else {
@@ -1031,7 +1031,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
             if (diagnostic) {
                 interpretationHTML = `
-                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px; line-height: 1.4;">
+                    <div class="tb-texte-description">
                         ${diagnostic}
                     </div>
                 `;
@@ -1066,7 +1066,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         }
 
         interpretationHTML = `
-            <div style="font-size: 0.75rem; color: #666; margin-top: 4px; line-height: 1.4;">
+            <div class="tb-texte-description">
                 ${explication}
             </div>
         `;
@@ -1090,7 +1090,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         }
 
         interpretationHTML = `
-            <div style="font-size: 0.75rem; color: #666; margin-top: 4px; line-height: 1.4;">
+            <div class="tb-texte-description">
                 Le ${niveauAdjectif} niveau d'engagement global du groupe (moy. ${Math.round(moyE)}%) ${impactContexte}.
             </div>
         `;
@@ -1212,7 +1212,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     }
 
     return `
-        <div class="distribution-container" style="margin-bottom: 20px;">
+        <div class="distribution-container" class="tb-mb-20">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <h4 style="margin: 0; font-size: 0.95rem; color: #333;">${label}</h4>
                 ${valeursHTML}
@@ -1418,7 +1418,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     }
 
     return `
-        <div class="distribution-container" style="margin-bottom: 15px;">
+        <div class="distribution-container" class="tb-mb-15">
             <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">Répartition des patterns d'apprentissage</h4>
             ${interpretation ? `<div class="interpretation-barre">${interpretation}</div>` : ''}
             <div class="barre-patterns" style="position: relative; height: 30px;">
@@ -1605,7 +1605,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
     }
 
     return `
-        <div class="distribution-container" style="margin-bottom: 15px;">
+        <div class="distribution-container" class="tb-mb-15">
             <h4 style="margin-bottom: 8px; font-size: 0.95rem; color: #333;">Modèle de la Réponse à l'intervention (RàI)</h4>
             ${interpretation ? `<div class="interpretation-barre">${interpretation}</div>` : ''}
             <div class="barre-rai" style="position: relative; height: 30px;">
@@ -1706,9 +1706,9 @@ function genererCarteEngagement(label, valeurSom, valeurPan, total, afficherSom,
 
     return `
         <div style="background: ${bgColor}; padding: 12px; border-radius: 6px; border: 2px solid ${borderColor};">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.85rem; color: #666;">${label}</span>
-                <div style="display: flex; gap: 15px; align-items: baseline;">
+            <div class="tb-flex-between">
+                <span class="tb-texte-moyen-gris">${label}</span>
+                <div class="tb-flex-gap15-baseline">
                     ${valeurs.join('')}
                 </div>
             </div>
@@ -1778,9 +1778,9 @@ function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, af
 
     return `
         <div style="background: ${bgColor}; padding: 12px; border-radius: 6px; border: 2px solid ${borderColor};">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.85rem; color: #666;">${label}</span>
-                <div style="display: flex; gap: 15px; align-items: baseline;">
+            <div class="tb-flex-between">
+                <span class="tb-texte-moyen-gris">${label}</span>
+                <div class="tb-flex-gap15-baseline">
                     ${valeurs.join('')}
                 </div>
             </div>
@@ -1893,9 +1893,9 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
 
     return `
         <div style="background: ${bgColor}; padding: 12px; border-radius: 6px; border: 2px solid ${borderColor};">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.85rem; color: #666;">${label}</span>
-                <div style="display: flex; gap: 15px; align-items: baseline;">
+            <div class="tb-flex-between">
+                <span class="tb-texte-moyen-gris">${label}</span>
+                <div class="tb-flex-gap15-baseline">
                     ${valeurs.join('')}
                 </div>
             </div>
@@ -2073,7 +2073,7 @@ function afficherActionsRecommandees(etudiants) {
                         <span style="color: #666; margin-left: 8px;">(${echapperHtml(e.groupe || '—')})</span>
                     </div>
                     <span class="badge-engagement engagement-${indices.niveauEngagement.replace(' ', '-')}"
-                          style="text-transform: capitalize;">
+                          class="tb-texte-capitalize">
                         ${indices.niveauEngagement}
                     </span>
                 </div>
@@ -2235,7 +2235,7 @@ function afficherAlertesPrioritaires(etudiants) {
                         <td>${formatPourcentage(e.performance)}</td>
                         <td>
                             <span class="badge-risque risque-${e.niveauRisque.replace(' ', '-')}" 
-                                  style="text-transform: capitalize;">
+                                  class="tb-texte-capitalize">
                                 ${e.niveauRisque}
                             </span>
                         </td>

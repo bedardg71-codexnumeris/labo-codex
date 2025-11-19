@@ -3832,6 +3832,76 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-size: 0.8rem;
 }
 
+/* 🆕 BETA 91: Module tableau-bord-apercu (optimisations Phase B) */
+.tb-texte-mini {
+    font-size: 0.7rem;
+    font-weight: 400;
+}
+
+.tb-texte-description {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+.tb-texte-petit-gris {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.tb-mb-20 {
+    margin-bottom: 20px;
+}
+
+.tb-mt-6 {
+    margin-top: 6px;
+}
+
+.tb-p-20 {
+    padding: 20px;
+}
+
+.tb-m-horizontal-6 {
+    margin: 0 6px;
+}
+
+.tb-texte-gras {
+    font-weight: 600;
+}
+
+.tb-flex-center-around {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 100%;
+}
+
+.tb-flex-gap15-baseline {
+    display: flex;
+    gap: 15px;
+    align-items: baseline;
+}
+
+.tb-texte-moyen-gris {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.tb-flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tb-texte-capitalize {
+    text-transform: capitalize;
+}
+
+.tb-mb-15 {
+    margin-bottom: 15px;
+}
+
 
 /* ===============================================
    SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)
