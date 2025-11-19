@@ -852,7 +852,7 @@ function genererSectionMobilisationEngagement(da) {
 
     return `
         <!-- Détails des calculs (masqué par défaut) -->
-        <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle" style="display: none;">
+        <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle" class="carte-info-toggle" style="display: none;">
             <div class="details-calculs-section">
                 <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
                 <div class="details-calculs-bloc">
@@ -898,8 +898,8 @@ function genererSectionMobilisationEngagement(da) {
 
             <!-- FICHE ASSIDUITÉ -->
             <div class="profil-carte">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                    <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Assiduité</h3>
+                <div class="profil-flex-between-mb15">
+                    <h3 class="profil-section-titre-seul">Assiduité</h3>
                     ${genererValeursComparatives(indicesSOM.A, indicesPAN.A, modeComparatif)}
                 </div>
 
@@ -915,7 +915,7 @@ function genererSectionMobilisationEngagement(da) {
                     ${detailsA.absences.length} absence${detailsA.absences.length > 1 ? 's' : ''} ou retard${detailsA.absences.length > 1 ? 's' : ''}
                 </h4>
                 ${detailsA.absences.length > 0 ? `
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                    <div class="badges-centres" class="profil-mb-20">
                         ${detailsA.absences.map(abs => {
                             const date = new Date(abs.date + 'T12:00:00');
                             const options = { weekday: 'short', day: 'numeric', month: 'short' };
@@ -971,7 +971,7 @@ function genererSectionMobilisationEngagement(da) {
                         <h4 class="profil-section-titre">
                             ${interventionsParticipees.length} intervention${interventionsParticipees.length > 1 ? 's' : ''} RàI
                         </h4>
-                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                        <div class="badges-centres" class="profil-mb-20">
                             ${interventionsParticipees.map(intervention => {
                                 const date = new Date(intervention.date + 'T12:00:00');
                                 const options = { weekday: 'short', day: 'numeric', month: 'short' };
@@ -995,8 +995,8 @@ function genererSectionMobilisationEngagement(da) {
 
             <!-- FICHE COMPLÉTION -->
             <div class="profil-carte">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                    <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Complétion</h3>
+                <div class="profil-flex-between-mb15">
+                    <h3 class="profil-section-titre-seul">Complétion</h3>
                     ${genererValeursComparatives(indicesSOM.C, indicesPAN.C, modeComparatif)}
                 </div>
 
@@ -1012,7 +1012,7 @@ function genererSectionMobilisationEngagement(da) {
                     ${artefactsRemis.length} production${artefactsRemis.length > 1 ? 's' : ''} remise${artefactsRemis.length > 1 ? 's' : ''}
                 </h4>
                 ${artefactsRemis.length > 0 ? `
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                    <div class="badges-centres" class="profil-mb-20">
                         ${artefactsRemis
                             .map(art => {
                                 // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
@@ -1033,7 +1033,7 @@ function genererSectionMobilisationEngagement(da) {
                             `).join('')}
                     </div>
                 ` : `
-                    <div class="profil-message-vide" style="margin-bottom: 15px;">
+                    <div class="profil-message-vide" class="profil-mb-15">
                         Aucun artefact remis
                     </div>
                 `}
@@ -1043,7 +1043,7 @@ function genererSectionMobilisationEngagement(da) {
                     ${artefactsNonRemis.length} production${artefactsNonRemis.length > 1 ? 's' : ''} non remise${artefactsNonRemis.length > 1 ? 's' : ''}
                 </h4>
                 ${artefactsNonRemis.length > 0 ? `
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                    <div class="badges-centres" class="profil-mb-20">
                         ${artefactsNonRemis
                             .map(art => {
                                 // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
@@ -1072,8 +1072,8 @@ function genererSectionMobilisationEngagement(da) {
 
             <!-- FICHE PERFORMANCE -->
             <div class="profil-carte">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                    <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">Performance</h3>
+                <div class="profil-flex-between-mb15">
+                    <h3 class="profil-section-titre-seul">Performance</h3>
                     ${genererValeursComparatives(indicesSOM.P, indicesPAN.P, modeComparatif)}
                 </div>
 
@@ -1113,11 +1113,11 @@ function genererSectionMobilisationEngagement(da) {
                     return `
                         <h4 class="profil-section-titre">
                             Gestion des jetons
-                            <span style="color: #666; font-size: 0.8rem; font-weight: normal; margin-left: 10px;">
+                            <span class="profil-texte-petit-ml10">
                                 (${totalJetonsUtilisesTousTypes} / ${quotaGlobal} utilisés au total)
                             </span>
                         </h4>
-                        <div style="display: grid; gap: 10px; margin-bottom: 15px;">
+                        <div class="profil-grid-gap10-mb15">
                             ${Object.entries(statutJetons).map(([jetonId, info]) => {
                                 const estPredefini = jetonId === 'delai' || jetonId === 'reprise';
                                 const jetonNonUtilise = info.utilises === 0;
@@ -1132,11 +1132,11 @@ function genererSectionMobilisationEngagement(da) {
 
                                 return `
                                     <div style="background: ${couleurFond}; border: 2px solid ${couleurBordure}; border-radius: 8px; padding: 12px; ${estGrise ? 'opacity: 0.4; filter: grayscale(0.7);' : ''}">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <div class="profil-flex-between-mb8">
                                             <strong style="color: ${couleurBordure}; font-size: 0.9rem;">
                                                 ${echapperHtml(info.nom)}
                                             </strong>
-                                            <span style="color: #666; font-size: 0.85rem;">
+                                            <span class="profil-texte-detail-compact">
                                                 ${info.utilises} / ${info.total} utilisé${info.utilises > 1 ? 's' : ''}
                                             </span>
                                         </div>
@@ -1191,7 +1191,7 @@ function genererSectionMobilisationEngagement(da) {
                     })()}
                 </h4>
                 ${artefactsRetenus.length > 0 ? `
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                    <div class="badges-centres" class="profil-mb-20">
                         ${artefactsRetenus.map(art => {
                             // Trouver l'index ORIGINAL dans la liste définie par l'enseignant
                             const indexOriginal = artefactsPortfolio.findIndex(p => p.id === art.id) + 1;
@@ -1226,8 +1226,8 @@ function genererSectionMobilisationEngagement(da) {
                                     <span class="badge-artefact-titre" style="color: ${couleurBadge};">
                                         A${indexOriginal}
                                     </span>
-                                    ${art.jetonReprise ? '<span style="font-size: 0.8rem;" title="Jeton de reprise appliqué">⭐</span>' : ''}
-                                    ${art.jetonDelai ? '<span style="font-size: 0.8rem;" title="Jeton de délai appliqué">⭐</span>' : ''}
+                                    ${art.jetonReprise ? '<span class="profil-texte-petit" title="Jeton de reprise appliqué">⭐</span>' : ''}
+                                    ${art.jetonDelai ? '<span class="profil-texte-petit" title="Jeton de délai appliqué">⭐</span>' : ''}
                                     <span class="badge-artefact-note" style="background: ${couleurBadge};">
                                         ${art.niveau || '--'}
                                     </span>
@@ -1239,7 +1239,7 @@ function genererSectionMobilisationEngagement(da) {
                         }).join('')}
                     </div>
                 ` : `
-                    <div class="profil-message-vide" style="margin-bottom: 15px;">
+                    <div class="profil-message-vide" class="profil-mb-15">
                         Aucun artefact évalué
                     </div>
                 `}
@@ -1276,9 +1276,9 @@ function genererSectionMobilisationEngagement(da) {
             }
 
             return `
-                <div class="profil-carte" style="margin-top: 10px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                        <h3 style="margin: 0; color: var(--bleu-principal); font-size: 1.1rem;">
+                <div class="profil-carte" class="profil-mt-10">
+                    <div class="profil-flex-between-mb15">
+                        <h3 class="profil-section-titre-seul">
                             Niveau d'engagement${texteExplicatifE}
                         </h3>
                         ${genererValeursComparatives(Math.round(E_SOM * 100), Math.round(E_PAN * 100), modeComparatif)}
@@ -1489,7 +1489,7 @@ function genererSectionAccompagnement(da) {
 
     let html = `
         <!-- Détails de la section (masqué par défaut) -->
-        <div id="details-calculs-accompagnement-${da}" class="carte-info-toggle" style="display: none;">
+        <div id="details-calculs-accompagnement-${da}" class="carte-info-toggle" class="carte-info-toggle" style="display: none;">
             <div class="details-calculs-section">
                 <h5 class="details-calculs-titre">À PROPOS DE CETTE SECTION</h5>
                 <div class="details-calculs-bloc">
@@ -1538,7 +1538,7 @@ function genererSectionAccompagnement(da) {
                     ${niveauRai.label}
                 </div>
 
-                <p style="margin: 10px 0; color: #495057; font-size: 0.95rem;">
+                <p class="profil-texte-paragraphe">
                     <strong>Performance (P) :</strong> ${(() => {
                         const pct = indices.P;
                         const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
@@ -1546,7 +1546,7 @@ function genererSectionAccompagnement(da) {
                     })()}
                 </p>
 
-                <p style="margin: 10px 0; color: #495057; font-size: 0.95rem;"><strong>Critères SRPNF :</strong></p>
+                <p class="profil-texte-paragraphe"><strong>Critères SRPNF :</strong></p>
                 <ul style="margin-left: 20px; color: #495057; font-size: 0.9rem;">
                     ${criteresSRPNF.map(c => {
                         const pct = c.valeur * 100;
@@ -1555,13 +1555,13 @@ function genererSectionAccompagnement(da) {
                     }).join('')}
                 </ul>
 
-                <div style="border-top: 1px solid #e9ecef; margin: 15px 0; padding-top: 15px;"></div>
+                <div class="profil-separateur-section"></div>
 
                 <div class="badge-sys ${niveauRai.patternBadge}" style="font-size: 0.9rem; padding: 6px 12px; margin-bottom: 10px;">
                     ${niveauRai.pattern}
                 </div>
 
-                <p style="font-size: 0.9rem; color: #666;">${niveauRai.description}</p>
+                <p class="profil-texte-detail">${niveauRai.description}</p>
                 ${niveauRai.defi !== 'Aucun' ? `<p style="font-size: 0.9rem; color: #666; margin-top: 8px;"><strong>Défi principal :</strong> ${niveauRai.defi}</p>` : ''}
             </div>
 
@@ -1573,15 +1573,15 @@ function genererSectionAccompagnement(da) {
                     ${alerteContexte.label}
                 </div>
 
-                <p style="margin: 10px 0; color: #495057; font-size: 0.95rem;">
+                <p class="profil-texte-paragraphe">
                     <strong>Assiduité (A) :</strong> ${alerteContexte.A}
                 </p>
 
-                <p style="margin: 10px 0; color: #495057; font-size: 0.95rem;">
+                <p class="profil-texte-paragraphe">
                     <strong>Complétion (C) :</strong> ${alerteContexte.C}
                 </p>
 
-                <div style="border-top: 1px solid #e9ecef; margin: 15px 0; padding-top: 15px;"></div>
+                <div class="profil-separateur-section"></div>
 
                 <p style="font-size: 0.9rem; color: ${alerteContexte.niveau === 'tres-favorable' || alerteContexte.niveau === 'favorable' ? '#16a34a' : alerteContexte.niveau === 'modere' ? '#ca8a04' : '#ea580c'}; font-weight: 600; margin-bottom: 8px;">
                     ${alerteContexte.description}
@@ -1591,9 +1591,9 @@ function genererSectionAccompagnement(da) {
                     ${alerteContexte.recommandation}
                 </p>
 
-                <div style="border-top: 1px solid #e9ecef; margin: 15px 0; padding-top: 15px;"></div>
+                <div class="profil-separateur-section"></div>
 
-                <p style="font-size: 0.85rem; color: #666;">
+                <p class="profil-texte-detail-compact">
                     <strong>Services adaptés :</strong> ${etudiant.caf === 'Oui' ? '✓ CAF' : ''} ${etudiant.sa === 'Oui' ? '✓ SA' : ''} ${etudiant.caf !== 'Oui' && etudiant.sa !== 'Oui' ? 'Aucun' : ''}
                 </p>
             </div>
@@ -1619,7 +1619,7 @@ function genererSectionAccompagnement(da) {
                 <p style="font-size: 0.9rem; color: #666; font-style: italic;">
                     Aucune force ni défi identifié selon la taxonomie SOLO.
                 </p>
-                <div style="border-top: 1px solid #e9ecef; margin: 15px 0; padding-top: 15px;"></div>
+                <div class="profil-separateur-section"></div>
                 <p style="font-size: 0.85rem; color: #999;">
                     Basé sur les travaux de Biggs & Collis (taxonomie SOLO)
                 </p>
@@ -1691,7 +1691,7 @@ function genererSectionAccompagnement(da) {
                 </div>
                 ` : ''}
 
-                <div style="border-top: 1px solid #e9ecef; margin: 15px 0; padding-top: 15px;"></div>
+                <div class="profil-separateur-section"></div>
                 <p style="font-size: 0.85rem; color: #999;">
                     Basé sur les travaux de Biggs & Collis (taxonomie SOLO)
                 </p>
@@ -1938,27 +1938,27 @@ function genererSectionEngagement(da) {
     return `
         <!-- STATISTIQUES -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Assiduité (A)</span>
+            <div class="profil-carte-importante">
+                <div class="carte-metrique-header">
+                    <span class="profil-texte-detail">Assiduité (A)</span>
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.A}%</strong>
                 </div>
             </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Complétion (C)</span>
+            <div class="profil-carte-importante">
+                <div class="carte-metrique-header">
+                    <span class="profil-texte-detail">Complétion (C)</span>
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.C}%</strong>
                 </div>
             </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Performance (P)</span>
+            <div class="profil-carte-importante">
+                <div class="carte-metrique-header">
+                    <span class="profil-texte-detail">Performance (P)</span>
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.P}%</strong>
                 </div>
             </div>
             <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal); border-left: 4px solid ${interpE.couleur};">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Engagement (E)</span>
+                <div class="carte-metrique-header">
+                    <span class="profil-texte-detail">Engagement (E)</span>
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${indices.E}</strong>
                 </div>
             </div>
@@ -2168,7 +2168,7 @@ function genererSectionRisque(da) {
         </div>
 
         ${indices.R >= seuilMinimal ? `
-            <div class="profil-recommandations ${indices.R >= seuilEleve ? 'profil-recommandations-danger' : indices.R >= seuilModere ? 'profil-recommandations-avertissement' : 'profil-recommandations-info'}" style="margin-top: 20px;">
+            <div class="profil-recommandations ${indices.R >= seuilEleve ? 'profil-recommandations-danger' : indices.R >= seuilModere ? 'profil-recommandations-avertissement' : 'profil-recommandations-info'}" class="profil-mt-20">
                 <h4 class="profil-recommandations-titre ${indices.R >= seuilEleve ? 'profil-texte-danger' : indices.R >= seuilModere ? 'profil-texte-avertissement' : 'profil-texte-info'}">
                     Intervention ciblée recommandée
                 </h4>
@@ -2194,7 +2194,7 @@ function genererSectionRisque(da) {
                 </ol>
             </div>
         ` : `
-            <div class="profil-recommandations profil-recommandations-succes" style="margin-top: 20px;">
+            <div class="profil-recommandations profil-recommandations-succes" class="profil-mt-20">
                 <h4 class="profil-recommandations-titre profil-texte-succes">Maintien de l'engagement</h4>
                 <ul class="profil-recommandations-liste profil-texte-succes">
                     <li>Continuer la surveillance universelle (Niveau RàI 1)</li>
@@ -3246,27 +3246,27 @@ function genererSectionAssiduite(da) {
     return `
         <!-- STATISTIQUES avec classes CSS natives -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Heures présentes</span>
+            <div class="profil-carte-importante">
+                <div class="carte-metrique-header">
+                    <span class="profil-texte-detail">Heures présentes</span>
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${details.heuresPresentes}h</strong>
                 </div>
             </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Heures offertes</span>
+            <div class="profil-carte-importante">
+                <div class="carte-metrique-header">
+                    <span class="profil-texte-detail">Heures offertes</span>
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${details.heuresOffertes}h</strong>
                 </div>
             </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Taux d'assiduité</span>
+            <div class="profil-carte-importante">
+                <div class="carte-metrique-header">
+                    <span class="profil-texte-detail">Taux d'assiduité</span>
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${taux}%</strong>
                 </div>
             </div>
-            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; border: 2px solid var(--bleu-principal);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 0.9rem; color: #666;">Séances</span>
+            <div class="profil-carte-importante">
+                <div class="carte-metrique-header">
+                    <span class="profil-texte-detail">Séances</span>
                     <strong style="font-size: 1.8rem; color: var(--bleu-principal);">${details.nombreSeances}</strong>
                 </div>
             </div>
@@ -3506,7 +3506,7 @@ function genererSectionPerformance(da) {
                 </div>
             </div>
             
-            <h4 style="color: var(--bleu-principal); margin-bottom: 15px;">
+            <h4 class="profil-section-titre-large">
                 🏆 Les ${meilleures.length} meilleur${meilleures.length > 1 ? 's' : ''} artefact${meilleures.length > 1 ? 's' : ''}
             </h4>
             
@@ -3517,7 +3517,7 @@ function genererSectionPerformance(da) {
                             <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">
                                 #${index + 1} · ${echapperHtml(art.description)}
                             </div>
-                            <div style="font-size: 0.85rem; color: #666;">
+                            <div class="profil-texte-detail-compact">
                                 Évalué le ${formaterDate(art.dateEvaluation)}
                             </div>
                         </div>
@@ -3774,7 +3774,7 @@ function genererSectionCompletion(da) {
             </h3>
 
             <!-- Badge avec interprétation -->
-            <div style="margin-bottom: 15px;">
+            <div class="profil-mb-15">
                 <span style="font-size: 1.5rem;">${interpC.emoji}</span>
                 <strong style="font-size: 1.1rem; color: ${interpC.couleur};">${interpC.niveau}</strong>
                 <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(${indices.C}%)</span>
@@ -3786,7 +3786,7 @@ function genererSectionCompletion(da) {
                 <li><strong>• Indice C :</strong> ${indices.C}%</li>
             </ul>
 
-            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+            <hr class="profil-separateur">
 
             <!-- Gestion des jetons (placeholder) -->
             <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
@@ -3801,14 +3801,14 @@ function genererSectionCompletion(da) {
                 </div>
             </div>
 
-            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+            <hr class="profil-separateur">
 
             <!-- Artefacts remis -->
             <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
                 ✅ ARTEFACTS REMIS (${artefactsRemis.length})
             </h4>
             ${artefactsRemis.length > 0 ? `
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                <div class="badges-centres" class="profil-mb-20">
                     ${artefactsRemis.map(art => `
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
                                     background: #d4edda; border-left: 3px solid #28a745; border-radius: 4px;">
@@ -3817,7 +3817,7 @@ function genererSectionCompletion(da) {
                                 ${art.jetonReprise ? '<span style="color: #9c27b0; margin-left: 6px;" title="Jeton de reprise appliqué">⭐</span>' : ''}
                                 ${art.jetonDelai ? '<span style="color: #ff6f00; margin-left: 6px;" title="Jeton de délai appliqué">⭐</span>' : ''}
                             </div>
-                            <div style="font-size: 0.9rem; color: #666;">
+                            <div class="profil-texte-detail">
                                 <strong>${art.note}</strong>${art.niveau ? ` · ${art.niveau}` : ''}
                             </div>
                         </div>
@@ -3834,7 +3834,7 @@ function genererSectionCompletion(da) {
                 ⏳ ARTEFACTS NON REMIS (${artefactsNonRemis.length})
             </h4>
             ${artefactsNonRemis.length > 0 ? `
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                <div class="badges-centres" class="profil-mb-20">
                     ${artefactsNonRemis.map(art => `
                         <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
                                     background: #f5f5f5; border-left: 3px solid #ddd; border-radius: 4px; opacity: 0.6;">
@@ -3851,7 +3851,7 @@ function genererSectionCompletion(da) {
                 </div>
             `}
 
-            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+            <hr class="profil-separateur">
 
             <!-- Placeholder graphique (en conclusion) -->
             <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
@@ -5385,7 +5385,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                         <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">
                             <strong>Formule :</strong> ${formuleTexte}
                         </div>
-                        <div style="font-size: 0.85rem; color: #666;">
+                        <div class="profil-texte-detail-compact">
                             = ${formuleDetail} = <strong>${pourcentageBlocage}%</strong>
                         </div>
                     </div>
@@ -5476,7 +5476,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
                 <div style="font-size: 0.9rem; color: #555; margin-bottom: 8px;">
                     Note obtenue : <strong style="color: ${couleur};">${defi.note}%</strong> (seuil : ${defi.seuil}%)
                 </div>
-                <div style="font-size: 0.85rem; color: #666;">
+                <div class="profil-texte-detail-compact">
                     💡 Recommandation : Envisager une reprise avec jeton ou un rattrapage ciblé.
                 </div>
             `;
@@ -5491,7 +5491,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
                     <br>
                     Moyenne ancienne : ${defi.moyenneAncienne.toFixed(1)}%
                 </div>
-                <div style="font-size: 0.85rem; color: #666;">
+                <div class="profil-texte-detail-compact">
                     💡 Recommandation : Identifier les causes de la baisse et ajuster les stratégies d'apprentissage.
                 </div>
             `;
@@ -5504,7 +5504,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
                     <br>
                     Moyenne : ${defi.moyenne.toFixed(1)}%
                 </div>
-                <div style="font-size: 0.85rem; color: #666;">
+                <div class="profil-texte-detail-compact">
                     💡 Recommandation : Travailler la régularité et la constance dans les efforts.
                 </div>
             `;
@@ -5768,7 +5768,7 @@ function genererSectionPerformance(da) {
 
     return `
         <!-- Détails des calculs (masqué par défaut) - AFFICHÉ EN HAUT -->
-        <div id="details-calculs-performance-${da}" class="carte-info-toggle" style="display: none;">
+        <div id="details-calculs-performance-${da}" class="carte-info-toggle" class="carte-info-toggle" style="display: none;">
             <div class="details-calculs-section">
                 <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
                 <div class="details-calculs-bloc">
@@ -5842,7 +5842,7 @@ function genererSectionPerformance(da) {
         <div style="border: 1px solid #dee2e6; background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
 
             <!-- En-tête avec indice P -->
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <div class="profil-flex-between-mb15">
                 <div>
                     <h3 style="margin: 0 0 5px 0; color: var(--bleu-principal); font-size: 1.1rem;">Développement des habiletés et compétences</h3>
                     <strong style="font-size: 0.95rem; color: ${interpP.couleur};">${interpP.niveau}</strong>
@@ -6114,7 +6114,7 @@ function genererSectionAssiduite(da) {
             </h3>
 
             <!-- Badge avec interprétation -->
-            <div style="margin-bottom: 15px;">
+            <div class="profil-mb-15">
                 <span style="font-size: 1.5rem;">${interpA.emoji}</span>
                 <strong style="font-size: 1.1rem; color: ${interpA.couleur};">${interpA.niveau}</strong>
                 <span style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur}; margin-left: 10px;">(${taux}%)</span>
@@ -6125,14 +6125,14 @@ function genererSectionAssiduite(da) {
                 <li><strong>• Heures présentes :</strong> ${details.heuresPresentes}h / ${details.heuresOffertes}h</li>
             </ul>
 
-            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+            <hr class="profil-separateur">
 
             <!-- Liste des absences et retards -->
             <h4 style="color: var(--bleu-principal); margin: 0 0 12px 0; font-size: 0.95rem; font-weight: 600;">
                 ${details.absences.length} ABSENCE${details.absences.length > 1 ? 'S' : ''} OU RETARD${details.absences.length > 1 ? 'S' : ''}
             </h4>
             ${details.absences.length > 0 ? `
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                <div class="badges-centres" class="profil-mb-20">
                     ${details.absences.map(abs => {
                         const date = new Date(abs.date + 'T12:00:00');
                         const options = { weekday: 'short', day: 'numeric', month: 'short' };
@@ -6157,12 +6157,12 @@ function genererSectionAssiduite(da) {
                     }).join('')}
                 </div>
             ` : `
-                <div class="profil-message-tous-remis" style="margin-bottom: 20px;">
+                <div class="profil-message-tous-remis" class="profil-mb-20">
                     Assiduité parfaite !
                 </div>
             `}
 
-            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
+            <hr class="profil-separateur">
 
             <!-- Placeholder graphique (en conclusion) -->
             <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
@@ -6713,7 +6713,7 @@ function genererSectionRapport(da) {
                         <div style="font-size: 0.85rem; color: #666; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
                             Sections à inclure
                         </div>
-                        <div class="grille-checkboxes" style="margin-bottom: 10px;">
+                        <div class="grille-checkboxes" class="profil-mb-10">
                             <label class="text-sm-pointer">
                                 <input type="checkbox" id="inclure-identification-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
                                 Identification
