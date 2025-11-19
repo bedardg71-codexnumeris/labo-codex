@@ -187,28 +187,28 @@ function afficherToutesLesEchellesNiveaux() {
     function genererHtmlNiveau(niveau, echelleId) {
         return `
             <div class="item-liste" style="margin-bottom: 10px; border-left: 4px solid ${niveau.couleur};">
-                <div style="display: grid; grid-template-columns: 80px 180px 1fr 80px 80px 120px; gap: 10px; align-items: center;">
+                <div class="echelle-grid-niveaux">
                     <div>
-                        <label style="font-size: 0.7rem; color: var(--bleu-moyen);">Code</label>
+                        <label class="echelle-texte-mini-bleu">Code</label>
                         <strong style="font-size: 1.1rem; color: var(--bleu-principal);">${echapperHtml(niveau.code)}</strong>
                     </div>
                     <div>
-                        <label style="font-size: 0.7rem; color: var(--bleu-moyen);">Nom</label>
-                        <span style="font-size: 0.9rem;">${echapperHtml(niveau.nom)}</span>
+                        <label class="echelle-texte-mini-bleu">Nom</label>
+                        <span class="echelle-texte-09">${echapperHtml(niveau.nom)}</span>
                     </div>
                     <div>
-                        <label style="font-size: 0.7rem; color: var(--bleu-moyen);">Description</label>
-                        <span style="font-size: 0.85rem; color: #666;">${echapperHtml(niveau.description || '')}</span>
+                        <label class="echelle-texte-mini-bleu">Description</label>
+                        <span class="echelle-texte-detail">${echapperHtml(niveau.description || '')}</span>
                     </div>
                     <div>
-                        <label style="font-size: 0.7rem; color: var(--bleu-moyen);">Min</label>
-                        <span style="font-size: 0.9rem;">${niveau.min}%</span>
+                        <label class="echelle-texte-mini-bleu">Min</label>
+                        <span class="echelle-texte-09">${niveau.min}%</span>
                     </div>
                     <div>
-                        <label style="font-size: 0.7rem; color: var(--bleu-moyen);">Max</label>
-                        <span style="font-size: 0.9rem;">${niveau.max}%</span>
+                        <label class="echelle-texte-mini-bleu">Max</label>
+                        <span class="echelle-texte-09">${niveau.max}%</span>
                     </div>
-                    <div style="text-align: center;">
+                    <div class="echelle-text-center">
                         <div style="width: 30px; height: 30px; background: ${niveau.couleur};
                              border-radius: 4px; border: 1px solid #ccc; display: inline-block;"></div>
                     </div>
@@ -232,17 +232,17 @@ function afficherToutesLesEchellesNiveaux() {
                         ${niveaux.length} niveau${niveaux.length > 1 ? 'x' : ''}
                     </span>
                 </summary>
-                <div style="padding: 15px;">
+                <div class="echelle-p-15">
                     ${niveaux.length > 0 ? `
-                        <div style="margin-bottom: 15px;">
+                        <div class="echelle-mb-15">
                             ${niveaux.map(n => genererHtmlNiveau(n, echelle.id)).join('')}
                         </div>
 
                         <!-- Aperçu visuel de l'échelle -->
                         <div style="margin-bottom: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
                             <strong style="display: block; margin-bottom: 10px; color: var(--bleu-principal);">Aperçu visuel :</strong>
-                            <div style="position: relative;">
-                                <div style="display: flex; gap: 5px; height: 40px;">
+                            <div class="echelle-relative">
+                                <div class="echelle-flex-seuils">
                                     ${niveaux.map(n => {
                                         const largeur = n.max - n.min + 1;
                                         return `
@@ -877,7 +877,7 @@ function afficherTableauNiveaux(niveaux) {
             <tbody>
                 ${niveaux.map((niveau, index) => `
                     <tr style="opacity: ${niveau.verrouille ? '0.7' : '1'};">
-                        <td style="text-align: center;">
+                        <td class="echelle-text-center">
                             <div style="display: flex; gap: 4px; justify-content: center;">
                                 <button onclick="deplacerNiveauHaut(${index})"
                                         class="btn btn-compact"
@@ -957,7 +957,7 @@ function afficherTableauNiveaux(niveaux) {
          style="width: 30px; height: 30px; background: ${niveau.couleur}; 
          border-radius: 4px; margin-top: 5px; border: 1px solid #ccc;"></div>
 </td>
-                        <td style="text-align: center;">
+                        <td class="echelle-text-center">
                             ${niveaux.length > 1 ?
             `<button onclick="supprimerNiveau(${index})"
                                          class="btn btn-supprimer btn-compact"
@@ -1684,8 +1684,8 @@ function afficherNiveauxEchelle(echelle) {
     const html = echelle.niveaux.map((niveau, index) => `
         <div class="item-liste" style="padding: 15px; background: white; border-left: 4px solid ${niveau.couleur}; margin-bottom: 10px;">
             <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px 100px; gap: 12px; align-items: end;">
-                <div class="groupe-form" style="text-align: center;">
-                    <label style="font-size: 0.85rem; color: #666;">Ordre</label>
+                <div class="groupe-form" class="echelle-text-center">
+                    <label class="echelle-texte-detail">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
                         <button onclick="deplacerNiveauEchelleHaut('${echelle.id}', ${index})"
                                 class="btn btn-compact"
@@ -1704,7 +1704,7 @@ function afficherNiveauxEchelle(echelle) {
                     </div>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Code</label>
+                    <label class="echelle-texte-detail">Code</label>
                     <input type="text"
                            class="controle-form"
                            value="${niveau.code}"
@@ -1713,7 +1713,7 @@ function afficherNiveauxEchelle(echelle) {
                            style="font-weight: 600; text-align: center;">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Nom du niveau</label>
+                    <label class="echelle-texte-detail">Nom du niveau</label>
                     <input type="text"
                            class="controle-form"
                            value="${niveau.nom}"
@@ -1721,7 +1721,7 @@ function afficherNiveauxEchelle(echelle) {
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Min (%)</label>
+                    <label class="echelle-texte-detail">Min (%)</label>
                     <input type="number"
                            class="controle-form"
                            value="${niveau.min}"
@@ -1730,7 +1730,7 @@ function afficherNiveauxEchelle(echelle) {
                            onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'min', parseFloat(this.value))">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Max (%)</label>
+                    <label class="echelle-texte-detail">Max (%)</label>
                     <input type="number"
                            class="controle-form"
                            value="${niveau.max}"
@@ -1739,7 +1739,7 @@ function afficherNiveauxEchelle(echelle) {
                            onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'max', parseFloat(this.value))">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Valeur calc (%)</label>
+                    <label class="echelle-texte-detail">Valeur calc (%)</label>
                     <input type="number"
                            class="controle-form"
                            value="${niveau.valeurCalcul}"
@@ -1749,7 +1749,7 @@ function afficherNiveauxEchelle(echelle) {
                            onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'valeurCalcul', parseFloat(this.value))">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Couleur</label>
+                    <label class="echelle-texte-detail">Couleur</label>
                     <input type="color"
                            class="controle-form"
                            value="${niveau.couleur}"
@@ -1757,7 +1757,7 @@ function afficherNiveauxEchelle(echelle) {
                            style="height: 38px; cursor: pointer;">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Actions</label>
+                    <label class="echelle-texte-detail">Actions</label>
                     ${echelle.niveaux.length > 1 ? `
                         <button onclick="supprimerNiveauEchelle('${echelle.id}', ${index})"
                                 class="btn btn-supprimer btn-compact"

@@ -3954,6 +3954,50 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-size: 0.9rem;
 }
 
+/* 🆕 BETA 91: Module echelles (optimisations Phase B) */
+.echelle-texte-mini-bleu {
+    font-size: 0.7rem;
+    color: var(--bleu-moyen);
+}
+
+.echelle-texte-09 {
+    font-size: 0.9rem;
+}
+
+.echelle-text-center {
+    text-align: center;
+}
+
+.echelle-mb-15 {
+    margin-bottom: 15px;
+}
+
+.echelle-texte-detail {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.echelle-p-15 {
+    padding: 15px;
+}
+
+.echelle-relative {
+    position: relative;
+}
+
+.echelle-grid-niveaux {
+    display: grid;
+    grid-template-columns: 80px 180px 1fr 80px 80px 120px;
+    gap: 10px;
+    align-items: center;
+}
+
+.echelle-flex-seuils {
+    display: flex;
+    gap: 5px;
+    height: 40px;
+}
+
 
 /* ===============================================
    SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)
