@@ -1901,7 +1901,7 @@ function genererDetailsEtudiant(etudiant) {
                                         </button>
                                     `}
                                 </td>
-                                <td style="text-align: center;">
+                                <td class="u-text-center">
                                     ${estRemplacee ? '' : `
                                         <span id="cadenas-${item.evaluation.id}"
                                               onclick="basculerVerrouillageEvaluation('${item.evaluation.id}')"
@@ -1916,7 +1916,7 @@ function genererDetailsEtudiant(etudiant) {
         } else {
             // Production non évaluée
             return `
-                            <tr style="opacity: 0.7;">
+                            <tr class="u-opacity-07">
                                 <td>${echapperHtml(item.production.titre || item.production.nom || '—')}</td>
                                 <td>—</td>
                                 <td>—</td>
@@ -3511,7 +3511,7 @@ function afficherIndicateurModeModification(evaluation) {
     // Mettre à jour le contenu
     const dateEval = evaluation.dateEvaluation ? new Date(evaluation.dateEvaluation).toLocaleString('fr-CA') : 'Inconnue';
     indicateur.innerHTML = `
-        <div style="flex: 1;">
+        <div class="u-flex-1">
             <strong>MODE MODIFICATION</strong><br>
             <span style="font-size: 0.9rem; opacity: 0.95;">
                 Vous modifiez l'évaluation de <strong>${evaluation.etudiantNom}</strong>
@@ -3749,7 +3749,7 @@ function afficherListeBanqueEvaluations(evaluations) {
         return `
             <div class="carte" style="margin-bottom: 15px; ${estRemplacee ? 'opacity: 0.6; border-left: 3px solid #999;' : ''}">
                 <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div style="flex: 1;">
+                    <div class="u-flex-1">
                         <h4 style="margin: 0 0 10px 0;">
                             ${echapperHtml(evaluation.etudiantNom)}
                             ${evaluation.verrouillee ? '<span style="color: #ff9800; margin-left: 8px;">(Verrouillée)</span>' : ''}
@@ -4341,8 +4341,8 @@ function afficherJetonsPersonnalisesEvaluation() {
     // Générer un badge avec checkbox pour chaque jeton personnalisé
     conteneur.innerHTML = jetonsPersonnalises.map(jeton => `
         <div style="display: flex; align-items: flex-start; gap: 10px;">
-            <input type="checkbox" id="checkboxJetonPerso_${jeton.id}" style="margin-top: 6px;">
-            <div style="flex: 1;">
+            <input type="checkbox" id="checkboxJetonPerso_${jeton.id}" class="u-mt-6">
+            <div class="u-flex-1">
                 <span class="badge-jeton-personnalise-wrapper">
                     <span class="badge-jeton-titre">${echapperHtml(jeton.nom)}</span>
                 </span>
