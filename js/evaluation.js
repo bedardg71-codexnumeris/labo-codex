@@ -474,16 +474,16 @@ function cartoucheSelectionnee() {
 
     ${estAlgorithmique ? `
         <!-- Interface algorithmique -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
             <div class="groupe-form">
-                <label style="font-size: 0.75rem; color: #666;">Nombre d'erreurs</label>
-                <input type="number"
-                       id="eval_erreurs_${critere.id}"
+                <label style="font-size: 0.75rem; color: #666;">Catégories d'erreurs (séparées par ;)</label>
+                <input type="text"
+                       id="eval_categories_${critere.id}"
                        class="controle-form"
-                       min="0"
-                       placeholder="0"
-                       oninput="calculerNoteAlgorithmique('${critere.id}', ${ponderation}, ${facteur})"
+                       placeholder="Ex: 1;4;6;1;4;10"
+                       oninput="calculerNoteAlgorithmiqueAvecCategories('${critere.id}', ${ponderation}, ${facteur}, '${critereGrille?.id || ''}')"
                        style="font-size: 0.85rem;">
+                <small style="font-size: 0.7rem; color: #999;">ⓘ Codes de 0 à 10 (voir configuration de la grille)</small>
             </div>
             <div class="groupe-form">
                 <label style="font-size: 0.75rem; color: #666;">Nombre de mots</label>
@@ -492,14 +492,19 @@ function cartoucheSelectionnee() {
                        class="controle-form"
                        min="1"
                        placeholder="500"
-                       oninput="calculerNoteAlgorithmique('${critere.id}', ${ponderation}, ${facteur})"
+                       oninput="calculerNoteAlgorithmiqueAvecCategories('${critere.id}', ${ponderation}, ${facteur}, '${critereGrille?.id || ''}')"
                        style="font-size: 0.85rem;">
             </div>
         </div>
         <div id="resultat_algo_${critere.id}" style="padding: 8px; background: #f0f8ff; border-radius: 4px; font-size: 0.85rem; color: #666; margin-bottom: 8px;">
-            <strong>Formule:</strong> ${ponderation} − (Erreurs ÷ Mots × ${facteur})<br>
+            <strong>Total erreurs:</strong> <span id="total_erreurs_${critere.id}">--</span><br>
+            <strong>Formule:</strong> ${ponderation} − (<span id="total_erreurs_formule_${critere.id}">--</span> ÷ Mots × ${facteur})<br>
             <strong>Résultat:</strong> <span id="note_algo_${critere.id}">--</span> / ${ponderation} = <span id="pct_algo_${critere.id}">--</span>%<br>
-            <strong>Niveau IDME:</strong> <span id="niveau_algo_${critere.id}">--</span>
+            <strong>Niveau IDME:</strong> <span id="niveau_algo_${critere.id}">--</span><br>
+            <strong>Catégorie dominante:</strong> <span id="cat_dominante_${critere.id}" style="color: var(--orange-accent);">--</span>
+        </div>
+        <div id="retroaction_cat_${critere.id}" style="padding: 10px; background: #fff3e0; border-left: 4px solid var(--orange-accent); border-radius: 4px; font-size: 0.85rem; color: #555; line-height: 1.5; display: none; margin-bottom: 8px;">
+            <!-- Rétroaction différenciée selon catégorie dominante -->
         </div>
     ` : `
         <!-- Interface standard (holistique/analytique) -->
@@ -644,6 +649,167 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
         mots: mots,
         noteCalculee: noteCalculee,
         pourcentage: pctFinal
+    };
+
+    // Calculer la note globale et générer la rétroaction
+    calculerNote();
+    genererRetroaction(1);
+}
+
+/**
+ * Calcule la note algorithmique AVEC catégorisation des erreurs
+ * Formule: Note = Pondération − (Total Erreurs ÷ Mots × Facteur)
+ * + Calcul du mode (catégorie dominante) pour rétroaction différenciée
+ *
+ * @param {string} critereId - ID du critère
+ * @param {number} ponderation - Pondération du critère (ex: 30)
+ * @param {number} facteur - Facteur de normalisation (ex: 500 mots)
+ * @param {string} critereGrilleId - ID du critère dans la grille (pour récupérer les catégories)
+ */
+function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur, critereGrilleId) {
+    if (!evaluationEnCours) return;
+
+    const categoriesInput = document.getElementById(`eval_categories_${critereId}`);
+    const motsInput = document.getElementById(`eval_mots_${critereId}`);
+
+    const categoriesTexte = categoriesInput?.value.trim() || '';
+    const mots = parseInt(motsInput?.value) || 0;
+
+    // Parser les catégories (ex: "1;4;6;1;4" → [1, 4, 6, 1, 4])
+    let categories = [];
+    if (categoriesTexte) {
+        categories = categoriesTexte.split(';')
+            .map(c => c.trim())
+            .filter(c => c !== '')
+            .map(c => parseInt(c))
+            .filter(c => !isNaN(c) && c >= 0 && c <= 10);
+    }
+
+    const totalErreurs = categories.length;
+
+    // Afficher le total d'erreurs
+    document.getElementById(`total_erreurs_${critereId}`).textContent = totalErreurs;
+    document.getElementById(`total_erreurs_formule_${critereId}`).textContent = totalErreurs;
+
+    if (mots === 0 || totalErreurs === 0) {
+        // Réinitialiser l'affichage
+        document.getElementById(`note_algo_${critereId}`).textContent = '--';
+        document.getElementById(`pct_algo_${critereId}`).textContent = '--';
+        document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
+        document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
+        document.getElementById(`retroaction_cat_${critereId}`).style.display = 'none';
+        return;
+    }
+
+    // Calcul selon la formule: Pondération − (Total Erreurs ÷ Mots × Facteur)
+    const noteCalculee = ponderation - (totalErreurs / mots * facteur);
+    const pourcentage = (noteCalculee / ponderation) * 100;
+
+    // Limiter entre 0 et 100%
+    const pctFinal = Math.max(0, Math.min(100, pourcentage));
+
+    // Déterminer le niveau IDME selon l'échelle
+    const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelleSelectionnee = echelles.find(e => e.id === echelleId);
+
+    let niveauIDME = '--';
+    if (echelleSelectionnee && echelleSelectionnee.niveaux) {
+        const niveau = echelleSelectionnee.niveaux.find(n => {
+            return pctFinal >= n.min && pctFinal <= n.max;
+        });
+        niveauIDME = niveau ? niveau.code : '--';
+    }
+
+    // Afficher les résultats
+    document.getElementById(`note_algo_${critereId}`).textContent = noteCalculee.toFixed(2);
+    document.getElementById(`pct_algo_${critereId}`).textContent = pctFinal.toFixed(1);
+    document.getElementById(`niveau_algo_${critereId}`).textContent = niveauIDME;
+
+    // === CALCUL DU MODE (catégorie dominante) ===
+    const frequences = {};
+    let maxFreq = 0;
+    let categorieDominante = null;
+
+    categories.forEach(cat => {
+        frequences[cat] = (frequences[cat] || 0) + 1;
+        if (frequences[cat] > maxFreq) {
+            maxFreq = frequences[cat];
+            categorieDominante = cat; // Premier en cas d'égalité
+        }
+    });
+
+    // Afficher la catégorie dominante
+    if (categorieDominante !== null) {
+        document.getElementById(`cat_dominante_${critereId}`).textContent =
+            `Code ${categorieDominante} (${maxFreq} occurrence${maxFreq > 1 ? 's' : ''})`;
+
+        // Récupérer la rétroaction associée depuis la grille
+        const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+        const grilleId = evaluationEnCours?.grilleId;
+        const grille = grilles.find(g => g.id === grilleId);
+
+        if (grille && grille.criteres) {
+            const critereGrille = grille.criteres.find(c => c.id === critereId);
+            if (critereGrille && critereGrille.categoriesErreurs) {
+                const categorieConfig = critereGrille.categoriesErreurs.find(c => parseInt(c.code) === categorieDominante);
+                if (categorieConfig && categorieConfig.retroaction) {
+                    // Construire la rétroaction complète avec le nombre d'erreurs
+                    const retroactionComplete = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français pour ${mots} mots. ${categorieConfig.retroaction}`;
+
+                    // Afficher la rétroaction dans la zone de commentaire normale
+                    const commDiv = document.getElementById(`comm_${critereId}`);
+                    if (commDiv) {
+                        commDiv.innerHTML = retroactionComplete;
+                    }
+
+                    // Masquer la zone orange (on ne l'utilise plus)
+                    const retroDiv = document.getElementById(`retroaction_cat_${critereId}`);
+                    if (retroDiv) retroDiv.style.display = 'none';
+                } else {
+                    document.getElementById(`comm_${critereId}`).innerHTML = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
+                }
+            }
+        }
+    } else {
+        document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
+        document.getElementById(`comm_${critereId}`).innerHTML = 'Saisissez les catégories d\'erreurs';
+    }
+
+    // Sauvegarder dans evaluationEnCours
+    evaluationEnCours.criteres[critereId] = niveauIDME;
+
+    // Construire et sauvegarder la rétroaction pour inclusion dans la rétroaction finale
+    let retroactionFinale = '';
+    if (categorieDominante !== null) {
+        const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+        const grilleId = evaluationEnCours?.grilleId;
+        const grille = grilles.find(g => g.id === grilleId);
+
+        if (grille && grille.criteres) {
+            const critereGrille = grille.criteres.find(c => c.id === critereId);
+            if (critereGrille && critereGrille.categoriesErreurs) {
+                const categorieConfig = critereGrille.categoriesErreurs.find(c => parseInt(c.code) === categorieDominante);
+                if (categorieConfig && categorieConfig.retroaction) {
+                    retroactionFinale = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français pour ${mots} mots. ${categorieConfig.retroaction}`;
+                }
+            }
+        }
+    }
+
+    // Sauvegarder les données algorithmiques séparément pour pouvoir les recharger
+    if (!evaluationEnCours.donneesAlgorithmiques) {
+        evaluationEnCours.donneesAlgorithmiques = {};
+    }
+    evaluationEnCours.donneesAlgorithmiques[critereId] = {
+        categories: categoriesTexte,
+        totalErreurs: totalErreurs,
+        categorieDominante: categorieDominante,
+        frequenceDominante: maxFreq,
+        mots: mots,
+        noteCalculee: noteCalculee,
+        pourcentage: pctFinal,
+        retroaction: retroactionFinale  // Sauvegarder la rétroaction pour genererRetroaction()
     };
 
     // Calculer la note globale et générer la rétroaction
@@ -851,11 +1017,19 @@ function genererRetroaction(num) {
         grille.criteres.forEach(critere => {
             const niveau = evaluationEnCours.criteres[critere.id];
             if (niveau) {
-                const cle = `${critere.id}_${niveau}`;
-                const commentaire = cartouche.commentaires[cle];
+                // Vérifier si c'est un critère algorithmique
+                if (critere.type === 'algorithmique' && evaluationEnCours.donneesAlgorithmiques?.[critere.id]?.retroaction) {
+                    // Utiliser la rétroaction algorithmique sauvegardée
+                    const retroAlgo = evaluationEnCours.donneesAlgorithmiques[critere.id].retroaction;
+                    texte += `${critere.nom} (${niveau}) : ${retroAlgo}\n\n`;
+                } else {
+                    // Critère standard (holistique/analytique)
+                    const cle = `${critere.id}_${niveau}`;
+                    const commentaire = cartouche.commentaires[cle];
 
-                if (commentaire) {
-                    texte += `${critere.nom} (${niveau}) : ${commentaire}\n\n`;
+                    if (commentaire) {
+                        texte += `${critere.nom} (${niveau}) : ${commentaire}\n\n`;
+                    }
                 }
             }
         });
@@ -4562,3 +4736,4 @@ window.afficherJetonsPersonnalisesEvaluation = afficherJetonsPersonnalisesEvalua
 window.appliquerJetonPersonnalise = appliquerJetonPersonnalise;
 window.confirmerSuppressionEvaluationSidebar = confirmerSuppressionEvaluationSidebar;
 window.reinitialiserFormulaire = reinitialiserFormulaire;
+window.calculerNoteAlgorithmiqueAvecCategories = calculerNoteAlgorithmiqueAvecCategories;

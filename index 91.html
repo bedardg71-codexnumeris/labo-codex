@@ -5818,7 +5818,7 @@ Exemple :
                                 </div>
 
                                 <!-- Option : Modèle RàI et détection des patterns -->
-                                <div class="form-group">
+                                <div class="form-group" style="margin-bottom: 15px;">
                                     <label style="cursor: pointer; display: flex; align-items: center;">
                                         <input type="checkbox" id="activerRai" checked>
                                         <strong style="margin-left: 8px;">Activer le modèle de la Réponse à l'intervention (RàI) et la détection des patterns</strong>
@@ -5832,7 +5832,7 @@ Exemple :
                                 </div>
 
                                 <!-- Grille de référence pour le dépistage -->
-                                <div class="form-group" id="groupeGrilleReference" style="margin-top: 15px;">
+                                <div class="form-group" id="groupeGrilleReference">
                                     <label for="grilleReferenceDepistage" style="font-weight: 600; display: block; margin-bottom: 8px;">
                                         Grille de critères pour le dépistage
                                     </label>
@@ -5843,6 +5843,27 @@ Exemple :
                                         Cette grille définit les critères utilisés pour identifier les <strong>forces et défis</strong> des étudiant·es.
                                         Les pondérations de la grille sont prises en compte dans le diagnostic.
                                         Vous devez utiliser cette même grille pour toutes les évaluations afin que le dépistage soit efficace.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Évaluation du français -->
+                            <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--bleu-principal);">Évaluation du français</h4>
+
+                                <p class="text-muted" style="margin-bottom: 12px; font-size: 0.8rem; line-height: 1.5;">
+                                    Ces options s'appliquent aux critères de type <strong>Algorithmique</strong> (calcul automatique basé sur le nombre d'erreurs et de mots).
+                                </p>
+
+                                <!-- Option : Catégorisation des erreurs -->
+                                <div class="form-group">
+                                    <label style="cursor: pointer; display: flex; align-items: center;">
+                                        <input type="checkbox" id="activerCategorisationErreurs">
+                                        <strong style="margin-left: 8px;">Activer la catégorisation des erreurs de français</strong>
+                                    </label>
+                                    <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.8rem; line-height: 1.5;">
+                                        Permet de catégoriser les erreurs selon 11 codes (0-10) et de fournir une rétroaction différenciée selon le type d'erreur dominant.
+                                        <strong>Si désactivé :</strong> L'enseignant saisit simplement le nombre total d'erreurs sans les catégoriser, et reçoit une rétroaction générique.
                                     </small>
                                 </div>
                             </div>
