@@ -197,7 +197,9 @@ class PratiquePANMaitrise {
     /**
      * Calcule l'indice C (Complétion) selon PAN-Maîtrise
      *
-     * Formule : Nombre d'artefacts portfolio remis / Nombre total attendu
+     * Formule : Nombre d'artefacts portfolio remis / Nombre d'artefacts évalués
+     * Un artefact est considéré "évalué" si au moins une évaluation existe pour celui-ci
+     * (pas seulement "créé dans le système")
      *
      * @param {string} da - Numéro de dossier d'admission
      * @returns {number} Indice C entre 0 et 1, ou null si pas de données
@@ -212,25 +214,36 @@ class PratiquePANMaitrise {
         const productions = JSON.parse(localStorage.getItem('productions') || '[]');
         const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
-        if (artefactsPortfolio.length === 0) {
-            console.log('[PAN] Aucun artefact portfolio défini');
-            return null;
-        }
-
-        // Compter artefacts remis
+        // Lire les évaluations
         const evaluations = this._lireEvaluations();
-        const artefactsRemis = artefactsPortfolio.filter(artefact => {
+
+        // 1. Identifier les artefacts QUI ONT ÉTÉ ÉVALUÉS (au moins 1 évaluation existe)
+        const artefactsEvalues = artefactsPortfolio.filter(artefact => {
             return evaluations.some(e =>
-                e.etudiantDA === da &&
                 e.productionId === artefact.id &&
-                !e.remplaceeParId && // Exclure remplacées
+                !e.remplaceeParId &&
                 e.noteFinale !== null
             );
         });
 
-        const indiceC = artefactsRemis.length / artefactsPortfolio.length;
+        if (artefactsEvalues.length === 0) {
+            console.log('[PAN] Aucun artefact portfolio évalué');
+            return null;
+        }
 
-        console.log(`[PAN] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${artefactsRemis.length}/${artefactsPortfolio.length})`);
+        // 2. Compter combien CET ÉTUDIANT a remis parmi les artefacts évalués
+        const artefactsRemis = artefactsEvalues.filter(artefact => {
+            return evaluations.some(e =>
+                e.etudiantDA === da &&
+                e.productionId === artefact.id &&
+                !e.remplaceeParId &&
+                e.noteFinale !== null
+            );
+        });
+
+        const indiceC = artefactsRemis.length / artefactsEvalues.length;
+
+        console.log(`[PAN] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${artefactsRemis.length}/${artefactsEvalues.length} évalués)`);
 
         return indiceC;
     }

@@ -100,8 +100,9 @@ class PratiqueSommative {
     /**
      * Calcule l'indice C (Complétion) selon pratique sommative
      *
-     * Formule : Nombre de productions remises / Nombre total de productions attendues
-     * Inclut TOUTES les productions (examens, travaux, quiz, artefacts)
+     * Formule : Nombre de productions remises / Nombre de productions évaluées
+     * Une production est considérée "évaluée" si au moins une évaluation existe pour celle-ci
+     * (pas seulement "créée dans le système")
      *
      * @param {string} da - Numéro de dossier d'admission
      * @returns {number} Indice C entre 0 et 1, ou null si pas de données
@@ -112,29 +113,41 @@ class PratiqueSommative {
             return null;
         }
 
-        // Lire les productions
+        // Lire les productions et évaluations
         const productions = this._lireProductions();
-        const productionsAttendues = productions.filter(p => !p.facultatif);
-
-        if (productionsAttendues.length === 0) {
-            console.log('[SOM] Aucune production attendue définie');
-            return null;
-        }
-
-        // Compter productions remises
         const evaluations = this._lireEvaluations();
-        const productionsRemises = productionsAttendues.filter(production => {
+
+        // 1. Identifier les productions QUI ONT ÉTÉ ÉVALUÉES (au moins 1 évaluation existe)
+        const productionsEvaluees = productions.filter(production => {
+            // Exclure les productions facultatives
+            if (production.facultatif) return false;
+
+            // Vérifier qu'au moins une évaluation existe pour cette production
             return evaluations.some(e =>
-                e.etudiantDA === da &&
                 e.productionId === production.id &&
-                !e.remplaceeParId && // Exclure remplacées
+                !e.remplaceeParId &&
                 e.noteFinale !== null
             );
         });
 
-        const indiceC = productionsRemises.length / productionsAttendues.length;
+        if (productionsEvaluees.length === 0) {
+            console.log('[SOM] Aucune production évaluée pour DA', da);
+            return null;
+        }
 
-        console.log(`[SOM] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${productionsRemises.length}/${productionsAttendues.length})`);
+        // 2. Compter combien CET ÉTUDIANT a remis parmi les productions évaluées
+        const productionsRemises = productionsEvaluees.filter(production => {
+            return evaluations.some(e =>
+                e.etudiantDA === da &&
+                e.productionId === production.id &&
+                !e.remplaceeParId &&
+                e.noteFinale !== null
+            );
+        });
+
+        const indiceC = productionsRemises.length / productionsEvaluees.length;
+
+        console.log(`[SOM] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${productionsRemises.length}/${productionsEvaluees.length} évaluées)`);
 
         return indiceC;
     }
