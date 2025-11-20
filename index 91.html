@@ -6799,6 +6799,122 @@ Exemple :
                         </div>
                     </div>
 
+                    <!-- Carte: 5c. Sous-critères avec pondération différenciée -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">5c. Sous-critères avec pondération différenciée (Critères algorithmiques)</h3>
+                        <p><strong>Navigation :</strong> Matériel → Critères d'évaluation</p>
+
+                        <p><strong>Qu'est-ce qu'un critère algorithmique ?</strong></p>
+                        <p>Un critère <strong>algorithmique</strong> est un type spécial de critère qui calcule automatiquement une note basée sur une formule mathématique. Le cas d'usage principal est l'<strong>évaluation du français écrit</strong> selon la formule :</p>
+
+                        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin: 15px 0;">
+                            <code style="font-size: 0.95rem;">Note = Pondération − (Erreurs pondérées ÷ Mots × Facteur de normalisation)</code>
+                        </div>
+
+                        <p><strong>Pourquoi des sous-critères ?</strong></p>
+                        <p>Les sous-critères permettent de <strong>catégoriser les erreurs</strong> avec des <strong>pondérations différentes</strong>. Par exemple, dans certains cégeps, les erreurs de ponctuation comptent pour un demi-point (0.5) au lieu d'un point complet (1.0).</p>
+
+                        <div class="alerte alerte-information">
+                            <strong>Exemple concret :</strong><br>
+                            Un étudiant commet 4 erreurs : 2× ponctuation (0.5 pt chacune) + 1× syntaxe (1.0 pt) + 1× orthographe (1.0 pt)<br>
+                            = 0.5 + 0.5 + 1.0 + 1.0 = <strong>3.0 points d'erreur</strong> (au lieu de 4.0)<br>
+                            Pour 500 mots et facteur 500 : Note = 30 − (3.0 ÷ 500 × 500) = 30 − 3.0 = <strong>27/30</strong>
+                        </div>
+
+                        <p><strong>Étape 1 : Créer un critère algorithmique</strong></p>
+                        <ol>
+                            <li>Dans votre grille de critères, ajouter un nouveau critère</li>
+                            <li>Sélectionner le type <strong>«Algorithmique»</strong></li>
+                            <li>Définir la pondération (ex: 30%)</li>
+                            <li>Définir le facteur de normalisation (défaut: 500 mots)</li>
+                        </ol>
+
+                        <p><strong>Étape 2 : Ajouter des sous-critères</strong></p>
+                        <p>Vous avez deux options :</p>
+
+                        <p><strong>Option A : Utiliser les 11 sous-critères par défaut</strong></p>
+                        <ul>
+                            <li>Cliquer sur le bouton <strong>«📋 Utiliser sous-critères par défaut (0-10)»</strong></li>
+                            <li>Le système crée automatiquement 11 sous-critères avec rétroactions complètes :
+                                <ul class="mt-5" style="font-size: 0.85rem;">
+                                    <li><strong>Code 0</strong> : Aucune erreur</li>
+                                    <li><strong>Code 1</strong> : Syntaxe (construction de phrases, accord du verbe)</li>
+                                    <li><strong>Code 2</strong> : Subordination (subordonnées mal construites)</li>
+                                    <li><strong>Code 3</strong> : Ponctuation (virgules, points)</li>
+                                    <li><strong>Code 4</strong> : Orthographe d'usage</li>
+                                    <li><strong>Code 5</strong> : Homophones (ce/se, a/à, son/sont)</li>
+                                    <li><strong>Code 6</strong> : Accords dans le GN (groupe nominal)</li>
+                                    <li><strong>Code 7</strong> : Participes passés</li>
+                                    <li><strong>Code 8</strong> : Mots inappropriés (anglicismes, registre)</li>
+                                    <li><strong>Code 9</strong> : Répétitions et pléonasmes</li>
+                                    <li><strong>Code 10</strong> : Autres erreurs variées</li>
+                                </ul>
+                            </li>
+                            <li>Tous les sous-critères ont une pondération initiale de <strong>1.0</strong></li>
+                        </ul>
+
+                        <p><strong>Option B : Créer vos propres sous-critères</strong></p>
+                        <ul>
+                            <li>Cliquer sur <strong>«+ Ajouter un sous-critère»</strong></li>
+                            <li>Remplir les champs :
+                                <ul class="mt-5">
+                                    <li><strong>Code</strong> : Identifiant court (ex: "1", "A", "syn", "pct")</li>
+                                    <li><strong>Nom</strong> : Nom descriptif (ex: "Syntaxe", "Ponctuation")</li>
+                                    <li><strong>Pondération</strong> : Poids de l'erreur (défaut: 1.0, ajustable par paliers de 0.1)</li>
+                                    <li><strong>Description/Rétroaction</strong> : Texte à afficher quand c'est le type d'erreur dominant</li>
+                                </ul>
+                            </li>
+                            <li>Répéter pour chaque catégorie d'erreurs</li>
+                            <li>Nombre de sous-critères : <strong>illimité</strong></li>
+                        </ul>
+
+                        <p><strong>Étape 3 : Personnaliser les pondérations (optionnel)</strong></p>
+                        <p>Pour adapter à la politique de votre département :</p>
+                        <ul>
+                            <li>Ponctuation = 0.5 point (demi-point)</li>
+                            <li>Erreurs graves de syntaxe = 2.0 points (doublement pénalisé)</li>
+                            <li>Erreurs mineures = 0.5 point</li>
+                            <li>Ou toute autre combinaison selon vos besoins</li>
+                        </ul>
+
+                        <p><strong>Comment utiliser lors de l'évaluation</strong></p>
+                        <ol>
+                            <li>Lors de la correction, noter le code de chaque erreur rencontrée</li>
+                            <li>Dans le formulaire d'évaluation, saisir les codes séparés par des points-virgules :
+                                <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace;">
+                                    3;3;1;4;4;6;1
+                                </div>
+                            </li>
+                            <li>Saisir le nombre de mots de la rédaction</li>
+                            <li>Le système calcule automatiquement :
+                                <ul class="mt-5">
+                                    <li>Le nombre total d'erreurs (7)</li>
+                                    <li>La somme pondérée (ex: 6.0 si ponctuation=0.5)</li>
+                                    <li>La note finale selon la formule</li>
+                                    <li>Le sous-critère dominant (MODE statistique)</li>
+                                    <li>La rétroaction personnalisée selon le type d'erreur dominant</li>
+                                </ul>
+                            </li>
+                        </ol>
+
+                        <div class="alerte alerte-attention">
+                            <strong>Mode simple disponible :</strong> Si vous ne souhaitez pas catégoriser les erreurs, désactivez l'option «Activer la catégorisation des erreurs de français» dans <strong>Réglages → Pratique de notation</strong>. Vous pourrez alors simplement saisir le nombre total d'erreurs sans codes.
+                        </div>
+
+                        <p><strong>Avantages pédagogiques</strong></p>
+                        <ul>
+                            <li><strong>Rétroaction ciblée</strong> : L'étudiant sait exactement quel type d'erreur dominer</li>
+                            <li><strong>Justice évaluative</strong> : Erreurs mineures pénalisent moins que graves</li>
+                            <li><strong>Gain de temps</strong> : Codes rapides à noter pendant la correction</li>
+                            <li><strong>Suivi longitudinal</strong> : Analyse des types d'erreurs au fil du temps</li>
+                            <li><strong>Flexibilité disciplinaire</strong> : Adaptation aux normes de chaque département</li>
+                        </ul>
+
+                        <div class="alerte alerte-succes">
+                            <strong>Astuce professionnelle :</strong> Imprimez une feuille de codes plastifiée pour référence rapide pendant la correction. Exemple : «1=Syntaxe, 2=Subord., 3=Ponct., 4=Ortho., 5=Hom., 6=GN, 7=PP, 8=Mots, 9=Rép., 10=Autre»
+                        </div>
+                    </div>
+
                     <!-- Carte: Checklist -->
                     <div class="carte" class="bg-bleu-tres-pale">
                         <h3 class="carte-titre-bleu">Checklist de configuration</h3>
@@ -8873,6 +8989,9 @@ Exemple :
 
                                 <dt class="titre-section-aide">SRPNF (Critères)</dt>
                                 <dd class="ml-20-mb-10">Grille d'évaluation en 5 critères : <strong>S</strong>tructure (15%), <strong>R</strong>igueur (20%), <strong>P</strong>lausibilité (10%), <strong>N</strong>uance (25%), <strong>F</strong>rançais (30%). Développée spécifiquement pour l'évaluation de productions en littératie. Permet une évaluation objective et cohérente.</dd>
+
+                                <dt class="titre-section-aide">Sous-critères (Pondération différenciée)</dt>
+                                <dd class="ml-20-mb-10">Catégories d'erreurs au sein d'un critère algorithmique permettant une <strong>pondération différenciée</strong>. Exemple : dans un critère «Français écrit», les erreurs de ponctuation peuvent compter 0.5 point au lieu de 1.0 point. Chaque sous-critère possède un code (ex: "1", "pct", "syn"), un nom, une pondération (ajustable par paliers de 0.1), et une rétroaction personnalisée. Le système calcule la somme pondérée des erreurs et identifie le sous-critère dominant (MODE statistique) pour fournir une rétroaction ciblée. Cas d'usage principal : évaluation du français avec 11 catégories par défaut (codes 0-10). Nombre de sous-critères : illimité. Configuration : Matériel → Critères d'évaluation → Type «Algorithmique».</dd>
                             </dl>
 
                             <h4 class="titre-section-principal">T</h4>
