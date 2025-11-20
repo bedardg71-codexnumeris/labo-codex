@@ -1665,96 +1665,88 @@ function afficherCriteresGrille(grille) {
                 </div>
 
                 <!-- Gestion des sous-critères -->
-                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h4 style="margin: 0; font-size: 0.9rem; color: #333;">
+                <div class="sous-criteres-conteneur">
+                    <div class="sous-criteres-header">
+                        <h4 class="sous-criteres-titre">
                             Sous-critères
                             ${critere.sousCriteres && critere.sousCriteres.length > 0 ?
-                                `<span style="font-weight: normal; color: #999; font-size: 0.85rem;">(${critere.sousCriteres.length})</span>` :
+                                `<span class="sous-criteres-compteur">(${critere.sousCriteres.length})</span>` :
                                 ''}
                         </h4>
                         ${!critere.sousCriteres || critere.sousCriteres.length === 0 ? `
-                        <button class="btn btn-secondaire btn-tres-compact"
-                                onclick="initialiserSousCriteresParDefaut('${grille.id}', ${index})"
-                                style="font-size: 0.8rem;">
+                        <button class="btn btn-secondaire btn-tres-compact sous-criteres-btn-defaut"
+                                onclick="initialiserSousCriteresParDefaut('${grille.id}', ${index})">
                             📋 Utiliser sous-critères par défaut (0-10)
                         </button>
                         ` : ''}
                     </div>
 
                     ${critere.sousCriteres && critere.sousCriteres.length > 0 ? `
-                    <div style="background: #f9f9f9; padding: 10px; border-radius: 4px;">
+                    <div class="sous-criteres-liste-conteneur">
                         ${critere.sousCriteres.map((sc, scIndex) => `
-                        <div style="background: white; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; margin-bottom: 8px;">
-                            <div style="display: grid; grid-template-columns: 80px 1fr 100px auto; gap: 10px; align-items: center;">
+                        <div class="sous-critere-item">
+                            <div class="sous-critere-champs-grid">
                                 <div class="groupe-form">
-                                    <label style="font-size: 0.75rem; color: #666;">Code</label>
+                                    <label class="sous-critere-label-petit">Code</label>
                                     <input type="text"
-                                           class="controle-form"
+                                           class="controle-form sous-critere-input-code"
                                            value="${sc.code || scIndex}"
-                                           onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'code', this.value)"
-                                           style="font-size: 0.85rem; text-align: center; font-weight: 600;">
+                                           onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'code', this.value)">
                                 </div>
                                 <div class="groupe-form">
-                                    <label style="font-size: 0.75rem; color: #666;">Nom</label>
+                                    <label class="sous-critere-label-petit">Nom</label>
                                     <input type="text"
-                                           class="controle-form"
+                                           class="controle-form sous-critere-input-standard"
                                            value="${sc.nom || ''}"
                                            placeholder="Ex: Syntaxe, Ponctuation..."
-                                           onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'nom', this.value)"
-                                           style="font-size: 0.85rem;">
+                                           onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'nom', this.value)">
                                 </div>
                                 <div class="groupe-form">
-                                    <label style="font-size: 0.75rem; color: #666;">Pondération</label>
+                                    <label class="sous-critere-label-petit">Pondération</label>
                                     <input type="number"
-                                           class="controle-form"
+                                           class="controle-form sous-critere-input-standard"
                                            value="${sc.ponderation !== undefined ? sc.ponderation : 1.0}"
                                            min="0"
                                            step="0.1"
                                            placeholder="1.0"
                                            onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'ponderation', parseFloat(this.value))"
-                                           style="font-size: 0.85rem;"
                                            title="Ex: 1.0 pour erreur complète, 0.5 pour demi-point">
                                 </div>
                                 <button class="btn btn-supprimer btn-tres-compact"
                                         onclick="supprimerSousCritere('${grille.id}', ${index}, ${scIndex})"
-                                        title="Supprimer ce sous-critère"
-                                        style="font-size: 0.75rem; padding: 4px 8px;">
+                                        title="Supprimer ce sous-critère">
                                     ✕
                                 </button>
                             </div>
-                            <div class="groupe-form" style="margin-top: 8px;">
-                                <label style="font-size: 0.75rem; color: #666;">Description / Rétroaction</label>
-                                <textarea class="controle-form"
+                            <div class="groupe-form sous-critere-description-groupe">
+                                <label class="sous-critere-label-petit">Description / Rétroaction</label>
+                                <textarea class="controle-form sous-critere-textarea"
                                           rows="2"
                                           placeholder="Ex: La plupart des erreurs concernent la construction syntaxique..."
-                                          onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'retroaction', this.value)"
-                                          style="font-size: 0.8rem; resize: vertical;">${sc.retroaction || ''}</textarea>
+                                          onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'retroaction', this.value)">${sc.retroaction || ''}</textarea>
                             </div>
                         </div>
                         `).join('')}
 
                         <!-- Bouton ajouter après la liste -->
-                        <button class="btn btn-ajouter btn-tres-compact"
-                                onclick="ajouterSousCritere('${grille.id}', ${index})"
-                                style="font-size: 0.8rem; width: 100%; margin-top: 8px;">
+                        <button class="btn btn-ajouter btn-tres-compact sous-criteres-btn-ajouter-liste"
+                                onclick="ajouterSousCritere('${grille.id}', ${index})">
                             + Ajouter un sous-critère
                         </button>
                     </div>
                     ` : `
-                    <p style="font-size: 0.8rem; color: #999; margin: 0 0 12px 0; padding: 12px; background: #f9f9f9; border-radius: 4px; text-align: center;">
+                    <p class="sous-criteres-vide-message">
                         Aucun sous-critère défini. Utilisez les sous-critères par défaut ou créez les vôtres.
                     </p>
 
                     <!-- Bouton ajouter quand liste vide -->
-                    <button class="btn btn-ajouter btn-tres-compact"
-                            onclick="ajouterSousCritere('${grille.id}', ${index})"
-                            style="font-size: 0.8rem; width: 100%;">
+                    <button class="btn btn-ajouter btn-tres-compact sous-criteres-btn-ajouter-vide"
+                            onclick="ajouterSousCritere('${grille.id}', ${index})">
                         + Ajouter un sous-critère
                     </button>
                     `}
 
-                    <p style="font-size: 0.75rem; color: #666; margin: 10px 0 0 0; font-style: italic;">
+                    <p class="sous-criteres-info">
                         💡 Les sous-critères permettent de catégoriser les erreurs avec des pondérations différentes (ex: ponctuation = 0.5 point).
                     </p>
                 </div>
