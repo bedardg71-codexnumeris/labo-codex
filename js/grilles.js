@@ -1673,20 +1673,13 @@ function afficherCriteresGrille(grille) {
                                 `<span style="font-weight: normal; color: #999; font-size: 0.85rem;">(${critere.sousCriteres.length})</span>` :
                                 ''}
                         </h4>
-                        <div>
-                            ${!critere.sousCriteres || critere.sousCriteres.length === 0 ? `
-                            <button class="btn btn-secondaire btn-tres-compact"
-                                    onclick="initialiserSousCriteresParDefaut('${grille.id}', ${index})"
-                                    style="font-size: 0.8rem; margin-right: 8px;">
-                                📋 Utiliser sous-critères par défaut (0-10)
-                            </button>
-                            ` : ''}
-                            <button class="btn btn-ajouter btn-tres-compact"
-                                    onclick="ajouterSousCritere('${grille.id}', ${index})"
-                                    style="font-size: 0.8rem;">
-                                + Ajouter un sous-critère
-                            </button>
-                        </div>
+                        ${!critere.sousCriteres || critere.sousCriteres.length === 0 ? `
+                        <button class="btn btn-secondaire btn-tres-compact"
+                                onclick="initialiserSousCriteresParDefaut('${grille.id}', ${index})"
+                                style="font-size: 0.8rem;">
+                            📋 Utiliser sous-critères par défaut (0-10)
+                        </button>
+                        ` : ''}
                     </div>
 
                     ${critere.sousCriteres && critere.sousCriteres.length > 0 ? `
@@ -1740,11 +1733,25 @@ function afficherCriteresGrille(grille) {
                             </div>
                         </div>
                         `).join('')}
+
+                        <!-- Bouton ajouter après la liste -->
+                        <button class="btn btn-ajouter btn-tres-compact"
+                                onclick="ajouterSousCritere('${grille.id}', ${index})"
+                                style="font-size: 0.8rem; width: 100%; margin-top: 8px;">
+                            + Ajouter un sous-critère
+                        </button>
                     </div>
                     ` : `
-                    <p style="font-size: 0.8rem; color: #999; margin: 0; padding: 12px; background: #f9f9f9; border-radius: 4px; text-align: center;">
+                    <p style="font-size: 0.8rem; color: #999; margin: 0 0 12px 0; padding: 12px; background: #f9f9f9; border-radius: 4px; text-align: center;">
                         Aucun sous-critère défini. Utilisez les sous-critères par défaut ou créez les vôtres.
                     </p>
+
+                    <!-- Bouton ajouter quand liste vide -->
+                    <button class="btn btn-ajouter btn-tres-compact"
+                            onclick="ajouterSousCritere('${grille.id}', ${index})"
+                            style="font-size: 0.8rem; width: 100%;">
+                        + Ajouter un sous-critère
+                    </button>
                     `}
 
                     <p style="font-size: 0.75rem; color: #666; margin: 10px 0 0 0; font-style: italic;">
