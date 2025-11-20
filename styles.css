@@ -4509,6 +4509,109 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--risque-minimal);
 }
 
+/* 🆕 BETA 91: Sous-critères avec pondération différenciée */
+.sous-criteres-conteneur {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.sous-criteres-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.sous-criteres-titre {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.sous-criteres-compteur {
+    font-weight: normal;
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.sous-criteres-liste-conteneur {
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.sous-critere-item {
+    background: white;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.sous-critere-champs-grid {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.sous-critere-label-petit {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.sous-critere-input-code {
+    font-size: 0.85rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.sous-critere-input-standard {
+    font-size: 0.85rem;
+}
+
+.sous-critere-textarea {
+    font-size: 0.8rem;
+    resize: vertical;
+}
+
+.sous-critere-description-groupe {
+    margin-top: 8px;
+}
+
+.sous-criteres-vide-message {
+    font-size: 0.8rem;
+    color: #999;
+    margin: 0 0 12px 0;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.sous-criteres-info {
+    font-size: 0.75rem;
+    color: #666;
+    margin: 10px 0 0 0;
+    font-style: italic;
+}
+
+.sous-criteres-btn-ajouter-liste {
+    font-size: 0.8rem;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.sous-criteres-btn-ajouter-vide {
+    font-size: 0.8rem;
+    width: 100%;
+}
+
+.sous-criteres-btn-defaut {
+    font-size: 0.8rem;
+}
+
 /* 🆕 BETA 91: Module productions (optimisations Phase B) */
 .prod-p-15 {
     padding: 15px;
