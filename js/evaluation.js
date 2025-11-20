@@ -460,6 +460,10 @@ function cartoucheSelectionnee() {
         const estAlgorithmique = critereGrille?.type === 'algorithmique';
         const facteur = critereGrille?.facteurNormalisation || 500;
 
+        // Vérifier si la catégorisation des erreurs est activée
+        const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const categorisationActive = modalites.activerCategorisationErreurs === true;
+
         return `
     <div style="margin-bottom: 15px; padding: 12px; background: white; border-left: 3px solid ${estAlgorithmique ? 'var(--orange-accent)' : 'var(--bleu-moyen)'};">
         <div class="eval-grid-critere">
@@ -472,8 +476,8 @@ function cartoucheSelectionnee() {
     ${critereGrille?.description ?
                 `<small style="display: block; color: #888; font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critereGrille.description)}</small>` : ''}
 
-    ${estAlgorithmique ? `
-        <!-- Interface algorithmique -->
+    ${estAlgorithmique ? (categorisationActive ? `
+        <!-- Interface algorithmique AVEC catégorisation -->
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
             <div class="groupe-form">
                 <label style="font-size: 0.75rem; color: #666;">Catégories d'erreurs (séparées par ;)</label>
@@ -503,10 +507,36 @@ function cartoucheSelectionnee() {
             <strong>Niveau IDME:</strong> <span id="niveau_algo_${critere.id}">--</span><br>
             <strong>Catégorie dominante:</strong> <span id="cat_dominante_${critere.id}" style="color: var(--orange-accent);">--</span>
         </div>
-        <div id="retroaction_cat_${critere.id}" style="padding: 10px; background: #fff3e0; border-left: 4px solid var(--orange-accent); border-radius: 4px; font-size: 0.85rem; color: #555; line-height: 1.5; display: none; margin-bottom: 8px;">
-            <!-- Rétroaction différenciée selon catégorie dominante -->
-        </div>
     ` : `
+        <!-- Interface algorithmique SIMPLE (sans catégorisation) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div class="groupe-form">
+                <label style="font-size: 0.75rem; color: #666;">Nombre d'erreurs</label>
+                <input type="number"
+                       id="eval_erreurs_${critere.id}"
+                       class="controle-form"
+                       min="0"
+                       placeholder="0"
+                       oninput="calculerNoteAlgorithmiqueSimple('${critere.id}', ${ponderation}, ${facteur})"
+                       style="font-size: 0.85rem;">
+            </div>
+            <div class="groupe-form">
+                <label style="font-size: 0.75rem; color: #666;">Nombre de mots</label>
+                <input type="number"
+                       id="eval_mots_${critere.id}"
+                       class="controle-form"
+                       min="1"
+                       placeholder="500"
+                       oninput="calculerNoteAlgorithmiqueSimple('${critere.id}', ${ponderation}, ${facteur})"
+                       style="font-size: 0.85rem;">
+            </div>
+        </div>
+        <div id="resultat_algo_${critere.id}" style="padding: 8px; background: #f0f8ff; border-radius: 4px; font-size: 0.85rem; color: #666; margin-bottom: 8px;">
+            <strong>Formule:</strong> ${ponderation} − (Erreurs ÷ Mots × ${facteur})<br>
+            <strong>Résultat:</strong> <span id="note_algo_${critere.id}">--</span> / ${ponderation} = <span id="pct_algo_${critere.id}">--</span>%<br>
+            <strong>Niveau IDME:</strong> <span id="niveau_algo_${critere.id}">--</span>
+        </div>
+    `) : `
         <!-- Interface standard (holistique/analytique) -->
         <select id="eval_${critere.id}" class="controle-form"
                 onchange="niveauSelectionne('${critere.id}')"
@@ -813,6 +843,88 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
     };
 
     // Calculer la note globale et générer la rétroaction
+    calculerNote();
+    genererRetroaction(1);
+}
+
+/**
+ * Calcule la note algorithmique SIMPLE (sans catégorisation des erreurs)
+ * Formule: Note = Pondération − (Total Erreurs ÷ Mots × Facteur)
+ * Rétroaction générique: "Ta rédaction contient X erreurs de français pour Y mots."
+ *
+ * @param {string} critereId - ID du critère
+ * @param {number} ponderation - Pondération du critère (ex: 30)
+ * @param {number} facteur - Facteur de normalisation (ex: 500 mots)
+ */
+function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
+    if (!evaluationEnCours) return;
+
+    const erreursInput = document.getElementById(`eval_erreurs_${critereId}`);
+    const motsInput = document.getElementById(`eval_mots_${critereId}`);
+
+    const erreurs = parseInt(erreursInput?.value) || 0;
+    const mots = parseInt(motsInput?.value) || 0;
+
+    if (mots === 0) {
+        // Réinitialiser l'affichage
+        document.getElementById(`note_algo_${critereId}`).textContent = '--';
+        document.getElementById(`pct_algo_${critereId}`).textContent = '--';
+        document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
+        return;
+    }
+
+    // Calcul selon la formule: Pondération − (Total Erreurs ÷ Mots × Facteur)
+    const noteCalculee = ponderation - (erreurs / mots * facteur);
+    const pourcentage = (noteCalculee / ponderation) * 100;
+
+    // Limiter entre 0 et 100%
+    const pctFinal = Math.max(0, Math.min(100, pourcentage));
+
+    // Déterminer le niveau IDME selon l'échelle
+    const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelleSelectionnee = echelles.find(e => e.id === echelleId);
+
+    let niveauIDME = '--';
+    if (echelleSelectionnee && echelleSelectionnee.niveaux) {
+        const niveau = echelleSelectionnee.niveaux.find(n => {
+            return pctFinal >= n.min && pctFinal <= n.max;
+        });
+        niveauIDME = niveau ? niveau.code : '--';
+    }
+
+    // Afficher les résultats
+    document.getElementById(`note_algo_${critereId}`).textContent = noteCalculee.toFixed(2);
+    document.getElementById(`pct_algo_${critereId}`).textContent = pctFinal.toFixed(1);
+    document.getElementById(`niveau_algo_${critereId}`).textContent = niveauIDME;
+
+    // Construire la rétroaction générique simple
+    const retroactionGenerique = `Ta rédaction contient ${erreurs} erreur${erreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
+
+    // Afficher dans le champ commentaire standard
+    const champCommentaire = document.getElementById(`comm_${critereId}`);
+    if (champCommentaire) {
+        champCommentaire.value = retroactionGenerique;
+    }
+
+    // === SAUVEGARDE DANS evaluationEnCours ===
+    if (!evaluationEnCours.donneesAlgorithmiques) {
+        evaluationEnCours.donneesAlgorithmiques = {};
+    }
+
+    evaluationEnCours.donneesAlgorithmiques[critereId] = {
+        erreurs: erreurs,
+        mots: mots,
+        noteCalculee: noteCalculee.toFixed(2),
+        pourcentage: pctFinal.toFixed(1),
+        niveau: niveauIDME,
+        retroaction: retroactionGenerique
+    };
+
+    // Sauvegarder le critère dans evaluationEnCours.criteres avec le niveau
+    evaluationEnCours.criteres[critereId] = niveauIDME;
+
+    // Déclencher le recalcul et la régénération de rétroaction
     calculerNote();
     genererRetroaction(1);
 }
@@ -4737,3 +4849,4 @@ window.appliquerJetonPersonnalise = appliquerJetonPersonnalise;
 window.confirmerSuppressionEvaluationSidebar = confirmerSuppressionEvaluationSidebar;
 window.reinitialiserFormulaire = reinitialiserFormulaire;
 window.calculerNoteAlgorithmiqueAvecCategories = calculerNoteAlgorithmiqueAvecCategories;
+window.calculerNoteAlgorithmiqueSimple = calculerNoteAlgorithmiqueSimple;
