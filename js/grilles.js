@@ -1645,7 +1645,7 @@ function afficherCriteresGrille(grille) {
             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
                     <div class="groupe-form">
-                        <label style="font-size: 0.85rem; color: #666;">Facteur de normalisation (mots)</label>
+                        <label style="font-size: 0.85rem; color: #666;">Facteur de normalisation (nombre de mots)</label>
                         <input type="number"
                                class="controle-form"
                                value="${critere.facteurNormalisation || 500}"
@@ -1664,17 +1664,91 @@ function afficherCriteresGrille(grille) {
                     </div>
                 </div>
 
-                <!-- Configuration des catégories d'erreurs -->
+                <!-- Gestion des sous-critères -->
                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
-                    <button class="btn btn-secondaire"
-                            onclick="afficherConfigurationCategoriesErreurs('${grille.id}', ${index})"
-                            style="font-size: 0.85rem;">
-                        ⚙️ Configurer les catégories d'erreurs (0-10)
-                    </button>
-                    <p style="font-size: 0.75rem; color: #999; margin: 8px 0 0 0;">
-                        ${critere.categoriesErreurs && critere.categoriesErreurs.length > 0 ?
-                            `✓ ${critere.categoriesErreurs.length} catégories configurées` :
-                            'Permet de catégoriser les erreurs et fournir une rétroaction différenciée'}
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h4 style="margin: 0; font-size: 0.9rem; color: #333;">
+                            Sous-critères
+                            ${critere.sousCriteres && critere.sousCriteres.length > 0 ?
+                                `<span style="font-weight: normal; color: #999; font-size: 0.85rem;">(${critere.sousCriteres.length})</span>` :
+                                ''}
+                        </h4>
+                        <div>
+                            ${!critere.sousCriteres || critere.sousCriteres.length === 0 ? `
+                            <button class="btn btn-secondaire btn-tres-compact"
+                                    onclick="initialiserSousCriteresParDefaut('${grille.id}', ${index})"
+                                    style="font-size: 0.8rem; margin-right: 8px;">
+                                📋 Utiliser sous-critères par défaut (0-10)
+                            </button>
+                            ` : ''}
+                            <button class="btn btn-ajouter btn-tres-compact"
+                                    onclick="ajouterSousCritere('${grille.id}', ${index})"
+                                    style="font-size: 0.8rem;">
+                                + Ajouter un sous-critère
+                            </button>
+                        </div>
+                    </div>
+
+                    ${critere.sousCriteres && critere.sousCriteres.length > 0 ? `
+                    <div style="background: #f9f9f9; padding: 10px; border-radius: 4px;">
+                        ${critere.sousCriteres.map((sc, scIndex) => `
+                        <div style="background: white; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; margin-bottom: 8px;">
+                            <div style="display: grid; grid-template-columns: 80px 1fr 100px auto; gap: 10px; align-items: center;">
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.75rem; color: #666;">Code</label>
+                                    <input type="text"
+                                           class="controle-form"
+                                           value="${sc.code || scIndex}"
+                                           onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'code', this.value)"
+                                           style="font-size: 0.85rem; text-align: center; font-weight: 600;">
+                                </div>
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.75rem; color: #666;">Nom</label>
+                                    <input type="text"
+                                           class="controle-form"
+                                           value="${sc.nom || ''}"
+                                           placeholder="Ex: Syntaxe, Ponctuation..."
+                                           onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'nom', this.value)"
+                                           style="font-size: 0.85rem;">
+                                </div>
+                                <div class="groupe-form">
+                                    <label style="font-size: 0.75rem; color: #666;">Pondération</label>
+                                    <input type="number"
+                                           class="controle-form"
+                                           value="${sc.ponderation !== undefined ? sc.ponderation : 1.0}"
+                                           min="0"
+                                           step="0.1"
+                                           placeholder="1.0"
+                                           onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'ponderation', parseFloat(this.value))"
+                                           style="font-size: 0.85rem;"
+                                           title="Ex: 1.0 pour erreur complète, 0.5 pour demi-point">
+                                </div>
+                                <button class="btn btn-supprimer btn-tres-compact"
+                                        onclick="supprimerSousCritere('${grille.id}', ${index}, ${scIndex})"
+                                        title="Supprimer ce sous-critère"
+                                        style="font-size: 0.75rem; padding: 4px 8px;">
+                                    ✕
+                                </button>
+                            </div>
+                            <div class="groupe-form" style="margin-top: 8px;">
+                                <label style="font-size: 0.75rem; color: #666;">Description / Rétroaction</label>
+                                <textarea class="controle-form"
+                                          rows="2"
+                                          placeholder="Ex: La plupart des erreurs concernent la construction syntaxique..."
+                                          onchange="modifierSousCritere('${grille.id}', ${index}, ${scIndex}, 'retroaction', this.value)"
+                                          style="font-size: 0.8rem; resize: vertical;">${sc.retroaction || ''}</textarea>
+                            </div>
+                        </div>
+                        `).join('')}
+                    </div>
+                    ` : `
+                    <p style="font-size: 0.8rem; color: #999; margin: 0; padding: 12px; background: #f9f9f9; border-radius: 4px; text-align: center;">
+                        Aucun sous-critère défini. Utilisez les sous-critères par défaut ou créez les vôtres.
+                    </p>
+                    `}
+
+                    <p style="font-size: 0.75rem; color: #666; margin: 10px 0 0 0; font-style: italic;">
+                        💡 Les sous-critères permettent de catégoriser les erreurs avec des pondérations différentes (ex: ponctuation = 0.5 point).
                     </p>
                 </div>
             </div>
@@ -1752,6 +1826,203 @@ function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
     }
 
     console.log('Critère modifié:', champ, '=', valeur);
+}
+
+/* ===============================
+   GESTION DES SOUS-CRITÈRES
+   =============================== */
+
+/**
+ * Initialise les sous-critères par défaut (codes 0-10) pour un critère algorithmique
+ * @param {string} grilleId - ID de la grille
+ * @param {number} critereIndex - Index du critère
+ */
+function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
+
+    // Sous-critères par défaut (vos 11 catégories)
+    const sousCriteresParDefaut = [
+        {
+            id: 'sc_0',
+            code: '0',
+            nom: 'Aucune erreur',
+            ponderation: 0,
+            retroaction: 'Le nombre d\'erreurs de français est trop petit pour cibler un objectif de travail précis.'
+        },
+        {
+            id: 'sc_1',
+            code: '1',
+            nom: 'Syntaxe',
+            ponderation: 1.0,
+            retroaction: 'La plupart des erreurs concernent la construction syntaxique (sujet, prédicat, complément de phrase ou autres compléments) ou l\'accord du verbe (accord avec le sujet, conjugaison, etc.). Il arrive que certaines phrases sont incomplètes ou confuses, ou encore que le lien entre le verbe et son sujet soit erroné. Vérifie que chaque phrase a bien un sujet et un verbe (et parfois un complément) en les identifiant dans l\'interligne. Assure-toi qu\'il n\'y a pas trop de compléments (ce qui pourrait rendre la phrase confuse). Vérifie également la conjugaison et l\'accord des verbes en t\'aidant de l\'Annexe de grammaire de ton manuel Méthodes quantitatives.'
+        },
+        {
+            id: 'sc_2',
+            code: '2',
+            nom: 'Subordination',
+            ponderation: 1.0,
+            retroaction: 'La plupart des erreurs sont causées par des subordonnées employées seules. Elles sont construites comme des compléments qui ne se rattachent à aucun prédicat. Relis la phrase pour vérifier sa clarté et assure-toi que chaque subordonnée est rattachée à une phrase principale par un mot de liaison. On peut parfois aussi ajuster la ponctuation pour y remédier.'
+        },
+        {
+            id: 'sc_3',
+            code: '3',
+            nom: 'Ponctuation',
+            ponderation: 1.0,
+            retroaction: 'La plupart des erreurs sont liées à l\'emploi de la ponctuation. Certains signes de ponctuation (comme la virgule) sont employés de manière superflue ou manquent là où ils seraient nécessaires. Dans d\'autres cas, le point d\'interrogation ou d\'exclamation doit être remplacé par un point. Pour réviser, tu peux te servir de la section portant sur la ponctuation dans l\'Annexe de grammaire de ton manuel.'
+        },
+        {
+            id: 'sc_4',
+            code: '4',
+            nom: 'Orthographe d\'usage',
+            ponderation: 1.0,
+            retroaction: 'La plupart des erreurs sont liées à l\'orthographe d\'usage, c\'est-à-dire que les mots sont mal orthographiés, ce qui peut parfois modifier le sens de la phrase. Il est conseillé de te servir d\'un dictionnaire (comme Antidote) pour réviser ton texte avant de le remettre. Utilise également un outil de synthèse vocale pour entendre ton texte : cela aide généralement à repérer et corriger ce type d\'erreur.'
+        },
+        {
+            id: 'sc_5',
+            code: '5',
+            nom: 'Homophones',
+            ponderation: 1.0,
+            retroaction: 'La plupart des erreurs sont causées par la confusion entre des homophones, c\'est-à-dire des mots qui se prononcent de la même façon, mais qui s\'écrivent différemment (par exemple : «ce» et «se», «a» et «à», «son» et «sont», etc.). Il est possible de réviser les règles générales de ces mots dans l\'Annexe de grammaire de ton manuel. Un truc : en lisant ton texte à voix haute, tu peux parfois repérer ces erreurs.'
+        },
+        {
+            id: 'sc_6',
+            code: '6',
+            nom: 'Accords dans le GN',
+            ponderation: 1.0,
+            retroaction: 'La plupart des erreurs concernent les accords dans le groupe nominal (déterminant, nom et adjectif). Vérifie que tous les mots d\'un même groupe nominal sont bien accordés en genre (masculin ou féminin) et en nombre (singulier ou pluriel). Pour réviser, sers-toi de ton manuel ou d\'Antidote. Un truc : surligne les groupes nominaux dans ton texte pour vérifier les accords.'
+        },
+        {
+            id: 'sc_7',
+            code: '7',
+            nom: 'Participes passés',
+            ponderation: 1.0,
+            retroaction: 'La plupart des erreurs concernent l\'accord des participes passés. Cet accord dépend de la présence et de la position du complément direct (CD) par rapport au verbe. Il est possible de réviser les règles dans l\'Annexe de grammaire de ton manuel. Un truc : identifie d\'abord le verbe conjugué, puis cherche le complément direct (CD) en posant les questions «qui ?» ou «quoi ?» après le verbe.'
+        },
+        {
+            id: 'sc_8',
+            code: '8',
+            nom: 'Mots inappropriés',
+            ponderation: 1.0,
+            retroaction: 'La plupart des erreurs sont liées à un mauvais usage de certains mots. Par exemple : des anglicismes, des mots employés dans un sens erroné, ou encore un registre de langue trop familier pour un texte scientifique. Assure-toi d\'employer les bons termes en consultant un dictionnaire (comme Antidote). Pour le registre de langue, révise ton texte en cherchant les mots ou expressions qui pourraient être trop familiers.'
+        },
+        {
+            id: 'sc_9',
+            code: '9',
+            nom: 'Répétitions et pléonasmes',
+            ponderation: 1.0,
+            retroaction: 'La plupart des erreurs sont liées à des répétitions (un même mot revient trop souvent) ou à des pléonasmes (redondance inutile, comme «monter en haut»). Pour corriger, utilise des synonymes pour varier ton vocabulaire et assure-toi de ne pas répéter inutilement une idée déjà exprimée.'
+        },
+        {
+            id: 'sc_10',
+            code: '10',
+            nom: 'Autres erreurs',
+            ponderation: 1.0,
+            retroaction: 'Les erreurs sont variées et ne relèvent pas d\'une seule catégorie précise. Continue de t\'exercer en français écrit et n\'hésite pas à consulter ton enseignant pour des conseils personnalisés.'
+        }
+    ];
+
+    grille.criteres[critereIndex].sousCriteres = sousCriteresParDefaut;
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+
+    // Réafficher la grille
+    afficherCriteresGrille(grille);
+
+    console.log('Sous-critères par défaut initialisés pour critère:', critereIndex);
+}
+
+/**
+ * Ajoute un nouveau sous-critère vide à un critère
+ * @param {string} grilleId - ID de la grille
+ * @param {number} critereIndex - Index du critère
+ */
+function ajouterSousCritere(grilleId, critereIndex) {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
+
+    // Initialiser le tableau sousCriteres si nécessaire
+    if (!grille.criteres[critereIndex].sousCriteres) {
+        grille.criteres[critereIndex].sousCriteres = [];
+    }
+
+    // Générer un ID unique et un code par défaut
+    const nouveauCode = grille.criteres[critereIndex].sousCriteres.length;
+
+    const nouveauSousCritere = {
+        id: `sc_${Date.now()}`,
+        code: nouveauCode.toString(),
+        nom: '',
+        ponderation: 1.0,
+        retroaction: ''
+    };
+
+    grille.criteres[critereIndex].sousCriteres.push(nouveauSousCritere);
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+
+    // Réafficher la grille
+    afficherCriteresGrille(grille);
+
+    console.log('Nouveau sous-critère ajouté au critère:', critereIndex);
+}
+
+/**
+ * Modifie un champ d'un sous-critère
+ * @param {string} grilleId - ID de la grille
+ * @param {number} critereIndex - Index du critère
+ * @param {number} sousCritereIndex - Index du sous-critère
+ * @param {string} champ - Nom du champ à modifier
+ * @param {any} valeur - Nouvelle valeur
+ */
+function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, champ, valeur) {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!grille || !grille.criteres || !grille.criteres[critereIndex] ||
+        !grille.criteres[critereIndex].sousCriteres ||
+        !grille.criteres[critereIndex].sousCriteres[sousCritereIndex]) return;
+
+    // Mettre à jour le champ
+    grille.criteres[critereIndex].sousCriteres[sousCritereIndex][champ] = valeur;
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+
+    console.log('Sous-critère modifié:', champ, '=', valeur);
+}
+
+/**
+ * Supprime un sous-critère
+ * @param {string} grilleId - ID de la grille
+ * @param {number} critereIndex - Index du critère
+ * @param {number} sousCritereIndex - Index du sous-critère
+ */
+function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
+    if (!confirm('Supprimer ce sous-critère ?')) return;
+
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!grille || !grille.criteres || !grille.criteres[critereIndex] ||
+        !grille.criteres[critereIndex].sousCriteres) return;
+
+    // Supprimer le sous-critère
+    grille.criteres[critereIndex].sousCriteres.splice(sousCritereIndex, 1);
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+
+    // Réafficher la grille
+    afficherCriteresGrille(grille);
+
+    console.log('Sous-critère supprimé:', sousCritereIndex);
 }
 
 /**
@@ -2066,9 +2337,61 @@ window.annulerFormGrille = annulerFormGrille;
 window.dupliquerGrilleActive = dupliquerGrilleActive;
 window.supprimerGrilleActive = supprimerGrilleActive;
 window.sauvegarderGrilleComplete = sauvegarderGrilleComplete;
+/* ===============================
+   MIGRATION AUTOMATIQUE
+   Convertit les anciennes catégories d'erreurs en sous-critères
+   =============================== */
+
+/**
+ * Migre automatiquement les anciennes catégories d'erreurs vers les sous-critères
+ * Exécuté au chargement du module
+ */
+function migrerCategoriesVersSousCriteres() {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    let nbMigrations = 0;
+
+    grilles.forEach(grille => {
+        if (!grille.criteres) return;
+
+        grille.criteres.forEach(critere => {
+            // Détecter l'ancienne structure avec categoriesErreurs
+            if (critere.categoriesErreurs && critere.categoriesErreurs.length > 0 && !critere.sousCriteres) {
+                console.log(`🔄 Migration: Conversion de ${critere.categoriesErreurs.length} catégories en sous-critères pour critère "${critere.nom}"`);
+
+                // Convertir chaque catégorie en sous-critère
+                critere.sousCriteres = critere.categoriesErreurs.map(cat => ({
+                    id: `sc_${cat.code}`,
+                    code: cat.code,
+                    nom: cat.nom || `Catégorie ${cat.code}`,
+                    ponderation: 1.0, // Par défaut, toutes les anciennes catégories valent 1.0
+                    retroaction: cat.retroaction || ''
+                }));
+
+                // Marquer comme migré (garder l'ancienne structure pour compatibilité temporaire)
+                critere._categoriesmigrees = true;
+
+                nbMigrations++;
+            }
+        });
+    });
+
+    if (nbMigrations > 0) {
+        localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+        console.log(`✅ Migration complétée: ${nbMigrations} critères migrés vers le système de sous-critères`);
+    }
+}
+
+// Exécuter la migration au chargement du module
+migrerCategoriesVersSousCriteres();
+
 window.modifierCritereGrille = modifierCritereGrille;
 window.ajouterCritereGrille = ajouterCritereGrille;
 window.supprimerCritereGrille = supprimerCritereGrille;
 window.afficherConfigurationCategoriesErreurs = afficherConfigurationCategoriesErreurs;
 window.sauvegarderCategoriesErreurs = sauvegarderCategoriesErreurs;
 window.fermerModalCategoriesErreurs = fermerModalCategoriesErreurs;
+// Exports des fonctions de gestion des sous-critères
+window.initialiserSousCriteresParDefaut = initialiserSousCriteresParDefaut;
+window.ajouterSousCritere = ajouterSousCritere;
+window.modifierSousCritere = modifierSousCritere;
+window.supprimerSousCritere = supprimerSousCritere;
