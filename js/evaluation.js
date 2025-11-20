@@ -457,26 +457,62 @@ function cartoucheSelectionnee() {
     const html = cartouche.criteres.map(critere => {
         const critereGrille = grille.criteres.find(c => c.id === critere.id);
         const ponderation = critereGrille ? critereGrille.ponderation : '?';
+        const estAlgorithmique = critereGrille?.type === 'algorithmique';
+        const facteur = critereGrille?.facteurNormalisation || 500;
 
         return `
-    <div style="margin-bottom: 15px; padding: 12px; background: white; border-left: 3px solid var(--bleu-moyen);">
+    <div style="margin-bottom: 15px; padding: 12px; background: white; border-left: 3px solid ${estAlgorithmique ? 'var(--orange-accent)' : 'var(--bleu-moyen)'};">
         <div class="eval-grid-critere">
             <div>
     <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
         <strong class="u-texte-09">${echapperHtml(critere.nom)}</strong>
         <small style="color: #666;">(${ponderation}%)</small>
+        ${estAlgorithmique ? '<span style="font-size: 0.7rem; color: var(--orange-accent); font-weight: bold; margin-left: 6px;">ALGORITHMIQUE</span>' : ''}
     </div>
     ${critereGrille?.description ?
                 `<small style="display: block; color: #888; font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critereGrille.description)}</small>` : ''}
-    <select id="eval_${critere.id}" class="controle-form"
-            onchange="niveauSelectionne('${critere.id}')"
-            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
-        <option value="">--</option>
-        ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
-    </select>
+
+    ${estAlgorithmique ? `
+        <!-- Interface algorithmique -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div class="groupe-form">
+                <label style="font-size: 0.75rem; color: #666;">Nombre d'erreurs</label>
+                <input type="number"
+                       id="eval_erreurs_${critere.id}"
+                       class="controle-form"
+                       min="0"
+                       placeholder="0"
+                       oninput="calculerNoteAlgorithmique('${critere.id}', ${ponderation}, ${facteur})"
+                       style="font-size: 0.85rem;">
+            </div>
+            <div class="groupe-form">
+                <label style="font-size: 0.75rem; color: #666;">Nombre de mots</label>
+                <input type="number"
+                       id="eval_mots_${critere.id}"
+                       class="controle-form"
+                       min="1"
+                       placeholder="500"
+                       oninput="calculerNoteAlgorithmique('${critere.id}', ${ponderation}, ${facteur})"
+                       style="font-size: 0.85rem;">
+            </div>
+        </div>
+        <div id="resultat_algo_${critere.id}" style="padding: 8px; background: #f0f8ff; border-radius: 4px; font-size: 0.85rem; color: #666; margin-bottom: 8px;">
+            <strong>Formule:</strong> ${ponderation} − (Erreurs ÷ Mots × ${facteur})<br>
+            <strong>Résultat:</strong> <span id="note_algo_${critere.id}">--</span> / ${ponderation} = <span id="pct_algo_${critere.id}">--</span>%<br>
+            <strong>Niveau IDME:</strong> <span id="niveau_algo_${critere.id}">--</span>
+        </div>
+    ` : `
+        <!-- Interface standard (holistique/analytique) -->
+        <select id="eval_${critere.id}" class="controle-form"
+                onchange="niveauSelectionne('${critere.id}')"
+                style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
+            <option value="">--</option>
+            ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+        </select>
+    `}
 </div>
             <div id="comm_${critere.id}" style="font-size: 0.85rem; line-height: 1.5; color: #555; font-style: italic; padding: 8px; background: #f8f9fa; border-radius: 4px; min-height: 60px;">
-                Sélectionnez un niveau
+                ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionnez un niveau'}
             </div>
         </div>
     </div>
@@ -542,6 +578,75 @@ function niveauSelectionne(critereId) {
     }
 
     // Calculer la note et générer la rétroaction en temps réel
+    calculerNote();
+    genererRetroaction(1);
+}
+
+/**
+ * Calcule automatiquement la note pour un critère algorithmique
+ * Formule: Note = Pondération − (Erreurs ÷ Mots × Facteur)
+ *
+ * @param {string} critereId - ID du critère
+ * @param {number} ponderation - Pondération du critère (ex: 30)
+ * @param {number} facteur - Facteur de normalisation (ex: 500 mots)
+ */
+function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
+    if (!evaluationEnCours) return;
+
+    const erreursInput = document.getElementById(`eval_erreurs_${critereId}`);
+    const motsInput = document.getElementById(`eval_mots_${critereId}`);
+
+    const erreurs = parseInt(erreursInput?.value) || 0;
+    const mots = parseInt(motsInput?.value) || 0;
+
+    if (mots === 0) {
+        // Réinitialiser l'affichage
+        document.getElementById(`note_algo_${critereId}`).textContent = '--';
+        document.getElementById(`pct_algo_${critereId}`).textContent = '--';
+        document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
+        return;
+    }
+
+    // Calcul selon la formule: Pondération − (Erreurs ÷ Mots × Facteur)
+    const noteCalculee = ponderation - (erreurs / mots * facteur);
+    const pourcentage = (noteCalculee / ponderation) * 100;
+
+    // Limiter entre 0 et 100%
+    const pctFinal = Math.max(0, Math.min(100, pourcentage));
+
+    // Déterminer le niveau IDME selon l'échelle
+    const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelleSelectionnee = echelles.find(e => e.id === echelleId);
+
+    let niveauIDME = '--';
+    if (echelleSelectionnee && echelleSelectionnee.niveaux) {
+        const niveau = echelleSelectionnee.niveaux.find(n => {
+            return pctFinal >= n.min && pctFinal <= n.max;
+        });
+        niveauIDME = niveau ? niveau.code : '--';
+    }
+
+    // Afficher les résultats
+    document.getElementById(`note_algo_${critereId}`).textContent = noteCalculee.toFixed(2);
+    document.getElementById(`pct_algo_${critereId}`).textContent = pctFinal.toFixed(1);
+    document.getElementById(`niveau_algo_${critereId}`).textContent = niveauIDME;
+
+    // Sauvegarder dans evaluationEnCours
+    evaluationEnCours.criteres[critereId] = niveauIDME;
+
+    // Sauvegarder les données algorithmiques séparément pour pouvoir les recharger
+    if (!evaluationEnCours.donneesAlgorithmiques) {
+        evaluationEnCours.donneesAlgorithmiques = {};
+    }
+    evaluationEnCours.donneesAlgorithmiques[critereId] = {
+        erreurs: erreurs,
+        mots: mots,
+        noteCalculee: noteCalculee,
+        pourcentage: pctFinal
+    };
+
+    // Calculer la note globale et générer la rétroaction
     calculerNote();
     genererRetroaction(1);
 }

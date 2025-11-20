@@ -1611,7 +1611,7 @@ function afficherCriteresGrille(grille) {
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: #666;">Type</label>
                     <select class="controle-form"
-                            onchange="modifierCritereGrille('${grille.id}', ${index}, 'type', this.value)">
+                            onchange="modifierCritereGrille('${grille.id}', ${index}, 'type', this.value); afficherCriteresGrille(obtenirGrilleParId('${grille.id}'));">
                         <option value="holistique" ${critere.type === 'holistique' ? 'selected' : ''}>Holistique</option>
                         <option value="analytique" ${critere.type === 'analytique' ? 'selected' : ''}>Analytique</option>
                         <option value="algorithmique" ${critere.type === 'algorithmique' ? 'selected' : ''}>Algorithmique</option>
@@ -1641,6 +1641,30 @@ function afficherCriteresGrille(grille) {
                     </button>
                 </div>
             </div>
+            ${critere.type === 'algorithmique' ? `
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                    <div class="groupe-form">
+                        <label style="font-size: 0.85rem; color: #666;">Facteur de normalisation (mots)</label>
+                        <input type="number"
+                               class="controle-form"
+                               value="${critere.facteurNormalisation || 500}"
+                               min="1"
+                               placeholder="500"
+                               onchange="modifierCritereGrille('${grille.id}', ${index}, 'facteurNormalisation', parseInt(this.value))"
+                               title="Nombre de mots de référence pour le calcul (défaut: 500)">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <p style="font-size: 0.85rem; color: #666; margin: 0; padding-top: 8px;">
+                            <strong>Formule:</strong> Note = Pondération − (Erreurs ÷ Mots × ${critere.facteurNormalisation || 500})
+                        </p>
+                        <p style="font-size: 0.75rem; color: #999; margin: 4px 0 0 0;">
+                            Lors de l'évaluation, vous saisirez le nombre d'erreurs et le nombre de mots de la rédaction.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
         </div>
     `).join('');
 
@@ -1688,6 +1712,14 @@ function calculerEtAfficherTotalPonderation(grille) {
  * @param {string} champ - Nom du champ à modifier
  * @param {any} valeur - Nouvelle valeur
  */
+/**
+ * Obtient une grille par son ID
+ */
+function obtenirGrilleParId(grilleId) {
+    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    return grilles.find(g => g.id === grilleId);
+}
+
 function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
     const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
     const grille = grilles.find(g => g.id === grilleId);
