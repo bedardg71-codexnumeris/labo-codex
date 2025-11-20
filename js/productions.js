@@ -189,10 +189,26 @@ function afficherFormProduction(id) {
 
     // Charger la liste des grilles dans le select (si l'élément existe)
     const selectGrille = document.getElementById('productionGrille');
-    if (selectGrille) {
+    const selectGrilleInline = document.getElementById('productionGrilleInline');
+
+    console.log('📋 Chargement des grilles disponibles...');
+    console.log('   - selectGrille trouvé?', !!selectGrille);
+    console.log('   - selectGrilleInline trouvé?', !!selectGrilleInline);
+
+    if (selectGrille || selectGrilleInline) {
         const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
-        selectGrille.innerHTML = '<option value="">Aucune grille</option>' +
+        console.log('   - Nombre de grilles:', grilles.length);
+        console.log('   - Grilles:', grilles.map(g => ({ id: g.id, nom: g.nom })));
+
+        const optionsHtml = '<option value="">Aucune</option>' +
             grilles.map(g => `<option value="${g.id}">${g.nom}</option>`).join('');
+
+        if (selectGrille) {
+            selectGrille.innerHTML = optionsHtml;
+        }
+        if (selectGrilleInline) {
+            selectGrilleInline.innerHTML = optionsHtml;
+        }
     }
 
     if (id) {
@@ -1164,6 +1180,7 @@ window.creerNouvelleProduction = creerNouvelleProduction;
 window.dupliquerProduction = dupliquerProduction;
 window.dupliquerProductionActive = dupliquerProductionActive;
 window.supprimerProductionActive = supprimerProductionActive;
+window.chargerGrillesDisponiblesPourProduction = chargerGrillesDisponiblesPourProduction;
 
 /* ===============================
    📌 NOTES D'UTILISATION
@@ -1377,8 +1394,10 @@ function creerNouvelleProduction() {
         item.classList.remove('active');
     });
 
-    // Charger les grilles disponibles
-    chargerGrillesDisponibles();
+    // Charger les grilles disponibles (avec petit délai pour laisser le DOM se mettre à jour)
+    setTimeout(() => {
+        chargerGrillesDisponiblesPourProduction();
+    }, 50);
 }
 
 // SUPPRIMÉ: Définition dupliquée de chargerProductionPourModif
@@ -1436,22 +1455,37 @@ function mettreAJourMetriquesProduction(production) {
 */
 
 /**
- * Charge les grilles disponibles dans le select
+ * Charge les grilles disponibles dans les selects de production
  * (Fonction helper pour éviter la duplication de code)
+ * NOTE: Renommée pour éviter conflit avec chargerGrillesDisponibles() de pratiques.js
  */
-function chargerGrillesDisponibles() {
+function chargerGrillesDisponiblesPourProduction() {
     const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
-    const select = document.getElementById('productionGrille');
+    const selectStandard = document.getElementById('productionGrille');
+    const selectInline = document.getElementById('productionGrilleInline');
 
-    if (!select) return;
+    console.log('📋 chargerGrillesDisponiblesPourProduction appelée');
+    console.log('   - Nombre de grilles:', grilles.length);
+    console.log('   - selectStandard trouvé?', !!selectStandard);
+    console.log('   - selectInline trouvé?', !!selectInline);
 
-    select.innerHTML = '<option value="">Aucune</option>';
-    grilles.forEach(grille => {
-        const option = document.createElement('option');
-        option.value = grille.id;
-        option.textContent = grille.nom;
-        select.appendChild(option);
-    });
+    if (!selectStandard && !selectInline) {
+        console.warn('⚠️ Aucun sélecteur de grille trouvé!');
+        return;
+    }
+
+    const optionsHtml = '<option value="">Aucune</option>' +
+        grilles.map(g => `<option value="${g.id}">${g.nom}</option>`).join('');
+
+    if (selectStandard) {
+        selectStandard.innerHTML = optionsHtml;
+        console.log('✅ Grilles chargées dans selectStandard');
+    }
+
+    if (selectInline) {
+        selectInline.innerHTML = optionsHtml;
+        console.log('✅ Grilles chargées dans selectInline');
+    }
 }
 
 /**

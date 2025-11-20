@@ -885,6 +885,15 @@ function sauvegarderPratiqueNotation() {
         modalites.activerRai = true;
     }
 
+    // Sauvegarder l'option d'activation de la catégorisation des erreurs de français
+    const checkCategorisation = document.getElementById('activerCategorisationErreurs');
+    if (checkCategorisation) {
+        modalites.activerCategorisationErreurs = checkCategorisation.checked;
+    } else {
+        // Par défaut désactivé si l'élément n'existe pas (mode simple par défaut)
+        modalites.activerCategorisationErreurs = false;
+    }
+
     localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
 
     // Sauvegarder toutes les configurations (portfolio et jetons)
@@ -976,6 +985,13 @@ function chargerModalites() {
     if (checkRai) {
         // Par défaut activé si non défini (rétrocompatibilité)
         checkRai.checked = modalites.activerRai !== false;
+    }
+
+    // Charger l'option d'activation de la catégorisation des erreurs de français
+    const checkCategorisation = document.getElementById('activerCategorisationErreurs');
+    if (checkCategorisation) {
+        // Par défaut désactivé si non défini (mode simple par défaut)
+        checkCategorisation.checked = modalites.activerCategorisationErreurs === true;
     }
 
     // Afficher la section options si nécessaire
