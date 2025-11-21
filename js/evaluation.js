@@ -1285,6 +1285,7 @@ function sauvegarderEvaluation() {
             adresse: document.getElementById('afficherAdresse1').checked,
             contexte: document.getElementById('afficherContexte1').checked
         },
+        donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {}, // Sauvegarder données du français écrit algorithmique
         verrouillee: true // Verrouiller par défaut toutes les nouvelles évaluations
     };
 
@@ -3653,6 +3654,57 @@ function modifierEvaluation(evaluationId) {
 
                 console.log(`✅ ${criteresCharges}/${evaluation.criteres.length} critères chargés`);
 
+                // ÉTAPE 10.5: Restaurer les données algorithmiques (français écrit)
+                if (evaluation.donneesAlgorithmiques && Object.keys(evaluation.donneesAlgorithmiques).length > 0) {
+                    console.log('🔟.5️⃣ Restauration données algorithmiques');
+
+                    Object.keys(evaluation.donneesAlgorithmiques).forEach(critereId => {
+                        const donnees = evaluation.donneesAlgorithmiques[critereId];
+
+                        // Restaurer le champ des codes (si existant - catégories)
+                        if (donnees.codes && Array.isArray(donnees.codes)) {
+                            const inputCategories = document.getElementById(`eval_categories_${critereId}`);
+                            if (inputCategories) {
+                                inputCategories.value = donnees.codes.join(';');
+                                console.log(`  ✓ Codes restaurés pour ${critereId}: ${donnees.codes.join(';')}`);
+                            }
+                        }
+
+                        // Restaurer le champ du nombre de mots
+                        if (donnees.mots !== undefined) {
+                            const inputMots = document.getElementById(`eval_mots_${critereId}`);
+                            if (inputMots) {
+                                inputMots.value = donnees.mots;
+                                console.log(`  ✓ Mots restaurés pour ${critereId}: ${donnees.mots}`);
+                            }
+                        }
+
+                        // Restaurer le champ d'erreurs (si mode simple - sans catégorisation)
+                        if (donnees.erreurs !== undefined) {
+                            const inputErreurs = document.getElementById(`eval_erreurs_${critereId}`);
+                            if (inputErreurs) {
+                                inputErreurs.value = donnees.erreurs;
+                                console.log(`  ✓ Erreurs restaurées pour ${critereId}: ${donnees.erreurs}`);
+                            }
+                        }
+
+                        // Déclencher le recalcul pour afficher les résultats
+                        // Attendre que le DOM soit complètement prêt
+                        setTimeout(() => {
+                            const inputCategories = document.getElementById(`eval_categories_${critereId}`);
+                            const inputErreurs = document.getElementById(`eval_erreurs_${critereId}`);
+
+                            if (inputCategories) {
+                                inputCategories.dispatchEvent(new Event('input', { bubbles: true }));
+                            } else if (inputErreurs) {
+                                inputErreurs.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                        }, 100);
+                    });
+
+                    console.log(`✅ ${Object.keys(evaluation.donneesAlgorithmiques).length} critères algorithmiques restaurés`);
+                }
+
                 // Forcer le recalcul de la note
                 setTimeout(() => {
                     if (typeof calculerNoteTotale === 'function') {
@@ -3805,6 +3857,7 @@ function sauvegarderEvaluationModifiee() {
             adresse: document.getElementById('afficherAdresse1').checked,
             contexte: document.getElementById('afficherContexte1').checked
         },
+        donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {}, // Sauvegarder données du français écrit algorithmique
         verrouillee: true // Verrouiller automatiquement après la sauvegarde
     };
 
