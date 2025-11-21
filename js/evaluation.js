@@ -725,7 +725,11 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
         document.getElementById(`pct_algo_${critereId}`).textContent = '--';
         document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
         document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
-        document.getElementById(`retroaction_cat_${critereId}`).style.display = 'none';
+
+        // Vérifier si l'élément existe avant d'y accéder
+        const retroDiv = document.getElementById(`retroaction_cat_${critereId}`);
+        if (retroDiv) retroDiv.style.display = 'none';
+
         return;
     }
 
@@ -1037,13 +1041,7 @@ function calculerNote() {
                 ponderationTotal += ponderation;
 
                 // 🔍 DEBUG: Afficher le détail de chaque critère
-                console.log(`  • ${critere.nom}:`, {
-                    niveau: niveau,
-                    valeurCritere: valeurCritere + '%',
-                    source: sourceValeur,
-                    ponderation: (ponderation * 100) + '%',
-                    contribution: contribution.toFixed(2) + '%'
-                });
+                console.log(`  • ${critere.nom}: niveau=${niveau}, valeur=${valeurCritere.toFixed(1)}%, source="${sourceValeur}", pond=${(ponderation * 100).toFixed(0)}%, contrib=${contribution.toFixed(2)}%`);
             }
         }
     });
@@ -1056,11 +1054,7 @@ function calculerNote() {
         pourcentage = noteTotal / ponderationTotal;
 
         // 🔍 DEBUG: Afficher le résultat final
-        console.log('🔍 DEBUG calculerNote() - Résultat:', {
-            noteTotal: noteTotal.toFixed(2) + '%',
-            ponderationTotal: (ponderationTotal * 100).toFixed(0) + '%',
-            pourcentageFinal: pourcentage.toFixed(1) + '%'
-        });
+        console.log(`🔍 DEBUG calculerNote() - Résultat: noteTotal=${noteTotal.toFixed(2)}%, ponderationTotal=${(ponderationTotal * 100).toFixed(0)}%, pourcentageFinal=${pourcentage.toFixed(1)}%`);
 
         // Déterminer le niveau global selon l'échelle
         const niveauFinal = niveaux.find(n => {
@@ -1070,7 +1064,7 @@ function calculerNote() {
         niveauGlobal = niveauFinal ? niveauFinal.code : '--';
 
         // 🔍 DEBUG: Afficher le niveau déterminé
-        console.log('🔍 DEBUG calculerNote() - Niveau final:', niveauGlobal, niveauFinal);
+        console.log(`🔍 DEBUG calculerNote() - Niveau final: ${niveauGlobal} (${niveauFinal ? niveauFinal.nom : 'non trouvé'})`);
     }
 
     // Mettre à jour l'affichage
