@@ -687,6 +687,40 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
 }
 
 /**
+ * Génère une rétroaction sur le ratio d'erreurs en prévision de l'EUF
+ * Formule: Ratio = Mots ÷ (Erreurs × 30)
+ * Seuil EUF: < 1 erreur par 30 mots pour réussir
+ *
+ * @param {number} erreurs - Nombre total d'erreurs
+ * @param {number} mots - Nombre de mots
+ * @returns {string} Rétroaction EUF
+ */
+function genererRetroactionEUF(erreurs, mots) {
+    if (erreurs === 0 || mots === 0) return '';
+
+    // Calcul du ratio: Mots ÷ (Erreurs × 30)
+    const ratio = mots / (erreurs * 30);
+
+    let retroactionEUF = '';
+
+    if (ratio <= 0.3) {
+        retroactionEUF = ' En prévision de l\'EUF, ce ratio est excellent.';
+    } else if (ratio <= 0.4) {
+        retroactionEUF = ' En prévision de l\'EUF, ce ratio est très bien.';
+    } else if (ratio <= 0.5) {
+        retroactionEUF = ' En prévision de l\'EUF, ce ratio est bien.';
+    } else if (ratio <= 1) {
+        retroactionEUF = ' En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec.';
+    } else if (ratio > 1) {
+        retroactionEUF = ' En prévision de l\'EUF, ce ratio mènerait à un échec automatique.';
+    } else {
+        retroactionEUF = ' En prévision de l\'EUF, ce ratio est à améliorer.';
+    }
+
+    return retroactionEUF;
+}
+
+/**
  * Calcule la note algorithmique AVEC catégorisation des erreurs
  * Formule: Note = Pondération − (Total Erreurs ÷ Mots × Facteur)
  * + Calcul du mode (catégorie dominante) pour rétroaction différenciée
@@ -822,6 +856,12 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
 
             retroactionComplete += ` pour ${mots} mots. ${scDominant.retroaction}`;
 
+            // Ajouter la rétroaction EUF (Épreuve Uniforme de Français)
+            const retroactionEUF = genererRetroactionEUF(totalErreurs, mots);
+            if (retroactionEUF) {
+                retroactionComplete += retroactionEUF;
+            }
+
             // Afficher la rétroaction dans la zone de commentaire normale
             const commDiv = document.getElementById(`comm_${critereId}`);
             if (commDiv) {
@@ -851,7 +891,14 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
             if (retroDiv) retroDiv.style.display = 'none';
         } else {
             // Pas de rétroaction personnalisée, rétroaction générique
-            const retroactionGenerique = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
+            let retroactionGenerique = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
+
+            // Ajouter la rétroaction EUF (Épreuve Uniforme de Français)
+            const retroactionEUF = genererRetroactionEUF(totalErreurs, mots);
+            if (retroactionEUF) {
+                retroactionGenerique += retroactionEUF;
+            }
+
             const commDiv = document.getElementById(`comm_${critereId}`);
             if (commDiv) {
                 commDiv.textContent = retroactionGenerique;
@@ -937,7 +984,13 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     document.getElementById(`niveau_algo_${critereId}`).textContent = niveauIDME;
 
     // Construire la rétroaction générique simple
-    const retroactionGenerique = `Ta rédaction contient ${erreurs} erreur${erreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
+    let retroactionGenerique = `Ta rédaction contient ${erreurs} erreur${erreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
+
+    // Ajouter la rétroaction EUF (Épreuve Uniforme de Français)
+    const retroactionEUF = genererRetroactionEUF(erreurs, mots);
+    if (retroactionEUF) {
+        retroactionGenerique += retroactionEUF;
+    }
 
     // Afficher dans le champ commentaire standard
     const champCommentaire = document.getElementById(`comm_${critereId}`);
