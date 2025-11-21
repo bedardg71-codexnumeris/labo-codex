@@ -953,8 +953,8 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     evaluationEnCours.donneesAlgorithmiques[critereId] = {
         erreurs: erreurs,
         mots: mots,
-        noteCalculee: noteCalculee.toFixed(2),
-        pourcentage: pctFinal.toFixed(1),
+        noteCalculee: noteCalculee,
+        pourcentage: pctFinal,  // Sauvegarder comme nombre, pas string
         niveau: niveauIDME,
         retroaction: retroactionGenerique
     };
@@ -1040,8 +1040,9 @@ function calculerNote() {
                 noteTotal += contribution;
                 ponderationTotal += ponderation;
 
-                // 🔍 DEBUG: Afficher le détail de chaque critère
-                console.log(`  • ${critere.nom}: niveau=${niveau}, valeur=${valeurCritere.toFixed(1)}%, source="${sourceValeur}", pond=${(ponderation * 100).toFixed(0)}%, contrib=${contribution.toFixed(2)}%`);
+                // 🔍 DEBUG: Afficher le détail de chaque critère (convertir en nombre pour toFixed)
+                const valNum = typeof valeurCritere === 'number' ? valeurCritere : parseFloat(valeurCritere);
+                console.log(`  • ${critere.nom}: niveau=${niveau}, valeur=${valNum.toFixed(1)}%, source="${sourceValeur}", pond=${(ponderation * 100).toFixed(0)}%, contrib=${contribution.toFixed(2)}%`);
             }
         }
     });
