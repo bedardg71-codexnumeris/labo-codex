@@ -4765,7 +4765,8 @@ function desactiverFormulaireEvaluation(desactiver) {
         'selectGrille1',
         'selectCartoucheEval',
         'selectEchelle1',
-        'remiseProduction1'
+        'remiseProduction1',
+        'statutIntegrite'  // Intégrité académique (recevabilité)
     ];
 
     selects.forEach(id => {
@@ -4781,6 +4782,13 @@ function desactiverFormulaireEvaluation(desactiver) {
     console.log(`  Trouvé ${selectsCriteres.length} selects de critères`);
     selectsCriteres.forEach(select => {
         select.disabled = desactiver;
+    });
+
+    // Désactiver tous les champs algorithmiques (codes d'erreurs, nombre de mots)
+    const inputsAlgorithmiques = document.querySelectorAll('#listeCriteresGrille1 input[type="text"], #listeCriteresGrille1 input[type="number"]');
+    console.log(`  Trouvé ${inputsAlgorithmiques.length} champs algorithmiques`);
+    inputsAlgorithmiques.forEach(input => {
+        input.disabled = desactiver;
     });
 
     // Désactiver la zone de rétroaction finale
