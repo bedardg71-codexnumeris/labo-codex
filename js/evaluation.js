@@ -688,34 +688,36 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
 
 /**
  * Génère une rétroaction sur le ratio d'erreurs en prévision de l'EUF
- * Formule: Ratio = (Erreurs × 30) ÷ Mots
- * Interprétation: Nombre d'erreurs par 30 mots
- * Seuil EUF: < 1 erreur par 30 mots pour réussir
+ * Formule: motsParErreur = Mots ÷ Erreurs
+ * Interprétation: 1 erreur à chaque X mots
+ * Seuil EUF: minimum 1 erreur à chaque 30 mots pour réussir
  *
  * @param {number} erreurs - Nombre total d'erreurs
  * @param {number} mots - Nombre de mots
  * @returns {string} Rétroaction EUF
  */
 function genererRetroactionEUF(erreurs, mots) {
-    if (erreurs === 0 || mots === 0) return '';
+    if (erreurs === 0) {
+        return ' En prévision de l\'EUF, l\'absence d\'erreur est exceptionnelle.';
+    }
+    if (mots === 0) return '';
 
-    // Calcul du ratio: (Erreurs × 30) ÷ Mots = nombre d'erreurs par 30 mots
-    const ratio = (erreurs * 30) / mots;
+    // Calcul: 1 erreur à chaque X mots
+    const motsParErreur = mots / erreurs;
 
-    let retroactionEUF = '';
+    let retroactionEUF = ` Tu fais en moyenne 1 erreur à chaque ${Math.round(motsParErreur)} mots.`;
 
-    if (ratio <= 0.3) {
-        retroactionEUF = ' En prévision de l\'EUF, ce ratio est excellent.';
-    } else if (ratio <= 0.4) {
-        retroactionEUF = ' En prévision de l\'EUF, ce ratio est très bien.';
-    } else if (ratio <= 0.5) {
-        retroactionEUF = ' En prévision de l\'EUF, ce ratio est bien.';
-    } else if (ratio <= 1) {
-        retroactionEUF = ' En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec.';
-    } else if (ratio > 1) {
-        retroactionEUF = ' En prévision de l\'EUF, ce ratio mènerait à un échec automatique.';
+    // Seuil EUF: minimum 30 mots par erreur pour réussir
+    if (motsParErreur >= 100) {
+        retroactionEUF += ' En prévision de l\'EUF, ce ratio est excellent.';
+    } else if (motsParErreur >= 75) {
+        retroactionEUF += ' En prévision de l\'EUF, ce ratio est très bien.';
+    } else if (motsParErreur >= 60) {
+        retroactionEUF += ' En prévision de l\'EUF, ce ratio est bien.';
+    } else if (motsParErreur >= 30) {
+        retroactionEUF += ' En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec.';
     } else {
-        retroactionEUF = ' En prévision de l\'EUF, ce ratio est à améliorer.';
+        retroactionEUF += ' En prévision de l\'EUF, ce ratio mènerait à un échec automatique.';
     }
 
     return retroactionEUF;
