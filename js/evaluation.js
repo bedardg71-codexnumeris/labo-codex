@@ -818,7 +818,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
             // Afficher la rétroaction dans la zone de commentaire normale
             const commDiv = document.getElementById(`comm_${critereId}`);
             if (commDiv) {
-                commDiv.value = retroactionComplete;
+                commDiv.textContent = retroactionComplete;
             }
 
             // Sauvegarder la rétroaction finale pour genererRetroaction()
@@ -847,7 +847,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
             const retroactionGenerique = `Ta rédaction contient ${totalErreurs} erreur${totalErreurs > 1 ? 's' : ''} de français pour ${mots} mots.`;
             const commDiv = document.getElementById(`comm_${critereId}`);
             if (commDiv) {
-                commDiv.value = retroactionGenerique;
+                commDiv.textContent = retroactionGenerique;
             }
 
             // Sauvegarder les données algorithmiques
@@ -869,7 +869,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
         document.getElementById(`cat_dominante_${critereId}`).textContent = '--';
         const commDiv = document.getElementById(`comm_${critereId}`);
         if (commDiv) {
-            commDiv.value = 'Saisissez les codes des sous-critères (ex: 1;4;6;1;4)';
+            commDiv.textContent = 'Saisissez les codes des sous-critères (ex: 1;4;6;1;4)';
         }
     }
 
