@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Référence Visuelle - Barres de Gradient</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 40px;
+            text-align: center;
+            border-bottom: 3px solid #2196F3;
+            padding-bottom: 20px;
+        }
+        
+        h2 {
+            color: #0277bd;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .demo {
+            margin: 20px 0;
+        }
+        
+        .demo-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        
+        .demo-description {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        /* BARRES ACPE */
+        .barre-indicateur {
+            height: 40px;
+            border-radius: 20px;
+            background: linear-gradient(to right, 
+                #ff8c00 0%,
+                #ffa500 10%,
+                #98d025 30%,
+                #22c55e 50%,
+                #14b8a6 65%,
+                #06b6d4 80%,
+                #0ea5e9 100%
+            );
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .barre-indicateur-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 30, 58, 0.2);
+            border-radius: 20px;
+            pointer-events: none;
+        }
+        
+        /* BARRES PATTERNS */
+        .barre-patterns {
+            height: 30px;
+            border-radius: 15px;
+            background: linear-gradient(to right, 
+                #22c55e 0%,
+                #14b8a6 25%,
+                #0ea5e9 50%,
+                #3b82f6 75%,
+                #6366f1 100%
+            );
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .barre-patterns-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 30, 58, 0.35);
+            border-radius: 15px;
+        }
+        
+        /* BARRES RAI */
+        .barre-rai {
+            height: 30px;
+            border-radius: 15px;
+            background: linear-gradient(to right, 
+                #0ea5e9 0%,
+                #3b82f6 25%,
+                #6366f1 50%,
+                #8b5cf6 75%,
+                #6b21a8 100%
+            );
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .barre-rai-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 30, 58, 0.4);
+            border-radius: 15px;
+        }
+        
+        /* POINTS SCATTER */
+        .points-demo {
+            position: relative;
+            height: 60px;
+            margin: 20px 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+        
+        .point-som {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff6f00;
+            border: 1px solid white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .point-pan {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #0277bd;
+            border: 1px solid white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* BARRES ENGAGEMENT */
+        .barre-engagement {
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(to right,
+                #ff9800 0%,
+                #ffc107 25%,
+                #28a745 50%,
+                #2196F3 75%
+            );
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .point-engagement {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .point-som-eng {
+            background: #ff6f00;
+        }
+        
+        .point-pan-eng {
+            background: #0277bd;
+        }
+        
+        /* BARRES SRPNF */
+        .barre-srpnf {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .srpnf-i { background: #ff6f00; }
+        .srpnf-d { background: #FFB800; }
+        .srpnf-m { background: #28a745; }
+        .srpnf-e { background: #2196F3; }
+        
+        /* LÉGENDE */
+        .legende {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 15px;
+            padding: 0 5px;
+        }
+        
+        .legende-item {
+            text-align: center;
+        }
+        
+        .legende-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin: 0 auto 5px;
+            border: 1px solid #ccc;
+        }
+        
+        .couleur-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .couleur-item {
+            padding: 15px;
+            border-radius: 6px;
+            background: #f9f9f9;
+            border-left: 4px solid;
+        }
+        
+        .couleur-nom {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .couleur-hex {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .code-block {
+            background: #f5f5f5;
+            border-left: 3px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        
+        .code-block code {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #333;
+        }
+        
+        .comparison {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .comparison-item {
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .comparison {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Référence Visuelle - Barres de Gradient</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 40px;">Application Monitorage v6 - Spécifications CSS complètes</p>
+        
+        <!-- SECTION 1: BARRES ACPE -->
+        <div class="section">
+            <h2>1. Barres A-C-P-E (Indicateurs globaux)</h2>
+            
+            <div class="demo">
+                <div class="demo-title">Gradient ACPE complet (Assiduité, Complétion, Performance, Engagement)</div>
+                <div class="demo-description">Orange → Vert → Bleu (mauvais → moyen → excellent)</div>
+                <div style="position: relative;">
+                    <div class="barre-indicateur">
+                        <div class="barre-indicateur-overlay"></div>
+                    </div>
+                </div>
+                <div class="legende">
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #ff8c00;"></div>
+                        Faible
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #98d025;"></div>
+                        Moyen
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #22c55e;"></div>
+                        Bon
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #0ea5e9;"></div>
+                        Excellent
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <code>Fichier: styles.css:6649-6674<br>
+Classes: .barre-indicateur, .barre-indicateur-overlay<br>
+Hauteur: 40px | Border-radius: 20px<br>
+Overlay: rgba(15, 30, 58, 0.2)</code>
+            </div>
+        </div>
+        
+        <!-- SECTION 2: BARRES PATTERNS -->
+        <div class="section">
+            <h2>2. Barres Patterns d'apprentissage</h2>
+            
+            <div class="demo">
+                <div class="demo-title">Gradient Patterns (Stable → Blocage critique)</div>
+                <div class="demo-description">Vert → Indigo (excellent → critique)</div>
+                <div style="position: relative;">
+                    <div class="barre-patterns">
+                        <div class="barre-patterns-overlay"></div>
+                    </div>
+                </div>
+                <div class="legende">
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #22c55e;"></div>
+                        Stable
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #14b8a6;"></div>
+                        Défi
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #0ea5e9;"></div>
+                        Émergent
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #6366f1;"></div>
+                        Critique
+                    </div>
+                </div>
+            </div>
+            
+            <div class="demo">
+                <div class="demo-title">Répartition avec points SOM/PAN</div>
+                <div class="points-demo">
+                    <div class="point-som" style="left: 15%;"></div>
+                    <div class="point-pan" style="left: 18%;"></div>
+                    <div class="point-som" style="left: 42%;"></div>
+                    <div class="point-pan" style="left: 48%;"></div>
+                    <div class="point-som" style="left: 65%;"></div>
+                    <div class="point-pan" style="left: 70%;"></div>
+                </div>
+                <div class="legende">
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #ff6f00;"></div>
+                        SOM
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #0277bd;"></div>
+                        PAN
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <code>Fichier: styles.css:6678-6701<br>
+Classes: .barre-patterns, .barre-etudiant-som, .barre-etudiant-pan<br>
+Hauteur: 30px | Border-radius: 15px<br>
+Overlay: rgba(15, 30, 58, 0.35)<br>
+Point: 8px diameter | Jitter: ±1.5% H, ±12px V</code>
+            </div>
+        </div>
+        
+        <!-- SECTION 3: BARRES RAI -->
+        <div class="section">
+            <h2>3. Barres RàI (Niveaux d'intervention)</h2>
+            
+            <div class="demo">
+                <div class="demo-title">Gradient RàI (Niveau 1 → Niveau 3)</div>
+                <div class="demo-description">Bleu → Mauve (universel → intensif)</div>
+                <div style="position: relative;">
+                    <div class="barre-rai">
+                        <div class="barre-rai-overlay"></div>
+                    </div>
+                </div>
+                <div class="legende">
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #0ea5e9;"></div>
+                        Niveau 1<br>Universel
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #3b82f6;"></div>
+                        Niveau 1-2<br>Transition
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #6366f1;"></div>
+                        Niveau 2<br>Préventif
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #6b21a8;"></div>
+                        Niveau 3<br>Intensif
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <code>Fichier: styles.css:6705-6728<br>
+Classes: .barre-rai, .barre-rai-overlay<br>
+Hauteur: 30px | Border-radius: 15px<br>
+Overlay: rgba(15, 30, 58, 0.4)<br>
+Positions: 16.5%, 49.5%, 83%</code>
+            </div>
+        </div>
+        
+        <!-- SECTION 4: BARRES ENGAGEMENT -->
+        <div class="section">
+            <h2>4. Barres d'engagement (E = A × C × P)</h2>
+            
+            <div class="demo">
+                <div class="demo-title">Gradient Engagement (Fragile → Très favorable)</div>
+                <div class="demo-description">Orange → Bleu (faible engagement → fort engagement)</div>
+                <div class="barre-engagement">
+                    <div class="point-engagement point-som-eng" style="left: 25%;"></div>
+                    <div class="point-engagement point-pan-eng" style="left: 72%;"></div>
+                </div>
+                <div class="legende">
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #ff9800;"></div>
+                        Fragile<br>0.30-0.49
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #ffc107;"></div>
+                        Modéré<br>0.50-0.64
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #28a745;"></div>
+                        Favorable<br>0.65-0.79
+                    </div>
+                    <div class="legende-item">
+                        <div class="legende-color" style="background: #2196F3;"></div>
+                        Très fav.<br>≥ 0.80
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <code>Fichier: styles.css:5451-5533<br>
+Classes: .profil-echelle-barre, .profil-echelle-point<br>
+Hauteur: 12px | Border-radius: 6px<br>
+Point: 12px (16px hover) | Animation float-subtle 7s</code>
+            </div>
+        </div>
+        
+        <!-- SECTION 5: COULEURS GLOBALES -->
+        <div class="section">
+            <h2>5. Palette de couleurs complète</h2>
+            
+            <h3 style="color: #333; margin-top: 20px;">Couleurs CSS Variables</h3>
+            <div class="couleur-list">
+                <div class="couleur-item" style="border-left-color: #ff6f00;">
+                    <div class="couleur-nom">SOM (Sommatif)</div>
+                    <div class="couleur-hex">--som-orange: #ff6f00</div>
+                </div>
+                <div class="couleur-item" style="border-left-color: #0277bd;">
+                    <div class="couleur-nom">PAN (Portfolio)</div>
+                    <div class="couleur-hex">--pan-bleu: #0277bd</div>
+                </div>
+                <div class="couleur-item" style="border-left-color: #9c27b0;">
+                    <div class="couleur-nom">Hybride (Réservé)</div>
+                    <div class="couleur-hex">--hybride-violet: #9c27b0</div>
+                </div>
+            </div>
+            
+            <h3 style="color: #333; margin-top: 20px;">Couleurs des dégradés</h3>
+            <div class="couleur-list">
+                <div class="couleur-item" style="border-left-color: #ff8c00;">
+                    <div class="couleur-nom">Orange foncé</div>
+                    <div class="couleur-hex">#ff8c00</div>
+                </div>
+                <div class="couleur-item" style="border-left-color: #98d025;">
+                    <div class="couleur-nom">Vert citron</div>
+                    <div class="couleur-hex">#98d025</div>
+                </div>
+                <div class="couleur-item" style="border-left-color: #22c55e;">
+                    <div class="couleur-nom">Vert</div>
+                    <div class="couleur-hex">#22c55e</div>
+                </div>
+                <div class="couleur-item" style="border-left-color: #14b8a6;">
+                    <div class="couleur-nom">Cyan/Sarcelle</div>
+                    <div class="couleur-hex">#14b8a6</div>
+                </div>
+                <div class="couleur-item" style="border-left-color: #0ea5e9;">
+                    <div class="couleur-nom">Bleu ciel</div>
+                    <div class="couleur-hex">#0ea5e9</div>
+                </div>
+                <div class="couleur-item" style="border-left-color: #3b82f6;">
+                    <div class="couleur-nom">Bleu</div>
+                    <div class="couleur-hex">#3b82f6</div>
+                </div>
+                <div class="couleur-item" style="border-left-color: #6366f1;">
+                    <div class="couleur-nom">Indigo</div>
+                    <div class="couleur-hex">#6366f1</div>
+                </div>
+                <div class="couleur-item" style="border-left-color: #8b5cf6;">
+                    <div class="couleur-nom">Violet</div>
+                    <div class="couleur-hex">#8b5cf6</div>
+                </div>
+                <div class="couleur-item" style="border-left-color: #6b21a8;">
+                    <div class="couleur-nom">Mauve foncé</div>
+                    <div class="couleur-hex">#6b21a8</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 6: RÉSUMÉ FICHIERS -->
+        <div class="section">
+            <h2>6. Résumé des fichiers</h2>
+            
+            <div class="code-block" style="margin-top: 20px;">
+                <code><strong>FICHIERS CSS PRINCIPAUX:</strong><br><br>
+styles.css:6420-6470 → Animation @keyframes float-subtle<br>
+styles.css:6437-6470 → Points scatter (.barre-etudiant)<br>
+styles.css:6649-6674 → Barres A-C-P-E (.barre-indicateur)<br>
+styles.css:6678-6701 → Barres Patterns (.barre-patterns)<br>
+styles.css:6705-6728 → Barres RàI (.barre-rai)<br>
+styles.css:5451-5533 → Barres engagement (.profil-echelle-barre)<br>
+styles.css:5957-6030 → Barres SRPNF (.critere-barre*)<br>
+styles.css:6473-6499 → Légendes (.distribution-*)<br><br>
+
+<strong>FICHIERS JS PRINCIPAUX:</strong><br><br>
+tableau-bord-apercu.js:1080-1228 → genererBarreAcpe()<br>
+tableau-bord-apercu.js:1240-1437 → genererBarrePatterns()<br>
+tableau-bord-apercu.js:1449-1630 → genererBarreRaI()<br>
+profil-etudiant.js:1280-1330 → Barre engagement dynamique<br>
+profil-etudiant.js:5451-5533 → Styles CSS engagement</code>
+            </div>
+        </div>
+        
+        <footer style="text-align: center; color: #999; margin-top: 60px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+            <p>Document de référence Monitorage v6 - Généré le 19 novembre 2025</p>
+        </footer>
+    </div>
+</body>
+</html>

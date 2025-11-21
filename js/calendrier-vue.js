@@ -406,15 +406,14 @@ function afficherCalendrierScolaire() {
     // Générer le HTML du calendrier complet
     let htmlCalendrier = '<div class="cal-grid-2col">';
 
+    // Générer les mois
     for (let i = 0; i < moisAAfficher.length; i++) {
         htmlCalendrier += genererHtmlMois(annee, moisAAfficher[i], calendrierComplet);
     }
 
-    htmlCalendrier += '</div>';
-
-    // Ajouter la légende
+    // Ajouter la légende comme dernier élément de la grille (6ème position)
     htmlCalendrier += '<div class="calendrier-legende">';
-    htmlCalendrier += '<h4 class="calendrier-legende-titre">📍 Légende</h4>';
+    htmlCalendrier += '<h3 class="calendrier-titre-mois">- LÉGENDE -</h3>';
     htmlCalendrier += '<div class="calendrier-legende-grille">';
 
     htmlCalendrier += '<div class="calendrier-legende-item">';
@@ -454,8 +453,11 @@ function afficherCalendrierScolaire() {
 
     htmlCalendrier += '</div>';
     htmlCalendrier += '<p class="calendrier-legende-astuce">';
-    htmlCalendrier += '💡 <strong>Astuce :</strong> Survole un jour pour illuminer toute sa semaine.';
+    htmlCalendrier += '<strong>Astuce :</strong> Survole un jour pour illuminer toute sa semaine.';
     htmlCalendrier += '</p>';
+    htmlCalendrier += '</div>';
+
+    // Fermer la grille
     htmlCalendrier += '</div>';
 
     // Statistiques - FORMAT HARMONISÉ (texte gauche / chiffre droite)
