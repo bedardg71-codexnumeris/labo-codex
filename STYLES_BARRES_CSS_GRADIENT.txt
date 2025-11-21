@@ -1,0 +1,480 @@
+RAPPORT COMPLET - STYLES CSS DES BARRES DE GRADIENT
+Application Monitorage v6
+Date: 19 novembre 2025
+
+==============================================================================
+1. BARRES A-C-P-E (INDICATEURS GLOBAUX)
+==============================================================================
+
+Fichier: styles.css:6649-6674
+Classe: .barre-indicateur
+
+.barre-indicateur {
+    height: 40px;
+    border-radius: 20px;
+    position: relative;
+    background: linear-gradient(to right, 
+        #ff8c00 0%,   /* Orange foncé */
+        #ffa500 10%,  /* Orange */
+        #98d025 30%,  /* Vert citron */
+        #22c55e 50%,  /* Vert */
+        #14b8a6 65%,  /* Cyan/Sarcelle */
+        #06b6d4 80%,  /* Bleu ciel clair */
+        #0ea5e9 100%  /* Bleu ciel */
+    );
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.barre-indicateur-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 30, 58, 0.2);
+    border-radius: 20px;
+    pointer-events: none;
+}
+
+Gradient ACPE (Orange → Vert → Bleu):
+- Orange foncé (#ff8c00) → Orange (#ffa500) : 0-10% (faible)
+- Vert citron (#98d025) → Vert (#22c55e) : 10-50% (moyen)
+- Cyan (#14b8a6) → Bleu ciel (#06b6d4) → Bleu ciel (#0ea5e9) : 50-100% (fort)
+- Overlay: "Nuit Élégante" à 20% d'opacité (rgba 15,30,58)
+
+Usage: Affichage indice A (Assiduité), C (Complétion), P (Performance), E (Engagement)
+Dimensions: 40px de hauteur, 20px de border-radius (très arrondi)
+
+
+==============================================================================
+2. BARRES PATTERNS D'APPRENTISSAGE (Défi → Excellence)
+==============================================================================
+
+Fichier: styles.css:6678-6701
+Classe: .barre-patterns
+
+.barre-patterns {
+    height: 30px;
+    border-radius: 15px;
+    position: relative;
+    background: linear-gradient(to right, 
+        #22c55e 0%,   /* Vert */
+        #14b8a6 25%,  /* Cyan/Sarcelle */
+        #0ea5e9 50%,  /* Bleu ciel */
+        #3b82f6 75%,  /* Bleu */
+        #6366f1 100%  /* Indigo */
+    );
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.barre-patterns-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 30, 58, 0.35);
+    border-radius: 15px;
+    pointer-events: none;
+}
+
+Gradient Patterns (Vert → Indigo):
+- Vert (#22c55e) : 0% (Progression/Stable - Excellent)
+- Cyan (#14b8a6) : 25% (Défi spécifique)
+- Bleu ciel (#0ea5e9) : 50% (Blocage émergent)
+- Bleu (#3b82f6) : 75% (Blocage émergent/critique)
+- Indigo (#6366f1) : 100% (Blocage critique)
+
+Zones de patterns (depuis tableau-bord-apercu.js:1245-1252):
+- Progression/Stable : 12.5% (centre de 0-25%) → Vert (#1bbd7e)
+- Défi spécifique : 37.5% (centre de 25-50%) → Cyan (#11aec5)
+- Blocage émergent : 62.5% (centre de 50-75%) → Bleu (#2994ee)
+- Blocage critique : 87.5% (centre de 75-100%) → Indigo (#4f74f3)
+
+Usage: Affichage patterns d'apprentissage
+Dimensions: 30px de hauteur, 15px de border-radius
+Overlay: "Nuit Élégante" à 35% d'opacité (rgba 15,30,58)
+
+
+==============================================================================
+3. BARRES RàI (NIVEAUX D'INTERVENTION)
+==============================================================================
+
+Fichier: styles.css:6705-6728
+Classe: .barre-rai
+
+.barre-rai {
+    height: 30px;
+    border-radius: 15px;
+    position: relative;
+    background: linear-gradient(to right, 
+        #0ea5e9 0%,   /* Bleu ciel */
+        #3b82f6 25%,  /* Bleu */
+        #6366f1 50%,  /* Indigo */
+        #8b5cf6 75%,  /* Violet */
+        #6b21a8 100%  /* Mauve foncé */
+    );
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.barre-rai-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 30, 58, 0.4);
+    border-radius: 15px;
+    pointer-events: none;
+}
+
+Gradient RàI (Bleu → Mauve):
+- Bleu ciel (#0ea5e9) : 0% (Niveau 1 - Universel)
+- Bleu (#3b82f6) : 25% (Niveau 1 - Universel/Préventif)
+- Indigo (#6366f1) : 50% (Niveau 2 - Préventif)
+- Violet (#8b5cf6) : 75% (Niveau 2 - Préventif/Intensif)
+- Mauve foncé (#6b21a8) : 100% (Niveau 3 - Intensif)
+
+Zones RàI (depuis tableau-bord-apercu.js:1455-1459):
+- Niveau 1 (Universel) : 16.5% (centre de 0-33%) → Vert (#1bbd7e)
+- Niveau 2 (Préventif) : 49.5% (centre de 33-66%) → Jaune (#FFB800)
+- Niveau 3 (Intensif) : 83% (centre de 66-100%) → Orange (#FF8A50)
+
+Usage: Affichage niveaux RàI (Réponse à l'Intervention)
+Dimensions: 30px de hauteur, 15px de border-radius
+Overlay: "Nuit Élégante" à 40% d'opacité (rgba 15,30,58)
+
+
+==============================================================================
+4. POINTS DE DISTRIBUTION (SCATTER PLOTS)
+==============================================================================
+
+Fichier: styles.css:6420-6470
+Classes: .barre-etudiant, .barre-etudiant-som, .barre-etudiant-pan
+
+/* Animation de flottement subtil pour les points (au hover seulement) */
+@keyframes float-subtle {
+    0%, 100% {
+        transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1.5);
+    }
+    25% {
+        transform: translate(-50%, -50%) translateX(1px) translateY(-1px) scale(1.5);
+    }
+    50% {
+        transform: translate(-50%, -50%) translateX(0px) translateY(-2px) scale(1.5);
+    }
+    75% {
+        transform: translate(-50%, -50%) translateX(-1px) translateY(-1px) scale(1.5);
+    }
+}
+
+/* Point représentant un étudiant (scatter plot) */
+.barre-etudiant {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    border: 1px solid white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    /* Pas d'animation par défaut - seulement au hover */
+}
+
+/* Animation et grossissement au hover */
+.barre-etudiant:hover {
+    z-index: 20;
+    border-width: 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    animation: float-subtle 7s ease-in-out infinite;
+}
+
+/* Point pour SOM (orange) */
+.barre-etudiant-som {
+    background: var(--som-orange);   /* #ff6f00 */
+    opacity: 1;
+}
+
+/* Point pour PAN (bleu) */
+.barre-etudiant-pan {
+    background: var(--pan-bleu);     /* #0277bd */
+    opacity: 1;
+}
+
+Spécifications des points:
+- Diamètre: 8px
+- Bordure: 1px blanc (2px au hover)
+- Ombre: 0 1px 2px rgba(0,0,0,0.15) normal, 0 2px 6px au hover
+- Transform: translate(-50%, -50%) centrant le point sur sa position
+- Positionnement: top: 50% (vertical center sur la barre)
+- Z-index: 10 (20 au hover pour apparaître devant)
+- Animation: float-subtle 7s ease-in-out infinite au hover
+  * Mouvement horizontal: ±1px
+  * Mouvement vertical: -2px maximum
+  * Échelle: scale(1.5) constant (1.5x plus grand)
+  * Transition: 0.2s ease pour tous les changements
+
+Couleurs (CSS variables):
+- SOM (Sommatif): var(--som-orange) = #ff6f00
+- PAN (Portfolio): var(--pan-bleu) = #0277bd
+
+
+==============================================================================
+5. BARRES D'ENGAGEMENT (Profil étudiant)
+==============================================================================
+
+Fichier: styles.css:5451-5533
+Classe: .profil-echelle-barre
+
+.profil-echelle-barre {
+    position: relative;
+    height: 12px;
+    border-radius: 6px;
+    /* Gradient défini dynamiquement en JS */
+}
+
+Gradient d'engagement (depuis profil-etudiant.js:1288-1292):
+background: linear-gradient(to right,
+    #ff9800 0%,      /* Orange - Fragile (0.30-0.49) */
+    #ffc107 25%,     /* Jaune - Modéré (0.50-0.64) */
+    #28a745 50%,     /* Vert - Favorable (0.65-0.79) */
+    #2196F3 75%      /* Bleu - Très favorable (≥ 0.80) */
+);
+
+Point d'engagement (depuis profil-etudiant.js:1298-1302):
+.profil-echelle-point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.profil-echelle-point-som {
+    background: var(--som-orange);   /* #ff6f00 */
+}
+
+.profil-echelle-point-pan {
+    background: var(--pan-bleu);     /* #0277bd */
+}
+
+.profil-echelle-point-unique {
+    background: var(--bleu-principal);  /* Pratique unique */
+}
+
+.profil-echelle-point:hover {
+    width: 16px;
+    height: 16px;
+    z-index: 20;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+Usage: Affichage engagement E = A × C × P
+Dimensions: 12px de hauteur, 6px de border-radius
+Légende avec 4 zones:
+- Fragile: 0.30-0.49 (Orange #ff9800) à 12.5%
+- Modéré: 0.50-0.64 (Jaune #ffc107) à 37.5%
+- Favorable: 0.65-0.79 (Vert #28a745) à 62.5%
+- Très favorable: ≥ 0.80 (Bleu #2196F3) à 87.5%
+
+
+==============================================================================
+6. BARRES SRPNF (Critères d'évaluation)
+==============================================================================
+
+Fichier: styles.css:5957-6030
+Classes: .critere-barre, .critere-barre-gradient, .critere-point
+
+.critere-barre {
+    flex: 1;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    margin: 0 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.critere-barre-fill {
+    height: 100%;
+    /* Couleur définie dynamiquement selon le niveau IDME (I/D/M/E) */
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.critere-barre-gradient {
+    position: relative;
+    height: 12px;
+    border-radius: 6px;
+    /* Gradient défini dynamiquement en JS selon échelles personnalisées */
+}
+
+.critere-point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    background: #333;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.critere-point:hover {
+    width: 16px;
+    height: 16px;
+    z-index: 20;
+}
+
+Dimensions:
+- Barre SRPNF: 8px de hauteur, 4px de border-radius
+- Point: 12px (16px au hover), border-radius 50%, border 2px white
+
+Gradient SRPNF (dynamique selon échelle):
+- Défini en JS pour supporter plusieurs échelles IDME
+- Couleurs typiques: I (#ff6f00) → D (#FFB800) → M (#28a745) → E (#2196F3)
+
+
+==============================================================================
+7. LÉGENDES DE DISTRIBUTION
+==============================================================================
+
+Fichier: styles.css:6473-6499
+Classes: .distribution-container, .interpretation-barre, .distribution-legende
+
+.distribution-container {
+    margin-bottom: 30px;
+}
+
+.interpretation-barre {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.distribution-legende {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #666;
+    padding: 0 5px;
+    margin-top: 10px;
+}
+
+.distribution-legende span {
+    text-align: center;
+    line-height: 1.3;
+}
+
+Conteneur et légende:
+- Espacement: 30px entre conteneurs
+- Interprétation: 0.75rem gris, marge 4px avant 10px après
+- Légende: flex row avec justify-content space-between
+- Font-size: 0.75rem (petite)
+- Couleurs des labels (depuis tableau-bord-apercu.js:1430-1433):
+  * Stable (#1bbd7e) - Vert
+  * Défi (#11aec5) - Cyan
+  * Émergent (#2994ee) - Bleu
+  * Critique (#4f74f3) - Indigo
+
+
+==============================================================================
+8. JITTER ET POSITIONNEMENT DES POINTS
+==============================================================================
+
+Source: tableau-bord-apercu.js:1140-1213 (A-C-P-E) et 1260-1330 (Patterns)
+
+Jitter horizontal: ±1.5% de la largeur de la barre
+Formule: (Math.random() - 0.5) * 3.0
+
+Jitter vertical: ±12px
+Formule: (Math.random() - 0.5) * 24
+
+Positionnement:
+- Pour A-C-P-E: Mapper 30-100% sur 0-100% de la barre
+  position = Math.max(0, Math.min((valeur - 0.30) / 0.70 * 100, 100))
+- Pour Patterns: Positions fixes par zone (12.5%, 37.5%, 62.5%, 87.5%)
+  + SOM décalage -2% (à gauche)
+  + PAN décalage +2% (à droite)
+- Pour RàI: Positions fixes par niveau (16.5%, 49.5%, 83%)
+  + SOM décalage -2% (à gauche)
+  + PAN décalage +2% (à droite)
+
+Contrainte finale: Math.max(0, Math.min(position + jitter, 100))
+
+
+==============================================================================
+9. VARIABLES CSS GLOBALES
+==============================================================================
+
+Fichier: styles.css (top du fichier)
+
+Couleurs pratiques:
+--som-orange: #ff6f00     /* Sommatif */
+--pan-bleu: #0277bd       /* Portfolio */
+--hybride-violet: #9c27b0 /* Réservé futur */
+
+Couleurs élémentaires:
+--bleu-principal: ...
+--bleu-leger: ...
+--bleu-tres-pale: ...
+--rouge-erreur: ...
+
+Utilisées dans:
+.barre-etudiant-som { background: var(--som-orange); }
+.barre-etudiant-pan { background: var(--pan-bleu); }
+.profil-echelle-point-som { background: var(--som-orange); }
+.profil-echelle-point-pan { background: var(--pan-bleu); }
+
+
+==============================================================================
+10. ÉCHELONNAGE RESPONSIVE
+==============================================================================
+
+Tous les gradients et barres utilisent:
+- border-radius en px (pas en %)
+- height en px (40px, 30px, 12px)
+- width: 100% (remplissage du conteneur parent)
+
+Conteneurs parents (flexible):
+.distribution-container - width: 100%
+.profil-echelle-risque - width: var
+.critere-container - width: var
+
+Les points restent 8px en mobile (lisible avec doigt).
+
+
+==============================================================================
+RÉSUMÉ COULEURS GLOBALES
+==============================================================================
+
+Spectre de couleurs utilisé:
+1. Orange (#ff8c00, #ffa500, #ff6f00) - Faible, Sommatif
+2. Vert (#98d025, #22c55e, #1bbd7e, #28a745) - Moyen-Bon, Stable
+3. Cyan/Sarcelle (#14b8a6, #11aec5) - Bon-Très bon, Défi
+4. Bleu ciel (#06b6d4, #0ea5e9) - Très bon, RàI Préventif
+5. Bleu (#3b82f6, #2196F3, #2994ee, #0277bd) - Excellent, Portfolio
+6. Indigo/Violet (#6366f1, #8b5cf6, #4f74f3) - Excellent, RàI Intensif
+7. Mauve (#6b21a8) - Maximum RàI
+
+Hiérarchie:
+- Mauvais ← Orange, Rouge
+- Moyen ← Jaune
+- Bon ← Vert, Cyan
+- Excellent ← Bleu, Indigo
+

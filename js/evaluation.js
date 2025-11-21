@@ -502,7 +502,7 @@ function cartoucheSelectionnee() {
         </div>
         <div id="resultat_algo_${critere.id}" style="padding: 8px; background: #f0f8ff; border-radius: 4px; font-size: 0.85rem; color: #666; margin-bottom: 8px;">
             <strong>Total erreurs:</strong> <span id="total_erreurs_${critere.id}">--</span><br>
-            <strong>Formule:</strong> ${ponderation} − (<span id="total_erreurs_formule_${critere.id}">--</span> ÷ Mots × ${facteur})<br>
+            <strong>Formule:</strong> ${ponderation} − (<span id="total_erreurs_formule_${critere.id}">--</span> ÷ <span id="mots_formule_${critere.id}">--</span> Mots × ${facteur})<br>
             <strong>Résultat:</strong> <span id="note_algo_${critere.id}">--</span> / ${ponderation} = <span id="pct_algo_${critere.id}">--</span>%<br>
             <strong>Niveau IDME:</strong> <span id="niveau_algo_${critere.id}">--</span><br>
             <strong>Catégorie dominante:</strong> <span id="cat_dominante_${critere.id}" style="color: var(--orange-accent);">--</span>
@@ -715,9 +715,9 @@ function genererRetroactionEUF(erreurs, mots) {
     } else if (motsParErreur >= 60) {
         retroactionEUF += ' En prévision de l\'EUF, ce ratio est bien.';
     } else if (motsParErreur >= 30) {
-        retroactionEUF += ' En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec.';
+        retroactionEUF += ' En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec. Il est recommandé de t\'inscrire au Centre d\'aide en français (CAF).';
     } else {
-        retroactionEUF += ' En prévision de l\'EUF, ce ratio mènerait à un échec automatique.';
+        retroactionEUF += ' En prévision de l\'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t\'inscrire au Centre d\'aide en français (CAF).';
     }
 
     return retroactionEUF;
@@ -755,6 +755,9 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
     // Afficher le total d'erreurs
     document.getElementById(`total_erreurs_${critereId}`).textContent = totalErreurs;
     document.getElementById(`total_erreurs_formule_${critereId}`).textContent = totalErreurs;
+
+    // Afficher le nombre de mots dans la formule
+    document.getElementById(`mots_formule_${critereId}`).textContent = mots;
 
     if (mots === 0 || totalErreurs === 0) {
         // Réinitialiser l'affichage

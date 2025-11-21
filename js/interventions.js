@@ -414,8 +414,8 @@ function afficherListeInterventions() {
                         <h4 class="intervention-titre">${intervention.titre}</h4>
                         <div class="intervention-badges">
                             <span>${badgeStatut}</span>
-                            <span class="badge-sys" style="background: var(--bleu-tres-pale); color: var(--bleu-principal);">${badgeType}</span>
-                            <span class="badge-sys badge-rai-${intervention.niveauRai}">${badgeNiveau}</span>
+                            <span class="badge-type-intervention">${badgeType}</span>
+                            <span class="badge-rai-${intervention.niveauRai}">${badgeNiveau}</span>
                             <span class="text-muted">${formaterDateLisible(intervention.date)}</span>
                             ${intervention.heure ? `<span class="text-muted">${intervention.heure}</span>` : ''}
                         </div>
@@ -438,11 +438,17 @@ function afficherListeInterventions() {
                     <p class="intervention-description">${intervention.description}</p>
                 ` : ''}
 
-                ${intervention.etudiants && intervention.etudiants.length > 0 ? `
-                    <p class="text-muted"><strong>Étudiants présents :</strong> ${intervention.etudiants.length}</p>
+                ${(intervention.analyse || (intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0)) ? `
+                    <h4 class="intervention-titre u-mb-10 u-mt-10">Aperçu du sous-groupe (${intervention.analyse ? intervention.analyse.nbEtudiants : 0} étudiant·e·s)</h4>
+                    <div class="intervention-layout-2col">
+                        <div class="intervention-col-gauche">
+                            ${intervention.analyse ? genererAffichageAnalyseCartes(intervention.analyse) : ''}
+                        </div>
+                        <div class="intervention-col-droite">
+                            ${intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0 ? genererAffichageNotesIndividuelles(intervention.notesIndividuelles) : ''}
+                        </div>
+                    </div>
                 ` : ''}
-
-                ${intervention.analyse ? genererAffichageAnalyse(intervention.analyse) : ''}
 
                 ${intervention.observations ? `
                     <div class="carte intervention-observations">
@@ -450,8 +456,6 @@ function afficherListeInterventions() {
                         <p>${intervention.observations}</p>
                     </div>
                 ` : ''}
-
-                ${intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0 ? genererAffichageNotesIndividuelles(intervention.notesIndividuelles) : ''}
             </div>
         `;
     });
@@ -466,9 +470,9 @@ function afficherListeInterventions() {
  */
 function genererBadgeStatut(statut) {
     const badges = {
-        'planifiee': '<span class="badge-sys" style="background: #e3f2fd; color: #1976d2;">Planifiée</span>',
-        'en-cours': '<span class="badge-sys" style="background: #fff3e0; color: #f57c00;">En cours</span>',
-        'completee': '<span class="badge-sys" style="background: #e8f5e9; color: #388e3c;">Complétée</span>'
+        'planifiee': '<span class="badge-statut-planifiee">Planifiée</span>',
+        'en-cours': '<span class="badge-statut-en-cours">En cours</span>',
+        'completee': '<span class="badge-statut-completee">Complétée</span>'
     };
     return badges[statut] || '';
 }
@@ -487,23 +491,72 @@ function formaterDateLisible(dateStr) {
 }
 
 /**
- * Générer l'affichage de l'analyse du sous-groupe avec badges compacts
- * @param {Object} analyse - Données d'analyse
- * @returns {string} HTML de l'analyse
+ * Obtenir la classe CSS correspondant à un pattern
+ * @param {string} pattern - Nom du pattern
+ * @returns {string} Classe CSS du pattern
  */
-function genererAffichageAnalyse(analyse) {
+function obtenirClassePattern(pattern) {
+    // Normaliser le nom du pattern pour correspondre aux classes CSS
+    const patternNormalise = pattern.toLowerCase()
+        .replace(/[éè]/g, 'e')
+        .replace(/\s+/g, '-');
+
+    // Mapping des patterns vers leurs classes CSS
+    const mapping = {
+        'stable': 'badge-pattern-stable',
+        'progression': 'badge-pattern-progression',
+        'defi-specifique': 'badge-pattern-defi-specifique',
+        'blocage-emergent': 'badge-pattern-blocage-emergent',
+        'blocage-critique': 'badge-pattern-blocage-critique'
+    };
+
+    return mapping[patternNormalise] || 'badge-pattern-analyse';
+}
+
+/**
+ * Générer seulement les cartes d'analyse (Patterns et Niveaux RàI)
+ * @param {Object} analyse - Données d'analyse
+ * @returns {string} HTML des cartes d'analyse
+ */
+function genererAffichageAnalyseCartes(analyse) {
     if (!analyse || analyse.nbEtudiants === 0) return '';
 
-    // Structure en 3 cartes séparées similaires au profil Engagement
-    let html = `
-        <div class="u-mt-15">
-            <h4 class="intervention-titre u-mb-15">Aperçu du sous-groupe (${analyse.nbEtudiants} étudiant·e·s)</h4>
+    let html = '';
 
-            <!-- Grille 3 colonnes avec cartes séparées -->
-            <div class="grille-metriques-3col">
+    // CARTE 1: Patterns d'apprentissage
+    html += '<div class="profil-carte u-mb-15">';
+
+    // Calculer le nombre de patterns distincts
+    const nbPatterns = analyse.patternsCommuns ? Object.keys(analyse.patternsCommuns).length : 0;
+
+    html += `
+        <div class="carte-metrique-header">
+            <h4>Patterns d'apprentissage</h4>
+            <strong>${nbPatterns}</strong>
+        </div>
     `;
 
-    // COLONNE 1: Niveaux RàI (carte)
+    if (analyse.patternsCommuns && Object.keys(analyse.patternsCommuns).length > 0) {
+        html += '<div class="badges-centres">';
+        Object.entries(analyse.patternsCommuns)
+            .sort((a, b) => b[1] - a[1])
+            .forEach(([pattern, count]) => {
+                // Convertir le nom du pattern en classe CSS
+                const classePattern = obtenirClassePattern(pattern);
+                html += `
+                    <span class="badge-analyse ${classePattern}">
+                        ${pattern}
+                        <span class="badge-analyse-count">${count}</span>
+                    </span>
+                `;
+            });
+        html += '</div>';
+    } else {
+        html += '<p class="text-muted u-text-center">Aucune donnée</p>';
+    }
+    html += '</div>';
+
+    // CARTE 2: Niveaux RàI
     html += '<div class="profil-carte">';
 
     // Calculer le nombre de niveaux distincts présents
@@ -533,90 +586,6 @@ function genererAffichageAnalyse(analyse) {
         html += '<p class="text-muted u-text-center">Aucune donnée</p>';
     }
     html += '</div>';
-
-    // COLONNE 2: Répartition du risque (carte)
-    html += '<div class="profil-carte">';
-
-    // Afficher le risque moyen en pourcentage
-    const risqueMoyenPct = analyse.risqueMoyen ? `${(analyse.risqueMoyen * 100).toFixed(1)}%` : '—';
-
-    html += `
-        <div class="carte-metrique-header">
-            <h4>Répartition du risque</h4>
-            <strong>${risqueMoyenPct}</strong>
-        </div>
-    `;
-
-    if (analyse.risqueDistribution) {
-        const risquesAvecCompte = Object.entries(analyse.risqueDistribution).filter(([niveau, count]) => count > 0);
-        if (risquesAvecCompte.length > 0) {
-            html += '<div class="badges-centres u-mb-15">';
-            risquesAvecCompte.forEach(([niveau, count]) => {
-                // Mapper le niveau de risque au nom de classe CSS
-                let classeRisque = 'badge-risque-analyse-defaut';
-
-                if (niveau === 'Risque très élevé') {
-                    classeRisque = 'badge-risque-analyse-tres-eleve';
-                } else if (niveau === 'Risque critique') {
-                    classeRisque = 'badge-risque-analyse-critique';
-                } else if (niveau === 'Risque élevé') {
-                    classeRisque = 'badge-risque-analyse-eleve';
-                } else if (niveau === 'Risque modéré') {
-                    classeRisque = 'badge-risque-analyse-modere';
-                } else if (niveau === 'Risque faible') {
-                    classeRisque = 'badge-risque-analyse-faible';
-                } else if (niveau === 'Minimal') {
-                    classeRisque = 'badge-risque-analyse-minimal';
-                }
-
-                html += `
-                    <span class="badge-analyse ${classeRisque}">
-                        ${niveau}
-                        <span class="badge-analyse-count">${count}</span>
-                    </span>
-                `;
-            });
-            html += '</div>';
-        } else {
-            html += '<p class="text-muted u-text-center">Aucune donnée</p>';
-        }
-    } else {
-        html += '<p class="text-muted u-text-center">Aucune donnée</p>';
-    }
-    html += '</div>';
-
-    // COLONNE 3: Patterns d'apprentissage (carte)
-    html += '<div class="profil-carte">';
-
-    // Calculer le nombre de patterns distincts
-    const nbPatterns = analyse.patternsCommuns ? Object.keys(analyse.patternsCommuns).length : 0;
-
-    html += `
-        <div class="carte-metrique-header">
-            <h4>Patterns d'apprentissage</h4>
-            <strong>${nbPatterns}</strong>
-        </div>
-    `;
-
-    if (analyse.patternsCommuns && Object.keys(analyse.patternsCommuns).length > 0) {
-        html += '<div class="badges-centres">';
-        Object.entries(analyse.patternsCommuns)
-            .sort((a, b) => b[1] - a[1])
-            .forEach(([pattern, count]) => {
-                html += `
-                    <span class="badge-analyse badge-pattern-analyse">
-                        ${pattern}
-                        <span class="badge-analyse-count">${count}</span>
-                    </span>
-                `;
-            });
-        html += '</div>';
-    } else {
-        html += '<p class="text-muted u-text-center">Aucune donnée</p>';
-    }
-    html += '</div>';
-
-    html += '</div></div></div>';
 
     return html;
 }
@@ -993,7 +962,7 @@ function ouvrirIntervention(interventionId) {
                 <textarea id="note-${etudiant.da}" class="controle-form" rows="1"
                           placeholder="Note individuelle..."
                           style="font-size: 0.85rem; resize: vertical;">${noteExistante}</textarea>
-                <span class="badge-sys badge-rai-${cible.niveau}">Niveau ${cible.niveau}</span>
+                <span class="badge-rai-${cible.niveau}">Niveau ${cible.niveau}</span>
             </div>
         `;
     });
@@ -1102,8 +1071,17 @@ function ouvrirIntervention(interventionId) {
 
             <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
 
-            <div style="display: grid; grid-template-columns: 1fr 0.9fr; gap: 20px; align-items: start; margin-bottom: 20px;">
-                <!-- Colonne gauche: Liste des étudiants avec notes (50%) -->
+            <div style="display: grid; grid-template-columns: 40fr 60fr; gap: 20px; align-items: start; margin-bottom: 20px;">
+                <!-- Colonne gauche: Aperçu du sous-groupe (40%) -->
+                <div>
+                    <h4>Aperçu du sous-groupe</h4>
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
+                        Cette aggrégation des profils des étudiant·e·s vise à éclairer votre préparation.
+                    </p>
+                    <div id="analyseTempsReel"></div>
+                </div>
+
+                <!-- Colonne droite: Liste des étudiants avec notes (60%) -->
                 <div>
                     <h4>Marquer les présences et notes individuelles</h4>
                     <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
@@ -1113,15 +1091,6 @@ function ouvrirIntervention(interventionId) {
                     <div id="listeEtudiantsIntervention" class="liste-etudiants-intervention">
                         ${listeHtml}
                     </div>
-                </div>
-
-                <!-- Colonne droite: Analyse du sous-groupe (45% = 3 × 15%) -->
-                <div>
-                    <h4>Aperçu du sous-groupe</h4>
-                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">
-                        Cette aggrégation des profils des étudiant·e·s vise à éclairer votre préparation.
-                    </p>
-                    <div id="analyseTempsReel"></div>
                 </div>
             </div>
 
@@ -1169,7 +1138,7 @@ function afficherAnalyseTempsReel(interventionId) {
     }
 
     const analyse = analyserSousGroupe(dasSelectionnes);
-    analyseDiv.innerHTML = genererAffichageAnalyse(analyse);
+    analyseDiv.innerHTML = genererAffichageAnalyseCartes(analyse);
 }
 
 /**
