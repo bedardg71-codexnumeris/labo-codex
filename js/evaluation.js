@@ -854,13 +854,16 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
                 retroactionComplete += ` (${sommePonderee.toFixed(1)} points)`;
             }
 
-            retroactionComplete += ` pour ${mots} mots. ${scDominant.retroaction}`;
+            retroactionComplete += ` pour ${mots} mots.`;
 
-            // Ajouter la rétroaction EUF (Épreuve Uniforme de Français)
+            // Ajouter la rétroaction EUF (Épreuve Uniforme de Français) immédiatement après le décompte
             const retroactionEUF = genererRetroactionEUF(totalErreurs, mots);
             if (retroactionEUF) {
                 retroactionComplete += retroactionEUF;
             }
+
+            // Ajouter la rétroaction spécifique à la catégorie dominante
+            retroactionComplete += ` ${scDominant.retroaction}`;
 
             // Afficher la rétroaction dans la zone de commentaire normale
             const commDiv = document.getElementById(`comm_${critereId}`);
