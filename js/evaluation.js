@@ -1009,10 +1009,24 @@ function calculerNote() {
 
     grille.criteres.forEach(critere => {
         const niveau = evaluationEnCours.criteres[critere.id];
-        if (niveau && valeurs[niveau]) {
+        if (niveau) {
             const ponderation = (critere.ponderation || 0) / 100;
-            noteTotal += valeurs[niveau] * ponderation;
-            ponderationTotal += ponderation;
+
+            // IMPORTANT: Pour les critères algorithmiques, utiliser le pourcentage exact calculé
+            // au lieu de la valeur par défaut du niveau (ex: 61.5% au lieu de 32% pour I)
+            let valeurCritere = valeurs[niveau];
+
+            if (evaluationEnCours.donneesAlgorithmiques &&
+                evaluationEnCours.donneesAlgorithmiques[critere.id] &&
+                evaluationEnCours.donneesAlgorithmiques[critere.id].pourcentage !== undefined) {
+                // Utiliser le pourcentage exact du calcul algorithmique
+                valeurCritere = evaluationEnCours.donneesAlgorithmiques[critere.id].pourcentage;
+            }
+
+            if (valeurCritere !== undefined) {
+                noteTotal += valeurCritere * ponderation;
+                ponderationTotal += ponderation;
+            }
         }
     });
 
