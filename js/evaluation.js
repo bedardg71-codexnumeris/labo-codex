@@ -688,7 +688,8 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
 
 /**
  * Génère une rétroaction sur le ratio d'erreurs en prévision de l'EUF
- * Formule: Ratio = Mots ÷ (Erreurs × 30)
+ * Formule: Ratio = (Erreurs × 30) ÷ Mots
+ * Interprétation: Nombre d'erreurs par 30 mots
  * Seuil EUF: < 1 erreur par 30 mots pour réussir
  *
  * @param {number} erreurs - Nombre total d'erreurs
@@ -698,8 +699,8 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
 function genererRetroactionEUF(erreurs, mots) {
     if (erreurs === 0 || mots === 0) return '';
 
-    // Calcul du ratio: Mots ÷ (Erreurs × 30)
-    const ratio = mots / (erreurs * 30);
+    // Calcul du ratio: (Erreurs × 30) ÷ Mots = nombre d'erreurs par 30 mots
+    const ratio = (erreurs * 30) / mots;
 
     let retroactionEUF = '';
 
