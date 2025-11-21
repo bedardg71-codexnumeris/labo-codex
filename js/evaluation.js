@@ -781,6 +781,9 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
     document.getElementById(`pct_algo_${critereId}`).textContent = pctFinal.toFixed(1);
     document.getElementById(`niveau_algo_${critereId}`).textContent = niveauIDME;
 
+    // ⚠️ IMPORTANT: Sauvegarder le niveau dans evaluationEnCours pour qu'il soit inclus dans calculerNote()
+    evaluationEnCours.criteres[critereId] = niveauIDME;
+
     // === CALCUL DU MODE (sous-critère dominant) ===
     const frequences = {};
     let maxFreq = 0;
@@ -1007,6 +1010,9 @@ function calculerNote() {
     let noteTotal = 0;
     let ponderationTotal = 0;
 
+    // 🔍 DEBUG: Afficher les données algorithmiques disponibles
+    console.log('🔍 DEBUG calculerNote() - Données algorithmiques:', evaluationEnCours.donneesAlgorithmiques);
+
     grille.criteres.forEach(critere => {
         const niveau = evaluationEnCours.criteres[critere.id];
         if (niveau) {
@@ -1015,17 +1021,29 @@ function calculerNote() {
             // IMPORTANT: Pour les critères algorithmiques, utiliser le pourcentage exact calculé
             // au lieu de la valeur par défaut du niveau (ex: 61.5% au lieu de 32% pour I)
             let valeurCritere = valeurs[niveau];
+            let sourceValeur = 'niveau défaut';
 
             if (evaluationEnCours.donneesAlgorithmiques &&
                 evaluationEnCours.donneesAlgorithmiques[critere.id] &&
                 evaluationEnCours.donneesAlgorithmiques[critere.id].pourcentage !== undefined) {
                 // Utiliser le pourcentage exact du calcul algorithmique
                 valeurCritere = evaluationEnCours.donneesAlgorithmiques[critere.id].pourcentage;
+                sourceValeur = 'algorithme exact';
             }
 
             if (valeurCritere !== undefined) {
-                noteTotal += valeurCritere * ponderation;
+                const contribution = valeurCritere * ponderation;
+                noteTotal += contribution;
                 ponderationTotal += ponderation;
+
+                // 🔍 DEBUG: Afficher le détail de chaque critère
+                console.log(`  • ${critere.nom}:`, {
+                    niveau: niveau,
+                    valeurCritere: valeurCritere + '%',
+                    source: sourceValeur,
+                    ponderation: (ponderation * 100) + '%',
+                    contribution: contribution.toFixed(2) + '%'
+                });
             }
         }
     });
@@ -1037,12 +1055,22 @@ function calculerNote() {
         // La moyenne pondérée est directement en pourcentage
         pourcentage = noteTotal / ponderationTotal;
 
+        // 🔍 DEBUG: Afficher le résultat final
+        console.log('🔍 DEBUG calculerNote() - Résultat:', {
+            noteTotal: noteTotal.toFixed(2) + '%',
+            ponderationTotal: (ponderationTotal * 100).toFixed(0) + '%',
+            pourcentageFinal: pourcentage.toFixed(1) + '%'
+        });
+
         // Déterminer le niveau global selon l'échelle
         const niveauFinal = niveaux.find(n => {
             return pourcentage >= n.min && pourcentage <= n.max;
         });
 
         niveauGlobal = niveauFinal ? niveauFinal.code : '--';
+
+        // 🔍 DEBUG: Afficher le niveau déterminé
+        console.log('🔍 DEBUG calculerNote() - Niveau final:', niveauGlobal, niveauFinal);
     }
 
     // Mettre à jour l'affichage
