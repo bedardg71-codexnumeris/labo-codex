@@ -6467,12 +6467,24 @@ Exemple :
                             <li><strong>Prédictivité</strong> : Détection précoce des signaux faibles</li>
                         </ul>
 
-                        <p><strong>Fondements théoriques :</strong></p>
+                        <p><strong>Architecture modulaire et flexible :</strong></p>
+                        <p>Le système s'adapte à <strong>votre pratique de notation</strong> existante. Vous pouvez configurer :</p>
                         <ul>
-                            <li><strong>RàI (Réponse à l'Intervention)</strong> : Modèle adapté au collégial avec 3 niveaux d'intensification</li>
-                            <li><strong>Enseignement explicite</strong> : Efficacité et explicitation des stratégies</li>
-                            <li><strong>Taxonomie SOLO / Échelle IDME</strong> : Évaluation de la profondeur de compréhension</li>
+                            <li><strong>Vos grilles d'évaluation</strong> : Créez vos propres critères selon votre discipline</li>
+                            <li><strong>Votre échelle de notation</strong> : Échelle qualitative (IDME) ou notes chiffrées (0-100%)</li>
+                            <li><strong>Votre pratique pédagogique</strong> : Évaluation par compétences (PAN) ou sommative traditionnelle</li>
                         </ul>
+
+                        <div class="alerte-info-bleu">
+                            <p><strong>📝 Exemple : Pratique PAN-Maîtrise</strong></p>
+                            <p>La pratique PAN-Maîtrise développée par Grégoire utilise :</p>
+                            <ul class="mt-5">
+                                <li><strong>Critères SRPNF</strong> : Structure, Rigueur, Plausibilité, Nuance, Français</li>
+                                <li><strong>Échelle IDME</strong> : Basée sur la taxonomie SOLO (Insuffisant, Développement, Maîtrisé, Étendu)</li>
+                                <li><strong>RàI (Réponse à l'Intervention)</strong> : Détection patterns et niveaux d'intervention</li>
+                            </ul>
+                            <p class="text-muted-sm mt-5"><em>Cette pratique est un exemple parmi d'autres possibilités.</em></p>
+                        </div>
                     </div>
 
                     <!-- Carte: Concepts clés A-C-P -->
@@ -6497,13 +6509,14 @@ Exemple :
                             <h4 class="titre-bleu-mb10">P - Performance</h4>
                             <p><strong>Qualité des productions</strong> - Mesure la maîtrise</p>
                             <p class="text-muted-sm"><em>Module source : portfolio.js</em></p>
-                            <p>Évaluée selon les critères SRPNF et l'échelle IDME, indique directement les compétences en lecture et écriture.</p>
+                            <p>Évalue la qualité des travaux selon vos critères et votre échelle de notation.</p>
+                            <p class="text-muted-sm mt-5"><em>Le calcul dépend de votre pratique : en PAN-Maîtrise, P = moyenne des N meilleurs artefacts (IDME). En Sommative, P = moyenne pondérée de toutes les évaluations (0-100%).</em></p>
                         </div>
                     </div>
 
                     <!-- Carte: Critères SRPNF -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Critères d'évaluation SRPNF</h3>
+                        <h3 class="carte-titre-bleu">Exemple de grille : SRPNF (pratique PAN-Maîtrise)</h3>
                         <p>Inspirés de l'approche ELLAC (Enseignement de la Lecture Littéraire Au Collégial)</p>
 
                         <table class="tableau">
@@ -6542,12 +6555,17 @@ Exemple :
                                 </tr>
                             </tbody>
                         </table>
+
+                        <div class="alerte alerte-info">
+                            <p><strong>💡 Créez vos propres grilles</strong></p>
+                            <p>Ces critères sont un exemple spécifique à l'enseignement de la littérature. Vous pouvez créer vos propres grilles adaptées à votre discipline dans <strong>Matériel → Critères d'évaluation</strong>.</p>
+                        </div>
                     </div>
 
                     <!-- Carte: Échelle IDME -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Taxonomie SOLO et échelle IDME</h3>
-                        <p>L'échelle IDME traduit la profondeur de compréhension selon la taxonomie SOLO :</p>
+                        <h3 class="carte-titre-bleu">Exemple d'échelle : IDME (pratique PAN-Maîtrise)</h3>
+                        <p>L'échelle IDME traduit la profondeur de compréhension selon la taxonomie SOLO de Biggs & Collis :</p>
 
                         <table class="tableau">
                             <thead>
@@ -6585,6 +6603,11 @@ Exemple :
                                 </tr>
                             </tbody>
                         </table>
+
+                        <div class="alerte alerte-info">
+                            <p><strong>📌 Autres échelles possibles</strong></p>
+                            <p>L'échelle IDME est utilisée en pratique PAN-Maîtrise pour évaluer la profondeur de compréhension. D'autres pratiques utilisent des <strong>moyennes pondérées traditionnelles (0-100%)</strong> ou des échelles personnalisées. Configurez votre échelle dans <strong>Matériel → Niveaux de performance</strong>.</p>
+                        </div>
                     </div>
 
                     <!-- Carte: Architecture Single Source of Truth -->
@@ -6623,8 +6646,8 @@ Exemple :
                             <li><strong>Cours</strong> : Informations de base (code, titre, pondération)</li>
                             <li><strong>Trimestre</strong> : Dates et calendrier complet (SOURCE)</li>
                             <li><strong>Groupe</strong> : Liste des étudiants</li>
-                            <li><strong>Horaire</strong> : Séances hebdomadaires (en refonte)</li>
-                            <li><strong>Pratiques PAN</strong> : Nombre d'artefacts et jetons</li>
+                            <li><strong>Horaire</strong> : Séances hebdomadaires ✅</li>
+                            <li><strong>Pratique de notation</strong> : Choisir votre approche (PAN-Maîtrise, Sommative, etc.)</li>
                         </ol>
                     </div>
 
@@ -6699,45 +6722,53 @@ Exemple :
 
                     <!-- Carte: 4. Horaire -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">4. Établir l'horaire</h3>
+                        <h3 class="carte-titre-bleu">4. Établir l'horaire - MODULE SOURCE</h3>
                         <p><strong>Navigation :</strong> Réglages → Horaire</p>
-                        <div class="alerte alerte-attention">
-                            <strong>Module en refonte :</strong> À venir - génération de seancesCompletes comme source unique
+                        <p class="text-succes-bold">Ce module GÉNÈRE les seancesCompletes (source unique)</p>
+
+                        <div class="alerte alerte-succes">
+                            <strong>✅ Module complété (octobre 2025)</strong> : Génération automatique des séances avec synchronisation au calendrier. Les séances s'adaptent automatiquement aux congés et reprises.
                         </div>
 
-                        <p><strong>Fonctionnalités prévues :</strong></p>
+                        <p><strong>Fonctionnalités :</strong></p>
                         <ul>
-                            <li>Définition des séances hebdomadaires</li>
-                            <li>Gestion des reprises (ex: "Horaire du lundi" le jeudi)</li>
-                            <li>API : <code>obtenirSeancesCompletes()</code></li>
+                            <li><strong>Définition des séances hebdomadaires</strong> : Jours et heures de cours</li>
+                            <li><strong>Gestion automatique des reprises</strong> : Ex: "Horaire du lundi" se déplace au jeudi si lundi est congé</li>
+                            <li><strong>API</strong> : <code>genererSeancesCompletes()</code> et <code>obtenirSeancesCompletes()</code></li>
                         </ul>
                     </div>
 
-                    <!-- Carte: 5. Pratiques PAN -->
+                    <!-- Carte: 5. Pratique de notation -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">5. Paramétrer les pratiques (PAN)</h3>
+                        <h3 class="carte-titre-bleu">5. Choisir votre pratique de notation</h3>
                         <p><strong>Navigation :</strong> Réglages → Pratique de notation</p>
 
-                        <p><strong>Paramètres à définir :</strong></p>
-                        <ul>
-                            <li><strong>Nombre d'artefacts</strong> : 8-14 recommandé
-                                <ul class="mt-5">
-                                    <li>8 artefacts : Pour enseignants débutants</li>
-                                    <li>12 artefacts : Configuration standard</li>
-                                    <li>14 artefacts : Pour enseignants expérimentés</li>
-                                </ul>
-                            </li>
-                            <li><strong>Système de jetons</strong> : 3-4 jetons maximum
-                                <ul class="mt-5">
-                                    <li>Jeton de délai : Report d'échéance sans pénalité</li>
-                                    <li>Jeton de reprise : Possibilité de refaire un artefact</li>
-                                </ul>
-                            </li>
-                            <li><strong>Méthode de sélection</strong> : N meilleurs artefacts (PAN)</li>
-                        </ul>
+                        <p>Le système supporte différentes pratiques pédagogiques. Choisissez celle qui correspond à votre approche :</p>
 
-                        <div class="alerte alerte-information">
-                            <strong>PAN (Pratiques Alternatives de Notation) :</strong> Sélection automatique des N meilleurs artefacts pour l'évaluation finale, permettant aux étudiants de progresser sans pénaliser leurs erreurs initiales.
+                        <div class="alerte-info-bleu">
+                            <h4 class="titre-bleu-mb10">📝 PAN-Maîtrise (Évaluation par compétences)</h4>
+                            <p><strong>Principes :</strong> Sélection des N meilleurs artefacts, échelle IDME, système de jetons</p>
+                            <p><strong>Paramètres à définir :</strong></p>
+                            <ul class="mt-5">
+                                <li><strong>Nombre d'artefacts</strong> : 8-14 recommandé (configuration standard : 12)</li>
+                                <li><strong>Système de jetons</strong> : 3-4 jetons maximum
+                                    <ul class="mt-5">
+                                        <li>Jeton de délai : Report d'échéance sans pénalité</li>
+                                        <li>Jeton de reprise : Possibilité de refaire un artefact</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Méthode de sélection</strong> : N meilleurs artefacts (permet progression sans pénaliser erreurs initiales)</li>
+                            </ul>
+                        </div>
+
+                        <div class="alerte-info-bleu">
+                            <h4 class="titre-bleu-mb10">📊 Sommative (Évaluation traditionnelle)</h4>
+                            <p><strong>Principes :</strong> Moyenne pondérée de toutes les évaluations, notation 0-100%</p>
+                            <p><strong>Fonctionnement :</strong> Toutes les évaluations comptent selon leur pondération. Approche classique utilisée dans la plupart des disciplines.</p>
+                        </div>
+
+                        <div class="alerte alerte-info">
+                            <p><strong>💡 À venir :</strong> PAN-Spécifications (Pass/Fail par objectifs) et Dénotation (Ungrading sans notes chiffrées)</p>
                         </div>
                     </div>
 
