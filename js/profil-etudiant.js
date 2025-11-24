@@ -45,6 +45,54 @@
    =============================== */
 
 /* ===============================
+   🎨 FONCTIONS HELPER POUR COULEURS IDME
+   =============================== */
+
+/**
+ * Obtient la couleur d'un niveau IDME depuis l'échelle configurée
+ * @param {string} codeNiveau - Code du niveau (I, D, M, E, 0)
+ * @returns {string} - Couleur CSS (hex ou var(--...))
+ */
+function obtenirCouleurNiveauIDME(codeNiveau) {
+    if (!codeNiveau) return '#999999';
+
+    // Lire l'échelle IDME par défaut (première échelle trouvée)
+    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelleIDME = echelles.find(e => e.nom && e.nom.toLowerCase().includes('idme')) || echelles[0];
+
+    if (!echelleIDME || !echelleIDME.niveaux) {
+        // Couleurs par défaut si pas d'échelle
+        const couleursDefaut = {
+            '0': '#9E9E9E',
+            'I': '#F44336',
+            'D': '#FF9800',
+            'M': '#4CAF50',
+            'E': '#2196F3'
+        };
+        return couleursDefaut[codeNiveau] || '#999999';
+    }
+
+    const niveau = echelleIDME.niveaux.find(n => n.code === codeNiveau);
+    return niveau ? niveau.couleur : '#999999';
+}
+
+/**
+ * Détermine le niveau IDME d'un pourcentage selon les seuils configurés
+ * @param {number} pourcentage - Pourcentage (0-100)
+ * @returns {string} - Code niveau ('I', 'D', 'M', 'E')
+ */
+function obtenirNiveauIDMEDepuisPourcentage(pourcentage) {
+    const seuilInsuffisant = obtenirSeuil('idme.insuffisant'); // Par défaut 65%
+    const seuilDeveloppement = obtenirSeuil('idme.developpement'); // Par défaut 75%
+    const seuilMaitrise = obtenirSeuil('idme.maitrise'); // Par défaut 85%
+
+    if (pourcentage < seuilInsuffisant) return 'I';
+    if (pourcentage < seuilDeveloppement) return 'D';
+    if (pourcentage < seuilMaitrise) return 'M';
+    return 'E';
+}
+
+/* ===============================
    🚀 INITIALISATION DU MODULE
    =============================== */
 
@@ -1451,8 +1499,11 @@ function genererSectionAccompagnement(da) {
         { nom: 'Français', valeur: moyennesCriteres?.francais ?? 0 }
     ];
 
+    // CORRECTION: Inclure TOUS les niveaux IDME (I, D, M, E)
+    // Forces: M (>=75%) et E (>=85%)
     const forces = criteresSRPNF.filter(c => c.valeur >= seuilMaitrise);
-    const defis = criteresSRPNF.filter(c => c.valeur < seuilDeveloppement);
+    // Défis: I (<65%) ET D (65-75%)
+    const defis = criteresSRPNF.filter(c => c.valeur > 0 && c.valeur < seuilMaitrise);
 
     console.log('Forces et défis pour DA', da, { forces, defis, seuilMaitrise, seuilDeveloppement, moyennesCriteres });
 
@@ -1631,65 +1682,93 @@ function genererSectionAccompagnement(da) {
             <div class="profil-carte">
                 <h2 class="profil-section-titre-sous">Observation de la structure des résultats d'apprentissage</h2>
 
-                ${forcesSolo.length > 0 ? `
-                <div style="margin-bottom: ${defisSolo.length > 0 ? '20px' : '0'};">
-                    <h4 style="color: #16a34a; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
-                        Forces
-                    </h4>
+                ${(() => {
+                    // Obtenir les couleurs IDME depuis l'échelle configurée
+                    const couleurE = obtenirCouleurNiveauIDME('E');
+                    const couleurM = obtenirCouleurNiveauIDME('M');
+                    const couleurD = obtenirCouleurNiveauIDME('D');
+                    const couleurI = obtenirCouleurNiveauIDME('I');
 
-                    ${forcesSolo.some(f => f.valeur >= 0.85) ? `
-                    <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px; margin-bottom: 8px;">
-                        <div class="u-texte-succes-gras">
+                    let html = '';
+
+                    // FORCES E (Étendu) - Bleu
+                    if (forcesSolo.some(f => f.valeur >= 0.85)) {
+                        html += `
+                <div style="margin-bottom: 12px;">
+                    <h4 style="color: ${couleurE}; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
+                        Forces exceptionnelles
+                    </h4>
+                    <div style="background: ${couleurE}22; border-left: 4px solid ${couleurE}; padding: 10px 12px;">
+                        <div style="font-weight: bold; color: ${couleurE};">
                             ${forcesSolo.filter(f => f.valeur >= 0.85).map(f => f.nom).join(', ')} : Maîtrisé et étendu (E)
                         </div>
                         <div class="profil-texte-explicatif">
-                            À ce niveau abstrait étendu, un nouvel apprentissage en génère un autre ou ouvre la porte à une nouvelle exploration. L'élève a la capacité de généraliser la structure au-delà de l'information donnée. Il comprend parfaitement et il est capable de transférer ses apprentissages à des contextes proches.
+                            À ce niveau abstrait étendu, l'élève a la capacité de généraliser la structure au-delà de l'information donnée. Il comprend et il est capable de transférer ses apprentissages à des contextes proches.
                         </div>
                     </div>
-                    ` : ''}
+                </div>
+                        `;
+                    }
 
-                    ${forcesSolo.some(f => f.valeur >= seuilMaitrise && f.valeur < 0.85) ? `
-                    <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 12px;">
-                        <div class="u-texte-succes-gras">
+                    // FORCES M (Maîtrisé) - Vert
+                    if (forcesSolo.some(f => f.valeur >= seuilMaitrise && f.valeur < 0.85)) {
+                        html += `
+                <div style="margin-bottom: ${defisSolo.length > 0 ? '20px' : '0'};">
+                    <h4 style="color: ${couleurM}; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
+                        Forces identifiées
+                    </h4>
+                    <div style="background: ${couleurM}22; border-left: 4px solid ${couleurM}; padding: 10px 12px;">
+                        <div style="font-weight: bold; color: ${couleurM};">
                             ${forcesSolo.filter(f => f.valeur >= seuilMaitrise && f.valeur < 0.85).map(f => f.nom).join(', ')} : Maîtrisé (M)
                         </div>
                         <div class="profil-texte-explicatif">
-                            À ce niveau relationnel, l'élève peut maintenant comprendre, lier et intégrer plusieurs aspects d'une réponse dans un tout cohérent. L'élève relie les savoirs entre eux, il voit plusieurs aspects d'une situation et sait l'aborder de différentes façons.
+                            À ce niveau relationnel, l'élève peut comprendre, lier et intégrer plusieurs aspects d'une réponse dans un tout cohérent. Il voit plusieurs aspects d'une situation et sait l'aborder de différentes façons.
                         </div>
                     </div>
-                    ` : ''}
                 </div>
-                ` : ''}
+                        `;
+                    }
 
-                ${defisSolo.length > 0 ? `
-                <div>
-                    <h4 style="color: #dc2626; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
-                        Défis
+                    // DÉFIS D (Développement) - Orange
+                    if (defisSolo.some(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement)) {
+                        html += `
+                <div style="margin-bottom: 12px;">
+                    <h4 style="color: ${couleurD}; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
+                        Défis en développement
                     </h4>
-
-                    ${defisSolo.some(d => d.valeur < obtenirSeuil('idme.insuffisant')) ? `
-                    <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px; margin-bottom: 8px;">
-                        <div class="u-texte-danger-gras">
-                            ${defisSolo.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : Insuffisant ou incomplet (I)
-                        </div>
-                        <div class="profil-texte-explicatif">
-                            À ce niveau unistructurel, l'élève ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois. L'élève fait des liens simples et évidents entre ses connaissances, mais n'a pas encore de réelle compréhension.
-                        </div>
-                    </div>
-                    ` : ''}
-
-                    ${defisSolo.some(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement) ? `
-                    <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 10px 12px;">
-                        <div class="u-texte-danger-gras">
+                    <div style="background: ${couleurD}22; border-left: 4px solid ${couleurD}; padding: 10px 12px;">
+                        <div style="font-weight: bold; color: ${couleurD};">
                             ${defisSolo.filter(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement).map(d => d.nom).join(', ')} : En développement (D)
                         </div>
                         <div class="profil-texte-explicatif">
-                            À ce niveau multistructurel, l'élève peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il les considère indépendamment. L'élève fait plus de liens entre ses connaissances, mais celles-ci restent compartimentées et séparées.
+                            À ce niveau multistructurel, l'élève peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il les considère indépendamment.
                         </div>
                     </div>
-                    ` : ''}
                 </div>
-                ` : ''}
+                        `;
+                    }
+
+                    // DÉFIS I (Insuffisant) - Rouge
+                    if (defisSolo.some(d => d.valeur < obtenirSeuil('idme.insuffisant'))) {
+                        html += `
+                <div>
+                    <h4 style="color: ${couleurI}; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase;">
+                        Défis critiques
+                    </h4>
+                    <div style="background: ${couleurI}22; border-left: 4px solid ${couleurI}; padding: 10px 12px;">
+                        <div style="font-weight: bold; color: ${couleurI};">
+                            ${defisSolo.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : Insuffisant ou incomplet (I)
+                        </div>
+                        <div class="profil-texte-explicatif">
+                            À ce niveau unistructurel, l'élève ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois. L'élève n'a pas encore de réelle compréhension.
+                        </div>
+                    </div>
+                </div>
+                        `;
+                    }
+
+                    return html;
+                })()}
 
                 <div class="profil-separateur-section"></div>
                 <p class="profil-texte-mini-gris">
@@ -4363,7 +4442,8 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
         forces: forces,
         defis: defis,
         principaleForce: forces.length > 0 ? forces[0] : null,
-        principalDefi: defis.length > 0 ? defis[0] : null
+        principalDefi: defis.length > 0 ? defis[0] : null,
+        moyennesCriteres: moyennes // Inclure les moyennes pour affichage par niveau IDME
     };
 }
 
@@ -5399,42 +5479,114 @@ function genererDiagnosticSRPNF(da, defisInfo) {
             `;
         })()}
 
-        <!-- Résumé forces -->
-        ${diagnostic.forces.length > 0 ? `
-            <div style="background: linear-gradient(to right, #28a74522, #28a74511);
-                        border-left: 4px solid #28a745; padding: 12px; margin-bottom: 10px;">
-                <div style="font-weight: bold; color: #155724; margin-bottom: 6px;">
-                    ✓ ${diagnostic.forces.length > 1 ? 'Forces identifiées' : 'Force identifiée'}
-                    ${diagnostic.forces.length > 1 ? ` (${diagnostic.forces.length})` : ''}
-                </div>
-                <div style="color: #155724; font-size: 0.9rem;">
-                    ${diagnostic.forces.map(f => `<strong>${f.nom}</strong> (${Math.round(f.score * 100)}%)`).join(', ')}
-                </div>
-            </div>
-        ` : `
-            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 10px;">
-                <div style="font-weight: bold; color: #856404;">
-                    ⚠️ Aucune force identifiée (aucun critère ≥ 71.25%)
-                </div>
-            </div>
-        `}
+        <!-- Résumé forces et défis par niveau IDME -->
+        ${(() => {
+            // Classifier tous les critères par niveau IDME
+            const criteresSRPNF = [
+                { nom: 'Structure', score: diagnostic.moyennesCriteres?.structure ?? 0 },
+                { nom: 'Rigueur', score: diagnostic.moyennesCriteres?.rigueur ?? 0 },
+                { nom: 'Plausibilité', score: diagnostic.moyennesCriteres?.plausibilite ?? 0 },
+                { nom: 'Nuance', score: diagnostic.moyennesCriteres?.nuance ?? 0 },
+                { nom: 'Français', score: diagnostic.moyennesCriteres?.francais ?? 0 }
+            ].filter(c => c.score > 0); // Exclure les critères sans données
 
-        <!-- Résumé défis -->
-        ${diagnostic.defis.length > 0 ? `
-            <div style="background: #fff3cd; border-left: 4px solid #ff9800; padding: 12px; margin-bottom: 15px;">
-                <div style="font-weight: bold; color: #856404; margin-bottom: 6px;">
-                    🎯 ${diagnostic.defis.length > 1 ? 'Défis identifiés' : 'Défi identifié'}
-                    ${diagnostic.defis.length > 1 ? ` (${diagnostic.defis.length})` : ''}
-                </div>
-                <div style="color: #856404; font-size: 0.9rem;">
-                    ${diagnostic.defis.map(d => `<strong>${d.nom}</strong> (${Math.round(d.score * 100)}%)`).join(', ')}
-                </div>
-                <div style="margin-top: 8px; font-size: 0.85rem; color: #856404;">
-                    💡 Cibler les efforts sur ${diagnostic.principalDefi ? `<strong>${diagnostic.principalDefi.nom}</strong>` : 'ces critères'}
-                    pour maximiser l'impact des interventions.
-                </div>
-            </div>
-        ` : ''}
+            // Grouper par niveau IDME
+            const parNiveau = {
+                'E': [],
+                'M': [],
+                'D': [],
+                'I': []
+            };
+
+            criteresSRPNF.forEach(critere => {
+                const pourcentage = critere.score * 100;
+                const niveau = obtenirNiveauIDMEDepuisPourcentage(pourcentage);
+                parNiveau[niveau].push({ ...critere, pourcentage });
+            });
+
+            let html = '';
+
+            // Afficher Forces E (Étendu) - Bleu
+            if (parNiveau['E'].length > 0) {
+                const couleur = obtenirCouleurNiveauIDME('E');
+                html += `
+                    <div style="background: ${couleur}22; border-left: 4px solid ${couleur}; padding: 12px; margin-bottom: 10px;">
+                        <div style="font-weight: bold; color: ${couleur}; margin-bottom: 6px;">
+                            ⭐ ${parNiveau['E'].length > 1 ? 'Forces exceptionnelles (E)' : 'Force exceptionnelle (E)'}
+                            ${parNiveau['E'].length > 1 ? ` (${parNiveau['E'].length})` : ''}
+                        </div>
+                        <div style="color: ${couleur}; font-size: 0.9rem;">
+                            ${parNiveau['E'].map(c => `<strong>${c.nom}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Afficher Forces M (Maîtrisé) - Vert
+            if (parNiveau['M'].length > 0) {
+                const couleur = obtenirCouleurNiveauIDME('M');
+                html += `
+                    <div style="background: ${couleur}22; border-left: 4px solid ${couleur}; padding: 12px; margin-bottom: 10px;">
+                        <div style="font-weight: bold; color: ${couleur}; margin-bottom: 6px;">
+                            ✓ ${parNiveau['M'].length > 1 ? 'Forces identifiées (M)' : 'Force identifiée (M)'}
+                            ${parNiveau['M'].length > 1 ? ` (${parNiveau['M'].length})` : ''}
+                        </div>
+                        <div style="color: ${couleur}; font-size: 0.9rem;">
+                            ${parNiveau['M'].map(c => `<strong>${c.nom}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Afficher Défis D (Développement) - Orange
+            if (parNiveau['D'].length > 0) {
+                const couleur = obtenirCouleurNiveauIDME('D');
+                html += `
+                    <div style="background: ${couleur}22; border-left: 4px solid ${couleur}; padding: 12px; margin-bottom: 10px;">
+                        <div style="font-weight: bold; color: ${couleur}; margin-bottom: 6px;">
+                            🎯 ${parNiveau['D'].length > 1 ? 'Défis en développement (D)' : 'Défi en développement (D)'}
+                            ${parNiveau['D'].length > 1 ? ` (${parNiveau['D'].length})` : ''}
+                        </div>
+                        <div style="color: ${couleur}; font-size: 0.9rem;">
+                            ${parNiveau['D'].map(c => `<strong>${c.nom}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Afficher Défis I (Insuffisant) - Rouge
+            if (parNiveau['I'].length > 0) {
+                const couleur = obtenirCouleurNiveauIDME('I');
+                html += `
+                    <div style="background: ${couleur}22; border-left: 4px solid ${couleur}; padding: 12px; margin-bottom: 15px;">
+                        <div style="font-weight: bold; color: ${couleur}; margin-bottom: 6px;">
+                            ⚠️ ${parNiveau['I'].length > 1 ? 'Défis critiques (I)' : 'Défi critique (I)'}
+                            ${parNiveau['I'].length > 1 ? ` (${parNiveau['I'].length})` : ''}
+                        </div>
+                        <div style="color: ${couleur}; font-size: 0.9rem;">
+                            ${parNiveau['I'].map(c => `<strong>${c.nom}</strong> (${Math.round(c.pourcentage)}%)`).join(', ')}
+                        </div>
+                        <div style="margin-top: 8px; font-size: 0.85rem; color: ${couleur};">
+                            💡 Cibler les efforts sur ${parNiveau['I'].length > 1 ? 'ces critères' : 'ce critère'}
+                            pour maximiser l'impact des interventions.
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Message si aucun critère avec données
+            if (criteresSRPNF.length === 0) {
+                html = `
+                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 10px;">
+                        <div style="font-weight: bold; color: #856404;">
+                            ⚠️ Aucune donnée disponible pour l'analyse des critères
+                        </div>
+                    </div>
+                `;
+            }
+
+            return html;
+        })()}
     `;
 }
 

@@ -3552,7 +3552,7 @@
                                 <div style="display: flex; flex-direction: column; gap: 10px;">
                                     <!-- Jeton de délai -->
                                     <div id="badgeJetonDelaiOption" style="display: flex; align-items: flex-start; gap: 10px;">
-                                        <input type="checkbox" id="checkboxJetonDelai" style="margin-top: 6px;">
+                                        <input type="checkbox" id="checkboxJetonDelai" style="margin-top: 6px;" onchange="gererChangementCheckboxJetonDelai()">
                                         <div style="flex: 1;">
                                             <span class="badge-jeton-delai-wrapper">
                                                 <span class="badge-jeton-titre">Délai</span>
@@ -3565,7 +3565,7 @@
 
                                     <!-- Jeton de reprise -->
                                     <div id="badgeJetonRepriseOption" style="display: flex; align-items: flex-start; gap: 10px;">
-                                        <input type="checkbox" id="checkboxJetonReprise" style="margin-top: 6px;">
+                                        <input type="checkbox" id="checkboxJetonReprise" style="margin-top: 6px;" onchange="gererChangementCheckboxJetonReprise()">
                                         <div style="flex: 1;">
                                             <span class="badge-jeton-reprise-wrapper">
                                                 <span class="badge-jeton-titre">Reprise</span>
@@ -4152,10 +4152,10 @@
                     <!-- Carte Note (pas de Conseil pour Échelle) -->
                     <div id="note-echelle" class="carte-info-toggle carte-info-note" style="display: none;">
                         <strong>Note :</strong> L'échelle de performance définit les niveaux de maîtrise utilisés pour évaluer les critères.
-                        Le système utilise par défaut l'échelle IDME (Insuffisant, en Développement, Maîtrisé, Étendu) basée sur la taxonomie SOLO.
+                        L'échelle IDME (Insuffisant, en Développement, Maîtrisé, Étendu) basée sur la taxonomie SOLO est utilisée dans la pratique PAN-Maîtrise.
                         Chaque niveau correspond à un seuil de performance : Insuffisant (&lt; 64%), Développement (65-74%), Maîtrisé (75-84%),
                         Étendu (≥ 85%). Cette échelle peut être personnalisée selon les besoins pédagogiques et permet un suivi longitudinal
-                        de la progression des étudiants.
+                        de la progression des étudiants. Vous pouvez créer vos propres échelles de notation adaptées à votre pratique.
                     </div>
 
                     <!-- LAYOUT SIDEBAR 2 COLONNES -->
@@ -5813,7 +5813,7 @@ Exemple :
                                         <strong style="margin-left: 8px;">Afficher l'observation de la structure des résultats d'apprentissage (SOLO)</strong>
                                     </label>
                                     <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.8rem; line-height: 1.5;">
-                                        Affiche une 3<sup>e</sup> carte dans Accompagnement avec les descriptions détaillées basées sur la taxonomie SOLO de Biggs & Collis (unistructurel, multistructurel, relationnel, abstrait étendu). Désactivez cette option si votre pratique ne s'appuie pas sur la taxonomie pas SOLO.
+                                        Affiche une 3<sup>e</sup> carte dans Accompagnement avec les descriptions détaillées basées sur la taxonomie SOLO de Biggs & Collis (unistructurel, multistructurel, relationnel, abstrait étendu). Désactivez cette option si votre pratique ne s'appuie pas sur la taxonomie SOLO.
                                     </small>
                                 </div>
 
@@ -6440,7 +6440,7 @@ Exemple :
                             </div>
                         </div>
                         <div class="alerte alerte-attention" style="margin: 10px 0; padding: 10px; font-size: 0.9rem;">
-                            ⚠️ <strong>Avertissement :</strong> La section Aide a été générée par une intelligence artificielle et peut contenir des erreurs.
+                            ⚠️ <strong>Avertissement :</strong> La section Aide a été générée par une intelligence artificielle et peut contenir des inexactitudes.
                         </div>
                         <div class="label-block-085-muted-center-mb8">
                             Recherche dans : Introduction • Configuration • Formation • Utilisation • Consultation • Référence
@@ -8056,21 +8056,65 @@ Exemple :
                         </table>
                     </div>
 
-                    <!-- Carte: Patterns d'apprentissage -->
+                    <!-- Carte: Options configurables RàI et SOLO -->
+                    <div class="carte" style="background: #fff3e0; border-left: 4px solid var(--orange-accent);">
+                        <h3 class="carte-titre-bleu">⚙️ Options configurables : RàI et SOLO</h3>
+
+                        <p><strong>Le système offre deux fonctionnalités optionnelles</strong> que vous pouvez activer/désactiver selon votre pratique de notation :</p>
+
+                        <div class="alerte alerte-info" style="margin-top: 15px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Option 1 : Détection des patterns et RàI</h4>
+                            <p><strong>Activation :</strong> Réglages → Pratique de notation → Cocher «Activer RàI et détection des patterns»</p>
+                            <p><strong>Fonction :</strong> Identifie automatiquement 4 patterns d'apprentissage (Stable, Défi spécifique, Blocage émergent, Blocage critique) et recommande des niveaux d'intervention selon le cadre Réponse à l'Intervention (RàI).</p>
+                            <p><strong>Utilisation recommandée :</strong></p>
+                            <ul style="margin-top: 5px;">
+                                <li><strong>✅ Activer si :</strong> Vous utilisez une grille de critères cohérente pour toutes les évaluations (ex: SRPNF, compétences disciplinaires)</li>
+                                <li><strong>❌ Désactiver si :</strong> Évaluations hétérogènes sans grille commune, ou système d'intervention non applicable dans votre contexte</li>
+                            </ul>
+                        </div>
+
+                        <div class="alerte alerte-info" style="margin-top: 15px;">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Option 2 : Observation de la structure SOLO</h4>
+                            <p><strong>Activation :</strong> Réglages → Pratique de notation → Cocher «Afficher l'observation de la structure des résultats d'apprentissage (SOLO)»</p>
+                            <p><strong>Fonction :</strong> Affiche une carte dans le profil étudiant (section Accompagnement) avec les forces et défis identifiés selon les 4 niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu) basés sur la taxonomie SOLO de Biggs & Collis.</p>
+                            <p><strong>Utilisation recommandée :</strong></p>
+                            <ul style="margin-top: 5px;">
+                                <li><strong>✅ Activer si :</strong> Votre pratique s'appuie sur la taxonomie SOLO et l'échelle IDME (ex: PAN-Maîtrise)</li>
+                                <li><strong>❌ Désactiver si :</strong> Vous utilisez une échelle chiffrée traditionnelle (0-100%) sans référence à la taxonomie SOLO</li>
+                            </ul>
+                        </div>
+
+                        <div class="alerte alerte-warning" style="margin-top: 15px;">
+                            <h4 style="color: #856404; margin-bottom: 10px;">⚠️ Distinction importante : Défis vs Défi spécifique</h4>
+                            <p><strong>Ces deux concepts sont différents</strong> (quand les deux options sont activées) :</p>
+                            <ul style="margin-top: 5px;">
+                                <li><strong>Défis (I/D)</strong> : Niveaux IDME <strong>individuels par critère</strong> dans «Observation de la structure SOLO»
+                                    <br><em style="font-size: 0.85rem; color: #856404;">→ Exemple : L'étudiant a un défi D (Développement 65-74%) en Structure mais une force M (Maîtrisé 75-84%) en Français</em>
+                                </li>
+                                <li><strong>Défi spécifique</strong> : <strong>Pattern global</strong> dans le tableau de bord (nécessite Performance ≥ 75% avec au moins un défi sur un critère)
+                                    <br><em style="font-size: 0.85rem; color: #856404;">→ Exemple : Performance moyenne 78% mais Structure à 68% = Pattern «Défi spécifique» (bon globalement, faiblesse ciblée)</em>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <p class="text-muted" style="margin-top: 15px; font-size: 0.9rem;"><em><strong>Note :</strong> Ces options ont été développées dans le cadre de la pratique PAN-Maîtrise de Grégoire Bédard mais peuvent être adaptées à d'autres pratiques pédagogiques. Elles ne sont pas obligatoires pour utiliser le système de monitorage A-C-P.</em></p>
+                    </div>
+
+                    <!-- Carte: Patterns d'apprentissage (optionnel) -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Patterns d'apprentissage</h3>
-                        <p>Le système identifie automatiquement 4 patterns selon la performance moyenne IDME et les défis identifiés :</p>
+                        <h3 class="carte-titre-bleu">Patterns d'apprentissage (optionnel - si activé)</h3>
+                        <p>Lorsque l'option RàI est activée, le système identifie automatiquement 4 patterns selon la performance moyenne et les défis identifiés :</p>
 
                         <div class="alerte-success-dark">
-                            <h4 class="text-success-mb10">Stable</h4>
-                            <p><strong>Critères :</strong> Performance &gt; 3.0 OU aucun défi majeur</p>
+                            <h4 class="text-success-mb10">Progression stable</h4>
+                            <p><strong>Critères :</strong> Performance ≥ 75% OU aucun défi détecté</p>
                             <p><strong>Intervention :</strong> RàI Niveau 1 - Enseignement universel avec suivi</p>
                             <p><strong>Action :</strong> Maintenir l'engagement, possibilités d'enrichissement</p>
                         </div>
 
                         <div class="alerte-warning-jaune">
                             <h4 class="text-warning-856-mb10">Défi spécifique</h4>
-                            <p><strong>Critères :</strong> Performance ≤ 3.0 avec défis identifiés</p>
+                            <p><strong>Critères :</strong> Performance ≥ 75% avec au moins un défi identifié sur un critère</p>
                             <p><strong>Intervention :</strong> RàI Niveau 2 - Soutien ciblé en petit groupe</p>
                             <p><strong>Action :</strong> Pratique guidée en s'appuyant sur les forces</p>
                         </div>
@@ -8714,7 +8758,7 @@ Exemple :
                                     <ul>
                                         <li><strong>Assiduité (A) :</strong> Mesure la présence physique et cognitive en classe. Un étudiant assidu est engagé dans son apprentissage.</li>
                                         <li><strong>Complétion (C) :</strong> Mesure la remise des travaux demandés. Un taux élevé indique une bonne mobilisation.</li>
-                                        <li><strong>Performance (P) :</strong> Mesure la qualité des productions selon les critères SRPNF. Reflète le niveau de maîtrise.</li>
+                                        <li><strong>Performance (P) :</strong> Mesure la qualité des productions selon vos critères d'évaluation (ex: SRPNF dans la pratique PAN-Maîtrise). Reflète le niveau de maîtrise.</li>
                                     </ul>
                                     <p class="mt-10"><strong>Exemple concret :</strong> Un étudiant peut avoir A=95% (toujours présent), C=80% (remet la plupart des travaux) et P=65% (qualité variable). L'indice R combinera ces trois dimensions pour prédire le risque.</p>
                                 </div>
@@ -8774,10 +8818,10 @@ Exemple :
                                     <p>La RàI est un système d'intervention à trois niveaux :</p>
                                     <ul>
                                         <li><strong>Niveau 1 - Universel :</strong> Enseignement de qualité pour tous (80% des étudiants)</li>
-                                        <li><strong>Niveau 2 - Ciblé :</strong> Interventions de groupe pour étudiants fragiles ou à risque (15% des étudiants)</li>
+                                        <li><strong>Niveau 2 - Préventif :</strong> Interventions de groupe pour étudiants fragiles ou à risque (15% des étudiants)</li>
                                         <li><strong>Niveau 3 - Intensif :</strong> Soutien individualisé pour étudiants en situation critique (&lt; 5% des étudiants)</li>
                                     </ul>
-                                    <p class="mt-10"><strong>Dans l'application :</strong> Le profil étudiant suggère automatiquement le niveau RàI selon l'indice R et fournit des recommandations d'intervention adaptées.</p>
+                                    <p class="mt-10"><strong>Dans l'application :</strong> Si l'option RàI est activée (Réglages → Pratique de notation), le profil étudiant suggère automatiquement le niveau RàI selon l'indice R et fournit des recommandations d'intervention adaptées.</p>
                                 </div>
                             </details>
                         </div>
@@ -8943,7 +8987,7 @@ Exemple :
 
                             <dl class="ml-10">
                                 <dt class="titre-section-aide">Échelle IDME</dt>
-                                <dd class="ml-20-mb-10">Échelle de performance à 4 niveaux : <strong>I</strong>nsuffisant (&lt;.64), <strong>D</strong>éveloppement (.65-.74), <strong>M</strong>aîtrisé (.75-.84), <strong>E</strong>tendu (≥.85). Basée sur la taxonomie SOLO de Biggs & Collis. Utilisée pour interpréter les scores SRPNF.</dd>
+                                <dd class="ml-20-mb-10">Échelle de performance à 4 niveaux : <strong>I</strong>nsuffisant (&lt; 64%), <strong>D</strong>éveloppement (65-74%), <strong>M</strong>aîtrisé (75-84%), <strong>E</strong>tendu (≥ 85%). Basée sur la taxonomie SOLO de Biggs & Collis. Utilisée dans la pratique PAN-Maîtrise pour interpréter les scores des critères d'évaluation. <em>(Optionnel - voir Réglages → Pratique de notation)</em></dd>
                             </dl>
 
                             <h4 class="titre-section-principal">G</h4>
@@ -8960,7 +9004,7 @@ Exemple :
                                 <dd class="ml-20-mb-10">Indice composite prédisant le risque d'échec. Formule : R = (2×A + C + P) / 4. Combine assiduité, complétion et performance en un seul score. 6 niveaux d'interprétation : Excellent (≥85%), Bon (70-84%), Fragile (60-69%), À risque (50-59%), Critique (40-49%), Échec probable (&lt;40%).</dd>
 
                                 <dt class="titre-section-aide">Indice RàI</dt>
-                                <dd class="ml-20-mb-10">Score déterminant le niveau d'intervention selon le cadre Réponse à l'Intervention. Calculé à partir de l'indice R. Trois niveaux : Universel (≥70%), Ciblé (40-69%), Intensif (&lt;40%).</dd>
+                                <dd class="ml-20-mb-10">Score déterminant le niveau d'intervention selon le cadre Réponse à l'Intervention. Calculé à partir de l'indice R. Trois niveaux : Universel (≥70%), Préventif (40-69%), Intensif (&lt;40%). <em>(Optionnel - voir Réglages → Pratique de notation → Activer RàI et détection des patterns)</em></dd>
                             </dl>
 
                             <h4 class="titre-section-principal">L</h4>

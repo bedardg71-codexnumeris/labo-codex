@@ -1673,7 +1673,7 @@ function genererSectionAccompagnement(da) {
                             ${defisSolo.filter(d => d.valeur < obtenirSeuil('idme.insuffisant')).map(d => d.nom).join(', ')} : Insuffisant ou incomplet (I)
                         </div>
                         <div style="font-size: 0.85rem; line-height: 1.5; color: #333;">
-                            À ce niveau unistructurel, l'élève ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois. L'élève fait des liens simples et évidents entre ses connaissances, mais n'a pas encore de réelle compréhension.
+                            À ce niveau unistructurel, l'élève ne traite que d'un seul aspect du savoir ou d'un savoir-faire à la fois.
                         </div>
                     </div>
                     ` : ''}
@@ -1684,7 +1684,7 @@ function genererSectionAccompagnement(da) {
                             ${defisSolo.filter(d => d.valeur >= obtenirSeuil('idme.insuffisant') && d.valeur < seuilDeveloppement).map(d => d.nom).join(', ')} : En développement (D)
                         </div>
                         <div style="font-size: 0.85rem; line-height: 1.5; color: #333;">
-                            À ce niveau multistructurel, l'élève peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il les considère indépendamment. L'élève fait plus de liens entre ses connaissances, mais celles-ci restent compartimentées et séparées.
+                            À ce niveau multistructurel, l'élève peut se concentrer sur plusieurs points pertinents à la fois. Cependant, il les considère indépendamment. 
                         </div>
                     </div>
                     ` : ''}

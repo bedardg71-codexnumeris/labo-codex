@@ -1388,8 +1388,27 @@ function sauvegarderEvaluation() {
         verrouillee: true // Verrouiller par défaut toutes les nouvelles évaluations
     };
 
-    // Note : Les jetons de délai ne peuvent être appliqués que sur des évaluations existantes
-    // via le bouton "Appliquer jeton de délai" dans la sidebar
+    // Lire l'état des checkboxes de jetons et appliquer si cochées
+    const checkboxDelai = document.getElementById('checkboxJetonDelai');
+    if (checkboxDelai && checkboxDelai.checked) {
+        // Vérifier la disponibilité du jeton avant de l'appliquer
+        if (typeof verifierDisponibiliteJeton === 'function' && verifierDisponibiliteJeton(etudiantDA, 'delai')) {
+            const config = obtenirConfigJetons();
+            evaluation.jetonDelaiApplique = true;
+            evaluation.dateApplicationJetonDelai = maintenant.toISOString();
+            evaluation.delaiAccorde = true;
+            evaluation.dureeDelaiJours = config.delai.dureeJours;
+        } else {
+            // Décocher la checkbox si le jeton n'est pas disponible
+            checkboxDelai.checked = false;
+            const config = obtenirConfigJetons();
+            const utilises = compterJetonsUtilises(etudiantDA, 'delai');
+            afficherNotificationErreur(
+                'Jetons épuisés',
+                `Plus de jetons de délai disponibles (${utilises}/${config.delai.nombre} utilisés)`
+            );
+        }
+    }
 
     // Sauvegarder
     let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
@@ -1667,25 +1686,77 @@ function afficherGestionJetons(afficher) {
 
 /**
  * Gère le changement de la checkbox jeton de délai
- * @param {HTMLInputElement} checkbox - La checkbox
+ * Applique ou retire le jeton selon l'état de la checkbox
  */
-function gererCheckboxJetonDelai(checkbox) {
+function gererChangementCheckboxJetonDelai() {
+    const checkbox = document.getElementById('checkboxJetonDelai');
+    const evaluationId = window.evaluationEnCours?.idModification;
+
+    if (!evaluationId) {
+        // Nouvelle évaluation : on laisse la checkbox cochée
+        // Le jeton sera appliqué lors de la sauvegarde
+        if (checkbox.checked) {
+            console.log('✅ Jeton de délai marqué pour application lors de la sauvegarde');
+        }
+        return;
+    }
+
+    // Évaluation existante : appliquer ou retirer immédiatement
     if (checkbox.checked) {
-        appliquerJetonDelaiDepuisSidebar();
-        // Désactiver la checkbox après application
-        checkbox.checked = false;
+        // Appliquer le jeton
+        const succes = appliquerJetonDelai(evaluationId);
+        if (!succes) {
+            // Si l'application a échoué, décocher la checkbox
+            checkbox.checked = false;
+        }
+    } else {
+        // Retirer le jeton
+        retirerJetonDelai(evaluationId);
     }
 }
 
 /**
  * Gère le changement de la checkbox jeton de reprise
- * @param {HTMLInputElement} checkbox - La checkbox
+ * Applique ou retire le jeton selon l'état de la checkbox
  */
-function gererCheckboxJetonReprise(checkbox) {
-    if (checkbox.checked) {
-        appliquerJetonRepriseDepuisSidebar();
-        // Désactiver la checkbox après application
+function gererChangementCheckboxJetonReprise() {
+    const checkbox = document.getElementById('checkboxJetonReprise');
+    const evaluationId = window.evaluationEnCours?.idModification;
+
+    if (!evaluationId) {
+        console.warn('⚠️ Jeton de reprise : Impossible d\'appliquer sur une nouvelle évaluation (pas encore sauvegardée)');
         checkbox.checked = false;
+        afficherNotificationErreur('Erreur', 'Veuillez d\'abord sauvegarder l\'évaluation avant d\'appliquer un jeton');
+        return;
+    }
+
+    if (checkbox.checked) {
+        // Pour le jeton de reprise, demander confirmation car cela crée une nouvelle évaluation
+        const confirmer = confirm(
+            'Appliquer un jeton de reprise créera une nouvelle évaluation qui remplacera celle-ci.\n\n' +
+            'Voulez-vous continuer ?'
+        );
+
+        if (confirmer) {
+            const nouvelleEval = appliquerJetonReprise(evaluationId);
+            if (nouvelleEval) {
+                // Charger la nouvelle évaluation dans le formulaire
+                setTimeout(() => {
+                    if (typeof modifierEvaluation === 'function') {
+                        modifierEvaluation(nouvelleEval.id);
+                    }
+                }, 500);
+            } else {
+                // Si l'application a échoué, décocher la checkbox
+                checkbox.checked = false;
+            }
+        } else {
+            // L'utilisateur a annulé, décocher la checkbox
+            checkbox.checked = false;
+        }
+    } else {
+        // Retirer le jeton
+        retirerJetonReprise(evaluationId);
     }
 }
 

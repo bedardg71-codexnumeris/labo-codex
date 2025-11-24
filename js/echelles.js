@@ -67,7 +67,7 @@ const niveauxDefaut = [
         nom: 'Incomplet ou insuffisant',
         description: 'Préstructurel, unistructurel',
         min: 0,
-        max: 64,
+        max: 64.99,
         valeurCalcul: 32,
         couleur: 'var(--risque-critique)'
     },
@@ -76,7 +76,7 @@ const niveauxDefaut = [
         nom: 'En Développement',
         description: 'Multistructurel',
         min: 65,
-        max: 74,
+        max: 74.99,
         valeurCalcul: 69.5,
         couleur: 'var(--risque-modere)'
     },
@@ -85,7 +85,7 @@ const niveauxDefaut = [
         nom: 'Maîtrisé',
         description: 'Relationnel',
         min: 75,
-        max: 84,
+        max: 84.99,
         valeurCalcul: 79.5,
         couleur: 'var(--risque-minimal)'
     },
