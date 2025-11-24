@@ -460,7 +460,7 @@
       ]
     }
   ],
-  "echellesPerformance": [
+  "echellesTemplates": [
     {
       "id": "echelle-idme",
       "nom": "Échelle IDME (SOLO)",
@@ -479,35 +479,35 @@
           "code": "I",
           "nom": "Insuffisant",
           "min": 0.01,
-          "max": 0.64,
-          "valeur": 0.5,
+          "max": 64.99,
+          "valeur": 32,
           "couleur": "#F44336",
           "description": "Compréhension superficielle ou fragmentée"
         },
         {
           "code": "D",
           "nom": "Développement",
-          "min": 0.65,
-          "max": 0.74,
-          "valeur": 0.7,
+          "min": 65,
+          "max": 74.99,
+          "valeur": 69.5,
           "couleur": "#FF9800",
           "description": "Points pertinents sans liens entre eux"
         },
         {
           "code": "M",
           "nom": "Maîtrisé",
-          "min": 0.75,
-          "max": 0.84,
-          "valeur": 0.8,
+          "min": 75,
+          "max": 84.99,
+          "valeur": 79.5,
           "couleur": "#4CAF50",
           "description": "Compréhension globale avec liens explicites"
         },
         {
           "code": "E",
           "nom": "Étendu",
-          "min": 0.85,
-          "max": 1,
-          "valeur": 0.9,
+          "min": 85,
+          "max": 100,
+          "valeur": 92.5,
           "couleur": "#2196F3",
           "description": "Transfert à d'autres contextes et généralisation"
         }
