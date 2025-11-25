@@ -201,6 +201,7 @@ function chargerInfosSysteme() {
     setStatText('stat-version', versionBeta);
 
     // Poids des données
+    // KEPT: Raw localStorage access for size calculation (justified exception)
     let poidsTotal = 0;
     const allKeys = Object.keys(localStorage);
     for (const cle of allKeys) {

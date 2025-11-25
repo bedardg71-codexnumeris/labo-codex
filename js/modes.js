@@ -629,7 +629,7 @@ function obtenirDonneesSelonMode(cle) {
 
 /**
  * Sauvegarde des données selon le mode actif
- * FONCTION CENTRALE - À utiliser partout où on fait localStorage.setItem()
+ * FONCTION CENTRALE - À utiliser partout où on fait db.setSync()
  * 
  * @param {string} cle - Clé de base (ex: 'groupeEtudiants')
  * @param {*} donnees - Données à sauvegarder
