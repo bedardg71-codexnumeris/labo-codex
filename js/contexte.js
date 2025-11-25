@@ -15,7 +15,7 @@ function mettreAJourContexteEntete() {
 
     try {
         // Obtenir les informations du cours
-        const infoCours = JSON.parse(localStorage.getItem('infoCours') || '{}');
+        const infoCours = db.getSync('infoCours', {});
         const nomCours = infoCours.nomCours || '';
 
         // Obtenir la date actuelle
@@ -23,11 +23,11 @@ function mettreAJourContexteEntete() {
         const dateStr = `${aujourdhui.getFullYear()}-${String(aujourdhui.getMonth() + 1).padStart(2, '0')}-${String(aujourdhui.getDate()).padStart(2, '0')}`;
 
         // Obtenir les informations du calendrier
-        const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+        const calendrier = db.getSync('calendrierComplet', {});
         const infoJour = calendrier[dateStr];
 
         // Obtenir les séances
-        const seancesCompletes = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
+        const seancesCompletes = db.getSync('seancesCompletes', {});
 
         let html = '';
 
