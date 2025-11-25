@@ -288,7 +288,7 @@ class PratiqueSommative {
         // Calculer indice A (assiduité) si disponible
         let indiceA = 0.85; // Valeur par défaut optimiste
         try {
-            const indicesAssiduite = JSON.parse(localStorage.getItem('indicesAssiduiteDetailles') || '{}');
+            const indicesAssiduite = db.getSync('indicesAssiduiteDetailles', {});
             if (indicesAssiduite[da]) {
                 indiceA = indicesAssiduite[da].actuel.A / 100;
             }
@@ -526,15 +526,15 @@ class PratiqueSommative {
         if (typeof obtenirDonneesSelonMode === 'function') {
             return obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         }
-        return JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+        return db.getSync('evaluationsSauvegardees', []);
     }
 
     /**
-     * Lit les productions depuis localStorage
+     * Lit les productions depuis db.getSync
      * @private
      */
     _lireProductions() {
-        return JSON.parse(localStorage.getItem('productions') || '[]');
+        return db.getSync('productions', []);
     }
 
     /**

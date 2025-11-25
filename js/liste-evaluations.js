@@ -72,9 +72,9 @@ function calculerEtSauvegarderIndiceCompletion() {
     });
     
     // Récupérer ou créer la structure indicesEvaluation
-    let indicesEvaluation = JSON.parse(localStorage.getItem('indicesEvaluation') || '{}');
+    let indicesEvaluation = db.getSync('indicesEvaluation', {});
     indicesEvaluation.completion = indices;
-    localStorage.setItem('indicesEvaluation', JSON.stringify(indicesEvaluation));
+    db.setSync('indicesEvaluation', indicesEvaluation);
     
     console.log('✅ Indices de complétion sauvegardés');
     console.log('   Sommatif:', Object.keys(indices.sommatif).length, 'étudiants');
@@ -92,7 +92,7 @@ function calculerEtSauvegarderIndiceCompletion() {
  */
 function calculerCompletionSommative(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     
     // Productions à évaluer (exclure portfolio)
     const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
@@ -123,7 +123,7 @@ function calculerCompletionSommative(da) {
  */
 function calculerCompletionAlternative(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     
     // Obtenir le nombre d'artefacts depuis les réglages
     const nombreArtefacts = config.configPAN?.nombreArtefacts || 3;
@@ -207,7 +207,7 @@ function chargerDonneesEvaluations() {
     // Charger les données selon le mode actif (géré automatiquement par le module 17)
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
 
     // Extraire les groupes uniques depuis les étudiants
     const groupes = etudiants.length > 0
@@ -262,7 +262,7 @@ function genererOptionsFiltres(groupes, productions) {
 
     // Filtre Note (selon la pratique de notation)
     const selectNote = document.getElementById('filtre-note-eval');
-    const pratiqueNotation = JSON.parse(localStorage.getItem('pratiqueNotation') || '{}');
+    const pratiqueNotation = db.getSync('pratiqueNotation', {});
 
     if (selectNote) {
         selectNote.innerHTML = '<option value="">Toutes les notes</option>';
@@ -310,7 +310,7 @@ function sauvegarderEtatFiltres() {
         tri: document.getElementById('tri-evaluations')?.value || 'nom-asc'
     };
 
-    localStorage.setItem('filtresListeEvaluations', JSON.stringify(etatFiltres));
+    db.setSync('filtresListeEvaluations', etatFiltres);
     console.log('💾 Filtres sauvegardés:', etatFiltres);
 }
 
@@ -318,7 +318,7 @@ function sauvegarderEtatFiltres() {
  * Restaure l'état des filtres depuis localStorage
  */
 function restaurerEtatFiltres() {
-    const etatSauvegarde = localStorage.getItem('filtresListeEvaluations');
+    const etatSauvegarde = db.getSync('filtresListeEvaluations', null);
 
     if (!etatSauvegarde) {
         console.log('📂 Aucun filtre sauvegardé à restaurer');
@@ -390,7 +390,7 @@ function reinitialiserFiltres() {
     if (recherche) recherche.value = '';
 
     // Supprimer l'état sauvegardé dans localStorage
-    localStorage.removeItem('filtresListeEvaluations');
+    db.removeSync('filtresListeEvaluations');
     console.log('🗑️ Filtres sauvegardés supprimés');
 
     appliquerFiltres();
@@ -502,7 +502,7 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
  */
 function construireLignesEvaluations(evaluations, productions, etudiants) {
     const lignes = [];
-    const pratiqueNotation = JSON.parse(localStorage.getItem('pratiqueNotation') || '{}');
+    const pratiqueNotation = db.getSync('pratiqueNotation', {});
 
     // Productions à évaluer (exclure le portfolio lui-même)
     const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
@@ -626,7 +626,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
 function obtenirNomCartouche(grilleId, cartoucheId) {
     if (!grilleId || !cartoucheId) return '-';
 
-    const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     return cartouche ? cartouche.nom : '-';
@@ -1073,15 +1073,15 @@ function toggleVerrouillerEvaluation(evaluationId) {
  */
 function obtenirIndicesEtudiant(da) {
     // Récupérer les indices selon la pratique active
-    const pratiqueNotation = JSON.parse(localStorage.getItem('pratiqueNotation') || '{}');
+    const pratiqueNotation = db.getSync('pratiqueNotation', {});
     const pratique = pratiqueNotation.pratique === 'alternative' ? 'PAN' : 'SOM';
 
     // Indice A (Assiduité)
-    const indicesAssiduiteDetailles = JSON.parse(localStorage.getItem('indicesAssiduiteDetailles') || '{}');
+    const indicesAssiduiteDetailles = db.getSync('indicesAssiduiteDetailles', {});
     const A = indicesAssiduiteDetailles[da]?.actuel?.indice ?? 0;
 
     // Indices C et P (Complétion et Performance)
-    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    const indicesCP = db.getSync('indicesCP', {});
     const donneesCP = indicesCP[da]?.actuel?.[pratique] || {};
     const C = donneesCP.C ?? 0;
     const P = donneesCP.P ?? 0;

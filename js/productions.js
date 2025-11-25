@@ -71,8 +71,8 @@
  * 6. Gère l'affichage spécial pour les portfolios
  */
 function afficherTableauProductions() {
-    const evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const evaluations = db.getSync('productions', []);
+    const grilles = db.getSync('grillesTemplates', []);
     const container = document.getElementById('tableauEvaluationsContainer');
 
     if (evaluations.length === 0) {
@@ -196,7 +196,7 @@ function afficherFormProduction(id) {
     console.log('   - selectGrilleInline trouvé?', !!selectGrilleInline);
 
     if (selectGrille || selectGrilleInline) {
-        const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+        const grilles = db.getSync('grillesTemplates', []);
         console.log('   - Nombre de grilles:', grilles.length);
         console.log('   - Grilles:', grilles.map(g => ({ id: g.id, nom: g.nom })));
 
@@ -213,7 +213,7 @@ function afficherFormProduction(id) {
 
     if (id) {
         // Mode modification
-        const evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
+        const evaluations = db.getSync('productions', []);
         console.log('📦 Nombre de productions:', evaluations.length);
         console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
 
@@ -343,7 +343,7 @@ function sauvegarderProduction() {
         return;
     }
 
-    let evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
+    let evaluations = db.getSync('productions', []);
 
     // Préparer l'objet de base
     let productionData = {
@@ -390,8 +390,8 @@ function sauvegarderProduction() {
         console.log('   - Nouveau ID:', productionData.id);
     }
 
-    console.log('💾 Sauvegarde dans localStorage...');
-    localStorage.setItem('productions', JSON.stringify(evaluations));
+    console.log('💾 Sauvegarde dans db.setSync...');
+    db.setSync('productions', evaluations);
     console.log('✅ Sauvegarde terminée');
 
     annulerFormProduction();
@@ -493,10 +493,10 @@ function modifierProduction(id) {
  */
 function supprimerProduction(id) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette production ?')) {
-        let evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
+        let evaluations = db.getSync('productions', []);
         evaluations = evaluations.filter(e => e.id !== id);
 
-        localStorage.setItem('productions', JSON.stringify(evaluations));
+        db.setSync('productions', evaluations);
         afficherTableauProductions();
         afficherToutesLesProductionsParType();
         mettreAJourPonderationTotale();
@@ -532,7 +532,7 @@ function supprimerProduction(id) {
 function verrouillerEvaluation(id) {
     console.log('🔐 verrouillerEvaluation appelée avec ID:', id, 'type:', typeof id);
 
-    let evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
+    let evaluations = db.getSync('productions', []);
     console.log('📦 Nombre de productions:', evaluations.length);
     console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
 
@@ -547,7 +547,7 @@ function verrouillerEvaluation(id) {
 
     if (index !== -1) {
         evaluations[index].verrouille = !evaluations[index].verrouille;
-        localStorage.setItem('productions', JSON.stringify(evaluations));
+        db.setSync('productions', evaluations);
         afficherTableauProductions();
         afficherToutesLesProductionsParType();
 
@@ -592,12 +592,12 @@ function verrouillerEvaluation(id) {
  * 5. Rafraîchit l'affichage
  */
 function monterEvaluation(id) {
-    let evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
+    let evaluations = db.getSync('productions', []);
     const index = evaluations.findIndex(e => e.id === id);
 
     if (index > 0) {
         [evaluations[index - 1], evaluations[index]] = [evaluations[index], evaluations[index - 1]];
-        localStorage.setItem('productions', JSON.stringify(evaluations));
+        db.setSync('productions', evaluations);
         afficherTableauProductions();
         afficherToutesLesProductionsParType();
     }
@@ -625,12 +625,12 @@ function monterEvaluation(id) {
  * 5. Rafraîchit l'affichage
  */
 function descendreEvaluation(id) {
-    let evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
+    let evaluations = db.getSync('productions', []);
     const index = evaluations.findIndex(e => e.id === id);
 
     if (index < evaluations.length - 1) {
         [evaluations[index], evaluations[index + 1]] = [evaluations[index + 1], evaluations[index]];
-        localStorage.setItem('productions', JSON.stringify(evaluations));
+        db.setSync('productions', evaluations);
         afficherTableauProductions();
         afficherToutesLesProductionsParType();
     }
@@ -728,7 +728,7 @@ function synchroniserGrilles() {
  * 4. Sinon : génère des checkboxes pour chaque artefact
  */
 function chargerArtefactsDisponibles() {
-    const evaluations = JSON.parse(localStorage.getItem('productions') || '[]');
+    const evaluations = db.getSync('productions', []);
     const artefacts = evaluations.filter(p => p.type === 'artefact-portfolio');
     const container = document.getElementById('listeArtefactsDisponibles');
 
@@ -774,7 +774,7 @@ function chargerArtefactsDisponibles() {
  *    - Orange si < 100%
  */
 function mettreAJourPonderationTotale() {
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
 
     // Ignorer les artefacts-portfolio dans le calcul (ils font partie du Portfolio)
     const productionsComptees = productions.filter(p => p.type !== 'artefact-portfolio');
@@ -910,8 +910,8 @@ function afficherToutesLesProductionsParType() {
     const container = document.getElementById('vueProductionsParType');
     if (!container) return;
 
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const productions = db.getSync('productions', []);
+    const grilles = db.getSync('grillesTemplates', []);
 
     if (productions.length === 0) {
         container.innerHTML = `
@@ -1250,8 +1250,8 @@ window.chargerGrillesDisponiblesPourProduction = chargerGrillesDisponiblesPourPr
  * 5. Boutons Dupliquer (violet) et Supprimer (rouge)
  */
 function afficherListeProductions(filtreType = '') {
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const productions = db.getSync('productions', []);
+    const grilles = db.getSync('grillesTemplates', []);
     const container = document.getElementById('sidebarListeProductions');
 
     if (!container) return;
@@ -1340,7 +1340,7 @@ function chargerProductionPourModif(id) {
     }
 
     // Mettre à jour les métriques - DÉSACTIVÉ (cartes métriques supprimées)
-    // const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    // const productions = db.getSync('productions', []);
     // const production = productions.find(p => p.id === id);
     // mettreAJourMetriquesProduction(production);
 }
@@ -1430,7 +1430,7 @@ function definirProductionActive(id) {
  */
 /*
 function mettreAJourMetriquesProduction(production) {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
 
     if (!production) {
         document.getElementById('ponderationProdMetrique').textContent = '-';
@@ -1460,7 +1460,7 @@ function mettreAJourMetriquesProduction(production) {
  * NOTE: Renommée pour éviter conflit avec chargerGrillesDisponibles() de pratiques.js
  */
 function chargerGrillesDisponiblesPourProduction() {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const selectStandard = document.getElementById('productionGrille');
     const selectInline = document.getElementById('productionGrilleInline');
 
@@ -1494,7 +1494,7 @@ function chargerGrillesDisponiblesPourProduction() {
  * @param {string} id - ID de la production à dupliquer
  */
 function dupliquerProduction(id) {
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const production = productions.find(p => p.id === id);
 
     if (!production) return;
@@ -1508,7 +1508,7 @@ function dupliquerProduction(id) {
     };
 
     productions.push(copie);
-    localStorage.setItem('productions', JSON.stringify(productions));
+    db.setSync('productions', productions);
 
     // Recharger la liste
     afficherListeProductions();
@@ -1543,10 +1543,10 @@ function supprimerProductionActive() {
         return;
     }
 
-    let productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    let productions = db.getSync('productions', []);
     productions = productions.filter(e => e.id !== productionEnEdition);
 
-    localStorage.setItem('productions', JSON.stringify(productions));
+    db.setSync('productions', productions);
 
     // Fermer le formulaire et retourner à l'accueil
     annulerFormProduction();
@@ -1581,7 +1581,7 @@ window.sauvegarderProduction = function() {
     // Mettre à jour les métriques
     const id = window.productionEnCoursEdition;
     if (id) {
-        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+        const productions = db.getSync('productions', []);
         const production = productions.find(p => p.id === id);
         if (production) {
             // mettreAJourMetriquesProduction(production); // DÉSACTIVÉ (cartes métriques supprimées)
@@ -1622,13 +1622,13 @@ const supprimerProductionOriginale = window.supprimerProduction;
 window.supprimerProduction = function(id) {
     if (!confirm('Supprimer cette production ?')) return;
 
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const index = productions.findIndex(p => p.id === id);
 
     if (index === -1) return;
 
     productions.splice(index, 1);
-    localStorage.setItem('productions', JSON.stringify(productions));
+    db.setSync('productions', productions);
 
     // Recharger la sidebar
     afficherListeProductions();

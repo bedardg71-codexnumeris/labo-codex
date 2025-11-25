@@ -42,7 +42,7 @@
  * // Sommative
  * obtenirId() => "sommative"
  *
- * NOTE : Cet ID doit correspondre à la valeur dans localStorage.modalitesEvaluation.pratique
+ * NOTE : Cet ID doit correspondre à la valeur dans db.getSync('modalitesEvaluation').pratique
  */
 
 /**
@@ -243,7 +243,7 @@
 // ============================================================================
 
 /**
- * STRUCTURE : Modalités d'évaluation (localStorage.modalitesEvaluation)
+ * STRUCTURE : Modalités d'évaluation (db.getSync('modalitesEvaluation'))
  *
  * {
  *   pratique: "pan-maitrise" | "sommative" | "pan-specifications" | "denotation",
@@ -266,7 +266,7 @@
  */
 
 /**
- * STRUCTURE : Indices CP (localStorage.indicesCP)
+ * STRUCTURE : Indices CP (db.getSync('indicesCP'))
  *
  * {
  *   "1234567": {  // DA de l'étudiant

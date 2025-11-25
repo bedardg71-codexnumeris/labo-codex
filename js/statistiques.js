@@ -81,7 +81,7 @@ function chargerStatistiquesApercu() {
  * Charge les informations du cours actif
  */
 function chargerInfosCours() {
-    const listeCours = JSON.parse(localStorage.getItem('listeCours') || '[]');
+    const listeCours = db.getSync('listeCours', []);
     const coursActif = listeCours.find(c => c.actif) || listeCours[0] || null;
 
     // Nombre de cours configurés
@@ -99,7 +99,7 @@ function chargerInfosCours() {
     setStatText('stat-nb-groupes', listeCours.length > 0 ? '1' : '—');
     
     // Nombre d'élèves
-    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    const etudiants = db.getSync('groupeEtudiants', []);
     setStatText('stat-nb-eleves', etudiants.length || '0');
 }
 
@@ -112,7 +112,7 @@ function chargerInfosCours() {
  */
 function chargerMaterielConfigure() {
     // Pratique de notation
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
     let pratique = 'Non configurée';
     
     if (modalites.pratique === 'sommative') {
@@ -131,25 +131,25 @@ function chargerMaterielConfigure() {
     // setStatText('stat-pratique', pratique); // RETIRÉ : Carte "Pratique de notation" supprimée de l'aperçu matériel
 
     // Productions
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     setStatText('stat-productions', productions.length);
     
     // Grilles de critères
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     setStatText('stat-grilles', grilles.length);
     
     // Échelles de performance
-    const echellesConfig = JSON.parse(localStorage.getItem('configEchelle') || 'null');
-    const niveauxEchelle = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
+    const echellesConfig = db.getSync('configEchelle', null);
+    const niveauxEchelle = db.getSync('niveauxEchelle', []);
     const nbEchelles = (echellesConfig || niveauxEchelle.length > 0) ? '1' : '0';
     setStatText('stat-echelles', nbEchelles);
     
     // Cartouches de rétroaction - compter TOUTES les cartouches
     let totalCartouches = 0;
-    for (let i = 0; i < localStorage.length; i++) {
-        const cle = localStorage.key(i);
+    const keys = Object.keys(localStorage);
+    for (const cle of keys) {
         if (cle && cle.startsWith('cartouches_')) {
-            const cartouches = JSON.parse(localStorage.getItem(cle) || '[]');
+            const cartouches = db.getSync(cle, []);
             totalCartouches += cartouches.length;
         }
     }
@@ -201,9 +201,10 @@ function chargerInfosSysteme() {
     setStatText('stat-version', versionBeta);
 
     // Poids des données
+    // KEPT: Raw localStorage access for size calculation (justified exception)
     let poidsTotal = 0;
-    for (let i = 0; i < localStorage.length; i++) {
-        const cle = localStorage.key(i);
+    const allKeys = Object.keys(localStorage);
+    for (const cle of allKeys) {
         const valeur = localStorage.getItem(cle);
         poidsTotal += (cle.length + valeur.length) * 2; // UTF-16 = 2 bytes par caractère
     }

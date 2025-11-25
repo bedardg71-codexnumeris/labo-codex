@@ -5,17 +5,21 @@
 
 /**
  * MODULE: import-export.js
- * 
+ *
  * RÔLE:
  * Gère l'exportation et l'importation sélective de données
- * stockées dans localStorage sous forme de fichiers JSON
- * 
+ * stockées via db.js sous forme de fichiers JSON
+ *
  * FONCTIONNALITÉS:
- * - Export sélectif des clés localStorage
+ * - Export sélectif des clés (backup complet)
  * - Import avec aperçu et confirmation
  * - Sélection "Toutes les clés"
  * - Validation des fichiers JSON
- * 
+ *
+ * NOTE TECHNIQUE:
+ * Ce module manipule localStorage directement (pas db.js) car il fait
+ * des backups complets et manipule des strings JSON brutes pour export/import.
+ *
  * ORIGINE:
  * Code extrait et adapté de index 35-M5 10-10-2025a
  */
@@ -44,13 +48,12 @@ function initialiserModuleImportExport() {
 function ouvrirModalExport() {
     const modal = document.getElementById('modalExport');
     const liste = document.getElementById('listeClesExport');
-    
-    const cles = [];
-    for (let i = 0; i < localStorage.length; i++) {
-        cles.push(localStorage.key(i));
-    }
-    
+
+    // Récupérer toutes les clés localStorage (pour export complet)
+    const cles = Object.keys(localStorage);
+
     let html = cles.map(cle => {
+        // KEPT: localStorage.getItem() pour obtenir la string JSON brute (calcul taille)
         const valeur = localStorage.getItem(cle);
         const tailleKo = ((cle.length + valeur.length) / 1024).toFixed(2);
         
@@ -97,9 +100,10 @@ function executerExport() {
     
     const donnees = {};
     clesSelectionnees.forEach(cle => {
+        // KEPT: localStorage.getItem() pour obtenir la string JSON brute (export)
         donnees[cle] = localStorage.getItem(cle);
     });
-    
+
     const json = JSON.stringify(donnees, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -189,11 +193,9 @@ function executerImport() {
 
     let nbCles = 0;
     Object.keys(donneesImportEnAttente).forEach(cle => {
-        // IMPORTANT : Convertir en JSON string avant de sauvegarder dans localStorage
-        const valeur = typeof donneesImportEnAttente[cle] === 'string'
-            ? donneesImportEnAttente[cle]
-            : JSON.stringify(donneesImportEnAttente[cle]);
-        localStorage.setItem(cle, valeur);
+        // IMPORTANT : Utiliser db.setSync pour écrire dans localStorage ET IndexedDB
+        // Pas besoin de JSON.stringify - db.setSync le fait automatiquement
+        db.setSync(cle, donneesImportEnAttente[cle]);
         nbCles++;
     });
     
@@ -231,9 +233,23 @@ function reinitialiserDonnees() {
     }
 
     try {
+        // Effacer localStorage
         localStorage.clear();
-        alert('Toutes les données ont été effacées.\n\nLa page va se recharger.');
-        location.reload();
+
+        // Effacer IndexedDB (async)
+        if (typeof db !== 'undefined' && typeof db.clear === 'function') {
+            db.clear().then(() => {
+                alert('Toutes les données ont été effacées.\n\nLa page va se recharger.');
+                location.reload();
+            }).catch(erreur => {
+                console.error('Erreur lors de l\'effacement IndexedDB:', erreur);
+                alert('Toutes les données ont été effacées.\n\nLa page va se recharger.');
+                location.reload();
+            });
+        } else {
+            alert('Toutes les données ont été effacées.\n\nLa page va se recharger.');
+            location.reload();
+        }
     } catch (erreur) {
         console.error('Erreur lors de la réinitialisation:', erreur);
         alert('Erreur lors de la réinitialisation.');

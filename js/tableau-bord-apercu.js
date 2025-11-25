@@ -122,7 +122,7 @@ function genererInterpretationPerformance(etudiants, echelle) {
     }
 
     // Lire les patterns stockés
-    const patterns = JSON.parse(localStorage.getItem('indicesPatternsRaI') || '{}');
+    const patterns = db.getSync('indicesPatternsRaI', {});
 
     // Classifier les étudiants par niveau IDME
     const niveaux = echelle.niveaux.filter(n => n.code !== '0' && n.code !== 0);
@@ -208,8 +208,8 @@ function calculerDistributionPerformance(etudiants) {
 
     // Lire l'échelle de performance active depuis localStorage
     // Essayer d'abord echellesTemplates (utilisé par echelles.js), puis echellesPerformance (fallback)
-    let echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
-    let echelleId = localStorage.getItem('echellePerformanceActive') || 'idme-5niv';
+    let echelles = db.getSync('echellesTemplates', []);
+    let echelleId = db.getSync('echellePerformanceActive', 'idme-5niv');
 
     console.log('📊 Distribution P : echelleId =', echelleId, 'echellesTemplates.length =', echelles.length);
 
@@ -283,7 +283,7 @@ function calculerDistributionPerformance(etudiants) {
  * @returns {string} - HTML du badge avec icône et texte
  */
 function genererBadgePratique() {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'alternative';
     const typePAN = config.typePAN || 'maitrise';
     const affichage = config.affichageTableauBord || {};
@@ -329,7 +329,7 @@ function genererBadgePratique() {
  * @returns {string} - HTML du badge
  */
 function genererBadgeSourceDonnees() {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSommatif = affichage.afficherSommatif !== false;
     const afficherAlternatif = affichage.afficherAlternatif !== false;
@@ -397,7 +397,7 @@ function chargerTableauBordApercu() {
     }
 
     // 🆕 BETA 91: Calculer et stocker les patterns + RàI pour tout le groupe (si RàI activé)
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const raiActive = config.activerRai !== false; // Par défaut true
 
     if (raiActive && typeof calculerEtStockerPatternsGroupe === 'function') {
@@ -430,7 +430,7 @@ function chargerTableauBordApercu() {
         // Ajouter l'indicateur de pratique ou les checkboxes selon le mode
         const titre = document.querySelector('#tableau-bord-apercu h2');
         if (titre) {
-            const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+            const config = db.getSync('modalitesEvaluation', {});
             const affichage = config.affichageTableauBord || {};
 
             // NOUVEAU Beta 90 : Détection automatique du mode comparatif
@@ -457,7 +457,7 @@ function chargerTableauBordApercu() {
         afficherAlertesPrioritairesCompteurs(etudiantsAvecIndices);
 
         // Afficher RàI et Patterns uniquement si activé dans les réglages
-        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const config = db.getSync('modalitesEvaluation', {});
         const activerRai = config.activerRai !== false; // Par défaut true (rétrocompatibilité)
 
         if (activerRai) {
@@ -622,7 +622,7 @@ function initialiserEvenementsToggle() {
  * @returns {string} HTML du badge ou des checkboxes
  */
 function genererIndicateurPratiqueOuCheckboxes() {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;
@@ -780,7 +780,7 @@ function determinerNiveauEngagement(engagement) {
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherMetriquesGlobales(etudiants) {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;
@@ -985,7 +985,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     // PRIORITÉ 1: Distribution P ou diagnostic note de passage
     if (type === 'P' && (etudiantsSOM.length > 0 || etudiantsPAN.length > 0)) {
         const etudiants = afficherPan ? etudiantsPAN : etudiantsSOM;
-        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const config = db.getSync('modalitesEvaluation', {});
         const soloActive = config.afficherDescriptionsSOLO !== false; // Par défaut true
         const raiActive = config.activerRai !== false; // Par défaut true
 
@@ -1002,8 +1002,8 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
             if (raiActive) {
                 // Interprétation pédagogique avancée avec patterns
-                const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
-                const echelleId = localStorage.getItem('echellePerformanceActive') || 'idme-5niv';
+                const echelles = db.getSync('echellesTemplates', []);
+                const echelleId = db.getSync('echellePerformanceActive', 'idme-5niv');
                 let echelle = echelles.find(e => e.id === echelleId);
                 if (!echelle) {
                     echelle = echelles.find(e => e.parDefaut === true) || echelles[0];
@@ -1140,7 +1140,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 // Contraindre la position finale pour ne pas dépasser les bords
                 const positionFinale = Math.max(0, Math.min(position + jitterH, 100));
                 // Anonymiser le nom si en mode anonymisation
-                const modeActif = localStorage.getItem('modeApplication') || 'normal';
+                const modeActif = db.getSync('modeApplication', 'normal');
                 let nomAffiche;
                 if (modeActif === 'anonymisation') {
                     // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
@@ -1188,7 +1188,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 // Contraindre la position finale pour ne pas dépasser les bords
                 const positionFinale = Math.max(0, Math.min(position + jitterH, 100));
                 // Anonymiser le nom si en mode anonymisation
-                const modeActif = localStorage.getItem('modeApplication') || 'normal';
+                const modeActif = db.getSync('modeApplication', 'normal');
                 let nomAffiche;
                 if (modeActif === 'anonymisation') {
                     // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
@@ -1270,7 +1270,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
             // Anonymiser le nom si en mode anonymisation
-            const modeActif = localStorage.getItem('modeApplication') || 'normal';
+            const modeActif = db.getSync('modeApplication', 'normal');
             let nomAffiche;
             if (modeActif === 'anonymisation') {
                 // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
@@ -1307,7 +1307,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
             // Anonymiser le nom si en mode anonymisation
-            const modeActif = localStorage.getItem('modeApplication') || 'normal';
+            const modeActif = db.getSync('modeApplication', 'normal');
             let nomAffiche;
             if (modeActif === 'anonymisation') {
                 // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
@@ -1477,7 +1477,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
             // Anonymiser le nom si en mode anonymisation
-            const modeActif = localStorage.getItem('modeApplication') || 'normal';
+            const modeActif = db.getSync('modeApplication', 'normal');
             let nomAffiche;
             if (modeActif === 'anonymisation') {
                 // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
@@ -1514,7 +1514,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
             // Contraindre la position finale pour ne pas dépasser les bords
             const positionFinale = Math.max(0, Math.min(position + decalageH + jitterH, 100));
             // Anonymiser le nom si en mode anonymisation
-            const modeActif = localStorage.getItem('modeApplication') || 'normal';
+            const modeActif = db.getSync('modeApplication', 'normal');
             let nomAffiche;
             if (modeActif === 'anonymisation') {
                 // Si les données sont déjà anonymisées (e.prenom commence par "Élève")
@@ -1629,7 +1629,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherAlertesPrioritairesCompteurs(etudiants) {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;
@@ -1797,7 +1797,7 @@ function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, af
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherPatternsApprentissage(etudiants) {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;
@@ -1913,7 +1913,7 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherNiveauxRaI(etudiants) {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;
@@ -2029,7 +2029,7 @@ function afficherActionsRecommandees(etudiants) {
 
     if (!container) return;
 
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
 
     // Filtrer étudiants à engagement faible et trier par priorité (engagement croissant)

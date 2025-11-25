@@ -41,25 +41,17 @@
      */
     function migrerConfigurationPratiques() {
         // Vérifier si la migration a déjà été effectuée
-        const dejaEffectuee = localStorage.getItem(CLE_MIGRATION_EFFECTUEE);
+        const dejaEffectuee = db.getSync(CLE_MIGRATION_EFFECTUEE, null);
         if (dejaEffectuee === 'true') {
             console.log('✅ Migration déjà effectuée (Beta 90)');
             return false;
         }
 
-        // Lire la configuration actuelle
-        const modalitesJSON = localStorage.getItem('modalitesEvaluation');
-        if (!modalitesJSON) {
+        // Lire la configuration actuelle (db.getSync retourne déjà un objet parsé)
+        const config = db.getSync('modalitesEvaluation', null);
+        if (!config) {
             console.log('ℹ️ Aucune configuration à migrer');
-            localStorage.setItem(CLE_MIGRATION_EFFECTUEE, 'true');
-            return false;
-        }
-
-        let config;
-        try {
-            config = JSON.parse(modalitesJSON);
-        } catch (error) {
-            console.error('❌ Erreur de lecture de la configuration:', error);
+            db.setSync(CLE_MIGRATION_EFFECTUEE, 'true');
             return false;
         }
 
@@ -70,7 +62,7 @@
         if (!nouveauId) {
             // Pas de migration nécessaire
             console.log(`ℹ️ Configuration actuelle ("${ancienId}") déjà à jour`);
-            localStorage.setItem(CLE_MIGRATION_EFFECTUEE, 'true');
+            db.setSync(CLE_MIGRATION_EFFECTUEE, 'true');
             return false;
         }
 
@@ -81,8 +73,8 @@
 
         // Sauvegarder la nouvelle configuration
         try {
-            localStorage.setItem('modalitesEvaluation', JSON.stringify(config));
-            localStorage.setItem(CLE_MIGRATION_EFFECTUEE, 'true');
+            db.setSync('modalitesEvaluation', config);
+            db.setSync(CLE_MIGRATION_EFFECTUEE, 'true');
 
             console.log(`✅ Migration effectuée avec succès`);
             console.log(`   Ancienne pratique: "${ancienId}"`);
@@ -110,7 +102,7 @@
      * Affiche des messages informatifs dans la console
      */
     function verifierMigration() {
-        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const config = db.getSync('modalitesEvaluation', {});
         const pratiqueActive = config.pratique;
 
         if (!pratiqueActive) {
@@ -156,7 +148,7 @@
      * ⚠️ NE PAS UTILISER EN PRODUCTION
      */
     window.resetMigrationPratiques = function() {
-        localStorage.removeItem(CLE_MIGRATION_EFFECTUEE);
+        db.removeSync(CLE_MIGRATION_EFFECTUEE);
         console.log('🔄 Flag de migration réinitialisé');
         console.log('💡 Rechargez la page pour réexécuter la migration');
     };
