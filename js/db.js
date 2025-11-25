@@ -182,7 +182,16 @@
                 if (value === null) {
                     return defaultValue;
                 }
-                return JSON.parse(value);
+
+                // Essayer de parser en JSON
+                try {
+                    return JSON.parse(value);
+                } catch (parseError) {
+                    // Si le parsing échoue, c'est probablement une ancienne valeur non-JSON (ex: "normal" au lieu de '"normal"')
+                    // Retourner la valeur brute pour compatibilité avec données migrées
+                    console.warn(`[DB] Valeur non-JSON détectée pour clé "${key}", retour valeur brute. Réécriture recommandée.`);
+                    return value;
+                }
             } catch (e) {
                 console.error(`[DB] Erreur lecture localStorage clé "${key}":`, e);
                 return defaultValue;
