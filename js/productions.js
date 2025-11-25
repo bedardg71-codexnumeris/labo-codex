@@ -390,7 +390,7 @@ function sauvegarderProduction() {
         console.log('   - Nouveau ID:', productionData.id);
     }
 
-    console.log('💾 Sauvegarde dans localStorage...');
+    console.log('💾 Sauvegarde dans db.setSync...');
     db.setSync('productions', evaluations);
     console.log('✅ Sauvegarde terminée');
 

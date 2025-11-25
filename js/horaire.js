@@ -178,7 +178,7 @@ function calculerHeureFin(debut, duree) {
  * - true si migration effectuée, false sinon
  */
 function migrerDonneesSeances() {
-    const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seancesHoraire = db.getSync('seancesHoraire', []);
 
     if (seancesHoraire.length === 0) {
         return false;
@@ -214,7 +214,7 @@ function migrerDonneesSeances() {
     });
 
     if (migrationNecessaire) {
-        localStorage.setItem('seancesHoraire', JSON.stringify(seancesHoraire));
+        db.setSync('seancesHoraire', seancesHoraire);
         console.log('   ✅ Migration des données séances effectuée');
     }
 
@@ -233,7 +233,7 @@ function migrerDonneesSeances() {
  * 1. Lit seancesHoraire (séances hebdomadaires configurées)
  * 2. Lit calendrierComplet (tous les jours du trimestre)
  * 3. Pour chaque jour de cours, crée les séances correspondantes
- * 4. Stocke dans localStorage.seancesCompletes
+ * 4. Stocke dans db.setSync('seancesCompletes')
  * 
  * FORMAT DE SORTIE:
  * {
@@ -263,20 +263,20 @@ function genererSeancesCompletes() {
     migrerDonneesSeances();
 
     // Lire les séances hebdomadaires configurées
-    const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seancesHoraire = db.getSync('seancesHoraire', []);
 
     if (seancesHoraire.length === 0) {
         console.log('   ⚠️  Aucune séance hebdomadaire configurée');
-        localStorage.setItem('seancesCompletes', JSON.stringify({}));
+        db.setSync('seancesCompletes', {});
         return {};
     }
 
     // Lire le calendrier complet (source unique)
-    const calendrierComplet = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+    const calendrierComplet = db.getSync('calendrierComplet', {});
 
     if (Object.keys(calendrierComplet).length === 0) {
         console.warn('   ⚠️  Calendrier complet non disponible');
-        localStorage.setItem('seancesCompletes', JSON.stringify({}));
+        db.setSync('seancesCompletes', {});
         return {};
     }
 
@@ -362,7 +362,7 @@ function genererSeancesCompletes() {
     });
 
     // Stocker dans localStorage - LA SOURCE UNIQUE
-    localStorage.setItem('seancesCompletes', JSON.stringify(seancesCompletes));
+    db.setSync('seancesCompletes', seancesCompletes);
 
     console.log(`✅ Séances complètes générées: ${compteurSeances} séances`);
     console.log(`   - Réparties sur ${Object.keys(seancesCompletes).length} jours de cours`);
@@ -375,7 +375,7 @@ function genererSeancesCompletes() {
  * @returns {Object} - Séances complètes du trimestre
  */
 function obtenirSeancesCompletes() {
-    const seancesCompletes = localStorage.getItem('seancesCompletes');
+    const seancesCompletes = db.getSync('seancesCompletes', null);
 
     if (!seancesCompletes) {
         console.log('⚠️  seancesCompletes non trouvé, génération...');
@@ -408,8 +408,8 @@ function obtenirSeancesJour(dateStr) {
  */
 function obtenirRangSeanceDansSemaine(dateStr) {
     try {
-        const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
-        const seancesCompletes = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
+        const calendrier = db.getSync('calendrierComplet', {});
+        const seancesCompletes = db.getSync('seancesCompletes', {});
 
         const infoJour = calendrier[dateStr];
         if (!infoJour || !infoJour.numeroSemaine) return null;
@@ -450,7 +450,7 @@ function obtenirRangSeanceDansSemaine(dateStr) {
  * @returns {string} HTML des options
  */
 function genererOptionsGroupes() {
-    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    const etudiants = db.getSync('groupeEtudiants', []);
 
     // Extraire les groupes uniques et les trier
     const groupes = [...new Set(etudiants.map(e => e.groupe))].filter(g => g).sort();
@@ -481,7 +481,7 @@ let seancesEnCours = [];
  */
 function afficherFormulaireSeancesDynamique() {
     // Charger les séances existantes ou initialiser avec une séance vide
-    const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seancesHoraire = db.getSync('seancesHoraire', []);
 
     if (seancesHoraire.length > 0) {
         // Mode édition : charger les séances existantes
@@ -772,7 +772,7 @@ function confirmerSeances() {
     }
 
     // Sauvegarder dans localStorage
-    localStorage.setItem('seancesHoraire', JSON.stringify(seancesAEnregistrer));
+    db.setSync('seancesHoraire', seancesAEnregistrer);
 
     // Rafraîchir l'affichage des séances existantes
     afficherSeancesExistantes();
@@ -915,7 +915,7 @@ function genererCarteSeanceEdition(seance, index) {
  * @param {number} index - Index de la séance dans seancesHoraire
  */
 function modifierSeanceEnPlace(index) {
-    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seances = db.getSync('seancesHoraire', []);
     const seance = seances[index];
 
     if (!seance) {
@@ -970,7 +970,7 @@ function sauvegarderEditionSeanceEnPlace(index) {
         return;
     }
 
-    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seances = db.getSync('seancesHoraire', []);
 
     if (index < 0 || index >= seances.length) {
         alert('Index de séance invalide');
@@ -987,7 +987,7 @@ function sauvegarderEditionSeanceEnPlace(index) {
         local: local || ''
     };
 
-    localStorage.setItem('seancesHoraire', JSON.stringify(seances));
+    db.setSync('seancesHoraire', seances);
 
     // Régénérer les séances complètes du trimestre
     genererSeancesCompletes();
@@ -1008,7 +1008,7 @@ function supprimerSeance(index) {
         return;
     }
 
-    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seances = db.getSync('seancesHoraire', []);
 
     // Supprimer la séance
     seances.splice(index, 1);
@@ -1019,7 +1019,7 @@ function supprimerSeance(index) {
         seance.lettre = lettres[i] || `S${i + 1}`;
     });
 
-    localStorage.setItem('seancesHoraire', JSON.stringify(seances));
+    db.setSync('seancesHoraire', seances);
 
     // Régénérer les séances complètes du trimestre
     genererSeancesCompletes();
@@ -1045,7 +1045,7 @@ function afficherSeancesExistantes() {
     const container = document.getElementById('seancesContainer');
     if (!container) return;
 
-    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seances = db.getSync('seancesHoraire', []);
 
     if (seances.length === 0) {
         container.innerHTML = '<p class="text-muted text-italic">Aucune séance configurée.</p>';
@@ -1119,7 +1119,7 @@ function confirmerAjoutSeance() {
     }
 
     // Récupérer les séances existantes
-    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seances = db.getSync('seancesHoraire', []);
 
     // Vérifier le nombre maximum de séances
     if (seances.length >= 6) {
@@ -1143,7 +1143,7 @@ function confirmerAjoutSeance() {
 
     // Ajouter la séance
     seances.push(nouvelleSeance);
-    localStorage.setItem('seancesHoraire', JSON.stringify(seances));
+    db.setSync('seancesHoraire', seances);
 
     // Régénérer les séances complètes du trimestre
     genererSeancesCompletes();
