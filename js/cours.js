@@ -103,7 +103,7 @@ function initialiserModuleCours() {
  * - #resumeCours : Code + Nom du cours actif
  */
 function afficherTableauCours() {
-    const cours = JSON.parse(localStorage.getItem('listeCours') || '[]');
+    const cours = db.getSync('listeCours', []);
     const container = document.getElementById('tableauCoursContainer');
     
     if (!container) return;
@@ -241,7 +241,7 @@ function afficherFormCours(id = null) {
     
     if (id) {
         // Mode édition
-        const cours = JSON.parse(localStorage.getItem('listeCours') || '[]');
+        const cours = db.getSync('listeCours', []);
         const c = cours.find(cours => cours.id === id);
         
         if (c) {
@@ -345,7 +345,7 @@ function annulerFormCours() {
  * - L'utilisateur peut laisser des champs vides
  */
 function sauvegarderCours() {
-    let cours = JSON.parse(localStorage.getItem('listeCours') || '[]');
+    let cours = db.getSync('listeCours', []);
     
     const nouveauCours = {
         id: coursEnEdition || 'COURS' + Date.now(),
@@ -383,7 +383,7 @@ function sauvegarderCours() {
         cours.push(nouveauCours);
     }
     
-    localStorage.setItem('listeCours', JSON.stringify(cours));
+    db.setSync('listeCours', cours);
     
     afficherTableauCours();
     annulerFormCours();
@@ -438,7 +438,7 @@ function modifierCours(id) {
  * - Notification de succès
  */
 function dupliquerCours(id) {
-    const cours = JSON.parse(localStorage.getItem('listeCours') || '[]');
+    const cours = db.getSync('listeCours', []);
     const coursOriginal = cours.find(c => c.id === id);
     
     if (coursOriginal) {
@@ -452,7 +452,7 @@ function dupliquerCours(id) {
         };
         
         cours.push(nouveauCours);
-        localStorage.setItem('listeCours', JSON.stringify(cours));
+        db.setSync('listeCours', cours);
         afficherTableauCours();
         afficherNotificationSucces('Cours dupliqué avec succès !');
     }
@@ -488,7 +488,7 @@ function dupliquerCours(id) {
  * - Notification de succès
  */
 function activerCours(id) {
-    let cours = JSON.parse(localStorage.getItem('listeCours') || '[]');
+    let cours = db.getSync('listeCours', []);
     
     // Désactiver tous les cours
     cours.forEach(c => c.actif = false);
@@ -499,7 +499,7 @@ function activerCours(id) {
         cours[index].actif = true;
     }
     
-    localStorage.setItem('listeCours', JSON.stringify(cours));
+    db.setSync('listeCours', cours);
     afficherTableauCours();
     afficherNotificationSucces('Cours activé !');
 }
@@ -531,7 +531,7 @@ function activerCours(id) {
  * - Notification de succès
  */
 function supprimerCours(id) {
-    const cours = JSON.parse(localStorage.getItem('listeCours') || '[]');
+    const cours = db.getSync('listeCours', []);
     const coursASupprimer = cours.find(c => c.id === id);
     
     if (coursASupprimer && coursASupprimer.verrouille) {
@@ -541,7 +541,7 @@ function supprimerCours(id) {
     
     if (confirm(`Êtes-vous sûr de vouloir supprimer le cours ${coursASupprimer?.codeCours} ?`)) {
         const coursFiltre = cours.filter(c => c.id !== id);
-        localStorage.setItem('listeCours', JSON.stringify(coursFiltre));
+        db.setSync('listeCours', coursFiltre);
         afficherTableauCours();
         afficherNotificationSucces('Cours supprimé');
     }
