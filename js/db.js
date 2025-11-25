@@ -1,14 +1,30 @@
 /**
  * Couche d'abstraction unifiée pour le stockage de données
- * Gère automatiquement localStorage OU IndexedDB selon disponibilité
+ * Architecture de cache hybride localStorage + IndexedDB
  *
- * Architecture de migration progressive:
- * - Phase 1: Support dual (localStorage + IndexedDB)
- * - Phase 2: IndexedDB uniquement avec fallback localStorage
+ * FONCTIONNEMENT:
+ * - localStorage = Cache synchrone rapide (accès immédiat)
+ * - IndexedDB = Stockage principal asynchrone (grandes capacités)
+ * - Synchronisation bidirectionnelle automatique
+ *
+ * MÉTHODES SYNCHRONES (getSync/setSync/removeSync):
+ * - Lecture: depuis localStorage (cache chaud)
+ * - Écriture: dans localStorage (synchrone) + IndexedDB (async en arrière-plan)
+ * - Suppression: de localStorage (synchrone) + IndexedDB (async en arrière-plan)
+ *
+ * MÉTHODES ASYNCHRONES (get/set/remove):
+ * - Accès direct à IndexedDB ou localStorage selon disponibilité
+ * - Utilisées pour migration et synchronisation
+ *
+ * AVANTAGES:
+ * - Accès synchrone rapide (pas de changement dans le code applicatif)
+ * - Capacité de stockage étendue (IndexedDB > localStorage)
+ * - Résilience (localStorage fonctionne toujours si IndexedDB échoue)
+ * - Support multi-groupes futur (bases IndexedDB séparées)
  *
  * @author Grégoire Bédard avec assistance Claude Code
- * @version Beta 91.5 (Migration IndexedDB)
- * @date 24 novembre 2025
+ * @version Beta 91.6 (Cache hybride IndexedDB)
+ * @date 26 novembre 2025
  */
 
 (function() {
@@ -272,31 +288,57 @@
         }
 
         /**
-         * Migration localStorage → IndexedDB
+         * Migration localStorage → IndexedDB (manuelle)
          * Copie toutes les données de localStorage vers IndexedDB
+         * Utile pour migration initiale ou récupération de données
+         *
+         * @param {boolean} force - Si true, écrase les données existantes dans IndexedDB
+         * @returns {Promise<Object>} Statistiques de migration
          */
-        async migrateFromLocalStorage() {
+        async migrateFromLocalStorage(force = false) {
             if (!this.useIndexedDB) {
                 console.warn('[DB] IndexedDB non disponible, migration impossible');
-                return;
+                return { success: false, error: 'IndexedDB non disponible' };
             }
 
             console.log('🔄 [DB] Début migration localStorage → IndexedDB...');
 
-            let compteur = 0;
+            let migrated = 0;
+            let skipped = 0;
+            let errors = 0;
             const keys = Object.keys(localStorage);
 
             for (const key of keys) {
                 try {
+                    // Vérifier si la clé existe déjà dans IndexedDB
+                    if (!force) {
+                        const existing = await this.get(key);
+                        if (existing !== null) {
+                            skipped++;
+                            continue;
+                        }
+                    }
+
+                    // Migrer la clé
                     const value = JSON.parse(localStorage.getItem(key));
                     await this.set(key, value);
-                    compteur++;
+                    migrated++;
                 } catch (e) {
                     console.error(`[DB] Erreur migration clé "${key}":`, e);
+                    errors++;
                 }
             }
 
-            console.log(`✅ [DB] Migration terminée: ${compteur}/${keys.length} clés migrées`);
+            const result = {
+                success: true,
+                total: keys.length,
+                migrated,
+                skipped,
+                errors
+            };
+
+            console.log(`✅ [DB] Migration terminée:`, result);
+            return result;
         }
 
         /**
@@ -390,6 +432,56 @@
             };
         }
 
+        /**
+         * Synchronisation IndexedDB → localStorage au démarrage
+         * Charge toutes les données d'IndexedDB dans le cache localStorage
+         * pour permettre un accès synchrone rapide
+         */
+        async syncToLocalStorageCache() {
+            if (!this.useIndexedDB) {
+                console.log('[DB] Pas de synchronisation nécessaire (IndexedDB non utilisé)');
+                return;
+            }
+
+            console.log('🔄 [DB] Synchronisation IndexedDB → localStorage cache...');
+
+            try {
+                const indexedDBKeys = await this.keys();
+                let synced = 0;
+                let skipped = 0;
+
+                for (const key of indexedDBKeys) {
+                    // Lire depuis IndexedDB
+                    const value = await this.get(key);
+
+                    // Vérifier si la clé existe déjà dans localStorage
+                    const existsInCache = localStorage.getItem(key) !== null;
+
+                    if (!existsInCache) {
+                        // Clé manquante dans cache, synchroniser
+                        this._setLocalStorage(key, value);
+                        synced++;
+                    } else {
+                        // Clé déjà présente, on garde la version localStorage (cache chaud)
+                        skipped++;
+                    }
+                }
+
+                console.log(`✅ [DB] Synchronisation terminée: ${synced} clés synchronisées, ${skipped} déjà en cache`);
+
+                // Émettre événement pour notifier que les données sont prêtes
+                window.dispatchEvent(new CustomEvent('db-ready', {
+                    detail: { synced, skipped, total: indexedDBKeys.length }
+                }));
+            } catch (error) {
+                console.error('❌ [DB] Erreur synchronisation cache:', error);
+                // Émettre événement même en cas d'erreur
+                window.dispatchEvent(new CustomEvent('db-ready', {
+                    detail: { error: error.message }
+                }));
+            }
+        }
+
         // ============================================
         // MÉTHODES SYNCHRONES (Migration progressive)
         // ============================================
@@ -407,20 +499,42 @@
         }
 
         /**
-         * Écriture synchrone (utilise toujours localStorage)
+         * Écriture synchrone (cache hybride)
+         * Écrit immédiatement dans localStorage (synchrone, cache rapide)
+         * et déclenche écriture asynchrone dans IndexedDB si disponible
          * @param {string} key - Clé de la donnée
          * @param {*} value - Valeur à stocker
          */
         setSync(key, value) {
+            // 1. Écriture synchrone dans localStorage (cache rapide)
             this._setLocalStorage(key, value);
+
+            // 2. Écriture asynchrone dans IndexedDB si disponible (en arrière-plan)
+            if (this.ready && this.useIndexedDB) {
+                this._setIndexedDB(key, value).catch(error => {
+                    console.warn(`[DB] Erreur écriture async IndexedDB clé "${key}":`, error);
+                    // localStorage a déjà la valeur, on continue
+                });
+            }
         }
 
         /**
-         * Suppression synchrone (utilise toujours localStorage)
+         * Suppression synchrone (cache hybride)
+         * Supprime immédiatement de localStorage (synchrone, cache rapide)
+         * et déclenche suppression asynchrone d'IndexedDB si disponible
          * @param {string} key - Clé à supprimer
          */
         removeSync(key) {
+            // 1. Suppression synchrone de localStorage (cache rapide)
             this._removeLocalStorage(key);
+
+            // 2. Suppression asynchrone d'IndexedDB si disponible (en arrière-plan)
+            if (this.ready && this.useIndexedDB) {
+                this._removeIndexedDB(key).catch(error => {
+                    console.warn(`[DB] Erreur suppression async IndexedDB clé "${key}":`, error);
+                    // localStorage a déjà supprimé, on continue
+                });
+            }
         }
     }
 
@@ -431,9 +545,14 @@
     // Créer instance unique (singleton)
     const db = new Database();
 
-    // Initialiser automatiquement
-    db.init().then(() => {
+    // Initialiser automatiquement et synchroniser le cache
+    db.init().then(async () => {
         console.log('✅ [DB] Base de données prête:', db.useIndexedDB ? 'IndexedDB' : 'localStorage');
+
+        // Synchroniser IndexedDB → localStorage cache si IndexedDB est disponible
+        if (db.useIndexedDB) {
+            await db.syncToLocalStorageCache();
+        }
     }).catch((error) => {
         console.error('❌ [DB] Erreur initialisation:', error);
     });
