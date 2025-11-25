@@ -100,7 +100,7 @@ function initialiserModulePratiques() {
  */
 function migrerConfigurationPortfolio() {
     // Lire modalitésEvaluation
-    let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    let modalites = db.getSync('modalitesEvaluation', {});
 
     // Vérifier si migration déjà effectuée
     if (modalites.configPAN && modalites.configPAN.portfolio && modalites.configPAN._migrationV1Complete) {
@@ -111,7 +111,7 @@ function migrerConfigurationPortfolio() {
     console.log('[Migration Phase 3] 🔄 Début migration configuration portfolio...');
 
     // Lire productions pour trouver le portfolio
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     if (!portfolio || !portfolio.regles) {
@@ -131,7 +131,7 @@ function migrerConfigurationPortfolio() {
         };
 
         modalites.configPAN._migrationV1Complete = true;
-        localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+        db.setSync('modalitesEvaluation', modalites);
 
         console.log('[Migration Phase 3] ✅ Configuration par défaut créée');
         return true;
@@ -160,7 +160,7 @@ function migrerConfigurationPortfolio() {
     modalites.configPAN._migrationDate = new Date().toISOString();
 
     // Sauvegarder
-    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    db.setSync('modalitesEvaluation', modalites);
 
     console.log('[Migration Phase 3] ✅ Configuration migrée vers modalitesEvaluation.configPAN.portfolio');
     console.log('[Migration Phase 3] 📊 Nouvelle config:', JSON.stringify(modalites.configPAN.portfolio));
@@ -256,10 +256,10 @@ function changerPratiqueNotation() {
     }
 
     // Sauvegarder dans modalitesEvaluation
-    let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    let modalites = db.getSync('modalitesEvaluation', {});
     modalites.pratique = pratique;
     modalites.typePAN = pratique === 'alternative' ? modalites.typePAN : null;
-    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    db.setSync('modalitesEvaluation', modalites);
 
     // Gérer l'affichage des options d'affichage
     afficherOptionsAffichage();
@@ -299,9 +299,9 @@ function afficherInfoPAN() {
         infoPAN.style.display = 'block';
 
         // Sauvegarder le type de PAN
-        let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        let modalites = db.getSync('modalitesEvaluation', {});
         modalites.typePAN = typePAN;
-        localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+        db.setSync('modalitesEvaluation', modalites);
 
         mettreAJourStatutModalites();
     } else {
@@ -375,7 +375,7 @@ function sauvegarderOptionsAffichage() {
     const pratique = selectPratique.value;
 
     // Récupérer la config existante
-    let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    let modalites = db.getSync('modalitesEvaluation', {});
 
     // Définir l'affichage selon le mode comparatif
     if (modeComparatif) {
@@ -399,7 +399,7 @@ function sauvegarderOptionsAffichage() {
         }
     }
 
-    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    db.setSync('modalitesEvaluation', modalites);
 
     console.log('Options d\'affichage sauvegardées:', modalites.affichageTableauBord);
 }
@@ -444,7 +444,7 @@ function afficherParametresPAN() {
  * Charge la configuration PAN depuis localStorage
  */
 function chargerConfigurationPAN() {
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
     const configPAN = modalites.configPAN || {};
 
     // Période d'évaluation
@@ -704,7 +704,7 @@ function afficherCartesExtras() {
  * Sauvegarde la configuration PAN
  */
 function sauvegarderConfigurationPAN() {
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
 
     // Période d'évaluation
     const radioPeriode = document.querySelector('input[name="periodePAN"]:checked');
@@ -796,7 +796,7 @@ function sauvegarderConfigurationPAN() {
         }
     };
 
-    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    db.setSync('modalitesEvaluation', modalites);
     console.log('✅ Configuration PAN sauvegardée:', modalites.configPAN);
 }
 
@@ -831,7 +831,7 @@ function sauvegarderPratiqueNotation() {
     }
 
     // Construire la configuration complète
-    let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    let modalites = db.getSync('modalitesEvaluation', {});
     modalites.pratique = pratique;
     modalites.typePAN = pratique === 'alternative' ? typePAN : null;
     modalites.dateConfiguration = new Date().toISOString();
@@ -894,7 +894,7 @@ function sauvegarderPratiqueNotation() {
         modalites.activerCategorisationErreurs = false;
     }
 
-    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    db.setSync('modalitesEvaluation', modalites);
 
     // Sauvegarder toutes les configurations (portfolio et jetons)
     sauvegarderConfigurationPAN();
@@ -917,7 +917,7 @@ function sauvegarderPratiqueNotation() {
  * 6. Met à jour le statut
  */
 function chargerModalites() {
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
 
     const selectPratique = document.getElementById('pratiqueNotation');
     const colonnePAN = document.getElementById('colonnePAN');
@@ -1130,7 +1130,7 @@ function chargerConfigurationPAN(configPAN) {
  * 3. Met à jour #statutModalites avec HTML formaté
  */
 function mettreAJourStatutModalites() {
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
     const statutDiv = document.getElementById('statutModalites');
 
     if (!statutDiv) {
@@ -1277,7 +1277,7 @@ window.supprimerTypeJetonPersonnalise = supprimerTypeJetonPersonnalise;
  * - Module statistiques pour les calculs
  */
 function obtenirConfigurationNotation() {
-    return JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    return db.getSync('modalitesEvaluation', {});
 }
 
 /* ===============================
@@ -1320,7 +1320,7 @@ function chargerGrillesDisponibles() {
     if (!select) return;
 
     // Lire les grilles depuis localStorage
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
 
     // Vider le select
     select.innerHTML = '<option value="">-- Sélectionner une grille --</option>';
