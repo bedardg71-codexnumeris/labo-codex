@@ -245,7 +245,7 @@ function changerPratiqueNotation() {
     const selectPAN = document.getElementById('typePAN');
     const infoPAN = document.getElementById('infoPAN');
 
-    if (pratique === 'alternative') {
+    if (pratique === 'pan-maitrise') {
         // Afficher le menu PAN
         colonnePAN.style.display = 'block';
     } else {
@@ -258,7 +258,7 @@ function changerPratiqueNotation() {
     // Sauvegarder dans modalitesEvaluation
     let modalites = db.getSync('modalitesEvaluation', {});
     modalites.pratique = pratique;
-    modalites.typePAN = pratique === 'alternative' ? modalites.typePAN : null;
+    modalites.typePAN = pratique === 'pan-maitrise' ? modalites.typePAN : null;
     db.setSync('modalitesEvaluation', modalites);
 
     // Gérer l'affichage des options d'affichage
@@ -328,14 +328,14 @@ function afficherOptionsAffichage() {
     const checkComparatif = document.getElementById('modeComparatif');
     const activationsExtras = document.getElementById('activationsExtras');
 
-    if (pratique === 'alternative' || pratique === 'sommative') {
+    if (pratique === 'pan-maitrise' || pratique === 'sommative') {
         // Afficher la section d'affichage au tableau de bord
         if (sectionAffichageTableauBord) {
             sectionAffichageTableauBord.style.display = 'block';
         }
 
         // Afficher les checkboxes d'activation pour PAN
-        if (pratique === 'alternative' && activationsExtras) {
+        if (pratique === 'pan-maitrise' && activationsExtras) {
             activationsExtras.style.display = 'block';
             // Initialiser l'affichage des cartes
             afficherCartesExtras();
@@ -391,7 +391,7 @@ function sauvegarderOptionsAffichage() {
                 afficherSommatif: true,
                 afficherAlternatif: false
             };
-        } else if (pratique === 'alternative') {
+        } else if (pratique === 'pan-maitrise') {
             modalites.affichageTableauBord = {
                 afficherSommatif: false,
                 afficherAlternatif: true
@@ -417,7 +417,7 @@ function afficherConfigurationPAN() {
 
     if (!configPAN) return;
 
-    if (pratique === 'alternative') {
+    if (pratique === 'pan-maitrise') {
         configPAN.style.display = 'block';
         chargerConfigurationPAN();
     } else {
@@ -825,7 +825,7 @@ function sauvegarderPratiqueNotation() {
         return;
     }
 
-    if (pratique === 'alternative' && !typePAN) {
+    if (pratique === 'pan-maitrise' && !typePAN) {
         alert('Veuillez choisir un type de pratique alternative');
         return;
     }
@@ -833,7 +833,7 @@ function sauvegarderPratiqueNotation() {
     // Construire la configuration complète
     let modalites = db.getSync('modalitesEvaluation', {});
     modalites.pratique = pratique;
-    modalites.typePAN = pratique === 'alternative' ? typePAN : null;
+    modalites.typePAN = pratique === 'pan-maitrise' ? typePAN : null;
     modalites.dateConfiguration = new Date().toISOString();
 
     // Sauvegarder la grille de référence pour le dépistage
@@ -858,7 +858,7 @@ function sauvegarderPratiqueNotation() {
                     afficherSommatif: true,
                     afficherAlternatif: false
                 };
-            } else if (pratique === 'alternative') {
+            } else if (pratique === 'pan-maitrise') {
                 modalites.affichageTableauBord = {
                     afficherSommatif: false,
                     afficherAlternatif: true
@@ -946,7 +946,7 @@ function chargerModalites() {
     selectPratique.value = modalites.pratique;
 
     // Gérer l'affichage du menu PAN
-    if (modalites.pratique === 'alternative') {
+    if (modalites.pratique === 'pan-maitrise') {
         colonnePAN.style.display = 'block';
 
         // Charger le type de PAN si disponible
@@ -1012,7 +1012,7 @@ function chargerModalites() {
     // Masquer la section configurationPAN au chargement
     // Elle sera affichée par le bouton "Modifier les paramètres"
     const configPAN = document.getElementById('configurationPAN');
-    if (configPAN && modalites.pratique === 'alternative') {
+    if (configPAN && modalites.pratique === 'pan-maitrise') {
         configPAN.style.display = 'none';
     }
 
@@ -1143,7 +1143,7 @@ function mettreAJourStatutModalites() {
         statutDiv.innerHTML = '<span style="color: var(--risque-critique);">✗ À configurer</span>';
     } else if (modalites.pratique === 'sommative') {
         statutDiv.innerHTML = '<span style="color: var(--vert-moyen);">✓ Sommative traditionnelle (en %)</span>';
-    } else if (modalites.pratique === 'alternative' && modalites.typePAN) {
+    } else if (modalites.pratique === 'pan-maitrise' && modalites.typePAN) {
         const types = {
             'maitrise': 'Maîtrise',
             'specifications': 'Spécifications',
@@ -1155,7 +1155,7 @@ function mettreAJourStatutModalites() {
                 Modifier les paramètres
             </button>
         `;
-    } else if (modalites.pratique === 'alternative' && !modalites.typePAN) {
+    } else if (modalites.pratique === 'pan-maitrise' && !modalites.typePAN) {
         statutDiv.innerHTML = '<span style="color: var(--orange-accent);">⚠ Choisir un type de PAN</span>';
     }
 }
