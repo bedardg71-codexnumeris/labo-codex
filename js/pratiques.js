@@ -59,18 +59,22 @@ function initialiserModulePratiques() {
     console.log('Initialisation du module Pratiques de notation');
 
     // Vérifier que nous sommes dans la bonne section
-    const selectPratique = document.getElementById('pratiqueNotation');
-    if (!selectPratique) {
+    // BETA 92: Nouveau conteneur pour la gestion des pratiques configurables
+    const listePratiques = document.getElementById('listePratiques');
+    if (!listePratiques) {
         console.log('   ⚠️  Section pratiques non active, initialisation reportée');
         return;
     }
-    
-    // Attacher les événements
+
+    // BETA 92: Afficher la liste des pratiques configurables
+    afficherListePratiques();
+
+    // Attacher les événements (pour les anciennes configurations)
     attacherEvenementsPratiques();
-    
+
     // Charger les modalités sauvegardées
     chargerModalites();
-    
+
     console.log('   ✅ Module Pratiques initialisé');
 
     // 🔄 Migration automatique de la configuration (Phase 3)
@@ -1336,6 +1340,1330 @@ function chargerGrillesDisponibles() {
     console.log(`✅ ${grilles.length} grille(s) chargée(s) dans le sélecteur de référence`);
 }
 
+// ============================================================================
+// GESTION DES PRATIQUES CONFIGURABLES (Beta 92)
+// ============================================================================
+
+/**
+ * Affiche la liste de toutes les pratiques (codées + configurables)
+ * Génère des cartes avec les actions disponibles
+ */
+async function afficherListePratiques() {
+    const container = document.getElementById('listePratiques');
+    if (!container) return;
+
+    try {
+        // Obtenir toutes les pratiques
+        const pratiques = await PratiqueManager.listerPratiques();
+        const modalites = db.getSync('modalitesEvaluation', {});
+        const pratiqueActiveId = modalites.pratique;
+
+        let html = '';
+
+        // 1. Pratiques codées (legacy)
+        if (pratiques.codees && pratiques.codees.length > 0) {
+            html += `
+                <div style="margin-bottom: 15px;">
+                    <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 10px;">
+                        Pratiques intégrées (non modifiables)
+                    </h4>
+                </div>
+            `;
+
+            pratiques.codees.forEach(p => {
+                const estActive = p.id === pratiqueActiveId;
+                html += genererCartePratique(p, estActive, false); // false = non modifiable
+            });
+        }
+
+        // 2. Pratiques configurables
+        if (pratiques.configurables && pratiques.configurables.length > 0) {
+            html += `
+                <div style="margin-top: 25px; margin-bottom: 15px;">
+                    <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 10px;">
+                        Pratiques configurables
+                    </h4>
+                </div>
+            `;
+
+            pratiques.configurables.forEach(p => {
+                const estActive = p.id === pratiqueActiveId;
+                html += genererCartePratique(p, estActive, true); // true = modifiable
+            });
+        }
+
+        // 3. Message si aucune pratique
+        if ((!pratiques.codees || pratiques.codees.length === 0) &&
+            (!pratiques.configurables || pratiques.configurables.length === 0)) {
+            html = `
+                <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
+                    <p style="color: var(--gris-moyen); margin-bottom: 10px;">
+                        Aucune pratique disponible
+                    </p>
+                    <button class="btn" onclick="afficherPratiquesPredefines()" style="background: var(--orange-accent); color: white;">
+                        📦 Charger les exemples
+                    </button>
+                </div>
+            `;
+        }
+
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Erreur lors de l\'affichage des pratiques:', error);
+        container.innerHTML = `
+            <div style="padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                <strong>Erreur</strong> : Impossible de charger les pratiques
+            </div>
+        `;
+    }
+}
+
+/**
+ * Génère le HTML d'une carte de pratique
+ * @param {object} pratique - Objet pratique {id, nom, description, auteur}
+ * @param {boolean} estActive - True si c'est la pratique active
+ * @param {boolean} modifiable - True si la pratique peut être éditée/supprimée
+ * @returns {string} HTML de la carte
+ */
+function genererCartePratique(pratique, estActive, modifiable) {
+    const badgeActif = estActive ? `<span style="background: var(--vert-succes); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-left: 10px;">ACTIVE</span>` : '';
+
+    const boutonActiver = !estActive ? `<button class="btn btn-tres-compact" onclick="activerPratique('${pratique.id}')" style="background: var(--vert-succes); color: white;">Activer</button>` : '';
+
+    const boutonsModification = modifiable ? `
+        <button class="btn btn-tres-compact" onclick="editerPratique('${pratique.id}')">Éditer</button>
+        <button class="btn btn-tres-compact" onclick="dupliquerPratique('${pratique.id}')">Dupliquer</button>
+        <button class="btn btn-tres-compact" onclick="exporterPratiqueVersJSON('${pratique.id}')">Exporter</button>
+        ${!estActive ? `<button class="btn btn-tres-compact" onclick="supprimerPratique('${pratique.id}')" style="background: var(--rouge-erreur); color: white;">Supprimer</button>` : ''}
+    ` : '';
+
+    const auteur = pratique.auteur ? `<small style="color: var(--gris-moyen);">Par ${pratique.auteur}</small>` : '';
+
+    return `
+        <div style="padding: 15px; background: white; border: 2px solid ${estActive ? 'var(--vert-succes)' : '#ddd'}; border-radius: 8px; ${estActive ? 'box-shadow: 0 2px 8px rgba(108, 207, 127, 0.2);' : ''}">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                        <strong style="font-size: 1rem; color: var(--bleu-principal);">${pratique.nom}</strong>
+                        ${badgeActif}
+                    </div>
+                    ${auteur ? `<div style="margin-bottom: 6px;">${auteur}</div>` : ''}
+                    ${pratique.description ? `<p style="color: var(--gris-moyen); font-size: 0.85rem; margin: 0; line-height: 1.4;">${pratique.description}</p>` : ''}
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+                ${boutonActiver}
+                ${boutonsModification}
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Active une pratique
+ * @param {string} id - ID de la pratique à activer
+ */
+async function activerPratique(id) {
+    if (!confirm(`Activer cette pratique ?\n\nToutes les évaluations futures utiliseront cette pratique.`)) {
+        return;
+    }
+
+    try {
+        await PratiqueManager.changerPratiqueActive(id);
+        console.log('✅ Pratique activée:', id);
+
+        // Recharger l'affichage
+        await afficherListePratiques();
+
+        // Notification
+        alert(`✅ Pratique activée avec succès !\n\nLes évaluations futures utiliseront cette pratique.`);
+    } catch (error) {
+        console.error('Erreur lors de l\'activation:', error);
+        alert(`❌ Erreur : ${error.message}`);
+    }
+}
+
+/**
+ * Éditer une pratique
+ * @param {string} id - ID de la pratique à éditer
+ */
+async function editerPratique(id) {
+    // Pour l'instant, on exporte la pratique et suggère de l'éditer manuellement
+    // Une future version implémentera le wizard d'édition pré-rempli
+
+    const confirmation = confirm(
+        `Édition de pratique\n\n` +
+        `L'édition via le wizard sera disponible dans une prochaine version.\n\n` +
+        `Voulez-vous exporter cette pratique en JSON pour l'éditer manuellement ?\n` +
+        `Vous pourrez ensuite la réimporter après modification.`
+    );
+
+    if (confirmation) {
+        await exporterPratiqueVersJSON(id);
+        alert(
+            `✅ Pratique exportée !\n\n` +
+            `1. Ouvrez le fichier JSON téléchargé\n` +
+            `2. Modifiez les valeurs souhaitées\n` +
+            `3. Sauvegardez le fichier\n` +
+            `4. Supprimez l'ancienne pratique\n` +
+            `5. Importez le fichier JSON modifié`
+        );
+    }
+}
+
+/**
+ * Dupliquer une pratique
+ * @param {string} id - ID de la pratique à dupliquer
+ */
+async function dupliquerPratique(id) {
+    const nouveauNom = prompt('Nom de la copie:', 'Copie de pratique');
+    if (!nouveauNom) return;
+
+    try {
+        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const original = pratiques.find(p => p.id === id);
+
+        if (!original) {
+            throw new Error('Pratique introuvable');
+        }
+
+        // Créer une copie avec un nouvel ID
+        const copie = {
+            id: 'pratique-' + Date.now(),
+            nom: nouveauNom,
+            auteur: original.auteur + ' (copie)',
+            description: original.description,
+            config: JSON.parse(JSON.stringify(original.config)) // Deep copy
+        };
+
+        // Mettre à jour l'ID et le nom dans la config
+        copie.config.id = copie.id;
+        copie.config.nom = nouveauNom;
+
+        // Sauvegarder
+        await PratiqueManager.sauvegarderPratique(copie);
+
+        console.log('✅ Pratique dupliquée:', copie.id);
+
+        // Recharger
+        await afficherListePratiques();
+
+        alert(`✅ Pratique dupliquée avec succès !\n\n"${nouveauNom}" a été ajoutée à vos pratiques.`);
+    } catch (error) {
+        console.error('Erreur lors de la duplication:', error);
+        alert(`❌ Erreur : ${error.message}`);
+    }
+}
+
+/**
+ * Supprimer une pratique
+ * @param {string} id - ID de la pratique à supprimer
+ */
+async function supprimerPratique(id) {
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratique = pratiques.find(p => p.id === id);
+
+    if (!confirm(`Supprimer définitivement cette pratique ?\n\n"${pratique?.nom}"\n\nCette action est irréversible.`)) {
+        return;
+    }
+
+    try {
+        await PratiqueManager.supprimerPratique(id);
+        console.log('✅ Pratique supprimée:', id);
+
+        // Recharger
+        await afficherListePratiques();
+
+        alert(`✅ Pratique supprimée avec succès.`);
+    } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+        alert(`❌ Erreur : ${error.message}`);
+    }
+}
+
+/**
+ * Exporter une pratique en JSON
+ * @param {string} id - ID de la pratique à exporter
+ */
+async function exporterPratiqueVersJSON(id) {
+    try {
+        const pratique = await PratiqueManager.exporterPratique(id);
+
+        // Créer le blob JSON
+        const json = JSON.stringify(pratique, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+
+        // Télécharger le fichier
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pratique-${id}-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        console.log('✅ Pratique exportée:', id);
+    } catch (error) {
+        console.error('Erreur lors de l\'export:', error);
+        alert(`❌ Erreur : ${error.message}`);
+    }
+}
+
+// ============================================================================
+// WIZARD DE CRÉATION DE PRATIQUE
+// ============================================================================
+
+/**
+ * État du wizard
+ */
+let wizardEtapeActuelle = 1;
+const wizardNbEtapes = 8;
+
+/**
+ * Titres des étapes du wizard
+ */
+const wizardTitresEtapes = {
+    1: 'Informations de base',
+    2: 'Échelle d\'évaluation',
+    3: 'Structure des évaluations',
+    4: 'Calcul de la note',
+    5: 'Système de reprises',
+    6: 'Gestion des critères',
+    7: 'Seuils d\'interprétation',
+    8: 'Interface et terminologie'
+};
+
+/**
+ * Ouvre le modal wizard de création de pratique
+ */
+function creerNouvellePratique() {
+    // Réinitialiser le wizard
+    wizardEtapeActuelle = 1;
+
+    // Réinitialiser les champs
+    resetterWizard();
+
+    // Afficher le modal
+    const modal = document.getElementById('modalWizardPratique');
+    if (modal) {
+        modal.style.display = 'flex';
+        afficherEtapeWizard(1);
+    }
+}
+
+/**
+ * Ferme le modal wizard
+ */
+function fermerWizardPratique() {
+    const modal = document.getElementById('modalWizardPratique');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+
+    // Réinitialiser
+    wizardEtapeActuelle = 1;
+    resetterWizard();
+}
+
+// ============================================================================
+// WIZARD - CHARGEMENT DES RESSOURCES EXISTANTES
+// ============================================================================
+
+/**
+ * Charge les grilles de critères existantes depuis localStorage
+ */
+function chargerGrillesWizard() {
+    const select = document.getElementById('wizard-grille-id');
+    if (!select) return;
+
+    // Charger les grilles depuis localStorage
+    const grilles = db.getSync('grillesTemplates', []);
+
+    // Vider le select
+    select.innerHTML = '<option value="">Choisir une grille...</option>';
+
+    // Option par défaut : Grille SRPNF
+    if (grilles.length === 0) {
+        select.innerHTML += '<option value="defaut-srpnf" selected>SRPNF (5 critères) - Grille par défaut</option>';
+    } else {
+        // Ajouter toutes les grilles disponibles
+        grilles.forEach(grille => {
+            const option = document.createElement('option');
+            option.value = grille.id;
+            const nbCriteres = grille.criteres ? grille.criteres.length : 0;
+            option.textContent = `${grille.nom} (${nbCriteres} critères)`;
+            select.appendChild(option);
+        });
+
+        // Pré-sélectionner la première grille
+        if (grilles.length > 0) {
+            select.value = grilles[0].id;
+            afficherPreviewGrilleWizard();
+        }
+    }
+}
+
+/**
+ * Affiche la prévisualisation de la grille sélectionnée
+ */
+function afficherPreviewGrilleWizard() {
+    const select = document.getElementById('wizard-grille-id');
+    const preview = document.getElementById('wizard-preview-grille');
+    const contenu = document.getElementById('wizard-preview-grille-contenu');
+
+    if (!select || !preview || !contenu) return;
+
+    const grilleId = select.value;
+
+    if (!grilleId) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    // Cas spécial : grille par défaut SRPNF
+    if (grilleId === 'defaut-srpnf') {
+        contenu.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                    <strong>Structure</strong>
+                    <span style="color: var(--gris-moyen); font-size: 0.9rem;">15%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                    <strong>Rigueur</strong>
+                    <span style="color: var(--gris-moyen); font-size: 0.9rem;">20%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                    <strong>Plausibilité</strong>
+                    <span style="color: var(--gris-moyen); font-size: 0.9rem;">10%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                    <strong>Nuance</strong>
+                    <span style="color: var(--gris-moyen); font-size: 0.9rem;">25%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                    <strong>Français</strong>
+                    <span style="color: var(--gris-moyen); font-size: 0.9rem;">30%</span>
+                </div>
+            </div>
+        `;
+        preview.style.display = 'block';
+        return;
+    }
+
+    // Charger la grille depuis localStorage
+    const grilles = db.getSync('grillesTemplates', []);
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!grille || !grille.criteres) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    // Générer le HTML de prévisualisation
+    let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+
+    grille.criteres.forEach(critere => {
+        html += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 4px;">
+                <strong>${critere.nom}</strong>
+                <span style="color: var(--gris-moyen); font-size: 0.9rem;">${critere.ponderation}%</span>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+
+    contenu.innerHTML = html;
+    preview.style.display = 'block';
+}
+
+/**
+ * Charge les échelles existantes depuis localStorage dans le select du wizard
+ */
+function chargerEchellesWizard() {
+    const select = document.getElementById('wizard-echelle-id');
+    if (!select) return;
+
+    // Charger les échelles depuis localStorage
+    const echelles = db.getSync('echellesTemplates', []);
+
+    // Vider le select (garder seulement l'option par défaut)
+    select.innerHTML = '<option value="">Choisir une échelle...</option>';
+
+    // Option par défaut : Échelle IDME (si elle n'existe pas, la créer)
+    if (echelles.length === 0) {
+        select.innerHTML += '<option value="defaut-idme" selected>IDME (4 niveaux) - Échelle par défaut</option>';
+    } else {
+        // Ajouter toutes les échelles disponibles
+        echelles.forEach(echelle => {
+            const option = document.createElement('option');
+            option.value = echelle.id;
+            option.textContent = `${echelle.nom} (${echelle.niveaux.length} niveaux)`;
+            select.appendChild(option);
+        });
+
+        // Pré-sélectionner la première échelle
+        if (echelles.length > 0) {
+            select.value = echelles[0].id;
+            afficherPreviewEchelleWizard();
+        }
+    }
+}
+
+/**
+ * Affiche la prévisualisation de l'échelle sélectionnée
+ */
+function afficherPreviewEchelleWizard() {
+    const select = document.getElementById('wizard-echelle-id');
+    const preview = document.getElementById('wizard-preview-echelle');
+    const contenu = document.getElementById('wizard-preview-echelle-contenu');
+
+    if (!select || !preview || !contenu) return;
+
+    const echelleId = select.value;
+
+    if (!echelleId) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    // Cas spécial : échelle par défaut IDME
+    if (echelleId === 'defaut-idme') {
+        contenu.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 4px;">
+                    <div style="width: 30px; height: 30px; border-radius: 4px; background: #FF6B6B;"></div>
+                    <div style="flex: 1;">
+                        <strong>I - Insuffisant</strong>
+                        <div style="font-size: 0.85rem; color: var(--gris-moyen);">Plage : 0-64% • Calcul : 50%</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 4px;">
+                    <div style="width: 30px; height: 30px; border-radius: 4px; background: #FFD93D;"></div>
+                    <div style="flex: 1;">
+                        <strong>D - En développement</strong>
+                        <div style="font-size: 0.85rem; color: var(--gris-moyen);">Plage : 65-74% • Calcul : 70%</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 4px;">
+                    <div style="width: 30px; height: 30px; border-radius: 4px; background: #6BCF7F;"></div>
+                    <div style="flex: 1;">
+                        <strong>M - Maîtrisé</strong>
+                        <div style="font-size: 0.85rem; color: var(--gris-moyen);">Plage : 75-84% • Calcul : 80%</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 4px;">
+                    <div style="width: 30px; height: 30px; border-radius: 4px; background: #4D96FF;"></div>
+                    <div style="flex: 1;">
+                        <strong>E - Étendu</strong>
+                        <div style="font-size: 0.85rem; color: var(--gris-moyen);">Plage : 85-100% • Calcul : 92,5%</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        preview.style.display = 'block';
+        return;
+    }
+
+    // Charger l'échelle depuis localStorage
+    const echelles = db.getSync('echellesTemplates', []);
+    const echelle = echelles.find(e => e.id === echelleId);
+
+    if (!echelle || !echelle.niveaux) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    // Générer le HTML de prévisualisation
+    let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+
+    echelle.niveaux.forEach(niveau => {
+        // Extraire la couleur (gérer var(--...) et hex)
+        let couleurStyle = niveau.couleur;
+        if (couleurStyle.includes('var(')) {
+            // Mapping des variables CSS vers couleurs hex
+            const couleurMap = {
+                '--risque-critique': '#FF6B6B',
+                '--risque-modere': '#FFD93D',
+                '--risque-minimal': '#6BCF7F',
+                '--risque-nul': '#4D96FF'
+            };
+            const varName = couleurStyle.match(/var\((.*?)\)/)?.[1];
+            couleurStyle = couleurMap[varName] || '#cccccc';
+        }
+
+        // Valeur de calcul (avec virgule française)
+        const valeurCalcul = Number(niveau.valeurCalcul) || ((Number(niveau.min) + Number(niveau.max)) / 2);
+        const valeurCalculFormatee = valeurCalcul.toFixed(1).replace('.', ',');
+
+        html += `
+            <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 4px;">
+                <div style="width: 30px; height: 30px; border-radius: 4px; background: ${couleurStyle};"></div>
+                <div style="flex: 1;">
+                    <strong>${niveau.code} - ${niveau.nom}</strong>
+                    <div style="font-size: 0.85rem; color: var(--gris-moyen);">
+                        Plage : ${Math.round(niveau.min)}-${Math.round(niveau.max)}% • Calcul : ${valeurCalculFormatee}%
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+
+    contenu.innerHTML = html;
+    preview.style.display = 'block';
+}
+
+/**
+ * Réinitialise tous les champs du wizard
+ */
+function resetterWizard() {
+    // Étape 1
+    document.getElementById('wizard-nom').value = '';
+    document.getElementById('wizard-auteur').value = '';
+    document.getElementById('wizard-etablissement').value = '';
+    document.getElementById('wizard-description').value = '';
+    document.getElementById('wizard-discipline').value = '';
+
+    // Étape 2 - Charger les échelles existantes
+    chargerEchellesWizard();
+
+    // Étape 3
+    document.getElementById('wizard-structure-type').value = '';
+    document.getElementById('wizard-nb-standards').value = '10';
+    document.getElementById('wizard-standards-terminaux').value = '';
+    document.getElementById('wizard-portfolio-selection').value = 'n_meilleurs';
+    document.getElementById('wizard-portfolio-options').value = '3, 7, 12';
+    document.getElementById('wizard-portfolio-defaut').value = '7';
+    document.getElementById('wizard-evaluations-liste').innerHTML = '';
+
+    // Étape 4
+    document.getElementById('wizard-calcul-methode').value = '';
+    document.getElementById('wizard-conditions-speciales').checked = false;
+
+    // Étape 5
+    document.getElementById('wizard-reprises-type').value = '';
+    document.getElementById('wizard-reprises-bureau').checked = false;
+    document.getElementById('wizard-niveau-retrogradable').checked = false;
+
+    // Étape 6 - Charger les grilles existantes
+    chargerGrillesWizard();
+
+    // Étape 7
+    document.getElementById('wizard-seuils-type').value = '';
+    document.getElementById('wizard-seuil-bien').value = '85';
+    document.getElementById('wizard-seuil-difficulte').value = '80';
+    document.getElementById('wizard-seuil-grande-difficulte').value = '70';
+    document.getElementById('wizard-niveau-acceptable').value = '';
+
+    // Étape 8
+    document.getElementById('wizard-afficher-notes').checked = true;
+    document.getElementById('wizard-afficher-rang').checked = false;
+    document.getElementById('wizard-afficher-moyenne').checked = false;
+    document.getElementById('wizard-terme-evaluation').value = 'Évaluation';
+    document.getElementById('wizard-terme-critere').value = 'Critère';
+    document.getElementById('wizard-terme-note').value = 'Note finale';
+    document.getElementById('wizard-terme-reprise').value = 'Reprise';
+}
+
+/**
+ * Affiche une étape spécifique du wizard
+ */
+function afficherEtapeWizard(numeroEtape) {
+    // Cacher toutes les étapes
+    const steps = document.querySelectorAll('.wizard-step');
+    steps.forEach(step => step.style.display = 'none');
+
+    // Afficher l'étape demandée
+    const currentStep = document.querySelector(`.wizard-step[data-step="${numeroEtape}"]`);
+    if (currentStep) {
+        currentStep.style.display = 'block';
+    }
+
+    // Mettre à jour l'indicateur
+    document.getElementById('wizard-etape-actuelle').textContent = numeroEtape;
+    document.getElementById('wizard-etape-titre').textContent = wizardTitresEtapes[numeroEtape];
+
+    // Mettre à jour les dots
+    const dots = document.querySelectorAll('.wizard-dot');
+    dots.forEach((dot, index) => {
+        if (index + 1 === numeroEtape) {
+            dot.classList.add('wizard-dot-active');
+        } else {
+            dot.classList.remove('wizard-dot-active');
+        }
+    });
+
+    // Gérer l'affichage des boutons
+    const btnPrecedent = document.getElementById('wizard-btn-precedent');
+    const btnSuivant = document.getElementById('wizard-btn-suivant');
+    const btnCreer = document.getElementById('wizard-btn-creer');
+
+    if (numeroEtape === 1) {
+        btnPrecedent.style.display = 'none';
+        btnSuivant.style.display = 'inline-block';
+        btnCreer.style.display = 'none';
+    } else if (numeroEtape === wizardNbEtapes) {
+        btnPrecedent.style.display = 'inline-block';
+        btnSuivant.style.display = 'none';
+        btnCreer.style.display = 'inline-block';
+    } else {
+        btnPrecedent.style.display = 'inline-block';
+        btnSuivant.style.display = 'inline-block';
+        btnCreer.style.display = 'none';
+    }
+}
+
+/**
+ * Passe à l'étape suivante
+ */
+function suivantEtapeWizard() {
+    // Valider l'étape actuelle
+    if (!validerEtapeWizard(wizardEtapeActuelle)) {
+        return;
+    }
+
+    // Passer à la suivante
+    if (wizardEtapeActuelle < wizardNbEtapes) {
+        wizardEtapeActuelle++;
+        afficherEtapeWizard(wizardEtapeActuelle);
+    }
+}
+
+/**
+ * Revient à l'étape précédente
+ */
+function precedentEtapeWizard() {
+    if (wizardEtapeActuelle > 1) {
+        wizardEtapeActuelle--;
+        afficherEtapeWizard(wizardEtapeActuelle);
+    }
+}
+
+/**
+ * Valide les champs de l'étape actuelle
+ */
+function validerEtapeWizard(numeroEtape) {
+    switch (numeroEtape) {
+        case 1: // Informations de base
+            const nom = document.getElementById('wizard-nom').value.trim();
+            if (!nom) {
+                alert('Veuillez saisir un nom pour la pratique.');
+                return false;
+            }
+            break;
+
+        case 2: // Échelle
+            const echelleId = document.getElementById('wizard-echelle-id').value;
+            if (!echelleId) {
+                alert('Veuillez choisir une échelle d\'évaluation.');
+                return false;
+            }
+            break;
+
+        case 3: // Structure
+            const typeStructure = document.getElementById('wizard-structure-type').value;
+            if (!typeStructure) {
+                alert('Veuillez choisir un type de structure.');
+                return false;
+            }
+            break;
+
+        case 4: // Calcul
+            const methodeCalcul = document.getElementById('wizard-calcul-methode').value;
+            if (!methodeCalcul) {
+                alert('Veuillez choisir une méthode de calcul.');
+                return false;
+            }
+            break;
+
+        case 5: // Reprises
+            const typeReprises = document.getElementById('wizard-reprises-type').value;
+            if (!typeReprises) {
+                alert('Veuillez choisir un type de système de reprises.');
+                return false;
+            }
+            break;
+
+        case 6: // Critères (grille sélectionnée)
+            const grilleId = document.getElementById('wizard-grille-id').value;
+            if (!grilleId) {
+                alert('Veuillez choisir une grille de critères.');
+                return false;
+            }
+            break;
+
+        case 7: // Seuils
+            const typeSeuils = document.getElementById('wizard-seuils-type').value;
+            if (!typeSeuils) {
+                alert('Veuillez choisir un type de seuils.');
+                return false;
+            }
+            break;
+    }
+
+    return true;
+}
+
+/**
+ * Affiche la configuration selon le type d'échelle
+ */
+function afficherConfigEchelle() {
+    const type = document.getElementById('wizard-echelle-type').value;
+
+    // Cacher toutes les configs
+    document.getElementById('wizard-config-niveaux').style.display = 'none';
+    document.getElementById('wizard-config-pourcentage').style.display = 'none';
+    document.getElementById('wizard-config-notes-fixes').style.display = 'none';
+
+    // Afficher la config appropriée
+    if (type === 'niveaux') {
+        document.getElementById('wizard-config-niveaux').style.display = 'block';
+        // Initialiser avec 4 niveaux IDME par défaut
+        if (document.getElementById('wizard-niveaux-liste').children.length === 0) {
+            initialiserNiveauxIDME();
+        }
+    } else if (type === 'pourcentage') {
+        document.getElementById('wizard-config-pourcentage').style.display = 'block';
+    } else if (type === 'notes_fixes') {
+        document.getElementById('wizard-config-notes-fixes').style.display = 'block';
+    }
+}
+
+/**
+ * Initialise les niveaux IDME par défaut
+ */
+function initialiserNiveauxIDME() {
+    const niveauxIDME = [
+        { code: 'I', label: 'Insuffisant', pct: 50, couleur: '#FF6B6B' },
+        { code: 'D', label: 'En développement', pct: 70, couleur: '#FFD93D' },
+        { code: 'M', label: 'Maîtrisé', pct: 80, couleur: '#6BCF7F' },
+        { code: 'E', label: 'Étendu', pct: 92.5, couleur: '#4D96FF' }
+    ];
+
+    const liste = document.getElementById('wizard-niveaux-liste');
+    liste.innerHTML = '';
+
+    niveauxIDME.forEach((niveau, index) => {
+        ajouterNiveauWizard(niveau);
+    });
+}
+
+/**
+ * Ajoute un niveau dans l'échelle à niveaux
+ */
+function ajouterNiveauWizard(niveauDefaut = null) {
+    const liste = document.getElementById('wizard-niveaux-liste');
+    const index = liste.children.length;
+
+    if (index >= 6) {
+        alert('Maximum 6 niveaux autorisés.');
+        return;
+    }
+
+    const niveau = niveauDefaut || { code: '', label: '', pct: 50, couleur: '#CCCCCC' };
+
+    const div = document.createElement('div');
+    div.className = 'niveau-item';
+    div.style.cssText = 'display: grid; grid-template-columns: 80px 1fr 100px 80px 40px; gap: 10px; margin-bottom: 10px; padding: 12px; background: white; border-radius: 4px; border: 1px solid var(--gris-leger);';
+
+    div.innerHTML = `
+        <input type="text" class="controle-form" placeholder="Code" value="${niveau.code}" data-field="code" style="padding: 6px;">
+        <input type="text" class="controle-form" placeholder="Label" value="${niveau.label}" data-field="label" style="padding: 6px;">
+        <input type="number" class="controle-form" placeholder="%" value="${niveau.pct}" min="0" max="100" step="0.1" data-field="pct" style="padding: 6px;">
+        <input type="color" class="controle-form" value="${niveau.couleur}" data-field="couleur" style="padding: 2px; height: 36px;">
+        <button type="button" class="btn btn-tres-compact" onclick="retirerNiveauWizard(this)" style="background: #dc3545; color: white; padding: 6px;">🗑️</button>
+    `;
+
+    liste.appendChild(div);
+}
+
+/**
+ * Retire un niveau
+ */
+function retirerNiveauWizard(btn) {
+    const liste = document.getElementById('wizard-niveaux-liste');
+    if (liste.children.length <= 2) {
+        alert('Minimum 2 niveaux requis.');
+        return;
+    }
+    btn.closest('.niveau-item').remove();
+}
+
+/**
+ * Affiche la configuration selon le type de structure
+ */
+function afficherConfigStructure() {
+    const type = document.getElementById('wizard-structure-type').value;
+
+    // Cacher toutes les configs
+    document.getElementById('wizard-config-standards').style.display = 'none';
+    document.getElementById('wizard-config-portfolio').style.display = 'none';
+    document.getElementById('wizard-config-evaluations').style.display = 'none';
+    document.getElementById('wizard-config-specifications').style.display = 'none';
+
+    // Afficher la config appropriée
+    if (type === 'standards') {
+        document.getElementById('wizard-config-standards').style.display = 'block';
+    } else if (type === 'portfolio') {
+        document.getElementById('wizard-config-portfolio').style.display = 'block';
+    } else if (type === 'evaluations_discretes') {
+        document.getElementById('wizard-config-evaluations').style.display = 'block';
+    } else if (type === 'specifications') {
+        document.getElementById('wizard-config-specifications').style.display = 'block';
+    }
+}
+
+/**
+ * Ajoute une évaluation dans la liste
+ */
+function ajouterEvaluationWizard() {
+    const liste = document.getElementById('wizard-evaluations-liste');
+    const index = liste.children.length;
+
+    const div = document.createElement('div');
+    div.className = 'evaluation-item';
+    div.style.cssText = 'display: grid; grid-template-columns: 1fr 100px 40px; gap: 10px; margin-bottom: 10px; padding: 12px; background: white; border-radius: 4px; border: 1px solid var(--gris-leger);';
+
+    div.innerHTML = `
+        <input type="text" class="controle-form" placeholder="Nom de l'évaluation" data-field="nom" style="padding: 6px;">
+        <input type="number" class="controle-form" placeholder="Poids %" min="0" max="100" step="1" data-field="poids" style="padding: 6px;">
+        <button type="button" class="btn btn-tres-compact" onclick="retirerEvaluationWizard(this)" style="background: #dc3545; color: white; padding: 6px;">🗑️</button>
+    `;
+
+    liste.appendChild(div);
+}
+
+/**
+ * Retire une évaluation
+ */
+function retirerEvaluationWizard(btn) {
+    btn.closest('.evaluation-item').remove();
+}
+
+/**
+ * Affiche la configuration selon la méthode de calcul
+ */
+function afficherConfigCalcul() {
+    const methode = document.getElementById('wizard-calcul-methode').value;
+    const infoDiv = document.getElementById('wizard-info-calcul');
+    const infoTexte = document.getElementById('wizard-info-calcul-texte');
+
+    if (!methode) {
+        infoDiv.style.display = 'none';
+        return;
+    }
+
+    infoDiv.style.display = 'block';
+
+    if (methode === 'conversion_niveaux') {
+        infoTexte.textContent = 'Chaque niveau sera converti en pourcentage selon la table de conversion définie dans l\'échelle (étape 2).';
+    } else if (methode === 'moyenne_ponderee') {
+        infoTexte.textContent = 'Les évaluations seront pondérées selon les poids définis à l\'étape 3.';
+    } else if (methode === 'specifications') {
+        infoTexte.textContent = 'Les notes seront déterminées selon les spécifications atteintes (notes fixes).';
+    }
+}
+
+/**
+ * Affiche la configuration selon le type de reprises
+ */
+function afficherConfigReprises() {
+    const type = document.getElementById('wizard-reprises-type').value;
+    const configDiv = document.getElementById('wizard-config-reprises');
+    const infoDiv = document.getElementById('wizard-info-reprises');
+
+    if (type === 'aucune') {
+        configDiv.style.display = 'none';
+        infoDiv.style.display = 'none';
+    } else if (type === 'illimitees' || type === 'occasions_ponctuelles' || type === 'limitees') {
+        configDiv.style.display = 'block';
+        infoDiv.style.display = type === 'occasions_ponctuelles' ? 'block' : 'none';
+    } else {
+        configDiv.style.display = 'none';
+        infoDiv.style.display = 'none';
+    }
+}
+
+/**
+ * Affiche la configuration selon le type de critères
+ */
+function afficherConfigCriteres() {
+    const type = document.getElementById('wizard-criteres-type').value;
+    const configFixesDiv = document.getElementById('wizard-config-criteres-fixes');
+    const infoDiv = document.getElementById('wizard-info-criteres');
+    const infoTexte = document.getElementById('wizard-info-criteres-texte');
+
+    // Cacher toutes les configs
+    configFixesDiv.style.display = 'none';
+    infoDiv.style.display = 'none';
+
+    if (type === 'fixes') {
+        configFixesDiv.style.display = 'block';
+    } else if (type === 'par_standard') {
+        infoDiv.style.display = 'block';
+        infoTexte.textContent = 'Chaque standard pourra avoir ses propres critères spécifiques.';
+    } else if (type === 'par_evaluation') {
+        infoDiv.style.display = 'block';
+        infoTexte.textContent = 'Les critères varient selon le type d\'évaluation.';
+    }
+}
+
+/**
+ * Affiche la configuration selon le type de seuils
+ */
+function afficherConfigSeuils() {
+    const type = document.getElementById('wizard-seuils-type').value;
+
+    // Cacher toutes les configs
+    document.getElementById('wizard-config-seuils-pct').style.display = 'none';
+    document.getElementById('wizard-config-seuils-niveau').style.display = 'none';
+
+    if (type === 'pourcentage') {
+        document.getElementById('wizard-config-seuils-pct').style.display = 'block';
+    } else if (type === 'niveau') {
+        document.getElementById('wizard-config-seuils-niveau').style.display = 'block';
+    }
+}
+
+/**
+ * Crée la pratique à partir des données du wizard
+ */
+async function creerPratiqueDepuisWizard() {
+    try {
+        // Collecter les données de toutes les étapes
+        const pratiqueConfig = {
+            // Étape 1: Informations de base
+            id: 'pratique-' + Date.now(),
+            nom: document.getElementById('wizard-nom').value.trim(),
+            auteur: document.getElementById('wizard-auteur').value.trim() || 'Auteur',
+            etablissement: document.getElementById('wizard-etablissement').value.trim(),
+            description: document.getElementById('wizard-description').value.trim(),
+            discipline: document.getElementById('wizard-discipline').value.trim(),
+            version: '1.0',
+            date_creation: new Date().toISOString().split('T')[0],
+
+            // Étape 2: Échelle
+            echelle: construireEchelle(),
+
+            // Étape 3: Structure
+            structure_evaluations: construireStructure(),
+
+            // Étape 4: Calcul
+            calcul_note: construireCalcul(),
+
+            // Étape 5: Reprises
+            systeme_reprises: construireReprises(),
+
+            // Étape 6: Critères
+            gestion_criteres: construireCriteres(),
+
+            // Étape 7: Seuils
+            seuils: construireSeuils(),
+
+            // Étape 8: Interface
+            interface: construireInterface()
+        };
+
+        // Sauvegarder via PratiqueManager
+        await PratiqueManager.sauvegarderPratique({
+            id: pratiqueConfig.id,
+            nom: pratiqueConfig.nom,
+            auteur: pratiqueConfig.auteur,
+            description: pratiqueConfig.description,
+            config: pratiqueConfig
+        });
+
+        console.log('✅ Pratique créée:', pratiqueConfig.id);
+
+        // Fermer le wizard
+        fermerWizardPratique();
+
+        // Recharger la liste
+        await afficherListePratiques();
+
+        alert(`✅ Pratique créée avec succès !\n\n"${pratiqueConfig.nom}" a été ajoutée à vos pratiques configurables.`);
+    } catch (error) {
+        console.error('Erreur lors de la création:', error);
+        alert(`❌ Erreur : ${error.message}`);
+    }
+}
+
+/**
+ * Construit la configuration de l'échelle
+ */
+function construireEchelle() {
+    const echelleId = document.getElementById('wizard-echelle-id').value;
+
+    // Cas spécial : échelle par défaut IDME
+    if (echelleId === 'defaut-idme') {
+        return {
+            type: 'niveaux',
+            echelle_id: 'defaut-idme',
+            niveaux: [
+                { code: 'I', label: 'Insuffisant', description: '', valeur_numerique: 1, valeur_pourcentage: 50, couleur: '#FF6B6B', ordre: 1 },
+                { code: 'D', label: 'En développement', description: '', valeur_numerique: 2, valeur_pourcentage: 70, couleur: '#FFD93D', ordre: 2 },
+                { code: 'M', label: 'Maîtrisé', description: '', valeur_numerique: 3, valeur_pourcentage: 80, couleur: '#6BCF7F', ordre: 3 },
+                { code: 'E', label: 'Étendu', description: '', valeur_numerique: 4, valeur_pourcentage: 92.5, couleur: '#4D96FF', ordre: 4 }
+            ]
+        };
+    }
+
+    // Charger l'échelle depuis localStorage
+    const echelles = db.getSync('echellesTemplates', []);
+    const echelle = echelles.find(e => e.id === echelleId);
+
+    if (!echelle) {
+        throw new Error(`Échelle introuvable: ${echelleId}`);
+    }
+
+    // Convertir le format échelle vers le format pratique
+    return {
+        type: 'niveaux',
+        echelle_id: echelle.id,
+        echelle_nom: echelle.nom,
+        niveaux: echelle.niveaux.map((niveau, index) => ({
+            code: niveau.code,
+            label: niveau.nom,
+            description: niveau.description || '',
+            valeur_numerique: index + 1,
+            valeur_pourcentage: niveau.valeurCalcul || ((niveau.min + niveau.max) / 2),
+            couleur: niveau.couleur,
+            ordre: index + 1
+        }))
+    };
+}
+
+/**
+ * Construit la configuration de la structure
+ */
+function construireStructure() {
+    const type = document.getElementById('wizard-structure-type').value;
+
+    if (type === 'standards') {
+        const nbStandards = parseInt(document.getElementById('wizard-nb-standards').value);
+        const terminaux = document.getElementById('wizard-standards-terminaux').value
+            .split(',')
+            .map(n => parseInt(n.trim()))
+            .filter(n => !isNaN(n));
+
+        return {
+            type: 'standards',
+            nombre_standards: nbStandards,
+            standards_terminaux: terminaux,
+            ponderation: 'egale'
+        };
+    } else if (type === 'portfolio') {
+        const selection = document.getElementById('wizard-portfolio-selection').value;
+        const options = document.getElementById('wizard-portfolio-options').value
+            .split(',')
+            .map(n => parseInt(n.trim()))
+            .filter(n => !isNaN(n));
+        const defaut = parseInt(document.getElementById('wizard-portfolio-defaut').value);
+
+        return {
+            type: 'portfolio',
+            description: 'Artefacts de portfolio',
+            selection: selection,
+            n_artefacts_options: options,
+            n_artefacts_defaut: defaut
+        };
+    } else if (type === 'evaluations_discretes') {
+        const evaluations = [];
+        const evaluationsItems = document.querySelectorAll('#wizard-evaluations-liste .evaluation-item');
+
+        evaluationsItems.forEach(item => {
+            const nom = item.querySelector('[data-field="nom"]').value;
+            const poids = parseInt(item.querySelector('[data-field="poids"]').value);
+
+            if (nom && !isNaN(poids)) {
+                evaluations.push({
+                    nom: nom,
+                    poids: poids,
+                    type: 'evaluation',
+                    obligatoire: true
+                });
+            }
+        });
+
+        return {
+            type: 'evaluations_discretes',
+            evaluations: evaluations
+        };
+    } else if (type === 'specifications') {
+        return {
+            type: 'specifications',
+            specifications: []
+        };
+    }
+}
+
+/**
+ * Construit la configuration du calcul
+ */
+function construireCalcul() {
+    const methode = document.getElementById('wizard-calcul-methode').value;
+
+    const config = {
+        methode: methode
+    };
+
+    if (methode === 'conversion_niveaux') {
+        config.description = 'Conversion des niveaux en pourcentages';
+        config.table_conversion = []; // Sera remplie automatiquement depuis l'échelle
+        config.conditions_speciales = [];
+    } else if (methode === 'moyenne_ponderee') {
+        config.formule = 'somme(note_i × poids_i) / 100';
+        config.conditions_speciales = [];
+    } else if (methode === 'specifications') {
+        config.description = 'Notes fixes selon spécifications atteintes';
+    }
+
+    return config;
+}
+
+/**
+ * Construit la configuration des reprises
+ */
+function construireReprises() {
+    const type = document.getElementById('wizard-reprises-type').value;
+
+    const config = {
+        type: type
+    };
+
+    if (type !== 'aucune') {
+        config.reprises_bureau = document.getElementById('wizard-reprises-bureau').checked;
+        config.niveau_retrogradable = document.getElementById('wizard-niveau-retrogradable').checked;
+    }
+
+    if (type === 'occasions_ponctuelles') {
+        config.occasions_formelles = [];
+    }
+
+    return config;
+}
+
+/**
+ * Construit la configuration des critères - Référence une grille existante
+ */
+function construireCriteres() {
+    const grilleId = document.getElementById('wizard-grille-id').value;
+
+    // Référence la grille par ID (stockée dans grillesTemplates)
+    return {
+        type: 'grille',
+        grille_id: grilleId,
+        description: 'Grille de critères sélectionnée depuis le matériel pédagogique'
+    };
+}
+
+/**
+ * Construit la configuration des seuils
+ */
+function construireSeuils() {
+    const type = document.getElementById('wizard-seuils-type').value;
+
+    if (type === 'pourcentage') {
+        return {
+            type: 'pourcentage',
+            va_bien: parseInt(document.getElementById('wizard-seuil-bien').value),
+            difficulte: parseInt(document.getElementById('wizard-seuil-difficulte').value),
+            grande_difficulte: parseInt(document.getElementById('wizard-seuil-grande-difficulte').value)
+        };
+    } else if (type === 'niveau') {
+        return {
+            type: 'niveau',
+            niveau_acceptable: document.getElementById('wizard-niveau-acceptable').value.trim()
+        };
+    }
+}
+
+/**
+ * Construit la configuration de l'interface
+ */
+function construireInterface() {
+    return {
+        afficher_notes_chiffrees: document.getElementById('wizard-afficher-notes').checked,
+        afficher_rang: document.getElementById('wizard-afficher-rang').checked,
+        afficher_moyenne_groupe: document.getElementById('wizard-afficher-moyenne').checked,
+        terminologie: {
+            evaluation: document.getElementById('wizard-terme-evaluation').value.trim(),
+            critere: document.getElementById('wizard-terme-critere').value.trim(),
+            note_finale: document.getElementById('wizard-terme-note').value.trim(),
+            reprise: document.getElementById('wizard-terme-reprise').value.trim()
+        }
+    };
+}
+
+/**
+ * Déclencher l'input file pour importer JSON
+ */
+function importerPratiqueJSON() {
+    const input = document.getElementById('inputImportPratique');
+    if (input) {
+        input.click();
+    }
+}
+
+/**
+ * Traiter le fichier JSON importé
+ * @param {Event} event - Événement change de l'input file
+ */
+async function traiterImportPratique(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        const text = await file.text();
+        const pratiqueJSON = JSON.parse(text);
+
+        // Valider la structure minimale
+        if (!pratiqueJSON.id || !pratiqueJSON.config) {
+            throw new Error('Structure JSON invalide (id et config requis)');
+        }
+
+        // Importer via PratiqueManager
+        await PratiqueManager.importerPratique(pratiqueJSON);
+
+        console.log('✅ Pratique importée:', pratiqueJSON.id);
+
+        // Recharger
+        await afficherListePratiques();
+
+        alert(`✅ Pratique importée avec succès !\n\n"${pratiqueJSON.nom}" a été ajoutée à vos pratiques.`);
+    } catch (error) {
+        console.error('Erreur lors de l\'import:', error);
+        alert(`❌ Erreur d'import : ${error.message}`);
+    }
+
+    // Réinitialiser l'input
+    event.target.value = '';
+}
+
+/**
+ * Afficher et initialiser les pratiques prédéfinies
+ */
+async function afficherPratiquesPredefines() {
+    if (!confirm('Charger les pratiques prédéfinies ?\n\nCela ajoutera des exemples de pratiques (Bruno, Marie-Hélène, François) que vous pourrez modifier.')) {
+        return;
+    }
+
+    try {
+        await PratiqueManager.initialiserPratiquesPredefines();
+
+        // Recharger
+        await afficherListePratiques();
+
+        alert(`✅ Pratiques prédéfinies chargées !\n\nVous pouvez maintenant les activer, les modifier ou les dupliquer.`);
+    } catch (error) {
+        console.error('Erreur lors du chargement des pratiques prédéfinies:', error);
+        alert(`❌ Erreur : ${error.message}`);
+    }
+}
+
 // ============================================
 // EXPORT DES FONCTIONS GLOBALES
 // ============================================
@@ -1343,3 +2671,32 @@ function chargerGrillesDisponibles() {
 window.initialiserModulePratiques = initialiserModulePratiques;
 window.sauvegarderPratiqueNotation = sauvegarderPratiqueNotation;
 window.obtenirConfigurationNotation = obtenirConfigurationNotation;
+
+// NOUVEAU Beta 92 : Gestion pratiques configurables
+window.afficherListePratiques = afficherListePratiques;
+window.activerPratique = activerPratique;
+window.editerPratique = editerPratique;
+window.dupliquerPratique = dupliquerPratique;
+window.supprimerPratique = supprimerPratique;
+window.exporterPratiqueVersJSON = exporterPratiqueVersJSON;
+window.creerNouvellePratique = creerNouvellePratique;
+window.importerPratiqueJSON = importerPratiqueJSON;
+window.traiterImportPratique = traiterImportPratique;
+window.afficherPratiquesPredefines = afficherPratiquesPredefines;
+
+// Wizard de création de pratique
+window.fermerWizardPratique = fermerWizardPratique;
+window.suivantEtapeWizard = suivantEtapeWizard;
+window.precedentEtapeWizard = precedentEtapeWizard;
+window.chargerEchellesWizard = chargerEchellesWizard;
+window.afficherPreviewEchelleWizard = afficherPreviewEchelleWizard;
+window.chargerGrillesWizard = chargerGrillesWizard;
+window.afficherPreviewGrilleWizard = afficherPreviewGrilleWizard;
+window.afficherConfigStructure = afficherConfigStructure;
+window.afficherConfigCalcul = afficherConfigCalcul;
+window.afficherConfigReprises = afficherConfigReprises;
+window.afficherConfigCriteres = afficherConfigCriteres;
+window.afficherConfigSeuils = afficherConfigSeuils;
+window.ajouterEvaluationWizard = ajouterEvaluationWizard;
+window.retirerEvaluationWizard = retirerEvaluationWizard;
+window.creerPratiqueDepuisWizard = creerPratiqueDepuisWizard;

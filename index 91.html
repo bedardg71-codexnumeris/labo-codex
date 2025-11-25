@@ -5734,15 +5734,451 @@ Exemple :
                                 </p>
                             </div>
 
-                            <!-- Pratique de notation -->
-                            <div class="groupe-form">
-                                <label>Pratique de notation</label>
-                                <select id="pratiqueNotation" class="controle-form">
-                                    <option value="">Choisir une pratique de notation</option>
-                                    <option value="sommative">Sommative traditionnelle (en %)</option>
-                                    <option value="pan-maitrise">PAN-Maîtrise</option>
-                                </select>
+                            <!-- ========================================= -->
+                            <!-- GESTION DES PRATIQUES CONFIGURABLES (Beta 92) -->
+                            <!-- ========================================= -->
+
+                            <div style="margin-bottom: 25px;">
+                                <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--bleu-principal);">
+                                    Pratiques d'évaluation disponibles
+                                </h3>
+
+                                <!-- Actions globales -->
+                                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                                    <button class="btn" onclick="creerNouvellePratique()" style="background: var(--vert-succes); color: white;">
+                                        Créer une pratique
+                                    </button>
+                                    <button class="btn" onclick="importerPratiqueJSON()" style="background: var(--bleu-moyen); color: white;">
+                                        Importer JSON
+                                    </button>
+                                    <button class="btn" onclick="afficherPratiquesPredefines()" style="background: var(--orange-accent); color: white;">
+                                        Exemples de pratiques
+                                    </button>
+                                </div>
+
+                                <!-- Liste des pratiques (sera remplie dynamiquement) -->
+                                <div id="listePratiques" style="display: flex; flex-direction: column; gap: 15px;">
+                                    <!-- Les cartes de pratiques seront insérées ici -->
+                                    <p style="color: var(--gris-moyen); font-style: italic;">
+                                        Chargement des pratiques...
+                                    </p>
+                                </div>
                             </div>
+
+                            <!-- Input caché pour import JSON -->
+                            <input type="file" id="inputImportPratique" accept=".json" style="display: none;" onchange="traiterImportPratique(event)">
+
+                            <!-- ========================================= -->
+                            <!-- MODAL WIZARD CRÉATION PRATIQUE -->
+                            <!-- ========================================= -->
+                            <div id="modalWizardPratique" class="modal-overlay" style="display: none;">
+                                <div class="modal-contenu" style="max-width: 700px; max-height: 85vh; overflow-y: auto;">
+                                    <button onclick="fermerWizardPratique()" class="modal-fermer">✕</button>
+
+                                    <h2 class="modal-titre">Créer une nouvelle pratique d'évaluation</h2>
+
+                                    <!-- Indicateur de progression -->
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                        <div>
+                                            <strong style="color: var(--bleu-principal);">Étape <span id="wizard-etape-actuelle">1</span>/8</strong>
+                                            <p id="wizard-etape-titre" style="margin: 5px 0 0 0; color: var(--gris-moyen); font-size: 0.9rem;">Informations de base</p>
+                                        </div>
+                                        <div style="display: flex; gap: 5px;">
+                                            <span class="wizard-dot wizard-dot-active" data-step="1"></span>
+                                            <span class="wizard-dot" data-step="2"></span>
+                                            <span class="wizard-dot" data-step="3"></span>
+                                            <span class="wizard-dot" data-step="4"></span>
+                                            <span class="wizard-dot" data-step="5"></span>
+                                            <span class="wizard-dot" data-step="6"></span>
+                                            <span class="wizard-dot" data-step="7"></span>
+                                            <span class="wizard-dot" data-step="8"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Conteneur des étapes -->
+                                    <div id="wizard-steps-container">
+                                        <!-- ÉTAPE 1: Informations de base -->
+                                        <div class="wizard-step" data-step="1">
+                                            <div class="groupe-form">
+                                                <label>Nom de la pratique *</label>
+                                                <input type="text" id="wizard-nom" class="controle-form" placeholder="Ex: PAN-Spécifications personnalisé" required>
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>Auteur</label>
+                                                <input type="text" id="wizard-auteur" class="controle-form" placeholder="Votre nom">
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>Établissement</label>
+                                                <input type="text" id="wizard-etablissement" class="controle-form" placeholder="Ex: Cégep de Drummondville">
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>Description</label>
+                                                <textarea id="wizard-description" class="controle-form" rows="3" placeholder="Brève description de cette pratique d'évaluation"></textarea>
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label>Discipline</label>
+                                                <input type="text" id="wizard-discipline" class="controle-form" placeholder="Ex: Chimie, Littérature, Philosophie">
+                                            </div>
+                                        </div>
+
+                                        <!-- ÉTAPE 2: Échelle d'évaluation -->
+                                        <div class="wizard-step" data-step="2" style="display: none;">
+                                            <p style="color: var(--gris-moyen); font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;">
+                                                L'échelle détermine comment vous évaluez les productions de vos étudiants.
+                                                Vous pouvez utiliser une échelle par niveaux (comme IDME) ou des pourcentages classiques.
+                                            </p>
+
+                                            <div class="groupe-form">
+                                                <label>Échelle à utiliser *</label>
+                                                <select id="wizard-echelle-id" class="controle-form" onchange="afficherPreviewEchelleWizard()">
+                                                    <option value="">Choisir une échelle...</option>
+                                                    <!-- Options chargées dynamiquement depuis echellesTemplates -->
+                                                </select>
+                                                <p style="color: var(--gris-moyen); font-size: 0.85rem; margin-top: 6px;">
+                                                    Vous pouvez créer ou modifier vos échelles dans
+                                                    <strong>Réglages → Matériel pédagogique → Niveaux de performance</strong>
+                                                </p>
+                                            </div>
+
+                                            <!-- Message explicatif -->
+                                            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                                                <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--bleu-principal);">
+                                                    À quoi servent ces valeurs ?
+                                                </h4>
+                                                <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                                                    <li style="margin-bottom: 8px;">
+                                                        <strong>Plage (min-max)</strong> : Détermine à quel niveau appartient un pourcentage.
+                                                        Par exemple, un étudiant avec 72% obtient le niveau «D» (plage 65-74%).
+                                                    </li>
+                                                    <li>
+                                                        <strong>Valeur de calcul</strong> : Valeur ponctuelle utilisée dans les moyennes.
+                                                        Quand un étudiant obtient «D», on compte 70% (pas toute la plage) dans sa moyenne.
+                                                    </li>
+                                                </ul>
+                                                <p style="margin: 12px 0 0 0; font-size: 0.85rem; font-style: italic; color: var(--gris-moyen);">
+                                                    Ces valeurs par défaut sont ajustables dans
+                                                    <strong>Réglages → Matériel pédagogique → Niveaux de performance</strong>.
+                                                </p>
+                                            </div>
+
+                                            <!-- Prévisualisation de l'échelle sélectionnée -->
+                                            <div id="wizard-preview-echelle" style="display: none; margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-principal);">
+                                                <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; color: var(--bleu-principal);">
+                                                    Aperçu de l'échelle
+                                                </h4>
+                                                <div id="wizard-preview-echelle-contenu">
+                                                    <!-- Niveaux affichés ici -->
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ÉTAPE 3: Structure des évaluations -->
+                                        <div class="wizard-step" data-step="3" style="display: none;">
+                                            <div class="groupe-form">
+                                                <label>Type de structure *</label>
+                                                <select id="wizard-structure-type" class="controle-form" onchange="afficherConfigStructure()">
+                                                    <option value="">Choisir un type...</option>
+                                                    <option value="standards">Standards (numérotés, avec terminaux)</option>
+                                                    <option value="portfolio">Portfolio (artefacts, sélection N meilleurs)</option>
+                                                    <option value="evaluations_discretes">Évaluations discrètes (examen, travaux, etc.)</option>
+                                                    <option value="specifications">Spécifications (objectifs pass/fail)</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Configuration Standards -->
+                                            <div id="wizard-config-standards" style="display: none;">
+                                                <div class="groupe-form">
+                                                    <label>Nombre de standards</label>
+                                                    <input type="number" id="wizard-nb-standards" class="controle-form" min="1" max="20" value="10">
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label>Standards terminaux (séparés par virgules)</label>
+                                                    <input type="text" id="wizard-standards-terminaux" class="controle-form" placeholder="Ex: 7, 8, 9, 10">
+                                                </div>
+                                            </div>
+
+                                            <!-- Configuration Portfolio -->
+                                            <div id="wizard-config-portfolio" style="display: none;">
+                                                <div class="groupe-form">
+                                                    <label>Mode de sélection</label>
+                                                    <select id="wizard-portfolio-selection" class="controle-form">
+                                                        <option value="n_meilleurs">N meilleurs artefacts</option>
+                                                        <option value="tous">Tous les artefacts</option>
+                                                        <option value="derniers">N derniers artefacts</option>
+                                                    </select>
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label>Options de nombre d'artefacts (séparées par virgules)</label>
+                                                    <input type="text" id="wizard-portfolio-options" class="controle-form" placeholder="Ex: 3, 7, 12" value="3, 7, 12">
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label>Valeur par défaut</label>
+                                                    <input type="number" id="wizard-portfolio-defaut" class="controle-form" value="7">
+                                                </div>
+                                            </div>
+
+                                            <!-- Configuration Évaluations discrètes -->
+                                            <div id="wizard-config-evaluations" style="display: none;">
+                                                <p style="color: var(--gris-moyen); font-size: 0.9rem; margin-bottom: 15px;">
+                                                    Définissez vos évaluations avec leur pondération
+                                                </p>
+                                                <div id="wizard-evaluations-liste"></div>
+                                                <button type="button" class="btn btn-tres-compact" onclick="ajouterEvaluationWizard()">+ Ajouter une évaluation</button>
+                                            </div>
+
+                                            <!-- Configuration Spécifications -->
+                                            <div id="wizard-config-specifications" style="display: none;">
+                                                <p style="color: var(--gris-moyen); font-size: 0.9rem;">
+                                                    Les spécifications seront configurées manuellement dans le JSON après création.
+                                                    Structure de base créée automatiquement.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- ÉTAPE 4: Calcul de la note -->
+                                        <div class="wizard-step" data-step="4" style="display: none;">
+                                            <div class="groupe-form">
+                                                <label>Méthode de calcul *</label>
+                                                <select id="wizard-calcul-methode" class="controle-form" onchange="afficherConfigCalcul()">
+                                                    <option value="">Choisir une méthode...</option>
+                                                    <option value="conversion_niveaux">Conversion niveaux → pourcentage</option>
+                                                    <option value="moyenne_ponderee">Moyenne pondérée</option>
+                                                    <option value="specifications">Spécifications (notes fixes)</option>
+                                                </select>
+                                            </div>
+
+                                            <div id="wizard-info-calcul" style="margin-top: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; display: none;">
+                                                <p id="wizard-info-calcul-texte" style="margin: 0; color: var(--gris-fonce); font-size: 0.9rem;"></p>
+                                            </div>
+
+                                            <div class="groupe-form" style="margin-top: 20px;">
+                                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                                    <input type="checkbox" id="wizard-conditions-speciales">
+                                                    Ajouter des conditions spéciales (double verrou, plafonnement, etc.)
+                                                </label>
+                                                <p style="color: var(--gris-moyen); font-size: 0.85rem; margin: 8px 0 0 0;">
+                                                    Les conditions spéciales peuvent être configurées manuellement dans le JSON après création.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- ÉTAPE 5: Système de reprises -->
+                                        <div class="wizard-step" data-step="5" style="display: none;">
+                                            <div class="groupe-form">
+                                                <label>Type de reprises *</label>
+                                                <select id="wizard-reprises-type" class="controle-form" onchange="afficherConfigReprises()">
+                                                    <option value="">Choisir un type...</option>
+                                                    <option value="aucune">Aucune reprise</option>
+                                                    <option value="illimitees">Reprises illimitées</option>
+                                                    <option value="occasions_ponctuelles">Occasions ponctuelles (ex: semaine 8, 14, 16)</option>
+                                                    <option value="limitees">Nombre limité de reprises</option>
+                                                </select>
+                                            </div>
+
+                                            <div id="wizard-config-reprises" style="display: none;">
+                                                <div class="groupe-form">
+                                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                                        <input type="checkbox" id="wizard-reprises-bureau">
+                                                        Reprises individuelles possibles (bureau)
+                                                    </label>
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                                        <input type="checkbox" id="wizard-niveau-retrogradable">
+                                                        Le niveau peut être rétrogradé lors d'une reprise
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div id="wizard-info-reprises" style="margin-top: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; display: none;">
+                                                <p style="margin: 0; color: var(--gris-fonce); font-size: 0.9rem;">
+                                                    Les occasions formelles de reprise peuvent être configurées manuellement dans le JSON.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- ÉTAPE 6: Gestion des critères -->
+                                        <div class="wizard-step" data-step="6" style="display: none;">
+                                            <!-- Message important sur les patterns -->
+                                            <div style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                                                <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #856404;">
+                                                    ⚠️ Important pour le suivi des apprentissages
+                                                </h4>
+                                                <p style="margin: 0; line-height: 1.6; color: #856404;">
+                                                    Pour détecter les patterns et les défis récurrents, vous devez utiliser
+                                                    <strong>les mêmes critères dans tous les travaux, durant toute la session</strong>.
+                                                    C'est également le cas avec la taxonomie SOLO et les niveaux RàI.
+                                                </p>
+                                            </div>
+
+                                            <div class="groupe-form">
+                                                <label>Type de gestion des critères *</label>
+                                                <select id="wizard-criteres-type" class="controle-form" onchange="afficherConfigCriteres()">
+                                                    <option value="">Choisir un type...</option>
+                                                    <option value="fixes">Critères fixes pour toutes les évaluations</option>
+                                                    <option value="par_standard">Critères par standard (SBG)</option>
+                                                    <option value="par_evaluation">Critères par évaluation</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Configuration critères fixes -->
+                                            <div id="wizard-config-criteres-fixes" style="display: none;">
+                                                <p style="color: var(--gris-moyen); font-size: 0.9rem; margin: 15px 0; line-height: 1.5;">
+                                                    Choisissez une grille de critères existante (ex: SRPNF holistique inspirée de ELLAC).
+                                                </p>
+
+                                                <div class="groupe-form">
+                                                    <label>Grille de critères à utiliser *</label>
+                                                    <select id="wizard-grille-id" class="controle-form" onchange="afficherPreviewGrilleWizard()">
+                                                        <option value="">Choisir une grille...</option>
+                                                        <!-- Options chargées dynamiquement depuis grillesTemplates -->
+                                                    </select>
+                                                    <p style="color: var(--gris-moyen); font-size: 0.85rem; margin-top: 6px;">
+                                                        Vous pouvez créer ou modifier vos grilles dans
+                                                        <strong>Réglages → Matériel pédagogique → Critères d'évaluation</strong>
+                                                    </p>
+                                                </div>
+
+                                                <!-- Prévisualisation de la grille -->
+                                                <div id="wizard-preview-grille" style="display: none; margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-principal);">
+                                                    <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; color: var(--bleu-principal);">
+                                                        Aperçu de la grille
+                                                    </h4>
+                                                    <div id="wizard-preview-grille-contenu">
+                                                        <!-- Critères + pondérations affichés ici -->
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Configuration par standard -->
+                                            <div id="wizard-config-criteres-standard" style="display: none;">
+                                                <p style="color: var(--gris-moyen); font-size: 0.9rem; margin-top: 15px;">
+                                                    Les critères seront définis individuellement pour chaque standard.
+                                                </p>
+                                            </div>
+
+                                            <!-- Configuration par évaluation -->
+                                            <div id="wizard-config-criteres-evaluation" style="display: none;">
+                                                <p style="color: var(--gris-moyen); font-size: 0.9rem; margin-top: 15px;">
+                                                    Les critères seront définis individuellement pour chaque évaluation.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- ÉTAPE 7: Seuils d'interprétation -->
+                                        <div class="wizard-step" data-step="7" style="display: none;">
+                                            <p style="color: var(--gris-moyen); font-size: 0.9rem; margin-bottom: 20px;">
+                                                Les seuils permettent d'interpréter les performances (ex: Fragile, Acceptable, Bon)
+                                            </p>
+
+                                            <div class="groupe-form">
+                                                <label>Type de seuils *</label>
+                                                <select id="wizard-seuils-type" class="controle-form" onchange="afficherConfigSeuils()">
+                                                    <option value="">Choisir un type...</option>
+                                                    <option value="pourcentage">Pourcentages</option>
+                                                    <option value="niveau">Niveaux</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Configuration seuils pourcentage -->
+                                            <div id="wizard-config-seuils-pct" style="display: none;">
+                                                <div class="groupe-form">
+                                                    <label>Seuil "Va bien" (%)</label>
+                                                    <input type="number" id="wizard-seuil-bien" class="controle-form" min="0" max="100" value="85">
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label>Seuil "Difficulté" (%)</label>
+                                                    <input type="number" id="wizard-seuil-difficulte" class="controle-form" min="0" max="100" value="80">
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label>Seuil "Grande difficulté" (%)</label>
+                                                    <input type="number" id="wizard-seuil-grande-difficulte" class="controle-form" min="0" max="100" value="70">
+                                                </div>
+                                            </div>
+
+                                            <!-- Configuration seuils niveau -->
+                                            <div id="wizard-config-seuils-niveau" style="display: none;">
+                                                <div class="groupe-form">
+                                                    <label>Niveau acceptable minimal</label>
+                                                    <input type="text" id="wizard-niveau-acceptable" class="controle-form" placeholder="Ex: M, 3">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ÉTAPE 8: Interface et terminologie -->
+                                        <div class="wizard-step" data-step="8" style="display: none;">
+                                            <p style="color: var(--gris-moyen); font-size: 0.9rem; margin-bottom: 20px;">
+                                                Personnalisez les termes affichés dans l'interface
+                                            </p>
+
+                                            <div class="groupe-form">
+                                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                                    <input type="checkbox" id="wizard-afficher-notes" checked>
+                                                    Afficher les notes chiffrées
+                                                </label>
+                                            </div>
+
+                                            <div class="groupe-form">
+                                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                                    <input type="checkbox" id="wizard-afficher-rang">
+                                                    Afficher le rang de l'étudiant
+                                                </label>
+                                            </div>
+
+                                            <div class="groupe-form">
+                                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                                    <input type="checkbox" id="wizard-afficher-moyenne">
+                                                    Afficher la moyenne du groupe
+                                                </label>
+                                            </div>
+
+                                            <h4 style="margin-top: 25px; margin-bottom: 15px; color: var(--bleu-principal);">Terminologie</h4>
+
+                                            <div class="groupe-form">
+                                                <label>Terme pour "Évaluation"</label>
+                                                <input type="text" id="wizard-terme-evaluation" class="controle-form" placeholder="Standard, Artefact, Évaluation..." value="Évaluation">
+                                            </div>
+
+                                            <div class="groupe-form">
+                                                <label>Terme pour "Critère"</label>
+                                                <input type="text" id="wizard-terme-critere" class="controle-form" placeholder="Critère, Objectif..." value="Critère">
+                                            </div>
+
+                                            <div class="groupe-form">
+                                                <label>Terme pour "Note finale"</label>
+                                                <input type="text" id="wizard-terme-note" class="controle-form" placeholder="Note finale, Performance..." value="Note finale">
+                                            </div>
+
+                                            <div class="groupe-form">
+                                                <label>Terme pour "Reprise"</label>
+                                                <input type="text" id="wizard-terme-reprise" class="controle-form" placeholder="Reprise, Tentative..." value="Reprise">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Boutons navigation -->
+                                    <div class="footer-border-top" style="display: flex; justify-content: space-between;">
+                                        <button class="btn btn-annuler" onclick="fermerWizardPratique()">
+                                            Annuler
+                                        </button>
+                                        <div style="display: flex; gap: 10px;">
+                                            <button id="wizard-btn-precedent" class="btn" onclick="precedentEtapeWizard()" style="display: none;">
+                                                ← Précédent
+                                            </button>
+                                            <button id="wizard-btn-suivant" class="btn btn-principal" onclick="suivantEtapeWizard()">
+                                                Suivant →
+                                            </button>
+                                            <button id="wizard-btn-creer" class="btn btn-confirmer" onclick="creerPratiqueDepuisWizard()" style="display: none;">
+                                                Créer la pratique
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ========================================= -->
+                            <!-- FIN GESTION PRATIQUES CONFIGURABLES -->
+                            <!-- ========================================= -->
 
                             <!-- Type de PAN -->
                             <div class="groupe-form" id="colonnePAN" style="display: none;">
@@ -9238,6 +9674,14 @@ Exemple :
     <script src="js/pratiques/pratique-pan-maitrise.js?v=2025112001"></script>
     <script src="js/pratiques/pratique-sommative.js?v=2025112001"></script>
 
+    <!-- Pratiques configurables JSON (Beta 92 - Jour 1) -->
+    <script src="js/pratiques/pratique-configurable.js?v=2025112501"></script>
+    <script src="js/pratiques/pratiques-predefines.js?v=2025112602"></script>
+    <script src="js/pratiques/pratique-manager.js?v=2025112501"></script>
+
+    <!-- Interface de gestion des pratiques configurables -->
+    <script src="js/pratiques.js?v=2025112515"></script>
+
     <script src="js/portfolio.js?v=2025111310"></script>
     <script src="js/saisie-presences.js?v=2025111202"></script>
 
@@ -9251,7 +9695,7 @@ Exemple :
     <script src="js/calendrier-vue.js?v=2025112112"></script>
     <script src="js/horaire.js?v=2025111328"></script>
     <script src="js/groupe.js?v=2025111703"></script>
-    <script src="js/pratiques.js?v=2025111433"></script>
+    <script src="js/pratiques.js?v=2025112515"></script>
     <script src="js/interventions.js?v=2025112122"></script>
 
     <!-- PRIORITÉ 6: Modules avancés -->
@@ -9261,7 +9705,7 @@ Exemple :
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2025111435"></script>
-    <script src="js/evaluation.js?v=2025112111"></script>
+    <script src="js/evaluation.js?v=2025112601"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2025111400"></script>
