@@ -193,12 +193,9 @@ function executerImport() {
 
     let nbCles = 0;
     Object.keys(donneesImportEnAttente).forEach(cle => {
-        // IMPORTANT : Convertir en JSON string avant de sauvegarder dans localStorage
-        // KEPT: localStorage.setItem() pour sauvegarder string JSON brute (import)
-        const valeur = typeof donneesImportEnAttente[cle] === 'string'
-            ? donneesImportEnAttente[cle]
-            : JSON.stringify(donneesImportEnAttente[cle]);
-        localStorage.setItem(cle, valeur);
+        // IMPORTANT : Utiliser db.setSync pour écrire dans localStorage ET IndexedDB
+        // Pas besoin de JSON.stringify - db.setSync le fait automatiquement
+        db.setSync(cle, donneesImportEnAttente[cle]);
         nbCles++;
     });
     
@@ -236,10 +233,23 @@ function reinitialiserDonnees() {
     }
 
     try {
-        // KEPT: localStorage.clear() pour effacement complet (opération globale)
+        // Effacer localStorage
         localStorage.clear();
-        alert('Toutes les données ont été effacées.\n\nLa page va se recharger.');
-        location.reload();
+
+        // Effacer IndexedDB (async)
+        if (typeof db !== 'undefined' && typeof db.clear === 'function') {
+            db.clear().then(() => {
+                alert('Toutes les données ont été effacées.\n\nLa page va se recharger.');
+                location.reload();
+            }).catch(erreur => {
+                console.error('Erreur lors de l\'effacement IndexedDB:', erreur);
+                alert('Toutes les données ont été effacées.\n\nLa page va se recharger.');
+                location.reload();
+            });
+        } else {
+            alert('Toutes les données ont été effacées.\n\nLa page va se recharger.');
+            location.reload();
+        }
     } catch (erreur) {
         console.error('Erreur lors de la réinitialisation:', erreur);
         alert('Erreur lors de la réinitialisation.');
