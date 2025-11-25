@@ -205,7 +205,7 @@ function filtrerEtudiantsParGroupe() {
  * - 'productions' : Array des productions (nom historique)
  */
 function chargerProductionsDansSelect() {
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const select = document.getElementById('selectProduction1');
 
     if (!select) return;
@@ -227,7 +227,7 @@ function chargerProductionsDansSelect() {
  * - 'grillesTemplates' : Array des grilles de critères
  */
 function chargerGrillesDansSelect() {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const select = document.getElementById('selectGrille1');
 
     if (!select) return;
@@ -249,7 +249,7 @@ function chargerGrillesDansSelect() {
  * - 'echellesTemplates' : Array des échelles créées par l'utilisateur
  */
 function chargerEchellePerformance() {
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelles = db.getSync('echellesTemplates', []);
     const select = document.getElementById('selectEchelle1');
 
     if (!select) return;
@@ -340,7 +340,7 @@ function chargerProduction(productionNum) {
     evaluationEnCours.productionId = productionId;
 
     // Récupérer les infos de la production
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const production = productions.find(p => p.id === productionId);
 
     if (production) {
@@ -389,7 +389,7 @@ function chargerGrilleSelectionnee() {
     evaluationEnCours.grilleId = grilleId;
 
     // Charger les cartouches pour cette grille
-    const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
     const selectCartouche = document.getElementById('selectCartoucheEval');
 
     if (!selectCartouche) return;
@@ -432,12 +432,12 @@ function cartoucheSelectionnee() {
     }
 
     const grilleId = evaluationEnCours.grilleId;
-    const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     if (!cartouche) return;
 
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) return;
@@ -445,7 +445,7 @@ function cartoucheSelectionnee() {
     // CRITIQUE: Lire les niveaux depuis l'échelle sélectionnée (pas depuis la cartouche)
     // Cela permet d'utiliser des échelles avec plus ou moins de niveaux que la cartouche
     const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelles = db.getSync('echellesTemplates', []);
     const echelleSelectionnee = echelles.find(e => e.id === echelleId);
 
     // Fallback: Si pas d'échelle sélectionnée ou non trouvée, utiliser les niveaux de la cartouche
@@ -461,7 +461,7 @@ function cartoucheSelectionnee() {
         const facteur = critereGrille?.facteurNormalisation || 500;
 
         // Vérifier si la catégorisation des erreurs est activée
-        const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const modalites = db.getSync('modalitesEvaluation', {});
         const categorisationActive = modalites.activerCategorisationErreurs === true;
 
         return `
@@ -596,7 +596,7 @@ function niveauSelectionne(critereId) {
     // Afficher le commentaire correspondant
     if (niveau && evaluationEnCours.cartoucheId) {
         const grilleId = evaluationEnCours.grilleId;
-        const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+        const cartouches = db.getSync(`cartouches_${grilleId}`, []);
         const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId);
 
         if (cartouche) {
@@ -651,7 +651,7 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
 
     // Déterminer le niveau IDME selon l'échelle
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelles = db.getSync('echellesTemplates', []);
     const echelleSelectionnee = echelles.find(e => e.id === echelleId);
 
     let niveauIDME = '--';
@@ -774,7 +774,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
     }
 
     // === RÉCUPÉRER LES SOUS-CRITÈRES DEPUIS LA GRILLE ===
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grilleId = evaluationEnCours?.grilleId;
     const grille = grilles.find(g => g.id === grilleId);
 
@@ -809,7 +809,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
 
     // Déterminer le niveau IDME selon l'échelle
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelles = db.getSync('echellesTemplates', []);
     const echelleSelectionnee = echelles.find(e => e.id === echelleId);
 
     let niveauIDME = '--';
@@ -976,7 +976,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
 
     // Déterminer le niveau IDME selon l'échelle
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelles = db.getSync('echellesTemplates', []);
     const echelleSelectionnee = echelles.find(e => e.id === echelleId);
 
     let niveauIDME = '--';
@@ -1046,14 +1046,14 @@ function calculerNote() {
     if (!evaluationEnCours) return;
 
     const grilleId = evaluationEnCours.grilleId;
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) return;
 
     // LECTURE DE L'ÉCHELLE SÉLECTIONNÉE (pas l'ancienne niveauxEchelle)
     const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelles = db.getSync('echellesTemplates', []);
     const echelleSelectionnee = echelles.find(e => e.id === echelleId);
 
     // SÉCURITÉ: Vérifier que l'échelle existe
@@ -1172,7 +1172,7 @@ function obtenirCouleurNiveau(codeNiveau) {
 
     // LECTURE DE L'ÉCHELLE SÉLECTIONNÉE (pas l'ancienne niveauxEchelle)
     const echelleId = evaluationEnCours?.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelles = db.getSync('echellesTemplates', []);
     const echelleSelectionnee = echelles.find(e => e.id === echelleId);
 
     if (!echelleSelectionnee || !echelleSelectionnee.niveaux) {
@@ -1210,12 +1210,12 @@ function genererRetroaction(num) {
     }
 
     const grilleId = evaluationEnCours.grilleId;
-    const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
     const cartouche = cartouches.find(c => c.id === evaluationEnCours.cartoucheId);
 
     if (!cartouche) return;
 
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const production = productions.find(p => p.id === evaluationEnCours.productionId);
 
     let texte = '';
@@ -1239,7 +1239,7 @@ function genererRetroaction(num) {
 
         if (etudiant) {
             // Utiliser prenom qui sera soit le vrai nom en mode normal, soit "Élève X" en mode anonymisation
-            console.log(`📝 [genererRetroaction] Mode actuel: ${localStorage.getItem('modeApplication')}, Nom utilisé: ${etudiant.prenom}`);
+            console.log(`📝 [genererRetroaction] Mode actuel: ${db.getSync('modeApplication', null)}, Nom utilisé: ${etudiant.prenom}`);
             texte += `\nBonjour ${etudiant.prenom} !\n\n`;
         }
     }
@@ -1252,7 +1252,7 @@ function genererRetroaction(num) {
     // Commentaires des critères
     texte += 'Voici quelques observations :\n\n';
 
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (grille) {
@@ -1331,10 +1331,10 @@ function sauvegarderEvaluation() {
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiant = etudiants.find(e => e.da === etudiantDA);
 
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const production = productions.find(p => p.id === productionId);
 
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     // Collecter les évaluations des critères
@@ -1411,7 +1411,7 @@ function sauvegarderEvaluation() {
     }
 
     // Sauvegarder
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    let evaluations = db.getSync('evaluationsSauvegardees', []);
     evaluations.push(evaluation);
 
     // Protection : bloquer en mode anonymisation, rediriger en mode simulation
@@ -1850,7 +1850,7 @@ function nouvelleEvaluation() {
     filtrerEtudiantsParGroupe();
 
     // 🔄 Effacer les sélections mémorisées du mode évaluation en série
-    localStorage.removeItem('dernieresSelectionsEvaluation');
+    db.removeSync('dernieresSelectionsEvaluation');
     console.log('✅ Sélections mémorisées effacées et mode nouvelle évaluation activé');
 
     // Masquer l'indicateur de progression
@@ -2016,9 +2016,9 @@ let donneesEvaluationsFiltrees = [];
 function calculerEtSauvegarderIndicesEvaluation() {
     console.log('Calcul des indices C et P...');
 
-    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const etudiants = db.getSync('groupeEtudiants', []);
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const productions = db.getSync('productions', []);
 
     const indicesEvaluation = {};
 
@@ -2074,7 +2074,7 @@ function calculerEtSauvegarderIndicesEvaluation() {
     });
 
     // Sauvegarder dans localStorage
-    localStorage.setItem('indicesEvaluation', JSON.stringify(indicesEvaluation));
+    db.setSync('indicesEvaluation', indicesEvaluation);
     console.log('✅ Indices C et P sauvegardés:', indicesEvaluation);
 
     return indicesEvaluation;
@@ -2129,7 +2129,7 @@ function obtenirNomCartouche(cartoucheId, grilleId) {
     if (!grilleId) {
         const cartouchesKeys = Object.keys(localStorage).filter(key => key.startsWith('cartouches_'));
         for (let key of cartouchesKeys) {
-            const cartouches = JSON.parse(localStorage.getItem(key) || '[]');
+            const cartouches = db.getSync(key, []);
             const cartouche = cartouches.find(c => c.id === cartoucheId);
             if (cartouche) return cartouche.nom;
         }
@@ -2138,7 +2138,7 @@ function obtenirNomCartouche(cartoucheId, grilleId) {
 
     // Chercher dans la grille spécifique
     const cartouchesKey = `cartouches_${grilleId}`;
-    const cartouches = JSON.parse(localStorage.getItem(cartouchesKey) || '[]');
+    const cartouches = db.getSync(cartouchesKey, []);
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     return cartouche ? cartouche.nom : cartoucheId;
@@ -2161,7 +2161,7 @@ function obtenirClasseNote(note, echelleId) {
     }
 
     // Chercher l'échelle dans localStorage
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelles = db.getSync('echellesTemplates', []);
     const echelle = echelles.find(e => e.id === echelleId);
 
     if (!echelle) {
@@ -2210,15 +2210,15 @@ function chargerListeEvaluationsRefonte() {
     // L'ancien calcul est désactivé pour éviter les conflits de structure
 
     // Récupérer toutes les données
-    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const etudiants = db.getSync('groupeEtudiants', []);
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
     // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : saisie-presences.js génère indicesAssiduiteDetailles
-    const indicesAssiduiteDetailles = JSON.parse(localStorage.getItem('indicesAssiduiteDetailles') || '{}');
+    const indicesAssiduiteDetailles = db.getSync('indicesAssiduiteDetailles', {});
     // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : portfolio.js génère indicesCP
-    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    const indicesCP = db.getSync('indicesCP', {});
 
     // Détecter la pratique active
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
     // Grouper les évaluations par étudiant
@@ -2268,7 +2268,7 @@ function chargerListeEvaluationsRefonte() {
     mettreAJourStatistiquesEvaluations();
 
     // Vérifier s'il y a une préférence sauvegardée
-    const preference = localStorage.getItem('preferenceTriEvaluations');
+    const preference = db.getSync('preferenceTriEvaluations', null);
     if (preference) {
         // Restaurer la préférence sauvegardée
         restaurerPreferenceTri();
@@ -2287,7 +2287,7 @@ function chargerListeEvaluationsRefonte() {
 function genererBadgeCompletion(etudiant) {
     // 🎯 Lire depuis la source unique : portfolio.js génère indicesCP
     // Détecter la pratique active pour lire le bon indice C
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
     // Compter uniquement les artefacts distincts (exclure les évaluations remplacées)
@@ -2308,7 +2308,7 @@ function genererBadgeCompletion(etudiant) {
 
     // PRIORITÉ 2 : Fallback - Lire directement depuis localStorage
     if (completion === 0) {
-        const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+        const indicesCP = db.getSync('indicesCP', {});
         const actuel = indicesCP[etudiant.da]?.actuel;
         if (actuel && actuel[pratique] && typeof actuel[pratique].C === 'number') {
             completion = actuel[pratique].C / 100;
@@ -2317,7 +2317,7 @@ function genererBadgeCompletion(etudiant) {
 
     // PRIORITÉ 3 : Fallback final - Calculer depuis le nombre d'artefacts
     if (completion === 0 && nbArtefacts > 0) {
-        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+        const productions = db.getSync('productions', []);
         const productionsAttendues = productions.filter(p => p.type !== 'portfolio').length;
         completion = productionsAttendues > 0 ? nbArtefacts / productionsAttendues : 0;
     }
@@ -2403,7 +2403,7 @@ ${genererBadgeCompletion(etudiant)}
  */
 function genererDetailsEtudiant(etudiant) {
     const evaluations = etudiant.evaluations || [];
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
 
     // Créer un tableau avec TOUTES les productions et leur statut
     const tableauComplet = productions.map(production => {
@@ -2542,11 +2542,11 @@ function genererDetailsEtudiant(etudiant) {
     const nbRemis = productionsDistinctes.size;
 
     // Lire les indices depuis la source unique (portfolio.js)
-    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
+    const indicesCP = db.getSync('indicesCP', {});
     const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
 
     // 🔍 DÉTERMINER LA PRATIQUE ACTIVE (SOM ou PAN)
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
     // Lire C et P depuis la branche appropriée
@@ -2626,7 +2626,7 @@ function chargerFiltresEvaluations() {
     // Charger les productions
     const selectProduction = document.getElementById('filtre-production-eval');
     if (selectProduction) {
-        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+        const productions = db.getSync('productions', []);
         selectProduction.innerHTML = '<option value="">Toutes les productions</option>';
         productions.forEach(prod => {
             selectProduction.innerHTML += `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`;
@@ -2750,14 +2750,14 @@ function trierListeEvaluations() {
     afficherListeEvaluations(donneesTries);
 
     // Sauvegarder la préférence
-    localStorage.setItem('preferenceTriEvaluations', critere);
+    db.setSync('preferenceTriEvaluations', critere);
 }
 
 /**
  * Restaure la préférence de tri sauvegardée
  */
 function restaurerPreferenceTri() {
-    const preference = localStorage.getItem('preferenceTriEvaluations');
+    const preference = db.getSync('preferenceTriEvaluations', null);
     if (preference) {
         const selectTri = document.getElementById('tri-evaluations');
         if (selectTri) {
@@ -2771,7 +2771,7 @@ function restaurerPreferenceTri() {
  * Restaure la préférence de tri sauvegardée
  */
 function restaurerPreferenceTri() {
-    const preference = localStorage.getItem('preferenceTriEvaluations');
+    const preference = db.getSync('preferenceTriEvaluations', null);
     if (preference) {
         const selectTri = document.getElementById('tri-evaluations');
         if (selectTri) {
@@ -2794,8 +2794,8 @@ function mettreAJourStatistiquesEvaluations() {
     const etudiantsEvalues = etudiants.filter(e => e.evaluations.length > 0).length;
 
     // 🎯 Calculer le total d'artefacts DONNÉS (même logique que portfolio.js)
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const productions = db.getSync('productions', []);
 
     // Identifier les artefacts-portfolio
     const artefactsPortfolioIds = new Set(
@@ -2946,7 +2946,7 @@ function memoriserSelectionsEvaluation() {
         afficherContexte: document.getElementById('afficherContexte1')?.checked ?? true
     };
 
-    localStorage.setItem('dernieresSelectionsEvaluation', JSON.stringify(selections));
+    db.setSync('dernieresSelectionsEvaluation', selections);
     console.log('✅ Sélections mémorisées');
 }
 
@@ -2955,7 +2955,7 @@ function memoriserSelectionsEvaluation() {
  * Appelée lors du passage à un nouvel étudiant
  */
 function restaurerSelectionsEvaluation() {
-    const selectionsJson = localStorage.getItem('dernieresSelectionsEvaluation');
+    const selectionsJson = db.getSync('dernieresSelectionsEvaluation', null);
     if (!selectionsJson) return;
 
     try {
@@ -3036,7 +3036,7 @@ function verifierEtChargerEvaluationExistante() {
     }
 
     // Chercher une évaluation existante
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
     const evaluationExistante = evaluations.find(e =>
         e.etudiantDA === etudiantDA &&
         e.productionId === productionId &&
@@ -3274,7 +3274,7 @@ function mettreAJourIndicateurProgression() {
     const totalEtudiants = etudiantsActifs.length;
 
     // Compter les évaluations déjà réalisées pour cette production
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
     const evaluationsProduction = evaluations.filter(e => e.productionId === productionId);
 
     // Compter les étudiants uniques évalués (au cas où il y aurait plusieurs évaluations par étudiant)
@@ -3486,8 +3486,8 @@ function lancerReparationEvaluations() {
 function reparer_evaluations_criteres_manquants() {
     console.log('Début de la réparation des évaluations...');
 
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const grilles = db.getSync('grillesTemplates', []);
 
     let nbEvaluationsReparees = 0;
     let nbEvaluationsIgnorees = 0;
@@ -3553,7 +3553,7 @@ function reparer_evaluations_criteres_manquants() {
 
     // Sauvegarder les modifications
     if (nbEvaluationsReparees > 0) {
-        localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+        db.setSync('evaluationsSauvegardees', evaluations);
         console.log(`\n${nbEvaluationsReparees} évaluation(s) sauvegardée(s)`);
     }
 
@@ -3796,7 +3796,7 @@ function modifierEvaluation(evaluationId) {
             } else {
                 // FALLBACK : Extraire depuis rétroaction si criteres[] vide
                 console.warn('⚠️ Extraction niveaux depuis rétroaction...');
-                const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+                const grilles = db.getSync('grillesTemplates', []);
                 const grille = grilles.find(g => g.id === evaluation.grilleId);
 
                 if (grille && evaluation.retroactionFinale) {
@@ -4024,13 +4024,13 @@ function sauvegarderEvaluationModifiee() {
     const productionId = document.getElementById('selectProduction1').value;
     const grilleId = document.getElementById('selectGrille1').value;
 
-    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    const etudiants = db.getSync('groupeEtudiants', []);
     const etudiant = etudiants.find(e => e.da === etudiantDA);
 
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const production = productions.find(p => p.id === productionId);
 
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     // Collecter les évaluations des critères
@@ -4119,7 +4119,7 @@ function sauvegarderEvaluationModifiee() {
  * NOTE: Fonction renommée pour éviter conflit avec verrouillerEvaluation de productions.js
  */
 function verrouillerEvaluationIndividuelle(evaluationId) {
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    let evaluations = db.getSync('evaluationsSauvegardees', []);
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
@@ -4149,7 +4149,7 @@ function verrouillerEvaluationIndividuelle(evaluationId) {
  * NOTE: Fonction renommée pour cohérence avec verrouillerEvaluationIndividuelle
  */
 function deverrouillerEvaluationIndividuelle(evaluationId) {
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    let evaluations = db.getSync('evaluationsSauvegardees', []);
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
@@ -4228,7 +4228,7 @@ function afficherIndicateurModeModification(evaluation) {
  * @param {string} evaluationId - ID de l'évaluation à supprimer
  */
 function supprimerEvaluation(evaluationId) {
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    let evaluations = db.getSync('evaluationsSauvegardees', []);
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
@@ -4304,9 +4304,9 @@ function fermerBanqueEvaluations() {
  * Charge les options de filtres
  */
 function chargerFiltresBanqueEvaluations() {
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
-    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    const etudiants = db.getSync('groupeEtudiants', []);
+    const productions = db.getSync('productions', []);
 
     // Filtre étudiants
     const selectEtudiant = document.getElementById('filtreBanqueEtudiant');
@@ -4361,7 +4361,7 @@ function chargerFiltresBanqueEvaluations() {
  * Filtre et affiche les évaluations selon les critères sélectionnés
  */
 function filtrerBanqueEvaluations() {
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
 
     // Récupérer les filtres dropdown
     const filtreGroupe = document.getElementById('filtreBanqueGroupe')?.value || '';
@@ -4670,7 +4670,7 @@ function retirerJeton(evaluationId, typeJeton) {
         return; // Annulation
     }
 
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    let evaluations = db.getSync('evaluationsSauvegardees', []);
     const index = evaluations.findIndex(e => e.id === evaluationId);
 
     if (index === -1) {
@@ -4718,7 +4718,7 @@ function supprimerEvaluationBanque(evaluationId) {
         return;
     }
 
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    let evaluations = db.getSync('evaluationsSauvegardees', []);
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
@@ -4756,7 +4756,7 @@ function supprimerEvaluationBanque(evaluationId) {
  * @param {boolean} verrouiller - true pour verrouiller, false pour déverrouiller
  */
 function verrouillerToutesEvaluations(verrouiller) {
-    let evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    let evaluations = db.getSync('evaluationsSauvegardees', []);
 
     if (evaluations.length === 0) {
         afficherNotificationErreur('Aucune évaluation', 'Aucune évaluation à modifier');
@@ -5030,7 +5030,7 @@ function afficherJetonsPersonnalisesEvaluation() {
     }
 
     // Récupérer les jetons personnalisés depuis la configuration
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const jetonsPersonnalises = config.jetons?.typesPersonnalises || [];
 
     console.log('🎯 Jetons personnalisés configurés:', jetonsPersonnalises.length, jetonsPersonnalises);
@@ -5071,7 +5071,7 @@ function appliquerJetonPersonnalise(jetonId) {
     }
 
     // Récupérer les informations du jeton
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const jeton = config.jetons?.typesPersonnalises?.find(j => j.id === jetonId);
 
     if (!jeton) {
@@ -5112,7 +5112,7 @@ function appliquerJetonPersonnalise(jetonId) {
     });
 
     // Sauvegarder
-    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+    db.setSync('evaluationsSauvegardees', evaluations);
 
     // Rafraîchir l'affichage
     afficherBadgesJetons();
@@ -5137,7 +5137,7 @@ function confirmerSuppressionEvaluationSidebar() {
 
     // Si la suppression réussit, réinitialiser le formulaire
     setTimeout(() => {
-        const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+        const evaluations = db.getSync('evaluationsSauvegardees', []);
         const evalExiste = evaluations.find(e => e.id === evaluationId);
 
         if (!evalExiste) {
