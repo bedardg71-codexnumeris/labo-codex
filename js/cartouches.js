@@ -103,7 +103,7 @@ function initialiserModuleCartouches() {
  * - 'grillesTemplates' : Array des grilles créées dans module 05
  */
 function chargerSelectGrillesRetroaction() {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const select = document.getElementById('selectGrilleRetroaction');
     
     if (!select) return;
@@ -144,7 +144,7 @@ function chargerCartouchesRetroaction() {
     }
     
     // Charger les cartouches existantes pour cette grille
-    const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
     
     selectCartouche.innerHTML = '<option value="">-- Nouvelle cartouche --</option>';
     cartouches.forEach(cartouche => {
@@ -208,7 +208,7 @@ function chargerCartouchesRetroaction() {
  */
 function initialiserNouveauCartouche(grilleId) {
     // Récupérer la grille sélectionnée
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
     
     if (!grille) {
@@ -220,12 +220,12 @@ function initialiserNouveauCartouche(grilleId) {
     const criteres = grille.criteres || [];
     
     // Récupérer l'échelle de performance globale
-    const niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || JSON.stringify([
+    const niveaux = db.getSync('niveauxEchelle', [
         { code: 'I', nom: 'Incomplet', min: 0, max: 64 },
         { code: 'D', nom: 'En Développement', min: 65, max: 74 },
         { code: 'M', nom: 'Maîtrisé', min: 75, max: 84 },
         { code: 'E', nom: 'Étendu', min: 85, max: 100 }
-    ]));
+    ]);
     
     // Créer la structure de cartouche
     cartoucheActuel = {
@@ -294,7 +294,7 @@ function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam = null
     }
 
     // Charger la cartouche existante
-    const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
     console.log('Cartouches trouvées:', cartouches.length);
 
     cartoucheActuel = cartouches.find(c => c.id === cartoucheId);
@@ -362,7 +362,7 @@ function afficherMatriceRetroaction() {
 
     // NOUVELLE LOGIQUE: Lire les niveaux depuis toutes les échelles disponibles
     // pour permettre d'ajouter des niveaux manquants (ex: niveau "0")
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelles = db.getSync('echellesTemplates', []);
 
     // Créer un Set de tous les niveaux disponibles (fusionner toutes les échelles)
     const niveauxDisponiblesMap = new Map(); // code -> {code, nom, couleur}
@@ -548,7 +548,7 @@ function sauvegarderCartouche() {
     cartoucheActuel.contexte = document.getElementById('contexteCartouche').value.trim();
     
     const grilleId = cartoucheActuel.grilleId;
-    let cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    let cartouches = db.getSync(`cartouches_${grilleId}`, []);
     
     // Vérifier si la cartouche existe déjà
     const index = cartouches.findIndex(c => c.id === cartoucheActuel.id);
@@ -561,7 +561,7 @@ function sauvegarderCartouche() {
     }
     
     // Sauvegarder
-    localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouches));
+    db.setSync(`cartouches_${grilleId}`, cartouches);
 
     // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
     afficherBanqueCartouches();
@@ -849,7 +849,7 @@ function calculerPourcentageComplete() {
 
     // CRITIQUE: Utiliser la même logique que afficherMatriceRetroaction()
     // pour compter tous les niveaux disponibles (pas seulement ceux de la cartouche)
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelles = db.getSync('echellesTemplates', []);
 
     const niveauxDisponiblesMap = new Map();
 
@@ -1022,7 +1022,7 @@ function afficherToutesLesGrillesEtCartouches() {
     const container = document.getElementById('vueGrillesCartouches');
     if (!container) return;
 
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
 
     if (grilles.length === 0) {
         container.innerHTML = `
@@ -1035,7 +1035,7 @@ function afficherToutesLesGrillesEtCartouches() {
     }
 
     container.innerHTML = grilles.map(grille => {
-        const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grille.id}`) || '[]');
+        const cartouches = db.getSync(`cartouches_${grille.id}`, []);
         const nomGrilleEchappe = echapperHtml(grille.nom);
 
         return `
@@ -1136,13 +1136,13 @@ function afficherToutesLesGrillesEtCartouches() {
  * - Change l'opacité des boutons
  */
 function basculerVerrouillageCartouche(cartoucheId, grilleId) {
-    let cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    let cartouches = db.getSync(`cartouches_${grilleId}`, []);
     const index = cartouches.findIndex(c => c.id === cartoucheId);
 
     if (index !== -1) {
         // Basculer directement l'état (pas de checkbox, juste un span cliquable)
         cartouches[index].verrouille = !cartouches[index].verrouille;
-        localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouches));
+        db.setSync(`cartouches_${grilleId}`, cartouches);
 
         // Afficher une notification spécifique
         const statut = cartouches[index].verrouille ? 'verrouillée' : 'déverrouillée';
@@ -1186,7 +1186,7 @@ function basculerVerrouillageCartouche(cartoucheId, grilleId) {
  * - Chargement automatique de la copie
  */
 function dupliquerCartouche(cartoucheId, grilleId) {
-    const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
     const cartoucheOriginal = cartouches.find(c => c.id === cartoucheId);
     
     if (cartoucheOriginal) {
@@ -1199,7 +1199,7 @@ function dupliquerCartouche(cartoucheId, grilleId) {
         };
 
         cartouches.push(nouveauCartouche);
-        localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouches));
+        db.setSync(`cartouches_${grilleId}`, cartouches);
 
         // NOUVELLE INTERFACE (Beta 80.5+): Charger directement la copie
         chargerCartouchePourModif(nouveauCartouche.id, grilleId);
@@ -1227,7 +1227,7 @@ function dupliquerCartouche(cartoucheId, grilleId) {
 function chargerCartouchePourModif(cartoucheId, grilleId) {
     console.log('📝 Chargement cartouche:', cartoucheId, 'de la grille:', grilleId);
 
-    const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     console.log('Cartouche trouvée:', cartouche ? 'OUI' : 'NON');
@@ -1337,7 +1337,7 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
  * - Confirmation obligatoire
  */
 function supprimerCartoucheConfirm(cartoucheId, grilleId) {
-    const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     if (cartouche && cartouche.verrouille) {
@@ -1347,7 +1347,7 @@ function supprimerCartoucheConfirm(cartoucheId, grilleId) {
 
     if (confirm(`Êtes-vous sûr de vouloir supprimer la cartouche «${cartouche?.nom}» ?`)) {
         const nouveauxCartouches = cartouches.filter(c => c.id !== cartoucheId);
-        localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(nouveauxCartouches));
+        db.setSync(`cartouches_${grilleId}`, nouveauxCartouches);
 
         // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
         afficherBanqueCartouches();
@@ -1446,11 +1446,12 @@ function exporterCartouches() {
     const cartouches = {};
 
     // Parcourir toutes les clés localStorage
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
+    const allKeys = Object.keys(localStorage);
+    for (let i = 0; i < allKeys.length; i++) {
+        const key = allKeys[i];
         if (key && key.startsWith('cartouches_')) {
             const grilleId = key.replace('cartouches_', '');
-            cartouches[grilleId] = JSON.parse(localStorage.getItem(key) || '[]');
+            cartouches[grilleId] = db.getSync(key, []);
         }
     }
 
@@ -1518,7 +1519,7 @@ function importerCartouches(event) {
             // Importer chaque grille de cartouches
             Object.keys(data.cartouches).forEach(grilleId => {
                 const cartouchesImportees = data.cartouches[grilleId];
-                const cartouchesExistantes = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+                const cartouchesExistantes = db.getSync(`cartouches_${grilleId}`, []);
 
                 // Fusionner : remplacer si même ID, sinon ajouter
                 cartouchesImportees.forEach(importee => {
@@ -1531,7 +1532,7 @@ function importerCartouches(event) {
                     compteur++;
                 });
 
-                localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouchesExistantes));
+                db.setSync(`cartouches_${grilleId}`, cartouchesExistantes);
             });
 
             // Rafraîchir l'interface si on est dans la section
@@ -1863,7 +1864,7 @@ window.sauvegarderCartoucheComplete = sauvegarderCartoucheComplete;
  * Remplit le select avec toutes les grilles disponibles
  */
 function chargerFiltreGrillesCartouche() {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const selectFiltre = document.getElementById('filtreGrilleCartouche');
 
     if (!selectFiltre) return;
@@ -1886,12 +1887,12 @@ function chargerFiltreGrillesCartouche() {
  * @param {string} grilleIdFiltre - ID de la grille à filtrer (optionnel)
  */
 function afficherBanqueCartouches(grilleIdFiltre = '') {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     let toutesLesCartouches = [];
 
     // Récupérer toutes les cartouches de toutes les grilles
     grilles.forEach(grille => {
-        const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grille.id}`) || '[]');
+        const cartouches = db.getSync(`cartouches_${grille.id}`, []);
         cartouches.forEach(cart => {
             toutesLesCartouches.push({
                 ...cart,
@@ -1949,7 +1950,7 @@ function filtrerCartouchesBanque() {
  * Demande à l'utilisateur de choisir une grille
  */
 function creerNouvelleCartouche() {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
 
     if (grilles.length === 0) {
         alert('Vous devez d\'abord créer au moins une grille de critères dans la section « Critères d\'évaluation »');
@@ -2143,7 +2144,7 @@ function exporterCartoucheActive() {
     }
 
     const grilleId = window.cartoucheActuel.grilleId || document.getElementById('selectGrilleRetroaction').value;
-    const cartouches = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
     const cartouche = cartouches.find(c => c.id === window.cartoucheActuel.id);
 
     if (!cartouche) {
@@ -2190,7 +2191,7 @@ function importerCartoucheJSON(event) {
             const cartouche = cartouches[0]; // Prendre la première
 
             // Demander quelle grille utiliser
-            const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+            const grilles = db.getSync('grillesTemplates', []);
             if (grilles.length === 0) {
                 alert('Créez d\'abord une grille de critères');
                 return;
@@ -2203,9 +2204,9 @@ function importerCartoucheJSON(event) {
             cartouche.grilleId = grilleId;
 
             // Sauvegarder
-            const cartouchesExistantes = JSON.parse(localStorage.getItem(`cartouches_${grilleId}`) || '[]');
+            const cartouchesExistantes = db.getSync(`cartouches_${grilleId}`, []);
             cartouchesExistantes.push(cartouche);
-            localStorage.setItem(`cartouches_${grilleId}`, JSON.stringify(cartouchesExistantes));
+            db.setSync(`cartouches_${grilleId}`, cartouchesExistantes);
 
             // Rafraîchir l'affichage
             afficherBanqueCartouches();
