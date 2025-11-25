@@ -61,7 +61,7 @@
  * @returns {Array} Liste des interventions
  */
 function obtenirInterventions() {
-    const interventions = localStorage.getItem('interventions');
+    const interventions = db.getSync('interventions', null);
     return interventions ? JSON.parse(interventions) : [];
 }
 
@@ -102,10 +102,10 @@ function sauvegarderInterventions(interventions) {
         });
     });
 
-    localStorage.setItem('interventions', JSON.stringify(interventions));
+    db.setSync('interventions', interventions);
 
     // Vérifier immédiatement la lecture
-    const verification = localStorage.getItem('interventions');
+    const verification = db.getSync('interventions', null);
     const parsed = JSON.parse(verification);
     console.log('   ✅ Vérification lecture immédiate:');
     console.log('   Nombre d\'interventions relues:', parsed.length);
@@ -1401,7 +1401,7 @@ function transfererPresencesVersModule(interventionId) {
     console.log('   Total étudiants du groupe:', etudiants.length);
 
     // Obtenir les présences existantes
-    let presences = JSON.parse(localStorage.getItem('presences') || '[]');
+    let presences = db.getSync('presences', []);
 
     // Supprimer les entrées existantes pour cette date (pour éviter les doublons)
     presences = presences.filter(p => p.date !== intervention.date);
@@ -1464,7 +1464,7 @@ function transfererPresencesVersModule(interventionId) {
     console.log('   ───────────────────────────────────');
 
     // Sauvegarder les présences mises à jour
-    localStorage.setItem('presences', JSON.stringify(presences));
+    db.setSync('presences', presences);
     console.log('   💾 Présences sauvegardées dans localStorage');
 
     // Recalculer les indices d'assiduité
@@ -1525,9 +1525,9 @@ function afficherNotificationSucces(message) {
  * Initialiser le module Interventions
  */
 function initialiserModuleInterventions() {
-    // Vérifier que localStorage.interventions existe
-    if (!localStorage.getItem('interventions')) {
-        localStorage.setItem('interventions', JSON.stringify([]));
+    // Vérifier que db.interventions existe
+    if (!db.getSync('interventions', null)) {
+        db.setSync('interventions', []);
     }
 
     // Observer les changements de visibilité de la sous-section

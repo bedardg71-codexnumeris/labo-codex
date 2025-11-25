@@ -211,7 +211,7 @@ class PratiquePANMaitrise {
         }
 
         // Lire les productions artefacts
-        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+        const productions = db.getSync('productions', []);
         const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
         // Lire les évaluations
@@ -408,11 +408,11 @@ class PratiquePANMaitrise {
     // ========================================================================
 
     /**
-     * Lit la configuration PAN depuis localStorage
+     * Lit la configuration PAN depuis db.getSync
      * @private
      */
     _lireConfiguration() {
-        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const config = db.getSync('modalitesEvaluation', {});
         const configPAN = config.configPAN || {};
 
         // ✅ PHASE 3: SINGLE SOURCE OF TRUTH centralisé dans modalitesEvaluation.configPAN.portfolio
@@ -432,7 +432,7 @@ class PratiquePANMaitrise {
             methodeSelection = configPAN.portfolio.methodeSelection || 'meilleurs';
         } else {
             // Ancien format (fallback pour rétrocompatibilité)
-            const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+            const productions = db.getSync('productions', []);
             const portfolio = productions.find(p => p.type === 'portfolio');
 
             if (portfolio && portfolio.regles) {
@@ -453,15 +453,15 @@ class PratiquePANMaitrise {
     }
 
     /**
-     * Lit les évaluations depuis localStorage (avec support mode simulation)
+     * Lit les évaluations depuis db.getSync (avec support mode simulation)
      * @private
      */
     _lireEvaluations() {
-        // Utiliser obtenirDonneesSelonMode si disponible, sinon localStorage direct
+        // Utiliser obtenirDonneesSelonMode si disponible, sinon db.getSync direct
         if (typeof obtenirDonneesSelonMode === 'function') {
             return obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         }
-        return JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+        return db.getSync('evaluationsSauvegardees', []);
     }
 
     /**
@@ -469,7 +469,7 @@ class PratiquePANMaitrise {
      * @private
      */
     _lireArtefactsPortfolio() {
-        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+        const productions = db.getSync('productions', []);
         return productions
             .filter(p => p.type === 'artefact-portfolio')
             .map(p => p.id);
