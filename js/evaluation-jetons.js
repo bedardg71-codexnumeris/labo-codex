@@ -18,7 +18,7 @@
  * @returns {object} Configuration des jetons avec valeurs par défaut
  */
 function obtenirConfigJetons() {
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
     const configPAN = modalites.configPAN || {};
 
     // Valeurs par défaut si config PAN n'existe pas
@@ -40,7 +40,7 @@ function obtenirConfigJetons() {
 function compterJetonsUtilises(da, type) {
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec obtenirDonneesSelonMode
     // qui peut retourner les données de simulation au lieu des données réelles
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
 
     if (type === 'delai') {
         return evaluations.filter(e =>
@@ -97,7 +97,7 @@ function appliquerJetonDelai(evaluationId) {
     console.log('⭐ Application jeton de délai:', evaluationId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
@@ -134,7 +134,7 @@ function appliquerJetonDelai(evaluationId) {
     evaluation.dureeDelaiJours = dureeDelai; // Stocker la durée appliquée
 
     // Sauvegarder directement dans localStorage
-    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+    db.setSync('evaluationsSauvegardees', evaluations);
     console.log('✅ Évaluations sauvegardées avec jeton de délai');
 
     console.log('✅ Jeton de délai appliqué');
@@ -174,7 +174,7 @@ function retirerJetonDelai(evaluationId) {
     console.log('🗑️ Retrait jeton de délai:', evaluationId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
     if (!evaluation) {
@@ -189,7 +189,7 @@ function retirerJetonDelai(evaluationId) {
     delete evaluation.dureeDelaiJours;
 
     // Sauvegarder directement dans localStorage
-    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+    db.setSync('evaluationsSauvegardees', evaluations);
     console.log('✅ Évaluations sauvegardées après retrait jeton de délai');
 
     console.log('✅ Jeton de délai retiré');
@@ -236,7 +236,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
     console.log('⭐ Application jeton de reprise:', evaluationOriginaleId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
     const indexOriginal = evaluations.findIndex(e => e.id === evaluationOriginaleId);
 
     if (indexOriginal === -1) {
@@ -316,7 +316,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
     evaluations.push(nouvelleEvaluation);
 
     // Sauvegarder directement dans localStorage
-    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+    db.setSync('evaluationsSauvegardees', evaluations);
     console.log('✅ Évaluations sauvegardées avec jeton de reprise');
     console.log('✅ Jeton de reprise appliqué, nouvelle évaluation:', nouvelleEvaluation.id);
 
@@ -345,7 +345,7 @@ function retirerJetonReprise(evaluationId) {
     console.log('🗑️ Retrait jeton de reprise:', evaluationId);
 
     // IMPORTANT: Utiliser directement localStorage pour éviter le conflit avec les modes
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
     const indexReprise = evaluations.findIndex(e => e.id === evaluationId);
 
     if (indexReprise === -1) {
@@ -420,7 +420,7 @@ function retirerJetonReprise(evaluationId) {
     }
 
     // Sauvegarder directement dans localStorage
-    localStorage.setItem('evaluationsSauvegardees', JSON.stringify(evaluations));
+    db.setSync('evaluationsSauvegardees', evaluations);
     console.log('✅ Évaluations sauvegardées après retrait jeton de reprise');
 
     // Recalculer les indices
@@ -492,11 +492,11 @@ function obtenirTousTypesJetons() {
  * @param {string} da - Code permanent de l'étudiant
  */
 function initialiserJetonsEtudiant(da) {
-    const jetons = JSON.parse(localStorage.getItem('jetonsEtudiants') || '{}');
+    const jetons = db.getSync('jetonsEtudiants', {});
 
     if (!jetons[da]) {
         jetons[da] = {};
-        localStorage.setItem('jetonsEtudiants', JSON.stringify(jetons));
+        db.setSync('jetonsEtudiants', jetons);
     }
 }
 
@@ -523,7 +523,7 @@ function obtenirStatutJetonsEtudiant(da) {
             };
         } else {
             // Pour les jetons personnalisés, lire depuis jetonsEtudiants
-            const jetons = JSON.parse(localStorage.getItem('jetonsEtudiants') || '{}');
+            const jetons = db.getSync('jetonsEtudiants', {});
             const utilises = jetons[da]?.[type.id] || 0;
             statut[type.id] = {
                 nom: type.nom,
@@ -559,7 +559,7 @@ function attribuerJetonPersonnalise(da, jetonId, motif = '') {
     }
 
     // Incrémenter le compteur
-    const jetons = JSON.parse(localStorage.getItem('jetonsEtudiants') || '{}');
+    const jetons = db.getSync('jetonsEtudiants', {});
     if (!jetons[da]) jetons[da] = {};
     jetons[da][jetonId] = (jetons[da][jetonId] || 0) + 1;
 
@@ -572,7 +572,7 @@ function attribuerJetonPersonnalise(da, jetonId, motif = '') {
         date: new Date().toISOString()
     });
 
-    localStorage.setItem('jetonsEtudiants', JSON.stringify(jetons));
+    db.setSync('jetonsEtudiants', jetons);
     console.log(`✅ Jeton personnalisé "${jetonId}" attribué à ${da}`);
 
     return true;
@@ -585,7 +585,7 @@ function attribuerJetonPersonnalise(da, jetonId, motif = '') {
  * @returns {boolean} Succès ou échec
  */
 function retirerJetonPersonnalise(da, jetonId) {
-    const jetons = JSON.parse(localStorage.getItem('jetonsEtudiants') || '{}');
+    const jetons = db.getSync('jetonsEtudiants', {});
 
     if (!jetons[da] || !jetons[da][jetonId] || jetons[da][jetonId] <= 0) {
         console.error('Aucun jeton à retirer pour:', da, jetonId);
@@ -603,7 +603,7 @@ function retirerJetonPersonnalise(da, jetonId) {
         date: new Date().toISOString()
     });
 
-    localStorage.setItem('jetonsEtudiants', JSON.stringify(jetons));
+    db.setSync('jetonsEtudiants', jetons);
     console.log(`✅ Jeton personnalisé "${jetonId}" retiré de ${da}`);
 
     return true;
