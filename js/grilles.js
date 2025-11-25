@@ -79,7 +79,7 @@ let critereEnEdition = null;
  * 3. Ajoute les options spéciales (nouvelle grille, créer)
  */
 function chargerListeGrillesTemplates() {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const select = document.getElementById('selectGrilleTemplate');
 
     if (!select) return;
@@ -145,7 +145,7 @@ function chargerGrilleTemplate(grilleId) {
         afficherListeCriteres(window.tempCriteres, null);
     } else {
         // Charger la grille existante
-        const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+        const grilles = db.getSync('grillesTemplates', []);
         const grille = grilles.find(g => g.id === selectValue);
 
         if (grille) {
@@ -600,7 +600,7 @@ function sauvegarderGrilleTemplate(silencieux = false) {
         return;
     }
 
-    let grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    let grilles = db.getSync('grillesTemplates', []);
 
     if (grilleTemplateActuelle) {
         // Mode édition
@@ -627,7 +627,7 @@ function sauvegarderGrilleTemplate(silencieux = false) {
         window.tempCriteres = [];
     }
 
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     // Recharger la liste des grilles
     chargerListeGrillesTemplates();
@@ -688,7 +688,7 @@ function sauvegarderNomGrille() {
  * 4. Affiche le modal
  */
 function afficherGrillesCriteres() {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const listeDiv = document.getElementById('listeGrilles');
 
     if (!listeDiv) return;
@@ -791,7 +791,7 @@ function fermerModalGrilles() {
  * 4. Ferme le modal
  */
 function chargerGrilleEnEdition(grilleId) {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (grille) {
@@ -827,9 +827,9 @@ function supprimerGrille(grilleId) {
         return;
     }
 
-    let grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    let grilles = db.getSync('grillesTemplates', []);
     grilles = grilles.filter(g => g.id !== grilleId);
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     // Rafraîchir le modal
     afficherGrillesCriteres();
@@ -867,7 +867,7 @@ function supprimerGrille(grilleId) {
  * 5. Charge la nouvelle grille
  */
 function dupliquerGrille(grilleId) {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grilleOriginale = grilles.find(g => g.id === grilleId);
 
     if (!grilleOriginale) {
@@ -900,7 +900,7 @@ function dupliquerGrille(grilleId) {
 
     // Sauvegarder
     grilles.push(nouvelleGrille);
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     // Charger la nouvelle grille en édition
     grilleTemplateActuelle = nouvelleGrille;
@@ -957,9 +957,9 @@ function dupliquerGrilleActuelle() {
     };
 
     // Sauvegarder la nouvelle grille
-    let grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    let grilles = db.getSync('grillesTemplates', []);
     grilles.push(nouvelleGrille);
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     // Mettre à jour l'interface
     grilleTemplateActuelle = nouvelleGrille;
@@ -1148,7 +1148,7 @@ function afficherToutesLesGrillesCriteres() {
         return;
     }
 
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     console.log('📋 Nombre de grilles trouvées:', grilles.length);
 
     if (grilles.length === 0) {
@@ -1501,7 +1501,7 @@ window.initialiserModuleGrilles = initialiserModuleGrilles;
    =============================== */
 
 function afficherListeGrilles() {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const container = document.getElementById('sidebarListeGrilles');
     if (!container) return;
 
@@ -1558,7 +1558,7 @@ function creerNouvelleGrille() {
 }
 
 function chargerGrillePourModif(id) {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === id);
 
     if (!grille) return;
@@ -1803,12 +1803,12 @@ function calculerEtAfficherTotalPonderation(grille) {
  * Obtient une grille par son ID
  */
 function obtenirGrilleParId(grilleId) {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     return grilles.find(g => g.id === grilleId);
 }
 
 function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
@@ -1817,7 +1817,7 @@ function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
     grille.criteres[critereIndex][champ] = valeur;
 
     // Sauvegarder dans localStorage
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     // Recalculer et afficher la pondération totale
     if (champ === 'ponderation') {
@@ -1837,7 +1837,7 @@ function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
  * @param {number} critereIndex - Index du critère
  */
 function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
@@ -1926,7 +1926,7 @@ function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
     grille.criteres[critereIndex].sousCriteres = sousCriteresParDefaut;
 
     // Sauvegarder dans localStorage
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     // Réafficher la grille
     afficherCriteresGrille(grille);
@@ -1940,7 +1940,7 @@ function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
  * @param {number} critereIndex - Index du critère
  */
 function ajouterSousCritere(grilleId, critereIndex) {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
@@ -1964,7 +1964,7 @@ function ajouterSousCritere(grilleId, critereIndex) {
     grille.criteres[critereIndex].sousCriteres.push(nouveauSousCritere);
 
     // Sauvegarder dans localStorage
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     // Réafficher la grille
     afficherCriteresGrille(grille);
@@ -1981,7 +1981,7 @@ function ajouterSousCritere(grilleId, critereIndex) {
  * @param {any} valeur - Nouvelle valeur
  */
 function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, champ, valeur) {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille || !grille.criteres || !grille.criteres[critereIndex] ||
@@ -1992,7 +1992,7 @@ function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, champ, va
     grille.criteres[critereIndex].sousCriteres[sousCritereIndex][champ] = valeur;
 
     // Sauvegarder dans localStorage
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     console.log('Sous-critère modifié:', champ, '=', valeur);
 }
@@ -2006,7 +2006,7 @@ function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, champ, va
 function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
     if (!confirm('Supprimer ce sous-critère ?')) return;
 
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille || !grille.criteres || !grille.criteres[critereIndex] ||
@@ -2016,7 +2016,7 @@ function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
     grille.criteres[critereIndex].sousCriteres.splice(sousCritereIndex, 1);
 
     // Sauvegarder dans localStorage
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     // Réafficher la grille
     afficherCriteresGrille(grille);
@@ -2029,7 +2029,7 @@ function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
  * @param {string} grilleId - ID de la grille
  */
 function ajouterCritereGrille(grilleId) {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) return;
@@ -2051,7 +2051,7 @@ function ajouterCritereGrille(grilleId) {
     grille.criteres.push(nouveauCritere);
 
     // Sauvegarder dans localStorage
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     // Réafficher la liste des critères (calculera automatiquement le total)
     afficherCriteresGrille(grille);
@@ -2069,7 +2069,7 @@ function supprimerCritereGrille(grilleId, critereIndex) {
         return;
     }
 
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return;
@@ -2078,7 +2078,7 @@ function supprimerCritereGrille(grilleId, critereIndex) {
     grille.criteres.splice(critereIndex, 1);
 
     // Sauvegarder dans localStorage
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     // Réafficher la liste des critères (calculera automatiquement le total)
     afficherCriteresGrille(grille);
@@ -2098,7 +2098,7 @@ function definirGrilleActive(id) {
 }
 
 function dupliquerGrilleDepuisSidebar(id) {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === id);
 
     if (!grille) return;
@@ -2111,7 +2111,7 @@ function dupliquerGrilleDepuisSidebar(id) {
     };
 
     grilles.push(copie);
-    localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+    db.setSync('grillesTemplates', grilles);
 
     afficherListeGrilles();
     chargerGrillePourModif(copie.id);
@@ -2122,12 +2122,12 @@ function dupliquerGrilleDepuisSidebar(id) {
 function supprimerGrilleDepuisSidebar(id) {
     if (!confirm('Supprimer cette grille ?')) return;
 
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const index = grilles.findIndex(g => g.id === id);
 
     if (index !== -1) {
         grilles.splice(index, 1);
-        localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+        db.setSync('grillesTemplates', grilles);
         afficherListeGrilles();
         document.getElementById('conteneurEditionGrille').style.display = 'none';
         document.getElementById('optionsImportExportGrilles').style.display = 'none';
@@ -2177,12 +2177,12 @@ function supprimerGrilleActive() {
         return;
     }
 
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const index = grilles.findIndex(g => g.id === grilleTemplateActuelle);
 
     if (index !== -1) {
         grilles.splice(index, 1);
-        localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+        db.setSync('grillesTemplates', grilles);
 
         // Fermer le formulaire et retourner à l'accueil
         annulerFormGrille();
@@ -2245,11 +2245,11 @@ function afficherConfigurationCategoriesErreurs(grilleId, critereIndex) {
         critere.categoriesErreurs = categoriesParDefaut;
 
         // Sauvegarder immédiatement dans localStorage
-        const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+        const grilles = db.getSync('grillesTemplates', []);
         const grilleIndex = grilles.findIndex(g => g.id === grilleId);
         if (grilleIndex !== -1) {
             grilles[grilleIndex] = grille;
-            localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+            db.setSync('grillesTemplates', grilles);
         }
     }
 
@@ -2305,11 +2305,11 @@ function sauvegarderCategoriesErreurs(grilleId, critereIndex) {
     });
 
     // Sauvegarder dans localStorage
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grilleIndex = grilles.findIndex(g => g.id === grilleId);
     if (grilleIndex !== -1) {
         grilles[grilleIndex] = grille;
-        localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+        db.setSync('grillesTemplates', grilles);
     }
 
     // Fermer le modal et rafraîchir l'affichage
@@ -2346,7 +2346,7 @@ window.sauvegarderGrilleComplete = sauvegarderGrilleComplete;
  * Exécuté au chargement du module
  */
 function migrerCategoriesVersSousCriteres() {
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     let nbMigrations = 0;
 
     grilles.forEach(grille => {
@@ -2375,7 +2375,7 @@ function migrerCategoriesVersSousCriteres() {
     });
 
     if (nbMigrations > 0) {
-        localStorage.setItem('grillesTemplates', JSON.stringify(grilles));
+        db.setSync('grillesTemplates', grilles);
         console.log(`✅ Migration complétée: ${nbMigrations} critères migrés vers le système de sous-critères`);
     }
 }

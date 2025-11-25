@@ -91,7 +91,7 @@ function migrerEvenementsAvecIDs() {
     console.log('🔄 Migration des événements : ajout des IDs manquants...');
 
     // Migrer les événements prévus
-    let evenementsPrevus = JSON.parse(localStorage.getItem('evenementsPrevus') || '[]');
+    let evenementsPrevus = db.getSync('evenementsPrevus', []);
     let nbMigres = 0;
 
     evenementsPrevus = evenementsPrevus.map((evt, index) => {
@@ -106,12 +106,12 @@ function migrerEvenementsAvecIDs() {
     });
 
     if (nbMigres > 0) {
-        localStorage.setItem('evenementsPrevus', JSON.stringify(evenementsPrevus));
+        db.setSync('evenementsPrevus', evenementsPrevus);
         console.log(`✅ ${nbMigres} événement(s) prévu(s) migré(s)`);
     }
 
     // Migrer les événements imprévus
-    let evenementsImprevus = JSON.parse(localStorage.getItem('evenementsImprevus') || '[]');
+    let evenementsImprevus = db.getSync('evenementsImprevus', []);
     nbMigres = 0;
 
     evenementsImprevus = evenementsImprevus.map((evt, index) => {
@@ -126,7 +126,7 @@ function migrerEvenementsAvecIDs() {
     });
 
     if (nbMigres > 0) {
-        localStorage.setItem('evenementsImprevus', JSON.stringify(evenementsImprevus));
+        db.setSync('evenementsImprevus', evenementsImprevus);
         console.log(`✅ ${nbMigres} événement(s) imprévu(s) migré(s)`);
     }
 
@@ -169,7 +169,7 @@ function initialiserModuleTrimestre() {
    =============================== */
 
 function chargerCadreCalendrier() {
-    const cadre = JSON.parse(localStorage.getItem('cadreCalendrier') || 'null');
+    const cadre = db.getSync('cadreCalendrier', null);
     if (!cadre) return;
 
     // Remplir les champs du formulaire
@@ -210,7 +210,7 @@ function sauvegarderCadreCalendrier() {
         return;
     }
 
-    localStorage.setItem('cadreCalendrier', JSON.stringify(cadre));
+    db.setSync('cadreCalendrier', cadre);
 
     // CRITIQUE: Régénérer le calendrier complet après modification
     genererCalendrierComplet();
@@ -224,7 +224,7 @@ function sauvegarderCadreCalendrier() {
    =============================== */
 
 function chargerEvenementsPrevus() {
-    const evenements = JSON.parse(localStorage.getItem('evenementsPrevus') || '[]');
+    const evenements = db.getSync('evenementsPrevus', []);
     const conteneur = document.getElementById('congesPrevusContainer');
 
     if (!conteneur) return;
@@ -348,7 +348,7 @@ function confirmerAjoutEvenement() {
         return;
     }
 
-    const evenements = JSON.parse(localStorage.getItem('evenementsPrevus') || '[]');
+    const evenements = db.getSync('evenementsPrevus', []);
 
     if (editId) {
         // MODE ÉDITION : Remplacer l'événement existant
@@ -374,7 +374,7 @@ function confirmerAjoutEvenement() {
         });
     }
 
-    localStorage.setItem('evenementsPrevus', JSON.stringify(evenements));
+    db.setSync('evenementsPrevus', evenements);
 
     // Régénérer tout
     genererCalendrierComplet();
@@ -392,9 +392,9 @@ function supprimerEvenement(id, type) {
     if (!confirm('Supprimer cet événement ?')) return;
 
     const cle = type === 'prevus' ? 'evenementsPrevus' : 'evenementsImprevus';
-    let evenements = JSON.parse(localStorage.getItem(cle) || '[]');
+    let evenements = db.getSync(cle, []);
     evenements = evenements.filter(e => e.id !== id);
-    localStorage.setItem(cle, JSON.stringify(evenements));
+    db.setSync(cle, evenements);
 
     // CRITIQUE: Régénérer le calendrier complet
     genererCalendrierComplet();
@@ -413,7 +413,7 @@ function supprimerEvenement(id, type) {
  */
 function modifierEvenementEnPlace(id, type) {
     const cle = type === 'prevus' ? 'evenementsPrevus' : 'evenementsImprevus';
-    const evenements = JSON.parse(localStorage.getItem(cle) || '[]');
+    const evenements = db.getSync(cle, []);
     const evt = evenements.find(e => e.id === id);
 
     if (!evt) {
@@ -463,7 +463,7 @@ function sauvegarderEditionEnPlace(id, type) {
     }
 
     const cle = type === 'prevus' ? 'evenementsPrevus' : 'evenementsImprevus';
-    const evenements = JSON.parse(localStorage.getItem(cle) || '[]');
+    const evenements = db.getSync(cle, []);
     const index = evenements.findIndex(e => e.id === id);
 
     if (index !== -1) {
@@ -474,7 +474,7 @@ function sauvegarderEditionEnPlace(id, type) {
             horaireReprise: horaireReprise || '',
             dateReprise: dateReprise || ''
         };
-        localStorage.setItem(cle, JSON.stringify(evenements));
+        db.setSync(cle, evenements);
 
         // Régénérer tout
         genererCalendrierComplet();
@@ -498,7 +498,7 @@ function sauvegarderEditionEnPlace(id, type) {
    =============================== */
 
 function chargerEvenementsImprevus() {
-    const evenements = JSON.parse(localStorage.getItem('evenementsImprevus') || '[]');
+    const evenements = db.getSync('evenementsImprevus', []);
     const conteneur = document.getElementById('congesImprevusContainer');
 
     if (!conteneur) return;
@@ -622,7 +622,7 @@ function confirmerAjoutEvenementImprevu() {
     const form = document.getElementById('formEvenementImprevu');
     const editId = form.getAttribute('data-edit-id');
 
-    const evenements = JSON.parse(localStorage.getItem('evenementsImprevus') || '[]');
+    const evenements = db.getSync('evenementsImprevus', []);
 
     if (editId) {
         // MODE ÉDITION : Remplacer l'événement existant
@@ -648,7 +648,7 @@ function confirmerAjoutEvenementImprevu() {
         });
     }
 
-    localStorage.setItem('evenementsImprevus', JSON.stringify(evenements));
+    db.setSync('evenementsImprevus', evenements);
 
     // CRITIQUE: Régénérer le calendrier complet
     genererCalendrierComplet();
@@ -676,9 +676,9 @@ function confirmerAjoutEvenementImprevu() {
 function genererCalendrierComplet() {
     console.log('🏭 Génération du calendrier complet (source unique)...');
 
-    const cadre = JSON.parse(localStorage.getItem('cadreCalendrier') || '{}');
-    const evenementsPrevus = JSON.parse(localStorage.getItem('evenementsPrevus') || '[]');
-    const evenementsImprevus = JSON.parse(localStorage.getItem('evenementsImprevus') || '[]');
+    const cadre = db.getSync('cadreCalendrier', {});
+    const evenementsPrevus = db.getSync('evenementsPrevus', []);
+    const evenementsImprevus = db.getSync('evenementsImprevus', []);
 
     // Valeurs par défaut si rien n'est configuré
     const dateDebut = cadre.dateDebut || cadre.debutTrimestre || '2025-08-21';
@@ -797,7 +797,7 @@ function genererCalendrierComplet() {
     }
 
     // STOCKER dans localStorage - LA SOURCE UNIQUE
-    localStorage.setItem('calendrierComplet', JSON.stringify(calendrier));
+    db.setSync('calendrierComplet', calendrier);
 
     console.log(`✅ Calendrier complet généré: ${Object.keys(calendrier).length} jours`);
     console.log(`   - ${compteurJoursCours} jours de cours`);
@@ -811,7 +811,7 @@ function genererCalendrierComplet() {
    =============================== */
 
 function afficherStatistiquesTrimestre() {
-    const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+    const calendrier = db.getSync('calendrierComplet', {});
 
     if (Object.keys(calendrier).length === 0) {
         console.warn('⚠️ Calendrier complet non généré');
@@ -966,7 +966,7 @@ function annulerFormEvenementImprevu() {
 
 function modifierEvenement(id, type) {
     const cle = type === 'prevus' ? 'evenementsPrevus' : 'evenementsImprevus';
-    const evenements = JSON.parse(localStorage.getItem(cle) || '[]');
+    const evenements = db.getSync(cle, []);
     const evt = evenements.find(e => e.id === id);
 
     if (!evt) {
@@ -1023,7 +1023,7 @@ function modifierEvenement(id, type) {
  * @returns {Object} Le calendrier complet (dictionnaire date -> infos)
  */
 function obtenirCalendrierComplet() {
-    return JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+    return db.getSync('calendrierComplet', {});
 }
 
 /**

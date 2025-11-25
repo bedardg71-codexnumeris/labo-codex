@@ -304,7 +304,7 @@ function calculerTauxCompletion(da) {
     // LIRE depuis la source unique de vérité (portfolio.js)
     if (typeof obtenirIndicesCP === 'function') {
         // Détecter la pratique active
-        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const config = db.getSync('modalitesEvaluation', {});
         const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
         const indicesCP = obtenirIndicesCP(da, pratique);
@@ -368,7 +368,7 @@ function calculerPerformance(da) {
     // LIRE depuis la source unique de vérité (portfolio.js)
     if (typeof obtenirIndicesCP === 'function') {
         // Détecter la pratique active
-        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const config = db.getSync('modalitesEvaluation', {});
         const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
 
         const indicesCP = obtenirIndicesCP(da, pratique);
@@ -450,7 +450,7 @@ function calculerCorrelationPearson(x, y) {
  */
 function genererExplicationCalculIndices() {
     // Récupérer la configuration de la pratique active
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'pan-maitrise';
     const isPAN = pratique === 'pan-maitrise';
 
@@ -526,7 +526,7 @@ function mettreAJourExplicationCalculIndices() {
  * @returns {string} - HTML du badge
  */
 function genererBadgePratiqueListeEtudiants() {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'pan-maitrise';
 
     let texte = '';
@@ -707,8 +707,8 @@ function calculerNiveauRaI(da) {
     // ========================================
     // DÉCOUPLAGE P/R : Lire P_recent si disponible
     // ========================================
-    const indicesCP = JSON.parse(localStorage.getItem('indicesCP') || '{}');
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const indicesCP = db.getSync('indicesCP', {});
+    const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
     const donneesCP = indicesCP[da]?.actuel?.[pratique];
 
@@ -859,7 +859,7 @@ function afficherListeEtudiantsConsultation() {
     }
 
     // Vérifier si le modèle RàI est activé
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const activerRai = config.activerRai !== false; // Par défaut true (rétrocompatibilité)
 
     // Afficher/masquer les colonnes Pattern et RàI dans les headers

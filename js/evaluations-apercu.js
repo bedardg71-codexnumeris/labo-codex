@@ -57,7 +57,7 @@ function calculerStatistiquesEvaluations(etudiants, evaluations, productions) {
     }
 
     // Déterminer la pratique active
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;

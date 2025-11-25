@@ -167,9 +167,9 @@ function obtenirStatutJour(dateStr, calendrierComplet) {
     };
     
     const type = mapStatuts[infosJour.statut] || 'cours';
-    
+
     // Vérifier si c'est un jour de cours avec horaire (cours-reel)
-    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seances = db.getSync('seancesHoraire', []);
     const estCoursReel = seances.some(function(seance) {
         return seance.jour === infosJour.jourSemaine;
     });
@@ -350,10 +350,10 @@ function desilluminerSemaines() {
 function afficherCalendrierScolaire() {
     console.log('🔵 Génération du calendrier scolaire...');
 
-    // Récupérer les paramètres depuis localStorage
-    const cadreCalendrier = JSON.parse(localStorage.getItem('cadreCalendrier') || '{}');
-    const evenementsPrevus = JSON.parse(localStorage.getItem('evenementsPrevus') || '[]');
-    const evenementsImprevus = JSON.parse(localStorage.getItem('evenementsImprevus') || '[]');
+    // Récupérer les paramètres depuis db.getSync
+    const cadreCalendrier = db.getSync('cadreCalendrier', {});
+    const evenementsPrevus = db.getSync('evenementsPrevus', []);
+    const evenementsImprevus = db.getSync('evenementsImprevus', []);
 
     // Configuration du calendrier
     const config = {

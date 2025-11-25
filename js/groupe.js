@@ -95,7 +95,7 @@ let tempImportData = [];
  */
 function sauvegarderDonneesSelonMode(cle, donnees) {
     try {
-        localStorage.setItem(cle, JSON.stringify(donnees));
+        db.setSync(cle, donnees);
         return true;
     } catch (error) {
         console.error(`Erreur sauvegarde ${cle}:`, error);
@@ -215,7 +215,7 @@ function addStudent() {
         }
 
         students.push(student);
-        localStorage.setItem('groupeEtudiants', JSON.stringify(students));
+        db.setSync('groupeEtudiants', students);
 
         // Prévisualisation
         const actionTexte = modeModification ? 'Étudiant·e modifié·e' : 'Étudiant·e ajouté·e';
@@ -631,7 +631,7 @@ function filtrerParGroupe() {
         if (noMsg) noMsg.style.display = 'none';
 
         // Trier alphabétiquement par nom, puis par prénom (sauf en mode anonymisation)
-        const modeActif = localStorage.getItem('mode_actuel') || 'normal';
+        const modeActif = db.getSync('mode_actuel', 'normal');
         if (modeActif !== 'anonymisation') {
             etudiantsFiltres.sort((a, b) => {
                 const nomA = a.nom.toLowerCase();
@@ -718,7 +718,7 @@ function resetFiltreGroupe() {
  * Modifie un étudiant (utilise le DA)
  */
 function modifierEtudiant(da) {
-    const verrouille = JSON.parse(localStorage.getItem('groupeVerrouille') || 'false');
+    const verrouille = db.getSync('groupeVerrouille', false);
     if (verrouille) {
         alert('Déverrouillez le groupe (🔓) avant de le modifier');
         return;
@@ -784,7 +784,7 @@ function deleteStudent(id, silent = false) {
         const student = students.find(s => s.id === id);
 
         students = students.filter(s => s.id !== id);
-        localStorage.setItem('groupeEtudiants', JSON.stringify(students));
+        db.setSync('groupeEtudiants', students);
 
         if (!silent && student) {
             const details = `${student.nom}, ${student.prenom}`;
@@ -859,7 +859,7 @@ function resetStudentsData() {
     }
 
     try {
-        localStorage.removeItem('groupeEtudiants');
+        db.removeSync('groupeEtudiants');
 
         // Forcer la mise à jour immédiate des statistiques
         mettreAJourStatistiquesGroupes();
@@ -915,7 +915,7 @@ function attacherEventListenersEtudiants() {
  * @param {string} id - DA ou ID de l'étudiant
  */
 function supprimerEtudiant(id) {
-    const verrouille = JSON.parse(localStorage.getItem('groupeVerrouille') || 'false');
+    const verrouille = db.getSync('groupeVerrouille', false);
     if (verrouille) {
         alert('Déverrouillez le groupe (🔓) avant de supprimer');
         return;

@@ -113,18 +113,27 @@ function enregistrerPratique(id, instance) {
  */
 function obtenirIdPratiqueActive() {
     try {
-        const modalites = localStorage.getItem('modalitesEvaluation');
-        if (!modalites) {
+        const config = db.getSync('modalitesEvaluation', null);
+
+        if (!config) {
             console.warn('Aucune configuration trouvée dans modalitesEvaluation');
             return null;
         }
 
-        const config = JSON.parse(modalites);
-        const idPratique = config.pratique;
+        let idPratique = config.pratique;
 
         if (!idPratique) {
             console.warn('Aucune pratique configurée dans modalitesEvaluation.pratique');
             return null;
+        }
+
+        // Fallback automatique pour migration Beta 89 → Beta 90
+        if (idPratique === 'alternative') {
+            console.warn('⚠️ Pratique "alternative" détectée, migration automatique vers "pan-maitrise"');
+            idPratique = 'pan-maitrise';
+            // Sauvegarder la migration
+            config.pratique = 'pan-maitrise';
+            db.setSync('modalitesEvaluation', config);
         }
 
         return idPratique;

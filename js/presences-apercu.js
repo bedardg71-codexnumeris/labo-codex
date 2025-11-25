@@ -63,7 +63,7 @@ function calculerStatistiquesPresences(etudiants, indicesAssiduite, presences) {
     }
 
     // Déterminer la pratique active
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;
@@ -115,7 +115,7 @@ function calculerStatistiquesPresences(etudiants, indicesAssiduite, presences) {
  */
 function calculerHeuresOffertes() {
     try {
-        const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+        const calendrier = db.getSync('calendrierComplet', {});
         let heuresOffertes = 0;
 
         Object.values(calendrier).forEach(jour => {
@@ -172,7 +172,7 @@ function calculerSeancesCompletees(presences) {
  */
 function calculerTotalSeances() {
     try {
-        const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+        const calendrier = db.getSync('calendrierComplet', {});
         const semainesUniques = new Set();
 
         Object.values(calendrier).forEach(jour => {
@@ -231,8 +231,8 @@ function calculerAbsencesMotivees(presences) {
  */
 function calculerProchaineSeance() {
     try {
-        const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
-        const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+        const calendrier = db.getSync('calendrierComplet', {});
+        const seancesHoraire = db.getSync('seancesHoraire', []);
 
         // Obtenir la liste des jours de la semaine où il y a cours (ex: ["Lundi", "Mercredi"])
         const joursCours = seancesHoraire.map(seance => seance.jour);

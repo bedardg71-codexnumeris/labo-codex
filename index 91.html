@@ -5740,7 +5740,7 @@ Exemple :
                                 <select id="pratiqueNotation" class="controle-form">
                                     <option value="">Choisir une pratique de notation</option>
                                     <option value="sommative">Sommative traditionnelle (en %)</option>
-                                    <option value="alternative">Alternative (PAN)</option>
+                                    <option value="pan-maitrise">PAN-Maîtrise</option>
                                 </select>
                             </div>
 
@@ -9209,6 +9209,9 @@ Exemple :
      CHARGEMENT DES MODULES JAVASCRIPT
      ORDRE CRITIQUE - Voir: js/ordre-chargement.txt
      =================================== -->
+
+    <!-- PRIORITÉ 0: Couche de stockage (Migration IndexedDB - Beta 91.5) -->
+    <script src="js/db.js?v=2025112401"></script>
 
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>

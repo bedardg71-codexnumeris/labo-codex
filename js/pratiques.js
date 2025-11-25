@@ -100,7 +100,7 @@ function initialiserModulePratiques() {
  */
 function migrerConfigurationPortfolio() {
     // Lire modalitésEvaluation
-    let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    let modalites = db.getSync('modalitesEvaluation', {});
 
     // Vérifier si migration déjà effectuée
     if (modalites.configPAN && modalites.configPAN.portfolio && modalites.configPAN._migrationV1Complete) {
@@ -111,7 +111,7 @@ function migrerConfigurationPortfolio() {
     console.log('[Migration Phase 3] 🔄 Début migration configuration portfolio...');
 
     // Lire productions pour trouver le portfolio
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     if (!portfolio || !portfolio.regles) {
@@ -131,7 +131,7 @@ function migrerConfigurationPortfolio() {
         };
 
         modalites.configPAN._migrationV1Complete = true;
-        localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+        db.setSync('modalitesEvaluation', modalites);
 
         console.log('[Migration Phase 3] ✅ Configuration par défaut créée');
         return true;
@@ -160,7 +160,7 @@ function migrerConfigurationPortfolio() {
     modalites.configPAN._migrationDate = new Date().toISOString();
 
     // Sauvegarder
-    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    db.setSync('modalitesEvaluation', modalites);
 
     console.log('[Migration Phase 3] ✅ Configuration migrée vers modalitesEvaluation.configPAN.portfolio');
     console.log('[Migration Phase 3] 📊 Nouvelle config:', JSON.stringify(modalites.configPAN.portfolio));
@@ -245,7 +245,7 @@ function changerPratiqueNotation() {
     const selectPAN = document.getElementById('typePAN');
     const infoPAN = document.getElementById('infoPAN');
 
-    if (pratique === 'alternative') {
+    if (pratique === 'pan-maitrise') {
         // Afficher le menu PAN
         colonnePAN.style.display = 'block';
     } else {
@@ -256,10 +256,10 @@ function changerPratiqueNotation() {
     }
 
     // Sauvegarder dans modalitesEvaluation
-    let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    let modalites = db.getSync('modalitesEvaluation', {});
     modalites.pratique = pratique;
-    modalites.typePAN = pratique === 'alternative' ? modalites.typePAN : null;
-    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    modalites.typePAN = pratique === 'pan-maitrise' ? modalites.typePAN : null;
+    db.setSync('modalitesEvaluation', modalites);
 
     // Gérer l'affichage des options d'affichage
     afficherOptionsAffichage();
@@ -299,9 +299,9 @@ function afficherInfoPAN() {
         infoPAN.style.display = 'block';
 
         // Sauvegarder le type de PAN
-        let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        let modalites = db.getSync('modalitesEvaluation', {});
         modalites.typePAN = typePAN;
-        localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+        db.setSync('modalitesEvaluation', modalites);
 
         mettreAJourStatutModalites();
     } else {
@@ -328,14 +328,14 @@ function afficherOptionsAffichage() {
     const checkComparatif = document.getElementById('modeComparatif');
     const activationsExtras = document.getElementById('activationsExtras');
 
-    if (pratique === 'alternative' || pratique === 'sommative') {
+    if (pratique === 'pan-maitrise' || pratique === 'sommative') {
         // Afficher la section d'affichage au tableau de bord
         if (sectionAffichageTableauBord) {
             sectionAffichageTableauBord.style.display = 'block';
         }
 
         // Afficher les checkboxes d'activation pour PAN
-        if (pratique === 'alternative' && activationsExtras) {
+        if (pratique === 'pan-maitrise' && activationsExtras) {
             activationsExtras.style.display = 'block';
             // Initialiser l'affichage des cartes
             afficherCartesExtras();
@@ -375,7 +375,7 @@ function sauvegarderOptionsAffichage() {
     const pratique = selectPratique.value;
 
     // Récupérer la config existante
-    let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    let modalites = db.getSync('modalitesEvaluation', {});
 
     // Définir l'affichage selon le mode comparatif
     if (modeComparatif) {
@@ -391,7 +391,7 @@ function sauvegarderOptionsAffichage() {
                 afficherSommatif: true,
                 afficherAlternatif: false
             };
-        } else if (pratique === 'alternative') {
+        } else if (pratique === 'pan-maitrise') {
             modalites.affichageTableauBord = {
                 afficherSommatif: false,
                 afficherAlternatif: true
@@ -399,7 +399,7 @@ function sauvegarderOptionsAffichage() {
         }
     }
 
-    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    db.setSync('modalitesEvaluation', modalites);
 
     console.log('Options d\'affichage sauvegardées:', modalites.affichageTableauBord);
 }
@@ -417,7 +417,7 @@ function afficherConfigurationPAN() {
 
     if (!configPAN) return;
 
-    if (pratique === 'alternative') {
+    if (pratique === 'pan-maitrise') {
         configPAN.style.display = 'block';
         chargerConfigurationPAN();
     } else {
@@ -444,7 +444,7 @@ function afficherParametresPAN() {
  * Charge la configuration PAN depuis localStorage
  */
 function chargerConfigurationPAN() {
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
     const configPAN = modalites.configPAN || {};
 
     // Période d'évaluation
@@ -704,7 +704,7 @@ function afficherCartesExtras() {
  * Sauvegarde la configuration PAN
  */
 function sauvegarderConfigurationPAN() {
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
 
     // Période d'évaluation
     const radioPeriode = document.querySelector('input[name="periodePAN"]:checked');
@@ -796,7 +796,7 @@ function sauvegarderConfigurationPAN() {
         }
     };
 
-    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    db.setSync('modalitesEvaluation', modalites);
     console.log('✅ Configuration PAN sauvegardée:', modalites.configPAN);
 }
 
@@ -825,15 +825,15 @@ function sauvegarderPratiqueNotation() {
         return;
     }
 
-    if (pratique === 'alternative' && !typePAN) {
+    if (pratique === 'pan-maitrise' && !typePAN) {
         alert('Veuillez choisir un type de pratique alternative');
         return;
     }
 
     // Construire la configuration complète
-    let modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    let modalites = db.getSync('modalitesEvaluation', {});
     modalites.pratique = pratique;
-    modalites.typePAN = pratique === 'alternative' ? typePAN : null;
+    modalites.typePAN = pratique === 'pan-maitrise' ? typePAN : null;
     modalites.dateConfiguration = new Date().toISOString();
 
     // Sauvegarder la grille de référence pour le dépistage
@@ -858,7 +858,7 @@ function sauvegarderPratiqueNotation() {
                     afficherSommatif: true,
                     afficherAlternatif: false
                 };
-            } else if (pratique === 'alternative') {
+            } else if (pratique === 'pan-maitrise') {
                 modalites.affichageTableauBord = {
                     afficherSommatif: false,
                     afficherAlternatif: true
@@ -894,7 +894,7 @@ function sauvegarderPratiqueNotation() {
         modalites.activerCategorisationErreurs = false;
     }
 
-    localStorage.setItem('modalitesEvaluation', JSON.stringify(modalites));
+    db.setSync('modalitesEvaluation', modalites);
 
     // Sauvegarder toutes les configurations (portfolio et jetons)
     sauvegarderConfigurationPAN();
@@ -917,7 +917,7 @@ function sauvegarderPratiqueNotation() {
  * 6. Met à jour le statut
  */
 function chargerModalites() {
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
 
     const selectPratique = document.getElementById('pratiqueNotation');
     const colonnePAN = document.getElementById('colonnePAN');
@@ -946,7 +946,7 @@ function chargerModalites() {
     selectPratique.value = modalites.pratique;
 
     // Gérer l'affichage du menu PAN
-    if (modalites.pratique === 'alternative') {
+    if (modalites.pratique === 'pan-maitrise') {
         colonnePAN.style.display = 'block';
 
         // Charger le type de PAN si disponible
@@ -1012,7 +1012,7 @@ function chargerModalites() {
     // Masquer la section configurationPAN au chargement
     // Elle sera affichée par le bouton "Modifier les paramètres"
     const configPAN = document.getElementById('configurationPAN');
-    if (configPAN && modalites.pratique === 'alternative') {
+    if (configPAN && modalites.pratique === 'pan-maitrise') {
         configPAN.style.display = 'none';
     }
 
@@ -1130,7 +1130,7 @@ function chargerConfigurationPAN(configPAN) {
  * 3. Met à jour #statutModalites avec HTML formaté
  */
 function mettreAJourStatutModalites() {
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
     const statutDiv = document.getElementById('statutModalites');
 
     if (!statutDiv) {
@@ -1143,7 +1143,7 @@ function mettreAJourStatutModalites() {
         statutDiv.innerHTML = '<span style="color: var(--risque-critique);">✗ À configurer</span>';
     } else if (modalites.pratique === 'sommative') {
         statutDiv.innerHTML = '<span style="color: var(--vert-moyen);">✓ Sommative traditionnelle (en %)</span>';
-    } else if (modalites.pratique === 'alternative' && modalites.typePAN) {
+    } else if (modalites.pratique === 'pan-maitrise' && modalites.typePAN) {
         const types = {
             'maitrise': 'Maîtrise',
             'specifications': 'Spécifications',
@@ -1155,7 +1155,7 @@ function mettreAJourStatutModalites() {
                 Modifier les paramètres
             </button>
         `;
-    } else if (modalites.pratique === 'alternative' && !modalites.typePAN) {
+    } else if (modalites.pratique === 'pan-maitrise' && !modalites.typePAN) {
         statutDiv.innerHTML = '<span style="color: var(--orange-accent);">⚠ Choisir un type de PAN</span>';
     }
 }
@@ -1277,7 +1277,7 @@ window.supprimerTypeJetonPersonnalise = supprimerTypeJetonPersonnalise;
  * - Module statistiques pour les calculs
  */
 function obtenirConfigurationNotation() {
-    return JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    return db.getSync('modalitesEvaluation', {});
 }
 
 /* ===============================
@@ -1320,7 +1320,7 @@ function chargerGrillesDisponibles() {
     if (!select) return;
 
     // Lire les grilles depuis localStorage
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
 
     // Vider le select
     select.innerHTML = '<option value="">-- Sélectionner une grille --</option>';

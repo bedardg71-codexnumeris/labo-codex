@@ -57,7 +57,7 @@ function obtenirCouleurNiveauIDME(codeNiveau) {
     if (!codeNiveau) return '#999999';
 
     // Lire l'échelle IDME par défaut (première échelle trouvée)
-    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    const echelles = db.getSync('echellesTemplates', []);
     const echelleIDME = echelles.find(e => e.nom && e.nom.toLowerCase().includes('idme')) || echelles[0];
 
     if (!echelleIDME || !echelleIDME.niveaux) {
@@ -114,7 +114,7 @@ function obtenirNombreProductionsPourPatterns() {
  */
 function obtenirGrilleReferenceDepistage() {
     // Lire la configuration
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
     const grilleId = modalites.grilleReferenceDepistage;
 
     if (!grilleId) {
@@ -123,7 +123,7 @@ function obtenirGrilleReferenceDepistage() {
     }
 
     // Lire toutes les grilles
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) {
@@ -265,9 +265,9 @@ function genererBadgePatternProfil(pattern) {
 function calculerTousLesIndices(da, pratique = null) {
     // ========================================
     // INDICE A : SINGLE SOURCE OF TRUTH
-    // Lire depuis localStorage.indicesAssiduite (calculé par saisie-presences.js)
+    // Lire depuis db.getSync('indicesAssiduite') (calculé par saisie-presences.js)
     // ========================================
-    const indicesAssiduite = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
+    const indicesAssiduite = db.getSync('indicesAssiduite', {});
     const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
 
     // Extraire l'indice (gérer ancien format nombre et nouveau format objet)
@@ -281,11 +281,11 @@ function calculerTousLesIndices(da, pratique = null) {
     // 🔍 DÉTERMINER LA PRATIQUE À UTILISER
     if (!pratique) {
         // Détecter depuis la configuration
-        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const config = db.getSync('modalitesEvaluation', {});
         pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
     }
 
-    // INDICES C et P : Lire depuis localStorage.indicesCP (Single Source of Truth)
+    // INDICES C et P : Lire depuis db.getSync('indicesCP') (Single Source of Truth)
     let C = 0;
     let P = 0;
     let P_pourRisque = 0; // P à utiliser pour le calcul de R (peut être P_recent si découplage activé)
@@ -687,7 +687,7 @@ function genererSectionMobilisationEngagement(da) {
     const interpE = interpreterEngagement(indices.E);
 
     // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;
@@ -776,7 +776,7 @@ function genererSectionMobilisationEngagement(da) {
     });
 
     // 🆕 LIRE LA CONFIGURATION DE LA PRATIQUE DE NOTATION (source unique)
-    const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const modalites = db.getSync('modalitesEvaluation', {});
     const configPortfolio = modalites.configPAN?.portfolio || {};
     const portfolioActif = configPortfolio.actif !== false;
     const nombreARetenir = configPortfolio.nombreARetenir || portfolio?.regles?.nombreARetenir || 3;
@@ -1152,7 +1152,7 @@ function genererSectionMobilisationEngagement(da) {
                     const totalJetonsUtilisesTousTypes = Object.values(statutJetons).reduce((sum, info) => sum + info.utilises, 0);
 
                     // Récupérer le quota global depuis la configuration
-                    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+                    const config = db.getSync('modalitesEvaluation', {});
                     const quotaGlobal = config.configPAN?.jetons?.nombreParEleve || 4;
 
                     // Déterminer si le quota global est atteint
@@ -1245,7 +1245,7 @@ function genererSectionMobilisationEngagement(da) {
                             const indexOriginal = artefactsPortfolio.findIndex(p => p.id === art.id) + 1;
 
                             // Récupérer les couleurs depuis l'échelle configurée
-                            const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+                            const echelles = db.getSync('echellesTemplates', []);
                             const echelleActive = echelles.find(e => e.active) || echelles[0];
 
                             // Déterminer la couleur selon la note
@@ -1577,7 +1577,7 @@ function genererSectionAccompagnement(da) {
 
         <!-- 🆕 NOUVEAU : Trois cartes côte à côte (RàI pédagogique + Contexte + Observation SOLO) -->
         <div class="${(() => {
-            const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+            const config = db.getSync('modalitesEvaluation', {});
             const afficherSOLO = config.afficherDescriptionsSOLO !== false;
             return afficherSOLO ? 'profil-grid-3col' : 'profil-grid-2col';
         })()}">
@@ -1651,7 +1651,7 @@ function genererSectionAccompagnement(da) {
 
             <!-- Carte 3 : Observation de la structure des résultats d'apprentissage (SOLO) - Optionnelle -->
             ${(() => {
-                const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+                const config = db.getSync('modalitesEvaluation', {});
                 const afficherSOLO = config.afficherDescriptionsSOLO !== false;
 
                 if (!afficherSOLO) {
@@ -2301,7 +2301,7 @@ function calculerPerformancePAN(da) {
 
     // 🆕 PRIORITÉ 1 : Utiliser les artefacts SÉLECTIONNÉS dans le portfolio
     const selectionsPortfolios = obtenirDonneesSelonMode('portfoliosEleves') || {};
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     if (portfolio && selectionsPortfolios[da]?.[portfolio.id]) {
@@ -2371,9 +2371,9 @@ function obtenirEmojiIndice(taux) {
 function obtenirDetailsAssiduite(da) {
     // ========================================
     // SINGLE SOURCE OF TRUTH
-    // Lire depuis localStorage.indicesAssiduite calculé par saisie-presences.js
+    // Lire depuis db.getSync('indicesAssiduite') calculé par saisie-presences.js
     // ========================================
-    const indices = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
+    const indices = db.getSync('indicesAssiduite', {});
     const detailsSommatif = indices.sommatif && indices.sommatif[da];
 
     // Si les données n'existent pas, retourner des valeurs par défaut
@@ -2410,7 +2410,7 @@ function obtenirDetailsAssiduite(da) {
 
     // Récupérer les séances configurées
     // NOTE: seancesHoraire n'est pas mode-aware (configuration globale)
-    const seances = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seances = db.getSync('seancesHoraire', []);
 
     // Détecter les absences (totales ET partielles)
     const absences = [];
@@ -2775,7 +2775,7 @@ function changerSectionProfil(section) {
  */
 function calculerDirectionRisque(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
 
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
@@ -2851,7 +2851,7 @@ function calculerDirectionRisque(da) {
  */
 function calculerDirectionsCriteres(da, pratique = 'PAN') {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
 
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
@@ -3057,7 +3057,7 @@ function genererHistoriqueInterventionsProfil(da) {
 function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif) {
     if (!modeComparatif) {
         // Mode normal: afficher seulement la valeur de la pratique active
-        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const config = db.getSync('modalitesEvaluation', {});
         const pratique = config.pratique || 'sommative';
         const valeur = pratique === 'sommative' ? valeurSOM : valeurPAN;
         return `<strong class="profil-valeur-grande-bleu">${valeur}%</strong>`;
@@ -3125,7 +3125,7 @@ function afficherProfilComplet(da) {
     const interpR = interpreterRisque(indices.R);
 
     // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;
@@ -3770,7 +3770,7 @@ function fermerDetailIndice() {
  * @returns {string} - HTML de la section
  */
 function genererSectionCompletion(da) {
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
@@ -3949,7 +3949,7 @@ function genererSectionCompletion(da) {
  */
 function obtenirTableConversionIDME(echelleId = null) {
     // PRIORITÉ 1 : Charger l'échelle active depuis niveauxEchelle
-    let niveaux = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
+    let niveaux = db.getSync('niveauxEchelle', []);
 
     // Si on a des niveaux IDME actifs, les utiliser
     if (niveaux.length > 0 && niveaux.some(n => ['0', 'I', 'D', 'M', 'E'].includes(n.code))) {
@@ -3966,7 +3966,7 @@ function obtenirTableConversionIDME(echelleId = null) {
     }
 
     // PRIORITÉ 2 : Charger depuis echellesTemplates si niveauxEchelle est vide
-    let echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+    let echelles = db.getSync('echellesTemplates', []);
     let echelle;
 
     if (echelleId) {
@@ -4143,13 +4143,13 @@ function calculerMoyennesCriteres(da) {
 function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
     // Lire le nombre d'artefacts depuis la config si non fourni
     if (nombreArtefacts === null) {
-        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const config = db.getSync('modalitesEvaluation', {});
         nombreArtefacts = config.configPAN?.nombreCours || 3; // Par défaut 3 cours = 6 artefacts
         nombreArtefacts = nombreArtefacts * 2; // 3 cours = 6 artefacts (2 par cours)
     }
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
 
     // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
     const artefactsPortfolio = productions
@@ -4474,12 +4474,12 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
         nombreArtefacts = obtenirNombreProductionsPourPatterns(); // Défaut 3
     } else {
         // Pour performance finale : N meilleurs artefacts (Réglages › Portfolio)
-        const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const config = db.getSync('modalitesEvaluation', {});
         nombreArtefacts = config.configPAN?.portfolio?.nombreARetenir || 4; // Défaut 4
     }
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
 
     // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
     const artefactsPortfolio = productions
@@ -4574,7 +4574,7 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
  */
 function calculerProgressionEleve(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
 
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
@@ -4662,7 +4662,7 @@ function calculerProgressionEleve(da) {
  */
 function identifierDefiSpecifique(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
 
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
@@ -4830,7 +4830,7 @@ function determinerNiveauRaiPedagogique(da) {
     const P = indices.P / 100; // Convertir en décimal 0-1
 
     // Déterminer quelle fonction utiliser selon la pratique
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'alternative';
 
     // Calculer moyennes SRPNF
@@ -5004,7 +5004,7 @@ function determinerCibleIntervention(da) {
     const indices = calculerTousLesIndices(da);
 
     // Déterminer quelle fonction utiliser selon la pratique
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'alternative';
 
     // En PAN : utiliser les moyennes sur les N derniers artefacts (récurrence récente)
@@ -5741,7 +5741,7 @@ function genererDiagnosticGenerique(da, defisInfo) {
  * @returns {string} - HTML de la section
  */
 function genererSectionPerformance(da) {
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     if (!portfolio) {
@@ -5818,7 +5818,7 @@ function genererSectionPerformance(da) {
                 dateSelection: new Date().toISOString(),
                 auto: true
             };
-            localStorage.setItem('portfoliosEleves', JSON.stringify(selectionsPortfolios));
+            db.setSync('portfoliosEleves', selectionsPortfolios);
 
             // 🔄 Recalculer les indices C et P après sélection automatique
             if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -5837,7 +5837,7 @@ function genererSectionPerformance(da) {
     const nbRetenus = selectionEleve.artefactsRetenus.length;
 
     // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
     const afficherSom = affichage.afficherSommatif !== false;
     const afficherPan = affichage.afficherAlternatif !== false;
@@ -5967,7 +5967,7 @@ function genererSectionPerformance(da) {
                     <div class="details-calculs-label">Calcul de la note de chaque artefact:</div>
                     <div class="details-calculs-valeur">
                         ${(() => {
-                            const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
+                            const grilles = db.getSync('grillesTemplates', []);
                             const grilleActive = grilles.find(g => g.active) || grilles[0];
                             if (grilleActive && grilleActive.criteres) {
                                 const ponderations = grilleActive.criteres
@@ -6041,7 +6041,7 @@ function genererSectionPerformance(da) {
             <div style="margin: 20px 0;">
                 ${(() => {
                     // Récupérer les couleurs depuis l'échelle configurée (localStorage)
-                    const echelles = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
+                    const echelles = db.getSync('echellesTemplates', []);
                     const echelleActive = echelles.find(e => e.active) || echelles[0];
 
                     // Couleurs par défaut IDME (si aucune échelle configurée)
@@ -6090,7 +6090,7 @@ function genererSectionPerformance(da) {
                     const gradientCSS = `linear-gradient(to right, ${gradientStops.join(', ')})`;
 
                     // Détecter le mode comparatif
-                    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+                    const config = db.getSync('modalitesEvaluation', {});
                     const affichage = config.affichageTableauBord || {};
                     const afficherSom = affichage.afficherSommatif !== false;
                     const afficherPan = affichage.afficherAlternatif !== false;
@@ -6737,7 +6737,7 @@ function genererRapportEtudiant(da, options = {}) {
     const maintenant = new Date();
     const dateRapport = maintenant.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    const config = JSON.parse(localStorage.getItem('informationsCours') || '{}');
+    const config = db.getSync('informationsCours', {});
     const nomCours = config.titre || 'ce cours';
 
     let rapport = '';
@@ -7073,7 +7073,7 @@ function sauvegarderPreferencesRapport(da) {
         afficherDetails: document.getElementById(`afficher-details-${da}`)?.checked ?? true
     };
 
-    localStorage.setItem('preferencesRapport', JSON.stringify(preferences));
+    db.setSync('preferencesRapport', preferences);
 }
 
 /**
@@ -7081,35 +7081,26 @@ function sauvegarderPreferencesRapport(da) {
  * @param {string} da - Numéro DA
  */
 function restaurerPreferencesRapport(da) {
-    const preferencesJson = localStorage.getItem('preferencesRapport');
+    // db.getSync retourne déjà l'objet parsé, pas besoin de JSON.parse
+    const preferences = db.getSync('preferencesRapport', null);
 
-    try {
-        let preferences = null;
-        if (preferencesJson) {
-            preferences = JSON.parse(preferencesJson);
+    // Restaurer les checkboxes de sections
+    const sections = ['identification', 'assiduite', 'completion', 'performance', 'apprentissage', 'interventions', 'date'];
+    sections.forEach(section => {
+        const checkbox = document.getElementById(`inclure-${section}-${da}`);
+        if (checkbox && preferences && preferences[section] !== undefined) {
+            checkbox.checked = preferences[section];
         }
+    });
 
-        // Restaurer les checkboxes de sections
-        const sections = ['identification', 'assiduite', 'completion', 'performance', 'apprentissage', 'interventions', 'date'];
-        sections.forEach(section => {
-            const checkbox = document.getElementById(`inclure-${section}-${da}`);
-            if (checkbox && preferences && preferences[section] !== undefined) {
-                checkbox.checked = preferences[section];
-            }
-        });
-
-        // Restaurer la checkbox de détails
-        const checkboxDetails = document.getElementById(`afficher-details-${da}`);
-        if (checkboxDetails && preferences && preferences.afficherDetails !== undefined) {
-            checkboxDetails.checked = preferences.afficherDetails;
-        }
-
-        // Générer automatiquement le rapport après restauration des préférences
-        genererEtAfficherRapport(da);
-
-    } catch (error) {
-        console.error('Erreur lors de la restauration des préférences:', error);
+    // Restaurer la checkbox de détails
+    const checkboxDetails = document.getElementById(`afficher-details-${da}`);
+    if (checkboxDetails && preferences && preferences.afficherDetails !== undefined) {
+        checkboxDetails.checked = preferences.afficherDetails;
     }
+
+    // Générer automatiquement le rapport après restauration des préférences
+    genererEtAfficherRapport(da);
 }
 
 // ============================================
@@ -7263,7 +7254,7 @@ window.determinerAlerteContextuelle = determinerAlerteContextuelle;
  * @returns {Object} - Patterns et RàI de tous les étudiants
  */
 function calculerEtStockerPatternsGroupe() {
-    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    const etudiants = db.getSync('groupeEtudiants', []);
     const patternsGroupe = {};
 
     console.log('📊 Calcul des patterns pour', etudiants.length, 'étudiants...');
@@ -7299,7 +7290,7 @@ function calculerEtStockerPatternsGroupe() {
     });
 
     // Stocker dans localStorage
-    localStorage.setItem('indicesPatternsRaI', JSON.stringify(patternsGroupe));
+    db.setSync('indicesPatternsRaI', patternsGroupe);
 
     console.log('✅ Patterns stockés pour', Object.keys(patternsGroupe).length, 'étudiants');
 
@@ -7312,7 +7303,7 @@ function calculerEtStockerPatternsGroupe() {
  * @returns {Object|null} - Pattern et RàI de l'étudiant, ou null si non trouvé
  */
 function obtenirPatternEtudiant(da) {
-    const patterns = JSON.parse(localStorage.getItem('indicesPatternsRaI') || '{}');
+    const patterns = db.getSync('indicesPatternsRaI', {});
     return patterns[da] || null;
 }
 
