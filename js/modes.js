@@ -100,7 +100,7 @@ const NOMS_FICTIFS = {
 // ÉTAT GLOBAL
 // ============================================
 
-let modeActuel = localStorage.getItem('modeApplication') || MODES.NORMAL;
+let modeActuel = db.getSync('modeApplication', MODES.NORMAL);
 
 // ============================================
 // INITIALISATION
@@ -113,7 +113,7 @@ function initialiserSystemeModes() {
     console.log('🎭 Initialisation du système de modes...');
 
     // Récupérer le mode sauvegardé
-    modeActuel = localStorage.getItem('modeApplication') || MODES.NORMAL;
+    modeActuel = db.getSync('modeApplication', MODES.NORMAL);
 
     // Appliquer le thème
     appliquerTheme(modeActuel);
@@ -195,7 +195,7 @@ function changerMode(nouveauMode) {
 
     // Sauvegarder le nouveau mode
     modeActuel = nouveauMode;
-    localStorage.setItem('modeApplication', nouveauMode);
+    db.setSync('modeApplication', nouveauMode);
 
     // Appliquer le thème
     appliquerTheme(nouveauMode);
@@ -365,8 +365,8 @@ function appliquerTheme(mode) {
  */
 function verifierDonnesSimulation() {
     // Vérifier si des données de simulation existent (étudiants OU évaluations)
-    const etudiantsExistent = localStorage.getItem('simulation_etudiants');
-    const evaluationsExistent = localStorage.getItem('simulation_evaluations');
+    const etudiantsExistent = db.getSync('simulation_etudiants', null);
+    const evaluationsExistent = db.getSync('simulation_evaluations', null);
 
     if (!etudiantsExistent && !evaluationsExistent) {
         console.log('🧪 Aucune donnée de simulation trouvée');
@@ -427,11 +427,11 @@ function genererDonneesSimulation() {
         });
     }
 
-    localStorage.setItem('simulation_etudiants', JSON.stringify(etudiants));
+    db.setSync('simulation_etudiants', etudiants);
 
     // Générer des évaluations réalistes
     const evaluations = [];
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const productions = db.getSync('productions', []);
     const artefacts = productions.filter(p => p.type === 'artefact-portfolio');
 
     etudiants.forEach(etudiant => {
@@ -467,7 +467,7 @@ function genererDonneesSimulation() {
         });
     });
 
-    localStorage.setItem('simulation_evaluations', JSON.stringify(evaluations));
+    db.setSync('simulation_evaluations', evaluations);
 
     console.log(`✅ Données de simulation générées: ${etudiants.length} étudiants, ${evaluations.length} évaluations`);
 }
@@ -495,7 +495,7 @@ function choisirCategorieCulturelle() {
  * @returns {Object} - Mapping DA réel → pseudonyme
  */
 function genererMappingAnonyme() {
-    let mapping = JSON.parse(localStorage.getItem('mapping_anonymisation') || '{}');
+    let mapping = db.getSync('mapping_anonymisation', {});
 
     // Vérifier si le mapping existe ET utilise le nouveau format
     if (Object.keys(mapping).length > 0) {
@@ -520,8 +520,8 @@ function genererMappingAnonyme() {
     }
 
     // Créer un nouveau mapping avec format "Élève X"
-    // IMPORTANT : Lire DIRECTEMENT depuis localStorage pour éviter la récursion
-    const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+    // IMPORTANT : Lire DIRECTEMENT depuis storage pour éviter la récursion
+    const etudiants = db.getSync('groupeEtudiants', []);
 
     // Filtrer pour exclure le groupe 9999 (simulation)
     const etudiantsReels = etudiants.filter(e => e.groupe !== '9999');
@@ -554,7 +554,7 @@ function genererMappingAnonyme() {
         };
     });
 
-    localStorage.setItem('mapping_anonymisation', JSON.stringify(mapping));
+    db.setSync('mapping_anonymisation', mapping);
     console.log(`✅ Mapping anonymisation créé avec ${etudiantsReels.length} étudiants (numéros aléatoires)`);
     return mapping;
 }
@@ -599,12 +599,11 @@ function obtenirDonneesSelonMode(cle) {
         };
 
         const cleSimulation = mappingCles[cle] || `simulation_${cle}`;
-        const donneesSimulation = localStorage.getItem(cleSimulation);
+        const donneesSimulation = db.getSync(cleSimulation, null);
 
         if (donneesSimulation) {
-            const donnees = JSON.parse(donneesSimulation);
-            console.log(`[Simulation] Chargement de ${Array.isArray(donnees) ? donnees.length : 'N/A'} element(s) depuis ${cleSimulation}`);
-            return donnees;
+            console.log(`[Simulation] Chargement de ${Array.isArray(donneesSimulation) ? donneesSimulation.length : 'N/A'} element(s) depuis ${cleSimulation}`);
+            return donneesSimulation;
         }
         // Fallback : si pas de données de simulation, utiliser les vraies
         console.warn(`Pas de donnees de simulation pour ${cle}, utilisation des donnees reelles`);
@@ -615,8 +614,8 @@ function obtenirDonneesSelonMode(cle) {
     // ===================================
     // Déterminer la valeur par défaut selon le type de clé
     const clesSontObjets = ['presences', 'indicesAssiduiteDetailles', 'indicesCP', 'calendrierComplet'];
-    const valeurParDefaut = clesSontObjets.includes(cle) ? '{}' : '[]';
-    let donnees = JSON.parse(localStorage.getItem(cle) || valeurParDefaut);
+    const valeurParDefaut = clesSontObjets.includes(cle) ? {} : [];
+    let donnees = db.getSync(cle, valeurParDefaut);
 
     // Si mode anonymisation, anonymiser selon le type de données
     if (mode === MODES.ANONYMISATION) {
@@ -654,13 +653,13 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
         };
         
         const cleSimulation = mappingCles[cle] || `simulation_${cle}`;
-        localStorage.setItem(cleSimulation, JSON.stringify(donnees));
+        db.setSync(cleSimulation, donnees);
         console.log(`[Simulation] Sauvegarde dans ${cleSimulation}`);
         return true;
     }
-    
+
     // MODE NORMAL : Sauvegarder normalement
-    localStorage.setItem(cle, JSON.stringify(donnees));
+    db.setSync(cle, donnees);
     console.log(`[Normal] Sauvegarde dans ${cle}`);
     return true;
 }
@@ -670,8 +669,8 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
  * @returns {boolean} - true pour afficher le DA réel, false pour "ANONYME"
  */
 function obtenirOptionAffichageDA() {
-    const option = localStorage.getItem('anonymisation_afficher_da_reel');
-    return option === null ? true : option === 'true'; // Par défaut: true (DA réel)
+    const option = db.getSync('anonymisation_afficher_da_reel', null);
+    return option === null ? true : option === 'true' || option === true; // Par défaut: true (DA réel)
 }
 
 /**
@@ -679,7 +678,7 @@ function obtenirOptionAffichageDA() {
  * @param {boolean} afficherDAReel - true pour DA réel, false pour "ANONYME"
  */
 function definirOptionAffichageDA(afficherDAReel) {
-    localStorage.setItem('anonymisation_afficher_da_reel', afficherDAReel.toString());
+    db.setSync('anonymisation_afficher_da_reel', afficherDAReel);
     console.log(`📝 Option DA anonymisation: ${afficherDAReel ? 'DA réel' : 'DA fictif (ANONYME)'}`);
 
     // Rafraîchir l'affichage si on est en mode anonymisation
@@ -693,7 +692,7 @@ function definirOptionAffichageDA(afficherDAReel) {
  * Utile quand la liste d'étudiants change
  */
 function reinitialiserMappingAnonyme() {
-    localStorage.removeItem('mapping_anonymisation');
+    db.removeSync('mapping_anonymisation');
     console.log('🔄 Mapping d\'anonymisation réinitialisé');
 }
 
@@ -901,11 +900,11 @@ function genererMappingAleatoire() {
     // 4. Sauvegarder les étudiants clonés dans l'espace de simulation
     // IMPORTANT : Toujours sauvegarder dans simulation_etudiants pour éviter de mélanger avec les vrais étudiants
     // On sauvegarde SEULEMENT les clones (pas les originaux) dans simulation_etudiants
-    localStorage.setItem('simulation_etudiants', JSON.stringify(clones));
+    db.setSync('simulation_etudiants', clones);
     console.log(`📝 ${clones.length} étudiants clonés sauvegardés dans simulation_etudiants`);
 
     // 5. Sauvegarder le mapping
-    localStorage.setItem('mapping_clonage', JSON.stringify(mapping));
+    db.setSync('mapping_clonage', mapping);
 
     console.log(`✅ Mapping généré: ${clones.length} étudiants clonés`);
     afficherNotificationSucces(`${clones.length} étudiants clonés créés dans le Groupe 9999`);
@@ -921,7 +920,7 @@ function genererMappingAleatoire() {
 function synchroniserDonnees() {
     console.log('🔄 Synchronisation des données...');
 
-    const mapping = JSON.parse(localStorage.getItem('mapping_clonage') || '{}');
+    const mapping = db.getSync('mapping_clonage', {});
 
     if (Object.keys(mapping).length === 0) {
         afficherNotificationErreur('Erreur', 'Aucun mapping trouvé. Générez d\'abord le mapping.');
@@ -937,7 +936,7 @@ function synchroniserDonnees() {
     // 1. CLONER LES ÉVALUATIONS
     // IMPORTANT : Lire DIRECTEMENT depuis les clés normales (groupe réel)
     // pour cloner vers le groupe 9999, puis sauvegarder selon le mode
-    const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+    const evaluations = db.getSync('evaluationsSauvegardees', []);
 
     // Supprimer les anciennes évaluations clonées
     const evaluationsNonClonees = evaluations.filter(e => e.groupe !== '9999');
@@ -966,12 +965,12 @@ function synchroniserDonnees() {
 
     // Sauvegarder les évaluations clonées dans l'espace de simulation
     // IMPORTANT : Toujours sauvegarder dans simulation_evaluations
-    localStorage.setItem('simulation_evaluations', JSON.stringify(nouvellesEvaluations));
+    db.setSync('simulation_evaluations', nouvellesEvaluations);
     console.log(`📝 ${nouvellesEvaluations.length} évaluations clonées sauvegardées dans simulation_evaluations`);
 
     // 2. CLONER LES PRÉSENCES
     // IMPORTANT : Lire DIRECTEMENT depuis les clés normales (groupe réel)
-    const presencesRaw = localStorage.getItem('presences');
+    const presencesRaw = db.getSync('presences', null);
     let presences = presencesRaw ? JSON.parse(presencesRaw) : [];
     let presencesClonees = []; // Tableau pour les présences clonées UNIQUEMENT
 
@@ -1012,7 +1011,7 @@ function synchroniserDonnees() {
 
     // Sauvegarder les présences clonées dans l'espace de simulation
     // IMPORTANT : Toujours sauvegarder dans simulation_presences
-    localStorage.setItem('simulation_presences', JSON.stringify(presencesClonees));
+    db.setSync('simulation_presences', presencesClonees);
     console.log(`📝 ${presencesClonees.length} présences clonées sauvegardées dans simulation_presences`);
 
     // 3. RECALCULER LES INDICES A, C, P
@@ -1066,7 +1065,7 @@ function afficherTableauMapping() {
     const conteneur = document.getElementById('tableau-mapping-groupes');
     if (!conteneur) return;
 
-    const mapping = JSON.parse(localStorage.getItem('mapping_clonage') || '{}');
+    const mapping = db.getSync('mapping_clonage', {});
 
     if (Object.keys(mapping).length === 0) {
         conteneur.innerHTML = `
@@ -1139,7 +1138,7 @@ function mettreAJourStatistiquesClonage() {
     // Compter les étudiants
     const etudiantsGroupe1 = obtenirEtudiantsGroupe1();
     const etudiantsGroupe9999 = obtenirEtudiantsGroupe9999();
-    const mapping = JSON.parse(localStorage.getItem('mapping_clonage') || '{}');
+    const mapping = db.getSync('mapping_clonage', {});
 
     statGroupe1.textContent = etudiantsGroupe1.length;
     statGroupe2.textContent = etudiantsGroupe9999.length;
@@ -1193,7 +1192,7 @@ function exporterGroupeFictif() {
     });
 
     // Récupérer le mapping
-    const mapping = JSON.parse(localStorage.getItem('mapping_clonage') || '{}');
+    const mapping = db.getSync('mapping_clonage', {});
 
     // Construire l'objet d'export
     const exportData = {
@@ -1306,7 +1305,7 @@ function importerGroupeFictif() {
 
                 // Importer le mapping
                 if (importData.mapping) {
-                    localStorage.setItem('mapping_clonage', JSON.stringify(importData.mapping));
+                    db.setSync('mapping_clonage', importData.mapping);
                 }
 
                 console.log('✅ Import terminé');
@@ -1379,27 +1378,27 @@ function supprimerGroupeFictif() {
         // 1. Supprimer les étudiants du Groupe 9999 (NORMAL + SIMULATION)
         // IMPORTANT : Les clés de simulation utilisent un mapping personnalisé
         ['groupeEtudiants', 'simulation_etudiants'].forEach(cle => {
-            let tousEtudiants = JSON.parse(localStorage.getItem(cle) || '[]');
+            let tousEtudiants = db.getSync(cle, []);
             const nbAvant = tousEtudiants.length;
             tousEtudiants = tousEtudiants.filter(e => e.groupe !== '9999');
-            localStorage.setItem(cle, JSON.stringify(tousEtudiants));
+            db.setSync(cle,tousEtudiants));
             nbEtudiantsSupprimes += (nbAvant - tousEtudiants.length);
         });
         console.log(`   ✅ ${nbEtudiantsSupprimes} étudiants supprimés (tous modes)`);
 
         // 2. Supprimer les évaluations du Groupe 9999 (NORMAL + SIMULATION)
         ['evaluationsSauvegardees', 'simulation_evaluations'].forEach(cle => {
-            let toutesEvaluations = JSON.parse(localStorage.getItem(cle) || '[]');
+            let toutesEvaluations = db.getSync(cle, []);
             const nbAvant = toutesEvaluations.length;
             toutesEvaluations = toutesEvaluations.filter(e => e.groupe !== '9999');
-            localStorage.setItem(cle, JSON.stringify(toutesEvaluations));
+            db.setSync(cle, toutesEvaluations);
             nbEvaluationsSupprimes += (nbAvant - toutesEvaluations.length);
         });
         console.log(`   ✅ ${nbEvaluationsSupprimes} évaluations supprimées (tous modes)`);
 
         // 3. Supprimer les présences des étudiants 9999xxx (NORMAL + SIMULATION)
         ['presences', 'simulation_presences'].forEach(cle => {
-            let presences = JSON.parse(localStorage.getItem(cle) || '[]');
+            let presences = db.getSync(cle, []);
 
             if (Array.isArray(presences)) {
                 const nbAvant = presences.length;
@@ -1414,14 +1413,14 @@ function supprimerGroupeFictif() {
                     }
                 });
             }
-            localStorage.setItem(cle, JSON.stringify(presences));
+            db.setSync(cle,presences));
         });
         console.log(`   ✅ ${nbPresencesSupprimes} entrées de présences supprimées (tous modes)`);
 
         // 4. Supprimer les indices d'assiduité du Groupe 9999 (NORMAL + SIMULATION)
         // 4a. indicesAssiduite (ancien format avec sommatif/alternatif)
         ['indicesAssiduite', 'simulation_indicesAssiduite'].forEach(cle => {
-            let indicesAssiduite = JSON.parse(localStorage.getItem(cle) || '{}');
+            let indicesAssiduite = db.getSync(cle, {});
 
             if (indicesAssiduite.sommatif) {
                 Object.keys(indicesAssiduite.sommatif).forEach(da => {
@@ -1438,12 +1437,12 @@ function supprimerGroupeFictif() {
                     }
                 });
             }
-            localStorage.setItem(cle, JSON.stringify(indicesAssiduite));
+            db.setSync(cle,indicesAssiduite));
         });
 
         // 4b. indicesAssiduiteDetailles (nouveau format détaillé)
         ['indicesAssiduiteDetailles', 'simulation_indicesAssiduiteDetailles'].forEach(cle => {
-            let indicesAssiduiteDetailles = JSON.parse(localStorage.getItem(cle) || '{}');
+            let indicesAssiduiteDetailles = db.getSync(cle, {});
 
             Object.keys(indicesAssiduiteDetailles).forEach(da => {
                 if (da.startsWith('9999')) {
@@ -1451,13 +1450,13 @@ function supprimerGroupeFictif() {
                     nbIndicesASupprimes++;
                 }
             });
-            localStorage.setItem(cle, JSON.stringify(indicesAssiduiteDetailles));
+            db.setSync(cle,indicesAssiduiteDetailles));
         });
         console.log(`   ✅ ${nbIndicesASupprimes} indices A supprimés (tous modes)`);
 
         // 5. Supprimer les indices C et P du Groupe 9999 (NORMAL + SIMULATION)
         ['indicesCP', 'simulation_indicesCP'].forEach(cle => {
-            let indicesCP = JSON.parse(localStorage.getItem(cle) || '{}');
+            let indicesCP = db.getSync(cle, {});
 
             Object.keys(indicesCP).forEach(da => {
                 if (da.startsWith('9999')) {
@@ -1465,14 +1464,14 @@ function supprimerGroupeFictif() {
                     nbIndicesCPSupprimes++;
                 }
             });
-            localStorage.setItem(cle, JSON.stringify(indicesCP));
+            db.setSync(cle,indicesCP));
         });
         console.log(`   ✅ ${nbIndicesCPSupprimes} indices C/P supprimés (tous modes)`);
 
         // 6. Supprimer les sélections de portfolio du Groupe 9999 (NORMAL + SIMULATION)
         let nbPortfoliosSupprimes = 0;
         ['portfoliosEleves', 'simulation_portfoliosEleves'].forEach(cle => {
-            let portfoliosEleves = JSON.parse(localStorage.getItem(cle) || '{}');
+            let portfoliosEleves = db.getSync(cle, {});
 
             Object.keys(portfoliosEleves).forEach(da => {
                 if (da.startsWith('9999')) {
@@ -1480,12 +1479,12 @@ function supprimerGroupeFictif() {
                     nbPortfoliosSupprimes++;
                 }
             });
-            localStorage.setItem(cle, JSON.stringify(portfoliosEleves));
+            db.setSync(cle,portfoliosEleves));
         });
         console.log(`   ✅ ${nbPortfoliosSupprimes} portfolios supprimés (tous modes)`);
 
         // 7. Supprimer le mapping de clonage
-        localStorage.removeItem('mapping_clonage');
+        db.removeSync('mapping_clonage');
         console.log(`   ✅ Mapping de clonage supprimé`);
 
         // 8. Rafraîchir l'affichage
@@ -1671,8 +1670,8 @@ function genererGroupeFictifAleatoire() {
     }
 
     // 2. Récupérer les grilles et productions existantes
-    const grilles = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
-    const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+    const grilles = db.getSync('grillesTemplates', []);
+    const productions = db.getSync('productions', []);
 
     if (grilles.length === 0) {
         afficherNotificationErreur('Erreur', 'Aucune grille d\'évaluation trouvée. Créez d\'abord des grilles.');
@@ -1789,7 +1788,7 @@ function genererGroupeFictifAleatoire() {
 
         // 6. Générer des présences réalistes (75-95% de présence)
         const tauxPresence = 0.75 + Math.random() * 0.20; // Entre 75% et 95%
-        const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+        const calendrier = db.getSync('calendrierComplet', {});
         const datesCours = Object.keys(calendrier).filter(date => {
             const jour = calendrier[date];
             return jour.typeSemaine === 'cours' && new Date(date) <= new Date();
