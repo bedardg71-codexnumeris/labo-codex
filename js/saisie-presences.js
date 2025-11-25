@@ -196,7 +196,7 @@ function calculerAssiduiteAlternative(da) {
     const presences = obtenirDonneesSelonMode('presences') || [];
 
     // Obtenir le nombre de séances depuis les réglages
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const nombreCours = config.configPAN?.nombreCours || 3; // Par défaut 3 cours
     const nombreSeances = nombreCours * 2; // 3 cours = 6 séances
 
@@ -291,7 +291,7 @@ function calculerAssiduiteAlternative(da) {
  * @returns {Object} Configuration complète de notation
  */
 function obtenirConfigurationNotation() {
-    return JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    return db.getSync('modalitesEvaluation', {});
 }
 
 function initialiserModuleSaisiePresences() {
@@ -380,7 +380,7 @@ function obtenirInfosJourCalendrier(dateStr) {
 
     // Fallback : lire directement depuis localStorage
     console.warn('⚠️ Fonctions trimestre.js non disponibles, lecture directe');
-    const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+    const calendrier = db.getSync('calendrierComplet', {});
     return calendrier[dateStr] || null;
 }
 
@@ -400,7 +400,7 @@ function estJourDeCoursReel(dateStr) {
 
     // Fallback : lire directement
     console.warn('⚠️ obtenirCalendrierComplet non disponible, lecture directe');
-    const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+    const calendrier = db.getSync('calendrierComplet', {});
 
     if (!calendrier[dateStr]) {
         return false;
@@ -422,7 +422,7 @@ function obtenirToutesDatesCours() {
         seancesCompletes = obtenirSeancesCompletes();
     } else {
         console.warn('⚠️ obtenirSeancesCompletes non disponible, lecture directe');
-        seancesCompletes = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
+        seancesCompletes = db.getSync('seancesCompletes', {});
     }
 
     // Si on a des séances, utiliser ces dates
@@ -448,7 +448,7 @@ function obtenirToutesDatesCours() {
     if (typeof obtenirCalendrierComplet === 'function') {
         calendrier = obtenirCalendrierComplet();
     } else {
-        calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+        calendrier = db.getSync('calendrierComplet', {});
     }
 
     if (!calendrier || Object.keys(calendrier).length === 0) {
@@ -457,7 +457,7 @@ function obtenirToutesDatesCours() {
     }
 
     // Obtenir les jours de séances depuis l'horaire
-    const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const seancesHoraire = db.getSync('seancesHoraire', []);
     const joursAvecSeances = new Set();
     seancesHoraire.forEach(seance => {
         if (seance.jour) {
@@ -504,7 +504,7 @@ function obtenirHeuresSeance(dateStr) {
         seances = obtenirSeancesJour(dateStr);
     } else {
         // Fallback : lecture directe
-        const seancesCompletes = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
+        const seancesCompletes = db.getSync('seancesCompletes', {});
         seances = seancesCompletes[dateStr] || [];
     }
 
@@ -514,7 +514,7 @@ function obtenirHeuresSeance(dateStr) {
         // Pour les jours de cours sans séances définies, utiliser valeur par défaut
         const infoJour = obtenirInfosJourCalendrier(dateStr);
         if (infoJour && (infoJour.statut === 'cours' || infoJour.statut === 'reprise')) {
-            const formatHoraire = localStorage.getItem('formatHoraire');
+            const formatHoraire = db.getSync('formatHoraire', null);
             const heuresDefaut = formatHoraire === '1x4' ? 4 : 2;
             console.log(`⚠️ Pas de séances définies pour ce jour de cours, utilisation de ${heuresDefaut}h par défaut`);
             return heuresDefaut;
@@ -549,7 +549,7 @@ function obtenirHeuresSeance(dateStr) {
         else {
             console.warn('⚠️ Format de séance non reconnu:', seance);
             // Utiliser une valeur par défaut
-            const formatHoraire = localStorage.getItem('formatHoraire');
+            const formatHoraire = db.getSync('formatHoraire', null);
             totalHeures = formatHoraire === '1x4' ? 4 : 2;
         }
     });
@@ -585,7 +585,7 @@ function calculerNombreSeances(dateJusqua) {
     } else {
         // Fallback : lecture directe
         console.warn('⚠️ obtenirSeancesCompletes non disponible, lecture directe');
-        seances = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
+        seances = db.getSync('seancesCompletes', {});
     }
 
     if (!seances || Object.keys(seances).length === 0) {
@@ -663,7 +663,7 @@ function validerDateSaisie(dateStr) {
  * Vérifie si une date est verrouillée
  */
 function estDateVerrouillee(dateStr) {
-    const datesVerrouillees = JSON.parse(localStorage.getItem('datesVerrouillees') || '[]');
+    const datesVerrouillees = db.getSync('datesVerrouillees', []);
     return datesVerrouillees.includes(dateStr);
 }
 
@@ -671,7 +671,7 @@ function estDateVerrouillee(dateStr) {
  * Bascule le verrouillage d'une date
  */
 function basculerVerrouillageDate(dateStr) {
-    let datesVerrouillees = JSON.parse(localStorage.getItem('datesVerrouillees') || '[]');
+    let datesVerrouillees = db.getSync('datesVerrouillees', []);
 
     const index = datesVerrouillees.indexOf(dateStr);
     if (index > -1) {
@@ -682,7 +682,7 @@ function basculerVerrouillageDate(dateStr) {
         console.log('🔒 Date verrouillée:', dateStr);
     }
 
-    localStorage.setItem('datesVerrouillees', JSON.stringify(datesVerrouillees));
+    db.setSync('datesVerrouillees', datesVerrouillees);
     initialiserSaisiePresences();
 }
 
@@ -693,8 +693,8 @@ function verifierConfigurationFormatHoraire() {
     const alerteDiv = document.getElementById('alerteFormatHoraire');
     if (!alerteDiv) return;
 
-    const formatHoraire = localStorage.getItem('formatHoraire');
-    const seancesHoraire = JSON.parse(localStorage.getItem('seancesHoraire') || '[]');
+    const formatHoraire = db.getSync('formatHoraire', null);
+    const seancesHoraire = db.getSync('seancesHoraire', []);
 
     if (!formatHoraire || seancesHoraire.length === 0) {
         alerteDiv.style.display = 'block';
@@ -764,7 +764,7 @@ function initialiserSaisiePresences() {
 
     // Restaurer la valeur de recherche sauvegardée (persistance lors de la navigation)
     const recherche = document.getElementById('recherche-saisie-presences');
-    const termeRecherche = localStorage.getItem('recherchePresences') || '';
+    const termeRecherche = db.getSync('recherchePresences', '');
     if (recherche && termeRecherche) {
         recherche.value = termeRecherche;
         filtrerTableauPresences();
@@ -802,7 +802,7 @@ function mettreAJourEnteteDateSeance(dateStr) {
     const rangSeance = obtenirRangSeanceDansSemaine(dateStr);
 
     // Récupérer le groupe depuis seancesCompletes
-    const seancesCompletes = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
+    const seancesCompletes = db.getSync('seancesCompletes', {});
     const seancesDuJour = seancesCompletes[dateStr];
     let groupePrefix = '';
     if (seancesDuJour && seancesDuJour.length > 0 && seancesDuJour[0].groupe) {
@@ -888,7 +888,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
 
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const presences = JSON.parse(localStorage.getItem('presences') || '[]');
+    const presences = db.getSync('presences', []);
 
     let etudiantsFiltres = etudiants;
 
@@ -1127,7 +1127,7 @@ function enregistrerPresences() {
     const groupeFiltre = selectGroupe ? selectGroupe.value : '';
 
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    let presences = JSON.parse(localStorage.getItem('presences') || '[]');
+    let presences = db.getSync('presences', []);
 
     // Filtrer les étudiants si un groupe est sélectionné
     let etudiantsATraiter = etudiants;
@@ -1243,7 +1243,7 @@ function calculerTotalHeuresPresence(da, dateActuelle) {
  */
 function calculerTauxAssiduite(da, dateActuelle, heuresSeanceActuelle) {
     // Utiliser les indices sauvegardés qui tiennent compte des séances facultatives
-    const indices = JSON.parse(localStorage.getItem('indicesAssiduite') || '{}');
+    const indices = db.getSync('indicesAssiduite', {});
 
     if (indices.sommatif && indices.sommatif[da] !== undefined) {
         // Retourner l'indice sommatif sauvegardé (déjà calculé avec logique facultative)
@@ -1586,7 +1586,7 @@ function ouvrirSaisiePresence(date) {
  * Obtient la dernière date de saisie (pour statistiques)
  */
 function obtenirDerniereDataSaisie(da = null) {
-    const presences = JSON.parse(localStorage.getItem('presences') || '[]');
+    const presences = db.getSync('presences', []);
 
     if (presences.length === 0) {
         return null;
@@ -1630,7 +1630,7 @@ function filtrerTableauPresences() {
     const terme = recherche.value.toLowerCase().trim();
 
     // Sauvegarder la valeur de recherche pour la persistance lors de la navigation
-    localStorage.setItem('recherchePresences', terme);
+    db.setSync('recherchePresences', terme);
 
     const tbody = document.getElementById('tbody-saisie-presences');
     if (!tbody) return;
