@@ -55,7 +55,26 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('📦 Modules chargés : 01-config, 02-navigation');
 
     // ===============================
-    // 0. GÉNÉRATION DYNAMIQUE DES BULLES D'APPRENTISSAGE
+    // 0. ÉCOUTER LA SYNCHRONISATION IndexedDB
+    // ===============================
+    // Recharger les données quand la synchronisation IndexedDB → localStorage est terminée
+    window.addEventListener('db-ready', function(event) {
+        console.log('🔄 [Main] Données synchronisées, rechargement...');
+
+        // Recharger les données de toutes les sections affichées
+        if (typeof chargerInfosCours === 'function') {
+            chargerInfosCours();
+        }
+        if (typeof chargerListeEtudiants === 'function') {
+            chargerListeEtudiants();
+        }
+        if (typeof afficherTableauProductions === 'function') {
+            afficherTableauProductions();
+        }
+    });
+
+    // ===============================
+    // 1. GÉNÉRATION DYNAMIQUE DES BULLES D'APPRENTISSAGE
     // ===============================
     console.log('🎨 Génération des bulles d\'apprentissage...');
 
