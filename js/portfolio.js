@@ -83,7 +83,7 @@ function selectionnerArtefactsSelonModalite(artefactsRemisAvecNote, nombreAReten
 function chargerPortfolioEleveDetail(da) {
     try {
         // Récupérer les données
-        const productions = JSON.parse(localStorage.getItem('productions') || '[]');
+        const productions = db.getSync('productions', []);
         const portfolio = productions.find(p => p.type === 'portfolio');
 
         if (!portfolio) {
@@ -96,15 +96,15 @@ function chargerPortfolioEleveDetail(da) {
         const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
         // Récupérer les évaluations de cet élève
-        const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees') || '[]');
+        const evaluations = db.getSync('evaluationsSauvegardees', []);
         const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
 
         // Récupérer les sélections de portfolio
-        const selectionsPortfolios = JSON.parse(localStorage.getItem('portfoliosEleves') || '{}');
+        const selectionsPortfolios = db.getSync('portfoliosEleves', {});
         const selectionEleve = selectionsPortfolios[da]?.[portfolio.id] || { artefactsRetenus: [] };
 
         // ✅ Configuration depuis modalitesEvaluation (avec fallback sur portfolio.regles)
-        const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const modalites = db.getSync('modalitesEvaluation', {});
         const configPortfolio = modalites.configPAN?.portfolio || {};
 
         // Lire depuis nouvelle source (Phase 3), sinon ancienne source (rétrocompatibilité)
@@ -186,7 +186,7 @@ function chargerPortfolioEleveDetail(da) {
                     auto: true, // Flag pour indiquer sélection automatique
                     modalite: methodeSelection // Tracer quelle modalité a été utilisée
                 };
-                localStorage.setItem('portfoliosEleves', JSON.stringify(selectionsPortfolios));
+                db.setSync('portfoliosEleves', selectionsPortfolios);
 
                 // 🔄 Recalculer les indices C et P après sélection automatique
                 if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -330,7 +330,7 @@ function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
         }
 
         // Sauvegarder la sélection
-        let selectionsPortfolios = JSON.parse(localStorage.getItem('portfoliosEleves') || '{}');
+        let selectionsPortfolios = db.getSync('portfoliosEleves', {});
         if (!selectionsPortfolios[da]) {
             selectionsPortfolios[da] = {};
         }
@@ -340,7 +340,7 @@ function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
             dateSelection: new Date().toISOString()
         };
 
-        localStorage.setItem('portfoliosEleves', JSON.stringify(selectionsPortfolios));
+        db.setSync('portfoliosEleves', selectionsPortfolios);
 
         // 🔄 Recalculer les indices C et P après modification de sélection
         if (typeof calculerEtStockerIndicesCP === 'function') {
@@ -445,13 +445,13 @@ function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
  *
  * @returns {string} - 'SOM' (sommative traditionnelle) ou 'PAN' (pratique alternative)
  *
- * SOURCE : localStorage.modalitesEvaluation.pratique
+ * SOURCE : db.getSync('modalitesEvaluation').pratique
  * - 'sommative' → retourne 'SOM'
  * - 'alternative' → retourne 'PAN'
  * - Par défaut (si non configuré) → retourne 'PAN' (rétrocompatibilité)
  */
 function obtenirModePratique() {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     return config.pratique === 'sommative' ? 'SOM' : 'PAN';
 }
 
@@ -510,7 +510,7 @@ function convertirNiveauEnPourcentage(niveau, echelleId = null) {
     };
 
     // Tenter de récupérer depuis l'échelle configurée
-    const echelles = JSON.parse(localStorage.getItem('echellesPerformance') || '[]');
+    const echelles = db.getSync('echellesPerformance', []);
     let echelle;
 
     if (echelleId) {
@@ -536,7 +536,7 @@ function convertirNiveauEnPourcentage(niveau, echelleId = null) {
    SOURCE UNIQUE (Single Source of Truth):
    - Calcule l'indice C (Complétion) pour tous les étudiants
    - Calcule l'indice P (Performance) pour tous les étudiants
-   - Stocke dans localStorage.indicesCP avec historique
+   - Stocke dans db.setSync('indicesCP') avec historique
    - À appeler après chaque évaluation ou modification de sélection
 
    SUPPORT UNIVERSEL SOM ET PAN :
@@ -630,7 +630,7 @@ function calculerEtStockerIndicesCP() {
         // ========================================
 
         // Lire la configuration PAN pour affichage explicite et découplage
-        const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+        const modalites = db.getSync('modalitesEvaluation', {});
         const configPortfolio = modalites.configPAN?.portfolio || {};
         const decouplerPR = configPortfolio.decouplerPR || false;
 
