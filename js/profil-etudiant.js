@@ -7081,35 +7081,26 @@ function sauvegarderPreferencesRapport(da) {
  * @param {string} da - Numéro DA
  */
 function restaurerPreferencesRapport(da) {
-    const preferencesJson = db.getSync('preferencesRapport', null);
+    // db.getSync retourne déjà l'objet parsé, pas besoin de JSON.parse
+    const preferences = db.getSync('preferencesRapport', null);
 
-    try {
-        let preferences = null;
-        if (preferencesJson) {
-            preferences = JSON.parse(preferencesJson);
+    // Restaurer les checkboxes de sections
+    const sections = ['identification', 'assiduite', 'completion', 'performance', 'apprentissage', 'interventions', 'date'];
+    sections.forEach(section => {
+        const checkbox = document.getElementById(`inclure-${section}-${da}`);
+        if (checkbox && preferences && preferences[section] !== undefined) {
+            checkbox.checked = preferences[section];
         }
+    });
 
-        // Restaurer les checkboxes de sections
-        const sections = ['identification', 'assiduite', 'completion', 'performance', 'apprentissage', 'interventions', 'date'];
-        sections.forEach(section => {
-            const checkbox = document.getElementById(`inclure-${section}-${da}`);
-            if (checkbox && preferences && preferences[section] !== undefined) {
-                checkbox.checked = preferences[section];
-            }
-        });
-
-        // Restaurer la checkbox de détails
-        const checkboxDetails = document.getElementById(`afficher-details-${da}`);
-        if (checkboxDetails && preferences && preferences.afficherDetails !== undefined) {
-            checkboxDetails.checked = preferences.afficherDetails;
-        }
-
-        // Générer automatiquement le rapport après restauration des préférences
-        genererEtAfficherRapport(da);
-
-    } catch (error) {
-        console.error('Erreur lors de la restauration des préférences:', error);
+    // Restaurer la checkbox de détails
+    const checkboxDetails = document.getElementById(`afficher-details-${da}`);
+    if (checkboxDetails && preferences && preferences.afficherDetails !== undefined) {
+        checkboxDetails.checked = preferences.afficherDetails;
     }
+
+    // Générer automatiquement le rapport après restauration des préférences
+    genererEtAfficherRapport(da);
 }
 
 // ============================================
