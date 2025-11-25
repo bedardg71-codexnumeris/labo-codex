@@ -1381,7 +1381,7 @@ function supprimerGroupeFictif() {
             let tousEtudiants = db.getSync(cle, []);
             const nbAvant = tousEtudiants.length;
             tousEtudiants = tousEtudiants.filter(e => e.groupe !== '9999');
-            db.setSync(cle,tousEtudiants));
+            db.setSync(cle, tousEtudiants);
             nbEtudiantsSupprimes += (nbAvant - tousEtudiants.length);
         });
         console.log(`   ✅ ${nbEtudiantsSupprimes} étudiants supprimés (tous modes)`);
@@ -1413,7 +1413,7 @@ function supprimerGroupeFictif() {
                     }
                 });
             }
-            db.setSync(cle,presences));
+            db.setSync(cle, presences);
         });
         console.log(`   ✅ ${nbPresencesSupprimes} entrées de présences supprimées (tous modes)`);
 
@@ -1437,7 +1437,7 @@ function supprimerGroupeFictif() {
                     }
                 });
             }
-            db.setSync(cle,indicesAssiduite));
+            db.setSync(cle, indicesAssiduite);
         });
 
         // 4b. indicesAssiduiteDetailles (nouveau format détaillé)
@@ -1450,7 +1450,7 @@ function supprimerGroupeFictif() {
                     nbIndicesASupprimes++;
                 }
             });
-            db.setSync(cle,indicesAssiduiteDetailles));
+            db.setSync(cle, indicesAssiduiteDetailles);
         });
         console.log(`   ✅ ${nbIndicesASupprimes} indices A supprimés (tous modes)`);
 
@@ -1464,7 +1464,7 @@ function supprimerGroupeFictif() {
                     nbIndicesCPSupprimes++;
                 }
             });
-            db.setSync(cle,indicesCP));
+            db.setSync(cle, indicesCP);
         });
         console.log(`   ✅ ${nbIndicesCPSupprimes} indices C/P supprimés (tous modes)`);
 
@@ -1479,7 +1479,7 @@ function supprimerGroupeFictif() {
                     nbPortfoliosSupprimes++;
                 }
             });
-            db.setSync(cle,portfoliosEleves));
+            db.setSync(cle, portfoliosEleves);
         });
         console.log(`   ✅ ${nbPortfoliosSupprimes} portfolios supprimés (tous modes)`);
 
