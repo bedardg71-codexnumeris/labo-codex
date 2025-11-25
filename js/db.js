@@ -389,6 +389,39 @@
                 ready: this.ready
             };
         }
+
+        // ============================================
+        // MÉTHODES SYNCHRONES (Migration progressive)
+        // ============================================
+        // Ces méthodes utilisent localStorage de manière synchrone
+        // pour permettre une migration progressive sans tout casser
+
+        /**
+         * Lecture synchrone (utilise toujours localStorage)
+         * @param {string} key - Clé de la donnée
+         * @param {*} defaultValue - Valeur par défaut
+         * @returns {*} Valeur stockée ou valeur par défaut
+         */
+        getSync(key, defaultValue = null) {
+            return this._getLocalStorage(key, defaultValue);
+        }
+
+        /**
+         * Écriture synchrone (utilise toujours localStorage)
+         * @param {string} key - Clé de la donnée
+         * @param {*} value - Valeur à stocker
+         */
+        setSync(key, value) {
+            this._setLocalStorage(key, value);
+        }
+
+        /**
+         * Suppression synchrone (utilise toujours localStorage)
+         * @param {string} key - Clé à supprimer
+         */
+        removeSync(key) {
+            this._removeLocalStorage(key);
+        }
     }
 
     // ============================================
