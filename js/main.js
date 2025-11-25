@@ -24,7 +24,7 @@
  * @returns {string} - HTML du badge avec classes CSS
  */
 window.genererBadgePratique = function(type, compact = false) {
-    const config = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+    const config = db.getSync('modalitesEvaluation', {});
     const typePAN = config.typePAN || 'maitrise';
 
     let texte = '';
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!container) return;
 
         // Récupérer le nombre d'étudiants (groupeEtudiants est la clé correcte)
-        const listeEtudiants = JSON.parse(localStorage.getItem('groupeEtudiants') || '[]');
+        const listeEtudiants = db.getSync('groupeEtudiants', []);
         const nbEtudiants = listeEtudiants.length || 10; // Par défaut 10 si pas d'étudiants
 
         console.log(`   → Création de ${nbEtudiants} bulles (1 par étudiant)`);

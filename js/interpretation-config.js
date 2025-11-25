@@ -97,31 +97,20 @@ const DESCRIPTIONS_SEUILS = {
    =============================== */
 
 /**
- * Charge les seuils depuis localStorage ou retourne les valeurs par défaut
+ * Charge les seuils depuis db.getSync ou retourne les valeurs par défaut
  * @returns {Object} - Objet contenant tous les seuils configurés
  */
 function chargerSeuilsInterpretation() {
-    const seuilsSauvegardes = localStorage.getItem('seuilsInterpretation');
-
-    if (seuilsSauvegardes) {
-        try {
-            return JSON.parse(seuilsSauvegardes);
-        } catch (e) {
-            console.warn('⚠️ Erreur lors du chargement des seuils, utilisation des valeurs par défaut');
-            return SEUILS_PAR_DEFAUT;
-        }
-    }
-
-    return SEUILS_PAR_DEFAUT;
+    return db.getSync('seuilsInterpretation', SEUILS_PAR_DEFAUT);
 }
 
 /**
- * Sauvegarde les seuils dans localStorage
+ * Sauvegarde les seuils dans db.setSync
  * @param {Object} seuils - Objet contenant les seuils à sauvegarder
  */
 function sauvegarderSeuilsInterpretation(seuils) {
     try {
-        localStorage.setItem('seuilsInterpretation', JSON.stringify(seuils));
+        db.setSync('seuilsInterpretation', seuils);
         console.log('✅ Seuils d\'interprétation sauvegardés');
         return true;
     } catch (e) {

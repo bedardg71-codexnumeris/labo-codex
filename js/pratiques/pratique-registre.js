@@ -113,13 +113,13 @@ function enregistrerPratique(id, instance) {
  */
 function obtenirIdPratiqueActive() {
     try {
-        const modalites = localStorage.getItem('modalitesEvaluation');
-        if (!modalites) {
+        const config = db.getSync('modalitesEvaluation', null);
+
+        if (!config) {
             console.warn('Aucune configuration trouvée dans modalitesEvaluation');
             return null;
         }
 
-        const config = JSON.parse(modalites);
         const idPratique = config.pratique;
 
         if (!idPratique) {
