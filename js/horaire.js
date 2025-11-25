@@ -375,6 +375,7 @@ function genererSeancesCompletes() {
  * @returns {Object} - Séances complètes du trimestre
  */
 function obtenirSeancesCompletes() {
+    // db.getSync retourne déjà l'objet parsé, pas besoin de JSON.parse
     const seancesCompletes = db.getSync('seancesCompletes', null);
 
     if (!seancesCompletes) {
@@ -382,7 +383,7 @@ function obtenirSeancesCompletes() {
         return genererSeancesCompletes();
     }
 
-    return JSON.parse(seancesCompletes);
+    return seancesCompletes;
 }
 
 /**
