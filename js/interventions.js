@@ -61,8 +61,8 @@
  * @returns {Array} Liste des interventions
  */
 function obtenirInterventions() {
-    const interventions = db.getSync('interventions', null);
-    return interventions ? JSON.parse(interventions) : [];
+    // db.getSync retourne déjà l'objet parsé, pas besoin de JSON.parse
+    return db.getSync('interventions', []);
 }
 
 /**
