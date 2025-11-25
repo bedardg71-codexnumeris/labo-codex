@@ -5012,8 +5012,8 @@ function ouvrirBanqueAvecRecherche() {
 window.filtrerBanqueEvaluations = filtrerBanqueEvaluations;
 window.ouvrirBanqueAvecRecherche = ouvrirBanqueAvecRecherche;
 window.modifierEvaluationParId = modifierEvaluation; // Export sous un nom différent pour éviter conflit avec liste-evaluations.js
-window.gererCheckboxJetonDelai = gererCheckboxJetonDelai;
-window.gererCheckboxJetonReprise = gererCheckboxJetonReprise;
+// window.gererCheckboxJetonDelai = gererCheckboxJetonDelai; // FIXME: Fonctions non définies dans ce fichier
+// window.gererCheckboxJetonReprise = gererCheckboxJetonReprise; // FIXME: Fonctions non définies dans ce fichier
 
 // ============================================
 // FONCTIONS POUR JETONS PERSONNALISÉS

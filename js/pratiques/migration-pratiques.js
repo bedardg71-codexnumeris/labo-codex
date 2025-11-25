@@ -47,19 +47,11 @@
             return false;
         }
 
-        // Lire la configuration actuelle
-        const modalitesJSON = db.getSync('modalitesEvaluation', null);
-        if (!modalitesJSON) {
+        // Lire la configuration actuelle (db.getSync retourne déjà un objet parsé)
+        const config = db.getSync('modalitesEvaluation', null);
+        if (!config) {
             console.log('ℹ️ Aucune configuration à migrer');
             db.setSync(CLE_MIGRATION_EFFECTUEE, 'true');
-            return false;
-        }
-
-        let config;
-        try {
-            config = JSON.parse(modalitesJSON);
-        } catch (error) {
-            console.error('❌ Erreur de lecture de la configuration:', error);
             return false;
         }
 
