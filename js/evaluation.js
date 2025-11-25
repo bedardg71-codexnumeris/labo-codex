@@ -3200,8 +3200,9 @@ function verifierEtChargerEvaluationExistante() {
 
         // Recalculer la note
         setTimeout(() => {
-            if (typeof calculerNoteTotale === 'function') {
-                calculerNoteTotale();
+            if (typeof calculerNote === 'function') {
+                calculerNote();
+                console.log('✅ Note finale recalculée après restauration critères');
             }
         }, 100);
     }, 300);
@@ -3928,11 +3929,11 @@ function modifierEvaluation(evaluationId) {
                     console.log(`✅ ${Object.keys(evaluation.donneesAlgorithmiques).length} critères algorithmiques restaurés`);
                 }
 
-                // Forcer le recalcul de la note
+                // Forcer le recalcul de la note après restauration données algorithmiques
                 setTimeout(() => {
-                    if (typeof calculerNoteTotale === 'function') {
-                        calculerNoteTotale();
-                        console.log('✅ Note finale recalculée');
+                    if (typeof calculerNote === 'function') {
+                        calculerNote();
+                        console.log('✅ Note finale recalculée après restauration données algorithmiques');
                     }
                 }, 200);
             }
