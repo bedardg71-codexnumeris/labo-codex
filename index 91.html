@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 91 - Développement avancé</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=2025112527">
+    <link rel="stylesheet" href="styles.css?v=2025112604">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -5850,6 +5850,39 @@ Exemple :
 
                                     <h2 class="modal-titre">Créer une nouvelle pratique d'évaluation</h2>
 
+                                    <!-- Message de bienvenue Primo -->
+                                    <div class="cc-badge" style="margin: 20px 0; padding: 20px; background: white; border: 1px solid var(--gris-leger); border-radius: 6px;">
+                                        <div style="display: flex; align-items: flex-start; gap: 15px;">
+                                            <img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg"
+                                                 alt="CC BY-SA 4.0"
+                                                 style="width: 88px; height: 31px; flex-shrink: 0; margin-top: 4px;">
+
+                                            <div style="flex: 1;">
+                                                <p style="margin: 0 0 12px 0; font-size: 1.05rem; font-weight: 600; color: var(--bleu-principal);">
+                                                    Bonjour! Je suis Primo, votre assistant de création de pratique
+                                                </p>
+
+                                                <p style="margin: 0 0 12px 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
+                                                    Je vais vous accompagner dans le réglage des paramètres de base de votre pratique. Plus tard,
+                                                    vous pourrez vous-même revoir ces choix ou en faire d'autres dans l'onglet Réglages.
+                                                    Chaque section est consacrée à un aspect précis de votre pratique.
+                                                </p>
+
+                                                <p style="margin: 0 0 12px 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
+                                                    Ce que je vais vous proposer repose sur des pratiques et du matériel déjà existant qui a été
+                                                    conçu par d'autres utilisateurs et utilisatrices comme vous. Vous y trouverez des grilles d'évaluation,
+                                                    des niveaux de performance, des cartouches de rétroaction, etc. Ce matériel pédagogique vous est
+                                                    proposé comme point de départ, mais vous pourrez l'ajuster à votre guise selon votre usage.
+                                                </p>
+
+                                                <p style="margin: 0; line-height: 1.6; font-size: 0.85rem; color: var(--gris-moyen); font-style: italic;">
+                                                    Ce matériel est partagé gracieusement sous licence <strong>CC BY-SA 4.0</strong>.
+                                                    N'hésitez pas à faire de même!
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <!-- Indicateur de progression -->
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
                                         <div>
@@ -5947,19 +5980,33 @@ Exemple :
 
                                         <!-- ÉTAPE 3: Structure des évaluations -->
                                         <div class="wizard-step" data-step="3" style="display: none;">
+                                            <p style="color: var(--gris-moyen); font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;">
+                                                Choisissez comment vous organisez vos évaluations durant la session.
+                                                Chaque type correspond à une approche pédagogique différente.
+                                            </p>
+
                                             <div class="groupe-form">
                                                 <label>Type de structure *</label>
                                                 <select id="wizard-structure-type" class="controle-form" onchange="afficherConfigStructure()">
                                                     <option value="">Choisir un type...</option>
-                                                    <option value="standards">Standards (numérotés, avec terminaux)</option>
-                                                    <option value="portfolio">Portfolio (artefacts, sélection N meilleurs)</option>
-                                                    <option value="evaluations_discretes">Évaluations discrètes (examen, travaux, etc.)</option>
-                                                    <option value="specifications">Spécifications (objectifs pass/fail)</option>
+                                                    <option value="portfolio">Portfolio (artefacts sans pondération individuelle)</option>
+                                                    <option value="standards">Notation par maîtrise – SBG (standards numérotés)</option>
+                                                    <option value="evaluations_discretes">Évaluations traditionnelles (examens, travaux avec pondération)</option>
+                                                    <option value="specifications">Notation par contrat – Spec Grading (objectifs à atteindre)</option>
                                                 </select>
                                             </div>
 
                                             <!-- Configuration Standards -->
                                             <div id="wizard-config-standards" style="display: none;">
+                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                                                    <p style="margin: 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
+                                                        <strong>Notation par maîtrise (Standards-Based Grading)</strong> :
+                                                        Les étudiants progressent à travers des standards numérotés qui représentent
+                                                        des compétences spécifiques. Les standards terminaux sont ceux qui doivent
+                                                        obligatoirement être maîtrisés pour réussir le cours.
+                                                    </p>
+                                                </div>
+
                                                 <div class="groupe-form">
                                                     <label>Nombre de standards</label>
                                                     <input type="number" id="wizard-nb-standards" class="controle-form" min="1" max="20" value="10">
@@ -5972,6 +6019,15 @@ Exemple :
 
                                             <!-- Configuration Portfolio -->
                                             <div id="wizard-config-portfolio" style="display: none;">
+                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                                                    <p style="margin: 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
+                                                        <strong>Portfolio</strong> :
+                                                        Approche fréquente en littérature avec ELLAC (Écrire, Lire, Littérature, Art, Culture).
+                                                        Chaque artefact qui compose le portfolio n'a pas de pondération propre.
+                                                        C'est le portfolio conteneur qui a une pondération dans la note finale.
+                                                    </p>
+                                                </div>
+
                                                 <div class="groupe-form">
                                                     <label>Mode de sélection</label>
                                                     <select id="wizard-portfolio-selection" class="controle-form">
@@ -5991,6 +6047,15 @@ Exemple :
 
                                             <!-- Configuration Évaluations discrètes -->
                                             <div id="wizard-config-evaluations" style="display: none;">
+                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                                                    <p style="margin: 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
+                                                        <strong>Évaluations traditionnelles</strong> :
+                                                        Approche classique avec examens, travaux, présentations, etc.
+                                                        Chaque évaluation a sa propre pondération (qui doit totaliser 100%).
+                                                        La note finale est la moyenne pondérée de toutes les évaluations.
+                                                    </p>
+                                                </div>
+
                                                 <p style="color: var(--gris-moyen); font-size: 0.9rem; margin-bottom: 15px;">
                                                     Définissez vos évaluations avec leur pondération
                                                 </p>
@@ -6000,6 +6065,15 @@ Exemple :
 
                                             <!-- Configuration Spécifications -->
                                             <div id="wizard-config-specifications" style="display: none;">
+                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                                                    <p style="margin: 0 0 10px 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
+                                                        <strong>Notation par contrat (Specification Grading)</strong> :
+                                                        Les étudiants doivent atteindre un certain nombre d'objectifs pour obtenir une note spécifique.
+                                                        Par exemple: 8 objectifs atteints = 80%, 9 objectifs = 90%, 10 objectifs = 100%.
+                                                        Approche binaire (objectif atteint ou non) qui simplifie l'évaluation.
+                                                    </p>
+                                                </div>
+
                                                 <p style="color: var(--gris-moyen); font-size: 0.9rem;">
                                                     Les spécifications seront configurées manuellement dans le JSON après création.
                                                     Structure de base créée automatiquement.
@@ -6096,15 +6170,25 @@ Exemple :
 
                                         <!-- ÉTAPE 6: Gestion des critères -->
                                         <div class="wizard-step" data-step="6" style="display: none;">
+                                            <!-- Introduction de l'étape -->
+                                            <p style="color: var(--gris-moyen); font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;">
+                                                Les critères d'évaluation définissent sur quoi vous évaluez vos étudiants
+                                                (ex: Structure, Rigueur, Plausibilité, Nuance, Français).
+                                            </p>
+
                                             <!-- Message important sur les patterns -->
                                             <div style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
                                                 <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #856404;">
-                                                    ⚠️ Important pour le suivi des apprentissages
+                                                    Recommandation de Primo
                                                 </h4>
-                                                <p style="margin: 0; line-height: 1.6; color: #856404;">
-                                                    Pour détecter les patterns et les défis récurrents, vous devez utiliser
-                                                    <strong>les mêmes critères dans tous les travaux, durant toute la session</strong>.
-                                                    C'est également le cas avec la taxonomie SOLO et les niveaux RàI.
+                                                <p style="margin: 0 0 10px 0; line-height: 1.6; color: #856404;">
+                                                    Pour que le système puisse détecter les <strong>patterns</strong> (tendances récurrentes)
+                                                    et calculer les <strong>niveaux RàI</strong> (Réponse à l'Intervention), il est fortement recommandé d'utiliser
+                                                    <strong>les mêmes critères dans tous vos travaux, durant toute la session</strong>.
+                                                </p>
+                                                <p style="margin: 0; line-height: 1.6; color: #856404; font-size: 0.85rem;">
+                                                    Exemples de patterns détectables: «Défis persistants en Structure», «Excellence constante en Rigueur»,
+                                                    «Progrès significatifs en Nuance».
                                                 </p>
                                             </div>
 
@@ -9766,8 +9850,11 @@ Exemple :
     <script src="js/pratiques/pratiques-predefines.js?v=2025112602"></script>
     <script src="js/pratiques/pratique-manager.js?v=2025112501"></script>
 
+    <!-- Licence Creative Commons -->
+    <script src="js/cc-license.js?v=2025112601"></script>
+
     <!-- Interface de gestion des pratiques configurables -->
-    <script src="js/pratiques.js?v=2025112541"></script>
+    <script src="js/pratiques.js?v=2025112605"></script>
 
     <script src="js/portfolio.js?v=2025112522"></script>
     <script src="js/saisie-presences.js?v=2025111202"></script>
