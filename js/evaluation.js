@@ -247,6 +247,9 @@ function chargerGrillesDansSelect() {
  *
  * CLÉ LOCALSTORAGE:
  * - 'echellesTemplates' : Array des échelles créées par l'utilisateur
+ *
+ * NOUVEAU (Beta 92): Support pratiques configurables
+ * Si une pratique configurable est active, son échelle est ajoutée à la liste
  */
 function chargerEchellePerformance() {
     const echelles = db.getSync('echellesTemplates', []);
@@ -254,8 +257,40 @@ function chargerEchellePerformance() {
 
     if (!select) return;
 
+    // NOUVEAU: Vérifier si une pratique configurable est active avec une échelle définie
+    let echellePratique = null;
+    let pratiqueId = null;
+
+    if (window.PratiqueManager) {
+        // NOUVEAU Beta 91: Utiliser la pratique du cours actif
+        const coursActifId = getCoursActifId();
+        if (coursActifId) {
+            pratiqueId = getPratiqueCours(coursActifId);
+        } else {
+            // Fallback: utiliser la configuration globale
+            const modalites = db.getSync('modalitesEvaluation', {});
+            pratiqueId = modalites.pratique || 'pan-maitrise';
+        }
+
+        // Si ce n'est pas une pratique codée en dur, charger l'échelle de la pratique
+        if (pratiqueId && pratiqueId !== 'pan-maitrise' && pratiqueId !== 'sommative') {
+            const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+            const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
+
+            if (pratiqueData && pratiqueData.config && pratiqueData.config.echelle) {
+                echellePratique = {
+                    id: `pratique-${pratiqueId}`,
+                    nom: `${pratiqueData.config.nom} (Pratique active)`,
+                    niveaux: pratiqueData.config.echelle.niveaux || [],
+                    type: pratiqueData.config.echelle.type || 'niveaux',
+                    source: 'pratique'
+                };
+            }
+        }
+    }
+
     // SÉCURITÉ: Vérifier qu'il existe au moins une échelle
-    if (!echelles || echelles.length === 0) {
+    if ((!echelles || echelles.length === 0) && !echellePratique) {
         console.error('❌ Aucune échelle de performance configurée');
         select.innerHTML = '<option value="">⚠️ Aucune échelle configurée - Aller dans Matériel › Niveaux de performance</option>';
         document.getElementById('noteProduction1').textContent = '--';
@@ -265,20 +300,38 @@ function chargerEchellePerformance() {
 
     // Remplir le select avec toutes les échelles disponibles
     select.innerHTML = '<option value="">-- Choisir une échelle --</option>';
-    echelles.forEach(echelle => {
-        const nomEchappe = (echelle.nom || 'Échelle sans nom').replace(/[<>&"']/g, c => ({
+
+    // NOUVEAU: Ajouter l'échelle de la pratique en premier (si disponible)
+    if (echellePratique) {
+        const nbNiveaux = echellePratique.niveaux?.length || 0;
+        const nomEchappe = echellePratique.nom.replace(/[<>&"']/g, c => ({
             '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;'
         }[c]));
-        const nbNiveaux = echelle.niveaux?.length || 0;
-        select.innerHTML += `<option value="${echelle.id}">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
-    });
+        select.innerHTML += `<option value="${echellePratique.id}" style="background: #e3f2fd; font-weight: 600;">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
+    }
 
-    // Si une seule échelle, la sélectionner automatiquement
-    if (echelles.length === 1) {
+    // Ajouter les échelles personnalisées
+    if (echelles && echelles.length > 0) {
+        echelles.forEach(echelle => {
+            const nomEchappe = (echelle.nom || 'Échelle sans nom').replace(/[<>&"']/g, c => ({
+                '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+            const nbNiveaux = echelle.niveaux?.length || 0;
+            select.innerHTML += `<option value="${echelle.id}">${nomEchappe} (${nbNiveaux} niveaux)</option>`;
+        });
+    }
+
+    // Sélection automatique
+    if (echellePratique) {
+        // Pré-sélectionner l'échelle de la pratique
+        select.value = echellePratique.id;
+    } else if (echelles.length === 1) {
+        // Si une seule échelle personnalisée, la sélectionner
         select.value = echelles[0].id;
     }
 
-    console.log('✅ Échelles de performance chargées:', echelles.length, 'échelle(s) disponible(s)');
+    const totalEchelles = (echelles?.length || 0) + (echellePratique ? 1 : 0);
+    console.log('✅ Échelles de performance chargées:', totalEchelles, 'échelle(s) disponible(s)', echellePratique ? '(dont pratique active)' : '');
 }
 
 /* ===============================
@@ -444,9 +497,28 @@ function cartoucheSelectionnee() {
 
     // CRITIQUE: Lire les niveaux depuis l'échelle sélectionnée (pas depuis la cartouche)
     // Cela permet d'utiliser des échelles avec plus ou moins de niveaux que la cartouche
+    // NOUVEAU (Beta 92): Support échelles de pratiques configurables
     const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = db.getSync('echellesTemplates', []);
-    const echelleSelectionnee = echelles.find(e => e.id === echelleId);
+    let echelleSelectionnee = null;
+
+    // Vérifier si c'est une échelle de pratique configurable
+    if (echelleId && echelleId.startsWith('pratique-')) {
+        const pratiqueId = echelleId.replace('pratique-', '');
+        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
+
+        if (pratiqueData && pratiqueData.config && pratiqueData.config.echelle) {
+            echelleSelectionnee = {
+                id: echelleId,
+                niveaux: pratiqueData.config.echelle.niveaux || [],
+                type: pratiqueData.config.echelle.type || 'niveaux'
+            };
+        }
+    } else {
+        // Échelle personnalisée classique
+        const echelles = db.getSync('echellesTemplates', []);
+        echelleSelectionnee = echelles.find(e => e.id === echelleId);
+    }
 
     // Fallback: Si pas d'échelle sélectionnée ou non trouvée, utiliser les niveaux de la cartouche
     const niveauxDisponibles = (echelleSelectionnee && echelleSelectionnee.niveaux)
@@ -1052,9 +1124,28 @@ function calculerNote() {
     if (!grille) return;
 
     // LECTURE DE L'ÉCHELLE SÉLECTIONNÉE (pas l'ancienne niveauxEchelle)
+    // NOUVEAU (Beta 92): Support échelles de pratiques configurables
     const echelleId = evaluationEnCours.echelleId || document.getElementById('selectEchelle1')?.value;
-    const echelles = db.getSync('echellesTemplates', []);
-    const echelleSelectionnee = echelles.find(e => e.id === echelleId);
+    let echelleSelectionnee = null;
+
+    // Vérifier si c'est une échelle de pratique configurable
+    if (echelleId && echelleId.startsWith('pratique-')) {
+        const pratiqueId = echelleId.replace('pratique-', '');
+        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
+
+        if (pratiqueData && pratiqueData.config && pratiqueData.config.echelle) {
+            echelleSelectionnee = {
+                id: echelleId,
+                niveaux: pratiqueData.config.echelle.niveaux || [],
+                type: pratiqueData.config.echelle.type || 'niveaux'
+            };
+        }
+    } else {
+        // Échelle personnalisée classique
+        const echelles = db.getSync('echellesTemplates', []);
+        echelleSelectionnee = echelles.find(e => e.id === echelleId);
+    }
 
     // SÉCURITÉ: Vérifier que l'échelle existe
     if (!echelleSelectionnee || !echelleSelectionnee.niveaux || echelleSelectionnee.niveaux.length === 0) {

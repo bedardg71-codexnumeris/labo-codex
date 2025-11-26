@@ -1457,9 +1457,177 @@ function initialiserModuleGrilles() {
  * - Moderniser les événements (remplacer onclick par addEventListener)
  * - Ajouter validation côté client plus robuste
  * - Permettre le glisser-déposer pour réorganiser les critères
- * - Export/Import de grilles au format JSON
+ * - ✅ Export/Import de grilles au format JSON (complété avec licence CC)
  * - Prévisualisation d'une grille avant utilisation
  */
+
+/* ===============================
+   EXPORT/IMPORT AVEC LICENCE CC
+   =============================== */
+
+/**
+ * Exporte les grilles de critères avec métadonnées Creative Commons
+ * Les exports incluent uniquement la structure des grilles et critères,
+ * JAMAIS les données d'étudiants ou les évaluations
+ *
+ * FONCTIONNEMENT:
+ * 1. Charge toutes les grilles depuis localStorage
+ * 2. Ajoute métadonnées CC BY-SA 4.0 (auteur, licence, version)
+ * 3. Génère nom de fichier avec watermark CC
+ * 4. Télécharge le fichier JSON
+ *
+ * FORMAT EXPORT:
+ * {
+ *   metadata: { licence, auteur_original, version, date, ... },
+ *   contenu: { grilles: [...] }
+ * }
+ */
+function exporterGrilles() {
+    const grilles = db.getSync('grillesTemplates', []);
+
+    if (grilles.length === 0) {
+        alert('Aucune grille à exporter.');
+        return;
+    }
+
+    // Emballer avec métadonnées CC
+    const donnees = ajouterMetadonnéesCC(
+        { grilles: grilles },
+        'grilles',
+        'Grilles de critères d\'évaluation'
+    );
+
+    // Générer nom de fichier avec watermark CC
+    const nomFichier = genererNomFichierCC(
+        'grilles',
+        'Grilles-criteres',
+        donnees.metadata.version
+    );
+
+    // Télécharger
+    const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nomFichier;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log('✅ Grilles exportées avec licence CC BY-SA 4.0');
+}
+
+/**
+ * Importe des grilles depuis un fichier JSON avec gestion CC
+ *
+ * FONCTIONNEMENT:
+ * 1. Lit le fichier JSON sélectionné
+ * 2. Vérifie et affiche la licence CC (si présente)
+ * 3. Valide la structure des données
+ * 4. Fusionne avec grilles existantes
+ * 5. Rafraîchit l'interface
+ *
+ * GESTION LICENCE:
+ * - Affiche badge CC si licence présente
+ * - Avertit si pas de licence (droit d'auteur classique)
+ * - Demande confirmation avant import
+ *
+ * @param {Event} event - Événement de changement du file input
+ */
+function importerGrilles(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const donnees = JSON.parse(e.target.result);
+
+            // Vérifier licence CC et afficher badge
+            const estCC = verifierLicenceCC(donnees);
+
+            let message = estCC ?
+                '<div style="margin-bottom: 15px;">' + genererBadgeCC(donnees.metadata) + '</div>' :
+                '';
+
+            message += '<p><strong>Voulez-vous importer ces grilles ?</strong></p>';
+
+            // Créer modal avec badge CC
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                        ${message}
+                        <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
+                            <button class="btn" onclick="this.closest('div[style*=fixed]').parentElement.remove()">Annuler</button>
+                            <button class="btn btn-confirmer" onclick="window.confirmerImportGrilles(${JSON.stringify(donnees).replace(/"/g, '&quot;')}); this.closest('div[style*=fixed]').parentElement.remove()">Importer</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Avertir si pas de licence CC
+            if (!estCC) {
+                avertirSansLicence(donnees);
+            }
+
+        } catch (error) {
+            console.error('Erreur lors de l\'import:', error);
+            alert('❌ Erreur lors de la lecture du fichier.\n' + error.message);
+        }
+    };
+    reader.readAsText(file);
+
+    // Réinitialiser l'input pour permettre le même fichier
+    event.target.value = '';
+}
+
+/**
+ * Confirme l'import et fusionne les grilles
+ * Fonction helper appelée depuis le modal de confirmation
+ */
+window.confirmerImportGrilles = function(donnees) {
+    try {
+        // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata)
+        const grillesImportees = donnees.contenu ?
+            donnees.contenu.grilles :
+            donnees.grilles || donnees;
+
+        if (!Array.isArray(grillesImportees)) {
+            throw new Error('Format invalide: grilles doit être un tableau');
+        }
+
+        // Charger grilles existantes
+        const grillesExistantes = db.getSync('grillesTemplates', []);
+
+        // Fusionner (remplacer si même ID, sinon ajouter)
+        grillesImportees.forEach(grille => {
+            const index = grillesExistantes.findIndex(g => g.id === grille.id);
+            if (index >= 0) {
+                grillesExistantes[index] = grille;
+            } else {
+                grillesExistantes.push(grille);
+            }
+        });
+
+        // Sauvegarder
+        db.setSync('grillesTemplates', grillesExistantes);
+
+        // Rafraîchir l'affichage
+        if (typeof afficherToutesLesGrillesCriteres === 'function') {
+            afficherToutesLesGrillesCriteres();
+        }
+
+        alert(`✅ Import réussi !\n\n${grillesImportees.length} grille(s) importée(s).`);
+        console.log('✅ Grilles importées:', grillesImportees.length);
+
+    } catch (error) {
+        console.error('Erreur lors de l\'import:', error);
+        alert('❌ Erreur lors de l\'import.\n' + error.message);
+    }
+};
 
 /* ===============================
    EXPORTS GLOBAUX
@@ -1492,6 +1660,10 @@ window.dupliquerGrilleActuelle = dupliquerGrilleActuelle;
 window.basculerVerrouillageCritere = basculerVerrouillageCritere;
 window.getTypeCritereLabel = getTypeCritereLabel;
 window.calculerTotalPonderationCriteres = calculerTotalPonderationCriteres;
+
+// Export/Import avec licence CC
+window.exporterGrilles = exporterGrilles;
+window.importerGrilles = importerGrilles;
 window.enregistrerCommeGrille = enregistrerCommeGrille;
 window.initialiserModuleGrilles = initialiserModuleGrilles;
 

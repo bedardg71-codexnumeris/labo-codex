@@ -75,10 +75,194 @@ function initialiserModulePratiques() {
     // Charger les modalités sauvegardées
     chargerModalites();
 
+    // Afficher les cartes PAN (Portfolio + Jetons) si PAN-Maîtrise est active
+    afficherCartesExtras();
+
+    // Charger les valeurs du portfolio et jetons depuis localStorage
+    const modalites = db.getSync('modalitesEvaluation', {});
+    console.log('[initialiserModulePratiques] modalites:', modalites);
+    console.log('[initialiserModulePratiques] configPAN:', modalites.configPAN);
+
+    if (modalites.configPAN) {
+        console.log('[initialiserModulePratiques] Appel de chargerConfigurationPAN()');
+        chargerConfigurationPAN(modalites.configPAN);
+    } else {
+        console.log('[initialiserModulePratiques] Pas de configPAN à charger');
+    }
+
     console.log('   ✅ Module Pratiques initialisé');
 
     // 🔄 Migration automatique de la configuration (Phase 3)
     migrerConfigurationPortfolio();
+
+    // 🎨 Mettre à jour l'interface de la pratique par défaut
+    mettreAJourUIPratiqueDefaut();
+}
+
+/* ===============================
+   📚 API : RÉCUPÉRER LA PRATIQUE D'UN COURS
+   =============================== */
+
+/**
+ * Obtient la pratique associée à un cours spécifique
+ *
+ * CONTEXTE:
+ * Chaque cours peut avoir sa propre pratique d'évaluation.
+ * Cette fonction permet de récupérer la pratique correcte
+ * pour un cours donné, au lieu d'utiliser une pratique globale.
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère le cours depuis listeCours
+ * 2. Lit le champ pratiqueId du cours
+ * 3. Si pas de pratique définie, utilise la pratique par défaut (pan-maitrise)
+ * 4. Retourne l'ID de la pratique
+ *
+ * @param {string} coursId - ID du cours (ex: "COURS1234567890")
+ * @returns {string} - ID de la pratique ('pan-maitrise' ou 'sommative')
+ *
+ * EXEMPLE:
+ * const pratiqueId = getPratiqueCours('COURS1234567890');
+ * // Retourne: 'pan-maitrise' ou 'sommative'
+ */
+function getPratiqueCours(coursId) {
+    // Récupérer tous les cours
+    const cours = db.getSync('listeCours', []);
+
+    // Trouver le cours spécifique
+    const coursActuel = cours.find(c => c.id === coursId);
+
+    if (!coursActuel) {
+        console.warn(`[getPratiqueCours] Cours introuvable: ${coursId}, utilisation pratique par défaut`);
+        return 'pan-maitrise'; // Pratique par défaut
+    }
+
+    // Si le cours a une pratique définie, la retourner
+    if (coursActuel.pratiqueId) {
+        console.log(`[getPratiqueCours] Cours ${coursId} utilise la pratique: ${coursActuel.pratiqueId}`);
+        return coursActuel.pratiqueId;
+    }
+
+    // Sinon, utiliser la pratique par défaut
+    console.log(`[getPratiqueCours] Cours ${coursId} n'a pas de pratique définie, utilisation de pan-maitrise par défaut`);
+    return 'pan-maitrise'; // Pratique par défaut
+}
+
+/**
+ * Obtient l'ID du cours actuellement actif
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère tous les cours
+ * 2. Trouve le cours marqué comme actif (actif: true)
+ * 3. Retourne son ID
+ *
+ * @returns {string|null} - ID du cours actif ou null si aucun
+ */
+function getCoursActifId() {
+    const cours = db.getSync('listeCours', []);
+    const coursActif = cours.find(c => c.actif === true);
+
+    if (!coursActif) {
+        console.warn('[getCoursActifId] Aucun cours actif trouvé');
+        return null;
+    }
+
+    return coursActif.id;
+}
+
+/**
+ * Liste les cours utilisant une pratique donnée
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère tous les cours
+ * 2. Filtre ceux qui ont le pratiqueId spécifié
+ * 3. Retourne la liste
+ *
+ * @param {string} pratiqueId - ID de la pratique ('pan-maitrise' ou 'sommative')
+ * @returns {Array} - Tableau des cours utilisant cette pratique
+ */
+function getCoursUtilisantPratique(pratiqueId) {
+    const cours = db.getSync('listeCours', []);
+    return cours.filter(c => c.pratiqueId === pratiqueId);
+}
+
+/**
+ * Obtient la pratique par défaut
+ *
+ * FONCTIONNEMENT:
+ * 1. Lit depuis localStorage 'pratiqueParDefaut'
+ * 2. Si non définie, retourne 'pan-maitrise'
+ *
+ * @returns {string} - ID de la pratique par défaut
+ */
+function getPratiqueParDefaut() {
+    const pratiqueParDefaut = db.getSync('pratiqueParDefaut', 'pan-maitrise');
+    return pratiqueParDefaut;
+}
+
+/**
+ * Définit une pratique comme pratique par défaut
+ *
+ * FONCTIONNEMENT:
+ * 1. Sauvegarde l'ID dans localStorage 'pratiqueParDefaut'
+ * 2. Affiche une notification de succès
+ *
+ * @param {string} pratiqueId - ID de la pratique à définir par défaut
+ */
+function definirPratiqueParDefaut(pratiqueId) {
+    db.setSync('pratiqueParDefaut', pratiqueId);
+
+    const nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Maîtrise';
+    console.log(`[definirPratiqueParDefaut] Pratique par défaut définie : ${nomPratique}`);
+
+    // Afficher notification
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(`Pratique par défaut : ${nomPratique}`);
+    }
+}
+
+/**
+ * Change la pratique par défaut et met à jour l'interface
+ *
+ * @param {string} pratiqueId - ID de la pratique ('pan-maitrise' ou 'sommative')
+ */
+function changerPratiqueParDefaut(pratiqueId) {
+    // Sauvegarder la nouvelle pratique par défaut
+    definirPratiqueParDefaut(pratiqueId);
+
+    // Mettre à jour l'interface
+    mettreAJourUIPratiqueDefaut();
+}
+
+/**
+ * Met à jour l'interface pour refléter la pratique par défaut actuelle
+ * - Met en surbrillance le bouton de la pratique sélectionnée (classe btn-principal)
+ * - Affiche le nom de la pratique actuelle
+ */
+function mettreAJourUIPratiqueDefaut() {
+    const pratiqueDefaut = getPratiqueParDefaut();
+
+    // Mettre à jour les boutons avec classes CSS standards
+    const btnPanMaitrise = document.getElementById('btnDefautPanMaitrise');
+    const btnSommative = document.getElementById('btnDefautSommative');
+
+    if (btnPanMaitrise && btnSommative) {
+        if (pratiqueDefaut === 'pan-maitrise') {
+            // PAN-Maîtrise est sélectionnée - classe btn-principal
+            btnPanMaitrise.className = 'btn btn-principal';
+            btnSommative.className = 'btn';
+        } else {
+            // Sommative est sélectionnée - classe btn-principal
+            btnSommative.className = 'btn btn-principal';
+            btnPanMaitrise.className = 'btn';
+        }
+    }
+
+    // Mettre à jour le texte de l'indicateur
+    const nomPratiqueSpan = document.getElementById('nomPratiqueDefaut');
+    if (nomPratiqueSpan) {
+        const nomPratique = pratiqueDefaut === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Maîtrise';
+        nomPratiqueSpan.textContent = nomPratique;
+    }
 }
 
 /* ===============================
@@ -371,15 +555,16 @@ function afficherOptionsAffichage() {
  */
 function sauvegarderOptionsAffichage() {
     const checkComparatif = document.getElementById('modeComparatif');
-    const selectPratique = document.getElementById('pratiqueNotation');
 
-    if (!checkComparatif || !selectPratique) return;
+    if (!checkComparatif) return;
 
     const modeComparatif = checkComparatif.checked;
-    const pratique = selectPratique.value;
 
     // Récupérer la config existante
     let modalites = db.getSync('modalitesEvaluation', {});
+
+    // Récupérer la pratique active depuis modalites (nouvelle architecture Beta 91)
+    const pratique = modalites.pratique || 'pan-maitrise';
 
     // Définir l'affichage selon le mode comparatif
     if (modeComparatif) {
@@ -708,6 +893,7 @@ function afficherCartesExtras() {
  * Sauvegarde la configuration PAN
  */
 function sauvegarderConfigurationPAN() {
+    console.log('[sauvegarderConfigurationPAN] Début de la sauvegarde');
     const modalites = db.getSync('modalitesEvaluation', {});
 
     // Période d'évaluation
@@ -723,9 +909,11 @@ function sauvegarderConfigurationPAN() {
 
     const selectNombreARetenir = document.getElementById('configNombreARetenir');
     const nombreARetenir = selectNombreARetenir ? parseInt(selectNombreARetenir.value) : 5;
+    console.log('[sauvegarderConfigurationPAN] nombreARetenir lu:', nombreARetenir, 'depuis champ:', selectNombreARetenir?.value);
 
     const inputMinimumCompletion = document.getElementById('configMinimumCompletion');
     const minimumCompletion = inputMinimumCompletion ? parseInt(inputMinimumCompletion.value) : 7;
+    console.log('[sauvegarderConfigurationPAN] minimumCompletion lu:', minimumCompletion, 'depuis champ:', inputMinimumCompletion?.value);
 
     const inputNombreTotal = document.getElementById('configNombreTotal');
     const nombreTotal = inputNombreTotal ? parseInt(inputNombreTotal.value) : 10;
@@ -821,21 +1009,28 @@ function sauvegarderConfigurationPAN() {
  * 6. Met à jour le statut
  */
 function sauvegarderPratiqueNotation() {
-    const pratique = document.getElementById('pratiqueNotation').value;
-    const typePAN = document.getElementById('typePAN').value;
+    // Lire la pratique active depuis localStorage (nouveau système de cartes)
+    let modalites = db.getSync('modalitesEvaluation', {});
+    const pratique = modalites.pratique;
+
+    // Les sélecteurs suivants n'existent que dans l'ancien système
+    const selectTypePAN = document.getElementById('typePAN');
+    const colonnePAN = document.getElementById('colonnePAN');
+    const typePAN = selectTypePAN ? selectTypePAN.value : modalites.typePAN;
 
     if (!pratique) {
         alert('Veuillez choisir une pratique de notation');
         return;
     }
 
-    if (pratique === 'pan-maitrise' && !typePAN) {
+    // Valider typePAN uniquement si le sélecteur est VISIBLE (ancien système)
+    const selecteurVisible = colonnePAN && colonnePAN.style.display !== 'none';
+    if (pratique === 'pan-maitrise' && selecteurVisible && !typePAN) {
         alert('Veuillez choisir un type de pratique alternative');
         return;
     }
 
     // Construire la configuration complète
-    let modalites = db.getSync('modalitesEvaluation', {});
     modalites.pratique = pratique;
     modalites.typePAN = pratique === 'pan-maitrise' ? typePAN : null;
     modalites.dateConfiguration = new Date().toISOString();
@@ -899,14 +1094,17 @@ function sauvegarderPratiqueNotation() {
     }
 
     db.setSync('modalitesEvaluation', modalites);
+    console.log('[sauvegarderPratiqueNotation] Modalités sauvegardées:', modalites);
 
     // Sauvegarder toutes les configurations (portfolio et jetons)
+    console.log('[sauvegarderPratiqueNotation] Appel de sauvegarderConfigurationPAN()');
     sauvegarderConfigurationPAN();
 
+    console.log('[sauvegarderPratiqueNotation] Affichage de la notification');
     afficherNotificationSucces('Toutes les configurations ont été sauvegardées !');
     mettreAJourStatutModalites();
 
-    console.log('Configuration complète sauvegardée:', modalites);
+    console.log('[sauvegarderPratiqueNotation] Configuration complète sauvegardée:', modalites);
 }
 
 /**
@@ -1029,10 +1227,17 @@ function chargerModalites() {
  * @param {Object} configPAN - Configuration PAN depuis localStorage
  */
 function chargerConfigurationPAN(configPAN) {
-    if (!configPAN) return;
+    console.log('[chargerConfigurationPAN] Appelée avec:', configPAN);
+
+    if (!configPAN) {
+        console.log('[chargerConfigurationPAN] Pas de configPAN, sortie');
+        return;
+    }
 
     // Charger configuration du portfolio
     if (configPAN.portfolio) {
+        console.log('[chargerConfigurationPAN] Chargement portfolio:', configPAN.portfolio);
+
         const checkPortfolio = document.getElementById('portfolioActif');
         if (checkPortfolio) {
             checkPortfolio.checked = configPAN.portfolio.actif !== false;
@@ -1046,16 +1251,19 @@ function chargerConfigurationPAN(configPAN) {
         const inputNombreARetenir = document.getElementById('configNombreARetenir');
         if (inputNombreARetenir && configPAN.portfolio.nombreARetenir) {
             inputNombreARetenir.value = configPAN.portfolio.nombreARetenir;
+            console.log('[chargerConfigurationPAN] nombreARetenir chargé:', configPAN.portfolio.nombreARetenir);
         }
 
         const inputMinimum = document.getElementById('configMinimumCompletion');
         if (inputMinimum && configPAN.portfolio.minimumCompletion) {
             inputMinimum.value = configPAN.portfolio.minimumCompletion;
+            console.log('[chargerConfigurationPAN] minimumCompletion chargé:', configPAN.portfolio.minimumCompletion);
         }
 
         const inputNombreTotal = document.getElementById('configNombreTotal');
         if (inputNombreTotal && configPAN.portfolio.nombreTotal) {
             inputNombreTotal.value = configPAN.portfolio.nombreTotal;
+            console.log('[chargerConfigurationPAN] nombreTotal chargé:', configPAN.portfolio.nombreTotal);
         }
 
         const checkDecoupler = document.getElementById('decouplerPR');
@@ -1358,50 +1566,66 @@ async function afficherListePratiques() {
         const modalites = db.getSync('modalitesEvaluation', {});
         const pratiqueActiveId = modalites.pratique;
 
-        let html = '';
+        // Structure en 2 colonnes pour séparer pratiques intégrées et configurables
+        let htmlIntegrees = '';
+        let htmlConfigurables = '';
 
-        // 1. Pratiques codées (legacy)
+        // 1. Pratiques codées (intégrées - non modifiables)
         if (pratiques.codees && pratiques.codees.length > 0) {
-            html += `
-                <div style="margin-bottom: 15px;">
-                    <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 10px;">
-                        Pratiques intégrées (non modifiables)
-                    </h4>
-                </div>
-            `;
-
             pratiques.codees.forEach(p => {
                 const estActive = p.id === pratiqueActiveId;
-                html += genererCartePratique(p, estActive, false); // false = non modifiable
+                htmlIntegrees += genererCartePratique(p, estActive, false); // false = non modifiable
             });
         }
 
         // 2. Pratiques configurables
         if (pratiques.configurables && pratiques.configurables.length > 0) {
-            html += `
-                <div style="margin-top: 25px; margin-bottom: 15px;">
-                    <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 10px;">
-                        Pratiques configurables
-                    </h4>
-                </div>
-            `;
-
             pratiques.configurables.forEach(p => {
                 const estActive = p.id === pratiqueActiveId;
-                html += genererCartePratique(p, estActive, true); // true = modifiable
+                htmlConfigurables += genererCartePratique(p, estActive, true); // true = modifiable
             });
         }
 
-        // 3. Message si aucune pratique
-        if ((!pratiques.codees || pratiques.codees.length === 0) &&
-            (!pratiques.configurables || pratiques.configurables.length === 0)) {
+        // 3. Assembler le HTML final en 2 colonnes
+        let html = '';
+
+        if (htmlIntegrees || htmlConfigurables) {
+            html = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+                    <!-- Colonne 1: Pratiques intégrées -->
+                    <div>
+                        <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 15px;">
+                            Pratiques intégrées (non modifiables)
+                        </h4>
+
+                        <!-- Sélecteur de pratique par défaut -->
+                        ${genererSelecteurPratiqueParDefaut()}
+
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                            ${htmlIntegrees || '<p style="color: var(--gris-moyen); font-style: italic;">Aucune pratique intégrée</p>'}
+                        </div>
+                    </div>
+
+                    <!-- Colonne 2: Pratiques configurables -->
+                    <div>
+                        <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 15px;">
+                            Pratiques configurables
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            ${htmlConfigurables || '<p style="color: var(--gris-moyen); font-style: italic;">Aucune pratique personnalisée</p>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Message si aucune pratique du tout
             html = `
                 <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
                     <p style="color: var(--gris-moyen); margin-bottom: 10px;">
                         Aucune pratique disponible
                     </p>
-                    <button class="btn" onclick="afficherPratiquesPredefines()" style="background: var(--orange-accent); color: white;">
-                        📦 Charger les exemples
+                    <button class="btn btn-ajouter" onclick="afficherPratiquesPredefines()">
+                        Charger les exemples
                     </button>
                 </div>
             `;
@@ -1419,6 +1643,45 @@ async function afficherListePratiques() {
 }
 
 /**
+ * Génère le HTML du sélecteur de pratique par défaut
+ * @returns {string} HTML du sélecteur
+ */
+function genererSelecteurPratiqueParDefaut() {
+    const pratiqueDefaut = getPratiqueParDefaut();
+
+    return `
+        <div class="carte" style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
+            <div style="margin-bottom: 8px;">
+                <strong style="font-size: 0.9rem; color: var(--bleu-principal);">Pratique par défaut</strong>
+            </div>
+            <p class="text-muted" style="margin: 0 0 10px 0; font-size: 0.8rem; line-height: 1.4;">
+                Présélectionnée lors de la création de nouveaux cours
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="cursor: pointer; display: flex; align-items: center;">
+                    <input
+                        type="radio"
+                        name="pratiqueDefaut"
+                        value="pan-maitrise"
+                        ${pratiqueDefaut === 'pan-maitrise' ? 'checked' : ''}
+                        onchange="changerPratiqueParDefaut('pan-maitrise')">
+                    <span style="margin-left: 8px;">PAN-Maîtrise</span>
+                </label>
+                <label style="cursor: pointer; display: flex; align-items: center;">
+                    <input
+                        type="radio"
+                        name="pratiqueDefaut"
+                        value="sommative"
+                        ${pratiqueDefaut === 'sommative' ? 'checked' : ''}
+                        onchange="changerPratiqueParDefaut('sommative')">
+                    <span style="margin-left: 8px;">Sommative</span>
+                </label>
+            </div>
+        </div>
+    `;
+}
+
+/**
  * Génère le HTML d'une carte de pratique
  * @param {object} pratique - Objet pratique {id, nom, description, auteur}
  * @param {boolean} estActive - True si c'est la pratique active
@@ -1426,15 +1689,23 @@ async function afficherListePratiques() {
  * @returns {string} HTML de la carte
  */
 function genererCartePratique(pratique, estActive, modifiable) {
-    const badgeActif = estActive ? `<span style="background: var(--vert-succes); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-left: 10px;">ACTIVE</span>` : '';
+    console.log(`[genererCartePratique] ${pratique.id} - estActive:${estActive}, modifiable:${modifiable}`);
 
-    const boutonActiver = !estActive ? `<button class="btn btn-tres-compact" onclick="activerPratique('${pratique.id}')" style="background: var(--vert-succes); color: white;">Activer</button>` : '';
+    const badgeActif = estActive ? `<span class="badge-pratique badge-pratique-active">ACTIVE</span>` : '';
+
+    // NOUVEAU Beta 91 : Compter le nombre de cours utilisant cette pratique
+    const coursUtilisant = getCoursUtilisantPratique(pratique.id);
+    const nbCours = coursUtilisant.length;
+    const badgeParDefaut = (getPratiqueParDefaut() === pratique.id) ?
+        `<span class="badge-pratique badge-pratique-defaut">PAR DÉFAUT</span>` : '';
+
+    const boutonActiver = !estActive ? `<button class="btn btn-tres-compact btn-confirmer" onclick="activerPratique('${pratique.id}')">Activer</button>` : '';
 
     const boutonsModification = modifiable ? `
-        <button class="btn btn-tres-compact" onclick="editerPratique('${pratique.id}')">Éditer</button>
-        <button class="btn btn-tres-compact" onclick="dupliquerPratique('${pratique.id}')">Dupliquer</button>
-        <button class="btn btn-tres-compact" onclick="exporterPratiqueVersJSON('${pratique.id}')">Exporter</button>
-        ${!estActive ? `<button class="btn btn-tres-compact" onclick="supprimerPratique('${pratique.id}')" style="background: var(--rouge-erreur); color: white;">Supprimer</button>` : ''}
+        <button class="btn btn-tres-compact btn-modifier" onclick="editerPratique('${pratique.id}')">Éditer</button>
+        <button class="btn btn-tres-compact btn-secondaire" onclick="dupliquerPratique('${pratique.id}')">Dupliquer</button>
+        <button class="btn btn-tres-compact btn-secondaire" onclick="exporterPratiqueVersJSON('${pratique.id}')">Exporter</button>
+        <button class="btn btn-tres-compact btn-supprimer" onclick="supprimerPratique('${pratique.id}')">Supprimer</button>
     ` : '';
 
     const auteur = pratique.auteur ? `<small style="color: var(--gris-moyen);">Par ${pratique.auteur}</small>` : '';
@@ -1446,9 +1717,16 @@ function genererCartePratique(pratique, estActive, modifiable) {
                     <div style="display: flex; align-items: center; margin-bottom: 6px;">
                         <strong style="font-size: 1rem; color: var(--bleu-principal);">${pratique.nom}</strong>
                         ${badgeActif}
+                        ${badgeParDefaut}
                     </div>
                     ${auteur ? `<div style="margin-bottom: 6px;">${auteur}</div>` : ''}
                     ${pratique.description ? `<p style="color: var(--gris-moyen); font-size: 0.85rem; margin: 0; line-height: 1.4;">${pratique.description}</p>` : ''}
+
+                    <!-- NOUVEAU Beta 91 : Compteur d'utilisation -->
+                    <div style="margin-top: 8px; padding: 8px; background: var(--bleu-tres-pale); border-radius: 4px; font-size: 0.85rem;">
+                        <strong style="color: var(--bleu-principal);">Utilisée par ${nbCours} cours</strong>
+                        ${nbCours > 0 ? `<span style="color: var(--gris-moyen); margin-left: 5px;">(${coursUtilisant.map(c => c.sigle).join(', ')})</span>` : ''}
+                    </div>
                 </div>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
@@ -1488,27 +1766,184 @@ async function activerPratique(id) {
  * @param {string} id - ID de la pratique à éditer
  */
 async function editerPratique(id) {
-    // Pour l'instant, on exporte la pratique et suggère de l'éditer manuellement
-    // Une future version implémentera le wizard d'édition pré-rempli
+    try {
+        // Charger la pratique à éditer
+        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratique = pratiques.find(p => p.id === id);
 
-    const confirmation = confirm(
-        `Édition de pratique\n\n` +
-        `L'édition via le wizard sera disponible dans une prochaine version.\n\n` +
-        `Voulez-vous exporter cette pratique en JSON pour l'éditer manuellement ?\n` +
-        `Vous pourrez ensuite la réimporter après modification.`
-    );
+        if (!pratique) {
+            throw new Error('Pratique introuvable');
+        }
 
-    if (confirmation) {
-        await exporterPratiqueVersJSON(id);
-        alert(
-            `✅ Pratique exportée !\n\n` +
-            `1. Ouvrez le fichier JSON téléchargé\n` +
-            `2. Modifiez les valeurs souhaitées\n` +
-            `3. Sauvegardez le fichier\n` +
-            `4. Supprimez l'ancienne pratique\n` +
-            `5. Importez le fichier JSON modifié`
-        );
+        const config = pratique.config;
+
+        // Ouvrir le wizard en mode édition
+        ouvrirWizardPratique(true, id);
+
+        // Pré-remplir tous les champs
+        setTimeout(() => {
+            preremplirWizardPourEdition(config);
+        }, 100); // Petit délai pour s'assurer que le wizard est bien ouvert
+
+    } catch (error) {
+        console.error('Erreur lors de l\'édition:', error);
+        alert(`❌ Erreur : ${error.message}`);
     }
+}
+
+/**
+ * Ouvre le wizard en mode création ou édition
+ * @param {boolean} modeEdition - true si mode édition, false si création
+ * @param {string} idPratique - ID de la pratique à éditer (si mode édition)
+ */
+function ouvrirWizardPratique(modeEdition = false, idPratique = null) {
+    const modal = document.getElementById('modalWizardPratique');
+    if (!modal) return;
+
+    // Stocker le mode et l'ID pour utilisation ultérieure
+    modal.dataset.modeEdition = modeEdition;
+    modal.dataset.idPratique = idPratique || '';
+
+    // Mettre à jour le titre du wizard
+    const titre = document.querySelector('#modalWizardPratique h2');
+    if (titre) {
+        titre.textContent = modeEdition ? 'Modifier une pratique' : 'Créer une nouvelle pratique';
+    }
+
+    // Mettre à jour le texte du bouton final
+    const btnCreer = document.getElementById('wizard-btn-creer');
+    if (btnCreer) {
+        btnCreer.textContent = modeEdition ? '✓ Sauvegarder' : '✓ Créer la pratique';
+    }
+
+    // Réinitialiser si mode création
+    if (!modeEdition) {
+        resetterWizard();
+    }
+
+    // Afficher le modal
+    modal.style.display = 'flex';
+    wizardEtapeActuelle = 1;
+    afficherEtapeWizard(1);
+
+    // Charger les données dynamiques
+    chargerEchellesWizard();
+    chargerGrillesWizard();
+}
+
+/**
+ * Pré-remplit tous les champs du wizard avec les données d'une pratique
+ * @param {object} config - Configuration de la pratique à éditer
+ */
+function preremplirWizardPourEdition(config) {
+    console.log('[preremplirWizardPourEdition] Début pré-remplissage', config);
+
+    // Étape 1 : Informations de base
+    document.getElementById('wizard-nom').value = config.nom || '';
+    document.getElementById('wizard-auteur').value = config.auteur || '';
+    document.getElementById('wizard-etablissement').value = config.etablissement || '';
+    document.getElementById('wizard-description').value = config.description || '';
+    document.getElementById('wizard-discipline').value = config.discipline || '';
+
+    // Étape 2 : Échelle
+    if (config.echelle && config.echelle.echelle_id) {
+        setTimeout(() => {
+            const selectEchelle = document.getElementById('wizard-echelle-id');
+            if (selectEchelle) {
+                selectEchelle.value = config.echelle.echelle_id;
+                afficherPreviewEchelleWizard();
+            }
+        }, 200);
+    }
+
+    // Étape 3 : Structure
+    if (config.structure_evaluations) {
+        const selectStructure = document.getElementById('wizard-structure-type');
+        if (selectStructure) {
+            selectStructure.value = config.structure_evaluations.type || '';
+            afficherConfigStructure();
+        }
+
+        // Pré-remplir les champs spécifiques au portfolio
+        setTimeout(() => {
+            if (config.structure_evaluations.type === 'portfolio') {
+                const selectSelection = document.getElementById('wizard-portfolio-selection');
+                const inputNombre = document.getElementById('wizard-portfolio-nombre');
+
+                if (selectSelection && config.structure_evaluations.selection) {
+                    selectSelection.value = config.structure_evaluations.selection;
+                }
+                if (inputNombre && config.structure_evaluations.n_artefacts) {
+                    inputNombre.value = config.structure_evaluations.n_artefacts;
+                }
+            }
+        }, 300);
+    }
+
+    // Étape 4 : Calcul
+    if (config.calcul_note) {
+        const selectCalcul = document.getElementById('wizard-calcul-methode');
+        if (selectCalcul) {
+            selectCalcul.value = config.calcul_note.methode || '';
+            afficherConfigCalcul();
+        }
+    }
+
+    // Étape 5 : Reprises
+    if (config.systeme_reprises) {
+        const selectReprises = document.getElementById('wizard-reprises-type');
+        if (selectReprises) {
+            selectReprises.value = config.systeme_reprises.type || '';
+            afficherConfigReprises();
+        }
+
+        // Checkboxes reprises
+        setTimeout(() => {
+            const checkBureau = document.getElementById('wizard-reprises-bureau');
+            const checkRetrogradable = document.getElementById('wizard-niveau-retrogradable');
+            const checkJetons = document.getElementById('wizard-utiliser-jetons');
+
+            if (checkBureau) checkBureau.checked = config.systeme_reprises.reprises_bureau || false;
+            if (checkRetrogradable) checkRetrogradable.checked = config.systeme_reprises.niveau_retrogradable || false;
+            if (checkJetons) {
+                checkJetons.checked = config.systeme_reprises.systeme_jetons_actif || false;
+                toggleResumeJetonsWizard();
+            }
+        }, 300);
+    }
+
+    // Étape 6 : Critères
+    if (config.gestion_criteres && config.gestion_criteres.grille_id) {
+        setTimeout(() => {
+            const selectGrille = document.getElementById('wizard-grille-id');
+            if (selectGrille) {
+                selectGrille.value = config.gestion_criteres.grille_id;
+                afficherPreviewGrilleWizard();
+            }
+        }, 200);
+    }
+
+    // Étape 7 : Seuils (lecture seule depuis Réglages, rien à pré-remplir)
+
+    // Étape 8 : Interface
+    if (config.interface) {
+        const checkNotes = document.getElementById('wizard-afficher-notes');
+        const checkRang = document.getElementById('wizard-afficher-rang');
+        const checkMoyenne = document.getElementById('wizard-afficher-moyenne');
+
+        if (checkNotes) checkNotes.checked = config.interface.afficher_notes_chiffrees !== false;
+        if (checkRang) checkRang.checked = config.interface.afficher_rang || false;
+        if (checkMoyenne) checkMoyenne.checked = config.interface.afficher_moyenne_groupe || false;
+
+        if (config.interface.terminologie) {
+            document.getElementById('wizard-terme-evaluation').value = config.interface.terminologie.evaluation || 'Évaluation';
+            document.getElementById('wizard-terme-critere').value = config.interface.terminologie.critere || 'Critère';
+            document.getElementById('wizard-terme-note').value = config.interface.terminologie.note_finale || 'Note finale';
+            document.getElementById('wizard-terme-reprise').value = config.interface.terminologie.reprise || 'Reprise';
+        }
+    }
+
+    console.log('[preremplirWizardPourEdition] Pré-remplissage terminé');
 }
 
 /**
@@ -1562,6 +1997,21 @@ async function dupliquerPratique(id) {
 async function supprimerPratique(id) {
     const pratiques = db.getSync('pratiquesConfigurables', []);
     const pratique = pratiques.find(p => p.id === id);
+
+    // Vérifier que la pratique n'est pas active
+    const modalites = db.getSync('modalitesEvaluation', {});
+    if (modalites.pratique === id) {
+        alert(`❌ Impossible de supprimer cette pratique\n\nElle est actuellement active.\n\nVous devez d'abord activer une autre pratique.`);
+        return;
+    }
+
+    // NOUVEAU Beta 91 : Vérifier que la pratique n'est pas utilisée par des cours
+    const coursUtilisant = getCoursUtilisantPratique(id);
+    if (coursUtilisant.length > 0) {
+        const listeCours = coursUtilisant.map(c => c.sigle).join(', ');
+        alert(`❌ Impossible de supprimer cette pratique\n\nElle est actuellement utilisée par ${coursUtilisant.length} cours :\n${listeCours}\n\nVous devez d'abord modifier ces cours pour utiliser une autre pratique.`);
+        return;
+    }
 
     if (!confirm(`Supprimer définitivement cette pratique ?\n\n"${pratique?.nom}"\n\nCette action est irréversible.`)) {
         return;
@@ -1638,18 +2088,8 @@ const wizardTitresEtapes = {
  * Ouvre le modal wizard de création de pratique
  */
 function creerNouvellePratique() {
-    // Réinitialiser le wizard
-    wizardEtapeActuelle = 1;
-
-    // Réinitialiser les champs
-    resetterWizard();
-
-    // Afficher le modal
-    const modal = document.getElementById('modalWizardPratique');
-    if (modal) {
-        modal.style.display = 'flex';
-        afficherEtapeWizard(1);
-    }
+    // Ouvrir le wizard en mode création
+    ouvrirWizardPratique(false, null);
 }
 
 /**
@@ -1935,8 +2375,7 @@ function resetterWizard() {
     document.getElementById('wizard-nb-standards').value = '10';
     document.getElementById('wizard-standards-terminaux').value = '';
     document.getElementById('wizard-portfolio-selection').value = 'n_meilleurs';
-    document.getElementById('wizard-portfolio-options').value = '3, 7, 12';
-    document.getElementById('wizard-portfolio-defaut').value = '7';
+    document.getElementById('wizard-portfolio-nombre').value = '7';
     document.getElementById('wizard-evaluations-liste').innerHTML = '';
 
     // Étape 4
@@ -1951,12 +2390,8 @@ function resetterWizard() {
     // Étape 6 - Charger les grilles existantes
     chargerGrillesWizard();
 
-    // Étape 7
-    document.getElementById('wizard-seuils-type').value = '';
-    document.getElementById('wizard-seuil-bien').value = '85';
-    document.getElementById('wizard-seuil-difficulte').value = '80';
-    document.getElementById('wizard-seuil-grande-difficulte').value = '70';
-    document.getElementById('wizard-niveau-acceptable').value = '';
+    // Étape 7 - Les seuils sont affichés en lecture seule depuis les Réglages
+    // Pas de champs à réinitialiser
 
     // Étape 8
     document.getElementById('wizard-afficher-notes').checked = true;
@@ -1995,6 +2430,11 @@ function afficherEtapeWizard(numeroEtape) {
             dot.classList.remove('wizard-dot-active');
         }
     });
+
+    // Charger les données dynamiques selon l'étape
+    if (numeroEtape === 7) {
+        afficherSeuilsActuelsWizard();
+    }
 
     // Gérer l'affichage des boutons
     const btnPrecedent = document.getElementById('wizard-btn-precedent');
@@ -2095,12 +2535,9 @@ function validerEtapeWizard(numeroEtape) {
             }
             break;
 
-        case 7: // Seuils
-            const typeSeuils = document.getElementById('wizard-seuils-type').value;
-            if (!typeSeuils) {
-                alert('Veuillez choisir un type de seuils.');
-                return false;
-            }
+        case 7: // Seuils (lecture seule depuis Réglages, pas de validation)
+            // Les seuils sont automatiquement chargés depuis les Réglages
+            // Pas de validation nécessaire
             break;
     }
 
@@ -2288,6 +2725,117 @@ function afficherConfigReprises() {
 }
 
 /**
+ * Affiche les seuils actuels configurés dans les Réglages
+ */
+function afficherSeuilsActuelsWizard() {
+    const contenu = document.getElementById('wizard-seuils-actuels');
+    if (!contenu) return;
+
+    // Charger les seuils depuis configPAN
+    const configPAN = db.getSync('configPAN', {});
+    const seuils = configPAN.seuils || { fragile: 70, acceptable: 80, bon: 85 };
+
+    const html = `
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="padding: 10px; background: white; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                <strong style="color: var(--bleu-principal);">Bon</strong>
+                <span style="color: var(--gris-fonce); font-size: 1.1rem; font-weight: 600;">≥ ${seuils.bon}%</span>
+            </div>
+            <div style="padding: 10px; background: white; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                <strong style="color: var(--bleu-principal);">Acceptable</strong>
+                <span style="color: var(--gris-fonce); font-size: 1.1rem; font-weight: 600;">≥ ${seuils.acceptable}%</span>
+            </div>
+            <div style="padding: 10px; background: white; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                <strong style="color: var(--bleu-principal);">Fragile</strong>
+                <span style="color: var(--gris-fonce); font-size: 1.1rem; font-weight: 600;">≥ ${seuils.fragile}%</span>
+            </div>
+        </div>
+    `;
+
+    contenu.innerHTML = html;
+}
+
+/**
+ * Toggle l'affichage du résumé des jetons dans le wizard
+ */
+function toggleResumeJetonsWizard() {
+    const checkbox = document.getElementById('wizard-utiliser-jetons');
+    const resume = document.getElementById('wizard-resume-jetons');
+    const contenu = document.getElementById('wizard-resume-jetons-contenu');
+
+    if (!checkbox || !resume || !contenu) return;
+
+    if (checkbox.checked) {
+        // Charger et afficher la configuration des jetons
+        const configPAN = db.getSync('configPAN', {});
+        const jetons = configPAN.jetons || {};
+
+        let html = '';
+
+        if (!jetons.actif && jetons.actif !== undefined) {
+            html = '<p style="color: var(--gris-moyen); margin: 0;">⚠️ Le système de jetons est actuellement désactivé dans les Réglages.</p>';
+        } else {
+            html = `<div style="display: flex; flex-direction: column; gap: 10px;">`;
+
+            // Allocation générale
+            if (jetons.nombreParEleve) {
+                html += `
+                    <div style="padding: 10px; background: white; border-radius: 4px;">
+                        <strong style="display: block; margin-bottom: 4px; color: var(--bleu-principal);">Allocation générale</strong>
+                        <span style="color: var(--gris-fonce);">${jetons.nombreParEleve} jetons par élève</span>
+                    </div>
+                `;
+            }
+
+            // Jetons de délai
+            if (jetons.delai && jetons.delai.actif) {
+                html += `
+                    <div style="padding: 10px; background: white; border-radius: 4px;">
+                        <strong style="display: block; margin-bottom: 4px; color: var(--bleu-principal);">Jetons de délai</strong>
+                        <span style="color: var(--gris-fonce);">Prolongation de ${jetons.delai.dureeJours || 0} jours</span>
+                    </div>
+                `;
+            }
+
+            // Jetons de reprise
+            if (jetons.reprise && jetons.reprise.actif) {
+                const action = jetons.reprise.archiverOriginale ? 'Archive l\'évaluation originale' : 'Remplace l\'évaluation originale';
+                html += `
+                    <div style="padding: 10px; background: white; border-radius: 4px;">
+                        <strong style="display: block; margin-bottom: 4px; color: var(--bleu-principal);">Jetons de reprise</strong>
+                        <span style="color: var(--gris-fonce);">${action}</span>
+                    </div>
+                `;
+            }
+
+            // Jetons personnalisés
+            if (jetons.typesPersonnalises && jetons.typesPersonnalises.length > 0) {
+                jetons.typesPersonnalises.forEach(type => {
+                    html += `
+                        <div style="padding: 10px; background: white; border-radius: 4px;">
+                            <strong style="display: block; margin-bottom: 4px; color: var(--bleu-principal);">${type.nom}</strong>
+                            <span style="color: var(--gris-fonce); font-size: 0.85rem;">${type.description}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            html += '</div>';
+
+            // Si aucune configuration
+            if (!jetons.nombreParEleve && !jetons.delai && !jetons.reprise && (!jetons.typesPersonnalises || jetons.typesPersonnalises.length === 0)) {
+                html = '<p style="color: var(--gris-moyen); margin: 0;">⚠️ Aucun jeton configuré. Configurez les jetons dans Réglages → Pratique de notation.</p>';
+            }
+        }
+
+        contenu.innerHTML = html;
+        resume.style.display = 'block';
+    } else {
+        resume.style.display = 'none';
+    }
+}
+
+/**
  * Affiche la configuration selon le type de critères
  */
 function afficherConfigCriteres() {
@@ -2333,10 +2881,15 @@ function afficherConfigSeuils() {
  */
 async function creerPratiqueDepuisWizard() {
     try {
+        // Détecter si on est en mode édition ou création
+        const modal = document.getElementById('modalWizardPratique');
+        const modeEdition = modal && modal.dataset.modeEdition === 'true';
+        const idPratique = modal && modal.dataset.idPratique;
+
         // Collecter les données de toutes les étapes
         const pratiqueConfig = {
             // Étape 1: Informations de base
-            id: 'pratique-' + Date.now(),
+            id: modeEdition ? idPratique : 'pratique-' + Date.now(),
             nom: document.getElementById('wizard-nom').value.trim(),
             auteur: document.getElementById('wizard-auteur').value.trim() || 'Auteur',
             etablissement: document.getElementById('wizard-etablissement').value.trim(),
@@ -2367,16 +2920,33 @@ async function creerPratiqueDepuisWizard() {
             interface: construireInterface()
         };
 
-        // Sauvegarder via PratiqueManager
-        await PratiqueManager.sauvegarderPratique({
-            id: pratiqueConfig.id,
-            nom: pratiqueConfig.nom,
-            auteur: pratiqueConfig.auteur,
-            description: pratiqueConfig.description,
-            config: pratiqueConfig
-        });
+        if (modeEdition) {
+            // Mode édition : Supprimer l'ancienne et créer la nouvelle
+            const pratiques = db.getSync('pratiquesConfigurables', []);
+            const index = pratiques.findIndex(p => p.id === idPratique);
 
-        console.log('✅ Pratique créée:', pratiqueConfig.id);
+            if (index !== -1) {
+                pratiques[index] = {
+                    id: idPratique,
+                    nom: pratiqueConfig.nom,
+                    auteur: pratiqueConfig.auteur,
+                    description: pratiqueConfig.description,
+                    config: pratiqueConfig
+                };
+                db.setSync('pratiquesConfigurables', pratiques);
+                console.log('✅ Pratique modifiée:', idPratique);
+            }
+        } else {
+            // Mode création : Sauvegarder via PratiqueManager
+            await PratiqueManager.sauvegarderPratique({
+                id: pratiqueConfig.id,
+                nom: pratiqueConfig.nom,
+                auteur: pratiqueConfig.auteur,
+                description: pratiqueConfig.description,
+                config: pratiqueConfig
+            });
+            console.log('✅ Pratique créée:', pratiqueConfig.id);
+        }
 
         // Fermer le wizard
         fermerWizardPratique();
@@ -2384,9 +2954,13 @@ async function creerPratiqueDepuisWizard() {
         // Recharger la liste
         await afficherListePratiques();
 
-        alert(`✅ Pratique créée avec succès !\n\n"${pratiqueConfig.nom}" a été ajoutée à vos pratiques configurables.`);
+        const message = modeEdition
+            ? `✅ Pratique modifiée avec succès !\n\n"${pratiqueConfig.nom}" a été mise à jour.`
+            : `✅ Pratique créée avec succès !\n\n"${pratiqueConfig.nom}" a été ajoutée à vos pratiques configurables.`;
+
+        alert(message);
     } catch (error) {
-        console.error('Erreur lors de la création:', error);
+        console.error('Erreur lors de la sauvegarde:', error);
         alert(`❌ Erreur : ${error.message}`);
     }
 }
@@ -2457,18 +3031,13 @@ function construireStructure() {
         };
     } else if (type === 'portfolio') {
         const selection = document.getElementById('wizard-portfolio-selection').value;
-        const options = document.getElementById('wizard-portfolio-options').value
-            .split(',')
-            .map(n => parseInt(n.trim()))
-            .filter(n => !isNaN(n));
-        const defaut = parseInt(document.getElementById('wizard-portfolio-defaut').value);
+        const nombre = parseInt(document.getElementById('wizard-portfolio-nombre').value) || 7;
 
         return {
             type: 'portfolio',
             description: 'Artefacts de portfolio',
             selection: selection,
-            n_artefacts_options: options,
-            n_artefacts_defaut: defaut
+            n_artefacts: nombre
         };
     } else if (type === 'evaluations_discretes') {
         const evaluations = [];
@@ -2543,6 +3112,12 @@ function construireReprises() {
         config.occasions_formelles = [];
     }
 
+    // Ajouter le système de jetons si activé
+    const utiliserJetons = document.getElementById('wizard-utiliser-jetons');
+    if (utiliserJetons && utiliserJetons.checked) {
+        config.systeme_jetons_actif = true;
+    }
+
     return config;
 }
 
@@ -2564,21 +3139,19 @@ function construireCriteres() {
  * Construit la configuration des seuils
  */
 function construireSeuils() {
-    const type = document.getElementById('wizard-seuils-type').value;
+    // Lire les seuils configurés dans les Réglages
+    const configPAN = db.getSync('configPAN', {});
+    const seuils = configPAN.seuils || { fragile: 70, acceptable: 80, bon: 85 };
 
-    if (type === 'pourcentage') {
-        return {
-            type: 'pourcentage',
-            va_bien: parseInt(document.getElementById('wizard-seuil-bien').value),
-            difficulte: parseInt(document.getElementById('wizard-seuil-difficulte').value),
-            grande_difficulte: parseInt(document.getElementById('wizard-seuil-grande-difficulte').value)
-        };
-    } else if (type === 'niveau') {
-        return {
-            type: 'niveau',
-            niveau_acceptable: document.getElementById('wizard-niveau-acceptable').value.trim()
-        };
-    }
+    // La pratique utilisera les seuils configurés dans les Réglages
+    return {
+        type: 'pourcentage',
+        va_bien: seuils.bon,
+        difficulte: seuils.acceptable,
+        grande_difficulte: seuils.fragile,
+        source: 'reglages',
+        description: 'Seuils configurés dans Réglages → Pratique de notation'
+    };
 }
 
 /**
@@ -2672,6 +3245,15 @@ window.initialiserModulePratiques = initialiserModulePratiques;
 window.sauvegarderPratiqueNotation = sauvegarderPratiqueNotation;
 window.obtenirConfigurationNotation = obtenirConfigurationNotation;
 
+// NOUVEAU Beta 91 : Association pratique ↔ cours
+window.getPratiqueCours = getPratiqueCours;
+window.getCoursActifId = getCoursActifId;
+window.getCoursUtilisantPratique = getCoursUtilisantPratique;
+window.getPratiqueParDefaut = getPratiqueParDefaut;
+window.definirPratiqueParDefaut = definirPratiqueParDefaut;
+window.changerPratiqueParDefaut = changerPratiqueParDefaut;
+window.mettreAJourUIPratiqueDefaut = mettreAJourUIPratiqueDefaut;
+
 // NOUVEAU Beta 92 : Gestion pratiques configurables
 window.afficherListePratiques = afficherListePratiques;
 window.activerPratique = activerPratique;
@@ -2690,11 +3272,15 @@ window.suivantEtapeWizard = suivantEtapeWizard;
 window.precedentEtapeWizard = precedentEtapeWizard;
 window.chargerEchellesWizard = chargerEchellesWizard;
 window.afficherPreviewEchelleWizard = afficherPreviewEchelleWizard;
+window.ouvrirWizardPratique = ouvrirWizardPratique;
+window.preremplirWizardPourEdition = preremplirWizardPourEdition;
 window.chargerGrillesWizard = chargerGrillesWizard;
 window.afficherPreviewGrilleWizard = afficherPreviewGrilleWizard;
 window.afficherConfigStructure = afficherConfigStructure;
 window.afficherConfigCalcul = afficherConfigCalcul;
 window.afficherConfigReprises = afficherConfigReprises;
+window.toggleResumeJetonsWizard = toggleResumeJetonsWizard;
+window.afficherSeuilsActuelsWizard = afficherSeuilsActuelsWizard;
 window.afficherConfigCriteres = afficherConfigCriteres;
 window.afficherConfigSeuils = afficherConfigSeuils;
 window.ajouterEvaluationWizard = ajouterEvaluationWizard;

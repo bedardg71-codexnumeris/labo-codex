@@ -441,18 +441,31 @@ function toggleArtefactPortfolio(da, portfolioId, nombreARetenir) {
    =============================== */
 
 /**
- * Détermine le mode de pratique pédagogique actuel
+ * Détermine le mode de pratique pédagogique du cours actif
  *
- * @returns {string} - 'SOM' (sommative traditionnelle) ou 'PAN' (pratique alternative)
+ * NOUVEAU (Beta 91) : Utilise la pratique associée au cours actif
+ * au lieu d'une configuration globale.
  *
- * SOURCE : db.getSync('modalitesEvaluation').pratique
+ * @returns {string} - 'SOM' (sommative) ou 'PAN' (pan-maitrise)
+ *
+ * SOURCE : getPratiqueCours(getCoursActifId())
  * - 'sommative' → retourne 'SOM'
- * - 'alternative' → retourne 'PAN'
+ * - 'pan-maitrise' → retourne 'PAN'
  * - Par défaut (si non configuré) → retourne 'PAN' (rétrocompatibilité)
  */
 function obtenirModePratique() {
-    const config = db.getSync('modalitesEvaluation', {});
-    return config.pratique === 'sommative' ? 'SOM' : 'PAN';
+    // NOUVEAU : Utiliser la pratique du cours actif
+    const coursActifId = getCoursActifId();
+
+    if (!coursActifId) {
+        console.warn('[obtenirModePratique] Aucun cours actif, utilisation PAN par défaut');
+        return 'PAN';
+    }
+
+    const pratiqueId = getPratiqueCours(coursActifId);
+    console.log(`[obtenirModePratique] Cours actif: ${coursActifId}, Pratique: ${pratiqueId}`);
+
+    return pratiqueId === 'sommative' ? 'SOM' : 'PAN';
 }
 
 /**

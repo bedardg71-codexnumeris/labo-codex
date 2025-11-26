@@ -147,7 +147,11 @@ function obtenirIdPratiqueActive() {
  * Obtient l'instance de la pratique active
  *
  * Cette fonction détecte automatiquement la pratique configurée et retourne
- * l'instance correspondante depuis le registre.
+ * l'instance correspondante depuis le registre OU depuis PratiqueManager
+ * (pour les pratiques configurables).
+ *
+ * NOUVEAU (Beta 92): Support pratiques configurables JSON
+ * Si la pratique n'est pas dans le registre, tente de la charger via PratiqueManager
  *
  * @returns {Object|null} Instance de la pratique active, ou null si non trouvée
  *
@@ -171,12 +175,31 @@ function obtenirPratiqueActive() {
         return null;
     }
 
-    // Chercher dans le registre
-    const instance = pratiquesEnregistrees.get(idActif);
+    // Chercher dans le registre (pratiques codées en dur)
+    let instance = pratiquesEnregistrees.get(idActif);
+
+    // NOUVEAU (Beta 92): Si non trouvée dans le registre, chercher dans les pratiques configurables
+    if (!instance && window.PratiqueManager) {
+        console.log(`[Registre] Pratique "${idActif}" non trouvée dans le registre, tentative via PratiqueManager...`);
+
+        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiqueData = pratiquesConfigurables.find(p => p.id === idActif);
+
+        if (pratiqueData && pratiqueData.config) {
+            // Créer une instance de PratiqueConfigurable
+            try {
+                instance = new PratiqueConfigurable(pratiqueData.config);
+                console.log(`✅ Pratique configurable chargée : ${idActif} (${instance.obtenirNom()})`);
+            } catch (error) {
+                console.error(`Erreur lors du chargement de la pratique configurable "${idActif}":`, error);
+                return null;
+            }
+        }
+    }
 
     if (!instance) {
         console.error(
-            `Pratique "${idActif}" non trouvée dans le registre. ` +
+            `Pratique "${idActif}" non trouvée (ni dans le registre, ni dans les pratiques configurables). ` +
             `Pratiques disponibles : ${Array.from(pratiquesEnregistrees.keys()).join(', ')}`
         );
         return null;
