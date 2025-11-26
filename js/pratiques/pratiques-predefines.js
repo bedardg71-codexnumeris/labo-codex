@@ -20,6 +20,7 @@ const PRATIQUE_PAN_STANDARDS_BRUNO = {
     id: 'pan-standards-bruno',
     nom: 'PAN-Standards (5 niveaux)',
     auteur: 'Bruno V.',
+    etablissement: 'Cégep Laurendeau',
     description: 'Système à 5 niveaux avec reprises multiples, niveau non rétrogradable',
     discipline: 'Chimie',
     version: '1.0',
@@ -147,14 +148,15 @@ const PRATIQUE_PAN_STANDARDS_BRUNO = {
 };
 
 // ============================================================================
-// PRATIQUE 2 : Sommative classique (Marie-Hélène L.)
+// PRATIQUE 2 : Sommative traditionnelle (Marie-Hélène L.)
 // ============================================================================
 
-const PRATIQUE_SOMMATIVE_CLASSIQUE = {
-    id: 'sommative-classique-mhl',
+const PRATIQUE_SOMMATIVE_TRADITIONNELLE = {
+    id: 'sommative-traditionnelle-mhl',
     nom: 'Sommative traditionnelle',
     auteur: 'Marie-Hélène L.',
-    description: 'Moyenne pondérée classique avec critères fixes',
+    etablissement: 'Cégep Valleyfield',
+    description: 'Moyenne pondérée traditionnelle avec critères fixes',
     discipline: 'Littérature',
     version: '1.0',
     date_creation: '2025-11-25',
@@ -259,6 +261,7 @@ const PRATIQUE_PAN_SPECIFICATIONS = {
     id: 'pan-specifications-fah',
     nom: 'PAN-Spécifications (notes fixes)',
     auteur: 'François A.-H.',
+    etablissement: 'Cégep Laurendeau',
     description: 'Notes fixes (50, 60, 80, 100%) selon critères atteints',
     discipline: 'Chimie',
     version: '1.0',
@@ -354,6 +357,7 @@ const PRATIQUE_PAN_MAITRISE = {
     id: 'pan-maitrise-json',
     nom: 'PAN-Maîtrise (IDME + SRPNF)',
     auteur: 'Grégoire Bédard',
+    etablissement: 'Cégep Drummond',
     description: 'Échelle IDME 4 niveaux, critères SRPNF, sélection des N meilleurs artefacts',
     discipline: 'Littérature',
     version: '1.0',
@@ -467,7 +471,7 @@ const PRATIQUE_PAN_MAITRISE = {
 window.PRATIQUES_PREDEFINES = {
     PRATIQUE_PAN_MAITRISE,
     PRATIQUE_PAN_STANDARDS_BRUNO,
-    PRATIQUE_SOMMATIVE_CLASSIQUE,
+    PRATIQUE_SOMMATIVE_TRADITIONNELLE,
     PRATIQUE_PAN_SPECIFICATIONS
 };
 

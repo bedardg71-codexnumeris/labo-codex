@@ -1553,10 +1553,44 @@ function chargerGrillesDisponibles() {
 // ============================================================================
 
 /**
+ * Migration: Ajoute les établissements manquants aux pratiques existantes
+ */
+function migrerEtablissementsPratiques() {
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    let modifie = false;
+
+    // Mapping des auteurs vers établissements
+    const etablissements = {
+        'Bruno V.': 'Cégep Laurendeau',
+        'Marie-Hélène L.': 'Cégep Valleyfield',
+        'François A.-H.': 'Cégep Laurendeau',
+        'Grégoire Bédard': 'Cégep Drummond'
+    };
+
+    pratiques.forEach(p => {
+        if (p.auteur && !p.etablissement && etablissements[p.auteur]) {
+            p.etablissement = etablissements[p.auteur];
+            modifie = true;
+            console.log(`[Migration] Ajout établissement pour ${p.auteur}: ${p.etablissement}`);
+        }
+    });
+
+    if (modifie) {
+        db.setSync('pratiquesConfigurables', pratiques);
+        console.log('✅ [Migration] Établissements ajoutés aux pratiques existantes');
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * Affiche la liste de toutes les pratiques (codées + configurables)
  * Génère des cartes avec les actions disponibles
  */
 async function afficherListePratiques() {
+    // Exécuter la migration si nécessaire
+    migrerEtablissementsPratiques();
     const container = document.getElementById('listePratiques');
     if (!container) return;
 
@@ -1650,14 +1684,14 @@ function genererSelecteurPratiqueParDefaut() {
     const pratiqueDefaut = getPratiqueParDefaut();
 
     return `
-        <div class="carte" style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
+        <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
             <div style="margin-bottom: 8px;">
                 <strong style="font-size: 0.9rem; color: var(--bleu-principal);">Pratique par défaut</strong>
             </div>
-            <p class="text-muted" style="margin: 0 0 10px 0; font-size: 0.8rem; line-height: 1.4;">
+            <p style="margin: 0 0 10px 0; font-size: 0.8rem; line-height: 1.4; color: var(--gris-moyen);">
                 Présélectionnée lors de la création de nouveaux cours
             </p>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                 <label style="cursor: pointer; display: flex; align-items: center;">
                     <input
                         type="radio"
@@ -1676,6 +1710,15 @@ function genererSelecteurPratiqueParDefaut() {
                         onchange="changerPratiqueParDefaut('sommative')">
                     <span style="margin-left: 8px;">Sommative</span>
                 </label>
+                <label style="cursor: pointer; display: flex; align-items: center;">
+                    <input
+                        type="radio"
+                        name="pratiqueDefaut"
+                        value="specifications"
+                        ${pratiqueDefaut === 'specifications' ? 'checked' : ''}
+                        onchange="changerPratiqueParDefaut('specifications')">
+                    <span style="margin-left: 8px;">PAN-Spécifications</span>
+                </label>
             </div>
         </div>
     `;
@@ -1690,6 +1733,7 @@ function genererSelecteurPratiqueParDefaut() {
  */
 function genererCartePratique(pratique, estActive, modifiable) {
     console.log(`[genererCartePratique] ${pratique.id} - estActive:${estActive}, modifiable:${modifiable}`);
+    console.log(`   auteur: "${pratique.auteur}", etablissement: "${pratique.etablissement}"`);
 
     const badgeActif = estActive ? `<span class="badge-pratique badge-pratique-active">ACTIVE</span>` : '';
 
@@ -1708,28 +1752,33 @@ function genererCartePratique(pratique, estActive, modifiable) {
         <button class="btn btn-tres-compact btn-supprimer" onclick="supprimerPratique('${pratique.id}')">Supprimer</button>
     ` : '';
 
-    const auteur = pratique.auteur ? `<small style="color: var(--gris-moyen);">Par ${pratique.auteur}</small>` : '';
+    const auteur = pratique.auteur ?
+        `Par ${pratique.auteur}${pratique.etablissement ? ` (${pratique.etablissement})` : ''}` : '';
 
     return `
-        <div style="padding: 15px; background: white; border: 2px solid ${estActive ? 'var(--vert-succes)' : '#ddd'}; border-radius: 8px; ${estActive ? 'box-shadow: 0 2px 8px rgba(108, 207, 127, 0.2);' : ''}">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                <div style="flex: 1;">
-                    <div style="display: flex; align-items: center; margin-bottom: 6px;">
-                        <strong style="font-size: 1rem; color: var(--bleu-principal);">${pratique.nom}</strong>
-                        ${badgeActif}
-                        ${badgeParDefaut}
-                    </div>
-                    ${auteur ? `<div style="margin-bottom: 6px;">${auteur}</div>` : ''}
-                    ${pratique.description ? `<p style="color: var(--gris-moyen); font-size: 0.85rem; margin: 0; line-height: 1.4;">${pratique.description}</p>` : ''}
-
-                    <!-- NOUVEAU Beta 91 : Compteur d'utilisation -->
-                    <div style="margin-top: 8px; padding: 8px; background: var(--bleu-tres-pale); border-radius: 4px; font-size: 0.85rem;">
-                        <strong style="color: var(--bleu-principal);">Utilisée par ${nbCours} cours</strong>
-                        ${nbCours > 0 ? `<span style="color: var(--gris-moyen); margin-left: 5px;">(${coursUtilisant.map(c => c.sigle).join(', ')})</span>` : ''}
-                    </div>
+        <div class="carte">
+            <!-- En-tête avec titre à gauche et compteur à droite (style carte métrique) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                    <strong style="font-size: 1rem; color: var(--bleu-principal);">${pratique.nom}</strong>
+                    ${badgeActif}
+                    ${badgeParDefaut}
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 1.2rem; font-weight: 600; color: var(--bleu-principal);">${nbCours}</div>
+                    <div style="font-size: 0.75rem; color: var(--gris-moyen);">cours</div>
                 </div>
             </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+
+            <!-- Détails sous le titre -->
+            <div style="margin-bottom: 12px;">
+                ${auteur ? `<div style="margin-bottom: 6px; color: var(--gris-moyen); font-size: 0.85rem;">${auteur}</div>` : ''}
+                ${pratique.description ? `<p style="color: var(--gris-moyen); font-size: 0.85rem; margin: 0; line-height: 1.4;">${pratique.description}</p>` : ''}
+                ${nbCours > 0 ? `<div style="margin-top: 8px; color: var(--gris-moyen); font-size: 0.85rem;">${coursUtilisant.map(c => c.sigle).join(', ')}</div>` : ''}
+            </div>
+
+            <!-- Boutons d'action -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 ${boutonActiver}
                 ${boutonsModification}
             </div>

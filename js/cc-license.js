@@ -2,7 +2,7 @@
  * cc-license.js
  * Module de gestion des licences Creative Commons
  *
- * Gère l'ajout de métadonnées CC BY-SA 4.0 aux exports/imports
+ * Gère l'ajout de métadonnées CC BY-NC-SA 4.0 aux exports/imports
  * de matériel pédagogique (grilles, échelles, cartouches, productions)
  */
 
@@ -11,9 +11,9 @@
 // ============================================
 
 const CC_LICENSE_DEFAULTS = {
-    licence: "CC BY-SA 4.0",
-    licence_url: "https://creativecommons.org/licenses/by-sa/4.0/",
-    licence_resume: "Attribution-ShareAlike 4.0 International",
+    licence: "CC BY-NC-SA 4.0",
+    licence_url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    licence_resume: "Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions 4.0 International",
     auteur_original: "Grégoire Bédard",
     email_auteur: "labo@codexnumeris.org",
     site_auteur: "https://codexnumeris.org"
@@ -86,8 +86,8 @@ function genererBadgeCC(metadata) {
 
     return `
         <div class="cc-badge">
-            <img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg"
-                 alt="CC BY-SA 4.0">
+            <img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg"
+                 alt="CC BY-NC-SA 4.0">
 
             <p class="cc-badge-titre">${metadata.nom || 'Matériel pédagogique'}</p>
 
@@ -108,7 +108,8 @@ function genererBadgeCC(metadata) {
                 <h4>À condition de :</h4>
                 <ul>
                     <li class="cc-condition-obligation">Attribuer les auteurs originaux</li>
-                    <li class="cc-condition-obligation">Partager sous la même licence (CC BY-SA 4.0)</li>
+                    <li class="cc-condition-obligation">Pas d'usage commercial (NC)</li>
+                    <li class="cc-condition-obligation">Partager sous la même licence (CC BY-NC-SA 4.0)</li>
                 </ul>
             </div>
 
@@ -119,7 +120,7 @@ function genererBadgeCC(metadata) {
             </p>
 
             <a href="${metadata.licence_url}" target="_blank" class="cc-badge-lien">
-                En savoir plus sur la licence CC BY-SA 4.0 →
+                En savoir plus sur la licence CC BY-NC-SA 4.0 →
             </a>
         </div>
     `;
@@ -230,26 +231,27 @@ function avertirSansLicence(donnees) {
 function genererBadgeCCPermanent() {
     return `
         <div class="cc-badge">
-            <img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg"
-                 alt="CC BY-SA 4.0">
+            <img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg"
+                 alt="CC BY-NC-SA 4.0">
 
             <p class="cc-badge-titre">Matériel partagé sous licence libre</p>
 
             <p class="cc-badge-auteur">
                 Ce matériel pédagogique est partagé sous licence
-                <strong>CC BY-SA 4.0</strong> (Attribution-ShareAlike).
+                <strong>CC BY-NC-SA 4.0</strong> (Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions).
             </p>
 
             <div class="cc-badge-conditions">
                 <p>
-                    Vous pouvez librement partager, modifier et réutiliser ce matériel,
-                    même à des fins commerciales, à condition d'attribuer les auteurs originaux
-                    et de partager vos modifications sous la même licence.
+                    Vous pouvez librement partager, modifier et réutiliser ce matériel à des fins éducatives,
+                    à condition d'attribuer les auteurs originaux, de ne pas en faire usage commercial,
+                    et de partager vos modifications sous la même licence. Cette licence protège le travail des enseignants
+                    tout en favorisant le partage et le bien commun en éducation.
                 </p>
             </div>
 
-            <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" class="cc-badge-lien">
-                En savoir plus sur la licence CC BY-SA 4.0 →
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" class="cc-badge-lien">
+                En savoir plus sur la licence CC BY-NC-SA 4.0 →
             </a>
         </div>
     `;

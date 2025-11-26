@@ -3,7 +3,7 @@
 **Auteur :** Grégoire Bédard
 **Projet :** Système de monitorage pédagogique (Application web)
 **Date de création :** 27 octobre 2025
-**Dernière modification :** 3 novembre 2025
+**Dernière modification :** 26 novembre 2025
 
 ---
 
@@ -40,14 +40,15 @@ Ce projet utilise une **double licence** pour distinguer le code technique du co
 - Guides méthodologiques (CLAUDE.md, README, documentation)
 - Articles et références bibliographiques
 
-**Pourquoi CC BY-SA 4.0 ?**
+**Pourquoi CC BY-NC-SA 4.0 ?**
 - Permet l'adaptation pour différents contextes pédagogiques
 - Autorise le partage dans des publications académiques
 - Encourage la collaboration entre enseignants
-- Usage non-commercial autorisé
+- **Protège le travail des enseignants (pas d'usage commercial)**
+- Favorise le partage et le bien commun en éducation
 - Redistribution sous même licence (ShareAlike)
 
-**Texte complet :** Voir [LICENSE-CC-BY-SA-4.0.txt](https://creativecommons.org/licenses/by-sa/4.0/legalcode.fr)
+**Texte complet :** Voir [LICENSE-CC-BY-NC-SA-4.0.txt](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.fr)
 
 ---
 
@@ -62,9 +63,9 @@ Ce projet utilise une **double licence** pour distinguer le code technique du co
 - Utiliser commercialement **si vous redistribuez sous AGPL v3**
 - Héberger en ligne **si vous publiez le code source modifié**
 
-**Contenu (CC BY-SA 4.0) :**
-- Copier et redistribuer les concepts pédagogiques
-- Adapter les textes pour vos cours
+**Contenu (CC BY-NC-SA 4.0) :**
+- Copier et redistribuer les concepts pédagogiques **à des fins éducatives**
+- Adapter les textes pour vos cours (usage non-commercial)
 - Publier dans des articles académiques avec attribution
 - Traduire dans d'autres langues
 - Partager avec vos collègues
@@ -77,8 +78,9 @@ Ce projet utilise une **double licence** pour distinguer le code technique du co
 - Héberger en ligne sans publier le code source modifié
 - Retirer les mentions de licence
 
-**Contenu (CC BY-SA 4.0) :**
+**Contenu (CC BY-NC-SA 4.0) :**
 - Utiliser sans attribution à l'auteur original
+- **Utiliser à des fins commerciales (vente, formation payante, etc.)**
 - Redistribuer sous une licence incompatible
 - Retirer les crédits et mentions de licence
 
@@ -91,7 +93,7 @@ Lors de l'utilisation ou redistribution, veuillez inclure :
 ```
 Système de suivi des apprentissages
 © 2025 Grégoire Bédard
-Code : AGPL v3.0 | Contenu : CC BY-SA 4.0
+Code : AGPL v3.0 | Contenu : CC BY-NC-SA 4.0
 https://github.com/[votre-repo]
 ```
 
@@ -101,12 +103,12 @@ https://github.com/[votre-repo]
 
 ### Enseignant qui veut utiliser l'application
 ✅ **Autorisé** : Télécharger, installer, utiliser tel quel (usage local)
-📄 **Licence applicable** : AGPL v3 + CC BY-SA 4.0
+📄 **Licence applicable** : AGPL v3 + CC BY-NC-SA 4.0
 ⚠️ **Condition** : Aucune (usage personnel local)
 
 ### Collègue qui veut adapter les textes pédagogiques
 ✅ **Autorisé** : Copier les concepts dans ses propres documents
-📄 **Licence applicable** : CC BY-SA 4.0
+📄 **Licence applicable** : CC BY-NC-SA 4.0
 ⚠️ **Condition** : Attribution à Grégoire Bédard
 
 ### Développeur qui veut améliorer le code
@@ -116,12 +118,12 @@ https://github.com/[votre-repo]
 
 ### Établissement qui veut déployer pour tous ses enseignants
 ✅ **Autorisé** : Installation sur serveur local, modifications internes
-📄 **Licence applicable** : AGPL v3 + CC BY-SA 4.0
+📄 **Licence applicable** : AGPL v3 + CC BY-NC-SA 4.0
 ⚠️ **Condition** : Si hébergement web accessible à l'extérieur, publier le code source
 
 ### Chercheur qui veut citer dans un article
 ✅ **Autorisé** : Citer les concepts, formules, méthodologie
-📄 **Licence applicable** : CC BY-SA 4.0
+📄 **Licence applicable** : CC BY-NC-SA 4.0
 ⚠️ **Condition** : Citation appropriée dans la bibliographie
 
 ---
@@ -131,8 +133,8 @@ https://github.com/[votre-repo]
 **Q : Puis-je utiliser l'application dans un contexte commercial (ex: formation privée) ?**
 R : Oui, mais si vous redistribuez une version modifiée, elle doit rester sous AGPL v3.
 
-**Q : Puis-je publier mes adaptations des concepts dans un livre ?**
-R : Oui, avec attribution, et votre livre doit permettre la redistribution sous CC BY-SA 4.0.
+**Q : Puis-je publier mes adaptations des concepts dans un livre commercial ?**
+R : Non, la licence NC (Non-Commercial) interdit l'usage commercial. Pour un usage académique non-commercial, oui avec attribution sous CC BY-NC-SA 4.0.
 
 **Q : Puis-je créer une version modifiée sans partager mon code ?**
 R : Non si vous la redistribuez OU l'hébergez en ligne. Oui si c'est pour usage local interne uniquement.
@@ -161,10 +163,11 @@ Les contributions sont les bienvenues ! Veuillez soumettre des pull requests ou 
 ## Versions des licences
 
 - **AGPL v3.0** : https://www.gnu.org/licenses/agpl-3.0.html
-- **CC BY-SA 4.0** : https://creativecommons.org/licenses/by-sa/4.0/deed.fr
+- **CC BY-NC-SA 4.0** : https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr
 
 **Historique des licences :**
 - **27 octobre 2025** : GPL v3 + CC BY-SA 4.0 (versions initiales)
 - **3 novembre 2025** : AGPL v3 + CC BY-SA 4.0 (protection renforcée contre appropriation SaaS)
+- **26 novembre 2025** : AGPL v3 + CC BY-NC-SA 4.0 (protection enseignants, usage non-commercial)
 
-**Dernière mise à jour :** 3 novembre 2025
+**Dernière mise à jour :** 26 novembre 2025
