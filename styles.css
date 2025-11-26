@@ -31,6 +31,7 @@
     --vert-doux: #b8d4b8;
     --vert-leger: #2a8a6a;
     --vert-succes: #28a745;
+    --rouge-erreur: #dc3545;
 
     /* Couleurs pratiques d'évaluation */
     --som-orange: #ff6f00;
@@ -1194,6 +1195,26 @@ input[type="number"].controle-form {
     color: #991b1b;
 }
 
+/* === BADGES DE PRATIQUES D'ÉVALUATION === */
+.badge-pratique {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.badge-pratique-active {
+    background: var(--vert-succes);
+    color: white;
+}
+
+.badge-pratique-defaut {
+    background: var(--bleu-moyen);
+    color: white;
+}
+
 /* === BADGES DE PATTERN D'APPRENTISSAGE === */
 /* Couleurs alignées sur le gradient de la barre patterns */
 /* Format uniformisé avec les autres badges */
@@ -1844,6 +1865,38 @@ input[type="number"].controle-form {
 }
 
 /* ===============================
+   WIZARD DE CRÉATION (PRATIQUES)
+   =============================== */
+
+.wizard-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--gris-leger);
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.wizard-dot-active {
+    background: var(--bleu-principal);
+    transform: scale(1.3);
+}
+
+.wizard-step {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===============================
    LISTES D'ÉLÉMENTS SAUVEGARDÉS
    =============================== */
 
@@ -1853,6 +1906,101 @@ input[type="number"].controle-form {
     border-radius: 6px;
     text-align: center;
     color: var(--bleu-leger);
+}
+
+/* ===============================
+   LICENCES CREATIVE COMMONS
+   =============================== */
+
+.cc-badge {
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    border-left: 4px solid var(--bleu-principal);
+    margin: 20px 0;
+}
+
+.cc-badge img {
+    height: 31px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.cc-badge-titre {
+    font-weight: 600;
+    color: var(--bleu-principal);
+    margin-bottom: 8px;
+}
+
+.cc-badge-auteur {
+    font-size: 0.9rem;
+    color: var(--gris-fonce);
+    margin: 4px 0;
+}
+
+.cc-badge-contributeurs {
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+    margin: 8px 0 0 0;
+    padding-left: 20px;
+}
+
+.cc-badge-conditions {
+    margin-top: 12px;
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+}
+
+.cc-badge-conditions h4 {
+    font-size: 0.9rem;
+    margin: 0 0 8px 0;
+    color: var(--bleu-principal);
+}
+
+.cc-badge-conditions ul {
+    margin: 0;
+    padding-left: 20px;
+    list-style: none;
+}
+
+.cc-badge-conditions li {
+    margin: 4px 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.cc-badge-conditions li::before {
+    content: "✓ ";
+    color: var(--vert-succes);
+    font-weight: bold;
+    margin-right: 4px;
+}
+
+.cc-badge-conditions .cc-condition-obligation::before {
+    content: "⚠️ ";
+}
+
+.cc-badge-lien {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--bleu-principal);
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.cc-badge-lien:hover {
+    text-decoration: underline;
+}
+
+.cc-metadata {
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+    margin-top: 8px;
+}
+
+.cc-metadata-version {
+    font-weight: 600;
 }
 
 .element-sauvegarde {

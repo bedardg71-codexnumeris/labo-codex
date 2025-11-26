@@ -4,6 +4,8 @@
 **Version**: Beta 90.5 (architecture modulaire)
 **Public cible**: Enseignant·es du collégial
 
+codexnumeris.org/labocodex
+
 ---
 
 ## 🎯 Vue d'ensemble

@@ -43,6 +43,42 @@
    =============================== */
 
 /**
+ * Migre les cours existants pour ajouter le champ pratiqueId
+ *
+ * CONTEXTE:
+ * Les cours créés avant l'implémentation de l'association pratique ↔ cours
+ * n'ont pas de champ pratiqueId. Cette fonction ajoute automatiquement
+ * la pratique par défaut (pan-maitrise) aux cours qui n'en ont pas.
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère tous les cours
+ * 2. Pour chaque cours sans pratiqueId, ajoute 'pan-maitrise'
+ * 3. Sauvegarde les cours modifiés
+ *
+ * @returns {number} - Nombre de cours migrés
+ */
+function migrerCoursVersPratiques() {
+    const cours = db.getSync('listeCours', []);
+    let nbMigres = 0;
+
+    cours.forEach(c => {
+        if (!c.pratiqueId) {
+            c.pratiqueId = 'pan-maitrise'; // Pratique par défaut
+            nbMigres++;
+        }
+    });
+
+    if (nbMigres > 0) {
+        db.setSync('listeCours', cours);
+        console.log(`[Migration cours] ✅ ${nbMigres} cours migré(s) avec pratique par défaut`);
+    } else {
+        console.log(`[Migration cours] Tous les cours ont déjà une pratique définie`);
+    }
+
+    return nbMigres;
+}
+
+/**
  * Initialise le module de gestion des cours
  * Appelée automatiquement par 99-main.js au chargement
  * 
@@ -55,17 +91,20 @@
  */
 function initialiserModuleCours() {
     console.log('📚 Initialisation du module Cours');
-    
+
     // Vérifier que nous sommes dans la bonne section
     const tableauContainer = document.getElementById('tableauCoursContainer');
     if (!tableauContainer) {
         console.log('   ⚠️  Section cours non active, initialisation reportée');
         return;
     }
-    
+
+    // Migrer les cours existants (ajouter pratiqueId si manquant)
+    migrerCoursVersPratiques();
+
     // Afficher le tableau des cours
     afficherTableauCours();
-    
+
     console.log('   ✅ Module Cours initialisé');
 }
 
@@ -123,6 +162,7 @@ function afficherTableauCours() {
                 <th>Nom du cours</th>
                 <th>Enseignant·e</th>
                 <th style="width: 80px;">Session</th>
+                <th style="width: 120px;">Pratique</th>
                 <th style="width: 60px;">Actif</th>
                 <th style="width: 280px;">Actions</th>
             </tr>
@@ -138,6 +178,14 @@ function afficherTableauCours() {
         const nomEnsEchappe = echapperHtml(c.nomEnseignant);
         const sessionEchappe = echapperHtml(c.session + c.annee);
 
+        // Afficher le nom de la pratique
+        let pratiqueNom = 'PAN-Maîtrise'; // Par défaut
+        if (c.pratiqueId === 'sommative') {
+            pratiqueNom = 'Sommative';
+        } else if (c.pratiqueId === 'pan-maitrise') {
+            pratiqueNom = 'PAN-Maîtrise';
+        }
+
         html += `
         <tr>
             <td><strong>${codeEchappe}</strong></td>
@@ -147,6 +195,9 @@ function afficherTableauCours() {
             </td>
             <td>${prenomEchappe} ${nomEnsEchappe}</td>
             <td>${sessionEchappe}</td>
+            <td>
+                <span style="font-size: 0.85rem; color: var(--bleu-leger);">${pratiqueNom}</span>
+            </td>
             <td style="text-align: center;">
                 <input type="radio"
                        name="cours-actif"
@@ -209,6 +260,55 @@ function afficherTableauCours() {
    =============================== */
 
 /**
+ * Charge les pratiques disponibles dans le sélecteur du formulaire
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère toutes les pratiques intégrées disponibles
+ * 2. Détermine quelle pratique est marquée comme "par défaut"
+ * 3. Remplit le <select id="pratiqueCours">
+ * 4. Présélectionne la pratique par défaut
+ */
+function chargerSelecteurPratiques() {
+    const selectPratique = document.getElementById('pratiqueCours');
+    if (!selectPratique) return;
+
+    // Obtenir la pratique par défaut depuis le storage
+    const pratiqueParDefaut = getPratiqueParDefaut ? getPratiqueParDefaut() : 'pan-maitrise';
+
+    // Liste des pratiques intégrées (codées en dur pour Beta 91)
+    const pratiquesIntegrees = [
+        {
+            id: 'pan-maitrise',
+            nom: 'PAN-Maîtrise (IDME 4 niveaux)',
+            description: 'Échelle IDME, critères SRPNF, N meilleurs artefacts'
+        },
+        {
+            id: 'sommative',
+            nom: 'Sommative traditionnelle',
+            description: 'Moyenne pondérée de toutes les évaluations'
+        }
+    ];
+
+    // Vider le sélecteur
+    selectPratique.innerHTML = '';
+
+    // Ajouter les options
+    pratiquesIntegrees.forEach(pratique => {
+        const option = document.createElement('option');
+        option.value = pratique.id;
+        option.textContent = pratique.nom;
+
+        // Marquer la pratique par défaut
+        if (pratique.id === pratiqueParDefaut) {
+            option.textContent += ' [PAR DÉFAUT]';
+            option.selected = true;
+        }
+
+        selectPratique.appendChild(option);
+    });
+}
+
+/**
  * Affiche le formulaire d'ajout ou d'édition
  * 
  * FONCTIONNEMENT:
@@ -233,11 +333,14 @@ function afficherFormCours(id = null) {
     const btnAjouter = document.getElementById('btnAjouterCours');
     const titre = document.getElementById('titreFormCours');
     const btnTexte = document.getElementById('btnTexteCours');
-    
+
     if (!formulaire) return;
-    
+
     formulaire.style.display = 'block';
     if (btnAjouter) btnAjouter.style.display = 'none';
+
+    // Charger les pratiques disponibles dans le sélecteur
+    chargerSelecteurPratiques();
     
     if (id) {
         // Mode édition
@@ -263,6 +366,12 @@ function afficherFormCours(id = null) {
             document.getElementById('annee').value = c.annee || '2025';
             document.getElementById('heuresParSemaine').value = c.heuresParSemaine || '4';
             document.getElementById('formatHoraire').value = c.formatHoraire || '2x2';
+
+            // Charger la pratique associée
+            const selectPratique = document.getElementById('pratiqueCours');
+            if (selectPratique && c.pratiqueId) {
+                selectPratique.value = c.pratiqueId;
+            }
         }
     } else {
         // Mode ajout
@@ -347,6 +456,10 @@ function annulerFormCours() {
 function sauvegarderCours() {
     let cours = db.getSync('listeCours', []);
     
+    // Récupérer la pratique sélectionnée (ou pratique par défaut si non spécifiée)
+    const selectPratique = document.getElementById('pratiqueCours');
+    const pratiqueId = selectPratique ? selectPratique.value : null;
+
     const nouveauCours = {
         id: coursEnEdition || 'COURS' + Date.now(),
         codeCours: document.getElementById('codeCours').value,
@@ -362,17 +475,22 @@ function sauvegarderCours() {
         annee: document.getElementById('annee').value,
         heuresParSemaine: document.getElementById('heuresParSemaine').value,
         formatHoraire: document.getElementById('formatHoraire').value,
+        pratiqueId: pratiqueId, // ✅ NOUVEAU : Association à une pratique
         verrouille: false,
         actif: false,
         dateEnregistrement: new Date().toISOString()
     };
     
     if (coursEnEdition) {
-        // Modification - conserver l'état de verrouillage et actif
+        // Modification - conserver l'état de verrouillage, actif et pratiqueId si non modifié
         const index = cours.findIndex(c => c.id === coursEnEdition);
         if (index !== -1) {
             nouveauCours.verrouille = cours[index].verrouille;
             nouveauCours.actif = cours[index].actif;
+            // Si aucune pratique sélectionnée, conserver l'ancienne
+            if (!nouveauCours.pratiqueId && cours[index].pratiqueId) {
+                nouveauCours.pratiqueId = cours[index].pratiqueId;
+            }
             cours[index] = nouveauCours;
         }
     } else {

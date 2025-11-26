@@ -1455,23 +1455,37 @@ function exporterCartouches() {
         }
     }
 
-    const data = {
-        version: "1.0",
-        dateExport: new Date().toISOString(),
-        cartouches: cartouches
-    };
+    if (Object.keys(cartouches).length === 0) {
+        alert('Aucune cartouche à exporter.');
+        return;
+    }
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    // Emballer avec métadonnées CC
+    const donnees = ajouterMetadonnéesCC(
+        { cartouches: cartouches },
+        'cartouches',
+        'Cartouches de rétroaction'
+    );
+
+    // Générer nom de fichier avec watermark CC
+    const nomFichier = genererNomFichierCC(
+        'cartouches',
+        'Cartouches-retroaction',
+        donnees.metadata.version
+    );
+
+    const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cartouches-retroaction-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = nomFichier;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    afficherNotificationSucces('Cartouches exportées avec succès !');
+    afficherNotificationSucces('Cartouches exportées avec licence CC BY-SA 4.0');
+    console.log('✅ Cartouches exportées avec licence CC BY-SA 4.0');
 }
 
 /**
@@ -1506,46 +1520,40 @@ function importerCartouches(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const data = JSON.parse(e.target.result);
+            const donnees = JSON.parse(e.target.result);
 
-            // Validation de base
-            if (!data.version || !data.cartouches) {
-                alert('Format de fichier invalide');
-                return;
+            // Vérifier licence CC et afficher badge
+            const estCC = verifierLicenceCC(donnees);
+
+            let message = estCC ?
+                '<div style="margin-bottom: 15px;">' + genererBadgeCC(donnees.metadata) + '</div>' :
+                '';
+
+            message += '<p><strong>Voulez-vous importer ces cartouches ?</strong></p>';
+
+            // Créer modal avec badge CC
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                        ${message}
+                        <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
+                            <button class="btn" onclick="this.closest('div[style*=fixed]').parentElement.remove()">Annuler</button>
+                            <button class="btn btn-confirmer" onclick="window.confirmerImportCartouches(${JSON.stringify(donnees).replace(/"/g, '&quot;')}); this.closest('div[style*=fixed]').parentElement.remove()">Importer</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Avertir si pas de licence CC
+            if (!estCC) {
+                avertirSansLicence(donnees);
             }
-
-            let compteur = 0;
-
-            // Importer chaque grille de cartouches
-            Object.keys(data.cartouches).forEach(grilleId => {
-                const cartouchesImportees = data.cartouches[grilleId];
-                const cartouchesExistantes = db.getSync(`cartouches_${grilleId}`, []);
-
-                // Fusionner : remplacer si même ID, sinon ajouter
-                cartouchesImportees.forEach(importee => {
-                    const index = cartouchesExistantes.findIndex(c => c.id === importee.id);
-                    if (index !== -1) {
-                        cartouchesExistantes[index] = importee;
-                    } else {
-                        cartouchesExistantes.push(importee);
-                    }
-                    compteur++;
-                });
-
-                db.setSync(`cartouches_${grilleId}`, cartouchesExistantes);
-            });
-
-            // Rafraîchir l'interface si on est dans la section
-            const selectGrille = document.getElementById('selectGrilleRetroaction');
-            if (selectGrille && selectGrille.value) {
-                chargerCartouchesRetroaction();
-            }
-
-            afficherNotificationSucces(`${compteur} cartouche(s) importée(s) avec succès !`);
 
         } catch (error) {
-            console.error('Erreur d\'import:', error);
-            alert('Erreur lors de l\'import du fichier. Vérifiez le format.');
+            console.error('Erreur lors de l\'import:', error);
+            alert('❌ Erreur lors de la lecture du fichier.\n' + error.message);
         }
     };
 
@@ -1554,6 +1562,57 @@ function importerCartouches(event) {
     // Réinitialiser l'input pour permettre de réimporter le même fichier
     event.target.value = '';
 }
+
+/**
+ * Confirme l'import et fusionne les cartouches
+ * Fonction helper appelée depuis le modal de confirmation
+ */
+window.confirmerImportCartouches = function(donnees) {
+    try {
+        // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata)
+        const cartouchesData = donnees.contenu ?
+            donnees.contenu.cartouches :
+            donnees.cartouches;
+
+        if (!cartouchesData || typeof cartouchesData !== 'object') {
+            throw new Error('Format invalide: cartouches doit être un objet');
+        }
+
+        let compteur = 0;
+
+        // Importer chaque grille de cartouches
+        Object.keys(cartouchesData).forEach(grilleId => {
+            const cartouchesImportees = cartouchesData[grilleId];
+            const cartouchesExistantes = db.getSync(`cartouches_${grilleId}`, []);
+
+            // Fusionner : remplacer si même ID, sinon ajouter
+            cartouchesImportees.forEach(importee => {
+                const index = cartouchesExistantes.findIndex(c => c.id === importee.id);
+                if (index !== -1) {
+                    cartouchesExistantes[index] = importee;
+                } else {
+                    cartouchesExistantes.push(importee);
+                }
+                compteur++;
+            });
+
+            db.setSync(`cartouches_${grilleId}`, cartouchesExistantes);
+        });
+
+        // Rafraîchir l'interface si on est dans la section
+        const selectGrille = document.getElementById('selectGrilleRetroaction');
+        if (selectGrille && selectGrille.value) {
+            chargerCartouchesRetroaction();
+        }
+
+        afficherNotificationSucces(`✅ Import réussi ! ${compteur} cartouche(s) importée(s).`);
+        console.log('✅ Cartouches importées:', compteur);
+
+    } catch (error) {
+        console.error('Erreur lors de l\'import:', error);
+        alert('❌ Erreur lors de l\'import.\n' + error.message);
+    }
+};
 
 /**
  * Importe une cartouche depuis un fichier texte Markdown (.txt)

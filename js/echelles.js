@@ -1527,6 +1527,174 @@ function afficherNotificationSucces(message) {
  */
 
 /* ===============================
+   EXPORT/IMPORT AVEC LICENCE CC
+   =============================== */
+
+/**
+ * Exporte les échelles de performance avec métadonnées Creative Commons
+ * Les exports incluent uniquement la structure des échelles et niveaux,
+ * JAMAIS les données d'étudiants ou les évaluations
+ *
+ * FONCTIONNEMENT:
+ * 1. Charge toutes les échelles depuis localStorage
+ * 2. Ajoute métadonnées CC BY-SA 4.0 (auteur, licence, version)
+ * 3. Génère nom de fichier avec watermark CC
+ * 4. Télécharge le fichier JSON
+ *
+ * FORMAT EXPORT:
+ * {
+ *   metadata: { licence, auteur_original, version, date, ... },
+ *   contenu: { echelles: [...] }
+ * }
+ */
+function exporterEchelles() {
+    const echelles = db.getSync('echellesTemplates', []);
+
+    if (echelles.length === 0) {
+        alert('Aucune échelle à exporter.');
+        return;
+    }
+
+    // Emballer avec métadonnées CC
+    const donnees = ajouterMetadonnéesCC(
+        { echelles: echelles },
+        'echelles',
+        'Échelles de performance'
+    );
+
+    // Générer nom de fichier avec watermark CC
+    const nomFichier = genererNomFichierCC(
+        'echelles',
+        'Echelles-performance',
+        donnees.metadata.version
+    );
+
+    // Télécharger
+    const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nomFichier;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log('✅ Échelles exportées avec licence CC BY-SA 4.0');
+}
+
+/**
+ * Importe des échelles depuis un fichier JSON avec gestion CC
+ *
+ * FONCTIONNEMENT:
+ * 1. Lit le fichier JSON sélectionné
+ * 2. Vérifie et affiche la licence CC (si présente)
+ * 3. Valide la structure des données
+ * 4. Fusionne avec échelles existantes
+ * 5. Rafraîchit l'interface
+ *
+ * GESTION LICENCE:
+ * - Affiche badge CC si licence présente
+ * - Avertit si pas de licence (droit d'auteur classique)
+ * - Demande confirmation avant import
+ *
+ * @param {Event} event - Événement de changement du file input
+ */
+function importerEchelles(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const donnees = JSON.parse(e.target.result);
+
+            // Vérifier licence CC et afficher badge
+            const estCC = verifierLicenceCC(donnees);
+
+            let message = estCC ?
+                '<div style="margin-bottom: 15px;">' + genererBadgeCC(donnees.metadata) + '</div>' :
+                '';
+
+            message += '<p><strong>Voulez-vous importer ces échelles ?</strong></p>';
+
+            // Créer modal avec badge CC
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                        ${message}
+                        <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
+                            <button class="btn" onclick="this.closest('div[style*=fixed]').parentElement.remove()">Annuler</button>
+                            <button class="btn btn-confirmer" onclick="window.confirmerImportEchelles(${JSON.stringify(donnees).replace(/"/g, '&quot;')}); this.closest('div[style*=fixed]').parentElement.remove()">Importer</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Avertir si pas de licence CC
+            if (!estCC) {
+                avertirSansLicence(donnees);
+            }
+
+        } catch (error) {
+            console.error('Erreur lors de l\'import:', error);
+            alert('❌ Erreur lors de la lecture du fichier.\n' + error.message);
+        }
+    };
+    reader.readAsText(file);
+
+    // Réinitialiser l'input pour permettre le même fichier
+    event.target.value = '';
+}
+
+/**
+ * Confirme l'import et fusionne les échelles
+ * Fonction helper appelée depuis le modal de confirmation
+ */
+window.confirmerImportEchelles = function(donnees) {
+    try {
+        // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata)
+        const echellesImportees = donnees.contenu ?
+            donnees.contenu.echelles :
+            donnees.echelles || donnees;
+
+        if (!Array.isArray(echellesImportees)) {
+            throw new Error('Format invalide: échelles doit être un tableau');
+        }
+
+        // Charger échelles existantes
+        const echellesExistantes = db.getSync('echellesTemplates', []);
+
+        // Fusionner (remplacer si même ID, sinon ajouter)
+        echellesImportees.forEach(echelle => {
+            const index = echellesExistantes.findIndex(e => e.id === echelle.id);
+            if (index >= 0) {
+                echellesExistantes[index] = echelle;
+            } else {
+                echellesExistantes.push(echelle);
+            }
+        });
+
+        // Sauvegarder
+        db.setSync('echellesTemplates', echellesExistantes);
+
+        // Rafraîchir l'affichage
+        if (typeof afficherToutesLesEchellesNiveaux === 'function') {
+            afficherToutesLesEchellesNiveaux();
+        }
+
+        alert(`✅ Import réussi !\n\n${echellesImportees.length} échelle(s) importée(s).`);
+        console.log('✅ Échelles importées:', echellesImportees.length);
+
+    } catch (error) {
+        console.error('Erreur lors de l\'import:', error);
+        alert('❌ Erreur lors de l\'import.\n' + error.message);
+    }
+};
+
+/* ===============================
    EXPORTS GLOBAUX
    =============================== */
 
@@ -1556,6 +1724,10 @@ window.reinitialiserNiveauxDefaut = reinitialiserNiveauxDefaut;
 // window.fermerModalEchelles = fermerModalEchelles; // FIXME: fonction n'existe pas
 // window.convertirNiveauVersNote = convertirNiveauVersNote; // FIXME: fonction n'existe pas - utiliser convertirNiveauEnPourcentage() dans portfolio.js
 // window.convertirNoteVersNiveau = convertirNoteVersNiveau; // FIXME: fonction n'existe pas
+
+// Export/Import avec licence CC
+window.exporterEchelles = exporterEchelles;
+window.importerEchelles = importerEchelles;
 
 /* ===============================
    FONCTIONS SIDEBAR (Beta 80.5+)
