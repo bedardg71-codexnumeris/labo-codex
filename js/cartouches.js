@@ -1484,8 +1484,8 @@ function exporterCartouches() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    afficherNotificationSucces('Cartouches exportées avec licence CC BY-SA 4.0');
-    console.log('✅ Cartouches exportées avec licence CC BY-SA 4.0');
+    afficherNotificationSucces('Cartouches exportées avec licence CC BY-NC-SA 4.0');
+    console.log('✅ Cartouches exportées avec licence CC BY-NC-SA 4.0');
 }
 
 /**

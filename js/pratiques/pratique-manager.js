@@ -34,7 +34,7 @@ const PratiqueManager = {
         }
 
         // Vérifier si c'est une pratique codée en dur ou configurable
-        if (pratiqueId === 'pan-maitrise' || pratiqueId === 'sommative') {
+        if (pratiqueId === 'pan-maitrise' || pratiqueId === 'sommative' || pratiqueId === 'specifications') {
             // Pratique codée en dur existante, utiliser pratique-registre.js
             console.log(`[PratiqueManager] Pratique codée : ${pratiqueId}`);
             return window.obtenirPratiqueActive();
@@ -195,6 +195,7 @@ const PratiqueManager = {
                     id: config.id,
                     nom: config.nom,
                     auteur: config.auteur,
+                    etablissement: config.etablissement,
                     description: config.description,
                     config: config
                 };

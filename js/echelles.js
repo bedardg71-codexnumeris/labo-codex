@@ -1537,7 +1537,7 @@ function afficherNotificationSucces(message) {
  *
  * FONCTIONNEMENT:
  * 1. Charge toutes les échelles depuis localStorage
- * 2. Ajoute métadonnées CC BY-SA 4.0 (auteur, licence, version)
+ * 2. Ajoute métadonnées CC BY-NC-SA 4.0 (auteur, licence, version)
  * 3. Génère nom de fichier avec watermark CC
  * 4. Télécharge le fichier JSON
  *
@@ -1580,7 +1580,7 @@ function exporterEchelles() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    console.log('✅ Échelles exportées avec licence CC BY-SA 4.0');
+    console.log('✅ Échelles exportées avec licence CC BY-NC-SA 4.0');
 }
 
 /**

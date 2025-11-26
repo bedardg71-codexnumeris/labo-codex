@@ -3178,7 +3178,7 @@
                             </div>
 
                             <!-- Compteur présents/absents -->
-                            <div id="compteur-presences" style="background: var(--bleu-tres-pale); padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; display: flex; justify-content: center; gap: 30px; font-size: 0.95rem; font-weight: 500; border-left: 4px solid var(--bleu-principal); color: var(--bleu-moyen);">
+                            <div id="compteur-presences" style="background: var(--bleu-tres-pale); padding: 12px 16px; margin-bottom: 15px; display: flex; justify-content: center; gap: 30px; font-size: 0.95rem; font-weight: 500; border-left: 4px solid var(--bleu-principal); color: var(--bleu-moyen);">
                                 <span>
                                     Présents : <span id="nb-presents">0</span>
                                 </span>
@@ -4730,10 +4730,11 @@
                             <p><strong>Licences :</strong></p>
                             <ul style="margin-left: 20px; margin-top: 5px;">
                                 <li>Code source : AGPL v3.0 (<a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer">voir licence</a>)</li>
-                                <li>Contenu pédagogique : CC BY-SA 4.0 (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">voir licence</a>)</li>
+                                <li>Contenu pédagogique : CC BY-NC-SA 4.0 (<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">voir licence</a>)</li>
                             </ul>
                             <p style="margin-top: 15px; font-size: 0.9rem; color: #777;">
-                                Pour plus de détails sur les licences, consultez le fichier LICENSE.md dans le répertoire du projet.
+                                La licence non-commerciale (NC) protège le travail des enseignants tout en favorisant le partage
+                                et le bien commun en éducation. Pour plus de détails, consultez le fichier LICENSE.md.
                             </p>
                         </div>
                     </div>
@@ -5850,39 +5851,6 @@ Exemple :
 
                                     <h2 class="modal-titre">Créer une nouvelle pratique d'évaluation</h2>
 
-                                    <!-- Message de bienvenue Primo -->
-                                    <div class="cc-badge" style="margin: 20px 0; padding: 20px; background: white; border: 1px solid var(--gris-leger); border-radius: 6px;">
-                                        <div style="display: flex; align-items: flex-start; gap: 15px;">
-                                            <img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-sa.svg"
-                                                 alt="CC BY-SA 4.0"
-                                                 style="width: 88px; height: 31px; flex-shrink: 0; margin-top: 4px;">
-
-                                            <div style="flex: 1;">
-                                                <p style="margin: 0 0 12px 0; font-size: 1.05rem; font-weight: 600; color: var(--bleu-principal);">
-                                                    Bonjour! Je suis Primo, votre assistant de création de pratique
-                                                </p>
-
-                                                <p style="margin: 0 0 12px 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
-                                                    Je vais vous accompagner dans le réglage des paramètres de base de votre pratique. Plus tard,
-                                                    vous pourrez vous-même revoir ces choix ou en faire d'autres dans l'onglet Réglages.
-                                                    Chaque section est consacrée à un aspect précis de votre pratique.
-                                                </p>
-
-                                                <p style="margin: 0 0 12px 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
-                                                    Ce que je vais vous proposer repose sur des pratiques et du matériel déjà existant qui a été
-                                                    conçu par d'autres utilisateurs et utilisatrices comme vous. Vous y trouverez des grilles d'évaluation,
-                                                    des niveaux de performance, des cartouches de rétroaction, etc. Ce matériel pédagogique vous est
-                                                    proposé comme point de départ, mais vous pourrez l'ajuster à votre guise selon votre usage.
-                                                </p>
-
-                                                <p style="margin: 0; line-height: 1.6; font-size: 0.85rem; color: var(--gris-moyen); font-style: italic;">
-                                                    Ce matériel est partagé gracieusement sous licence <strong>CC BY-SA 4.0</strong>.
-                                                    N'hésitez pas à faire de même!
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
                                     <!-- Indicateur de progression -->
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
                                         <div>
@@ -5905,6 +5873,46 @@ Exemple :
                                     <div id="wizard-steps-container">
                                         <!-- ÉTAPE 1: Informations de base -->
                                         <div class="wizard-step" data-step="1">
+                                            <!-- Message de bienvenue Primo -->
+                                            <div class="primo-message" style="margin: 0 0 20px 0; padding: 20px; background: white; border: 1px solid var(--gris-leger); border-radius: 6px;">
+                                                <div style="display: flex; align-items: flex-start; gap: 15px;">
+                                                    <img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg"
+                                                         alt="CC BY-NC-SA 4.0"
+                                                         style="width: 88px; height: 31px; flex-shrink: 0; margin-top: 4px;">
+
+                                                    <div style="flex: 1;">
+                                                        <p style="margin: 0 0 12px 0; font-size: 1.05rem; font-weight: 600; color: var(--bleu-principal);">
+                                                            Bonjour! Je suis Primo, votre assistant de création de pratique
+                                                        </p>
+
+                                                        <p style="margin: 0 0 12px 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
+                                                            Je vais vous accompagner dans le réglage des paramètres de base de votre pratique. Plus tard,
+                                                            vous pourrez vous-même revoir ces choix ou en faire d'autres dans l'onglet Réglages.
+                                                            Chaque section est consacrée à un aspect précis de votre pratique.
+                                                        </p>
+
+                                                        <p style="margin: 0 0 12px 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
+                                                            Ce que je vais vous proposer repose sur des pratiques et du matériel déjà existant qui a été
+                                                            conçu par d'autres utilisateurs et utilisatrices comme vous. Vous y trouverez des grilles d'évaluation,
+                                                            des niveaux de performance, des cartouches de rétroaction, etc. Ce matériel pédagogique vous est
+                                                            proposé comme point de départ, mais vous pourrez l'ajuster à votre guise selon votre usage.
+                                                        </p>
+
+                                                        <p style="margin: 0 0 12px 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
+                                                            Ce matériel est partagé gracieusement sous licence <strong>CC BY-NC-SA 4.0</strong>
+                                                            (Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions).
+                                                            Cela signifie que vous pouvez l'utiliser, le modifier et le redistribuer librement à des fins éducatives,
+                                                            mais pas pour en tirer profit commercialement. Cette licence protège le travail des enseignants tout en
+                                                            favorisant le partage et le bien commun en éducation.
+                                                        </p>
+
+                                                        <p style="margin: 0; line-height: 1.6; font-size: 0.85rem; color: var(--gris-moyen); font-style: italic;">
+                                                            N'hésitez pas à partager votre propre matériel sous la même licence pour enrichir notre communauté!
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <div class="groupe-form">
                                                 <label>Nom de la pratique *</label>
                                                 <input type="text" id="wizard-nom" class="controle-form" placeholder="Ex: PAN-Spécifications personnalisé" required>
@@ -5929,10 +5937,13 @@ Exemple :
 
                                         <!-- ÉTAPE 2: Échelle d'évaluation -->
                                         <div class="wizard-step" data-step="2" style="display: none;">
-                                            <p style="color: var(--gris-moyen); font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;">
-                                                L'échelle détermine comment vous évaluez les productions de vos étudiants.
-                                                Vous pouvez utiliser une échelle par niveaux (comme IDME) ou des pourcentages classiques.
-                                            </p>
+                                            <!-- Message contextuel Primo: TECHNIQUE -->
+                                            <div class="alerte alerte-attention">
+                                                💡 <strong>Conseil technique :</strong>
+                                                L'échelle d'évaluation que vous choisissez ici sera utilisée pour toutes vos évaluations.
+                                                Si vous travaillez avec des niveaux de performance (comme IDME), je les convertirai automatiquement
+                                                en pourcentages pour calculer les indices de performance. Cette conversion en chiffre n'a aucun impact sur la note ou la manière de communiquer le résultat de l'élève.
+                                            </div>
 
                                             <div class="groupe-form">
                                                 <label>Échelle à utiliser *</label>
@@ -5947,7 +5958,7 @@ Exemple :
                                             </div>
 
                                             <!-- Message explicatif -->
-                                            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                                            <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal);">
                                                 <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--bleu-principal);">
                                                     À quoi servent ces valeurs ?
                                                 </h4>
@@ -5968,7 +5979,7 @@ Exemple :
                                             </div>
 
                                             <!-- Prévisualisation de l'échelle sélectionnée -->
-                                            <div id="wizard-preview-echelle" style="display: none; margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-principal);">
+                                            <div id="wizard-preview-echelle" style="display: none; margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
                                                 <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; color: var(--bleu-principal);">
                                                     Aperçu de l'échelle
                                                 </h4>
@@ -5980,10 +5991,13 @@ Exemple :
 
                                         <!-- ÉTAPE 3: Structure des évaluations -->
                                         <div class="wizard-step" data-step="3" style="display: none;">
-                                            <p style="color: var(--gris-moyen); font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;">
-                                                Choisissez comment vous organisez vos évaluations durant la session.
-                                                Chaque type correspond à une approche pédagogique différente.
-                                            </p>
+                                            <!-- Message contextuel Primo: PÉDAGOGIQUE -->
+                                            <div class="alerte alerte-succes">
+                                                🍎 <strong>Conseil pédagogique :</strong>
+                                                Le choix de votre structure détermine comment vos étudiants seront évalués. Prenez le temps de lire
+                                                les descriptions ci-dessous. Il n'y a pas de mauvais choix, seulement celui qui correspond à votre
+                                                vision pédagogique et aux besoins de vos étudiants.
+                                            </div>
 
                                             <div class="groupe-form">
                                                 <label>Type de structure *</label>
@@ -5998,7 +6012,7 @@ Exemple :
 
                                             <!-- Configuration Standards -->
                                             <div id="wizard-config-standards" style="display: none;">
-                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal);">
                                                     <p style="margin: 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
                                                         <strong>Notation par maîtrise (Standards-Based Grading)</strong> :
                                                         Les étudiants progressent à travers des standards numérotés qui représentent
@@ -6019,7 +6033,7 @@ Exemple :
 
                                             <!-- Configuration Portfolio -->
                                             <div id="wizard-config-portfolio" style="display: none;">
-                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal);">
                                                     <p style="margin: 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
                                                         <strong>Portfolio</strong> :
                                                         Approche fréquente en littérature avec ELLAC (Écrire, Lire, Littérature, Art, Culture).
@@ -6047,10 +6061,10 @@ Exemple :
 
                                             <!-- Configuration Évaluations discrètes -->
                                             <div id="wizard-config-evaluations" style="display: none;">
-                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal);">
                                                     <p style="margin: 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
                                                         <strong>Évaluations traditionnelles</strong> :
-                                                        Approche classique avec examens, travaux, présentations, etc.
+                                                        Approche traditionnelle avec examens, travaux, présentations, etc.
                                                         Chaque évaluation a sa propre pondération (qui doit totaliser 100%).
                                                         La note finale est la moyenne pondérée de toutes les évaluations.
                                                     </p>
@@ -6065,24 +6079,47 @@ Exemple :
 
                                             <!-- Configuration Spécifications -->
                                             <div id="wizard-config-specifications" style="display: none;">
-                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                                                <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-left: 4px solid var(--bleu-principal);">
                                                     <p style="margin: 0 0 10px 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
                                                         <strong>Notation par contrat (Specification Grading)</strong> :
-                                                        Les étudiants doivent atteindre un certain nombre d'objectifs pour obtenir une note spécifique.
-                                                        Par exemple: 8 objectifs atteints = 80%, 9 objectifs = 90%, 10 objectifs = 100%.
-                                                        Approche binaire (objectif atteint ou non) qui simplifie l'évaluation.
+                                                        Les étudiants atteignent des paliers de notes fixes (ex: 60%, 80%, 100%) en réussissant
+                                                        des ensembles d'objectifs mesurables. Chaque objectif est évalué réussite/échec selon des
+                                                        critères clairs communiqués à l'avance.
+                                                    </p>
+                                                    <p style="margin: 10px 0 0 0; line-height: 1.6; font-size: 0.9rem; color: var(--gris-fonce);">
+                                                        Cette approche clarifie les attentes, responsabilise les étudiants, réduit le stress
+                                                        et encourage l'orientation vers l'apprentissage plutôt que vers la note. Les étudiants
+                                                        peuvent réviser leur travail via le système de jetons pour atteindre les paliers supérieurs.
                                                     </p>
                                                 </div>
 
-                                                <p style="color: var(--gris-moyen); font-size: 0.9rem;">
-                                                    Les spécifications seront configurées manuellement dans le JSON après création.
-                                                    Structure de base créée automatiquement.
+                                                <div style="margin-bottom: 15px; padding: 12px; background: #fffbf0; border-left: 4px solid #f0ad4e;">
+                                                    <p style="margin: 0; line-height: 1.6; font-size: 0.85rem; color: var(--gris-fonce);">
+                                                        <strong>Recommandation de Primo</strong> :
+                                                        Cette pratique nécessite une configuration avancée après la création initiale.
+                                                        Vous devrez définir vos objectifs, les regrouper par palier de note, et les relier
+                                                        à vos évaluations. Un exemple complet basé sur une pratique réelle (Chimie 202) est
+                                                        disponible dans la documentation.
+                                                    </p>
+                                                </div>
+
+                                                <p style="color: var(--gris-moyen); font-size: 0.9rem; margin: 0;">
+                                                    La structure de base sera créée automatiquement. Consultez la documentation pour configurer
+                                                    vos objectifs et paliers de notes.
                                                 </p>
                                             </div>
                                         </div>
 
                                         <!-- ÉTAPE 4: Calcul de la note -->
                                         <div class="wizard-step" data-step="4" style="display: none;">
+                                            <!-- Message contextuel Primo: TECHNIQUE -->
+                                            <div class="alerte alerte-attention">
+                                                💡 <strong>Conseil technique :</strong>
+                                                La méthode de calcul définit comment la note finale sera déterminée à partir de vos évaluations.
+                                                Je vous recommande de choisir une méthode cohérente avec la structure que vous avez sélectionnée
+                                                à l'étape précédente.
+                                            </div>
+
                                             <div class="groupe-form">
                                                 <label>Méthode de calcul *</label>
                                                 <select id="wizard-calcul-methode" class="controle-form" onchange="afficherConfigCalcul()">
@@ -6110,6 +6147,14 @@ Exemple :
 
                                         <!-- ÉTAPE 5: Système de reprises -->
                                         <div class="wizard-step" data-step="5" style="display: none;">
+                                            <!-- Message contextuel Primo: PÉDAGOGIQUE -->
+                                            <div class="alerte alerte-succes">
+                                                🍎 <strong>Conseil pédagogique :</strong>
+                                                Les reprises permettent à vos étudiants de réviser leur travail et de progresser. Le système de jetons
+                                                que vous configurez ici sera disponible dans le profil de chaque étudiant. Vous pourrez attribuer
+                                                ou retirer des jetons individuellement selon les besoins.
+                                            </div>
+
                                             <div class="groupe-form">
                                                 <label>Type de reprises *</label>
                                                 <select id="wizard-reprises-type" class="controle-form" onchange="afficherConfigReprises()">
@@ -6155,7 +6200,7 @@ Exemple :
                                                 </div>
 
                                                 <!-- Résumé de la configuration des jetons -->
-                                                <div id="wizard-resume-jetons" style="display: none; margin-top: 15px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-principal);">
+                                                <div id="wizard-resume-jetons" style="display: none; margin-top: 15px; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
                                                     <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: var(--bleu-principal);">Configuration actuelle des jetons</h4>
                                                     <div id="wizard-resume-jetons-contenu">
                                                         <!-- Chargé dynamiquement -->
@@ -6170,14 +6215,17 @@ Exemple :
 
                                         <!-- ÉTAPE 6: Gestion des critères -->
                                         <div class="wizard-step" data-step="6" style="display: none;">
-                                            <!-- Introduction de l'étape -->
-                                            <p style="color: var(--gris-moyen); font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;">
-                                                Les critères d'évaluation définissent sur quoi vous évaluez vos étudiants
-                                                (ex: Structure, Rigueur, Plausibilité, Nuance, Français).
-                                            </p>
+                                            <!-- Message contextuel Primo: TECHNIQUE -->
+                                            <div class="alerte alerte-attention">
+                                                💡 <strong>Conseil technique :</strong>
+                                                Pour que je puisse détecter les patterns récurrents (tendances) et calculer les niveaux RàI
+                                                (Réponse à l'Intervention), je vous recommande fortement d'utiliser les mêmes critères dans tous
+                                                vos travaux durant la session. Cela me permettra d'identifier les défis persistants ou les progrès
+                                                significatifs de vos étudiants.
+                                            </div>
 
                                             <!-- Message important sur les patterns -->
-                                            <div style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                                            <div style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107;">
                                                 <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #856404;">
                                                     Recommandation de Primo
                                                 </h4>
@@ -6221,7 +6269,7 @@ Exemple :
                                                 </div>
 
                                                 <!-- Prévisualisation de la grille -->
-                                                <div id="wizard-preview-grille" style="display: none; margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-principal);">
+                                                <div id="wizard-preview-grille" style="display: none; margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
                                                     <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; color: var(--bleu-principal);">
                                                         Aperçu de la grille
                                                     </h4>
@@ -6248,13 +6296,16 @@ Exemple :
 
                                         <!-- ÉTAPE 7: Seuils d'interprétation -->
                                         <div class="wizard-step" data-step="7" style="display: none;">
-                                            <p style="color: var(--gris-moyen); font-size: 0.9rem; margin-bottom: 20px;">
-                                                Les seuils permettent d'interpréter les performances (ex: Fragile, Acceptable, Bon).
-                                                La pratique utilisera les seuils configurés dans vos Réglages.
-                                            </p>
+                                            <!-- Message contextuel Primo: TECHNIQUE -->
+                                            <div class="alerte alerte-attention">
+                                                💡 <strong>Conseil technique :</strong>
+                                                Ces seuils déterminent comment j'interprète les indices A-C-P de vos étudiants. Les valeurs par défaut
+                                                (70%, 80%, 85%) sont basées sur l'expérience pédagogique, mais vous pouvez les ajuster selon votre
+                                                contexte d'enseignement et vos exigences.
+                                            </div>
 
                                             <!-- Affichage des seuils configurés -->
-                                            <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-principal);">
+                                            <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
                                                 <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; color: var(--bleu-principal);">
                                                     Seuils configurés
                                                 </h4>
@@ -6278,9 +6329,13 @@ Exemple :
 
                                         <!-- ÉTAPE 8: Interface et terminologie -->
                                         <div class="wizard-step" data-step="8" style="display: none;">
-                                            <p style="color: var(--gris-moyen); font-size: 0.9rem; margin-bottom: 20px;">
-                                                Personnalisez les termes affichés dans l'interface
-                                            </p>
+                                            <!-- Message contextuel Primo: TECHNIQUE -->
+                                            <div class="alerte alerte-attention">
+                                                💡 <strong>Conseil technique :</strong>
+                                                Dernière étape! Ces paramètres d'affichage vous permettent de personnaliser la terminologie utilisée
+                                                dans l'application selon votre discipline et vos préférences. Vous pourrez toujours les modifier plus
+                                                tard dans les Réglages.
+                                            </div>
 
                                             <div class="groupe-form">
                                                 <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
@@ -6710,7 +6765,7 @@ Exemple :
                     </p>
 
                     <!-- RAPPEL PATTERNS -->
-                    <div style="margin-bottom: 20px; padding: 15px; background: var(--alerte-fond-attention); border-radius: 6px; border-left: 4px solid #ffc107;">
+                    <div style="margin-bottom: 20px; padding: 15px; background: var(--alerte-fond-attention); border-left: 4px solid #ffc107;">
                         <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 600; color: #333;">
                             💡 Rappel : Conditions pour la détection des patterns
                         </p>
@@ -7374,7 +7429,7 @@ Exemple :
                         <div class="alerte alerte-information">
                             <h4 style="color: var(--bleu-principal); margin-bottom: 10px">📊 Sommative (Évaluation traditionnelle)</h4>
                             <p><strong>Principes :</strong> Moyenne pondérée de toutes les évaluations, notation 0-100%</p>
-                            <p><strong>Fonctionnement :</strong> Toutes les évaluations comptent selon leur pondération. Approche classique utilisée dans la plupart des disciplines.</p>
+                            <p><strong>Fonctionnement :</strong> Toutes les évaluations comptent selon leur pondération. Approche traditionnelle utilisée dans la plupart des disciplines.</p>
                         </div>
 
                         <div class="alerte alerte-info">
@@ -9780,7 +9835,7 @@ Exemple :
                             <tr>
                                 <td class="td-bold-bleu">Licence</td>
                                 <td class="ligne-separee-bleu">Double licence<br>
-                                    <span class="text-muted" style="font-size: 0.9rem">GPL v3.0 (code) + CC BY-SA 4.0 (contenu)</span>
+                                    <span class="text-muted" style="font-size: 0.9rem">GPL v3.0 (code) + CC BY-NC-SA 4.0 (contenu)</span>
                                 </td>
                             </tr>
                             <tr>
@@ -9844,6 +9899,8 @@ Exemple :
     <script src="js/pratiques/pratique-test.js"></script>
     <script src="js/pratiques/pratique-pan-maitrise.js?v=2025112001"></script>
     <script src="js/pratiques/pratique-sommative.js?v=2025112001"></script>
+    <script src="js/pratiques/pratique-pan-specifications.js?v=2025112600"></script>
+    <script src="js/pratiques/config-francois-chimie.js?v=2025112600"></script>
 
     <!-- Pratiques configurables JSON (Beta 92 - Jour 1) -->
     <script src="js/pratiques/pratique-configurable.js?v=2025112501"></script>
