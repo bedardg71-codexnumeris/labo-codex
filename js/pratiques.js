@@ -2424,11 +2424,20 @@ function afficherEtapeWizard(numeroEtape) {
     // Mettre à jour les dots
     const dots = document.querySelectorAll('.wizard-dot');
     dots.forEach((dot, index) => {
-        if (index + 1 === numeroEtape) {
+        const dotStep = index + 1;
+
+        // Retirer toutes les classes
+        dot.classList.remove('wizard-dot-active', 'wizard-dot-completed');
+
+        // Étape actuelle : bleu vif + agrandi
+        if (dotStep === numeroEtape) {
             dot.classList.add('wizard-dot-active');
-        } else {
-            dot.classList.remove('wizard-dot-active');
         }
+        // Étapes complétées : bleu foncé
+        else if (dotStep < numeroEtape) {
+            dot.classList.add('wizard-dot-completed');
+        }
+        // Étapes futures : gris (classe par défaut)
     });
 
     // Charger les données dynamiques selon l'étape

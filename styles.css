@@ -1876,9 +1876,14 @@ input[type="number"].controle-form {
     transition: background 0.3s ease, transform 0.3s ease;
 }
 
+.wizard-dot-completed {
+    background: var(--bleu-fonce);
+}
+
 .wizard-dot-active {
     background: var(--bleu-principal);
-    transform: scale(1.3);
+    transform: scale(1.4);
+    box-shadow: 0 0 0 3px rgba(66, 139, 202, 0.2);
 }
 
 .wizard-step {
