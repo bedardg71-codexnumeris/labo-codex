@@ -198,15 +198,28 @@ function executerImport() {
         db.setSync(cle, donneesImportEnAttente[cle]);
         nbCles++;
     });
-    
+
+    // Détecter si ce sont les données de démo (pour déclencher tutoriel)
+    // On vérifie la présence de clés caractéristiques des données démo
+    const clesDemoPresentes = ['groupeEtudiants', 'artefacts', 'modalitesEvaluation'].every(cle =>
+        donneesImportEnAttente.hasOwnProperty(cle)
+    );
+
+    if (clesDemoPresentes && donneesImportEnAttente.groupeEtudiants &&
+        Array.isArray(donneesImportEnAttente.groupeEtudiants) &&
+        donneesImportEnAttente.groupeEtudiants.length > 0) {
+        // Marquer que les données de démo ont été chargées
+        db.setSync('donnees_demo_chargees', true);
+    }
+
     fermerModalImport();
-    
+
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`Import réussi : ${nbCles} clé(s) importée(s)`);
     } else {
         console.log(`Import réussi: ${nbCles} clés`);
     }
-    
+
     if (confirm('Import terminé ! Recharger la page pour appliquer les changements ?')) {
         location.reload();
     }
