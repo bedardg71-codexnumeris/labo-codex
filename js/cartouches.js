@@ -1240,10 +1240,12 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
         if (selectGrille) selectGrille.value = grilleId;
         if (selectCartouche) selectCartouche.value = cartoucheId;
 
-        // Afficher les boutons Dupliquer et Supprimer (mode édition)
+        // Afficher les boutons Dupliquer, Exporter et Supprimer (mode édition)
         const btnDupliquer = document.getElementById('btnDupliquerCartouche');
+        const btnExporter = document.getElementById('btnExporterCartouche');
         const btnSupprimer = document.getElementById('btnSupprimerCartouche');
         if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
+        if (btnExporter) btnExporter.style.display = 'inline-block';
         if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
         // NOUVELLE INTERFACE (Beta 80.5+): Passer les paramètres directement
@@ -1442,7 +1444,7 @@ function afficherNotificationSucces(message) {
  *   }
  * }
  */
-function exporterCartouches() {
+async function exporterCartouches() {
     const cartouches = {};
 
     // Parcourir toutes les clés localStorage
@@ -1460,11 +1462,29 @@ function exporterCartouches() {
         return;
     }
 
-    // Emballer avec métadonnées CC
+    // Compter le nombre total de cartouches
+    let nbCartouches = 0;
+    Object.values(cartouches).forEach(arr => {
+        nbCartouches += arr.length;
+    });
+
+    // NOUVEAU (Beta 91): Demander métadonnées enrichies
+    const metaEnrichies = await demanderMetadonneesEnrichies(
+        'Cartouches de rétroaction',
+        `${nbCartouches} cartouche(s) pour ${Object.keys(cartouches).length} grille(s)`
+    );
+
+    if (!metaEnrichies) {
+        console.log('Export annulé par l\'utilisateur');
+        return;
+    }
+
+    // Emballer avec métadonnées CC enrichies
     const donnees = ajouterMetadonnéesCC(
         { cartouches: cartouches },
         'cartouches',
-        'Cartouches de rétroaction'
+        'Cartouches de rétroaction',
+        metaEnrichies
     );
 
     // Générer nom de fichier avec watermark CC
@@ -1484,7 +1504,7 @@ function exporterCartouches() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    afficherNotificationSucces('Cartouches exportées avec licence CC BY-NC-SA 4.0');
+    afficherNotificationSucces(`${nbCartouches} cartouche(s) exportée(s) avec succès`);
     console.log('✅ Cartouches exportées avec licence CC BY-NC-SA 4.0');
 }
 
@@ -1566,16 +1586,77 @@ function importerCartouches(event) {
 /**
  * Confirme l'import et fusionne les cartouches
  * Fonction helper appelée depuis le modal de confirmation
+ * PHASE 3.3: Détection de dépendances manquantes (Beta 91)
  */
 window.confirmerImportCartouches = function(donnees) {
     try {
+        let cartouchesData;
+        let metadata = null;
+
         // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata)
-        const cartouchesData = donnees.contenu ?
-            donnees.contenu.cartouches :
-            donnees.cartouches;
+        if (donnees.contenu) {
+            metadata = donnees.metadata;
+
+            // Vérifier si c'est un export individuel (une seule cartouche)
+            if (donnees.contenu.id && donnees.contenu.grilleId) {
+                // Individual export: { metadata, contenu: { ...cartouche... } }
+                const cartouche = { ...donnees.contenu };
+
+                // Préserver metadata_cc si présent
+                if (metadata && metadata.licence) {
+                    cartouche.metadata_cc = {
+                        auteur_original: metadata.auteur_original,
+                        date_creation: metadata.date_creation,
+                        licence: metadata.licence,
+                        contributeurs: metadata.contributeurs || []
+                    };
+                }
+
+                // Convertir en format batch pour traitement uniforme
+                cartouchesData = {
+                    [cartouche.grilleId]: [cartouche]
+                };
+            } else if (donnees.contenu.cartouches) {
+                // Batch export: { metadata, contenu: { cartouches: {...} } }
+                cartouchesData = donnees.contenu.cartouches;
+            } else {
+                throw new Error('Format invalide: structure de contenu non reconnue');
+            }
+        } else {
+            // Ancien format direct
+            cartouchesData = donnees.cartouches;
+        }
 
         if (!cartouchesData || typeof cartouchesData !== 'object') {
             throw new Error('Format invalide: cartouches doit être un objet');
+        }
+
+        // PHASE 3.3: Détecter les dépendances manquantes (grilles référencées)
+        const grillesExistantes = db.getSync('grillesTemplates', []);
+        const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
+        const grillesManquantes = [];
+
+        Object.keys(cartouchesData).forEach(grilleId => {
+            if (!idsGrillesExistants.has(grilleId)) {
+                grillesManquantes.push(grilleId);
+            }
+        });
+
+        // Avertir l'utilisateur si des dépendances manquent
+        if (grillesManquantes.length > 0) {
+            const nbGrillesManquantes = grillesManquantes.length;
+            const message = `⚠️ Attention : ${nbGrillesManquantes} grille(s) de critères manquante(s)\n\n` +
+                `Les cartouches importées sont associées à des grilles qui n'existent pas encore dans votre système.\n\n` +
+                `Grilles manquantes :\n${grillesManquantes.map(id => `  • ${id}`).join('\n')}\n\n` +
+                `Les cartouches seront importées mais ne seront visibles qu'après avoir importé les grilles manquantes.\n\n` +
+                `Continuer quand même ?`;
+
+            if (!confirm(message)) {
+                console.log('Import annulé par l\'utilisateur (dépendances manquantes)');
+                return;
+            }
+
+            console.log(`⚠️ Import avec ${nbGrillesManquantes} dépendance(s) manquante(s):`, grillesManquantes);
         }
 
         let compteur = 0;
@@ -1587,6 +1668,16 @@ window.confirmerImportCartouches = function(donnees) {
 
             // Fusionner : remplacer si même ID, sinon ajouter
             cartouchesImportees.forEach(importee => {
+                // Préserver metadata_cc pour batch export aussi
+                if (metadata && metadata.licence && !importee.metadata_cc) {
+                    importee.metadata_cc = {
+                        auteur_original: metadata.auteur_original,
+                        date_creation: metadata.date_creation,
+                        licence: metadata.licence,
+                        contributeurs: metadata.contributeurs || []
+                    };
+                }
+
                 const index = cartouchesExistantes.findIndex(c => c.id === importee.id);
                 if (index !== -1) {
                     cartouchesExistantes[index] = importee;
@@ -1745,10 +1836,12 @@ function ajouterCartoucheAGrille(grilleId) {
         selectGrille.value = grilleId;
     }
 
-    // Masquer les boutons Dupliquer et Supprimer (mode création)
+    // Masquer les boutons Dupliquer, Exporter et Supprimer (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerCartouche');
+    const btnExporter = document.getElementById('btnExporterCartouche');
     const btnSupprimer = document.getElementById('btnSupprimerCartouche');
     if (btnDupliquer) btnDupliquer.style.display = 'none';
+    if (btnExporter) btnExporter.style.display = 'none';
     if (btnSupprimer) btnSupprimer.style.display = 'none';
 
     // Initialiser une nouvelle cartouche pour cette grille
@@ -1781,6 +1874,44 @@ function dupliquerCartoucheActive() {
         return;
     }
     dupliquerCartouche(cartoucheActuel.id, cartoucheActuel.grilleId);
+}
+
+/**
+ * Exporte la cartouche actuellement en cours d'édition
+ */
+function exporterCartoucheActive() {
+    if (!cartoucheActuel || !cartoucheActuel.id || !cartoucheActuel.grilleId) {
+        alert('Aucune cartouche à exporter');
+        return;
+    }
+
+    const grilleId = cartoucheActuel.grilleId;
+    const cartoucheId = cartoucheActuel.id;
+
+    // Récupérer la cartouche
+    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+    const cartouche = cartouches.find(c => c.id === cartoucheId);
+
+    if (!cartouche) {
+        alert('Cartouche introuvable');
+        return;
+    }
+
+    // Ajouter les métadonnées CC
+    const exportAvecCC = ajouterMetadonnéesCC(
+        cartouche,
+        'cartouche-retroaction',
+        `${cartouche.criterenom} - ${cartouche.niveaunom}`
+    );
+
+    const json = JSON.stringify(exportAvecCC, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cartouche-${cartouche.criterenom}-${cartouche.niveaunom}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 /**
@@ -1855,6 +1986,7 @@ window.importerCartoucheDepuisTxt = importerCartoucheDepuisTxt;
 
 // Nouvelles fonctions Beta 90 (boutons dans formulaire)
 window.dupliquerCartoucheActive = dupliquerCartoucheActive;
+window.exporterCartoucheActive = exporterCartoucheActive;
 window.supprimerCartoucheActive = supprimerCartoucheActive;
 window.annulerFormCartouche = annulerFormCartouche;
 window.sauvegarderCartoucheComplete = sauvegarderCartoucheComplete;

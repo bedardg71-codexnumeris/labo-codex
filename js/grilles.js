@@ -1482,7 +1482,7 @@ function initialiserModuleGrilles() {
  *   contenu: { grilles: [...] }
  * }
  */
-function exporterGrilles() {
+async function exporterGrilles() {
     const grilles = db.getSync('grillesTemplates', []);
 
     if (grilles.length === 0) {
@@ -1490,11 +1490,23 @@ function exporterGrilles() {
         return;
     }
 
-    // Emballer avec métadonnées CC
+    // NOUVEAU (Beta 91): Demander métadonnées enrichies
+    const metaEnrichies = await demanderMetadonneesEnrichies(
+        'Grilles de critères',
+        `${grilles.length} grille(s)`
+    );
+
+    if (!metaEnrichies) {
+        console.log('Export annulé par l\'utilisateur');
+        return;
+    }
+
+    // Emballer avec métadonnées CC enrichies
     const donnees = ajouterMetadonnéesCC(
         { grilles: grilles },
         'grilles',
-        'Grilles de critères d\'évaluation'
+        'Grilles de critères d\'évaluation',
+        metaEnrichies
     );
 
     // Générer nom de fichier avec watermark CC
@@ -1516,6 +1528,84 @@ function exporterGrilles() {
     URL.revokeObjectURL(url);
 
     console.log('✅ Grilles exportées avec licence CC BY-NC-SA 4.0');
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(`${grilles.length} grille(s) exportée(s) avec succès`);
+    }
+}
+
+/**
+ * Exporte la grille actuellement en cours d'édition
+ */
+async function exporterGrilleActive() {
+    if (!grilleTemplateActuelle) {
+        alert('Aucune grille sélectionnée à exporter.');
+        return;
+    }
+
+    const grilles = db.getSync('grillesTemplates', []);
+    const grille = grilles.find(g => g.id === grilleTemplateActuelle);
+
+    if (!grille) {
+        alert('Grille introuvable.');
+        return;
+    }
+
+    // NOUVEAU (Beta 91): Demander métadonnées enrichies
+    const metaEnrichies = await demanderMetadonneesEnrichies(
+        'Grille de critères',
+        grille.nom
+    );
+
+    if (!metaEnrichies) {
+        console.log('Export annulé par l\'utilisateur');
+        return;
+    }
+
+    // Préparer le contenu pour l'export
+    let contenuExport = { ...grille };
+
+    // Si la grille a été importée avec des métadonnées CC, ajouter l'utilisateur actuel comme contributeur
+    if (grille.metadata_cc) {
+        // Demander le nom de l'utilisateur s'il modifie le matériel
+        const nomUtilisateur = prompt(
+            'Vous allez exporter un matériel créé par ' + grille.metadata_cc.auteur_original + '.\n\n' +
+            'Entrez votre nom pour être crédité comme contributeur :\n' +
+            '(Laissez vide si vous n\'avez fait aucune modification)'
+        );
+
+        if (nomUtilisateur && nomUtilisateur.trim()) {
+            // Ajouter le contributeur
+            const contributeurs = grille.metadata_cc.contributeurs || [];
+            contributeurs.push({
+                nom: nomUtilisateur.trim(),
+                date: new Date().toISOString().split('T')[0],
+                modifications: 'Modifications et adaptations'
+            });
+
+            // Créer les métadonnées enrichies
+            contenuExport.metadata_cc = {
+                ...grille.metadata_cc,
+                contributeurs: contributeurs
+            };
+        }
+    }
+
+    // Ajouter les métadonnées CC enrichies
+    const exportAvecCC = ajouterMetadonnéesCC(contenuExport, 'grille-criteres', grille.nom, metaEnrichies);
+
+    const json = JSON.stringify(exportAvecCC, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `grille-${grille.nom.replace(/[^a-z0-9]/gi, '-')}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    console.log('✅ Grille exportée avec licence CC BY-NC-SA 4.0');
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(`Grille "${grille.nom}" exportée avec succès`);
+    }
 }
 
 /**
@@ -1591,9 +1681,24 @@ function importerGrilles(event) {
 window.confirmerImportGrilles = function(donnees) {
     try {
         // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata)
-        const grillesImportees = donnees.contenu ?
-            donnees.contenu.grilles :
-            donnees.grilles || donnees;
+        let grillesImportees;
+        let metadata = null;
+
+        if (donnees.contenu) {
+            // Nouveau format avec CC metadata
+            metadata = donnees.metadata;
+
+            if (donnees.contenu.grilles) {
+                // Batch export: { metadata, contenu: { grilles: [...] } }
+                grillesImportees = donnees.contenu.grilles;
+            } else {
+                // Individual export: { metadata, contenu: { ...grille... } }
+                grillesImportees = [donnees.contenu];
+            }
+        } else {
+            // Ancien format direct
+            grillesImportees = donnees.grilles || [donnees];
+        }
 
         if (!Array.isArray(grillesImportees)) {
             throw new Error('Format invalide: grilles doit être un tableau');
@@ -1604,6 +1709,16 @@ window.confirmerImportGrilles = function(donnees) {
 
         // Fusionner (remplacer si même ID, sinon ajouter)
         grillesImportees.forEach(grille => {
+            // Préserver les métadonnées CC dans la grille importée
+            if (metadata && metadata.licence) {
+                grille.metadata_cc = {
+                    auteur_original: metadata.auteur_original,
+                    date_creation: metadata.date_creation,
+                    licence: metadata.licence,
+                    contributeurs: metadata.contributeurs || []
+                };
+            }
+
             const index = grillesExistantes.findIndex(g => g.id === grille.id);
             if (index >= 0) {
                 grillesExistantes[index] = grille;
@@ -1663,6 +1778,7 @@ window.calculerTotalPonderationCriteres = calculerTotalPonderationCriteres;
 
 // Export/Import avec licence CC
 window.exporterGrilles = exporterGrilles;
+window.exporterGrilleActive = exporterGrilleActive;
 window.importerGrilles = importerGrilles;
 window.enregistrerCommeGrille = enregistrerCommeGrille;
 window.initialiserModuleGrilles = initialiserModuleGrilles;
@@ -1701,10 +1817,12 @@ function creerNouvelleGrille() {
     document.getElementById('conteneurEditionGrille').style.display = 'block';
     document.getElementById('optionsImportExportGrilles').style.display = 'block';
 
-    // Cacher les boutons Dupliquer et Supprimer (mode création)
+    // Cacher les boutons Dupliquer, Exporter et Supprimer (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerGrille');
+    const btnExporter = document.getElementById('btnExporterGrille');
     const btnSupprimer = document.getElementById('btnSupprimerGrille');
     if (btnDupliquer) btnDupliquer.style.display = 'none';
+    if (btnExporter) btnExporter.style.display = 'none';
     if (btnSupprimer) btnSupprimer.style.display = 'none';
 
     // Réinitialiser grilleTemplateActuelle
@@ -1739,10 +1857,12 @@ function chargerGrillePourModif(id) {
     document.getElementById('conteneurEditionGrille').style.display = 'block';
     document.getElementById('optionsImportExportGrilles').style.display = 'block';
 
-    // Afficher les boutons Dupliquer et Supprimer (mode édition)
+    // Afficher les boutons Dupliquer, Exporter et Supprimer (mode édition)
     const btnDupliquer = document.getElementById('btnDupliquerGrille');
+    const btnExporter = document.getElementById('btnExporterGrille');
     const btnSupprimer = document.getElementById('btnSupprimerGrille');
     if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
+    if (btnExporter) btnExporter.style.display = 'inline-block';
     if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
     // Définir la grille actuelle
