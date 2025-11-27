@@ -1,0 +1,77 @@
+{
+  "metadata": {
+    "type": "echelles",
+    "nom": "Échelle IDME (SOLO)",
+    "auteur": "Grégoire Bédard",
+    "auteur_original": "Grégoire Bédard",
+    "discipline": ["Français", "Littérature", "Sciences humaines"],
+    "niveau": "Collégial",
+    "description_courte": "Échelle de performance basée sur la taxonomie SOLO adaptée pour l'évaluation qualitative : Insuffisant, Développement, Maîtrisé, Étendu",
+    "licence": "CC BY-NC-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "version": "1.0",
+    "date_creation": "2025-11-26",
+    "date_export": "2025-11-26",
+    "application_version": "Beta 91",
+    "email_auteur": "labo@codexnumeris.org",
+    "site_auteur": "https://codexnumeris.org"
+  },
+  "contenu": {
+    "echelles": [
+      {
+        "id": "ECH1732625000111",
+        "nom": "Échelle IDME (SOLO)",
+        "description": "Échelle basée sur la taxonomie SOLO pour mesurer la profondeur de compréhension",
+        "niveaux": [
+          {
+            "code": "0",
+            "nom": "Aucun",
+            "min": 0,
+            "max": 0,
+            "valeur": 0,
+            "description": "Travail non original ou non recevable (plagiat, IA non autorisée)",
+            "couleur": "#000000"
+          },
+          {
+            "code": "I",
+            "nom": "Insuffisant",
+            "min": 0,
+            "max": 64,
+            "valeur": 0.5,
+            "description": "Compréhension superficielle ou fragmentaire",
+            "couleur": "#e74c3c"
+          },
+          {
+            "code": "D",
+            "nom": "Développement",
+            "min": 65,
+            "max": 74,
+            "valeur": 0.70,
+            "description": "Points pertinents identifiés mais sans liens entre eux",
+            "couleur": "#f39c12"
+          },
+          {
+            "code": "M",
+            "nom": "Maîtrisé",
+            "min": 75,
+            "max": 84,
+            "valeur": 0.80,
+            "description": "Compréhension globale avec liens établis",
+            "couleur": "#27ae60"
+          },
+          {
+            "code": "E",
+            "nom": "Étendu",
+            "min": 85,
+            "max": 100,
+            "valeur": 0.925,
+            "description": "Transfert à d'autres contextes et généralisation",
+            "couleur": "#2980b9"
+          }
+        ],
+        "dateCreation": "2025-11-26",
+        "typeEchelle": "idme-solo"
+      }
+    ]
+  }
+}
