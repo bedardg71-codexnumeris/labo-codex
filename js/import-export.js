@@ -255,3 +255,486 @@ function reinitialiserDonnees() {
         alert('Erreur lors de la réinitialisation.');
     }
 }
+
+/* ===============================
+   IMPORT CONFIGURATION COMPLÈTE (Beta 91)
+   =============================== */
+
+let configCompleteEnAttente = null;
+
+/**
+ * Ouvre le sélecteur de fichier pour importer une configuration complète
+ */
+function ouvrirImportConfigComplete() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = previsualiserConfigComplete;
+    input.click();
+}
+
+/**
+ * Prévisualise une configuration complète avant import
+ * @param {Event} event - Événement de sélection de fichier
+ */
+function previsualiserConfigComplete(event) {
+    const fichier = event.target.files[0];
+    if (!fichier) return;
+
+    const lecteur = new FileReader();
+    lecteur.onload = function(e) {
+        try {
+            const config = JSON.parse(e.target.result);
+
+            // Validation: vérifier que c'est bien une configuration complète
+            if (!config.metadata || config.metadata.type !== 'configuration-complete') {
+                alert('Fichier invalide. Ce n\'est pas une configuration complète exportée par Monitorage.');
+                return;
+            }
+
+            if (!config.contenu) {
+                alert('Fichier invalide. La structure de la configuration est incorrecte.');
+                return;
+            }
+
+            // Stocker la configuration en attente
+            configCompleteEnAttente = config;
+
+            // Afficher le modal de prévisualisation
+            afficherModalPreviewConfigComplete(config);
+
+        } catch (err) {
+            alert('Erreur lors de la lecture du fichier JSON.\n\n' + err.message);
+            console.error('Erreur parsing JSON:', err);
+        }
+    };
+    lecteur.readAsText(fichier);
+}
+
+/**
+ * Affiche le modal de prévisualisation de la configuration
+ * @param {Object} config - Configuration complète à prévisualiser
+ */
+function afficherModalPreviewConfigComplete(config) {
+    const meta = config.metadata;
+    const contenu = config.contenu;
+
+    // Compter les ressources
+    const nbEchelles = contenu.echelles ? contenu.echelles.length : 0;
+    const nbGrilles = contenu.grilles ? contenu.grilles.length : 0;
+    const nbProductions = contenu.productions ? contenu.productions.length : 0;
+    const nbCartouches = contenu.cartouches
+        ? Object.keys(contenu.cartouches).reduce((total, grilleId) => {
+            return total + (contenu.cartouches[grilleId] ? contenu.cartouches[grilleId].length : 0);
+          }, 0)
+        : 0;
+
+    // Créer le modal
+    const modalHTML = `
+        <div id="modalPreviewConfigComplete" style="display: flex; position: fixed; top: 0; left: 0;
+             width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;
+             align-items: center; justify-content: center;">
+            <div style="background: white; border-radius: 8px; padding: 30px; max-width: 600px;
+                 width: 90%; max-height: 80vh; overflow-y: auto;">
+
+                <h2 style="margin-top: 0; color: var(--bleu-moyen); border-bottom: 2px solid var(--bleu-pale);
+                     padding-bottom: 10px;">
+                    Aperçu de la configuration
+                </h2>
+
+                <!-- Métadonnées -->
+                <div style="background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-moyen);
+                     padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                    <h3 style="margin-top: 0; font-size: 1.1rem;">📋 ${meta.nom}</h3>
+                    <p style="margin: 5px 0;"><strong>Auteur :</strong> ${meta.auteur}</p>
+                    ${meta.discipline && meta.discipline.length > 0
+                        ? `<p style="margin: 5px 0;"><strong>Discipline :</strong> ${meta.discipline.join(', ')}</p>`
+                        : ''}
+                    ${meta.niveau ? `<p style="margin: 5px 0;"><strong>Niveau :</strong> ${meta.niveau}</p>` : ''}
+                    ${meta.description
+                        ? `<p style="margin: 10px 0 5px 0; font-style: italic; color: var(--gris-fonce);">${meta.description}</p>`
+                        : ''}
+                    <p style="margin: 10px 0 0 0; font-size: 0.85rem; color: var(--gris-moyen);">
+                        Version ${meta.version} • Exportée le ${meta.date_export}
+                    </p>
+                </div>
+
+                <!-- Contenu -->
+                <div style="background: white; border: 1px solid var(--bleu-pale); padding: 15px;
+                     margin-bottom: 20px; border-radius: 4px;">
+                    <h3 style="margin-top: 0; font-size: 1rem; color: var(--bleu-moyen);">📦 Contenu de la configuration</h3>
+                    <ul style="list-style: none; padding-left: 0; margin: 10px 0;">
+                        <li style="padding: 5px 0; border-bottom: 1px solid var(--bleu-tres-pale);">
+                            ✓ ${nbEchelles} échelle(s) de performance
+                        </li>
+                        <li style="padding: 5px 0; border-bottom: 1px solid var(--bleu-tres-pale);">
+                            ✓ ${nbGrilles} grille(s) de critères
+                        </li>
+                        <li style="padding: 5px 0; border-bottom: 1px solid var(--bleu-tres-pale);">
+                            ✓ ${nbProductions} production(s) pédagogique(s)
+                        </li>
+                        <li style="padding: 5px 0; border-bottom: 1px solid var(--bleu-tres-pale);">
+                            ✓ ${nbCartouches} cartouche(s) de rétroaction
+                        </li>
+                        <li style="padding: 5px 0;">
+                            ✓ Paramètres du cours (jetons, reprises, etc.)
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Avertissement -->
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px;
+                     margin-bottom: 20px; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 0.9rem; color: #856404;">
+                        <strong>⚠️ Attention :</strong> Cette action va importer toutes les ressources de cette configuration.
+                        Les ressources existantes avec les mêmes identifiants seront écrasées.
+                    </p>
+                </div>
+
+                <!-- Boutons -->
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="fermerModalPreviewConfigComplete()"
+                            style="padding: 10px 20px; background: var(--gris-clair); color: var(--gris-fonce);
+                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;">
+                        Annuler
+                    </button>
+                    <button onclick="executerImportConfigComplete()"
+                            style="padding: 10px 20px; background: var(--bleu-moyen); color: white;
+                                   border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem;
+                                   font-weight: 500;">
+                        Importer cette configuration
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Insérer le modal dans le DOM
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHTML;
+    document.body.appendChild(modalContainer);
+}
+
+/**
+ * Ferme le modal de prévisualisation
+ */
+function fermerModalPreviewConfigComplete() {
+    const modal = document.getElementById('modalPreviewConfigComplete');
+    if (modal) {
+        modal.parentElement.remove();
+    }
+    configCompleteEnAttente = null;
+}
+
+/**
+ * Exécute l'import de la configuration complète avec gestion des conflits d'ID
+ */
+function executerImportConfigComplete() {
+    if (!configCompleteEnAttente) {
+        alert('Aucune configuration en attente d\'importation.');
+        return;
+    }
+
+    const config = configCompleteEnAttente;
+    const contenu = config.contenu;
+
+    try {
+        // Table de remapping: oldId → newId
+        const remapEchelles = {};
+        const remapGrilles = {};
+
+        // Récupérer les ressources existantes
+        const echellesExistantes = db.getSync('echellesTemplates', []);
+        const grillesExistantes = db.getSync('grillesTemplates', []);
+
+        // Créer des Sets d'IDs existants pour recherche rapide
+        const idsEchellesExistants = new Set(echellesExistantes.map(e => e.id));
+        const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
+
+        // 1. Importer les échelles avec détection de conflits
+        if (contenu.echelles && contenu.echelles.length > 0) {
+            const echellesAImporter = contenu.echelles.map(echelle => {
+                // Vérifier si l'ID existe déjà
+                if (idsEchellesExistants.has(echelle.id)) {
+                    // Conflit détecté: générer un nouvel ID
+                    const ancienId = echelle.id;
+                    const nouvelId = 'ECH' + Date.now() + Math.floor(Math.random() * 1000);
+
+                    // Enregistrer le remapping
+                    remapEchelles[ancienId] = nouvelId;
+
+                    console.log(`⚠️ Conflit d'ID échelle: ${ancienId} → ${nouvelId}`);
+
+                    // Retourner échelle avec nouvel ID
+                    return { ...echelle, id: nouvelId };
+                }
+                // Pas de conflit, retourner tel quel
+                return echelle;
+            });
+
+            // Fusionner avec échelles existantes
+            const echellesFusionnees = [...echellesExistantes, ...echellesAImporter];
+            db.setSync('echellesTemplates', echellesFusionnees);
+            console.log(`✅ ${echellesAImporter.length} échelle(s) importée(s)`);
+        }
+
+        // 2. Importer les grilles avec détection de conflits
+        if (contenu.grilles && contenu.grilles.length > 0) {
+            const grillesAImporter = contenu.grilles.map(grille => {
+                // Vérifier si l'ID existe déjà
+                if (idsGrillesExistants.has(grille.id)) {
+                    // Conflit détecté: générer un nouvel ID
+                    const ancienId = grille.id;
+                    const nouvelId = 'GRILLE' + Date.now() + Math.floor(Math.random() * 1000);
+
+                    // Enregistrer le remapping
+                    remapGrilles[ancienId] = nouvelId;
+
+                    console.log(`⚠️ Conflit d'ID grille: ${ancienId} → ${nouvelId}`);
+
+                    // Retourner grille avec nouvel ID
+                    return { ...grille, id: nouvelId };
+                }
+                // Pas de conflit, retourner tel quel
+                return grille;
+            });
+
+            // Fusionner avec grilles existantes
+            const grillesFusionnees = [...grillesExistantes, ...grillesAImporter];
+            db.setSync('grillesTemplates', grillesFusionnees);
+            console.log(`✅ ${grillesAImporter.length} grille(s) importée(s)`);
+        }
+
+        // 3. Importer les productions avec mise à jour des références aux grilles
+        if (contenu.productions && contenu.productions.length > 0) {
+            const productionsExistantes = db.getSync('productions', []);
+
+            const productionsAImporter = contenu.productions.map(production => {
+                // Créer une copie de la production
+                const prod = { ...production };
+
+                // Générer un nouvel ID pour éviter les conflits
+                prod.id = 'PROD' + Date.now() + Math.floor(Math.random() * 1000);
+
+                // Mettre à jour la référence à la grille si elle a été remappée
+                if (prod.grilleId && remapGrilles[prod.grilleId]) {
+                    console.log(`🔗 Mise à jour référence grille dans production: ${prod.grilleId} → ${remapGrilles[prod.grilleId]}`);
+                    prod.grilleId = remapGrilles[prod.grilleId];
+                }
+
+                return prod;
+            });
+
+            // Fusionner avec productions existantes
+            const productionsFusionnees = [...productionsExistantes, ...productionsAImporter];
+            db.setSync('productions', productionsFusionnees);
+            console.log(`✅ ${productionsAImporter.length} production(s) importée(s)`);
+        }
+
+        // 4. Importer les cartouches avec mise à jour des clés (grilleId)
+        if (contenu.cartouches) {
+            let nbCartouchesTotal = 0;
+
+            Object.keys(contenu.cartouches).forEach(ancienGrilleId => {
+                const cartouchesGrille = contenu.cartouches[ancienGrilleId];
+                if (!cartouchesGrille || cartouchesGrille.length === 0) return;
+
+                // Déterminer la bonne clé à utiliser (remappée ou originale)
+                const grilleIdFinal = remapGrilles[ancienGrilleId] || ancienGrilleId;
+
+                if (remapGrilles[ancienGrilleId]) {
+                    console.log(`🔗 Mise à jour clé cartouches: cartouches_${ancienGrilleId} → cartouches_${grilleIdFinal}`);
+                }
+
+                // Récupérer les cartouches existantes pour cette grille
+                const cartouchesExistantes = db.getSync(`cartouches_${grilleIdFinal}`, []);
+
+                // Fusionner (ajouter les nouvelles cartouches)
+                const cartouchesFusionnees = [...cartouchesExistantes, ...cartouchesGrille];
+                db.setSync(`cartouches_${grilleIdFinal}`, cartouchesFusionnees);
+
+                nbCartouchesTotal += cartouchesGrille.length;
+            });
+
+            console.log(`✅ ${nbCartouchesTotal} cartouche(s) importée(s)`);
+        }
+
+        // 5. Importer les paramètres du cours (fusion avec paramètres existants)
+        if (contenu.parametres) {
+            const modalitesActuelles = db.getSync('modalitesEvaluation', {});
+            const modalitesFusionnees = {
+                ...modalitesActuelles,
+                systemeJetons: contenu.parametres.systeme_jetons,
+                reprisesAutorisees: contenu.parametres.reprises_autorisees,
+                nombreArtefacts: contenu.parametres.nombre_artefacts,
+                pratiqueActive: contenu.parametres.pratique_active,
+                modeComparatif: contenu.parametres.mode_comparatif
+            };
+            db.setSync('modalitesEvaluation', modalitesFusionnees);
+            console.log('✅ Paramètres du cours importés');
+        }
+
+        // Afficher résumé des remappages si nécessaire
+        const nbRemapEchelles = Object.keys(remapEchelles).length;
+        const nbRemapGrilles = Object.keys(remapGrilles).length;
+
+        if (nbRemapEchelles > 0 || nbRemapGrilles > 0) {
+            console.log('\n📊 Résumé des conflits d\'ID résolus:');
+            if (nbRemapEchelles > 0) {
+                console.log(`   - ${nbRemapEchelles} échelle(s) remappée(s)`);
+            }
+            if (nbRemapGrilles > 0) {
+                console.log(`   - ${nbRemapGrilles} grille(s) remappée(s)`);
+            }
+        }
+
+        // Fermer le modal
+        fermerModalPreviewConfigComplete();
+
+        // Notification de succès
+        let messageSucces = `Configuration «${config.metadata.nom}» importée avec succès!`;
+        if (nbRemapEchelles > 0 || nbRemapGrilles > 0) {
+            messageSucces += `\n\n${nbRemapEchelles + nbRemapGrilles} conflit(s) d'ID résolu(s) automatiquement.`;
+        }
+
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(messageSucces);
+        }
+
+        // Proposer de recharger la page
+        if (confirm('Import terminé!\n\nRecharger la page pour appliquer les changements?')) {
+            location.reload();
+        }
+
+    } catch (erreur) {
+        console.error('Erreur lors de l\'import de la configuration:', erreur);
+        alert('Erreur lors de l\'import de la configuration.\n\n' + erreur.message);
+    }
+}
+
+/* ===============================
+   EXPORT CONFIGURATION COMPLÈTE (Beta 91)
+   =============================== */
+
+/**
+ * Exporte une configuration pédagogique complète
+ * Rassemble toutes les ressources du cours actif:
+ * - Échelles de performance
+ * - Grilles de critères
+ * - Productions
+ * - Cartouches de rétroaction
+ * - Paramètres du cours (jetons, reprises, etc.)
+ */
+async function exporterConfigurationComplete() {
+    // 1. Rassembler toutes les ressources
+    const echelles = db.getSync('echellesTemplates', []);
+    const grilles = db.getSync('grillesTemplates', []);
+    const productions = db.getSync('productions', []);
+
+    // Cartouches (stockage par grille)
+    const cartouches = {};
+    const allKeys = Object.keys(localStorage);
+    for (let i = 0; i < allKeys.length; i++) {
+        const key = allKeys[i];
+        if (key && key.startsWith('cartouches_')) {
+            const grilleId = key.replace('cartouches_', '');
+            cartouches[grilleId] = db.getSync(key, []);
+        }
+    }
+
+    // Paramètres du cours
+    const modalitesEvaluation = db.getSync('modalitesEvaluation', {});
+    const parametres = {
+        systeme_jetons: modalitesEvaluation.systemeJetons || false,
+        reprises_autorisees: modalitesEvaluation.reprisesAutorisees || false,
+        nombre_artefacts: modalitesEvaluation.nombreArtefacts || 0,
+        pratique_active: modalitesEvaluation.pratiqueActive || 'sommative',
+        mode_comparatif: modalitesEvaluation.modeComparatif || false
+    };
+
+    // Vérifier qu'il y a du contenu à exporter
+    const nbRessources = echelles.length + grilles.length + productions.length + Object.keys(cartouches).length;
+    if (nbRessources === 0) {
+        alert('Aucune ressource à exporter.\n\nCréez d\'abord des grilles, échelles ou productions.');
+        return;
+    }
+
+    // 2. Demander les métadonnées enrichies (modal spécial pour config complète)
+    const metaEnrichies = await demanderMetadonneesConfigComplete(nbRessources);
+
+    if (!metaEnrichies) {
+        console.log('Export annulé par l\'utilisateur');
+        return;
+    }
+
+    // 3. Construire l'objet de configuration complète
+    const configComplete = {
+        metadata: {
+            type: "configuration-complete",
+            nom: metaEnrichies.nom,
+            auteur: metaEnrichies.auteur,
+            discipline: metaEnrichies.discipline,
+            niveau: metaEnrichies.niveau,
+            description: metaEnrichies.description,
+            licence: "CC BY-NC-SA 4.0",
+            licence_url: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+            version: "1.0",
+            date_creation: new Date().toISOString().split('T')[0],
+            date_export: new Date().toISOString().split('T')[0],
+            application_version: "Beta 91",
+            email_auteur: metaEnrichies.email || "",
+            site_auteur: metaEnrichies.site || ""
+        },
+        contenu: {
+            echelles: echelles,
+            grilles: grilles,
+            productions: productions,
+            cartouches: cartouches,
+            parametres: parametres
+        }
+    };
+
+    // 4. Générer nom de fichier
+    const nomAuteurSimple = metaEnrichies.auteur.replace(/[^a-z0-9]/gi, '-');
+    const dateStr = new Date().toISOString().split('T')[0];
+    const nomFichierJSON = `PRATIQUE-COMPLETE-${nomAuteurSimple}-${dateStr}.json`;
+    const nomFichierTXT = `LISEZMOI-${nomAuteurSimple}-${dateStr}.txt`;
+
+    // 5. Générer le fichier LISEZMOI.txt
+    const contenuLISEZMOI = genererFichierLISEZMOI(configComplete.metadata, {
+        nbEchelles: echelles.length,
+        nbGrilles: grilles.length,
+        nbProductions: productions.length,
+        nbCartouches: Object.keys(cartouches).reduce((total, grilleId) => total + cartouches[grilleId].length, 0)
+    });
+
+    // 6. Télécharger le JSON
+    const blobJSON = new Blob([JSON.stringify(configComplete, null, 2)], { type: 'application/json' });
+    const urlJSON = URL.createObjectURL(blobJSON);
+    const aJSON = document.createElement('a');
+    aJSON.href = urlJSON;
+    aJSON.download = nomFichierJSON;
+    document.body.appendChild(aJSON);
+    aJSON.click();
+    document.body.removeChild(aJSON);
+    URL.revokeObjectURL(urlJSON);
+
+    // 7. Télécharger le LISEZMOI.txt (avec un petit délai pour éviter le blocage navigateur)
+    setTimeout(() => {
+        const blobTXT = new Blob([contenuLISEZMOI], { type: 'text/plain;charset=utf-8' });
+        const urlTXT = URL.createObjectURL(blobTXT);
+        const aTXT = document.createElement('a');
+        aTXT.href = urlTXT;
+        aTXT.download = nomFichierTXT;
+        document.body.appendChild(aTXT);
+        aTXT.click();
+        document.body.removeChild(aTXT);
+        URL.revokeObjectURL(urlTXT);
+
+        // 8. Notification de succès
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces('Configuration complète exportée avec succès!\n\n2 fichiers téléchargés: JSON + LISEZMOI.txt');
+        }
+        console.log('✅ Configuration complète exportée:', nomFichierJSON, '+', nomFichierTXT);
+    }, 500);
+}
