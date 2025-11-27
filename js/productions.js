@@ -1171,7 +1171,7 @@ function initialiserModuleProductions() {
  *   contenu: { productions: [...] }
  * }
  */
-function exporterProductions() {
+async function exporterProductions() {
     const productions = db.getSync('productions', []);
 
     if (productions.length === 0) {
@@ -1179,11 +1179,23 @@ function exporterProductions() {
         return;
     }
 
-    // Emballer avec métadonnées CC
+    // NOUVEAU (Beta 91): Demander métadonnées enrichies
+    const metaEnrichies = await demanderMetadonneesEnrichies(
+        'Productions pédagogiques',
+        `${productions.length} production(s)`
+    );
+
+    if (!metaEnrichies) {
+        console.log('Export annulé par l\'utilisateur');
+        return;
+    }
+
+    // Emballer avec métadonnées CC enrichies
     const donnees = ajouterMetadonnéesCC(
         { productions: productions },
         'productions',
-        'Productions pédagogiques'
+        'Productions pédagogiques',
+        metaEnrichies
     );
 
     // Générer nom de fichier avec watermark CC
@@ -1205,6 +1217,98 @@ function exporterProductions() {
     URL.revokeObjectURL(url);
 
     console.log('✅ Productions exportées avec licence CC BY-NC-SA 4.0');
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(`${productions.length} production(s) exportée(s) avec succès`);
+    }
+}
+
+/**
+ * Exporte la production actuellement en cours d'édition
+ */
+async function exporterProductionActive() {
+    // Récupérer l'ID de la production depuis le sidebar actif
+    const itemActif = document.querySelector('.sidebar-item.active');
+    if (!itemActif) {
+        alert('Aucune production sélectionnée à exporter.');
+        return;
+    }
+
+    const productionId = itemActif.getAttribute('data-id');
+    if (!productionId) {
+        alert('Impossible de déterminer la production à exporter.');
+        return;
+    }
+
+    const productions = db.getSync('productions', []);
+    const production = productions.find(p => p.id === productionId);
+
+    if (!production) {
+        alert('Production introuvable.');
+        return;
+    }
+
+    // NOUVEAU (Beta 91): Demander métadonnées enrichies
+    const metaEnrichies = await demanderMetadonneesEnrichies(
+        'Production pédagogique',
+        production.description || production.titre || 'Production'
+    );
+
+    if (!metaEnrichies) {
+        console.log('Export annulé par l\'utilisateur');
+        return;
+    }
+
+    // Préparer le contenu pour l'export
+    let contenuExport = { ...production };
+
+    // Si la production a été importée avec des métadonnées CC, ajouter l'utilisateur actuel comme contributeur
+    if (production.metadata_cc) {
+        // Demander le nom de l'utilisateur s'il modifie le matériel
+        const nomUtilisateur = prompt(
+            'Vous allez exporter un matériel créé par ' + production.metadata_cc.auteur_original + '.\n\n' +
+            'Entrez votre nom pour être crédité comme contributeur :\n' +
+            '(Laissez vide si vous n\'avez fait aucune modification)'
+        );
+
+        if (nomUtilisateur && nomUtilisateur.trim()) {
+            // Ajouter le contributeur
+            const contributeurs = production.metadata_cc.contributeurs || [];
+            contributeurs.push({
+                nom: nomUtilisateur.trim(),
+                date: new Date().toISOString().split('T')[0],
+                modifications: 'Modifications et adaptations'
+            });
+
+            // Créer les métadonnées enrichies
+            contenuExport.metadata_cc = {
+                ...production.metadata_cc,
+                contributeurs: contributeurs
+            };
+        }
+    }
+
+    // Ajouter les métadonnées CC enrichies
+    const exportAvecCC = ajouterMetadonnéesCC(
+        contenuExport,
+        'production',
+        production.description || production.titre || 'Production',
+        metaEnrichies
+    );
+
+    const json = JSON.stringify(exportAvecCC, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const nomFichier = (production.description || production.titre || 'production').replace(/[^a-z0-9]/gi, '-');
+    a.download = `production-${nomFichier}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    console.log('✅ Production exportée avec licence CC BY-NC-SA 4.0');
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(`Production "${production.description || production.titre}" exportée avec succès`);
+    }
 }
 
 /**
@@ -1276,16 +1380,63 @@ function importerProductions(event) {
 /**
  * Confirme l'import et fusionne les productions
  * Fonction helper appelée depuis le modal de confirmation
+ * PHASE 3.3: Détection de dépendances manquantes (Beta 91)
  */
 window.confirmerImportProductions = function(donnees) {
     try {
         // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata)
-        const productionsImportees = donnees.contenu ?
-            donnees.contenu.productions :
-            donnees.productions || donnees;
+        let productionsImportees;
+
+        if (donnees.contenu) {
+            // Nouveau format avec CC metadata
+            if (donnees.contenu.productions) {
+                // Batch export: { metadata, contenu: { productions: [...] } }
+                productionsImportees = donnees.contenu.productions;
+            } else {
+                // Individual export: { metadata, contenu: { ...production... } }
+                // Préserver metadata_cc dans la production
+                const production = { ...donnees.contenu };
+                production.metadata_cc = donnees.metadata;
+                productionsImportees = [production];
+            }
+        } else {
+            // Ancien format direct
+            productionsImportees = donnees.productions || [donnees];
+        }
 
         if (!Array.isArray(productionsImportees)) {
             throw new Error('Format invalide: productions doit être un tableau');
+        }
+
+        // PHASE 3.3: Détecter les dépendances manquantes (grilles référencées)
+        const grillesExistantes = db.getSync('grillesTemplates', []);
+        const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
+        const grillesManquantes = [];
+
+        productionsImportees.forEach(prod => {
+            if (prod.grilleId && !idsGrillesExistants.has(prod.grilleId)) {
+                // Grille manquante détectée
+                if (!grillesManquantes.includes(prod.grilleId)) {
+                    grillesManquantes.push(prod.grilleId);
+                }
+            }
+        });
+
+        // Avertir l'utilisateur si des dépendances manquent
+        if (grillesManquantes.length > 0) {
+            const nbGrillesManquantes = grillesManquantes.length;
+            const message = `⚠️ Attention : ${nbGrillesManquantes} grille(s) de critères manquante(s)\n\n` +
+                `Les productions importées font référence à des grilles qui n'existent pas encore dans votre système.\n\n` +
+                `Grilles manquantes :\n${grillesManquantes.map(id => `  • ${id}`).join('\n')}\n\n` +
+                `Vous pouvez continuer l'import, mais ces productions ne fonctionneront correctement qu'après avoir importé les grilles manquantes.\n\n` +
+                `Continuer quand même ?`;
+
+            if (!confirm(message)) {
+                console.log('Import annulé par l\'utilisateur (dépendances manquantes)');
+                return;
+            }
+
+            console.log(`⚠️ Import avec ${nbGrillesManquantes} dépendance(s) manquante(s):`, grillesManquantes);
         }
 
         // Charger productions existantes
@@ -1342,6 +1493,7 @@ window.initialiserModuleProductions = initialiserModuleProductions;
 
 // Export/Import avec licence CC
 window.exporterProductions = exporterProductions;
+window.exporterProductionActive = exporterProductionActive;
 window.importerProductions = importerProductions;
 
 // Nouvelles fonctions sidebar (Beta 80.5+)
@@ -1493,10 +1645,12 @@ function chargerProductionPourModif(id) {
     const options = document.getElementById('optionsImportExportProductions');
     if (options) options.style.display = 'block';
 
-    // Afficher les boutons Dupliquer et Supprimer (mode édition)
+    // Afficher les boutons Dupliquer, Exporter et Supprimer (mode édition)
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
+    const btnExporter = document.getElementById('btnExporterProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
     if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
+    if (btnExporter) btnExporter.style.display = 'inline-block';
     if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
     // Appeler afficherFormProduction pour charger les données
@@ -1533,10 +1687,12 @@ function creerNouvelleProduction() {
     const options = document.getElementById('optionsImportExportProductions');
     if (options) options.style.display = 'block';
 
-    // Cacher les boutons Dupliquer et Supprimer (mode création)
+    // Cacher les boutons Dupliquer, Exporter et Supprimer (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
+    const btnExporter = document.getElementById('btnExporterProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
     if (btnDupliquer) btnDupliquer.style.display = 'none';
+    if (btnExporter) btnExporter.style.display = 'none';
     if (btnSupprimer) btnSupprimer.style.display = 'none';
 
     // Réinitialiser le formulaire

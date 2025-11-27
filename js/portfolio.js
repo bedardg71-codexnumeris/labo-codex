@@ -616,6 +616,9 @@ function calculerEtStockerIndicesCP() {
     etudiantsActifs.forEach(etudiant => {
         const da = etudiant.da;
 
+        // Lire la configuration des modalités d'évaluation (nécessaire pour multi-objectifs et découplage)
+        const modalites = db.getSync('modalitesEvaluation', {});
+
         // ========================================
         // CALCUL PRATIQUE SOM (via registre)
         // ========================================
@@ -632,7 +635,25 @@ function calculerEtStockerIndicesCP() {
         // ========================================
 
         const C_pan_decimal = pratiquePAN.calculerCompletion(da);
-        const P_pan_decimal = pratiquePAN.calculerPerformance(da);
+        let P_pan_decimal = pratiquePAN.calculerPerformance(da);
+
+        // 🎯 DÉTECTION PRATIQUE MULTI-OBJECTIFS
+        // Si un ensemble d'objectifs est configuré, utiliser le calcul par pratique multi-objectifs
+        const ensembleObjectifsId = modalites.configPAN?.ensembleObjectifsId || null;
+        let performancesObjectifs = null;
+        let noteFinaleMultiObjectifs = null;
+
+        if (ensembleObjectifsId && typeof calculerNoteFinaleMultiObjectifs === 'function') {
+            console.log(`[Multi-Objectifs] Calcul pour DA ${da} avec ensemble ${ensembleObjectifsId}`);
+            noteFinaleMultiObjectifs = calculerNoteFinaleMultiObjectifs(da, ensembleObjectifsId);
+            performancesObjectifs = calculerPerformanceParObjectif(da, ensembleObjectifsId);
+
+            if (noteFinaleMultiObjectifs && noteFinaleMultiObjectifs.noteFinale !== null) {
+                // Utiliser la note de la pratique multi-objectifs au lieu de P_pan global
+                P_pan_decimal = noteFinaleMultiObjectifs.noteFinale / 100;
+                console.log(`[Multi-Objectifs] Note finale DA ${da}: ${noteFinaleMultiObjectifs.noteFinale.toFixed(1)}%`);
+            }
+        }
 
         // Convertir 0-1 → 0-100
         const C_pan = C_pan_decimal !== null ? Math.round(C_pan_decimal * 100) : 0;
@@ -642,8 +663,7 @@ function calculerEtStockerIndicesCP() {
         // CALCUL P_RECENT POUR LE RISQUE (si découplage activé)
         // ========================================
 
-        // Lire la configuration PAN pour affichage explicite et découplage
-        const modalites = db.getSync('modalitesEvaluation', {});
+        // Utiliser la configuration PAN pour affichage explicite et découplage (modalites déjà déclaré au début du forEach)
         const configPortfolio = modalites.configPAN?.portfolio || {};
         const decouplerPR = configPortfolio.decouplerPR || false;
 
@@ -678,7 +698,12 @@ function calculerEtStockerIndicesCP() {
                     methodeSelection: configPortfolio.methodeSelection || 'meilleurs',
                     nombreARetenir: configPortfolio.nombreARetenir || 5,
                     decouplerPR: decouplerPR,
-                    P_recent: P_recent  // Performance récente pour le calcul de R (si découplage activé)
+                    P_recent: P_recent,  // Performance récente pour le calcul de R (si découplage activé)
+                    // 🎯 Données multi-objectifs (si pratique active)
+                    pratiqueMultiObjectifs: !!ensembleObjectifsId,
+                    ensembleObjectifsId: ensembleObjectifsId || null,
+                    performancesObjectifs: performancesObjectifs || null,
+                    noteFinaleMultiObjectifs: noteFinaleMultiObjectifs || null
                 }
             }
         };
@@ -776,3 +801,201 @@ function obtenirHistoriqueIndicesCP(da, pratique = null) {
         details: entree[pratique]?.details || {}
     }));
 }
+
+/* ===============================
+   🎯 CALCULS MULTI-OBJECTIFS
+
+   Support pour le système d'évaluation multi-objectifs (ex: Michel B.)
+   - Groupement des évaluations par objectif
+   - Calcul de la performance par objectif (moyenne N meilleurs)
+   - Calcul de la note finale pondérée
+
+   DATE : 26 novembre 2025
+   AUTEUR : Grégoire Bédard (Labo Codex)
+   =============================== */
+
+/**
+ * Calcule la performance par objectif pour un étudiant
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {string} ensembleId - ID de l'ensemble d'objectifs
+ * @returns {Object} - { obj1: {P: 85, nbArtefacts: 5, artefacts: [...]}, obj2: {...}, ... }
+ *
+ * EXEMPLES :
+ * calculerPerformanceParObjectif('1234567', 'objectifs-michel-calcul-diff')
+ * → {
+ *     obj1: { P: 85, nbArtefacts: 5, artefacts: [{id, note}, ...] },
+ *     obj2: { P: 72, nbArtefacts: 3, artefacts: [{id, note}, ...] },
+ *     ...
+ *   }
+ */
+function calculerPerformanceParObjectif(da, ensembleId) {
+    if (!da || !ensembleId) {
+        console.warn('[Multi-Objectifs] DA ou ensembleId manquant');
+        return null;
+    }
+
+    // 1. Charger l'ensemble d'objectifs
+    const ensembles = chargerEnsemblesObjectifs();
+    const ensemble = ensembles.find(e => e.id === ensembleId);
+
+    if (!ensemble || !ensemble.objectifs) {
+        console.warn('[Multi-Objectifs] Ensemble introuvable:', ensembleId);
+        return null;
+    }
+
+    // 2. Charger les productions et évaluations
+    const productions = obtenirDonneesSelonMode('productions');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+
+    // 3. Filtrer les évaluations de cet étudiant
+    const evaluationsEleve = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        e.noteFinale !== null &&
+        e.noteFinale !== undefined &&
+        !e.remplaceeParId
+    );
+
+    // 4. Grouper par objectif
+    const performancesParObjectif = {};
+
+    ensemble.objectifs.forEach(objectif => {
+        // Trouver toutes les évaluations liées à cet objectif
+        const evaluationsObjectif = evaluationsEleve.filter(eval => {
+            const prod = productions.find(p => p.id === eval.productionId);
+            return prod && prod.objectif === objectif.id;
+        });
+
+        if (evaluationsObjectif.length === 0) {
+            performancesParObjectif[objectif.id] = {
+                P: null,
+                nbArtefacts: 0,
+                artefacts: []
+            };
+            return;
+        }
+
+        // Trier par note décroissante et prendre les N meilleurs
+        // Utiliser la configuration PAN pour le nombre à retenir
+        const config = obtenirDonneesSelonMode('modalitesEvaluation') || {};
+        const nombreARetenir = config.configPAN?.portfolio?.nombreARetenir || 3;
+
+        evaluationsObjectif.sort((a, b) => b.noteFinale - a.noteFinale);
+        const meilleurs = evaluationsObjectif.slice(0, nombreARetenir);
+
+        // Calculer la moyenne
+        const somme = meilleurs.reduce((acc, e) => acc + e.noteFinale, 0);
+        const moyenne = somme / meilleurs.length;
+
+        performancesParObjectif[objectif.id] = {
+            P: moyenne,
+            nbArtefacts: evaluationsObjectif.length,
+            artefacts: meilleurs.map(e => ({
+                id: e.productionId,
+                note: e.noteFinale,
+                date: e.dateEvaluation
+            }))
+        };
+    });
+
+    console.log(`[Multi-Objectifs] DA ${da}: ${Object.keys(performancesParObjectif).length} objectifs calculés`);
+
+    return performancesParObjectif;
+}
+
+/**
+ * Calcule la note finale pondérée multi-objectifs
+ *
+ * Formule : Note_finale = Σ(P_obji × poids_i) / 100
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {string} ensembleId - ID de l'ensemble d'objectifs
+ * @returns {Object} - { noteFinale: 78.5, details: {...} }
+ *
+ * EXEMPLES :
+ * calculerNoteFinaleMultiObjectifs('1234567', 'objectifs-michel-calcul-diff')
+ * → {
+ *     noteFinale: 78.5,
+ *     nbObjectifsEvalues: 13,
+ *     nbObjectifsSansNote: 0,
+ *     performances: { obj1: {P: 85, poids: 8}, ... }
+ *   }
+ */
+function calculerNoteFinaleMultiObjectifs(da, ensembleId) {
+    if (!da || !ensembleId) {
+        console.warn('[Multi-Objectifs] DA ou ensembleId manquant');
+        return null;
+    }
+
+    // 1. Charger l'ensemble d'objectifs
+    const ensembles = chargerEnsemblesObjectifs();
+    const ensemble = ensembles.find(e => e.id === ensembleId);
+
+    if (!ensemble || !ensemble.objectifs) {
+        console.warn('[Multi-Objectifs] Ensemble introuvable:', ensembleId);
+        return null;
+    }
+
+    // 2. Calculer performance par objectif
+    const performances = calculerPerformanceParObjectif(da, ensembleId);
+
+    if (!performances) {
+        return null;
+    }
+
+    // 3. Calculer la note finale pondérée
+    let noteFinale = 0;
+    let poidsTotal = 0;
+    let nbObjectifsEvalues = 0;
+    let nbObjectifsSansNote = 0;
+
+    const detailsPerformances = {};
+
+    ensemble.objectifs.forEach(objectif => {
+        const perf = performances[objectif.id];
+
+        if (perf && perf.P !== null) {
+            // Contribution de cet objectif = P × poids
+            noteFinale += (perf.P * objectif.poids) / 100;
+            poidsTotal += objectif.poids;
+            nbObjectifsEvalues++;
+
+            detailsPerformances[objectif.id] = {
+                nom: objectif.nom,
+                P: perf.P,
+                poids: objectif.poids,
+                contribution: (perf.P * objectif.poids) / 100,
+                nbArtefacts: perf.nbArtefacts
+            };
+        } else {
+            nbObjectifsSansNote++;
+            detailsPerformances[objectif.id] = {
+                nom: objectif.nom,
+                P: null,
+                poids: objectif.poids,
+                contribution: 0,
+                nbArtefacts: 0
+            };
+        }
+    });
+
+    console.log(`[Multi-Objectifs] Note finale DA ${da}: ${noteFinale.toFixed(1)}% (${nbObjectifsEvalues}/${ensemble.objectifs.length} objectifs évalués)`);
+
+    return {
+        noteFinale: noteFinale,
+        nbObjectifsEvalues: nbObjectifsEvalues,
+        nbObjectifsSansNote: nbObjectifsSansNote,
+        poidsTotal: poidsTotal,
+        performances: detailsPerformances
+    };
+}
+
+/* ===============================
+   EXPORTS GLOBAUX
+   =============================== */
+
+// Exporter les fonctions multi-objectifs pour utilisation par d'autres modules
+window.calculerPerformanceParObjectif = calculerPerformanceParObjectif;
+window.calculerNoteFinaleMultiObjectifs = calculerNoteFinaleMultiObjectifs;
+
+console.log('✅ Module portfolio.js chargé (avec support multi-objectifs)');

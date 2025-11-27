@@ -459,6 +459,7 @@ function chargerEchelleTemplate(echelleId) {
     const selectValue = echelleId || (select ? select.value : '');
     const nomContainer = document.getElementById('nomEchelleContainer');
     const btnDupliquer = document.getElementById('btnDupliquerEchelle');
+    const btnExporter = document.getElementById('btnExporterEchelle');
 
     if (!selectValue || selectValue === 'new') {
         // Nouvelle échelle
@@ -469,8 +470,9 @@ function chargerEchelleTemplate(echelleId) {
         reinitialiserNiveauxDefaut();
         echelleTemplateActuelle = null;
 
-        // Masquer le bouton dupliquer
+        // Masquer les boutons dupliquer et exporter
         if (btnDupliquer) btnDupliquer.style.display = 'none';
+        if (btnExporter) btnExporter.style.display = 'none';
 
     } else {
         // Charger une échelle existante
@@ -510,8 +512,9 @@ function chargerEchelleTemplate(echelleId) {
 
             echelleTemplateActuelle = echelle;
 
-            // Afficher le bouton dupliquer
+            // Afficher les boutons dupliquer et exporter
             if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
+            if (btnExporter) btnExporter.style.display = 'inline-block';
 
             // Scroll vers le formulaire pour que l'utilisateur voie le changement
             const formulaire = document.getElementById('formEchelle');
@@ -1547,7 +1550,7 @@ function afficherNotificationSucces(message) {
  *   contenu: { echelles: [...] }
  * }
  */
-function exporterEchelles() {
+async function exporterEchelles() {
     const echelles = db.getSync('echellesTemplates', []);
 
     if (echelles.length === 0) {
@@ -1555,11 +1558,23 @@ function exporterEchelles() {
         return;
     }
 
-    // Emballer avec métadonnées CC
+    // NOUVEAU (Beta 91): Demander métadonnées enrichies
+    const metaEnrichies = await demanderMetadonneesEnrichies(
+        'Échelles de performance',
+        `${echelles.length} échelle(s)`
+    );
+
+    if (!metaEnrichies) {
+        console.log('Export annulé par l\'utilisateur');
+        return;
+    }
+
+    // Emballer avec métadonnées CC enrichies
     const donnees = ajouterMetadonnéesCC(
         { echelles: echelles },
         'echelles',
-        'Échelles de performance'
+        'Échelles de performance',
+        metaEnrichies
     );
 
     // Générer nom de fichier avec watermark CC
@@ -1581,6 +1596,86 @@ function exporterEchelles() {
     URL.revokeObjectURL(url);
 
     console.log('✅ Échelles exportées avec licence CC BY-NC-SA 4.0');
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(`${echelles.length} échelle(s) exportée(s) avec succès`);
+    }
+}
+
+/**
+ * Exporte l'échelle actuellement en cours d'édition
+ * Avec support des métadonnées CC et suivi des contributeurs
+ */
+async function exporterEchelleActive() {
+    if (!echelleTemplateActuelle) {
+        alert('Aucune échelle sélectionnée à exporter.');
+        return;
+    }
+
+    const echelles = db.getSync('echellesTemplates', []);
+    const echelle = echelles.find(e => e.id === echelleTemplateActuelle.id);
+
+    if (!echelle) {
+        alert('Échelle introuvable.');
+        return;
+    }
+
+    // NOUVEAU (Beta 91): Demander métadonnées enrichies
+    const metaEnrichies = await demanderMetadonneesEnrichies(
+        'Échelle de performance',
+        echelle.nom
+    );
+
+    if (!metaEnrichies) {
+        console.log('Export annulé par l\'utilisateur');
+        return;
+    }
+
+    // Préparer le contenu pour l'export
+    let contenuExport = { ...echelle };
+
+    // Si l'échelle a été importée avec des métadonnées CC, ajouter l'utilisateur actuel comme contributeur
+    if (echelle.metadata_cc) {
+        // Demander le nom de l'utilisateur s'il modifie le matériel
+        const nomUtilisateur = prompt(
+            'Vous allez exporter un matériel créé par ' + echelle.metadata_cc.auteur_original + '.\n\n' +
+            'Entrez votre nom pour être crédité comme contributeur :\n' +
+            '(Laissez vide si vous n\'avez fait aucune modification)'
+        );
+
+        if (nomUtilisateur && nomUtilisateur.trim()) {
+            // Ajouter le contributeur
+            const contributeurs = echelle.metadata_cc.contributeurs || [];
+            contributeurs.push({
+                nom: nomUtilisateur.trim(),
+                date: new Date().toISOString().split('T')[0],
+                modifications: 'Modifications et adaptations'
+            });
+
+            // Créer les métadonnées enrichies
+            contenuExport.metadata_cc = {
+                ...echelle.metadata_cc,
+                contributeurs: contributeurs
+            };
+        }
+    }
+
+    // Ajouter les métadonnées CC enrichies
+    const exportAvecCC = ajouterMetadonnéesCC(contenuExport, 'echelle-performance', echelle.nom, metaEnrichies);
+
+    const json = JSON.stringify(exportAvecCC, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const nomFichier = (echelle.nom || 'echelle').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    a.download = `echelle-${nomFichier}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    console.log('✅ Échelle exportée avec licence CC BY-NC-SA 4.0');
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces(`Échelle "${echelle.nom}" exportée avec succès`);
+    }
 }
 
 /**
@@ -1656,9 +1751,24 @@ function importerEchelles(event) {
 window.confirmerImportEchelles = function(donnees) {
     try {
         // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata)
-        const echellesImportees = donnees.contenu ?
-            donnees.contenu.echelles :
-            donnees.echelles || donnees;
+        let echellesImportees;
+
+        if (donnees.contenu) {
+            // Nouveau format avec CC metadata
+            if (donnees.contenu.echelles) {
+                // Batch export: { metadata, contenu: { echelles: [...] } }
+                echellesImportees = donnees.contenu.echelles;
+            } else {
+                // Individual export: { metadata, contenu: { ...échelle... } }
+                // Préserver metadata_cc dans l'échelle
+                const echelle = { ...donnees.contenu };
+                echelle.metadata_cc = donnees.metadata;
+                echellesImportees = [echelle];
+            }
+        } else {
+            // Ancien format direct
+            echellesImportees = donnees.echelles || [donnees];
+        }
 
         if (!Array.isArray(echellesImportees)) {
             throw new Error('Format invalide: échelles doit être un tableau');
@@ -1727,6 +1837,7 @@ window.reinitialiserNiveauxDefaut = reinitialiserNiveauxDefaut;
 
 // Export/Import avec licence CC
 window.exporterEchelles = exporterEchelles;
+window.exporterEchelleActive = exporterEchelleActive;
 window.importerEchelles = importerEchelles;
 
 /* ===============================
