@@ -51,6 +51,7 @@ Si tu as déjà utilisé l'application (Beta 91.x) :
 - ✅ 3 parcours de démarrage guidés
 - ✅ Navigation intelligente vers les bonnes sections
 - ✅ Messages d'encouragement personnalisés
+- ✅ Tutoriel interactif 7 étapes après données démo
 
 ### 2. Améliorations interface
 - ✅ Animations fluides pour le modal
@@ -91,8 +92,9 @@ Beta_92_Primo/
 ├── index 92.html            # Point d'entrée Beta 92
 ├── styles.css               # Feuille de style complète (142 KB)
 ├── logo-codex-numeris.png   # Logo Codex Numeris
-├── js/                      # Code JavaScript (42 modules)
+├── js/                      # Code JavaScript (43 modules)
 │   ├── primo-accueil.js     # 🆕 Module Primo Assistant
+│   ├── tutoriel-interactif.js  # 🆕 Tutoriel guidé 7 étapes
 │   ├── pratiques/           # Système de pratiques configurables
 │   │   ├── pratique-configurable.js
 │   │   ├── pratique-registre.js
@@ -125,6 +127,14 @@ Beta_92_Primo/
 - Partage entre collègues facilité
 - Backup complet des données
 
+### Tutoriel interactif (NOUVEAU Beta 92)
+- Démarrage automatique après chargement données démo
+- 7 étapes guidées : Tableau de bord → Étudiants → Profil → Évaluations → Pratiques
+- Bulles positionnées dynamiquement avec surbrillance
+- Navigation Précédent/Suivant/Terminer
+- Barre de progression visuelle
+- Ne s'affiche qu'une seule fois par utilisateur
+
 ---
 
 ## 🔍 Tests et validation
@@ -137,17 +147,23 @@ Beta_92_Primo/
 - ✅ Navigation vers Wizard Primo (création pratique)
 - ✅ Fermeture modal et exploration libre
 - ✅ Utilisateurs existants : Primo ne s'affiche pas
+- ✅ Tutoriel interactif démarre après données démo
+- ✅ 7 étapes s'affichent avec positionnement correct
 - ✅ Compatible Safari, Chrome, Firefox, Edge
 
 ### Pour tester Primo manuellement
 
 ```javascript
-// Console navigateur
+// Console navigateur - Réafficher Primo
 db.removeSync('primo_accueil_vu');
 location.reload();
 
 // Ou directement :
 reafficherAccueilPrimo();
+
+// Console navigateur - Relancer le tutoriel
+db.removeSync('tutoriel_demo_vu');
+demarrerTutoriel();
 ```
 
 ---

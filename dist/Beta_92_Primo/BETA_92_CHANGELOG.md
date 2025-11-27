@@ -95,6 +95,36 @@ Beta 92 introduit **Primo**, un assistant de démarrage accueillant qui guide le
 
 ---
 
+### 6. Tutoriel interactif (après données démo)
+
+**Activation** : Démarre automatiquement 2 secondes après le chargement des données de démonstration
+
+**Parcours guidé en 7 étapes** :
+1. **Bienvenue** (message centré) : Présentation des données chargées
+2. **Tableau de bord** : Découverte des indicateurs A-C-P et navigation
+3. **Liste des étudiants** : Aperçu des 30 étudiants de démo
+4. **Profil d'un étudiant** : Ouverture automatique du premier profil
+5. **Section Évaluations** : Localisation des évaluations
+6. **Réglages pratiques** : Où trouver le Wizard Primo
+7. **Félicitations** : Message final encourageant
+
+**Fonctionnalités** :
+- Bulles positionnées dynamiquement (top/bottom/left/right/center)
+- Surbrillance des éléments cibles (box-shadow bleu)
+- Barre de progression visuelle (Étape X/7)
+- Navigation : Boutons Précédent/Suivant/Terminer
+- Actions contextuelles automatiques (navigation entre sections)
+- Animations CSS fluides (fadeIn, slideUp)
+
+**Détection automatique** :
+- Flag `donnees_demo_chargees` activé lors de l'import
+- S'affiche uniquement si pas encore vu (`tutoriel_demo_vu`)
+- Ne perturbe pas les utilisateurs existants
+
+**Fichier** : `js/tutoriel-interactif.js` (~650 lignes)
+
+---
+
 ## 📝 Modifications techniques
 
 ### Fichiers créés
@@ -105,16 +135,30 @@ Beta 92 introduit **Primo**, un assistant de démarrage accueillant qui guide le
 - Gestion des 3 parcours
 - Auto-initialisation au chargement
 
+**`js/tutoriel-interactif.js`** (650 lignes)
+- Système de tutoriel guidé en 7 étapes
+- Positionnement dynamique de bulles
+- Animation et surbrillance d'éléments
+- Navigation et barre de progression
+- Auto-déclenchement après données démo
+
 ### Fichiers modifiés
 
 **`index 92.html`**
 - Titre : "Système de suivi Beta 92 - Primo Assistant"
 - Meta : "Beta 92 par Grégoire Bédard (27 novembre 2025 - Primo Assistant)"
-- Ajout script : `<script src="js/primo-accueil.js?v=2025112700"></script>`
-- Position : Juste avant `main.js` (ligne 10224)
+- Ajout script : `<script src="js/primo-accueil.js?v=2025112700"></script>` (ligne 10224)
+- Ajout script : `<script src="js/tutoriel-interactif.js?v=2025112701"></script>` (ligne 10227)
+- Position : Juste avant `main.js`
+
+**`js/import-export.js`**
+- Détection automatique des données de démo lors de l'import
+- Activation du flag `donnees_demo_chargees` pour déclencher le tutoriel
+- Vérification de la présence des clés caractéristiques (groupeEtudiants, artefacts, etc.)
 
 ### Exports globaux
 
+**Primo Accueil** :
 ```javascript
 window.initialiserPrimoAccueil = initialiserPrimoAccueil;
 window.reafficherAccueilPrimo = reafficherAccueilPrimo;
@@ -122,6 +166,14 @@ window.fermerModalAccueil = fermerModalAccueil;
 window.chargerDonneesDemo = chargerDonneesDemo;
 window.demarrerWizard = demarrerWizard;
 window.explorerLibrement = explorerLibrement;
+```
+
+**Tutoriel Interactif** :
+```javascript
+window.demarrerTutoriel = demarrerTutoriel;
+window.avancerEtapeTutoriel = avancerEtapeTutoriel;
+window.reculerEtapeTutoriel = reculerEtapeTutoriel;
+window.terminerTutoriel = terminerTutoriel;
 ```
 
 ---
@@ -160,6 +212,15 @@ window.explorerLibrement = explorerLibrement;
    - Chrome : ✅
    - Firefox : ✅
    - Edge : ✅
+
+7. **✅ Tutoriel interactif** (après données démo)
+   - Détection automatique flag `donnees_demo_chargees`
+   - Démarrage après 2 secondes
+   - 7 étapes s'affichent correctement
+   - Navigation Précédent/Suivant fonctionne
+   - Positionnement bulles adaptatif
+   - Surbrillance éléments visible
+   - Terminaison propre avec marquage `tutoriel_demo_vu`
 
 ---
 
@@ -203,7 +264,7 @@ window.explorerLibrement = explorerLibrement;
 - [ ] Traduction anglaise du message de Primo
 
 ### Moyen terme
-- [ ] Tutoriel interactif après données démo
+- [x] Tutoriel interactif après données démo ✅ **COMPLÉTÉ**
 - [ ] Checklist de progression visible
 - [ ] Bulles d'information contextuelles
 
