@@ -4,9 +4,9 @@
 
 ---
 
-## 🎁 Fichiers prêts à l'emploi (Beta 78)
+## 🎁 Fichiers prêts à l'emploi (Beta 91.1)
 
-**Nouveauté :** Des fichiers de démonstration sont maintenant inclus dans le projet !
+**Nouveauté Beta 91.1 :** Support complet des pratiques configurables et système multi-objectifs !
 
 ### Fichiers disponibles
 
@@ -15,12 +15,13 @@
    - 9 productions configurées (5 sommatives + 4 artefacts)
    - Grille SRPNF complète
    - Échelle IDME (Insuffisant, Développement, Maîtrisé, Étendu)
-   - **NOUVEAU** : Cartouche de rétroaction complète "A2 Description d'un personnage"
+   - Cartouche de rétroaction complète "A2 Description d'un personnage"
      * 16 commentaires prédéfinis (4 critères × 4 niveaux IDME)
      * Tutoiement et approche constructive avec suggestions concrètes
      * Critères : Structure, Rigueur, Plausibilité, Nuance
    - Calendrier trimestre (Hiver 2025)
    - Horaire configuré (2 séances/semaine)
+   - **🆕 Beta 91.1** : Compatible avec 7 pratiques prédéfinies
 
 2. **`etudiants-demo.txt`** - Liste d'étudiants (groupe TEST)
    - 30 étudiants avec noms québécois (80%) et multiculturels (20%)
@@ -36,21 +37,39 @@
 ### Import rapide (2 minutes)
 
 **Option A : Tout-en-un (recommandé)**
-1. Ouvrir `index 75 (import-export matériel pédagogique).html`
+1. Ouvrir `index 91.html`
 2. Réglages → Import/Export
 3. Importer `donnees-demo.json`
-4. ✅ Application prête à tester !
+4. **🆕 Charger une pratique prédéfinie** (optionnel) :
+   - Réglages → Pratique de notation
+   - Cliquer sur "🎯 Exemples de pratiques"
+   - Sélectionner votre pratique (ex: PAN-Maîtrise, Sommative traditionnelle)
+   - Cliquer sur "Charger les pratiques sélectionnées"
+   - Sélectionner la pratique dans le menu déroulant "Pratique active"
+   - Sauvegarder
+5. ✅ Application prête à tester !
 
 **Option B : Import manuel des étudiants**
 1. Réglages → Groupe → Import/Export
 2. Choisir `etudiants-demo.txt` ou `etudiants-demo-groupe9999.txt`
 3. Les étudiants sont importés automatiquement
 
-### ✨ Nouveauté Beta 78 : Bouton de soutien
+### ✨ Nouveautés Beta 91.1
 
-**NOUVEAU :** Ajout d'un bouton "Soutenir le projet" dans l'en-tête permettant de contribuer financièrement au développement via Ghost/Stripe.
+**7 pratiques prédéfinies disponibles :**
+- PAN-Standards 5 niveaux (Bruno V. - Chimie)
+- Sommative traditionnelle (Marie-Hélène L. - Littérature)
+- PAN-Spécifications (François A.-H. - Chimie)
+- PAN-Maîtrise IDME (Grégoire Bédard - Littérature)
+- PAN-Objectifs pondérés (Michel B. - Mathématiques)
+- Sommative avec remplacement (Jordan R. - Philosophie)
+- PAN-Jugement global (Isabelle M. - Biologie)
 
-**Rappel Beta 77 :** Correctifs critiques pour l'import de données. Si vous aviez des problèmes avec Beta 75 ou 0.76, ces bugs sont maintenant corrigés.
+**Wizard de création :** Créez votre propre pratique en 8 étapes guidées
+
+**Système multi-objectifs :** Évaluation par objectifs pondérés avec détection automatique des défis
+
+**Architecture IndexedDB :** Capacité de stockage améliorée (5-10 MB → plusieurs GB)
 
 ### Import/Export matériel pédagogique
 
@@ -106,7 +125,7 @@ Vous pouvez importer/exporter séparément :
 
 ### ÉTAPE 1 : Ouvrir l'application en mode vierge
 
-1. Ouvrir `index 75 (import-export matériel pédagogique).html`
+1. Ouvrir `index 91.html`
 2. Vérifier que vous êtes en mode **Normal**
 3. Si des données existent déjà :
    - Réglages → Import/Export
@@ -137,11 +156,16 @@ Vous pouvez importer/exporter séparément :
 - Séance 2 : Mercredi, 13h00-16h00
 - Enregistrer
 
-**D) Paramétrer les pratiques**
-- Réglages → Pratiques
-- Pratique principale : Sommative
-- ☑ Activer le mode comparatif (pour montrer SOM + PAN)
-- Nombre d'artefacts : 4
+**D) Paramétrer les pratiques** 🆕
+- Réglages → Pratique de notation
+- **Option 1** : Charger une pratique prédéfinie
+  * Cliquer sur "🎯 Exemples de pratiques"
+  * Sélectionner une pratique (ex: PAN-Maîtrise IDME de Grégoire Bédard)
+  * Charger et activer
+- **Option 2** : Utiliser pratique par défaut
+  * Pratique : Sommative
+  * ☑ Activer le mode comparatif (optionnel, pour montrer SOM + PAN)
+  * Nombre d'artefacts PAN : 4
 
 ---
 
@@ -358,7 +382,11 @@ Le fichier `donnees-demo.json` doit contenir ces clés :
 
 **Taille approximative :** 50-200 Ko selon le nombre d'étudiants et de données
 
-**Note Beta 78 :** La clé `cartouches_grille-srpnf` contient les cartouches de rétroaction liées à la grille SRPNF. Les correctifs import/export garantissent que ces données sont correctement sauvegardées dans localStorage.
+**Note Beta 91.1 :**
+- Les données sont stockées dans IndexedDB (capacité plusieurs GB)
+- Cache localStorage pour accès synchrone rapide
+- La clé `cartouches_grille-srpnf` contient les cartouches de rétroaction liées à la grille SRPNF
+- Compatible avec toutes les pratiques prédéfinies et configurables
 
 ---
 
@@ -421,4 +449,4 @@ Le fichier `donnees-demo.json` doit contenir ces clés :
 
 Contact : labo@codexnumeris.org
 
-**Fichier mis à jour le :** 28 octobre 2025 (Beta 78 - bouton soutien)
+**Fichier mis à jour le :** 26 novembre 2025 (Beta 91.1 - pratiques configurables et multi-objectifs)

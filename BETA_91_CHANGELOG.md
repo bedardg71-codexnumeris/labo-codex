@@ -244,6 +244,8 @@ console.log(indices);
 
 | Version | Date | Description |
 |---------|------|-------------|
+| **Beta 91.2** | 26 nov 2025 | Système import/export pédagogique complet (5 phases, ~700 lignes) |
+| **Beta 91.1** | 25-26 nov 2025 | Migration IndexedDB (38 commits, 37 fichiers, capacité GB) |
 | **Beta 91.0** | 18 nov 2025 | Création depuis Beta 90.5, début développement avancé |
 | Beta 90.5 | 5-16 nov 2025 | Sprint présentation AQPC (109 commits, 11 jours) |
 | Beta 90.0 | 5 nov 2025 | Création, intégration Chart.js, système pratiques |
@@ -254,5 +256,136 @@ console.log(indices);
 
 ---
 
-**Dernière mise à jour** : 18 novembre 2025
+## 🆕 Nouveautés Beta 91.2 (26 novembre 2025)
+
+### Système d'import/export pédagogique
+
+**Objectif** : Faciliter le partage de pratiques pédagogiques entre enseignants avec licence CC BY-NC-SA 4.0.
+
+#### Fonctionnalités implémentées
+
+**Export enrichi** :
+- ✅ Métadonnées enrichies pour tous les exports (grilles, échelles, productions, cartouches)
+- ✅ Champs: discipline[], niveau, description_courte, auteur, email, site
+- ✅ Modal de saisie avec validation et compteurs de caractères
+- ✅ Licence Creative Commons BY-NC-SA 4.0 obligatoire
+
+**Export configuration complète** :
+- ✅ Bundle toutes les ressources (échelles + grilles + productions + cartouches + paramètres)
+- ✅ Génération automatique fichier LISEZMOI.txt avec:
+  - Métadonnées complètes
+  - Statistiques de contenu
+  - Instructions d'utilisation
+  - Texte complet licence CC
+  - Guide d'attribution
+- ✅ Téléchargement dual (JSON + TXT) avec délai 500ms
+
+**Import intelligent** :
+- ✅ Validation structure JSON
+- ✅ Modal d'aperçu avec métadonnées et statistiques
+- ✅ Détection automatique conflits d'ID
+- ✅ Remapping intelligent des IDs (échelles, grilles)
+- ✅ Mise à jour automatique références (productions → grilles, cartouches → grilles)
+- ✅ Détection dépendances manquantes avec avertissement
+- ✅ Option annuler ou continuer malgré dépendances manquantes
+
+#### Fichiers modifiés/créés
+
+**Code (7 fichiers modifiés, ~700 lignes ajoutées)** :
+- `js/import-export.js` : +360 lignes (import config complète, remapping)
+- `js/cc-license.js` : +330 lignes (métadonnées enrichies, README)
+- `js/productions.js` : Détection dépendances manquantes
+- `js/cartouches.js` : Détection dépendances manquantes
+- `js/grilles.js` : Export async avec métadonnées
+- `js/echelles.js` : Export async avec métadonnées
+- `index 91.html` : Section UI "Configuration pédagogique complète"
+
+**Tests et documentation (5 fichiers créés)** :
+- `PHASE_5_PLAN_TESTS.md` : Plan détaillé 5 scénarios (~600 lignes)
+- `PHASE_5_GUIDE_EXECUTION.md` : Guide exécution rapide
+- `test-echelle-idme.json` : Échelle IDME test
+- `test-grille-srpnf.json` : Grille SRPNF test
+- `test-production-avec-dependance.json` : Production test avec dépendance
+
+#### Interface utilisateur
+
+**Réglages → Gestion des données** :
+- Bouton "Exporter ma configuration complète"
+- Bouton "Importer une configuration"
+- Documentation claire des différences (backup vs config vs partiel)
+
+#### Cas d'usage
+
+1. **Harmonisation départementale** : Partager grilles communes entre collègues
+2. **Mentorat** : Transmettre pratique complète à nouvel enseignant
+3. **Réutilisation sessions** : Conserver configuration entre sessions
+4. **Communautés de pratique** : Mutualiser ressources pédagogiques
+
+#### Statistiques
+
+- **Développement** : 1 session (26 novembre 2025)
+- **Phases** : 5 phases (1-2-3 implémentées, 4 optionnelle, 5 tests)
+- **Lignes code** : ~700 lignes ajoutées
+- **Fichiers modifiés** : 7 fichiers JavaScript + 1 HTML
+- **Documentation** : 5 fichiers (plan tests, guide, 3 JSON test)
+- **Commits** : À créer (package complet)
+
+---
+
+## 🆕 Nouveautés Beta 91.1 (25-26 novembre 2025)
+
+### Migration IndexedDB
+
+**Objectif** : Augmenter capacité de stockage de 5-10 MB à plusieurs GB pour support multi-groupes futur.
+
+#### Architecture hybride implémentée
+
+- ✅ IndexedDB comme stockage persistant principal (asynchrone)
+- ✅ localStorage comme cache synchrone (accès 0ms)
+- ✅ API unifiée `db.js` (450 lignes)
+- ✅ 100% compatibilité modules existants (aucun changement requis)
+- ✅ Fallback automatique si IndexedDB indisponible
+
+#### Fonctions clés
+
+**API publique** :
+- `db.getSync(key, defaultValue)` : Lecture synchrone depuis cache
+- `db.setSync(key, value)` : Écriture synchrone + async IndexedDB
+- `db.removeSync(key)` : Suppression synchrone + async IndexedDB
+- `db.keys()` : Liste des clés
+
+**API interne** :
+- `db.get(key)` : Lecture async IndexedDB
+- `db.set(key, value)` : Écriture async IndexedDB
+- `db.remove(key)` : Suppression async IndexedDB
+- `db.clear()` : Vidage complet
+- `db.syncToLocalStorageCache()` : Synchronisation cache démarrage
+
+#### Statistiques migration
+
+- **Période** : 25-26 novembre 2025 (2 jours)
+- **Commits** : 38 (20 lundi + 18 mardi)
+- **Fichiers modifiés** : 37 fichiers
+- **Lignes ajoutées** : +1,966
+- **Lignes supprimées** : -682
+- **Bugs corrigés** : 10 (double parsing, fonctions manquantes, etc.)
+- **Tag Git** : `v0.91.1-indexeddb` (26 novembre 2025)
+- **Fusion** : Mergé dans `main` avec succès
+
+#### Documentation
+
+- `INDEXEDDB_ARCHITECTURE.md` : Architecture complète (441 lignes)
+- CLAUDE.md : Section mise à jour
+
+#### Bénéfices
+
+- **Capacité** : 5-10 MB → plusieurs GB
+- **Performance** : Accès cache synchrone (0ms) préservé
+- **Compatibilité** : Aucun module à modifier
+- **Résilience** : Fallback localStorage automatique
+- **Futur** : Base pour support multi-groupes (Beta 92+)
+
+---
+
+**Dernière mise à jour** : 26 novembre 2025
 **Prochaine révision prévue** : À déterminer selon développements
