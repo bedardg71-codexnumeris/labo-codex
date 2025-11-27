@@ -51,7 +51,8 @@ const configurationsOnglets = {
         { id: 'productions', label: 'Productions' },
         { id: 'grille-criteres', label: 'Grilles de critères' },
         { id: 'echelle-performance', label: 'Échelle de performance' },
-        { id: 'retroactions', label: 'Rétroactions' }
+        { id: 'retroactions', label: 'Rétroactions' },
+        { id: 'objectifs', label: 'Objectifs d\'apprentissage' }
     ],
     'reglages': [
         { id: 'apercu', label: 'Aperçu' },
