@@ -262,6 +262,12 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModuleCartouches();
     }
 
+    // MODULE 07B: Objectifs d'apprentissage
+    if (typeof initialiserModuleObjectifs === 'function') {
+        console.log('   → Module 07b-objectifs détecté');
+        initialiserModuleObjectifs();
+    }
+
     // MODULE 08: Cours
     if (typeof initialiserModuleCours === 'function') {
         console.log('   → Module 08-cours détecté');

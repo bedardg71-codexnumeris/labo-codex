@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 91 - Développement avancé</title>
+    <title>Système de suivi Beta 91.2 - Import/Export pédagogique</title>
 
     <!-- AJOUTER CETTE LIGNE -->
-    <link rel="stylesheet" href="styles.css?v=2025112604">
+    <link rel="stylesheet" href="styles.css?v=2025112626">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -2705,7 +2705,7 @@
                 <!-- Titre et description centrés -->
                 <div class="titre-section">
                     <h1>Système de suivi des apprentissages</h1>
-                    <p class="meta">Beta 91 par Grégoire Bédard (18 novembre 2025)</p>
+                    <p class="meta">Beta 91.2 par Grégoire Bédard (26 novembre 2025)</p>
 
                     <!-- Sélecteur de mode au centre (sera généré par 17-modes.js) -->
                     <div id="selecteur-mode" class="selecteur-mode-centre" style="margin-top: 10px;">
@@ -3948,6 +3948,9 @@
                                         <button id="btnDupliquerProduction" class="btn btn-secondaire" onclick="dupliquerProductionActive()" style="display: none;" title="Créer une copie de cette production">
                                             Dupliquer
                                         </button>
+                                        <button id="btnExporterProduction" class="btn btn-secondaire" onclick="exporterProductionActive()" style="display: none;" title="Exporter cette production">
+                                            Exporter
+                                        </button>
                                         <button id="btnSupprimerProduction" class="btn btn-supprimer" onclick="supprimerProductionActive()" style="display: none;" title="Supprimer cette production">
                                             Supprimer
                                         </button>
@@ -4085,6 +4088,9 @@
                                         <button id="btnDupliquerGrille" class="btn btn-secondaire" onclick="dupliquerGrilleActive()" style="display: none;" title="Créer une copie de cette grille">
                                             Dupliquer la grille
                                         </button>
+                                        <button id="btnExporterGrille" class="btn btn-secondaire" onclick="exporterGrilleActive()" style="display: none;" title="Exporter cette grille">
+                                            Exporter la grille
+                                        </button>
                                         <button id="btnSupprimerGrille" class="btn btn-supprimer" onclick="supprimerGrilleActive()" style="display: none;" title="Supprimer cette grille">
                                             Supprimer la grille
                                         </button>
@@ -4101,7 +4107,7 @@
                             </div><!-- Fin conteneurEditionGrille -->
 
                             <!-- Options d'import/export (accordéon pliable) -->
-                            <div id="optionsImportExportGrilles" class="section-accordeon" class="hidden-mt-20">
+                            <div id="optionsImportExportGrilles" class="section-accordeon">
                                 <details>
                                     <summary class="summary-materiel">
                                         Options d'import/export
@@ -4213,6 +4219,9 @@
                                         <button id="btnDupliquerEchelle" class="btn btn-secondaire" onclick="dupliquerEchelleActive()" style="display: none;" title="Créer une copie de cette échelle">
                                             Dupliquer l'échelle
                                         </button>
+                                        <button id="btnExporterEchelle" class="btn btn-secondaire" onclick="exporterEchelleActive()" style="display: none;" title="Exporter cette échelle">
+                                            Exporter
+                                        </button>
                                         <button id="btnSupprimerEchelle" class="btn btn-supprimer" onclick="supprimerEchelleActive()" style="display: none;" title="Supprimer cette échelle">
                                             Supprimer l'échelle
                                         </button>
@@ -4229,7 +4238,7 @@
                             </div><!-- Fin conteneurEditionEchelle -->
 
                             <!-- Options d'import/export (accordéon pliable) -->
-                            <div id="optionsImportExportEchelles" class="section-accordeon" class="hidden-mt-20">
+                            <div id="optionsImportExportEchelles" class="section-accordeon">
                                 <details>
                                     <summary class="summary-materiel">
                                         Options d'import/export
@@ -4535,10 +4544,13 @@
 
                             <!-- Boutons du formulaire -->
                             <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-                                <!-- Boutons gauche (actions destructives) -->
+                                <!-- Boutons gauche (actions sur la cartouche) -->
                                 <div style="display: flex; gap: 10px;">
                                     <button id="btnDupliquerCartouche" class="btn btn-secondaire" onclick="dupliquerCartoucheActive()" style="display: none;" title="Créer une copie de cette cartouche">
                                         Dupliquer la cartouche
+                                    </button>
+                                    <button id="btnExporterCartouche" class="btn btn-secondaire" onclick="exporterCartoucheActive()" style="display: none;" title="Exporter cette cartouche">
+                                        Exporter la cartouche
                                     </button>
                                     <button id="btnSupprimerCartouche" class="btn btn-supprimer" onclick="supprimerCartoucheActive()" style="display: none;" title="Supprimer cette cartouche">
                                         Supprimer la cartouche
@@ -4563,7 +4575,7 @@
                                 <div id="zoneImportUnifiee" class="accordeon-import" class="hidden-mb-20">
                             <details>
                                 <summary class="summary-materiel">
-                                    Options d'importation
+                                    Options d'import/export
                                 </summary>
                                 <div class="carte-white-p15">
 
@@ -4663,6 +4675,27 @@
                                     </button>
                                 </div>
 
+                                <!-- Options d'import/export (accordéon pliable) -->
+                                <div id="optionsImportExportCartouches" class="section-accordeon">
+                                    <details>
+                                        <summary class="summary-materiel">
+                                            Options d'import/export
+                                        </summary>
+                                        <div class="accordeon-contenu">
+                                            <div class="d-flex-gap-10">
+                                                <button class="btn btn-confirmer" onclick="exporterCartouches()" class="flex-1">
+                                                    Exporter les cartouches
+                                                </button>
+                                                <button class="btn btn-principal" onclick="document.getElementById('fichier-import-cartouches-all').click()" class="flex-1">
+                                                    Importer des cartouches
+                                                </button>
+                                                <input type="file" id="fichier-import-cartouches-all" accept=".json" style="display: none;" onchange="importerCartouches(event)">
+                                            </div>
+                                            <p class="aide mt-10">Les cartouches exportées contiennent tous les commentaires pour toutes les grilles, mais aucune donnée d'étudiants.</p>
+                                        </div>
+                                    </details>
+                                </div>
+
                             </div><!-- fin zone-principale -->
 
                         </div><!-- fin layout-sidebar-2col -->
@@ -4670,6 +4703,111 @@
                     </div><!-- fin carte -->
 
                 </div><!--fin sous-section retroactions-->
+
+                <!-- Sous-section: Objectifs d'apprentissage -->
+                <div id="materiel-objectifs" class="sous-section">
+                    <h2 class="titre-avec-emoji-toggles">
+                        <span>Objectifs d'apprentissage</span>
+                        <span class="titre-emoji-container">
+                            <span class="emoji-toggle" data-target="conseil-objectifs">💡</span>
+                        </span>
+                    </h2>
+                    <p class="text-muted">
+                        Définissez des ensembles d'objectifs réutilisables pour vos pratiques d'évaluation multi-objectifs.
+                        Chaque ensemble regroupe plusieurs objectifs avec leurs pondérations et types. Les ensembles peuvent
+                        être exportés et partagés avec vos collègues.
+                    </p>
+
+                    <div id="conseil-objectifs" class="carte-info-toggle carte-info-conseil">
+                        <strong>Conseil pratique :</strong> Les ensembles d'objectifs sont utilisés dans les pratiques de type
+                        «Multi-objectifs pondérés». Créez vos objectifs ici une fois, puis référencez-les dans le wizard
+                        de création de pratique. Les modifications apportées à un ensemble se répercutent automatiquement
+                        sur toutes les pratiques qui l'utilisent.
+                    </div>
+
+<!-- CARTE : OBJECTIFS D'APPRENTISSAGE -->
+                    <div class="carte">
+                        <h3>Ensembles d'objectifs</h3>
+
+                        <!-- LAYOUT SIDEBAR 2 COLONNES -->
+                        <div class="layout-sidebar-2col">
+
+                            <!-- SIDEBAR GAUCHE (280px, sticky) -->
+                            <div class="sidebar-navigation">
+                                <!-- Stats -->
+                                <div class="sidebar-stat">
+                                    <span class="sidebar-stat-label">Ensembles créés</span>
+                                    <strong id="stat-objectifs-ensembles" class="sidebar-stat-valeur">0</strong>
+                                </div>
+
+                                <!-- Liste des ensembles -->
+                                <div class="sidebar-liste" id="listeEnsemblesObjectifs">
+                                    <p class="banque-vide">Aucun ensemble d'objectifs</p>
+                                </div>
+                            </div>
+
+                            <!-- ZONE PRINCIPALE (centrale, scroll) -->
+                            <div class="zone-principale">
+
+                                <!-- Boutons d'action -->
+                                <div class="actions-principales">
+                                    <button onclick="document.getElementById('importObjectifsInput').click()" class="btn btn-secondaire">
+                                        Importer un ensemble
+                                    </button>
+                                    <button onclick="creerNouvelEnsembleObjectifs()" class="btn btn-principal">
+                                        + Nouvel ensemble
+                                    </button>
+                                </div>
+                                <input type="file" id="importObjectifsInput" accept=".json" class="input-file-hidden" onchange="traiterImportObjectifs(event)">
+
+                                <!-- Message d'accueil initial -->
+                                <div class="zone-principale-accueil" id="messageAccueilObjectifs">
+                                    <div class="message-vide">
+                                        <h3>Bienvenue dans les objectifs d'apprentissage</h3>
+                                        <p class="text-muted">
+                                            Créez des ensembles d'objectifs réutilisables pour structurer vos évaluations.
+                                            Par exemple : 13 objectifs pour un cours de calcul différentiel, 8 objectifs
+                                            pour un cours de biologie, etc.
+                                        </p>
+                                        <button onclick="creerNouvelEnsembleObjectifs()" class="btn btn-principal">
+                                            Créer mon premier ensemble
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Zone d'édition d'un ensemble -->
+                                <div id="editionEnsembleObjectifs" class="hidden">
+                                    <!-- Le contenu sera généré dynamiquement -->
+                                </div>
+
+                                <!-- Options d'import/export (accordéon pliable) -->
+                                <div id="optionsImportExportObjectifs" class="section-accordeon">
+                                    <details>
+                                        <summary class="summary-materiel">
+                                            Options d'import/export
+                                        </summary>
+                                        <div class="accordeon-contenu">
+                                            <div class="d-flex-gap-10">
+                                                <button class="btn btn-confirmer flex-1" onclick="exporterTousObjectifs()">
+                                                    Exporter les ensembles
+                                                </button>
+                                                <button class="btn btn-principal flex-1" onclick="document.getElementById('importObjectifsInputAccordeon').click()">
+                                                    Importer des ensembles
+                                                </button>
+                                                <input type="file" id="importObjectifsInputAccordeon" accept=".json" class="input-file-hidden" onchange="traiterImportObjectifs(event)">
+                                            </div>
+                                            <p class="aide mt-10">Les ensembles exportés contiennent les objectifs et pondérations, mais aucune donnée d'étudiants.</p>
+                                        </div>
+                                    </details>
+                                </div>
+
+                            </div><!-- fin zone-principale -->
+
+                        </div><!-- fin layout-sidebar-2col -->
+
+                    </div><!-- fin carte -->
+
+                </div><!--fin sous-section objectifs-->
 
             </section><!-- fin section-materiel -->
 
@@ -6007,6 +6145,7 @@ Exemple :
                                                     <option value="standards">Notation par maîtrise – SBG (standards numérotés)</option>
                                                     <option value="evaluations_discretes">Évaluations traditionnelles (examens, travaux avec pondération)</option>
                                                     <option value="specifications">Notation par contrat – Spec Grading (objectifs à atteindre)</option>
+                                                    <option value="multi_objectifs">Multi-objectifs pondérés (évaluation par compétences)</option>
                                                 </select>
                                             </div>
 
@@ -6107,6 +6246,76 @@ Exemple :
                                                     La structure de base sera créée automatiquement. Consultez la documentation pour configurer
                                                     vos objectifs et paliers de notes.
                                                 </p>
+                                            </div>
+
+                                            <!-- Configuration Multi-objectifs -->
+                                            <div id="wizard-config-multi-objectifs" class="hidden">
+                                                <div class="alerte alerte-information">
+                                                    <p>
+                                                        <strong>Multi-objectifs pondérés (évaluation par compétences)</strong> :
+                                                        Cette approche permet d'évaluer plusieurs objectifs ou compétences avec des pondérations différentes
+                                                        selon leur importance. Chaque objectif peut regrouper plusieurs artefacts, et vous pouvez choisir
+                                                        de retenir les N meilleurs artefacts pour chaque objectif (mode PAN par objectif).
+                                                    </p>
+                                                    <p>
+                                                        Cas d'usage typique : Un cours de mathématiques avec 13 objectifs (Limites, Dérivées, Intégration, etc.)
+                                                        où chaque objectif a un poids différent selon son importance dans le cours. Les objectifs
+                                                        intégrateurs (ex: Optimisation) peuvent avoir un poids plus élevé que les objectifs fondamentaux.
+                                                    </p>
+                                                </div>
+
+                                                <div class="alerte alerte-conseil">
+                                                    <p>
+                                                        <strong>Recommandation</strong> :
+                                                        Créez d'abord vos ensembles d'objectifs dans <em>Matériel → Objectifs d'apprentissage</em>,
+                                                        puis sélectionnez l'ensemble approprié ci-dessous. Vous pourrez ensuite associer vos artefacts
+                                                        à un ou plusieurs objectifs lors de la création des évaluations.
+                                                    </p>
+                                                </div>
+
+                                                <div class="groupe-form">
+                                                    <label>Nombre d'artefacts retenus par objectif</label>
+                                                    <input type="number" id="wizard-multi-objectifs-nombre" class="controle-form" min="1" max="20" value="3">
+                                                    <small class="form-text">
+                                                        Pour chaque objectif, les N meilleurs artefacts seront retenus pour le calcul
+                                                    </small>
+                                                </div>
+
+                                                <div class="groupe-form">
+                                                    <label>Ensemble d'objectifs</label>
+                                                    <select id="wizard-ensemble-objectifs" class="controle-form" onchange="chargerEnsembleWizard()">
+                                                        <option value="">-- Sélectionner un ensemble existant --</option>
+                                                    </select>
+                                                    <small class="form-text">
+                                                        Sélectionnez un ensemble créé dans Matériel → Objectifs d'apprentissage, ou créez-en un nouveau
+                                                    </small>
+                                                </div>
+
+                                                <div class="wizard-objectifs-container">
+                                                    <div class="section-header">
+                                                        <label>Objectifs (compétences)</label>
+                                                        <button type="button" class="btn btn-tres-compact" onclick="ajouterObjectifWizard()">
+                                                            + Ajouter manuellement
+                                                        </button>
+                                                    </div>
+
+                                                    <div id="wizard-objectifs-liste" class="wizard-objectifs-liste">
+                                                        <!-- Les objectifs seront ajoutés dynamiquement ici -->
+                                                    </div>
+
+                                                    <!-- Indicateur du total des poids -->
+                                                    <div class="total-poids-container">
+                                                        <div class="total-poids-header">
+                                                            <span class="total-poids-label">Total des pondérations :</span>
+                                                            <span id="wizard-total-poids" class="total-poids-valeur">
+                                                                0%
+                                                            </span>
+                                                        </div>
+                                                        <p id="wizard-validation-poids" class="total-poids-message">
+                                                            Le total doit atteindre 100% pour continuer
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -7023,18 +7232,67 @@ Exemple :
                         </div>
                     </div>
 
+                    <!-- Configuration pédagogique complète -->
+                    <div class="carte">
+                        <h3>Configuration pédagogique complète (Beta 91)</h3>
+                        <p class="text-muted" class="mb-25">
+                            Exporte ou importe une pratique pédagogique complète avec tous ses outils :
+                            échelles, grilles, productions, cartouches et paramètres du cours.
+                        </p>
+
+                        <!-- Export configuration complète -->
+                        <div class="carte-bleu-pale-p15-mb20">
+                            <h4 style="color: var(--bleu-moyen); margin-bottom: 10px;">📦 Exporter une configuration complète</h4>
+                            <p>
+                                Rassemble <strong>toutes les ressources</strong> de ton cours dans un package pédagogique
+                                partageable : échelles, grilles, productions, cartouches et paramètres.
+                            </p>
+                            <p class="mb-15">
+                                L'export génère automatiquement un fichier JSON + un fichier LISEZMOI.txt avec les métadonnées
+                                et les instructions d'utilisation.
+                            </p>
+                            <button class="btn btn-principal" onclick="exporterConfigurationComplete()" class="mt-10">
+                                Exporter ma configuration complète
+                            </button>
+                            <p class="text-muted" class="mt-10-text-09">
+                                💡 Idéal pour partager une pratique pédagogique avec des collègues ou conserver une configuration de cours.
+                            </p>
+                        </div>
+
+                        <!-- Import configuration complète -->
+                        <div class="carte-bleu-pale-p15">
+                            <h4 style="color: var(--bleu-moyen); margin-bottom: 10px;">📥 Importer une configuration complète</h4>
+                            <p>
+                                Importe une configuration pédagogique exportée précédemment.
+                                Le système détectera automatiquement le type de fichier et affichera un aperçu avant l'import.
+                            </p>
+                            <button class="btn btn-principal" onclick="ouvrirImportConfigComplete()" class="mt-10">
+                                Importer une configuration
+                            </button>
+                            <div class="badge-alerte" class="mt-15">
+                                <strong>Attention :</strong> L'import écrasera les ressources existantes avec les mêmes identifiants.
+                                Exporte ta configuration actuelle d'abord si tu souhaites la conserver !
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Informations sur les backups -->
                     <div class="carte">
                         <h3>À propos des sauvegardes</h3>
                         <div class="carte-info-bleu-clair">
-                            <h4 style="color: var(--bleu-clair); margin-bottom: 10px;"> Backup complet vs Import/Export partiel</h4>
+                            <h4 style="color: var(--bleu-clair); margin-bottom: 10px;"> Backup complet vs Configuration pédagogique vs Import/Export partiel</h4>
                             <p class="mb-15">
-                                <strong>Les boutons ci-dessus</strong> permettent de faire un <strong>backup complet</strong>
-                                de toutes tes données d'application (cours, trimestre, étudiants, évaluations, présences, etc.).
+                                <strong>Backup complet</strong> (boutons "Exporter/Importer les données" ci-dessus) :
+                                Sauvegarde <strong>toutes</strong> tes données d'application (cours, trimestre, étudiants, évaluations, présences, etc.).
                             </p>
                             <p class="mb-15">
-                                Pour exporter/importer uniquement du <strong>matériel pédagogique</strong> (grilles, échelles, productions),
-                                utilise les boutons d'import/export directement dans les sections :
+                                <strong>Configuration pédagogique complète</strong> (nouveau - Beta 91) :
+                                Exporte uniquement le <strong>matériel pédagogique réutilisable</strong> (échelles, grilles, productions, cartouches, paramètres)
+                                dans un package partageable avec métadonnées CC BY-NC-SA 4.0.
+                            </p>
+                            <p class="mb-15">
+                                <strong>Import/Export partiel</strong> : Importe/exporte des ressources individuelles via les boutons
+                                dans les sections :
                             </p>
                             <ul class="ml-20-lh-95">
                                 <li><strong>Matériel pédagogique → Productions</strong> : Import/export des évaluations</li>
@@ -8399,6 +8657,76 @@ Exemple :
                                 <li><strong>Adaptation</strong> : Ajuste le matériel selon ses besoins</li>
                                 <li><strong>Utilisation</strong> : Matériel prêt pour le trimestre</li>
                             </ol>
+                        </div>
+
+                        <div class="alerte alerte-succes" style="margin-top: 20px;">
+                            <h4 style="color: #2e7d32; margin-bottom: 10px;">📜 Licence Creative Commons BY-NC-SA 4.0</h4>
+                            <p><strong>Tout le matériel exporté est automatiquement sous licence CC BY-NC-SA 4.0</strong></p>
+
+                            <p style="margin: 10px 0;"><strong>Cette licence permet :</strong></p>
+                            <ul style="margin-bottom: 15px;">
+                                <li>✅ <strong>Partager</strong> : Copier et redistribuer le matériel</li>
+                                <li>✅ <strong>Adapter</strong> : Modifier et transformer le matériel</li>
+                                <li>✅ <strong>Utiliser</strong> : Pour votre enseignement</li>
+                            </ul>
+
+                            <p style="margin: 10px 0;"><strong>Avec ces conditions :</strong></p>
+                            <ul style="margin-bottom: 15px;">
+                                <li>📝 <strong>Attribution (BY)</strong> : Créditer l'auteur original</li>
+                                <li>🚫 <strong>Non-commercial (NC)</strong> : Pas d'usage commercial</li>
+                                <li>🔄 <strong>Partage dans les mêmes conditions (SA)</strong> : Partager sous la même licence</li>
+                            </ul>
+
+                            <div style="background: #f1f8e9; padding: 12px; border-radius: 6px; margin-top: 15px;">
+                                <p style="margin: 0 0 10px 0; font-weight: bold; color: #558b2f;">🤝 Système automatique d'attribution des contributeurs</p>
+
+                                <p style="margin: 10px 0;"><strong>Comment ça fonctionne :</strong></p>
+
+                                <p style="margin: 5px 0; padding-left: 15px;"><strong>1. Import</strong> : Quand vous importez du matériel, vous voyez :</p>
+                                <ul style="margin: 5px 0 10px 20px;">
+                                    <li>Licence CC BY-NC-SA 4.0</li>
+                                    <li>Auteur original du matériel</li>
+                                    <li>Date de création initiale</li>
+                                    <li>Liste des contributeurs (si applicable)</li>
+                                </ul>
+
+                                <p style="margin: 5px 0; padding-left: 15px;"><strong>2. Modification</strong> : Vous adaptez le matériel à vos besoins</p>
+                                <ul style="margin: 5px 0 10px 20px;">
+                                    <li>Ajout/suppression d'éléments</li>
+                                    <li>Modification de pondérations</li>
+                                    <li>Personnalisation selon votre contexte</li>
+                                </ul>
+
+                                <p style="margin: 5px 0; padding-left: 15px;"><strong>3. Export</strong> : Quand vous exportez du matériel modifié :</p>
+                                <ul style="margin: 5px 0 10px 20px;">
+                                    <li>Le système détecte qu'il s'agit de matériel importé</li>
+                                    <li>Vous invite à entrer votre nom comme contributeur</li>
+                                    <li><strong>L'auteur original est préservé</strong></li>
+                                    <li>Votre nom est ajouté à la liste des contributeurs avec la date</li>
+                                </ul>
+
+                                <p style="margin: 5px 0; padding-left: 15px;"><strong>4. Partage</strong> : Le fichier exporté contient :</p>
+                                <ul style="margin: 5px 0 0 20px;">
+                                    <li>📋 Toutes les métadonnées de licence</li>
+                                    <li>👤 Auteur original : <em>préservé</em></li>
+                                    <li>👥 Contributeurs : <em>liste complète avec dates</em></li>
+                                    <li>📅 Dates de création et modification</li>
+                                </ul>
+                            </div>
+
+                            <p style="margin-top: 15px; font-style: italic; color: #555;">
+                                <strong>Exemple :</strong> Grégoire Bédard crée un ensemble d'objectifs et l'exporte.
+                                Marie Tremblay l'importe, l'adapte pour son cours, et l'exporte.
+                                Le fichier crédite Grégoire comme auteur original ET Marie comme contributrice.
+                                Si Jean Leblanc importe ensuite la version de Marie et y contribue,
+                                le fichier créditera les trois personnes dans l'ordre chronologique.
+                            </p>
+
+                            <p style="margin-top: 15px; padding: 10px; background: #fff3e0; border-left: 4px solid #f57c00; border-radius: 4px;">
+                                💡 <strong>Conseil :</strong> Même si vous n'avez fait que de petites modifications,
+                                entrez votre nom lors de l'export. Cela permet de tracer l'évolution du matériel
+                                et de reconnaître le travail de chacun·e dans la communauté pédagogique.
+                            </p>
                         </div>
                     </div>
 
@@ -9883,10 +10211,10 @@ Exemple :
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025111325"></script>
     <script src="js/etudiants.js?v=2025111812"></script>
-    <script src="js/productions.js?v=2025111303"></script>
-    <script src="js/grilles.js?v=2025111215"></script>
-    <script src="js/echelles.js?v=2025111202"></script>
-    <script src="js/cartouches.js?v=2025111201"></script>
+    <script src="js/productions.js?v=2025112626"></script>
+    <script src="js/grilles.js?v=2025112626"></script>
+    <script src="js/echelles.js?v=2025112626"></script>
+    <script src="js/cartouches.js?v=2025112626"></script>
     <script src="js/cours.js?v=2025112522"></script>
     <script src="js/contexte.js?v=2025111201"></script>
 
@@ -9903,15 +10231,16 @@ Exemple :
     <script src="js/pratiques/config-francois-chimie.js?v=2025112600"></script>
 
     <!-- Pratiques configurables JSON (Beta 92 - Jour 1) -->
-    <script src="js/pratiques/pratique-configurable.js?v=2025112501"></script>
+    <script src="js/pratiques/pratique-configurable.js?v=2025112609"></script>
     <script src="js/pratiques/pratiques-predefines.js?v=2025112602"></script>
     <script src="js/pratiques/pratique-manager.js?v=2025112501"></script>
 
-    <!-- Licence Creative Commons -->
-    <script src="js/cc-license.js?v=2025112601"></script>
+    <!-- Licence Creative Commons (Beta 91.2 - Import/Export) -->
+    <script src="js/cc-license.js?v=2025112626"></script>
 
     <!-- Interface de gestion des pratiques configurables -->
-    <script src="js/pratiques.js?v=2025112605"></script>
+    <script src="js/pratiques.js?v=2025112607"></script>
+    <script src="js/objectifs.js?v=2025112620"></script>
 
     <script src="js/portfolio.js?v=2025112522"></script>
     <script src="js/saisie-presences.js?v=2025111202"></script>
@@ -9928,8 +10257,8 @@ Exemple :
     <script src="js/groupe.js?v=2025111703"></script>
     <script src="js/interventions.js?v=2025112122"></script>
 
-    <!-- PRIORITÉ 6: Modules avancés -->
-    <script src="js/import-export.js?v=1761387764"></script>
+    <!-- PRIORITÉ 6: Modules avancés (Beta 91.2 - Import/Export) -->
+    <script src="js/import-export.js?v=2025112626"></script>
     <script src="js/statistiques.js?v=2025111032"></script>
     <script src="js/liste-evaluations.js?v=2025111716"></script>
 
@@ -10371,126 +10700,19 @@ Exemple :
         // ========================================
         // EXPORT DES GRILLES D'ÉVALUATION
         // ========================================
-        function exporterGrilles() {
-            try {
-                const grillesTemplates = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
-
-                // Filtrer pour garder seulement les grilles (pas les échelles)
-                const grilles = grillesTemplates.filter(g => g.type !== 'echelle');
-
-                if (grilles.length === 0) {
-                    alert('Aucune grille d\'évaluation à exporter.\n\nCrée d\'abord des grilles dans la section Évaluations.');
-                    return;
-                }
-
-                // Créer le fichier JSON
-                const json = JSON.stringify(grilles, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-
-                // Télécharger
-                const a = document.createElement('a');
-                a.href = url;
-                const dateStr = new Date().toISOString().slice(0, 10);
-                a.download = `grilles-evaluation-${dateStr}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-
-                if (typeof afficherNotificationSucces === 'function') {
-                    afficherNotificationSucces(`Export réussi : ${grilles.length} grille(s) exportée(s)`);
-                } else {
-                    alert(`Export réussi : ${grilles.length} grille(s) exportée(s)`);
-                }
-
-            } catch (err) {
-                console.error('Erreur exportation grilles:', err);
-                alert('Erreur lors de l\'exportation des grilles.');
-            }
-        }
+        // SUPPRIMÉ : La fonction exporterGrilles() est maintenant dans js/grilles.js avec support CC
 
         // ========================================
         // EXPORT DES ÉCHELLES DE PERFORMANCE
         // ========================================
-        function exporterEchelles() {
-            try {
-                const echellesTemplates = JSON.parse(localStorage.getItem('echellesTemplates') || '[]');
-                const niveauxEchelle = JSON.parse(localStorage.getItem('niveauxEchelle') || '[]');
-                const configEchelle = JSON.parse(localStorage.getItem('configEchelle') || '{}');
-
-                // Vérifier qu'il y a des données
-                if (echellesTemplates.length === 0 && niveauxEchelle.length === 0 && Object.keys(configEchelle).length === 0) {
-                    alert('Aucune échelle de performance à exporter.\n\nConfigure d\'abord ton échelle dans Réglages → Échelles de performance.');
-                    return;
-                }
-
-                // Créer un objet avec toutes les données d'échelles
-                const exportData = {
-                    echellesTemplates: echellesTemplates,
-                    niveauxEchelle: niveauxEchelle,
-                    configEchelle: configEchelle
-                };
-
-                // Créer le fichier JSON
-                const json = JSON.stringify(exportData, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-
-                // Télécharger
-                const a = document.createElement('a');
-                a.href = url;
-                const dateStr = new Date().toISOString().slice(0, 10);
-                a.download = `echelles-performance-${dateStr}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-
-                if (typeof afficherNotificationSucces === 'function') {
-                    afficherNotificationSucces(`Export réussi : échelle(s) exportée(s)`);
-                } else {
-                    alert(`Export réussi : échelle(s) exportée(s)`);
-                }
-
-            } catch (err) {
-                console.error('Erreur exportation échelles:', err);
-                alert('Erreur lors de l\'exportation des échelles.');
-            }
-        }
+        // Les fonctions exporterEchelles() et exporterEchelleActive() sont définies dans js/echelles.js
+        // Elles exportent les échelles avec métadonnées CC BY-NC-SA 4.0
 
         // ========================================
         // EXPORT DES PRODUCTIONS
         // ========================================
-        function exporterProductions() {
-            try {
-                const productions = JSON.parse(localStorage.getItem('productions') || '[]');
-
-                if (productions.length === 0) {
-                    alert('Aucune production à exporter.\n\nCrée d\'abord des productions dans Réglages → Productions.');
-                    return;
-                }
-
-                // Créer le fichier JSON
-                const json = JSON.stringify(productions, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-
-                // Télécharger
-                const a = document.createElement('a');
-                a.href = url;
-                const dateStr = new Date().toISOString().slice(0, 10);
-                a.download = `productions-${dateStr}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-
-                if (typeof afficherNotificationSucces === 'function') {
-                    afficherNotificationSucces(`Export réussi : ${productions.length} production(s) exportée(s)`);
-                } else {
-                    alert(`Export réussi : ${productions.length} production(s) exportée(s)`);
-                }
-
-            } catch (err) {
-                console.error('Erreur exportation productions:', err);
-                alert('Erreur lors de l\'exportation des productions.');
-            }
-        }
+        // La fonction exporterProductions() est définie dans js/productions.js
+        // Elle exporte toutes les productions avec métadonnées CC BY-NC-SA 4.0
 
         // ========================================
         // IMPORT DES GRILLES D'ÉVALUATION

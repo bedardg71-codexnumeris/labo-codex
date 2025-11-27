@@ -3597,6 +3597,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .actions-principales {
     display: flex;
     justify-content: flex-end;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
@@ -7153,4 +7154,227 @@ label:has(+ textarea:disabled) {
 
 .badge-jeton-numero-personnalise {
     background: #2196f3;
+}
+
+/* ===============================
+   UTILITAIRES - Objectifs d'apprentissage (Beta 91)
+   =============================== */
+
+/* En-tête avec actions (gauche + droite) */
+.actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Groupe d'actions (gauche) */
+.actions-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* Input file caché */
+.input-file-hidden {
+    display: none;
+}
+
+/* Utilitaire pour cacher des éléments */
+.hidden {
+    display: none !important;
+}
+
+/* En-tête d'un ensemble avec titre et actions */
+.ensemble-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--gris-leger);
+}
+
+.ensemble-header h3 {
+    margin: 0;
+    color: var(--bleu-principal);
+}
+
+/* Carte d'information avec fond bleu pâle */
+.carte-info-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+}
+
+.carte-info-section h4 {
+    margin: 0 0 15px 0;
+    color: var(--bleu-principal);
+}
+
+/* Grille 2 colonnes */
+.grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Section des objectifs */
+.objectifs-section {
+    margin-bottom: 20px;
+}
+
+/* En-tête de section avec titre et bouton */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.section-header h4 {
+    margin: 0;
+    color: var(--bleu-principal);
+}
+
+/* Item d'objectif (ligne dans la grille) */
+.objectif-item {
+    display: grid;
+    grid-template-columns: 1fr 100px 150px auto;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 12px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid var(--gris-leger);
+}
+
+/* Conteneur du total des pondérations */
+.total-poids-container {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+}
+
+.total-poids-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-poids-label {
+    font-weight: 600;
+    color: var(--gris-fonce);
+}
+
+.total-poids-valeur {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--bleu-principal);
+}
+
+.total-poids-message {
+    margin: 8px 0 0 0;
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+}
+
+/* Pied de page avec boutons d'action */
+.actions-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 2px solid var(--gris-leger);
+}
+
+/* Alerte conseil (vert pâle) */
+.alerte-conseil {
+    margin-bottom: 15px;
+    padding: 12px;
+    background: #e8f5e9;
+    border-left: 4px solid #4caf50;
+    border-radius: 4px;
+}
+
+.alerte-conseil p {
+    margin: 0;
+    line-height: 1.6;
+    font-size: 0.85rem;
+    color: var(--gris-fonce);
+}
+
+/* Texte d'aide sous les champs de formulaire */
+.form-text {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+}
+
+/* Conteneur des objectifs du wizard */
+.wizard-objectifs-container {
+    margin-top: 20px;
+}
+
+/* Liste des objectifs du wizard */
+.wizard-objectifs-liste {
+    margin-bottom: 15px;
+    min-height: 50px;
+}
+
+/* ============================================================================
+   TABLEAU OBJECTIFS MULTI-OBJECTIFS (PROFIL ÉTUDIANT)
+   Styles pour l'affichage des objectifs d'apprentissage dans le profil
+   Date: 26 novembre 2025
+   ============================================================================ */
+
+.tableau-objectifs-profil {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.tableau-objectifs-profil thead {
+    background: var(--bleu-tres-pale);
+    border-bottom: 2px solid var(--bleu-leger);
+}
+
+.tableau-objectifs-profil thead th {
+    padding: 12px;
+    font-weight: 600;
+    color: var(--bleu-fonce);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.tableau-objectifs-profil tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.tableau-objectifs-profil tbody tr:hover {
+    background: var(--bleu-tres-pale);
+}
+
+.tableau-objectifs-profil tbody tr:last-child {
+    border-bottom: none;
+}
+
+.tableau-objectifs-profil tbody td {
+    vertical-align: middle;
+}
+
+/* Responsive pour tableaux objectifs */
+@media (max-width: 1200px) {
+    .tableau-objectifs-profil {
+        font-size: 0.85rem;
+    }
+
+    .tableau-objectifs-profil th,
+    .tableau-objectifs-profil td {
+        padding: 10px 8px;
+    }
 }
