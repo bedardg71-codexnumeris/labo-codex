@@ -1,0 +1,1114 @@
+{
+  "infoCours": {
+    "code": "601-101-MQ",
+    "titre": "Écriture et littérature",
+    "session": "Hiver 2025",
+    "ponderation": "2-2-3"
+  },
+  "infoTrimestre": {
+    "dateDebut": "2025-01-20",
+    "dateFin": "2025-05-23",
+    "congesPrevus": [
+      {
+        "dateDebut": "2025-03-03",
+        "dateFin": "2025-03-07",
+        "nom": "Semaine de lecture"
+      }
+    ]
+  },
+  "groupeEtudiants": [
+    {
+      "da": "9999001",
+      "prenom": "Émilie",
+      "nom": "Tremblay",
+      "groupe": "9999",
+      "programme": "300.M0",
+      "nomProgramme": "Sciences humaines",
+      "sa": "Non"
+    },
+    {
+      "da": "9999002",
+      "prenom": "Thomas",
+      "nom": "Gagnon",
+      "groupe": "9999",
+      "programme": "200.B0",
+      "nomProgramme": "Sciences de la nature",
+      "sa": "Non"
+    },
+    {
+      "da": "9999003",
+      "prenom": "Camille",
+      "nom": "Roy",
+      "groupe": "9999",
+      "programme": "420.B0",
+      "nomProgramme": "Techniques de l'informatique",
+      "sa": "Non"
+    },
+    {
+      "da": "9999004",
+      "prenom": "Alexandre",
+      "nom": "Côté",
+      "groupe": "9999",
+      "programme": "410.B0",
+      "nomProgramme": "Techniques de comptabilité et de gestion",
+      "sa": "Oui"
+    },
+    {
+      "da": "9999005",
+      "prenom": "Sarah",
+      "nom": "Bouchard",
+      "groupe": "9999",
+      "programme": "180.A0",
+      "nomProgramme": "Soins Infirmiers",
+      "sa": "Non"
+    },
+    {
+      "da": "9999006",
+      "prenom": "Minh",
+      "nom": "Nguyen",
+      "groupe": "9999",
+      "programme": "300.M0",
+      "nomProgramme": "Sciences humaines",
+      "sa": "Non"
+    },
+    {
+      "da": "9999007",
+      "prenom": "Léa",
+      "nom": "Morin",
+      "groupe": "9999",
+      "programme": "500.AL",
+      "nomProgramme": "Arts, lettres et communication – Langues",
+      "sa": "Non"
+    },
+    {
+      "da": "9999008",
+      "prenom": "Maxime",
+      "nom": "Lavoie",
+      "groupe": "9999",
+      "programme": "200.B0",
+      "nomProgramme": "Sciences de la nature",
+      "sa": "Non"
+    },
+    {
+      "da": "9999009",
+      "prenom": "Jade",
+      "nom": "Fortin",
+      "groupe": "9999",
+      "programme": "351.A1",
+      "nomProgramme": "Techniques d'éducation spécialisée",
+      "sa": "Oui"
+    },
+    {
+      "da": "9999010",
+      "prenom": "William",
+      "nom": "Gagné",
+      "groupe": "9999",
+      "programme": "300.M1",
+      "nomProgramme": "Sciences humaines avec mathématiques",
+      "sa": "Non"
+    },
+    {
+      "da": "9999011",
+      "prenom": "Florence",
+      "nom": "Ouellet",
+      "groupe": "9999",
+      "programme": "322.A1",
+      "nomProgramme": "Techniques d'éducation à l'enfance",
+      "sa": "Non"
+    },
+    {
+      "da": "9999012",
+      "prenom": "Nathan",
+      "nom": "Pelletier",
+      "groupe": "9999",
+      "programme": "200.B0",
+      "nomProgramme": "Sciences de la nature",
+      "sa": "Non"
+    },
+    {
+      "da": "9999013",
+      "prenom": "Chloé",
+      "nom": "Bélanger",
+      "groupe": "9999",
+      "programme": "300.M0",
+      "nomProgramme": "Sciences humaines",
+      "sa": "Non"
+    },
+    {
+      "da": "9999014",
+      "prenom": "Olivier",
+      "nom": "Lévesque",
+      "groupe": "9999",
+      "programme": "420.B0",
+      "nomProgramme": "Techniques de l'informatique",
+      "sa": "Non"
+    },
+    {
+      "da": "9999015",
+      "prenom": "Nour",
+      "nom": "El Khoury",
+      "groupe": "9999",
+      "programme": "410.D0",
+      "nomProgramme": "Gestion de commerces",
+      "sa": "Non"
+    },
+    {
+      "da": "9999016",
+      "prenom": "Samuel",
+      "nom": "Leblanc",
+      "groupe": "9999",
+      "programme": "180.A0",
+      "nomProgramme": "Soins Infirmiers",
+      "sa": "Non"
+    },
+    {
+      "da": "9999017",
+      "prenom": "Alice",
+      "nom": "Paquette",
+      "groupe": "9999",
+      "programme": "500.AL",
+      "nomProgramme": "Arts, lettres et communication – Langues",
+      "sa": "Oui"
+    },
+    {
+      "da": "9999018",
+      "prenom": "Félix",
+      "nom": "Girard",
+      "groupe": "9999",
+      "programme": "200.B0",
+      "nomProgramme": "Sciences de la nature",
+      "sa": "Non"
+    },
+    {
+      "da": "9999019",
+      "prenom": "Juliette",
+      "nom": "Simard",
+      "groupe": "9999",
+      "programme": "300.M0",
+      "nomProgramme": "Sciences humaines",
+      "sa": "Non"
+    },
+    {
+      "da": "9999020",
+      "prenom": "Antoine",
+      "nom": "Boucher",
+      "groupe": "9999",
+      "programme": "410.B0",
+      "nomProgramme": "Techniques de comptabilité et de gestion",
+      "sa": "Non"
+    },
+    {
+      "da": "9999021",
+      "prenom": "Maude",
+      "nom": "Caron",
+      "groupe": "9999",
+      "programme": "351.A1",
+      "nomProgramme": "Techniques d'éducation spécialisée",
+      "sa": "Non"
+    },
+    {
+      "da": "9999022",
+      "prenom": "Lucas",
+      "nom": "Beaulieu",
+      "groupe": "9999",
+      "programme": "420.B0",
+      "nomProgramme": "Techniques de l'informatique",
+      "sa": "Non"
+    },
+    {
+      "da": "9999023",
+      "prenom": "Sofia",
+      "nom": "Rodriguez",
+      "groupe": "9999",
+      "programme": "300.M1",
+      "nomProgramme": "Sciences humaines avec mathématiques",
+      "sa": "Non"
+    },
+    {
+      "da": "9999024",
+      "prenom": "Raphaël",
+      "nom": "Poirier",
+      "groupe": "9999",
+      "programme": "200.B0",
+      "nomProgramme": "Sciences de la nature",
+      "sa": "Non"
+    },
+    {
+      "da": "9999025",
+      "prenom": "Amélie",
+      "nom": "Fournier",
+      "groupe": "9999",
+      "programme": "180.A0",
+      "nomProgramme": "Soins Infirmiers",
+      "sa": "Oui"
+    },
+    {
+      "da": "9999026",
+      "prenom": "Louis",
+      "nom": "Leclerc",
+      "groupe": "9999",
+      "programme": "410.D0",
+      "nomProgramme": "Gestion de commerces",
+      "sa": "Non"
+    },
+    {
+      "da": "9999027",
+      "prenom": "Charlotte",
+      "nom": "Dupont",
+      "groupe": "9999",
+      "programme": "300.M0",
+      "nomProgramme": "Sciences humaines",
+      "sa": "Non"
+    },
+    {
+      "da": "9999028",
+      "prenom": "Amadou",
+      "nom": "Diallo",
+      "groupe": "9999",
+      "programme": "322.A1",
+      "nomProgramme": "Techniques d'éducation à l'enfance",
+      "sa": "Non"
+    },
+    {
+      "da": "9999029",
+      "prenom": "Élizabeth",
+      "nom": "Dubois",
+      "groupe": "9999",
+      "programme": "500.AL",
+      "nomProgramme": "Arts, lettres et communication – Langues",
+      "sa": "Non"
+    },
+    {
+      "da": "9999030",
+      "prenom": "Diego",
+      "nom": "Martinez",
+      "groupe": "9999",
+      "programme": "420.B0",
+      "nomProgramme": "Techniques de l'informatique",
+      "sa": "Non"
+    }
+  ],
+  "modalitesEvaluation": {
+    "pratique": "pan-maitrise",
+    "typePAN": "maitrise",
+    "dateConfiguration": "2025-11-16T12:00:00.000Z",
+    "grilleReferenceDepistage": "grille-srpnf",
+    "affichageTableauBord": {
+      "afficherSommatif": true,
+      "afficherAlternatif": true
+    },
+    "afficherDescriptionsSOLO": true,
+    "activerRai": true,
+    "configPAN": {
+      "nombreCours": 7,
+      "portfolio": {
+        "actif": true,
+        "nombreARetenir": 4,
+        "minimumCompletion": 7,
+        "nombreTotal": 10,
+        "methodeSelection": "meilleurs",
+        "decouplerPR": false
+      },
+      "jetons": {
+        "actif": true,
+        "nombreParEleve": 4,
+        "delai": {
+          "actif": true,
+          "nombre": 2,
+          "dureeJours": 7
+        },
+        "reprise": {
+          "actif": true,
+          "nombre": 2,
+          "maxParProduction": 1,
+          "archiverOriginale": true
+        },
+        "typesPersonnalises": [
+          {
+            "id": "jeton-aide",
+            "nom": "Aide individualisée",
+            "description": "Rencontre de 30 minutes avec l'enseignant",
+            "icone": "💬",
+            "couleur": "#2196F3",
+            "nombreDisponible": 2
+          },
+          {
+            "id": "jeton-bonus",
+            "nom": "Bonus de performance",
+            "description": "+5% sur un artefact au choix",
+            "icone": "⭐",
+            "couleur": "#FFC107",
+            "nombreDisponible": 1
+          }
+        ]
+      }
+    }
+  },
+  "productions": [
+    {
+      "id": "prod-001",
+      "titre": "Examen formatif 1",
+      "type": "examen-formatif",
+      "dateRemise": "2025-02-05",
+      "ponderation": 0,
+      "grilleId": "grille-srpnf",
+      "verrouille": false
+    },
+    {
+      "id": "prod-002",
+      "titre": "Travail 1 : Analyse littéraire",
+      "type": "travail",
+      "dateRemise": "2025-02-12",
+      "ponderation": 20,
+      "grilleId": "grille-srpnf",
+      "verrouille": false
+    },
+    {
+      "id": "prod-003",
+      "titre": "Examen intra",
+      "type": "examen",
+      "dateRemise": "2025-02-26",
+      "ponderation": 25,
+      "grilleId": "grille-srpnf",
+      "verrouille": false
+    },
+    {
+      "id": "prod-004",
+      "titre": "Travail 2 : Dissertation",
+      "type": "travail",
+      "dateRemise": "2025-03-19",
+      "ponderation": 25,
+      "grilleId": "grille-srpnf",
+      "verrouille": false
+    },
+    {
+      "id": "prod-005",
+      "titre": "Examen final",
+      "type": "examen",
+      "dateRemise": "2025-05-14",
+      "ponderation": 30,
+      "grilleId": "grille-srpnf",
+      "verrouille": false
+    },
+    {
+      "id": "prod-006",
+      "titre": "Artefact 1 : Fiche de lecture",
+      "type": "artefact-portfolio",
+      "dateRemise": "2025-02-07",
+      "ponderation": 0,
+      "grilleId": "grille-idme",
+      "verrouille": false
+    },
+    {
+      "id": "prod-007",
+      "titre": "Artefact 2 : Analyse comparative",
+      "type": "artefact-portfolio",
+      "dateRemise": "2025-02-21",
+      "ponderation": 0,
+      "grilleId": "grille-idme",
+      "verrouille": false
+    },
+    {
+      "id": "prod-008",
+      "titre": "Artefact 3 : Essai critique",
+      "type": "artefact-portfolio",
+      "dateRemise": "2025-03-14",
+      "ponderation": 0,
+      "grilleId": "grille-idme",
+      "verrouille": false
+    },
+    {
+      "id": "prod-009",
+      "titre": "Artefact 4 : Production finale",
+      "type": "artefact-portfolio",
+      "dateRemise": "2025-04-11",
+      "ponderation": 0,
+      "grilleId": "grille-idme",
+      "verrouille": false
+    }
+  ],
+  "grillesTemplates": [
+    {
+      "id": "grille-srpnf",
+      "nom": "Grille SRPNF",
+      "criteres": [
+        {
+          "nom": "structure",
+          "libelle": "Structure",
+          "poids": 0.15
+        },
+        {
+          "nom": "rigueur",
+          "libelle": "Rigueur",
+          "poids": 0.2
+        },
+        {
+          "nom": "plausibilite",
+          "libelle": "Plausibilité",
+          "poids": 0.1
+        },
+        {
+          "nom": "nuance",
+          "libelle": "Nuance",
+          "poids": 0.25
+        },
+        {
+          "nom": "francais",
+          "libelle": "Français",
+          "poids": 0.3
+        }
+      ]
+    }
+  ],
+  "echellesTemplates": [
+    {
+      "id": "echelle-idme",
+      "nom": "Échelle IDME (SOLO)",
+      "description": "Taxonomy SOLO adaptée pour l'évaluation formative",
+      "niveaux": [
+        {
+          "code": "0",
+          "nom": "Aucun",
+          "min": 0,
+          "max": 0,
+          "valeur": 0,
+          "couleur": "#9E9E9E",
+          "description": "Travail non original ou non recevable (plagiat, IA non autorisée)"
+        },
+        {
+          "code": "I",
+          "nom": "Insuffisant",
+          "min": 0.01,
+          "max": 64.99,
+          "valeur": 32,
+          "couleur": "#F44336",
+          "description": "Compréhension superficielle ou fragmentée"
+        },
+        {
+          "code": "D",
+          "nom": "Développement",
+          "min": 65,
+          "max": 74.99,
+          "valeur": 69.5,
+          "couleur": "#FF9800",
+          "description": "Points pertinents sans liens entre eux"
+        },
+        {
+          "code": "M",
+          "nom": "Maîtrisé",
+          "min": 75,
+          "max": 84.99,
+          "valeur": 79.5,
+          "couleur": "#4CAF50",
+          "description": "Compréhension globale avec liens explicites"
+        },
+        {
+          "code": "E",
+          "nom": "Étendu",
+          "min": 85,
+          "max": 100,
+          "valeur": 92.5,
+          "couleur": "#2196F3",
+          "description": "Transfert à d'autres contextes et généralisation"
+        }
+      ]
+    }
+  ],
+  "artefactsSelectionnes": {
+    "9999001": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999002": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999003": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999004": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999005": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999006": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999007": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999008": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999009": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999010": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999011": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999012": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999013": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999014": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999015": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999016": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999017": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999018": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999019": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999020": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999021": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999022": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999023": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999024": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999025": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999026": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999027": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999028": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999029": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ],
+    "9999030": [
+      "prod-006",
+      "prod-007",
+      "prod-008",
+      "prod-009"
+    ]
+  },
+  "evaluations": {
+    "9999001": {
+      "prod-001": {
+        "structure": 0.85,
+        "rigueur": 0.9,
+        "plausibilite": 0.85,
+        "nuance": 0.85,
+        "francais": 0.9
+      },
+      "prod-002": {
+        "structure": 0.85,
+        "rigueur": 0.85,
+        "plausibilite": 0.8,
+        "nuance": 0.85,
+        "francais": 0.9
+      },
+      "prod-003": {
+        "structure": 0.85,
+        "rigueur": 0.85,
+        "plausibilite": 0.8,
+        "nuance": 0.85,
+        "francais": 0.9
+      },
+      "prod-006": {
+        "niveau": "M"
+      },
+      "prod-007": {
+        "niveau": "M"
+      },
+      "prod-008": {
+        "niveau": "M"
+      },
+      "prod-009": {
+        "niveau": "E"
+      }
+    },
+    "9999002": {
+      "prod-001": {
+        "structure": 0.9,
+        "rigueur": 0.9,
+        "plausibilite": 0.85,
+        "nuance": 0.9,
+        "francais": 0.9
+      },
+      "prod-002": {
+        "structure": 0.85,
+        "rigueur": 0.9,
+        "plausibilite": 0.85,
+        "nuance": 0.85,
+        "francais": 0.9
+      },
+      "prod-003": {
+        "structure": 0.85,
+        "rigueur": 0.85,
+        "plausibilite": 0.85,
+        "nuance": 0.9,
+        "francais": 0.9
+      },
+      "prod-006": {
+        "niveau": "M"
+      },
+      "prod-007": {
+        "niveau": "E"
+      },
+      "prod-008": {
+        "niveau": "M"
+      },
+      "prod-009": {
+        "niveau": "E"
+      }
+    },
+    "9999003": {
+      "prod-001": {
+        "structure": 0.85,
+        "rigueur": 0.85,
+        "plausibilite": 0.8,
+        "nuance": 0.85,
+        "francais": 0.85
+      },
+      "prod-002": {
+        "structure": 0.8,
+        "rigueur": 0.85,
+        "plausibilite": 0.85,
+        "nuance": 0.85,
+        "francais": 0.9
+      },
+      "prod-003": {
+        "structure": 0.85,
+        "rigueur": 0.85,
+        "plausibilite": 0.8,
+        "nuance": 0.85,
+        "francais": 0.85
+      },
+      "prod-006": {
+        "niveau": "M"
+      },
+      "prod-007": {
+        "niveau": "M"
+      },
+      "prod-008": {
+        "niveau": "M"
+      },
+      "prod-009": {
+        "niveau": "M"
+      }
+    },
+    "9999004": {
+      "prod-001": {
+        "structure": 0.7,
+        "rigueur": 0.75,
+        "plausibilite": 0.7,
+        "nuance": 0.7,
+        "francais": 0.75
+      },
+      "prod-002": {
+        "structure": 0.7,
+        "rigueur": 0.7,
+        "plausibilite": 0.7,
+        "nuance": 0.75,
+        "francais": 0.75
+      },
+      "prod-003": {
+        "structure": 0.7,
+        "rigueur": 0.7,
+        "plausibilite": 0.7,
+        "nuance": 0.7,
+        "francais": 0.75
+      },
+      "prod-006": {
+        "niveau": "D"
+      },
+      "prod-007": {
+        "niveau": "M"
+      },
+      "prod-008": {
+        "niveau": "D"
+      },
+      "prod-009": {
+        "niveau": "M"
+      }
+    },
+    "9999005": {
+      "prod-001": {
+        "structure": 0.7,
+        "rigueur": 0.75,
+        "plausibilite": 0.75,
+        "nuance": 0.7,
+        "francais": 0.7
+      },
+      "prod-002": {
+        "structure": 0.75,
+        "rigueur": 0.7,
+        "plausibilite": 0.7,
+        "nuance": 0.7,
+        "francais": 0.75
+      },
+      "prod-003": {
+        "structure": 0.7,
+        "rigueur": 0.7,
+        "plausibilite": 0.7,
+        "nuance": 0.75,
+        "francais": 0.7
+      },
+      "prod-006": {
+        "niveau": "D"
+      },
+      "prod-007": {
+        "niveau": "D"
+      },
+      "prod-008": {
+        "niveau": "M"
+      },
+      "prod-009": {
+        "niveau": "D"
+      }
+    },
+    "9999006": {
+      "prod-001": {
+        "structure": 0.75,
+        "rigueur": 0.7,
+        "plausibilite": 0.7,
+        "nuance": 0.7,
+        "francais": 0.75
+      },
+      "prod-002": {
+        "structure": 0.7,
+        "rigueur": 0.75,
+        "plausibilite": 0.7,
+        "nuance": 0.7,
+        "francais": 0.7
+      },
+      "prod-003": {
+        "structure": 0.7,
+        "rigueur": 0.7,
+        "plausibilite": 0.75,
+        "nuance": 0.7,
+        "francais": 0.75
+      },
+      "prod-006": {
+        "niveau": "D"
+      },
+      "prod-007": {
+        "niveau": "D"
+      },
+      "prod-008": {
+        "niveau": "D"
+      },
+      "prod-009": {
+        "niveau": "M"
+      }
+    },
+    "9999007": {
+      "prod-001": {
+        "structure": 0.6,
+        "rigueur": 0.62,
+        "plausibilite": 0.58,
+        "nuance": 0.6,
+        "francais": 0.65
+      },
+      "prod-002": {
+        "structure": 0.6,
+        "rigueur": 0.6,
+        "plausibilite": 0.6,
+        "nuance": 0.62,
+        "francais": 0.6
+      },
+      "prod-003": {
+        "structure": 0.58,
+        "rigueur": 0.6,
+        "plausibilite": 0.58,
+        "nuance": 0.6,
+        "francais": 0.62
+      },
+      "prod-006": {
+        "niveau": "D"
+      },
+      "prod-007": {
+        "niveau": "D"
+      },
+      "prod-008": {
+        "niveau": "I"
+      },
+      "prod-009": {
+        "niveau": "D"
+      }
+    },
+    "9999008": {
+      "prod-001": {
+        "structure": 0.6,
+        "rigueur": 0.6,
+        "plausibilite": 0.62,
+        "nuance": 0.58,
+        "francais": 0.6
+      },
+      "prod-002": {
+        "structure": 0.62,
+        "rigueur": 0.58,
+        "plausibilite": 0.6,
+        "nuance": 0.6,
+        "francais": 0.65
+      },
+      "prod-003": {
+        "structure": 0.58,
+        "rigueur": 0.6,
+        "plausibilite": 0.58,
+        "nuance": 0.62,
+        "francais": 0.6
+      },
+      "prod-006": {
+        "niveau": "I"
+      },
+      "prod-007": {
+        "niveau": "D"
+      },
+      "prod-008": {
+        "niveau": "D"
+      },
+      "prod-009": {
+        "niveau": "D"
+      }
+    },
+    "9999009": {
+      "prod-001": {
+        "structure": 0.45,
+        "rigueur": 0.5,
+        "plausibilite": 0.45,
+        "nuance": 0.48,
+        "francais": 0.52
+      },
+      "prod-002": {
+        "structure": 0.48,
+        "rigueur": 0.45,
+        "plausibilite": 0.5,
+        "nuance": 0.45,
+        "francais": 0.48
+      },
+      "prod-003": {
+        "structure": 0.45,
+        "rigueur": 0.48,
+        "plausibilite": 0.45,
+        "nuance": 0.5,
+        "francais": 0.45
+      },
+      "prod-006": {
+        "niveau": "I"
+      },
+      "prod-007": {
+        "niveau": "I"
+      },
+      "prod-008": {
+        "niveau": "I"
+      },
+      "prod-009": {
+        "niveau": "D"
+      }
+    },
+    "9999010": {
+      "prod-001": {
+        "structure": 0.48,
+        "rigueur": 0.45,
+        "plausibilite": 0.5,
+        "nuance": 0.45,
+        "francais": 0.5
+      },
+      "prod-002": {
+        "structure": 0.45,
+        "rigueur": 0.5,
+        "plausibilite": 0.48,
+        "nuance": 0.48,
+        "francais": 0.45
+      },
+      "prod-003": {
+        "structure": 0.5,
+        "rigueur": 0.45,
+        "plausibilite": 0.45,
+        "nuance": 0.48,
+        "francais": 0.52
+      },
+      "prod-006": {
+        "niveau": "I"
+      },
+      "prod-007": {
+        "niveau": "I"
+      },
+      "prod-008": {
+        "niveau": "I"
+      },
+      "prod-009": {
+        "niveau": "I"
+      }
+    }
+  },
+  "cartouches_grille-srpnf": [
+    {
+      "id": "CART1730000000001",
+      "nom": "A2 Description d'un personnage",
+      "grilleId": "grille-srpnf",
+      "contexte": "Cette production porte sur la description d'un personnage dans un extrait littéraire. L'étudiant·e devait démontrer sa capacité à observer rigoureusement tous les aspects du personnage (physique, psychologique, social, moral) et à soutenir ses observations avec des preuves textuelles appropriées.",
+      "criteres": [
+        {
+          "id": "crit-structure",
+          "nom": "STRUCTURE"
+        },
+        {
+          "id": "crit-rigueur",
+          "nom": "RIGUEUR"
+        },
+        {
+          "id": "crit-plausibilite",
+          "nom": "PLAUSIBILITÉ"
+        },
+        {
+          "id": "crit-nuance",
+          "nom": "NUANCE"
+        }
+      ],
+      "niveaux": [
+        {
+          "code": "I",
+          "nom": "Insuffisant"
+        },
+        {
+          "code": "D",
+          "nom": "Développement"
+        },
+        {
+          "code": "M",
+          "nom": "Maîtrisé"
+        },
+        {
+          "code": "E",
+          "nom": "Étendu"
+        }
+      ],
+      "commentaires": {
+        "crit-structure_I": "Ta description manque d'organisation claire. Les éléments sont présentés de manière isolée, sans progression logique évidente. Pour améliorer, essaie de structurer ta description autour d'aspects spécifiques du personnage et sois explicite (par exemple : apparence physique, traits de caractère, relations avec les autres). Une introduction brève et une conclusion synthétique renforceraient la cohérence de ton texte.",
+        "crit-structure_D": "Ta description présente une certaine organisation, ce qui est un bon début. Tu as tenté de regrouper les informations par thèmes, mais les liens entre ces éléments manquent parfois de clarté. Travaille sur les transitions entre les différents aspects du personnage. Une structure plus explicite, allant par exemple du physique au psychologique, ou du social au moral, rendrait ta description plus fluide et cohérente.",
+        "crit-structure_M": "Ta description montre une bonne organisation logique. Tu as clairement structuré ton texte autour de différents aspects du personnage, créant une progression fluide dans ta présentation. Les transitions entre les idées sont généralement efficaces. Pour aller plus loin, tu pourrais renforcer les liens entre les caractéristiques physiques et psychologiques du personnage, montrant comment elles s'influencent mutuellement dans la construction du personnage.",
+        "crit-structure_E": "Excellente structure dans ta description ! Tu as non seulement organisé ton texte de manière logique et fluide, mais tu as aussi inclus une introduction et une conclusion efficaces qui encadrent parfaitement ton analyse. Ta progression, des aspects les plus évidents aux plus subtils du personnage, démontre une réflexion approfondie sur la construction du personnage. Les transitions entre les différents éléments sont particulièrement bien travaillées, créant un portrait cohérent et nuancé.",
+        "crit-rigueur_I": "Ta description manque de détails sur plusieurs aspects du personnage. Tu t'es concentré principalement sur un seul aspect (par exemple, l'apparence psychologique), négligeant les autres dimensions importantes. Essaie d'élargir ton observation à tous les aspects du personnage : traits physiques, psychologiques, sociaux et moraux. Chaque élément que tu ajoutes enrichira ton portrait.",
+        "crit-rigueur_D": "Ta description aborde plusieurs aspects du personnage, ce qui est un bon début. Tu as mentionné quelques traits (par exemple physiques et psychologiques), mais certains aspects restent peu développés. Approfondis chaque dimension : détaille davantage l'apparence physique, explore plus en profondeur la personnalité et n'oublie pas d'inclure des éléments sur le portrait social et les valeurs morales du personnage. Un portrait plus complet émergera de ces observations variées.",
+        "crit-rigueur_M": "Ta description démontre une bonne rigueur dans l'observation du personnage. Tu as couvert la plupart des aspects importants : physique, psychologique, social et moral. Tes observations sont généralement précises et bien étayées. Réfléchis aussi aux liens entre ces différents aspects pour enrichir ton analyse.",
+        "crit-rigueur_E": "Excellent travail d'observation ! Ta description est très complète, couvrant en détail tous les aspects du personnage : physique, psychologique, social et moral. Tu as su relever des détails subtils et significatifs dans chaque catégorie. Ton portrait est riche et nuancé, offrant une vision approfondie du personnage. Tu as même réussi à montrer comment ces différents aspects s'influencent mutuellement, ce qui témoigne d'une compréhension sophistiquée de la construction du personnage.",
+        "crit-plausibilite_I": "Ta description manque de preuves tirées du texte pour soutenir tes observations. Les affirmations sur le personnage semblent basées sur des impressions générales plutôt que sur des éléments concrets de l'extrait. Concentre-toi sur l'identification d'exemples spécifiques dans le texte qui illustrent chacune de tes observations sur le personnage.",
+        "crit-plausibilite_D": "Ta description s'appuie sur quelques preuves implicites ou indirectes du texte, ce qui est un bon début. Tu fais référence à certains éléments du récit pour soutenir tes observations, mais sans les citer directement. Sois plus explicite dans tes références au texte et utilise des guillemets quand tu cites un passage. Identifie précisément les passages qui soutiennent tes affirmations sur le personnage.",
+        "crit-plausibilite_M": "Ta description utilise efficacement des preuves explicites du texte, y compris des citations entre guillemets. Tu as su sélectionner des passages pertinents pour appuyer tes observations sur le personnage. C'est un bon niveau de plausibilité. Travaille sur l'intégration fluide de ces citations dans tes explications, en veillant à bien les contextualiser.",
+        "crit-plausibilite_E": "Excellente utilisation des preuves textuelles ! Ta description intègre habilement des citations courtes et bien choisies, fondues dans tes explications. Cette technique renforce considérablement la plausibilité de tes observations. Tu as su sélectionner les preuves les plus pertinentes et les présenter de manière à ce qu'elles s'intègrent naturellement dans ton analyse, démontrant une excellente maîtrise de la technique de citation.",
+        "crit-nuance_I": "Ta description du personnage manque de nuances. Tu as tendance à présenter les caractéristiques de manière binaire ou simpliste, sans explorer les subtilités. Tu décris le personnage un peu trop en noir et blanc, sans considérer les nuances de sa personnalité. Essaie d'identifier des aspects plus complexes du personnage, comme des contradictions dans son comportement ou des émotions mitigées.",
+        "crit-nuance_D": "Ta description commence à montrer quelques nuances, ce qui est un bon début. Tu as identifié certaines complexités dans le personnage, allant au-delà d'une simple caractérisation en noir et blanc. Cependant, tu pourrais approfondir davantage. Essaie d'explorer comment différents traits de caractère peuvent coexister chez le personnage, même s'ils semblent contradictoires. Réfléchis aussi à comment le contexte influence le comportement du personnage.",
+        "crit-nuance_M": "Ta description démontre une bonne compréhension des nuances du personnage. Tu as su identifier et expliquer des aspects complexes de sa personnalité, montrant comment différents traits peuvent interagir ou évoluer selon les situations. Tes observations reflètent une analyse fine des motivations et des réactions du personnage. Tu pourrais explorer davantage comment ces nuances contribuent à la profondeur et à la crédibilité du personnage dans l'ensemble du récit.",
+        "crit-nuance_E": "Excellente nuance dans ta description ! Tu as habilement capturé la complexité et les subtilités du personnage. Ton analyse va au-delà des apparences, explorant les contradictions internes, les motivations cachées et les évolutions subtiles du personnage. Tu as su montrer comment différents aspects de sa personnalité s'influencent mutuellement et comment le contexte façonne ses actions. Ta description offre une vision riche et multidimensionnelle du personnage, démontrant une compréhension sophistiquée de sa construction dans l'œuvre."
+      },
+      "verrouille": false
+    }
+  ]
+}

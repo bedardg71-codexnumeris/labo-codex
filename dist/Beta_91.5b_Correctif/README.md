@@ -57,8 +57,9 @@ Si vous utilisez déjà Beta 91.5 :
 5. ✅ Sélecteur de grille de référence vide
 6. ✅ Erreur SyntaxError dans pratique-configurable.js
 
-### Bug corrigé (Beta 91.5b)
+### Bugs corrigés (Beta 91.5b)
 7. ✅ Ordre chargement scripts (PratiqueConfigurable is not defined)
+8. ✅ Page blanche dans Microsoft Edge (CSS externe manquant)
 
 ### Nouvelles fonctionnalités
 - ✅ Wizard Primo : Création de pratiques personnalisées en 8 étapes
@@ -93,7 +94,7 @@ Beta_91.5b_Correctif/
 ## 🔍 Vérification du correctif
 
 ### Tests rapides
-1. Ouvrir `index 91.5b.html` dans Safari ou Chrome
+1. Ouvrir `index 91.5b.html` dans **Safari, Chrome, Firefox ou Edge**
 2. Ouvrir la console JavaScript (Cmd+Option+C)
 3. **Vérifier** : Aucune erreur "PratiqueConfigurable is not defined"
 4. **Vérifier** : Messages de chargement pratiques affichés
