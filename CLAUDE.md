@@ -1034,6 +1034,48 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - ✅ Tag Git: `v0.91.1-indexeddb` (26 novembre 2025)
 - ✅ Fusionné dans `main` avec succès
 
+**Système d'import/export pédagogique Beta 91.2** (26 novembre 2025):
+- ✅ Export avec métadonnées enrichies CC BY-NC-SA 4.0
+- ✅ Configuration complète (échelles + grilles + productions + cartouches + paramètres)
+- ✅ Génération automatique fichier LISEZMOI.txt avec instructions
+- ✅ Import avec détection et résolution automatique conflits d'ID
+- ✅ Remapping intelligent des références (productions → grilles, cartouches → grilles)
+- ✅ Détection dépendances manquantes avec avertissements
+- ✅ Interface complète dans Réglages → Gestion des données
+- ✅ Documentation: Plan de tests complet + fichiers de test JSON
+- ✅ 5 phases implémentées en 1 session (~700 lignes ajoutées)
+
+**Fichiers clés import/export**:
+```
+js/
+├── import-export.js        # Module principal (613 lignes)
+│   ├── exporterConfigurationComplete()
+│   ├── importerConfigComplete()
+│   └── executerImportConfigComplete() (avec remapping)
+├── cc-license.js          # Métadonnées CC (748 lignes)
+│   ├── demanderMetadonneesEnrichies()
+│   ├── demanderMetadonneesConfigComplete()
+│   └── genererFichierLISEZMOI()
+├── productions.js         # Détection dépendances
+├── cartouches.js          # Détection dépendances
+├── grilles.js            # Export enrichi
+└── echelles.js           # Export enrichi
+
+Tests/
+├── PHASE_5_PLAN_TESTS.md           # Plan détaillé (~600 lignes)
+├── PHASE_5_GUIDE_EXECUTION.md      # Guide rapide
+├── test-echelle-idme.json          # Échelle IDME test
+├── test-grille-srpnf.json          # Grille SRPNF test
+└── test-production-avec-dependance.json  # Production test
+```
+
+**Fonctionnalités**:
+1. **Export individuel**: Grilles, échelles, productions, cartouches avec métadonnées
+2. **Export complet**: Bundle toutes ressources + README automatique
+3. **Import intelligent**: Détection conflits, remapping IDs, validation dépendances
+4. **Métadonnées enrichies**: discipline[], niveau, description, auteur, licence CC
+5. **Partage pédagogique**: Format standardisé pour collaboration entre enseignants
+
 ---
 
 ### ✅ Beta 90.5 - Résumé historique (5-16 novembre 2025)
