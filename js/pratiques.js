@@ -97,6 +97,12 @@ function initialiserModulePratiques() {
 
     // 🎨 Mettre à jour l'interface de la pratique par défaut
     mettreAJourUIPratiqueDefaut();
+
+    // 🔄 Écouter l'événement db-ready pour recharger les grilles après synchronisation IndexedDB
+    window.addEventListener('db-ready', function() {
+        console.log('🔄 [Pratiques] Rechargement des grilles après synchronisation IndexedDB');
+        chargerGrillesDisponibles();
+    });
 }
 
 /* ===============================
@@ -2698,6 +2704,7 @@ function afficherConfigStructure() {
     document.getElementById('wizard-config-portfolio').style.display = 'none';
     document.getElementById('wizard-config-evaluations').style.display = 'none';
     document.getElementById('wizard-config-specifications').style.display = 'none';
+    document.getElementById('wizard-config-multi-objectifs').classList.add('hidden');
 
     // Afficher la config appropriée
     if (type === 'standards') {
@@ -2708,6 +2715,10 @@ function afficherConfigStructure() {
         document.getElementById('wizard-config-evaluations').style.display = 'block';
     } else if (type === 'specifications') {
         document.getElementById('wizard-config-specifications').style.display = 'block';
+    } else if (type === 'multi_objectifs') {
+        document.getElementById('wizard-config-multi-objectifs').classList.remove('hidden');
+        // Peupler le dropdown avec les ensembles disponibles
+        populerDropdownEnsembles();
     }
 }
 
@@ -2736,6 +2747,159 @@ function ajouterEvaluationWizard() {
  */
 function retirerEvaluationWizard(btn) {
     btn.closest('.evaluation-item').remove();
+}
+
+/**
+ * Peuple le dropdown avec les ensembles d'objectifs disponibles
+ */
+function populerDropdownEnsembles() {
+    const dropdown = document.getElementById('wizard-ensemble-objectifs');
+    if (!dropdown) return;
+
+    // Charger les ensembles depuis IndexedDB
+    const ensembles = db.getSync('objectifsTemplates', []);
+
+    // Vider et remplir le dropdown
+    dropdown.innerHTML = '<option value="">-- Sélectionner un ensemble existant --</option>';
+
+    ensembles.forEach(ensemble => {
+        const option = document.createElement('option');
+        option.value = ensemble.id;
+        option.textContent = `${ensemble.nom} (${ensemble.objectifs?.length || 0} objectifs)`;
+        dropdown.appendChild(option);
+    });
+
+    if (ensembles.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = '(Aucun ensemble créé - allez dans Matériel → Objectifs)';
+        option.disabled = true;
+        dropdown.appendChild(option);
+    }
+}
+
+/**
+ * Charge un ensemble d'objectifs sélectionné dans le wizard
+ */
+function chargerEnsembleWizard() {
+    const dropdown = document.getElementById('wizard-ensemble-objectifs');
+    const ensembleId = dropdown.value;
+
+    if (!ensembleId) {
+        return;
+    }
+
+    // Charger l'ensemble depuis IndexedDB
+    const ensembles = db.getSync('objectifsTemplates', []);
+    const ensemble = ensembles.find(e => e.id === ensembleId);
+
+    if (!ensemble || !ensemble.objectifs) {
+        alert('Impossible de charger cet ensemble d\'objectifs.');
+        return;
+    }
+
+    // Vider la liste actuelle
+    const liste = document.getElementById('wizard-objectifs-liste');
+    liste.innerHTML = '';
+
+    // Ajouter chaque objectif de l'ensemble
+    ensemble.objectifs.forEach(obj => {
+        const div = document.createElement('div');
+        div.className = 'objectif-item';
+
+        div.innerHTML = `
+            <input type="text" class="controle-form" placeholder="Nom de l'objectif" data-field="nom" value="${obj.nom}" oninput="calculerTotalPoidsObjectifs()">
+            <input type="number" class="controle-form" placeholder="Poids %" min="0" max="100" step="1" data-field="poids" value="${obj.poids}" oninput="calculerTotalPoidsObjectifs()">
+            <select class="controle-form" data-field="type">
+                <option value="fondamental" ${obj.type === 'fondamental' ? 'selected' : ''}>Fondamental</option>
+                <option value="integrateur" ${obj.type === 'integrateur' ? 'selected' : ''}>Intégrateur</option>
+                <option value="transversal" ${obj.type === 'transversal' ? 'selected' : ''}>Transversal</option>
+            </select>
+            <button type="button" class="btn btn-tres-compact btn-supprimer" onclick="retirerObjectifWizard(this)">Retirer</button>
+        `;
+
+        liste.appendChild(div);
+    });
+
+    // Recalculer le total
+    calculerTotalPoidsObjectifs();
+}
+
+/**
+ * Ajoute un objectif manuellement dans la liste (pour structure multi-objectifs)
+ */
+function ajouterObjectifWizard() {
+    const liste = document.getElementById('wizard-objectifs-liste');
+
+    const div = document.createElement('div');
+    div.className = 'objectif-item';
+
+    div.innerHTML = `
+        <input type="text" class="controle-form" placeholder="Nom de l'objectif (ex: Limites et continuité)" data-field="nom" oninput="calculerTotalPoidsObjectifs()">
+        <input type="number" class="controle-form" placeholder="Poids %" min="0" max="100" step="1" data-field="poids" value="0" oninput="calculerTotalPoidsObjectifs()">
+        <select class="controle-form" data-field="type">
+            <option value="fondamental">Fondamental</option>
+            <option value="integrateur">Intégrateur</option>
+            <option value="transversal">Transversal</option>
+        </select>
+        <button type="button" class="btn btn-tres-compact btn-supprimer" onclick="retirerObjectifWizard(this)">Retirer</button>
+    `;
+
+    liste.appendChild(div);
+    calculerTotalPoidsObjectifs();
+}
+
+/**
+ * Retire un objectif
+ */
+function retirerObjectifWizard(btn) {
+    btn.closest('.objectif-item').remove();
+    calculerTotalPoidsObjectifs();
+}
+
+/**
+ * Calcule le total des pondérations des objectifs
+ */
+function calculerTotalPoidsObjectifs() {
+    const liste = document.getElementById('wizard-objectifs-liste');
+    if (!liste) return 0;
+
+    const objectifs = liste.querySelectorAll('.objectif-item');
+
+    let total = 0;
+    objectifs.forEach(obj => {
+        const poidsInput = obj.querySelector('[data-field="poids"]');
+        const poids = parseFloat(poidsInput.value) || 0;
+        total += poids;
+    });
+
+    // Mettre à jour l'affichage
+    const totalSpan = document.getElementById('wizard-total-poids');
+    const validationP = document.getElementById('wizard-validation-poids');
+
+    if (!totalSpan || !validationP) return total;
+
+    totalSpan.textContent = total + '%';
+
+    // Changer la couleur et le message selon la validité
+    totalSpan.className = 'total-poids-valeur';
+    validationP.className = 'total-poids-message';
+
+    if (total === 100) {
+        totalSpan.style.color = '#4caf50'; // Vert
+        validationP.textContent = 'Total valide ! Vous pouvez continuer.';
+        validationP.style.color = '#4caf50';
+    } else if (total > 100) {
+        totalSpan.style.color = '#dc3545'; // Rouge
+        validationP.textContent = 'Le total dépasse 100% (' + total + '%). Ajustez les pondérations.';
+        validationP.style.color = '#dc3545';
+    } else {
+        totalSpan.style.color = '#f0ad4e'; // Orange
+        validationP.textContent = 'Le total doit atteindre 100% pour continuer (actuellement ' + total + '%)';
+        validationP.style.color = '#f0ad4e';
+    }
+
+    return total;
 }
 
 /**
@@ -3276,22 +3440,197 @@ async function traiterImportPratique(event) {
 
 /**
  * Afficher et initialiser les pratiques prédéfinies
+ * Affiche un modal de sélection pour choisir les pratiques à charger
  */
 async function afficherPratiquesPredefines() {
-    if (!confirm('Charger les pratiques prédéfinies ?\n\nCela ajoutera des exemples de pratiques (Bruno, Marie-Hélène, François) que vous pourrez modifier.')) {
+    // Vérifier que PRATIQUES_PREDEFINES existe
+    if (!window.PRATIQUES_PREDEFINES) {
+        alert('❌ Erreur : Les pratiques prédéfinies ne sont pas chargées.\n\nVérifiez que le fichier pratiques-predefines.js est bien chargé.');
+        return;
+    }
+
+    // Récupérer les pratiques déjà chargées
+    const pratiquesExistantes = db.getSync('pratiquesConfigurables', []);
+    const idsExistants = new Set(pratiquesExistantes.map(p => p.id));
+
+    // Construire le HTML du modal
+    let modalHTML = `
+        <div id="modalSelectionPratiques" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        ">
+            <div style="
+                background: white;
+                border-radius: 8px;
+                padding: 30px;
+                max-width: 700px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            ">
+                <h2 style="margin-top: 0; color: #2c3e50;">📦 Sélectionner les pratiques à charger</h2>
+                <p style="color: #7f8c8d; margin-bottom: 20px;">
+                    Cochez les pratiques que vous souhaitez ajouter à votre bibliothèque.
+                    Les pratiques déjà chargées sont grisées.
+                </p>
+
+                <div id="listePratiquesPredefines" style="margin-bottom: 20px;">
+    `;
+
+    // Ajouter chaque pratique prédéfinie
+    Object.entries(window.PRATIQUES_PREDEFINES).forEach(([key, pratique]) => {
+        const dejaChargee = idsExistants.has(pratique.id);
+        const disabled = dejaChargee ? 'disabled' : '';
+        const checked = dejaChargee ? '' : 'checked';
+        const opacity = dejaChargee ? '0.5' : '1';
+        const statut = dejaChargee ? '<span style="color: #27ae60; font-weight: bold;">✓ Déjà chargée</span>' : '<span style="color: #3498db;">Nouvelle</span>';
+
+        modalHTML += `
+            <div style="
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 15px;
+                margin-bottom: 10px;
+                opacity: ${opacity};
+                background: ${dejaChargee ? '#f8f9fa' : 'white'};
+            ">
+                <label style="display: flex; align-items: flex-start; cursor: ${dejaChargee ? 'not-allowed' : 'pointer'};">
+                    <input
+                        type="checkbox"
+                        value="${pratique.id}"
+                        ${checked}
+                        ${disabled}
+                        style="margin-right: 12px; margin-top: 4px;"
+                    >
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
+                            ${pratique.nom}
+                        </div>
+                        <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">
+                            Par ${pratique.auteur} ${pratique.etablissement ? '(' + pratique.etablissement + ')' : ''}
+                        </div>
+                        <div style="color: #95a5a6; font-size: 0.85em;">
+                            ${pratique.description}
+                        </div>
+                        <div style="margin-top: 6px;">
+                            ${statut}
+                        </div>
+                    </div>
+                </label>
+            </div>
+        `;
+    });
+
+    modalHTML += `
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #ddd;">
+                    <button onclick="fermerModalPratiques()" class="btn" style="background: #95a5a6;">
+                        Annuler
+                    </button>
+                    <button onclick="chargerPratiqueSelectionnees()" class="btn btn-ajouter">
+                        Charger les pratiques sélectionnées
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Ajouter le modal au DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+/**
+ * Fermer le modal de sélection des pratiques
+ */
+function fermerModalPratiques() {
+    const modal = document.getElementById('modalSelectionPratiques');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+/**
+ * Charger les pratiques sélectionnées
+ */
+async function chargerPratiqueSelectionnees() {
+    const checkboxes = document.querySelectorAll('#listePratiquesPredefines input[type="checkbox"]:checked:not(:disabled)');
+    const idsACharger = Array.from(checkboxes).map(cb => cb.value);
+
+    if (idsACharger.length === 0) {
+        alert('Aucune nouvelle pratique sélectionnée.');
+        fermerModalPratiques();
         return;
     }
 
     try {
-        await PratiqueManager.initialiserPratiquesPredefines();
+        // Récupérer les pratiques existantes
+        const pratiques = db.getSync('pratiquesConfigurables', []);
+        let ajoutees = 0;
 
-        // Recharger
-        await afficherListePratiques();
+        // Ajouter chaque pratique sélectionnée
+        for (const id of idsACharger) {
+            // Trouver la pratique dans PRATIQUES_PREDEFINES
+            const pratiquePredefinie = Object.values(window.PRATIQUES_PREDEFINES).find(p => p.id === id);
 
-        alert(`✅ Pratiques prédéfinies chargées !\n\nVous pouvez maintenant les activer, les modifier ou les dupliquer.`);
+            if (!pratiquePredefinie) {
+                console.warn(`Pratique introuvable : ${id}`);
+                continue;
+            }
+
+            // Vérifier qu'elle n'existe pas déjà
+            if (pratiques.find(p => p.id === id)) {
+                console.log(`Pratique déjà présente : ${id}`);
+                continue;
+            }
+
+            // Créer l'objet pratique à sauvegarder
+            const pratique = {
+                id: pratiquePredefinie.id,
+                nom: pratiquePredefinie.nom,
+                auteur: pratiquePredefinie.auteur,
+                etablissement: pratiquePredefinie.etablissement || '',
+                description: pratiquePredefinie.description,
+                discipline: pratiquePredefinie.discipline || '',
+                version: pratiquePredefinie.version || '1.0',
+                date_creation: pratiquePredefinie.date_creation || new Date().toISOString().split('T')[0],
+                config: pratiquePredefinie
+            };
+
+            // Ajouter à la liste
+            pratiques.push(pratique);
+            ajoutees++;
+            console.log(`✅ Ajoutée : ${pratique.nom}`);
+        }
+
+        // Sauvegarder dans IndexedDB
+        if (ajoutees > 0) {
+            db.setSync('pratiquesConfigurables', pratiques);
+
+            // Fermer le modal
+            fermerModalPratiques();
+
+            // Recharger l'affichage
+            await afficherListePratiques();
+
+            // Message de succès
+            alert(`✅ ${ajoutees} pratique(s) chargée(s) avec succès !\n\nVous pouvez maintenant les activer, les modifier ou les dupliquer.`);
+        } else {
+            fermerModalPratiques();
+            alert('Aucune nouvelle pratique n\'a été ajoutée.');
+        }
     } catch (error) {
-        console.error('Erreur lors du chargement des pratiques prédéfinies:', error);
+        console.error('Erreur lors du chargement des pratiques:', error);
         alert(`❌ Erreur : ${error.message}`);
+        fermerModalPratiques();
     }
 }
 
@@ -3343,4 +3682,7 @@ window.afficherConfigCriteres = afficherConfigCriteres;
 window.afficherConfigSeuils = afficherConfigSeuils;
 window.ajouterEvaluationWizard = ajouterEvaluationWizard;
 window.retirerEvaluationWizard = retirerEvaluationWizard;
+window.ajouterObjectifWizard = ajouterObjectifWizard;
+window.retirerObjectifWizard = retirerObjectifWizard;
+window.calculerTotalPoidsObjectifs = calculerTotalPoidsObjectifs;
 window.creerPratiqueDepuisWizard = creerPratiqueDepuisWizard;

@@ -465,6 +465,341 @@ const PRATIQUE_PAN_MAITRISE = {
 };
 
 // ============================================================================
+// PRATIQUE 5 : PAN-Objectifs pondérés (Michel B.)
+// ============================================================================
+
+const PRATIQUE_PAN_OBJECTIFS_PONDERES_MICHEL = {
+    id: 'pan-objectifs-ponderes-michel',
+    nom: 'PAN-Objectifs pondérés (Michel B.)',
+    auteur: 'Michel B.',
+    etablissement: 'Cégep (Mathématiques)',
+    description: '13 objectifs évalués en mode PAN avec pondérations variables selon importance',
+    discipline: 'Mathématiques - Calcul différentiel',
+    version: '1.0',
+    date_creation: '2025-11-26',
+
+    echelle: {
+        type: 'niveaux',
+        niveaux: [
+            {
+                code: 'I',
+                label: 'Insuffisant',
+                description: 'Compréhension insuffisante de l\'objectif',
+                valeur_numerique: 1,
+                valeur_pourcentage: 50,
+                couleur: '#FF6B6B',
+                ordre: 1
+            },
+            {
+                code: 'D',
+                label: 'Développement',
+                description: 'Développement en cours, maîtrise partielle',
+                valeur_numerique: 2,
+                valeur_pourcentage: 70,
+                couleur: '#FFD93D',
+                ordre: 2
+            },
+            {
+                code: 'M',
+                label: 'Maîtrisé',
+                description: 'Maîtrise satisfaisante de l\'objectif',
+                valeur_numerique: 3,
+                valeur_pourcentage: 80,
+                couleur: '#6BCF7F',
+                ordre: 3
+            },
+            {
+                code: 'E',
+                label: 'Étendu',
+                description: 'Maîtrise approfondie avec transfert',
+                valeur_numerique: 4,
+                valeur_pourcentage: 92.5,
+                couleur: '#4D96FF',
+                ordre: 4
+            }
+        ]
+    },
+
+    structure_evaluations: {
+        type: 'objectifs-multiples',
+        description: 'Système multi-objectifs avec pondérations variables',
+        objectifs: [
+            { id: 'obj1', nom: 'Limites et continuité', poids: 8, type: 'fondamental' },
+            { id: 'obj2', nom: 'Dérivées simples', poids: 8, type: 'fondamental' },
+            { id: 'obj3', nom: 'Dérivées composées', poids: 10, type: 'integrateur' },
+            { id: 'obj4', nom: 'Applications des dérivées', poids: 12, type: 'integrateur' },
+            { id: 'obj5', nom: 'Optimisation', poids: 15, type: 'integrateur' },
+            { id: 'obj6', nom: 'Analyse graphique', poids: 7, type: 'fondamental' },
+            { id: 'obj7', nom: 'Théorèmes fondamentaux', poids: 10, type: 'integrateur' },
+            { id: 'obj8', nom: 'Intégration', poids: 12, type: 'integrateur' },
+            { id: 'obj9', nom: 'Applications des intégrales', poids: 8, type: 'fondamental' },
+            { id: 'obj10', nom: 'Séries', poids: 5, type: 'fondamental' },
+            { id: 'obj11', nom: 'Modélisation mathématique', poids: 5, type: 'fondamental' },
+            { id: 'obj12', nom: 'Communication mathématique', poids: 5, type: 'transversal' },
+            { id: 'obj13', nom: 'Rigueur démonstrative', poids: 5, type: 'transversal' }
+        ],
+        poids_total: 100
+    },
+
+    calcul_note: {
+        methode: 'pan-par-objectif',
+        description: 'Mode PAN appliqué à chaque objectif, puis combinaison pondérée',
+        nombre_artefacts_par_objectif: 3,
+        mode_selection: 'N_meilleurs',
+        mode_combinaison: 'moyenne_ponderee_objectifs',
+        normalisation: 'poids_total_100',
+        formule: 'Note_finale = Σ (Note_objectif_i × Poids_i) / 100'
+    },
+
+    systeme_reprises: {
+        type: 'par-objectif',
+        description: 'Reprises possibles pour chaque objectif individuellement',
+        limite: 'illimitees',
+        niveau_retrogradable: false
+    },
+
+    gestion_criteres: {
+        type: 'par_objectif',
+        description: 'Chaque objectif a ses propres critères définis dans grilles'
+    },
+
+    seuils: {
+        type: 'pourcentage',
+        va_bien: 80,
+        difficulte: 70,
+        grande_difficulte: 60
+    },
+
+    interface: {
+        afficher_notes_chiffrees: true,
+        afficher_rang: false,
+        afficher_moyenne_groupe: true,
+        terminologie: {
+            evaluation: 'Objectif',
+            critere: 'Critère',
+            note_finale: 'Note finale',
+            reprise: 'Reprise'
+        }
+    }
+};
+
+// ============================================================================
+// PRATIQUE 6 : Sommative avec remplacement (Jordan R.)
+// ============================================================================
+
+const PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN = {
+    id: 'sommative-remplacement-jordan',
+    nom: 'Sommative avec remplacement (Jordan R.)',
+    auteur: 'Jordan R.',
+    etablissement: 'Cégep (Philosophie)',
+    description: 'Évaluation finale peut remplacer mi-session si note supérieure. Valorise la progression.',
+    discipline: 'Philosophie 101',
+    version: '1.0',
+    date_creation: '2025-11-26',
+
+    echelle: {
+        type: 'pourcentage',
+        min: 0,
+        max: 100,
+        precision: 0.5
+    },
+
+    structure_evaluations: {
+        type: 'sommative-progressive',
+        description: 'Paires d\'évaluations avec remplacement automatique',
+        paires_remplacement: [
+            {
+                id: 'paire_examens',
+                nom: 'Examens',
+                evaluation_initiale: {
+                    nom: 'Examen mi-session',
+                    id: 'examen-mi-session',
+                    poids: 10,
+                    type: 'examen'
+                },
+                evaluation_finale: {
+                    nom: 'Examen final',
+                    id: 'examen-final',
+                    poids: 20,
+                    type: 'examen'
+                },
+                regle_remplacement: 'max',
+                description_regle: 'Si note finale > note mi-session, alors finale remplace mi-session'
+            },
+            {
+                id: 'paire_textes',
+                nom: 'Textes argumentatifs',
+                evaluation_initiale: {
+                    nom: 'Texte mi-session',
+                    id: 'texte-mi-session',
+                    poids: 20,
+                    type: 'dissertation'
+                },
+                evaluation_finale: {
+                    nom: 'Texte final',
+                    id: 'texte-final',
+                    poids: 40,
+                    type: 'dissertation'
+                },
+                regle_remplacement: 'max'
+            }
+        ],
+        autres_evaluations: [
+            {
+                nom: 'Activités en classe',
+                id: 'activites-classe',
+                poids: 10,
+                type: 'completion'
+            }
+        ]
+    },
+
+    calcul_note: {
+        methode: 'remplacement-progression',
+        description: 'Comparaison paire par paire avec remplacement conditionnel',
+        formule: 'Pour chaque paire: utiliser max(note_initiale, note_finale) × poids correspondant'
+    },
+
+    systeme_reprises: {
+        type: 'automatique-progressif',
+        description: 'Le mécanisme de remplacement constitue un système de reprise automatique',
+        niveau_retrogradable: false
+    },
+
+    gestion_criteres: {
+        type: 'par_evaluation',
+        criteres_variables_description: 'Examens : précision. Textes : argumentation/conceptualisation.'
+    },
+
+    seuils: {
+        type: 'pourcentage',
+        va_bien: 80,
+        difficulte: 60,
+        grande_difficulte: 50
+    },
+
+    interface: {
+        afficher_notes_chiffrees: true,
+        afficher_rang: false,
+        afficher_moyenne_groupe: true,
+        terminologie: {
+            evaluation: 'Évaluation',
+            critere: 'Critère',
+            note_finale: 'Note finale',
+            reprise: 'Reprise'
+        }
+    }
+};
+
+// ============================================================================
+// PRATIQUE 7 : PAN-Jugement global (Isabelle M.)
+// ============================================================================
+
+const PRATIQUE_PAN_JUGEMENT_GLOBAL_ISABELLE = {
+    id: 'pan-jugement-global-isabelle',
+    nom: 'PAN-Jugement global (Isabelle M.)',
+    auteur: 'Isabelle M.',
+    etablissement: 'Cégep Champlain Lennoxville',
+    description: 'Calcul mode statistique comme suggestion. Jugement professionnel de l\'enseignante requis.',
+    discipline: 'Biologie - Anatomie et physiologie 3',
+    version: '1.0',
+    date_creation: '2025-11-26',
+
+    echelle: {
+        type: 'niveaux',
+        niveaux: [
+            {
+                code: 'I',
+                label: 'Insuffisant',
+                description: 'Compréhension insuffisante ou incompréhension majeure',
+                valeur_numerique: 1,
+                valeur_pourcentage: 50,
+                couleur: '#FF6B6B',
+                ordre: 1
+            },
+            {
+                code: 'D',
+                label: 'Développement',
+                description: 'En développement, maîtrise partielle avec lacunes',
+                valeur_numerique: 2,
+                valeur_pourcentage: 70,
+                couleur: '#FFD93D',
+                ordre: 2
+            },
+            {
+                code: 'M',
+                label: 'Maîtrisé',
+                description: 'Maîtrise satisfaisante des concepts et techniques',
+                valeur_numerique: 3,
+                valeur_pourcentage: 80,
+                couleur: '#6BCF7F',
+                ordre: 3
+            },
+            {
+                code: 'E',
+                label: 'Étendu',
+                description: 'Maîtrise approfondie avec capacité de transfert',
+                valeur_numerique: 4,
+                valeur_pourcentage: 92.5,
+                couleur: '#4D96FF',
+                ordre: 4
+            }
+        ]
+    },
+
+    structure_evaluations: {
+        type: 'portfolio-integral',
+        description: 'Tous les artefacts sont considérés (pas de sélection N meilleurs)',
+        nombre_total_evaluations: 11,
+        types_evaluations: [
+            { type: 'examens-ecrits', description: 'Évaluation holistique de la compréhension' },
+            { type: 'projets-posters', description: 'Précision anatomique et clarté' }
+        ]
+    },
+
+    calcul_note: {
+        methode: 'mode-statistique-avec-jugement',
+        description: 'Le mode (niveau le plus fréquent) est calculé comme SUGGESTION',
+        fenetre_recente: 4,
+        fenetre_description: 'Les 4 derniers artefacts prioritaires pour niveau actuel',
+        regles_mode: {
+            si_egalite: 'niveau_superieur',
+            poids_progression: 'favorise_niveaux_recents'
+        },
+        avertissement_important: '⚠️ Ce système calcule une SUGGESTION. L\'enseignante DOIT exercer son jugement professionnel pour la décision finale.'
+    },
+
+    systeme_reprises: {
+        type: 'aucune-formelle',
+        description: 'Pas de système de reprises formelles. Approche par jugement global.',
+        niveau_retrogradable: false
+    },
+
+    gestion_criteres: {
+        type: 'par_evaluation',
+        criteres_variables_description: 'Projets ont critères. Examens : évaluation holistique.'
+    },
+
+    seuils: {
+        type: 'contextuel',
+        note: 'Pas de seuils chiffrés rigides - jugement contextuel',
+        description: 'Isabelle n\'utilise PAS de seuils chiffrés rigides. Le jugement est contextuel et qualitatif.'
+    },
+
+    interface: {
+        afficher_notes_chiffrees: true,
+        afficher_rang: false,
+        afficher_moyenne_groupe: false,
+        terminologie: {
+            evaluation: 'Évaluation',
+            critere: 'Critère',
+            note_finale: 'Note finale',
+            reprise: 'Reprise'
+        }
+    }
+};
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -472,7 +807,10 @@ window.PRATIQUES_PREDEFINES = {
     PRATIQUE_PAN_MAITRISE,
     PRATIQUE_PAN_STANDARDS_BRUNO,
     PRATIQUE_SOMMATIVE_TRADITIONNELLE,
-    PRATIQUE_PAN_SPECIFICATIONS
+    PRATIQUE_PAN_SPECIFICATIONS,
+    PRATIQUE_PAN_OBJECTIFS_PONDERES_MICHEL,
+    PRATIQUE_SOMMATIVE_REMPLACEMENT_JORDAN,
+    PRATIQUE_PAN_JUGEMENT_GLOBAL_ISABELLE
 };
 
 console.log('✅ Module pratiques-predefines.js chargé');
