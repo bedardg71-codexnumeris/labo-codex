@@ -1,0 +1,7380 @@
+/* ===============================
+   SYSTÈME DE DESIGN - Beta 0.60
+   Index: 60 24-10-2025a
+   Convention: 100% français
+   Palette: "Nuit Élégante" (Terracotta)
+   Dernière mise à jour: 24-10-2025
+   =============================== */
+
+/* ===============================
+   VARIABLES CSS
+   =============================== */
+
+:root {
+    /* === PALETTE DE COULEURS === */
+
+    /* Bleus - Couleurs principales */
+    --bleu-principal: #032e5c;
+    --bleu-fonce: #0f1e3a;
+    --bleu-moyen: #2a4a8a;
+    --bleu-clair: #065dbb;
+    --bleu-leger: #6b85b3;
+    --bleu-carte: #9fc5e8;
+    --bleu-pale: #e8f2fd;
+    --bleu-tres-pale: #f0f8ff;
+    --bleu-simulation: #1a5266;
+    --bleu-anonymisation: #0f1e3a;
+
+    /* Couleurs d'accent */
+    --orange-accent: #ff6b35;
+    --vert-pale: #f8fef8;
+    --vert-doux: #b8d4b8;
+    --vert-leger: #2a8a6a;
+    --vert-succes: #28a745;
+    --rouge-erreur: #dc3545;
+
+    /* Couleurs pratiques d'évaluation */
+    --som-orange: #ff6f00;
+    --pan-bleu: #0277bd;
+    --hybride-violet: #9c27b0;
+
+    /* === NAVIGATION === */
+    --nav-bg: #f8f9fa;
+    --nav-normal: #04376f;
+    --nav-hover: #3e98f9;
+    --nav-actif: #054a95;
+    --nav-bordure-actif: var(--orange-accent);
+
+    /* Navigation - États actifs par mode */
+    --nav-actif-normal: #2a4a8a;
+    --nav-actif-simulation: #2a6a7a;
+    --nav-actif-anonymisation: #2a3d5a;
+
+    /* === SOUS-NAVIGATION === */
+    --sous-nav-bg: #e8f2fd;
+    --sous-nav-normal: #054a95;
+    --sous-nav-hover: #3e98f9;
+    --sous-nav-actif: #065dbb;
+
+    /* Sous-navigation - Fonds par mode */
+    --sous-nav-bg-normal: #e8f2fd;
+    --sous-nav-bg-simulation: #e0f0f0;
+    --sous-nav-bg-anonymisation: #dce8f5;
+
+    /* === BOUTONS D'ACTION - Palette Nuit Élégante === */
+    --btn-principal: #032e5c;
+    --btn-principal-hover: #054a95;
+    --btn-ajouter: #1e5a4a;
+    --btn-ajouter-hover: #165040;
+    --btn-modifier: #4a3a6a;
+    --btn-modifier-hover: #3a2a5a;
+    --btn-confirmer: #1e5a4a;
+    --btn-confirmer-hover: #165040;
+    --btn-annuler: #d97706;
+    --btn-annuler-hover: #b45309;
+    --btn-supprimer: #8a2a2a;
+    --btn-supprimer-hover: #7a1a1a;
+
+    /* === INDICATEURS DE RISQUE === */
+    --risque-nul: #065dbb;
+    --risque-minimal: #28a745;
+    --risque-faible: #90EE90;
+    --risque-modere: #ffc107;
+    --risque-eleve: #fd7e14;
+    --risque-tres-eleve: #dc3545;
+    --risque-critique: #721c24;
+
+    /* === COULEURS GRISES === */
+    --gris-tres-fonce: #222222;
+    --gris-fonce: #333333;
+    --gris-moyen: #666666;
+    --gris-clair: #999999;
+    --gris-tres-clair: #cccccc;
+    --gris-tres-pale: #f9f9f9;
+
+    /* === BORDURES === */
+    --bordure-claire: #dddddd;
+    --bordure-moyenne: #cccccc;
+
+    /* === ALERTES - Attention (orange/terracotta) === */
+    --alerte-fond-attention: #fff8f0;
+    --alerte-bordure-attention: #ff6b35;
+    --alerte-texte-attention: #8a4a2a;
+
+    /* === ALERTES - Information (bleue) === */
+    --alerte-fond-information: #e8f2fd;
+    --alerte-bordure-information: #032e5c;
+    --alerte-texte-information: #032e5c;
+
+    /* === ALERTES - Succès (sarcelle) === */
+    --alerte-fond-succes: #e8f5f2;
+    --alerte-bordure-succes: #1e5a4a;
+    --alerte-texte-succes: #165040;
+
+    /* === ALERTES - Erreur (rouge) === */
+    --alerte-fond-erreur: #f8e8e8;
+    --alerte-bordure-erreur: #8a2a2a;
+    --alerte-texte-erreur: #7a1a1a;
+
+    /* === ÉTATS FORMULAIRES === */
+    --etat-erreur-fond: #fff8f0;
+    --etat-erreur-bordure: #ff6b35;
+    --etat-erreur-texte: #8a4a2a;
+    --etat-valide-fond: #e8f5f2;
+    --etat-valide-bordure: #1e5a4a;
+    --etat-valide-texte: #165040;
+    --etat-verrouille-fond: #e9ecef;
+    --etat-verrouille-bordure: #6c757d;
+    --etat-verrouille-texte: #495057;
+
+    /* === BADGES - Statuts d'évaluation === */
+    --badge-evalue-fond: #e8f5f2;
+    --badge-evalue-texte: #165040;
+    --badge-evalue-bordure: #b3d9cf;
+    --badge-non-evalue-fond: #f8f9fa;
+    --badge-non-evalue-texte: #6c757d;
+    --badge-non-evalue-bordure: #dee2e6;
+
+    /* === ESPACEMENT === */
+    --espacement-petit: 10px;
+    --espacement-moyen: 20px;
+    --espacement-grand: 30px;
+
+    /* === CALENDRIER === */
+    --jour-cours-reel-bg: #e3f2fd;
+    --reprise-bg: #fff3e0;
+    --conge-bg: #ffebee;
+    --planification-bg: #f3e5f5;
+    --examens-bg: #fce4ec;
+    --weekend-bg: #f5f5f5;
+}
+
+/* ===============================
+   CLASSES UTILITAIRES GLOBALES (Phase C)
+   Préfixe: u- (utility)
+   =============================== */
+
+/* === MARGES === */
+.u-m-0 { margin: 0; }
+.u-mb-8 { margin-bottom: 8px; }
+.u-mb-10 { margin-bottom: 10px; }
+.u-mb-15 { margin-bottom: 15px; }
+.u-mb-20 { margin-bottom: 20px; }
+.u-mt-6 { margin-top: 6px; }
+.u-mt-10 { margin-top: 10px; }
+.u-mt-15 { margin-top: 15px; }
+.u-mt-20 { margin-top: 20px; }
+.u-mt-25 { margin-top: 25px; }
+.u-mr-10 { margin-right: 10px; }
+.u-mr-20 { margin-right: 20px; }
+.u-ml-6 { margin-left: 6px; }
+.u-ml-10 { margin-left: 10px; }
+
+/* === PADDING === */
+.u-p-15 { padding: 15px; }
+.u-p-20 { padding: 20px; }
+
+/* === TEXTE - TAILLES === */
+.u-texte-mini { font-size: 0.7rem; }
+.u-texte-petit { font-size: 0.85rem; }
+.u-texte-09 { font-size: 0.9rem; }
+.u-texte-moyen { font-size: 0.95rem; }
+.u-texte-11 { font-size: 1.1rem; }
+.u-texte-grand { font-size: 1.2rem; }
+
+/* === TEXTE - COULEURS === */
+.u-texte-bleu { color: var(--bleu-principal); }
+.u-texte-gris { color: #666; }
+.u-texte-gris-clair { color: #999; }
+.u-texte-danger { color: #dc2626; }
+.u-texte-succes { color: #16a34a; }
+.u-texte-warning { color: #ffc107; }
+
+/* === TEXTE - ALIGNEMENT === */
+.u-text-center { text-align: center; }
+.u-text-right { text-align: right; }
+.u-text-left { text-align: left; }
+
+/* === TEXTE - FONT-WEIGHT === */
+.u-texte-gras { font-weight: 600; }
+.u-texte-bold { font-weight: bold; }
+.u-texte-medium { font-weight: 500; }
+.u-texte-normal { font-weight: 400; }
+
+/* === TEXTE - STYLE === */
+.u-texte-italic { font-style: italic; }
+.u-texte-capitalize { text-transform: capitalize; }
+.u-texte-uppercase { text-transform: uppercase; }
+
+/* === WIDTHS === */
+.u-w-100 { width: 100%; }
+.u-w-80 { width: 80px; }
+
+/* === DISPLAY === */
+.u-hide { display: none; }
+.u-block { display: block; }
+.u-inline-block { display: inline-block; }
+
+/* === FLEX === */
+.u-flex { display: flex; }
+.u-flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.u-flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.u-flex-end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* === DIVERS === */
+.u-nowrap { white-space: nowrap; }
+.u-overflow-auto { overflow: auto; }
+.u-overflow-x-auto { overflow-x: auto; }
+.u-opacity-07 { opacity: 0.7; }
+.u-flex-1 { flex: 1; }
+.u-flex-gap-10 { display: flex; gap: 10px; }
+
+/* ===============================
+   RESET ET BASE
+   =============================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, var(--bleu-pale) 0%, var(--bleu-tres-pale) 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* ===============================
+   CONTENEUR PRINCIPAL
+   =============================== */
+
+.conteneur {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(3, 46, 92, 0.1);
+    overflow: hidden;
+}
+
+/* ===============================
+   EN-TÊTE
+   =============================== */
+
+.entete {
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
+    color: white;
+    padding: 30px 40px;
+    position: relative;
+}
+
+.entete-conteneur {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+/* === LOGO ET MÉTADONNÉES === */
+
+.logo-section {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    width: 70px;
+    height: 70px;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.logo-meta {
+    font-size: 0.85rem;
+    color: #9fc5e8;
+    text-align: center;
+    line-height: 1.2;
+    max-width: 200px;
+}
+
+/* === TITRE ET DESCRIPTION === */
+
+.titre-section {
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 1;
+}
+
+.titre-section h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0 0 3px 0;
+    letter-spacing: 0px;
+    color: white;
+}
+
+.titre-section .sous-titre {
+    font-size: 1.05rem;
+    color: #d0e4f5;
+    margin: 0 0 5px 0;
+}
+
+.titre-section .meta {
+    font-size: 0.7rem;
+    color: #9fc5e8;
+    margin: 0;
+}
+
+/* === INFORMATIONS LÉGALES (à droite) === */
+
+.info-legales-section {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    margin-left: auto;
+}
+
+/* Informations contextuelles au centre (sous le titre) */
+.info-contextuelles-centre {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-align: center;
+    line-height: 1.6;
+    margin-top: 10px;
+}
+
+/* Sélecteur de mode dans la navigation (à droite) */
+.selecteur-mode-nav {
+    margin-left: auto;
+    padding-right: 20px;
+}
+
+.info-legales-section .meta {
+    font-size: 0.7rem;
+    color: #9fc5e8;
+    margin: 0;
+    padding-top: 3px;
+    padding-right: 20px;
+    text-align: right;
+    line-height: 1.6;
+}
+
+/* === SÉLECTEUR DE MODE === */
+
+#selecteur-mode {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* === RESPONSIVE === */
+
+@media (max-width: 768px) {
+    .entete-conteneur {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .titre-section h1 {
+        font-size: 1.8rem;
+    }
+
+    .logo-meta {
+        max-width: 100%;
+    }
+
+    .info-legales-section {
+        align-items: center;
+        margin-left: 0;
+    }
+
+    .info-legales-section .meta {
+        text-align: center;
+    }
+}
+
+/* === FORMULAIRE GROUPE RESPONSIVE === */
+.formulaire-ajout-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.7fr 1.5fr 1.5fr 1fr 0.7fr 0.7fr auto;
+    gap: 10px;
+    align-items: end;
+}
+
+/* Tablette */
+@media (max-width: 1200px) {
+    .formulaire-ajout-grid {
+        grid-template-columns: 1fr 0.7fr 1.5fr 1.5fr 1fr;
+        gap: 10px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .formulaire-ajout-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .formulaire-ajout-grid>div:last-child button {
+        width: 100%;
+    }
+}
+
+/* === LIENS DANS L'EN-TÊTE === */
+
+.logo-link {
+    display: block;
+    text-decoration: none;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.logo-link:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.logo-link:hover .logo {
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+
+.site-link {
+    color: #d0e4f5;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.site-link:hover {
+    color: white;
+    border-bottom: 1px solid white;
+}
+
+.site-link:active {
+    color: #9fc5e8;
+}
+
+/* ===============================
+   NAVIGATION PRINCIPALE - GLASSMORPHISME
+   =============================== */
+
+.navigation-principale {
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    padding: 0 20px 15px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.navigation-principale button {
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navigation-principale button:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.navigation-principale button.actif {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ===============================
+   SOUS-NAVIGATION - GLASSMORPHISME
+   =============================== */
+
+.sous-navigation {
+    /* Couche rgba(0,0,0,0.15) par-dessus le gradient bleu pour créer effet de profondeur */
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)),
+        linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    padding: 12px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sous-navigation button {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sous-navigation button:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.sous-navigation button.actif {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.sous-navigation.vide {
+    background: transparent;
+    padding: 0;
+    border: none;
+}
+
+.sous-navigation .vide {
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    color: var(--bleu-leger);
+    font-style: italic;
+}
+
+/* ===============================
+   CONTENU PRINCIPAL
+   =============================== */
+
+.contenu {
+    padding: var(--espacement-grand);
+    min-height: 500px;
+}
+
+/* ===============================
+   SÉLECTEUR DE MODE
+   =============================== */
+
+.en-tete {
+    position: relative;
+}
+
+#selecteur-mode {
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ===============================
+   SECTIONS ET SOUS-SECTIONS
+   =============================== */
+
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+    animation: apparition 0.3s ease;
+}
+
+.sous-section {
+    display: none;
+}
+
+.sous-section.active {
+    display: block;
+    animation: apparition 0.3s ease;
+}
+
+/* Forcer l'affichage des sous-sections dans réglages */
+#section-reglages .sous-section.active {
+    display: block !important;
+}
+
+@keyframes apparition {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===============================
+   CARTES
+   =============================== */
+
+.carte {
+    background: white;
+    border: 1px solid var(--bleu-pale);
+    border-radius: 8px;
+    padding: var(--espacement-moyen);
+    margin-bottom: var(--espacement-moyen);
+    box-shadow: 0 2px 8px rgba(3, 46, 92, 0.05);
+}
+
+.carte h3 {
+    color: var(--bleu-principal);
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--bleu-pale);
+}
+
+/* Titre avec fond bleu dégradé (comme l'en-tête) */
+.carte h3.carte-titre-bleu {
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
+    color: white;
+    margin: -20px -20px 15px -20px;
+    padding: 15px 20px;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+}
+
+.carte ul,
+.carte ol {
+    padding-left: 30px;
+    margin: 10px 0;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===============================
+   CARTES D'ITEMS (Productions, Congés, etc.)
+   =============================== */
+
+.item-carte {
+    padding: 12px;
+    background: var(--bleu-tres-pale);
+    border: 2px solid var(--bleu-leger);
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.item-carte.item-special {
+    background: var(--bleu-carte);
+    border-color: var(--bleu-moyen);
+}
+
+.item-carte-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.item-carte-titre {
+    color: var(--bleu-principal);
+    font-weight: 600;
+}
+
+.item-carte-actions {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.item-carte-checkbox {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.item-carte-checkbox input {
+    margin-right: 5px;
+}
+
+.item-carte-checkbox span {
+    font-size: 0.85rem;
+}
+
+.item-carte-grille {
+    display: grid;
+    gap: 10px;
+}
+
+.item-carte-grille-2col {
+    grid-template-columns: 1fr 1fr;
+}
+
+.item-carte-grille-3col {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.item-carte-grille-custom {
+    grid-template-columns: 1.5fr 1.5fr 1fr;
+}
+
+.item-carte-champ {
+    /* Conteneur pour un champ */
+}
+
+.item-carte-label {
+    font-size: 0.75rem;
+    color: var(--bleu-moyen);
+    display: block;
+    margin-bottom: 2px;
+}
+
+.item-carte-valeur {
+    font-size: 0.85rem;
+}
+
+.item-carte-valeur.readonly {
+    background: white;
+    border: 1px solid var(--bleu-tres-pale);
+    border-radius: 4px;
+    padding: 6px 10px;
+}
+
+.item-carte-valeur.manquant {
+    color: var(--rouge);
+    font-style: italic;
+}
+
+.item-carte-valeur.important {
+    font-weight: bold;
+    color: var(--vert-leger);
+}
+
+.item-carte-footer {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--bleu-tres-pale);
+    font-size: 0.85rem;
+}
+
+.item-carte-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: white;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--bleu-principal);
+}
+
+/* Styles spécifiques pour la liste des évaluations */
+.conteneur-statistiques {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--espacement-moyen);
+    margin-bottom: var(--espacement-grand);
+}
+
+.grille-filtres {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--espacement-moyen);
+    margin-bottom: var(--espacement-moyen);
+}
+
+.etudiant-evaluation-carte {
+    margin-bottom: var(--espacement-moyen);
+}
+
+.etudiant-header:hover {
+    background: var(--bleu-tres-pale);
+}
+
+.toggle-icon {
+    display: inline-block;
+    width: 20px;
+    transition: transform 0.2s;
+}
+
+.note-maitrise { background: var(--risque-minimal); color: white; }
+.note-intermediaire { background: var(--risque-faible); color: #1a5f1a; }
+.note-developpement { background: var(--risque-modere); color: #7a5900; }
+.note-base { background: var(--risque-eleve); color: white; }
+.note-observation { background: var(--risque-critique); color: white; }
+
+.badge-statut {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.etudiant-details {
+    border-top: 1px solid var(--bleu-pale);
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 1000px;
+    }
+}
+
+/* ===============================
+   GRILLES ET STATISTIQUES
+   =============================== */
+
+.grille-statistiques {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--espacement-moyen);
+    margin-bottom: var(--espacement-grand);
+}
+
+/* ===============================
+   CARTES MÉTRIQUES - FORMAT STANDARD
+   Beta 85+
+   Layout: Texte à gauche, données à droite
+   =============================== */
+
+.carte-metrique {
+    background: var(--bleu-tres-pale);
+    border: 1px solid var(--bleu-principal);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.2s ease;
+}
+
+.carte-metrique:hover {
+    box-shadow: 0 2px 8px rgba(3, 46, 92, 0.15);
+    transform: translateY(-1px);
+}
+
+.carte-metrique .label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.carte-metrique .valeur {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--bleu-principal);
+}
+
+/* Support ancien format (strong/span) - À DÉPRÉCIER */
+.carte-metrique strong {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--bleu-principal);
+}
+
+.carte-metrique span {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* ===============================
+   TABLEAUX
+   =============================== */
+
+.tableau {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--espacement-moyen) 0;
+}
+
+.tableau thead {
+    background: var(--bleu-pale);
+}
+
+.tableau th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--bleu-principal);
+    font-size: 0.9rem;
+    border-bottom: 2px solid var(--bleu-leger);
+}
+
+.tableau td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--bleu-tres-pale);
+}
+
+.tableau tbody tr:hover {
+    background: var(--bleu-tres-pale);
+}
+
+/* ===============================
+   ENCADRÉ DE DATE - ÉTATS
+   =============================== */
+
+/* Base commune pour tous les encadrés de date */
+#enteteDateSeance {
+    padding: 16px 24px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-style: solid;
+    margin-bottom: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    display: none;
+    /* Caché par défaut */
+}
+
+#enteteDateSeance #texteDateSeance {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* État ERREUR - Jaune */
+#enteteDateSeance.etat-erreur {
+    background: #fff3cd;
+    border-color: #ffc107;
+}
+
+#enteteDateSeance.etat-erreur #texteDateSeance {
+    color: #856404;
+}
+
+/* État VALIDE - Vert */
+#enteteDateSeance.etat-valide {
+    background: #d4edda;
+    border-color: #28a745;
+}
+
+#enteteDateSeance.etat-valide #texteDateSeance {
+    color: #155724;
+}
+
+/* État VERROUILLÉ - Gris */
+#enteteDateSeance.etat-verrouille {
+    background: #e9ecef;
+    border-color: #6c757d;
+}
+
+#enteteDateSeance.etat-verrouille #texteDateSeance {
+    color: #495057;
+}
+
+/* ===============================
+   CONTRÔLE DE VERROUILLAGE COMPACT
+   =============================== */
+
+.controle-verrouillage {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 15px;
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.controle-verrouillage input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    margin: 0;
+    accent-color: var(--bleu-principal);
+}
+
+.controle-verrouillage label {
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+    font-weight: 500;
+    color: inherit;
+}
+
+/* Icônes cadenas plus petites */
+.controle-verrouillage .icone-cadenas {
+    font-size: 0.85rem;
+    margin-right: 2px;
+}
+
+/* ===============================
+   CODES COULEUR POUR SAISIE DES HEURES
+   =============================== */
+
+/* Absence complète (0h) - Rouge léger */
+input.saisie-absence {
+    background-color: #f8d7da !important;
+    border-color: #f5c6cb !important;
+    color: #721c24 !important;
+    font-weight: 600;
+}
+
+/* Retard ou absence partielle - Orange/Jaune */
+input.saisie-retard {
+    background-color: #fff3cd !important;
+    border-color: #ffc107 !important;
+    color: #856404 !important;
+    font-weight: 600;
+}
+
+/* Absence motivée/facultative (RàI) - Ambre/Orange clair */
+input.saisie-absence-motivee {
+    background-color: #ffe8cc !important;
+    border-color: #ffb74d !important;
+    color: #e65100 !important;
+    font-weight: 600;
+}
+
+/* Présence complète - Vert léger */
+input.saisie-present {
+    background-color: #d4edda !important;
+    border-color: #c3e6cb !important;
+    color: #155724 !important;
+    font-weight: 600;
+}
+
+/* État par défaut (vide ou non saisi) */
+input.saisie-vide {
+    background-color: #ffffff;
+    border-color: #ced4da;
+    color: #495057;
+}
+
+/* Transition douce pour les changements de couleur */
+input[type="number"].controle-form {
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ===============================
+   BADGES SYSTÈME (Beta 84)
+   Badges uniformisés pour Risque, Pattern, RàI
+   =============================== */
+
+/* Style de base pour tous les badges */
+.badge-sys {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* === BADGES GÉNÉRIQUES === */
+.badge-info {
+    display: inline-block;
+    background: var(--bleu-pale);
+    color: var(--bleu-principal);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* === BADGES DE RISQUE (sans émojis) - OBSOLÈTE - Gardé pour compatibilité === */
+.badge-risque-minimal {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.badge-risque-faible {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.badge-risque-modere {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.badge-risque-eleve {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+.badge-risque-tres-eleve {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.badge-risque-critique {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+/* === BADGES D'ENGAGEMENT (remplace les badges de risque) === */
+.badge-engagement-tres-favorable {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.badge-engagement-favorable {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.badge-engagement-modere {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.badge-engagement-fragile {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+.badge-engagement-insuffisant {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+/* === BADGES DE PRATIQUES D'ÉVALUATION === */
+.badge-pratique {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.badge-pratique-active {
+    background: var(--vert-succes);
+    color: white;
+}
+
+.badge-pratique-defaut {
+    background: var(--bleu-moyen);
+    color: white;
+}
+
+/* === BADGES DE PATTERN D'APPRENTISSAGE === */
+/* Couleurs alignées sur le gradient de la barre patterns */
+/* Format uniformisé avec les autres badges */
+.badge-pattern-blocage-critique {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #dbeafe;
+    color: #4f74f3;
+}
+
+.badge-pattern-blocage-critique .badge-analyse-count {
+    background: #4f74f3;
+}
+
+.badge-pattern-blocage-emergent {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #dbeafe;
+    color: #2994ee;
+}
+
+.badge-pattern-blocage-emergent .badge-analyse-count {
+    background: #2994ee;
+}
+
+.badge-pattern-defi-specifique {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #cffafe;
+    color: #11aec5;
+}
+
+.badge-pattern-defi-specifique .badge-analyse-count {
+    background: #11aec5;
+}
+
+.badge-pattern-stable {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #d1fae5;
+    color: #1bbd7e;
+}
+
+.badge-pattern-stable .badge-analyse-count {
+    background: #1bbd7e;
+}
+
+.badge-pattern-progression {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #d1fae5;
+    color: #1bbd7e;
+}
+
+.badge-pattern-progression .badge-analyse-count {
+    background: #1bbd7e;
+}
+
+/* === BADGES DE NIVEAU RÀI === */
+/* Couleurs alignées sur le gradient de la barre RàI */
+/* Format uniformisé avec les autres badges d'intervention */
+.badge-rai-1 {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #dbeafe;
+    color: #2196f3;
+}
+
+.badge-rai-2 {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #e0e7ff;
+    color: #6366f1;
+}
+
+.badge-rai-3 {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+/* === BADGES D'ANALYSE (Aperçu du sous-groupe) === */
+/* Style de base pour tous les badges d'analyse - style uniformisé avec tableau */
+.badge-analyse {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* Badge compteur interne (petit badge avec nombre) */
+.badge-analyse-count {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: white;
+}
+
+/* === Badges RàI pour analyse === */
+/* Styles uniformisés avec les badges du tableau individuel */
+.badge-rai-analyse-1 {
+    background: #dbeafe;
+    color: #2196f3;
+}
+
+.badge-rai-analyse-1 .badge-analyse-count {
+    background: #2196f3;
+}
+
+.badge-rai-analyse-2 {
+    background: #e0e7ff;
+    color: #6366f1;
+}
+
+.badge-rai-analyse-2 .badge-analyse-count {
+    background: #6366f1;
+}
+
+.badge-rai-analyse-3 {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+.badge-rai-analyse-3 .badge-analyse-count {
+    background: #7c3aed;
+}
+
+/* === Badges de risque pour analyse === */
+/* Styles uniformisés - fonds pleins sans bordures */
+.badge-risque-analyse-minimal,
+.badge-risque-analyse-faible {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-risque-analyse-minimal .badge-analyse-count,
+.badge-risque-analyse-faible .badge-analyse-count {
+    background: #28a745;
+}
+
+.badge-risque-analyse-modere {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-risque-analyse-modere .badge-analyse-count {
+    background: #ffc107;
+}
+
+.badge-risque-analyse-eleve {
+    background: #ffe5d0;
+    color: #fd7e14;
+}
+
+.badge-risque-analyse-eleve .badge-analyse-count {
+    background: #fd7e14;
+}
+
+.badge-risque-analyse-tres-eleve,
+.badge-risque-analyse-critique {
+    background: #f8d7da;
+    color: #dc3545;
+}
+
+.badge-risque-analyse-tres-eleve .badge-analyse-count,
+.badge-risque-analyse-critique .badge-analyse-count {
+    background: #dc3545;
+}
+
+/* Badge de risque par défaut (gris neutre) */
+.badge-risque-analyse-defaut {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.badge-risque-analyse-defaut .badge-analyse-count {
+    background: #6c757d;
+}
+
+/* === Badge pattern d'apprentissage (neutre gris) === */
+.badge-pattern-analyse {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.badge-pattern-analyse .badge-analyse-count {
+    background: #6c757d;
+}
+
+/* === Badge type d'intervention (Groupe/Individuel) === */
+.badge-type-intervention {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--bleu-tres-pale);
+    color: var(--bleu-principal);
+}
+
+/* === Badges statut d'intervention (Planifiée/En cours/Complétée) === */
+.badge-statut-planifiee {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.badge-statut-en-cours {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.badge-statut-completee {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #e8f5e9;
+    color: #388e3c;
+}
+
+/* === Badge intervention RàI (vert uniforme) === */
+.badge-intervention-vert {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 4px 6px;
+    border: 2px solid #4caf50;
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.badge-intervention-vert:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+}
+
+.badge-intervention-vert .badge-analyse-count {
+    background: #4caf50;
+    color: white;
+}
+
+/* === CARTES EN COLONNES (Interventions) === */
+.carte-header {
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-bottom: 2px solid var(--bleu-moyen);
+}
+
+.carte-colonne {
+    padding: 20px;
+}
+
+.carte-titre-colonne {
+    margin: 0 0 15px 0;
+    color: var(--bleu-principal);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.carte-info {
+    padding: 10px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+}
+
+/* ===============================
+   ALERTES ET BOÎTES D'INFORMATION
+   =============================== */
+
+.alerte {
+    padding: 15px 20px;
+    border-left: 4px solid;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.alerte-attention {
+    background: var(--alerte-fond-attention);
+    border-color: var(--alerte-bordure-attention);
+    color: var(--alerte-texte-attention);
+}
+
+.alerte-attention strong,
+.alerte-attention h4 {
+    color: var(--alerte-texte-attention);
+}
+
+.alerte-information {
+    background: var(--alerte-fond-information);
+    border-color: var(--alerte-bordure-information);
+    color: var(--alerte-texte-information);
+}
+
+.alerte-information strong,
+.alerte-information h4 {
+    color: var(--alerte-texte-information);
+}
+
+.alerte-succes {
+    background: var(--alerte-fond-succes);
+    border-color: var(--alerte-bordure-succes);
+    color: var(--alerte-texte-succes);
+}
+
+.alerte-succes strong,
+.alerte-succes h4 {
+    color: var(--alerte-texte-succes);
+}
+
+.alerte-erreur {
+    background: var(--alerte-fond-erreur);
+    border-color: var(--alerte-bordure-erreur);
+    color: var(--alerte-texte-erreur);
+}
+
+.alerte-erreur strong,
+.alerte-erreur h4 {
+    color: var(--alerte-texte-erreur);
+}
+
+.alerte h4 {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.alerte p {
+    margin: 8px 0 0 0;
+}
+
+.alerte ul {
+    margin: 8px 0 0 20px;
+}
+
+/* ===============================
+   FORMULAIRES
+   =============================== */
+
+.groupe-form {
+    margin-bottom: var(--espacement-moyen);
+}
+
+.groupe-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--bleu-principal);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.controle-form {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--bleu-leger);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+.controle-form:focus {
+    outline: none;
+    border-color: var(--bleu-clair);
+    box-shadow: 0 0 0 3px rgba(6, 93, 187, 0.1);
+}
+
+/* Inputs spéciaux pour saisie de présences */
+#tbody-saisie-presences input[type="number"]:placeholder-shown {
+    background-color: #fff9e6;
+    border: 1px dashed #ffc107;
+}
+
+#tbody-saisie-presences input[type="number"]:not(:placeholder-shown) {
+    background-color: white;
+    border: 1px solid var(--bleu-leger);
+}
+
+/* ===============================
+   ÉTATS DE VALIDATION FORMULAIRES
+   =============================== */
+
+.etat-erreur {
+    padding: 16px 24px;
+    border-radius: 8px;
+    border: 2px solid var(--etat-erreur-bordure);
+    background: var(--etat-erreur-fond);
+    color: var(--etat-erreur-texte);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.etat-valide {
+    padding: 16px 24px;
+    border-radius: 8px;
+    border: 2px solid var(--etat-valide-bordure);
+    background: var(--etat-valide-fond);
+    color: var(--etat-valide-texte);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.etat-verrouille {
+    padding: 16px 24px;
+    border-radius: 8px;
+    border: 2px solid var(--etat-verrouille-bordure);
+    background: var(--etat-verrouille-fond);
+    color: var(--etat-verrouille-texte);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* ===============================
+   BOUTONS
+   =============================== */
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-principal {
+    background: var(--btn-principal);
+    color: white;
+}
+
+.btn-principal:hover:not(:disabled) {
+    background: var(--btn-principal-hover);
+}
+
+.btn-secondaire {
+    background: var(--bleu-moyen);
+    color: white;
+}
+
+.btn-secondaire:hover:not(:disabled) {
+    background: var(--bleu-clair);
+}
+
+.btn-ajouter {
+    background: var(--btn-ajouter);
+    color: white;
+}
+
+.btn-ajouter:hover:not(:disabled) {
+    background: var(--btn-ajouter-hover);
+}
+
+.btn-modifier {
+    background: var(--btn-modifier);
+    color: white;
+}
+
+.btn-modifier:hover:not(:disabled) {
+    background: var(--btn-modifier-hover);
+}
+
+.btn-confirmer {
+    background: var(--btn-confirmer);
+    color: white;
+}
+
+.btn-confirmer:hover:not(:disabled) {
+    background: var(--btn-confirmer-hover);
+}
+
+.btn-annuler {
+    background: var(--btn-annuler);
+    color: white;
+}
+
+.btn-annuler:hover:not(:disabled) {
+    background: var(--btn-annuler-hover);
+}
+
+.btn-supprimer {
+    background: var(--btn-supprimer);
+    color: white;
+}
+
+.btn-supprimer:hover:not(:disabled) {
+    background: var(--btn-supprimer-hover);
+}
+
+.btn-groupe {
+    display: flex;
+    gap: 10px;
+    margin-top: var(--espacement-moyen);
+}
+
+/* ===============================
+   MODIFICATEURS DE BOUTONS
+   =============================== */
+
+/* Tailles alternatives */
+.btn-compact {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.btn-tres-compact {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+}
+
+/* ===============================
+   RÈGLE ÉPURÉE: TAILLE CONTEXTUELLE
+   Approche simple et maintenable
+   =============================== */
+
+/* Classe sémantique pour items de liste/cartes */
+.item-liste {
+    padding: 12px;
+    background: white;
+    border: 1px solid var(--bleu-leger);
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+/* TOUS les boutons dans un .item-liste sont automatiquement compacts */
+.item-liste .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* ===============================
+   MODAUX
+   =============================== */
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    overflow-y: auto;
+}
+
+.modal-overlay.actif {
+    display: block;
+}
+
+.modal-contenu {
+    max-width: 800px;
+    margin: 50px auto;
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-contenu.modal-large {
+    max-width: 1200px;
+}
+
+.modal-contenu.modal-compact {
+    max-width: 600px;
+    margin: 100px auto;
+}
+
+.modal-fermer {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--gris-moyen);
+    transition: color 0.2s;
+}
+
+.modal-fermer:hover {
+    color: var(--gris-fonce);
+}
+
+.modal-titre {
+    margin: 0 0 20px 0;
+    color: var(--bleu-principal);
+    font-size: 1.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+/* ===============================
+   WIZARD DE CRÉATION (PRATIQUES)
+   =============================== */
+
+.wizard-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--gris-leger);
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.wizard-dot-completed {
+    background: var(--bleu-fonce);
+}
+
+.wizard-dot-active {
+    background: var(--bleu-principal);
+    transform: scale(1.4);
+    box-shadow: 0 0 0 3px rgba(66, 139, 202, 0.2);
+}
+
+.wizard-step {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===============================
+   LISTES D'ÉLÉMENTS SAUVEGARDÉS
+   =============================== */
+
+.liste-vide {
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+    color: var(--bleu-leger);
+}
+
+/* ===============================
+   LICENCES CREATIVE COMMONS
+   =============================== */
+
+.cc-badge {
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    border-left: 4px solid var(--bleu-principal);
+    margin: 20px 0;
+}
+
+.cc-badge img {
+    height: 31px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.cc-badge-titre {
+    font-weight: 600;
+    color: var(--bleu-principal);
+    margin-bottom: 8px;
+}
+
+.cc-badge-auteur {
+    font-size: 0.9rem;
+    color: var(--gris-fonce);
+    margin: 4px 0;
+}
+
+.cc-badge-contributeurs {
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+    margin: 8px 0 0 0;
+    padding-left: 20px;
+}
+
+.cc-badge-conditions {
+    margin-top: 12px;
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+}
+
+.cc-badge-conditions h4 {
+    font-size: 0.9rem;
+    margin: 0 0 8px 0;
+    color: var(--bleu-principal);
+}
+
+.cc-badge-conditions ul {
+    margin: 0;
+    padding-left: 20px;
+    list-style: none;
+}
+
+.cc-badge-conditions li {
+    margin: 4px 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.cc-badge-conditions li::before {
+    content: "✓ ";
+    color: var(--vert-succes);
+    font-weight: bold;
+    margin-right: 4px;
+}
+
+.cc-badge-conditions .cc-condition-obligation::before {
+    content: "⚠️ ";
+}
+
+.cc-badge-lien {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--bleu-principal);
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.cc-badge-lien:hover {
+    text-decoration: underline;
+}
+
+.cc-metadata {
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+    margin-top: 8px;
+}
+
+.cc-metadata-version {
+    font-weight: 600;
+}
+
+.element-sauvegarde {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    border: 1px solid var(--bleu-leger);
+}
+
+.element-sauvegarde-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 10px;
+}
+
+.element-sauvegarde-titre {
+    margin: 0 0 8px 0;
+    color: var(--bleu-principal);
+}
+
+.element-sauvegarde-info {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.element-sauvegarde-date {
+    font-size: 0.85rem;
+    color: #999;
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
+.element-sauvegarde-source {
+    color: var(--orange-accent);
+    margin-left: 10px;
+    font-size: 0.85rem;
+}
+
+/* ===============================
+   RÉTROACTIONS
+   =============================== */
+
+.retroaction-critere {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: var(--bleu-tres-pale);
+    border-left: 3px solid var(--bleu-moyen);
+    border-radius: 4px;
+}
+
+.retroaction-titre {
+    font-weight: 600;
+    color: var(--bleu-principal);
+}
+
+.retroaction-texte {
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+/* ===============================
+   NOTIFICATIONS
+   =============================== */
+
+.notification-succes {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    background: var(--vert-leger);
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    animation: slideIn 0.3s ease;
+}
+
+.notification-details {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ===============================
+   GRILLES RÉUTILISABLES
+   =============================== */
+
+.grille-3-colonnes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.grille-4-colonnes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.grille-5-colonnes {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+}
+
+/* Grilles avec colonnes personnalisées */
+.grille-filtres {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr;
+    gap: 15px;
+    align-items: end;
+}
+
+.grille-saisie-presences {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 20px;
+}
+
+.grille-evaluation-principale {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 25px;
+}
+
+.grille-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+}
+
+/* Variantes d'espacement */
+.grille-gap-petit {
+    gap: 8px;
+}
+
+.grille-gap-moyen {
+    gap: 15px;
+}
+
+.grille-gap-grand {
+    gap: 25px;
+}
+
+/* Alignement */
+.grille-alignement-fin {
+    align-items: end;
+}
+
+.grille-alignement-centre {
+    align-items: center;
+}
+
+/* ===============================
+   COMPOSANTS SPÉCIALISÉS
+   =============================== */
+
+/* Séparateur horizontal */
+.separateur-horizontal {
+    margin: 15px 0;
+    border: none;
+    border-top: 1px solid var(--bordure-claire);
+}
+
+/* Boîte note finale */
+.boite-note-finale {
+    margin-top: 20px;
+    padding: 12px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+}
+
+.boite-note-finale .label {
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+    margin-bottom: 5px;
+}
+
+.boite-note-finale .valeur {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--bleu-principal);
+}
+
+.boite-note-finale .niveau {
+    font-size: 1.2rem;
+    margin-top: 5px;
+    color: var(--gris-moyen);
+}
+
+/* Zone de critères d'évaluation */
+.zone-criteres {
+    padding: 15px;
+    background: var(--gris-tres-pale);
+    border-radius: 8px;
+}
+
+.zone-criteres h4 {
+    margin: 0 0 15px 0;
+    color: var(--gris-fonce);
+}
+
+.zone-criteres .conteneur-liste {
+    max-height: 750px;
+    overflow-y: auto;
+}
+
+/* Zone de rétroaction */
+.zone-retroaction {
+    padding: 15px;
+    background: var(--gris-tres-pale);
+    border-radius: 8px;
+}
+
+.zone-retroaction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.zone-retroaction h4 {
+    margin: 0;
+    color: var(--gris-fonce);
+}
+
+/* Labels de formulaire standardisés */
+.label-formulaire {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--bleu-principal);
+    font-size: 0.9rem;
+}
+
+.champ-formulaire {
+    margin-bottom: 15px;
+}
+
+/* Conteneur de boutons en groupe */
+.groupe-boutons-colonne {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.groupe-boutons-ligne {
+    display: flex;
+    gap: 8px;
+}
+
+/* Indicateur de verrouillage */
+.indicateur-verrouillage {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.indicateur-verrouillage .icone {
+    font-size: 1rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.indicateur-verrouillage .icone-inactive {
+    color: var(--gris-clair);
+}
+
+.indicateur-verrouillage .icone-active {
+    color: var(--bleu-principal);
+}
+
+/* ===============================
+   BADGES - Statuts d'évaluation
+   =============================== */
+
+.badge-statut {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-block;
+    border: 1px solid;
+}
+
+.badge-statut.evalue {
+    background: var(--badge-evalue-fond);
+    color: var(--badge-evalue-texte);
+    border-color: var(--badge-evalue-bordure);
+}
+
+.badge-statut.non-evalue {
+    background: var(--badge-non-evalue-fond);
+    color: var(--badge-non-evalue-texte);
+    border-color: var(--badge-non-evalue-bordure);
+}
+
+/* ===============================
+   UTILITAIRES
+   =============================== */
+
+.text-muted {
+    color: var(--bleu-leger);
+    font-size: 0.9rem;
+    margin-bottom: var(--espacement-moyen);
+}
+
+.texte-centre {
+    text-align: center;
+}
+
+/* Marges */
+.mt-1 {
+    margin-top: 10px;
+}
+
+.mt-2 {
+    margin-top: 20px;
+}
+
+.mt-3 {
+    margin-top: 30px;
+}
+
+.mb-1 {
+    margin-bottom: 10px;
+}
+
+.mb-2 {
+    margin-bottom: 20px;
+}
+
+.mb-3 {
+    margin-bottom: 30px;
+}
+
+/* ===============================
+   IMPRESSION
+   =============================== */
+
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    .navigation-principale,
+    .sous-navigation,
+    .btn,
+    .statut-sauvegarde {
+        display: none !important;
+    }
+
+    .conteneur {
+        box-shadow: none;
+        border-radius: 0;
+        max-width: 100%;
+    }
+
+    .carte {
+        break-inside: avoid;
+    }
+
+    .entete {
+        background: white;
+        color: var(--bleu-principal);
+        border-bottom: 2px solid var(--bleu-principal);
+    }
+}
+
+/* ===============================
+   RESPONSIVE
+   =============================== */
+
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+
+    .conteneur {
+        border-radius: 0;
+        margin: 0;
+    }
+
+    .navigation-principale {
+        flex-wrap: wrap;
+    }
+
+    .navigation-principale button {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .sous-navigation {
+        padding: 10px;
+    }
+
+    .grille-statistiques {
+        grid-template-columns: 1fr;
+    }
+
+    .tableau {
+        font-size: 0.85rem;
+    }
+
+    .tableau th,
+    .tableau td {
+        padding: 8px 6px;
+    }
+
+    .contenu {
+        padding: var(--espacement-moyen);
+    }
+
+    .carte {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .entete h1 {
+        font-size: 1.5rem;
+    }
+
+    .entete h2 {
+        font-size: 1rem;
+    }
+
+    .navigation-principale button {
+        font-size: 0.85rem;
+        padding: 12px 15px;
+    }
+
+    .carte-statistique .valeur {
+        font-size: 2rem;
+    }
+}
+
+/* ===============================
+   PROFIL ÉTUDIANT - REDESIGN
+   Layout 2 colonnes + Sections collapsibles
+   Inspiré de la page d'évaluation
+   =============================== */
+
+/* Layout 2 colonnes principal */
+.profil-layout-2col {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+    align-items: start;
+    min-height: 600px;
+}
+
+/* Colonne gauche (sidebar) */
+.profil-sidebar {
+    background: var(--bleu-pale);
+    border-radius: 8px;
+    border: 1px solid var(--bleu-moyen);
+    padding: 15px;
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+}
+
+/* En-tête sidebar */
+.profil-sidebar-header {
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--bleu-moyen);
+    margin-bottom: 12px;
+}
+
+.profil-sidebar-nom {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--bleu-principal);
+    margin-bottom: 6px;
+}
+
+.profil-sidebar-meta {
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+/* Métriques sidebar (grille compacte 2 colonnes) */
+.profil-sidebar-metriques {
+    margin: 15px 0;
+}
+
+.profil-sidebar-metriques-grille {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.metrique-sidebar {
+    background: var(--bleu-tres-pale);
+    padding: 10px 8px;
+    border-radius: 6px;
+    text-align: center;
+    border-left: 3px solid;
+    transition: all 0.2s;
+    cursor: default;
+}
+
+.metrique-sidebar:hover {
+    background: var(--bleu-pale);
+}
+
+.metrique-sidebar-valeur {
+    font-size: 1.3rem;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.metrique-sidebar-label {
+    font-size: 0.75rem;
+    color: var(--bleu-moyen);
+    font-weight: 500;
+}
+
+/* Navigation sections sidebar avec indices intégrés */
+.profil-sidebar-nav {
+    margin-top: 15px;
+}
+
+.profil-nav-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 0.95rem;
+    color: #032e5c;
+    background: #e8f2fd;
+    border: 1px solid #6b85b3;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.profil-nav-item:hover {
+    border-color: #2a4a8a;
+    box-shadow: 0 2px 6px rgba(3, 46, 92, 0.15);
+    transform: translateY(-1px);
+}
+
+.profil-nav-item.actif {
+    background: var(--bleu-principal);
+    color: white;
+    font-weight: 600;
+    border-color: var(--bleu-principal);
+    box-shadow: 0 3px 8px rgba(0, 82, 204, 0.25);
+    transform: translateX(2px);
+}
+
+.profil-nav-item.actif:hover {
+    background: var(--bleu-moyen);
+    box-shadow: 0 4px 10px rgba(0, 82, 204, 0.3);
+    transform: translateX(2px) translateY(-1px);
+}
+
+/* Ligne principale du nav item */
+.profil-nav-item-ligne {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.profil-nav-item-titre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.profil-nav-item-valeur {
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.profil-nav-item.actif .profil-nav-item-valeur {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Sous-ligne optionnelle pour détails */
+.profil-nav-item-sous-ligne {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    padding-left: 28px;
+    display: flex;
+    gap: 10px;
+}
+
+.profil-nav-item.actif .profil-nav-item-sous-ligne {
+    opacity: 0.9;
+}
+
+/* Badge interprétatif qualitatif */
+.interpretation-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    border-left: 4px solid;
+}
+
+/* Placeholder graphique */
+.placeholder-graphique {
+    background: var(--bleu-tres-pale);
+    border: 2px dashed var(--bleu-pale);
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--bleu-moyen);
+    font-style: italic;
+    margin: 20px 0;
+}
+
+.placeholder-graphique-icone {
+    font-size: 2.5rem;
+    opacity: 0.3;
+    margin-bottom: 10px;
+}
+
+/* Colonne droite (contenu) */
+.profil-contenu {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--bleu-pale);
+    padding: 20px;
+    min-height: 500px;
+}
+
+.profil-contenu-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--bleu-pale);
+}
+
+.profil-contenu-titre {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--bleu-principal);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profil-contenu-body {
+    /* Contenu dynamique */
+}
+
+/* Responsive - Layout 2 colonnes */
+@media (max-width: 1024px) {
+    .profil-layout-2col {
+        grid-template-columns: 280px 1fr;
+        gap: 15px;
+    }
+
+    .profil-sidebar {
+        top: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .profil-layout-2col {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .profil-sidebar {
+        position: static;
+        max-height: none;
+    }
+
+    .profil-sidebar-metriques-grille {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ===============================
+   PROFIL ÉTUDIANT - CARTES ET SECTIONS
+   (Conservé du redesign précédent)
+   =============================== */
+
+/* Métriques compactes pour header du profil */
+.metriques-header {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.metrique-compacte {
+    text-align: center;
+    padding: 12px 8px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    border: 1px solid var(--bleu-pale);
+    transition: all 0.2s;
+}
+
+.metrique-compacte:hover {
+    background: white;
+    box-shadow: 0 2px 6px rgba(3, 46, 92, 0.1);
+    transform: translateY(-1px);
+}
+
+.metrique-compacte-valeur {
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.metrique-compacte-label {
+    font-size: 0.8rem;
+    color: var(--bleu-moyen);
+    display: block;
+    font-weight: 500;
+}
+
+/* Carte premium pour cible d'intervention */
+.carte-cible-intervention {
+    background: white;
+    border: 2px solid;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+}
+
+.carte-cible-intervention:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.carte-cible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.carte-cible-titre {
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.carte-cible-badge-niveau {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: white;
+    white-space: nowrap;
+}
+
+.carte-cible-texte-principal {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.carte-cible-meta {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.carte-cible-description {
+    background: var(--bleu-tres-pale);
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Sections collapsibles */
+.section-collapsible {
+    background: white;
+    border: 1px solid var(--bleu-pale);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.section-collapsible-header {
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.section-collapsible-header:hover {
+    background: var(--bleu-pale);
+}
+
+.section-collapsible-titre {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--bleu-principal);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-collapsible-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: var(--bleu-moyen);
+    font-weight: 500;
+}
+
+.section-collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out;
+}
+
+.section-collapsible-content.expanded {
+    max-height: 3000px;
+    padding: 15px;
+    border-top: 1px solid var(--bleu-pale);
+}
+
+/* Toggle pour détails techniques */
+.toggle-details {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: var(--bleu-moyen);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    user-select: none;
+    border: 1px solid transparent;
+}
+
+.toggle-details:hover {
+    background: var(--bleu-pale);
+    border-color: var(--bleu-moyen);
+}
+
+.details-techniques {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    opacity: 0;
+}
+
+.details-techniques.visible {
+    max-height: 800px;
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 4px;
+    margin-top: 10px;
+    opacity: 1;
+}
+
+/* Chevron rotatif pour toggles */
+.chevron {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    font-size: 0.8rem;
+}
+
+.chevron.expanded {
+    transform: rotate(180deg);
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+    .metriques-header {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .metrique-compacte {
+        padding: 10px 6px;
+    }
+
+    .metrique-compacte-valeur {
+        font-size: 1.3rem;
+    }
+
+    .carte-cible-texte-principal {
+        font-size: 1.1rem;
+    }
+
+    .carte-cible-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .section-collapsible-header {
+        padding: 12px;
+    }
+}
+
+/* ===============================
+   THÈMES PAR MODE - DÉGRADÉS
+   =============================== */
+
+/* MODE NORMAL - Dégradé bleu principal vers bleu foncé */
+body[data-mode="normal"] .entete {
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+}
+
+body[data-mode="normal"] .navigation-principale {
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+}
+
+body[data-mode="normal"] .sous-navigation {
+    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+}
+
+/* MODE SIMULATION - Dégradé sarcelle vers sarcelle foncé */
+body[data-mode="simulation"] .entete {
+    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
+}
+
+body[data-mode="simulation"] .navigation-principale {
+    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
+}
+
+body[data-mode="simulation"] .sous-navigation {
+    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
+}
+
+/* MODE ANONYMISATION - Dégradé bleu nuit vers noir bleuté */
+body[data-mode="anonymisation"] .entete {
+    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
+}
+
+body[data-mode="anonymisation"] .navigation-principale {
+    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
+}
+
+body[data-mode="anonymisation"] .sous-navigation {
+    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
+}
+
+/* Noms et prénoms en italique en mode anonymisation */
+body[data-mode="anonymisation"] .tableau tbody td:nth-child(3),
+body[data-mode="anonymisation"] .tableau tbody td:nth-child(4),
+body[data-mode="anonymisation"] .etudiant-nom,
+body[data-mode="anonymisation"] .profil-sidebar-nom,
+body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
+    font-style: italic;
+}
+
+/* Adaptation des sidebars aux modes */
+body[data-mode="simulation"] .sidebar-cartouches,
+body[data-mode="simulation"] .sidebar-navigation {
+    background: var(--sous-nav-bg-simulation);
+}
+
+body[data-mode="anonymisation"] .sidebar-cartouches,
+body[data-mode="anonymisation"] .sidebar-navigation {
+    background: var(--sous-nav-bg-anonymisation);
+}
+
+/* ===============================================
+   CARTES INFO-TOGGLE (Notes et Conseils)
+   Affichage des informations via emojis cliquables
+   =============================================== */
+
+/* Emojis cliquables dans les H2 */
+.emoji-toggle {
+    cursor: pointer;
+    margin-left: 10px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    display: inline-block;
+    user-select: none;
+    font-size: 1.2rem;
+}
+
+.emoji-toggle:hover {
+    transform: scale(1.2);
+    opacity: 0.8;
+}
+
+.emoji-toggle:active {
+    transform: scale(0.95);
+}
+
+/* 🆕 BETA 91: État "ouvert" avec rotation de 180deg */
+.emoji-toggle.ouvert {
+    transform: rotate(180deg);
+}
+
+/* Animation keyframes pour slide-down */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 500px;
+    }
+}
+
+/* Classe de base pour toutes les cartes info-toggle */
+.carte-info-toggle {
+    display: none; /* Caché par défaut */
+    padding: 15px 15px 15px 20px;
+    border-left: 4px solid;
+    border-radius: 0 6px 6px 0;
+    background: var(--bleu-tres-pale);
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+/* Variante Note (💡) - Style post-it jaune */
+.carte-info-note {
+    background: #fffbea;
+    border-left-color: #f5c842;
+}
+
+/* Variante Conseil (📐) - Style vert technique */
+.carte-info-conseil {
+    background: #f0fdf4;
+    border-left-color: #4ade80;
+}
+
+.carte-info-conseil .carte-info-toggle-titre .texte {
+    color: #16a34a;
+}
+
+/* Variante Pédagogique (🍎) - Style rouge pédagogique */
+.carte-info-pedagogique {
+    background: #fef2f2;
+    border-left-color: #f87171;
+}
+
+.carte-info-pedagogique .carte-info-toggle-titre .texte {
+    color: #dc2626;
+}
+
+/* En-tête de la carte avec emoji et titre */
+.carte-info-toggle-titre {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.carte-info-toggle-titre .emoji {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.carte-info-toggle-titre .texte {
+    font-weight: 600;
+    color: #d97706;
+}
+
+/* Listes à l'intérieur des cartes info-toggle */
+.carte-info-toggle ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    line-height: 1.8;
+}
+
+.carte-info-toggle strong {
+    color: var(--bleu-principal);
+}
+
+/* ===============================================
+   DÉTAILS DE CALCULS - STYLE UNIFORME
+   Basé sur le modèle du calcul du risque
+   =============================================== */
+
+/* Conteneur de section de calcul */
+.details-calculs-section {
+    margin-bottom: 20px;
+}
+
+/* Grille 2 colonnes pour calculs côte à côte */
+.details-calculs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .details-calculs-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Titre de section (CALCUL DU RISQUE, CALCUL DU BLOCAGE, etc.) */
+.details-calculs-titre {
+    color: var(--bleu-principal);
+    margin: 0 0 10px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* Bloc contenant les formules et calculs */
+.details-calculs-bloc {
+    background: var(--bleu-fonce);
+    padding: 12px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    color: var(--bleu-leger);
+    border: 1px solid var(--bleu-leger);
+}
+
+/* Label (Formule:, Calcul détaillé:, etc.) */
+.details-calculs-label {
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--bleu-leger);
+}
+
+/* Valeurs et formules */
+.details-calculs-valeur {
+    color: var(--bleu-leger);
+    margin-bottom: 12px;
+}
+
+.details-calculs-valeur:last-child {
+    margin-bottom: 0;
+}
+
+.details-calculs-valeur strong {
+    color: var(--bleu-leger);
+}
+
+.details-calculs-bloc strong {
+    color: var(--bleu-leger);
+}
+
+/* Alerte (avertissements, calculs partiels, etc.) */
+.details-calculs-alerte {
+    background: #fff3cd;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-family: sans-serif;
+}
+
+.details-calculs-alerte strong {
+    color: #856404;
+}
+
+/* Liste de détails dans les toggles */
+.details-calculs-liste {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    line-height: 1.8;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    color: var(--bleu-leger);
+}
+
+.details-calculs-liste strong {
+    color: var(--bleu-leger);
+}
+
+/* ===============================================
+   CARTES MÉTRIQUES - FORMAT STANDARD
+   Texte à gauche / Chiffre à droite (réutilisable)
+   =============================================== */
+
+/* Grille de disposition des métriques */
+.grille-metriques {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Carte métrique de base */
+.carte-metrique-standard {
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.carte-metrique-standard .label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.carte-metrique-standard .valeur {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+/* Pourcentages dans les cartes métriques (plus petits) */
+.carte-metrique-standard .valeur span[id$="-pct"] {
+    font-size: 0.75rem;
+    font-weight: normal;
+    color: #666;
+    margin-left: 5px;
+}
+
+/* Variantes de couleur (selon echelles.js) - Fond blanc */
+.carte-metrique-bleue {
+    background: white;
+    border-color: var(--bleu-principal);
+}
+
+.carte-metrique-bleue .valeur {
+    color: var(--bleu-principal);
+}
+
+.carte-metrique-verte,
+.carte-metrique-standard.carte-metrique-minimal {
+    background: white;
+    border-color: var(--risque-minimal);
+}
+
+.carte-metrique-verte .valeur,
+.carte-metrique-standard.carte-metrique-minimal .valeur {
+    color: var(--risque-minimal);
+}
+
+.carte-metrique-violette,
+.carte-metrique-standard.carte-metrique-nul {
+    background: white;
+    border-color: var(--risque-nul);
+}
+
+.carte-metrique-violette .valeur,
+.carte-metrique-standard.carte-metrique-nul .valeur {
+    color: var(--risque-nul);
+}
+
+.carte-metrique-terracotta,
+.carte-metrique-standard.carte-metrique-modere {
+    background: white;
+    border-color: var(--risque-modere);
+}
+
+.carte-metrique-terracotta .valeur,
+.carte-metrique-standard.carte-metrique-modere .valeur {
+    color: var(--risque-modere);
+}
+
+.carte-metrique-standard.carte-metrique-critique {
+    background: white;
+    border-color: var(--risque-critique);
+}
+
+.carte-metrique-standard.carte-metrique-critique .valeur {
+    color: var(--risque-critique);
+}
+
+/* ===============================================
+   SELECT MODE D'AFFICHAGE
+   Menu déroulant pour changer de mode
+   =============================================== */
+
+#selecteur-mode {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.select-mode {
+    padding: 6px 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.select-mode:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.select-mode:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.select-mode option {
+    background: var(--bleu-principal);
+    color: white;
+    padding: 8px;
+}
+
+/* ===============================
+   CALENDRIER - Vue mensuelle
+   =============================== */
+
+/* Conteneur principal du calendrier */
+.calendrier-conteneur {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Titre du mois - Texte blanc sur fond bleu */
+.calendrier-titre-mois {
+    text-align: center;
+    color: white !important;
+    background: var(--bleu-principal);
+    margin: 0 0 15px 0;
+    padding: 10px 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+/* Tableau du calendrier */
+.calendrier-tableau {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Cellules de jours du calendrier */
+.jour-calendrier {
+    text-align: center;
+    padding: 8px 4px;
+    position: relative;
+    transition: opacity 0.15s ease;
+    min-height: 50px;
+    vertical-align: top;
+    border: 2px solid #e8e8e8;
+}
+
+/* 🆕 BETA 91: Styles des cellules de jours selon statut */
+/* Base commune pour tous les jours */
+.calendrier-jour {
+    text-align: center;
+    padding: 8px 4px;
+    position: relative;
+    transition: opacity 0.15s ease;
+    min-height: 50px;
+    vertical-align: top;
+    cursor: default;
+    font-weight: 400;
+    font-size: 0.85rem;
+}
+
+/* Weekend */
+.calendrier-jour-weekend {
+    background: var(--weekend-bg);
+    color: #757575;
+    border: 2px solid #e8e8e8;
+}
+
+/* Semaine d'examens */
+.calendrier-jour-examens {
+    background: var(--examens-bg);
+    color: var(--bleu-principal);
+    border: 2px solid #f06292;
+    font-weight: 400;
+}
+
+/* Semaine de planification */
+.calendrier-jour-planification {
+    background: var(--planification-bg);
+    color: var(--bleu-principal);
+    border: 2px solid #ba68c8;
+    font-weight: 400;
+}
+
+/* Congé prévu au calendrier */
+.calendrier-jour-conge {
+    background: var(--conge-bg);
+    color: #c62828;
+    border: 2px solid #ef5350;
+    font-weight: 600;
+}
+
+/* Reprise */
+.calendrier-jour-reprise {
+    background: var(--reprise-bg);
+    color: #e65100;
+    border: 2px solid #ff9800;
+    font-weight: 600;
+}
+
+/* Cours régulier (jour avec horaire) */
+.calendrier-jour-cours-reel {
+    background: var(--jour-cours-reel-bg);
+    color: var(--bleu-principal);
+    border: 2px solid var(--bleu-moyen);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.calendrier-jour-cours-reel:hover {
+    background: var(--bleu-pale);
+}
+
+/* Jour ouvrable (sans horaire planifié) */
+.calendrier-jour-ouvrable {
+    background: white;
+    color: var(--bleu-principal);
+    border: 2px solid var(--bleu-carte);
+    font-weight: 400;
+}
+
+/* 🆕 BETA 91: En-têtes des jours de la semaine */
+.calendrier-jour-header {
+    padding: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* 🆕 BETA 91: Légende du calendrier (intégrée dans la grille) */
+.calendrier-legende {
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 8px;
+    border: 2px solid var(--bleu-pale);
+}
+
+.calendrier-legende-titre {
+    margin: 0 0 15px 0;
+    color: var(--bleu-principal);
+}
+
+.calendrier-legende-grille {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.calendrier-legende-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.calendrier-legende-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.calendrier-legende-label {
+    color: var(--bleu-principal);
+}
+
+.calendrier-legende-astuce {
+    margin-top: 15px;
+    color: var(--bleu-moyen);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+/* 🆕 BETA 91: Module interventions RàI */
+/* En-tête d'intervention avec titre et badges */
+.intervention-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 10px;
+}
+
+/* Titre d'intervention */
+.intervention-titre {
+    margin: 0 0 8px 0;
+    color: var(--bleu-principal);
+}
+
+/* Container pour badges (statut, type, niveau, date) */
+.intervention-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+}
+
+/* Groupe de boutons d'action */
+.intervention-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Description de l'intervention */
+.intervention-description {
+    margin: 10px 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Carte d'observations avec fond distinct */
+.intervention-observations {
+    margin-top: 10px;
+    background: #fffef7;
+}
+
+.intervention-observations h5 {
+    margin: 0 0 8px 0;
+    color: var(--bleu-principal);
+}
+
+.intervention-observations p {
+    margin: 0;
+    white-space: pre-wrap;
+    color: #555;
+}
+
+/* Message vide centré */
+.message-vide {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.message-vide p {
+    margin: 0;
+}
+
+.message-vide-aide {
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+/* Container pour bouton d'action principal (en haut à droite) */
+.actions-principales {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Grilles pour métriques d'analyse */
+.grille-metriques-3col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.grille-metriques-pondérée {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.grille-metriques-2col {
+    display: grid;
+    grid-template-columns: 1fr 0.9fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* En-tête de carte métrique (label + valeur) */
+.carte-metrique-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.carte-metrique-header h4 {
+    margin: 0;
+    color: var(--bleu-principal);
+    font-size: 1rem;
+}
+
+.carte-metrique-header strong {
+    font-size: 1.8rem;
+    color: var(--bleu-principal);
+}
+
+/* Container pour badges/éléments centrés */
+.badges-centres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* Carte notes individuelles avec fond bleu pâle */
+.intervention-notes-individuelles {
+    margin-top: 10px;
+    background: #f0f8ff;
+}
+
+.intervention-notes-individuelles h5 {
+    margin: 0 0 8px 0;
+    color: var(--bleu-principal);
+}
+
+/* Layout 2 colonnes pour interventions (Aperçu 40% + Notes 60%) */
+.intervention-layout-2col {
+    display: grid;
+    grid-template-columns: 40fr 60fr;
+    gap: 20px;
+}
+
+.intervention-col-gauche {
+    /* Colonne gauche: cartes d'analyse empilées (Patterns + Niveaux RàI) */
+}
+
+.intervention-col-droite {
+    /* Colonne droite: notes individuelles */
+}
+
+/* 🆕 BETA 91: Module portfolio (sélection artefacts) */
+/* Barre de progression du portfolio */
+.portfolio-progression {
+    background: var(--bleu-tres-pale);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.portfolio-progression-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.portfolio-barre-progression {
+    background: #ddd;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.portfolio-barre-remplissage {
+    background: var(--bleu-principal);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.portfolio-progression-aide {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Liste des artefacts du portfolio */
+.portfolio-artefacts-section {
+    margin-bottom: 20px;
+}
+
+.portfolio-artefacts-titre {
+    color: var(--bleu-principal);
+    margin-bottom: 15px;
+}
+
+/* Carte d'artefact */
+.portfolio-artefact-carte {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+/* Artefact retenu (sélectionné) */
+.portfolio-artefact-retenu {
+    background: linear-gradient(to right, #d4edda, #e8f5e9);
+    border: 3px solid #28a745;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+/* Artefact disponible (non retenu) */
+.portfolio-artefact-disponible {
+    background: white;
+    border: 2px solid #ddd;
+}
+
+/* Artefact à venir (non créé) */
+.portfolio-artefact-avenir {
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    opacity: 0.7;
+}
+
+/* Label d'artefact avec checkbox */
+.portfolio-artefact-label {
+    display: flex;
+    align-items: start;
+}
+
+.portfolio-artefact-label input[type="checkbox"] {
+    margin-right: 15px;
+    margin-top: 3px;
+    transform: scale(1.4);
+    accent-color: #28a745;
+}
+
+.portfolio-artefact-contenu {
+    flex: 1;
+}
+
+.portfolio-artefact-titre {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.portfolio-artefact-titre-retenu {
+    color: #155724;
+}
+
+.portfolio-artefact-titre-normal {
+    color: var(--bleu-principal);
+}
+
+.portfolio-artefact-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+}
+
+/* Artefact placeholder (à venir) */
+.portfolio-artefact-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.portfolio-artefact-checkbox-vide {
+    width: 18px;
+    height: 18px;
+    border: 2px dashed #ccc;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.portfolio-artefact-avenir-titre {
+    font-weight: 500;
+    color: #999;
+    margin-bottom: 3px;
+}
+
+.portfolio-artefact-avenir-info {
+    font-size: 0.85rem;
+    color: #999;
+    font-style: italic;
+}
+
+/* Carte de calcul de note (finale/provisoire) */
+.portfolio-note-carte {
+    padding: 20px;
+    border-left: 4px solid;
+    border-radius: 8px;
+}
+
+.portfolio-note-finale {
+    background: #d4edda;
+    border-left-color: #28a745;
+}
+
+.portfolio-note-provisoire {
+    background: #fff3cd;
+    border-left-color: #ffc107;
+}
+
+.portfolio-note-carte h4 {
+    margin-top: 0;
+}
+
+.portfolio-note-finale h4 {
+    color: #155724;
+}
+
+.portfolio-note-provisoire h4 {
+    color: #856404;
+}
+
+.portfolio-note-carte p:last-child {
+    margin-bottom: 0;
+}
+
+.portfolio-note-finale p:last-child {
+    color: #155724;
+}
+
+.portfolio-note-provisoire p:last-child {
+    color: #856404;
+}
+
+.portfolio-note-detail {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.portfolio-note-valeur {
+    color: #28a745;
+    font-size: 1.3rem;
+}
+
+/* 🆕 BETA 91: Module productions (liste évaluations) */
+/* En-tête de production avec titre et boutons */
+.production-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.production-titre {
+    color: var(--bleu-principal);
+}
+
+.production-actions {
+    white-space: nowrap;
+}
+
+/* Grille de champs (type, pondération, grilles) */
+.production-champs-grille {
+    display: grid;
+    gap: 10px;
+}
+
+.production-champs-grille-2col {
+    grid-template-columns: 1fr 1fr;
+}
+
+.production-champs-grille-3col {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.production-champ-label {
+    font-size: 0.75rem;
+    color: var(--bleu-moyen);
+}
+
+.production-champ-input {
+    font-size: 0.85rem;
+}
+
+.production-champ-input-bold {
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.production-champ-input-placeholder {
+    font-size: 0.85rem;
+    color: var(--bleu-leger);
+    font-style: italic;
+}
+
+/* Info artefacts portfolio */
+.production-portfolio-info {
+    margin-top: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+}
+
+.production-portfolio-info strong {
+    font-size: 0.85rem;
+    color: var(--bleu-principal);
+}
+
+/* Section objectif/tâche */
+.production-details {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--bleu-tres-pale);
+}
+
+.production-details p {
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.production-details p:last-child {
+    margin-bottom: 0;
+}
+
+/* Message vide productions */
+.production-vide {
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+}
+
+.production-vide p {
+    color: var(--bleu-leger);
+}
+
+/* Compact display (sidebar/modal) */
+.production-compact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.production-compact-titre {
+    font-weight: 600;
+    color: var(--bleu-principal);
+}
+
+.production-compact-meta {
+    color: #666;
+    font-size: 0.85rem;
+    margin-top: 2px;
+}
+
+.production-separateur {
+    margin: 0 8px;
+    color: #ccc;
+}
+
+.production-ponderation {
+    color: var(--orange-accent);
+}
+
+/* 🆕 BETA 91: Module profil-etudiant (optimisations) */
+/* Section header avec titre et valeur (réutilise .carte-metrique-header existant mais ajoute variantes) */
+.profil-section-titre-seul {
+    margin: 0;
+    color: var(--bleu-principal);
+    font-size: 1.1rem;
+}
+
+.profil-section-titre-large {
+    color: var(--bleu-principal);
+    margin-bottom: 15px;
+    padding-right: 40px;
+}
+
+.profil-section-titre-compact {
+    color: var(--bleu-principal);
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.profil-section-titre-sous {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* Texte descriptif */
+.profil-texte-detail {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.profil-texte-detail-compact {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.profil-texte-paragraphe {
+    margin: 10px 0;
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.profil-texte-explicatif {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #333;
+}
+
+/* Séparateurs */
+.profil-separateur {
+    border: none;
+    border-top: 1px solid #dee2e6;
+    margin: 20px 0;
+}
+
+.profil-separateur-section {
+    border-top: 1px solid #e9ecef;
+    margin: 15px 0;
+    padding-top: 15px;
+}
+
+/* Carte simple (alternative à profil-carte) */
+.profil-carte-simple {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.profil-carte-bordure {
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* Zone vide centrée */
+.profil-zone-vide {
+    text-align: center;
+    padding: 30px;
+}
+
+/* Tableau headers */
+.profil-tableau-header-gauche {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.profil-tableau-header-centre {
+    padding: 12px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.profil-tableau-cellule {
+    padding: 12px;
+}
+
+/* Liste sans puces */
+.profil-liste-simple {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    line-height: 2;
+}
+
+/* Espacement utilitaires */
+
+
+
+
+/* Nouveaux patterns (Phase B Beta 91) */
+.profil-section-titre-large {
+    color: var(--bleu-principal);
+    margin-bottom: 15px;
+}
+
+.profil-carte-importante {
+    background: var(--bleu-tres-pale);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid var(--bleu-principal);
+}
+
+.profil-valeur-grande {
+    font-size: 1.8rem;
+    color: var(--bleu-principal);
+    font-weight: bold;
+}
+
+
+.profil-carte-grise {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.profil-flex-gap {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.profil-texte-fort {
+    font-weight: bold;
+    color: var(--bleu-principal);
+}
+
+
+.profil-flex-between-mb15 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.profil-grid-gap10-mb15 {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.profil-texte-petit-ml10 {
+    color: #666;
+    font-size: 0.8rem;
+    font-weight: normal;
+    margin-left: 10px;
+}
+
+.profil-flex-between-mb8 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+
+.profil-texte-petit {
+    font-size: 0.8rem;
+}
+
+/* Nouveaux patterns Phase B (suite - 18 nov 2025) */
+.profil-valeur-grande-bleu {
+    font-size: 1.8rem;
+    color: var(--bleu-principal);
+}
+
+.profil-valeur-grande-orange {
+    font-size: 1.8rem;
+    color: var(--som-orange);
+}
+
+.profil-valeur-grande-bleu-pan {
+    font-size: 1.8rem;
+    color: var(--pan-bleu);
+}
+
+.profil-valeur-moyenne {
+    font-size: 1.5rem;
+}
+
+.profil-texte-detail-gris {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.profil-texte-italique-gris {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+}
+
+.profil-texte-mini-gris {
+    font-size: 0.85rem;
+    color: #999;
+}
+
+.profil-texte-normal-gris {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 400;
+}
+
+.profil-titre-bleu-compact {
+    color: var(--bleu-principal);
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.profil-titre-bleu-large-pr40 {
+    color: var(--bleu-principal);
+    margin-bottom: 15px;
+    padding-right: 40px;
+}
+
+.profil-titre-sous-section {
+    color: var(--bleu-principal);
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.profil-carte-bordure-blanche {
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.profil-grid-auto-200 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.profil-texte-mono-centre-bleu {
+    font-family: monospace;
+    font-size: 1rem;
+    text-align: center;
+    color: var(--bleu-principal);
+    margin-bottom: 10px;
+}
+
+.profil-zone-centre-p30 {
+    text-align: center;
+    padding: 30px;
+}
+
+.profil-tableau-header-gauche-p12 {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.profil-tableau-header-centre-p12 {
+    padding: 12px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.profil-tableau-cellule-p12 {
+    padding: 12px;
+}
+
+.profil-texte-danger-gras {
+    font-weight: 600;
+    color: #dc2626;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+}
+
+.profil-texte-succes-gras {
+    font-weight: 600;
+    color: #16a34a;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+}
+
+
+
+
+
+.profil-flex-between-mb20 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 20px 0;
+}
+
+.profil-flex-between-mb10 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.profil-flex-gap15-baseline {
+    display: flex;
+    gap: 15px;
+    align-items: baseline;
+}
+
+.profil-titre-section-majeur {
+    color: var(--bleu-principal);
+    margin: 0 0 20px 0;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.profil-titre-bleu-mt20 {
+    color: var(--bleu-principal);
+    margin-bottom: 12px;
+    font-size: 1rem;
+    margin-top: 20px;
+}
+
+
+.profil-zone-centre-fond-bleu {
+    text-align: center;
+    padding: 30px 20px;
+    background: var(--bleu-tres-pale);
+}
+
+.profil-zone-centre-grise {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.profil-zone-centre-verte {
+    text-align: center;
+    padding: 15px;
+    background: #d4edda;
+    border-radius: 6px;
+    color: #155724;
+    margin-bottom: 20px;
+}
+
+
+
+.profil-texte-centre-gris {
+    text-align: center;
+    color: #999;
+}
+
+.profil-tableau-full {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.profil-position-relative-mt15 {
+    position: relative;
+    margin-top: 15px;
+}
+
+.profil-zone-grande-bleu {
+    padding: 40px;
+    text-align: center;
+    background: var(--bleu-tres-pale);
+    border-radius: 8px;
+}
+
+.profil-zone-moyenne-bleu {
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+}
+
+/* 🆕 BETA 91: Module tableau-bord-apercu (optimisations Phase B) */
+.tb-texte-mini {
+    font-size: 0.7rem;
+    font-weight: 400;
+}
+
+.tb-texte-description {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+.tb-texte-petit-gris {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+
+
+.tb-p-20 {
+    padding: 20px;
+}
+
+.tb-m-horizontal-6 {
+    margin: 0 6px;
+}
+
+
+.tb-flex-center-around {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 100%;
+}
+
+.tb-flex-gap15-baseline {
+    display: flex;
+    gap: 15px;
+    align-items: baseline;
+}
+
+.tb-texte-moyen-gris {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+
+.tb-texte-capitalize {
+    text-transform: capitalize;
+}
+
+
+/* Nouveaux patterns Phase B (suite - 18 nov 2025) */
+.tb-texte-mini-orange {
+    font-size: 0.7rem;
+    color: var(--som-orange);
+}
+
+.tb-texte-mini-bleu-pan {
+    font-size: 0.7rem;
+    color: var(--pan-bleu);
+}
+
+.tb-valeur-grande-orange {
+    font-size: 1.5rem;
+    color: var(--som-orange);
+    font-weight: 700;
+}
+
+.tb-valeur-grande-bleu-pan {
+    font-size: 1.5rem;
+    color: var(--pan-bleu);
+    font-weight: 700;
+}
+
+.tb-valeur-tres-grande-orange {
+    font-size: 1.8rem;
+    color: var(--som-orange);
+    font-weight: 700;
+}
+
+.tb-barre-distribution {
+    position: relative;
+    height: 50px;
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.tb-barre-simple {
+    position: relative;
+    height: 30px;
+}
+
+.tb-barre-rai {
+    position: relative;
+    height: 40px;
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 20px;
+    padding: 0 20px;
+}
+
+.tb-padding-compact {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+.tb-titre-metrique {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.tb-titre-simple {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.tb-zone-succes {
+    text-align: center;
+    padding: 30px;
+    color: green;
+}
+
+.tb-padding-top {
+    padding: 20px 20px 20px 20px;
+    margin-top: 0;
+}
+
+.tb-padding-top-espacé {
+    padding: 20px 20px 0 20px;
+    margin-top: 10px;
+}
+
+
+
+.tb-valeur-tres-grande-bleu-pan {
+    font-size: 1.8rem;
+    color: var(--pan-bleu);
+    font-weight: 700;
+}
+
+.tb-texte-moyen-orange {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--som-orange);
+    margin-left: 10px;
+}
+
+.tb-texte-moyen-bleu-pan {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--pan-bleu);
+    margin-left: 10px;
+}
+
+.tb-texte-gris-mb10 {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* 🆕 BETA 91: Module interventions (optimisations Phase B) */
+
+
+
+.intervention-mt-0 {
+    margin-top: 0;
+}
+
+.intervention-grid-2-1-1 {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.intervention-grid-1-09 {
+    display: grid;
+    grid-template-columns: 1fr 0.9fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.intervention-grid-3col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.intervention-flex-end {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+
+
+/* 🆕 BETA 91: Module echelles (optimisations Phase B) */
+.echelle-texte-mini-bleu {
+    font-size: 0.7rem;
+    color: var(--bleu-moyen);
+}
+
+
+.echelle-text-center {
+    text-align: center;
+}
+
+
+.echelle-texte-detail {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.echelle-p-15 {
+    padding: 15px;
+}
+
+.echelle-relative {
+    position: relative;
+}
+
+.echelle-grid-niveaux {
+    display: grid;
+    grid-template-columns: 80px 180px 1fr 80px 80px 120px;
+    gap: 10px;
+    align-items: center;
+}
+
+.echelle-flex-seuils {
+    display: flex;
+    gap: 5px;
+    height: 40px;
+}
+
+/* Nouveaux patterns Phase B (suite - 18 nov 2025) */
+.echelle-w-80 {
+    width: 80px;
+}
+
+.echelle-w-60 {
+    width: 60px;
+}
+
+.echelle-w-100 {
+    width: 100px;
+}
+
+.echelle-w-120 {
+    width: 120px;
+}
+
+.echelle-w-150 {
+    width: 150px;
+}
+
+.echelle-w-180 {
+    width: 180px;
+}
+
+.echelle-padding-compact {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+}
+
+.echelle-w-60-p4 {
+    width: 60px;
+    padding: 4px;
+}
+
+.echelle-w-full-p4 {
+    width: 100%;
+    padding: 4px;
+}
+
+.echelle-texte-petit-mt5 {
+    font-size: 0.75rem;
+    margin-top: 5px;
+}
+
+.echelle-input-full {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.echelle-position-right {
+    position: absolute;
+    right: 0;
+}
+
+.echelle-position-left {
+    position: absolute;
+    left: 0;
+}
+
+.echelle-zone-bleu-pale {
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+}
+
+/* 🆕 BETA 91: Module evaluation (optimisations Phase B) */
+.eval-texte-placeholder {
+    color: #999;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+.eval-texte-italic-gris {
+    color: #999;
+    font-style: italic;
+}
+
+
+
+.eval-grid-critere {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.eval-texte-11 {
+    font-size: 1.1rem;
+}
+
+.eval-width-60 {
+    width: 60px;
+}
+
+.eval-ml-6 {
+    margin-left: 6px;
+}
+
+.eval-desactive {
+    opacity: 0.6;
+    background: #f5f5f5;
+}
+
+/* 🆕 BETA 91: Module grilles (optimisations Phase B) */
+.grille-texte-bleu-leger {
+    color: var(--bleu-leger);
+}
+
+.grille-nowrap {
+    white-space: nowrap;
+}
+
+
+.grille-mt-4 {
+    margin-top: 4px;
+}
+
+.grille-italic {
+    font-style: italic;
+}
+
+.grille-flex-1 {
+    flex: 1;
+}
+
+.grille-flex-between-mb10 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.grille-mr-20 {
+    margin-right: 20px;
+}
+
+.grille-texte-critique {
+    color: var(--risque-critique);
+}
+
+.grille-texte-modere {
+    color: var(--risque-modere);
+}
+
+.grille-texte-minimal {
+    color: var(--risque-minimal);
+}
+
+/* 🆕 BETA 91: Sous-critères avec pondération différenciée */
+.sous-criteres-conteneur {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.sous-criteres-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.sous-criteres-titre {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.sous-criteres-compteur {
+    font-weight: normal;
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.sous-criteres-liste-conteneur {
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.sous-critere-item {
+    background: white;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.sous-critere-champs-grid {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.sous-critere-label-petit {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.sous-critere-input-code {
+    font-size: 0.85rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.sous-critere-input-standard {
+    font-size: 0.85rem;
+}
+
+.sous-critere-textarea {
+    font-size: 0.8rem;
+    resize: vertical;
+}
+
+.sous-critere-description-groupe {
+    margin-top: 8px;
+}
+
+.sous-criteres-vide-message {
+    font-size: 0.8rem;
+    color: #999;
+    margin: 0 0 12px 0;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.sous-criteres-info {
+    font-size: 0.75rem;
+    color: #666;
+    margin: 10px 0 0 0;
+    font-style: italic;
+}
+
+.sous-criteres-btn-ajouter-liste {
+    font-size: 0.8rem;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.sous-criteres-btn-ajouter-vide {
+    font-size: 0.8rem;
+    width: 100%;
+}
+
+.sous-criteres-btn-defaut {
+    font-size: 0.8rem;
+}
+
+/* 🆕 BETA 91: Module productions (optimisations Phase B) */
+.prod-p-15 {
+    padding: 15px;
+}
+
+.prod-texte-secondaire {
+    font-size: 0.9rem;
+    font-weight: normal;
+    opacity: 0.9;
+}
+
+
+
+.prod-italic {
+    font-style: italic;
+}
+
+.prod-flex-1 {
+    flex: 1;
+}
+
+
+.prod-texte-bleu-leger {
+    color: var(--bleu-leger);
+}
+
+/* 🆕 BETA 91: Module etudiants (optimisations Phase B) */
+.etud-texte-gris-petit {
+    color: var(--gris-moyen);
+    font-size: 0.85rem;
+}
+
+.etud-text-center {
+    text-align: center;
+}
+
+
+.etud-texte-gris-mini {
+    color: #999;
+    font-size: 0.75rem;
+}
+
+.etud-texte-gris-moyen {
+    color: var(--gris-moyen);
+    font-size: 0.9rem;
+}
+
+.etud-texte-gris-clair {
+    color: #ccc;
+}
+
+
+/* ===============================================
+   SYSTÈME DE LAYOUT SIDEBAR 2 COLONNES (Beta 80.2+)
+   Design épuré, efficace et uniforme
+
+   USAGE : Cartouches, Productions, Grilles, Échelles
+   PATTERN : Sidebar navigation + Zone principale
+   =============================================== */
+
+/* ----------------
+   Layout principal
+   ---------------- */
+
+/**
+ * Layout 2 colonnes avec sidebar sticky
+ * Utilisé pour : Cartouches, Productions, Grilles, Échelles
+ *
+ * Structure HTML attendue :
+ * <div class="layout-sidebar-2col">
+ *   <div class="sidebar-navigation">...</div>
+ *   <div class="zone-principale">...</div>
+ * </div>
+ *
+ * Alias : .layout-cartouches-2col (rétrocompatibilité)
+ */
+
+.layout-cartouches-2col,
+.layout-sidebar-2col {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.sidebar-cartouches,
+.sidebar-navigation {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    background: var(--bleu-pale);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.item-cartouche-banque,
+.sidebar-item {
+    padding: 12px;
+    background: #e8f2fd;
+    border-radius: 6px;
+    border: 1px solid #6b85b3;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.item-cartouche-banque:hover,
+.sidebar-item:hover {
+    border-color: #2a4a8a;
+    box-shadow: 0 2px 6px rgba(3, 46, 92, 0.15);
+}
+
+.item-cartouche-banque.active,
+.sidebar-item.active {
+    border: 2px solid #032e5c;
+    background: linear-gradient(135deg, #e8f2fd 0%, #d0e5f8 100%);
+    box-shadow: 0 3px 10px rgba(3, 46, 92, 0.25);
+}
+
+.nom-cartouche,
+.sidebar-item-titre {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #032e5c;
+    margin-bottom: 6px;
+}
+
+.badge-grille,
+.sidebar-item-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(3, 46, 92, 0.3);
+}
+
+.actions-cartouche,
+.sidebar-item-actions {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.actions-cartouche .btn-icone,
+.sidebar-item-actions .btn-icone {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.15s;
+    color: white;
+    border: none;
+}
+
+/* Bouton Dupliquer - violet */
+.actions-cartouche .btn-icone:first-child,
+.sidebar-item-actions .btn-icone:first-child {
+    background: #4a3a6a;
+}
+
+.actions-cartouche .btn-icone:first-child:hover,
+.sidebar-item-actions .btn-icone:first-child:hover {
+    background: #3a2a5a;
+    box-shadow: 0 2px 6px rgba(74, 58, 106, 0.3);
+}
+
+/* Bouton Supprimer - rouge */
+.actions-cartouche .btn-icone:last-child,
+.sidebar-item-actions .btn-icone:last-child {
+    background: #8a2a2a;
+}
+
+.actions-cartouche .btn-icone:last-child:hover,
+.sidebar-item-actions .btn-icone:last-child:hover {
+    background: #7a1a1a;
+    box-shadow: 0 2px 6px rgba(138, 42, 42, 0.3);
+}
+
+.btn-ajouter-cartouche,
+.sidebar-btn-ajouter {
+    width: 100%;
+    margin-top: 15px;
+    padding: 11px 14px;
+    background: linear-gradient(135deg, #1e5a4a 0%, #165040 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(30, 90, 74, 0.3);
+    transition: all 0.15s;
+}
+
+.btn-ajouter-cartouche:hover,
+.sidebar-btn-ajouter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(30, 90, 74, 0.4);
+}
+
+.zone-centrale-cartouche,
+.zone-principale {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Message d'accueil zone principale */
+.zone-principale-accueil {
+    padding: 40px 20px;
+    text-align: center;
+    background: var(--bleu-tres-pale);
+    border-radius: 8px;
+}
+
+.zone-principale-accueil p {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* === SECTION ACCORDÉON D'IMPORT === */
+.accordeon-import,
+.section-accordeon {
+    margin: 20px 0;
+    border: 1px solid #6b85b3;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.accordeon-import h3,
+.accordeon-import h4,
+.section-accordeon h3,
+.section-accordeon h4 {
+    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);
+    color: white;
+    padding: 12px 15px;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.accordeon-import details,
+.section-accordeon details {
+    border-top: 1px solid #ddd;
+}
+
+.accordeon-import summary,
+.section-accordeon summary {
+    padding: 12px 15px;
+    cursor: pointer;
+    background: #f9f9f9;
+    font-weight: 600;
+    color: #032e5c;
+    user-select: none;
+}
+
+.accordeon-import summary:hover,
+.section-accordeon summary:hover {
+    background: #e8f2fd;
+}
+
+/* Summary pour sections de matériel pédagogique - style uniformisé */
+.summary-materiel {
+    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%) !important;
+    color: white !important;
+    padding: 12px 15px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.summary-materiel:hover {
+    background: linear-gradient(135deg, #2a4a8a 0%, #4a6aa8 100%) !important;
+}
+
+.panneau-import,
+.accordeon-contenu {
+    padding: 15px;
+    background: white;
+}
+
+.banque-vide,
+.sidebar-vide {
+    text-align: center;
+    padding: 20px 10px;
+    color: #999;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+.checkboxes-import-partiel,
+.liste-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 10px 0;
+}
+
+#listeCartouchesBanque,
+.sidebar-liste {
+    margin: 15px 0;
+}
+
+.filtre-grille-cartouche,
+.sidebar-filtre {
+    margin-bottom: 15px;
+}
+
+/* Carte d'information dans la sidebar */
+.sidebar-info-card {
+    background: var(--bleu-tres-pale);
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+    line-height: 1.8;
+}
+
+.sidebar-info-card-nom {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--bleu-principal);
+}
+
+.sidebar-info-card-details {
+    color: #666;
+}
+
+/* Groupe de boutons de navigation */
+.sidebar-nav-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.sidebar-nav-buttons .btn {
+    flex: 1;
+    font-size: 0.85rem;
+    padding: 8px;
+}
+
+/* Titre de section dans sidebar */
+.sidebar-section-titre {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--bleu-principal);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ======================================
+   CLASSES POUR PROFIL ÉTUDIANT
+   Élimination des styles inline
+   ====================================== */
+
+/* Carte blanche standard */
+.profil-carte {
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.profil-carte-titre {
+    margin-bottom: 15px;
+}
+
+.profil-carte-titre strong {
+    font-size: 1.1rem;
+}
+
+.profil-carte-titre .valeur-indice {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.profil-carte-description {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Grid 2 colonnes pour mobilisation */
+.profil-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Grid 3 colonnes pour engagement (A, C, P) */
+.profil-grid-3col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Grid indicateurs */
+.profil-grid-indicateurs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* Carte indicateur individuelle */
+.profil-indicateur {
+    background: var(--bleu-tres-pale);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid var(--bleu-principal);
+}
+
+.profil-indicateur-contenu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.profil-indicateur-label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.profil-indicateur-valeur {
+    font-size: 1.8rem;
+    color: var(--bleu-principal);
+    font-weight: bold;
+}
+
+/* Indicateur avec bordure gauche colorée */
+.profil-indicateur-accent-gauche {
+    border-left: 4px solid currentColor;
+}
+
+/* Liste sans puces */
+.profil-liste-simple {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    line-height: 2;
+}
+
+/* Séparateur horizontal */
+.profil-separateur {
+    border: none;
+    border-top: 1px solid #dee2e6;
+    margin: 20px 0;
+}
+
+/* Section titre (comme H4) */
+.profil-section-titre {
+    color: var(--bleu-principal);
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* Conteneur flex pour artefacts */
+.profil-artefacts-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Item artefact individuel */
+.profil-artefact-item {
+    flex: 0 0 auto;
+    min-width: 140px;
+    padding: 8px 10px;
+    background: #d4edda;
+    border-left: 3px solid #28a745;
+    border-radius: 6px;
+}
+
+.profil-artefact-nom {
+    color: var(--bleu-principal);
+    font-weight: 500;
+}
+
+.profil-artefact-note {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Message de succès (assiduité parfaite) */
+.profil-message-succes {
+    text-align: center;
+    padding: 15px;
+    background: #d4edda;
+    border-radius: 6px;
+    color: #155724;
+}
+
+.profil-message-succes-icone {
+    font-size: 1.5rem;
+}
+
+.profil-message-succes-texte {
+    font-weight: 500;
+}
+
+/* Section avec bordure gauche colorée */
+.profil-section-bordure-gauche {
+    border-left: 4px solid;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
+}
+
+/* Jetons de reprise (violet) */
+.profil-jetons-reprise {
+    background: #f3e5f5;
+    border-color: #9c27b0;
+}
+
+.profil-jetons-reprise-titre {
+    font-size: 1rem;
+    color: #7b1fa2;
+    font-weight: 600;
+}
+
+.profil-jetons-reprise-icone {
+    font-size: 1.2rem;
+}
+
+.profil-jetons-details {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 8px;
+}
+
+.profil-jetons-details div {
+    padding: 4px 0;
+}
+
+/* Jetons de délai (orange) */
+.profil-jetons-delai {
+    background: #fff3e0;
+    border-color: #ff6f00;
+}
+
+.profil-jetons-delai-titre {
+    font-size: 1rem;
+    color: #e65100;
+    font-weight: 600;
+}
+
+/* Liste de jetons (nouvelle version avec badges) */
+.profil-jetons-liste {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.profil-jeton-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Badges de jetons en flex (format compact) */
+.profil-jetons-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* Badge jeton délai (style comme badge-completion) */
+.badge-jeton-delai-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ff6f0022;
+    border: 2px solid #ff6f00;
+    border-radius: 8px;
+    padding: 2px 6px;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+.badge-jeton-delai-wrapper:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 111, 0, 0.2);
+    opacity: 1;
+}
+
+/* Badge jeton reprise (style comme badge-completion) */
+.badge-jeton-reprise-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #9c27b022;
+    border: 2px solid #9c27b0;
+    border-radius: 8px;
+    padding: 2px 6px;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+.badge-jeton-reprise-wrapper:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(156, 39, 176, 0.2);
+    opacity: 1;
+}
+
+/* Texte du badge jeton */
+.badge-jeton-titre {
+    font-weight: 600;
+    font-size: 0.7rem;
+    color: #333;
+}
+
+/* Numéro d'artefact dans le badge jeton */
+.badge-jeton-numero {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.7rem;
+    color: white;
+}
+
+.badge-jeton-numero-delai {
+    background: #ff6f00;
+}
+
+.badge-jeton-numero-reprise {
+    background: #9c27b0;
+}
+
+/* Badge non remis (gris neutre) */
+.badge-non-remis-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f5f5f522;
+    border: 2px solid #999;
+    border-radius: 8px;
+    padding: 2px 6px;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+}
+
+/* Artefacts sélectionnés */
+.profil-artefacts-liste {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.profil-artefact-selectionne {
+    padding: 8px 10px;
+    background: #d4edda;
+    border-left: 3px solid #28a745;
+    border-radius: 6px;
+}
+
+.profil-artefact-selectionne-nom {
+    color: #155724;
+    font-weight: 500;
+}
+
+.profil-artefact-selectionne-details {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Badge jeton inline */
+.profil-badge-jeton {
+    margin-left: 6px;
+}
+
+.profil-badge-jeton-reprise {
+    color: #9c27b0;
+}
+
+.profil-badge-jeton-delai {
+    color: #ff6f00;
+}
+
+/* Message vide/aucun */
+.profil-message-vide {
+    text-align: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    color: #999;
+    font-size: 0.85rem;
+}
+
+/* Message succès (tous remis) */
+.profil-message-tous-remis {
+    text-align: center;
+    padding: 10px;
+    background: #d4edda;
+    border-radius: 6px;
+    color: #155724;
+    font-size: 0.85rem;
+}
+
+/* Artefact non remis */
+.profil-artefact-non-remis {
+    padding: 8px 10px;
+    background: #f5f5f5;
+    border-left: 3px solid #ddd;
+    border-radius: 6px;
+}
+
+.profil-artefact-non-remis-nom {
+    color: #666;
+    font-weight: 500;
+}
+
+.profil-artefact-non-remis-statut {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+/* Zone d'avertissement avec bordure pointillée */
+.profil-zone-avertissement {
+    background: var(--bleu-tres-pale);
+    border: 2px dashed var(--bleu-pale);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    margin: 20px 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* Toggle détails techniques */
+.profil-toggle-details {
+    margin-top: 25px;
+}
+
+.profil-toggle-btn {
+    background: var(--bleu-pale);
+    border: 1px solid var(--bleu-moyen);
+    border-radius: 8px;
+    padding: 12px 20px;
+    width: 100%;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--bleu-principal);
+    transition: all 0.2s ease;
+}
+
+.profil-toggle-fleche {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.profil-details-contenu {
+    background: white;
+    padding: 12px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+}
+
+.profil-details-titre {
+    color: var(--bleu-principal);
+    margin: 0 0 10px 0;
+    font-size: 0.95rem;
+}
+
+.profil-details-liste {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    line-height: 1.8;
+}
+
+.profil-details-liste li {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.profil-details-liste li:not(:first-child) {
+    margin-left: 20px;
+}
+
+/* Carte interprétation (gradient) */
+.profil-interpretation {
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid;
+    margin-bottom: 20px;
+}
+
+.profil-interpretation-titre {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.profil-interpretation-texte {
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Formule mathématique */
+.profil-formule {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.profil-formule-code {
+    font-family: monospace;
+    font-size: 1.1rem;
+    text-align: center;
+    color: var(--bleu-principal);
+}
+
+/* Carte recommandations */
+.profil-recommandations {
+    border-left: 4px solid;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.profil-recommandations-titre {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.profil-recommandations-liste {
+    margin: 0;
+    padding-left: 20px;
+    line-height: 1.6;
+}
+
+/* Recommandations - variantes de couleur */
+.profil-recommandations-neutre {
+    background: #f5f5f5;
+    border-color: #9e9e9e;
+    color: #616161;
+}
+
+.profil-recommandations-avertissement {
+    background: #fff3cd;
+    border-color: #ffc107;
+}
+
+.profil-recommandations-danger {
+    background: #f8d7da;
+    border-color: #dc3545;
+}
+
+.profil-recommandations-info {
+    background: #e7f3ff;
+    border-color: #2196F3;
+}
+
+.profil-recommandations-succes {
+    background: #d4edda;
+    border-color: #28a745;
+}
+
+/* Texte de couleur dynamique pour recommandations */
+.profil-texte-avertissement {
+    color: #856404;
+}
+
+
+.profil-texte-info {
+    color: #1976d2;
+}
+
+
+/* Carte principale de risque */
+.profil-carte-risque {
+    border: 2px solid;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.profil-carte-risque-centre {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.profil-carte-risque-emoji {
+    font-size: 3rem;
+    margin-bottom: 8px;
+}
+
+.profil-carte-risque-niveau {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.profil-carte-risque-valeur {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.profil-carte-risque-urgence {
+    background: white;
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 12px;
+}
+
+.profil-carte-risque-urgence-titre {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.profil-carte-risque-urgence-texte {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+/* Échelle de risque visuelle (alignée avec barres SRPNF) */
+.profil-echelle-risque {
+    margin: 20px 0;
+}
+
+.profil-echelle-barre {
+    position: relative;
+    height: 12px;
+    border-radius: 6px;
+    /* Gradient défini dynamiquement en JS */
+}
+
+.profil-echelle-indicateur-haut {
+    position: absolute;
+    transform: translateX(-50%);
+    top: -18px;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.profil-echelle-indicateur-bas {
+    position: absolute;
+    transform: translateX(-50%);
+    bottom: -30px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--bleu-principal);
+    white-space: nowrap;
+}
+
+/* Point circulaire pour barre d'engagement (profil étudiant) */
+.profil-echelle-point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.profil-echelle-point-som {
+    background: var(--som-orange);
+}
+
+.profil-echelle-point-pan {
+    background: var(--pan-bleu);
+}
+
+.profil-echelle-point-unique {
+    background: var(--bleu-principal);
+}
+
+.profil-echelle-point:hover {
+    width: 16px;
+    height: 16px;
+    z-index: 20;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+/* Légende échelle de risque (alignée avec zones) */
+.legende-risque-container {
+    position: relative;
+    height: 50px;
+    margin-top: 40px;
+}
+
+.legende-risque-item {
+    position: absolute;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.legende-risque-niveau {
+    font-weight: bold;
+    font-size: 0.95rem;
+    display: block;
+}
+
+.legende-risque-seuil {
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 2px;
+}
+
+/* Explications formule avec fond bleu pâle */
+.profil-formule-explications {
+    background: #f0f7ff;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Message objectif (bleu) */
+.profil-message-objectif {
+    background: #e7f3ff;
+    border: 1px solid #2196F3;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.profil-message-objectif-titre {
+    color: #1976d2;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.profil-message-objectif-texte {
+    color: #1976d2;
+    line-height: 1.6;
+}
+
+/* Message progression (gradient bleu) */
+.profil-message-progression {
+    background: linear-gradient(to right, #2196F322, #2196F311);
+    border-left: 4px solid #2196F3;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.profil-message-progression-texte {
+    color: #1976d2;
+    font-weight: bold;
+}
+
+/* Badges pratiques de notation (SOM, PAN-Maîtrise, etc.) */
+.badge-pratique {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1.5px solid;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 12px;
+    vertical-align: middle;
+}
+
+/* Badge pratique compact (pour profil) */
+.badge-pratique-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1.5px solid;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+/* Variantes SOM */
+.badge-pratique.som,
+.badge-pratique-compact.som {
+    background: color-mix(in srgb, var(--som-orange) 9%, transparent);
+    border-color: var(--som-orange);
+    color: var(--som-orange);
+}
+
+/* Variantes PAN */
+.badge-pratique.pan,
+.badge-pratique-compact.pan {
+    background: color-mix(in srgb, var(--pan-bleu) 9%, transparent);
+    border-color: var(--pan-bleu);
+    color: var(--pan-bleu);
+}
+
+/* Ancienne classe pour rétrocompatibilité */
+.profil-badge-pratique {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1.5px solid;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+/* Badge sobre (général) */
+.badge {
+    display: inline-block;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+/* Badges d'absence/retard */
+.badge-absence {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 4px 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+    border-width: 2px;
+    border-style: solid;
+}
+
+.badge-absence:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.badge-absence-complete {
+    background: #dc354522;
+    border-color: #dc3545;
+}
+
+.badge-absence-complete .badge-absence-date {
+    color: #dc3545;
+}
+
+.badge-absence-partielle {
+    background: #ffc10722;
+    border-color: #ffc107;
+}
+
+.badge-absence-partielle .badge-absence-date {
+    color: #dc3545;
+}
+
+.badge-absence-date {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-absence-heures {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* Badge heures pour absences complètes (rouge) */
+.badge-absence-complete .badge-absence-heures {
+    background: #dc3545;
+    color: white;
+}
+
+/* Badge heures pour retards (orange avec texte rouge) */
+.badge-absence-partielle .badge-absence-heures {
+    background: #ffc107;
+    color: #dc3545;
+}
+
+/* Badge intervention RàI (style positif en vert) */
+.badge-intervention-rai {
+    background: #e8f5e9;
+    border-color: #4caf50;
+    cursor: default;
+}
+
+.badge-intervention-rai:hover {
+    opacity: 1;
+    transform: none;
+    box-shadow: none;
+}
+
+.badge-intervention-rai .badge-absence-date {
+    color: #2e7d32;
+}
+
+.badge-intervention-rai .badge-absence-heures {
+    background: #4caf50;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* Badge artefact (production remise/non remise) */
+.badge-artefact {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 4px 6px;
+    border-width: 2px;
+    border-style: solid;
+    transition: all 0.2s ease;
+}
+
+.badge-artefact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.badge-artefact-checkbox {
+    margin: 0;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.badge-artefact-contenu {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.badge-artefact-titre {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-artefact-note {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: white;
+}
+
+/* Badge artefact non remis (gris) */
+.badge-artefact-non-remis {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f5f5f5;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 4px 6px;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.badge-artefact-non-remis:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge completion pour colonne C (format comme Assiduité) */
+.badge-completion-remis {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #28a74522;
+    border: 2px solid #28a745;
+    border-radius: 8px;
+    padding: 4px 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+.badge-completion-remis:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+    opacity: 1;
+}
+
+.badge-completion-non-remis {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #99999922;
+    border: 2px solid #999;
+    border-radius: 8px;
+    padding: 4px 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.badge-completion-non-remis:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0.9;
+}
+
+.badge-completion-titre {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+.badge-completion-non-remis .badge-completion-titre {
+    color: #666;
+}
+
+.badge-completion-numero {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.badge-completion-remis .badge-completion-numero {
+    background: #28a745;
+    color: white;
+}
+
+.badge-completion-non-remis .badge-completion-numero {
+    background: #999;
+    color: white;
+}
+
+/* Timeline intervention (format compact pour Accompagnement) */
+.intervention-timeline-item {
+    display: flex;
+    align-items: start;
+    gap: 10px;
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    transition: background 0.2s ease;
+}
+
+.intervention-timeline-item:last-child {
+    border-bottom: none;
+}
+
+.intervention-timeline-item:hover {
+    background: #f9f9f9;
+}
+
+.intervention-timeline-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.intervention-timeline-note {
+    margin-top: 8px;
+    padding-left: 12px;
+    border-left: 3px solid var(--bleu-principal);
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.intervention-timeline-actions {
+    display: flex;
+    align-items: center;
+}
+
+/* Badge type intervention */
+.badge-intervention-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: var(--bleu-tres-pale);
+    color: var(--bleu-principal);
+    border: 2px solid var(--bleu-principal);
+}
+
+/* Liste d'informations */
+.info-liste {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+}
+
+.info-liste li {
+    padding: 5px 0;
+    font-size: 0.95rem;
+}
+
+.info-liste li strong {
+    color: var(--bleu-principal);
+}
+
+/* Barre de progression SRPNF */
+.critere {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.critere-nom {
+    flex: 0 0 120px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--bleu-principal);
+}
+
+.critere-valeur {
+    flex: 0 0 50px;
+    text-align: right;
+    font-weight: 600;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.critere-barre {
+    flex: 1;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    margin: 0 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.critere-barre-fill {
+    height: 100%;
+    /* Couleur définie dynamiquement selon le niveau IDME (I/D/M/E) */
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* Section titre (comme dans ébauche) */
+.section-titre {
+    color: var(--bleu-principal);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 20px 0 10px 0;
+}
+
+/* Barres de critères SRPNF avec échelle IDME */
+.critere-container {
+    margin-bottom: 15px;
+}
+
+.critere-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.critere-barre-gradient {
+    position: relative;
+    height: 12px;
+    border-radius: 6px;
+    /* Gradient défini dynamiquement en JS selon échelles personnalisées */
+}
+
+.critere-indicateur {
+    position: absolute;
+    transform: translateX(-50%);
+    top: -18px;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+/* Point circulaire pour barres de critères SRPNF */
+.critere-point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    background: #333;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.critere-point:hover {
+    width: 16px;
+    height: 16px;
+    z-index: 20;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+}
+
+/* Points colorés pour mode comparatif SOM/PAN */
+.critere-point-som {
+    background: var(--som-orange);
+}
+
+.critere-point-pan {
+    background: var(--pan-bleu);
+}
+
+/* Légende IDME alignée avec zones */
+.legende-idme-container {
+    position: relative;
+    height: 50px;
+    margin-top: 15px;
+}
+
+.legende-idme-item {
+    position: absolute;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.legende-idme-code {
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: block;
+}
+
+.legende-idme-nom {
+    font-size: 0.85rem;
+    display: block;
+}
+
+/* === MATRICE DE COMMENTAIRES EN TABLEAU === */
+.matrice-tableau {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.matrice-tableau thead {
+    color: white;
+}
+
+.matrice-tableau th {
+    /* Couleurs individuelles appliquées via inline style depuis cartouches.js */
+    padding: 12px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.matrice-tableau th:first-child {
+    text-align: left;
+    background: #032e5c;
+}
+
+.matrice-tableau th .niveau-code {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.matrice-tableau th .niveau-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+.matrice-tableau tbody tr:nth-child(odd) {
+    background: #f9f9f9;
+}
+
+.matrice-tableau tbody tr:nth-child(even) {
+    background: #ffffff;
+}
+
+.matrice-tableau td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.matrice-tableau td:first-child {
+    font-weight: 600;
+    color: #032e5c;
+    background: #e8f2fd;
+    white-space: nowrap;
+}
+
+.matrice-tableau textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.matrice-tableau textarea:focus {
+    outline: none;
+    border-color: #6b85b3;
+    background: #f0f8ff;
+}
+
+.matrice-tableau textarea::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+/* === CARTES MÉTRIQUES INDIVIDUELLES === */
+.cartes-metriques {
+    display: flex;
+    gap: 15px;
+    margin: 0 0 20px 0;
+    flex-wrap: wrap;
+}
+
+.cartes-metriques .carte-metrique {
+    flex: 1;
+    min-width: 200px;
+}
+/* ===============================
+   INTERVENTIONS RàI (Beta 85)
+   =============================== */
+
+.profil-info-item {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.profil-info-item strong {
+    color: var(--bleu-principal);
+}
+
+.liste-etudiants-intervention {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.liste-etudiants-intervention > div {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+
+.liste-etudiants-intervention > div:hover {
+    background: var(--bleu-tres-pale);
+}
+
+.liste-etudiants-intervention > div:last-child {
+    border-bottom: none;
+}
+
+.liste-etudiants-intervention input[type="checkbox"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.liste-etudiants-intervention label {
+    flex: 1;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.intervention-item {
+    transition: box-shadow 0.2s;
+}
+
+.intervention-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ===============================
+   TABLEAU LISTE DES ÉVALUATIONS
+   =============================== */
+
+/* Plus d'espacement vertical dans les cellules */
+#corps-tableau-evaluations td {
+    padding: 16px 12px !important;
+}
+
+/* Effet hover sur les lignes */
+#corps-tableau-evaluations tr {
+    transition: background-color 0.2s ease;
+}
+
+#corps-tableau-evaluations tr:hover {
+    background-color: var(--bleu-tres-pale);
+}
+
+/* Ligne grisée pour évaluations remplacées */
+#corps-tableau-evaluations tr.eval-remplacee {
+    background-color: #f5f5f5;
+    opacity: 0.7;
+}
+
+/* Alignement centré pour colonnes Niveau et Note */
+#corps-tableau-evaluations td.text-center {
+    text-align: center;
+}
+
+/* Actions sans retour à la ligne */
+#corps-tableau-evaluations td.actions {
+    white-space: nowrap;
+}
+
+/* Badges de jetons */
+.badge-jeton {
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: white;
+    margin-left: 8px;
+}
+
+.badge-jeton-reprise {
+    background-color: #9c27b0;
+}
+
+.badge-jeton-delai {
+    background-color: #ff6f00;
+}
+
+/* ===============================
+   MEDIA QUERIES - RESPONSIVE
+   =============================== */
+
+/* Grille des seuils d'interprétation - Responsive */
+@media (max-width: 1200px) {
+    #reglages-interpretation > div[style*="grid-template-columns: repeat(2, 1fr)"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ===============================
+   PAGE TRIMESTRE - CLASSES UTILITAIRES
+   =============================== */
+
+/* Grilles responsives */
+.grille-2col {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.grille-2col-gap15 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.grille-4col-form {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 15px 20px;
+}
+
+/* Titres de sous-sections */
+.sous-titre-section {
+    color: var(--bleu-moyen);
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--bleu-leger);
+}
+
+/* Textes descriptifs */
+.texte-desc {
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+}
+
+/* Boîte d'information */
+.info-box {
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 4px;
+}
+
+.info-box p {
+    margin: 0;
+    color: var(--texte-principal);
+    font-size: 0.95rem;
+}
+
+/* Formulaires cachés */
+.form-cache {
+    display: none;
+    margin-bottom: 30px;
+}
+
+.form-cache-mt {
+    display: none;
+    margin-top: 20px;
+}
+
+/* Groupes de boutons avec alignement */
+.btn-groupe-droite {
+    justify-content: flex-end;
+    padding: 0 20px 15px;
+}
+
+/* Champs de formulaire compacts */
+.controle-form-compact {
+    padding: 4px 8px;
+    font-size: 0.9rem;
+}
+
+/* Couleurs de titres spécifiques */
+.titre-vert {
+    color: var(--vert-leger);
+}
+
+.titre-orange {
+    color: var(--orange-accent);
+}
+
+/* Marges utilitaires supplémentaires */
+.mb-30 {
+    margin-bottom: 30px;
+}
+
+/* ===============================
+   ANIMATIONS
+   =============================== */
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ===============================
+   SECTIONS DÉSACTIVÉES (Pratiques de notation)
+   =============================== */
+
+/* Amélioration visuelle des champs désactivés dans les sections avec opacité réduite */
+select:disabled,
+input:disabled,
+textarea:disabled {
+    cursor: not-allowed;
+    background-color: #f5f5f5;
+    color: #999;
+}
+
+/* Labels associés aux champs désactivés */
+label:has(+ select:disabled),
+label:has(+ input:disabled),
+label:has(+ textarea:disabled) {
+    color: #999;
+}
+
+/* ===============================
+   BARRES DE DISTRIBUTION (Tableau de bord)
+   =============================== */
+
+/* Conteneur de barre de distribution */
+.distribution-barre-container {
+    position: relative;
+    height: 60px;
+    border-radius: 6px;
+    overflow: visible;
+    opacity: 1; /* Opacité maximale pour fond dégradé visible */
+}
+
+/* Animation de flottement subtil pour les points (au hover seulement) */
+@keyframes float-subtle {
+    0%, 100% {
+        transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1.5);
+    }
+    25% {
+        transform: translate(-50%, -50%) translateX(1px) translateY(-1px) scale(1.5);
+    }
+    50% {
+        transform: translate(-50%, -50%) translateX(0px) translateY(-2px) scale(1.5);
+    }
+    75% {
+        transform: translate(-50%, -50%) translateX(-1px) translateY(-1px) scale(1.5);
+    }
+}
+
+/* Point représentant un étudiant (scatter plot) */
+.barre-etudiant {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    border: 1px solid white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    /* Pas d'animation par défaut - seulement au hover */
+}
+
+/* Animation et grossissement au hover */
+.barre-etudiant:hover {
+    z-index: 20;
+    border-width: 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    animation: float-subtle 7s ease-in-out infinite;
+}
+
+/* Point pour SOM (orange) */
+.barre-etudiant-som {
+    background: var(--som-orange);
+    opacity: 1; /* Opacité maximale pour meilleure visibilité */
+}
+
+/* Point pour PAN (bleu) */
+.barre-etudiant-pan {
+    background: var(--pan-bleu);
+    opacity: 1; /* Opacité maximale pour meilleure visibilité */
+}
+
+/* Conteneur de distribution */
+.distribution-container {
+    margin-bottom: 30px;
+}
+
+/* 🆕 BETA 91: Interprétation textuelle au-dessus des barres Patterns et RàI */
+.interpretation-barre {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+/* Légende sous la barre */
+.distribution-legende {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #666;
+    padding: 0 5px;
+    margin-top: 10px;
+}
+
+.distribution-legende span {
+    text-align: center;
+    line-height: 1.3;
+}
+
+/* 🆕 BETA 91: Module cartouches (optimisations Phase B) */
+
+
+
+.cartouche-texte-bleu-leger {
+    color: var(--bleu-leger);
+}
+
+.cartouche-texte-bleu-leger-ml10 {
+    color: var(--bleu-leger);
+    margin-left: 10px;
+}
+
+.cartouche-texte-bleu-mb15 {
+    color: var(--bleu-principal);
+    margin-bottom: 15px;
+}
+
+.cartouche-texte-italique-bleu-leger {
+    color: var(--bleu-leger);
+    font-style: italic;
+    margin-bottom: 15px;
+}
+
+.cartouche-fond-bleu-pale {
+    background: var(--bleu-tres-pale);
+}
+
+.cartouche-zone-bleu-pale {
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    text-align: center;
+}
+
+.cartouche-texte-secondaire {
+    font-size: 0.9rem;
+    font-weight: normal;
+    opacity: 0.9;
+}
+
+.cartouche-texte-warning {
+    color: #ffc107;
+    font-size: 0.9rem;
+}
+
+.cartouche-texte-gris-italique {
+    color: #999;
+    font-style: italic;
+}
+
+.cartouche-p-15 {
+    padding: 15px;
+}
+
+
+.cartouche-mt5-mb0 {
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+
+.cartouche-gradient-bleu {
+    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);
+}
+
+/* 🆕 BETA 91: Module calendrier-vue (optimisations Phase B) */
+.cal-valeur-grande-bleu {
+    font-size: 1.8rem;
+    color: var(--bleu-principal);
+}
+
+.cal-texte-gris {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+
+.cal-carte-importante {
+    background: var(--bleu-tres-pale);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid var(--bleu-principal);
+}
+
+
+.cal-texte-moyen {
+    font-size: 0.95rem;
+}
+
+.cal-texte-mini-fade {
+    font-size: 0.7rem;
+    margin-top: 2px;
+    opacity: 0.9;
+}
+
+.cal-grid-auto-200 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.cal-grid-2col {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.cal-carte-blanche {
+    background: white;
+    border: 2px solid var(--bleu-carte);
+}
+
+/* 🆕 BETA 91: Module portfolio (optimisations Phase B) */
+
+
+
+.portfolio-texte-gris-fade {
+    color: #999;
+}
+
+/* 🆕 BETA 91: Module saisie-presences (optimisations Phase B) */
+
+.presences-texte-gris {
+    color: #666;
+}
+
+.presences-texte-petit {
+    font-size: 0.9rem;
+}
+
+
+
+.presences-text-center-erreur {
+    text-align: center;
+    color: var(--rouge-erreur);
+}
+
+
+/* ===============================
+   BARRES DE PROGRESSION - Beta 90
+   Spectres lumineux avec overlays "Nuit Élégante"
+   Référence: GUIDE_BARRES_PROGRESSION 14 nov.html
+   =============================== */
+
+/* === INDICATEURS A-C-P-E (Overlay 20%) === */
+
+.barre-indicateur {
+    height: 40px;
+    border-radius: 20px;
+    position: relative;
+    background: linear-gradient(to right, 
+        #ff8c00 0%,   /* Orange foncé */
+        #ffa500 10%,  /* Orange */
+        #98d025 30%,  /* Vert citron */
+        #22c55e 50%,  /* Vert */
+        #14b8a6 65%,  /* Cyan/Sarcelle */
+        #06b6d4 80%,  /* Bleu ciel clair */
+        #0ea5e9 100%  /* Bleu ciel */
+    );
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.barre-indicateur-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 30, 58, 0.2);
+    border-radius: 20px;
+    pointer-events: none;
+}
+
+/* === PATTERNS D'APPRENTISSAGE (Overlay 35%) === */
+
+.barre-patterns {
+    height: 30px;
+    border-radius: 15px;
+    position: relative;
+    background: linear-gradient(to right, 
+        #22c55e 0%,   /* Vert */
+        #14b8a6 25%,  /* Cyan/Sarcelle */
+        #0ea5e9 50%,  /* Bleu ciel */
+        #3b82f6 75%,  /* Bleu */
+        #6366f1 100%  /* Indigo */
+    );
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.barre-patterns-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 30, 58, 0.35);
+    border-radius: 15px;
+    pointer-events: none;
+}
+
+/* === MODÈLE RàI (Overlay 40%) === */
+
+.barre-rai {
+    height: 30px;
+    border-radius: 15px;
+    position: relative;
+    background: linear-gradient(to right, 
+        #0ea5e9 0%,   /* Bleu ciel */
+        #3b82f6 25%,  /* Bleu */
+        #6366f1 50%,  /* Indigo */
+        #8b5cf6 75%,  /* Violet */
+        #6b21a8 100%  /* Mauve foncé */
+    );
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.barre-rai-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 30, 58, 0.4);
+    border-radius: 15px;
+    pointer-events: none;
+}
+
+/* === DOTS (Points blancs sur les barres) === */
+
+.barre-dots {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    padding: 0 20px;
+    display: flex;
+    gap: 15px;
+    pointer-events: none;
+}
+
+.barre-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* ===============================
+   TABLEAU DES ÉTUDIANTS - COLONNES CENTRÉES
+   =============================== */
+
+/* En-têtes des colonnes A, C, P, E, RàI centrés */
+.td-center-clickable,
+.td-center-100-clickable,
+.td-center-70,
+.td-center-40,
+.td-center-80 {
+    text-align: center !important;
+}
+
+/* Colonne Pattern centrée */
+.td-left-140-clickable {
+    text-align: center !important;
+}
+
+/* Badge jeton personnalisé (neutre - bleu clair) */
+.badge-jeton-personnalise-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2196f322;
+    border: 2px solid #2196f3;
+    border-radius: 8px;
+    padding: 2px 6px;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+.badge-jeton-personnalise-wrapper:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
+    opacity: 1;
+}
+
+.badge-jeton-numero-personnalise {
+    background: #2196f3;
+}
+
+/* ===============================
+   UTILITAIRES - Objectifs d'apprentissage (Beta 91)
+   =============================== */
+
+/* En-tête avec actions (gauche + droite) */
+.actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Groupe d'actions (gauche) */
+.actions-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* Input file caché */
+.input-file-hidden {
+    display: none;
+}
+
+/* Utilitaire pour cacher des éléments */
+.hidden {
+    display: none !important;
+}
+
+/* En-tête d'un ensemble avec titre et actions */
+.ensemble-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--gris-leger);
+}
+
+.ensemble-header h3 {
+    margin: 0;
+    color: var(--bleu-principal);
+}
+
+/* Carte d'information avec fond bleu pâle */
+.carte-info-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+}
+
+.carte-info-section h4 {
+    margin: 0 0 15px 0;
+    color: var(--bleu-principal);
+}
+
+/* Grille 2 colonnes */
+.grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Section des objectifs */
+.objectifs-section {
+    margin-bottom: 20px;
+}
+
+/* En-tête de section avec titre et bouton */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.section-header h4 {
+    margin: 0;
+    color: var(--bleu-principal);
+}
+
+/* Item d'objectif (ligne dans la grille) */
+.objectif-item {
+    display: grid;
+    grid-template-columns: 1fr 100px 150px auto;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 12px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid var(--gris-leger);
+}
+
+/* Conteneur du total des pondérations */
+.total-poids-container {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+}
+
+.total-poids-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-poids-label {
+    font-weight: 600;
+    color: var(--gris-fonce);
+}
+
+.total-poids-valeur {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--bleu-principal);
+}
+
+.total-poids-message {
+    margin: 8px 0 0 0;
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+}
+
+/* Pied de page avec boutons d'action */
+.actions-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 2px solid var(--gris-leger);
+}
+
+/* Alerte conseil (vert pâle) */
+.alerte-conseil {
+    margin-bottom: 15px;
+    padding: 12px;
+    background: #e8f5e9;
+    border-left: 4px solid #4caf50;
+    border-radius: 4px;
+}
+
+.alerte-conseil p {
+    margin: 0;
+    line-height: 1.6;
+    font-size: 0.85rem;
+    color: var(--gris-fonce);
+}
+
+/* Texte d'aide sous les champs de formulaire */
+.form-text {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+}
+
+/* Conteneur des objectifs du wizard */
+.wizard-objectifs-container {
+    margin-top: 20px;
+}
+
+/* Liste des objectifs du wizard */
+.wizard-objectifs-liste {
+    margin-bottom: 15px;
+    min-height: 50px;
+}
+
+/* ============================================================================
+   TABLEAU OBJECTIFS MULTI-OBJECTIFS (PROFIL ÉTUDIANT)
+   Styles pour l'affichage des objectifs d'apprentissage dans le profil
+   Date: 26 novembre 2025
+   ============================================================================ */
+
+.tableau-objectifs-profil {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.tableau-objectifs-profil thead {
+    background: var(--bleu-tres-pale);
+    border-bottom: 2px solid var(--bleu-leger);
+}
+
+.tableau-objectifs-profil thead th {
+    padding: 12px;
+    font-weight: 600;
+    color: var(--bleu-fonce);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.tableau-objectifs-profil tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.tableau-objectifs-profil tbody tr:hover {
+    background: var(--bleu-tres-pale);
+}
+
+.tableau-objectifs-profil tbody tr:last-child {
+    border-bottom: none;
+}
+
+.tableau-objectifs-profil tbody td {
+    vertical-align: middle;
+}
+
+/* Responsive pour tableaux objectifs */
+@media (max-width: 1200px) {
+    .tableau-objectifs-profil {
+        font-size: 0.85rem;
+    }
+
+    .tableau-objectifs-profil th,
+    .tableau-objectifs-profil td {
+        padding: 10px 8px;
+    }
+}

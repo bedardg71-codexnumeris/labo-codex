@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "type": "grilles",
+    "nom": "Grille SRPNF - Description de personnage",
+    "auteur": "Grégoire Bédard",
+    "auteur_original": "Grégoire Bédard",
+    "discipline": ["Français", "Littérature"],
+    "niveau": "Collégial",
+    "description_courte": "Grille de critères SRPNF pour l'évaluation de descriptions de personnages littéraires",
+    "licence": "CC BY-NC-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "version": "1.0",
+    "date_creation": "2025-11-26",
+    "date_export": "2025-11-26",
+    "application_version": "Beta 91",
+    "email_auteur": "labo@codexnumeris.org",
+    "site_auteur": "https://codexnumeris.org"
+  },
+  "contenu": {
+    "grilles": [
+      {
+        "id": "GRILLE1732625123456",
+        "nom": "Grille SRPNF - Description de personnage",
+        "criteres": [
+          {
+            "nom": "Structure",
+            "ponderation": 15,
+            "description": "Organisation logique et cohérente de la description"
+          },
+          {
+            "nom": "Rigueur",
+            "ponderation": 20,
+            "description": "Précision et exhaustivité des observations"
+          },
+          {
+            "nom": "Plausibilité",
+            "ponderation": 10,
+            "description": "Crédibilité du portrait et des choix stylistiques"
+          },
+          {
+            "nom": "Nuance",
+            "ponderation": 25,
+            "description": "Subtilité et complexité de la caractérisation"
+          },
+          {
+            "nom": "Français",
+            "ponderation": 30,
+            "description": "Qualité de la langue et correction linguistique"
+          }
+        ],
+        "dateCreation": "2025-11-26",
+        "typeGrille": "srpnf",
+        "echelleId": "ECH1732625000111"
+      }
+    ]
+  }
+}
