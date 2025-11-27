@@ -867,13 +867,16 @@ function afficherMetriquesGlobales(etudiants) {
 
     if (!carteIndicateurs) return;
 
-    // Conserver le header et la note toggle
+    // Conserver le header et la note toggle AVANT de vider
     const noteToggle = carteIndicateurs.querySelector('.carte-info-toggle');
     const header = carteIndicateurs.querySelector('h3');
 
-    carteIndicateurs.innerHTML = '';
-    carteIndicateurs.appendChild(header);
-    if (noteToggle) carteIndicateurs.appendChild(noteToggle);
+    // Sauvegarder le HTML des éléments à préserver
+    const headerHTML = header ? header.outerHTML : '';
+    const noteToggleHTML = noteToggle ? noteToggle.outerHTML : '';
+
+    // Vider et reconstruire avec header et note
+    carteIndicateurs.innerHTML = headerHTML + noteToggleHTML;
 
     // Générer la légende unique en haut
     const legendeUnique = `
