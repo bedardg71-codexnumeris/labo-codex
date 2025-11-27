@@ -247,25 +247,20 @@ function fermerModalAccueil() {
 function chargerDonneesDemo() {
     fermerModalAccueil();
 
-    // Afficher notification
-    afficherNotificationSucces(
-        'Chargement en cours...',
-        'Je vais charger les données de démonstration pour toi !'
-    );
+    // Naviguer vers Import/Export
+    afficherSection('reglages');
+    afficherSousSection('reglages-import-export');
 
-    // Naviguer vers Import/Export et déclencher import
+    // Message d'instruction (après navigation)
     setTimeout(() => {
-        afficherSection('reglages');
-        afficherSousSection('reglages-import-export');
-
-        // Message d'instruction
-        setTimeout(() => {
-            afficherNotificationInformation(
-                'Presque prêt !',
-                'Clique sur le bouton "Importer des données" et sélectionne le fichier "donnees-demo.json" 📦'
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(
+                '📦 Clique sur "Importer des données" et sélectionne le fichier "donnees-demo.json"'
             );
-        }, 500);
-    }, 300);
+        } else {
+            alert('📦 Clique sur "Importer des données" et sélectionne le fichier "donnees-demo.json"');
+        }
+    }, 800);
 }
 
 /**

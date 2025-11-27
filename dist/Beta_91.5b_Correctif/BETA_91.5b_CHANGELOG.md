@@ -7,9 +7,9 @@
 
 ---
 
-## 🐛 Bug corrigé
+## 🐛 Bugs corrigés
 
-### **Erreur : `PratiqueConfigurable is not defined`**
+### **Bug #1 : Erreur `PratiqueConfigurable is not defined`**
 
 **Symptôme** :
 - Erreur JavaScript bloquante au chargement de l'application
@@ -29,6 +29,29 @@
 **Fichiers modifiés** :
 - `index 91.5b.html` : Ordre scripts corrigé (lignes 10179-10180)
 - `index 91.html` : Ordre scripts corrigé (lignes 10226-10227)
+
+---
+
+### **Bug #2 : Page blanche dans Microsoft Edge**
+
+**Symptôme** :
+- Page blanche dans Microsoft Edge
+- Boutons blancs à gauche, interface non chargée
+- Testeurs incapables d'utiliser l'application
+
+**Cause** :
+- Référence au fichier externe `styles.css` dans le HTML (ligne 9)
+- Fichier `styles.css` non inclus dans le package de distribution
+- Edge tente de charger le CSS externe, échoue, et n'affiche pas l'interface
+
+**Correction** :
+- Suppression de la ligne `<link rel="stylesheet" href="styles.css?v=2025112700">`
+- Tous les styles sont déjà présents dans le `<style>` inline
+- Application fonctionne maintenant sans dépendance externe
+
+**Fichiers modifiés** :
+- `index 91.5b.html` : Suppression référence CSS externe (ligne 9)
+- `index 91.5.html` : Suppression référence CSS externe (ligne 9)
 
 ---
 
@@ -59,9 +82,12 @@
 - ✅ Wizard Primo fonctionnel
 - ✅ Pratiques prédéfinies chargées correctement
 - ✅ Aucune erreur console JavaScript
+- ✅ Compatibilité Microsoft Edge confirmée (interface complète)
+- ✅ CSS inline fonctionne sans fichier externe
 
 **Testé par** : Grégoire Bédard
-**Bug signalé par** : Bruno V. (Cégep Laurendeau)
+**Bug #1 signalé par** : Bruno V. (Cégep Laurendeau)
+**Bug #2 signalé par** : Testeurs demo Valleyfield (27 nov 2025)
 
 ---
 

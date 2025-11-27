@@ -185,7 +185,25 @@
 
                 // Essayer de parser en JSON
                 try {
-                    return JSON.parse(value);
+                    const parsed = JSON.parse(value);
+
+                    // CORRECTIF CRITIQUE : Détection double stringify
+                    // Si on obtient une string après parsing, c'est probablement du double stringify
+                    // Exemple: "\"[{...}]\"" → parse → "[{...}]" (string) → reparse → [{...}] (array)
+                    if (typeof parsed === 'string') {
+                        try {
+                            const reparsed = JSON.parse(parsed);
+                            console.warn(`[DB] Double stringify détecté pour clé "${key}", correction automatique appliquée`);
+                            // Corriger immédiatement dans localStorage pour éviter le problème futur
+                            this._setLocalStorage(key, reparsed);
+                            return reparsed;
+                        } catch (reparseError) {
+                            // Si le re-parsing échoue, la string est légitime
+                            return parsed;
+                        }
+                    }
+
+                    return parsed;
                 } catch (parseError) {
                     // Si le parsing échoue, c'est probablement une ancienne valeur non-JSON (ex: "normal" au lieu de '"normal"')
                     // Retourner la valeur brute pour compatibilité avec données migrées
