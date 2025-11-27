@@ -3561,7 +3561,221 @@ function genererSectionProductions(da) {
     `;
 }
 
+/**
+ * Génère le tableau des objectifs d'apprentissage avec leurs performances
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {string} ensembleId - ID de l'ensemble d'objectifs
+ * @param {Object} noteFinaleMultiObjectifs - Résultats du calcul par pratique multi-objectifs
+ * @returns {string} - HTML du tableau
+ */
+function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
+    // Charger l'ensemble d'objectifs
+    const ensembles = chargerEnsemblesObjectifs();
+    const ensemble = ensembles.find(e => e.id === ensembleId);
+
+    if (!ensemble) {
+        return '<p style="color: #999;">Ensemble d\'objectifs introuvable</p>';
+    }
+
+    const performances = noteFinaleMultiObjectifs.performances || {};
+    const noteFinale = noteFinaleMultiObjectifs.noteFinale || 0;
+
+    // Calculer forces et défis
+    const seuil = obtenirSeuil('defiSpecifique') || 0.75;
+    let forces = [];
+    let defis = [];
+
+    ensemble.objectifs.forEach(obj => {
+        const perf = performances[obj.id];
+        if (perf && perf.P !== null && perf.P >= seuil * 100) {
+            forces.push({ ...obj, P: perf.P });
+        } else if (perf && perf.P !== null && perf.P < seuil * 100) {
+            defis.push({ ...obj, P: perf.P });
+        }
+    });
+
+    // Couleurs par type
+    const couleurType = {
+        'fondamental': '#2196F3',      // Bleu
+        'integrateur': '#FF9800',      // Orange
+        'transversal': '#9C27B0'       // Violet
+    };
+
+    return `
+        <!-- Note finale pratique multi-objectifs -->
+        <div style="background: white; padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">
+                Note finale pondérée (${noteFinaleMultiObjectifs.nbObjectifsEvalues}/${ensemble.objectifs.length} objectifs évalués)
+            </div>
+            <div style="font-size: 3rem; font-weight: bold; color: ${obtenirCouleurIndice(noteFinale)};">
+                ${noteFinale.toFixed(1)}/100
+            </div>
+            <div style="font-size: 0.85rem; color: #999; margin-top: 5px;">
+                Σ(P_objectif × poids) / 100
+            </div>
+        </div>
+
+        <!-- Résumé forces et défis -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div style="background: #e8f5e9; padding: 15px; border-radius: 6px; border-left: 4px solid #4caf50;">
+                <div style="font-weight: bold; color: #2e7d32; margin-bottom: 5px;">✅ Forces (≥ ${(seuil * 100).toFixed(0)}%)</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #2e7d32;">${forces.length}</div>
+                ${forces.length > 0 ? `<div style="font-size: 0.85rem; color: #666; margin-top: 5px;">${forces.map(f => f.nom).join(', ')}</div>` : ''}
+            </div>
+            <div style="background: #fff3e0; padding: 15px; border-radius: 6px; border-left: 4px solid #ff9800;">
+                <div style="font-weight: bold; color: #e65100; margin-bottom: 5px;">⚠️ Défis (< ${(seuil * 100).toFixed(0)}%)</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #e65100;">${defis.length}</div>
+                ${defis.length > 0 ? `<div style="font-size: 0.85rem; color: #666; margin-top: 5px;">${defis.map(d => d.nom).join(', ')}</div>` : ''}
+            </div>
+        </div>
+
+        <!-- Tableau détaillé des objectifs -->
+        <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
+            🎯 Détail des ${ensemble.objectifs.length} objectifs d'apprentissage
+        </h4>
+
+        <div style="background: white; border-radius: 6px; overflow: hidden;">
+            <table class="tableau-objectifs-profil">
+                <thead>
+                    <tr>
+                        <th style="text-align: left; width: 40%;">Objectif</th>
+                        <th style="text-align: center; width: 15%;">Type</th>
+                        <th style="text-align: center; width: 10%;">Poids</th>
+                        <th style="text-align: center; width: 15%;">Performance</th>
+                        <th style="text-align: center; width: 10%;">Niveau</th>
+                        <th style="text-align: center; width: 10%;">Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${ensemble.objectifs.map(obj => {
+                        const perf = performances[obj.id];
+                        const P = perf?.P ?? null;
+                        const nbArtefacts = perf?.nbArtefacts ?? 0;
+
+                        let niveau = '--';
+                        let couleurNiveau = '#999';
+                        let statut = '⏸️';
+                        let couleurStatut = '#999';
+                        let labelStatut = 'Non évalué';
+
+                        if (P !== null) {
+                            // Convertir en niveau IDME
+                            niveau = obtenirNiveauIDMEDepuisPourcentage(P);
+                            couleurNiveau = obtenirCouleurNiveauIDME(niveau);
+
+                            // Déterminer statut
+                            if (P >= seuil * 100) {
+                                statut = '✅';
+                                couleurStatut = '#4caf50';
+                                labelStatut = 'Force';
+                            } else {
+                                statut = '⚠️';
+                                couleurStatut = '#ff9800';
+                                labelStatut = 'Défi';
+                            }
+                        }
+
+                        const couleurBordure = couleurType[obj.type] || '#999';
+
+                        return `
+                            <tr style="border-left: 4px solid ${couleurBordure};">
+                                <td style="padding: 12px;">
+                                    <div style="font-weight: bold; margin-bottom: 3px;">${echapperHtml(obj.nom)}</div>
+                                    ${nbArtefacts > 0 ? `<div style="font-size: 0.85rem; color: #666;">${nbArtefacts} artefact${nbArtefacts > 1 ? 's' : ''}</div>` : ''}
+                                </td>
+                                <td style="text-align: center; padding: 12px;">
+                                    <span style="
+                                        display: inline-block;
+                                        padding: 4px 10px;
+                                        border-radius: 4px;
+                                        font-size: 0.85rem;
+                                        font-weight: bold;
+                                        background: ${couleurBordure}22;
+                                        color: ${couleurBordure};
+                                        border: 1px solid ${couleurBordure}66;
+                                    ">
+                                        ${obj.type.charAt(0).toUpperCase() + obj.type.slice(1)}
+                                    </span>
+                                </td>
+                                <td style="text-align: center; padding: 12px; font-weight: bold; font-size: 1.1rem;">
+                                    ${obj.poids}%
+                                </td>
+                                <td style="text-align: center; padding: 12px;">
+                                    ${P !== null ? `
+                                        <div style="font-size: 1.3rem; font-weight: bold; color: ${obtenirCouleurIndice(P)};">
+                                            ${P.toFixed(1)}%
+                                        </div>
+                                    ` : `<span style="color: #999;">--</span>`}
+                                </td>
+                                <td style="text-align: center; padding: 12px;">
+                                    <span style="
+                                        display: inline-block;
+                                        width: 32px;
+                                        height: 32px;
+                                        line-height: 32px;
+                                        border-radius: 50%;
+                                        background: ${couleurNiveau};
+                                        color: white;
+                                        font-weight: bold;
+                                        font-size: 1rem;
+                                    ">
+                                        ${niveau}
+                                    </span>
+                                </td>
+                                <td style="text-align: center; padding: 12px;">
+                                    <div style="font-size: 1.5rem;">${statut}</div>
+                                    <div style="font-size: 0.75rem; color: ${couleurStatut}; font-weight: bold;">
+                                        ${labelStatut}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Légende -->
+        <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: #666;">
+            <div style="margin-bottom: 10px;"><strong>Légende types :</strong></div>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <div><span style="color: ${couleurType.fondamental}; font-weight: bold;">●</span> Fondamental : Concepts de base</div>
+                <div><span style="color: ${couleurType.integrateur}; font-weight: bold;">●</span> Intégrateur : Compétences complexes</div>
+                <div><span style="color: ${couleurType.transversal}; font-weight: bold;">●</span> Transversal : Habiletés générales</div>
+            </div>
+            <div style="margin-top: 10px;">
+                <strong>Formule :</strong> Note finale = Σ(Performance_objectif × Poids) / 100
+            </div>
+        </div>
+    `;
+}
+
 function genererSectionPerformance(da) {
+    // 🎯 DÉTECTION PRATIQUE MULTI-OBJECTIFS
+    const statusPratiqueMultiObjectifs = verifierPratiqueMultiObjectifs();
+
+    if (statusPratiqueMultiObjectifs.actif && typeof calculerNoteFinaleMultiObjectifs === 'function') {
+        // Pratique multi-objectifs : afficher le tableau des objectifs
+        const noteFinale = calculerNoteFinaleMultiObjectifs(da, statusPratiqueMultiObjectifs.ensembleId);
+
+        if (noteFinale && noteFinale.noteFinale !== null) {
+            return `
+                <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                    ${genererTableauObjectifs(da, statusPratiqueMultiObjectifs.ensembleId, noteFinale)}
+                </div>
+            `;
+        } else {
+            return `
+                <div class="profil-zone-moyenne-bleu">
+                    <p style="color: #666;">Pratique multi-objectifs activée avec l'ensemble «${echapperHtml(statusPratiqueMultiObjectifs.ensemble.nom)}»</p>
+                    <p style="color: #999; margin-top: 10px;">Aucune évaluation disponible pour le moment</p>
+                </div>
+            `;
+        }
+    }
+
+    // Pratique PAN classique : afficher les meilleurs artefacts
     const meilleures = obtenirDetailsPerformance(da);
 
     if (meilleures.length === 0) {
@@ -3584,11 +3798,11 @@ function genererSectionPerformance(da) {
                     ${moyenne.toFixed(1)}/100
                 </div>
             </div>
-            
+
             <h4 class="profil-section-titre-large">
                 🏆 Les ${meilleures.length} meilleur${meilleures.length > 1 ? 's' : ''} artefact${meilleures.length > 1 ? 's' : ''}
             </h4>
-            
+
             ${meilleures.map((art, index) => `
                 <div style="background: white; padding: 15px; margin-bottom: 10px; border-left: 4px solid ${obtenirCouleurIndice(art.note)};">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
@@ -3611,9 +3825,9 @@ function genererSectionPerformance(da) {
                     </div>
                 </div>
             `).join('')}
-            
+
             <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9rem; color: #666;">
-                <strong>Principe PAN :</strong> La note finale est calculée sur la moyenne des 3 meilleurs artefacts 
+                <strong>Principe PAN :</strong> La note finale est calculée sur la moyenne des 3 meilleurs artefacts
                 plutôt que sur la moyenne de tous les artefacts.
             </div>
         </div>
@@ -6149,7 +6363,8 @@ function genererSectionPerformance(da) {
 
                         // ✅ CORRECTIF: Utiliser la clé en minuscules (structure, rigueur, etc.)
                         const score = moyennes?.[cle];
-                        if (score === null) return '';
+                        // Vérifier que score est un nombre valide (pas null, undefined, ou NaN)
+                        if (typeof score !== 'number' || isNaN(score)) return '';
 
                         const pourcentage = Math.round(score * 100);
 
@@ -6161,10 +6376,14 @@ function genererSectionPerformance(da) {
                         if (modeComparatif) {
                             // Vérifier si les moyennes existent avant d'accéder à leurs propriétés
                             // ✅ CORRECTIF: Utiliser la clé en minuscules (cle au lieu de cleMoyennes)
-                            const scoreSOM = moyennesSOM ? moyennesSOM[cle] : null;
-                            const scorePAN = moyennesPAN ? moyennesPAN[cle] : null;
-                            const pourcentageSOM = scoreSOM !== null && scoreSOM !== undefined ? Math.round(scoreSOM * 100) : null;
-                            const pourcentagePAN = scorePAN !== null && scorePAN !== undefined ? Math.round(scorePAN * 100) : null;
+                            const scoreSOM = moyennesSOM?.[cle];
+                            const scorePAN = moyennesPAN?.[cle];
+                            // Vérifier que les scores sont des nombres valides
+                            const pourcentageSOM = (typeof scoreSOM === 'number' && !isNaN(scoreSOM)) ? Math.round(scoreSOM * 100) : null;
+                            const pourcentagePAN = (typeof scorePAN === 'number' && !isNaN(scorePAN)) ? Math.round(scorePAN * 100) : null;
+
+                            // Si aucun score valide en mode comparatif, ne pas afficher cette barre
+                            if (pourcentageSOM === null && pourcentagePAN === null) return '';
 
                             // Obtenir les directions pour SOM et PAN
                             const directionSOM = directionsSOM ? directionsSOM[cle] : null;
@@ -6174,14 +6393,14 @@ function genererSectionPerformance(da) {
 
                             // Points colorés
                             pointsHTML = `
-                                ${scoreSOM !== null && scoreSOM !== undefined ? `<div class="critere-point critere-point-som" style="left: ${Math.min(pourcentageSOM, 100)}%;"></div>` : ''}
-                                ${scorePAN !== null && scorePAN !== undefined ? `<div class="critere-point critere-point-pan" style="left: ${Math.min(pourcentagePAN, 100)}%;"></div>` : ''}
+                                ${pourcentageSOM !== null ? `<div class="critere-point critere-point-som" style="left: ${Math.min(pourcentageSOM, 100)}%;"></div>` : ''}
+                                ${pourcentagePAN !== null ? `<div class="critere-point critere-point-pan" style="left: ${Math.min(pourcentagePAN, 100)}%;"></div>` : ''}
                             `;
 
                             // Symboles de direction au-dessus des points
                             symbolesHTML = `
-                                ${symboleSOM && scoreSOM !== null && scoreSOM !== undefined ? `<div style="position: absolute; left: ${Math.min(pourcentageSOM, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${symboleSOM}</div>` : ''}
-                                ${symbolePAN && scorePAN !== null && scorePAN !== undefined ? `<div style="position: absolute; left: ${Math.min(pourcentagePAN, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--pan-bleu);" title="PAN: ${directionPAN.interpretation}">${symbolePAN}</div>` : ''}
+                                ${symboleSOM && pourcentageSOM !== null ? `<div style="position: absolute; left: ${Math.min(pourcentageSOM, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${symboleSOM}</div>` : ''}
+                                ${symbolePAN && pourcentagePAN !== null ? `<div style="position: absolute; left: ${Math.min(pourcentagePAN, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--pan-bleu);" title="PAN: ${directionPAN.interpretation}">${symbolePAN}</div>` : ''}
                             `;
 
                             // Affichage des valeurs duales
@@ -6235,6 +6454,43 @@ function genererSectionPerformance(da) {
                             `).join('')}
                         </div>
                     `;
+
+                    // Si aucune barre n'est générée, afficher un message informatif
+                    if (!barresHTML || barresHTML.trim() === '') {
+                        // Vérifier la raison : pas de grille OU pas d'évaluations
+                        const grilleRef = obtenirGrilleReferenceDepistage();
+
+                        if (!grilleRef) {
+                            return `
+                                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                                    <div style="display: flex; gap: 10px; align-items: start;">
+                                        <span style="font-size: 1.3rem;">⚙️</span>
+                                        <div style="flex: 1;">
+                                            <strong style="color: #856404; display: block; margin-bottom: 5px;">Configuration requise</strong>
+                                            <p style="margin: 0; color: #856404; font-size: 0.9rem; line-height: 1.5;">
+                                                Pour afficher les forces et défis par critère, vous devez configurer une grille de référence dans
+                                                <strong>Réglages → Pratique de notation → Grille de référence pour le dépistage</strong>.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <div style="background: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                                    <div style="display: flex; gap: 10px; align-items: start;">
+                                        <span style="font-size: 1.3rem;">📝</span>
+                                        <div style="flex: 1;">
+                                            <strong style="color: #0c5460; display: block; margin-bottom: 5px;">Aucune donnée disponible</strong>
+                                            <p style="margin: 0; color: #0c5460; font-size: 0.9rem; line-height: 1.5;">
+                                                Cet·te étudiant·e n'a pas encore d'évaluations complétées avec des critères correspondant à la grille de référence.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
 
                     return barresHTML + legendeHTML;
                 })()}
