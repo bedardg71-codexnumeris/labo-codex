@@ -10211,10 +10211,10 @@ Exemple :
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025111325"></script>
     <script src="js/etudiants.js?v=2025111812"></script>
-    <script src="js/productions.js?v=2025112626"></script>
-    <script src="js/grilles.js?v=2025112626"></script>
-    <script src="js/echelles.js?v=2025112626"></script>
-    <script src="js/cartouches.js?v=2025112626"></script>
+    <script src="js/productions.js?v=2025112800"></script>
+    <script src="js/grilles.js?v=2025112800"></script>
+    <script src="js/echelles.js?v=2025112800"></script>
+    <script src="js/cartouches.js?v=2025112800"></script>
     <script src="js/cours.js?v=2025112522"></script>
     <script src="js/contexte.js?v=2025111201"></script>
 
@@ -10222,6 +10222,8 @@ Exemple :
     <script src="js/interpretation-config.js?v=2025111501"></script>
 
     <!-- Système de pratiques de notation (Beta 90-91) -->
+    <!-- IMPORTANT: pratique-configurable.js doit être chargé EN PREMIER car pratique-registre.js l'utilise -->
+    <script src="js/pratiques/pratique-configurable.js?v=2025112609"></script>
     <script src="js/pratiques/pratique-registre.js"></script>
     <script src="js/pratiques/migration-pratiques.js"></script>
     <script src="js/pratiques/pratique-test.js"></script>
@@ -10230,8 +10232,7 @@ Exemple :
     <script src="js/pratiques/pratique-pan-specifications.js?v=2025112600"></script>
     <script src="js/pratiques/config-francois-chimie.js?v=2025112600"></script>
 
-    <!-- Pratiques configurables JSON (Beta 92 - Jour 1) -->
-    <script src="js/pratiques/pratique-configurable.js?v=2025112609"></script>
+    <!-- Pratiques prédéfinies (Beta 92 - Jour 1) -->
     <script src="js/pratiques/pratiques-predefines.js?v=2025112602"></script>
     <script src="js/pratiques/pratique-manager.js?v=2025112501"></script>
 
@@ -10784,60 +10785,8 @@ Exemple :
         // ========================================
         // IMPORT DES ÉCHELLES DE PERFORMANCE
         // ========================================
-        function importerEchelles(event) {
-            const fichier = event.target.files[0];
-            if (!fichier) return;
-
-            const lecteur = new FileReader();
-            lecteur.onload = function(e) {
-                try {
-                    const donneesImportees = JSON.parse(e.target.result);
-
-                    // Validation structure (doit contenir au moins une des trois clés)
-                    if (!donneesImportees.echellesTemplates && !donneesImportees.niveauxEchelle && !donneesImportees.configEchelle) {
-                        alert('Format invalide : le fichier doit contenir echellesTemplates, niveauxEchelle ou configEchelle.');
-                        return;
-                    }
-
-                    // Importer echellesTemplates
-                    if (donneesImportees.echellesTemplates) {
-                        localStorage.setItem('echellesTemplates', JSON.stringify(donneesImportees.echellesTemplates));
-                    }
-
-                    // Importer niveauxEchelle
-                    if (donneesImportees.niveauxEchelle) {
-                        localStorage.setItem('niveauxEchelle', JSON.stringify(donneesImportees.niveauxEchelle));
-                    }
-
-                    // Importer configEchelle
-                    if (donneesImportees.configEchelle) {
-                        localStorage.setItem('configEchelle', JSON.stringify(donneesImportees.configEchelle));
-                    }
-
-                    // Notification
-                    let message = 'Import réussi : Échelle(s) de performance importée(s)';
-
-                    if (typeof afficherNotificationSucces === 'function') {
-                        afficherNotificationSucces(message);
-                    } else {
-                        alert(message);
-                    }
-
-                    // Réinitialiser le champ fichier
-                    event.target.value = '';
-
-                    // Recharger la page pour appliquer les changements
-                    if (confirm('Import terminé ! Recharger la page pour voir les échelles importées ?')) {
-                        location.reload();
-                    }
-
-                } catch (err) {
-                    console.error('Erreur import échelles:', err);
-                    alert('Fichier JSON invalide ou format incorrect.');
-                }
-            };
-            lecteur.readAsText(fichier);
-        }
+        // OBSOLÈTE : Cette fonction a été déplacée vers echelles.js (supporte nouveau format CC)
+        // La fonction importerEchelles() est maintenant chargée depuis echelles.js
 
         // ========================================
         // IMPORT DES PRODUCTIONS
