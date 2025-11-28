@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "type": "echelle",
+    "nom": "Échelle IDME Test",
+    "auteur": "Grégoire Bédard",
+    "auteur_original": "Grégoire Bédard",
+    "discipline": ["Test"],
+    "niveau": "Collégial",
+    "description": "Échelle de test pour validation import",
+    "licence": "CC BY-NC-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "version": "1.0",
+    "date_creation": "2025-11-28",
+    "application_version": "Beta 92",
+    "email_auteur": "labo@codexnumeris.org",
+    "site_auteur": "https://codexnumeris.org"
+  },
+  "contenu": {
+    "id": "echelle-test-001",
+    "nom": "Échelle IDME Test",
+    "description": "Échelle de test",
+    "niveaux": [
+      {
+        "code": "I",
+        "nom": "Insuffisant",
+        "min": 0,
+        "max": 64,
+        "valeur": 50,
+        "description": "Niveau insuffisant",
+        "couleur": "#ef5350"
+      },
+      {
+        "code": "M",
+        "nom": "Maîtrisé",
+        "min": 65,
+        "max": 100,
+        "valeur": 82.5,
+        "description": "Niveau maîtrisé",
+        "couleur": "#66bb6a"
+      }
+    ],
+    "dateCreation": "2025-11-28",
+    "typeEchelle": "idme-solo"
+  }
+}
