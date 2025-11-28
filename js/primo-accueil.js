@@ -131,28 +131,7 @@ function afficherModalAccueil() {
                     margin: 0 0 15px;
                 ">Que veux-tu faire ?</h3>
 
-                <!-- Option 1: Données de démo -->
-                <button onclick="chargerDonneesDemo()" style="
-                    width: 100%;
-                    padding: 15px 20px;
-                    margin-bottom: 12px;
-                    background: var(--bleu-principal);
-                    color: white;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 1rem;
-                    cursor: pointer;
-                    text-align: left;
-                    transition: all 0.2s;
-                    box-shadow: 0 2px 8px rgba(3, 46, 92, 0.2);
-                " onmouseover="this.style.background='var(--bleu-moyen)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(3, 46, 92, 0.3)';" onmouseout="this.style.background='var(--bleu-principal)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(3, 46, 92, 0.2)';">
-                    <strong>🎓 Charger des données de démonstration</strong>
-                    <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.9;">
-                        Parfait pour explorer l'application avec des exemples
-                    </div>
-                </button>
-
-                <!-- Option 2: Pour bien débuter -->
+                <!-- Option 1: Pour bien débuter -->
                 <button onclick="demarrerConfigComplete()" style="
                     width: 100%;
                     padding: 15px 20px;
@@ -212,7 +191,27 @@ function afficherModalAccueil() {
                     </div>
                 </button>
 
-                <!-- Option 4: Explorer librement -->
+                <!-- Option 5: Charger données de démo -->
+                <button onclick="chargerDonneesDemo()" style="
+                    width: 100%;
+                    padding: 15px 20px;
+                    margin-bottom: 12px;
+                    background: white;
+                    color: var(--bleu-principal);
+                    border: 2px solid var(--bleu-principal);
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    text-align: left;
+                    transition: all 0.2s;
+                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
+                    <strong>🎓 Charger des données de démonstration</strong>
+                    <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
+                        Parfait pour explorer l'application avec des exemples
+                    </div>
+                </button>
+
+                <!-- Option 6: Explorer librement -->
                 <button onclick="explorerLibrement()" style="
                     width: 100%;
                     padding: 15px 20px;
