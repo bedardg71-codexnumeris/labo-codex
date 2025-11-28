@@ -23,13 +23,16 @@ function estPremiereUtilisation() {
     if (dejaVu) return false;
 
     // Vérifier s'il y a des données importantes
+    const cours = db.getSync('listeCours', []);
     const etudiants = db.getSync('groupeEtudiants', []);
-    const productions = db.getSync('productions', []);
-    const grilles = db.getSync('grillesTemplates', []);
+    const trimestre = db.getSync('informationsTrimestre', {});
     const modalites = db.getSync('modalitesEvaluation', {});
 
-    // Si pas d'étudiants ET pas de pratique configurée → première utilisation
-    const aucuneDonnee = etudiants.length === 0 && !modalites.pratique;
+    // Première utilisation = AUCUN cours configuré ET aucune donnée de base
+    const aucuneDonnee = cours.length === 0 &&
+                         etudiants.length === 0 &&
+                         !trimestre.dateDebut &&
+                         !modalites.pratique;
 
     return aucuneDonnee;
 }
@@ -81,16 +84,16 @@ function afficherModalAccueil() {
                 <div style="
                     width: 80px;
                     height: 80px;
-                    background: linear-gradient(135deg, #032e5c, #065dbb);
+                    background: linear-gradient(135deg, #1a5266, #2d7a8c);
                     border-radius: 50%;
                     margin: 0 auto 20px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 40px;
-                    box-shadow: 0 4px 15px rgba(3, 46, 92, 0.3);
+                    box-shadow: 0 4px 15px rgba(26, 82, 102, 0.3);
                 ">
-                    👋
+                    😎
                 </div>
                 <h2 style="
                     color: var(--bleu-principal);
@@ -101,7 +104,7 @@ function afficherModalAccueil() {
                     color: var(--gris-moyen);
                     font-size: 0.95rem;
                     margin: 0;
-                ">C'est Claude et Grégoire qui m'envoient ! 😊</p>
+                ">C'est Claude et Grégoire qui m'envoient !</p>
             </div>
 
             <!-- Message principal -->
@@ -149,7 +152,27 @@ function afficherModalAccueil() {
                     </div>
                 </button>
 
-                <!-- Option 2: Créer ma classe -->
+                <!-- Option 2: Configuration complète -->
+                <button onclick="demarrerConfigComplete()" style="
+                    width: 100%;
+                    padding: 15px 20px;
+                    margin-bottom: 12px;
+                    background: white;
+                    color: var(--bleu-principal);
+                    border: 2px solid var(--bleu-principal);
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    text-align: left;
+                    transition: all 0.2s;
+                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
+                    <strong>⚙️ Configuration complète pas à pas</strong>
+                    <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
+                        Cours, trimestre, horaire, groupe et pratique (15 minutes)
+                    </div>
+                </button>
+
+                <!-- Option 3: Créer juste la pratique -->
                 <button onclick="demarrerWizard()" style="
                     width: 100%;
                     padding: 15px 20px;
@@ -163,13 +186,13 @@ function afficherModalAccueil() {
                     text-align: left;
                     transition: all 0.2s;
                 " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
-                    <strong>✨ Créer ma propre pratique d'évaluation</strong>
+                    <strong>✨ Créer ma propre pratique de notation</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
-                        Je te guide étape par étape (8 minutes)
+                        Juste la pratique de notation (8 minutes)
                     </div>
                 </button>
 
-                <!-- Option 3: Explorer librement -->
+                <!-- Option 4: Explorer librement -->
                 <button onclick="explorerLibrement()" style="
                     width: 100%;
                     padding: 15px 20px;
@@ -247,20 +270,25 @@ function fermerModalAccueil() {
 function chargerDonneesDemo() {
     fermerModalAccueil();
 
-    // Naviguer vers Import/Export
-    afficherSection('reglages');
-    afficherSousSection('reglages-import-export');
+    // Afficher notification
+    afficherNotificationSucces(
+        'Chargement en cours...',
+        'Je vais charger les données de démonstration pour toi !'
+    );
 
-    // Message d'instruction (après navigation)
+    // Naviguer vers Import/Export et déclencher import
     setTimeout(() => {
-        if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(
-                '📦 Clique sur "Importer des données" et sélectionne le fichier "donnees-demo.json"'
+        afficherSection('reglages');
+        afficherSousSection('reglages-import-export');
+
+        // Message d'instruction
+        setTimeout(() => {
+            afficherNotificationInformation(
+                'Presque prêt !',
+                'Clique sur le bouton "Importer des données" et sélectionne le fichier "donnees-demo.json" 📦'
             );
-        } else {
-            alert('📦 Clique sur "Importer des données" et sélectionne le fichier "donnees-demo.json"');
-        }
-    }, 800);
+        }, 500);
+    }, 300);
 }
 
 /**
@@ -269,40 +297,68 @@ function chargerDonneesDemo() {
 function demarrerWizard() {
     fermerModalAccueil();
 
-    afficherNotificationSucces(
-        'C\'est parti !',
-        'Je vais te guider pour créer ta pratique personnalisée 🎯'
-    );
+    // Afficher notification simple
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('C\'est parti ! Je vais te guider pour créer ta pratique personnalisée 🎯');
+    }
 
     // Naviguer vers Pratiques et ouvrir Wizard
     setTimeout(() => {
         afficherSection('reglages');
-        afficherSousSection('reglages-pratiques');
 
-        // Attendre que la page soit chargée, puis ouvrir le wizard
+        // CORRECTIF: Attendre que la section soit affichée avant d'afficher la sous-section
         setTimeout(() => {
-            if (typeof ouvrirWizardPrimo === 'function') {
-                ouvrirWizardPrimo();
-            } else {
-                afficherNotificationInformation(
-                    'Wizard Primo',
-                    'Va dans "Pratiques configurables" et clique sur "Créer avec Wizard Primo" ✨'
-                );
-            }
-        }, 500);
+            afficherSousSection('reglages-pratiques');
+
+            // Attendre que la page soit chargée, puis ouvrir le wizard
+            setTimeout(() => {
+                if (typeof ouvrirWizardPrimo === 'function') {
+                    ouvrirWizardPrimo();
+                } else {
+                    if (typeof afficherNotificationInformation === 'function') {
+                        afficherNotificationInformation('Va dans «Pratique de notation» et clique sur «Créer une pratique» ✨');
+                    } else {
+                        alert('Va dans «Pratique de notation» et clique sur «Créer une pratique» ✨');
+                    }
+                }
+            }, 800);
+        }, 200);
     }, 300);
 }
 
 /**
- * Option 3: Explorer librement (ferme juste le modal)
+ * Option 2: Démarrer la configuration complète conversationnelle
+ */
+function demarrerConfigComplete() {
+    fermerModalAccueil();
+
+    // Afficher notification
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('C\'est parti ! Je vais te poser quelques questions. 😎');
+    }
+
+    // Ouvrir le modal conversationnel après un court délai
+    setTimeout(() => {
+        if (typeof ouvrirModalConversationnel === 'function') {
+            ouvrirModalConversationnel();
+        } else {
+            console.error('[Primo] Fonction ouvrirModalConversationnel non disponible');
+            alert('Erreur : Le module de configuration n\'est pas chargé.');
+        }
+    }, 500);
+}
+
+/**
+ * Option 4: Explorer librement (ferme juste le modal)
  */
 function explorerLibrement() {
     fermerModalAccueil();
 
-    afficherNotificationInformation(
-        'Bonne exploration ! 🗺️',
-        'Si tu as besoin d\'aide, regarde dans la section "Aide" ou reviens me voir dans Réglages → Pratiques'
-    );
+    if (typeof afficherNotificationInformation === 'function') {
+        afficherNotificationInformation('Bonne exploration ! 🗺️ Tu peux me rappeler à tout moment en cliquant sur le bouton «👋 ASSISTANCE PRIMO» en haut à droite.');
+    } else {
+        alert('Bonne exploration ! 🗺️ Tu peux me rappeler à tout moment en cliquant sur le bouton «👋 ASSISTANCE PRIMO» en haut à droite.');
+    }
 }
 
 // ============================================================================
@@ -324,15 +380,24 @@ function initialiserPrimoAccueil() {
 
 /**
  * Vérifie et affiche l'accueil si nécessaire
+ * SEULEMENT en mode Assisté - Affichage AUTO uniquement pour premiers utilisateurs
  */
 function verifierEtAfficherAccueil() {
     // Attendre 1 seconde après le chargement pour laisser l'interface se stabiliser
     setTimeout(() => {
+        // Vérifier si on est en mode Assisté
+        const modeAssiste = typeof estModeAssiste === 'function' ? estModeAssiste() : false;
+
+        if (!modeAssiste) {
+            console.log('ℹ️ Mode Normal/Anonymisé - Primo désactivé (auto)');
+            return;
+        }
+
         if (estPremiereUtilisation()) {
-            console.log('👋 Première utilisation détectée - Affichage de Primo');
+            console.log('👋 Première utilisation détectée - Affichage AUTO de Primo');
             afficherModalAccueil();
         } else {
-            console.log('✅ Utilisateur existant - Pas d\'accueil Primo');
+            console.log('✅ Utilisateur existant - Primo accessible via bouton 😎 seulement');
         }
     }, 1000);
 }
@@ -353,6 +418,7 @@ window.initialiserPrimoAccueil = initialiserPrimoAccueil;
 window.reafficherAccueilPrimo = reafficherAccueilPrimo;
 window.fermerModalAccueil = fermerModalAccueil;
 window.chargerDonneesDemo = chargerDonneesDemo;
+window.demarrerConfigComplete = demarrerConfigComplete;
 window.demarrerWizard = demarrerWizard;
 window.explorerLibrement = explorerLibrement;
 

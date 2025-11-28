@@ -101,7 +101,7 @@ const ETAPES_TUTORIEL = [
 // ============================================================================
 
 let tutorielActif = false;
-let etapeActuelle = 0;
+let etapeTutorielActuelle = 0;
 let overlayElement = null;
 let bulleElement = null;
 
@@ -117,7 +117,7 @@ function demarrerTutoriel() {
 
     console.log('🎓 Démarrage du tutoriel interactif');
     tutorielActif = true;
-    etapeActuelle = 0;
+    etapeTutorielActuelle = 0;
 
     // Marquer le tutoriel comme vu
     db.setSync('tutoriel_demo_vu', true);
@@ -155,7 +155,7 @@ function creerOverlay() {
 function afficherEtape(index) {
     if (index < 0 || index >= ETAPES_TUTORIEL.length) return;
 
-    etapeActuelle = index;
+    etapeTutorielActuelle = index;
     const etape = ETAPES_TUTORIEL[index];
 
     console.log(`📍 Étape ${index + 1}/${ETAPES_TUTORIEL.length}: ${etape.titre}`);
@@ -415,7 +415,7 @@ function nettoyerSurbrillances() {
  */
 function etapeSuivante() {
     nettoyerSurbrillances();
-    afficherEtape(etapeActuelle + 1);
+    afficherEtape(etapeTutorielActuelle + 1);
 }
 
 /**
@@ -423,7 +423,7 @@ function etapeSuivante() {
  */
 function etapePrecedente() {
     nettoyerSurbrillances();
-    afficherEtape(etapeActuelle - 1);
+    afficherEtape(etapeTutorielActuelle - 1);
 }
 
 /**
