@@ -9,7 +9,7 @@ que tu vas importer dans l'application pendant la configuration guidée avec Pri
 
 1. etudiants-demo.csv
    • Liste de 10 étudiants fictifs prête à copier-coller
-   • Format : DA, Nom, Prénom, Programme, Courriel
+   • Format : DA, Nom, Prénom, Programme
    • À utiliser lors de la configuration avec Primo
    • Note : Dans un vrai contexte, tu exporterais cette liste depuis ton système de gestion
      des apprentissages (ex: Léa, Omnivox, Moodle)
