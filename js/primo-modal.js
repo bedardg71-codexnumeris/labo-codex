@@ -357,24 +357,40 @@ function genererInputQuestion(question) {
         case 'radio':
             const radioOptions = obtenirOptions(question.id);
             radioOptions.forEach((opt, index) => {
+                const isDisabled = opt.disabled === true;
+                const labelStyle = isDisabled
+                    ? `display: block;
+                       padding: 15px;
+                       margin-bottom: 10px;
+                       border: 2px solid var(--bordure-claire);
+                       border-radius: 8px;
+                       cursor: not-allowed;
+                       opacity: 0.5;
+                       background: var(--gris-tres-pale);
+                       transition: all 0.2s;`
+                    : `display: block;
+                       padding: 15px;
+                       margin-bottom: 10px;
+                       border: 2px solid var(--bordure-claire);
+                       border-radius: 8px;
+                       cursor: pointer;
+                       transition: all 0.2s;`;
+
+                const hoverEvents = isDisabled
+                    ? ''
+                    : `onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.borderColor='var(--bleu-principal)';"
+                       onmouseout="if(!this.querySelector('input').checked) { this.style.background='white'; this.style.borderColor='var(--bordure-claire)'; }"`;
+
                 html += `
-                    <label style="
-                        display: block;
-                        padding: 15px;
-                        margin-bottom: 10px;
-                        border: 2px solid var(--bordure-claire);
-                        border-radius: 8px;
-                        cursor: pointer;
-                        transition: all 0.2s;
-                    "
-                    onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.borderColor='var(--bleu-principal)';"
-                    onmouseout="if(!this.querySelector('input').checked) { this.style.background='white'; this.style.borderColor='var(--bordure-claire)'; }">
+                    <label style="${labelStyle}" ${hoverEvents}>
                         <input type="radio" name="${inputId}" value="${opt.value}"
                             style="margin-right: 10px;"
-                            onchange="this.parentElement.parentElement.querySelectorAll('label').forEach(l => { l.style.background='white'; l.style.borderColor='var(--bordure-claire)'; }); this.parentElement.style.background='var(--bleu-tres-pale)'; this.parentElement.style.borderColor='var(--bleu-principal)';"
+                            ${isDisabled ? 'disabled' : ''}
+                            onchange="this.parentElement.parentElement.querySelectorAll('label').forEach(l => { if(!l.querySelector('input').disabled) { l.style.background='white'; l.style.borderColor='var(--bordure-claire)'; } }); this.parentElement.style.background='var(--bleu-tres-pale)'; this.parentElement.style.borderColor='var(--bleu-principal)';"
                         />
                         <strong>${opt.label}</strong>
                         ${opt.description ? `<div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 5px; margin-left: 24px;">${opt.description}</div>` : ''}
+                        ${opt.disabledMessage && isDisabled ? `<div style="font-size: 0.8rem; color: var(--orange-accent); margin-top: 8px; margin-left: 24px; font-style: italic;">💡 ${opt.disabledMessage}</div>` : ''}
                     </label>
                 `;
             });

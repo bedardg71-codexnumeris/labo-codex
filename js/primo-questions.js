@@ -107,14 +107,36 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'pratique-notation',
-        texte: '**Pratique de notation**\n\nPour ce tutoriel, nous allons configurer la **pratique sommative traditionnelle**.\n\nVoici les pratiques disponibles :\n\n✅ **Sommative traditionnelle** (utilisée dans ce tutoriel)\n   → Moyenne pondérée de toutes les évaluations\n\n⚪ **PAN-Maîtrise (IDME)**\n   → Portfolio avec niveaux de maîtrise (Insuffisant, Développement, Maîtrisé, Étendu)\n   → *Configurable après dans Réglages → Pratique de notation*\n\n⚪ **PAN-Spécifications**\n   → Portfolio avec critères Pass/Fail sur objectifs d\'apprentissage\n   → *Configurable après dans Réglages → Pratique de notation*',
-        type: 'instruction',
+        texte: 'Quelle pratique de notation veux-tu mettre en place ?\n\n💡 Pour ce tutoriel, seule la **sommative traditionnelle** est disponible. Tu pourras configurer les pratiques alternatives après dans **Réglages → Pratique de notation**.',
+        type: 'radio',
+        options: [
+            {
+                value: 'sommative',
+                label: 'Sommative traditionnelle',
+                description: 'Moyenne pondérée de toutes les évaluations'
+            },
+            {
+                value: 'pan-maitrise',
+                label: 'PAN-Maîtrise (IDME)',
+                description: 'Portfolio avec niveaux de maîtrise (Insuffisant, Développement, Maîtrisé, Étendu)',
+                disabled: true,
+                disabledMessage: 'Configurable après dans Réglages'
+            },
+            {
+                value: 'pan-specifications',
+                label: 'PAN-Spécifications',
+                description: 'Portfolio avec critères Pass/Fail sur objectifs d\'apprentissage',
+                disabled: true,
+                disabledMessage: 'Configurable après dans Réglages'
+            }
+        ],
         champsCibles: [
-            { cle: 'modalitesEvaluation', champ: 'pratique', valeurFixe: 'sommative' }
+            { cle: 'modalitesEvaluation', champ: 'pratique' }
         ],
         validation: {
-            requis: false
-        }
+            requis: true
+        },
+        aide: 'Tu pourras changer plus tard dans Réglages.'
     },
 
     // Question commune PAN (Maîtrise et Spécifications)
