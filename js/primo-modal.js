@@ -780,36 +780,49 @@ function creerEchelleIDMEParDefaut() {
  * Importe le matériel pédagogique de démarrage (échelle IDME + grille SRPNF + cartouches)
  */
 async function importerMaterielDemarrage() {
-    console.log('[Primo] Début import matériel de démarrage...');
+    console.log('[Primo] 🚀 Début import matériel de démarrage...');
 
     // Vérifier si du matériel existe déjà
     const echellesExistantes = db.getSync('echellesTemplates', []);
     const grillesExistantes = db.getSync('grillesTemplates', []);
 
+    console.log('[Primo] 🔍 Vérification matériel existant:', {
+        echelles: echellesExistantes.length,
+        grilles: grillesExistantes.length
+    });
+
     if (echellesExistantes.length > 0 || grillesExistantes.length > 0) {
-        console.log('[Primo] Matériel pédagogique déjà présent, import annulé');
+        console.log('[Primo] ⏭️ Matériel pédagogique déjà présent, import annulé');
+        console.log('[Primo] Échelles existantes:', echellesExistantes);
+        console.log('[Primo] Grilles existantes:', grillesExistantes);
         return;
     }
 
     try {
         // Charger le fichier materiel-demarrage.json
+        console.log('[Primo] 📥 Chargement de materiel-demarrage.json...');
         const response = await fetch('materiel-demarrage.json');
         if (!response.ok) {
-            throw new Error(`Erreur chargement: ${response.status}`);
+            throw new Error(`Erreur HTTP ${response.status}: ${response.statusText}`);
         }
 
         const config = await response.json();
+        console.log('[Primo] 📦 Fichier chargé:', config.metadata?.nom);
+
         const contenu = config.contenu;
+        let nbImporte = 0;
 
         // Importer les échelles
         if (contenu.echelles && contenu.echelles.length > 0) {
             db.setSync('echellesTemplates', contenu.echelles);
+            nbImporte += contenu.echelles.length;
             console.log(`[Primo] ✅ ${contenu.echelles.length} échelle(s) importée(s)`);
         }
 
         // Importer les grilles
         if (contenu.grilles && contenu.grilles.length > 0) {
             db.setSync('grillesTemplates', contenu.grilles);
+            nbImporte += contenu.grilles.length;
             console.log(`[Primo] ✅ ${contenu.grilles.length} grille(s) importée(s)`);
         }
 
@@ -819,15 +832,33 @@ async function importerMaterielDemarrage() {
             contenu.cartouches.forEach(cartouche => {
                 const cle = `cartouches_${cartouche.grilleId}`;
                 db.setSync(cle, [cartouche]);
+                nbImporte++;
                 console.log(`[Primo] ✅ Cartouche importée pour grille ${cartouche.grilleId}`);
             });
         }
 
-        console.log('[Primo] ✅ Matériel pédagogique de démarrage importé avec succès');
+        console.log(`[Primo] 🎉 Matériel pédagogique importé: ${nbImporte} ressources`);
+
+        // Notification à l'utilisateur
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(
+                'Matériel pédagogique installé',
+                `${nbImporte} ressources importées (échelle, grille, cartouches)`
+            );
+        }
 
     } catch (erreur) {
         console.error('[Primo] ❌ Erreur import matériel de démarrage:', erreur);
-        // Ne pas bloquer la configuration si l'import échoue
+        console.error('[Primo] Détails:', erreur.message, erreur.stack);
+
+        // Notification d'erreur à l'utilisateur
+        if (typeof afficherNotificationErreur === 'function') {
+            afficherNotificationErreur(
+                'Import partiel',
+                'Le matériel de base n\'a pas pu être importé. Vous pourrez l\'ajouter manuellement plus tard.'
+            );
+        }
+
         // Fallback: créer au moins l'échelle IDME
         creerEchelleIDMEParDefaut();
     }
