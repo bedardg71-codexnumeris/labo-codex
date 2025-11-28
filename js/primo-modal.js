@@ -609,6 +609,52 @@ function afficherErreur(message) {
 // ============================================================================
 
 /**
+ * Convertit les données horaireHebdomadaire en tableau seancesHoraire
+ * Format Primo → Format attendu par horaire.js
+ */
+function creerSeancesHoraire() {
+    const horaire = db.getSync('horaireHebdomadaire', null);
+    if (!horaire || !horaire.nombreSeances) {
+        console.log('[Primo] Aucun horaire à convertir');
+        return;
+    }
+
+    const seances = [];
+    const lettres = ['A', 'B', 'C'];
+    const nbSeances = parseInt(horaire.nombreSeances) || 1;
+
+    for (let i = 1; i <= nbSeances; i++) {
+        const jour = horaire[`jour${i}`];
+        const heureDebut = horaire[`heure${i}Debut`];
+        const heureFin = horaire[`heure${i}Fin`];
+
+        if (jour && heureDebut && heureFin) {
+            // Calculer la durée en heures (décimal)
+            const debut = heureDebut.split(':');
+            const fin = heureFin.split(':');
+            const debutMinutes = parseInt(debut[0]) * 60 + parseInt(debut[1]);
+            const finMinutes = parseInt(fin[0]) * 60 + parseInt(fin[1]);
+            const dureeMinutes = finMinutes - debutMinutes;
+            const dureeHeures = dureeMinutes / 60;
+
+            seances.push({
+                lettre: lettres[i - 1] || `S${i}`,
+                groupe: '',  // Vide par défaut
+                jour: jour,
+                debut: heureDebut,
+                duree: dureeHeures,
+                local: ''  // Pas demandé dans Primo pour l'instant
+            });
+        }
+    }
+
+    if (seances.length > 0) {
+        db.setSync('seancesHoraire', seances);
+        console.log(`[Primo] ${seances.length} séance(s) créée(s):`, seances);
+    }
+}
+
+/**
  * Termine la configuration et sauvegarde toutes les réponses
  */
 function terminerConfiguration() {
@@ -617,6 +663,9 @@ function terminerConfiguration() {
 
     // Sauvegarder toutes les réponses dans localStorage
     sauvegarderReponses(reponsesPrimo);
+
+    // Créer le tableau de séances à partir de horaireHebdomadaire
+    creerSeancesHoraire();
 
     // Créer le cours initial dans listeCours
     creerCoursInitial(reponsesPrimo);
