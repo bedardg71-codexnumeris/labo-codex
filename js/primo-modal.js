@@ -1180,6 +1180,11 @@ async function terminerConfiguration() {
     console.log('[Primo] Configuration terminée !');
     console.log('[Primo] Réponses collectées:', reponsesPrimo);
 
+    // Vérifier si c'est un parcours court (fin après création groupe)
+    const questionsActives = obtenirQuestionsActives(reponsesPrimo);
+    const questionActuelle = questionsActives[indexQuestionActuelle];
+    const estParcoursCourt = questionActuelle && questionActuelle.finParcoursCourt === true;
+
     // Sauvegarder toutes les réponses dans localStorage
     sauvegarderReponses(reponsesPrimo);
 
@@ -1201,34 +1206,60 @@ async function terminerConfiguration() {
         console.log('[Primo] Séances complètes générées');
     }
 
-    // Importer le matériel pédagogique de démarrage (asynchrone)
-    await importerMaterielDemarrage();
+    if (estParcoursCourt) {
+        // PARCOURS COURT : Retourner au menu d'accueil
+        console.log('[Primo] Parcours court terminé - retour au menu');
 
-    // Définir le mode de travail sur "simulation" (Mode Assisté)
-    // L'utilisateur qui utilise Primo est nécessairement en mode assisté
-    db.setSync('modeApplication', 'simulation');
-    console.log('[Primo] Mode de travail défini sur "simulation" (Mode Assisté)');
+        // Afficher notification de succès
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(
+                'Configuration de base terminée ! ✅',
+                'Tu peux maintenant choisir une autre activité.'
+            );
+        }
 
-    // Afficher notification de succès
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(
-            'Configuration terminée ! 🎉',
-            'Ton application est maintenant prête à l\'emploi !'
-        );
+        // Fermer le modal
+        fermerModalConversationnel();
+
+        // Attendre un peu puis rouvrir le menu d'accueil
+        setTimeout(() => {
+            if (typeof afficherModalAccueil === 'function') {
+                afficherModalAccueil();
+            }
+        }, 1000);
+
+    } else {
+        // PARCOURS COMPLET : Configuration complète avec import matériel
+        console.log('[Primo] Parcours complet - import matériel et rechargement');
+
+        // Importer le matériel pédagogique de démarrage (asynchrone)
+        await importerMaterielDemarrage();
+
+        // Définir le mode de travail sur "simulation" (Mode Assisté)
+        db.setSync('modeApplication', 'simulation');
+        console.log('[Primo] Mode de travail défini sur "simulation" (Mode Assisté)');
+
+        // Afficher notification de succès
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(
+                'Configuration terminée ! 🎉',
+                'Ton application est maintenant prête à l\'emploi !'
+            );
+        }
+
+        // Fermer le modal
+        fermerModalConversationnel();
+
+        // Marquer l'accueil comme vu
+        if (typeof marquerAccueilVu === 'function') {
+            marquerAccueilVu();
+        }
+
+        // Recharger l'interface pour refléter les changements
+        setTimeout(() => {
+            location.reload();
+        }, 1500);
     }
-
-    // Fermer le modal
-    fermerModalConversationnel();
-
-    // Marquer l'accueil comme vu
-    if (typeof marquerAccueilVu === 'function') {
-        marquerAccueilVu();
-    }
-
-    // Recharger l'interface pour refléter les changements
-    setTimeout(() => {
-        location.reload();
-    }, 1500);
 }
 
 /**
