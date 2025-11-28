@@ -233,13 +233,15 @@ const QUESTIONS_PRIMO = [
         texte: 'Et la date de fin ?',
         type: 'date',
         champsCibles: [
-            { cle: 'cadreCalendrier', champ: 'finCours' }
+            { cle: 'cadreCalendrier', champ: 'finCours' },
+            { cle: 'cadreCalendrier', champ: 'dateFin' },
+            { cle: 'cadreCalendrier', champ: 'finTrimestre' }
         ],
         validation: {
             requis: true,
             apres: 'trimestre-debut'
         },
-        aide: 'Dernier jour de cours.'
+        aide: 'Dernier jour de cours (incluant les examens).'
     },
 
     // ========================================================================
