@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "type": "cartouche",
+    "nom": "Cartouche Test",
+    "auteur": "Grégoire Bédard",
+    "auteur_original": "Grégoire Bédard",
+    "discipline": ["Test"],
+    "niveau": "Collégial",
+    "description": "Cartouche de test pour validation import",
+    "licence": "CC BY-NC-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "version": "1.0",
+    "date_creation": "2025-11-28",
+    "application_version": "Beta 92",
+    "email_auteur": "labo@codexnumeris.org",
+    "site_auteur": "https://codexnumeris.org"
+  },
+  "contenu": {
+    "id": "cartouche-test-001",
+    "grilleId": "grille-test-001",
+    "nom": "Cartouche Test",
+    "contexte": "Cartouche de test",
+    "criteres": [
+      {
+        "nom": "Critère A"
+      },
+      {
+        "nom": "Critère B"
+      }
+    ],
+    "niveaux": [
+      {
+        "code": "I",
+        "nom": "Insuffisant"
+      },
+      {
+        "code": "M",
+        "nom": "Maîtrisé"
+      }
+    ],
+    "commentaires": {
+      "Critère A_I": "Commentaire A insuffisant",
+      "Critère A_M": "Commentaire A maîtrisé",
+      "Critère B_I": "Commentaire B insuffisant",
+      "Critère B_M": "Commentaire B maîtrisé"
+    },
+    "verrouille": false,
+    "dateCreation": "2025-11-28"
+  }
+}
