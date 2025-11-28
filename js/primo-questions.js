@@ -568,16 +568,17 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 6 : CONFIRMATION CRÉATION DU GROUPE
+    // ÉTAPE 6 : CONFIRMATION CRÉATION DU GROUPE ET FIN PARCOURS COURT
     // ========================================================================
     {
         id: 'confirmation-groupe',
-        texte: 'Parfait ! Je viens de créer un groupe de simulation avec les étudiants que tu as fournis. 🎓\n\nMaintenant, passons à l\'étape suivante : le matériel pédagogique !',
-        type: 'instruction',
+        texte: '🎉 **Bravo !** Tu as terminé la configuration de base !\n\n✅ Cours créé\n✅ Trimestre configuré\n✅ Horaire défini\n✅ Groupe d\'étudiants créé\n\n**Que veux-tu faire maintenant ?**\n\nTu peux choisir une autre activité depuis le menu d\'accueil :\n• **Évaluer** : Importer du matériel pédagogique et créer des évaluations\n• **Créer ma pratique** : Configurer ta pratique de notation\n• **Charger données démo** : Explorer avec des données complètes\n• **Explorer** : Naviguer librement dans l\'application',
+        type: 'message',
         champsCibles: [],
         validation: {
             requis: false
-        }
+        },
+        finParcoursCourt: true  // Indicateur pour retourner au menu
     },
 
     // ========================================================================
