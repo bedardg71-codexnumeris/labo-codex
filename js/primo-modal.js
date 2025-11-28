@@ -1037,6 +1037,17 @@ function sauvegarderReponses(reponses) {
     const questionsActives = obtenirQuestionsActives(reponses);
 
     questionsActives.forEach(question => {
+        // Pour les questions de type 'instruction' avec valeurFixe, utiliser cette valeur
+        if (question.type === 'instruction' && question.champsCibles) {
+            question.champsCibles.forEach(cible => {
+                if (cible.valeurFixe !== undefined) {
+                    console.log(`[Primo] Sauvegarde valeur fixe pour ${question.id}:`, cible.valeurFixe);
+                    sauvegarderChamp(cible, cible.valeurFixe);
+                }
+            });
+            return;
+        }
+
         const valeur = reponses[question.id];
         if (!valeur) return;
 

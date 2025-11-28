@@ -103,36 +103,18 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 2 : PRATIQUE DE NOTATION (jusqu'à 4 questions selon choix)
+    // ÉTAPE 2 : PRATIQUE DE NOTATION (Simplifié - Sommative par défaut)
     // ========================================================================
     {
         id: 'pratique-notation',
-        texte: 'Quelle pratique de notation veux-tu mettre en place ?',
-        type: 'radio',
-        options: [
-            {
-                value: 'sommative',
-                label: 'Sommative traditionnelle',
-                description: 'Moyenne pondérée de toutes les évaluations'
-            },
-            {
-                value: 'pan-maitrise',
-                label: 'PAN-Maîtrise (IDME)',
-                description: 'Portfolio avec niveaux de maîtrise (Insuffisant, Développement, Maîtrisé, Étendu)'
-            },
-            {
-                value: 'pan-specifications',
-                label: 'PAN-Spécifications',
-                description: 'Portfolio avec critères Pass/Fail sur objectifs d\'apprentissage'
-            }
-        ],
+        texte: '**Pratique de notation**\n\nPour ce tutoriel, nous allons configurer la **pratique sommative traditionnelle**.\n\nVoici les pratiques disponibles :\n\n✅ **Sommative traditionnelle** (utilisée dans ce tutoriel)\n   → Moyenne pondérée de toutes les évaluations\n\n⚪ **PAN-Maîtrise (IDME)**\n   → Portfolio avec niveaux de maîtrise (Insuffisant, Développement, Maîtrisé, Étendu)\n   → *Configurable après dans Réglages → Pratique de notation*\n\n⚪ **PAN-Spécifications**\n   → Portfolio avec critères Pass/Fail sur objectifs d\'apprentissage\n   → *Configurable après dans Réglages → Pratique de notation*',
+        type: 'instruction',
         champsCibles: [
-            { cle: 'modalitesEvaluation', champ: 'pratique' }
+            { cle: 'modalitesEvaluation', champ: 'pratique', valeurFixe: 'sommative' }
         ],
         validation: {
-            requis: true
-        },
-        aide: 'Tu pourras changer plus tard dans Réglages.'
+            requis: false
+        }
     },
 
     // Question commune PAN (Maîtrise et Spécifications)
