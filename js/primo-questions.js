@@ -663,23 +663,71 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 9 : CRÉATION D'UNE PRODUCTION
+    // ÉTAPE 9 : CRÉATION D'UNE PRODUCTION (SIMULÉE)
     // ========================================================================
     {
-        id: 'creer-production',
-        texte: '**Créons ta première production**\n\n1️⃣ Va dans **Matériel → Productions**\n2️⃣ Clique sur **Nouvelle production**\n3️⃣ Remplis le formulaire :\n   • **Nom** : Test de connaissances\n   • **Type** : Test/Quiz\n   • **Pondération** : 10%\n   • **Grille liée** : Grille SRPNF\n4️⃣ Sauvegarde !\n\nC\'est fait ?',
-        type: 'radio',
+        id: 'intro-production',
+        texte: '**Créons ta première production**\n\nUne production, c\'est une évaluation que tu vas créer pour tes étudiants (test, travail, examen, etc.).\n\nJe vais te guider pour en créer une directement ici. Ensuite, je la créerai automatiquement pour toi dans l\'application.\n\nCommençons !',
+        type: 'instruction',
+        champsCibles: [],
+        validation: { requis: false }
+    },
+
+    {
+        id: 'production-titre',
+        texte: 'Quel est le **titre** de ta production ?\n\n💡 Par exemple : "Test de connaissances", "Travail 1", "Quiz chapitre 3", etc.',
+        type: 'text',
+        placeholder: 'Test de connaissances',
+        champsCibles: [
+            { cle: 'tutoriel', champ: 'productionTitre' }
+        ],
+        validation: {
+            requis: true,
+            minLength: 3
+        }
+    },
+
+    {
+        id: 'production-description',
+        texte: 'Quelle est la **description** de cette production ?\n\n💡 Quelques mots pour décrire l\'activité.',
+        type: 'text',
+        placeholder: 'Évaluation des connaissances de base',
+        champsCibles: [
+            { cle: 'tutoriel', champ: 'productionDescription' }
+        ],
+        validation: {
+            requis: true,
+            minLength: 3
+        }
+    },
+
+    {
+        id: 'production-ponderation',
+        texte: 'Quelle **pondération** (%) veux-tu donner à cette production ?',
+        type: 'select',
         options: [
-            { value: 'fait', label: 'Production créée ! ✅' },
-            { value: 'aide', label: 'J\'ai besoin d\'aide' },
-            { value: 'sauter', label: 'Je vais le faire plus tard' }
+            { value: '5', label: '5%' },
+            { value: '10', label: '10%' },
+            { value: '15', label: '15%' },
+            { value: '20', label: '20%' },
+            { value: '25', label: '25%' },
+            { value: '30', label: '30%' }
         ],
         champsCibles: [
-            { cle: 'tutoriel', champ: 'productionCreee' }
+            { cle: 'tutoriel', champ: 'productionPonderation' }
         ],
         validation: {
             requis: true
         }
+    },
+
+    {
+        id: 'production-creation-auto',
+        texte: 'Parfait ! Je vais maintenant créer cette production pour toi.\n\nC\'est parti ! 🚀',
+        type: 'action',
+        action: 'creerProduction',
+        champsCibles: [],
+        validation: { requis: false }
     },
 
     // ========================================================================
