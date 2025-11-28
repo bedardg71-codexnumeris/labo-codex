@@ -23,76 +23,13 @@ const THEMES = {
     },
     simulation: {
         couleur: '#1a5266', // Teal/sarcelle
-        nom: 'Mode Simulation',
-        icone: ''
+        nom: 'Mode Assisté',
+        icone: '😎'
     },
     anonymisation: {
         couleur: '#0f1e3a', // Bleu très foncé
         nom: 'Mode Anonymisation',
         icone: ''
-    }
-};
-
-// ============================================
-// NOMS FICTIFS RÉALISTES (DIVERSIFIÉS)
-// ============================================
-
-const NOMS_FICTIFS = {
-    // 85% Québécois
-    quebecois: {
-        noms: [
-            'Tremblay', 'Gagnon', 'Roy', 'Côté', 'Bouchard', 'Gauthier', 'Morin', 'Lavoie',
-            'Fortin', 'Gagné', 'Ouellet', 'Pelletier', 'Bélanger', 'Lévesque', 'Bergeron',
-            'Leblanc', 'Paquette', 'Girard', 'Simard', 'Boucher', 'Caron', 'Beaulieu',
-            'Cloutier', 'Poirier', 'Fournier', 'Leclerc', 'Dupont', 'Lefebvre', 'Dubois',
-            'Martin', 'Mercier', 'Gendron', 'Landry', 'Martel', 'Hébert', 'Rousseau',
-            'Dufour', 'Nadeau', 'Proulx', 'Thibault', 'Lessard', 'St-Pierre', 'Demers',
-            'Picard', 'Desrosiers', 'Deschamps', 'Michaud', 'Vaillancourt', 'Carrier'
-        ],
-        prenoms: [
-            'Olivier', 'Emma', 'William', 'Léa', 'Thomas', 'Alice', 'Gabriel', 'Florence',
-            'Samuel', 'Jade', 'Alexis', 'Rosalie', 'Antoine', 'Camille', 'Nathan', 'Émilie',
-            'Xavier', 'Chloé', 'Félix', 'Sarah', 'Maxime', 'Laura', 'Benjamin', 'Maude',
-            'Raphaël', 'Zoé', 'Lucas', 'Juliette', 'Noah', 'Laurie', 'Jacob', 'Mélodie',
-            'Mathis', 'Amélie', 'Louis', 'Charlotte', 'Charles', 'Élizabeth', 'Étienne', 'Océane',
-            'Jérémie', 'Audrey', 'Nicolas', 'Sophie', 'Vincent', 'Catherine', 'Alexandre', 'Marie'
-        ]
-    },
-
-    // 5% Africains
-    africains: {
-        noms: [
-            'Diallo', 'Traoré', 'Koné', 'Touré', 'Camara', 'Keita', 'Sylla', 'Bah',
-            'Barry', 'Sow', 'Dembélé', 'Diarra', 'Sangaré', 'Coulibaly', 'Ouedraogo'
-        ],
-        prenoms: [
-            'Amadou', 'Aïcha', 'Ibrahim', 'Fatima', 'Mamadou', 'Mariam', 'Abdoulaye', 'Aminata',
-            'Moussa', 'Kadiatou', 'Sekou', 'Fatoumata', 'Boubacar', 'Safiatou', 'Adama', 'Hawa'
-        ]
-    },
-
-    // 5% Latino
-    latino: {
-        noms: [
-            'Garcia', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Perez', 'Sanchez',
-            'Ramirez', 'Torres', 'Flores', 'Rivera', 'Gomez', 'Diaz', 'Cruz'
-        ],
-        prenoms: [
-            'Carlos', 'Maria', 'Jose', 'Carmen', 'Luis', 'Ana', 'Miguel', 'Sofia',
-            'Diego', 'Isabella', 'Pablo', 'Valentina', 'Juan', 'Camila', 'Antonio', 'Lucia'
-        ]
-    },
-
-    // 5% Arabes
-    arabes: {
-        noms: [
-            'Ahmed', 'Ben Ali', 'Khalil', 'Hassan', 'Mansour', 'Saidi', 'Amari', 'Brahim',
-            'El Khoury', 'Salah', 'Farid', 'Nasser', 'Bouazza', 'Hamdi', 'Rachid'
-        ],
-        prenoms: [
-            'Mohamed', 'Yasmine', 'Omar', 'Leila', 'Karim', 'Sarah', 'Ali', 'Nadia',
-            'Youssef', 'Amina', 'Mehdi', 'Fatima', 'Bilal', 'Samira', 'Amine', 'Khadija'
-        ]
     }
 };
 
@@ -120,6 +57,9 @@ function initialiserSystemeModes() {
 
     // Créer le sélecteur de mode
     creerSelecteurMode();
+
+    // Afficher/masquer le bouton Assistance Primo selon le mode
+    gererAffichageBoutonPrimo(modeActuel);
 
     console.log(`✅ Mode actif: ${THEMES[modeActuel].nom}`);
 }
@@ -149,11 +89,11 @@ function creerSelecteurMode() {
     // Créer les options pour chaque mode (tous adjectifs)
     const labels = {
         'normal': 'Normal',
-        'simulation': 'Simulé',
+        'simulation': 'Assisté',
         'anonymisation': 'Anonymisé'
     };
 
-    // Ordre souhaité : Normal → Anonymisé → Simulé
+    // Ordre souhaité : Normal → Assisté → Anonymisé
     const ordreAffichage = [
         MODES.NORMAL,
         MODES.ANONYMISATION,
@@ -202,6 +142,9 @@ function changerMode(nouveauMode) {
 
     // Mettre à jour le sélecteur de mode
     creerSelecteurMode();
+
+    // Afficher/masquer le bouton Assistance Primo selon le mode
+    gererAffichageBoutonPrimo(nouveauMode);
 
     // Générer des données si nécessaire
     if (nouveauMode === MODES.SIMULATION) {
@@ -324,7 +267,7 @@ function appliquerTheme(mode) {
         bandeau.id = 'bandeau-mode';
 
         // Texte du bandeau
-        let texte = `${THEMES[mode].icone} ${THEMES[mode].nom.toUpperCase()} - Les identités affichées sont ${mode === MODES.SIMULATION ? 'fictives' : 'anonymisées'}`;
+        let texte = `${THEMES[mode].icone} ${THEMES[mode].nom.toUpperCase()} - Les identités affichées sont ${mode === MODES.SIMULATION ? 'réelles' : 'anonymisées'}`;
 
         // Ajouter contrôle DA seulement en mode anonymisation
         if (mode === MODES.ANONYMISATION) {
@@ -785,12 +728,74 @@ function estModeeLectureSeule() {
 }
 
 // ============================================
+// GESTION BOUTON ASSISTANCE PRIMO
+// ============================================
+
+/**
+ * Gère l'affichage des boutons d'en-tête et de la section Aide selon le mode actif
+ * @param {string} mode - Le mode actif
+ */
+function gererAffichageBoutonPrimo(mode) {
+    // Bouton Assistance Primo (visible en mode Assisté)
+    const boutonPrimo = document.getElementById('btn-assistance-primo');
+    if (boutonPrimo) {
+        boutonPrimo.style.display = (mode === MODES.SIMULATION) ? 'inline-block' : 'none';
+    }
+
+    // Boutons Soutenir/Feedback (visibles en mode Normal uniquement)
+    const boutonSoutenir = document.getElementById('btn-soutenir-projet');
+    const boutonFeedback = document.getElementById('btn-feedback');
+
+    if (boutonSoutenir) {
+        boutonSoutenir.style.display = (mode === MODES.NORMAL) ? 'inline-block' : 'none';
+    }
+
+    if (boutonFeedback) {
+        boutonFeedback.style.display = (mode === MODES.NORMAL) ? 'inline-block' : 'none';
+    }
+
+    // Section Aide dans la navigation (visible en mode Assisté)
+    const boutonAide = document.getElementById('btn-section-aide');
+    if (boutonAide) {
+        if (mode === MODES.SIMULATION) {
+            // Mode Assisté : section Aide visible
+            boutonAide.style.display = 'inline-block';
+        } else {
+            // Modes Normal et Anonymisé : section Aide masquée
+            boutonAide.style.display = 'none';
+
+            // Si on est sur la section Aide, rediriger vers Tableau de bord
+            if (typeof sectionActive !== 'undefined' && sectionActive === 'aide') {
+                if (typeof afficherSection === 'function') {
+                    afficherSection('tableau-bord');
+                }
+            }
+        }
+    }
+}
+
+// ============================================
 // EXPORT
 // ============================================
+
+/**
+ * Vérifie si on est en mode Assisté
+ * @returns {boolean} true si mode Assisté actif
+ */
+function estModeAssiste() {
+    return modeActuel === MODES.SIMULATION; // 'simulation' = mode Assisté
+}
+
+// Alias pour compatibilité (à migrer progressivement)
+function estModeGuide() {
+    return estModeAssiste();
+}
 
 window.MODES = MODES;
 window.initialiserSystemeModes = initialiserSystemeModes;
 window.changerMode = changerMode;
+window.estModeAssiste = estModeAssiste;
+window.estModeGuide = estModeGuide; // Alias compatibilité
 window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
 window.sauvegarderDonneesSelonMode = sauvegarderDonneesSelonMode;
 window.anonymiserNom = anonymiserNom;
@@ -1845,7 +1850,7 @@ function genererGroupeFictifAleatoire() {
 /**
  * Filtre la liste des étudiants selon le mode actuel
  * - Mode Normal : affiche seulement les groupes réels (exclut 9999)
- * - Mode Simulé : affiche seulement le Groupe 9999
+ * - Mode Assisté : affiche seulement le Groupe 9999 (données de démo/exploration)
  * - Mode Anonymisé : affiche les groupes réels (exclut 9999) avec noms anonymisés
  *
  * @param {Array} etudiants - Liste complète des étudiants
@@ -1861,7 +1866,7 @@ function filtrerEtudiantsParMode(etudiants) {
 
     switch(mode) {
         case 'simulation':
-            // Mode Simulé : afficher SEULEMENT le Groupe 9999
+            // Mode Assisté : afficher SEULEMENT le Groupe 9999 (données de démo)
             return etudiants.filter(e => e.groupe === '9999');
 
         case 'normal':
