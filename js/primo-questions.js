@@ -731,36 +731,42 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 10 : CRÉATION D'UNE ÉVALUATION
+    // ÉTAPE 10 : PASSAGE EN MODE GUIDÉ (NOTIFICATIONS)
     // ========================================================================
     {
-        id: 'creer-evaluation',
-        texte: '**Évaluons cette production pour un étudiant**\n\n1️⃣ Va dans **Évaluations → Procéder à une évaluation**\n2️⃣ Clique sur **Nouvelle évaluation**\n3️⃣ Choisis n\'importe quel étudiant de ta liste fictive\n4️⃣ Sélectionne **Test de connaissances**\n\nTu devrais voir :\n✅ Échelle IDME avec les 5 niveaux\n✅ Grille SRPNF avec les 5 critères\n✅ Cartouches de rétroaction suggérées\n\nTu vois tout ça ?',
-        type: 'radio',
-        options: [
-            { value: 'oui', label: 'Oui, je vois tout ! ✅' },
-            { value: 'non', label: 'Non, il manque quelque chose' }
-        ],
+        id: 'transition-mode-guide',
+        texte: '**Maintenant, place à la pratique !**\n\nJe vais te guider pour créer ta première évaluation.\n\nJe vais me transformer en **assistant discret** (notifications en haut à droite) pendant que tu navigues librement dans l\'application.\n\nUtilise le bouton **"Suivant →"** en bas à droite pour avancer dans les étapes.\n\nC\'est parti ! 🚀',
+        type: 'action',
+        action: 'passerEnModeNotification',
         champsCibles: [],
-        validation: {
-            requis: true
-        }
+        validation: { requis: false }
+    },
+
+    // ========================================================================
+    // ÉTAPE 11 : CRÉATION D'UNE ÉVALUATION (MODE NOTIFICATION)
+    // ========================================================================
+    {
+        id: 'navigation-evaluations',
+        texte: '**Étape 1 : Accéder aux évaluations**\n\n1️⃣ Va dans **Évaluations → Procéder à une évaluation**\n2️⃣ Clique sur **Nouvelle évaluation**\n\nQuand c\'est fait, clique sur **"Suivant →"** en bas à droite.',
+        type: 'instruction',
+        champsCibles: [],
+        validation: { requis: false }
+    },
+
+    {
+        id: 'selection-etudiant',
+        texte: '**Étape 2 : Choisir un étudiant**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne la production **{{tutoriel.productionTitre}}**\n\nTu devrais voir :\n✅ Échelle IDME (5 niveaux)\n✅ Grille SRPNF (5 critères)\n✅ Cartouches de rétroaction suggérées\n\nClique **"Suivant →"** quand tu vois tout ça.',
+        type: 'instruction',
+        champsCibles: [],
+        validation: { requis: false }
     },
 
     {
         id: 'attribuer-niveaux',
-        texte: '**Attribue des niveaux de performance**\n\nPour chaque critère, choisis un niveau IDME :\n• **Structure** : M (Maîtrisé)\n• **Rigueur** : D (Développement)\n• **Plausibilité** : M (Maîtrisé)\n• **Nuance** : I (Insuffisant)\n• **Français** : D (Développement)\n\nUne note est calculée automatiquement ! 🎉\n\nSauvegarde l\'évaluation.\n\nC\'est fait ?',
-        type: 'radio',
-        options: [
-            { value: 'fait', label: 'Évaluation sauvegardée ! ✅' },
-            { value: 'sauter', label: 'Je vais le faire plus tard' }
-        ],
-        champsCibles: [
-            { cle: 'tutoriel', champ: 'evaluationCreee' }
-        ],
-        validation: {
-            requis: true
-        }
+        texte: '**Étape 3 : Évaluer**\n\nAttribue des niveaux pour chaque critère :\n• **Structure** : M (Maîtrisé)\n• **Rigueur** : D (Développement)\n• **Plausibilité** : M (Maîtrisé)\n• **Nuance** : I (Insuffisant)\n• **Français** : D (Développement)\n\nUne note est calculée automatiquement ! 🎉\n\nSauvegarde l\'évaluation, puis clique **"Suivant →"**.',
+        type: 'instruction',
+        champsCibles: [],
+        validation: { requis: false }
     },
 
     // ========================================================================
