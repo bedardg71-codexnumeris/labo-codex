@@ -145,6 +145,15 @@ async function afficherQuestionActuelle() {
     if (reponsesPrimo[question.id]) {
         preremplirReponse(question.id, reponsesPrimo[question.id]);
     }
+
+    // Si c'est une action, l'exécuter automatiquement après affichage
+    if (question.type === 'action') {
+        console.log('[Primo] Question type action détectée - déclenchement automatique');
+        // Petit délai pour que l'utilisateur voie le message
+        setTimeout(() => {
+            executerAction(question);
+        }, 500);
+    }
 }
 
 /**
@@ -527,8 +536,11 @@ function primoQuestionSuivante() {
     const questionsActives = obtenirQuestionsActives(reponsesPrimo);
     const question = questionsActives[indexQuestionActuelle];
 
+    console.log('[Primo] primoQuestionSuivante() - Type:', question.type, 'ID:', question.id);
+
     // Pour les types 'instruction' et 'message', pas de validation nécessaire
     if (question.type === 'instruction' || question.type === 'message') {
+        console.log('[Primo] Type instruction/message - passage direct');
         indexQuestionActuelle++;
         afficherQuestionActuelle();
         return;
@@ -536,6 +548,7 @@ function primoQuestionSuivante() {
 
     // Pour le type 'action', exécuter l'action puis passer à la suite
     if (question.type === 'action') {
+        console.log('[Primo] Type action détecté - appel executerAction()');
         executerAction(question);
         return; // L'action appellera afficherQuestionActuelle() après son exécution
     }
