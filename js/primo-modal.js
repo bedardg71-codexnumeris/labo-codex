@@ -613,6 +613,8 @@ async function executerAction(question) {
             await importerDonneesDemo();
         } else if (question.action === 'importerMaterielPedagogique') {
             await importerMaterielPedagogique();
+        } else if (question.action === 'creerProduction') {
+            await creerProduction();
         }
 
         // Succès - afficher confirmation
@@ -766,6 +768,61 @@ async function importerMaterielPedagogique() {
     } catch (error) {
         console.error('[Primo] ❌ Erreur import matériel pédagogique:', error);
         throw new Error(`Import échoué: ${error.message}`);
+    }
+}
+
+/**
+ * Crée une production automatiquement avec les données collectées par Primo
+ */
+async function creerProduction() {
+    console.log('[Primo] 🚀 Création de la production...');
+
+    try {
+        // Récupérer les données saisies par l'utilisateur
+        const titre = reponsesPrimo['production-titre'] || 'Test de connaissances';
+        const description = reponsesPrimo['production-description'] || 'Évaluation des connaissances';
+        const ponderation = parseInt(reponsesPrimo['production-ponderation']) || 10;
+
+        console.log('[Primo] 📝 Données production:', { titre, description, ponderation });
+
+        // Trouver la grille SRPNF importée
+        const grillesTemplates = db.getSync('grillesTemplates', []);
+        const grilleSRPNF = grillesTemplates.find(g => g.id === 'grille-srpnf' || g.nom.includes('SRPNF'));
+
+        if (!grilleSRPNF) {
+            throw new Error('Grille SRPNF non trouvée. Assure-toi que l\'import du matériel pédagogique a fonctionné.');
+        }
+
+        console.log('[Primo] 📋 Grille SRPNF trouvée:', grilleSRPNF.id);
+
+        // Créer l'objet production
+        const nouvelleProduction = {
+            id: 'PROD-PRIMO-' + Date.now(),
+            titre,
+            description,
+            type: 'quiz',
+            ponderation,
+            objectif: '',
+            tache: '',
+            grilleId: grilleSRPNF.id,
+            verrouille: false
+        };
+
+        console.log('[Primo] 💾 Objet production créé:', nouvelleProduction);
+
+        // Ajouter la production dans localStorage
+        const productions = db.getSync('productions', []);
+        productions.push(nouvelleProduction);
+        db.setSync('productions', productions);
+
+        console.log('[Primo] ✅ Production créée avec succès:', titre);
+
+        // Sauvegarder l'ID pour référence future
+        reponsesPrimo.productionCreeeId = nouvelleProduction.id;
+
+    } catch (error) {
+        console.error('[Primo] ❌ Erreur création production:', error);
+        throw new Error(`Création production échouée: ${error.message}`);
     }
 }
 
