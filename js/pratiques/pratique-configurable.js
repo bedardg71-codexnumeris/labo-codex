@@ -135,10 +135,10 @@ class PratiqueConfigurable {
 
         this.config.objectifs.forEach(objectif => {
             // Filtrer les évaluations associées à cet objectif
-            const evaluationsObjectif = evaluationsEtudiant.filter(eval => {
+            const evaluationsObjectif = evaluationsEtudiant.filter(evaluation => {
                 // Vérifier si l'évaluation est taguée avec cet objectif
                 // (Suppose que les évaluations ont un champ 'objectifs' avec les IDs)
-                return eval.objectifs && eval.objectifs.includes(objectif.id);
+                return evaluation.objectifs && evaluation.objectifs.includes(objectif.id);
             });
 
             if (evaluationsObjectif.length === 0) {
@@ -152,7 +152,7 @@ class PratiqueConfigurable {
                 .slice(0, nombreArtefacts);
 
             // Calculer la moyenne pour cet objectif
-            const moyenneObjectif = meilleures.reduce((sum, eval) => sum + eval.note, 0) / meilleures.length;
+            const moyenneObjectif = meilleures.reduce((sum, evaluation) => sum + evaluation.note, 0) / meilleures.length;
 
             // Ajouter à la somme pondérée
             sommeNotesPonderees += moyenneObjectif * objectif.poids;
