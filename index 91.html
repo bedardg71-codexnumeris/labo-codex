@@ -10787,62 +10787,6 @@ Exemple :
         // ========================================
         // OBSOLÈTE : Cette fonction a été déplacée vers echelles.js (supporte nouveau format CC)
         // La fonction importerEchelles() est maintenant chargée depuis echelles.js
-        /*
-        function importerEchelles(event) {
-            const fichier = event.target.files[0];
-            if (!fichier) return;
-
-            const lecteur = new FileReader();
-            lecteur.onload = function(e) {
-                try {
-                    const donneesImportees = JSON.parse(e.target.result);
-
-                    // Validation structure (doit contenir au moins une des trois clés)
-                    if (!donneesImportees.echellesTemplates && !donneesImportees.niveauxEchelle && !donneesImportees.configEchelle) {
-                        alert('Format invalide : le fichier doit contenir echellesTemplates, niveauxEchelle ou configEchelle.');
-                        return;
-                    }
-
-                    // Importer echellesTemplates
-                    if (donneesImportees.echellesTemplates) {
-                        localStorage.setItem('echellesTemplates', JSON.stringify(donneesImportees.echellesTemplates));
-                    }
-
-                    // Importer niveauxEchelle
-                    if (donneesImportees.niveauxEchelle) {
-                        localStorage.setItem('niveauxEchelle', JSON.stringify(donneesImportees.niveauxEchelle));
-                    }
-
-                    // Importer configEchelle
-                    if (donneesImportees.configEchelle) {
-                        localStorage.setItem('configEchelle', JSON.stringify(donneesImportees.configEchelle));
-                    }
-
-                    // Notification
-                    let message = 'Import réussi : Échelle(s) de performance importée(s)';
-
-                    if (typeof afficherNotificationSucces === 'function') {
-                        afficherNotificationSucces(message);
-                    } else {
-                        alert(message);
-                    }
-
-                    // Réinitialiser le champ fichier
-                    event.target.value = '';
-
-                    // Recharger la page pour appliquer les changements
-                    if (confirm('Import terminé ! Recharger la page pour voir les échelles importées ?')) {
-                        location.reload();
-                    }
-
-                } catch (err) {
-                    console.error('Erreur import échelles:', err);
-                    alert('Fichier JSON invalide ou format incorrect.');
-                }
-            };
-            lecteur.readAsText(fichier);
-        }
-        */
 
         // ========================================
         // IMPORT DES PRODUCTIONS
