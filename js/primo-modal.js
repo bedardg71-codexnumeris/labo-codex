@@ -374,6 +374,29 @@ function genererInputQuestion(question) {
         case 'message':
             // Pas d'input, juste le message (question finale)
             break;
+
+        case 'instruction':
+            // Pas d'input non plus, juste une instruction à lire
+            // Le bouton "Suivant" permettra de continuer
+            break;
+
+        case 'action':
+            // Type spécial pour déclencher une action (import données demo, etc.)
+            html += `
+                <div id="action-status" style="
+                    padding: 20px;
+                    background: var(--bleu-tres-pale);
+                    border-left: 4px solid var(--bleu-principal);
+                    border-radius: 8px;
+                    text-align: center;
+                ">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
+                    <div style="font-size: 1rem; color: var(--gris-fonce);">
+                        En cours d'exécution...
+                    </div>
+                </div>
+            `;
+            break;
     }
 
     return html;
@@ -410,7 +433,7 @@ function genererBoutonsNavigation() {
         `;
     }
 
-    // Bouton Suivant ou Terminer
+    // Bouton Suivant, Continuer ou Terminer
     if (question.type === 'message') {
         html += `
             <button onclick="terminerConfiguration().catch(err => console.error('[Primo] Erreur terminerConfiguration:', err))" style="
@@ -430,7 +453,28 @@ function genererBoutonsNavigation() {
                 Terminer ✓
             </button>
         `;
+    } else if (question.type === 'action') {
+        // Pour les actions, le bouton est géré automatiquement par executerAction()
+        html += `
+            <button disabled style="
+                flex: 2;
+                padding: 12px 20px;
+                background: var(--gris-clair);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: not-allowed;
+                opacity: 0.6;
+            ">
+                Exécution en cours...
+            </button>
+        `;
     } else {
+        // Texte du bouton selon le type
+        const texteBouton = question.type === 'instruction' ? 'Continuer →' : 'Suivant →';
+
         html += `
             <button onclick="primoQuestionSuivante()" style="
                 flex: 2;
@@ -446,7 +490,7 @@ function genererBoutonsNavigation() {
                 box-shadow: 0 4px 12px rgba(26, 82, 102, 0.3);
             " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(26, 82, 102, 0.4)';"
                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(26, 82, 102, 0.3)';">
-                Suivant →
+                ${texteBouton}
             </button>
         `;
     }
@@ -483,6 +527,19 @@ function primoQuestionSuivante() {
     const questionsActives = obtenirQuestionsActives(reponsesPrimo);
     const question = questionsActives[indexQuestionActuelle];
 
+    // Pour les types 'instruction' et 'message', pas de validation nécessaire
+    if (question.type === 'instruction' || question.type === 'message') {
+        indexQuestionActuelle++;
+        afficherQuestionActuelle();
+        return;
+    }
+
+    // Pour le type 'action', exécuter l'action puis passer à la suite
+    if (question.type === 'action') {
+        executerAction(question);
+        return; // L'action appellera afficherQuestionActuelle() après son exécution
+    }
+
     // Récupérer la réponse
     const reponse = recupererReponse(question);
 
@@ -517,6 +574,99 @@ function primoQuestionPrecedente() {
 function confirmerAnnulation() {
     if (confirm('Es-tu sûr de vouloir annuler la configuration ? Tes réponses seront perdues.')) {
         fermerModalConversationnel();
+    }
+}
+
+/**
+ * Exécute une action spéciale (import données demo, etc.)
+ */
+async function executerAction(question) {
+    console.log(`[Primo] Exécution de l'action: ${question.action}`);
+
+    try {
+        // Afficher un indicateur de chargement
+        const statusDiv = document.getElementById('action-status');
+        if (statusDiv) {
+            statusDiv.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
+                <div style="font-size: 1rem; color: var(--gris-fonce);">
+                    ${question.texte || 'Exécution en cours...'}
+                </div>
+            `;
+        }
+
+        // Exécuter l'action selon son type
+        if (question.action === 'importerDonneesDemo') {
+            await importerDonneesDemo();
+        }
+
+        // Succès - afficher confirmation
+        if (statusDiv) {
+            statusDiv.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
+                <div style="font-size: 1rem; color: var(--gris-fonce);">
+                    Action terminée avec succès !
+                </div>
+            `;
+        }
+
+        // Passer à la question suivante après 1.5 secondes
+        setTimeout(() => {
+            indexQuestionActuelle++;
+            afficherQuestionActuelle();
+        }, 1500);
+
+    } catch (error) {
+        console.error(`[Primo] Erreur lors de l'exécution de l'action ${question.action}:`, error);
+
+        // Afficher l'erreur
+        const statusDiv = document.getElementById('action-status');
+        if (statusDiv) {
+            statusDiv.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 10px;">❌</div>
+                <div style="font-size: 1rem; color: var(--rouge);">
+                    Erreur lors de l'exécution : ${error.message}
+                </div>
+                <button onclick="indexQuestionActuelle++; afficherQuestionActuelle();" style="
+                    margin-top: 15px;
+                    padding: 10px 20px;
+                    background: var(--bleu-principal);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                ">Continuer quand même</button>
+            `;
+        }
+    }
+}
+
+/**
+ * Importe les données de démonstration
+ */
+async function importerDonneesDemo() {
+    console.log('[Primo] Import des données de démonstration...');
+
+    try {
+        // Charger le fichier donnees-demo.json
+        const response = await fetch('donnees-demo.json');
+        if (!response.ok) {
+            throw new Error('Impossible de charger donnees-demo.json');
+        }
+
+        const donnees = await response.json();
+
+        // Importer les données via la fonction existante
+        if (typeof importerDonnees === 'function') {
+            await importerDonnees(donnees);
+            console.log('[Primo] ✅ Données de démonstration importées avec succès');
+        } else {
+            throw new Error('Fonction importerDonnees non disponible');
+        }
+
+    } catch (error) {
+        console.error('[Primo] Erreur import données demo:', error);
+        throw error;
     }
 }
 
