@@ -7,17 +7,24 @@ que tu vas importer dans l'application pendant la configuration guidée avec Pri
 🎯 CONTENU DU DOSSIER
 ---------------------
 
-1. echelle-idme.json
+1. etudiants-demo.csv
+   • Liste de 10 étudiants fictifs prête à copier-coller
+   • Format : DA, Nom, Prénom, Programme, Courriel
+   • À utiliser lors de la configuration avec Primo
+   • Note : Dans un vrai contexte, tu exporterais cette liste depuis ton système de gestion
+     des apprentissages (ex: Léa, Omnivox, Moodle)
+
+2. echelle-idme.json
    • Échelle IDME (SOLO) avec 5 niveaux de performance
    • Niveaux : 0 (Aucun), I (Insuffisant), D (Développement), M (Maîtrisé), E (Étendu)
    • Utilisée pour évaluer la profondeur de compréhension
 
-2. grille-srpnf.json
+3. grille-srpnf.json
    • Grille de critères SRPNF (5 critères)
    • Structure (15%), Rigueur (20%), Plausibilité (10%), Nuance (25%), Français (30%)
    • Adaptée pour productions écrites
 
-3. cartouches-srpnf.json
+4. cartouches-srpnf.json
    • 20 cartouches de rétroaction personnalisées
    • Commentaires adaptatifs selon niveau (I, D, M, E) et critère
    • Approche constructive avec suggestions d'amélioration

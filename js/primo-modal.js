@@ -598,6 +598,8 @@ async function executerAction(question) {
         // Exécuter l'action selon son type
         if (question.action === 'importerDonneesDemo') {
             await importerDonneesDemo();
+        } else if (question.action === 'importerMaterielPedagogique') {
+            await importerMaterielPedagogique();
         }
 
         // Succès - afficher confirmation
@@ -667,6 +669,59 @@ async function importerDonneesDemo() {
     } catch (error) {
         console.error('[Primo] Erreur import données demo:', error);
         throw error;
+    }
+}
+
+/**
+ * Importe le matériel pédagogique (échelle, grille, cartouches)
+ */
+async function importerMaterielPedagogique() {
+    console.log('[Primo] 🚀 Import du matériel pédagogique...');
+
+    let compteur = 0;
+
+    try {
+        // 1. Importer l'échelle IDME
+        console.log('[Primo] 📥 Import échelle IDME...');
+        const responseEchelle = await fetch('materiel-demo/echelle-idme.json');
+        if (!responseEchelle.ok) throw new Error('Échelle IDME introuvable');
+        const echelleData = await responseEchelle.json();
+
+        if (typeof importerEchelle === 'function') {
+            await importerEchelle(echelleData.echelle);
+            compteur++;
+            console.log('[Primo] ✅ Échelle IDME importée');
+        }
+
+        // 2. Importer la grille SRPNF
+        console.log('[Primo] 📥 Import grille SRPNF...');
+        const responseGrille = await fetch('materiel-demo/grille-srpnf.json');
+        if (!responseGrille.ok) throw new Error('Grille SRPNF introuvable');
+        const grilleData = await responseGrille.json();
+
+        if (typeof importerGrille === 'function') {
+            await importerGrille(grilleData.grille);
+            compteur++;
+            console.log('[Primo] ✅ Grille SRPNF importée');
+        }
+
+        // 3. Importer les cartouches
+        console.log('[Primo] 📥 Import cartouches SRPNF...');
+        const responseCartouches = await fetch('materiel-demo/cartouches-srpnf.json');
+        if (!responseCartouches.ok) throw new Error('Cartouches SRPNF introuvables');
+        const cartouchesData = await responseCartouches.json();
+
+        if (typeof importerCartouche === 'function') {
+            await importerCartouche(cartouchesData.cartouche);
+            compteur++;
+            console.log('[Primo] ✅ Cartouches SRPNF importées');
+        }
+
+        console.log(`[Primo] 🎉 Matériel pédagogique importé avec succès (${compteur}/3)`);
+
+    } catch (error) {
+        console.error('[Primo] ❌ Erreur import matériel pédagogique:', error);
+        throw new Error(`Import échoué: ${error.message}`);
     }
 }
 
