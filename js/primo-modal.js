@@ -1405,7 +1405,7 @@ function afficherNotificationActuelle() {
     boutonFermer.onmouseout = () => boutonFermer.style.color = 'var(--gris-moyen)';
     boutonFermer.onclick = () => notification.remove();
 
-    // Texte de la notification (Markdown simplifié)
+    // Texte de la notification (Markdown simplifié + interpolation variables)
     const texte = document.createElement('div');
     texte.style.cssText = `
         font-size: 0.95rem;
@@ -1413,7 +1413,14 @@ function afficherNotificationActuelle() {
         color: var(--gris-fonce);
         margin-top: 5px;
     `;
-    texte.innerHTML = question.texte
+
+    // Interpoler les variables {{tutoriel.xxx}}
+    let texteRendu = question.texte;
+    texteRendu = texteRendu.replace(/\{\{tutoriel\.productionTitre\}\}/g, reponsesPrimo['production-titre'] || 'ta production');
+    texteRendu = texteRendu.replace(/\{\{tutoriel\.productionDescription\}\}/g, reponsesPrimo['production-description'] || '');
+    texteRendu = texteRendu.replace(/\{\{tutoriel\.productionPonderation\}\}/g, reponsesPrimo['production-ponderation'] || '10');
+
+    texte.innerHTML = texteRendu
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\n/g, '<br>');
 
