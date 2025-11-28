@@ -2496,7 +2496,9 @@ function afficherEtapeWizard(numeroEtape) {
     });
 
     // Charger les données dynamiques selon l'étape
-    if (numeroEtape === 7) {
+    if (numeroEtape === 2) {
+        afficherPreviewEchelleWizard();
+    } else if (numeroEtape === 7) {
         afficherSeuilsActuelsWizard();
     }
 
