@@ -374,25 +374,55 @@ function afficherFormCours(id = null) {
             }
         }
     } else {
-        // Mode ajout
-        coursEnEdition = null;
-        if (titre) titre.textContent = 'Nouvelle configuration de cours';
-        if (btnTexte) btnTexte.textContent = 'Ajouter';
-        
-        // Réinitialiser les champs
-        document.getElementById('codeCours').value = '';
-        document.getElementById('nomCours').value = '';
-        document.getElementById('numeroCompetence').value = '';
-        document.getElementById('competence').value = '';
-        document.getElementById('elementsCompetence').value = '';
-        document.getElementById('prenomEnseignant').value = '';
-        document.getElementById('nomEnseignant').value = '';
-        document.getElementById('departement').value = '';
-        document.getElementById('local').value = '';
-        document.getElementById('session').value = 'H';
-        document.getElementById('annee').value = new Date().getFullYear().toString();
-        document.getElementById('heuresParSemaine').value = '4';
-        document.getElementById('formatHoraire').value = '2x2';
+        // Mode ajout - MAIS vérifier s'il y a déjà un cours (créé par Primo par ex)
+        const cours = db.getSync('listeCours', []);
+        const coursActif = cours.find(c => c.actif);
+
+        if (coursActif && cours.length > 0) {
+            // Pré-remplir avec le premier cours ou le cours actif
+            const premierCours = coursActif || cours[0];
+            document.getElementById('codeCours').value = premierCours.codeCours || '';
+            document.getElementById('nomCours').value = premierCours.nomCours || '';
+            document.getElementById('numeroCompetence').value = premierCours.numeroCompetence || '';
+            document.getElementById('competence').value = premierCours.competence || '';
+            document.getElementById('elementsCompetence').value = premierCours.elementsCompetence || '';
+            document.getElementById('prenomEnseignant').value = premierCours.prenomEnseignant || '';
+            document.getElementById('nomEnseignant').value = premierCours.nomEnseignant || '';
+            document.getElementById('departement').value = premierCours.departement || '';
+            document.getElementById('local').value = premierCours.local || '';
+            document.getElementById('session').value = premierCours.session || 'H';
+            document.getElementById('annee').value = premierCours.annee || '2025';
+            document.getElementById('heuresParSemaine').value = premierCours.heuresParSemaine || '4';
+            document.getElementById('formatHoraire').value = premierCours.formatHoraire || '2x2';
+
+            const selectPratique = document.getElementById('pratiqueCours');
+            if (selectPratique && premierCours.pratiqueId) {
+                selectPratique.value = premierCours.pratiqueId;
+            }
+
+            if (titre) titre.textContent = 'Configuration du cours';
+            coursEnEdition = premierCours.id; // Permettre la modification
+        } else {
+            // Vraiment aucun cours - formulaire vide
+            coursEnEdition = null;
+            if (titre) titre.textContent = 'Nouvelle configuration de cours';
+            if (btnTexte) btnTexte.textContent = 'Ajouter';
+
+            // Réinitialiser les champs
+            document.getElementById('codeCours').value = '';
+            document.getElementById('nomCours').value = '';
+            document.getElementById('numeroCompetence').value = '';
+            document.getElementById('competence').value = '';
+            document.getElementById('elementsCompetence').value = '';
+            document.getElementById('prenomEnseignant').value = '';
+            document.getElementById('nomEnseignant').value = '';
+            document.getElementById('departement').value = '';
+            document.getElementById('local').value = '';
+            document.getElementById('session').value = 'H';
+            document.getElementById('annee').value = new Date().getFullYear().toString();
+            document.getElementById('heuresParSemaine').value = '4';
+            document.getElementById('formatHoraire').value = '2x2';
+        }
     }
 }
 
@@ -759,3 +789,17 @@ function afficherNotificationSucces(message) {
  * - Fonctionne avec tous les navigateurs modernes
  * - Pas de dépendances externes
  */
+
+/* ===============================
+   EXPORTS - Rendre les fonctions accessibles globalement
+   =============================== */
+
+window.afficherFormCours = afficherFormCours;
+window.sauvegarderCours = sauvegarderCours;
+window.annulerFormCours = annulerFormCours;
+window.modifierCours = modifierCours;
+window.dupliquerCours = dupliquerCours;
+window.supprimerCours = supprimerCours;
+window.activerCours = activerCours;
+window.afficherTableauCours = afficherTableauCours;
+window.initialiserModuleCours = initialiserModuleCours;
