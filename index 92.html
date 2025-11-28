@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 92 - Primo Assistant</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2025112701">
+    <link rel="stylesheet" href="styles.css?v=2025112711">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -2721,29 +2721,46 @@
                 <!-- Boutons d'action en haut à droite -->
                 <div class="info-legales-section">
 
-                <!-- Bouton Soutenir le projet -->
-                    <a href="https://codexnumeris.org/#/portal/support"
+                <!-- Bouton Soutenir le projet (visible en mode Normal uniquement) -->
+                    <a id="btn-soutenir-projet"
+                       href="https://codexnumeris.org/#/portal/support"
                        target="_blank" rel="noopener noreferrer"
                        class="btn-action-header"
                        title="Soutenir financièrement le développement">
                         Soutenir le projet
                     </a>
 
-
-                    <!-- Bouton Feedback testeurs -->
-                    <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=ISONVhCY_k-ORNlO_ecv4ZE_a9_snRBOtx0ASfcIqmBUNUoxMzIzQ0wySVJEQzI3R1E0VlU3MFQ1TS4u"
+                    <!-- Bouton Feedback testeurs (visible en mode Normal uniquement) -->
+                    <a id="btn-feedback"
+                       href="https://forms.office.com/Pages/ResponsePage.aspx?id=ISONVhCY_k-ORNlO_ecv4ZE_a9_snRBOtx0ASfcIqmBUNUoxMzIzQ0wySVJEQzI3R1E0VlU3MFQ1TS4u"
                        target="_blank" rel="noopener noreferrer"
                        class="btn-action-header"
                        title="Donner votre feedback sur cette version Beta">
                         Fournir un feedback
                     </a>
 
-                    <!-- Bouton Assistance Primo -->
-                    <button onclick="reafficherAccueilPrimo()"
-                       class="btn-action-header"
-                       style="background: linear-gradient(135deg, #032e5c, #065dbb); color: white; border: none; cursor: pointer;"
-                       title="Revoir le guide de démarrage avec Primo">
-                        👋 ASSISTANCE PRIMO
+                    <!-- Bouton Assistance Primo rond (visible uniquement en mode Assisté) -->
+                    <button id="btn-assistance-primo"
+                       onclick="reafficherAccueilPrimo()"
+                       style="
+                           width: 80px;
+                           height: 80px;
+                           border-radius: 50%;
+                           background: linear-gradient(135deg, #1a5266, #2d7a8c);
+                           color: white;
+                           border: none;
+                           cursor: pointer;
+                           font-size: 3rem;
+                           display: none;
+                           box-shadow: 0 4px 12px rgba(26, 82, 102, 0.3);
+                           transition: all 0.2s;
+                           animation: scintillement-primo 3s ease-in-out infinite;
+                           position: relative;
+                       "
+                       onmouseover="this.style.transform='translateY(-2px) scale(1.05)';"
+                       onmouseout="this.style.transform='translateY(0) scale(1)';"
+                       title="Obtenir de l'aide avec Primo">
+                        😎
                     </button>
                 </div>
             </div>
@@ -2758,7 +2775,7 @@
                 <button data-onglet="evaluations">Évaluations</button>
                 <button data-onglet="materiel">Matériel</button>
                 <button data-onglet="reglages">Réglages</button>
-                <button data-onglet="aide">Aide</button>
+                <button id="btn-section-aide" data-onglet="aide">Aide</button>
             </div>
         </nav>
 
@@ -5648,127 +5665,6 @@ Exemple :
                     </div><!-- FIN carte -->
 
                     <!-- ↓↓↓ AJOUTER LA NOUVELLE CARTE ICI ↓↓↓ -->
-
-                    <div class="carte">
-                        <h3 class="cursor-pointer-user-select" onclick="toggleSection('section-clonage-anonymise')">
-                            <span id="icone-clonage-anonymise">▶</span> 🔒 Clonage anonymisé (Groupe 9999 → Démo)
-                            <span style="font-size: 0.8em; color: var(--gris-moyen); font-weight: normal;">(Section avancée)</span>
-                        </h3>
-
-                        <div id="section-clonage-anonymise" style="display: none;">
-                        <div
-                            class="carte-bleu-tres-pale-mb20-border">
-                            <p class="m-0-bleu-moyen-sm">
-                                <strong>À quoi sert cette fonctionnalité ?</strong><br>
-                                Le Groupe 9999 est un groupe fictif utilisé pour les démonstrations et formations.
-                                Les étudiants du Groupe 9999 sont des clones anonymisés d'étudiants réels du Groupe
-                                1,
-                                avec des noms fictifs et des DA reconnaissables (9999XXX).
-                            </p>
-                        </div>
-
-                        <!-- STATISTIQUES -->
-                        <div
-                            class="grid-auto-200">
-                            <div
-                                class="carte-blanche-centree">
-                                <div class="stat-2rem-bold-bleu"
-                                    id="stat-groupe1">--</div>
-                                <div class="text-muted">Étudiants Groupe 1</div>
-                            </div>
-                            <div
-                                class="carte-blanche-centree">
-                                <div class="stat-2rem-bold-bleu-moyen"
-                                    id="stat-groupe2">--</div>
-                                <div class="text-muted">Étudiants Groupe 9999</div>
-                            </div>
-                            <div
-                                class="carte-blanche-centree">
-                                <div class="stat-2rem-bold-minimal"
-                                    id="stat-mappings">--</div>
-                                <div class="text-muted">Mappings actifs</div>
-                            </div>
-                        </div>
-
-                        <!-- ACTIONS -->
-                        <div class="mb-20">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Actions rapides</h4>
-
-                            <!-- Options de génération -->
-                            <div class="carte-mb15-grise">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;">
-                                    Nombre d'étudiants fictifs :
-                                </label>
-                                <input type="number" id="input-nb-etudiants" value="10" min="5" max="50"
-                                       class="w-80-select">
-                                <span class="text-sm-muted">(entre 5 et 50 étudiants)</span>
-                            </div>
-
-                            <div class="btn-groupe">
-                                <button onclick="genererMappingAleatoire()" class="btn btn-principal">
-                                    Cloner depuis Groupe 1
-                                </button>
-                                <button onclick="genererGroupeFictifAleatoire()" class="btn btn-confirmer">
-                                    🎲 Générer groupe aléatoire
-                                </button>
-                            </div>
-
-                            <div class="btn-groupe" class="mt-10">
-                                <button onclick="synchroniserDonnees()" class="btn btn-principal">
-                                    Synchroniser maintenant
-                                </button>
-                                <button onclick="afficherTableauMapping()" class="btn btn-principal">
-                                    Afficher le mapping
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- IMPORT / EXPORT -->
-                        <div class="mb-20">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">📦 Import / Export</h4>
-                            <p class="text-09-muted-mb10">
-                                Partagez des groupes fictifs pour formation ou démonstration. Idéal pour apprendre comment l'application fonctionne.
-                            </p>
-                            <div class="btn-groupe">
-                                <button onclick="exporterGroupeFictif()" class="btn btn-confirmer">
-                                    Exporter le Groupe 9999
-                                </button>
-                                <button onclick="importerGroupeFictif()" class="btn btn-modifier">
-                                    Importer un groupe fictif
-                                </button>
-                            </div>
-                            <div class="btn-groupe" class="mt-10">
-                                <button onclick="supprimerGroupeFictif()" class="btn btn-annuler" class="w-100">
-                                    Supprimer le Groupe 9999
-                                </button>
-                            </div>
-                            <div class="carte-grise-mt10-sm-muted">
-                                <strong>💡 Astuce :</strong> Exportez votre Groupe 9999, passez en mode "Simulé" et explorez l'application sans risque !
-                            </div>
-                        </div>
-
-                        <!-- TABLEAU -->
-                        <div id="tableau-mapping-groupes">
-                            <div class="empty-state-center-20">Chargement...</div>
-                        </div>
-
-                        <!-- INFOS TECHNIQUES -->
-                        <div
-                            class="carte-grise-mt20-sm-muted">
-                            <details>
-                                <summary class="cursor-pointer-bold">Informations techniques
-                                </summary>
-                                <ul class="m-10-0-pl20">
-                                    <li><strong>Groupe 1 :</strong> Étudiants réels (DA : 1234567)</li>
-                                    <li><strong>Groupe 9999 :</strong> Clones fictifs (DA : 9999001, 9999002...)
-                                    </li>
-                                    <li><strong>Noms :</strong> 80% québécois, 20% africains</li>
-                                    <li><strong>Synchronisation :</strong> Présences, évaluations, portfolios</li>
-                                </ul>
-                            </details>
-                        </div>
-                        </div><!-- FIN section-clonage-anonymise -->
-                    </div><!-- FIN carte clonage -->
 
                     <script>
                         // Fonction pour plier/déplier une section
@@ -10159,7 +10055,7 @@ Exemple :
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>
     <script src="js/navigation.js?v=2025111431"></script>
-    <script src="js/modes.js?v=2025111702"></script>
+    <script src="js/modes.js?v=2025112707"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025111325"></script>
@@ -10168,7 +10064,7 @@ Exemple :
     <script src="js/grilles.js?v=2025112700"></script>
     <script src="js/echelles.js?v=2025112700"></script>
     <script src="js/cartouches.js?v=2025112700"></script>
-    <script src="js/cours.js?v=2025112522"></script>
+    <script src="js/cours.js?v=2025112727"></script>
     <script src="js/contexte.js?v=2025111201"></script>
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
@@ -10176,7 +10072,7 @@ Exemple :
 
     <!-- Système de pratiques de notation (Beta 90-91) -->
     <!-- IMPORTANT: pratique-configurable.js doit être chargé EN PREMIER car pratique-registre.js l'utilise -->
-    <script src="js/pratiques/pratique-configurable.js?v=2025112705"></script>
+    <script src="js/pratiques/pratique-configurable.js?v=2025112710"></script>
     <script src="js/pratiques/pratique-registre.js"></script>
     <script src="js/pratiques/migration-pratiques.js"></script>
     <script src="js/pratiques/pratique-test.js"></script>
@@ -10220,11 +10116,17 @@ Exemple :
     <script src="js/evaluation-jetons.js?v=2025111435"></script>
     <script src="js/evaluation.js?v=2025112522"></script>
 
-    <!-- PRIMO ACCUEIL - Assistant de démarrage (Beta 92) -->
-    <script src="js/primo-accueil.js?v=2025112700"></script>
+    <!-- PRIMO - Système conversationnel de configuration (Beta 92) -->
+    <script src="js/primo-questions.js?v=2025112727"></script>
+    <script src="js/primo-modal.js?v=2025112727"></script>
+    <script src="js/primo-accueil.js?v=2025112727"></script>
+    <script src="js/primo-validation-champs.js?v=2025112727"></script>
+
+    <!-- GUIDAGE - Système d'assistance contextuelle en mode Assisté (Beta 92) -->
+    <script src="js/guidage.js?v=2025112706"></script>
 
     <!-- TUTORIEL INTERACTIF - Guide après données démo (Beta 92) -->
-    <script src="js/tutoriel-interactif.js?v=2025112701"></script>
+    <script src="js/tutoriel-interactif.js?v=2025112727"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2025111400"></script>
