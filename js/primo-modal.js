@@ -637,6 +637,8 @@ async function executerAction(question) {
             await importerDonneesDemo();
         } else if (question.action === 'importerMaterielPedagogique') {
             await importerMaterielPedagogique();
+        } else if (question.action === 'importerEchelleIDME') {
+            await importerEchelleIDME();
         } else if (question.action === 'creerProduction') {
             await creerProduction();
         } else if (question.action === 'passerEnModeNotification') {
@@ -795,6 +797,40 @@ async function importerMaterielPedagogique() {
 
     } catch (error) {
         console.error('[Primo] ❌ Erreur import matériel pédagogique:', error);
+        throw new Error(`Import échoué: ${error.message}`);
+    }
+}
+
+/**
+ * Importe uniquement l'échelle IDME
+ */
+async function importerEchelleIDME() {
+    console.log('[Primo] 🚀 Import de l\'échelle IDME...');
+
+    try {
+        // Importer l'échelle IDME
+        console.log('[Primo] 📥 Import échelle IDME...');
+        const responseEchelle = await fetch('materiel-demo/echelle-idme.json');
+        if (!responseEchelle.ok) throw new Error('Échelle IDME introuvable');
+        const echelleData = await responseEchelle.json();
+
+        // Sauvegarder directement dans localStorage
+        const echelle = echelleData.echelle;
+        const echelles = db.getSync('echelles', []);
+
+        // Vérifier si l'échelle existe déjà
+        const index = echelles.findIndex(e => e.id === echelle.id);
+        if (index !== -1) {
+            echelles[index] = echelle; // Remplacer
+        } else {
+            echelles.push(echelle); // Ajouter
+        }
+
+        db.setSync('echelles', echelles);
+        console.log('[Primo] ✅ Échelle IDME importée avec succès');
+
+    } catch (error) {
+        console.error('[Primo] ❌ Erreur import échelle IDME:', error);
         throw new Error(`Import échoué: ${error.message}`);
     }
 }
