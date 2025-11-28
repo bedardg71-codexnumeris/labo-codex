@@ -528,7 +528,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'etudiants-liste',
-        texte: 'Parfait ! Colle ta liste ici (DA, Nom, Prénom par ligne, séparés par virgules ou tabulations).\n\n💡 **Astuce** : Tu trouveras un fichier **etudiants-demo.csv** dans le dossier **materiel-demo/** que tu peux ouvrir et copier-coller.\n\nDans un vrai contexte, tu exporterais cette liste depuis ton système de gestion des apprentissages (Léa, Omnivox, Moodle, etc.).',
+        texte: 'Parfait ! Colle ta liste ici (DA, Nom, Prénom, Programme par ligne, séparés par virgules ou tabulations).\n\n💡 **Astuce** : Tu trouveras un fichier **etudiants-demo.csv** dans le dossier **materiel-demo/** que tu peux ouvrir et copier-coller.\n\nDans un vrai contexte, tu exporterais cette liste depuis ton système de gestion des apprentissages (Léa, Omnivox, Moodle, etc.).',
         type: 'textarea',
         placeholder: 'Ex:\n1234567,Tremblay,Sophie,506.A0\n2345678,Gagnon,Marc,200.B1',
         champsCibles: [
@@ -538,9 +538,6 @@ const QUESTIONS_PRIMO = [
             requis: true
         },
         aide: 'Copie-colle depuis Excel ou CSV fonctionne directement.',
-        sautSi: function(reponses) {
-            return reponses['etudiants-methode'] !== 'copier-coller';
-        },
         transformation: function(valeur) {
             if (!valeur || valeur.trim() === '') return [];
 
