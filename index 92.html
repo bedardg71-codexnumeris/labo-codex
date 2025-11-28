@@ -10046,7 +10046,7 @@ Exemple :
     <script src="js/trimestre.js?v=2025111325"></script>
     <script src="js/etudiants.js?v=2025111812"></script>
     <script src="js/productions.js?v=2025112700"></script>
-    <script src="js/grilles.js?v=2025112700"></script>
+    <script src="js/grilles.js?v=2025112800"></script>
     <script src="js/echelles.js?v=2025112800"></script>
     <script src="js/cartouches.js?v=2025112700"></script>
     <script src="js/cours.js?v=2025112727"></script>
@@ -10564,69 +10564,8 @@ Exemple :
         // ========================================
         // IMPORT DES GRILLES D'ÉVALUATION
         // ========================================
-        function importerGrilles(event) {
-            const fichier = event.target.files[0];
-            if (!fichier) return;
-
-            const lecteur = new FileReader();
-            lecteur.onload = function(e) {
-                try {
-                    const grillesImportees = JSON.parse(e.target.result);
-
-                    // Validation structure
-                    if (!Array.isArray(grillesImportees)) {
-                        alert('Format invalide : le fichier doit contenir un tableau de grilles.');
-                        return;
-                    }
-
-                    // Validation contenu
-                    for (let grille of grillesImportees) {
-                        if (!grille.id || !grille.nom || !grille.criteres) {
-                            alert('Format invalide : chaque grille doit avoir un id, un nom et des critères.');
-                            return;
-                        }
-                    }
-
-                    // Charger les grilles existantes
-                    let grillesTemplates = JSON.parse(localStorage.getItem('grillesTemplates') || '[]');
-
-                    // Fusionner (remplacer si ID existe, ajouter sinon)
-                    let nbAjoutees = 0;
-                    let nbMisesAJour = 0;
-
-                    grillesImportees.forEach(grilleImportee => {
-                        const index = grillesTemplates.findIndex(g => g.id === grilleImportee.id);
-                        if (index >= 0) {
-                            grillesTemplates[index] = grilleImportee;
-                            nbMisesAJour++;
-                        } else {
-                            grillesTemplates.push(grilleImportee);
-                            nbAjoutees++;
-                        }
-                    });
-
-                    // Sauvegarder
-                    localStorage.setItem('grillesTemplates', JSON.stringify(grillesTemplates));
-
-                    // Notification
-                    let message = `Import réussi :\n• ${nbAjoutees} grille(s) ajoutée(s)\n• ${nbMisesAJour} grille(s) mise(s) à jour`;
-
-                    if (typeof afficherNotificationSucces === 'function') {
-                        afficherNotificationSucces(message.replace(/\n/g, ' '));
-                    } else {
-                        alert(message);
-                    }
-
-                    // Réinitialiser le champ fichier
-                    event.target.value = '';
-
-                } catch (err) {
-                    console.error('Erreur import grilles:', err);
-                    alert('Fichier JSON invalide ou format incorrect.');
-                }
-            };
-            lecteur.readAsText(fichier);
-        }
+        // OBSOLÈTE : Cette fonction a été déplacée vers grilles.js (supporte nouveau format CC)
+        // La fonction importerGrilles() est maintenant chargée depuis grilles.js
 
         // ========================================
         // IMPORT DES ÉCHELLES DE PERFORMANCE
