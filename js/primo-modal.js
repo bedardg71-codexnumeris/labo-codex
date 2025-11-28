@@ -123,7 +123,7 @@ function ajouterAnimationsCSS() {
 /**
  * Affiche la question actuelle dans le modal
  */
-function afficherQuestionActuelle() {
+async function afficherQuestionActuelle() {
     const contenu = document.getElementById('primo-conversation-contenu');
     if (!contenu) return;
 
@@ -132,7 +132,7 @@ function afficherQuestionActuelle() {
 
     // Vérifier si on a terminé
     if (indexQuestionActuelle >= questionsActives.length) {
-        terminerConfiguration();
+        await terminerConfiguration();
         return;
     }
 
@@ -413,7 +413,7 @@ function genererBoutonsNavigation() {
     // Bouton Suivant ou Terminer
     if (question.type === 'message') {
         html += `
-            <button onclick="terminerConfiguration()" style="
+            <button onclick="terminerConfiguration().catch(err => console.error('[Primo] Erreur terminerConfiguration:', err))" style="
                 flex: 2;
                 padding: 12px 20px;
                 background: linear-gradient(135deg, #1a5266, #2d7a8c);
