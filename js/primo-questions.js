@@ -699,6 +699,18 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
+    // FIN DE LA SÉQUENCE "ÉVALUER" - RETOUR AU MENU
+    // ========================================================================
+    {
+        id: 'fin-sequence-evaluer',
+        texte: '🎉 **Bravo !** Tu as terminé la séquence d\'évaluation !\n\n✅ Échelle de performance importée\n✅ Grille de critères importée\n✅ Production créée\n✅ Évaluation complétée\n\n**Que veux-tu faire maintenant ?**\n\nTu peux choisir une autre activité depuis le menu d\'accueil :\n• **Créer ma pratique** : Configurer ta pratique de notation\n• **Charger données démo** : Explorer avec des données complètes\n• **Explorer** : Naviguer librement dans l\'application',
+        type: 'message',
+        champsCibles: [],
+        validation: { requis: false },
+        finParcoursEvaluer: true  // Indicateur pour retourner au menu
+    },
+
+    // ========================================================================
     // ÉTAPE 11 : IMPORT DES DONNÉES COMPLÈTES (MAGIE)
     // ========================================================================
     {
