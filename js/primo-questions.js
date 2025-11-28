@@ -538,16 +538,16 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'etudiants-liste',
-        texte: 'Parfait ! Colle ta liste ici (DA, Nom, Prénom par ligne, séparés par virgules ou tabulations).',
+        texte: 'Parfait ! Colle ta liste ici (DA, Nom, Prénom par ligne, séparés par virgules ou tabulations).\n\n💡 **Astuce** : Tu trouveras un fichier **etudiants-demo.csv** dans le dossier **materiel-demo/** que tu peux ouvrir et copier-coller.\n\nDans un vrai contexte, tu exporterais cette liste depuis ton système de gestion des apprentissages (Léa, Omnivox, Moodle, etc.).',
         type: 'textarea',
-        placeholder: 'Ex:\n1234567,Tremblay,Sophie\n2345678,Gagnon,Marc',
+        placeholder: 'Ex:\n1234567,Tremblay,Sophie,506.A0\n2345678,Gagnon,Marc,200.B1',
         champsCibles: [
             { cle: 'groupeEtudiants', champ: null }
         ],
         validation: {
             requis: true
         },
-        aide: 'Copie-colle depuis Excel fonctionne directement.',
+        aide: 'Copie-colle depuis Excel ou CSV fonctionne directement.',
         sautSi: function(reponses) {
             return reponses['etudiants-methode'] !== 'copier-coller';
         },
@@ -639,56 +639,16 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 8 : IMPORT DU MATÉRIEL PÉDAGOGIQUE
+    // ÉTAPE 8 : IMPORT AUTOMATIQUE DU MATÉRIEL PÉDAGOGIQUE
     // ========================================================================
     {
-        id: 'import-echelle',
-        texte: '**ÉTAPE 1/3 : Importer l\'échelle IDME**\n\n1️⃣ Va dans **Réglages → Matériel pédagogique → Échelles**\n2️⃣ Clique sur le bouton **📥 Importer**\n3️⃣ Sélectionne le fichier **echelle-idme.json**\n\nTu devrais voir apparaître «Échelle IDME (SOLO)» avec 5 niveaux.\n\nC\'est fait ?',
-        type: 'radio',
-        options: [
-            { value: 'fait', label: 'C\'est importé ! ✅' },
-            { value: 'erreur', label: 'J\'ai une erreur' },
-            { value: 'sauter', label: 'Je vais le faire plus tard' }
-        ],
-        champsCibles: [
-            { cle: 'tutoriel', champ: 'echelleImportee' }
-        ],
+        id: 'import-materiel-auto',
+        texte: 'Maintenant, je vais importer automatiquement pour toi :\n• Échelle IDME (5 niveaux)\n• Grille SRPNF (5 critères)\n• Cartouches de rétroaction (20 commentaires)\n\nC\'est parti ! 🚀',
+        type: 'action',
+        action: 'importerMaterielPedagogique',
+        champsCibles: [],
         validation: {
-            requis: true
-        }
-    },
-
-    {
-        id: 'import-grille',
-        texte: '**ÉTAPE 2/3 : Importer la grille SRPNF**\n\n1️⃣ Va dans **Réglages → Matériel pédagogique → Grilles**\n2️⃣ Clique sur le bouton **📥 Importer**\n3️⃣ Sélectionne le fichier **grille-srpnf.json**\n\nTu devrais voir apparaître «Grille SRPNF» avec 5 critères (Structure, Rigueur, Plausibilité, Nuance, Français).\n\nC\'est fait ?',
-        type: 'radio',
-        options: [
-            { value: 'fait', label: 'C\'est importé ! ✅' },
-            { value: 'erreur', label: 'J\'ai une erreur' },
-            { value: 'sauter', label: 'Je vais le faire plus tard' }
-        ],
-        champsCibles: [
-            { cle: 'tutoriel', champ: 'grilleImportee' }
-        ],
-        validation: {
-            requis: true
-        }
-    },
-
-    {
-        id: 'import-cartouches',
-        texte: '**ÉTAPE 3/3 : Importer les cartouches de rétroaction**\n\n1️⃣ Va dans **Réglages → Matériel pédagogique → Cartouches**\n2️⃣ Clique sur le bouton **📥 Importer**\n3️⃣ Sélectionne le fichier **cartouches-srpnf.json**\n\nTu devrais voir apparaître «Rétroactions SRPNF» avec 20 commentaires.\n\nC\'est fait ?',
-        type: 'radio',
-        options: [
-            { value: 'fait', label: 'C\'est importé ! ✅' },
-            { value: 'erreur', label: 'J\'ai une erreur' },
-            { value: 'sauter', label: 'Je vais le faire plus tard' }
-        ],
-        champsCibles: [
-            { cle: 'tutoriel', champ: 'cartouchesImportees' }
-        ],
-        validation: {
-            requis: true
+            requis: false
         }
     },
 
