@@ -269,6 +269,25 @@ async function afficherQuestionActuelle() {
 }
 
 /**
+ * Parse le markdown simple dans le texte
+ * Gère: **bold**, bullet points, numérotation
+ */
+function parserMarkdownSimple(texte) {
+    if (!texte) return '';
+
+    // Convertir **bold** en <strong>
+    texte = texte.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Convertir lignes commençant par - en liste à puces
+    texte = texte.replace(/^- (.+)$/gm, '<li>$1</li>');
+
+    // Convertir lignes commençant par chiffre. en liste numérotée
+    texte = texte.replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>');
+
+    return texte;
+}
+
+/**
  * Génère le HTML pour une question
  */
 function genererHTMLQuestion(question) {
@@ -308,7 +327,9 @@ function genererHTMLQuestion(question) {
         </div>
     `;
 
-    // Question
+    // Question (avec parsing markdown)
+    const texteFormate = parserMarkdownSimple(question.texte);
+
     html += `
         <div style="margin-bottom: var(--primo-spacing-lg, 30px);">
             <div style="
@@ -317,14 +338,15 @@ function genererHTMLQuestion(question) {
                 line-height: 1.6;
                 white-space: pre-line;
                 margin-bottom: var(--primo-spacing-md, 20px);
-            ">${question.texte}</div>
+            ">${texteFormate}</div>
     `;
 
     // Input selon le type
     html += genererInputQuestion(question);
 
-    // Aide si présente
+    // Aide si présente (avec parsing markdown)
     if (question.aide) {
+        const aideFormatee = parserMarkdownSimple(question.aide);
         html += `
             <div style="
                 margin-top: var(--primo-spacing-sm, 10px);
@@ -336,7 +358,7 @@ function genererHTMLQuestion(question) {
                 color: var(--gris-fonce);
                 line-height: 1.5;
             ">
-                💡 ${question.aide}
+                💡 ${aideFormatee}
             </div>
         `;
     }
