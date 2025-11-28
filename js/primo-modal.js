@@ -685,6 +685,11 @@ async function terminerConfiguration() {
     // Importer le matériel pédagogique de démarrage (asynchrone)
     await importerMaterielDemarrage();
 
+    // Définir le mode de travail sur "simulation" (Mode Assisté)
+    // L'utilisateur qui utilise Primo est nécessairement en mode assisté
+    db.setSync('modeApplication', 'simulation');
+    console.log('[Primo] Mode de travail défini sur "simulation" (Mode Assisté)');
+
     // Afficher notification de succès
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(
