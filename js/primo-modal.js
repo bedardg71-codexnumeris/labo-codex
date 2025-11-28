@@ -735,6 +735,20 @@ function sauvegarderReponses(reponses) {
 }
 
 /**
+ * Transforme une réponse selon la fonction transformation de la question
+ */
+function transformerReponse(questionId, valeur) {
+    const question = obtenirQuestion(questionId);
+
+    if (question && typeof question.transformation === 'function') {
+        console.log(`[Primo] Transformation appliquée pour ${questionId}`);
+        return question.transformation(valeur);
+    }
+
+    return valeur;
+}
+
+/**
  * Sauvegarde un champ dans localStorage
  */
 function sauvegarderChamp(cible, valeur) {
