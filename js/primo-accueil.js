@@ -73,9 +73,9 @@ function afficherModalAccueil() {
     modal.innerHTML = `
         <div style="
             background: white;
-            border-radius: 12px;
-            padding: 40px;
-            max-width: 600px;
+            border-radius: var(--primo-border-radius, 12px);
+            padding: var(--primo-padding, 35px);
+            max-width: var(--primo-modal-width, 700px);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             animation: slideUp 0.4s ease-out;
         ">
@@ -112,8 +112,8 @@ function afficherModalAccueil() {
                 background: var(--bleu-tres-pale);
                 border-left: 4px solid var(--bleu-principal);
                 padding: 20px;
-                border-radius: 8px;
-                margin-bottom: 30px;
+                border-radius: 6px;
+                margin-bottom: var(--primo-spacing-lg, 30px);
             ">
                 <p style="margin: 0 0 15px; color: var(--gris-fonce); font-size: 1rem;">
                     Je constate que tu n'as pas encore de configuration ou de données dans l'application.
@@ -234,12 +234,14 @@ function afficherModalAccueil() {
             <!-- Footer -->
             <div style="
                 text-align: center;
-                padding-top: 20px;
+                padding-top: var(--primo-spacing-md, 20px);
+                margin-top: var(--primo-spacing-md, 20px);
                 border-top: 1px solid var(--bordure-claire);
-                color: var(--gris-clair);
+                color: var(--gris-moyen);
                 font-size: 0.85rem;
+                line-height: 1.5;
             ">
-                💡 <strong>Conseil :</strong> Les données de démo sont idéales pour commencer !
+                💡 <strong style="color: var(--bleu-principal);">Conseil :</strong> Les données de démo sont idéales pour commencer !
             </div>
         </div>
     `;
