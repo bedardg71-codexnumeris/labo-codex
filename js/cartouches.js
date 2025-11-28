@@ -1542,6 +1542,9 @@ function importerCartouches(event) {
         try {
             const donnees = JSON.parse(e.target.result);
 
+            // Stocker temporairement dans une variable globale pour éviter problèmes sérialisation
+            window._cartouchesImportEnAttente = donnees;
+
             // Vérifier licence CC et afficher badge
             const estCC = verifierLicenceCC(donnees);
 
@@ -1558,8 +1561,8 @@ function importerCartouches(event) {
                     <div style="background: white; padding: 20px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto;">
                         ${message}
                         <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
-                            <button class="btn" onclick="this.closest('div[style*=fixed]').parentElement.remove()">Annuler</button>
-                            <button class="btn btn-confirmer" onclick="window.confirmerImportCartouches(${JSON.stringify(donnees).replace(/"/g, '&quot;')}); this.closest('div[style*=fixed]').parentElement.remove()">Importer</button>
+                            <button class="btn" onclick="this.closest('div[style*=fixed]').parentElement.remove(); delete window._cartouchesImportEnAttente;">Annuler</button>
+                            <button class="btn btn-confirmer" onclick="window.confirmerImportCartouches(window._cartouchesImportEnAttente); this.closest('div[style*=fixed]').parentElement.remove(); delete window._cartouchesImportEnAttente;">Importer</button>
                         </div>
                     </div>
                 </div>
