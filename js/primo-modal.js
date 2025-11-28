@@ -50,10 +50,10 @@ function ouvrirModalConversationnel(indexDepart = 0) {
     modal.innerHTML = `
         <div id="primo-conversation-contenu" style="
             background: white;
-            border-radius: 12px;
-            padding: 40px;
-            max-width: 600px;
-            min-width: 500px;
+            border-radius: var(--primo-border-radius, 12px);
+            padding: var(--primo-padding, 35px);
+            max-width: var(--primo-modal-width, 700px);
+            min-width: 550px;
             max-height: 80vh;
             overflow-y: auto;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
@@ -94,6 +94,17 @@ function ajouterAnimationsCSS() {
     const style = document.createElement('style');
     style.id = 'primo-animations';
     style.textContent = `
+        /* Variables CSS pour Primo */
+        :root {
+            --primo-modal-width: 700px;
+            --primo-padding: 35px;
+            --primo-spacing-sm: 10px;
+            --primo-spacing-md: 20px;
+            --primo-spacing-lg: 30px;
+            --primo-border-radius: 12px;
+        }
+
+        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -111,6 +122,107 @@ function ajouterAnimationsCSS() {
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        /* Barre de progression Primo */
+        .primo-progress-bar {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--bordure-claire);
+            z-index: 100;
+        }
+        .primo-progress-track {
+            height: 6px;
+            background: var(--gris-tres-pale);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .primo-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--bleu-principal), #2d7a8c);
+            border-radius: 3px;
+            transition: width 0.4s ease-out;
+        }
+        .primo-progress-text {
+            font-size: 0.8rem;
+            color: var(--gris-moyen);
+            text-align: center;
+        }
+
+        /* Typographie améliorée pour les instructions */
+        #primo-conversation-contenu h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--bleu-principal);
+            margin: 20px 0 12px 0;
+            line-height: 1.4;
+        }
+
+        #primo-conversation-contenu p {
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        #primo-conversation-contenu code {
+            background: var(--gris-tres-pale);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            color: var(--gris-fonce);
+        }
+
+        #primo-conversation-contenu pre {
+            background: var(--gris-tres-pale);
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+
+        #primo-conversation-contenu ul,
+        #primo-conversation-contenu ol {
+            margin: 12px 0;
+            padding-left: 25px;
+        }
+
+        #primo-conversation-contenu li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        #primo-conversation-contenu ol li {
+            padding-left: 8px;
+        }
+
+        #primo-conversation-contenu strong {
+            color: var(--bleu-principal);
+            font-weight: 600;
+        }
+
+        /* Cartes d'instruction */
+        .primo-instruction-card {
+            background: var(--bleu-tres-pale);
+            border-left: 4px solid var(--bleu-principal);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        /* Badge d'étape complétée */
+        .primo-step-completed {
+            display: inline-block;
+            background: var(--vert-success);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
         }
     `;
     document.head.appendChild(style);
@@ -162,6 +274,20 @@ async function afficherQuestionActuelle() {
 function genererHTMLQuestion(question) {
     let html = '';
 
+    // Barre de progression
+    const questionsActives = obtenirQuestionsActives(reponsesPrimo);
+    const progression = ((indexQuestionActuelle + 1) / questionsActives.length) * 100;
+    const etapeTexte = `Étape ${indexQuestionActuelle + 1} sur ${questionsActives.length}`;
+
+    html += `
+        <div class="primo-progress-bar">
+            <div class="primo-progress-track">
+                <div class="primo-progress-fill" style="width: ${progression}%;"></div>
+            </div>
+            <div class="primo-progress-text">${etapeTexte}</div>
+        </div>
+    `;
+
     // En-tête avec Primo
     html += `
         <div style="text-align: center; margin-bottom: 30px;">
@@ -184,13 +310,13 @@ function genererHTMLQuestion(question) {
 
     // Question
     html += `
-        <div style="margin-bottom: 25px;">
+        <div style="margin-bottom: var(--primo-spacing-lg, 30px);">
             <div style="
-                font-size: 1.1rem;
+                font-size: 1.05rem;
                 color: var(--gris-fonce);
                 line-height: 1.6;
                 white-space: pre-line;
-                margin-bottom: 20px;
+                margin-bottom: var(--primo-spacing-md, 20px);
             ">${question.texte}</div>
     `;
 
@@ -201,13 +327,14 @@ function genererHTMLQuestion(question) {
     if (question.aide) {
         html += `
             <div style="
-                margin-top: 10px;
-                padding: 10px;
+                margin-top: var(--primo-spacing-sm, 10px);
+                padding: 12px 15px;
                 background: var(--bleu-tres-pale);
-                border-left: 3px solid var(--bleu-principal);
-                border-radius: 4px;
-                font-size: 0.85rem;
-                color: var(--gris-moyen);
+                border-left: 4px solid var(--bleu-principal);
+                border-radius: 6px;
+                font-size: 0.9rem;
+                color: var(--gris-fonce);
+                line-height: 1.5;
             ">
                 💡 ${question.aide}
             </div>
@@ -436,7 +563,7 @@ function genererBoutonsNavigation() {
     const estPremiere = indexQuestionActuelle === 0;
     const estDerniere = indexQuestionActuelle === questionsActives.length - 1;
 
-    let html = '<div style="display: flex; gap: 10px; margin-top: 25px;">';
+    let html = '<div style="display: flex; gap: var(--primo-spacing-sm, 10px); margin-top: var(--primo-spacing-lg, 30px);">';
 
     // Bouton Précédent
     if (!estPremiere) {
