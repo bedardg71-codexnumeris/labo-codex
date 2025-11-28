@@ -725,21 +725,12 @@ const QUESTIONS_PRIMO = [
         }
     },
 
-    {
-        id: 'production-creation-auto',
-        texte: 'Parfait ! Je vais maintenant créer cette production pour toi.\n\nC\'est parti ! 🚀',
-        type: 'action',
-        action: 'creerProduction',
-        champsCibles: [],
-        validation: { requis: false }
-    },
-
     // ========================================================================
     // ÉTAPE 10 : PASSAGE EN MODE GUIDÉ (NOTIFICATIONS)
     // ========================================================================
     {
         id: 'transition-mode-guide',
-        texte: '**Maintenant, place à la pratique !**\n\nJe vais te guider pour créer ta première évaluation.\n\nJe vais me transformer en **assistant discret** (notifications en haut à droite) pendant que tu navigues librement dans l\'application.\n\nUtilise le bouton **"Suivant →"** en bas à droite pour avancer dans les étapes.\n\nC\'est parti ! 🚀',
+        texte: '**Maintenant, place à la pratique !**\n\nJe vais te guider pas à pas pour créer ta première production et évaluation.\n\nJe vais me transformer en **assistant discret** (notifications en haut à droite) pendant que tu navigues librement dans l\'application.\n\nUtilise le bouton **"Suivant →"** en bas à droite pour avancer dans les étapes.\n\nC\'est parti ! 🚀',
         type: 'action',
         action: 'passerEnModeNotification',
         champsCibles: [],
@@ -747,11 +738,22 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 11 : CRÉATION D'UNE ÉVALUATION (MODE NOTIFICATION)
+    // ÉTAPE 11 : CRÉATION D'UNE PRODUCTION (MODE NOTIFICATION)
+    // ========================================================================
+    {
+        id: 'creer-production-guidee',
+        texte: '**Étape 1 : Créer ta production**\n\n1️⃣ Va dans **Matériel → Productions**\n2️⃣ Clique sur **Nouvelle production**\n3️⃣ Remplis le formulaire :\n   • **Titre** : {{tutoriel.productionTitre}}\n   • **Description** : {{tutoriel.productionDescription}}\n   • **Type** : Test/Quiz\n   • **Pondération** : {{tutoriel.productionPonderation}}%\n   • **Grille liée** : Grille SRPNF\n4️⃣ Sauvegarde !\n\nClique **"Suivant →"** quand c\'est fait.',
+        type: 'instruction',
+        champsCibles: [],
+        validation: { requis: false }
+    },
+
+    // ========================================================================
+    // ÉTAPE 12 : CRÉATION D'UNE ÉVALUATION (MODE NOTIFICATION)
     // ========================================================================
     {
         id: 'navigation-evaluations',
-        texte: '**Étape 1 : Accéder aux évaluations**\n\n1️⃣ Va dans **Évaluations → Procéder à une évaluation**\n2️⃣ Clique sur **Nouvelle évaluation**\n\nQuand c\'est fait, clique sur **"Suivant →"** en bas à droite.',
+        texte: '**Étape 2 : Accéder aux évaluations**\n\n1️⃣ Va dans **Évaluations → Procéder à une évaluation**\n2️⃣ Clique sur **Nouvelle évaluation**\n\nQuand c\'est fait, clique sur **"Suivant →"** en bas à droite.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -759,7 +761,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'selection-etudiant',
-        texte: '**Étape 2 : Choisir un étudiant**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne la production **{{tutoriel.productionTitre}}**\n\nTu devrais voir :\n✅ Échelle IDME (5 niveaux)\n✅ Grille SRPNF (5 critères)\n✅ Cartouches de rétroaction suggérées\n\nClique **"Suivant →"** quand tu vois tout ça.',
+        texte: '**Étape 3 : Choisir un étudiant et la production**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne ta production **{{tutoriel.productionTitre}}**\n\nTu devrais voir :\n✅ Échelle IDME (5 niveaux)\n✅ Grille SRPNF (5 critères)\n✅ Cartouches de rétroaction suggérées\n\nClique **"Suivant →"** quand tu vois tout ça.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
