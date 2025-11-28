@@ -2331,37 +2331,8 @@ function importerPartiel() {
 /**
  * Exporte la cartouche actuellement active en JSON
  */
-function exporterCartoucheActive() {
-    if (!window.cartoucheActuel) {
-        alert('Aucune cartouche n\'est chargée');
-        return;
-    }
-
-    const grilleId = window.cartoucheActuel.grilleId || document.getElementById('selectGrilleRetroaction').value;
-    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
-    const cartouche = cartouches.find(c => c.id === window.cartoucheActuel.id);
-
-    if (!cartouche) {
-        alert('Cartouche introuvable');
-        return;
-    }
-
-    // Créer le fichier JSON
-    const dataStr = JSON.stringify([cartouche], null, 2);
-    const dataBlob = new Blob([dataStr], {type: 'application/json'});
-
-    // Télécharger
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    const nomFichier = cartouche.nom.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    const dateStr = new Date().toISOString().split('T')[0];
-    link.download = `cartouche-${nomFichier}-${dateStr}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-
-    afficherNotificationSucces('Cartouche exportée !');
-}
+// OBSOLÈTE : Fonction dupliquée supprimée (exportait dans l'ancien format sans métadonnées CC)
+// La fonction exporterCartoucheActive() correcte est définie plus haut (ligne 1885) et utilise ajouterMetadonnéesCC()
 
 /**
  * Importe une cartouche depuis un fichier JSON
