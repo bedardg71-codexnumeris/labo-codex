@@ -85,12 +85,13 @@ const QUESTIONS_PRIMO = [
         texte: 'Quelle année ?',
         type: 'select',
         options: function() {
-            // Générer les 3 prochaines années
+            // Générer les 3 prochaines années (à partir de 2026 minimum)
             const anneeActuelle = new Date().getFullYear();
+            const anneeDepart = anneeActuelle < 2026 ? 2026 : anneeActuelle;
             return [
-                { value: anneeActuelle, label: anneeActuelle.toString() },
-                { value: anneeActuelle + 1, label: (anneeActuelle + 1).toString() },
-                { value: anneeActuelle + 2, label: (anneeActuelle + 2).toString() }
+                { value: anneeDepart, label: anneeDepart.toString() },
+                { value: anneeDepart + 1, label: (anneeDepart + 1).toString() },
+                { value: anneeDepart + 2, label: (anneeDepart + 2).toString() }
             ];
         },
         champsCibles: [
@@ -299,28 +300,52 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure1-debut',
         texte: 'Séance 1 - À quelle heure commence-t-elle ?',
-        type: 'time',
+        type: 'select',
+        options: [
+            { value: '08:00', label: '08:00' },
+            { value: '09:00', label: '09:00' },
+            { value: '10:00', label: '10:00' },
+            { value: '11:00', label: '11:00' },
+            { value: '12:00', label: '12:00' },
+            { value: '13:00', label: '13:00' },
+            { value: '14:00', label: '14:00' },
+            { value: '15:00', label: '15:00' },
+            { value: '16:00', label: '16:00' },
+            { value: '17:00', label: '17:00' },
+            { value: '18:00', label: '18:00' }
+        ],
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure1Debut' }
         ],
         validation: {
             requis: true
-        },
-        placeholder: 'Ex: 08:00'
+        }
     },
 
     {
         id: 'horaire-heure1-fin',
         texte: 'Séance 1 - À quelle heure finit-elle ?',
-        type: 'time',
+        type: 'select',
+        options: [
+            { value: '09:00', label: '09:00' },
+            { value: '10:00', label: '10:00' },
+            { value: '11:00', label: '11:00' },
+            { value: '12:00', label: '12:00' },
+            { value: '13:00', label: '13:00' },
+            { value: '14:00', label: '14:00' },
+            { value: '15:00', label: '15:00' },
+            { value: '16:00', label: '16:00' },
+            { value: '17:00', label: '17:00' },
+            { value: '18:00', label: '18:00' },
+            { value: '19:00', label: '19:00' }
+        ],
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure1Fin' }
         ],
         validation: {
             requis: true,
             apres: 'horaire-heure1-debut'
-        },
-        placeholder: 'Ex: 11:00'
+        }
     },
 
     // Questions conditionnelles si 2 ou 3 séances
@@ -350,14 +375,26 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure2-debut',
         texte: 'Séance 2 - À quelle heure commence-t-elle ?',
-        type: 'time',
+        type: 'select',
+        options: [
+            { value: '08:00', label: '08:00' },
+            { value: '09:00', label: '09:00' },
+            { value: '10:00', label: '10:00' },
+            { value: '11:00', label: '11:00' },
+            { value: '12:00', label: '12:00' },
+            { value: '13:00', label: '13:00' },
+            { value: '14:00', label: '14:00' },
+            { value: '15:00', label: '15:00' },
+            { value: '16:00', label: '16:00' },
+            { value: '17:00', label: '17:00' },
+            { value: '18:00', label: '18:00' }
+        ],
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure2Debut' }
         ],
         validation: {
             requis: true
         },
-        placeholder: 'Ex: 13:00',
         sautSi: function(reponses) {
             const nb = reponses['nombre-seances'];
             return nb !== '2' && nb !== '3';
@@ -367,7 +404,20 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure2-fin',
         texte: 'Séance 2 - À quelle heure finit-elle ?',
-        type: 'time',
+        type: 'select',
+        options: [
+            { value: '09:00', label: '09:00' },
+            { value: '10:00', label: '10:00' },
+            { value: '11:00', label: '11:00' },
+            { value: '12:00', label: '12:00' },
+            { value: '13:00', label: '13:00' },
+            { value: '14:00', label: '14:00' },
+            { value: '15:00', label: '15:00' },
+            { value: '16:00', label: '16:00' },
+            { value: '17:00', label: '17:00' },
+            { value: '18:00', label: '18:00' },
+            { value: '19:00', label: '19:00' }
+        ],
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure2Fin' }
         ],
@@ -375,7 +425,6 @@ const QUESTIONS_PRIMO = [
             requis: true,
             apres: 'horaire-heure2-debut'
         },
-        placeholder: 'Ex: 16:00',
         sautSi: function(reponses) {
             const nb = reponses['nombre-seances'];
             return nb !== '2' && nb !== '3';
@@ -408,14 +457,26 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure3-debut',
         texte: 'Séance 3 - À quelle heure commence-t-elle ?',
-        type: 'time',
+        type: 'select',
+        options: [
+            { value: '08:00', label: '08:00' },
+            { value: '09:00', label: '09:00' },
+            { value: '10:00', label: '10:00' },
+            { value: '11:00', label: '11:00' },
+            { value: '12:00', label: '12:00' },
+            { value: '13:00', label: '13:00' },
+            { value: '14:00', label: '14:00' },
+            { value: '15:00', label: '15:00' },
+            { value: '16:00', label: '16:00' },
+            { value: '17:00', label: '17:00' },
+            { value: '18:00', label: '18:00' }
+        ],
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure3Debut' }
         ],
         validation: {
             requis: true
         },
-        placeholder: 'Ex: 13:00',
         sautSi: function(reponses) {
             return reponses['nombre-seances'] !== '3';
         }
@@ -424,7 +485,20 @@ const QUESTIONS_PRIMO = [
     {
         id: 'horaire-heure3-fin',
         texte: 'Séance 3 - À quelle heure finit-elle ?',
-        type: 'time',
+        type: 'select',
+        options: [
+            { value: '09:00', label: '09:00' },
+            { value: '10:00', label: '10:00' },
+            { value: '11:00', label: '11:00' },
+            { value: '12:00', label: '12:00' },
+            { value: '13:00', label: '13:00' },
+            { value: '14:00', label: '14:00' },
+            { value: '15:00', label: '15:00' },
+            { value: '16:00', label: '16:00' },
+            { value: '17:00', label: '17:00' },
+            { value: '18:00', label: '18:00' },
+            { value: '19:00', label: '19:00' }
+        ],
         champsCibles: [
             { cle: 'horaireHebdomadaire', champ: 'heure3Fin' }
         ],
@@ -432,7 +506,6 @@ const QUESTIONS_PRIMO = [
             requis: true,
             apres: 'horaire-heure3-debut'
         },
-        placeholder: 'Ex: 16:00',
         sautSi: function(reponses) {
             return reponses['nombre-seances'] !== '3';
         }
@@ -508,11 +581,284 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // MESSAGE FINAL
+    // ÉTAPE 6 : CONFIRMATION CRÉATION DU GROUPE
+    // ========================================================================
+    {
+        id: 'confirmation-groupe',
+        texte: 'Parfait ! Je viens de créer un groupe de simulation avec les étudiants que tu as fournis. 🎓\n\nMaintenant, passons à l\'étape suivante : le matériel pédagogique !',
+        type: 'instruction',
+        champsCibles: [],
+        validation: {
+            requis: false
+        }
+    },
+
+    // ========================================================================
+    // ÉTAPE 7 : PRÉPARATION MATÉRIEL PÉDAGOGIQUE
+    // ========================================================================
+    {
+        id: 'intro-materiel',
+        texte: 'Des collègues ont créé du matériel pédagogique pour toi et l\'ont partagé sous licence libre (CC BY-NC-SA 4.0). C\'est une caractéristique de cette application : la collaboration entre enseignant·es ! 🤝\n\nTu vas trouver ce matériel dans le dossier **materiel-demo/** :\n\n📁 materiel-demo/\n   ├── echelle-idme.json\n   ├── grille-srpnf.json\n   └── cartouches-srpnf.json\n\nOuvre ce dossier dans une autre fenêtre, on va en avoir besoin ! 📂',
+        type: 'instruction',
+        champsCibles: [],
+        validation: {
+            requis: false
+        },
+        aide: 'Le dossier materiel-demo/ se trouve à la racine du projet.'
+    },
+
+    {
+        id: 'confirmation-dossier-ouvert',
+        texte: 'As-tu ouvert le dossier **materiel-demo/** ?',
+        type: 'radio',
+        options: [
+            { value: 'oui', label: 'Oui, c\'est ouvert !' },
+            { value: 'aide', label: 'J\'ai besoin d\'aide pour le trouver' }
+        ],
+        champsCibles: [],
+        validation: {
+            requis: true
+        }
+    },
+
+    {
+        id: 'aide-dossier',
+        texte: 'Le dossier **materiel-demo/** se trouve au même endroit que le fichier index 92.html.\n\nSi tu utilises le Finder (macOS), tu peux faire un clic droit sur le fichier index 92.html et choisir «Afficher dans le Finder».\n\nC\'est bon, tu l\'as trouvé ?',
+        type: 'radio',
+        options: [
+            { value: 'oui', label: 'Oui, trouvé !' },
+            { value: 'non', label: 'Non, je continue sans' }
+        ],
+        champsCibles: [],
+        validation: {
+            requis: false
+        },
+        sautSi: function(reponses) {
+            return reponses['confirmation-dossier-ouvert'] === 'oui';
+        }
+    },
+
+    // ========================================================================
+    // ÉTAPE 8 : IMPORT DU MATÉRIEL PÉDAGOGIQUE
+    // ========================================================================
+    {
+        id: 'import-echelle',
+        texte: '**ÉTAPE 1/3 : Importer l\'échelle IDME**\n\n1️⃣ Va dans **Réglages → Matériel pédagogique → Échelles**\n2️⃣ Clique sur le bouton **📥 Importer**\n3️⃣ Sélectionne le fichier **echelle-idme.json**\n\nTu devrais voir apparaître «Échelle IDME (SOLO)» avec 5 niveaux.\n\nC\'est fait ?',
+        type: 'radio',
+        options: [
+            { value: 'fait', label: 'C\'est importé ! ✅' },
+            { value: 'erreur', label: 'J\'ai une erreur' },
+            { value: 'sauter', label: 'Je vais le faire plus tard' }
+        ],
+        champsCibles: [
+            { cle: 'tutoriel', champ: 'echelleImportee' }
+        ],
+        validation: {
+            requis: true
+        }
+    },
+
+    {
+        id: 'import-grille',
+        texte: '**ÉTAPE 2/3 : Importer la grille SRPNF**\n\n1️⃣ Va dans **Réglages → Matériel pédagogique → Grilles**\n2️⃣ Clique sur le bouton **📥 Importer**\n3️⃣ Sélectionne le fichier **grille-srpnf.json**\n\nTu devrais voir apparaître «Grille SRPNF» avec 5 critères (Structure, Rigueur, Plausibilité, Nuance, Français).\n\nC\'est fait ?',
+        type: 'radio',
+        options: [
+            { value: 'fait', label: 'C\'est importé ! ✅' },
+            { value: 'erreur', label: 'J\'ai une erreur' },
+            { value: 'sauter', label: 'Je vais le faire plus tard' }
+        ],
+        champsCibles: [
+            { cle: 'tutoriel', champ: 'grilleImportee' }
+        ],
+        validation: {
+            requis: true
+        }
+    },
+
+    {
+        id: 'import-cartouches',
+        texte: '**ÉTAPE 3/3 : Importer les cartouches de rétroaction**\n\n1️⃣ Va dans **Réglages → Matériel pédagogique → Cartouches**\n2️⃣ Clique sur le bouton **📥 Importer**\n3️⃣ Sélectionne le fichier **cartouches-srpnf.json**\n\nTu devrais voir apparaître «Rétroactions SRPNF» avec 20 commentaires.\n\nC\'est fait ?',
+        type: 'radio',
+        options: [
+            { value: 'fait', label: 'C\'est importé ! ✅' },
+            { value: 'erreur', label: 'J\'ai une erreur' },
+            { value: 'sauter', label: 'Je vais le faire plus tard' }
+        ],
+        champsCibles: [
+            { cle: 'tutoriel', champ: 'cartouchesImportees' }
+        ],
+        validation: {
+            requis: true
+        }
+    },
+
+    {
+        id: 'validation-materiel',
+        texte: 'Excellent ! 🎉\n\nVérifie que tu vois bien :\n✅ Échelle IDME (5 niveaux) dans Échelles\n✅ Grille SRPNF (5 critères) dans Grilles\n✅ 20 cartouches dans Cartouches\n\nMaintenant, nous allons voir comment créer une production et l\'évaluer !',
+        type: 'instruction',
+        champsCibles: [],
+        validation: {
+            requis: false
+        }
+    },
+
+    // ========================================================================
+    // ÉTAPE 9 : CRÉATION D'UNE PRODUCTION
+    // ========================================================================
+    {
+        id: 'creer-production',
+        texte: '**Créons ta première production**\n\n1️⃣ Va dans **Matériel → Productions**\n2️⃣ Clique sur **Nouvelle production**\n3️⃣ Remplis le formulaire :\n   • **Nom** : Test de connaissances\n   • **Type** : Test/Quiz\n   • **Pondération** : 10%\n   • **Grille liée** : Grille SRPNF\n4️⃣ Sauvegarde !\n\nC\'est fait ?',
+        type: 'radio',
+        options: [
+            { value: 'fait', label: 'Production créée ! ✅' },
+            { value: 'aide', label: 'J\'ai besoin d\'aide' },
+            { value: 'sauter', label: 'Je vais le faire plus tard' }
+        ],
+        champsCibles: [
+            { cle: 'tutoriel', champ: 'productionCreee' }
+        ],
+        validation: {
+            requis: true
+        }
+    },
+
+    // ========================================================================
+    // ÉTAPE 10 : CRÉATION D'UNE ÉVALUATION
+    // ========================================================================
+    {
+        id: 'creer-evaluation',
+        texte: '**Évaluons cette production pour un étudiant**\n\n1️⃣ Va dans **Évaluations → Procéder à une évaluation**\n2️⃣ Clique sur **Nouvelle évaluation**\n3️⃣ Choisis n\'importe quel étudiant de ta liste fictive\n4️⃣ Sélectionne **Test de connaissances**\n\nTu devrais voir :\n✅ Échelle IDME avec les 5 niveaux\n✅ Grille SRPNF avec les 5 critères\n✅ Cartouches de rétroaction suggérées\n\nTu vois tout ça ?',
+        type: 'radio',
+        options: [
+            { value: 'oui', label: 'Oui, je vois tout ! ✅' },
+            { value: 'non', label: 'Non, il manque quelque chose' }
+        ],
+        champsCibles: [],
+        validation: {
+            requis: true
+        }
+    },
+
+    {
+        id: 'attribuer-niveaux',
+        texte: '**Attribue des niveaux de performance**\n\nPour chaque critère, choisis un niveau IDME :\n• **Structure** : M (Maîtrisé)\n• **Rigueur** : D (Développement)\n• **Plausibilité** : M (Maîtrisé)\n• **Nuance** : I (Insuffisant)\n• **Français** : D (Développement)\n\nUne note est calculée automatiquement ! 🎉\n\nSauvegarde l\'évaluation.\n\nC\'est fait ?',
+        type: 'radio',
+        options: [
+            { value: 'fait', label: 'Évaluation sauvegardée ! ✅' },
+            { value: 'sauter', label: 'Je vais le faire plus tard' }
+        ],
+        champsCibles: [
+            { cle: 'tutoriel', champ: 'evaluationCreee' }
+        ],
+        validation: {
+            requis: true
+        }
+    },
+
+    // ========================================================================
+    // ÉTAPE 11 : IMPORT DES DONNÉES COMPLÈTES (MAGIE)
+    // ========================================================================
+    {
+        id: 'intro-magie',
+        texte: '**Tour de magie ! 🎩✨**\n\nMaintenant je vais remplir automatiquement ton groupe fictif avec :\n• 50+ évaluations déjà complétées\n• Présences variées (assidus, absents, entre-deux)\n• Productions diversifiées\n• Indices A-C-P calculés\n\nComme ça, tu peux explorer toutes les fonctionnalités de l\'application sans avoir à tout saisir manuellement !\n\nPrêt·e pour la magie ?',
+        type: 'radio',
+        options: [
+            { value: 'oui', label: 'Oui, allons-y ! 🚀' },
+            { value: 'non', label: 'Non, je préfère continuer sans' }
+        ],
+        champsCibles: [
+            { cle: 'tutoriel', champ: 'importDonneesDemo' }
+        ],
+        validation: {
+            requis: true
+        }
+    },
+
+    {
+        id: 'execution-import-demo',
+        texte: 'Import des données de démonstration en cours...',
+        type: 'action',
+        action: 'importerDonneesDemo',
+        champsCibles: [],
+        validation: {
+            requis: false
+        },
+        sautSi: function(reponses) {
+            return reponses['intro-magie'] !== 'oui';
+        }
+    },
+
+    {
+        id: 'confirmation-import-demo',
+        texte: '✅ **Données importées !**\n\nTon groupe fictif contient maintenant :\n• 10 étudiants\n• 5 productions évaluées\n• 12 semaines de présences\n• Indices de risque calculés\n\nPassons maintenant à la saisie des présences !',
+        type: 'instruction',
+        champsCibles: [],
+        validation: {
+            requis: false
+        },
+        sautSi: function(reponses) {
+            return reponses['intro-magie'] !== 'oui';
+        }
+    },
+
+    // ========================================================================
+    // ÉTAPE 12 : SAISIE DES PRÉSENCES
+    // ========================================================================
+    {
+        id: 'saisie-presences',
+        texte: '**Apprenons à saisir les présences**\n\n1️⃣ Va dans **Suivi → Saisie des présences**\n2️⃣ Choisis une date récente\n3️⃣ Tu vois la liste de tes étudiants :\n   • ✅ = Présent\n   • ❌ = Absent\n   • 🟧 = Retard\n\nEssaie de modifier quelques présences.\n\nLes indices d\'assiduité (A) se recalculent automatiquement !\n\nTu as essayé ?',
+        type: 'radio',
+        options: [
+            { value: 'oui', label: 'Oui, j\'ai essayé ! ✅' },
+            { value: 'sauter', label: 'Je vais le faire plus tard' }
+        ],
+        champsCibles: [
+            { cle: 'tutoriel', champ: 'presencesModifiees' }
+        ],
+        validation: {
+            requis: true
+        }
+    },
+
+    // ========================================================================
+    // ÉTAPE 13 : TABLEAU DE BORD
+    // ========================================================================
+    {
+        id: 'tableau-bord',
+        texte: '**Découvre le tableau de bord**\n\n1️⃣ Va dans **Suivi → Tableau de bord**\n\nTu vois maintenant :\n📊 Indicateurs globaux (moyennes A-C-P)\n🎯 Étudiants à risque (niveau RàI)\n📈 Patterns détectés (défis, blocages)\n\nC\'est ici que tu identifies qui a besoin d\'aide !\n\nTu y es ?',
+        type: 'radio',
+        options: [
+            { value: 'oui', label: 'Oui, c\'est impressionnant ! 🎉' },
+            { value: 'sauter', label: 'Je vais y aller plus tard' }
+        ],
+        champsCibles: [],
+        validation: {
+            requis: true
+        }
+    },
+
+    {
+        id: 'profil-individuel',
+        texte: '**Consulte un profil individuel**\n\n1️⃣ Clique sur **Liste des étudiants**\n2️⃣ Choisis n\'importe qui\n\nTu vois :\n• Son engagement (A-C-P)\n• Ses forces et défis SRPNF\n• Ses productions évaluées\n• Recommandations d\'intervention\n\nC\'est le cœur du système de monitorage ! 💙\n\nTu as exploré un profil ?',
+        type: 'radio',
+        options: [
+            { value: 'oui', label: 'Oui, j\'ai exploré ! ✅' },
+            { value: 'sauter', label: 'Je vais le faire plus tard' }
+        ],
+        champsCibles: [
+            { cle: 'tutoriel', champ: 'profilExplore' }
+        ],
+        validation: {
+            requis: true
+        }
+    },
+
+    // ========================================================================
+    // ÉTAPE 14 : CONCLUSION
     // ========================================================================
     {
         id: 'fin',
-        texte: 'Voilà, j\'ai rempli pour toi l\'essentiel des informations pour que ton application soit fonctionnelle ! 🎉\n\nSi tu veux plus de précision, tu pourras visiter les onglets Réglages et Matériel pédagogique.\n\nBonne session !',
+        texte: '**Bravo, tu as terminé ! 🎉**\n\nTu sais maintenant :\n✅ Configurer l\'application\n✅ Importer du matériel pédagogique\n✅ Créer et évaluer des productions\n✅ Saisir les présences\n✅ Consulter le tableau de bord\n✅ Analyser les profils individuels\n\nTu peux maintenant :\n\n🔄 **Recommencer avec un vrai groupe**\n   (efface les données fictives dans Réglages → Gestion des données)\n\n🎓 **Explorer en autonomie**\n   (je reste accessible via le bouton 😎 en haut à droite)\n\n📖 **Consulter l\'aide**\n   (section Aide avec guides détaillés)\n\nBon monitorage pédagogique ! 🚀',
         type: 'message',
         champsCibles: [],
         validation: {

@@ -1,0 +1,86 @@
+{
+  "metadata": {
+    "type": "cartouche",
+    "nom": "Cartouches de rétroaction SRPNF",
+    "auteur": "Grégoire Bédard",
+    "discipline": ["Français", "Littérature", "Sciences humaines"],
+    "niveau": "Collégial",
+    "description": "Cartouches de rétroaction pour la grille SRPNF avec commentaires adaptatifs selon le niveau de performance (I, D, M, E). 20 commentaires prédéfinis pour guider les étudiants.",
+    "licence": "CC BY-NC-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "version": "1.0",
+    "date_creation": "2025-11-28",
+    "application_version": "Beta 92",
+    "email_auteur": "labo@codexnumeris.org",
+    "site_auteur": "https://codexnumeris.org"
+  },
+  "cartouche": {
+    "id": "cartouche-srpnf-defaut",
+    "grilleId": "grille-srpnf-defaut",
+    "nom": "Rétroactions SRPNF",
+    "contexte": "Commentaires de base pour chaque critère selon le niveau de performance. À personnaliser selon vos besoins pédagogiques.",
+    "criteres": [
+      {
+        "nom": "Structure"
+      },
+      {
+        "nom": "Rigueur"
+      },
+      {
+        "nom": "Plausibilité"
+      },
+      {
+        "nom": "Nuance"
+      },
+      {
+        "nom": "Français"
+      }
+    ],
+    "niveaux": [
+      {
+        "code": "I",
+        "nom": "Insuffisant"
+      },
+      {
+        "code": "D",
+        "nom": "Développement"
+      },
+      {
+        "code": "M",
+        "nom": "Maîtrisé"
+      },
+      {
+        "code": "E",
+        "nom": "Étendu"
+      }
+    ],
+    "commentaires": {
+      "Structure_I": "L'organisation des idées manque de clarté. La structure n'est pas évidente et rend la lecture difficile. Pour progresser, établis un plan clair avant de rédiger et veille à ce que chaque paragraphe développe une seule idée principale.",
+      "Structure_D": "L'organisation commence à se dessiner, mais certaines transitions sont abruptes. La structure globale se devine, mais pourrait être plus explicite. Pour t'améliorer, renforce les liens entre tes paragraphes et vérifie que ton plan est équilibré.",
+      "Structure_M": "L'organisation est claire et logique. Les idées s'enchaînent bien et la structure facilite la compréhension. Les transitions entre les parties sont fluides et le développement suit une progression cohérente.",
+      "Structure_E": "L'organisation est exemplaire. La structure est non seulement claire, mais elle met en valeur ton argumentation de façon particulièrement efficace. Les transitions sont subtiles et l'enchaînement des idées révèle une maîtrise remarquable de la composition.",
+
+      "Rigueur_I": "L'analyse manque de profondeur et reste superficielle. Plusieurs éléments importants ne sont pas abordés. Pour progresser, prends le temps d'explorer ton sujet plus en détail et appuie tes affirmations sur des exemples précis.",
+      "Rigueur_D": "L'analyse aborde plusieurs aspects pertinents, mais certains points mériteraient d'être approfondis. Les observations sont présentes mais parfois trop générales. Pour t'améliorer, développe davantage tes idées et multiplie les exemples concrets.",
+      "Rigueur_M": "L'analyse est approfondie et couvre les aspects essentiels. Les observations sont précises et bien développées. Le traitement du sujet est complet et les affirmations sont systématiquement appuyées par des exemples pertinents.",
+      "Rigueur_E": "L'analyse est remarquablement approfondie et exhaustive. Tous les aspects importants sont explorés avec finesse. Les observations sont particulièrement précises et révèlent une compréhension exceptionnelle du sujet.",
+
+      "Plausibilité_I": "L'interprétation proposée est peu convaincante ou s'éloigne trop du sujet. Les liens entre les observations et les conclusions ne sont pas clairs. Pour progresser, assure-toi que ton interprétation découle logiquement de tes observations.",
+      "Plausibilité_D": "L'interprétation est partiellement convaincante. Certains liens sont bien établis, d'autres restent fragiles. Pour t'améliorer, vérifie que chaque conclusion est bien soutenue par tes observations et évite les raccourcis interprétatifs.",
+      "Plausibilité_M": "L'interprétation est crédible et bien fondée. Les conclusions découlent logiquement des observations présentées. L'argumentation est convaincante et les liens entre les faits et leur interprétation sont clairs.",
+      "Plausibilité_E": "L'interprétation est particulièrement convaincante et éclairante. Les conclusions sont non seulement bien fondées, mais elles révèlent une compréhension fine et originale du sujet. L'argumentation est remarquablement solide.",
+
+      "Nuance_I": "L'approche reste trop binaire ou simpliste. Les nuances du sujet ne sont pas explorées. Pour progresser, cherche à dépasser les évidences et à explorer la complexité des situations que tu analyses.",
+      "Nuance_D": "Quelques nuances commencent à apparaître, mais l'analyse pourrait être plus subtile. Certaines complexités sont reconnues, d'autres ignorées. Pour t'améliorer, évite les généralisations et explore davantage les zones grises de ton sujet.",
+      "Nuance_M": "L'analyse fait preuve de nuance et évite les simplifications abusives. Les subtilités du sujet sont reconnues et explorées. L'approche démontre une compréhension de la complexité des situations analysées.",
+      "Nuance_E": "L'analyse révèle une finesse remarquable. Les nuances les plus subtiles sont identifiées et explorées avec brio. La complexité du sujet est non seulement reconnue, mais elle enrichit l'interprétation de façon exceptionnelle.",
+
+      "Français_I": "La qualité de la langue nuit à la compréhension. Les erreurs sont nombreuses (syntaxe, orthographe, vocabulaire). Pour progresser, relis attentivement ton texte et utilise les outils de correction disponibles.",
+      "Français_D": "La langue est généralement correcte, mais plusieurs erreurs persistent. Le vocabulaire pourrait être plus précis. Pour t'améliorer, accorde plus d'attention à la révision linguistique et enrichis ton vocabulaire.",
+      "Français_M": "La maîtrise de la langue est bonne. Les erreurs sont rares et ne nuisent pas à la compréhension. Le vocabulaire est approprié et varié. L'expression est claire et fluide.",
+      "Français_E": "La maîtrise de la langue est exemplaire. L'expression est à la fois précise et élégante. Le vocabulaire est riche et parfaitement adapté. Le style témoigne d'une excellente maîtrise de l'écriture."
+    },
+    "verrouille": false,
+    "dateCreation": "2025-11-28"
+  }
+}

@@ -1,0 +1,66 @@
+📦 MATÉRIEL PÉDAGOGIQUE DE DÉMONSTRATION
+========================================
+
+Ce dossier contient du matériel pédagogique partagé sous licence libre (CC BY-NC-SA 4.0)
+que tu vas importer dans l'application pendant la configuration guidée avec Primo.
+
+🎯 CONTENU DU DOSSIER
+---------------------
+
+1. echelle-idme.json
+   • Échelle IDME (SOLO) avec 5 niveaux de performance
+   • Niveaux : 0 (Aucun), I (Insuffisant), D (Développement), M (Maîtrisé), E (Étendu)
+   • Utilisée pour évaluer la profondeur de compréhension
+
+2. grille-srpnf.json
+   • Grille de critères SRPNF (5 critères)
+   • Structure (15%), Rigueur (20%), Plausibilité (10%), Nuance (25%), Français (30%)
+   • Adaptée pour productions écrites
+
+3. cartouches-srpnf.json
+   • 20 cartouches de rétroaction personnalisées
+   • Commentaires adaptatifs selon niveau (I, D, M, E) et critère
+   • Approche constructive avec suggestions d'amélioration
+
+📥 COMMENT IMPORTER
+-------------------
+
+Pendant la configuration avec Primo, tu devras importer ces 3 fichiers :
+
+ÉTAPE 1 : Importer l'échelle
+→ Réglages → Matériel pédagogique → Échelles
+→ Clic sur bouton "📥 Importer"
+→ Sélectionne "echelle-idme.json"
+
+ÉTAPE 2 : Importer la grille
+→ Réglages → Matériel pédagogique → Grilles
+→ Clic sur bouton "📥 Importer"
+→ Sélectionne "grille-srpnf.json"
+
+ÉTAPE 3 : Importer les cartouches
+→ Réglages → Matériel pédagogique → Cartouches
+→ Clic sur bouton "📥 Importer"
+→ Sélectionne "cartouches-srpnf.json"
+
+✅ VALIDATION
+-------------
+
+Après l'import, vérifie que tu vois bien :
+✓ Échelle IDME (5 niveaux) dans Échelles
+✓ Grille SRPNF (5 critères) dans Grilles
+✓ 20 cartouches dans Cartouches
+
+📜 LICENCE
+----------
+
+CC BY-NC-SA 4.0 (Creative Commons Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions)
+Auteur : Grégoire Bédard (Labo Codex)
+Site : https://codexnumeris.org
+Courriel : labo@codexnumeris.org
+
+Tu peux utiliser, modifier et partager ce matériel librement pour usage pédagogique non commercial.
+
+🚀 PRÊT ?
+---------
+
+Garde cette fenêtre ouverte et retourne dans Primo pour continuer la configuration !
