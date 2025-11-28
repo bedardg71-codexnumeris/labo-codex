@@ -667,70 +667,11 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 9 : CRÉATION D'UNE PRODUCTION (SIMULÉE)
-    // ========================================================================
-    {
-        id: 'intro-production',
-        texte: '**Créons ta première production**\n\nUne production, c\'est une évaluation que tu vas créer pour tes étudiants (test, travail, examen, etc.).\n\nJe vais te guider pour en créer une directement ici. Ensuite, je la créerai automatiquement pour toi dans l\'application.\n\nCommençons !',
-        type: 'instruction',
-        champsCibles: [],
-        validation: { requis: false }
-    },
-
-    {
-        id: 'production-titre',
-        texte: 'Quel est le **titre** de ta production ?\n\n💡 Par exemple : "Test de connaissances", "Travail 1", "Quiz chapitre 3", etc.',
-        type: 'text',
-        placeholder: 'Test de connaissances',
-        champsCibles: [
-            { cle: 'tutoriel', champ: 'productionTitre' }
-        ],
-        validation: {
-            requis: true,
-            minLength: 3
-        }
-    },
-
-    {
-        id: 'production-description',
-        texte: 'Quelle est la **description** de cette production ?\n\n💡 Quelques mots pour décrire l\'activité.',
-        type: 'text',
-        placeholder: 'Évaluation des connaissances de base',
-        champsCibles: [
-            { cle: 'tutoriel', champ: 'productionDescription' }
-        ],
-        validation: {
-            requis: true,
-            minLength: 3
-        }
-    },
-
-    {
-        id: 'production-ponderation',
-        texte: 'Quelle **pondération** (%) veux-tu donner à cette production ?',
-        type: 'select',
-        options: [
-            { value: '5', label: '5%' },
-            { value: '10', label: '10%' },
-            { value: '15', label: '15%' },
-            { value: '20', label: '20%' },
-            { value: '25', label: '25%' },
-            { value: '30', label: '30%' }
-        ],
-        champsCibles: [
-            { cle: 'tutoriel', champ: 'productionPonderation' }
-        ],
-        validation: {
-            requis: true
-        }
-    },
-
-    // ========================================================================
-    // ÉTAPE 10 : PASSAGE EN MODE GUIDÉ (NOTIFICATIONS)
+    // ÉTAPE 9 : PASSAGE EN MODE GUIDÉ (NOTIFICATIONS)
     // ========================================================================
     {
         id: 'transition-mode-guide',
-        texte: '**Maintenant, place à la pratique !**\n\nJe vais te guider pas à pas pour créer ta première production et évaluation.\n\nJe vais me transformer en **assistant discret** (notifications en haut à droite) pendant que tu navigues librement dans l\'application.\n\nUtilise le bouton **"Suivant →"** en bas à droite pour avancer dans les étapes.\n\nC\'est parti ! 🚀',
+        texte: '**Maintenant, place à la pratique !**\n\nJe vais te guider pas à pas pour créer ta première production et évaluation directement dans l\'application.\n\nJe vais me transformer en **assistant discret** (notifications en haut à droite) pendant que tu navigues librement.\n\nUtilise le bouton **"Suivant →"** en bas à droite pour avancer dans les étapes.\n\nC\'est parti ! 🚀',
         type: 'action',
         action: 'passerEnModeNotification',
         champsCibles: [],
@@ -738,11 +679,11 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 11 : CRÉATION D'UNE PRODUCTION (MODE NOTIFICATION)
+    // ÉTAPE 10 : CRÉATION D'UNE PRODUCTION (MODE NOTIFICATION)
     // ========================================================================
     {
         id: 'creer-production-guidee',
-        texte: '**Étape 1 : Créer ta production**\n\n1️⃣ Va dans **Matériel → Productions**\n2️⃣ Clique sur **Nouvelle production**\n3️⃣ Remplis le formulaire :\n   • **Titre** : {{tutoriel.productionTitre}}\n   • **Description** : {{tutoriel.productionDescription}}\n   • **Type** : Test/Quiz\n   • **Pondération** : {{tutoriel.productionPonderation}}%\n   • **Grille liée** : Grille SRPNF\n4️⃣ Sauvegarde !\n\nClique **"Suivant →"** quand c\'est fait.',
+        texte: '**Étape 1 : Créer ta production**\n\n1️⃣ Va dans **Matériel → Productions**\n2️⃣ Clique sur **Nouvelle production**\n3️⃣ Remplis le formulaire :\n   • **Titre** : Ce que tu veux (ex: "Test de connaissances")\n   • **Description** : Une courte description\n   • **Type** : Test/Quiz\n   • **Pondération** : 5 à 15%\n   • **Grille liée** : Grille SRPNF\n4️⃣ Sauvegarde !\n\nClique **"Suivant →"** quand c\'est fait.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -761,7 +702,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'selection-etudiant',
-        texte: '**Étape 3 : Choisir un étudiant et la production**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne ta production **{{tutoriel.productionTitre}}**\n\nTu devrais voir :\n✅ Échelle IDME (5 niveaux)\n✅ Grille SRPNF (5 critères)\n✅ Cartouches de rétroaction suggérées\n\nClique **"Suivant →"** quand tu vois tout ça.',
+        texte: '**Étape 3 : Choisir un étudiant et la production**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne la production que tu viens de créer\n\nTu devrais voir :\n✅ Échelle IDME (5 niveaux)\n✅ Grille SRPNF (5 critères)\n✅ Cartouches de rétroaction suggérées\n\nClique **"Suivant →"** quand tu vois tout ça.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
