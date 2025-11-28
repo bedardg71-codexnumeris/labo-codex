@@ -12,9 +12,10 @@
     "date_creation": "2025-11-28",
     "application_version": "Beta 92",
     "email_auteur": "labo@codexnumeris.org",
-    "site_auteur": "https://codexnumeris.org"
+    "site_auteur": "https://codexnumeris.org",
+    "auteur_original": "Grégoire Bédard"
   },
-  "grille": {
+  "contenu": {
     "id": "grille-srpnf-defaut",
     "nom": "Grille SRPNF",
     "criteres": [

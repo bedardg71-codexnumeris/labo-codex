@@ -732,8 +732,8 @@ async function importerMaterielPedagogique() {
         if (!responseEchelle.ok) throw new Error('Échelle IDME introuvable');
         const echelleData = await responseEchelle.json();
 
-        // Sauvegarder directement dans localStorage
-        const echelle = echelleData.echelle;
+        // Extraire l'échelle du nouveau format { metadata, contenu }
+        const echelle = echelleData.contenu || echelleData.echelle || echelleData;
         const echelles = db.getSync('echelles', []);
 
         // Vérifier si l'échelle existe déjà
@@ -754,8 +754,8 @@ async function importerMaterielPedagogique() {
         if (!responseGrille.ok) throw new Error('Grille SRPNF introuvable');
         const grilleData = await responseGrille.json();
 
-        // Sauvegarder directement dans localStorage
-        const grille = grilleData.grille;
+        // Extraire la grille du nouveau format { metadata, contenu }
+        const grille = grilleData.contenu || grilleData.grille || grilleData;
         const grilles = db.getSync('grillesTemplates', []);
 
         // Vérifier si la grille existe déjà
@@ -776,8 +776,8 @@ async function importerMaterielPedagogique() {
         if (!responseCartouches.ok) throw new Error('Cartouches SRPNF introuvables');
         const cartouchesData = await responseCartouches.json();
 
-        // Sauvegarder directement dans localStorage
-        const cartouche = cartouchesData.cartouche;
+        // Extraire la cartouche du nouveau format { metadata, contenu }
+        const cartouche = cartouchesData.contenu || cartouchesData.cartouche || cartouchesData;
         const cleCartouche = `cartouches_${cartouche.grilleId}`;
         const cartouchesExistantes = db.getSync(cleCartouche, []);
 
@@ -814,8 +814,8 @@ async function importerEchelleIDME() {
         if (!responseEchelle.ok) throw new Error('Échelle IDME introuvable');
         const echelleData = await responseEchelle.json();
 
-        // Sauvegarder directement dans localStorage
-        const echelle = echelleData.echelle;
+        // Extraire l'échelle du nouveau format { metadata, contenu }
+        const echelle = echelleData.contenu || echelleData.echelle || echelleData;
         const echelles = db.getSync('echelles', []);
 
         // Vérifier si l'échelle existe déjà

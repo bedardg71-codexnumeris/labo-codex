@@ -3,6 +3,7 @@
     "type": "echelle",
     "nom": "Échelle IDME (SOLO)",
     "auteur": "Grégoire Bédard",
+    "auteur_original": "Grégoire Bédard",
     "discipline": ["Français", "Littérature", "Sciences humaines", "Général"],
     "niveau": "Collégial",
     "description": "Échelle basée sur la taxonomie SOLO pour mesurer la profondeur de compréhension. Les 5 niveaux (0, I, D, M, E) permettent d'évaluer la progression des apprentissages.",
@@ -14,7 +15,7 @@
     "email_auteur": "labo@codexnumeris.org",
     "site_auteur": "https://codexnumeris.org"
   },
-  "echelle": {
+  "contenu": {
     "id": "echelle-idme-defaut",
     "nom": "Échelle IDME (SOLO)",
     "description": "Échelle basée sur la taxonomie SOLO pour mesurer la profondeur de compréhension",

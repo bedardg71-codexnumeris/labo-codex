@@ -3,6 +3,7 @@
     "type": "cartouche",
     "nom": "Cartouches de rétroaction SRPNF",
     "auteur": "Grégoire Bédard",
+    "auteur_original": "Grégoire Bédard",
     "discipline": ["Français", "Littérature", "Sciences humaines"],
     "niveau": "Collégial",
     "description": "Cartouches de rétroaction pour la grille SRPNF avec commentaires adaptatifs selon le niveau de performance (I, D, M, E). 20 commentaires prédéfinis pour guider les étudiants.",
@@ -14,7 +15,7 @@
     "email_auteur": "labo@codexnumeris.org",
     "site_auteur": "https://codexnumeris.org"
   },
-  "cartouche": {
+  "contenu": {
     "id": "cartouche-srpnf-defaut",
     "grilleId": "grille-srpnf-defaut",
     "nom": "Rétroactions SRPNF",
