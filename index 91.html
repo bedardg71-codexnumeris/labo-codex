@@ -10785,6 +10785,9 @@ Exemple :
         // ========================================
         // IMPORT DES ÉCHELLES DE PERFORMANCE
         // ========================================
+        // OBSOLÈTE : Cette fonction a été déplacée vers echelles.js (supporte nouveau format CC)
+        // La fonction importerEchelles() est maintenant chargée depuis echelles.js
+        /*
         function importerEchelles(event) {
             const fichier = event.target.files[0];
             if (!fichier) return;
@@ -10839,6 +10842,7 @@ Exemple :
             };
             lecteur.readAsText(fichier);
         }
+        */
 
         // ========================================
         // IMPORT DES PRODUCTIONS
