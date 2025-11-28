@@ -1180,10 +1180,12 @@ async function terminerConfiguration() {
     console.log('[Primo] Configuration terminée !');
     console.log('[Primo] Réponses collectées:', reponsesPrimo);
 
-    // Vérifier si c'est un parcours court (fin après création groupe)
+    // Vérifier si c'est un parcours modulaire (retour au menu)
     const questionsActives = obtenirQuestionsActives(reponsesPrimo);
     const questionActuelle = questionsActives[indexQuestionActuelle];
     const estParcoursCourt = questionActuelle && questionActuelle.finParcoursCourt === true;
+    const estParcoursEvaluer = questionActuelle && questionActuelle.finParcoursEvaluer === true;
+    const estParcoursModulaire = estParcoursCourt || estParcoursEvaluer;
 
     // Sauvegarder toutes les réponses dans localStorage
     sauvegarderReponses(reponsesPrimo);
@@ -1206,14 +1208,15 @@ async function terminerConfiguration() {
         console.log('[Primo] Séances complètes générées');
     }
 
-    if (estParcoursCourt) {
-        // PARCOURS COURT : Retourner au menu d'accueil
-        console.log('[Primo] Parcours court terminé - retour au menu');
+    if (estParcoursModulaire) {
+        // PARCOURS MODULAIRE : Retourner au menu d'accueil
+        console.log('[Primo] Parcours modulaire terminé - retour au menu');
 
         // Afficher notification de succès
         if (typeof afficherNotificationSucces === 'function') {
+            const messageType = estParcoursCourt ? 'Configuration de base' : 'Séquence d\'évaluation';
             afficherNotificationSucces(
-                'Configuration de base terminée ! ✅',
+                `${messageType} terminée ! ✅`,
                 'Tu peux maintenant choisir une autre activité.'
             );
         }
