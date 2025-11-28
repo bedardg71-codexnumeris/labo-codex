@@ -687,11 +687,21 @@ async function importerMaterielPedagogique() {
         if (!responseEchelle.ok) throw new Error('Échelle IDME introuvable');
         const echelleData = await responseEchelle.json();
 
-        if (typeof importerEchelle === 'function') {
-            await importerEchelle(echelleData.echelle);
-            compteur++;
-            console.log('[Primo] ✅ Échelle IDME importée');
+        // Sauvegarder directement dans localStorage
+        const echelle = echelleData.echelle;
+        const echelles = db.getSync('echelles', []);
+
+        // Vérifier si l'échelle existe déjà
+        const index = echelles.findIndex(e => e.id === echelle.id);
+        if (index !== -1) {
+            echelles[index] = echelle; // Remplacer
+        } else {
+            echelles.push(echelle); // Ajouter
         }
+
+        db.setSync('echelles', echelles);
+        compteur++;
+        console.log('[Primo] ✅ Échelle IDME importée');
 
         // 2. Importer la grille SRPNF
         console.log('[Primo] 📥 Import grille SRPNF...');
@@ -699,11 +709,21 @@ async function importerMaterielPedagogique() {
         if (!responseGrille.ok) throw new Error('Grille SRPNF introuvable');
         const grilleData = await responseGrille.json();
 
-        if (typeof importerGrille === 'function') {
-            await importerGrille(grilleData.grille);
-            compteur++;
-            console.log('[Primo] ✅ Grille SRPNF importée');
+        // Sauvegarder directement dans localStorage
+        const grille = grilleData.grille;
+        const grilles = db.getSync('grillesTemplates', []);
+
+        // Vérifier si la grille existe déjà
+        const indexGrille = grilles.findIndex(g => g.id === grille.id);
+        if (indexGrille !== -1) {
+            grilles[indexGrille] = grille; // Remplacer
+        } else {
+            grilles.push(grille); // Ajouter
         }
+
+        db.setSync('grillesTemplates', grilles);
+        compteur++;
+        console.log('[Primo] ✅ Grille SRPNF importée');
 
         // 3. Importer les cartouches
         console.log('[Primo] 📥 Import cartouches SRPNF...');
@@ -711,11 +731,22 @@ async function importerMaterielPedagogique() {
         if (!responseCartouches.ok) throw new Error('Cartouches SRPNF introuvables');
         const cartouchesData = await responseCartouches.json();
 
-        if (typeof importerCartouche === 'function') {
-            await importerCartouche(cartouchesData.cartouche);
-            compteur++;
-            console.log('[Primo] ✅ Cartouches SRPNF importées');
+        // Sauvegarder directement dans localStorage
+        const cartouche = cartouchesData.cartouche;
+        const cleCartouche = `cartouches_${cartouche.grilleId}`;
+        const cartouchesExistantes = db.getSync(cleCartouche, []);
+
+        // Vérifier si la cartouche existe déjà
+        const indexCartouche = cartouchesExistantes.findIndex(c => c.id === cartouche.id);
+        if (indexCartouche !== -1) {
+            cartouchesExistantes[indexCartouche] = cartouche; // Remplacer
+        } else {
+            cartouchesExistantes.push(cartouche); // Ajouter
         }
+
+        db.setSync(cleCartouche, cartouchesExistantes);
+        compteur++;
+        console.log('[Primo] ✅ Cartouches SRPNF importées');
 
         console.log(`[Primo] 🎉 Matériel pédagogique importé avec succès (${compteur}/3)`);
 
