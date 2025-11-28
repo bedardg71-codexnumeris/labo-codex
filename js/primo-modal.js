@@ -538,6 +538,14 @@ function primoQuestionSuivante() {
 
     console.log('[Primo] primoQuestionSuivante() - Type:', question.type, 'ID:', question.id);
 
+    // En mode notification, simplement avancer sans validation
+    if (modeNotification) {
+        console.log('[Primo] Mode notification - passage direct');
+        indexQuestionActuelle++;
+        afficherNotificationActuelle();
+        return;
+    }
+
     // Pour les types 'instruction' et 'message', pas de validation nécessaire
     if (question.type === 'instruction' || question.type === 'message') {
         console.log('[Primo] Type instruction/message - passage direct');
@@ -615,6 +623,10 @@ async function executerAction(question) {
             await importerMaterielPedagogique();
         } else if (question.action === 'creerProduction') {
             await creerProduction();
+        } else if (question.action === 'passerEnModeNotification') {
+            // Action spéciale : passer en mode notification
+            passerEnModeNotification();
+            return; // Pas besoin de continuer l'exécution normale
         }
 
         // Succès - afficher confirmation
@@ -1225,6 +1237,239 @@ function creerCoursInitial(reponses) {
 }
 
 // ============================================================================
+// MODE NOTIFICATION (PHASE 2 : PRATIQUE GUIDÉE)
+// ============================================================================
+
+let modeNotification = false;
+
+/**
+ * Passe du mode modal au mode notification
+ */
+function passerEnModeNotification() {
+    console.log('[Primo] 🔄 Passage en mode notification');
+
+    modeNotification = true;
+
+    // Fermer le modal
+    const modal = document.getElementById('modal-primo-conversation');
+    if (modal) {
+        modal.remove();
+    }
+
+    // Créer le conteneur de notifications (coin supérieur droit)
+    const notificationContainer = document.createElement('div');
+    notificationContainer.id = 'primo-notification-container';
+    notificationContainer.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 400px;
+        max-width: 90vw;
+        z-index: 9999;
+        pointer-events: none;
+    `;
+
+    document.body.appendChild(notificationContainer);
+
+    // Créer le bouton "Suivant" flottant (bas à droite)
+    const boutonSuivant = document.createElement('button');
+    boutonSuivant.id = 'primo-bouton-suivant';
+    boutonSuivant.innerHTML = 'Suivant →';
+    boutonSuivant.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #1a5266, #2d7a8c);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(26, 82, 102, 0.4);
+        z-index: 9998;
+        transition: all 0.3s;
+        pointer-events: auto;
+    `;
+
+    boutonSuivant.onmouseover = function() {
+        this.style.transform = 'translateY(-3px)';
+        this.style.boxShadow = '0 6px 25px rgba(26, 82, 102, 0.5)';
+    };
+
+    boutonSuivant.onmouseout = function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 4px 20px rgba(26, 82, 102, 0.4)';
+    };
+
+    boutonSuivant.onclick = primoQuestionSuivante;
+
+    document.body.appendChild(boutonSuivant);
+
+    // Afficher la première notification
+    afficherNotificationActuelle();
+}
+
+/**
+ * Affiche la notification correspondant à la question actuelle
+ */
+function afficherNotificationActuelle() {
+    const questionsActives = obtenirQuestionsActives(reponsesPrimo);
+    const question = questionsActives[indexQuestionActuelle];
+
+    if (!question) {
+        console.log('[Primo] Fin du mode notification');
+        revenirEnModeModal();
+        return;
+    }
+
+    const container = document.getElementById('primo-notification-container');
+    if (!container) return;
+
+    // Créer la notification
+    const notification = document.createElement('div');
+    notification.className = 'primo-notification';
+    notification.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        border-left: 4px solid var(--bleu-principal);
+        pointer-events: auto;
+        animation: slideInRight 0.4s ease-out;
+    `;
+
+    // Icône Primo (petit)
+    const icone = document.createElement('div');
+    icone.style.cssText = `
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #1a5266, #2d7a8c);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: white;
+        float: left;
+        margin-right: 15px;
+    `;
+    icone.innerHTML = '😎';
+
+    // Bouton fermer
+    const boutonFermer = document.createElement('button');
+    boutonFermer.innerHTML = '×';
+    boutonFermer.style.cssText = `
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--gris-moyen);
+        cursor: pointer;
+        padding: 5px 10px;
+        line-height: 1;
+        transition: color 0.2s;
+    `;
+    boutonFermer.onmouseover = () => boutonFermer.style.color = 'var(--gris-fonce)';
+    boutonFermer.onmouseout = () => boutonFermer.style.color = 'var(--gris-moyen)';
+    boutonFermer.onclick = () => notification.remove();
+
+    // Texte de la notification (Markdown simplifié)
+    const texte = document.createElement('div');
+    texte.style.cssText = `
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--gris-fonce);
+        margin-top: 5px;
+    `;
+    texte.innerHTML = question.texte
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+
+    notification.style.position = 'relative';
+    notification.appendChild(boutonFermer);
+    notification.appendChild(icone);
+    notification.appendChild(texte);
+
+    // Vider le container et ajouter la nouvelle notification
+    container.innerHTML = '';
+    container.appendChild(notification);
+}
+
+/**
+ * Revient au mode modal pour la conclusion
+ */
+function revenirEnModeModal() {
+    console.log('[Primo] 🔄 Retour en mode modal pour conclusion');
+
+    modeNotification = false;
+
+    // Supprimer les éléments du mode notification
+    const container = document.getElementById('primo-notification-container');
+    const boutonSuivant = document.getElementById('primo-bouton-suivant');
+
+    if (container) container.remove();
+    if (boutonSuivant) boutonSuivant.remove();
+
+    // Créer le modal SANS réinitialiser l'état
+    const modal = document.createElement('div');
+    modal.id = 'modal-primo-conversation';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease-in-out;
+    `;
+
+    modal.innerHTML = `
+        <div id="primo-conversation-contenu" style="
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease-out;
+        ">
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    modalPrimoActif = true;
+
+    // Afficher la question actuelle (sans réinitialiser l'index)
+    afficherQuestionActuelle();
+}
+
+// Animation slideInRight
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
@@ -1234,5 +1479,6 @@ window.primoQuestionSuivante = primoQuestionSuivante;
 window.primoQuestionPrecedente = primoQuestionPrecedente;
 window.confirmerAnnulation = confirmerAnnulation;
 window.terminerConfiguration = terminerConfiguration;
+window.passerEnModeNotification = passerEnModeNotification;
 
 console.log('✅ Module primo-modal.js chargé');
