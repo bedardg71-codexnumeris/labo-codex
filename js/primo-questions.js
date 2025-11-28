@@ -629,13 +629,13 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 8 : IMPORT AUTOMATIQUE DU MATÉRIEL PÉDAGOGIQUE
+    // ÉTAPE 8 : IMPORT AUTOMATIQUE DE L'ÉCHELLE IDME
     // ========================================================================
     {
-        id: 'import-materiel-auto',
-        texte: 'Maintenant, je vais importer automatiquement pour toi :\n• Échelle IDME (5 niveaux)\n• Grille SRPNF (5 critères)\n• Cartouches de rétroaction (20 commentaires)\n\nC\'est parti ! 🚀',
+        id: 'import-echelle-auto',
+        texte: 'Maintenant, je vais importer automatiquement l\'échelle IDME (5 niveaux) pour toi.\n\nTu vas importer la grille et les cartouches manuellement un peu plus tard dans le tutoriel.\n\nC\'est parti ! 🚀',
         type: 'action',
-        action: 'importerMaterielPedagogique',
+        action: 'importerEchelleIDME',
         champsCibles: [],
         validation: {
             requis: false
@@ -643,8 +643,8 @@ const QUESTIONS_PRIMO = [
     },
 
     {
-        id: 'validation-materiel',
-        texte: 'Excellent ! 🎉\n\nVérifie que tu vois bien :\n✅ Échelle IDME (5 niveaux) dans Échelles\n✅ Grille SRPNF (5 critères) dans Grilles\n✅ 20 cartouches dans Cartouches\n\nMaintenant, nous allons voir comment créer une production et l\'évaluer !',
+        id: 'validation-echelle',
+        texte: 'Excellent ! 🎉\n\nTu peux vérifier que tu vois bien l\'**Échelle IDME** (5 niveaux) dans **Réglages → Matériel pédagogique → Échelles**.\n\nMaintenant, nous allons passer à la pratique !',
         type: 'instruction',
         champsCibles: [],
         validation: {
@@ -669,18 +669,51 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'creer-production-guidee',
-        texte: '**Étape 1 : Créer ta production**\n\n1️⃣ Va dans **Matériel → Productions**\n2️⃣ Clique sur **Nouvelle production**\n3️⃣ Remplis le formulaire :\n   • **Titre** : Ce que tu veux (ex: "Test de connaissances")\n   • **Description** : Une courte description\n   • **Type** : Test/Quiz\n   • **Pondération** : 5 à 15%\n   • **Grille liée** : Grille SRPNF\n4️⃣ Sauvegarde !\n\nClique **"Suivant →"** quand c\'est fait.',
+        texte: '**Étape 1 : Créer ta production**\n\n1️⃣ Va dans **Matériel → Productions**\n2️⃣ Clique sur **Nouvelle production**\n3️⃣ Remplis le formulaire :\n   • **Titre** : Ce que tu veux (ex: "Test de connaissances")\n   • **Description** : Une courte description\n   • **Type** : Test/Quiz\n   • **Pondération** : 5 à 15%\n4️⃣ Sauvegarde !\n\n⚠️ **Note** : Ne sélectionne PAS encore la grille liée - nous allons l\'importer à la prochaine étape.\n\nClique **"Suivant →"** quand c\'est fait.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
     },
 
     // ========================================================================
-    // ÉTAPE 12 : CRÉATION D'UNE ÉVALUATION (MODE NOTIFICATION)
+    // ÉTAPE 11 : IMPORT MANUEL DE LA GRILLE SRPNF (MODE NOTIFICATION)
+    // ========================================================================
+    {
+        id: 'importer-grille-srpnf',
+        texte: '**Étape 2 : Importer la grille d\'évaluation**\n\n1️⃣ Va dans **Réglages → Matériel pédagogique → Grilles de critères**\n2️⃣ Clique sur le bouton **📥 Importer**\n3️⃣ Sélectionne le fichier **grille-srpnf.json** dans le dossier **materiel-demo**\n4️⃣ Confirme l\'importation\n\nTu devrais voir apparaître la **Grille SRPNF** avec ses 5 critères.\n\nClique **"Suivant →"** quand c\'est fait.',
+        type: 'instruction',
+        champsCibles: [],
+        validation: { requis: false }
+    },
+
+    // ========================================================================
+    // ÉTAPE 12 : IMPORT MANUEL DES CARTOUCHES (MODE NOTIFICATION)
+    // ========================================================================
+    {
+        id: 'importer-cartouches-srpnf',
+        texte: '**Étape 3 : Importer les cartouches de rétroaction**\n\n1️⃣ Reste dans **Réglages → Matériel pédagogique**\n2️⃣ Descends à la section **Cartouches de rétroaction**\n3️⃣ Clique sur le bouton **📥 Importer**\n4️⃣ Sélectionne le fichier **cartouches-srpnf.json** dans le dossier **materiel-demo**\n5️⃣ Confirme l\'importation\n\nTu devrais voir apparaître 20 cartouches de rétroaction.\n\nClique **"Suivant →"** quand c\'est fait.',
+        type: 'instruction',
+        champsCibles: [],
+        validation: { requis: false }
+    },
+
+    // ========================================================================
+    // ÉTAPE 13 : LIER LA GRILLE À LA PRODUCTION (MODE NOTIFICATION)
+    // ========================================================================
+    {
+        id: 'lier-grille-production',
+        texte: '**Étape 4 : Lier la grille à ta production**\n\n1️⃣ Retourne dans **Matériel → Productions**\n2️⃣ Trouve la production que tu as créée\n3️⃣ Clique sur **✏️ Modifier**\n4️⃣ Dans le sélecteur **Grille liée**, choisis **Grille SRPNF**\n5️⃣ Sauvegarde la modification\n\nMaintenant ta production est liée à la grille d\'évaluation !\n\nClique **"Suivant →"** quand c\'est fait.',
+        type: 'instruction',
+        champsCibles: [],
+        validation: { requis: false }
+    },
+
+    // ========================================================================
+    // ÉTAPE 14 : CRÉATION D'UNE ÉVALUATION (MODE NOTIFICATION)
     // ========================================================================
     {
         id: 'navigation-evaluations',
-        texte: '**Étape 2 : Accéder aux évaluations**\n\n1️⃣ Va dans **Évaluations → Procéder à une évaluation**\n2️⃣ Clique sur **Nouvelle évaluation**\n\nQuand c\'est fait, clique sur **"Suivant →"** en bas à droite.',
+        texte: '**Étape 5 : Accéder aux évaluations**\n\n1️⃣ Va dans **Évaluations → Procéder à une évaluation**\n2️⃣ Clique sur **Nouvelle évaluation**\n\nQuand c\'est fait, clique sur **"Suivant →"** en bas à droite.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -688,7 +721,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'selection-etudiant',
-        texte: '**Étape 3 : Choisir un étudiant et la production**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne la production que tu viens de créer\n\nTu devrais voir :\n✅ Échelle IDME (5 niveaux)\n✅ Grille SRPNF (5 critères)\n✅ Cartouches de rétroaction suggérées\n\nClique **"Suivant →"** quand tu vois tout ça.',
+        texte: '**Étape 6 : Choisir un étudiant et la production**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne la production que tu viens de créer\n\nTu devrais maintenant voir :\n✅ Échelle IDME (5 niveaux)\n✅ Grille SRPNF (5 critères)\n✅ Cartouches de rétroaction suggérées\n\n🎉 **Tout est là ! Le matériel importé est bien disponible.**\n\nClique **"Suivant →"** quand tu vois tout ça.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -696,7 +729,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'attribuer-niveaux',
-        texte: '**Étape 3 : Évaluer**\n\nAttribue des niveaux pour chaque critère :\n• **Structure** : M (Maîtrisé)\n• **Rigueur** : D (Développement)\n• **Plausibilité** : M (Maîtrisé)\n• **Nuance** : I (Insuffisant)\n• **Français** : D (Développement)\n\nUne note est calculée automatiquement ! 🎉\n\nSauvegarde l\'évaluation, puis clique **"Suivant →"**.',
+        texte: '**Étape 7 : Évaluer**\n\nAttribue des niveaux pour chaque critère :\n• **Structure** : M (Maîtrisé)\n• **Rigueur** : D (Développement)\n• **Plausibilité** : M (Maîtrisé)\n• **Nuance** : I (Insuffisant)\n• **Français** : D (Développement)\n\nUne note est calculée automatiquement ! 🎉\n\nSauvegarde l\'évaluation, puis clique **"Suivant →"**.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
