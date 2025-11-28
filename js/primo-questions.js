@@ -642,7 +642,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'importer-echelle-idme',
-        texte: '**Étape 1 : Importer l\'échelle de performance**\n\n1️⃣ Va dans **Matériel → Échelles de performance**\n2️⃣ Clique sur **Nouvelle échelle**\n3️⃣ Clique sur **Options d\'import/export**\n4️⃣ Clique sur **Importer une échelle**\n5️⃣ Sélectionne le fichier **echelle-idme.json** dans le dossier **materiel-demo**\n6️⃣ Confirme l\'importation\n\nTu devrais voir apparaître l\'**Échelle IDME** avec 5 niveaux (0, I, D, M, E).\n\nClique **"Suivant →"** quand c\'est fait.',
+        texte: '**Étape 1 : Importer l\'échelle de performance**\n\n1️⃣ Va dans **Matériel → Échelles de performance**\n2️⃣ Clique sur **Nouvelle échelle**\n3️⃣ Clique sur **Options d\'import/export**\n4️⃣ Clique sur **Importer une échelle**\n5️⃣ Sélectionne le fichier **test-echelle-idme.json** dans le dossier **materiel-demo**\n6️⃣ Confirme l\'importation\n\nTu devrais voir apparaître **Échelle IDME Test** avec 2 niveaux (I et M).\n\nClique **"Suivant →"** quand c\'est fait.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -653,7 +653,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'importer-grille-srpnf',
-        texte: '**Étape 2 : Importer la grille d\'évaluation**\n\n1️⃣ Va dans **Matériel → Grilles de critères**\n2️⃣ Clique sur **Nouvelle grille**\n3️⃣ Clique sur **Options d\'import/export**\n4️⃣ Clique sur **Importer des grilles**\n5️⃣ Sélectionne le fichier **grille-srpnf.json** dans le dossier **materiel-demo**\n6️⃣ Confirme l\'importation\n\nTu devrais voir apparaître la **Grille SRPNF** avec ses 5 critères.\n\nClique **"Suivant →"** quand c\'est fait.',
+        texte: '**Étape 2 : Importer la grille d\'évaluation**\n\n1️⃣ Va dans **Matériel → Grilles de critères**\n2️⃣ Clique sur **Nouvelle grille**\n3️⃣ Clique sur **Options d\'import/export**\n4️⃣ Clique sur **Importer des grilles**\n5️⃣ Sélectionne le fichier **test-grille-srpnf.json** dans le dossier **materiel-demo**\n6️⃣ Confirme l\'importation\n\nTu devrais voir apparaître **Grille Test** avec 2 critères (Critère A et B).\n\nClique **"Suivant →"** quand c\'est fait.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -664,7 +664,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'creer-production-guidee',
-        texte: '**Étape 3 : Créer ta production**\n\n1️⃣ Va dans **Matériel → Productions**\n2️⃣ Clique sur **Nouvelle production**\n3️⃣ Remplis le formulaire :\n   • **Titre** : Ce que tu veux (ex: "Analyse littéraire")\n   • **Description** : Une courte description\n   • **Type** : Artefact portfolio\n   • **Pondération** : 15 à 25%\n   • **Grille liée** : Grille SRPNF\n4️⃣ Sauvegarde !\n\nMaintenant ta production est liée à la grille d\'évaluation !\n\nClique **"Suivant →"** quand c\'est fait.',
+        texte: '**Étape 3 : Créer ta production**\n\n1️⃣ Va dans **Matériel → Productions**\n2️⃣ Clique sur **Nouvelle production**\n3️⃣ Remplis le formulaire :\n   • **Titre** : Ce que tu veux (ex: "Analyse littéraire")\n   • **Description** : Une courte description\n   • **Type** : Artefact portfolio\n   • **Pondération** : 15 à 25%\n   • **Grille liée** : **Grille Test** (celle que tu as importée)\n4️⃣ Sauvegarde !\n\nMaintenant ta production est liée à la grille d\'évaluation !\n\nClique **"Suivant →"** quand c\'est fait.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -683,7 +683,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'selection-etudiant',
-        texte: '**Étape 5 : Choisir un étudiant et la production**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne la production que tu viens de créer\n\nTu devrais maintenant voir :\n✅ Échelle IDME (5 niveaux)\n✅ Grille SRPNF (5 critères)\n\n🎉 **Tout est là ! Le matériel importé est bien disponible.**\n\nClique **"Suivant →"** quand tu vois tout ça.',
+        texte: '**Étape 5 : Choisir un étudiant et la production**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne la production que tu viens de créer\n\nTu devrais maintenant voir le formulaire d\'évaluation avec :\n✅ **Échelle IDME Test** (niveaux I et M)\n✅ **Grille Test** (critères A et B)\n\n🎉 **Tout est là ! Le matériel importé est bien disponible.**\n\nClique **"Suivant →"** quand tu vois tout ça.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -691,7 +691,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'attribuer-niveaux',
-        texte: '**Étape 6 : Évaluer**\n\nAttribue des niveaux pour chaque critère :\n• **Structure** : M (Maîtrisé)\n• **Rigueur** : D (Développement)\n• **Plausibilité** : M (Maîtrisé)\n• **Nuance** : I (Insuffisant)\n• **Français** : D (Développement)\n\nUne note est calculée automatiquement ! 🎉\n\nSauvegarde l\'évaluation, puis clique **"Suivant →"**.',
+        texte: '**Étape 6 : Évaluer**\n\nAttribue des niveaux pour chaque critère :\n• **Critère A** : M (Maîtrisé)\n• **Critère B** : I (Insuffisant)\n\nUne note est calculée automatiquement ! 🎉\n\nTu peux aussi ajouter des commentaires si tu veux.\n\nSauvegarde l\'évaluation, puis clique **"Suivant →"**.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
