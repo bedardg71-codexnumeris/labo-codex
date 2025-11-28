@@ -24,9 +24,9 @@ let reponsesPrimo = {};
 /**
  * Ouvre le modal conversationnel de Primo
  */
-function ouvrirModalConversationnel() {
+function ouvrirModalConversationnel(indexDepart = 0) {
     // Réinitialiser l'état
-    indexQuestionActuelle = 0;
+    indexQuestionActuelle = indexDepart;
     reponsesPrimo = {};
     modalPrimoActif = true;
 
