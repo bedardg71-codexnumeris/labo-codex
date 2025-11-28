@@ -520,24 +520,10 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'etudiants-methode',
-        texte: 'Comment veux-tu ajouter tes étudiants ?',
-        type: 'radio',
-        options: [
-            {
-                value: 'copier-coller',
-                label: 'Copier-coller une liste',
-                description: 'Depuis Excel ou un fichier'
-            },
-            {
-                value: 'plus-tard',
-                label: 'Je ferai ça plus tard',
-                description: 'Passer cette étape'
-            }
-        ],
+        texte: '**Ajout des étudiants**\n\nPour continuer le tutoriel (création de production et évaluation), tu dois créer un groupe d\'étudiants maintenant.\n\nTu vas copier-coller une liste d\'étudiants fictifs à l\'étape suivante.',
+        type: 'instruction',
         champsCibles: [],
-        validation: {
-            requis: true
-        }
+        validation: { requis: false }
     },
 
     {
