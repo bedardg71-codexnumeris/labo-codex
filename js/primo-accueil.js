@@ -152,7 +152,7 @@ function afficherModalAccueil() {
                     </div>
                 </button>
 
-                <!-- Option 2: Configuration complète -->
+                <!-- Option 2: Pour bien débuter -->
                 <button onclick="demarrerConfigComplete()" style="
                     width: 100%;
                     padding: 15px 20px;
@@ -166,13 +166,33 @@ function afficherModalAccueil() {
                     text-align: left;
                     transition: all 0.2s;
                 " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
-                    <strong>⚙️ Configuration complète pas à pas</strong>
+                    <strong>⚙️ Pour bien débuter</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
-                        Cours, trimestre, horaire, groupe et pratique (15 minutes)
+                        Cours, trimestre, horaire, groupe (10 minutes)
                     </div>
                 </button>
 
-                <!-- Option 3: Créer juste la pratique -->
+                <!-- Option 3: Évaluer -->
+                <button onclick="demarrerEvaluation()" style="
+                    width: 100%;
+                    padding: 15px 20px;
+                    margin-bottom: 12px;
+                    background: white;
+                    color: var(--bleu-principal);
+                    border: 2px solid var(--bleu-principal);
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    text-align: left;
+                    transition: all 0.2s;
+                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
+                    <strong>📝 Évaluer</strong>
+                    <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
+                        Import de matériel et création d'évaluations (15 minutes)
+                    </div>
+                </button>
+
+                <!-- Option 4: Créer juste la pratique -->
                 <button onclick="demarrerWizard()" style="
                     width: 100%;
                     padding: 15px 20px;
@@ -345,6 +365,38 @@ function demarrerConfigComplete() {
     setTimeout(() => {
         if (typeof ouvrirModalConversationnel === 'function') {
             ouvrirModalConversationnel();
+        } else {
+            console.error('[Primo] Fonction ouvrirModalConversationnel non disponible');
+            alert('Erreur : Le module de configuration n\'est pas chargé.');
+        }
+    }, 500);
+}
+
+/**
+ * Option 3: Démarrer le parcours "Évaluer"
+ * Commence directement à l'étape d'import de matériel
+ */
+function demarrerEvaluation() {
+    fermerModalAccueil();
+
+    // Afficher notification
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Passons à l\'évaluation ! 📝');
+    }
+
+    // Trouver l'index de l'étape 'transition-mode-guide'
+    const indexEtapeEvaluation = QUESTIONS_PRIMO.findIndex(q => q.id === 'transition-mode-guide');
+
+    if (indexEtapeEvaluation === -1) {
+        console.error('[Primo] Étape transition-mode-guide introuvable');
+        alert('Erreur : L\'étape d\'évaluation n\'a pas été trouvée.');
+        return;
+    }
+
+    // Ouvrir le modal conversationnel à partir de cette étape
+    setTimeout(() => {
+        if (typeof ouvrirModalConversationnel === 'function') {
+            ouvrirModalConversationnel(indexEtapeEvaluation);
         } else {
             console.error('[Primo] Fonction ouvrirModalConversationnel non disponible');
             alert('Erreur : Le module de configuration n\'est pas chargé.');
