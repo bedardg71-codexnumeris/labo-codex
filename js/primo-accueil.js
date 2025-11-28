@@ -283,10 +283,14 @@ function chargerDonneesDemo() {
 
         // Message d'instruction
         setTimeout(() => {
-            afficherNotificationInformation(
-                'Presque prêt !',
-                'Clique sur le bouton "Importer des données" et sélectionne le fichier "donnees-demo.json" 📦'
-            );
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces(
+                    'Presque prêt !',
+                    'Clique sur le bouton "Importer des données" et sélectionne le fichier "donnees-demo.json" 📦'
+                );
+            } else {
+                alert('Presque prêt !\n\nClique sur le bouton "Importer des données" et sélectionne le fichier "donnees-demo.json" 📦');
+            }
         }, 500);
     }, 300);
 }
