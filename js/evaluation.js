@@ -534,7 +534,13 @@ function cartoucheSelectionnee() {
 
         // Vérifier si la catégorisation des erreurs est activée
         const modalites = db.getSync('modalitesEvaluation', {});
-        const categorisationActive = modalites.activerCategorisationErreurs === true;
+        let categorisationActive = modalites.activerCategorisationErreurs === true;
+
+        // DÉTECTION AUTOMATIQUE : Si l'évaluation a des codes sauvegardés, forcer le mode catégorisation
+        // Cela préserve les données existantes et la rétroaction précise
+        if (evaluationEnCours?.donneesAlgorithmiques?.[critere.id]?.codes) {
+            categorisationActive = true;
+        }
 
         return `
     <div style="margin-bottom: 15px; padding: 12px; background: white; border-left: 3px solid ${estAlgorithmique ? 'var(--orange-accent)' : 'var(--bleu-moyen)'};">
@@ -920,7 +926,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
         const nomDominant = scDominant ? scDominant.nom : `Code ${codeDominant}`;
 
         document.getElementById(`cat_dominante_${critereId}`).textContent =
-            `${nomDominant} (${maxFreq} occurrence${maxFreq > 1 ? 's' : ''})`;
+            `${nomDominant} (${maxFreq} occurrence${maxFreq > 1 ? 's' : ''} du code ${codeDominant})`;
 
         // Récupérer la rétroaction du sous-critère dominant
         if (scDominant && scDominant.retroaction) {
@@ -3042,6 +3048,34 @@ function memoriserSelectionsEvaluation() {
 }
 
 /**
+ * Sauvegarde les sélections actuelles pour les restaurer lors de la navigation
+ * Appelée avant de changer d'étudiant (Précédent/Suivant)
+ */
+function sauvegarderSelectionsEvaluation() {
+    const selectProduction = document.getElementById('selectProduction1');
+    const selectGrille = document.getElementById('selectGrille1');
+    const selectEchelle = document.getElementById('selectEchelle1');
+    const selectCartouche = document.getElementById('selectCartoucheEval');
+    const selectRemise = document.getElementById('remiseProduction1');
+
+    const selections = {
+        production: selectProduction?.value || '',
+        grille: selectGrille?.value || '',
+        echelle: selectEchelle?.value || '',
+        cartouche: selectCartouche?.value || '',
+        remise: selectRemise?.value || '',
+        afficherDescription: document.getElementById('afficherDescription1')?.checked ?? true,
+        afficherObjectif: document.getElementById('afficherObjectif1')?.checked ?? true,
+        afficherTache: document.getElementById('afficherTache1')?.checked ?? true,
+        afficherAdresse: document.getElementById('afficherAdresse1')?.checked ?? true,
+        afficherContexte: document.getElementById('afficherContexte1')?.checked ?? true
+    };
+
+    db.setSync('dernieresSelectionsEvaluation', JSON.stringify(selections));
+    console.log('💾 Sélections sauvegardées:', selections);
+}
+
+/**
  * Restaure les dernières sélections utilisées
  * Appelée lors du passage à un nouvel étudiant
  */
@@ -3308,15 +3342,28 @@ function naviguerEtudiantPrecedent() {
     const selectEtudiant = document.getElementById('selectEtudiantEval');
     if (!selectEtudiant || !selectEtudiant.value) return;
 
+    // CORRECTION : Sauvegarder les sélections actuelles avant de changer d'étudiant
+    sauvegarderSelectionsEvaluation();
+
     const options = Array.from(selectEtudiant.options).filter(opt => opt.value !== '');
     const indexActuel = options.findIndex(opt => opt.value === selectEtudiant.value);
 
     if (indexActuel > 0) {
         selectEtudiant.value = options[indexActuel - 1].value;
-        selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
+        // NE PAS déclencher 'change' qui réinitialise le formulaire
+        // selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // Mettre à jour evaluationEnCours avec le nouvel étudiant
+        if (evaluationEnCours) {
+            evaluationEnCours.etudiantDA = selectEtudiant.value;
+        }
 
         // Restaurer les sélections
-        setTimeout(() => restaurerSelectionsEvaluation(), 300);
+        setTimeout(() => {
+            restaurerSelectionsEvaluation();
+            // Forcer le chargement de l'évaluation après restauration
+            setTimeout(() => verifierEtChargerEvaluationExistante(), 500);
+        }, 100);
 
         mettreAJourIndicateurProgression();
     }
@@ -3329,15 +3376,28 @@ function naviguerEtudiantSuivant() {
     const selectEtudiant = document.getElementById('selectEtudiantEval');
     if (!selectEtudiant || !selectEtudiant.value) return;
 
+    // CORRECTION : Sauvegarder les sélections actuelles avant de changer d'étudiant
+    sauvegarderSelectionsEvaluation();
+
     const options = Array.from(selectEtudiant.options).filter(opt => opt.value !== '');
     const indexActuel = options.findIndex(opt => opt.value === selectEtudiant.value);
 
     if (indexActuel >= 0 && indexActuel < options.length - 1) {
         selectEtudiant.value = options[indexActuel + 1].value;
-        selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
+        // NE PAS déclencher 'change' qui réinitialise le formulaire
+        // selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // Mettre à jour evaluationEnCours avec le nouvel étudiant
+        if (evaluationEnCours) {
+            evaluationEnCours.etudiantDA = selectEtudiant.value;
+        }
 
         // Restaurer les sélections
-        setTimeout(() => restaurerSelectionsEvaluation(), 300);
+        setTimeout(() => {
+            restaurerSelectionsEvaluation();
+            // Forcer le chargement de l'évaluation après restauration
+            setTimeout(() => verifierEtChargerEvaluationExistante(), 500);
+        }, 100);
 
         mettreAJourIndicateurProgression();
     }
