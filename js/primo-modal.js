@@ -52,8 +52,7 @@ function ouvrirModalConversationnel(indexDepart = 0) {
             background: white;
             border-radius: var(--primo-border-radius, 12px);
             padding: var(--primo-padding, 35px);
-            max-width: var(--primo-modal-width, 700px);
-            min-width: 550px;
+            width: var(--primo-modal-width, 700px);
             max-height: 80vh;
             overflow-y: auto;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
@@ -96,7 +95,7 @@ function ajouterAnimationsCSS() {
     style.textContent = `
         /* Variables CSS pour Primo */
         :root {
-            --primo-modal-width: 700px;
+            --primo-modal-width: 500px;
             --primo-padding: 35px;
             --primo-spacing-sm: 10px;
             --primo-spacing-md: 20px;
@@ -288,41 +287,73 @@ function parserMarkdownSimple(texte) {
 }
 
 /**
+ * Calcule le nombre d'étapes du parcours en cours
+ * @param {Array} questionsActives - Tableau des questions actives
+ * @param {number} indexActuel - Index de la question actuelle
+ * @returns {Object} - { indexDansParcours, totalParcours, titre }
+ */
+function calculerInfosParcours(questionsActives, indexActuel) {
+    // Trouver les indices des fins de parcours et de début MODULE 2
+    const indexFinParcoursCourt = questionsActives.findIndex(q => q.finParcoursCourt);
+    const indexTransitionModeGuide = questionsActives.findIndex(q => q.id === 'transition-mode-guide');
+    const indexFinParcoursEvaluer = questionsActives.findIndex(q => q.finParcoursEvaluer);
+
+    let indexDansParcours, totalParcours, titre;
+
+    // Déterminer dans quel parcours on se trouve
+    if (indexFinParcoursCourt !== -1 && indexActuel <= indexFinParcoursCourt) {
+        // MODULE 1 : Créer un groupe-cours (parcours court)
+        indexDansParcours = indexActuel + 1;
+        totalParcours = indexFinParcoursCourt + 1;
+        titre = 'Créons ensemble ton groupe-cours !';
+    } else if (indexTransitionModeGuide !== -1 && indexFinParcoursEvaluer !== -1 && indexActuel >= indexTransitionModeGuide && indexActuel <= indexFinParcoursEvaluer) {
+        // MODULE 2 : Évaluer une production
+        indexDansParcours = indexActuel - indexTransitionModeGuide + 1;
+        totalParcours = indexFinParcoursEvaluer - indexTransitionModeGuide + 1;
+        titre = 'Évaluons une production !';
+    } else {
+        // MODULE 1 étendu (après finParcoursCourt mais avant transition-mode-guide)
+        indexDansParcours = indexActuel + 1;
+        totalParcours = questionsActives.length;
+        titre = 'Créons ensemble ton groupe-cours !';
+    }
+
+    return { indexDansParcours, totalParcours, titre };
+}
+
+/**
  * Génère le HTML pour une question
  */
 function genererHTMLQuestion(question) {
     let html = '';
 
-    // Barre de progression
+    // En-tête Primo simplifié
     const questionsActives = obtenirQuestionsActives(reponsesPrimo);
-    const progression = ((indexQuestionActuelle + 1) / questionsActives.length) * 100;
-    const etapeTexte = `Étape ${indexQuestionActuelle + 1} sur ${questionsActives.length}`;
+    const infos = calculerInfosParcours(questionsActives, indexQuestionActuelle);
+    const etapeTexte = `Étape ${infos.indexDansParcours}/${infos.totalParcours}`;
+    const titreModule = infos.titre;
 
     html += `
-        <div class="primo-progress-bar">
-            <div class="primo-progress-track">
-                <div class="primo-progress-fill" style="width: ${progression}%;"></div>
-            </div>
-            <div class="primo-progress-text">${etapeTexte}</div>
-        </div>
-    `;
-
-    // En-tête avec Primo
-    html += `
-        <div style="text-align: center; margin-bottom: 30px;">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
             <div style="
-                width: 80px;
-                height: 80px;
+                width: 50px;
+                height: 50px;
                 background: linear-gradient(135deg, #1a5266, #2d7a8c);
                 border-radius: 50%;
-                margin: 0 auto 20px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 40px;
+                font-size: 1.8rem;
                 box-shadow: 0 4px 15px rgba(26, 82, 102, 0.3);
+                flex-shrink: 0;
             ">
                 😎
+            </div>
+            <div style="flex: 1;">
+                <h2 style="margin: 0 0 5px 0; font-size: 1.5rem; color: var(--bleu-principal);">${titreModule}</h2>
+                <p style="margin: 0; color: var(--gris-moyen); font-size: 0.9rem;">
+                    <strong style="color: var(--bleu-principal);">${etapeTexte}</strong>
+                </p>
             </div>
         </div>
     `;
@@ -592,12 +623,12 @@ function genererBoutonsNavigation() {
         html += `
             <button onclick="primoQuestionPrecedente()" style="
                 flex: 1;
-                padding: 12px 20px;
+                padding: 8px 16px;
                 background: white;
                 color: var(--bleu-principal);
                 border: 2px solid var(--bleu-principal);
                 border-radius: 8px;
-                font-size: 1rem;
+                font-size: 0.9rem;
                 cursor: pointer;
                 transition: all 0.2s;
             " onmouseover="this.style.background='var(--bleu-tres-pale)';"
@@ -612,12 +643,12 @@ function genererBoutonsNavigation() {
         html += `
             <button onclick="terminerConfiguration().catch(err => console.error('[Primo] Erreur terminerConfiguration:', err))" style="
                 flex: 2;
-                padding: 12px 20px;
+                padding: 8px 16px;
                 background: linear-gradient(135deg, #1a5266, #2d7a8c);
                 color: white;
                 border: none;
                 border-radius: 8px;
-                font-size: 1rem;
+                font-size: 0.9rem;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.2s;
@@ -632,12 +663,12 @@ function genererBoutonsNavigation() {
         html += `
             <button disabled style="
                 flex: 2;
-                padding: 12px 20px;
+                padding: 8px 16px;
                 background: var(--gris-clair);
                 color: white;
                 border: none;
                 border-radius: 8px;
-                font-size: 1rem;
+                font-size: 0.9rem;
                 font-weight: 600;
                 cursor: not-allowed;
                 opacity: 0.6;
@@ -652,12 +683,12 @@ function genererBoutonsNavigation() {
         html += `
             <button onclick="primoQuestionSuivante()" style="
                 flex: 2;
-                padding: 12px 20px;
+                padding: 8px 16px;
                 background: linear-gradient(135deg, #1a5266, #2d7a8c);
                 color: white;
                 border: none;
                 border-radius: 8px;
-                font-size: 1rem;
+                font-size: 0.9rem;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.2s;
@@ -672,12 +703,12 @@ function genererBoutonsNavigation() {
     // Bouton Annuler (toujours présent)
     html += `
         <button onclick="confirmerAnnulation()" style="
-            padding: 12px 20px;
+            padding: 8px 16px;
             background: white;
             color: var(--gris-moyen);
             border: 1px solid var(--bordure-claire);
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.2s;
         " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';"
@@ -770,7 +801,13 @@ async function executerAction(question) {
     console.log(`[Primo] Exécution de l'action: ${question.action}`);
 
     try {
-        // Afficher un indicateur de chargement
+        // Action spéciale : passer en mode notification (sans afficher de statut)
+        if (question.action === 'passerEnModeNotification') {
+            passerEnModeNotification();
+            return; // Pas besoin de continuer l'exécution normale
+        }
+
+        // Afficher un indicateur de chargement (pour les autres actions)
         const statusDiv = document.getElementById('action-status');
         if (statusDiv) {
             statusDiv.innerHTML = `
@@ -790,10 +827,6 @@ async function executerAction(question) {
             await importerEchelleIDME();
         } else if (question.action === 'creerProduction') {
             await creerProduction();
-        } else if (question.action === 'passerEnModeNotification') {
-            // Action spéciale : passer en mode notification
-            passerEnModeNotification();
-            return; // Pas besoin de continuer l'exécution normale
         }
 
         // Succès - afficher confirmation
@@ -1489,6 +1522,22 @@ function creerCoursInitial(reponses) {
 let modeNotification = false;
 
 /**
+ * Démarre directement en mode notification (sans passer par le modal)
+ * @param {number} indexDepart - Index de la question de départ
+ */
+function demarrerModeNotification(indexDepart = 0) {
+    console.log('[Primo] 🚀 Démarrage direct en mode notification');
+
+    // Initialiser l'état
+    indexQuestionActuelle = indexDepart;
+    reponsesPrimo = {};
+    modalPrimoActif = true;
+
+    // Passer en mode notification
+    passerEnModeNotification();
+}
+
+/**
  * Passe du mode modal au mode notification
  */
 function passerEnModeNotification() {
@@ -1552,6 +1601,9 @@ function passerEnModeNotification() {
     boutonSuivant.onclick = primoQuestionSuivante;
 
     document.body.appendChild(boutonSuivant);
+
+    // Passer à la question suivante (la transition est terminée)
+    indexQuestionActuelle++;
 
     // Afficher la première notification
     afficherNotificationActuelle();
@@ -1733,5 +1785,6 @@ window.primoQuestionPrecedente = primoQuestionPrecedente;
 window.confirmerAnnulation = confirmerAnnulation;
 window.terminerConfiguration = terminerConfiguration;
 window.passerEnModeNotification = passerEnModeNotification;
+window.demarrerModeNotification = demarrerModeNotification;
 
 console.log('✅ Module primo-modal.js chargé');

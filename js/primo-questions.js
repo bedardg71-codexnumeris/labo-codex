@@ -35,7 +35,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'nom-utilisateur',
-        texte: 'Salut, je suis Primo ! 😎 Je vais t\'assister dans la configuration des paramètres de l\'application.\n\nToi, quel est ton nom ?',
+        texte: 'Salut, je suis Primo ! Je vais t\'assister dans la configuration des paramètres de l\'application.\n\nToi, quel est ton nom ?',
         type: 'text',
         placeholder: 'Ton prénom',
         champsCibles: [
@@ -44,8 +44,7 @@ const QUESTIONS_PRIMO = [
         validation: {
             requis: true,
             minLength: 2
-        },
-        aide: 'Ton nom apparaîtra dans les rapports.'
+        }
     },
 
     {
@@ -59,8 +58,7 @@ const QUESTIONS_PRIMO = [
         validation: {
             requis: true,
             minLength: 3
-        },
-        aide: 'Le titre complet du cours.'
+        }
     },
 
     {
@@ -135,8 +133,7 @@ const QUESTIONS_PRIMO = [
         ],
         validation: {
             requis: true
-        },
-        aide: 'Tu pourras changer plus tard dans Réglages.'
+        }
     },
 
     // Question commune PAN (Maîtrise et Spécifications)
@@ -229,8 +226,7 @@ const QUESTIONS_PRIMO = [
         ],
         validation: {
             requis: true
-        },
-        aide: 'Premier jour de cours.'
+        }
     },
 
     {
@@ -245,8 +241,7 @@ const QUESTIONS_PRIMO = [
         validation: {
             requis: true,
             apres: 'trimestre-debut'
-        },
-        aide: 'Dernier jour de cours (incluant les examens).'
+        }
     },
 
     // ========================================================================
@@ -520,7 +515,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'etudiants-methode',
-        texte: '**Ajout des étudiants**\n\nPour continuer le tutoriel (création de production et évaluation), tu dois créer un groupe d\'étudiants maintenant.\n\nTu vas copier-coller une liste d\'étudiants fictifs à l\'étape suivante.',
+        texte: '**Ajout des étudiants**\n\nConsulte le système de gestion des apprentissages de ton établissement pour récupérer la liste de tes élèves. Nous allons la copier-coller à la prochaine étape.\n\nSi tu préfères utiliser une liste fictive, tu trouveras un fichier **etudiants-demo.csv** dans le dossier **materiel-demo/** que tu peux ouvrir et copier-coller.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -528,7 +523,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'etudiants-liste',
-        texte: 'Parfait ! Colle ta liste ici (DA, Nom, Prénom, Programme par ligne, séparés par virgules ou tabulations).\n\n💡 **Astuce** : Tu trouveras un fichier **etudiants-demo.csv** dans le dossier **materiel-demo/** que tu peux ouvrir et copier-coller.\n\nDans un vrai contexte, tu exporterais cette liste depuis ton système de gestion des apprentissages (Léa, Omnivox, Moodle, etc.).',
+        texte: 'Parfait ! Colle ta liste ici (DA, Nom, Prénom, Programme par ligne, séparés par virgules ou tabulations).',
         type: 'textarea',
         placeholder: 'Ex:\n1234567,Tremblay,Sophie,506.A0\n2345678,Gagnon,Marc,200.B1',
         champsCibles: [
@@ -537,7 +532,6 @@ const QUESTIONS_PRIMO = [
         validation: {
             requis: true
         },
-        aide: 'Copie-colle depuis Excel ou CSV fonctionne directement.',
         transformation: function(valeur) {
             if (!valeur || valeur.trim() === '') return [];
 
@@ -572,7 +566,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'confirmation-groupe',
-        texte: '🎉 **Bravo !** Tu as terminé la configuration de base !\n\n✅ Cours créé\n✅ Trimestre configuré\n✅ Horaire défini\n✅ Groupe d\'étudiants créé\n\n**Que veux-tu faire maintenant ?**\n\nTu peux choisir une autre activité depuis le menu d\'accueil :\n• **Évaluer** : Importer du matériel pédagogique et créer des évaluations\n• **Créer ma pratique** : Configurer ta pratique de notation\n• **Charger données démo** : Explorer avec des données complètes\n• **Explorer** : Naviguer librement dans l\'application',
+        texte: '🎉 **Bravo !** Tu as terminé la configuration de base !\n\n✅ Cours créé\n✅ Trimestre configuré\n✅ Horaire défini\n✅ Groupe d\'étudiants créé',
         type: 'message',
         champsCibles: [],
         validation: {
@@ -631,7 +625,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'transition-mode-guide',
-        texte: '**Maintenant, place à la pratique !**\n\nJe vais te guider pas à pas pour créer ta première production et évaluation directement dans l\'application.\n\nJe vais me transformer en **assistant discret** (notifications en haut à droite) pendant que tu navigues librement.\n\nUtilise le bouton **"Suivant →"** en bas à droite pour avancer dans les étapes.\n\nC\'est parti ! 🚀',
+        texte: '**Maintenant, place à la pratique !**\n\nJe vais te guider pas à pas pour créer ta première production et évaluation directement dans l\'application.\n\nJe vais me transformer en **assistant discret** (notifications en haut à droite) pendant que tu navigues librement.\n\nUtilise le bouton **"Suivant →"** en bas à droite pour avancer dans les étapes.\n\nC\'est parti !',
         type: 'action',
         action: 'passerEnModeNotification',
         champsCibles: [],
@@ -684,7 +678,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'selection-etudiant',
-        texte: '**Étape 5 : Choisir un étudiant et la production**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne la production que tu viens de créer\n\nTu devrais maintenant voir le formulaire d\'évaluation avec :\n✅ **Échelle IDME Test** (niveaux I et M)\n✅ **Grille Test** (critères A et B)\n\n🎉 **Tout est là ! Le matériel importé est bien disponible.**\n\nClique **"Suivant →"** quand tu vois tout ça.',
+        texte: '**Étape 5 : Choisir un étudiant et la production**\n\n1️⃣ Choisis n\'importe quel étudiant de ta liste\n2️⃣ Sélectionne la production que tu viens de créer\n\nTu devrais maintenant voir le formulaire d\'évaluation avec :\n✅ **Échelle IDME Test** (niveaux I et M)\n✅ **Grille Test** (critères A et B)\n\n**Tout est là ! Le matériel importé est bien disponible.**\n\nClique **"Suivant →"** quand tu vois tout ça.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -692,7 +686,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'attribuer-niveaux',
-        texte: '**Étape 6 : Évaluer**\n\nAttribue des niveaux pour chaque critère :\n• **Critère A** : M (Maîtrisé)\n• **Critère B** : I (Insuffisant)\n\nUne note est calculée automatiquement ! 🎉\n\nTu peux aussi ajouter des commentaires si tu veux.\n\nSauvegarde l\'évaluation, puis clique **"Suivant →"**.',
+        texte: '**Étape 6 : Évaluer**\n\nAttribue des niveaux pour chaque critère :\n• **Critère A** : M (Maîtrisé)\n• **Critère B** : I (Insuffisant)\n\nUne note est calculée automatiquement !\n\nTu peux aussi ajouter des commentaires si tu veux.\n\nSauvegarde l\'évaluation, puis clique **"Suivant →"**.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -703,7 +697,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'fin-sequence-evaluer',
-        texte: '🎉 **Bravo !** Tu as terminé la séquence d\'évaluation !\n\n✅ Échelle de performance importée\n✅ Grille de critères importée\n✅ Production créée\n✅ Évaluation complétée\n\n**Que veux-tu faire maintenant ?**\n\nTu peux choisir une autre activité depuis le menu d\'accueil :\n• **Créer ma pratique** : Configurer ta pratique de notation\n• **Charger données démo** : Explorer avec des données complètes\n• **Explorer** : Naviguer librement dans l\'application',
+        texte: '**Bravo !** Tu as terminé la séquence d\'évaluation !\n\n✅ Échelle de performance importée\n✅ Grille de critères importée\n✅ Production créée\n✅ Évaluation complétée',
         type: 'message',
         champsCibles: [],
         validation: { requis: false },
@@ -718,7 +712,7 @@ const QUESTIONS_PRIMO = [
         texte: '**Tour de magie ! 🎩✨**\n\nMaintenant je vais remplir automatiquement ton groupe fictif avec :\n• 50+ évaluations déjà complétées\n• Présences variées (assidus, absents, entre-deux)\n• Productions diversifiées\n• Indices A-C-P calculés\n\nComme ça, tu peux explorer toutes les fonctionnalités de l\'application sans avoir à tout saisir manuellement !\n\nPrêt·e pour la magie ?',
         type: 'radio',
         options: [
-            { value: 'oui', label: 'Oui, allons-y ! 🚀' },
+            { value: 'oui', label: 'Oui, allons-y !' },
             { value: 'non', label: 'Non, je préfère continuer sans' }
         ],
         champsCibles: [
@@ -761,10 +755,10 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'saisie-presences',
-        texte: '**Apprenons à saisir les présences**\n\n1️⃣ Va dans **Suivi → Saisie des présences**\n2️⃣ Choisis une date récente\n3️⃣ Tu vois la liste de tes étudiants :\n   • ✅ = Présent\n   • ❌ = Absent\n   • 🟧 = Retard\n\nEssaie de modifier quelques présences.\n\nLes indices d\'assiduité (A) se recalculent automatiquement !\n\nTu as essayé ?',
+        texte: '**Apprenons à saisir les présences**\n\n1️⃣ Va dans **Suivi → Saisie des présences**\n2️⃣ Choisis une date récente\n3️⃣ Tu vois la liste de tes étudiants\n\nEssaie de modifier quelques présences.\n\nLes indices d\'assiduité (A) se recalculent automatiquement !\n\nTu as essayé ?',
         type: 'radio',
         options: [
-            { value: 'oui', label: 'Oui, j\'ai essayé ! ✅' },
+            { value: 'oui', label: 'Oui, j\'ai essayé !' },
             { value: 'sauter', label: 'Je vais le faire plus tard' }
         ],
         champsCibles: [
@@ -780,10 +774,10 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'tableau-bord',
-        texte: '**Découvre le tableau de bord**\n\n1️⃣ Va dans **Suivi → Tableau de bord**\n\nTu vois maintenant :\n📊 Indicateurs globaux (moyennes A-C-P)\n🎯 Étudiants à risque (niveau RàI)\n📈 Patterns détectés (défis, blocages)\n\nC\'est ici que tu identifies qui a besoin d\'aide !\n\nTu y es ?',
+        texte: '**Découvre le tableau de bord**\n\n1️⃣ Va dans **Suivi → Tableau de bord**\n\nTu vois maintenant :\n• Indicateurs globaux (moyennes A-C-P)\n• Étudiants à risque (niveau RàI)\n• Patterns détectés (défis, blocages)\n\nC\'est ici que tu identifies qui a besoin d\'aide !\n\nTu y es ?',
         type: 'radio',
         options: [
-            { value: 'oui', label: 'Oui, c\'est impressionnant ! 🎉' },
+            { value: 'oui', label: 'Oui' },
             { value: 'sauter', label: 'Je vais y aller plus tard' }
         ],
         champsCibles: [],
@@ -794,10 +788,10 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'profil-individuel',
-        texte: '**Consulte un profil individuel**\n\n1️⃣ Clique sur **Liste des étudiants**\n2️⃣ Choisis n\'importe qui\n\nTu vois :\n• Son engagement (A-C-P)\n• Ses forces et défis SRPNF\n• Ses productions évaluées\n• Recommandations d\'intervention\n\nC\'est le cœur du système de monitorage ! 💙\n\nTu as exploré un profil ?',
+        texte: '**Consulte un profil individuel**\n\n1️⃣ Clique sur **Liste des étudiants**\n2️⃣ Choisis n\'importe qui\n\nTu vois :\n• Son engagement (A-C-P)\n• Ses forces et défis SRPNF\n• Ses productions évaluées\n• Recommandations d\'intervention\n\nC\'est le cœur du système de monitorage !\n\nTu as exploré un profil ?',
         type: 'radio',
         options: [
-            { value: 'oui', label: 'Oui, j\'ai exploré ! ✅' },
+            { value: 'oui', label: 'Oui, j\'ai exploré !' },
             { value: 'sauter', label: 'Je vais le faire plus tard' }
         ],
         champsCibles: [
@@ -813,7 +807,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'fin',
-        texte: '**Bravo, tu as terminé ! 🎉**\n\nTu sais maintenant :\n✅ Configurer l\'application\n✅ Importer du matériel pédagogique\n✅ Créer et évaluer des productions\n✅ Saisir les présences\n✅ Consulter le tableau de bord\n✅ Analyser les profils individuels\n\nTu peux maintenant :\n\n🔄 **Recommencer avec un vrai groupe**\n   (efface les données fictives dans Réglages → Gestion des données)\n\n🎓 **Explorer en autonomie**\n   (je reste accessible via le bouton 😎 en haut à droite)\n\n📖 **Consulter l\'aide**\n   (section Aide avec guides détaillés)\n\nBon monitorage pédagogique ! 🚀',
+        texte: '**Bravo, tu as terminé !**\n\nTu sais maintenant :\n✅ Configurer l\'application\n✅ Importer du matériel pédagogique\n✅ Créer et évaluer des productions\n✅ Saisir les présences\n✅ Consulter le tableau de bord\n✅ Analyser les profils individuels',
         type: 'message',
         champsCibles: [],
         validation: {

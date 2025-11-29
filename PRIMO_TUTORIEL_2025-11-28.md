@@ -1,7 +1,7 @@
 # Primo - Système tutoriel amélioré
 
 ## Date
-28 novembre 2025 (fin de journée)
+28 novembre 2025 12:00
 
 ## Résumé exécutif
 
@@ -17,7 +17,7 @@ Transformation complète du système d'assistance Primo en un **parcours tutorie
 
 Transformer Primo d'un simple assistant de configuration en un **système tutoriel complet** qui :
 1. Configure l'application (déjà fait)
-2. **NOUVEAU** : Guide l'utilisateur à travers toutes les fonctionnalités
+2. **NOUVEAU** : Guide l'utilisateur à travers les fonctionnalités de base
 3. **NOUVEAU** : Permet de pratiquer la création d'une évaluation
 4. **NOUVEAU** : Importe automatiquement des données de démo pour exploration
 5. **NOUVEAU** : Enseigne comment utiliser le système de monitorage
