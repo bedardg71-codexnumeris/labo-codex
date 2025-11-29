@@ -1862,7 +1862,7 @@ function ouvrirWizardPratique(modeEdition = false, idPratique = null) {
     // Mettre à jour le titre du wizard
     const titre = document.querySelector('#modalWizardPratique h2');
     if (titre) {
-        titre.textContent = modeEdition ? 'Modifier une pratique' : 'Créer une nouvelle pratique';
+        titre.textContent = modeEdition ? 'Modifions ensemble ta pratique !' : 'Créons ensemble ta pratique !';
     }
 
     // Mettre à jour le texte du bouton final

@@ -1,0 +1,63 @@
+[
+  {
+    "id": "GAB1759269075967",
+    "grilleId": "GRILLE1759264206489",
+    "nom": "Stratégies de lecture",
+    "criteres": [
+      {
+        "id": "CR17592642064900.618466646516426",
+        "nom": "Structure"
+      },
+      {
+        "id": "CR17592642064900.9140629252044018",
+        "nom": "Rigueur"
+      },
+      {
+        "id": "CR17592642064900.06875447039747506",
+        "nom": "Plausibilité"
+      },
+      {
+        "id": "CR17592642064900.21301963126012036",
+        "nom": "Nuance"
+      }
+    ],
+    "niveaux": [
+      {
+        "code": "I",
+        "nom": "Incomplet ou insuffisant"
+      },
+      {
+        "code": "D",
+        "nom": "En Développement"
+      },
+      {
+        "code": "M",
+        "nom": "Maîtrisé"
+      },
+      {
+        "code": "E",
+        "nom": "Étendu"
+      }
+    ],
+    "commentaires": {
+      "CR17592642064900.618466646516426_I": "Les stratégies de lecture ne sont pas clairement identifiées et le système d'annotation manque de cohérence. L'absence de traces systématiques (couleurs, symboles, annotations) rend difficile le repérage des éléments importants pour la future carte mentale. Pour progresser, identifie explicitement les stratégies utilisées et développe un système d'annotation cohérent pour marquer les passages significatifs.",
+      "CR17592642064900.618466646516426_D": "Les stratégies de lecture sont partiellement identifiées et le système d'annotation commence à se développer, mais manque encore de constance. Les traces présentes faciliteront la création d'une carte mentale, mais celle-ci risque d'être incomplète. Pour t'améliorer, applique plus systématiquement les stratégies choisies et enrichis tes annotations pour mieux préparer l'étape suivante.",
+      "CR17592642064900.618466646516426_M": "Les stratégies de lecture sont clairement identifiées et le système d'annotation est cohérent, utilisant efficacement couleurs, symboles et notes marginales. Cette organisation méthodique permet de repérer facilement les éléments importants et facilitera grandement la création d'une carte mentale riche et structurée. Les traces laissées témoignent d'une lecture active et réfléchie.",
+      "CR17592642064900.618466646516426_E": "Les stratégies de lecture sont parfaitement identifiées et le système d'annotation est sophistiqué, combinant avec finesse couleurs, symboles et annotations. Cette organisation exemplaire révèle une compréhension approfondie du texte et permettra une carte mentale particulièrement riche et nuancée. Les traces démontrent une lecture analytique mature et perspicace.",
+      "CR17592642064900.9140629252044018_I": "L'application des stratégies de lecture est insuffisante en nombre et en profondeur. Les annotations ne couvrent pas assez d'aspects du texte pour permettre une analyse complète. Pour progresser, veille à utiliser au moins trois stratégies différentes et à développer davantage tes observations pour chacune d'entre elles, selon ce que le texte permet d'explorer.",
+      "CR17592642064900.9140629252044018_D": "Les stratégies de lecture sont appliquées, mais certains aspects importants du texte restent peu explorés. Bien que certaines annotations soient pertinentes, d'autres occasions d'analyse sont manquées. Pour t'améliorer, exploite plus à fond les possibilités offertes par chaque stratégie choisie, en fonction des particularités du texte.",
+      "CR17592642064900.9140629252044018_M": "Les stratégies de lecture sont bien appliquées, permettant d'explorer différents aspects significatifs du texte. Les annotations sont développées là où le texte le permet, offrant une base solide pour l'analyse. L'attention portée aux éléments importants montre une bonne compréhension des possibilités offertes par chaque stratégie.",
+      "CR17592642064900.9140629252044018_E": "Les stratégies de lecture sont appliquées de manière approfondie, explorant finement tous les aspects significatifs du texte. Les annotations sont particulièrement développées aux endroits stratégiques, démontrant une excellente compréhension des possibilités offertes par chaque stratégie. Cette application judicieuse enrichira considérablement l'analyse.",
+      "CR17592642064900.06875447039747506_I": "Le lien entre les stratégies choisies et l'hypothèse d'objectif de communication n'est pas clairement établi. Les éléments annotés semblent choisis au hasard plutôt que pour leur pertinence. Pour progresser, sélectionne des extraits qui soutiennent directement ton hypothèse et explique leur contribution dans tes annotations.",
+      "CR17592642064900.06875447039747506_D": "Les stratégies choisies sont partiellement reliées à l'hypothèse d'objectif de communication. Certaines annotations sont pertinentes, d'autres moins ciblées. Pour t'améliorer, renforce le lien entre tes annotations et ton hypothèse en expliquant plus clairement comment chaque élément relevé contribue à la démonstration.",
+      "CR17592642064900.06875447039747506_M": "Les stratégies choisies servent efficacement l'hypothèse d'objectif de communication. Les annotations sont pertinentes et bien expliquées, montrant clairement comment chaque élément contribue à la démonstration. Cette cohérence entre observations et hypothèse permettra une carte mentale convaincante et bien articulée.",
+      "CR17592642064900.06875447039747506_E": "Les stratégies choisies soutiennent remarquablement l'hypothèse d'objectif de communication. Les annotations sont particulièrement pertinentes et finement expliquées, révélant une compréhension approfondie des liens entre les éléments observés et l'hypothèse. Cette cohérence exceptionnelle permettra une carte mentale particulièrement convaincante.",
+      "CR17592642064900.21301963126012036_I": "L'approche reste principalement descriptive, se limitant aux éléments les plus évidents. Les stratégies sont utilisées de façon isolée, sans explorer leurs complémentarités possibles. Pour progresser, cherche à croiser les observations issues de différentes stratégies pour enrichir ta compréhension des subtilités du texte.",
+      "CR17592642064900.21301963126012036_D": "L'approche commence à dépasser le niveau descriptif. Quelques liens sont établis entre les observations issues de différentes stratégies, mais plusieurs connexions potentielles restent inexploitées. Pour t'améliorer, exploite davantage la complémentarité des stratégies pour révéler les nuances du texte.",
+      "CR17592642064900.21301963126012036_M": "L'approche combine efficacement description et analyse. La complémentarité des stratégies est bien exploitée, permettant de révéler des nuances significatives. Les liens établis entre les différentes observations enrichissent la compréhension du texte et ouvrent des perspectives interprétatives intéressantes.",
+      "CR17592642064900.21301963126012036_E": "L'approche développe une analyse particulièrement fine grâce à l'exploitation judicieuse de la complémentarité des stratégies. Les connexions établies entre les différentes observations révèlent des nuances subtiles et ouvrent des perspectives interprétatives riches et originales. Cette lecture croisée démontre une excellente maîtrise analytique."
+    },
+    "verrouille": false,
+    "contexte": "Cet exercice nous permet d’observer comment tu adoptes la posture analytique en appliquant tes stratégies de lecture, en adoptant une méthode de travail efficace et en interprétant et en reliant les informations. Voici quelques observations."
+  }
+]

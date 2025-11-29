@@ -74,13 +74,13 @@ function afficherModalAccueil() {
         <div style="
             background: white;
             border-radius: var(--primo-border-radius, 12px);
-            padding: var(--primo-padding, 35px);
-            max-width: var(--primo-modal-width, 700px);
+            padding: 25px;
+            max-width: var(--primo-modal-width, 500px);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             animation: slideUp 0.4s ease-out;
         ">
             <!-- En-tête avec Primo -->
-            <div style="text-align: center; margin-bottom: 30px;">
+            <div style="text-align: center; margin-bottom: 25px;">
                 <div style="
                     width: 80px;
                     height: 80px;
@@ -90,7 +90,7 @@ function afficherModalAccueil() {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 40px;
+                    font-size: 2.5rem;
                     box-shadow: 0 4px 15px rgba(26, 82, 102, 0.3);
                 ">
                     😎
@@ -104,38 +104,24 @@ function afficherModalAccueil() {
                     color: var(--gris-moyen);
                     font-size: 0.95rem;
                     margin: 0;
-                ">C'est Claude et Grégoire qui m'envoient !</p>
+                ">Je te propose un tour guidé !</p>
             </div>
 
-            <!-- Message principal -->
-            <div style="
-                background: var(--bleu-tres-pale);
-                border-left: 4px solid var(--bleu-principal);
-                padding: 20px;
-                border-radius: 6px;
-                margin-bottom: var(--primo-spacing-lg, 30px);
-            ">
-                <p style="margin: 0 0 15px; color: var(--gris-fonce); font-size: 1rem;">
-                    Je constate que tu n'as pas encore de configuration ou de données dans l'application.
-                </p>
-                <p style="margin: 0; color: var(--gris-fonce); font-size: 1rem;">
-                    <strong>Laisse-moi t'aider à démarrer !</strong> 🚀
-                </p>
-            </div>
-
-            <!-- Options de démarrage -->
+            <!-- Parcours modulaire -->
             <div style="margin-bottom: 25px;">
                 <h3 style="
                     color: var(--bleu-principal);
                     font-size: 1.1rem;
                     margin: 0 0 15px;
-                ">Que veux-tu faire ?</h3>
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                ">Parcours modulaire</h3>
 
-                <!-- Option 1: Pour bien débuter -->
+                <!-- MODULE 1: Créer un groupe-cours -->
                 <button onclick="demarrerConfigComplete()" style="
                     width: 100%;
                     padding: 15px 20px;
-                    margin-bottom: 12px;
+                    margin-bottom: 8px;
                     background: white;
                     color: var(--bleu-principal);
                     border: 2px solid var(--bleu-principal);
@@ -145,17 +131,17 @@ function afficherModalAccueil() {
                     text-align: left;
                     transition: all 0.2s;
                 " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
-                    <strong>⚙️ Pour bien débuter</strong>
+                    <strong>MODULE 1 : Créer un groupe-cours</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
-                        Cours, trimestre, horaire, groupe (10 minutes)
+                        Configurer cours, trimestre, horaire, groupe (3 minutes)
                     </div>
                 </button>
 
-                <!-- Option 3: Évaluer -->
+                <!-- MODULE 2: Évaluer une production -->
                 <button onclick="demarrerEvaluation()" style="
                     width: 100%;
                     padding: 15px 20px;
-                    margin-bottom: 12px;
+                    margin-bottom: 8px;
                     background: white;
                     color: var(--bleu-principal);
                     border: 2px solid var(--bleu-principal);
@@ -165,17 +151,37 @@ function afficherModalAccueil() {
                     text-align: left;
                     transition: all 0.2s;
                 " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
-                    <strong>📝 Évaluer</strong>
+                    <strong>MODULE 2 : Évaluer une production</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
-                        Import de matériel et création d'évaluations (15 minutes)
+                        Importer matériel et compléter une évaluation
                     </div>
                 </button>
 
-                <!-- Option 4: Créer juste la pratique -->
+                <!-- MODULE 3: Explorer les diagnostics (DÉSACTIVÉ) -->
+                <button disabled style="
+                    width: 100%;
+                    padding: 15px 20px;
+                    margin-bottom: 8px;
+                    background: var(--gris-tres-pale);
+                    color: var(--gris-moyen);
+                    border: 1px solid var(--bordure-claire);
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: not-allowed;
+                    text-align: left;
+                    opacity: 0.6;
+                ">
+                    <strong>MODULE 3 : Explorer les diagnostics pédagogiques</strong>
+                    <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
+                        Disponible plus tard
+                    </div>
+                </button>
+
+                <!-- MODULE 4: Créer ma pratique -->
                 <button onclick="demarrerWizard()" style="
                     width: 100%;
                     padding: 15px 20px;
-                    margin-bottom: 12px;
+                    margin-bottom: 8px;
                     background: white;
                     color: var(--bleu-principal);
                     border: 2px solid var(--bleu-principal);
@@ -185,33 +191,13 @@ function afficherModalAccueil() {
                     text-align: left;
                     transition: all 0.2s;
                 " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
-                    <strong>✨ Créer ma propre pratique de notation</strong>
+                    <strong>MODULE 4 : Créer ma pratique de notation</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
-                        Juste la pratique de notation (8 minutes)
+                        Configurer pratique, seuils, échelle, grille (8 minutes)
                     </div>
                 </button>
 
-                <!-- Option 5: Charger données de démo -->
-                <button onclick="chargerDonneesDemo()" style="
-                    width: 100%;
-                    padding: 15px 20px;
-                    margin-bottom: 12px;
-                    background: white;
-                    color: var(--bleu-principal);
-                    border: 2px solid var(--bleu-principal);
-                    border-radius: 8px;
-                    font-size: 1rem;
-                    cursor: pointer;
-                    text-align: left;
-                    transition: all 0.2s;
-                " onmouseover="this.style.background='var(--bleu-tres-pale)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">
-                    <strong>🎓 Charger des données de démonstration</strong>
-                    <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
-                        Parfait pour explorer l'application avec des exemples
-                    </div>
-                </button>
-
-                <!-- Option 6: Explorer librement -->
+                <!-- Explorer sans guide -->
                 <button onclick="explorerLibrement()" style="
                     width: 100%;
                     padding: 15px 20px;
@@ -224,24 +210,11 @@ function afficherModalAccueil() {
                     text-align: left;
                     transition: all 0.2s;
                 " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';" onmouseout="this.style.background='white'; this.style.borderColor='var(--bordure-claire)';">
-                    <strong>🔍 Explorer par moi-même</strong>
+                    <strong>Explorer sans guide</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
-                        Je peux toujours revenir te voir plus tard
+                        Naviguer librement dans l'application
                     </div>
                 </button>
-            </div>
-
-            <!-- Footer -->
-            <div style="
-                text-align: center;
-                padding-top: var(--primo-spacing-md, 20px);
-                margin-top: var(--primo-spacing-md, 20px);
-                border-top: 1px solid var(--bordure-claire);
-                color: var(--gris-moyen);
-                font-size: 0.85rem;
-                line-height: 1.5;
-            ">
-                💡 <strong style="color: var(--bleu-principal);">Conseil :</strong> Les données de démo sont idéales pour commencer !
             </div>
         </div>
     `;
@@ -291,28 +264,10 @@ function fermerModalAccueil() {
 function chargerDonneesDemo() {
     fermerModalAccueil();
 
-    // Afficher notification
-    afficherNotificationSucces(
-        'Chargement en cours...',
-        'Je vais charger les données de démonstration pour toi !'
-    );
-
     // Naviguer vers Import/Export et déclencher import
     setTimeout(() => {
         afficherSection('reglages');
         afficherSousSection('reglages-import-export');
-
-        // Message d'instruction
-        setTimeout(() => {
-            if (typeof afficherNotificationSucces === 'function') {
-                afficherNotificationSucces(
-                    'Presque prêt !',
-                    'Clique sur le bouton "Importer des données" et sélectionne le fichier "donnees-demo.json" 📦'
-                );
-            } else {
-                alert('Presque prêt !\n\nClique sur le bouton "Importer des données" et sélectionne le fichier "donnees-demo.json" 📦');
-            }
-        }, 500);
     }, 300);
 }
 
@@ -322,32 +277,35 @@ function chargerDonneesDemo() {
 function demarrerWizard() {
     fermerModalAccueil();
 
-    // Afficher notification simple
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('C\'est parti ! Je vais te guider pour créer ta pratique personnalisée 🎯');
-    }
-
     // Naviguer vers Pratiques et ouvrir Wizard
     setTimeout(() => {
         afficherSection('reglages');
 
-        // CORRECTIF: Attendre que la section soit affichée avant d'afficher la sous-section
+        // Attendre que la section soit affichée avant d'afficher la sous-section
         setTimeout(() => {
-            afficherSousSection('reglages-pratiques');
+            afficherSousSection('reglages-pratique-notation');
 
             // Attendre que la page soit chargée, puis ouvrir le wizard
             setTimeout(() => {
-                if (typeof ouvrirWizardPrimo === 'function') {
-                    ouvrirWizardPrimo();
-                } else {
-                    if (typeof afficherNotificationInformation === 'function') {
-                        afficherNotificationInformation('Va dans «Pratique de notation» et clique sur «Créer une pratique» ✨');
-                    } else {
-                        alert('Va dans «Pratique de notation» et clique sur «Créer une pratique» ✨');
-                    }
+                console.log('[Primo] Tentative d\'ouverture du wizard pratique...');
+
+                // Vérifier que le modal existe dans le DOM
+                const modal = document.getElementById('modalWizardPratique');
+                if (!modal) {
+                    console.error('[Primo] Modal #modalWizardPratique introuvable dans le DOM');
+                    alert('Erreur : Le modal de configuration n\'a pas pu être trouvé.');
+                    return;
                 }
-            }, 800);
-        }, 200);
+
+                if (typeof ouvrirWizardPratique === 'function') {
+                    console.log('[Primo] Ouverture du wizard...');
+                    ouvrirWizardPratique();
+                } else {
+                    console.error('[Primo] Fonction ouvrirWizardPratique non disponible');
+                    alert('Erreur : Le module de configuration des pratiques n\'est pas chargé.');
+                }
+            }, 1200);
+        }, 400);
     }, 300);
 }
 
@@ -356,11 +314,6 @@ function demarrerWizard() {
  */
 function demarrerConfigComplete() {
     fermerModalAccueil();
-
-    // Afficher notification
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('C\'est parti ! Je vais te poser quelques questions. 😎');
-    }
 
     // Ouvrir le modal conversationnel après un court délai
     setTimeout(() => {
@@ -380,13 +333,13 @@ function demarrerConfigComplete() {
 function demarrerEvaluation() {
     fermerModalAccueil();
 
-    // Afficher notification
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces('Passons à l\'évaluation ! 📝');
-    }
+    // Calculer les questions actives (avec réponses vides car on démarre)
+    const questionsActives = typeof obtenirQuestionsActives === 'function'
+        ? obtenirQuestionsActives({})
+        : QUESTIONS_PRIMO;
 
-    // Trouver l'index de l'étape 'transition-mode-guide'
-    const indexEtapeEvaluation = QUESTIONS_PRIMO.findIndex(q => q.id === 'transition-mode-guide');
+    // Trouver l'index de l'étape 'transition-mode-guide' dans questionsActives
+    const indexEtapeEvaluation = questionsActives.findIndex(q => q.id === 'transition-mode-guide');
 
     if (indexEtapeEvaluation === -1) {
         console.error('[Primo] Étape transition-mode-guide introuvable');
@@ -394,15 +347,15 @@ function demarrerEvaluation() {
         return;
     }
 
-    // Ouvrir le modal conversationnel à partir de cette étape
+    // Passer directement en mode notification (sans modal)
     setTimeout(() => {
-        if (typeof ouvrirModalConversationnel === 'function') {
-            ouvrirModalConversationnel(indexEtapeEvaluation);
+        if (typeof demarrerModeNotification === 'function') {
+            demarrerModeNotification(indexEtapeEvaluation);
         } else {
-            console.error('[Primo] Fonction ouvrirModalConversationnel non disponible');
+            console.error('[Primo] Fonction demarrerModeNotification non disponible');
             alert('Erreur : Le module de configuration n\'est pas chargé.');
         }
-    }, 500);
+    }, 300);
 }
 
 /**
@@ -410,12 +363,6 @@ function demarrerEvaluation() {
  */
 function explorerLibrement() {
     fermerModalAccueil();
-
-    if (typeof afficherNotificationInformation === 'function') {
-        afficherNotificationInformation('Bonne exploration ! 🗺️ Tu peux me rappeler à tout moment en cliquant sur le bouton «👋 ASSISTANCE PRIMO» en haut à droite.');
-    } else {
-        alert('Bonne exploration ! 🗺️ Tu peux me rappeler à tout moment en cliquant sur le bouton «👋 ASSISTANCE PRIMO» en haut à droite.');
-    }
 }
 
 // ============================================================================
