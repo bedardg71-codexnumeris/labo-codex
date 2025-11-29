@@ -3248,11 +3248,13 @@ function verifierEtChargerEvaluationExistante() {
                     }
 
                     // Restaurer le champ d'erreurs (si mode simple - sans catégorisation)
-                    if (donnees.erreurs !== undefined) {
+                    // CORRECTION: Supporter aussi totalErreurs pour compatibilité avec anciennes évaluations
+                    const nbErreurs = donnees.erreurs !== undefined ? donnees.erreurs : donnees.totalErreurs;
+                    if (nbErreurs !== undefined) {
                         const inputErreurs = document.getElementById(`eval_erreurs_${critereId}`);
                         if (inputErreurs) {
-                            inputErreurs.value = donnees.erreurs;
-                            console.log(`  ✓ Erreurs restaurées pour ${critereId}: ${donnees.erreurs}`);
+                            inputErreurs.value = nbErreurs;
+                            console.log(`  ✓ Erreurs restaurées pour ${critereId}: ${nbErreurs}`);
                         }
                     }
 
