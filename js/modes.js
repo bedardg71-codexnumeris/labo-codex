@@ -262,7 +262,7 @@ function appliquerTheme(mode) {
         bandeau.id = 'bandeau-mode';
 
         // Texte du bandeau
-        let texte = `${THEMES[mode].icone} ${THEMES[mode].nom.toUpperCase()} - Les identités affichées sont ${mode === MODES.SIMULATION ? 'réelles' : 'anonymisées'}`;
+        let texte = `${THEMES[mode].icone} ${THEMES[mode].nom.toUpperCase()} - Les identités affichées ${mode === MODES.SIMULATION ? 'sont réelles' : 'sont anonymisées'}`;
 
         // Ajouter contrôle DA seulement en mode anonymisation
         if (mode === MODES.ANONYMISATION) {
@@ -411,29 +411,11 @@ function obtenirDonneesSelonMode(cle) {
     console.log(`🔍 [obtenirDonneesSelonMode] cle="${cle}", modeActuel="${modeActuel}", mode="${mode}"`);
 
     // ===================================
-    // MODE SIMULATION : Données fictives
+    // MODE ASSISTÉ et NORMAL : Données réelles partagées
     // ===================================
-    if (mode === MODES.SIMULATION) {
-        // Mapping des clés : certaines données de simulation ont des noms différents
-        const mappingCles = {
-            'groupeEtudiants': 'simulation_etudiants',
-            'evaluationsSauvegardees': 'simulation_evaluations'
-        };
+    // Depuis Beta 92, le mode Assisté utilise les mêmes données réelles que Normal
+    // (Primo aide l'utilisateur avec ses vraies données, pas des données simulées)
 
-        const cleSimulation = mappingCles[cle] || `simulation_${cle}`;
-        const donneesSimulation = db.getSync(cleSimulation, null);
-
-        if (donneesSimulation) {
-            console.log(`[Simulation] Chargement de ${Array.isArray(donneesSimulation) ? donneesSimulation.length : 'N/A'} element(s) depuis ${cleSimulation}`);
-            return donneesSimulation;
-        }
-        // Fallback : si pas de données de simulation, utiliser les vraies
-        console.warn(`Pas de donnees de simulation pour ${cle}, utilisation des donnees reelles`);
-    }
-
-    // ===================================
-    // MODE NORMAL ou ANONYMISATION : Données réelles
-    // ===================================
     // Déterminer la valeur par défaut selon le type de clé
     const clesSontObjets = ['presences', 'indicesAssiduiteDetailles', 'indicesCP', 'calendrierComplet'];
     const valeurParDefaut = clesSontObjets.includes(cle) ? {} : [];
@@ -459,30 +441,17 @@ function obtenirDonneesSelonMode(cle) {
  */
 function sauvegarderDonneesSelonMode(cle, donnees) {
     const mode = modeActuel;
-    
+
     // MODE ANONYMISATION : Bloquer toute écriture
     if (mode === MODES.ANONYMISATION) {
         console.warn('⚠️ Écriture bloquée en mode anonymisation');
         return false;
     }
-    
-    // MODE SIMULATION : Rediriger vers les clés de simulation
-    if (mode === MODES.SIMULATION) {
-        const mappingCles = {
-            'groupeEtudiants': 'simulation_etudiants',
-            'evaluationsSauvegardees': 'simulation_evaluations',
-            'presences': 'simulation_presences'
-        };
-        
-        const cleSimulation = mappingCles[cle] || `simulation_${cle}`;
-        db.setSync(cleSimulation, donnees);
-        console.log(`[Simulation] Sauvegarde dans ${cleSimulation}`);
-        return true;
-    }
 
-    // MODE NORMAL : Sauvegarder normalement
+    // MODE ASSISTÉ et NORMAL : Sauvegarder dans les mêmes clés réelles
+    // Depuis Beta 92, le mode Assisté partage les données avec Normal
     db.setSync(cle, donnees);
-    console.log(`[Normal] Sauvegarde dans ${cle}`);
+    console.log(`[${mode === MODES.SIMULATION ? 'Assisté' : 'Normal'}] Sauvegarde dans ${cle}`);
     return true;
 }
 

@@ -571,11 +571,11 @@ function mettreAJourTitreListeEtudiants() {
         ${genererBadgePratiqueListeEtudiants()}
     `;
 
-    // Partie droite : toggle 📐
+    // Partie droite : aide Primo 😎
     const partieDroite = document.createElement('div');
     partieDroite.innerHTML = `
-        <span class="emoji-toggle" data-target="note-calcul-indices-liste"
-              title="Afficher les détails de calcul des indices">📐</span>
+        <span class="primo-aide" data-target="note-calcul-indices-liste"
+              title="Primo explique le calcul des indices">😎</span>
     `;
 
     conteneurTitre.appendChild(partieGauche);
@@ -975,7 +975,7 @@ function afficherListeEtudiantsConsultation() {
     // 🆕 BETA 91: Mettre à jour le titre avec toggle et badge pratique
     mettreAJourTitreListeEtudiants();
 
-    // Réattacher les événements des toggles emoji (pour le toggle 📐)
+    // Réattacher les événements Primo (pour l'icône 😎)
     if (typeof reattacherEvenementsToggles === 'function') {
         reattacherEvenementsToggles();
     }
