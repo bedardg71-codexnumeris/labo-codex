@@ -558,14 +558,14 @@ function cartoucheSelectionnee() {
         <!-- Interface algorithmique AVEC catégorisation -->
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
             <div class="groupe-form">
-                <label style="font-size: 0.75rem; color: #666;">Catégories d'erreurs (séparées par ;)</label>
+                <label style="font-size: 0.75rem; color: #666;">Codes d'erreurs → séparer par ;</label>
                 <input type="text"
                        id="eval_categories_${critere.id}"
                        class="controle-form"
                        placeholder="Ex: 1;4;6;1;4;10"
                        oninput="calculerNoteAlgorithmiqueAvecCategories('${critere.id}', ${ponderation}, ${facteur}, '${critereGrille?.id || ''}')"
                        style="font-size: 0.85rem;">
-                <small style="font-size: 0.7rem; color: #999;">ⓘ Codes de 0 à 10 (voir configuration de la grille)</small>
+                <small style="font-size: 0.7rem; color: #999;">(Voir configuration de la grille)</small>
             </div>
             <div class="groupe-form">
                 <label style="font-size: 0.75rem; color: #666;">Nombre de mots</label>
@@ -579,10 +579,7 @@ function cartoucheSelectionnee() {
             </div>
         </div>
         <div id="resultat_algo_${critere.id}" style="padding: 8px; background: #f0f8ff; border-radius: 4px; font-size: 0.85rem; color: #666; margin-bottom: 8px;">
-            <strong>Total erreurs:</strong> <span id="total_erreurs_${critere.id}">--</span><br>
-            <strong>Formule:</strong> ${ponderation} − (<span id="total_erreurs_formule_${critere.id}">--</span> ÷ <span id="mots_formule_${critere.id}">--</span> Mots × ${facteur})<br>
-            <strong>Résultat:</strong> <span id="note_algo_${critere.id}">--</span> / ${ponderation} = <span id="pct_algo_${critere.id}">--</span>%<br>
-            <strong>Niveau IDME:</strong> <span id="niveau_algo_${critere.id}">--</span><br>
+            <span id="total_erreurs_${critere.id}">--</span> erreurs / <span id="mots_formule_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span><br>
             <strong>Catégorie dominante:</strong> <span id="cat_dominante_${critere.id}" style="color: var(--orange-accent);">--</span>
         </div>
     ` : `
@@ -610,9 +607,7 @@ function cartoucheSelectionnee() {
             </div>
         </div>
         <div id="resultat_algo_${critere.id}" style="padding: 8px; background: #f0f8ff; border-radius: 4px; font-size: 0.85rem; color: #666; margin-bottom: 8px;">
-            <strong>Formule:</strong> ${ponderation} − (Erreurs ÷ Mots × ${facteur})<br>
-            <strong>Résultat:</strong> <span id="note_algo_${critere.id}">--</span> / ${ponderation} = <span id="pct_algo_${critere.id}">--</span>%<br>
-            <strong>Niveau IDME:</strong> <span id="niveau_algo_${critere.id}">--</span>
+            <span id="total_erreurs_simple_${critere.id}">--</span> errreurs sur <span id="mots_simple_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
         </div>
     `) : `
         <!-- Interface standard (holistique/analytique) -->
@@ -830,11 +825,8 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
 
     const totalErreurs = codesSousCriteres.length;
 
-    // Afficher le total d'erreurs
+    // Afficher le total d'erreurs et le nombre de mots
     document.getElementById(`total_erreurs_${critereId}`).textContent = totalErreurs;
-    document.getElementById(`total_erreurs_formule_${critereId}`).textContent = totalErreurs;
-
-    // Afficher le nombre de mots dans la formule
     document.getElementById(`mots_formule_${critereId}`).textContent = mots;
 
     if (mots === 0 || totalErreurs === 0) {
@@ -1037,11 +1029,19 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     const erreurs = parseInt(erreursInput?.value) || 0;
     const mots = parseInt(motsInput?.value) || 0;
 
+    // Mettre à jour l'affichage du résumé
+    const totalErreursElem = document.getElementById(`total_erreurs_simple_${critereId}`);
+    const motsElem = document.getElementById(`mots_simple_${critereId}`);
+    if (totalErreursElem) totalErreursElem.textContent = erreurs;
+    if (motsElem) motsElem.textContent = mots;
+
     if (mots === 0) {
         // Réinitialiser l'affichage
         document.getElementById(`note_algo_${critereId}`).textContent = '--';
         document.getElementById(`pct_algo_${critereId}`).textContent = '--';
         document.getElementById(`niveau_algo_${critereId}`).textContent = '--';
+        if (totalErreursElem) totalErreursElem.textContent = '--';
+        if (motsElem) motsElem.textContent = '--';
         return;
     }
 
@@ -1172,6 +1172,7 @@ function calculerNote() {
 
     let noteTotal = 0;
     let ponderationTotal = 0;
+    const notesCriteres = []; // Pour collecter les notes à copier-coller
 
     // 🔍 DEBUG: Afficher les données algorithmiques disponibles
     console.log('🔍 DEBUG calculerNote() - Données algorithmiques:', evaluationEnCours.donneesAlgorithmiques);
@@ -1198,6 +1199,9 @@ function calculerNote() {
                 const contribution = valeurCritere * ponderation;
                 noteTotal += contribution;
                 ponderationTotal += ponderation;
+
+                // Collecter le niveau IDME du critère pour l'export (ex: M, D, E, I)
+                notesCriteres.push(niveau);
 
                 // 🔍 DEBUG: Afficher le détail de chaque critère (convertir en nombre pour toFixed)
                 const valNum = typeof valeurCritere === 'number' ? valeurCritere : parseFloat(valeurCritere);
@@ -1230,6 +1234,16 @@ function calculerNote() {
     // Mettre à jour l'affichage
     document.getElementById('noteProduction1').textContent = pourcentage.toFixed(1) + ' %';
     document.getElementById('niveauProduction1').textContent = niveauGlobal;
+
+    // Afficher les notes des critères pour copier-coller
+    const criteresCopierElement = document.getElementById('criteresCopier');
+    if (criteresCopierElement) {
+        if (notesCriteres.length > 0) {
+            criteresCopierElement.textContent = notesCriteres.join('\t');
+        } else {
+            criteresCopierElement.textContent = '--';
+        }
+    }
 
     // Colorer l'encadré de la note finale selon le niveau
     const noteContainer = document.getElementById('noteProduction1').closest('div[style*="background"]');
@@ -3443,7 +3457,7 @@ function mettreAJourIndicateurProgression() {
     if (nbEvaluations === totalEtudiants) {
         indicateur.style.color = '#28a745'; // Vert - Terminé
     } else if (nbEvaluations > totalEtudiants / 2) {
-        indicateur.style.color = '#ffc107'; // Jaune - En cours
+        indicateur.style.color = 'var(--bleu-principal)'; // Bleu - En cours (meilleur contraste)
     } else {
         indicateur.style.color = 'var(--bleu-principal)'; // Bleu - Début
     }
@@ -5312,6 +5326,74 @@ window.addEventListener('modeChanged', (event) => {
     }
 });
 
+/**
+ * Copie du texte en format TSV (Tab-Separated Values)
+ * Utilise l'API Clipboard moderne avec le bon MIME type
+ */
+async function copierEnFormatTSV(texte) {
+    try {
+        const blob = new Blob([texte], { type: 'text/plain' });
+        const clipboardItem = new ClipboardItem({
+            'text/plain': blob
+        });
+        await navigator.clipboard.write([clipboardItem]);
+        return true;
+    } catch (err) {
+        console.error('Erreur lors de la copie TSV:', err);
+        return false;
+    }
+}
+
+/**
+ * Copie les 4 premiers critères (SRPN) dans le presse-papiers
+ */
+async function copierCriteresSRPN() {
+    const element = document.getElementById('criteresCopier');
+    if (!element || element.textContent === '--') {
+        afficherNotificationErreur('Erreur', 'Aucun critère à copier');
+        return;
+    }
+
+    // Extraire les 4 premiers critères (SRPN) avec tabulations
+    const texte = element.textContent.trim();
+    const criteres = texte.split('\t');
+    const srpn = criteres.slice(0, 4).join('\t');
+
+    console.log('[Debug] Copie SRPN TSV:', { texte, criteres, srpn });
+
+    // Copier en format TSV
+    const succes = await copierEnFormatTSV(srpn);
+    if (succes) {
+        afficherNotificationSucces('Copié', 'SRPN copiés dans le presse-papiers');
+    } else {
+        afficherNotificationErreur('Erreur', 'Impossible de copier dans le presse-papiers');
+    }
+}
+
+/**
+ * Copie les 5 critères (SRPNF) dans le presse-papiers
+ */
+async function copierCriteresSRPNF() {
+    const element = document.getElementById('criteresCopier');
+    if (!element || element.textContent === '--') {
+        afficherNotificationErreur('Erreur', 'Aucun critère à copier');
+        return;
+    }
+
+    // Copier tous les critères avec tabulations
+    const texte = element.textContent.trim();
+
+    console.log('[Debug] Copie SRPNF TSV:', { texte, length: texte.length });
+
+    // Copier en format TSV
+    const succes = await copierEnFormatTSV(texte);
+    if (succes) {
+        afficherNotificationSucces('Copié', 'SRPNF copiés dans le presse-papiers');
+    } else {
+        afficherNotificationErreur('Erreur', 'Impossible de copier dans le presse-papiers');
+    }
+}
+
 // Exporter les fonctions
 window.afficherJetonsPersonnalisesEvaluation = afficherJetonsPersonnalisesEvaluation;
 window.appliquerJetonPersonnalise = appliquerJetonPersonnalise;
@@ -5319,3 +5401,5 @@ window.confirmerSuppressionEvaluationSidebar = confirmerSuppressionEvaluationSid
 window.reinitialiserFormulaire = reinitialiserFormulaire;
 window.calculerNoteAlgorithmiqueAvecCategories = calculerNoteAlgorithmiqueAvecCategories;
 window.calculerNoteAlgorithmiqueSimple = calculerNoteAlgorithmiqueSimple;
+window.copierCriteresSRPN = copierCriteresSRPN;
+window.copierCriteresSRPNF = copierCriteresSRPNF;

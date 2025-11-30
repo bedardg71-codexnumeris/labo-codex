@@ -552,7 +552,7 @@ function cartoucheSelectionnee() {
         <!-- Interface algorithmique AVEC catégorisation -->
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
             <div class="groupe-form">
-                <label style="font-size: 0.75rem; color: #666;">Catégories d'erreurs (séparées par ;)</label>
+                <label style="font-size: 0.75rem; color: #666;">Codes d'erreurs (séparer par ;)</label>
                 <input type="text"
                        id="eval_categories_${critere.id}"
                        class="controle-form"
