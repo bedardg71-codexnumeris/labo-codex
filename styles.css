@@ -33,6 +33,16 @@
     --vert-succes: #28a745;
     --rouge-erreur: #dc3545;
 
+    /* Couleurs mode Assisté (palette sarcelle/teal équivalents aux bleus) */
+    --sarcelle-principal: #0a3d4d;        /* Équivalent de --bleu-principal (plus de bleu) */
+    --sarcelle-fonce: #0d2838;            /* Équivalent de --bleu-fonce (plus de bleu) */
+    --sarcelle-moyen: #1a5266;            /* Équivalent de --bleu-moyen (couleur signature) */
+    --sarcelle-clair: #2a7080;            /* Équivalent de --bleu-clair (plus de bleu) */
+    --sarcelle-leger: #5a9aaa;            /* Équivalent de --bleu-leger (plus de bleu) */
+    --sarcelle-carte: #9ac5d5;            /* Équivalent de --bleu-carte (plus de bleu) */
+    --sarcelle-pale: #e0f0f5;             /* Équivalent de --bleu-pale (plus de bleu) */
+    --sarcelle-tres-pale: #f0f8fd;        /* Équivalent de --bleu-tres-pale (plus de bleu) */
+
     /* Couleurs pratiques d'évaluation */
     --som-orange: #ff6f00;
     --pan-bleu: #0277bd;
@@ -147,6 +157,75 @@
     --planification-bg: #f3e5f5;
     --examens-bg: #fce4ec;
     --weekend-bg: #f5f5f5;
+}
+
+/* ===============================
+   MODE ASSISTÉ - CONVERSION BLEU → VERT
+   =============================== */
+
+[data-mode="simulation"] {
+    /* Conversion complète de tous les bleus vers leurs équivalents sarcelle */
+    --bleu-principal: var(--sarcelle-principal);
+    --bleu-fonce: var(--sarcelle-fonce);
+    --bleu-moyen: var(--sarcelle-moyen);
+    --bleu-clair: var(--sarcelle-clair);
+    --bleu-leger: var(--sarcelle-leger);
+    --bleu-carte: var(--sarcelle-carte);
+    --bleu-pale: var(--sarcelle-pale);
+    --bleu-tres-pale: var(--sarcelle-tres-pale);
+
+    /* Navigation */
+    --nav-normal: var(--sarcelle-principal);
+    --nav-actif: var(--sarcelle-moyen);
+    --nav-actif-normal: var(--sarcelle-moyen);
+
+    /* Sous-navigation */
+    --sous-nav-bg: var(--sarcelle-pale);
+    --sous-nav-bg-normal: var(--sarcelle-pale);
+    --sous-nav-normal: var(--sarcelle-moyen);
+    --sous-nav-actif: var(--sarcelle-clair);
+
+    /* Boutons */
+    --btn-principal: var(--sarcelle-principal);
+    --btn-principal-hover: var(--sarcelle-moyen);
+}
+
+/* Sous-navigation plus foncée en mode Assisté */
+[data-mode="simulation"] .sous-navigation {
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+        linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%) !important;
+}
+
+/* ===============================
+   MODE ANONYMISÉ - BLEUS DÉSATURÉS
+   =============================== */
+
+[data-mode="anonymisation"] {
+    /* Conversion des bleus vers des bleus désaturés (plus gris/neutres) */
+    --bleu-principal: #0f2e4a;        /* Bleu désaturé principal */
+    --bleu-fonce: #0d1e32;            /* Bleu désaturé foncé */
+    --bleu-moyen: #2a4060;            /* Bleu désaturé moyen */
+    --bleu-clair: #3a5a7a;            /* Bleu désaturé clair */
+    --bleu-leger: #6a7a8a;            /* Bleu désaturé léger */
+    --bleu-carte: #9aacba;            /* Bleu désaturé carte */
+    --bleu-pale: #e0e8f0;             /* Bleu désaturé pâle */
+    --bleu-tres-pale: #f0f4f8;        /* Bleu désaturé très pâle */
+
+    /* Navigation */
+    --nav-normal: #0f2e4a;
+    --nav-actif: #2a4060;
+    --nav-actif-normal: #2a4060;
+
+    /* Sous-navigation */
+    --sous-nav-bg: #e0e8f0;
+    --sous-nav-bg-normal: #e0e8f0;
+    --sous-nav-normal: #2a4060;
+    --sous-nav-actif: #3a5a7a;
+
+    /* Boutons */
+    --btn-principal: #0f2e4a;
+    --btn-principal-hover: #2a4060;
 }
 
 /* ===============================
@@ -495,7 +574,7 @@ body {
    =============================== */
 
 .navigation-principale {
-    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
     padding: 0 20px 15px 20px;
     display: flex;
     justify-content: center;
@@ -538,7 +617,7 @@ body {
     /* Couche rgba(0,0,0,0.15) par-dessus le gradient bleu pour créer effet de profondeur */
     background:
         linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)),
-        linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+        linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
     padding: 12px 20px;
     display: flex;
     gap: 8px;
@@ -2616,9 +2695,9 @@ input[type="number"].controle-form {
     cursor: pointer;
     transition: all 0.15s ease;
     font-size: 0.95rem;
-    color: #032e5c;
-    background: #e8f2fd;
-    border: 1px solid #6b85b3;
+    color: var(--bleu-principal);
+    background: var(--bleu-pale);
+    border: 1px solid var(--bleu-leger);
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -2626,7 +2705,7 @@ input[type="number"].controle-form {
 }
 
 .profil-nav-item:hover {
-    border-color: #2a4a8a;
+    border-color: var(--bleu-moyen);
     box-shadow: 0 2px 6px rgba(3, 46, 92, 0.15);
     transform: translateY(-1px);
 }
@@ -3010,44 +3089,9 @@ input[type="number"].controle-form {
    THÈMES PAR MODE - DÉGRADÉS
    =============================== */
 
-/* MODE NORMAL - Dégradé bleu principal vers bleu foncé */
-body[data-mode="normal"] .entete {
-    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
-}
-
-body[data-mode="normal"] .navigation-principale {
-    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
-}
-
-body[data-mode="normal"] .sous-navigation {
-    background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
-}
-
-/* MODE SIMULATION - Dégradé sarcelle vers sarcelle foncé */
-body[data-mode="simulation"] .entete {
-    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
-}
-
-body[data-mode="simulation"] .navigation-principale {
-    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
-}
-
-body[data-mode="simulation"] .sous-navigation {
-    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
-}
-
-/* MODE ANONYMISATION - Dégradé bleu nuit vers noir bleuté */
-body[data-mode="anonymisation"] .entete {
-    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
-}
-
-body[data-mode="anonymisation"] .navigation-principale {
-    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
-}
-
-body[data-mode="anonymisation"] .sous-navigation {
-    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
-}
+/* Les dégradés de l'en-tête et de la navigation sont gérés automatiquement
+   par les variables CSS qui sont redéfinies selon le mode actif.
+   Voir le bloc [data-mode="simulation"] pour la conversion bleu → sarcelle. */
 
 /* Noms et prénoms en italique en mode anonymisation */
 body[data-mode="anonymisation"] .tableau tbody td:nth-child(3),
@@ -4121,6 +4165,45 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     padding: 30px;
 }
 
+/* Tableau des productions avec bordures verticales */
+.profil-tableau-full {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--espacement-moyen) 0;
+}
+
+.profil-tableau-full thead {
+    background: var(--bleu-pale);
+}
+
+.profil-tableau-full th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--bleu-principal);
+    font-size: 0.9rem;
+    border-bottom: 2px solid var(--bleu-leger);
+    border-right: 1px solid var(--bleu-tres-pale);
+}
+
+.profil-tableau-full th:last-child {
+    border-right: none;
+}
+
+.profil-tableau-full td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--bleu-tres-pale);
+    border-right: 1px solid var(--bleu-tres-pale);
+}
+
+.profil-tableau-full td:last-child {
+    border-right: none;
+}
+
+.profil-tableau-full tbody tr:hover {
+    background: var(--bleu-tres-pale);
+}
+
 /* Tableau headers */
 .profil-tableau-header-gauche {
     padding: 12px;
@@ -5031,24 +5114,26 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .item-cartouche-banque,
 .sidebar-item {
     padding: 12px;
-    background: #e8f2fd;
+    background: var(--bleu-pale);
     border-radius: 6px;
-    border: 1px solid #6b85b3;
+    border: 1px solid var(--bleu-leger);
     margin-bottom: 8px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.3s ease;
 }
 
 .item-cartouche-banque:hover,
 .sidebar-item:hover {
-    border-color: #2a4a8a;
+    background: linear-gradient(135deg, var(--bleu-tres-pale) 0%, var(--bleu-pale) 100%);
+    border-color: var(--bleu-moyen);
     box-shadow: 0 2px 6px rgba(3, 46, 92, 0.15);
+    transform: translateY(-1px);
 }
 
 .item-cartouche-banque.active,
 .sidebar-item.active {
-    border: 2px solid #032e5c;
-    background: linear-gradient(135deg, #e8f2fd 0%, #d0e5f8 100%);
+    border: 2px solid var(--bleu-principal);
+    background: var(--bleu-tres-pale);
     box-shadow: 0 3px 10px rgba(3, 46, 92, 0.25);
 }
 
@@ -5056,14 +5141,14 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .sidebar-item-titre {
     font-weight: 600;
     font-size: 0.95rem;
-    color: #032e5c;
+    color: var(--bleu-principal);
     margin-bottom: 6px;
 }
 
 .badge-grille,
 .sidebar-item-badge {
     display: inline-block;
-    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);
+    background: var(--bleu-principal);
     color: white;
     padding: 3px 10px;
     border-radius: 12px;
@@ -5071,6 +5156,14 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-weight: 500;
     margin-bottom: 8px;
     box-shadow: 0 1px 3px rgba(3, 46, 92, 0.3);
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.badge-grille:hover,
+.sidebar-item-badge:hover {
+    background: linear-gradient(135deg, var(--bleu-moyen) 0%, var(--bleu-principal) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(3, 46, 92, 0.4);
 }
 
 .actions-cartouche,
@@ -5163,7 +5256,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .accordeon-import,
 .section-accordeon {
     margin: 20px 0;
-    border: 1px solid #6b85b3;
+    border: 1px solid var(--bleu-leger);
     border-radius: 8px;
     overflow: hidden;
 }
@@ -5172,7 +5265,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .accordeon-import h4,
 .section-accordeon h3,
 .section-accordeon h4 {
-    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);
+    background: linear-gradient(135deg, var(--bleu-moyen) 0%, var(--bleu-principal) 100%);
     color: white;
     padding: 12px 15px;
     margin: 0;
@@ -5190,18 +5283,18 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     cursor: pointer;
     background: #f9f9f9;
     font-weight: 600;
-    color: #032e5c;
+    color: var(--bleu-principal);
     user-select: none;
 }
 
 .accordeon-import summary:hover,
 .section-accordeon summary:hover {
-    background: #e8f2fd;
+    background: var(--bleu-pale);
 }
 
 /* Summary pour sections de matériel pédagogique - style uniformisé */
 .summary-materiel {
-    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%) !important;
+    background: linear-gradient(135deg, var(--bleu-moyen) 0%, var(--bleu-principal) 100%) !important;
     color: white !important;
     padding: 12px 15px;
     cursor: pointer;
@@ -5211,7 +5304,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .summary-materiel:hover {
-    background: linear-gradient(135deg, #2a4a8a 0%, #4a6aa8 100%) !important;
+    background: linear-gradient(135deg, var(--bleu-clair) 0%, var(--bleu-moyen) 100%) !important;
 }
 
 .panneau-import,
@@ -6507,7 +6600,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .matrice-tableau th:first-child {
     text-align: left;
-    background: #032e5c;
+    background: var(--bleu-principal);
 }
 
 .matrice-tableau th .niveau-code {
@@ -6539,8 +6632,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .matrice-tableau td:first-child {
     font-weight: 600;
-    color: #032e5c;
-    background: #e8f2fd;
+    color: var(--bleu-principal);
+    background: var(--bleu-pale);
     white-space: nowrap;
 }
 
@@ -6557,8 +6650,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .matrice-tableau textarea:focus {
     outline: none;
-    border-color: #6b85b3;
-    background: #f0f8ff;
+    border-color: var(--bleu-leger);
+    background: var(--bleu-tres-pale);
 }
 
 .matrice-tableau textarea::placeholder {
@@ -6983,7 +7076,7 @@ label:has(+ textarea:disabled) {
 
 
 .cartouche-gradient-bleu {
-    background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);
+    background: linear-gradient(135deg, var(--bleu-moyen) 0%, var(--bleu-principal) 100%);
 }
 
 /* 🆕 BETA 91: Module calendrier-vue (optimisations Phase B) */
@@ -7433,4 +7526,274 @@ label:has(+ textarea:disabled) {
     .tableau-objectifs-profil td {
         padding: 10px 8px;
     }
+}
+
+/* ============================================================================
+   OPTIMISATION ESPACE VERTICAL - Formulaire d'évaluation
+   ============================================================================ */
+
+/* Réduire taille des labels dans le formulaire d'évaluation */
+#souspage-evaluation1 .label-formulaire {
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+/* Réduire espacement entre groupes de formulaire */
+#souspage-evaluation1 .groupe-form {
+    margin-bottom: 12px;
+}
+
+/* Compacter l'en-tête des paramètres */
+#souspage-evaluation1 .indicateur-verrouillage h4 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+/* Réduire padding du texte d'aide sous Intégrité académique */
+#souspage-evaluation1 .text-085-muted-m5-0-0-28 {
+    font-size: 0.75rem;
+    margin-top: 3px;
+}
+
+/* ============================================================================
+   SYSTÈME PRIMO - Tooltips riches (mode Assisté uniquement)
+   ============================================================================ */
+
+/* Icône Primo cliquable */
+.primo-aide {
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: inline-block;
+    transition: transform 0.2s ease;
+    user-select: none;
+    margin-left: 8px;
+}
+
+.primo-aide:hover {
+    transform: scale(1.15);
+}
+
+.primo-aide:active {
+    transform: scale(0.95);
+}
+
+/* Masquer Primo en mode Normal/Anonymisé */
+.mode-normal .primo-aide,
+.mode-anonymise .primo-aide {
+    display: none !important;
+}
+
+/* Popup riche */
+.primo-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    z-index: 10000;
+    display: none;
+    animation: primoFadeIn 0.3s ease-out;
+}
+
+.primo-popup.active {
+    display: block;
+}
+
+/* Animation d'apparition */
+@keyframes primoFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -45%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* En-tête du popup */
+.primo-popup-header {
+    background: linear-gradient(135deg, #1a5266, #2d7a8c);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px 12px 0 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.primo-popup-header .primo-icon {
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+
+/* Bouton fermer */
+.primo-popup-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.primo-popup-close:hover {
+    opacity: 1;
+}
+
+/* Corps du popup */
+.primo-popup-body {
+    padding: 20px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+.primo-popup-body strong {
+    color: var(--bleu-principal);
+}
+
+.primo-popup-body ul {
+    margin: 10px 0;
+    padding-left: 25px;
+}
+
+.primo-popup-body li {
+    margin: 8px 0;
+}
+
+.primo-popup-body p {
+    margin: 10px 0;
+}
+
+/* Overlay sombre */
+.primo-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.primo-overlay.active {
+    display: block;
+}
+
+/* ============================================================================
+   MODE ASSISTÉ - THÈME VERT PÂLE
+   ============================================================================ */
+
+/* Harmonisation des couleurs en mode Assisté (simulation) */
+/* Remplace les bleus pâles par des verts pâles pour une identité visuelle cohérente */
+
+body[data-mode="simulation"] {
+    /* Gradient de fond principal */
+    background: linear-gradient(135deg, var(--vert-pale-assiste) 0%, var(--vert-tres-pale-assiste) 100%);
+}
+
+/* Cartes et conteneurs */
+body[data-mode="simulation"] .carte {
+    border: 1px solid var(--vert-pale-assiste);
+}
+
+body[data-mode="simulation"] .carte-metrique-bleue {
+    background: var(--vert-tres-pale-assiste);
+    border-color: var(--vert-leger);
+}
+
+body[data-mode="simulation"] .carte-header {
+    border-bottom: 2px solid var(--vert-pale-assiste);
+}
+
+body[data-mode="simulation"] .carte-bleu-encadree {
+    background: var(--vert-tres-pale-assiste);
+}
+
+body[data-mode="simulation"] .carte-body {
+    border: 1px solid var(--vert-tres-pale-assiste);
+}
+
+body[data-mode="simulation"] .carte-footer {
+    border-top: 1px solid var(--vert-tres-pale-assiste);
+}
+
+/* Items et listes */
+body[data-mode="simulation"] .item-carte {
+    background: var(--vert-tres-pale-assiste);
+}
+
+body[data-mode="simulation"] .item-carte-header {
+    border-top: 1px solid var(--vert-pale-assiste);
+}
+
+body[data-mode="simulation"] .item-carte-body {
+    background: var(--vert-tres-pale-assiste);
+}
+
+body[data-mode="simulation"] .item-header {
+    background: var(--vert-pale-assiste);
+}
+
+body[data-mode="simulation"] .item-body {
+    border-bottom: 1px solid var(--vert-tres-pale-assiste);
+}
+
+body[data-mode="simulation"] .item-content {
+    background: var(--vert-tres-pale-assiste);
+}
+
+/* Éléments de formulaire et sections */
+body[data-mode="simulation"] .liste-evaluations-container {
+    background: var(--vert-pale-assiste);
+}
+
+body[data-mode="simulation"] .evaluation-item,
+body[data-mode="simulation"] .critere-item,
+body[data-mode="simulation"] .production-item {
+    background: var(--vert-tres-pale-assiste);
+}
+
+body[data-mode="simulation"] .detail-artefact,
+body[data-mode="simulation"] .detail-calcul,
+body[data-mode="simulation"] .detail-formule {
+    background: var(--vert-tres-pale-assiste);
+}
+
+/* Badges et indicateurs */
+body[data-mode="simulation"] .badge-info,
+body[data-mode="simulation"] .info-box {
+    background: var(--vert-tres-pale-assiste);
+}
+
+/* Statistiques et métriques */
+body[data-mode="simulation"] .statistique-item,
+body[data-mode="simulation"] .metrique-carte {
+    background: var(--vert-tres-pale-assiste);
+}
+
+/* Sections pliables et accordéons */
+body[data-mode="simulation"] details summary {
+    background: var(--vert-tres-pale-assiste);
+}
+
+/* Tableaux */
+body[data-mode="simulation"] table th {
+    background: var(--vert-pale-assiste);
+}
+
+body[data-mode="simulation"] table tr:hover {
+    background: var(--vert-tres-pale-assiste);
 }
