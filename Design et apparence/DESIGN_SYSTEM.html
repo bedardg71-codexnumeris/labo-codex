@@ -561,177 +561,345 @@ body {
         </div>
 
         <!-- ===================== -->
-        <!-- 1.2 MODE SIMULATION -->
+        <!-- 1.2 MODE ASSISTÉ -->
         <!-- ===================== -->
         <div class="guide-component">
-            <h3 class="guide-component-title">1.2 Mode Simulation</h3>
+            <h3 class="guide-component-title">1.2 Mode Assisté</h3>
             <p class="guide-component-description">
-                Mode pour le groupe 9999 (données fictives). Utilise des tons sarcelle/vert pour
-                distinguer clairement l'environnement de test. Palette unique distincte du mode Normal
-                pour signaler visuellement qu'il s'agit de données simulées.
+                Mode pour l'intervention pédagogique avec soutien personnalisé. Utilise une palette sarcelle/teal
+                complète (8 shades) équivalente à la palette bleue du mode Normal. Cette palette crée une distinction
+                visuelle claire tout en maintenant la même hiérarchie et les mêmes relations de contraste.
             </p>
 
-            <div class="guide-example-title" style="margin: 20px 0 15px 0;">Couleurs du Mode Simulation</div>
-            <div class="guide-color-grid">
+            <div class="guide-example-title" style="margin: 20px 0 15px 0;">Palette sarcelle complète (8 shades)</div>
+            <div class="guide-color-grid" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
                 <div class="guide-color-card">
-                    <div class="guide-color-swatch" style="background: #1a5266;">Bleu Simulation</div>
+                    <div class="guide-color-swatch" style="background: #0a3d4d;">Sarcelle Principal</div>
                     <div class="guide-color-info">
-                        <div class="guide-color-name">Bleu Simulation</div>
-                        <div class="guide-color-var">--bleu-simulation</div>
+                        <div class="guide-color-name">Sarcelle Principal</div>
+                        <div class="guide-color-var">--sarcelle-principal</div>
+                        <div class="guide-color-hex">#0a3d4d</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">≈ --bleu-principal</p>
+                    </div>
+                </div>
+
+                <div class="guide-color-card">
+                    <div class="guide-color-swatch" style="background: #0d2838;">Sarcelle Foncé</div>
+                    <div class="guide-color-info">
+                        <div class="guide-color-name">Sarcelle Foncé</div>
+                        <div class="guide-color-var">--sarcelle-fonce</div>
+                        <div class="guide-color-hex">#0d2838</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">≈ --bleu-fonce</p>
+                    </div>
+                </div>
+
+                <div class="guide-color-card">
+                    <div class="guide-color-swatch" style="background: #1a5266;">Sarcelle Moyen</div>
+                    <div class="guide-color-info">
+                        <div class="guide-color-name">Sarcelle Moyen</div>
+                        <div class="guide-color-var">--sarcelle-moyen</div>
                         <div class="guide-color-hex">#1a5266</div>
-                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Sarcelle foncé - Couleur unique</p>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">≈ --bleu-moyen (signature)</p>
                     </div>
                 </div>
 
                 <div class="guide-color-card">
-                    <div class="guide-color-swatch" style="background: #2a6a7a;">Nav Active Simulation</div>
+                    <div class="guide-color-swatch" style="background: #2a7080;">Sarcelle Clair</div>
                     <div class="guide-color-info">
-                        <div class="guide-color-name">Navigation Active</div>
-                        <div class="guide-color-var">--nav-actif-simulation</div>
-                        <div class="guide-color-hex">#2a6a7a</div>
-                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Sarcelle moyen - Couleur unique</p>
+                        <div class="guide-color-name">Sarcelle Clair</div>
+                        <div class="guide-color-var">--sarcelle-clair</div>
+                        <div class="guide-color-hex">#2a7080</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">≈ --bleu-clair</p>
                     </div>
                 </div>
 
                 <div class="guide-color-card">
-                    <div class="guide-color-swatch color-contrast-light" style="background: #e0f0f0;">Sous-nav Simulation</div>
+                    <div class="guide-color-swatch" style="background: #5a9aaa;">Sarcelle Léger</div>
                     <div class="guide-color-info">
-                        <div class="guide-color-name">Sous-navigation</div>
-                        <div class="guide-color-var">--sous-nav-bg-simulation</div>
-                        <div class="guide-color-hex">#e0f0f0</div>
-                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Cyan très pâle - Couleur unique</p>
+                        <div class="guide-color-name">Sarcelle Léger</div>
+                        <div class="guide-color-var">--sarcelle-leger</div>
+                        <div class="guide-color-hex">#5a9aaa</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">≈ --bleu-leger</p>
+                    </div>
+                </div>
+
+                <div class="guide-color-card">
+                    <div class="guide-color-swatch color-contrast-light" style="background: #9ac5d5;">Sarcelle Carte</div>
+                    <div class="guide-color-info">
+                        <div class="guide-color-name">Sarcelle Carte</div>
+                        <div class="guide-color-var">--sarcelle-carte</div>
+                        <div class="guide-color-hex">#9ac5d5</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">≈ --bleu-carte</p>
+                    </div>
+                </div>
+
+                <div class="guide-color-card">
+                    <div class="guide-color-swatch color-contrast-light" style="background: #e0f0f5;">Sarcelle Pâle</div>
+                    <div class="guide-color-info">
+                        <div class="guide-color-name">Sarcelle Pâle</div>
+                        <div class="guide-color-var">--sarcelle-pale</div>
+                        <div class="guide-color-hex">#e0f0f5</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">≈ --bleu-pale</p>
+                    </div>
+                </div>
+
+                <div class="guide-color-card">
+                    <div class="guide-color-swatch color-contrast-light" style="background: #f0f8fd;">Sarcelle Très Pâle</div>
+                    <div class="guide-color-info">
+                        <div class="guide-color-name">Sarcelle Très Pâle</div>
+                        <div class="guide-color-var">--sarcelle-tres-pale</div>
+                        <div class="guide-color-hex">#f0f8fd</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">≈ --bleu-tres-pale</p>
                     </div>
                 </div>
             </div>
 
             <div class="guide-specs">
-                <div class="guide-specs-title">📋 Correspondances avec Mode Normal</div>
+                <div class="guide-specs-title">📋 Architecture de conversion automatique</div>
                 <ul>
-                    <li><strong>En-tête:</strong> Palette sarcelle/vert unique (#1a5266) distincte du bleu Normal</li>
-                    <li><strong>Navigation:</strong> Teinte sarcelle (#2a6a7a) vs bleu (#2a4a8a) - même luminosité</li>
-                    <li><strong>Sous-navigation:</strong> Fond cyan pâle (#e0f0f0) vs bleu pâle (#e8f2fd) - même clarté</li>
-                    <li><strong>Autres éléments:</strong> Partagent les mêmes couleurs que le mode Normal (bleu-pale, bleu-tres-pale, etc.)</li>
+                    <li><strong>Principe:</strong> Conversion complète blue → sarcelle via redéfinition de variables CSS</li>
+                    <li><strong>Mécanisme:</strong> [data-mode="simulation"] redéfinit toutes les variables --bleu-* vers --sarcelle-*</li>
+                    <li><strong>Équivalences:</strong> Chaque shade sarcelle équivaut à son shade bleu (même luminosité, saturation ajustée)</li>
+                    <li><strong>Navigation:</strong> --nav-normal, --nav-actif, --btn-principal automatiquement convertis</li>
+                    <li><strong>Cohérence:</strong> Toute l'interface bascule en sarcelle sans code dupliqué</li>
+                    <li><strong>Signature:</strong> #1a5266 (sarcelle-moyen) est la couleur signature du mode Assisté</li>
                 </ul>
             </div>
 
-            <div class="guide-example-title" style="margin: 30px 0 15px 0;">Dégradé du Mode Simulation</div>
+            <div class="guide-example-title" style="margin: 30px 0 15px 0;">Dégradés Mode Assisté (automatiques)</div>
             <div class="guide-example">
                 <div style="margin-bottom: 20px;">
-                    <div style="background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
+                    <div style="background: linear-gradient(135deg, #0a3d4d 0%, #0d2838 100%);
                                 color: white;
                                 padding: 30px;
                                 border-radius: 8px;
                                 text-align: center;">
-                        <h4 style="margin: 0;">En-tête Mode Simulation</h4>
+                        <h4 style="margin: 0;">En-tête Mode Assisté</h4>
                         <p style="margin: 10px 0 0 0; font-size: 0.9rem; opacity: 0.9;">
-                            linear-gradient(135deg, #1a5266 0%, #0d3540 100%)
+                            linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%)
+                        </p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.85rem; opacity: 0.7;">
+                            → Automatiquement converti en sarcelle (#0a3d4d → #0d2838)
+                        </p>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <div style="background: linear-gradient(135deg, #e0f0f5 0%, #f0f8fd 100%);
+                                color: #0a3d4d;
+                                padding: 30px;
+                                border-radius: 8px;
+                                text-align: center;
+                                border: 2px solid #e0f0f5;">
+                        <h4 style="margin: 0;">Fond de page Mode Assisté</h4>
+                        <p style="margin: 10px 0 0 0; font-size: 0.9rem; opacity: 0.8;">
+                            linear-gradient(135deg, var(--bleu-pale) 0%, var(--bleu-tres-pale) 100%)
+                        </p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.85rem; opacity: 0.6;">
+                            → Automatiquement converti en sarcelle (#e0f0f5 → #f0f8fd)
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div class="guide-code-title">Code CSS - Mode Simulation</div>
-            <div class="guide-code">/* En-tête Mode Simulation */
-body[data-mode="simulation"] .entete {
-    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
+            <div class="guide-code-title">Code CSS - Mode Assisté (Conversion automatique)</div>
+            <div class="guide-code">/* Définition de la palette sarcelle (styles.css lignes 36-44) */
+:root {
+    --sarcelle-principal: #0a3d4d;
+    --sarcelle-fonce: #0d2838;
+    --sarcelle-moyen: #1a5266;     /* Couleur signature */
+    --sarcelle-clair: #2a7080;
+    --sarcelle-leger: #5a9aaa;
+    --sarcelle-carte: #9ac5d5;
+    --sarcelle-pale: #e0f0f5;
+    --sarcelle-tres-pale: #f0f8fd;
 }
 
-/* Navigation active en mode Simulation */
-body[data-mode="simulation"] .nav-actif {
-    background-color: var(--nav-actif-simulation);
+/* Conversion complète en mode Assisté (styles.css lignes 166-191) */
+[data-mode="simulation"] {
+    /* Redéfinition de TOUTES les variables bleu vers sarcelle */
+    --bleu-principal: var(--sarcelle-principal);
+    --bleu-fonce: var(--sarcelle-fonce);
+    --bleu-moyen: var(--sarcelle-moyen);
+    --bleu-clair: var(--sarcelle-clair);
+    --bleu-leger: var(--sarcelle-leger);
+    --bleu-carte: var(--sarcelle-carte);
+    --bleu-pale: var(--sarcelle-pale);
+    --bleu-tres-pale: var(--sarcelle-tres-pale);
+
+    /* Navigation, boutons, etc. automatiquement convertis */
+    --nav-normal: var(--sarcelle-principal);
+    --nav-actif: var(--sarcelle-moyen);
+    --btn-principal: var(--sarcelle-principal);
+    --btn-principal-hover: var(--sarcelle-moyen);
 }
 
-/* Sous-navigation en mode Simulation */
-body[data-mode="simulation"] .sous-nav {
-    background-color: var(--sous-nav-bg-simulation);
-}</div>
+/* Résultat : Toute l'interface bascule en sarcelle sans code dupliqué */</div>
         </div>
 
         <!-- ===================== -->
-        <!-- 1.3 MODE ANONYMISATION -->
+        <!-- 1.3 MODE ANONYMISÉ -->
         <!-- ===================== -->
         <div class="guide-component">
-            <h3 class="guide-component-title">1.3 Mode Anonymisation</h3>
+            <h3 class="guide-component-title">1.3 Mode Anonymisé</h3>
             <p class="guide-component-description">
-                Mode lecture seule avec identités anonymisées. Utilise des tons bleu nuit désaturés pour
-                signaler la protection des données personnelles avec sobriété et discrétion. Palette sobre et neutre.
+                Mode lecture seule avec identités anonymisées pour partage de captures d'écran. Utilise une palette
+                de bleus désaturés (8 shades) créant une atmosphère sobre et neutre. Les couleurs sont plus grises
+                que le mode Normal pour signaler visuellement la protection des données personnelles.
             </p>
 
-            <div class="guide-example-title" style="margin: 20px 0 15px 0;">Couleurs du Mode Anonymisation</div>
-            <div class="guide-color-grid">
+            <div class="guide-example-title" style="margin: 20px 0 15px 0;">Palette bleus désaturés (8 shades)</div>
+            <div class="guide-color-grid" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
                 <div class="guide-color-card">
-                    <div class="guide-color-swatch" style="background: #0f1e3a;">Bleu Anonymisation</div>
+                    <div class="guide-color-swatch" style="background: #0f2e4a;">Bleu Désaturé Principal</div>
                     <div class="guide-color-info">
-                        <div class="guide-color-name">Bleu Anonymisation</div>
-                        <div class="guide-color-var">--bleu-anonymisation</div>
-                        <div class="guide-color-hex">#0f1e3a</div>
-                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Bleu nuit désaturé - Couleur sobre</p>
+                        <div class="guide-color-name">Bleu Principal</div>
+                        <div class="guide-color-var">--bleu-principal</div>
+                        <div class="guide-color-hex">#0f2e4a</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Mode Anonymisé</p>
                     </div>
                 </div>
 
                 <div class="guide-color-card">
-                    <div class="guide-color-swatch" style="background: #2a3d5a;">Nav Active Anonymisation</div>
+                    <div class="guide-color-swatch" style="background: #0d1e32;">Bleu Désaturé Foncé</div>
                     <div class="guide-color-info">
-                        <div class="guide-color-name">Navigation Active</div>
-                        <div class="guide-color-var">--nav-actif-anonymisation</div>
-                        <div class="guide-color-hex">#2a3d5a</div>
-                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Bleu moyen désaturé - Couleur sobre</p>
+                        <div class="guide-color-name">Bleu Foncé</div>
+                        <div class="guide-color-var">--bleu-fonce</div>
+                        <div class="guide-color-hex">#0d1e32</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Mode Anonymisé</p>
                     </div>
                 </div>
 
                 <div class="guide-color-card">
-                    <div class="guide-color-swatch color-contrast-light" style="background: #dce8f5;">Sous-nav Anonymisation</div>
+                    <div class="guide-color-swatch" style="background: #2a4060;">Bleu Désaturé Moyen</div>
                     <div class="guide-color-info">
-                        <div class="guide-color-name">Sous-navigation</div>
-                        <div class="guide-color-var">--sous-nav-bg-anonymisation</div>
-                        <div class="guide-color-hex">#dce8f5</div>
-                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Bleu très pâle - Couleur sobre</p>
+                        <div class="guide-color-name">Bleu Moyen</div>
+                        <div class="guide-color-var">--bleu-moyen</div>
+                        <div class="guide-color-hex">#2a4060</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Mode Anonymisé</p>
+                    </div>
+                </div>
+
+                <div class="guide-color-card">
+                    <div class="guide-color-swatch" style="background: #3a5a7a;">Bleu Désaturé Clair</div>
+                    <div class="guide-color-info">
+                        <div class="guide-color-name">Bleu Clair</div>
+                        <div class="guide-color-var">--bleu-clair</div>
+                        <div class="guide-color-hex">#3a5a7a</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Mode Anonymisé</p>
+                    </div>
+                </div>
+
+                <div class="guide-color-card">
+                    <div class="guide-color-swatch" style="background: #6a7a8a;">Bleu Désaturé Léger</div>
+                    <div class="guide-color-info">
+                        <div class="guide-color-name">Bleu Léger</div>
+                        <div class="guide-color-var">--bleu-leger</div>
+                        <div class="guide-color-hex">#6a7a8a</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Mode Anonymisé</p>
+                    </div>
+                </div>
+
+                <div class="guide-color-card">
+                    <div class="guide-color-swatch color-contrast-light" style="background: #9aacba;">Bleu Désaturé Carte</div>
+                    <div class="guide-color-info">
+                        <div class="guide-color-name">Bleu Carte</div>
+                        <div class="guide-color-var">--bleu-carte</div>
+                        <div class="guide-color-hex">#9aacba</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Mode Anonymisé</p>
+                    </div>
+                </div>
+
+                <div class="guide-color-card">
+                    <div class="guide-color-swatch color-contrast-light" style="background: #e0e8f0;">Bleu Désaturé Pâle</div>
+                    <div class="guide-color-info">
+                        <div class="guide-color-name">Bleu Pâle</div>
+                        <div class="guide-color-var">--bleu-pale</div>
+                        <div class="guide-color-hex">#e0e8f0</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Mode Anonymisé</p>
+                    </div>
+                </div>
+
+                <div class="guide-color-card">
+                    <div class="guide-color-swatch color-contrast-light" style="background: #f0f4f8;">Bleu Désaturé Très Pâle</div>
+                    <div class="guide-color-info">
+                        <div class="guide-color-name">Bleu Très Pâle</div>
+                        <div class="guide-color-var">--bleu-tres-pale</div>
+                        <div class="guide-color-hex">#f0f4f8</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Mode Anonymisé</p>
                     </div>
                 </div>
             </div>
 
             <div class="guide-specs">
-                <div class="guide-specs-title">📋 Correspondances avec Mode Normal</div>
+                <div class="guide-specs-title">📋 Architecture de désaturation automatique</div>
                 <ul>
-                    <li><strong>En-tête:</strong> Utilise bleu nuit désaturé (#0f1e3a) qui est identique à --bleu-fonce</li>
-                    <li><strong>Navigation:</strong> Teinte bleu désaturé (#2a3d5a) vs bleu vif (#2a4a8a) - même luminosité</li>
-                    <li><strong>Sous-navigation:</strong> Fond bleu pâle désaturé (#dce8f5) vs bleu pâle (#e8f2fd) - même clarté</li>
-                    <li><strong>Autres éléments:</strong> Partagent les mêmes couleurs que le mode Normal (bleu-pale, bleu-tres-pale, etc.)</li>
-                    <li><strong>Objectif:</strong> Signaler visuellement la protection des données avec sobriété et discrétion</li>
+                    <li><strong>Principe:</strong> Conversion complète vers bleus désaturés (plus gris/neutres)</li>
+                    <li><strong>Mécanisme:</strong> [data-mode="anonymisation"] redéfinit toutes les variables --bleu-*</li>
+                    <li><strong>Objectif:</strong> Signaler visuellement la protection des données avec sobriété</li>
+                    <li><strong>Équivalences:</strong> Chaque shade désaturé équivaut à son shade normal (même luminosité)</li>
+                    <li><strong>Navigation:</strong> Tout le système de navigation automatiquement converti</li>
+                    <li><strong>Cohérence:</strong> Interface complète en tons désaturés sans code dupliqué</li>
                 </ul>
             </div>
 
-            <div class="guide-example-title" style="margin: 30px 0 15px 0;">Dégradé du Mode Anonymisation</div>
+            <div class="guide-example-title" style="margin: 30px 0 15px 0;">Dégradés Mode Anonymisé (automatiques)</div>
             <div class="guide-example">
                 <div style="margin-bottom: 20px;">
-                    <div style="background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
+                    <div style="background: linear-gradient(135deg, #0f2e4a 0%, #0d1e32 100%);
                                 color: white;
                                 padding: 30px;
                                 border-radius: 8px;
                                 text-align: center;">
-                        <h4 style="margin: 0;">En-tête Mode Anonymisation</h4>
+                        <h4 style="margin: 0;">En-tête Mode Anonymisé</h4>
                         <p style="margin: 10px 0 0 0; font-size: 0.9rem; opacity: 0.9;">
-                            linear-gradient(135deg, #0f1e3a 0%, #071428 100%)
+                            linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%)
+                        </p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.85rem; opacity: 0.7;">
+                            → Automatiquement converti en bleus désaturés (#0f2e4a → #0d1e32)
+                        </p>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <div style="background: linear-gradient(135deg, #e0e8f0 0%, #f0f4f8 100%);
+                                color: #0f2e4a;
+                                padding: 30px;
+                                border-radius: 8px;
+                                text-align: center;
+                                border: 2px solid #e0e8f0;">
+                        <h4 style="margin: 0;">Fond de page Mode Anonymisé</h4>
+                        <p style="margin: 10px 0 0 0; font-size: 0.9rem; opacity: 0.8;">
+                            linear-gradient(135deg, var(--bleu-pale) 0%, var(--bleu-tres-pale) 100%)
+                        </p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.85rem; opacity: 0.6;">
+                            → Automatiquement converti en bleus désaturés (#e0e8f0 → #f0f4f8)
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div class="guide-code-title">Code CSS - Mode Anonymisation</div>
-            <div class="guide-code">/* En-tête Mode Anonymisation */
-body[data-mode="anonymisation"] .entete {
-    background: linear-gradient(135deg, #0f1e3a 0%, #071428 100%);
+            <div class="guide-code-title">Code CSS - Mode Anonymisé (Conversion automatique)</div>
+            <div class="guide-code">/* Conversion complète en mode Anonymisé (styles.css lignes 197-222) */
+[data-mode="anonymisation"] {
+    /* Redéfinition de TOUTES les variables vers bleus désaturés (plus gris) */
+    --bleu-principal: #0f2e4a;        /* Bleu désaturé principal */
+    --bleu-fonce: #0d1e32;            /* Bleu désaturé foncé */
+    --bleu-moyen: #2a4060;            /* Bleu désaturé moyen */
+    --bleu-clair: #3a5a7a;            /* Bleu désaturé clair */
+    --bleu-leger: #6a7a8a;            /* Bleu désaturé léger */
+    --bleu-carte: #9aacba;            /* Bleu désaturé carte */
+    --bleu-pale: #e0e8f0;             /* Bleu désaturé pâle */
+    --bleu-tres-pale: #f0f4f8;        /* Bleu désaturé très pâle */
+
+    /* Navigation, sous-navigation, boutons */
+    --nav-normal: #0f2e4a;
+    --nav-actif: #2a4060;
+    --btn-principal: #0f2e4a;
+    --btn-principal-hover: #2a4060;
 }
 
-/* Navigation active en mode Anonymisation */
-body[data-mode="anonymisation"] .nav-actif {
-    background-color: var(--nav-actif-anonymisation);
-}
-
-/* Sous-navigation en mode Anonymisation */
-body[data-mode="anonymisation"] .sous-nav {
-    background-color: var(--sous-nav-bg-anonymisation);
-}</div>
+/* Résultat : Toute l'interface en tons désaturés pour protection des données */</div>
         </div>
 
         <!-- ===================== -->
@@ -808,6 +976,176 @@ body[data-mode="anonymisation"] .sous-nav {
                     <li><strong>Mode Anonymisation:</strong> Les boutons restent visibles sur le fond sarcelle</li>
                     <li><strong>Principe:</strong> Toutes les couleurs de boutons ont été testées pour assurer un contraste suffisant dans les trois modes</li>
                 </ul>
+            </div>
+        </div>
+
+        <!-- ===================== -->
+        <!-- 1.5 PRINCIPES DE DESIGN -->
+        <!-- ===================== -->
+        <div class="guide-component">
+            <h3 class="guide-component-title">1.5 Principes de design uniformes</h3>
+            <p class="guide-component-description">
+                Règles et standards appliqués de manière cohérente dans toute l'interface pour assurer
+                une expérience utilisateur fluide et prévisible. Ces principes s'appliquent aux trois modes.
+            </p>
+
+            <div class="guide-example-title" style="margin: 20px 0 15px 0;">Direction des dégradés (Standard 135°)</div>
+            <div class="guide-specs">
+                <div class="guide-specs-title">📐 Règle absolue de direction</div>
+                <ul>
+                    <li><strong>Tous les dégradés:</strong> 135° diagonal (du coin supérieur gauche au coin inférieur droit)</li>
+                    <li><strong>Ordre des couleurs:</strong> TOUJOURS de la couleur claire vers la couleur foncée</li>
+                    <li><strong>Format standard:</strong> linear-gradient(135deg, couleur-claire 0%, couleur-foncée 100%)</li>
+                    <li><strong>Exemples conformes:</strong>
+                        <ul>
+                            <li>linear-gradient(135deg, var(--bleu-moyen) 0%, var(--bleu-principal) 100%)</li>
+                            <li>linear-gradient(135deg, var(--bleu-tres-pale) 0%, var(--bleu-pale) 100%)</li>
+                            <li>linear-gradient(135deg, #2a4a8a 0%, #032e5c 100%)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Cohérence:</strong> Pas d'exceptions - tous les dégradés suivent cette règle</li>
+                </ul>
+            </div>
+
+            <div class="guide-example">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="background: linear-gradient(135deg, #2a4a8a 0%, #032e5c 100%);
+                                color: white;
+                                padding: 20px;
+                                border-radius: 6px;
+                                text-align: center;">
+                        <strong style="color: #22c55e;">✓ CORRECT</strong>
+                        <p style="margin: 10px 0 0 0; font-size: 0.85rem; opacity: 0.9;">
+                            135deg, clair → foncé<br>#2a4a8a → #032e5c
+                        </p>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #032e5c 0%, #2a4a8a 100%);
+                                color: white;
+                                padding: 20px;
+                                border-radius: 6px;
+                                text-align: center;">
+                        <strong style="color: #ef4444;">✗ INCORRECT</strong>
+                        <p style="margin: 10px 0 0 0; font-size: 0.85rem; opacity: 0.9;">
+                            135deg, foncé → clair<br>#032e5c → #2a4a8a
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-example-title" style="margin: 30px 0 15px 0;">États des composants (Normal / Hover / Active)</div>
+            <div class="guide-specs">
+                <div class="guide-specs-title">🎨 Hiérarchie visuelle par état</div>
+                <ul>
+                    <li><strong>État Normal:</strong> Couleur solide avec variables CSS (var(--bleu-pale), var(--bleu-principal), etc.)</li>
+                    <li><strong>État Hover:</strong> Dégradé + transformation légère (translateY, scale)</li>
+                    <li><strong>État Active:</strong> Couleur plus CLAIRE (plus pâle) avec bordure épaissie</li>
+                    <li><strong>Principe:</strong> L'activation éclaircit plutôt que d'assombrir (cohérence avec boutons)</li>
+                    <li><strong>Transitions:</strong> Toutes les transitions en 0.3s ease (fluidité)</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code CSS - Pattern d'états (Badges et cartes)</div>
+            <div class="guide-code">/* BADGES - Pattern standard (styles.css lignes 5069-5088) */
+.badge-grille,
+.sidebar-item-badge {
+    /* État Normal: Couleur solide */
+    background: var(--bleu-principal);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.badge-grille:hover,
+.sidebar-item-badge:hover {
+    /* État Hover: Dégradé + élévation */
+    background: linear-gradient(135deg, var(--bleu-moyen) 0%, var(--bleu-principal) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(3, 46, 92, 0.4);
+}
+
+/* CARTES - Pattern standard (styles.css lignes 5038-5092) */
+.sidebar-item {
+    /* État Normal: Couleur solide pâle */
+    padding: 12px;
+    background: var(--bleu-pale);
+    border-radius: 6px;
+    border: 1px solid var(--bleu-leger);
+    transition: all 0.3s ease;
+}
+
+.sidebar-item:hover {
+    /* État Hover: Dégradé + élévation */
+    background: linear-gradient(135deg, var(--bleu-tres-pale) 0%, var(--bleu-pale) 100%);
+    border-color: var(--bleu-moyen);
+    box-shadow: 0 2px 6px rgba(3, 46, 92, 0.15);
+    transform: translateY(-1px);
+}
+
+.sidebar-item.active {
+    /* État Active: Plus CLAIR (pas plus foncé) */
+    border: 2px solid var(--bleu-principal);
+    background: var(--bleu-tres-pale);  /* Lighter, not darker! */
+    box-shadow: 0 3px 10px rgba(3, 46, 92, 0.25);
+}</div>
+
+            <div class="guide-example">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    <div style="background: var(--bleu-pale);
+                                border: 1px solid var(--bleu-leger);
+                                padding: 15px;
+                                border-radius: 6px;
+                                text-align: center;">
+                        <strong>Normal</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #666;">
+                            Couleur solide<br>var(--bleu-pale)
+                        </p>
+                    </div>
+                    <div style="background: linear-gradient(135deg, var(--bleu-tres-pale) 0%, var(--bleu-pale) 100%);
+                                border: 1px solid var(--bleu-moyen);
+                                padding: 15px;
+                                border-radius: 6px;
+                                text-align: center;
+                                box-shadow: 0 2px 6px rgba(3, 46, 92, 0.15);
+                                transform: translateY(-1px);">
+                        <strong>Hover</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #666;">
+                            Dégradé + élévation<br>très-pale → pale
+                        </p>
+                    </div>
+                    <div style="background: var(--bleu-tres-pale);
+                                border: 2px solid var(--bleu-principal);
+                                padding: 15px;
+                                border-radius: 6px;
+                                text-align: center;
+                                box-shadow: 0 3px 10px rgba(3, 46, 92, 0.25);">
+                        <strong>Active</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #666;">
+                            Plus clair + bordure<br>var(--bleu-tres-pale)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-do-dont" style="margin-top: 30px;">
+                <div class="guide-do">
+                    <div class="guide-do-title">✅ À FAIRE</div>
+                    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                        <li>État actif plus clair que normal</li>
+                        <li>Dégradés 135° clair → foncé</li>
+                        <li>Transitions fluides (0.3s ease)</li>
+                        <li>Variables CSS partout</li>
+                    </ul>
+                </div>
+                <div class="guide-dont">
+                    <div class="guide-dont-title">❌ À ÉVITER</div>
+                    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                        <li>État actif plus foncé</li>
+                        <li>Dégradés inversés ou angles différents</li>
+                        <li>Couleurs codées en dur (#032e5c)</li>
+                        <li>Dégradé sur état normal</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </section>
@@ -2543,7 +2881,7 @@ body[data-mode="anonymisation"] .sous-navigation {
                         <div style="position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); text-align: center;">
                             <h1 style="font-size: 2rem; font-weight: bold; margin: 0 0 3px 0; color: white;">Système de suivi</h1>
                             <div style="font-size: 1.05rem; color: #d0e4f5; margin: 0 0 5px 0;">Monitorage pédagogique</div>
-                            <div style="font-size: 0.7rem; color: #9fc5e8; margin: 0;">Beta 91 • 18 novembre 2025</div>
+                            <div style="font-size: 0.7rem; color: #9fc5e8; margin: 0;">Beta 92 • 29 novembre 2025</div>
                         </div>
 
                         <!-- Actions droite -->
