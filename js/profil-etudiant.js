@@ -900,45 +900,27 @@ function genererSectionMobilisationEngagement(da) {
 
     return `
         <!-- Détails des calculs (masqué par défaut) -->
-        <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle u-hide">
-            <div class="details-calculs-section">
-                <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
-                <div class="details-calculs-bloc">
-                    <div class="details-calculs-label">Assiduité (A):</div>
-                    <div class="details-calculs-valeur">
-                        Indice A = ${indices.A}%<br>
-                        ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
-                    </div>
-
-                    <div class="details-calculs-label">Complétion (C):</div>
-                    <div class="details-calculs-valeur">
-                        Indice C = ${indices.C}%<br>
-                        ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
-                    </div>
-
-                    <div class="details-calculs-label">Performance (P):</div>
-                    <div class="details-calculs-valeur">
-                        Indice P = ${moyenneP}%<br>
-                        Moyenne des ${nbRetenus} meilleurs artefacts
-                    </div>
-
-                    <div class="details-calculs-label">Engagement (E):</div>
-                    <div class="details-calculs-valeur">
-                        Formule: E = (A × C × P)^(1/3) (racine cubique)<br>
-                        E_brut = ${(A).toFixed(2)} × ${(C).toFixed(2)} × ${(moyenneP / 100).toFixed(2)} = ${(A * C * (moyenneP / 100)).toFixed(3)}<br>
-                        E_ajusté = (${(A * C * (moyenneP / 100)).toFixed(3)})^(1/3) = <strong>${Math.pow(A * C * (moyenneP / 100), 1/3).toFixed(3)}</strong><br>
-                        <br>
-                        L'engagement combine assiduité, complétion et performance.<br>
-                        La racine cubique compense la décroissance multiplicative.<br>
-                        Niveau d'engagement : <strong>${(() => {
-                            const E_brut_calc = A * C * (moyenneP / 100);
-                            const E_ajuste = Math.pow(E_brut_calc, 1/3);
-                            const interpE_calc = interpreterEngagement(E_ajuste);
-                            return `<span style="color: ${interpE_calc.couleur};">${interpE_calc.niveau}</span>`;
-                        })()}</strong>
-                    </div>
-                </div>
-            </div>
+        <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle carte-info-note u-hide">
+            <strong>Méthodologie de calcul</strong>
+            <br><br>
+            <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
+            <br><br>
+            <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
+            <br><br>
+            <strong>Performance (P) :</strong> Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} meilleurs artefacts
+            <br><br>
+            <strong>Engagement (E) :</strong> Formule E = (A × C × P)^(1/3) (racine cubique)
+            <br>
+            ${(A).toFixed(2)} × ${(C).toFixed(2)} × ${(moyenneP / 100).toFixed(2)} = ${(A * C * (moyenneP / 100)).toFixed(3)} → E = ${Math.pow(A * C * (moyenneP / 100), 1/3).toFixed(3)}
+            <br><br>
+            L'engagement combine assiduité, complétion et performance. La racine cubique compense la décroissance multiplicative.
+            <br>
+            Niveau d'engagement : <strong>${(() => {
+                const E_brut_calc = A * C * (moyenneP / 100);
+                const E_ajuste = Math.pow(E_brut_calc, 1/3);
+                const interpE_calc = interpreterEngagement(E_ajuste);
+                return `<span style="color: ${interpE_calc.couleur};">${interpE_calc.niveau}</span>`;
+            })()}</strong>
         </div>
 
         <!-- GRILLE 3 COLONNES : ASSIDUITÉ, COMPLÉTION ET PERFORMANCE -->
@@ -1540,39 +1522,14 @@ function genererSectionAccompagnement(da) {
 
     let html = `
         <!-- Détails de la section (masqué par défaut) -->
-        <div id="details-calculs-accompagnement-${da}" class="carte-info-toggle u-hide">
-            <div class="details-calculs-section">
-                <h5 class="details-calculs-titre">À PROPOS DE CETTE SECTION</h5>
-                <div class="details-calculs-bloc">
-                    <div class="details-calculs-label">Objectif :</div>
-                    <div class="details-calculs-valeur">
-                        Cette section centralise les indicateurs de suivi et l'historique complet des interventions RàI
-                        (Réponse à l'Intervention). Elle permet d'orienter les décisions d'accompagnement pédagogique
-                        et de documenter les observations spécifiques.
-                    </div>
-                </div>
-
-                <div class="details-calculs-bloc">
-                    <div class="details-calculs-label">Contenu :</div>
-                    <div class="details-calculs-valeur">
-                        • Niveau d'intervention RàI recommandé (1, 2 ou 3)<br>
-                        • Indicateurs de risque, pattern d'apprentissage et progression<br>
-                        • Services adaptés (SA, CAF) pour contextualiser l'accompagnement<br>
-                        • Échelle visuelle de positionnement du risque<br>
-                        • Liste chronologique des interventions documentées
-                    </div>
-                </div>
-
-                <div class="details-calculs-bloc">
-                    <div class="details-calculs-label">Utilisation :</div>
-                    <div class="details-calculs-valeur">
-                        • <strong>Planifier intervention :</strong> Basez-vous sur le niveau RàI et les indicateurs affichés<br>
-                        • <strong>Nouvelle intervention :</strong> Cliquez sur le bouton «Nouvelle intervention»<br>
-                        • <strong>Consulter historique :</strong> Cliquez sur «Consulter» pour voir les détails complets<br>
-                        • <strong>Notes individuelles :</strong> Visibles directement sous chaque intervention
-                    </div>
-                </div>
-            </div>
+        <div id="details-calculs-accompagnement-${da}" class="carte-info-toggle carte-info-note u-hide">
+            <strong>À propos de cette section</strong>
+            <br><br>
+            <strong>Objectif :</strong> Cette section centralise les indicateurs de suivi et l'historique complet des interventions RàI (Réponse à l'Intervention). Elle permet d'orienter les décisions d'accompagnement pédagogique et de documenter les observations spécifiques.
+            <br><br>
+            <strong>Contenu :</strong> Niveau d'intervention RàI recommandé (1, 2 ou 3) • Indicateurs de risque, pattern d'apprentissage et progression • Services adaptés (SA, CAF) pour contextualiser l'accompagnement • Échelle visuelle de positionnement du risque • Liste chronologique des interventions documentées
+            <br><br>
+            <strong>Utilisation :</strong> Planifier intervention (basez-vous sur le niveau RàI et les indicateurs affichés) • Nouvelle intervention (cliquez sur «Nouvelle intervention») • Consulter historique (cliquez sur «Consulter» pour voir les détails complets) • Notes individuelles (visibles directement sous chaque intervention)
         </div>
 
         <!-- 🆕 NOUVEAU : Trois cartes côte à côte (RàI pédagogique + Contexte + Observation SOLO) -->
@@ -2539,6 +2496,19 @@ function genererCarteCibleIntervention(da) {
         : '✓ <strong>Maintien</strong> - Performance satisfaisante. Continuer le suivi régulier et encourager la constance.';
 
     return `
+        <!-- Détails de la section (masqué par défaut) -->
+        <div id="details-calculs-risque-${da}" class="carte-info-toggle carte-info-note u-hide">
+            <strong>À propos de cette section</strong>
+            <br><br>
+            <strong>Objectif :</strong> Cette section présente le niveau d'intervention RàI (Réponse à l'Intervention) recommandé pour l'étudiant, basé sur une analyse combinée de son engagement, de ses patterns d'apprentissage et de sa performance récente.
+            <br><br>
+            <strong>Niveaux RàI :</strong> Niveau 1 (Universel) : suivi régulier en classe • Niveau 2 (Préventif) : interventions préventives ciblées • Niveau 3 (Intensif) : interventions intensives individuelles hors classe
+            <br><br>
+            <strong>Méthodologie :</strong> Le système analyse l'engagement (E = A × C × P), le pattern d'apprentissage actuel (basé sur les ${nbArtefacts} dernier${nbArtefacts > 1 ? 's' : ''} artefact${nbArtefacts > 1 ? 's' : ''}), et les défis identifiés sur les critères de la grille de référence. La logique de décision priorise les situations de décrochage, puis les blocages critiques et émergents, avant de recommander des cibles d'enrichissement ou de maintien.
+            <br><br>
+            <strong>Utilisation :</strong> Cette section vous guide dans le choix d'interventions appropriées. Les recommandations sont contextualisées selon les besoins spécifiques de l'étudiant. Consultez la section Accompagnement pour planifier et documenter vos interventions.
+        </div>
+
         <!-- CARTE CIBLE D'INTERVENTION PREMIUM -->
         <div class="carte-cible-intervention" style="border-color: ${cibleInfo.couleur};">
             <div class="carte-cible-header">
@@ -2727,16 +2697,16 @@ function changerSectionProfil(section) {
     const indices = calculerTousLesIndices(da);
     const badgePratique = genererBadgePratiqueProfil(indices.pratique);
 
-    // Générer le toggle info selon la section (styles gérés par CSS)
+    // Générer l'aide Primo selon la section (popup au clic)
     let toggleInfo = '';
     if (section === 'cible') {
-        toggleInfo = `<span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-risque-${da}">😎</span>`;
     } else if (section === 'performance') {
-        toggleInfo = `<span class="emoji-toggle" data-target="details-calculs-performance-${da}">ℹ️</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-performance-${da}">😎</span>`;
     } else if (section === 'mobilisation') {
-        toggleInfo = `<span class="emoji-toggle" data-target="details-calculs-mobilisation-${da}">ℹ️</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-mobilisation-${da}">😎</span>`;
     } else if (section === 'accompagnement') {
-        toggleInfo = `<span class="emoji-toggle" data-target="details-calculs-accompagnement-${da}">ℹ️</span>`;
+        toggleInfo = `<span class="primo-aide" data-target="details-calculs-accompagnement-${da}">😎</span>`;
     }
 
     contenuContainer.innerHTML = `
@@ -2751,10 +2721,15 @@ function changerSectionProfil(section) {
         </div>
     `;
 
-    // Réattacher les événements des toggles après changement de section
+    // Réattacher les événements des toggles et Primo après changement de section
     setTimeout(() => {
         if (typeof reattacherEvenementsToggles === 'function') {
             reattacherEvenementsToggles();
+        }
+
+        // Réinitialiser les tooltips Primo pour les icônes 😎 dynamiques
+        if (typeof initialiserPrimoTooltips === 'function') {
+            initialiserPrimoTooltips();
         }
 
         // Restaurer les préférences du rapport si on vient de charger cette section
@@ -3257,7 +3232,7 @@ function afficherProfilComplet(da) {
                 <div class="profil-contenu-header">
                     <h2 class="u-flex-between-mb20">
                         <span>${titreSection}${genererBadgePratiqueProfil(indices.pratique, modeComparatif)}</span>
-                        <span class="emoji-toggle" data-target="details-calculs-risque-${da}">ℹ️</span>
+                        <span class="primo-aide" data-target="details-calculs-risque-${da}">😎</span>
                     </h2>
                 </div>
                 <div class="profil-contenu-body">
@@ -3267,10 +3242,15 @@ function afficherProfilComplet(da) {
         </div>
     `;
 
-    // Réattacher les événements des toggles après insertion du contenu
+    // Réattacher les événements des toggles et Primo après insertion du contenu
     setTimeout(() => {
         if (typeof reattacherEvenementsToggles === 'function') {
             reattacherEvenementsToggles();
+        }
+
+        // Réinitialiser les tooltips Primo pour les icônes 😎 dynamiques
+        if (typeof initialiserPrimoTooltips === 'function') {
+            initialiserPrimoTooltips();
         }
 
         // Restaurer les préférences du rapport si on est sur cette section
@@ -6134,74 +6114,43 @@ function genererSectionPerformance(da) {
 
     return `
         <!-- Détails des calculs (masqué par défaut) - AFFICHÉ EN HAUT -->
-        <div id="details-calculs-performance-${da}" class="carte-info-toggle u-hide">
-            <div class="details-calculs-section">
-                <h5 class="details-calculs-titre">MÉTHODOLOGIE DE CALCUL</h5>
-                <div class="details-calculs-bloc">
-                    <div class="details-calculs-label">Pratique de notation active:</div>
-                    <div class="details-calculs-valeur">
-                        ${indices.pratique === 'PAN' ? 'PAN (Portfolio à nombre limité)' : 'SOM (Sommative provisoire)'}
-                    </div>
-
-                    <div class="details-calculs-label">Règle de sélection:</div>
-                    <div class="details-calculs-valeur">
-                        ${(() => {
-                            if (!portfolioActif) {
-                                return 'Portfolio désactivé - Les productions sont évaluées de manière indépendante';
-                            }
-
-                            // Textes selon la modalité de sélection
-                            const textes = {
-                                'meilleurs': `Les <strong>${nombreARetenirConfig} meilleures productions</strong> sont retenues pour le calcul de l'indice P (note maximale atteinte)`,
-                                'recents': `Les <strong>${nombreARetenirConfig} plus récentes productions</strong> sont retenues pour le calcul de l'indice P (niveau terminal actuel)`,
-                                'recents-meilleurs': `Les <strong>${nombreARetenirConfig} plus récentes productions parmi les 50% meilleures</strong> sont retenues pour le calcul de l'indice P (approche hybride)`,
-                                'tous': `<strong>Toutes les productions</strong> sont retenues pour le calcul de l'indice P (calcul de type sommative)`
-                            };
-
-                            return textes[methodeSelection] || textes['meilleurs'];
-                        })()}
-                    </div>
-
-                    <div class="details-calculs-label">Artefacts retenus pour le calcul:</div>
-                    <div class="details-calculs-valeur">
-                        ${artefactsRetenus.length > 0 ? artefactsRetenus.map((art, idx) =>
-                            `${idx + 1}. ${art.description} → <strong>${art.note.toFixed(1)}/100</strong>`
-                        ).join('<br>') : 'Aucun artefact évalué'}
-                    </div>
-
-                    <div class="details-calculs-label">Calcul de l'indice P:</div>
-                    <div class="details-calculs-valeur">
-                        ${artefactsRetenus.length > 0 ? `
-                            Moyenne des ${artefactsRetenus.length} artefact${artefactsRetenus.length > 1 ? 's' : ''} retenu${artefactsRetenus.length > 1 ? 's' : ''}<br>
-                            P = (${notesRetenues.map(n => n.toFixed(1)).join(' + ')}) / ${artefactsRetenus.length}<br>
-                            P = <strong>${noteTop3}/100</strong> soit <strong>${indices.P}%</strong>
-                        ` : 'Calcul impossible : aucune évaluation disponible'}
-                    </div>
-
-                    <div class="details-calculs-label">Calcul de la note de chaque artefact:</div>
-                    <div class="details-calculs-valeur">
-                        ${(() => {
-                            const grilles = db.getSync('grillesTemplates', []);
-                            const grilleActive = grilles.find(g => g.active) || grilles[0];
-                            if (grilleActive && grilleActive.criteres) {
-                                const ponderations = grilleActive.criteres
-                                    .map(c => `${c.nom}: ${c.ponderation || 0}%`)
-                                    .join(', ');
-                                return `Note = Pondération des critères configurés dans la grille «${grilleActive.nom}»<br>
-                                        (${ponderations})`;
-                            }
-                            return 'Note = Pondération des critères déterminée dans les réglages';
-                        })()}
-                    </div>
-
-                    ${selectionEleve.auto ? `
-                        <div class="details-calculs-label">Note:</div>
-                        <div class="details-calculs-valeur">
-                            Sélection automatique basée sur les meilleures notes
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
+        <div id="details-calculs-performance-${da}" class="carte-info-toggle carte-info-note u-hide">
+            <strong>Méthodologie de calcul</strong>
+            <br><br>
+            <strong>Pratique de notation active :</strong> ${indices.pratique === 'PAN' ? 'PAN (Portfolio à nombre limité)' : 'SOM (Sommative provisoire)'}
+            <br><br>
+            <strong>Règle de sélection :</strong> ${(() => {
+                if (!portfolioActif) {
+                    return 'Portfolio désactivé — Les productions sont évaluées de manière indépendante';
+                }
+                const textes = {
+                    'meilleurs': `Les <strong>${nombreARetenirConfig} meilleures productions</strong> sont retenues pour le calcul de l'indice P (note maximale atteinte)`,
+                    'recents': `Les <strong>${nombreARetenirConfig} plus récentes productions</strong> sont retenues pour le calcul de l'indice P (niveau terminal actuel)`,
+                    'recents-meilleurs': `Les <strong>${nombreARetenirConfig} plus récentes productions parmi les 50% meilleures</strong> sont retenues pour le calcul de l'indice P (approche hybride)`,
+                    'tous': `<strong>Toutes les productions</strong> sont retenues pour le calcul de l'indice P (calcul de type sommative)`
+                };
+                return textes[methodeSelection] || textes['meilleurs'];
+            })()}
+            <br><br>
+            <strong>Artefacts retenus :</strong> ${artefactsRetenus.length > 0 ? artefactsRetenus.map((art, idx) =>
+                `${idx + 1}. ${art.description} → ${art.note.toFixed(1)}/100`
+            ).join(' • ') : 'Aucun artefact évalué'}
+            <br><br>
+            <strong>Calcul de l'indice P :</strong> ${artefactsRetenus.length > 0 ? `
+                Moyenne des ${artefactsRetenus.length} artefact${artefactsRetenus.length > 1 ? 's' : ''} retenu${artefactsRetenus.length > 1 ? 's' : ''} — P = (${notesRetenues.map(n => n.toFixed(1)).join(' + ')}) / ${artefactsRetenus.length} = <strong>${indices.P}%</strong>
+            ` : 'Calcul impossible : aucune évaluation disponible'}
+            <br><br>
+            <strong>Calcul de la note de chaque artefact :</strong> ${(() => {
+                const grilles = db.getSync('grillesTemplates', []);
+                const grilleActive = grilles.find(g => g.active) || grilles[0];
+                if (grilleActive && grilleActive.criteres) {
+                    const ponderations = grilleActive.criteres
+                        .map(c => `${c.nom}: ${c.ponderation || 0}%`)
+                        .join(', ');
+                    return `Pondération des critères configurés dans la grille «${grilleActive.nom}» (${ponderations})`;
+                }
+                return 'Pondération des critères déterminée dans les réglages';
+            })()}${selectionEleve.auto ? '<br><br><strong>Note :</strong> Sélection automatique basée sur les meilleures notes' : ''}
         </div>
 
         <!-- ENCADRÉ UNIQUE: DÉVELOPPEMENT DES HABILETÉS ET COMPÉTENCES -->
