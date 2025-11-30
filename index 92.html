@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 92 - Primo Assistant</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2025112711">
+    <link rel="stylesheet" href="styles.css?v=2025112917">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -210,22 +210,22 @@
         body[data-mode="normal"] .sous-navigation,
         .sous-navigation {
             background:
-                linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)),
-                linear-gradient(135deg, var(--bleu-fonce) 100%, var(--bleu-principal) 0%) !important;
+                linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)),
+                linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%) !important;
         }
 
-        /* Mode Anonymisé (plus foncé) */
+        /* Mode Anonymisé */
         body[data-mode="anonymisation"] .sous-navigation {
             background:
-                linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)),
-                linear-gradient(135deg, var(--bleu-anonymisation) 100%, var(--bleu-fonce) 0%) !important;
+                linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)),
+                linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%) !important;
         }
 
-        /* Mode Simulé (teal/sarcelle) */
+        /* Mode Assisté (sarcelle - plus foncé pour compenser luminosité) */
         body[data-mode="simulation"] .sous-navigation {
             background:
-                linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)),
-                linear-gradient(135deg, var(--bleu-simulation) 100%, var(--bleu-simulation) 0%) !important;
+                linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+                linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%) !important;
         }
 
         /* ===============================
@@ -2775,7 +2775,7 @@
                 <button data-onglet="evaluations">Évaluations</button>
                 <button data-onglet="materiel">Matériel</button>
                 <button data-onglet="reglages">Réglages</button>
-                <button id="btn-section-aide" data-onglet="aide">Aide</button>
+                <button id="btn-section-aide" data-onglet="aide">😎 Aide</button>
             </div>
         </nav>
 
@@ -2802,7 +2802,7 @@
                         <h3 class="carte-titre-avec-toggle">
                             <span>Indicateurs globaux du groupe</span>
                             <span class="emoji-container">
-                                <span class="emoji-toggle" data-target="note-indicateurs">📐</span>
+                                <span class="primo-aide" data-target="note-indicateurs">😎</span>
                             </span>
                         </h3>
 
@@ -3006,7 +3006,7 @@
                     <h2 class="carte-titre-avec-toggle">
                         <span>Aperçu des présences</span>
                         <span class="emoji-container">
-                            <span class="emoji-toggle" data-target="note-presences-apercu">📐</span>
+                            <span class="primo-aide" data-target="note-presences-apercu">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">Vue d'ensemble des statistiques de présence du groupe</p>
@@ -3224,7 +3224,7 @@
                     <h2 class="carte-titre-avec-toggle">
                         <span>Aperçu des évaluations</span>
                         <span class="emoji-container">
-                            <span class="emoji-toggle" data-target="note-evaluations-apercu">📐</span>
+                            <span class="primo-aide" data-target="note-evaluations-apercu">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">Vue d'ensemble des évaluations du groupe</p>
@@ -3520,29 +3520,32 @@
                                 <label class="label-formulaire">Appliquer un jeton :</label>
 
                                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                                    <!-- Jeton de délai -->
-                                    <div id="badgeJetonDelaiOption" style="display: flex; align-items: flex-start; gap: 10px;">
-                                        <input type="checkbox" id="checkboxJetonDelai" style="margin-top: 6px;" onchange="gererChangementCheckboxJetonDelai()">
-                                        <div style="flex: 1;">
-                                            <span class="badge-jeton-delai-wrapper">
-                                                <span class="badge-jeton-titre">Délai</span>
-                                            </span>
-                                            <p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">
-                                                L'évaluation comptera dans les travaux remis sans pénalité de retard.
-                                            </p>
+                                    <!-- Jetons standards (Délai et Reprise) côte à côte -->
+                                    <div style="display: flex; gap: 10px;">
+                                        <!-- Jeton de délai -->
+                                        <div id="badgeJetonDelaiOption" style="display: flex; align-items: flex-start; gap: 8px; flex: 1;">
+                                            <input type="checkbox" id="checkboxJetonDelai" style="margin-top: 6px;" onchange="gererChangementCheckboxJetonDelai()">
+                                            <div style="flex: 1;">
+                                                <span class="badge-jeton-delai-wrapper">
+                                                    <span class="badge-jeton-titre">Délai</span>
+                                                </span>
+                                                <p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">
+                                                    Aucune pénalité de retard.
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <!-- Jeton de reprise -->
-                                    <div id="badgeJetonRepriseOption" style="display: flex; align-items: flex-start; gap: 10px;">
-                                        <input type="checkbox" id="checkboxJetonReprise" style="margin-top: 6px;" onchange="gererChangementCheckboxJetonReprise()">
-                                        <div style="flex: 1;">
-                                            <span class="badge-jeton-reprise-wrapper">
-                                                <span class="badge-jeton-titre">Reprise</span>
-                                            </span>
-                                            <p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">
-                                                Remplace l'évaluation précédente. L'ancienne note sera archivée.
-                                            </p>
+                                        <!-- Jeton de reprise -->
+                                        <div id="badgeJetonRepriseOption" style="display: flex; align-items: flex-start; gap: 8px; flex: 1;">
+                                            <input type="checkbox" id="checkboxJetonReprise" style="margin-top: 6px;" onchange="gererChangementCheckboxJetonReprise()">
+                                            <div style="flex: 1;">
+                                                <span class="badge-jeton-reprise-wrapper">
+                                                    <span class="badge-jeton-titre">Reprise</span>
+                                                </span>
+                                                <p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">
+                                                    Remplace et archive l'ancienne.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -3555,12 +3558,26 @@
 
                             <!-- NOTE ET NIVEAU -->
                             <div id="noteFinale1" class="boite-note-finale">
-                                <div class="label">Note finale</div>
-                                <div class="valeur">
-                                    <span id="noteProduction1">0.0</span>
+                                <!-- Critères en haut -->
+                                <div class="criteres-copier" style="padding: 8px 12px; background: #f8f9fa; border-radius: 4px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin-bottom: 15px;">
+                                    <div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">Critères</div>
+                                    <span id="criteresCopier" style="font-size: 10px; color: #333; white-space: pre; user-select: all; cursor: text;">--</span>
                                 </div>
-                                <div class="niveau">
-                                    Niveau: <span id="niveauProduction1">--</span>
+
+                                <!-- Note finale et niveau sur la même ligne -->
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 15px; border-top: 2px solid #e0e0e0;">
+                                    <div>
+                                        <div class="label" style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">Note finale</div>
+                                        <div class="valeur" style="font-size: 2rem; font-weight: bold; color: var(--bleu-principal);">
+                                            <span id="noteProduction1">0.0</span>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">Niveau</div>
+                                        <div style="font-size: 2rem; font-weight: bold; color: var(--bleu-principal);">
+                                            <span id="niveauProduction1">--</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3693,8 +3710,8 @@
                     <h2 class="d-flex-between-center">
                         <span>Vue d'ensemble</span>
                         <span class="text-12">
-                            <span class="emoji-toggle" data-target="note-apercu">📐</span>
-                            <span class="emoji-toggle" data-target="conseil-apercu">💡</span>
+                            <span class="primo-aide" data-target="note-apercu">😎</span>
+                            <span class="primo-aide" data-target="conseil-apercu">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">Résumé du matériel pédagogique configuré</p>
@@ -3758,8 +3775,8 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Exercices formatifs et certificatifs</span>
                         <span class="titre-emoji-container">
-                            <span class="emoji-toggle" data-target="note-productions">📐</span>
-                            <span class="emoji-toggle" data-target="conseil-productions">💡</span>
+                            <span class="primo-aide" data-target="note-productions">😎</span>
+                            <span class="primo-aide" data-target="conseil-productions">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">Définir les évaluations du cours et leurs pondérations</p>
@@ -3978,8 +3995,8 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Critères d'évaluation</span>
                         <span class="titre-emoji-container">
-                            <span class="emoji-toggle" data-target="note-grilles">📐</span>
-                            <span class="emoji-toggle" data-target="conseil-grilles">💡</span>
+                            <span class="primo-aide" data-target="note-grilles">😎</span>
+                            <span class="primo-aide" data-target="conseil-grilles">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">Créer des grilles de critères réutilisables pour évaluer différents types
@@ -4120,7 +4137,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Niveaux de performance</span>
                         <span class="titre-emoji-container">
-                            <span class="emoji-toggle" data-target="note-echelle">📐</span>
+                            <span class="primo-aide" data-target="note-echelle">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">Configuration de l'échelle de notation pour les PAN/SBG</p>
@@ -4411,8 +4428,8 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Rétroactions prédéfinies</span>
                         <span class="titre-emoji-container">
-                            <span class="emoji-toggle" data-target="note-retroactions">📐</span>
-                            <span class="emoji-toggle" data-target="conseil-retroactions">💡</span>
+                            <span class="primo-aide" data-target="note-retroactions">😎</span>
+                            <span class="primo-aide" data-target="conseil-retroactions">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">Créer des cartouches de rétroaction basées sur les critères et l'échelle
@@ -4679,7 +4696,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Objectifs d'apprentissage</span>
                         <span class="titre-emoji-container">
-                            <span class="emoji-toggle" data-target="conseil-objectifs">💡</span>
+                            <span class="primo-aide" data-target="conseil-objectifs">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">
@@ -4855,7 +4872,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration du cours</span>
                         <span class="titre-emoji-container">
-                            <span class="emoji-toggle" data-target="conseil-cours">💡</span>
+                            <span class="primo-aide" data-target="conseil-cours">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">Informations techniques du cours : code, nom, compétences, enseignant·e,
@@ -5288,7 +5305,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration de l'horaire</span>
                         <span class="titre-emoji-container">
-                            <span class="emoji-toggle" data-target="conseil-horaire">💡</span>
+                            <span class="primo-aide" data-target="conseil-horaire">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">Définissez le format horaire hebdomadaire de vos séances de cours</p>
@@ -5404,7 +5421,7 @@
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration du groupe d'étudiants</span>
                         <span class="titre-emoji-container">
-                            <span class="emoji-toggle" data-target="conseil-groupe">💡</span>
+                            <span class="primo-aide" data-target="conseil-groupe">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">Liste complète des étudiants inscrits : ajout, import, modification,
@@ -5594,7 +5611,7 @@ Exemple :
                         <!-- ZONE DE PRÉVISUALISATION (cachée par défaut) -->
                         <div id="previewZone" style="display: none; margin-bottom: 20px; background: var(--alerte-fond-attention); 
                                      padding: 15px; border-radius: 8px; border: 2px solid #ffc107;">
-                            <h4 class="mt-0-warning">📐 Prévisualisation de l'import</h4>
+                            <h4 class="mt-0-warning">😎 Prévisualisation de l'import</h4>
                             <p style="color: var(--alerte-texte-attention); margin-bottom: 15px;">
                                 Vérifiez les données avant de les importer définitivement.
                             </p>
@@ -6744,8 +6761,8 @@ Exemple :
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration des seuils d'interprétation</span>
                         <span class="titre-emoji-container">
-                            <span class="emoji-toggle" data-target="note-interpretation">📐</span>
-                            <span class="emoji-toggle" data-target="conseil-interpretation">💡</span>
+                            <span class="primo-aide" data-target="note-interpretation">😎</span>
+                            <span class="primo-aide" data-target="conseil-interpretation">😎</span>
                         </span>
                     </h2>
                     <p class="text-muted">
@@ -9174,7 +9191,7 @@ Exemple :
                             </ol>
 
                             <div class="alerte alerte-info" class="mt-15">
-                                <strong>📐 Astuce :</strong> Les artefacts marqués d'une étoile ★ sont ceux sélectionnés automatiquement par les règles PAN (les N meilleurs). Si un étudiant a 9 artefacts mais que seuls les 3 meilleurs comptent, seuls ces 3 auront l'étoile.
+                                <strong>😎 Astuce :</strong> Les artefacts marqués d'une étoile ★ sont ceux sélectionnés automatiquement par les règles PAN (les N meilleurs). Si un étudiant a 9 artefacts mais que seuls les 3 meilleurs comptent, seuls ces 3 auront l'étoile.
                             </div>
 
                             <p class="mt-15"><strong>Actions possibles depuis ce tableau :</strong></p>
@@ -9857,7 +9874,7 @@ Exemple :
                         </div>
 
                         <div class="alerte alerte-info" class="mt-20">
-                            <strong>📐 Note :</strong> Ce glossaire est une référence rapide. Pour des explications détaillées avec exemples et formules, consultez le Guide complet (PDF) disponible dans les ressources ci-dessous.
+                            <strong>😎 Note :</strong> Ce glossaire est une référence rapide. Pour des explications détaillées avec exemples et formules, consultez le Guide complet (PDF) disponible dans les ressources ci-dessous.
                         </div>
                     </div>
 
@@ -9921,7 +9938,7 @@ Exemple :
                                     </ul>
                                 </li>
                             </ul>
-                            <p class="m-15-0-0-0-sm-bleu"><strong>📐 Détails complets :</strong> Voir LICENSE.md dans le dépôt du projet</p>
+                            <p class="m-15-0-0-0-sm-bleu"><strong>😎 Détails complets :</strong> Voir LICENSE.md dans le dépôt du projet</p>
                         </div>
                     </div>
 
@@ -9985,11 +10002,11 @@ Exemple :
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>
     <script src="js/navigation.js?v=2025111431"></script>
-    <script src="js/modes.js?v=2025112707"></script>
+    <script src="js/modes.js?v=2025112904"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025111325"></script>
-    <script src="js/etudiants.js?v=2025111812"></script>
+    <script src="js/etudiants.js?v=2025112905"></script>
     <script src="js/productions.js?v=2025112700"></script>
     <script src="js/grilles.js?v=2025112804"></script>
     <script src="js/echelles.js?v=2025112804"></script>
@@ -10027,7 +10044,7 @@ Exemple :
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025111830"></script>
-    <script src="js/profil-etudiant.js?v=2025112703"></script>
+    <script src="js/profil-etudiant.js?v=2025112907"></script>
     <script src="js/presences-apercu.js?v=2025111029"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
 
@@ -10044,13 +10061,14 @@ Exemple :
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2025111435"></script>
-    <script src="js/evaluation.js?v=2025112905"></script>
+    <script src="js/evaluation.js?v=2025112916"></script>
 
     <!-- PRIMO - Système conversationnel de configuration (Beta 92) -->
     <script src="js/primo-questions.js?v=2025112805"></script>
     <script src="js/primo-modal.js?v=2025112805"></script>
     <script src="js/primo-accueil.js?v=2025112809"></script>
     <script src="js/primo-validation-champs.js?v=2025112727"></script>
+    <script src="js/primo-tooltips.js?v=2025112903"></script>
 
     <!-- GUIDAGE - Système d'assistance contextuelle en mode Assisté (Beta 92) -->
     <script src="js/guidage.js?v=2025112706"></script>
@@ -10188,7 +10206,7 @@ Exemple :
             <div
                 class="carte-mb20-orange">
                 <p class="m-0-bleu-principal">
-                    <strong>📐 Attention :</strong> L'importation écrasera les données existantes pour les clés
+                    <strong>😎 Attention :</strong> L'importation écrasera les données existantes pour les clés
                     importées.
                 </p>
             </div>
@@ -10465,7 +10483,7 @@ Exemple :
             }
 
             // Vérifier échelles
-            console.log('\n📐 Échelles de performance:');
+            console.log('\n😎 Échelles de performance:');
             const echellesTemplates = localStorage.getItem('echellesTemplates');
             const niveauxEchelle = localStorage.getItem('niveauxEchelle');
             const configEchelle = localStorage.getItem('configEchelle');
