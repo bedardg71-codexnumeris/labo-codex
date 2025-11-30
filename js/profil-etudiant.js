@@ -3476,15 +3476,15 @@ function genererSectionProductions(da) {
         <div class="profil-carte">
             <h3 style="color: var(--bleu-principal); margin: 0 0 15px 0;">Liste des productions</h3>
             <div style="overflow-x: auto;">
-                <table class="profil-tableau-full">
+                <table class="tableau">
                     <thead>
-                        <tr style="background: var(--bleu-tres-pale); border-bottom: 2px solid var(--bleu-moyen);">
-                            <th class="profil-tableau-header-gauche-p12">Production</th>
-                            <th class="profil-tableau-header-gauche-p12">Description</th>
-                            <th class="profil-tableau-header-gauche-p12">Jeton</th>
-                            <th class="profil-tableau-header-centre-p12">Note</th>
-                            <th class="profil-tableau-header-centre-p12">Date</th>
-                            <th class="profil-tableau-header-centre-p12">Actions</th>
+                        <tr>
+                            <th>Production</th>
+                            <th>Description</th>
+                            <th>Jeton</th>
+                            <th style="text-align: center;">Note</th>
+                            <th style="text-align: center;">Date</th>
+                            <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
