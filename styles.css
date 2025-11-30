@@ -1090,35 +1090,30 @@ body {
 }
 
 .tableau thead {
-    background: var(--bleu-pale);
+    background: var(--bleu-moyen);
+    color: white;
 }
 
 .tableau th {
     padding: 12px;
     text-align: left;
     font-weight: 600;
-    color: var(--bleu-principal);
     font-size: 0.9rem;
-    border-bottom: 2px solid var(--bleu-leger);
-    border-right: 1px solid #e0e8f0;
-}
-
-.tableau th:last-child {
-    border-right: none;
+    color: white;
+    border: 1px solid #ddd;
 }
 
 .tableau tbody tr {
-    background: var(--bleu-tres-pale);
+    background: white;
+}
+
+.tableau tbody tr:nth-child(even) {
+    background: #f9f9f9;
 }
 
 .tableau td {
     padding: 10px 12px;
-    border-bottom: 1px solid #e0e8f0;
-    border-right: 1px solid #e0e8f0;
-}
-
-.tableau td:last-child {
-    border-right: none;
+    border: 1px solid #ddd;
 }
 
 .tableau tbody tr:hover {
@@ -1143,6 +1138,7 @@ body {
     text-align: left;
     font-weight: 600;
     font-size: 0.9rem;
+    color: white;
     border: 1px solid #ddd;
 }
 
@@ -1978,6 +1974,12 @@ input[type="number"].controle-form {
     border: 1px solid var(--bleu-leger);
     border-radius: 6px;
     margin-bottom: 10px;
+    transition: background-color 0.2s ease;
+}
+
+.item-liste:hover {
+    background: var(--table-hover);
+    cursor: pointer;
 }
 
 /* TOUS les boutons dans un .item-liste sont automatiquement compacts */

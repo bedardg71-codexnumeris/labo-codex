@@ -344,26 +344,26 @@ function afficherPrevisualisation(data, titre) {
     if (!previewZone || !previewTable) return;
 
     const tableHtml = `
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead style="background: var(--bleu-moyen); color: white;">
+        <table class="tableau-blanc">
+            <thead>
                 <tr>
-                    <th style="padding: 8px; text-align: left;">DA</th>
-                    <th style="padding: 8px; text-align: center;">Groupe</th>
-                    <th style="padding: 8px; text-align: left;">Nom</th>
-                    <th style="padding: 8px; text-align: left;">Prénom</th>
-                    <th style="padding: 8px; text-align: left;">Programme</th>
-                    <th style="padding: 8px; text-align: center;">SA</th>
+                    <th>DA</th>
+                    <th style="text-align: center;">Groupe</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Programme</th>
+                    <th style="text-align: center;">SA</th>
                 </tr>
             </thead>
             <tbody>
                 ${data.map((s, index) => `
-                    <tr style="background: ${index % 2 === 0 ? 'white' : '#f8f9fa'};">
-                        <td style="padding: 8px;">${echapperHtml(s.da)}</td>
-                        <td style="padding: 8px; text-align: center;">${echapperHtml(s.groupe)}</td>
-                        <td style="padding: 8px;">${echapperHtml(s.nom)}</td>
-                        <td style="padding: 8px;">${echapperHtml(s.prenom)}</td>
-                        <td style="padding: 8px;">${echapperHtml(s.programme || '---')}</td>
-                        <td style="padding: 8px; text-align: center;">${s.sa === 'Oui' ? '✓' : ''}</td>
+                    <tr>
+                        <td>${echapperHtml(s.da)}</td>
+                        <td style="text-align: center;">${echapperHtml(s.groupe)}</td>
+                        <td>${echapperHtml(s.nom)}</td>
+                        <td>${echapperHtml(s.prenom)}</td>
+                        <td>${echapperHtml(s.programme || '---')}</td>
+                        <td style="text-align: center;">${s.sa === 'Oui' ? '✓' : ''}</td>
                     </tr>
                 `).join('')}
             </tbody>
