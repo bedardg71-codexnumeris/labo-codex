@@ -48,6 +48,9 @@
     --pan-bleu: #0277bd;
     --hybride-violet: #9c27b0;
 
+    /* Couleurs de tableau */
+    --table-hover: var(--bleu-carte);    /* Couleur hover des rangées (plus foncé, texte reste lisible) */
+
     /* === NAVIGATION === */
     --nav-bg: #f8f9fa;
     --nav-normal: #04376f;
@@ -1083,6 +1086,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     margin: var(--espacement-moyen) 0;
+    background: var(--bleu-tres-pale);
 }
 
 .tableau thead {
@@ -1096,15 +1100,67 @@ body {
     color: var(--bleu-principal);
     font-size: 0.9rem;
     border-bottom: 2px solid var(--bleu-leger);
+    border-right: 1px solid #e0e8f0;
+}
+
+.tableau th:last-child {
+    border-right: none;
+}
+
+.tableau tbody tr {
+    background: var(--bleu-tres-pale);
 }
 
 .tableau td {
     padding: 10px 12px;
-    border-bottom: 1px solid var(--bleu-tres-pale);
+    border-bottom: 1px solid #e0e8f0;
+    border-right: 1px solid #e0e8f0;
+}
+
+.tableau td:last-child {
+    border-right: none;
 }
 
 .tableau tbody tr:hover {
-    background: var(--bleu-tres-pale);
+    background: var(--table-hover);
+}
+
+/* Tableau avec fond blanc (utilisé pour liste étudiants, etc.) */
+.tableau-blanc {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--espacement-moyen) 0;
+    background: white;
+}
+
+.tableau-blanc thead {
+    background: var(--bleu-moyen);
+    color: white;
+}
+
+.tableau-blanc th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid #ddd;
+}
+
+.tableau-blanc tbody tr {
+    background: white;
+}
+
+.tableau-blanc tbody tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+.tableau-blanc td {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+}
+
+.tableau-blanc tbody tr:hover {
+    background: var(--table-hover);
 }
 
 /* ===============================
@@ -4165,48 +4221,9 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     padding: 30px;
 }
 
-/* Tableau des productions - style identique à la liste des étudiants */
+/* Alias pour compatibilité - utilise le style .tableau standard */
 .profil-tableau-full {
-    width: 100%;
-    border-collapse: collapse;
-    margin: var(--espacement-moyen) 0;
-    background: var(--bleu-tres-pale);
-}
-
-.profil-tableau-full thead {
-    background: var(--bleu-pale);
-}
-
-.profil-tableau-full th {
-    padding: 12px;
-    text-align: left;
-    font-weight: 600;
-    color: var(--bleu-principal);
-    font-size: 0.9rem;
-    border-bottom: 2px solid var(--bleu-leger);
-    border-right: 1px solid var(--bleu-tres-pale);
-}
-
-.profil-tableau-full th:last-child {
-    border-right: none;
-}
-
-.profil-tableau-full tbody tr {
-    background: var(--bleu-tres-pale);
-}
-
-.profil-tableau-full td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #e0e8f0;
-    border-right: 1px solid #e0e8f0;
-}
-
-.profil-tableau-full td:last-child {
-    border-right: none;
-}
-
-.profil-tableau-full tbody tr:hover {
-    background: #d8e8f8;
+    /* Hérite de .tableau - pas besoin de redéfinir les styles */
 }
 
 /* Tableau headers */
@@ -6628,6 +6645,10 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .matrice-tableau tbody tr:nth-child(even) {
     background: #ffffff;
+}
+
+.matrice-tableau tbody tr:hover {
+    background: var(--table-hover);
 }
 
 .matrice-tableau td {
