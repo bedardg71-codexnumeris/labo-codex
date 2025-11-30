@@ -4165,11 +4165,12 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     padding: 30px;
 }
 
-/* Tableau des productions avec bordures verticales */
+/* Tableau des productions - style identique à la liste des étudiants */
 .profil-tableau-full {
     width: 100%;
     border-collapse: collapse;
     margin: var(--espacement-moyen) 0;
+    background: var(--bleu-tres-pale);
 }
 
 .profil-tableau-full thead {
@@ -4190,10 +4191,14 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     border-right: none;
 }
 
+.profil-tableau-full tbody tr {
+    background: var(--bleu-tres-pale);
+}
+
 .profil-tableau-full td {
     padding: 10px 12px;
-    border-bottom: 1px solid var(--bleu-tres-pale);
-    border-right: 1px solid var(--bleu-tres-pale);
+    border-bottom: 1px solid #e0e8f0;
+    border-right: 1px solid #e0e8f0;
 }
 
 .profil-tableau-full td:last-child {
@@ -4201,7 +4206,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 .profil-tableau-full tbody tr:hover {
-    background: var(--bleu-tres-pale);
+    background: #d8e8f8;
 }
 
 /* Tableau headers */
