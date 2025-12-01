@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "licence": "CC BY-NC-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "licence_resume": "Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions 4.0 International",
+    "auteur_original": "Grégoire Bédard",
+    "email_auteur": "gregoire.bedard@cegepdrummond.ca",
+    "site_auteur": "https://codexnumeris.org",
+    "type": "production",
+    "nom": "Carte mentale",
+    "date_creation": "2025-12-01",
+    "date_modification": "2025-12-01",
+    "version": "1.0",
+    "contributeurs": [],
+    "attribution": "Créé par Grégoire Bédard pour l'application Monitorage Pédagogique",
+    "discipline": [
+      "Littérature"
+    ],
+    "niveau": "Collégial",
+    "institution": "Cégep Drummond",
+    "description_courte": "Production d'une carte mentale - matériel de test"
+  },
+  "contenu": {
+    "id": "EV3",
+    "code": "EV3",
+    "titre": "Artefact 3",
+    "description": "Carte mentale",
+    "type": "artefact-portfolio",
+    "ponderation": 0,
+    "grilleId": "GRILLE1759264206489",
+    "objectif": "Développer sa capacité à analyser collaborativement un texte et à représenter les relations entre objectif, mécanismes et procédés.",
+    "tache": "En binôme, construire une carte mentale qui organise visuellement l'analyse du texte, en délibérant sur chaque élément pour arriver à une interprétation commune.",
+    "verrouille": true
+  }
+}

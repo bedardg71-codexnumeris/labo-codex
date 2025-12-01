@@ -1,0 +1,132 @@
+================================================================================
+MONITORAGE PEDAGOGIQUE - VERSION BETA 0.92
+================================================================================
+
+Une nouvelle version enrichie pour mieux partager votre expertise pedagogique
+
+================================================================================
+L'ESSENTIEL
+================================================================================
+
+Cette nouvelle version vous permet de **partager facilement votre materiel
+pedagogique** avec vos collegues tout en protégeant vos droits d'auteur grace
+a un systeme de licence Creative Commons integre.
+
+================================================================================
+NOUVELLES FONCTIONNALITES
+================================================================================
+
+------------------------------------------------------------------------
+Partage intelligent de votre materiel
+------------------------------------------------------------------------
+
+Vous pouvez maintenant **exporter et partager** :
+- Vos grilles d'evaluation
+- Vos echelles de performance
+- Vos cartouches de retroaction
+- Vos productions etudiantes
+- Vos ensembles d'objectifs d'apprentissage
+
+**Nouveaute** : Chaque exportation inclut automatiquement vos informations
+professionnelles (nom, discipline, institution) et une licence Creative
+Commons qui protege votre travail.
+
+------------------------------------------------------------------------
+Protection de votre vie privee
+------------------------------------------------------------------------
+
+Lors de chaque exportation, **vous choisissez** ce que vous partagez :
+- Votre nom et prenom (recommande pour la reconnaissance professionnelle)
+- Votre courriel (optionnel - si vous souhaitez etre contacte)
+- Votre site web (optionnel)
+- Votre discipline d'enseignement
+- Votre institution
+
+**Vous controlez** : Decochez simplement les informations que vous preferez
+garder privees.
+
+------------------------------------------------------------------------
+Importation facilitee
+------------------------------------------------------------------------
+
+Vos collegues peuvent maintenant **importer directement** le materiel que
+vous partagez :
+- Un seul fichier a telecharger
+- Import en un clic
+- Toutes les informations pedagogiques sont preservees
+- Attribution automatique a l'auteur original
+
+------------------------------------------------------------------------
+Materiel de demarrage inclus
+------------------------------------------------------------------------
+
+Pour vous aider a demarrer rapidement, cette version inclut :
+- Une echelle IDME complete (Incomplet, Developpement, Maitrise, Etendu)
+- Une grille d'evaluation "Global-5 FR-HOLIS" pour l'analyse litteraire
+- Des cartouches de retroaction pretes a l'emploi
+- Une production exemple (Carte mentale)
+- Une liste de 10 etudiants fictifs pour tester l'application
+
+================================================================================
+AMELIORATIONS TECHNIQUES
+================================================================================
+
+------------------------------------------------------------------------
+Interface plus intuitive
+------------------------------------------------------------------------
+- Les boutons d'export/import apparaissent seulement quand c'est pertinent
+- Formulaires optimises pour reduire le defilement
+- Confirmation visuelle de vos actions
+
+------------------------------------------------------------------------
+Corrections importantes
+------------------------------------------------------------------------
+- Meilleure gestion des interventions pedagogiques (Reponse a l'intervention)
+- Prise de presence automatique lors des interventions
+- Stabilite generale amelioree
+
+================================================================================
+LICENCE CREATIVE COMMONS
+================================================================================
+
+**Qu'est-ce que ca signifie pour vous ?**
+
+La licence CC BY-NC-SA 4.0 utilisee par defaut signifie que :
+- Vos collegues peuvent utiliser et adapter votre materiel
+- Votre nom reste toujours associe a votre travail
+- Usage educatif seulement (pas d'utilisation commerciale)
+- Les adaptations doivent aussi etre partagees sous la meme licence
+
+**C'est du partage professionnel respectueux de votre expertise.**
+
+================================================================================
+POUR COMMENCER
+================================================================================
+
+1. **Configurez vos informations** dans Reglages → Informations du cours
+2. **Explorez le materiel de demonstration** inclus
+3. **Creez votre propre materiel** ou adaptez les exemples
+4. **Partagez avec vos collegues** en toute confiance
+
+================================================================================
+BESOIN D'AIDE ?
+================================================================================
+
+Consultez la section **Aide** dans l'application pour des guides detailles
+sur chaque fonctionnalite.
+
+================================================================================
+INFORMATIONS
+================================================================================
+
+Version      : Beta 0.92
+Date         : Decembre 2025
+Developpeur  : Gregoire Bedard
+Site         : https://codexnumeris.org
+
+================================================================================
+
+Monitorage Pedagogique est un outil libre et gratuit concu pour faciliter
+l'evaluation formative et le suivi des apprentissages au niveau collegial.
+
+================================================================================
