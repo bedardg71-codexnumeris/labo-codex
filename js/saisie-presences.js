@@ -997,19 +997,21 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     if (colonnePresenceTitre) {
         // Toujours afficher 2h peu importe la durée réelle
         colonnePresenceTitre.innerHTML = `
-            Présence (max. 2h)
-            <button class="btn-mini btn-tous-presents" 
-                    onclick="tousPresents()" 
-                    ${estVerrouille ? 'disabled' : ''}
-                    title="Mettre tous présents">
-                Tous 2h
-            </button>
-            <button class="btn-mini btn-reinit" 
-                    onclick="reinitialiserSaisie()" 
-                    ${estVerrouille ? 'disabled' : ''}
-                    title="Réinitialiser">
-                ↻
-            </button>
+            Présence
+            <div class="mt-8-flex-col-gap4">
+                <button class="btn btn-principal btn-tres-compact"
+                        onclick="tousPresents()"
+                        ${estVerrouille ? 'disabled' : ''}
+                        title="Mettre tous présents">
+                    Tous 2h
+                </button>
+                <button class="btn btn-annuler btn-tres-compact"
+                        onclick="reinitialiserSaisie()"
+                        ${estVerrouille ? 'disabled' : ''}
+                        title="Réinitialiser">
+                    ↻
+                </button>
+            </div>
         `;
     }
 

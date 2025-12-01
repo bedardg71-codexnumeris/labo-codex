@@ -102,6 +102,23 @@ function initialiserModulePratiques() {
     window.addEventListener('db-ready', function() {
         console.log('🔄 [Pratiques] Rechargement des grilles après synchronisation IndexedDB');
         chargerGrillesDisponibles();
+
+        // Restaurer les valeurs sauvegardées après rechargement des grilles
+        const modalitesDB = db.getSync('modalitesEvaluation', {});
+
+        // Restaurer la grille de référence
+        const selectGrilleRef = document.getElementById('grilleReferenceDepistage');
+        if (selectGrilleRef && modalitesDB.grilleReferenceDepistage) {
+            selectGrilleRef.value = modalitesDB.grilleReferenceDepistage;
+            console.log('🔄 [Pratiques] Grille de référence restaurée:', modalitesDB.grilleReferenceDepistage);
+        }
+
+        // Restaurer la checkbox de catégorisation des erreurs
+        const checkCategorisation = document.getElementById('activerCategorisationErreurs');
+        if (checkCategorisation) {
+            checkCategorisation.checked = modalitesDB.activerCategorisationErreurs === true;
+            console.log('🔄 [Pratiques] Catégorisation erreurs restaurée:', modalitesDB.activerCategorisationErreurs);
+        }
     });
 }
 
@@ -952,6 +969,16 @@ function sauvegarderConfigurationPAN() {
     const radioGestion = document.querySelector('input[name="gestionOriginale"]:checked');
     const gestionOriginale = radioGestion ? radioGestion.value : 'archiver';
 
+    // NOUVEAU: Reprise ciblée
+    const checkJetonRepriseCibleeActif = document.getElementById('jetonRepriseCibleeActif');
+    const jetonRepriseCibleeActif = checkJetonRepriseCibleeActif ? checkJetonRepriseCibleeActif.checked : true;
+
+    const selectPlafondNoteCiblee = document.getElementById('plafondNoteCiblee');
+    const plafondNoteCiblee = selectPlafondNoteCiblee ? selectPlafondNoteCiblee.value : 'M';
+
+    const radioGestionCiblee = document.querySelector('input[name="gestionOriginaleCiblee"]:checked');
+    const gestionOriginaleCiblee = radioGestionCiblee ? radioGestionCiblee.value : 'archiver';
+
     // NOUVEAU: Nombre de jetons par élève
     const inputNombreJetonsParEleve = document.getElementById('nombreJetonsParEleve');
     const nombreParEleve = inputNombreJetonsParEleve ? parseInt(inputNombreJetonsParEleve.value) : 4;
@@ -988,6 +1015,12 @@ function sauvegarderConfigurationPAN() {
                 nombre: nombreJetonsReprise,
                 maxParProduction: maxRepriseParProduction,
                 archiverOriginale: gestionOriginale === 'archiver'
+            },
+
+            repriseCiblee: {
+                actif: jetonRepriseCibleeActif,
+                plafondNote: plafondNoteCiblee,
+                archiverOriginale: gestionOriginaleCiblee === 'archiver'
             },
 
             typesPersonnalises: typesPersonnalises
@@ -1045,6 +1078,7 @@ function sauvegarderPratiqueNotation() {
     const selectGrilleRef = document.getElementById('grilleReferenceDepistage');
     if (selectGrilleRef) {
         modalites.grilleReferenceDepistage = selectGrilleRef.value || null;
+        console.log('[sauvegarderPratiqueNotation] Grille de référence:', selectGrilleRef.value);
     }
 
     // S'assurer que les options d'affichage sont incluses
@@ -1094,9 +1128,11 @@ function sauvegarderPratiqueNotation() {
     const checkCategorisation = document.getElementById('activerCategorisationErreurs');
     if (checkCategorisation) {
         modalites.activerCategorisationErreurs = checkCategorisation.checked;
+        console.log('[sauvegarderPratiqueNotation] Catégorisation erreurs:', checkCategorisation.checked);
     } else {
         // Par défaut désactivé si l'élément n'existe pas (mode simple par défaut)
         modalites.activerCategorisationErreurs = false;
+        console.log('[sauvegarderPratiqueNotation] Élément activerCategorisationErreurs non trouvé');
     }
 
     db.setSync('modalitesEvaluation', modalites);
@@ -1322,6 +1358,27 @@ function chargerConfigurationPAN(configPAN) {
             }
         }
 
+        // Jetons de reprise ciblée
+        if (configPAN.jetons.repriseCiblee) {
+            const checkRepriseCiblee = document.getElementById('jetonRepriseCibleeActif');
+            if (checkRepriseCiblee) {
+                checkRepriseCiblee.checked = configPAN.jetons.repriseCiblee.actif !== false;
+            }
+
+            const selectPlafond = document.getElementById('plafondNoteCiblee');
+            if (selectPlafond && configPAN.jetons.repriseCiblee.plafondNote) {
+                selectPlafond.value = configPAN.jetons.repriseCiblee.plafondNote;
+            }
+
+            const radioArchiverCiblee = document.getElementById('archiverOriginaleCiblee');
+            const radioSupprimerCiblee = document.getElementById('supprimerOriginaleCiblee');
+            if (configPAN.jetons.repriseCiblee.archiverOriginale === true) {
+                if (radioArchiverCiblee) radioArchiverCiblee.checked = true;
+            } else {
+                if (radioSupprimerCiblee) radioSupprimerCiblee.checked = true;
+            }
+        }
+
         // Types personnalisés
         if (configPAN.jetons.typesPersonnalises) {
             afficherJetonsPersonnalises(configPAN.jetons.typesPersonnalises);
@@ -1537,6 +1594,9 @@ function chargerGrillesDisponibles() {
     const select = document.getElementById('grilleReferenceDepistage');
     if (!select) return;
 
+    // Sauvegarder la valeur actuellement sélectionnée
+    const valeurActuelle = select.value;
+
     // Lire les grilles depuis localStorage
     const grilles = db.getSync('grillesTemplates', []);
 
@@ -1550,6 +1610,11 @@ function chargerGrillesDisponibles() {
         option.textContent = grille.nom;
         select.appendChild(option);
     });
+
+    // Restaurer la valeur sélectionnée si elle existe toujours
+    if (valeurActuelle) {
+        select.value = valeurActuelle;
+    }
 
     console.log(`✅ ${grilles.length} grille(s) chargée(s) dans le sélecteur de référence`);
 }

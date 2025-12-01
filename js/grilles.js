@@ -1609,6 +1609,118 @@ async function exporterGrilleActive() {
 }
 
 /**
+ * Importe un fichier JSON pour remplacer la grille actuellement en cours d'édition
+ * NOUVEAU (Beta 92): Support métadonnées Creative Commons
+ */
+function importerDansGrilleActive(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Récupérer l'ID de la grille active
+    if (!grilleTemplateActuelle) {
+        alert('Aucune grille sélectionnée. Veuillez d\'abord sélectionner une grille à remplacer.');
+        event.target.value = ''; // Reset input
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const donnees = JSON.parse(e.target.result);
+
+            // Valider que c'est bien une grille
+            if (!donnees || typeof donnees !== 'object') {
+                alert('Le fichier JSON n\'est pas valide.');
+                event.target.value = '';
+                return;
+            }
+
+            // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata CC)
+            let grilleImportee;
+            let metadata = null;
+
+            if (donnees.contenu) {
+                // Nouveau format avec CC metadata
+                metadata = donnees.metadata;
+                grilleImportee = donnees.contenu;
+            } else {
+                // Ancien format direct
+                grilleImportee = donnees;
+            }
+
+            // Afficher badge CC si présent
+            let messageConfirmation = '';
+            if (metadata && metadata.licence && metadata.licence.includes("CC")) {
+                messageConfirmation = `📋 Matériel sous licence ${metadata.licence}\n` +
+                    `👤 Auteur: ${metadata.auteur_original}\n` +
+                    `📅 Créé le: ${metadata.date_creation}\n\n`;
+            }
+
+            // Confirmer le remplacement
+            const confirmation = confirm(
+                messageConfirmation +
+                `⚠️ ATTENTION: Cette action va remplacer la grille actuelle.\n\n` +
+                `Voulez-vous continuer ?`
+            );
+
+            if (!confirmation) {
+                console.log('Import annulé par l\'utilisateur');
+                event.target.value = '';
+                return;
+            }
+
+            // Récupérer les grilles
+            const grilles = db.getSync('grillesTemplates', []);
+            const index = grilles.findIndex(g => g.id === grilleTemplateActuelle);
+
+            if (index === -1) {
+                alert('Grille introuvable.');
+                event.target.value = '';
+                return;
+            }
+
+            // Préserver l'ID original et remplacer les données
+            const grilleMiseAJour = {
+                ...grilleImportee,
+                id: grilleTemplateActuelle // Garder l'ID original
+            };
+
+            // Préserver les métadonnées CC si présentes
+            if (metadata) {
+                grilleMiseAJour.metadata_cc = metadata;
+            }
+
+            // Remplacer dans le tableau
+            grilles[index] = grilleMiseAJour;
+
+            // Sauvegarder
+            db.setSync('grillesTemplates', grilles);
+
+            // Recharger la grille dans le formulaire
+            chargerGrillePourModif(grilleTemplateActuelle);
+
+            // Rafraîchir la liste
+            afficherGrillesExistantes();
+
+            console.log('✅ Grille importée et remplacée avec succès');
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces('Grille importée et remplacée avec succès');
+            } else {
+                alert('Grille importée et remplacée avec succès !');
+            }
+
+        } catch (error) {
+            console.error('Erreur lors de l\'import:', error);
+            alert('Erreur lors de la lecture du fichier JSON. Assurez-vous qu\'il s\'agit d\'un fichier valide.');
+        } finally {
+            event.target.value = ''; // Reset input
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+/**
  * Importe des grilles depuis un fichier JSON avec gestion CC
  *
  * FONCTIONNEMENT:
@@ -1782,6 +1894,7 @@ window.calculerTotalPonderationCriteres = calculerTotalPonderationCriteres;
 // Export/Import avec licence CC
 window.exporterGrilles = exporterGrilles;
 window.exporterGrilleActive = exporterGrilleActive;
+window.importerDansGrilleActive = importerDansGrilleActive;
 window.importerGrilles = importerGrilles;
 window.enregistrerCommeGrille = enregistrerCommeGrille;
 window.initialiserModuleGrilles = initialiserModuleGrilles;
@@ -1818,14 +1931,18 @@ function afficherListeGrilles() {
 function creerNouvelleGrille() {
     document.getElementById('accueilGrilles').style.display = 'none';
     document.getElementById('conteneurEditionGrille').style.display = 'block';
-    document.getElementById('optionsImportExportGrilles').style.display = 'block';
 
-    // Cacher les boutons Dupliquer, Exporter et Supprimer (mode création)
+    // Note: Section optionsImportExportGrilles supprimée (Beta 92)
+    // Les boutons Import/Export sont maintenant dans l'en-tête
+
+    // Cacher les boutons Dupliquer, Exporter, Importer et Supprimer (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerGrille');
     const btnExporter = document.getElementById('btnExporterGrille');
+    const btnImporter = document.getElementById('btnImporterGrille');
     const btnSupprimer = document.getElementById('btnSupprimerGrille');
     if (btnDupliquer) btnDupliquer.style.display = 'none';
     if (btnExporter) btnExporter.style.display = 'none';
+    if (btnImporter) btnImporter.style.display = 'none';
     if (btnSupprimer) btnSupprimer.style.display = 'none';
 
     // Réinitialiser grilleTemplateActuelle
@@ -1858,14 +1975,18 @@ function chargerGrillePourModif(id) {
 
     document.getElementById('accueilGrilles').style.display = 'none';
     document.getElementById('conteneurEditionGrille').style.display = 'block';
-    document.getElementById('optionsImportExportGrilles').style.display = 'block';
 
-    // Afficher les boutons Dupliquer, Exporter et Supprimer (mode édition)
+    // Note: Section optionsImportExportGrilles supprimée (Beta 92)
+    // Les boutons Import/Export sont maintenant dans l'en-tête
+
+    // Afficher les boutons Dupliquer, Exporter, Importer et Supprimer (mode édition)
     const btnDupliquer = document.getElementById('btnDupliquerGrille');
     const btnExporter = document.getElementById('btnExporterGrille');
+    const btnImporter = document.getElementById('btnImporterGrille');
     const btnSupprimer = document.getElementById('btnSupprimerGrille');
     if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
     if (btnExporter) btnExporter.style.display = 'inline-block';
+    if (btnImporter) btnImporter.style.display = 'inline-block';
     if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
     // Définir la grille actuelle

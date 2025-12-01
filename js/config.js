@@ -48,11 +48,11 @@ const configurationsOnglets = {
     ],
     'materiel': [
         { id: 'apercu', label: 'Aperçu' },
-        { id: 'productions', label: 'Productions' },
+        { id: 'productions', label: 'Productions étudiantes' },
         { id: 'grille-criteres', label: 'Grilles de critères' },
-        { id: 'echelle-performance', label: 'Échelle de performance' },
-        { id: 'retroactions', label: 'Rétroactions' },
-        { id: 'objectifs', label: 'Objectifs d\'apprentissage' }
+        { id: 'echelle-performance', label: 'Échelles de performance' },
+        { id: 'retroactions', label: 'Cartouches de rétroaction' },
+        { id: 'objectifs', label: 'Ensembles d\'objectifs' }
     ],
     'reglages': [
         { id: 'apercu', label: 'Aperçu' },

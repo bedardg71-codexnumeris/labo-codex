@@ -66,6 +66,11 @@
  * // → Affiche la section étudiants et sa sous-navigation
  */
 function afficherSection(nomSection) {
+    // 🆕 BETA 92: Terminer le tutoriel si actif (évite que le bouton Suivant reste affiché)
+    if (typeof terminerTutoriel === 'function') {
+        terminerTutoriel();
+    }
+
     // Masquer toutes les sections
     document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');

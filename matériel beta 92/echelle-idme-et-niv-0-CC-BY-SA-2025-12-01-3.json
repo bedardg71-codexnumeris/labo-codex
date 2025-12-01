@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "licence": "CC BY-NC-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "licence_resume": "Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions 4.0 International",
+    "auteur_original": "Grégoire Bédard",
+    "email_auteur": "gregoire.bedard@cegepdrummond.ca",
+    "site_auteur": "https://codexnumeris.org",
+    "type": "echelle-performance",
+    "nom": "IDME et niv 0",
+    "date_creation": "2025-12-01",
+    "date_modification": "2025-12-01",
+    "version": "1.0",
+    "contributeurs": [],
+    "attribution": "Créé par Grégoire Bédard pour l'application Monitorage Pédagogique",
+    "discipline": [
+      "Littérature"
+    ],
+    "niveau": "Collégial",
+    "institution": "Cégep Drummond",
+    "description_courte": "Échelle de performance - matériel de test"
+  },
+  "contenu": {
+    "id": "ECH1759264511178",
+    "nom": "IDME et niv 0",
+    "niveaux": [
+      {
+        "code": "0",
+        "nom": "Aucun",
+        "min": 0,
+        "max": 0,
+        "valeurCalcul": 0,
+        "couleur": "#831100"
+      },
+      {
+        "code": "I",
+        "nom": "Incomplet ou insuffisant",
+        "description": "Préstructurel, unistructurel",
+        "min": 0,
+        "max": 64.99,
+        "couleur": "#e67e22",
+        "valeurCalcul": "40"
+      },
+      {
+        "code": "D",
+        "nom": "En Développement",
+        "description": "Multistructurel",
+        "min": 65,
+        "max": 74.99,
+        "couleur": "#f1c40f",
+        "valeurCalcul": "65"
+      },
+      {
+        "code": "M",
+        "nom": "Maîtrisé",
+        "description": "Relationnel acquis",
+        "min": 75,
+        "max": 84.99,
+        "couleur": "#27ae60",
+        "valeurCalcul": "75"
+      },
+      {
+        "code": "E",
+        "nom": "Étendu",
+        "description": "Abstrait étendu",
+        "min": 85,
+        "max": 100,
+        "couleur": "#3498db",
+        "valeurCalcul": "100"
+      }
+    ],
+    "config": {
+      "typeEchelle": "lettres",
+      "seuilReussite": 60,
+      "notePassage": "",
+      "codesPersonnalises": ""
+    },
+    "dateCreation": "2025-09-30T20:35:11.178Z",
+    "dateModification": "2025-11-22T12:19:33.703Z"
+  }
+}

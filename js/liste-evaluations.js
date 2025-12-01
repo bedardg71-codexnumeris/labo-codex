@@ -326,23 +326,29 @@ function restaurerEtatFiltres() {
     }
 
     try {
-        const etat = JSON.parse(etatSauvegarde);
+        // db.getSync retourne déjà un objet JavaScript, pas besoin de JSON.parse
+        const etat = etatSauvegarde;
         console.log('📂 Restauration des filtres:', etat);
 
-        // Restaurer chaque filtre
-        const filtreGroupe = document.getElementById('filtre-groupe-eval');
-        const filtreProduction = document.getElementById('filtre-production-eval');
-        const filtreStatut = document.getElementById('filtre-statut-eval');
-        const filtreNote = document.getElementById('filtre-note-eval');
-        const tri = document.getElementById('tri-evaluations');
+        // Restaurer chaque filtre (attendre que les éléments soient disponibles)
+        setTimeout(() => {
+            const filtreGroupe = document.getElementById('filtre-groupe-eval');
+            const filtreProduction = document.getElementById('filtre-production-eval');
+            const filtreStatut = document.getElementById('filtre-statut-eval');
+            const filtreNote = document.getElementById('filtre-note-eval');
+            const tri = document.getElementById('tri-evaluations');
 
-        if (filtreGroupe && etat.groupe) filtreGroupe.value = etat.groupe;
-        if (filtreProduction && etat.production) filtreProduction.value = etat.production;
-        if (filtreStatut && etat.statut) filtreStatut.value = etat.statut;
-        if (filtreNote && etat.note) filtreNote.value = etat.note;
-        if (tri && etat.tri) tri.value = etat.tri;
+            if (filtreGroupe && etat.groupe) filtreGroupe.value = etat.groupe;
+            if (filtreProduction && etat.production) filtreProduction.value = etat.production;
+            if (filtreStatut && etat.statut) filtreStatut.value = etat.statut;
+            if (filtreNote && etat.note) filtreNote.value = etat.note;
+            if (tri && etat.tri) tri.value = etat.tri;
 
-        console.log('✅ Filtres restaurés avec succès');
+            console.log('✅ Filtres restaurés avec succès');
+
+            // Appliquer les filtres après restauration
+            appliquerFiltres();
+        }, 100);
     } catch (error) {
         console.error('❌ Erreur lors de la restauration des filtres:', error);
     }
@@ -531,7 +537,8 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
 
                     const estOriginaleRemplacee = evaluation.remplaceeParId ? true : false;
                     const estNouvelleReprise = evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
-                    const aJetonDelai = evaluation.jetonDelaiApplique && !evaluation.repriseDeId;
+                    const estRepriseCiblee = evaluation.jetonRepriseCibleeApplique === true;
+                    const aJetonDelai = evaluation.jetonDelaiApplique && !evaluation.repriseDeId && !evaluation.jetonRepriseCibleeApplique;
 
                     // Déterminer le statut et le badge
                     let statut = 'evalue';
@@ -550,8 +557,12 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         // L'originale remplacée par une reprise
                         statut = 'remplacee';
                         badgeType = 'originale-reprise';
+                    } else if (estRepriseCiblee) {
+                        // La nouvelle évaluation de reprise ciblée
+                        statut = 'evalue';
+                        badgeType = 'reprise-ciblee';
                     } else if (estNouvelleReprise) {
-                        // La nouvelle évaluation de reprise
+                        // La nouvelle évaluation de reprise standard
                         statut = 'evalue';
                         badgeType = 'nouvelle-reprise';
                     } else if (aJetonDelai) {
@@ -773,8 +784,11 @@ function genererLigneHTML(ligne) {
         // Originale remplacée : classe grisée + badge "Remplacée"
         classeRemplacee = ' class="eval-remplacee"';
         badgeJeton = ' <span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Remplacée</span></span>';
+    } else if (ligne.badgeType === 'reprise-ciblee') {
+        // Nouvelle de reprise ciblée : badge "Reprise ciblée"
+        badgeJeton = ' <span class="badge-jeton-reprise-ciblee-wrapper"><span class="badge-jeton-titre">Reprise ciblée</span></span>';
     } else if (ligne.badgeType === 'nouvelle-reprise') {
-        // Nouvelle de reprise : badge "Reprise"
+        // Nouvelle de reprise standard : badge "Reprise"
         badgeJeton = ' <span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Reprise</span></span>';
     } else if (ligne.badgeType === 'delai') {
         // Délai : badge "Délai"

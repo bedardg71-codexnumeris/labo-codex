@@ -826,7 +826,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
     if (colonnePresenceTitre) {
         // Toujours afficher 2h peu importe la durée réelle
         colonnePresenceTitre.innerHTML = `
-            Présence (max. 2h)
+            Présence
             <button class="btn-mini btn-tous-presents" 
                     onclick="tousPresents()" 
                     ${estVerrouille ? 'disabled' : ''}

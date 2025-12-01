@@ -80,31 +80,33 @@ function afficherModalAccueil() {
             animation: slideUp 0.4s ease-out;
         ">
             <!-- En-tête avec Primo -->
-            <div style="text-align: center; margin-bottom: 25px;">
+            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 25px;">
                 <div style="
                     width: 80px;
                     height: 80px;
                     background: linear-gradient(135deg, #1a5266, #2d7a8c);
                     border-radius: 50%;
-                    margin: 0 auto 20px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 2.5rem;
                     box-shadow: 0 4px 15px rgba(26, 82, 102, 0.3);
+                    flex-shrink: 0;
                 ">
                     😎
                 </div>
-                <h2 style="
-                    color: var(--bleu-principal);
-                    margin: 0 0 10px;
-                    font-size: 1.8rem;
-                ">Allô, je suis Primo !</h2>
-                <p style="
-                    color: var(--gris-moyen);
-                    font-size: 0.95rem;
-                    margin: 0;
-                ">Je te propose un tour guidé !</p>
+                <div style="flex: 1;">
+                    <h2 style="
+                        color: var(--bleu-principal);
+                        margin: 0 0 5px;
+                        font-size: 1.8rem;
+                    ">Allô, je suis Primo !</h2>
+                    <p style="
+                        color: var(--gris-moyen);
+                        font-size: 0.95rem;
+                        margin: 0;
+                    ">Je te propose un tour guidé !</p>
+                </div>
             </div>
 
             <!-- Parcours modulaire -->
@@ -197,10 +199,11 @@ function afficherModalAccueil() {
                     </div>
                 </button>
 
-                <!-- Explorer sans guide -->
-                <button onclick="explorerLibrement()" style="
+                <!-- Consulter l'aide -->
+                <button onclick="consulterAide()" style="
                     width: 100%;
                     padding: 15px 20px;
+                    margin-bottom: 8px;
                     background: white;
                     color: var(--gris-moyen);
                     border: 1px solid var(--bordure-claire);
@@ -210,10 +213,26 @@ function afficherModalAccueil() {
                     text-align: left;
                     transition: all 0.2s;
                 " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';" onmouseout="this.style.background='white'; this.style.borderColor='var(--bordure-claire)';">
-                    <strong>Explorer sans guide</strong>
+                    <strong>Consulter l'aide</strong>
                     <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">
-                        Naviguer librement dans l'application
+                        Accéder à la documentation
                     </div>
+                </button>
+
+                <!-- Retour à la navigation libre -->
+                <button onclick="explorerLibrement()" style="
+                    width: 100%;
+                    padding: 15px 20px;
+                    background: white;
+                    color: var(--gris-moyen);
+                    border: 1px solid var(--bordure-claire);
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    text-align: center;
+                    transition: all 0.2s;
+                " onmouseover="this.style.background='var(--gris-tres-pale)'; this.style.borderColor='var(--gris-moyen)';" onmouseout="this.style.background='white'; this.style.borderColor='var(--bordure-claire)';">
+                    <strong>Retour à la navigation libre</strong>
                 </button>
             </div>
         </div>
@@ -365,6 +384,23 @@ function explorerLibrement() {
     fermerModalAccueil();
 }
 
+/**
+ * Option 5: Consulter l'aide
+ * Navigue vers la section Aide
+ */
+function consulterAide() {
+    fermerModalAccueil();
+
+    // Naviguer vers la section Aide
+    setTimeout(() => {
+        if (typeof afficherSection === 'function') {
+            afficherSection('aide');
+        } else {
+            console.error('[Primo] Fonction afficherSection non disponible');
+        }
+    }, 300);
+}
+
 // ============================================================================
 // INITIALISATION
 // ============================================================================
@@ -425,6 +461,7 @@ window.chargerDonneesDemo = chargerDonneesDemo;
 window.demarrerConfigComplete = demarrerConfigComplete;
 window.demarrerWizard = demarrerWizard;
 window.explorerLibrement = explorerLibrement;
+window.consulterAide = consulterAide;
 
 // Auto-initialisation
 console.log('👋 Module Primo Accueil chargé');
