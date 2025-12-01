@@ -1140,64 +1140,104 @@ function genererSectionMobilisationEngagement(da) {
                     // Déterminer si le quota global est atteint
                     const quotaGlobalAtteint = totalJetonsUtilisesTousTypes >= quotaGlobal;
 
+                    // Fonction pour obtenir les badges des artefacts où un type de jeton a été utilisé
+                    const obtenirBadgesJetons = (typeJeton) => {
+                        const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
+                        const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
+                        const badges = [];
+
+                        evaluationsEleve.forEach(evaluation => {
+                            let jetonUtilise = false;
+                            if (typeJeton === 'delai' && evaluation.jetonDelaiApplique === true) {
+                                jetonUtilise = true;
+                            } else if (typeJeton === 'reprise' && evaluation.jetonRepriseApplique === true) {
+                                jetonUtilise = true;
+                            } else if (typeJeton === 'repriseCiblee' && evaluation.jetonRepriseCibleeApplique === true) {
+                                jetonUtilise = true;
+                            }
+
+                            if (jetonUtilise) {
+                                // Trouver l'index de la production
+                                const indexProduction = productionsNonPortfolio.findIndex(p => p.id === evaluation.productionId);
+                                if (indexProduction !== -1) {
+                                    badges.push(`A${indexProduction + 1}`);
+                                }
+                            }
+                        });
+
+                        return badges;
+                    };
+
                     return `
-                        <h4 class="profil-section-titre">
-                            Gestion des jetons
-                            <span class="profil-texte-petit-ml10">
-                                (${totalJetonsUtilisesTousTypes} / ${quotaGlobal} utilisés au total)
-                            </span>
-                        </h4>
-                        <div class="profil-grid-gap10-mb15">
-                            ${Object.entries(statutJetons).map(([jetonId, info]) => {
-                                const estPredefini = jetonId === 'delai' || jetonId === 'reprise';
-                                const jetonNonUtilise = info.utilises === 0;
-                                const estGrise = quotaGlobalAtteint && jetonNonUtilise;
-
-                                const couleurFond = estPredefini
-                                    ? (jetonId === 'delai' ? '#fff3e0' : '#f3e5f5')
-                                    : '#e8f5e9';
-                                const couleurBordure = estPredefini
-                                    ? (jetonId === 'delai' ? '#ff9800' : '#9c27b0')
-                                    : '#4caf50';
-
-                                return `
-                                    <div style="background: ${couleurFond}; border: 2px solid ${couleurBordure}; border-radius: 8px; padding: 12px; ${estGrise ? 'opacity: 0.4; filter: grayscale(0.7);' : ''}">
-                                        <div class="u-flex-between-mb8">
-                                            <strong style="color: ${couleurBordure}; font-size: 0.9rem;">
-                                                ${echapperHtml(info.nom)}
-                                            </strong>
-                                            <span class="profil-texte-detail-compact">
-                                                ${info.utilises} / ${info.total} utilisé${info.utilises > 1 ? 's' : ''}
-                                            </span>
-                                        </div>
-                                        <div style="background: white; height: 8px; border-radius: 4px; overflow: hidden;">
-                                            <div style="background: ${couleurBordure}; height: 100%; width: ${(info.utilises / info.total * 100)}%; transition: width 0.3s ease;"></div>
-                                        </div>
-                                        ${estGrise ? `
-                                            <div style="margin-top: 8px; padding: 6px; background: #f5f5f5; border-radius: 4px; text-align: center; font-size: 0.75rem; color: #999;">
-                                                Quota global atteint
-                                            </div>
-                                        ` : ''}
-                                        ${!estPredefini && info.restants > 0 && !estGrise ? `
-                                            <button
-                                                onclick="attribuerJetonPersonnaliseAvecPrompt('${da}', '${jetonId}', '${echapperHtml(info.nom)}')"
-                                                class="btn btn-sm btn-secondaire"
-                                                style="margin-top: 8px; width: 100%; padding: 4px 8px; font-size: 0.8rem;">
-                                                + Attribuer ce jeton
-                                            </button>
-                                        ` : ''}
-                                        ${!estPredefini && info.utilises > 0 ? `
-                                            <button
-                                                onclick="retirerJetonPersonnaliseAvecConfirmation('${da}', '${jetonId}', '${echapperHtml(info.nom)}')"
-                                                class="btn btn-sm btn-danger"
-                                                style="margin-top: 4px; width: 100%; padding: 4px 8px; font-size: 0.8rem;">
-                                                − Retirer un jeton
-                                            </button>
-                                        ` : ''}
-                                    </div>
-                                `;
-                            }).join('')}
+                        <!-- Encadré pour le titre et la barre de progression globale -->
+                        <div class="profil-encadre-jetons">
+                            <div class="profil-encadre-jetons-header">
+                                <strong class="profil-encadre-jetons-titre">
+                                    Gestion des jetons
+                                </strong>
+                                <span class="profil-encadre-jetons-compteur">
+                                    ${totalJetonsUtilisesTousTypes} / ${quotaGlobal} utilisés
+                                </span>
+                            </div>
+                            <div class="profil-encadre-jetons-barre">
+                                <div class="profil-encadre-jetons-progression" style="width: ${(totalJetonsUtilisesTousTypes / quotaGlobal * 100)}%;"></div>
+                            </div>
                         </div>
+
+                        <!-- Badges des jetons utilisés -->
+                        ${(() => {
+                            const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
+                            const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
+                            const badgesJetons = [];
+
+                            evaluationsEleve.forEach(evaluation => {
+                                // Vérifier quel type de jeton a été utilisé
+                                let typeJeton = null;
+                                let badgeClass = '';
+                                let badgeNumeroClass = '';
+
+                                if (evaluation.jetonRepriseCibleeApplique === true) {
+                                    typeJeton = 'Reprise ciblée';
+                                    badgeClass = 'badge-jeton-reprise-ciblee-wrapper';
+                                    badgeNumeroClass = 'badge-jeton-numero-reprise-ciblee';
+                                } else if (evaluation.jetonRepriseApplique === true) {
+                                    typeJeton = 'Reprise';
+                                    badgeClass = 'badge-jeton-reprise-wrapper';
+                                    badgeNumeroClass = 'badge-jeton-numero-reprise';
+                                } else if (evaluation.jetonDelaiApplique === true) {
+                                    typeJeton = 'Délai';
+                                    badgeClass = 'badge-jeton-delai-wrapper';
+                                    badgeNumeroClass = 'badge-jeton-numero-delai';
+                                }
+
+                                if (typeJeton) {
+                                    // Trouver l'index de la production
+                                    const indexProduction = productionsNonPortfolio.findIndex(p => p.id === evaluation.productionId);
+                                    if (indexProduction !== -1) {
+                                        const badge = 'A' + (indexProduction + 1);
+                                        badgesJetons.push({
+                                            type: typeJeton,
+                                            badge: badge,
+                                            class: badgeClass,
+                                            numeroClass: badgeNumeroClass
+                                        });
+                                    }
+                                }
+                            });
+
+                            if (badgesJetons.length > 0) {
+                                const badgesHTML = badgesJetons.map(jeton =>
+                                    '<span class="' + jeton.class + '">' +
+                                        '<span class="badge-jeton-titre">' + jeton.type + '</span>' +
+                                        '<span class="badge-jeton-numero ' + jeton.numeroClass + '">' + jeton.badge + '</span>' +
+                                    '</span>'
+                                ).join('');
+
+                                return '<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">' + badgesHTML + '</div>';
+                            }
+                            return '';
+                        })()}
+
                         <hr class="profil-separateur">
                     `;
                 })() : ''}
@@ -3411,10 +3451,15 @@ function genererSectionProductions(da) {
         const evaluationsProduction = evaluationsEleve.filter(e => e.productionId === production.id);
         let evaluation = null;
         if (evaluationsProduction.length > 0) {
-            // PRIORITÉ 1 : Chercher une reprise active (repriseDeId ET non remplacée)
-            evaluation = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
+            // PRIORITÉ 1 : Chercher une reprise ciblée active (jetonRepriseCibleeApplique ET non remplacée)
+            evaluation = evaluationsProduction.find(e => e.jetonRepriseCibleeApplique === true && !e.remplaceeParId);
 
-            // PRIORITÉ 2 : Chercher l'évaluation normale non remplacée
+            // PRIORITÉ 2 : Chercher une reprise active (repriseDeId ET non remplacée)
+            if (!evaluation) {
+                evaluation = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
+            }
+
+            // PRIORITÉ 3 : Chercher l'évaluation normale non remplacée
             if (!evaluation) {
                 evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
             }
@@ -3429,12 +3474,15 @@ function genererSectionProductions(da) {
             // Détecter les jetons appliqués
             const estOriginaleRemplacee = evaluation.remplaceeParId ? true : false;
             const estNouvelleReprise = evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
-            const aJetonDelai = evaluation.jetonDelaiApplique && !evaluation.repriseDeId;
+            const estRepriseCiblee = evaluation.jetonRepriseCibleeApplique === true;
+            const aJetonDelai = evaluation.jetonDelaiApplique && !evaluation.repriseDeId && !evaluation.jetonRepriseCibleeApplique;
 
             // Déterminer le type de badge
             let badgeType = null;
             if (estOriginaleRemplacee) {
                 badgeType = 'remplacee';
+            } else if (estRepriseCiblee) {
+                badgeType = 'reprise-ciblee';
             } else if (estNouvelleReprise) {
                 badgeType = 'nouvelle-reprise';
             } else if (aJetonDelai) {
@@ -3493,6 +3541,8 @@ function genererSectionProductions(da) {
                             let badgeJeton = '';
                             if (ligne.badgeType === 'remplacee') {
                                 badgeJeton = '<span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Remplacée</span><span class="badge-jeton-numero badge-jeton-numero-reprise">' + ligne.indexArtefact + '</span></span>';
+                            } else if (ligne.badgeType === 'reprise-ciblee') {
+                                badgeJeton = '<span class="badge-jeton-reprise-ciblee-wrapper"><span class="badge-jeton-titre">Reprise ciblée</span><span class="badge-jeton-numero badge-jeton-numero-reprise-ciblee">' + ligne.indexArtefact + '</span></span>';
                             } else if (ligne.badgeType === 'nouvelle-reprise') {
                                 badgeJeton = '<span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Reprise</span><span class="badge-jeton-numero badge-jeton-numero-reprise">' + ligne.indexArtefact + '</span></span>';
                             } else if (ligne.badgeType === 'delai') {
@@ -4597,6 +4647,8 @@ function diagnostiquerForcesChallenges(moyennes, seuil = null) {
 
     if (!grille || !grille.criteres || grille.criteres.length === 0) {
         console.warn('⚠️ Pas de grille de référence - diagnostic forces/défis impossible');
+        console.warn('   → Grille:', grille);
+        console.warn('   → Allez dans Réglages → Pratique de notation pour configurer une grille de référence');
         return { forces: [], defis: [], principaleForce: null, principalDefi: null };
     }
 
@@ -4987,22 +5039,33 @@ function identifierPatternActuel(performancePAN3, aUnDefi) {
     const seuilInsuffisant = obtenirSeuil('idme.insuffisant');      // Par défaut 0.64 (64%)
     const seuilDeveloppement = obtenirSeuil('idme.developpement');  // Par défaut 0.75 (75%)
 
+    console.log('🔍 [identifierPatternActuel]', {
+        performance: (performancePAN3 * 100).toFixed(1) + '%',
+        aUnDefi: aUnDefi,
+        seuilInsuffisant: (seuilInsuffisant * 100) + '%',
+        seuilDeveloppement: (seuilDeveloppement * 100) + '%'
+    });
+
     // Blocage critique : Performance < 64% (Insuffisant - unistructurel)
     if (performancePAN3 < seuilInsuffisant) {
+        console.log('   → Pattern: Blocage critique');
         return 'Blocage critique';
     }
 
     // Blocage émergent : Performance < 75% (En développement - multistructurel) ET a un défi
     if (performancePAN3 < seuilDeveloppement && aUnDefi) {
+        console.log('   → Pattern: Blocage émergent');
         return 'Blocage émergent';
     }
 
     // Défi spécifique : Performance acceptable mais a un défi récurrent
     if (aUnDefi) {
+        console.log('   → Pattern: Défi spécifique');
         return 'Défi spécifique';
     }
 
     // Stable : Pas de défi ou performance maîtrisée
+    console.log('   → Pattern: Stable');
     return 'Stable';
 }
 
@@ -5032,9 +5095,14 @@ function determinerNiveauRaiPedagogique(da) {
         ? calculerMoyennesCriteresRecents(da)
         : calculerMoyennesCriteres(da);
 
+    console.log('🔍 [determinerNiveauRaiPedagogique] DA:', da, 'Moyennes:', moyennes);
+
     // Détecter les défis
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
+    console.log('🔍 [determinerNiveauRaiPedagogique] Diagnostic:', diagnostic);
+
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
+    console.log('🔍 [determinerNiveauRaiPedagogique] Indices 3 derniers:', indices3Derniers);
 
     // Déterminer le pattern basé uniquement sur la performance
     const pattern = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
@@ -7060,7 +7128,14 @@ function genererSectionRapport(da) {
                 <!-- En-tête minimaliste -->
                 <h3 style="margin: 0 0 20px 0; color: var(--bleu-principal); font-size: 1.1rem; border-bottom: 2px solid var(--bleu-pale); padding-bottom: 10px;">
                     Rapport de bilan pédagogique
+                    <span class="primo-aide" data-target="conseil-rapport">😎</span>
                 </h3>
+
+                <!-- Conseil Primo: Informations sur le rapport -->
+                <div id="conseil-rapport" class="carte-info-toggle carte-info-conseil" style="display: none;">
+                    <strong>À propos du rapport :</strong>
+                    <p>Le rapport est généré à la demande avec les données actuelles et n'est pas sauvegardé automatiquement. Vous pouvez modifier le texte avant de le copier.</p>
+                </div>
 
                 <!-- Grid 2 colonnes : Paramètres + Actions -->
                 <div style="display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: start;">
@@ -7103,11 +7178,6 @@ function genererSectionRapport(da) {
                                 <input type="checkbox" id="afficher-details-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
                                 Précisions
                             </label>
-                        </div>
-
-                        <!-- Note discrète -->
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0; font-size: 0.85rem; color: #999;">
-                            Le rapport est généré à la demande avec les données actuelles et n'est pas sauvegardé automatiquement. Vous pouvez modifier le texte avant de le copier.
                         </div>
                     </div>
 
@@ -7515,3 +7585,4 @@ function obtenirPatternEtudiant(da) {
 // 🆕 BETA 91: Exporter les fonctions de patterns de groupe
 window.calculerEtStockerPatternsGroupe = calculerEtStockerPatternsGroupe;
 window.obtenirPatternEtudiant = obtenirPatternEtudiant;
+window.calculerTousLesIndices = calculerTousLesIndices; // Utilisé par etudiants.js pour cohérence pratique SOM/PAN

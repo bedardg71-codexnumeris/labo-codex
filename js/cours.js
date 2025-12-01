@@ -362,6 +362,11 @@ function afficherFormCours(id = null) {
             document.getElementById('nomEnseignant').value = c.nomEnseignant || '';
             document.getElementById('departement').value = c.departement || '';
             document.getElementById('local').value = c.local || '';
+            // 🆕 BETA 92: Champs pour métadonnées CC
+            document.getElementById('courrielEnseignant').value = c.courriel || '';
+            document.getElementById('siteWebEnseignant').value = c.siteWeb || '';
+            document.getElementById('disciplineEnseignant').value = c.discipline || '';
+            document.getElementById('institutionEnseignant').value = c.institution || '';
             document.getElementById('session').value = c.session || 'H';
             document.getElementById('annee').value = c.annee || '2025';
             document.getElementById('heuresParSemaine').value = c.heuresParSemaine || '4';
@@ -501,6 +506,11 @@ function sauvegarderCours() {
         nomEnseignant: document.getElementById('nomEnseignant').value,
         departement: document.getElementById('departement').value,
         local: document.getElementById('local').value,
+        // 🆕 BETA 92: Champs pour métadonnées CC
+        courriel: document.getElementById('courrielEnseignant').value,
+        siteWeb: document.getElementById('siteWebEnseignant').value,
+        discipline: document.getElementById('disciplineEnseignant').value,
+        institution: document.getElementById('institutionEnseignant').value,
         session: document.getElementById('session').value,
         annee: document.getElementById('annee').value,
         heuresParSemaine: document.getElementById('heuresParSemaine').value,

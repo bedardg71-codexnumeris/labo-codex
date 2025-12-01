@@ -20,6 +20,19 @@ function initialiserModuleObjectifs() {
     chargerEnsemblesObjectifs();
     afficherListeEnsemblesObjectifs();
     mettreAJourStatsObjectifs();
+
+    // Gestionnaire d'événements pour les boutons d'export (Beta 92 - fix async)
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.btn-exporter-ensemble')) {
+            e.preventDefault();
+            const btn = e.target.closest('.btn-exporter-ensemble');
+            const ensembleId = btn.getAttribute('data-ensemble-id');
+            if (ensembleId) {
+                await exporterEnsembleObjectifs(ensembleId);
+            }
+        }
+    });
+
     console.log('✅ Module objectifs.js initialisé');
 }
 
@@ -294,10 +307,10 @@ function genererFormulaireEnsemble(ensemble) {
         <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
             <!-- Boutons gauche (actions sur l'ensemble) -->
             <div style="display: flex; gap: 10px;">
-                <button onclick="dupliquerEnsembleObjectifs('${ensemble.id}')" class="btn btn-secondaire" title="Créer une copie de cet ensemble">
+                <button onclick="dupliquerEnsembleObjectifs('${ensemble.id}')" class="btn btn-secondaire" style="display: ${ensemble.nom === 'Nouvel ensemble d\'objectifs' ? 'none' : 'inline-block'};" title="Créer une copie de cet ensemble">
                     Dupliquer l'ensemble
                 </button>
-                <button onclick="exporterEnsembleObjectifs('${ensemble.id}')" class="btn btn-secondaire" title="Exporter cet ensemble">
+                <button class="btn btn-secondaire btn-exporter-ensemble" data-ensemble-id="${ensemble.id}" style="display: ${ensemble.nom === 'Nouvel ensemble d\'objectifs' ? 'none' : 'inline-block'};" title="Exporter cet ensemble">
                     Exporter l'ensemble
                 </button>
                 <button onclick="supprimerEnsembleObjectifs('${ensemble.id}')" class="btn btn-supprimer" title="Supprimer cet ensemble">
@@ -561,6 +574,14 @@ function sauvegarderEnsembleObjectifs() {
         btnSauvegarder.style.background = '';
     }
 
+    // Afficher les boutons Dupliquer et Exporter si le nom a changé (Beta 92)
+    if (nom !== 'Nouvel ensemble d\'objectifs') {
+        const btnsDupliquer = document.querySelectorAll('[onclick*="dupliquerEnsembleObjectifs"]');
+        const btnsExporter = document.querySelectorAll('.btn-exporter-ensemble');
+        btnsDupliquer.forEach(btn => btn.style.display = 'inline-block');
+        btnsExporter.forEach(btn => btn.style.display = 'inline-block');
+    }
+
     alert('✅ Ensemble d\'objectifs sauvegardé !');
 }
 
@@ -649,52 +670,49 @@ function dupliquerEnsembleObjectifs(ensembleId) {
  * Exporte un ensemble d'objectifs
  * @param {string} ensembleId - ID de l'ensemble à exporter
  */
-function exporterEnsembleObjectifs(ensembleId) {
+async function exporterEnsembleObjectifs(ensembleId) {
     const ensembles = chargerEnsemblesObjectifs();
     const ensemble = ensembles.find(e => e.id === ensembleId);
 
     if (!ensemble) return;
 
-    // Préparer le contenu pour l'export
-    let contenuExport = { ...ensemble };
+    // NOUVEAU (Beta 92): Demander métadonnées enrichies
+    const metaEnrichies = await demanderMetadonneesEnrichies(
+        'Ensemble d\'objectifs',
+        ensemble.nom
+    );
 
-    // Si l'ensemble a été importé avec des métadonnées CC, ajouter l'utilisateur actuel comme contributeur
-    if (ensemble.metadata_cc) {
-        // Demander le nom de l'utilisateur s'il modifie le matériel
-        const nomUtilisateur = prompt(
-            'Vous allez exporter un matériel créé par ' + ensemble.metadata_cc.auteur_original + '.\n\n' +
-            'Entrez votre nom pour être crédité comme contributeur :\n' +
-            '(Laissez vide si vous n\'avez fait aucune modification)'
-        );
-
-        if (nomUtilisateur && nomUtilisateur.trim()) {
-            // Ajouter le contributeur
-            const contributeurs = ensemble.metadata_cc.contributeurs || [];
-            contributeurs.push({
-                nom: nomUtilisateur.trim(),
-                date: new Date().toISOString().split('T')[0],
-                modifications: 'Modifications et adaptations'
-            });
-
-            // Créer les métadonnées enrichies
-            contenuExport.metadata_cc = {
-                ...ensemble.metadata_cc,
-                contributeurs: contributeurs
-            };
-        }
+    if (!metaEnrichies) {
+        console.log('Export annulé par l\'utilisateur');
+        return;
     }
 
-    // Ajouter les métadonnées CC
-    const exportAvecCC = ajouterMetadonnéesCC(contenuExport, 'ensemble-objectifs', ensemble.nom);
+    // Ajouter les métadonnées CC enrichies
+    const exportAvecCC = ajouterMetadonnéesCC(
+        ensemble,
+        'ensemble-objectifs',
+        ensemble.nom,
+        metaEnrichies
+    );
+
+    // Générer nom de fichier avec watermark CC
+    const nomFichier = genererNomFichierCC(
+        'objectifs',
+        ensemble.nom.replace(/[^a-z0-9]/gi, '-'),
+        exportAvecCC.metadata.version
+    );
 
     const json = JSON.stringify(exportAvecCC, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `objectifs-${ensemble.nom.replace(/[^a-z0-9]/gi, '-')}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = nomFichier;
     a.click();
     URL.revokeObjectURL(url);
+
+    afficherNotificationSucces('Ensemble d\'objectifs exporté avec succès');
+    console.log('✅ Ensemble d\'objectifs exporté avec licence CC BY-NC-SA 4.0');
 }
 
 /**

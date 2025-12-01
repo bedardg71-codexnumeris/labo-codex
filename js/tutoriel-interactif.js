@@ -430,6 +430,11 @@ function etapePrecedente() {
  * Termine le tutoriel
  */
 function terminerTutoriel() {
+    // 🆕 BETA 92: Ne rien faire si le tutoriel n'est pas actif
+    if (!tutorielActif) {
+        return;
+    }
+
     console.log('✅ Tutoriel terminé');
     tutorielActif = false;
 

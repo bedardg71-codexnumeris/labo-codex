@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 92 - Primo Assistant</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2025112927">
+    <link rel="stylesheet" href="styles.css?v=2025120111">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -40,6 +40,9 @@
             --som-orange: #ff6f00;
             --pan-bleu: #0277bd;
             --hybride-violet: #9c27b0;
+
+            /* Couleurs de tableau */
+            --table-hover: var(--bleu-carte);    /* Couleur hover des rangées (plus foncé, texte reste lisible) */
 
             /* === NAVIGATION === */
             --nav-bg: #f8f9fa;
@@ -153,6 +156,22 @@
 
             /* === COMPATIBILITÉ (anciennes variables) === */
             --succes: var(--vert-succes);
+        }
+
+        /* ===============================
+           MODE ASSISTÉ - CONVERSION BLEU → SARCELLE
+           =============================== */
+        body[data-mode="simulation"] {
+            --bleu-carte: #9ac5d5;            /* Sarcelle carte (équivalent sarcelle) */
+            --table-hover: #9ac5d5;           /* Hover sarcelle pour tableaux */
+        }
+
+        /* ===============================
+           MODE ANONYMISÉ - BLEUS DÉSATURÉS
+           =============================== */
+        body[data-mode="anonymisation"] {
+            --bleu-carte: #9aacba;            /* Bleu désaturé carte */
+            --table-hover: #9aacba;           /* Hover bleu gris pour tableaux */
         }
 
         /* ===============================
@@ -333,12 +352,21 @@
         }
 
         .tableau th {
-            background: var(--bleu-pale);
+            background: var(--bleu-moyen);
             padding: 10px;
             text-align: left;
             border: 1px solid var(--bordure-claire);
             font-weight: 600;
-            color: var(--bleu-principal);
+            color: white;
+        }
+
+        /* Coins arrondis sur l'en-tête */
+        .tableau thead tr:first-child th:first-child {
+            border-top-left-radius: 6px;
+        }
+
+        .tableau thead tr:first-child th:last-child {
+            border-top-right-radius: 6px;
         }
 
         .tableau td {
@@ -347,7 +375,7 @@
         }
 
         .tableau tr:hover {
-            background: var(--bleu-tres-pale);
+            background: var(--table-hover);
         }
 
         /* ===============================
@@ -2317,11 +2345,20 @@
 
         /* Headers sticky */
         .thead-sticky-bleu {
-            background: var(--bleu-principal);
+            background: var(--bleu-moyen);
             color: white;
             position: sticky;
             top: 0;
             z-index: 10;
+        }
+
+        /* Coins arrondis sur l'en-tête sticky */
+        .thead-sticky-bleu tr:first-child th:first-child {
+            border-top-left-radius: 6px;
+        }
+
+        .thead-sticky-bleu tr:first-child th:last-child {
+            border-top-right-radius: 6px;
         }
         .thead-bleu-moyen {
             background: var(--bleu-moyen);
@@ -2705,7 +2742,7 @@
                 <!-- Titre et description centrés -->
                 <div class="titre-section">
                     <h1>Système de suivi des apprentissages</h1>
-                    <p class="meta">Beta 92 par Grégoire Bédard (27 novembre 2025 - Primo Assistant)</p>
+                    <p class="meta">Beta 92 par Grégoire Bédard (30 novembre 2025 - Primo Assistant)</p>
 
                     <!-- Sélecteur de mode au centre (sera généré par 17-modes.js) -->
                     <div id="selecteur-mode" class="selecteur-mode-centre" style="margin-top: 10px;">
@@ -2775,7 +2812,6 @@
                 <button data-onglet="evaluations">Évaluations</button>
                 <button data-onglet="materiel">Matériel</button>
                 <button data-onglet="reglages">Réglages</button>
-                <button id="btn-section-aide" data-onglet="aide">😎 Aide</button>
             </div>
         </nav>
 
@@ -2830,12 +2866,20 @@
 
                 <!-- Sous-section: Liste des individus -->
                 <div id="tableau-bord-liste" class="sous-section">
-                    <h2 id="titre-liste-etudiants">Liste des étudiant·es</h2>
+                    <h2 id="titre-liste-etudiants">Liste des étudiant·es
+                        <span class="primo-aide" data-target="conseil-liste-etudiants">😎</span>
+                    </h2>
                     <p class="text-muted">Consultation de la liste complète et accès aux portfolios individuels</p>
 
                     <!-- Carte Note Détails Calcul (cachée par défaut) -->
                     <div id="note-calcul-indices-liste" class="carte-info-toggle carte-info-note" style="display: none; margin-bottom: 20px;">
                         <!-- Contenu généré dynamiquement par JS -->
+                    </div>
+
+                    <!-- Conseil Primo: Gestion des étudiants -->
+                    <div id="conseil-liste-etudiants" class="carte-info-toggle carte-info-conseil" style="display: none;">
+                        <strong>Conseil pratique :</strong>
+                        <p>Pour ajouter, modifier ou supprimer des étudiants, allez dans <strong>Réglages › Groupe</strong>.</p>
                     </div>
 
                     <div class="carte">
@@ -2845,15 +2889,6 @@
                                 (0 étudiant·e)
                             </span>
                         </h3>
-
-                        <!-- ZONE INFO: Lien vers configuration -->
-                        <div style="background: var(--bleu-tres-pale); padding: 15px;
-                margin-bottom: 20px; border-left: 4px solid var(--bleu-principal);">
-                            <p class="m-0-bleu-moyen">
-                                <strong>Pour ajouter, modifier ou supprimer des étudiants :</strong>
-                                Allez dans <strong>Réglages › Groupe</strong>
-                            </p>
-                        </div>
 
                         <!-- FILTRAGE ET RECHERCHE -->
                         <div class="carte-grise-mb20">
@@ -2902,10 +2937,17 @@
                             </div>
                         </div>
 
+                        <!-- Bouton de réinitialisation des filtres -->
+                        <div style="margin-bottom: 15px; text-align: center;">
+                            <button class="btn btn-secondaire" onclick="reinitialiserFiltresListeEtudiants()" title="Réinitialiser tous les filtres">
+                                Réinitialiser les filtres
+                            </button>
+                        </div>
+
                         <!-- TABLEAU DES ÉTUDIANTS -->
                         <div id="tableEtudiantsListe"
                             class="overflow-xy-600">
-                            <table class="tableau" class="tableau-blanc">
+                            <table class="tableau">
                                 <thead class="thead-sticky-bleu">
                                     <tr>
                                         <th onclick="trierTableauPar('num')" class="td-center-50" title="Cliquer pour trier">
@@ -3169,19 +3211,18 @@
                                         <th class="w-100px">DA</th>
                                         <th>Prénom</th>
                                         <th>Nom</th>
-                                        <th id="colonneHeuresTitre" class="w-120-center">
-                                            Heures (par défaut: 2h)
-                                            <div
-                                                class="mt-8-flex-col-gap4">
-                                                <button id="btn-tous-presents" onclick="remplirTousPresents()"
-                                                    class="btn btn-principal btn-compact"
-                                                    class="fw-600">
+                                        <th id="colonneHeuresTitre" class="w-100-center">
+                                            Présence
+                                            <div class="mt-8-flex-col-gap4">
+                                                <button class="btn btn-principal btn-tres-compact"
+                                                        onclick="tousPresents()"
+                                                        title="Mettre tous présents">
                                                     Tous 2h
                                                 </button>
-                                                <button id="btn-reinit-saisie" onclick="reinitialiserSaisie()"
-                                                    class="btn btn-annuler btn-compact"
-                                                    title="Réinitialiser la saisie">
-                                                    Réinitialiser
+                                                <button class="btn btn-annuler btn-tres-compact"
+                                                        onclick="reinitialiserSaisie()"
+                                                        title="Réinitialiser">
+                                                    ↻
                                                 </button>
                                             </div>
                                         </th>
@@ -3520,32 +3561,30 @@
                                 <label class="label-formulaire">Appliquer un jeton :</label>
 
                                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                                    <!-- Jetons standards (Délai et Reprise) côte à côte -->
-                                    <div style="display: flex; gap: 10px;">
+                                    <!-- Jetons standards (Délai, Reprise, Reprise ciblée) -->
+                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
                                         <!-- Jeton de délai -->
-                                        <div id="badgeJetonDelaiOption" style="display: flex; align-items: flex-start; gap: 8px; flex: 1;">
-                                            <input type="checkbox" id="checkboxJetonDelai" style="margin-top: 6px;" onchange="gererChangementCheckboxJetonDelai()">
-                                            <div style="flex: 1;">
-                                                <span class="badge-jeton-delai-wrapper">
-                                                    <span class="badge-jeton-titre">Délai</span>
-                                                </span>
-                                                <p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">
-                                                    Aucune pénalité de retard.
-                                                </p>
-                                            </div>
+                                        <div id="badgeJetonDelaiOption" style="display: flex; align-items: center; gap: 8px;">
+                                            <input type="checkbox" id="checkboxJetonDelai" onchange="gererChangementCheckboxJetonDelai()">
+                                            <span class="badge-jeton-delai-wrapper">
+                                                <span class="badge-jeton-titre">Délai</span>
+                                            </span>
                                         </div>
 
                                         <!-- Jeton de reprise -->
-                                        <div id="badgeJetonRepriseOption" style="display: flex; align-items: flex-start; gap: 8px; flex: 1;">
-                                            <input type="checkbox" id="checkboxJetonReprise" style="margin-top: 6px;" onchange="gererChangementCheckboxJetonReprise()">
-                                            <div style="flex: 1;">
-                                                <span class="badge-jeton-reprise-wrapper">
-                                                    <span class="badge-jeton-titre">Reprise</span>
-                                                </span>
-                                                <p class="text-085-muted-m5-0-0-0" style="margin: 4px 0 0 0; font-size: 0.75rem;">
-                                                    Remplace et archive l'ancienne.
-                                                </p>
-                                            </div>
+                                        <div id="badgeJetonRepriseOption" style="display: flex; align-items: center; gap: 8px;">
+                                            <input type="checkbox" id="checkboxJetonReprise" onchange="gererChangementCheckboxJetonReprise()">
+                                            <span class="badge-jeton-reprise-wrapper">
+                                                <span class="badge-jeton-titre">Reprise</span>
+                                            </span>
+                                        </div>
+
+                                        <!-- Jeton de reprise ciblée -->
+                                        <div id="badgeJetonRepriseCibleeOption" style="display: flex; align-items: center; gap: 8px;">
+                                            <input type="checkbox" id="checkboxJetonRepriseCiblee" onchange="gererChangementCheckboxJetonRepriseCiblee()">
+                                            <span class="badge-jeton-reprise-ciblee-wrapper">
+                                                <span class="badge-jeton-titre">Reprise ciblée</span>
+                                            </span>
                                         </div>
                                     </div>
 
@@ -3558,14 +3597,8 @@
 
                             <!-- NOTE ET NIVEAU -->
                             <div id="noteFinale1" class="boite-note-finale">
-                                <!-- Critères en haut -->
-                                <div class="criteres-copier" style="padding: 8px 12px; background: #f8f9fa; border-radius: 4px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin-bottom: 15px;">
-                                    <div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">Critères</div>
-                                    <span id="criteresCopier" style="font-size: 10px; color: #333; white-space: pre; user-select: all; cursor: text;">--</span>
-                                </div>
-
                                 <!-- Note finale et niveau sur la même ligne -->
-                                <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 15px; border-top: 2px solid #e0e0e0;">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <div>
                                         <div class="label" style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">Note finale</div>
                                         <div class="valeur" style="font-size: 2rem; font-weight: bold; color: var(--bleu-principal);">
@@ -3773,7 +3806,7 @@
                 <!-- Sous-section: Productions -->
                 <div id="materiel-productions" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Exercices formatifs et certificatifs</span>
+                        <span>Productions étudiantes</span>
                         <span class="titre-emoji-container">
                             <span class="primo-aide" data-target="note-productions">😎</span>
                             <span class="primo-aide" data-target="conseil-productions">😎</span>
@@ -3804,17 +3837,6 @@
                         <!-- SIDEBAR GAUCHE (280px, sticky) -->
                         <div class="sidebar-navigation">
 
-                            <!-- Filtre par type -->
-                            <div class="sidebar-filtre">
-                                <label>Filtrer par type :</label>
-                                <select class="controle-form" id="filtreTypeProduction" onchange="filtrerListeProductions()">
-                                    <option value="">Toutes</option>
-                                    <option value="sommative">Sommatives</option>
-                                    <option value="formative">Formatives</option>
-                                    <option value="portfolio">Portfolios</option>
-                                </select>
-                            </div>
-
                             <!-- Liste des productions -->
                             <div class="sidebar-liste" id="sidebarListeProductions">
                                 <!-- Généré par afficherListeProductions() -->
@@ -3824,8 +3846,19 @@
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
-                            <!-- Barre d'en-tête avec bouton Nouvelle production (toujours visible) -->
-                            <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                            <!-- Barre d'en-tête avec boutons (toujours visible) -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <!-- Boutons Import/Export à gauche -->
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-confirmer" onclick="exporterProductions()">
+                                        Exporter toutes les productions
+                                    </button>
+                                    <button class="btn btn-principal" onclick="document.getElementById('fichier-import-productions-local').click()">
+                                        Importer des productions
+                                    </button>
+                                    <input type="file" id="fichier-import-productions-local" accept=".json" style="display: none;" onchange="importerProductions(event)">
+                                </div>
+                                <!-- Bouton Nouvelle production à droite -->
                                 <button onclick="creerNouvelleProduction()" class="btn btn-principal">
                                     + Nouvelle production
                                 </button>
@@ -3930,13 +3963,17 @@
 
                                 <!-- Boutons du formulaire -->
                                 <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
-                                    <!-- Boutons gauche (actions destructives) -->
+                                    <!-- Boutons gauche (actions sur la production) -->
                                     <div style="display: flex; gap: 10px;">
+                                        <button id="btnExporterProduction" class="btn btn-secondaire" onclick="exporterProductionActive()" style="display: none;" title="Exporter cette production en JSON">
+                                            Exporter cette production
+                                        </button>
+                                        <button id="btnImporterProduction" class="btn btn-secondaire" onclick="document.getElementById('fichier-import-production-individuelle').click()" style="display: none;" title="Importer pour remplacer cette production">
+                                            Importer dans cette production
+                                        </button>
+                                        <input type="file" id="fichier-import-production-individuelle" accept=".json" style="display: none;" onchange="importerDansProductionActive(event)">
                                         <button id="btnDupliquerProduction" class="btn btn-secondaire" onclick="dupliquerProductionActive()" style="display: none;" title="Créer une copie de cette production">
                                             Dupliquer
-                                        </button>
-                                        <button id="btnExporterProduction" class="btn btn-secondaire" onclick="exporterProductionActive()" style="display: none;" title="Exporter cette production">
-                                            Exporter
                                         </button>
                                         <button id="btnSupprimerProduction" class="btn btn-supprimer" onclick="supprimerProductionActive()" style="display: none;" title="Supprimer cette production">
                                             Supprimer
@@ -3952,27 +3989,6 @@
                                 </div>
 
                             </div><!-- Fin du formulaireProduction -->
-
-                            <!-- Options d'import/export (accordéon pliable) -->
-                            <div id="optionsImportExportProductions" class="section-accordeon">
-                                <details>
-                                    <summary class="summary-materiel">
-                                        Options d'import/export
-                                    </summary>
-                                    <div class="accordeon-contenu">
-                                        <div class="accordeon-btns-flex">
-                                            <button class="btn btn-confirmer" onclick="exporterProductions()">
-                                                Exporter les productions
-                                            </button>
-                                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-productions-local').click()">
-                                                Importer des productions
-                                            </button>
-                                            <input type="file" id="fichier-import-productions-local" accept=".json" style="display: none;" onchange="importerProductions(event)">
-                                        </div>
-                                        <p class="aide accordeon-aide-text">Les fichiers exportés ne contiennent aucune donnée d'étudiants, seulement la structure des productions.</p>
-                                    </div>
-                                </details>
-                            </div>
 
                             <!-- Conteneurs cachés pour compatibilité -->
                             <div style="display: none;">
@@ -3993,7 +4009,7 @@
                 <!-- Sous-section : Grilles de critères -->
                 <div id="materiel-grille-criteres" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Critères d'évaluation</span>
+                        <span>Grilles de critères</span>
                         <span class="titre-emoji-container">
                             <span class="primo-aide" data-target="note-grilles">😎</span>
                             <span class="primo-aide" data-target="conseil-grilles">😎</span>
@@ -4035,8 +4051,19 @@
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
-                            <!-- Barre d'en-tête avec bouton Nouvelle grille (toujours visible) -->
-                            <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                            <!-- Barre d'en-tête avec boutons (toujours visible) -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <!-- Boutons Import/Export à gauche -->
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-confirmer" onclick="exporterGrilles()">
+                                        Exporter toutes les grilles
+                                    </button>
+                                    <button class="btn btn-principal" onclick="document.getElementById('fichier-import-grilles-local').click()">
+                                        Importer des grilles
+                                    </button>
+                                    <input type="file" id="fichier-import-grilles-local" accept=".json" style="display: none;" onchange="importerGrilles(event)">
+                                </div>
+                                <!-- Bouton Nouvelle grille à droite -->
                                 <button onclick="creerNouvelleGrille()" class="btn btn-principal">
                                     + Nouvelle grille
                                 </button>
@@ -4070,16 +4097,20 @@
 
                                 <!-- Boutons du formulaire -->
                                 <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
-                                    <!-- Boutons gauche (actions destructives) -->
+                                    <!-- Boutons gauche (actions sur la grille) -->
                                     <div style="display: flex; gap: 10px;">
-                                        <button id="btnDupliquerGrille" class="btn btn-secondaire" onclick="dupliquerGrilleActive()" style="display: none;" title="Créer une copie de cette grille">
-                                            Dupliquer la grille
+                                        <button id="btnExporterGrille" class="btn btn-secondaire" onclick="exporterGrilleActive()" style="display: none;" title="Exporter cette grille en JSON">
+                                            Exporter cette grille
                                         </button>
-                                        <button id="btnExporterGrille" class="btn btn-secondaire" onclick="exporterGrilleActive()" style="display: none;" title="Exporter cette grille">
-                                            Exporter la grille
+                                        <button id="btnImporterGrille" class="btn btn-secondaire" onclick="document.getElementById('fichier-import-grille-individuelle').click()" style="display: none;" title="Importer pour remplacer cette grille">
+                                            Importer dans cette grille
+                                        </button>
+                                        <input type="file" id="fichier-import-grille-individuelle" accept=".json" style="display: none;" onchange="importerDansGrilleActive(event)">
+                                        <button id="btnDupliquerGrille" class="btn btn-secondaire" onclick="dupliquerGrilleActive()" style="display: none;" title="Créer une copie de cette grille">
+                                            Dupliquer
                                         </button>
                                         <button id="btnSupprimerGrille" class="btn btn-supprimer" onclick="supprimerGrilleActive()" style="display: none;" title="Supprimer cette grille">
-                                            Supprimer la grille
+                                            Supprimer
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
@@ -4092,27 +4123,6 @@
                                 </div>
 
                             </div><!-- Fin conteneurEditionGrille -->
-
-                            <!-- Options d'import/export (accordéon pliable) -->
-                            <div id="optionsImportExportGrilles" class="section-accordeon">
-                                <details>
-                                    <summary class="summary-materiel">
-                                        Options d'import/export
-                                    </summary>
-                                    <div class="accordeon-contenu">
-                                        <div class="d-flex-gap-10">
-                                            <button class="btn btn-confirmer" onclick="exporterGrilles()" class="flex-1">
-                                                Exporter les grilles
-                                            </button>
-                                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-grilles-local').click()" class="flex-1">
-                                                Importer des grilles
-                                            </button>
-                                            <input type="file" id="fichier-import-grilles-local" accept=".json" style="display: none;" onchange="importerGrilles(event)">
-                                        </div>
-                                        <p class="aide" class="mt-10">Les grilles exportées contiennent les critères et pondérations, mais aucune donnée d'étudiants.</p>
-                                    </div>
-                                </details>
-                            </div>
 
                             <!-- Conteneurs cachés pour compatibilité -->
                             <div style="display: none;">
@@ -4135,7 +4145,7 @@
                 <!-- Sous-section : Échelle de performance -->
                 <div id="materiel-echelle-performance" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Niveaux de performance</span>
+                        <span>Échelles de performance</span>
                         <span class="titre-emoji-container">
                             <span class="primo-aide" data-target="note-echelle">😎</span>
                         </span>
@@ -4166,8 +4176,19 @@
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
-                            <!-- Barre d'en-tête avec bouton Nouvelle échelle (toujours visible) -->
-                            <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                            <!-- Barre d'en-tête avec boutons (toujours visible) -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <!-- Boutons Import/Export à gauche -->
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-confirmer" onclick="exporterEchelles()">
+                                        Exporter toutes les échelles
+                                    </button>
+                                    <button class="btn btn-principal" onclick="document.getElementById('fichier-import-echelles-local').click()">
+                                        Importer des échelles
+                                    </button>
+                                    <input type="file" id="fichier-import-echelles-local" accept=".json" style="display: none;" onchange="importerEchelles(event)">
+                                </div>
+                                <!-- Bouton Nouvelle échelle à droite -->
                                 <button onclick="creerNouvelleEchelle()" class="btn btn-principal">
                                     + Nouvelle échelle
                                 </button>
@@ -4201,16 +4222,20 @@
 
                                 <!-- Boutons du formulaire -->
                                 <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
-                                    <!-- Boutons gauche (actions destructives) -->
+                                    <!-- Boutons gauche (actions sur l'échelle) -->
                                     <div style="display: flex; gap: 10px;">
-                                        <button id="btnDupliquerEchelle" class="btn btn-secondaire" onclick="dupliquerEchelleActive()" style="display: none;" title="Créer une copie de cette échelle">
-                                            Dupliquer l'échelle
+                                        <button id="btnExporterEchelle" class="btn btn-secondaire" onclick="exporterEchelleActive()" style="display: none;" title="Exporter cette échelle en JSON">
+                                            Exporter cette échelle
                                         </button>
-                                        <button id="btnExporterEchelle" class="btn btn-secondaire" onclick="exporterEchelleActive()" style="display: none;" title="Exporter cette échelle">
-                                            Exporter
+                                        <button id="btnImporterEchelle" class="btn btn-secondaire" onclick="document.getElementById('fichier-import-echelle-individuelle').click()" style="display: none;" title="Importer pour remplacer cette échelle">
+                                            Importer dans cette échelle
+                                        </button>
+                                        <input type="file" id="fichier-import-echelle-individuelle" accept=".json" style="display: none;" onchange="importerDansEchelleActive(event)">
+                                        <button id="btnDupliquerEchelle" class="btn btn-secondaire" onclick="dupliquerEchelleActive()" style="display: none;" title="Créer une copie de cette échelle">
+                                            Dupliquer
                                         </button>
                                         <button id="btnSupprimerEchelle" class="btn btn-supprimer" onclick="supprimerEchelleActive()" style="display: none;" title="Supprimer cette échelle">
-                                            Supprimer l'échelle
+                                            Supprimer
                                         </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
@@ -4223,27 +4248,6 @@
                                 </div>
 
                             </div><!-- Fin conteneurEditionEchelle -->
-
-                            <!-- Options d'import/export (accordéon pliable) -->
-                            <div id="optionsImportExportEchelles" class="section-accordeon">
-                                <details>
-                                    <summary class="summary-materiel">
-                                        Options d'import/export
-                                    </summary>
-                                    <div class="accordeon-contenu">
-                                        <div class="d-flex-gap-10">
-                                            <button class="btn btn-principal" onclick="exporterEchelles()" class="flex-1">
-                                                Exporter l'échelle
-                                            </button>
-                                            <button class="btn btn-principal" onclick="document.getElementById('fichier-import-echelles-local').click()" class="flex-1">
-                                                Importer une échelle
-                                            </button>
-                                            <input type="file" id="fichier-import-echelles-local" accept=".json" style="display: none;" onchange="importerEchelles(event)">
-                                        </div>
-                                        <p class="aide" class="mt-10">Les échelles exportées contiennent les niveaux de performance, mais aucune donnée d'étudiants.</p>
-                                    </div>
-                                </details>
-                            </div>
 
                             <!-- Conteneurs cachés pour compatibilité -->
                             <div style="display: none;">
@@ -4426,7 +4430,7 @@
                 <!-- Sous-section : Rétroactions -->
                 <div id="materiel-retroactions" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Rétroactions prédéfinies</span>
+                        <span>Cartouches de rétroaction</span>
                         <span class="titre-emoji-container">
                             <span class="primo-aide" data-target="note-retroactions">😎</span>
                             <span class="primo-aide" data-target="conseil-retroactions">😎</span>
@@ -4454,21 +4458,12 @@
 
 <!-- CARTE : CARTOUCHES DE RÉTROACTION -->
                     <div class="carte">
-                        <h3>Cartouches de rétroaction</h3>
 
                         <!-- LAYOUT SIDEBAR 2 COLONNES -->
                         <div class="layout-sidebar-2col">
 
                             <!-- SIDEBAR GAUCHE (280px, sticky) -->
                             <div class="sidebar-navigation">
-                                <!-- Filtre par grille -->
-                                <div class="sidebar-filtre">
-                                    <label>Filtrer par grille :</label>
-                                    <select id="filtreGrilleCartouche" class="controle-form" onchange="filtrerCartouchesBanque()">
-                                        <option value="">Toutes les grilles</option>
-                                        <!-- Options générées dynamiquement -->
-                                    </select>
-                                </div>
 
                                 <!-- Liste des cartouches -->
                                 <div class="sidebar-liste" id="listeCartouchesBanque">
@@ -4479,8 +4474,19 @@
                             <!-- ZONE PRINCIPALE (centrale, scroll) -->
                             <div class="zone-principale">
 
-                                <!-- Barre d'en-tête avec bouton Nouvelle cartouche (toujours visible) -->
-                                <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                                <!-- Barre d'en-tête avec boutons (toujours visible) -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                    <!-- Boutons Import/Export à gauche -->
+                                    <div style="display: flex; gap: 10px;">
+                                        <button id="btnExporterToutesCartouches" class="btn btn-confirmer">
+                                            Exporter toutes les cartouches
+                                        </button>
+                                        <button class="btn btn-principal" onclick="document.getElementById('fichier-import-cartouches-all').click()">
+                                            Importer des cartouches
+                                        </button>
+                                        <input type="file" id="fichier-import-cartouches-all" accept=".json" style="display: none;" onchange="importerCartouches(event)">
+                                    </div>
+                                    <!-- Bouton Nouvelle cartouche à droite -->
                                     <button onclick="creerNouvelleCartouche()" class="btn btn-principal">
                                         + Nouvelle cartouche
                                     </button>
@@ -4529,111 +4535,10 @@
                                     l'option est cochée lors de la génération.</small>
                             </div>
 
-                            <!-- Boutons du formulaire -->
-                            <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-                                <!-- Boutons gauche (actions sur la cartouche) -->
-                                <div style="display: flex; gap: 10px;">
-                                    <button id="btnDupliquerCartouche" class="btn btn-secondaire" onclick="dupliquerCartoucheActive()" style="display: none;" title="Créer une copie de cette cartouche">
-                                        Dupliquer la cartouche
-                                    </button>
-                                    <button id="btnExporterCartouche" class="btn btn-secondaire" onclick="exporterCartoucheActive()" style="display: none;" title="Exporter cette cartouche">
-                                        Exporter la cartouche
-                                    </button>
-                                    <button id="btnSupprimerCartouche" class="btn btn-supprimer" onclick="supprimerCartoucheActive()" style="display: none;" title="Supprimer cette cartouche">
-                                        Supprimer la cartouche
-                                    </button>
-                                </div>
-                                <!-- Boutons droite (actions principales) -->
-                                <div style="display: flex; gap: 10px;">
-                                    <button class="btn btn-annuler" onclick="annulerFormCartouche()">Annuler</button>
-                                    <button class="btn btn-confirmer" onclick="sauvegarderCartoucheComplete()">
-                                        Sauvegarder
-                                    </button>
-                                </div>
-                            </div>
-
                             <!-- Liste des cartouches existantes (DÉSACTIVÉ - remplacé par sidebar) -->
                             <div id="listeCartouchesExistants" class="d-none-important">
                                 <div id="listeCartouchesContainer"></div>
                             </div>
-                                </div>
-
-                                <!-- ZONE D'IMPORT UNIFIÉE (Accordéon 4 options) -->
-                                <div id="zoneImportUnifiee" class="accordeon-import" class="hidden-mb-20">
-                            <details>
-                                <summary class="summary-materiel">
-                                    Options d'import/export
-                                </summary>
-                                <div class="carte-white-p15">
-
-                            <!-- Option 1: Import JSON complet -->
-                            <details>
-                                <summary>Importer/Exporter JSON complet</summary>
-                                <div class="panneau-import">
-                                    <p class="aide">Importer une cartouche complète depuis un fichier JSON ou exporter la cartouche actuelle</p>
-                                    <div class="d-flex-gap10-mt10">
-                                        <button class="btn btn-principal" onclick="document.getElementById('fichier-import-json-modal').click()">
-                                            Importer JSON
-                                        </button>
-                                        <input type="file" id="fichier-import-json-modal" accept=".json" style="display: none;" onchange="importerCartoucheJSON(event)">
-                                        <button class="btn btn-confirmer" onclick="exporterCartoucheActive()">
-                                            Exporter JSON
-                                        </button>
-                                    </div>
-                                    <p class="aide" class="mt-8">Le fichier JSON remplace toute la cartouche (nom, contexte, commentaires)</p>
-                                </div>
-                            </details>
-
-                            <!-- Option 2: Coller Markdown -->
-                            <details>
-                                <summary>Coller Markdown</summary>
-                                <div class="panneau-import">
-                                    <label class="label-block-09-fw500-mb8">
-                                        Collez vos commentaires ici :
-                                    </label>
-                                    <textarea id="markdownColle" class="panneau-import textarea" rows="10"
-                                              placeholder="## STRUCTURE&#10;&#10;**STRUCTURE (I)** : Commentaire incomplet...&#10;&#10;**STRUCTURE (D)** : Commentaire en développement...&#10;&#10;**STRUCTURE (M)** : Commentaire maîtrisé...&#10;&#10;**STRUCTURE (E)** : Commentaire étendu..."></textarea>
-                                    <button class="btn btn-confirmer" onclick="importerDepuisMarkdown()">
-                                        Importer les commentaires
-                                    </button>
-                                    <p class="aide">Format: ## CRITÈRE puis **CRITÈRE (NIVEAU)** : Commentaire</p>
-                                </div>
-                            </details>
-
-                            <!-- Option 3: Charger fichier .txt -->
-                            <details>
-                                <summary>Charger fichier .txt</summary>
-                                <div class="panneau-import">
-                                    <button class="btn btn-principal" onclick="document.getElementById('fichier-import-txt-modal').click()">
-                                        Sélectionner fichier .txt
-                                    </button>
-                                    <input type="file" id="fichier-import-txt-modal" accept=".txt" style="display: none;" onchange="importerCartoucheDepuisTxt(event)">
-                                    <p class="aide">Même format que l'option textarea ci-dessus</p>
-                                    <div class="alerte-error-red">
-                                        <strong>Important :</strong> Les noms de critères doivent correspondre exactement (ex: STRUCTURE, RIGUEUR, PLAUSIBILITÉ, NUANCE)
-                                    </div>
-                                </div>
-                            </details>
-
-                            <!-- Option 4: Import partiel -->
-                            <details>
-                                <summary>Import partiel (sélection critères)</summary>
-                                <div class="panneau-import">
-                                    <p class="text-09-mb10">Cochez les critères à importer :</p>
-                                    <div id="checklistCriteresImport" class="checkboxes-import-partiel">
-                                        <!-- Généré dynamiquement -->
-                                        <p style="color: var(--gris-clair); font-style: italic;">Chargez d'abord une cartouche pour voir les critères</p>
-                                    </div>
-                                    <textarea id="markdownImportPartiel" rows="8" placeholder="Collez vos commentaires ici (même format que ci-dessus)"></textarea>
-                                    <button class="btn btn-confirmer" onclick="importerPartiel()" disabled id="btnImportPartiel">
-                                        Importer critères sélectionnés
-                                    </button>
-                                    <p class="aide">Importe seulement les commentaires des critères cochés</p>
-                                </div>
-                            </details>
-
-                                </div>
-                            </details>
                                 </div>
 
                                 <!-- MATRICE DE RÉTROACTION -->
@@ -4662,25 +4567,31 @@
                                     </button>
                                 </div>
 
-                                <!-- Options d'import/export (accordéon pliable) -->
-                                <div id="optionsImportExportCartouches" class="section-accordeon">
-                                    <details>
-                                        <summary class="summary-materiel">
-                                            Options d'import/export
-                                        </summary>
-                                        <div class="accordeon-contenu">
-                                            <div class="d-flex-gap-10">
-                                                <button class="btn btn-confirmer" onclick="exporterCartouches()" class="flex-1">
-                                                    Exporter les cartouches
-                                                </button>
-                                                <button class="btn btn-principal" onclick="document.getElementById('fichier-import-cartouches-all').click()" class="flex-1">
-                                                    Importer des cartouches
-                                                </button>
-                                                <input type="file" id="fichier-import-cartouches-all" accept=".json" style="display: none;" onchange="importerCartouches(event)">
-                                            </div>
-                                            <p class="aide mt-10">Les cartouches exportées contiennent tous les commentaires pour toutes les grilles, mais aucune donnée d'étudiants.</p>
-                                        </div>
-                                    </details>
+                                <!-- Boutons du formulaire -->
+                                <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+                                    <!-- Boutons gauche (actions sur la cartouche) -->
+                                    <div style="display: flex; gap: 10px;">
+                                        <button id="btnExporterCartouche" class="btn btn-secondaire" style="display: none;" title="Exporter cette cartouche en JSON">
+                                            Exporter cette cartouche
+                                        </button>
+                                        <button id="btnImporterCartouche" class="btn btn-secondaire" onclick="document.getElementById('fichier-import-cartouche-individuelle').click()" style="display: none;" title="Importer pour remplacer cette cartouche">
+                                            Importer dans cette cartouche
+                                        </button>
+                                        <input type="file" id="fichier-import-cartouche-individuelle" accept=".json" style="display: none;" onchange="importerDansCartoucheActive(event)">
+                                        <button id="btnDupliquerCartouche" class="btn btn-secondaire" onclick="dupliquerCartoucheActive()" style="display: none;" title="Créer une copie de cette cartouche">
+                                            Dupliquer
+                                        </button>
+                                        <button id="btnSupprimerCartouche" class="btn btn-supprimer" onclick="supprimerCartoucheActive()" style="display: none;" title="Supprimer cette cartouche">
+                                            Supprimer
+                                        </button>
+                                    </div>
+                                    <!-- Boutons droite (actions principales) -->
+                                    <div style="display: flex; gap: 10px;">
+                                        <button class="btn btn-annuler" onclick="annulerFormCartouche()">Annuler</button>
+                                        <button class="btn btn-confirmer" onclick="sauvegarderCartoucheComplete()">
+                                            Sauvegarder
+                                        </button>
+                                    </div>
                                 </div>
 
                             </div><!-- fin zone-principale -->
@@ -4694,7 +4605,7 @@
                 <!-- Sous-section: Objectifs d'apprentissage -->
                 <div id="materiel-objectifs" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
-                        <span>Objectifs d'apprentissage</span>
+                        <span>Ensembles d'objectifs</span>
                         <span class="titre-emoji-container">
                             <span class="primo-aide" data-target="conseil-objectifs">😎</span>
                         </span>
@@ -4714,18 +4625,12 @@
 
 <!-- CARTE : OBJECTIFS D'APPRENTISSAGE -->
                     <div class="carte">
-                        <h3>Ensembles d'objectifs</h3>
 
                         <!-- LAYOUT SIDEBAR 2 COLONNES -->
                         <div class="layout-sidebar-2col">
 
                             <!-- SIDEBAR GAUCHE (280px, sticky) -->
                             <div class="sidebar-navigation">
-                                <!-- Stats -->
-                                <div class="sidebar-stat">
-                                    <span class="sidebar-stat-label">Ensembles créés</span>
-                                    <strong id="stat-objectifs-ensembles" class="sidebar-stat-valeur">0</strong>
-                                </div>
 
                                 <!-- Liste des ensembles -->
                                 <div class="sidebar-liste" id="listeEnsemblesObjectifs">
@@ -4736,56 +4641,32 @@
                             <!-- ZONE PRINCIPALE (centrale, scroll) -->
                             <div class="zone-principale">
 
-                                <!-- Boutons d'action -->
-                                <div class="actions-principales">
-                                    <button onclick="document.getElementById('importObjectifsInput').click()" class="btn btn-secondaire">
-                                        Importer un ensemble
-                                    </button>
+                                <!-- Barre d'en-tête avec boutons (toujours visible) -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                    <!-- Boutons Import/Export à gauche -->
+                                    <div style="display: flex; gap: 10px;">
+                                        <button class="btn btn-confirmer" onclick="exporterTousObjectifs()">
+                                            Exporter tous les ensembles
+                                        </button>
+                                        <button class="btn btn-principal" onclick="document.getElementById('importObjectifsInput').click()">
+                                            Importer des ensembles
+                                        </button>
+                                        <input type="file" id="importObjectifsInput" accept=".json" style="display: none;" onchange="traiterImportObjectifs(event)">
+                                    </div>
+                                    <!-- Bouton Nouvel ensemble à droite -->
                                     <button onclick="creerNouvelEnsembleObjectifs()" class="btn btn-principal">
                                         + Nouvel ensemble
                                     </button>
                                 </div>
-                                <input type="file" id="importObjectifsInput" accept=".json" class="input-file-hidden" onchange="traiterImportObjectifs(event)">
 
                                 <!-- Message d'accueil initial -->
                                 <div class="zone-principale-accueil" id="messageAccueilObjectifs">
-                                    <div class="message-vide">
-                                        <h3>Bienvenue dans les objectifs d'apprentissage</h3>
-                                        <p class="text-muted">
-                                            Créez des ensembles d'objectifs réutilisables pour structurer vos évaluations.
-                                            Par exemple : 13 objectifs pour un cours de calcul différentiel, 8 objectifs
-                                            pour un cours de biologie, etc.
-                                        </p>
-                                        <button onclick="creerNouvelEnsembleObjectifs()" class="btn btn-principal">
-                                            Créer mon premier ensemble
-                                        </button>
-                                    </div>
+                                    <p>Sélectionnez un ensemble dans la liste</p>
                                 </div>
 
                                 <!-- Zone d'édition d'un ensemble -->
                                 <div id="editionEnsembleObjectifs" class="hidden">
                                     <!-- Le contenu sera généré dynamiquement -->
-                                </div>
-
-                                <!-- Options d'import/export (accordéon pliable) -->
-                                <div id="optionsImportExportObjectifs" class="section-accordeon">
-                                    <details>
-                                        <summary class="summary-materiel">
-                                            Options d'import/export
-                                        </summary>
-                                        <div class="accordeon-contenu">
-                                            <div class="d-flex-gap-10">
-                                                <button class="btn btn-confirmer flex-1" onclick="exporterTousObjectifs()">
-                                                    Exporter les ensembles
-                                                </button>
-                                                <button class="btn btn-principal flex-1" onclick="document.getElementById('importObjectifsInputAccordeon').click()">
-                                                    Importer des ensembles
-                                                </button>
-                                                <input type="file" id="importObjectifsInputAccordeon" accept=".json" class="input-file-hidden" onchange="traiterImportObjectifs(event)">
-                                            </div>
-                                            <p class="aide mt-10">Les ensembles exportés contiennent les objectifs et pondérations, mais aucune donnée d'étudiants.</p>
-                                        </div>
-                                    </details>
                                 </div>
 
                             </div><!-- fin zone-principale -->
@@ -4957,7 +4838,8 @@
                             <h5 class="sous-titre-section" style="margin-top: 25px;">
                                 Enseignant·e
                             </h5>
-                            <div class="grille-4col-form" style="margin-bottom: 20px;">
+                            <!-- Ligne 1: Prénom, Nom, Courriel -->
+                            <div class="grille-3col-form" style="margin-bottom: 15px;">
                                 <div class="groupe-form">
                                     <label>Prénom</label>
                                     <input type="text" id="prenomEnseignant" class="controle-form controle-form-compact"
@@ -4969,6 +4851,20 @@
                                         placeholder="Ex: Bédard">
                                 </div>
                                 <div class="groupe-form">
+                                    <label>Courriel <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
+                                    <input type="email" id="courrielEnseignant" class="controle-form controle-form-compact"
+                                        placeholder="Ex: prenom.nom@cegep.qc.ca">
+                                </div>
+                            </div>
+
+                            <!-- Ligne 2: Discipline, Département, Local -->
+                            <div class="grille-3col-form" style="margin-bottom: 15px;">
+                                <div class="groupe-form">
+                                    <label>Discipline <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
+                                    <input type="text" id="disciplineEnseignant" class="controle-form controle-form-compact"
+                                        placeholder="Ex: Littérature, Philosophie">
+                                </div>
+                                <div class="groupe-form">
                                     <label>Département</label>
                                     <input type="text" id="departement" class="controle-form controle-form-compact"
                                         placeholder="Ex: Littérature et communication">
@@ -4976,6 +4872,23 @@
                                 <div class="groupe-form">
                                     <label>Local</label>
                                     <input type="text" id="local" class="controle-form controle-form-compact" placeholder="Ex: 2314">
+                                </div>
+                            </div>
+
+                            <!-- Ligne 3: Institution, Site web -->
+                            <div class="grille-3col-form" style="margin-bottom: 20px;">
+                                <div class="groupe-form">
+                                    <label>Institution <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
+                                    <input type="text" id="institutionEnseignant" class="controle-form controle-form-compact"
+                                        placeholder="Ex: Cégep de Drummondville">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Site web <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
+                                    <input type="url" id="siteWebEnseignant" class="controle-form controle-form-compact"
+                                        placeholder="Ex: https://monsite.com">
+                                </div>
+                                <div class="groupe-form">
+                                    <!-- Colonne vide pour garder l'alignement -->
                                 </div>
                             </div>
 
@@ -5012,13 +4925,13 @@
                                 </div>
                             </div>
 
-                            <!-- Pratique d'évaluation -->
+                            <!-- Pratique de notation -->
                             <h5 class="sous-titre-section" style="margin-top: 25px;">
-                                Pratique d'évaluation
+                                Pratique de notation
                             </h5>
                             <div class="groupe-form" style="margin-bottom: 20px;">
                                 <label>
-                                    Pratique d'évaluation utilisée pour ce cours
+                                    Pratique de notation mise en place pour ce cours
                                     <small style="display: block; color: var(--gris-moyen); font-weight: normal; margin-top: 3px;">
                                         La pratique par défaut est présélectionnée. Vous pouvez en choisir une autre.
                                     </small>
@@ -6683,54 +6596,92 @@ Exemple :
 
                                         </div>
 
-                                        <!-- Grille 2 colonnes : Délai et Reprise -->
-                                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                        <!-- Grille 3 colonnes : Délai, Reprise, Reprise ciblée -->
+                                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
 
-                                            <!-- Colonne gauche : Jetons de délai -->
+                                            <!-- Colonne 1 : Jetons de délai -->
                                             <div id="configJetonsDelai" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                                <div class="form-group">
+                                                <div class="form-group" style="margin-bottom: 8px;">
                                                     <label style="cursor: pointer;">
                                                         <input type="checkbox" id="jetonDelaiActif" checked>
                                                         <strong style="margin-left: 8px;">Jetons de délai</strong>
                                                     </label>
                                                 </div>
-                                                <p class="text-muted">
+                                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
                                                     Permettent de prolonger l'échéance d'une évaluation
                                                 </p>
                                                 <div class="groupe-form">
-                                                    <label for="dureeDelai" style="font-weight: 500;">
+                                                    <label for="dureeDelai" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
                                                         Durée du délai :
                                                     </label>
-                                                    <input type="number" id="dureeDelai" class="controle-form"
-                                                           min="1" max="30" value="7">
-                                                    <span>jours</span>
+                                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                                        <input type="number" id="dureeDelai" class="controle-form"
+                                                               min="1" max="30" value="7" style="width: 70px;">
+                                                        <span style="font-size: 0.9rem;">jours</span>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <!-- Colonne droite : Jetons de reprise -->
+                                            <!-- Colonne 2 : Jetons de reprise -->
                                             <div id="configJetonsReprise" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                                <div class="form-group">
+                                                <div class="form-group" style="margin-bottom: 8px;">
                                                     <label style="cursor: pointer;">
                                                         <input type="checkbox" id="jetonRepriseActif" checked>
                                                         <strong style="margin-left: 8px;">Jetons de reprise</strong>
                                                     </label>
                                                 </div>
-                                                <p class="text-muted">
+                                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
                                                     Permettent de refaire une évaluation pour améliorer la maîtrise
                                                 </p>
                                                 <div class="groupe-form">
-                                                    <label style="font-weight: 500; display: block; margin-bottom: 8px;">
+                                                    <label style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 8px;">
                                                         Que fait-on avec l'évaluation originale?
                                                     </label>
-                                                    <div>
-                                                        <label style="display: inline-flex; align-items: center; margin-bottom: 6px; cursor: pointer;">
+                                                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                                                        <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
                                                             <input type="radio" id="archiverOriginale" name="gestionOriginale" value="archiver" checked>
                                                             <span style="margin-left: 6px;">On la garde en archive</span>
                                                         </label>
-                                                    </div>
-                                                    <div>
-                                                        <label style="display: inline-flex; align-items: center; cursor: pointer;">
+                                                        <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
                                                             <input type="radio" id="supprimerOriginale" name="gestionOriginale" value="supprimer">
+                                                            <span style="margin-left: 6px;">On la supprime</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Colonne 3 : Jetons de reprise ciblée -->
+                                            <div id="configJetonsRepriseCiblee" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                                <div class="form-group" style="margin-bottom: 8px;">
+                                                    <label style="cursor: pointer;">
+                                                        <input type="checkbox" id="jetonRepriseCibleeActif" checked>
+                                                        <strong style="margin-left: 8px;">Jetons de reprise ciblée</strong>
+                                                    </label>
+                                                </div>
+                                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
+                                                    Permettent de refaire une évaluation en ciblant <strong>UN SEUL critère spécifique</strong> (ex: Français, Rigueur, Structure). La correction apportée doit être justifiée.
+                                                </p>
+                                                <div class="groupe-form" style="margin-bottom: 12px;">
+                                                    <label for="plafondNoteCiblee" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
+                                                        Note maximale du critère ciblé :
+                                                    </label>
+                                                    <select id="plafondNoteCiblee" class="controle-form" style="width: 100%; font-size: 0.85rem;">
+                                                        <option value="M" selected>M (Maîtrisé) - 75-84%</option>
+                                                        <option value="D">D (Développement) - 65-74%</option>
+                                                        <option value="aucun">Aucun plafond (selon pratique)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 8px;">
+                                                        Que fait-on avec l'évaluation originale?
+                                                    </label>
+                                                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                                                        <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
+                                                            <input type="radio" id="archiverOriginaleCiblee" name="gestionOriginaleCiblee" value="archiver" checked>
+                                                            <span style="margin-left: 6px;">On la garde en archive</span>
+                                                        </label>
+                                                        <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
+                                                            <input type="radio" id="supprimerOriginaleCiblee" name="gestionOriginaleCiblee" value="supprimer">
                                                             <span style="margin-left: 6px;">On la supprime</span>
                                                         </label>
                                                     </div>
@@ -9793,6 +9744,22 @@ Exemple :
                                 <dd class="ml-20-mb-10">Score déterminant le niveau d'intervention selon le cadre Réponse à l'Intervention. Calculé à partir de l'indice R. Trois niveaux : Universel (≥70%), Préventif (40-69%), Intensif (&lt;40%). <em>(Optionnel - voir Réglages → Pratique de notation → Activer RàI et détection des patterns)</em></dd>
                             </dl>
 
+                            <h4 class="titre-section-principal">J</h4>
+
+                            <dl class="ml-10">
+                                <dt class="titre-section-aide">Jetons</dt>
+                                <dd class="ml-20-mb-10">Ressources limitées que l'apprenant·e peut utiliser pour adapter son parcours d'apprentissage. Chaque élève reçoit un nombre fixe de jetons par trimestre qu'il peut choisir d'utiliser selon ses besoins. Trois types de jetons sont disponibles : délai, reprise, et reprise ciblée. <em>(Configuration : Réglages → Pratique de notation → Système de jetons)</em></dd>
+
+                                <dt class="titre-section-aide">Jetons de délai</dt>
+                                <dd class="ml-20-mb-10">Permettent de prolonger l'échéance d'une évaluation d'un nombre de jours configuré (par défaut : 7 jours). L'étudiant·e utilise un jeton pour obtenir un délai supplémentaire sans pénalité. La nouvelle échéance est calculée automatiquement et visible dans son profil.</dd>
+
+                                <dt class="titre-section-aide">Jetons de reprise</dt>
+                                <dd class="ml-20-mb-10">Permettent de refaire une évaluation complète pour améliorer la maîtrise. L'étudiant·e soumet une nouvelle version de son travail qui remplace ou s'ajoute à l'évaluation originale selon la configuration. L'enseignant·e peut choisir de conserver l'évaluation originale en archive ou de la supprimer.</dd>
+
+                                <dt class="titre-section-aide">Jetons de reprise ciblée</dt>
+                                <dd class="ml-20-mb-10">Permettent de refaire une évaluation en ciblant <strong>UN SEUL critère spécifique</strong> (ex: Français, Rigueur, Structure). La correction apportée doit être justifiée. La note maximale pour le critère ciblé est configurable (par défaut : M - Maîtrisé, 75-84%). Les autres critères conservent leur note originale. Utile pour l'autocorrection linguistique ou l'amélioration ciblée d'un aspect précis du travail.</dd>
+                            </dl>
+
                             <h4 class="titre-section-principal">L</h4>
 
                             <dl class="ml-10">
@@ -10001,17 +9968,17 @@ Exemple :
 
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>
-    <script src="js/navigation.js?v=2025111431"></script>
-    <script src="js/modes.js?v=2025112904"></script>
+    <script src="js/navigation.js?v=2025120101"></script>
+    <script src="js/modes.js?v=2025113001"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025111325"></script>
-    <script src="js/etudiants.js?v=2025112905"></script>
-    <script src="js/productions.js?v=2025112700"></script>
-    <script src="js/grilles.js?v=2025112804"></script>
-    <script src="js/echelles.js?v=2025112804"></script>
-    <script src="js/cartouches.js?v=2025112801"></script>
-    <script src="js/cours.js?v=2025112727"></script>
+    <script src="js/etudiants.js?v=2025113029"></script>
+    <script src="js/productions.js?v=2025113003"></script>
+    <script src="js/grilles.js?v=2025113001"></script>
+    <script src="js/echelles.js?v=2025113001"></script>
+    <script src="js/cartouches.js?v=2025120122"></script>
+    <script src="js/cours.js?v=2025120115"></script>
     <script src="js/contexte.js?v=2025111201"></script>
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
@@ -10033,39 +10000,39 @@ Exemple :
     <script src="js/pratiques/pratique-manager.js?v=2025112501"></script>
 
     <!-- Licence Creative Commons (Beta 91.5 - Import/Export) -->
-    <script src="js/cc-license.js?v=2025112700"></script>
+    <script src="js/cc-license.js?v=2025120118"></script>
 
     <!-- Interface de gestion des pratiques configurables -->
-    <script src="js/pratiques.js?v=2025112806"></script>
-    <script src="js/objectifs.js?v=2025112620"></script>
+    <script src="js/pratiques.js?v=2025113019"></script>
+    <script src="js/objectifs.js?v=2025120124"></script>
 
     <script src="js/portfolio.js?v=2025112701"></script>
-    <script src="js/saisie-presences.js?v=2025111202"></script>
+    <script src="js/saisie-presences.js?v=2025113008"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025111830"></script>
-    <script src="js/profil-etudiant.js?v=2025112920"></script>
+    <script src="js/profil-etudiant.js?v=2025113026"></script>
     <script src="js/presences-apercu.js?v=2025111029"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=2025112112"></script>
     <script src="js/horaire.js?v=2025111328"></script>
-    <script src="js/groupe.js?v=2025112925"></script>
-    <script src="js/interventions.js?v=2025112122"></script>
+    <script src="js/groupe.js?v=2025113006"></script>
+    <script src="js/interventions.js?v=2025120125"></script>
 
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
     <script src="js/import-export.js?v=2025112700"></script>
-    <script src="js/statistiques.js?v=2025111032"></script>
-    <script src="js/liste-evaluations.js?v=2025111716"></script>
+    <script src="js/statistiques.js?v=2025113016"></script>
+    <script src="js/liste-evaluations.js?v=2025113002"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
-    <script src="js/evaluation-jetons.js?v=2025111435"></script>
-    <script src="js/evaluation.js?v=2025112916"></script>
+    <script src="js/evaluation-jetons.js?v=2025113013"></script>
+    <script src="js/evaluation.js?v=2025113003"></script>
 
     <!-- PRIMO - Système conversationnel de configuration (Beta 92) -->
-    <script src="js/primo-questions.js?v=2025112805"></script>
-    <script src="js/primo-modal.js?v=2025112805"></script>
+    <script src="js/primo-questions.js?v=2025120109"></script>
+    <script src="js/primo-modal.js?v=2025120106"></script>
     <script src="js/primo-accueil.js?v=2025112809"></script>
     <script src="js/primo-validation-champs.js?v=2025112727"></script>
     <script src="js/primo-tooltips.js?v=2025112903"></script>
@@ -10074,7 +10041,7 @@ Exemple :
     <script src="js/guidage.js?v=2025112706"></script>
 
     <!-- TUTORIEL INTERACTIF - Guide après données démo (Beta 92) -->
-    <script src="js/tutoriel-interactif.js?v=2025112727"></script>
+    <script src="js/tutoriel-interactif.js?v=2025120102"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=2025111400"></script>

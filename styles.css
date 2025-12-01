@@ -1103,6 +1103,76 @@ body {
     border: 1px solid #ddd;
 }
 
+/* Largeurs spécifiques pour le tableau des évaluations */
+/* Forcer une seule ligne par rangée avec text-overflow */
+#conteneur-tableau-evaluations .tableau th,
+#conteneur-tableau-evaluations .tableau td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#conteneur-tableau-evaluations .tableau th:nth-child(1),
+#conteneur-tableau-evaluations .tableau td:nth-child(1) {
+    width: 8%; /* DA */
+}
+
+#conteneur-tableau-evaluations .tableau th:nth-child(2),
+#conteneur-tableau-evaluations .tableau td:nth-child(2) {
+    width: 12%; /* Nom */
+}
+
+#conteneur-tableau-evaluations .tableau th:nth-child(3),
+#conteneur-tableau-evaluations .tableau td:nth-child(3) {
+    width: 12%; /* Prénom */
+}
+
+#conteneur-tableau-evaluations .tableau th:nth-child(4),
+#conteneur-tableau-evaluations .tableau td:nth-child(4) {
+    width: 25%; /* Production - élargie pour le titre + description */
+}
+
+#conteneur-tableau-evaluations .tableau th:nth-child(5),
+#conteneur-tableau-evaluations .tableau td:nth-child(5) {
+    width: 15%; /* Jeton - élargie pour les badges */
+}
+
+#conteneur-tableau-evaluations .tableau th:nth-child(6),
+#conteneur-tableau-evaluations .tableau td:nth-child(6) {
+    width: 8%; /* Niveau */
+}
+
+#conteneur-tableau-evaluations .tableau th:nth-child(7),
+#conteneur-tableau-evaluations .tableau td:nth-child(7) {
+    width: 10%; /* Note */
+}
+
+#conteneur-tableau-evaluations .tableau th:nth-child(8),
+#conteneur-tableau-evaluations .tableau td:nth-child(8) {
+    width: 10%; /* Actions */
+}
+
+/* Centrer les colonnes Jeton, Niveau, Note et Actions */
+#conteneur-tableau-evaluations .tableau th:nth-child(5),
+#conteneur-tableau-evaluations .tableau td:nth-child(5),
+#conteneur-tableau-evaluations .tableau th:nth-child(6),
+#conteneur-tableau-evaluations .tableau td:nth-child(6),
+#conteneur-tableau-evaluations .tableau th:nth-child(7),
+#conteneur-tableau-evaluations .tableau td:nth-child(7),
+#conteneur-tableau-evaluations .tableau th:nth-child(8),
+#conteneur-tableau-evaluations .tableau td:nth-child(8) {
+    text-align: center !important;
+}
+
+/* Coins arrondis sur l'en-tête */
+.tableau thead tr:first-child th:first-child {
+    border-top-left-radius: 6px;
+}
+
+.tableau thead tr:first-child th:last-child {
+    border-top-right-radius: 6px;
+}
+
 .tableau tbody tr {
     background: white;
 }
@@ -1140,6 +1210,15 @@ body {
     font-size: 0.9rem;
     color: white;
     border: 1px solid #ddd;
+}
+
+/* Coins arrondis sur l'en-tête */
+.tableau-blanc thead tr:first-child th:first-child {
+    border-top-left-radius: 6px;
+}
+
+.tableau-blanc thead tr:first-child th:last-child {
+    border-top-right-radius: 6px;
 }
 
 .tableau-blanc tbody tr {
@@ -1960,6 +2039,34 @@ input[type="number"].controle-form {
 .btn-tres-compact {
     padding: 4px 10px;
     font-size: 0.8rem;
+}
+
+.btn-mini {
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-tous-presents {
+    background: var(--btn-principal);
+    color: white;
+}
+
+.btn-tous-presents:hover:not(:disabled) {
+    background: var(--btn-principal-hover);
+}
+
+.btn-reinit {
+    background: var(--btn-annuler);
+    color: white;
+}
+
+.btn-reinit:hover:not(:disabled) {
+    background: var(--btn-annuler-hover);
 }
 
 /* ===============================
@@ -4310,6 +4417,47 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 15px;
 }
 
+/* Encadré de gestion des jetons */
+.profil-encadre-jetons {
+    background: #f5f5f5;
+    border: 2px solid #757575;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.profil-encadre-jetons-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.profil-encadre-jetons-titre {
+    color: #757575;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.profil-encadre-jetons-compteur {
+    color: #757575;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.profil-encadre-jetons-barre {
+    background: white;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.profil-encadre-jetons-progression {
+    background: #757575;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
 .profil-texte-petit-ml10 {
     color: #666;
     font-size: 0.8rem;
@@ -5692,6 +5840,29 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     background: #9c27b0;
 }
 
+.badge-jeton-numero-reprise-ciblee {
+    background: #9c27b0;
+}
+
+/* Badge jeton reprise ciblée (même style que reprise) */
+.badge-jeton-reprise-ciblee-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #9c27b022;
+    border: 2px solid #9c27b0;
+    border-radius: 8px;
+    padding: 2px 6px;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+.badge-jeton-reprise-ciblee-wrapper:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(156, 39, 176, 0.2);
+    opacity: 1;
+}
+
 /* Badge non remis (gris neutre) */
 .badge-non-remis-wrapper {
     display: inline-flex;
@@ -6622,6 +6793,15 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-size: 0.9rem;
 }
 
+/* Coins arrondis sur l'en-tête */
+.matrice-tableau thead tr:first-child th:first-child {
+    border-top-left-radius: 6px;
+}
+
+.matrice-tableau thead tr:first-child th:last-child {
+    border-top-right-radius: 6px;
+}
+
 .matrice-tableau th:first-child {
     text-align: left;
     background: var(--bleu-principal);
@@ -6774,7 +6954,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 }
 
 #corps-tableau-evaluations tr:hover {
-    background-color: var(--bleu-tres-pale);
+    background-color: var(--table-hover);
 }
 
 /* Ligne grisée pour évaluations remplacées */
@@ -6838,6 +7018,13 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
+}
+
+.grille-3col-form {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    padding: 15px 20px;
 }
 
 .grille-4col-form {
@@ -7533,7 +7720,7 @@ label:has(+ textarea:disabled) {
 }
 
 .tableau-objectifs-profil tbody tr:hover {
-    background: var(--bleu-tres-pale);
+    background: var(--table-hover);
 }
 
 .tableau-objectifs-profil tbody tr:last-child {
@@ -7605,10 +7792,13 @@ label:has(+ textarea:disabled) {
     transform: scale(0.95);
 }
 
-/* Masquer Primo en mode Normal/Anonymisé */
-.mode-normal .primo-aide,
-.mode-anonymise .primo-aide {
+/* Primo caché par défaut, visible uniquement en mode Assisté */
+.primo-aide {
     display: none !important;
+}
+
+.mode-assiste .primo-aide {
+    display: inline-block !important;
 }
 
 /* Popup riche */
@@ -7818,6 +8008,7 @@ body[data-mode="simulation"] details summary {
 }
 
 /* Tableaux */
+/* DÉSACTIVÉ : Laisse le style standard s'appliquer (uniformisation design)
 body[data-mode="simulation"] table th {
     background: var(--vert-pale-assiste);
 }
@@ -7825,3 +8016,4 @@ body[data-mode="simulation"] table th {
 body[data-mode="simulation"] table tr:hover {
     background: var(--vert-tres-pale-assiste);
 }
+*/

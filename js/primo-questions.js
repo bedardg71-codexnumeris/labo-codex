@@ -31,7 +31,7 @@
 
 const QUESTIONS_PRIMO = [
     // ========================================================================
-    // ÉTAPE 1 : UTILISATEUR ET COURS (4 questions essentielles)
+    // ÉTAPE 1 : UTILISATEUR ET COURS (6 questions essentielles)
     // ========================================================================
     {
         id: 'nom-utilisateur',
@@ -45,6 +45,38 @@ const QUESTIONS_PRIMO = [
             requis: true,
             minLength: 2
         }
+    },
+
+    {
+        id: 'courriel-utilisateur',
+        texte: 'Quel est ton courriel professionnel ?',
+        type: 'text',
+        placeholder: 'Ex: prenom.nom@cegep.qc.ca',
+        champsCibles: [
+            { cle: 'infoCours', champ: 'courriel' }
+        ],
+        validation: {
+            requis: false,
+            pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            messageErreur: 'Format de courriel invalide'
+        },
+        aide: 'Optionnel. Sera inclus dans les métadonnées lors du partage de matériel pédagogique.'
+    },
+
+    {
+        id: 'site-utilisateur',
+        texte: 'As-tu un site web professionnel ou une page de ressources à partager ?',
+        type: 'text',
+        placeholder: 'Ex: https://monsite.com',
+        champsCibles: [
+            { cle: 'infoCours', champ: 'siteWeb' }
+        ],
+        validation: {
+            requis: false,
+            pattern: /^https?:\/\/.+/,
+            messageErreur: 'Le lien doit commencer par http:// ou https://'
+        },
+        aide: 'Optionnel. Permet aux collègues de te contacter ou d\'explorer tes ressources.'
     },
 
     {

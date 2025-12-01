@@ -739,6 +739,19 @@ function primoQuestionSuivante() {
         console.log('[Primo] Mode notification - passage direct');
         indexQuestionActuelle++;
         afficherNotificationActuelle();
+
+        // 🆕 BETA 92: Mettre à jour le bouton Précédent
+        const btn = document.getElementById('primo-bouton-precedent');
+        if (btn) {
+            if (indexQuestionActuelle <= indexDepartModule) {
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            } else {
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            }
+        }
+
         return;
     }
 
@@ -1520,6 +1533,7 @@ function creerCoursInitial(reponses) {
 // ============================================================================
 
 let modeNotification = false;
+let indexDepartModule = 0; // 🆕 BETA 92: Index de départ du module (pour limiter le bouton Précédent)
 
 /**
  * Démarre directement en mode notification (sans passer par le modal)
@@ -1530,6 +1544,7 @@ function demarrerModeNotification(indexDepart = 0) {
 
     // Initialiser l'état
     indexQuestionActuelle = indexDepart;
+    indexDepartModule = indexDepart; // 🆕 BETA 92: Sauvegarder l'index de départ
     reponsesPrimo = {};
     modalPrimoActif = true;
 
@@ -1572,7 +1587,7 @@ function passerEnModeNotification() {
     boutonSuivant.innerHTML = 'Suivant →';
     boutonSuivant.style.cssText = `
         position: fixed;
-        bottom: 30px;
+        bottom: 80px;
         right: 30px;
         padding: 15px 30px;
         background: linear-gradient(135deg, #1a5266, #2d7a8c);
@@ -1602,11 +1617,140 @@ function passerEnModeNotification() {
 
     document.body.appendChild(boutonSuivant);
 
-    // Passer à la question suivante (la transition est terminée)
-    indexQuestionActuelle++;
+    // 🆕 BETA 92: Créer le bouton "Quitter" à côté du bouton "Suivant"
+    const boutonArreter = document.createElement('button');
+    boutonArreter.id = 'primo-bouton-arreter';
+    boutonArreter.innerHTML = 'Quitter';
+    boutonArreter.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        right: 190px;
+        padding: 15px 30px;
+        background: white;
+        color: var(--gris-moyen);
+        border: 2px solid var(--bordure-claire);
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        z-index: 9998;
+        transition: all 0.3s;
+        pointer-events: auto;
+    `;
 
-    // Afficher la première notification
+    boutonArreter.onmouseover = function() {
+        this.style.transform = 'translateY(-3px)';
+        this.style.boxShadow = '0 6px 25px rgba(0, 0, 0, 0.15)';
+        this.style.borderColor = 'var(--gris-moyen)';
+    };
+
+    boutonArreter.onmouseout = function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)';
+        this.style.borderColor = 'var(--bordure-claire)';
+    };
+
+    boutonArreter.onclick = function() {
+        // Demander confirmation avant d'arrêter
+        if (confirm('Veux-tu vraiment quitter le MODULE 2 ?\n\nTu pourras toujours le relancer plus tard depuis le modal Primo (bouton 😎).')) {
+            // Nettoyer le mode notification
+            const container = document.getElementById('primo-notification-container');
+            const boutonSuivant = document.getElementById('primo-bouton-suivant');
+            const boutonArreter = document.getElementById('primo-bouton-arreter');
+            const boutonPrecedent = document.getElementById('primo-bouton-precedent');
+
+            if (container) container.remove();
+            if (boutonSuivant) boutonSuivant.remove();
+            if (boutonArreter) boutonArreter.remove();
+            if (boutonPrecedent) boutonPrecedent.remove();
+
+            modeNotification = false;
+            modalPrimoActif = false;
+
+            console.log('[Primo] 🛑 MODULE 2 quitté par l\'utilisateur');
+        }
+    };
+
+    document.body.appendChild(boutonArreter);
+
+    // 🆕 BETA 92: Créer le bouton "Précédent" à gauche du bouton "Quitter"
+    const boutonPrecedent = document.createElement('button');
+    boutonPrecedent.id = 'primo-bouton-precedent';
+    boutonPrecedent.innerHTML = '← Précédent';
+    boutonPrecedent.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        right: 330px;
+        padding: 15px 30px;
+        background: white;
+        color: var(--gris-moyen);
+        border: 2px solid var(--bordure-claire);
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        z-index: 9998;
+        transition: all 0.3s;
+        pointer-events: auto;
+        opacity: 0.5;
+    `;
+
+    boutonPrecedent.onmouseover = function() {
+        // 🆕 BETA 92: Vérifier par rapport à indexDepartModule
+        if (indexQuestionActuelle > indexDepartModule) {
+            this.style.transform = 'translateY(-3px)';
+            this.style.boxShadow = '0 6px 25px rgba(0, 0, 0, 0.15)';
+            this.style.borderColor = 'var(--gris-moyen)';
+            this.style.opacity = '1';
+        }
+    };
+
+    boutonPrecedent.onmouseout = function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)';
+        this.style.borderColor = 'var(--bordure-claire)';
+        // 🆕 BETA 92: Vérifier par rapport à indexDepartModule
+        if (indexQuestionActuelle <= indexDepartModule) {
+            this.style.opacity = '0.5';
+        }
+    };
+
+    boutonPrecedent.onclick = function() {
+        // 🆕 BETA 92: Ne pas déborder en-dessous de l'index de départ du module
+        if (indexQuestionActuelle > indexDepartModule) {
+            indexQuestionActuelle--;
+            afficherNotificationActuelle();
+            mettreAJourBoutonPrecedent();
+        }
+    };
+
+    // Fonction pour mettre à jour l'état du bouton Précédent
+    function mettreAJourBoutonPrecedent() {
+        const btn = document.getElementById('primo-bouton-precedent');
+        if (btn) {
+            // 🆕 BETA 92: Désactiver si on est à l'index de départ du module
+            if (indexQuestionActuelle <= indexDepartModule) {
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            } else {
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            }
+        }
+    }
+
+    document.body.appendChild(boutonPrecedent);
+
+    // 🆕 BETA 92: Ne PAS incrémenter ici - commencer directement à indexDepart
+    // L'ancienne ligne "indexQuestionActuelle++" faisait sauter la première étape
+
+    // Afficher la première notification (à l'index de départ)
     afficherNotificationActuelle();
+
+    // Mettre à jour l'état initial du bouton Précédent (désactivé au départ)
+    setTimeout(() => mettreAJourBoutonPrecedent(), 100);
 }
 
 /**
@@ -1716,9 +1860,13 @@ function revenirEnModeModal() {
     // Supprimer les éléments du mode notification
     const container = document.getElementById('primo-notification-container');
     const boutonSuivant = document.getElementById('primo-bouton-suivant');
+    const boutonArreter = document.getElementById('primo-bouton-arreter');
+    const boutonPrecedent = document.getElementById('primo-bouton-precedent');
 
     if (container) container.remove();
     if (boutonSuivant) boutonSuivant.remove();
+    if (boutonArreter) boutonArreter.remove();
+    if (boutonPrecedent) boutonPrecedent.remove();
 
     // Créer le modal SANS réinitialiser l'état
     const modal = document.createElement('div');

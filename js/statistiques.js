@@ -179,8 +179,8 @@ function chargerInfosSysteme() {
             versionBeta = `β ${matchBeta[1]}`;
         }
 
-        // Extraire la date (ex: "(5 novembre 2025)" → "5 nov. 2025")
-        const matchDate = texte.match(/\((\d+)\s+(\w+)\s+(\d{4})\)/);
+        // Extraire la date (ex: "(5 novembre 2025)" ou "(30 novembre 2025 - Primo Assistant)" → "5 nov. 2025")
+        const matchDate = texte.match(/\((\d+)\s+(\w+)\s+(\d{4})/);
         if (matchDate) {
             const jour = matchDate[1];
             const mois = matchDate[2];

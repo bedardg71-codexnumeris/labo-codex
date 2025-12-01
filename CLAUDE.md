@@ -144,7 +144,8 @@ portfolio.js convertit 0-100 et stocke dans indicesCP
 
 ```
 projet/
-├── index 91.html                            # Point d'entrée actuel (Beta 91)
+├── index 92.html                            # Point d'entrée actuel (Beta 92)
+├── index 91.html                            # Beta 91 (archivé - Import/Export config complète)
 ├── index 90 (architecture).html             # Beta 90.5 (archivé - présentation 19 nov 2025)
 ├── css/
 │   └── styles.css                        # Styles globaux + variables CSS pratiques
@@ -153,6 +154,11 @@ projet/
 │   ├── navigation.js                     # ⚠️ PROTÉGÉ - Gestion navigation
 │   ├── main.js                           # Initialisation
 │   ├── db.js                             # ✅ NOUVEAU (Beta 91.1) - Gestionnaire de stockage hybride
+│   │
+│   ├── primo-accueil.js                  # 🆕 NOUVEAU (Beta 92) - Modal d'accueil Primo
+│   ├── primo-modal.js                    # 🆕 NOUVEAU (Beta 92) - Configuration conversationnelle
+│   ├── primo-questions.js                # 🆕 NOUVEAU (Beta 92) - Questions structurées Primo
+│   ├── tutoriel-interactif.js            # 🆕 NOUVEAU (Beta 92) - Tutoriel guidé 7 étapes
 │   │
 │   ├── pratiques/                        # 🆕 SYSTÈME DE PRATIQUES (Beta 91)
 │   │   ├── pratique-interface.js         # Documentation contrat IPratique
@@ -179,6 +185,8 @@ projet/
 │   ├── import-export.js                  # Import/export JSON
 │   └── statistiques.js                   # Calculs statistiques
 │
+├── materiel-demarrage.json               # 🆕 NOUVEAU (Beta 92) - Matériel pédagogique de base
+│
 ├── CLAUDE.md                             # Ce fichier
 ├── README_PROJET.md                      # Documentation projet
 ├── COLLAB_RULES.txt                      # Règles de collaboration
@@ -188,7 +196,9 @@ projet/
 ├── ARCHITECTURE_PRATIQUES.md             # 🆕 Architecture système pratiques (Beta 91)
 ├── GUIDE_AJOUT_PRATIQUE.md               # 🆕 Guide pour ajouter une pratique
 ├── FEUILLE_DE_ROUTE_PRATIQUES.md         # 🆕 Roadmap implémentation pratiques
-└── INDEXEDDB_ARCHITECTURE.md             # ✅ Architecture stockage hybride (Beta 91.1)
+├── INDEXEDDB_ARCHITECTURE.md             # ✅ Architecture stockage hybride (Beta 91.1)
+├── BETA_92_CHANGELOG.md                  # 🆕 Changelog complet Beta 92 (Primo + Import/Export CC)
+└── PLAN_TESTS_BETA_92.md                 # 🆕 Plan de tests systématique Beta 92
 ```
 
 ---
@@ -1007,7 +1017,113 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 ---
 
-**Fichier actuel: Beta 91 (Développement avancé)**
+**Fichier actuel: Beta 92 (Primo Assistant)**
+
+**Nom**: `index 92.html`
+**Date de création**: 27 novembre 2025
+**Version actuelle**: Beta 92
+**Statut**: ✅ Prêt pour distribution
+
+**Créée à partir de**: Beta 91.2 (`index 91.html`)
+**Provenance**: Beta 91.2 avec système import/export CC complet
+**Changelog**: Voir `BETA_92_CHANGELOG.md` pour détails complets
+
+**Développement sur 3 jours** (27-30 novembre 2025):
+
+### Session 1 : Primo Assistant (27 novembre)
+
+**Nouvelle fonctionnalité majeure** : Modal d'accueil conversationnel pour nouveaux utilisateurs
+
+**Composantes Primo** :
+1. ✅ Détection automatique première utilisation
+2. ✅ Modal d'accueil animé (emoji 😎 + message chaleureux)
+3. ✅ 4 parcours modulaires guidés :
+   - MODULE 1 : Créer un groupe-cours (config conversationnelle, 3 min)
+   - MODULE 2 : Évaluer une production (mode guide direct)
+   - MODULE 3 : Explorer diagnostics (placeholder, désactivé)
+   - MODULE 4 : Créer pratique de notation (Wizard, 8 min)
+4. ✅ Import automatique matériel de démarrage (IDME + SRPNF + cartouches)
+5. ✅ Tutoriel interactif en 7 étapes (après données démo)
+
+**Fichiers créés** :
+- `js/primo-accueil.js` (469 lignes) : Modal d'accueil et parcours
+- `js/primo-modal.js` (~900 lignes) : Configuration conversationnelle
+- `js/primo-questions.js` (~600 lignes) : Questions structurées avec dépendances
+- `js/tutoriel-interactif.js` (~650 lignes) : Tutoriel guidé
+- `materiel-demarrage.json` : Échelle IDME + Grille SRPNF + 20 cartouches
+
+---
+
+### Session 2 : Corrections bugs Primo (28 novembre)
+
+**4 bugs critiques corrigés** :
+1. ✅ Fonction notification manquante → Fallback avec `afficherNotificationSucces()`
+2. ✅ CORS file:// bloque fetch() → Documentation serveur HTTP local
+3. ✅ Mode application non initialisé → Définition automatique `modeApplication = 'simulation'`
+4. ✅ Fonction transformation manquante → Création `transformerReponse()`
+
+**Workflow end-to-end validé** :
+- Configuration complète Primo → Import matériel → Mode simulation → Liste étudiants → Évaluation
+
+**Commits** : 3 commits (`8004069`, `592d559`, `2b84123`)
+
+---
+
+### Session 3 : Import/Export CC + Navigation (30 novembre)
+
+**1. Import/Export individuel avec Creative Commons** :
+- ✅ Export individuel avec métadonnées CC BY-NC-SA 4.0 (4 modules)
+- ✅ Import individuel avec préservation ID et métadonnées (4 modules)
+- ✅ Support ancien format (JSON direct) et nouveau format (avec metadata wrapper)
+- ✅ Affichage badge CC lors de l'import (licence, auteur, date)
+- ✅ Visibilité contextuelle des boutons (mode création vs modification)
+
+**Fonctions implémentées** :
+- Productions : `importerDansProductionActive()` (lignes 1314-1432)
+- Grilles : `importerDansGrilleActive()` (lignes 1611-1721)
+- Échelles : `importerDansEchelleActive()` (lignes 1681-1791)
+- Cartouches : `importerDansCartoucheActive()` (lignes 1920-2031)
+
+**2. Renommage sections navigation Matériel** :
+| Ancien | Nouveau |
+|--------|---------|
+| Productions | **Productions étudiantes** |
+| Échelle de performance | **Échelles de performance** |
+| Rétroactions | **Cartouches de rétroaction** |
+| Objectifs d'apprentissage | **Ensembles d'objectifs** |
+
+**3. Optimisations Modal Primo** :
+- ✅ Layout horizontal (emoji gauche, texte droite)
+- ✅ Bouton "Consulter l'aide" ajouté (navigation vers section Aide)
+- ✅ Reformulation "Retour à la navigation libre" (simplifié, centré)
+- ✅ Ordre final : MODULE 1-4 → Consulter l'aide → Retour navigation
+
+**4. Correctifs divers** :
+- ✅ Boutons manquants dans Échelles (btnSupprimer + visibilité contextuelle)
+- ✅ Réorganisation boutons Cartouches (déplacés en bas de page)
+
+**Fichiers modifiés** : 7 fichiers (productions.js, grilles.js, echelles.js, cartouches.js, config.js, primo-accueil.js, index 92.html)
+
+---
+
+### Statistiques globales Beta 92
+
+| Métrique | Valeur |
+|----------|--------|
+| **Sessions** | 3 (27, 28, 30 novembre) |
+| **Commits** | ~15 commits |
+| **Fichiers créés** | 5 (Primo + materiel-demarrage.json) |
+| **Fichiers modifiés** | ~20 fichiers |
+| **Lignes ajoutées** | ~3,500 lignes |
+| **Bugs corrigés** | 6 bugs (4 critiques + 2 mineurs) |
+
+**Documentation** :
+- `BETA_92_CHANGELOG.md` : Changelog complet (3 sessions détaillées)
+- `PLAN_TESTS_BETA_92.md` : Plan de tests systématique (30-45 min)
+
+---
+
+**Fichier précédent: Beta 91 (Développement avancé)**
 
 **Nom**: `index 91.html`
 **Date de création**: 18 novembre 2025
@@ -1096,26 +1212,33 @@ Tests/
 
 ---
 
-### 🔴 Prochaines priorités (Beta 91 - Développement avancé)
+### 🔴 Prochaines priorités (Beta 93 - Développement avancé)
 
-**Date de démarrage**: 18 novembre 2025 (post-présentation)
-**Objectif**: Intégration feedback communauté et développement nouvelles fonctionnalités
+**Date de démarrage**: Décembre 2025 (post-Beta 92)
+**Objectif**: Tests Beta 92, feedback utilisateurs, et développement nouvelles fonctionnalités
 
-**Phase 1 - Court terme (novembre-décembre 2025)**:
+**Phase 1 - Court terme (décembre 2025)**:
 
-1. **Intégration feedback communauté** (post-présentation 19 nov)
+1. **Tests et validation Beta 92** ✅ **EN COURS**
+   - [ ] Exécution plan de tests PLAN_TESTS_BETA_92.md
+   - [ ] Validation workflow Primo end-to-end
+   - [ ] Tests import/export individuel avec CC
+   - [ ] Corrections bugs découverts
+   - [ ] Package distribution Monitorage_Beta_0.92.zip
+
+2. **Intégration feedback communauté** (post-présentation 19 nov)
    - [ ] Collecte et analyse feedback présentation
    - [ ] Corrections bugs rapportés par utilisateurs
    - [ ] Améliorations UX suggérées
    - [ ] Priorisation demandes fonctionnalités
 
-2. **Optimisations performance**
+3. **Optimisations performance**
    - [ ] Réduction temps chargement initial
    - [ ] Optimisation calculs indices A-C-P
    - [ ] Amélioration responsive mobile
    - [ ] Cache intelligent pour données calculées
 
-3. **Documentation enrichie**
+4. **Documentation enrichie**
    - [ ] Guide utilisateur simplifié (version publique)
    - [ ] FAQ étendue (questions communauté)
    - [ ] Tutoriels vidéo courts (< 5 min chacun)
@@ -1163,6 +1286,8 @@ Tests/
 **Note** : Migration IndexedDB complétée **2 mois en avance** sur calendrier initial (prévu janvier-février 2026, réalisé novembre 2025).
 
 **Voir**:
+- `BETA_92_CHANGELOG.md` pour changelog complet Beta 92 (Primo + Import/Export CC + Navigation)
+- `PLAN_TESTS_BETA_92.md` pour plan de tests systématique Beta 92
 - `BETA_91_CHANGELOG.md` pour suivi détaillé développements Beta 91
 - `INDEXEDDB_ARCHITECTURE.md` pour architecture stockage hybride complète
 - `MIGRATION_INDEXEDDB.md` pour plan migration technique (si existe)
@@ -1175,7 +1300,8 @@ Tests/
 
 ```bash
 # Test local
-open "index 91.html"   # macOS - Beta 91 (actuel)
+open "index 92.html"   # macOS - Beta 92 (actuel)
+open "index 91.html"   # macOS - Beta 91 (archivé)
 open "index 90 (architecture).html"   # macOS - Beta 90.5 (archivé)
 
 # Voir localStorage dans console Safari

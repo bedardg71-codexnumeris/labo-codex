@@ -582,6 +582,17 @@ function cartoucheSelectionnee() {
             <span id="total_erreurs_${critere.id}">--</span> erreurs / <span id="mots_formule_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span><br>
             <strong>Catégorie dominante:</strong> <span id="cat_dominante_${critere.id}" style="color: var(--orange-accent);">--</span>
         </div>
+        <!-- Menu sélecteur IDME pour modification manuelle (ex: jeton de reprise ciblée) -->
+        <div style="margin-top: 8px;">
+            <label style="font-size: 0.75rem; color: #666; margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
+            <select id="eval_${critere.id}" class="controle-form"
+                    onchange="niveauSelectionne('${critere.id}')"
+                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
+                <option value="">-- Utiliser le niveau calculé --</option>
+                ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+            </select>
+            <small style="font-size: 0.7rem; color: #999; display: block; margin-top: 4px;">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
+        </div>
     ` : `
         <!-- Interface algorithmique SIMPLE (sans catégorisation) -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
@@ -608,6 +619,17 @@ function cartoucheSelectionnee() {
         </div>
         <div id="resultat_algo_${critere.id}" style="padding: 8px; background: #f0f8ff; border-radius: 4px; font-size: 0.85rem; color: #666; margin-bottom: 8px;">
             <span id="total_erreurs_simple_${critere.id}">--</span> errreurs sur <span id="mots_simple_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
+        </div>
+        <!-- Menu sélecteur IDME pour modification manuelle (ex: jeton de reprise ciblée) -->
+        <div style="margin-top: 8px;">
+            <label style="font-size: 0.75rem; color: #666; margin-bottom: 4px; display: block;">Niveau IDME (modifiable manuellement) :</label>
+            <select id="eval_${critere.id}" class="controle-form"
+                    onchange="niveauSelectionne('${critere.id}')"
+                    style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
+                <option value="">-- Utiliser le niveau calculé --</option>
+                ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+            </select>
+            <small style="font-size: 0.7rem; color: #999; display: block; margin-top: 4px;">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
         </div>
     `) : `
         <!-- Interface standard (holistique/analytique) -->
@@ -1184,15 +1206,24 @@ function calculerNote() {
 
             // IMPORTANT: Pour les critères algorithmiques, utiliser le pourcentage exact calculé
             // au lieu de la valeur par défaut du niveau (ex: 61.5% au lieu de 32% pour I)
+            // SAUF si l'utilisateur a manuellement sélectionné un niveau différent (jeton de reprise ciblée)
             let valeurCritere = valeurs[niveau];
             let sourceValeur = 'niveau défaut';
 
+            // Vérifier si le select du critère est en mode manuel (valeur non vide)
+            const selectCritere = document.getElementById(`eval_${critere.id}`);
+            const niveauManuel = selectCritere?.value; // Niveau sélectionné manuellement (vide si "-- Utiliser le niveau calculé --")
+
             if (evaluationEnCours.donneesAlgorithmiques &&
                 evaluationEnCours.donneesAlgorithmiques[critere.id] &&
-                evaluationEnCours.donneesAlgorithmiques[critere.id].pourcentage !== undefined) {
+                evaluationEnCours.donneesAlgorithmiques[critere.id].pourcentage !== undefined &&
+                !niveauManuel) { // Utiliser l'algorithme SEULEMENT si pas de sélection manuelle
                 // Utiliser le pourcentage exact du calcul algorithmique
                 valeurCritere = evaluationEnCours.donneesAlgorithmiques[critere.id].pourcentage;
                 sourceValeur = 'algorithme exact';
+            } else if (niveauManuel) {
+                // Niveau sélectionné manuellement : utiliser la valeur par défaut du niveau
+                sourceValeur = 'manuel (jeton)';
             }
 
             if (valeurCritere !== undefined) {
@@ -1219,6 +1250,15 @@ function calculerNote() {
 
         // 🔍 DEBUG: Afficher le résultat final
         console.log(`🔍 DEBUG calculerNote() - Résultat: noteTotal=${noteTotal.toFixed(2)}%, ponderationTotal=${(ponderationTotal * 100).toFixed(0)}%, pourcentageFinal=${pourcentage.toFixed(1)}%`);
+
+        // APPLIQUER LE PLAFOND (CEILING) si c'est une reprise ciblée
+        if (evaluationEnCours.plafondNoteCiblee) {
+            const niveauPlafond = niveaux.find(n => n.code === evaluationEnCours.plafondNoteCiblee);
+            if (niveauPlafond && pourcentage > niveauPlafond.max) {
+                console.log(`🔍 DEBUG calculerNote() - Application plafond "${evaluationEnCours.plafondNoteCiblee}": ${pourcentage.toFixed(1)}% → ${niveauPlafond.max}%`);
+                pourcentage = niveauPlafond.max;
+            }
+        }
 
         // Déterminer le niveau global selon l'échelle
         const niveauFinal = niveaux.find(n => {
@@ -1872,9 +1912,62 @@ function gererChangementCheckboxJetonReprise() {
 }
 
 /**
+ * Gère le changement de la checkbox jeton de reprise ciblée
+ * Applique ou retire le jeton selon l'état de la checkbox
+ */
+function gererChangementCheckboxJetonRepriseCiblee() {
+    const checkbox = document.getElementById('checkboxJetonRepriseCiblee');
+    const evaluationId = window.evaluationEnCours?.idModification;
+
+    if (!evaluationId) {
+        console.warn('⚠️ Jeton de reprise ciblée : Impossible d\'appliquer sur une nouvelle évaluation (pas encore sauvegardée)');
+        checkbox.checked = false;
+        afficherNotificationErreur('Erreur', 'Veuillez d\'abord sauvegarder l\'évaluation avant d\'appliquer un jeton');
+        return;
+    }
+
+    if (checkbox.checked) {
+        // Pour le jeton de reprise ciblée, demander confirmation
+        const confirmer = confirm(
+            'Appliquer un jeton de reprise ciblée créera une nouvelle évaluation ciblant UN SEUL critère spécifique.\n\n' +
+            'La correction apportée devra être justifiée et la note sera plafonnée selon votre configuration.\n\n' +
+            'Voulez-vous continuer ?'
+        );
+
+        if (confirmer) {
+            // Appliquer le jeton via le module evaluation-jetons.js
+            if (typeof appliquerJetonRepriseCiblee === 'function') {
+                const nouvelleEval = appliquerJetonRepriseCiblee(evaluationId);
+                if (nouvelleEval) {
+                    // Charger la nouvelle évaluation dans le formulaire
+                    setTimeout(() => {
+                        if (typeof modifierEvaluation === 'function') {
+                            modifierEvaluation(nouvelleEval.id);
+                        }
+                    }, 500);
+                } else {
+                    // Si l'application a échoué, décocher la checkbox
+                    checkbox.checked = false;
+                }
+            } else {
+                console.error('❌ Fonction appliquerJetonRepriseCiblee non disponible');
+                afficherNotificationErreur('Erreur', 'Module jetons non disponible');
+                checkbox.checked = false;
+            }
+        } else {
+            // L'utilisateur a annulé, décocher la checkbox
+            checkbox.checked = false;
+        }
+    } else {
+        // Retirer le jeton (TODO: implémenter si nécessaire)
+        console.log('ℹ️ Retrait du jeton de reprise ciblée');
+    }
+}
+
+/**
  * Retire un jeton depuis la barre latérale (pendant l'édition)
  * @param {string} evaluationId - ID de l'évaluation
- * @param {string} typeJeton - Type de jeton à retirer ('reprise' ou 'delai')
+ * @param {string} typeJeton - Type de jeton à retirer ('reprise', 'delai', ou 'reprise-ciblee')
  */
 function retirerJetonDepuisSidebar(evaluationId, typeJeton) {
     console.log('🗑️ Retrait jeton:', typeJeton, 'pour évaluation:', evaluationId);
@@ -3951,6 +4044,11 @@ function modifierEvaluation(evaluationId) {
                 jetonRepriseApplique: evaluation.jetonRepriseApplique || false,
                 repriseDeId: evaluation.repriseDeId,
                 dateApplicationJetonReprise: evaluation.dateApplicationJetonReprise,
+                jetonRepriseCibleeApplique: evaluation.jetonRepriseCibleeApplique || false,
+                repriseDeIdCiblee: evaluation.repriseDeIdCiblee,
+                critereRepriseCiblee: evaluation.critereRepriseCiblee,
+                plafondNoteCiblee: evaluation.plafondNoteCiblee,
+                dateApplicationJetonRepriseCiblee: evaluation.dateApplicationJetonRepriseCiblee,
                 criteres: {},
                 idModification: evaluationId
             };
@@ -4221,6 +4319,27 @@ function sauvegarderEvaluationModifiee() {
 
     // Mettre à jour l'évaluation existante avec horodatage
     const maintenant = new Date();
+
+    // Préserver les propriétés de jetons existantes
+    const evaluationExistante = evaluations[indexEval];
+    const proprietesJetons = {
+        jetonRepriseCibleeApplique: evaluationExistante.jetonRepriseCibleeApplique,
+        repriseDeIdCiblee: evaluationExistante.repriseDeIdCiblee,
+        critereRepriseCiblee: evaluationExistante.critereRepriseCiblee,
+        plafondNoteCiblee: evaluationExistante.plafondNoteCiblee,
+        dateApplicationJetonRepriseCiblee: evaluationExistante.dateApplicationJetonRepriseCiblee,
+        jetonDelaiApplique: evaluationExistante.jetonDelaiApplique,
+        dateEcheanceOriginale: evaluationExistante.dateEcheanceOriginale,
+        nombreJoursDelai: evaluationExistante.nombreJoursDelai,
+        dateApplicationJetonDelai: evaluationExistante.dateApplicationJetonDelai,
+        repriseDeId: evaluationExistante.repriseDeId,
+        dateApplicationJetonReprise: evaluationExistante.dateApplicationJetonReprise,
+        remplaceeParId: evaluationExistante.remplaceeParId,
+        dateRemplacement: evaluationExistante.dateRemplacement,
+        archivee: evaluationExistante.archivee,
+        dateArchivage: evaluationExistante.dateArchivage
+    };
+
     evaluations[indexEval] = {
         ...evaluations[indexEval], // Garder l'ID et la date originale
         etudiantDA: etudiantDA,
@@ -4249,6 +4368,7 @@ function sauvegarderEvaluationModifiee() {
             contexte: document.getElementById('afficherContexte1').checked
         },
         donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {}, // Sauvegarder données du français écrit algorithmique
+        ...proprietesJetons, // Préserver toutes les propriétés de jetons
         verrouillee: true // Verrouiller automatiquement après la sauvegarde
     };
 
@@ -5403,3 +5523,4 @@ window.calculerNoteAlgorithmiqueAvecCategories = calculerNoteAlgorithmiqueAvecCa
 window.calculerNoteAlgorithmiqueSimple = calculerNoteAlgorithmiqueSimple;
 window.copierCriteresSRPN = copierCriteresSRPN;
 window.copierCriteresSRPNF = copierCriteresSRPNF;
+window.gererChangementCheckboxJetonRepriseCiblee = gererChangementCheckboxJetonRepriseCiblee;

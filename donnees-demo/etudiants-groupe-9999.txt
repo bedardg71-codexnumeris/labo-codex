@@ -1,0 +1,11 @@
+DA	Groupe	Nom	Prénom	Programme	SA
+9999001	9999	Tremblay	Émilie	200.B1
+9999002	9999	Gagnon	Thomas	310.B1
+9999003	9999	Roy	Camille	200.B1
+9999004	9999	Côté	Alexandre	200.B1
+9999005	9999	Bouchard	Sarah	200.B1
+9999006	9999	Nguyen	Minh	322.A1
+9999007	9999	Morin	Léa	310.B1
+9999008	9999	Lavoie	Maxime	200.B1
+9999009	9999	Fortin	Jade	200.B1
+9999010	9999	Gagné	William	200.B1

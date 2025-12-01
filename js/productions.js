@@ -1312,6 +1312,126 @@ async function exporterProductionActive() {
 }
 
 /**
+ * Importe un fichier JSON pour remplacer la production actuellement en cours d'édition
+ * NOUVEAU (Beta 92): Support métadonnées Creative Commons
+ */
+function importerDansProductionActive(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Récupérer l'ID de la production active
+    const itemActif = document.querySelector('.sidebar-item.active');
+    if (!itemActif) {
+        alert('Aucune production sélectionnée. Veuillez d\'abord sélectionner une production à remplacer.');
+        event.target.value = ''; // Reset input
+        return;
+    }
+
+    const productionId = itemActif.getAttribute('data-id');
+    if (!productionId) {
+        alert('Impossible de déterminer la production à remplacer.');
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const donnees = JSON.parse(e.target.result);
+
+            // Valider que c'est bien une production
+            if (!donnees || typeof donnees !== 'object') {
+                alert('Le fichier JSON n\'est pas valide.');
+                event.target.value = '';
+                return;
+            }
+
+            // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata CC)
+            let productionImportee;
+            let metadata = null;
+
+            if (donnees.contenu) {
+                // Nouveau format avec CC metadata
+                metadata = donnees.metadata;
+                productionImportee = donnees.contenu;
+            } else {
+                // Ancien format direct
+                productionImportee = donnees;
+            }
+
+            // Afficher badge CC si présent
+            let messageConfirmation = '';
+            if (metadata && metadata.licence && metadata.licence.includes("CC")) {
+                messageConfirmation = `📋 Matériel sous licence ${metadata.licence}\n` +
+                    `👤 Auteur: ${metadata.auteur_original}\n` +
+                    `📅 Créé le: ${metadata.date_creation}\n\n`;
+            }
+
+            // Confirmer le remplacement
+            const confirmation = confirm(
+                messageConfirmation +
+                `⚠️ ATTENTION: Cette action va remplacer la production actuelle.\n\n` +
+                `Voulez-vous continuer ?`
+            );
+
+            if (!confirmation) {
+                console.log('Import annulé par l\'utilisateur');
+                event.target.value = '';
+                return;
+            }
+
+            // Récupérer les productions
+            const productions = db.getSync('productions', []);
+            const index = productions.findIndex(p => p.id === productionId);
+
+            if (index === -1) {
+                alert('Production introuvable.');
+                event.target.value = '';
+                return;
+            }
+
+            // Préserver l'ID original et remplacer les données
+            const productionMiseAJour = {
+                ...productionImportee,
+                id: productionId // Garder l'ID original
+            };
+
+            // Préserver les métadonnées CC si présentes
+            if (metadata) {
+                productionMiseAJour.metadata_cc = metadata;
+            }
+
+            // Remplacer dans le tableau
+            productions[index] = productionMiseAJour;
+
+            // Sauvegarder
+            db.setSync('productions', productions);
+
+            // Recharger la production dans le formulaire
+            afficherFormProduction(productionId);
+
+            // Rafraîchir la liste
+            afficherListeProductions();
+
+            console.log('✅ Production importée et remplacée avec succès');
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces('Production importée et remplacée avec succès');
+            } else {
+                alert('Production importée et remplacée avec succès !');
+            }
+
+        } catch (error) {
+            console.error('Erreur lors de l\'import:', error);
+            alert('Erreur lors de la lecture du fichier JSON. Assurez-vous qu\'il s\'agit d\'un fichier valide.');
+        } finally {
+            event.target.value = ''; // Reset input
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+/**
  * Importe des productions depuis un fichier JSON avec gestion CC
  *
  * FONCTIONNEMENT:
@@ -1494,11 +1614,12 @@ window.initialiserModuleProductions = initialiserModuleProductions;
 // Export/Import avec licence CC
 window.exporterProductions = exporterProductions;
 window.exporterProductionActive = exporterProductionActive;
+window.importerDansProductionActive = importerDansProductionActive;
 window.importerProductions = importerProductions;
 
 // Nouvelles fonctions sidebar (Beta 80.5+)
 window.afficherListeProductions = afficherListeProductions;
-window.filtrerListeProductions = filtrerListeProductions;
+// window.filtrerListeProductions = filtrerListeProductions; // Fonction commentée (Beta 92)
 window.chargerProductionPourModif = chargerProductionPourModif;
 window.creerNouvelleProduction = creerNouvelleProduction;
 window.dupliquerProduction = dupliquerProduction;
@@ -1618,7 +1739,9 @@ function afficherListeProductions(filtreType = '') {
 /**
  * Filtre la liste des productions par type
  * Appelée par le select de filtre dans la sidebar
+ * DÉSACTIVÉ : Filtre retiré de l'interface (Beta 92)
  */
+/*
 function filtrerListeProductions() {
     const select = document.getElementById('filtreTypeProduction');
     if (!select) return;
@@ -1626,6 +1749,7 @@ function filtrerListeProductions() {
     const filtreType = select.value;
     afficherListeProductions(filtreType);
 }
+*/
 
 /**
  * Charge une production pour modification dans le formulaire
@@ -1638,19 +1762,21 @@ function chargerProductionPourModif(id) {
     const accueil = document.getElementById('accueilProductions');
     if (accueil) accueil.style.display = 'none';
 
-    // Afficher le formulaire et les options
+    // Afficher le formulaire
     const formulaire = document.getElementById('formulaireProduction');
     if (formulaire) formulaire.style.display = 'block';
 
-    const options = document.getElementById('optionsImportExportProductions');
-    if (options) options.style.display = 'block';
+    // Note: Section optionsImportExportProductions supprimée (Beta 92)
+    // Les boutons Import/Export sont maintenant dans l'en-tête
 
-    // Afficher les boutons Dupliquer, Exporter et Supprimer (mode édition)
+    // Afficher les boutons Dupliquer, Exporter, Importer et Supprimer (mode édition)
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
     const btnExporter = document.getElementById('btnExporterProduction');
+    const btnImporter = document.getElementById('btnImporterProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
     if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
     if (btnExporter) btnExporter.style.display = 'inline-block';
+    if (btnImporter) btnImporter.style.display = 'inline-block';
     if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
     // Appeler afficherFormProduction pour charger les données
@@ -1680,19 +1806,21 @@ function creerNouvelleProduction() {
     const accueil = document.getElementById('accueilProductions');
     if (accueil) accueil.style.display = 'none';
 
-    // Afficher le formulaire et les options
+    // Afficher le formulaire
     const formulaire = document.getElementById('formulaireProduction');
     if (formulaire) formulaire.style.display = 'block';
 
-    const options = document.getElementById('optionsImportExportProductions');
-    if (options) options.style.display = 'block';
+    // Note: Section optionsImportExportProductions supprimée (Beta 92)
+    // Les boutons Import/Export sont maintenant dans l'en-tête
 
-    // Cacher les boutons Dupliquer, Exporter et Supprimer (mode création)
+    // Cacher les boutons Dupliquer, Exporter, Importer et Supprimer (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
     const btnExporter = document.getElementById('btnExporterProduction');
+    const btnImporter = document.getElementById('btnImporterProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
     if (btnDupliquer) btnDupliquer.style.display = 'none';
     if (btnExporter) btnExporter.style.display = 'none';
+    if (btnImporter) btnImporter.style.display = 'none';
     if (btnSupprimer) btnSupprimer.style.display = 'none';
 
     // Réinitialiser le formulaire

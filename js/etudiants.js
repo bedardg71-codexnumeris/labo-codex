@@ -611,19 +611,8 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneE) {
             return '<span class="etud-texte-gris-mini">—</span>';
         }
 
-        const absR = Math.abs(r);
-        let couleur;
-
-        // Déterminer la couleur selon la force de corrélation
-        if (absR >= 0.7) {
-            couleur = '#2e7d32'; // Vert foncé (forte)
-        } else if (absR >= 0.5) {
-            couleur = '#f57c00'; // Orange (modérée)
-        } else {
-            couleur = '#c62828'; // Rouge (faible)
-        }
-
-        return `<span style="color: ${couleur}; font-size: 0.75rem; font-weight: 600;">r=${r.toFixed(2)}</span>`;
+        // Texte blanc pour meilleur contraste sur fond bleu foncé
+        return `<span style="color: white; font-size: 0.75rem; font-weight: 600;">r=${r.toFixed(2)}</span>`;
     }
 
     // Fonction helper pour formater la moyenne
@@ -632,17 +621,8 @@ function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneE) {
             return '<span class="etud-texte-gris-mini">—</span>';
         }
 
-        // Couleur selon la valeur de l'engagement moyen
-        let couleur;
-        if (valeur >= 70) {
-            couleur = '#2e7d32'; // Vert (contexte favorable)
-        } else if (valeur >= 55) {
-            couleur = '#f57c00'; // Orange (contexte modéré)
-        } else {
-            couleur = '#c62828'; // Rouge (contexte difficile)
-        }
-
-        return `<span style="color: ${couleur}; font-size: 0.75rem; font-weight: 600;">moy=${Math.round(valeur)}%</span>`;
+        // Texte blanc pour meilleur contraste sur fond bleu foncé
+        return `<span style="color: white; font-size: 0.75rem; font-weight: 600;">moy=${Math.round(valeur)}%</span>`;
     }
 
     // Mettre à jour l'en-tête A (assiduité)
@@ -805,7 +785,12 @@ function filtrerEtudiants(etudiants) {
         resultats = resultats.filter(function (e) {
             // 🆕 BETA 90+ : Utiliser determinerNiveauRaiPedagogique (Single Source of Truth)
             const niveauInfo = determinerNiveauRaiPedagogique(e.da);
-            const pattern = niveauInfo.pattern.toLowerCase().replace(/\s+/g, '-');
+            // Normaliser le pattern : lowercase, sans accents, espaces → tirets
+            const pattern = niveauInfo.pattern
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Retirer les accents
+                .replace(/\s+/g, '-');
             return pattern === patternFiltre;
         });
     }
@@ -935,9 +920,42 @@ function afficherListeEtudiantsConsultation() {
         tableContainer.style.display = 'block';
     }
 
+    // 🆕 BETA 91: Calculer les corrélations A-P et C-P sur TOUS les étudiants (avant filtrage)
+    // Ceci assure la cohérence avec le tableau de bord qui calcule sur tous les étudiants
+    // IMPORTANT: Utiliser la même pratique que le tableau de bord (SOM ou PAN selon config)
+    // Réutiliser la variable config déjà chargée à la ligne 847
+    const affichage = config.affichageTableauBord || {};
+    const afficherSommatif = affichage.afficherSommatif !== false;
+    const afficherAlternatif = affichage.afficherAlternatif !== false;
+
+    // Déterminer quelle pratique afficher (cohérence avec tableau-bord-apercu.js)
+    let pratiqueAffichee = null;
+    if (afficherSommatif && !afficherAlternatif) {
+        pratiqueAffichee = 'SOM';
+    } else if (!afficherSommatif && afficherAlternatif) {
+        pratiqueAffichee = 'PAN';
+    } else if (afficherSommatif && afficherAlternatif) {
+        // Mode comparatif : utiliser PAN comme dans le tableau de bord
+        pratiqueAffichee = 'PAN';
+    }
+
+    // Vérifier que calculerTousLesIndices existe (chargé depuis profil-etudiant.js)
+    const tousIndices = typeof window.calculerTousLesIndices === 'function'
+        ? etudiants.map(e => calculerTousLesIndices(e.da, pratiqueAffichee))
+        : etudiants.map(e => calculerIndicesEtudiant(e.da)); // Fallback vers ancienne fonction
+
+    const valeursA_tous = tousIndices.map(indices => indices.A);
+    const valeursC_tous = tousIndices.map(indices => indices.C);
+    const valeursP_tous = tousIndices.map(indices => indices.P);
+
+    const r_AP = calculerCorrelationPearson(valeursA_tous, valeursP_tous);
+    const r_CP = calculerCorrelationPearson(valeursC_tous, valeursP_tous);
+
     // NOUVEAU: Enrichir les données pour le tri (sans assigner les numéros encore)
     etudiantsFiltres = etudiantsFiltres.map((e) => {
-        const indices = calculerTousLesIndices(e.da);
+        const indices = typeof window.calculerTousLesIndices === 'function'
+            ? calculerTousLesIndices(e.da, pratiqueAffichee)
+            : calculerIndicesEtudiant(e.da); // Fallback
         // 🆕 BETA 90+ : Utiliser determinerNiveauRaiPedagogique (Single Source of Truth)
         const niveauInfo = determinerNiveauRaiPedagogique(e.da);
         return {
@@ -947,24 +965,16 @@ function afficherListeEtudiantsConsultation() {
         };
     });
 
-    // 🆕 BETA 91: Calculer les corrélations A-P et C-P pour afficher dans l'en-tête
-    const valeursA = etudiantsFiltres.map(e => e.indicesCalcules.A);
-    const valeursC = etudiantsFiltres.map(e => e.indicesCalcules.C);
-    const valeursP = etudiantsFiltres.map(e => e.indicesCalcules.P);
-
-    const r_AP = calculerCorrelationPearson(valeursA, valeursP);
-    const r_CP = calculerCorrelationPearson(valeursC, valeursP);
-
-    // 🆕 BETA 91: Calculer la moyenne de l'engagement E pour afficher dans l'en-tête
-    const valeursE = etudiantsFiltres.map(e => {
-        const A = e.indicesCalcules.A / 100;
-        const C = e.indicesCalcules.C / 100;
-        const P = e.indicesCalcules.P / 100;
+    // 🆕 BETA 91: Calculer la moyenne de l'engagement E sur TOUS les étudiants (cohérence avec corrélations)
+    const valeursE_tous = tousIndices.map(indices => {
+        const A = indices.A / 100;
+        const C = indices.C / 100;
+        const P = indices.P / 100;
         const E_brut = A * C * P;
         const E = Math.pow(E_brut, 1/3);
         return E * 100; // Retourner en pourcentage
     });
-    const moyenneE = valeursE.length > 0 ? valeursE.reduce((sum, val) => sum + val, 0) / valeursE.length : null;
+    const moyenneE = valeursE_tous.length > 0 ? valeursE_tous.reduce((sum, val) => sum + val, 0) / valeursE_tous.length : null;
 
     // Mettre à jour les en-têtes avec les corrélations et la moyenne de E
     mettreAJourEntetesAvecCorrelations(r_AP, r_CP, moyenneE);
@@ -1077,13 +1087,7 @@ function afficherListeEtudiantsConsultation() {
             afficherPortfolio(etudiant.da);
         };
 
-        // Effet de survol
-        tr.onmouseenter = function () {
-            this.style.backgroundColor = 'var(--bleu-tres-pale)';
-        };
-        tr.onmouseleave = function () {
-            this.style.backgroundColor = '';
-        };
+        // Effet de survol géré par CSS (plus fiable pour adaptation par mode)
 
         // Échapper les valeurs pour sécurité
         // IMPORTANT: Utiliser daAffichage pour l'affichage, mais garder da pour les calculs
@@ -1209,6 +1213,8 @@ function obtenirNomProgramme(code) {
 function resetFiltresListe() {
     const filtreGroupe = document.getElementById('filtre-groupe-liste');
     const filtreProgramme = document.getElementById('filtre-programme-liste');
+    const filtreRai = document.getElementById('filtre-rai-liste');
+    const filtrePattern = document.getElementById('filtre-pattern-liste');
     const rechercheNom = document.getElementById('recherche-nom-liste');
 
     if (filtreGroupe) {
@@ -1217,11 +1223,24 @@ function resetFiltresListe() {
     if (filtreProgramme) {
         filtreProgramme.value = '';
     }
+    if (filtreRai) {
+        filtreRai.value = '';
+    }
+    if (filtrePattern) {
+        filtrePattern.value = '';
+    }
     if (rechercheNom) {
         rechercheNom.value = '';
     }
 
     afficherListeEtudiantsConsultation();  // ← CHANGEMENT ICI
+}
+
+/**
+ * Alias pour resetFiltresListe() - utilisé par le bouton dans l'interface
+ */
+function reinitialiserFiltresListeEtudiants() {
+    resetFiltresListe();
 }
 
 /* ===============================
@@ -1431,3 +1450,4 @@ window.chargerListeEtudiants = chargerListeEtudiants;
 window.afficherListeEtudiantsConsultation = afficherListeEtudiantsConsultation;
 window.trierTableauPar = trierTableauPar;
 window.obtenirNomProgramme = obtenirNomProgramme;
+window.reinitialiserFiltresListeEtudiants = reinitialiserFiltresListeEtudiants;

@@ -677,15 +677,7 @@ function filtrerParGroupe() {
             `;
         }).join('');
 
-        // Ajouter l'effet de survol sur chaque rangée
-        tbody.querySelectorAll('tr').forEach(tr => {
-            tr.onmouseenter = function () {
-                this.style.backgroundColor = 'var(--bleu-tres-pale)';
-            };
-            tr.onmouseleave = function () {
-                this.style.backgroundColor = '';
-            };
-        });
+        // Effet de survol géré par CSS (plus fiable pour adaptation par mode)
 
     } catch (error) {
         console.error('Erreur filtrage:', error);

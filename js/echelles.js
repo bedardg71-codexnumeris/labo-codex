@@ -460,6 +460,8 @@ function chargerEchelleTemplate(echelleId) {
     const nomContainer = document.getElementById('nomEchelleContainer');
     const btnDupliquer = document.getElementById('btnDupliquerEchelle');
     const btnExporter = document.getElementById('btnExporterEchelle');
+    const btnImporter = document.getElementById('btnImporterEchelle');
+    const btnSupprimer = document.getElementById('btnSupprimerEchelle');
 
     if (!selectValue || selectValue === 'new') {
         // Nouvelle échelle
@@ -470,9 +472,11 @@ function chargerEchelleTemplate(echelleId) {
         reinitialiserNiveauxDefaut();
         echelleTemplateActuelle = null;
 
-        // Masquer les boutons dupliquer et exporter
+        // Masquer les boutons dupliquer, exporter, importer et supprimer
         if (btnDupliquer) btnDupliquer.style.display = 'none';
         if (btnExporter) btnExporter.style.display = 'none';
+        if (btnImporter) btnImporter.style.display = 'none';
+        if (btnSupprimer) btnSupprimer.style.display = 'none';
 
     } else {
         // Charger une échelle existante
@@ -512,9 +516,11 @@ function chargerEchelleTemplate(echelleId) {
 
             echelleTemplateActuelle = echelle;
 
-            // Afficher les boutons dupliquer et exporter
+            // Afficher les boutons dupliquer, exporter, importer et supprimer
             if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
             if (btnExporter) btnExporter.style.display = 'inline-block';
+            if (btnImporter) btnImporter.style.display = 'inline-block';
+            if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
             // Scroll vers le formulaire pour que l'utilisateur voie le changement
             const formulaire = document.getElementById('formEchelle');
@@ -1679,6 +1685,118 @@ async function exporterEchelleActive() {
 }
 
 /**
+ * Importe un fichier JSON pour remplacer l'échelle actuellement en cours d'édition
+ * NOUVEAU (Beta 92): Support métadonnées Creative Commons
+ */
+function importerDansEchelleActive(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Récupérer l'ID de l'échelle active
+    if (!echelleTemplateActuelle || !echelleTemplateActuelle.id) {
+        alert('Aucune échelle sélectionnée. Veuillez d\'abord sélectionner une échelle à remplacer.');
+        event.target.value = ''; // Reset input
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const donnees = JSON.parse(e.target.result);
+
+            // Valider que c'est bien une échelle
+            if (!donnees || typeof donnees !== 'object') {
+                alert('Le fichier JSON n\'est pas valide.');
+                event.target.value = '';
+                return;
+            }
+
+            // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata CC)
+            let echelleImportee;
+            let metadata = null;
+
+            if (donnees.contenu) {
+                // Nouveau format avec CC metadata
+                metadata = donnees.metadata;
+                echelleImportee = donnees.contenu;
+            } else {
+                // Ancien format direct
+                echelleImportee = donnees;
+            }
+
+            // Afficher badge CC si présent
+            let messageConfirmation = '';
+            if (metadata && metadata.licence && metadata.licence.includes("CC")) {
+                messageConfirmation = `📋 Matériel sous licence ${metadata.licence}\n` +
+                    `👤 Auteur: ${metadata.auteur_original}\n` +
+                    `📅 Créé le: ${metadata.date_creation}\n\n`;
+            }
+
+            // Confirmer le remplacement
+            const confirmation = confirm(
+                messageConfirmation +
+                `⚠️ ATTENTION: Cette action va remplacer l'échelle actuelle.\n\n` +
+                `Voulez-vous continuer ?`
+            );
+
+            if (!confirmation) {
+                console.log('Import annulé par l\'utilisateur');
+                event.target.value = '';
+                return;
+            }
+
+            // Récupérer les échelles
+            const echelles = db.getSync('echellesTemplates', []);
+            const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
+
+            if (index === -1) {
+                alert('Échelle introuvable.');
+                event.target.value = '';
+                return;
+            }
+
+            // Préserver l'ID original et remplacer les données
+            const echelleMiseAJour = {
+                ...echelleImportee,
+                id: echelleTemplateActuelle.id // Garder l'ID original
+            };
+
+            // Préserver les métadonnées CC si présentes
+            if (metadata) {
+                echelleMiseAJour.metadata_cc = metadata;
+            }
+
+            // Remplacer dans le tableau
+            echelles[index] = echelleMiseAJour;
+
+            // Sauvegarder
+            db.setSync('echellesTemplates', echelles);
+
+            // Recharger l'échelle dans le formulaire
+            chargerEchellePourModif(echelleTemplateActuelle.id);
+
+            // Rafraîchir la liste
+            afficherEchellesExistantes();
+
+            console.log('✅ Échelle importée et remplacée avec succès');
+            if (typeof afficherNotificationSucces === 'function') {
+                afficherNotificationSucces('Échelle importée et remplacée avec succès');
+            } else {
+                alert('Échelle importée et remplacée avec succès !');
+            }
+
+        } catch (error) {
+            console.error('Erreur lors de l\'import:', error);
+            alert('Erreur lors de la lecture du fichier JSON. Assurez-vous qu\'il s\'agit d\'un fichier valide.');
+        } finally {
+            event.target.value = ''; // Reset input
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+/**
  * Importe des échelles depuis un fichier JSON avec gestion CC
  *
  * FONCTIONNEMENT:
@@ -1841,6 +1959,7 @@ window.reinitialiserNiveauxDefaut = reinitialiserNiveauxDefaut;
 // Export/Import avec licence CC
 window.exporterEchelles = exporterEchelles;
 window.exporterEchelleActive = exporterEchelleActive;
+window.importerDansEchelleActive = importerDansEchelleActive;
 window.importerEchelles = importerEchelles;
 
 /* ===============================
@@ -1876,11 +1995,17 @@ function afficherListeEchelles() {
 function creerNouvelleEchelle() {
     document.getElementById('accueilEchelles').style.display = 'none';
     document.getElementById('conteneurEditionEchelle').style.display = 'block';
-    document.getElementById('optionsImportExportEchelles').style.display = 'block';
 
-    // Masquer les boutons Dupliquer et Supprimer (mode création)
+    // Note: Section optionsImportExportEchelles supprimée (Beta 92)
+    // Les boutons Import/Export sont maintenant dans l'en-tête
+
+    // Masquer les boutons Exporter, Importer, Dupliquer et Supprimer (mode création)
+    const btnExporter = document.getElementById('btnExporterEchelle');
+    const btnImporter = document.getElementById('btnImporterEchelle');
     const btnDupliquer = document.getElementById('btnDupliquerEchelle');
     const btnSupprimer = document.getElementById('btnSupprimerEchelle');
+    if (btnExporter) btnExporter.style.display = 'none';
+    if (btnImporter) btnImporter.style.display = 'none';
     if (btnDupliquer) btnDupliquer.style.display = 'none';
     if (btnSupprimer) btnSupprimer.style.display = 'none';
 
@@ -1900,7 +2025,7 @@ function creerNouvelleEchelle() {
 function annulerFormEchelle() {
     // Masquer l'éditeur et réafficher l'accueil
     document.getElementById('conteneurEditionEchelle').style.display = 'none';
-    document.getElementById('optionsImportExportEchelles').style.display = 'none';
+    // Note: Section optionsImportExportEchelles supprimée (Beta 92)
     document.getElementById('accueilEchelles').style.display = 'block';
 
     // Réinitialiser les champs
@@ -1924,11 +2049,17 @@ function chargerEchellePourModif(id) {
 
     document.getElementById('accueilEchelles').style.display = 'none';
     document.getElementById('conteneurEditionEchelle').style.display = 'block';
-    document.getElementById('optionsImportExportEchelles').style.display = 'block';
 
-    // Afficher les boutons Dupliquer et Supprimer (mode édition)
+    // Note: Section optionsImportExportEchelles supprimée (Beta 92)
+    // Les boutons Import/Export sont maintenant dans l'en-tête
+
+    // Afficher les boutons Exporter, Importer, Dupliquer et Supprimer (mode édition)
+    const btnExporter = document.getElementById('btnExporterEchelle');
+    const btnImporter = document.getElementById('btnImporterEchelle');
     const btnDupliquer = document.getElementById('btnDupliquerEchelle');
     const btnSupprimer = document.getElementById('btnSupprimerEchelle');
+    if (btnExporter) btnExporter.style.display = 'inline-block';
+    if (btnImporter) btnImporter.style.display = 'inline-block';
     if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
     if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
@@ -2410,7 +2541,7 @@ function supprimerEchelleDepuisSidebar(id) {
                         db.setSync('echellesTemplates', echelles);
                         afficherListeEchelles();
                         document.getElementById('conteneurEditionEchelle').style.display = 'none';
-                        document.getElementById('optionsImportExportEchelles').style.display = 'none';
+                        // Note: Section optionsImportExportEchelles supprimée (Beta 92)
                         document.getElementById('accueilEchelles').style.display = 'block';
                         alert(`✅ Échelle supprimée avec succès !\n${nbMigrees} évaluation(s) ont été migrées vers "${nouvelleEchelle.nom}".`);
                     }
@@ -2438,7 +2569,7 @@ function supprimerEchelleDepuisSidebar(id) {
             db.setSync('echellesTemplates', echelles);
             afficherListeEchelles();
             document.getElementById('conteneurEditionEchelle').style.display = 'none';
-            document.getElementById('optionsImportExportEchelles').style.display = 'none';
+            // Note: Section optionsImportExportEchelles supprimée (Beta 92)
             document.getElementById('accueilEchelles').style.display = 'block';
             alert('Échelle supprimée avec succès !');
         }

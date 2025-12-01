@@ -106,9 +106,8 @@ function sauvegarderInterventions(interventions) {
 
     // Vérifier immédiatement la lecture
     const verification = db.getSync('interventions', null);
-    const parsed = JSON.parse(verification);
     console.log('   ✅ Vérification lecture immédiate:');
-    console.log('   Nombre d\'interventions relues:', parsed.length);
+    console.log('   Nombre d\'interventions relues:', verification ? verification.length : 0);
     console.log('💾 sauvegarderInterventions() - FIN');
 }
 

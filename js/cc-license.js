@@ -34,14 +34,37 @@ const CC_LICENSE_DEFAULTS = {
 function ajouterMetadonnéesCC(contenu, type, nom, metaEnrichies = {}) {
     const date_actuelle = new Date().toISOString().split('T')[0];
 
+    // 🆕 BETA 92: Utiliser les métadonnées enrichies du modal (avec checkboxes)
+    // Si metaEnrichies contient auteur/courriel/siteWeb, les utiliser; sinon, fallback sur infoCours
+    const infoCours = JSON.parse(localStorage.getItem('infoCours') || '{}');
+
+    const auteur_utilisateur = metaEnrichies.auteur ||
+                               infoCours.enseignant ||
+                               CC_LICENSE_DEFAULTS.auteur_original;
+
+    const email_utilisateur = metaEnrichies.courriel ||
+                             infoCours.courriel ||
+                             CC_LICENSE_DEFAULTS.email_auteur;
+
+    const site_utilisateur = metaEnrichies.siteWeb ||
+                            infoCours.siteWeb ||
+                            CC_LICENSE_DEFAULTS.site_auteur;
+
     // Déterminer l'auteur original (si c'est du matériel importé, préserver l'auteur)
-    const auteur_original = contenu.metadata_cc?.auteur_original || CC_LICENSE_DEFAULTS.auteur_original;
-    const date_creation = contenu.metadata_cc?.date_creation || contenu.metadata?.date_creation || date_actuelle;
+    const auteur_original = contenu.metadata_cc?.auteur_original ||
+                           contenu.metadata?.auteur_original ||
+                           auteur_utilisateur;
+
+    const date_creation = contenu.metadata_cc?.date_creation ||
+                         contenu.metadata?.date_creation ||
+                         date_actuelle;
 
     return {
         metadata: {
             ...CC_LICENSE_DEFAULTS,
             auteur_original: auteur_original,
+            email_auteur: email_utilisateur,
+            site_auteur: site_utilisateur,
             type: type,
             nom: nom,
             date_creation: date_creation,
@@ -49,9 +72,10 @@ function ajouterMetadonnéesCC(contenu, type, nom, metaEnrichies = {}) {
             version: contenu.metadata?.version || "1.0",
             contributeurs: contenu.metadata_cc?.contributeurs || contenu.metadata?.contributeurs || [],
             attribution: `Créé par ${auteur_original} pour l'application Monitorage Pédagogique`,
-            // NOUVEAUX CHAMPS (Beta 91) - Métadonnées enrichies
+            // 🆕 BETA 92: Métadonnées enrichies avec discipline, niveau et institution
             discipline: metaEnrichies.discipline || contenu.metadata?.discipline || [],
             niveau: metaEnrichies.niveau || contenu.metadata?.niveau || "",
+            institution: metaEnrichies.institution || contenu.metadata?.institution || "",
             description_courte: metaEnrichies.description_courte || contenu.metadata?.description_courte || ""
         },
         contenu: contenu
@@ -286,16 +310,60 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
             document.body.appendChild(modal);
         }
 
-        // Remplir les informations
+        // 🆕 BETA 92: Lire les informations de l'utilisateur depuis infoCours ET listeCours
+        const infoCours = JSON.parse(localStorage.getItem('infoCours') || '{}');
+        const listeCours = JSON.parse(localStorage.getItem('listeCours') || '[]');
+        const coursActif = listeCours.find(c => c.actif) || listeCours[0] || {};
+
+        // Construire le nom complet (prioriser listeCours puis infoCours)
+        const prenom = coursActif.prenomEnseignant || infoCours.prenomEnseignant || infoCours.enseignant || '';
+        const nom = coursActif.nomEnseignant || infoCours.nomEnseignant || '';
+        const nomComplet = [prenom, nom].filter(Boolean).join(' ');
+
+        const courriel = coursActif.courriel || infoCours.courriel || '';
+        const siteWeb = coursActif.siteWeb || infoCours.siteWeb || '';
+        const discipline = coursActif.discipline || infoCours.discipline || '';
+        const institution = coursActif.institution || infoCours.institution || '';
+
+        console.log('[CC Export] Pré-remplissage:', { nomComplet, courriel, siteWeb, discipline, institution });
+
+        // Remplir les informations de base
         document.getElementById('metaTypeContenu').textContent = typeContenu;
         document.getElementById('metaNomContenu').textContent = nomContenu;
-        document.getElementById('metaDisciplines').value = '';
+
+        // 🆕 Pré-remplir les champs avec les données utilisateur
+        document.getElementById('metaNomAuteur').value = nomComplet;
+        document.getElementById('metaCourriel').value = courriel;
+        document.getElementById('metaSiteWeb').value = siteWeb;
+        document.getElementById('metaDisciplines').value = discipline;
+        document.getElementById('metaInstitution').value = institution;
         document.getElementById('metaNiveau').value = 'Collégial';
         document.getElementById('metaDescription').value = '';
         document.getElementById('metaDescriptionCompteur').textContent = '0/200';
 
+        // 🆕 Réinitialiser les checkboxes (intelligentes : cochées si valeur présente)
+        document.getElementById('checkPartagerNom').checked = true;
+        document.getElementById('checkPartagerCourriel').checked = !!courriel;
+        document.getElementById('checkPartagerSiteWeb').checked = !!siteWeb;
+        document.getElementById('checkPartagerDiscipline').checked = !!discipline;
+        document.getElementById('checkPartagerInstitution').checked = !!institution;
+        document.getElementById('checkPartagerNiveau').checked = true;
+        document.getElementById('zoneClarification').style.display = 'none';
+
         // Afficher le modal
         modal.style.display = 'flex';
+
+        // 🆕 Gérer la checkbox "Partager mon nom" → afficher/masquer la zone de clarification
+        const checkNom = document.getElementById('checkPartagerNom');
+        const zoneClarif = document.getElementById('zoneClarification');
+
+        checkNom.onchange = function() {
+            if (!this.checked) {
+                zoneClarif.style.display = 'block';
+            } else {
+                zoneClarif.style.display = 'none';
+            }
+        };
 
         // Gestionnaire de fermeture
         const fermer = (resultat) => {
@@ -308,17 +376,65 @@ function demanderMetadonneesEnrichies(typeContenu, nomContenu) {
 
         // Bouton Valider
         document.getElementById('btnValiderMeta').onclick = () => {
-            const disciplines = document.getElementById('metaDisciplines').value
-                .split(',')
-                .map(d => d.trim())
-                .filter(d => d.length > 0);
+            // 🆕 Vérifier l'intention si le nom n'est pas partagé
+            const partagerNom = document.getElementById('checkPartagerNom').checked;
 
-            const niveau = document.getElementById('metaNiveau').value;
+            if (!partagerNom) {
+                const intention = document.querySelector('input[name="intentionPartage"]:checked');
+
+                if (!intention) {
+                    alert('Veuillez préciser votre intention de partage.');
+                    return;
+                }
+
+                if (intention.value === 'prive') {
+                    // L'utilisateur ne veut pas partager → annuler l'export
+                    alert('Export annulé. Ce matériel reste privé.');
+                    fermer(null);
+                    return;
+                }
+                // Si intention === 'anonyme', continuer avec auteur = "Anonyme"
+            }
+
+            // Valider la description (obligatoire)
             const description = document.getElementById('metaDescription').value.trim();
+            if (!description) {
+                alert('La description est obligatoire.');
+                return;
+            }
+
+            // 🆕 Construire les métadonnées selon les checkboxes
+            const disciplines = document.getElementById('checkPartagerDiscipline').checked
+                ? document.getElementById('metaDisciplines').value.split(',').map(d => d.trim()).filter(d => d.length > 0)
+                : [];
+
+            const niveau = document.getElementById('checkPartagerNiveau').checked
+                ? document.getElementById('metaNiveau').value
+                : '';
+
+            const institution = document.getElementById('checkPartagerInstitution').checked
+                ? document.getElementById('metaInstitution').value.trim()
+                : '';
+
+            const auteur = partagerNom
+                ? document.getElementById('metaNomAuteur').value.trim()
+                : 'Anonyme';
+
+            const courriel = document.getElementById('checkPartagerCourriel').checked
+                ? document.getElementById('metaCourriel').value.trim()
+                : '';
+
+            const siteWeb = document.getElementById('checkPartagerSiteWeb').checked
+                ? document.getElementById('metaSiteWeb').value.trim()
+                : '';
 
             fermer({
+                auteur: auteur,
+                courriel: courriel,
+                siteWeb: siteWeb,
                 discipline: disciplines,
                 niveau: niveau,
+                institution: institution,
                 description_courte: description
             });
         };
@@ -347,9 +463,15 @@ function creerModalMetadonneesEnrichies() {
     modal.style.cssText = 'display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center;';
 
     modal.innerHTML = `
-        <div class="modal-content" style="background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-            <h2 style="margin-top: 0; color: var(--bleu-leger);">
-                📦 Métadonnées d'export
+        <div class="modal-content" style="background: white; padding: 30px; border-radius: 8px; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <h2 style="margin-top: 0; color: var(--bleu-leger); display: flex; align-items: center; justify-content: space-between;">
+                <span>📦 Métadonnées d'export</span>
+                <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank"
+                   style="font-size: 0.75rem; color: var(--bleu-leger); text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                    <img src="https://mirrors.creativecommons.org/presskit/buttons/80x15/svg/by-nc-sa.svg"
+                         alt="CC BY-NC-SA 4.0" style="height: 15px;">
+                    En savoir plus
+                </a>
             </h2>
 
             <p style="color: var(--gris-leger); margin-bottom: 20px;">
@@ -357,25 +479,82 @@ function creerModalMetadonneesEnrichies() {
                 <span style="font-size: 0.9rem;" id="metaNomContenu"></span>
             </p>
 
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">
-                    Discipline(s) <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span>
-                </label>
-                <input type="text"
-                       id="metaDisciplines"
-                       placeholder="Ex: Littérature, Philosophie (séparer par des virgules)"
-                       style="width: 100%; padding: 10px; border: 1px solid var(--bleu-pale); border-radius: 4px; font-size: 0.95rem;">
-                <small style="color: var(--gris-leger); display: block; margin-top: 5px;">
-                    Séparez plusieurs disciplines par des virgules
-                </small>
+            <!-- Section 1: Informations personnelles -->
+            <h3 style="font-size: 1rem; color: var(--bleu-moyen); margin-top: 20px; margin-bottom: 10px;">
+                Informations personnelles
+            </h3>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <input type="checkbox" id="checkPartagerNom" checked style="transform: scale(1.2); flex-shrink: 0;">
+                <label for="checkPartagerNom" style="font-weight: 600; min-width: 150px; margin: 0;">Nom</label>
+                <input type="text" id="metaNomAuteur"
+                       style="flex: 1; padding: 8px; border: 1px solid var(--bleu-pale); border-radius: 4px; font-size: 0.95rem;">
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">
-                    Niveau <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <input type="checkbox" id="checkPartagerCourriel" checked style="transform: scale(1.2); flex-shrink: 0;">
+                <label for="checkPartagerCourriel" style="font-weight: 600; min-width: 150px; margin: 0;">Courriel</label>
+                <input type="email" id="metaCourriel"
+                       style="flex: 1; padding: 8px; border: 1px solid var(--bleu-pale); border-radius: 4px; font-size: 0.95rem;">
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                <input type="checkbox" id="checkPartagerSiteWeb" checked style="transform: scale(1.2); flex-shrink: 0;">
+                <label for="checkPartagerSiteWeb" style="font-weight: 600; min-width: 150px; margin: 0;">Site web</label>
+                <input type="url" id="metaSiteWeb"
+                       style="flex: 1; padding: 8px; border: 1px solid var(--bleu-pale); border-radius: 4px; font-size: 0.95rem;">
+            </div>
+
+            <!-- Zone de clarification (cachée par défaut) -->
+            <div id="zoneClarification" style="display: none; background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <p style="margin: 0 0 15px 0; font-weight: 600; color: #856404;">
+                    ⚠️ Clarification nécessaire
+                </p>
+                <p style="margin: 0 0 15px 0; font-size: 0.9rem; color: #856404;">
+                    Pourquoi ne voulez-vous pas partager votre nom ?
+                </p>
+                <label style="display: flex; align-items: start; margin-bottom: 10px; cursor: pointer;">
+                    <input type="radio" name="intentionPartage" value="anonyme" style="margin-right: 10px; margin-top: 3px;">
+                    <span style="font-size: 0.9rem; line-height: 1.5;">
+                        <strong>Je veux partager anonymement</strong><br>
+                        <small style="color: var(--gris-leger);">Le matériel sera sous licence CC BY-NC-SA mais marqué "Auteur anonyme"</small>
+                    </span>
                 </label>
+                <label style="display: flex; align-items: start; cursor: pointer;">
+                    <input type="radio" name="intentionPartage" value="prive" style="margin-right: 10px; margin-top: 3px;">
+                    <span style="font-size: 0.9rem; line-height: 1.5;">
+                        <strong>Je ne veux pas partager ce matériel</strong><br>
+                        <small style="color: var(--gris-leger);">Usage privé/personnel uniquement (annule l'export)</small>
+                    </span>
+                </label>
+            </div>
+
+            <!-- Section 2: Informations contextuelles -->
+            <h3 style="font-size: 1rem; color: var(--bleu-moyen); margin-top: 20px; margin-bottom: 10px;">
+                Informations contextuelles
+            </h3>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <input type="checkbox" id="checkPartagerDiscipline" checked style="transform: scale(1.2); flex-shrink: 0;">
+                <label for="checkPartagerDiscipline" style="font-weight: 600; min-width: 150px; margin: 0;">Discipline(s)</label>
+                <input type="text" id="metaDisciplines"
+                       placeholder="Ex: Littérature, Philosophie"
+                       style="flex: 1; padding: 8px; border: 1px solid var(--bleu-pale); border-radius: 4px; font-size: 0.95rem;">
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <input type="checkbox" id="checkPartagerInstitution" style="transform: scale(1.2); flex-shrink: 0;">
+                <label for="checkPartagerInstitution" style="font-weight: 600; min-width: 150px; margin: 0;">Institution</label>
+                <input type="text" id="metaInstitution"
+                       placeholder="Ex: Cégep de Drummondville"
+                       style="flex: 1; padding: 8px; border: 1px solid var(--bleu-pale); border-radius: 4px; font-size: 0.95rem;">
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                <input type="checkbox" id="checkPartagerNiveau" checked style="transform: scale(1.2); flex-shrink: 0;">
+                <label for="checkPartagerNiveau" style="font-weight: 600; min-width: 150px; margin: 0;">Niveau</label>
                 <select id="metaNiveau"
-                        style="width: 100%; padding: 10px; border: 1px solid var(--bleu-pale); border-radius: 4px; font-size: 0.95rem;">
+                        style="flex: 1; padding: 8px; border: 1px solid var(--bleu-pale); border-radius: 4px; font-size: 0.95rem;">
                     <option value="">-- Non spécifié --</option>
                     <option value="Collégial" selected>Collégial</option>
                     <option value="Universitaire">Universitaire</option>
@@ -383,10 +562,12 @@ function creerModalMetadonneesEnrichies() {
                 </select>
             </div>
 
+            <!-- Section 3: Description (obligatoire) -->
+            <h3 style="font-size: 1rem; color: var(--bleu-moyen); margin-top: 20px; margin-bottom: 15px;">
+                Description du contenu <span style="color: red;">*</span>
+            </h3>
+
             <div style="margin-bottom: 25px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">
-                    Description courte <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span>
-                </label>
                 <textarea id="metaDescription"
                           placeholder="Décrivez brièvement ce contenu pédagogique..."
                           maxlength="200"
@@ -403,8 +584,7 @@ function creerModalMetadonneesEnrichies() {
                     Annuler
                 </button>
                 <button id="btnValiderMeta"
-                        class="btn btn-primaire"
-                        style="background: var(--bleu-leger); color: white;">
+                        class="btn btn-principal">
                     Valider et exporter
                 </button>
             </div>

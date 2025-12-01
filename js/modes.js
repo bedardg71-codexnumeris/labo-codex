@@ -417,7 +417,8 @@ function obtenirDonneesSelonMode(cle) {
     // (Primo aide l'utilisateur avec ses vraies données, pas des données simulées)
 
     // Déterminer la valeur par défaut selon le type de clé
-    const clesSontObjets = ['presences', 'indicesAssiduiteDetailles', 'indicesCP', 'calendrierComplet'];
+    // IMPORTANT: 'presences' est un TABLEAU, pas un objet (utilisé avec .forEach dans profil-etudiant.js)
+    const clesSontObjets = ['indicesAssiduiteDetailles', 'indicesCP', 'calendrierComplet'];
     const valeurParDefaut = clesSontObjets.includes(cle) ? {} : [];
     let donnees = db.getSync(cle, valeurParDefaut);
 
