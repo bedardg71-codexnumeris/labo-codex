@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "licence": "CC BY-NC-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "licence_resume": "Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions 4.0 International",
+    "auteur_original": "Grégoire Bédard",
+    "email_auteur": "gregoire.bedard@cegepdrummond.ca",
+    "site_auteur": "https://codexnumeris.org",
+    "type": "cartouche-retroaction",
+    "nom": "undefined - undefined",
+    "date_creation": "2025-12-01",
+    "date_modification": "2025-12-01",
+    "version": "1.0",
+    "contributeurs": [],
+    "attribution": "Créé par Grégoire Bédard pour l'application Monitorage Pédagogique",
+    "discipline": [
+      "Littérature"
+    ],
+    "niveau": "Collégial",
+    "institution": "Cégep Drummond",
+    "description_courte": "Rétroaction carte mentale - matériel de test"
+  },
+  "contenu": {
+    "id": "GAB1759620598310",
+    "grilleId": "GRILLE1759264206489",
+    "nom": "Carte mentale",
+    "contexte": "Cet exercice nous permet de pratiquer la posture analytique en organisant des idées dans une carte mentale. La carte présente une hypothèse d’objectif de communication. Celle-ci est soutenue par des mécanismes que tu observes dans le texte et dont tu expliques le fonctionnement avec des procédés littéraires. Toutes tes explications doivent être appuyées sur des preuves. Voici quelques observations.",
+    "criteres": [
+      {
+        "id": "CR17592642064900.618466646516426",
+        "nom": "Structure"
+      },
+      {
+        "id": "CR17592642064900.9140629252044018",
+        "nom": "Rigueur"
+      },
+      {
+        "id": "CR17592642064900.06875447039747506",
+        "nom": "Plausibilité"
+      },
+      {
+        "id": "CR17592642064900.21301963126012036",
+        "nom": "Nuance"
+      }
+    ],
+    "niveaux": [
+      {
+        "code": "I",
+        "nom": "Incomplet ou insuffisant"
+      },
+      {
+        "code": "D",
+        "nom": "En Développement"
+      },
+      {
+        "code": "M",
+        "nom": "Maîtrisé"
+      },
+      {
+        "code": "E",
+        "nom": "Étendu"
+      }
+    ],
+    "commentaires": {
+      "CR17592642064900.618466646516426_I": "La structure n'est pas claire ou la schématisation n'est pas méthodique. L'hypothèse d'objectif de communication n'est pas évidente au centre, et la hiérarchie entre mécanismes et procédés littéraires est confuse. L'alignement entre l'objectif de communication, les mécanismes et les procédés est faible ou inexistant. Cette structure imprécise rendra difficile la création d'un plan détaillé cohérent.",
+      "CR17592642064900.618466646516426_D": "La structure est en développement ou la schématisation n'est pas systématique. L'hypothèse d'objectif de communication est présente au centre, mais les mécanismes et procédés littéraires ne sont pas toujours clairement distingués. L'alignement entre l'objectif, les mécanismes et les procédés est visible.",
+      "CR17592642064900.618466646516426_M": "La structure est claire et la schématisation est méthodique et efficace. L'hypothèse d'objectif de communication est bien placée au centre, avec les mécanismes littéraires formant les branches principales et les procédés littéraires les branches secondaires. L'alignement logique entre l'objectif de communication, les mécanismes et les procédés est clair et logique. Cette organisation efficace facilitera la création du plan détaillé.",
+      "CR17592642064900.618466646516426_E": "La structure est très bonne et la schématisation est claire et systématique. L'hypothèse d'objectif de communication est présentée avec une hiérarchie claire et logique des mécanismes et procédés littéraires. L'alignement entre l'objectif, les mécanismes et les procédés est cohérent et révèle une bonne organisation des idées. Cette structure facilitera la création d'un plan détaillé approfondi.",
+      "CR17592642064900.9140629252044018_I": "Les mécanismes et/ou les procédés littéraires sont insuffisants. Les éléments identifiés sont incomplets ou trop vagues. Les preuves textuelles, l'interprétation et/ou l'identification des procédés sont manquantes ou absentes. Cette approche insuffisante ne fournit pas une base solide pour l'analyse du texte et limitera la profondeur du plan qui en découlera.",
+      "CR17592642064900.9140629252044018_D": "Les mécanismes et/ou les procédés littéraires sont en développement. Certains éléments sont bien développés, d'autres restent insuffisants. Les preuves textuelles, les interprétations et/ou l'identification des procédés sont incomplets. Cette approche fournit une base limitée pour l'analyse, elle nécessite un approfondissement pour le plan.",
+      "CR17592642064900.9140629252044018_M": "Les mécanismes et les procédés littéraires sont pertinents et bien développés. Les preuves textuelles sont nombreuses et précises, l'interprétation claire et pertinente et les procédés bien identifiés. Cette approche rigoureuse fournit une base solide pour une analyse approfondie du texte et permettra l'élaboration d'un plan détaillé et cohérent.",
+      "CR17592642064900.9140629252044018_E": "Les mécanismes sont complémentaires et les procédés littéraires sont pertinents et bien développés. Les preuves textuelles sont nombreuses, précises et judicieusement sélectionnées. Les interprétations sont claires et pertinentes. Les procédés sont bien identifiés. Cette approche exhaustive offre une bonne base pour une analyse riche et nuancée, permettant un plan de qualité.",
+      "CR17592642064900.06875447039747506_I": "Dans son ensemble, la carte mentale est incomplète, car elle manque de cohésion et de pertinence. Les mécanismes et/ou procédés littéraires identifiés sont peu liés à l'hypothèse centrale. Les preuves textuelles sont peu pertinentes ou insuffisantes en regarde de l'interprétation. Les liens entre l'objectif, les mécanismes et les procédés sont faibles ou insuffisants. La carte mentale offre une interprétation peu solide du texte, compromettant la validité de l'analyse future.",
+      "CR17592642064900.06875447039747506_D": "L'hypothèse d'objectif de communication est en développement. Certains mécanismes et procédés littéraires sont pertinents, d'autres moins. Les preuves textuelles sont présentes, mais plus ou moins alignées avec les mécanismes qu'elle doivent soutenir. Les liens entre l'objectif, les mécanismes et les procédés sont parfois cohérents, parfois flous. Cette carte mentale propose une interprétation partiellement plausible du texte, nécessitant des ajustements pour une analyse solide.",
+      "CR17592642064900.06875447039747506_M": "L'hypothèse d'objectif de communication est claire et pertinente, tandis que les mécanismes et procédés littéraires identifiés viennent bien la soutenir. Les preuves textuelles sont bien choisies et correctement interprétées. Les liens entre l'objectif, les mécanismes et les procédés sont logiques et cohérents. Cette carte mentale offre une interprétation crédible du texte, fournissant une base solide pour l'analyse littéraire à venir.",
+      "CR17592642064900.06875447039747506_E": "L'hypothèse d'objectif de communication est juste et bien formulée. Les mécanismes et procédés littéraires sont bien alignés avec l'hypothèse et révèlent une compréhension fine du texte. Les preuves textuelles soutiennent bien l'argumentation. Les liens entre l'objectif, les mécanismes et les procédés sont non seulement cohérents, mais révèlent des idées originales. La carte mentale propose une interprétation crédible et éclairante du texte, permettant une analyse littéraire de qualité.",
+      "CR17592642064900.21301963126012036_I": "Ce schéma présenté une vision assez simpliste ou binaire du texte. Les mécanismes et procédés littéraires sont décrits de manière insuffisante, sans subtilités. Les interprétations sont descriptives (résumé) manquent de profondeur (analyse). Les interprétations sont centré sur ce qui est explicite dans le texte et abordent peu l'implicite. Cette approche descriptive limite la richesse de l'analyse future.",
+      "CR17592642064900.21301963126012036_D": "Ce schéma démontre quelques nuances dans l'interprétation du texte, mais elles sont en développement. Certains mécanismes et/ou procédés littéraires sont explorés avec plus de détails, mais d'autres restent traités un peu trop rapidement. Les interprétations manquent de profondeur (parfois résumé, parfois analyse). Cette approche descriptive ou partiellement analytique nécessite plus de développement.",
+      "CR17592642064900.21301963126012036_M": "Ce schéma démontre une bonne compréhension des nuances du texte. Les mécanismes et procédés littéraires sont explorés en détail, avec une considération de leurs effets. Les liens entre l'objectif, les mécanismes et les procédés révèlent des interactions subtiles. Cette approche analytique reflète la richesse du texte et permet un plan nuancé.",
+      "CR17592642064900.21301963126012036_E": "Ce schéma révèle une compréhension fine et nuancée du texte. Les mécanismes et procédés littéraires sont analysés en profondeur, avec une appréciation de leurs effets. Les subtilités et les complexités du texte sont reconnues et enrichissent l'interprétation. Les liens entre les éléments révèlent des interactions complexes et fines. Cette approche capture la richesse et la profondeur du texte, permettant une analyse littéraire de qualité."
+    },
+    "verrouille": false
+  }
+}
