@@ -226,9 +226,8 @@ Ce projet est distribué sous licence **Creative Commons Attribution - Pas d'Uti
 ## 👤 Auteur
 
 **Grégoire Bédard**
-Enseignant en littérature
-Laboratoire Codex
-Cégep de Drummondville
+Enseignant en littérature, Cégep de Drummondville
+Labo Codex : le laboratoire de codexnumeris.org
 
 - 🌐 Site web : [https://codexnumeris.org](https://codexnumeris.org)
 - 📧 Courriel : [labo@codexnumeris.org](mailto:labo@codexnumeris.org)
