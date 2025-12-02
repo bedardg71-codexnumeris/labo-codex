@@ -1923,9 +1923,14 @@ async function exporterCartoucheActive() {
     }
 
     // NOUVEAU (Beta 92): Demander métadonnées enrichies
+    // Beta 93: Fix - Utiliser cartouche.nom au lieu de criterenom/niveaunom qui n'existent pas
+    const nbCriteres = cartouche.criteres ? cartouche.criteres.length : 0;
+    const nbNiveaux = cartouche.niveaux ? cartouche.niveaux.length : 0;
+    const description = `${cartouche.nom || 'Cartouche'} (${nbCriteres} critères, ${nbNiveaux} niveaux)`;
+
     const metaEnrichies = await demanderMetadonneesEnrichies(
         'Cartouche de rétroaction',
-        `${cartouche.criterenom} - ${cartouche.niveaunom}`
+        description
     );
 
     if (!metaEnrichies) {
@@ -1937,14 +1942,16 @@ async function exporterCartoucheActive() {
     const exportAvecCC = ajouterMetadonnéesCC(
         cartouche,
         'cartouche-retroaction',
-        `${cartouche.criterenom} - ${cartouche.niveaunom}`,
+        cartouche.nom || 'Cartouche',
         metaEnrichies
     );
 
     // Générer nom de fichier avec watermark CC
+    // Beta 93: Nom de fichier basé sur cartouche.nom au lieu de critere-niveau
+    const nomFichierBase = (cartouche.nom || 'Cartouche').replace(/\s+/g, '-');
     const nomFichier = genererNomFichierCC(
         'cartouche',
-        `${cartouche.criterenom}-${cartouche.niveaunom}`,
+        nomFichierBase,
         exportAvecCC.metadata.version
     );
 
