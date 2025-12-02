@@ -3,10 +3,16 @@
 .AppleDouble
 .LSOverride
 
-# Backups
+# Backups et données sensibles
 *.backup-*
 *.old
 *.bak
+backups-donnees/
+Documents de travail (privé)/
+
+# Données de test OK (déjà fictives)
+# donnees-demo.json
+# matériel beta 92/
 
 # Temporary
 *.tmp
