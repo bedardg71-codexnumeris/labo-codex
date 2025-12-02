@@ -1893,6 +1893,12 @@ input[type="number"].controle-form {
     box-shadow: 0 0 0 3px rgba(6, 93, 187, 0.1);
 }
 
+/* Style de base pour TOUS les textarea - fix texte invisible */
+textarea {
+    color: #333 !important;
+    background-color: white !important;
+}
+
 /* Inputs spéciaux pour saisie de présences */
 #tbody-saisie-presences input[type="number"]:placeholder-shown {
     background-color: #fff9e6;
@@ -6854,6 +6860,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-size: 0.85rem;
     font-family: inherit;
     resize: vertical;
+    color: #333 !important; /* Force texte sombre - fix texte invisible */
+    background-color: white !important; /* Force fond blanc */
 }
 
 .matrice-tableau textarea:focus {
