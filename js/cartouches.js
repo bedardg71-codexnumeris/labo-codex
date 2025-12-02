@@ -1793,18 +1793,74 @@ function importerCartoucheDepuisTxt(event) {
                     .replace(/[^A-Z0-9]/g, ''); // Garder seulement lettres et chiffres
             };
 
+            // Fonction intelligente pour trouver le meilleur critère correspondant
+            const trouverCritereCorrespondant = (nomRecherche) => {
+                const rechercheNorm = normaliserNom(nomRecherche);
+
+                // Stratégie 1: Correspondance exacte (normalisée)
+                let critere = cartoucheActuel.criteres.find(c =>
+                    normaliserNom(c.nom) === rechercheNorm
+                );
+                if (critere) {
+                    console.log(`✓ Match exact: "${nomRecherche}" → "${critere.nom}"`);
+                    return critere;
+                }
+
+                // Stratégie 2: Le nom recherché est contenu dans le critère
+                // Ex: "FRANÇAIS" matcherait "Français écrit"
+                critere = cartoucheActuel.criteres.find(c =>
+                    normaliserNom(c.nom).includes(rechercheNorm)
+                );
+                if (critere) {
+                    console.log(`✓ Match partiel (contenu): "${nomRecherche}" → "${critere.nom}"`);
+                    return critere;
+                }
+
+                // Stratégie 3: Le critère est contenu dans le nom recherché
+                // Ex: "STRUCTURE DE TEXTE" matcherait "Structure"
+                critere = cartoucheActuel.criteres.find(c =>
+                    rechercheNorm.includes(normaliserNom(c.nom))
+                );
+                if (critere) {
+                    console.log(`✓ Match partiel (inversé): "${nomRecherche}" → "${critere.nom}"`);
+                    return critere;
+                }
+
+                // Stratégie 4: Correspondance floue par distance de Levenshtein simplifiée
+                // Trouve le critère le plus proche si la différence est < 3 caractères
+                let meilleurMatch = null;
+                let meilleurScore = Infinity;
+
+                cartoucheActuel.criteres.forEach(c => {
+                    const cnorm = normaliserNom(c.nom);
+                    const score = Math.abs(cnorm.length - rechercheNorm.length);
+                    if (score < 3 && score < meilleurScore) {
+                        // Vérifier si au moins 70% des caractères correspondent
+                        const intersection = [...rechercheNorm].filter(char => cnorm.includes(char)).length;
+                        const similarite = intersection / Math.max(rechercheNorm.length, cnorm.length);
+                        if (similarite > 0.7) {
+                            meilleurMatch = c;
+                            meilleurScore = score;
+                        }
+                    }
+                });
+
+                if (meilleurMatch) {
+                    console.log(`✓ Match flou: "${nomRecherche}" → "${meilleurMatch.nom}"`);
+                    return meilleurMatch;
+                }
+
+                // Aucune correspondance trouvée
+                return null;
+            };
+
             // Fonction pour sauvegarder un commentaire complet
             const sauvegarderCommentaire = () => {
                 if (niveauActuel && commentaireEnCours.length > 0 && critereActuel) {
                     const commentaire = commentaireEnCours.join(' ').trim();
                     if (commentaire) {
-                        // Normaliser le nom du critère recherché
-                        const critereNormalise = normaliserNom(critereActuel);
-
-                        // Trouver le critère correspondant dans la cartouche avec matching flexible
-                        const critere = cartoucheActuel.criteres.find(c =>
-                            normaliserNom(c.nom) === critereNormalise
-                        );
+                        // Trouver le critère correspondant avec stratégies multiples
+                        const critere = trouverCritereCorrespondant(critereActuel);
 
                         if (critere) {
                             const key = `${critere.id}_${niveauActuel}`;
@@ -1812,6 +1868,7 @@ function importerCartoucheDepuisTxt(event) {
                             compteur++;
                             console.log(`✅ Importé: ${critere.nom} (${niveauActuel}) - ${commentaire.substring(0, 50)}...`);
                         } else {
+                            const critereNormalise = normaliserNom(critereActuel);
                             console.warn(`⚠️ Critère non trouvé: "${critereActuel}" (normalisé: "${critereNormalise}")`);
                             console.log('Critères disponibles:', cartoucheActuel.criteres.map(c => `"${c.nom}" (normalisé: "${normaliserNom(c.nom)}")`));
                         }
