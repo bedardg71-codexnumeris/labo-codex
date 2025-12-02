@@ -1262,10 +1262,12 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
         const btnDupliquer = document.getElementById('btnDupliquerCartouche');
         const btnExporter = document.getElementById('btnExporterCartouche');
         const btnImporter = document.getElementById('btnImporterCartouche');
+        const btnImporterTxt = document.getElementById('btnImporterCartoucheTxt');
         const btnSupprimer = document.getElementById('btnSupprimerCartouche');
         if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
         if (btnExporter) btnExporter.style.display = 'inline-block';
         if (btnImporter) btnImporter.style.display = 'inline-block';
+        if (btnImporterTxt) btnImporterTxt.style.display = 'inline-block';
         if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
         // NOUVELLE INTERFACE (Beta 80.5+): Passer les paramètres directement
@@ -1777,42 +1779,97 @@ function importerCartoucheDepuisTxt(event) {
                 return;
             }
 
-            // Parser le texte
+            // Parser le texte avec support multiligne
             const lignes = texte.split('\n');
             let critereActuel = null;
+            let niveauActuel = null;
+            let commentaireEnCours = [];
             let compteur = 0;
+
+            // Fonction pour normaliser un nom de critère (pour matching flexible)
+            const normaliserNom = (nom) => {
+                return nom.toUpperCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Retirer accents
+                    .replace(/[^A-Z0-9]/g, ''); // Garder seulement lettres et chiffres
+            };
+
+            // Fonction pour sauvegarder un commentaire complet
+            const sauvegarderCommentaire = () => {
+                if (niveauActuel && commentaireEnCours.length > 0 && critereActuel) {
+                    const commentaire = commentaireEnCours.join(' ').trim();
+                    if (commentaire) {
+                        // Normaliser le nom du critère recherché
+                        const critereNormalise = normaliserNom(critereActuel);
+
+                        // Trouver le critère correspondant dans la cartouche avec matching flexible
+                        const critere = cartoucheActuel.criteres.find(c =>
+                            normaliserNom(c.nom) === critereNormalise
+                        );
+
+                        if (critere) {
+                            const key = `${critere.id}_${niveauActuel}`;
+                            cartoucheActuel.commentaires[key] = commentaire;
+                            compteur++;
+                            console.log(`✅ Importé: ${critere.nom} (${niveauActuel}) - ${commentaire.substring(0, 50)}...`);
+                        } else {
+                            console.warn(`⚠️ Critère non trouvé: "${critereActuel}" (normalisé: "${critereNormalise}")`);
+                            console.log('Critères disponibles:', cartoucheActuel.criteres.map(c => `"${c.nom}" (normalisé: "${normaliserNom(c.nom)}")`));
+                        }
+                    }
+                }
+                // Réinitialiser
+                niveauActuel = null;
+                commentaireEnCours = [];
+            };
 
             lignes.forEach(ligne => {
                 ligne = ligne.trim();
 
-                // Détecter un titre de critère : ## CRITÈRE
-                if (ligne.startsWith('##')) {
-                    critereActuel = ligne.replace('##', '').trim().toUpperCase();
+                // Ignorer les lignes vides et les séparateurs
+                if (!ligne || ligne === '---') {
                     return;
                 }
 
-                // Détecter un commentaire : **CRITÈRE (NIVEAU)** : Texte...
-                const match = ligne.match(/^\*\*(.+?)\s*\(([IDME])\)\*\*\s*:\s*(.+)$/);
-                if (match && critereActuel) {
-                    const nomCritere = match[1].trim().toUpperCase();
-                    const niveau = match[2].trim();
-                    const commentaire = match[3].trim();
+                // Détecter un titre de critère : ## CRITÈRE
+                if (ligne.startsWith('##')) {
+                    // Sauvegarder le commentaire précédent si nécessaire
+                    sauvegarderCommentaire();
+                    critereActuel = ligne.replace('##', '').trim().toUpperCase();
+                    console.log(`📋 Section critère détectée: "${critereActuel}"`);
+                    return;
+                }
 
-                    // Vérifier que le critère correspond
-                    if (nomCritere === critereActuel) {
-                        // Trouver le critère correspondant dans la cartouche
-                        const critere = cartoucheActuel.criteres.find(c =>
-                            c.nom.toUpperCase() === critereActuel
-                        );
+                // Détecter un début de commentaire : **CRITÈRE (NIVEAU)** : ou **CRITÈRE (NIVEAU) :**
+                // Version flexible qui accepte plusieurs variantes
+                const matchDebut = ligne.match(/^\*\*(.+?)\s*\(([IDME0])\)\s*\*\*\s*:?\s*(.*)$/);
+                if (matchDebut && critereActuel) {
+                    // Sauvegarder le commentaire précédent si nécessaire
+                    sauvegarderCommentaire();
 
-                        if (critere) {
-                            const key = `${critere.id}_${niveau}`;
-                            cartoucheActuel.commentaires[key] = commentaire;
-                            compteur++;
+                    const nomCritere = matchDebut[1].trim().toUpperCase();
+                    const niveau = matchDebut[2].trim();
+                    const debutCommentaire = matchDebut[3].trim();
+
+                    // Matching flexible : comparer les versions normalisées
+                    if (normaliserNom(nomCritere) === normaliserNom(critereActuel)) {
+                        niveauActuel = niveau;
+                        commentaireEnCours = [];
+                        if (debutCommentaire) {
+                            commentaireEnCours.push(debutCommentaire);
                         }
+                        console.log(`📝 Début commentaire détecté: ${nomCritere} (${niveau})`);
                     }
+                    return;
+                }
+
+                // Si on est en train de collecter un commentaire, ajouter cette ligne
+                if (niveauActuel && ligne) {
+                    commentaireEnCours.push(ligne);
                 }
             });
+
+            // Sauvegarder le dernier commentaire
+            sauvegarderCommentaire();
 
             if (compteur === 0) {
                 alert('Aucun commentaire n\'a pu être importé. Vérifiez que :\n- Le fichier est au format Markdown attendu\n- Les noms de critères correspondent à ceux de la grille sélectionnée');
@@ -1863,10 +1920,12 @@ function ajouterCartoucheAGrille(grilleId) {
     const btnDupliquer = document.getElementById('btnDupliquerCartouche');
     const btnExporter = document.getElementById('btnExporterCartouche');
     const btnImporter = document.getElementById('btnImporterCartouche');
+    const btnImporterTxt = document.getElementById('btnImporterCartoucheTxt');
     const btnSupprimer = document.getElementById('btnSupprimerCartouche');
     if (btnDupliquer) btnDupliquer.style.display = 'none';
     if (btnExporter) btnExporter.style.display = 'none';
     if (btnImporter) btnImporter.style.display = 'none';
+    if (btnImporterTxt) btnImporterTxt.style.display = 'none';
     if (btnSupprimer) btnSupprimer.style.display = 'none';
 
     // Initialiser une nouvelle cartouche pour cette grille

@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 93 - Correctifs export</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2025120201">
+    <link rel="stylesheet" href="styles.css?v=2025120202">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4578,6 +4578,10 @@
                                             Importer dans cette cartouche
                                         </button>
                                         <input type="file" id="fichier-import-cartouche-individuelle" accept=".json" style="display: none;" onchange="importerDansCartoucheActive(event)">
+                                        <button id="btnImporterCartoucheTxt" class="btn btn-secondaire" onclick="document.getElementById('fichier-import-cartouche-txt').click()" style="display: none;" title="Importer commentaires depuis fichier .txt">
+                                            Importer depuis fichier .txt
+                                        </button>
+                                        <input type="file" id="fichier-import-cartouche-txt" accept=".txt" style="display: none;" onchange="importerCartoucheDepuisTxt(event)">
                                         <button id="btnDupliquerCartouche" class="btn btn-secondaire" onclick="dupliquerCartoucheActive()" style="display: none;" title="Créer une copie de cette cartouche">
                                             Dupliquer
                                         </button>
@@ -9977,7 +9981,7 @@ Exemple :
     <script src="js/productions.js?v=2025113003"></script>
     <script src="js/grilles.js?v=2025113001"></script>
     <script src="js/echelles.js?v=2025113001"></script>
-    <script src="js/cartouches.js?v=2025120201"></script>
+    <script src="js/cartouches.js?v=2025120204"></script>
     <script src="js/cours.js?v=2025120115"></script>
     <script src="js/contexte.js?v=2025111201"></script>
 
