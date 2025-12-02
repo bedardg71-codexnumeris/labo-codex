@@ -1896,25 +1896,45 @@ function importerCartoucheDepuisTxt(event) {
                     return;
                 }
 
-                // Détecter un début de commentaire : **CRITÈRE (NIVEAU)** : ou **CRITÈRE (NIVEAU) :**
-                // Version flexible qui accepte plusieurs variantes
-                const matchDebut = ligne.match(/^\*\*(.+?)\s*\(([IDME0])\)\s*\*\*\s*:?\s*(.*)$/);
-                if (matchDebut && critereActuel) {
-                    // Sauvegarder le commentaire précédent si nécessaire
-                    sauvegarderCommentaire();
-
+                // Détecter un début de commentaire : accepte TOUTES les variantes possibles
+                // Formats acceptés :
+                // - **CRITÈRE (NIVEAU)** :        (format correct)
+                // - **CRITÈRE (NIVEAU) :**        (format incorrect mais courant)
+                // - **CRITÈRE (NIVEAU):**         (sans espace)
+                // - **CRITÈRE (NIVEAU) : **       (astérisques mal placés)
+                // Regex ultra-flexible : capture tout entre ** et (NIVEAU), puis ignore tout jusqu'au :
+                const matchDebut = ligne.match(/^\*\*(.+?)\s*\(([IDME0])\)\s*[:\*\s]+(.*)$/);
+                if (matchDebut) {
                     const nomCritere = matchDebut[1].trim().toUpperCase();
                     const niveau = matchDebut[2].trim();
                     const debutCommentaire = matchDebut[3].trim();
 
-                    // Matching flexible : comparer les versions normalisées
-                    if (normaliserNom(nomCritere) === normaliserNom(critereActuel)) {
+                    console.log(`🔍 Regex matché: "${nomCritere}" (${niveau}) - Critère actuel: "${critereActuel}"`);
+                    console.log(`   Normalisé: "${normaliserNom(nomCritere)}" vs "${normaliserNom(critereActuel || '')}"`);
+
+                    // Sauvegarder le commentaire précédent si nécessaire
+                    sauvegarderCommentaire();
+
+                    // Matching intelligent : utiliser la fonction multi-stratégies
+                    // Vérifier d'abord si ça correspond au critère actuel
+                    if (critereActuel && normaliserNom(nomCritere) === normaliserNom(critereActuel)) {
                         niveauActuel = niveau;
                         commentaireEnCours = [];
                         if (debutCommentaire) {
                             commentaireEnCours.push(debutCommentaire);
                         }
                         console.log(`📝 Début commentaire détecté: ${nomCritere} (${niveau})`);
+                    } else {
+                        // Si pas de match direct, changer le critère actuel
+                        // (cas où on saute une section ou mauvais ordre)
+                        console.log(`⚠️ Pas de match: "${nomCritere}" ≠ "${critereActuel}" - Changement de contexte`);
+                        critereActuel = nomCritere;
+                        niveauActuel = niveau;
+                        commentaireEnCours = [];
+                        if (debutCommentaire) {
+                            commentaireEnCours.push(debutCommentaire);
+                        }
+                        console.log(`📝 Début commentaire détecté (nouveau critère): ${nomCritere} (${niveau})`);
                     }
                     return;
                 }
