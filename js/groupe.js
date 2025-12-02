@@ -290,43 +290,106 @@ function previewPastedData() {
 
 /**
  * Parse et affiche la prévisualisation
+ * VERSION TOLÉRANTE : Accepte presque tous les formats
  */
 function parseAndPreview(content) {
     try {
-        const lines = content.trim().split('\n');
+        console.log('🧹 Nettoyage automatique des données importées...');
+
+        // ÉTAPE 1 : Normaliser les sauts de ligne
+        content = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+        // ÉTAPE 2 : Détecter intelligemment le séparateur
+        const detecterSeparateur = (ligne) => {
+            const separateurs = ['\t', ';', ',', '|'];
+            let meilleurSep = '\t';
+            let maxColonnes = 0;
+
+            for (const sep of separateurs) {
+                const colonnes = ligne.split(sep).length;
+                if (colonnes > maxColonnes) {
+                    maxColonnes = colonnes;
+                    meilleurSep = sep;
+                }
+            }
+            return meilleurSep;
+        };
+
+        const lines = content.trim().split('\n').filter(l => l.trim());
+        if (lines.length === 0) {
+            afficherNotificationErreur('Fichier vide', 'Le fichier ne contient aucune données.');
+            return;
+        }
+
+        // Détecter séparateur sur première ligne non-vide
+        const separator = detecterSeparateur(lines[0]);
+        console.log(`✓ Séparateur détecté: "${separator === '\t' ? 'TAB' : separator}"`);
+
         tempImportData = [];
+        let ligneSautees = 0;
 
         lines.forEach((line, index) => {
             if (!line.trim()) return;
 
-            // Détection du séparateur
-            const separator = line.includes('\t') ? '\t' : ',';
-            const parts = line.split(separator).map(p => p.trim());
+            // Split avec le séparateur détecté
+            let parts = line.split(separator).map(p => p.trim());
 
-            if (parts.length >= 4) {
+            // TOLÉRANCE : Si moins de 4 colonnes, essayer d'autres séparateurs
+            if (parts.length < 4) {
+                for (const altSep of ['\t', ';', ',']) {
+                    const altParts = line.split(altSep).map(p => p.trim());
+                    if (altParts.length >= 4) {
+                        parts = altParts;
+                        break;
+                    }
+                }
+            }
+
+            // TOLÉRANCE : Accepter même avec seulement Nom et Prénom
+            if (parts.length >= 2) {
                 const student = {
-                    id: Date.now() + index,
+                    id: Date.now() + index + Math.random(),
                     da: parts[0] || `AUTO-${Date.now() + index}`,
                     groupe: parts[1] || '1',
-                    nom: parts[2] || '',
-                    prenom: parts[3] || '',
+                    nom: parts[2] || parts[0] || '', // Si pas de DA, premier champ = nom
+                    prenom: parts[3] || parts[1] || '', // Si pas de groupe, deuxième champ = prénom
                     programme: parts[4] || '---',
                     sa: parts[5] || '',
                     caf: parts[6] || ''
                 };
 
-                if (student.nom && student.prenom) {
-                    tempImportData.push(student);
+                // Nettoyer le DA (retirer espaces, lettres parasites)
+                student.da = student.da.replace(/[^0-9]/g, '');
+                if (!student.da) student.da = `AUTO-${Date.now() + index}`;
+
+                // Nettoyer Services adaptés (accepter Oui/O/X/✓)
+                if (student.sa && /^(oui|o|x|✓|1)$/i.test(student.sa.trim())) {
+                    student.sa = 'Oui';
                 }
+
+                // Validation minimale : au moins un nom ou prénom
+                if (student.nom || student.prenom) {
+                    tempImportData.push(student);
+                } else {
+                    ligneSautees++;
+                }
+            } else {
+                ligneSautees++;
             }
         });
 
+        console.log(`✅ Import: ${tempImportData.length} étudiant(s), ${ligneSautees} ligne(s) ignorée(s)`);
+
         if (tempImportData.length === 0) {
-            afficherNotificationErreur('Aucune donnée valide', 'Format attendu : DA, Groupe, Nom, Prénom, Programme, Nom du programme, SA');
+            afficherNotificationErreur('Aucune donnée valide',
+                'Impossible de trouver des noms d\'étudiants.\n' +
+                'Format attendu (flexible) :\n' +
+                '- Minimum : Nom, Prénom\n' +
+                '- Complet : DA, Groupe, Nom, Prénom, Programme, SA');
             return;
         }
 
-        afficherPrevisualisation(tempImportData, 'Prévisualisation de l\'import');
+        afficherPrevisualisation(tempImportData, `Import de ${tempImportData.length} étudiant(s)`);
 
     } catch (error) {
         afficherNotificationErreur('Erreur de parsing', error.message);

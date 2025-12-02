@@ -1772,12 +1772,33 @@ function importerCartoucheDepuisTxt(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const texte = e.target.result.trim();
+            let texte = e.target.result.trim();
 
             if (!texte) {
                 alert('Le fichier est vide');
                 return;
             }
+
+            // PRÉ-PROCESSEUR : Nettoyer et normaliser automatiquement le fichier
+            // Cela rend l'import beaucoup plus tolérant aux erreurs de format
+            console.log('🧹 Nettoyage automatique du fichier...');
+
+            // 1. Normaliser les sauts de ligne (Windows/Mac/Linux)
+            texte = texte.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+            // 2. Corriger les astérisques mal placés : **CRITÈRE (N) :** → **CRITÈRE (N)** :
+            texte = texte.replace(/\*\*([^*]+)\(([IDME0])\)\s*:\s*\*\*/g, '**$1($2)** :');
+
+            // 3. Normaliser les espaces autour des deux-points
+            texte = texte.replace(/\*\*([^*]+)\(([IDME0])\)\*\*\s*:\s*/g, '**$1($2)** : ');
+
+            // 4. Supprimer les lignes vides multiples (max 2 sauts de ligne consécutifs)
+            texte = texte.replace(/\n{3,}/g, '\n\n');
+
+            // 5. Nettoyer les espaces en fin de ligne
+            texte = texte.split('\n').map(l => l.trimEnd()).join('\n');
+
+            console.log('✅ Nettoyage terminé');
 
             // Parser le texte avec support multiligne
             const lignes = texte.split('\n');
