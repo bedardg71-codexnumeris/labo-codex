@@ -109,8 +109,8 @@ python -m http.server 8000
 
 ### Publications académiques
 
-- **Bédard, G. (2024)**. « Monitorage pédagogique : un système d'indices pour suivre les apprentissages au collégial ». *Pédagogie collégiale*, vol. 37, n° 3, printemps-été 2024.
-- **Bédard, G. (2025)**. « Le monitorage pédagogique : implantation et résultats d'une approche proactive de suivi des apprentissages » (à paraître). *Pédagogie collégiale*, hiver 2025.
+- **Bédard, G. (2024)**. « Observer pour mieux accompagner ». *Pédagogie collégiale*, vol. 37, n° 3, printemps-été 2024. En ligne : https://eduq.info/xmlui/bitstream/handle/11515/39749/Bedard-38-2-25.pdf?sequence=2&isAllowed=y
+
 
 ---
 
