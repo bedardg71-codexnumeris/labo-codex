@@ -256,6 +256,7 @@ function genererHtmlMois(annee, mois, calendrierComplet) {
             estCliquable = true;
         } else if (statut.type === 'cours') {
             classeJour += ' calendrier-jour-ouvrable';
+            estCliquable = true;
         }
 
         const numSemaine = statut.numeroSemaine || '';

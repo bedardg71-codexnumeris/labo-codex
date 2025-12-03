@@ -475,9 +475,27 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         const nbProductions = productionsUniques.length;
 
         // Mettre à jour les statistiques en haut
-        // Afficher seulement le nombre d'évaluations recevables (qui comptent dans la moyenne)
+        // ✅ Afficher le nombre total de lignes filtrées (pas seulement les recevables)
         if (compteur) {
-            compteur.textContent = `${evaluationsRecevables.length} évaluation(s)`;
+            // Adapter le texte selon le contexte
+            const nbTotal = lignesFiltrees.length;
+            const nbRecevables = evaluationsRecevables.length;
+
+            // Adapter le texte selon le filtre de statut
+            const filtreStatut = document.getElementById('filtre-statut-eval')?.value;
+            if (filtreStatut === 'non-evalue') {
+                compteur.textContent = `${nbTotal} non évalué(s)`;
+            } else if (filtreStatut === 'remis') {
+                compteur.textContent = `${nbTotal} remis`;
+            } else if (filtreStatut === 'non-remis') {
+                compteur.textContent = `${nbTotal} non remis`;
+            } else if (nbTotal === nbRecevables) {
+                // Toutes les lignes affichées sont recevables
+                compteur.textContent = `${nbTotal} évaluation(s)`;
+            } else {
+                // Mix de recevables et non-recevables
+                compteur.textContent = `${nbTotal} résultat(s) (${nbRecevables} évaluation(s) recevable(s))`;
+            }
         }
 
         const elemMoyenne = document.getElementById('moyenne-evaluations');
@@ -593,6 +611,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         niveauFinal: evaluation.niveauFinal || '-',
                         statut: statut,
                         statutIntegrite: statutIntegrite,
+                        statutRemise: evaluation.statutRemise || 'non-remis',  // ✅ Ajout statut de remise
                         evaluationId: evaluation.id,
                         verrouille: evaluation.verrouillee || false,
                         remplacee: estOriginaleRemplacee,
@@ -621,6 +640,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     noteChiffree: null,
                     niveauFinal: '-',
                     statut: 'non-evalue',
+                    statutRemise: 'non-remis',  // ✅ Ajout statut de remise (par défaut non remis)
                     evaluationId: null,
                     verrouille: false
                 });
@@ -684,21 +704,34 @@ function appliquerFiltresSurLignes(lignes) {
         if (filtreProduction && ligne.productionId !== filtreProduction) return false;
 
         // Filtre Statut
-        if (filtreStatut === 'actives') {
-            // "Actives" exclut les évaluations remplacées par jetons
-            if (ligne.statut === 'remplacee') return false;
+        if (filtreStatut === 'remis') {
+            // Afficher seulement les travaux remis (exclut "non-remis" ET "retard")
+            // Les travaux en retard deviennent "remis" quand un jeton de délai est appliqué
+            if (ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard') return false;
+        } else if (filtreStatut === 'non-remis') {
+            // Afficher les travaux non remis ET en retard (considérés comme non remis)
+            if (ligne.statutRemise !== 'non-remis' && ligne.statutRemise !== 'retard') return false;
         } else if (filtreStatut === 'jeton-delai') {
             // Afficher seulement les évaluations avec jeton de délai
             if (ligne.badgeType !== 'delai') return false;
         } else if (filtreStatut === 'jeton-reprise') {
-            // Afficher seulement les nouvelles reprises (pas les originales remplacées)
+            // Afficher seulement les reprises STANDARD (pas ciblées)
             if (ligne.badgeType !== 'nouvelle-reprise') return false;
+        } else if (filtreStatut === 'jeton-reprise-ciblee') {
+            // Afficher seulement les reprises CIBLÉES
+            if (ligne.badgeType !== 'reprise-ciblee') return false;
         } else if (filtreStatut === 'tous-jetons') {
-            // Afficher toutes les évaluations avec jetons (délai + reprises nouvelles, exclure originales)
-            if (!['delai', 'nouvelle-reprise'].includes(ligne.badgeType)) return false;
+            // Afficher toutes les évaluations avec jetons (délai + reprises standard + reprises ciblées)
+            if (!['delai', 'nouvelle-reprise', 'reprise-ciblee'].includes(ligne.badgeType)) return false;
         } else if (filtreStatut === 'remplacees') {
             // Afficher seulement les évaluations originales remplacées
             if (ligne.statut !== 'remplacee') return false;
+        } else if (filtreStatut === 'evalue') {
+            // Afficher seulement les évaluations RÉELLEMENT évaluées (exclure les "non-remis")
+            if (ligne.statut !== 'evalue' || ligne.statutRemise === 'non-remis') return false;
+        } else if (filtreStatut === 'non-evalue') {
+            // Afficher les non évalués OU les travaux marqués comme non remis
+            if (ligne.statut !== 'non-evalue' && ligne.statutRemise !== 'non-remis') return false;
         } else if (filtreStatut && ligne.statut !== filtreStatut) {
             return false;
         }
@@ -797,7 +830,10 @@ function genererLigneHTML(ligne) {
 
     // Afficher le niveau IDME
     let affichageNiveau;
-    if (ligne.statut === 'non-recevable') {
+    if (ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard') {
+        // Non remis ou en retard : afficher le badge "Non remis"
+        affichageNiveau = '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>';
+    } else if (ligne.statut === 'non-recevable') {
         // Non recevable : afficher 0 ou --
         affichageNiveau = '<strong style="color: #999;">0</strong>';
     } else if ((ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.niveauFinal !== '-') {
@@ -808,7 +844,10 @@ function genererLigneHTML(ligne) {
 
     // Afficher la note chiffrée (%)
     let affichageNoteChiffree;
-    if (ligne.statut === 'non-recevable') {
+    if (ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard') {
+        // Non remis ou en retard : afficher --
+        affichageNoteChiffree = '<strong style="color: #999;">--</strong>';
+    } else if (ligne.statut === 'non-recevable') {
         // Non recevable : afficher -- au lieu d'une note
         affichageNoteChiffree = '<strong style="color: #999;">--</strong>';
     } else if ((ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.noteChiffree !== null) {
@@ -907,7 +946,7 @@ function genererBoutonsActionsNonRecevable(ligne) {
  */
 function genererBoutonsActionsNonEvalue(ligne) {
     return `
-        <button class="btn btn-confirmer btn-compact" onclick="consulterEvaluationDepuisListe('${ligne.da}', '${ligne.productionId}')" title="Évaluer">
+        <button class="btn btn-confirmer btn-compact" onclick="evaluerProduction('${ligne.da}', '${ligne.productionId}')" title="Évaluer">
             Évaluer
         </button>
     `;
@@ -936,7 +975,7 @@ function ouvrirCartouche(cartoucheId, productionId) {
 }
 
 /**
- * Ouvre la page d'évaluation pour modifier/créer une évaluation
+ * Ouvre la page d'évaluation pour modifier une évaluation existante
  * RENOMMÉ consulterEvaluationDepuisListe pour éviter conflit avec evaluation.js
  */
 function consulterEvaluationDepuisListe(evaluationId) {
@@ -971,6 +1010,53 @@ function consulterEvaluationDepuisListe(evaluationId) {
             console.error('❌ Fonction modifierEvaluationParId non disponible');
             alert('Erreur: Module d\'évaluation non chargé correctement');
         }
+    }, 200);
+}
+
+/**
+ * Ouvre la page d'évaluation pour créer une nouvelle évaluation
+ * pour un étudiant et une production donnés
+ */
+function evaluerProduction(da, productionId) {
+    console.log(`📝 Création nouvelle évaluation pour DA: ${da}, Production: ${productionId}`);
+
+    // Naviguer vers la section Évaluations › Évaluer
+    afficherSection('evaluations');
+
+    // Attendre que la section soit chargée
+    setTimeout(() => {
+        // Pré-remplir le formulaire avec l'étudiant et la production
+        const selectEtudiant = document.getElementById('selectEtudiantEval');
+        const selectProduction = document.getElementById('selectProduction1');
+
+        if (!selectEtudiant || !selectProduction) {
+            console.error('❌ Éléments de formulaire non trouvés');
+            alert('Erreur: Formulaire d\'évaluation non disponible');
+            return;
+        }
+
+        // Sélectionner l'étudiant
+        selectEtudiant.value = da;
+
+        // Déclencher le chargement des productions pour cet étudiant
+        if (typeof chargerEvaluationsEtudiant === 'function') {
+            chargerEvaluationsEtudiant();
+        }
+
+        // Attendre que les productions soient chargées
+        setTimeout(() => {
+            // Sélectionner la production
+            selectProduction.value = productionId;
+
+            // Déclencher le chargement de la grille associée
+            const event = new Event('change');
+            selectProduction.dispatchEvent(event);
+
+            console.log('✅ Formulaire pré-rempli:', {
+                etudiant: da,
+                production: productionId
+            });
+        }, 100);
     }, 200);
 }
 
