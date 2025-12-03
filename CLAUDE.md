@@ -60,8 +60,19 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 - **Séparation** : portfolio.js orchestre, pratiques calculent (Single Source of Truth)
 
 **Pratiques implémentées** :
-- PAN-Maîtrise (Grégoire) : Échelle IDME, critères SRPNF, N derniers artefacts
+- PAN-Maîtrise (Grégoire) : Échelle IDME, critères configurables, N derniers artefacts
 - Sommative : Moyenne pondérée, toutes évaluations, défis génériques
+
+**✅ SYSTÈME 100% UNIVERSEL (3 décembre 2025)** : Critères d'évaluation configurables
+- **Avant** : Critères SRPNF codés en dur dans le code
+- **Après** : N'importe quelle grille de critères peut être utilisée
+- **Impact** : Un utilisateur peut créer ses propres critères (ex: Créativité, Analyse, Synthèse)
+- **Fonctionnalités universelles** :
+  * Détection automatique des critères depuis la grille de référence
+  * Calcul des moyennes avec regex dynamique
+  * Détection forces/défis pour n'importe quels critères
+  * Patterns et diagnostics universels
+  * Interventions RàI configurables avec fallback générique intelligent
 
 **Pratiques futures** :
 - PAN-Spécifications : Pass/fail sur objectifs
@@ -1120,6 +1131,188 @@ localStorage.seancesCompletes             // horaire.js (futur)
 **Documentation** :
 - `BETA_92_CHANGELOG.md` : Changelog complet (3 sessions détaillées)
 - `PLAN_TESTS_BETA_92.md` : Plan de tests systématique (30-45 min)
+
+---
+
+**Fichier actuel: Beta 93 (Système universel)**
+
+**Nom**: `index 93.html`
+**Date de création**: 3 décembre 2025
+**Version actuelle**: Beta 93
+**Statut**: ✅ En cours de développement
+
+**Créée à partir de**: Beta 92 (`index 92.html`)
+**Provenance**: Beta 92 avec système Primo complet
+**Changelog**: Session unique (3 décembre 2025)
+
+**Développement sur 1 jour** (3 décembre 2025):
+
+### Session unique : Correction statutRemise + Système 100% universel
+
+**1. CORRECTION CRITIQUE : Single Source of Truth pour statutRemise**
+
+**Problème identifié** : Plusieurs endroits affichaient des travaux "non remis" comme étant remis
+- Liste évaluations : Badge "Non remis" ne s'affichait pas (note 0% affichée à la place)
+- Profil étudiant (Productions) : Idem
+- Profil étudiant (Engagement) : Artefacts "non remis" comptés comme remis
+
+**Cause** : Logique vérifiait `statut === 'evalue'` avant de vérifier `statutRemise`
+
+**Solution appliquée** :
+```javascript
+// ✅ PRIORITÉ 1 : Vérifier statutRemise D'ABORD
+if (statutRemise === 'non-remis' || statutRemise === 'retard') {
+    affichage = '<span class="badge-non-remis">Non remis</span>';
+} else if (statut === 'evalue') {
+    affichage = `<strong>${note}</strong>`;
+}
+```
+
+**Fichiers corrigés** :
+- `liste-evaluations.js` (v=2025120207) : lignes 833-857
+- `profil-etudiant.js` (v=2025120302) :
+  * Section Productions : lignes 3568-3597
+  * Section Engagement : lignes 765-780
+
+**Résultat** : `statutRemise` est maintenant la **seule source de vérité**
+
+---
+
+**2. SYSTÈME 100% UNIVERSEL : Critères configurables**
+
+**Objectif** : Permettre à n'importe quel utilisateur d'utiliser ses propres critères d'évaluation (pas seulement SRPNF)
+
+**Avant** (90% universel) :
+- Critères SRPNF codés en dur dans le code
+- Recommandations RàI spécifiques à SRPNF
+- Impossible d'utiliser d'autres critères
+
+**Après** (100% universel) :
+- Critères lus dynamiquement depuis la grille de référence
+- Recommandations RàI configurables avec fallback générique
+- Support de N'IMPORTE quelle grille
+
+**Modifications profil-etudiant.js** (v=2025120303) :
+
+1. **Nouvelle fonction `obtenirCriteresAvecValeurs(da)`** (lignes 138-171)
+   - Remplace tableau SRPNF codé en dur
+   - Lit grille de référence configurée
+   - Retourne `[{ nom, valeur, cleNormalisee }, ...]`
+
+2. **Section Suivi de l'apprentissage** (ligne 1556)
+   - Utilise `obtenirCriteresAvecValeurs()` dynamiquement
+   - Forces/défis calculés pour n'importe quels critères
+
+3. **Rapport diagnostic** (lignes 5795-5812)
+   - Extraction dynamique depuis grille
+   - Support de toute grille personnalisée
+
+4. **Textes universalisés**
+   - "Critères SRPNF" → "Critères d'évaluation"
+
+**Modifications pratique-pan-maitrise.js** (v=2025120302) :
+
+1. **Nouvelle fonction `_obtenirGrilleReference()`** (lignes 478-501)
+   - Lit grille configurée dans `modalitesEvaluation.grilleReferenceDepistage`
+
+2. **Nouvelle fonction `_obtenirInterventionConfiguree(nomCritere, niveau)`** (lignes 503-549)
+   - Cherche interventions RàI dans la grille
+   - Support format `critere.interventions.niveau1/2/3`
+
+3. **`_calculerMoyennesCriteresRecents()` - Refonte complète** (lignes 514-642)
+   - ✅ Regex dynamique construite depuis noms de critères
+   - ✅ Support variantes accentuées (É→[ÉE], Ç→[ÇC])
+   - ✅ Initialisation accumulateurs dynamique
+   - ✅ Matching insensible accents/espaces
+
+4. **`_diagnostiquerForcesChallenges()` - Universel** (lignes 644-695)
+   - ✅ Critères extraits dynamiquement depuis moyennes
+   - ✅ Plus de tableau SRPNF codé
+
+5. **`_determinerCibleIntervention()` - Système à 2 niveaux** (lignes 860-974)
+   ```javascript
+   // NIVEAU 1 : Chercher dans grille si configuré
+   const interventionConfig = this._obtenirInterventionConfiguree(defiPrincipal, niveau);
+   if (interventionConfig) {
+       cible.cible = interventionConfig.cible;
+       cible.strategies = interventionConfig.strategies;
+   } else {
+       // NIVEAU 2 : Recommandations génériques intelligentes
+       cible.cible = `Remédiation intensive en ${defiPrincipal}`;
+       cible.strategies = [
+           `Rencontre individuelle pour diagnostic approfondi`,
+           `Exercices de remédiation ciblés sur ${defiPrincipal}`,
+           // ...
+       ];
+   }
+   ```
+
+6. **Documentation mise à jour**
+   - Version : 1.0 → 1.1 (Universelle)
+   - Description : "critères configurables" au lieu de "critères SRPNF"
+   - `type: 'critere-grille'` au lieu de `'critere-srpnf'`
+
+**Autres corrections** :
+- `calendrier-vue.js` (v=2025120201) : Jours type='cours' cliquables (ligne 259)
+- `evaluation.js` (v=2025120216) : Navigation bouton profil corrigée (lignes 5361-5396)
+- `index 93.html` : Statut "En retard" supprimé (simplifié à remis/non-remis)
+
+---
+
+### Résultat : Système 100% universel
+
+**Pour VOUS (grille SRPNF actuelle)** :
+- ✅ Rien ne change ! Recommandations génériques de qualité
+- ✅ Possibilité d'ajouter `interventions{}` dans grille pour recommandations spécifiques originales
+
+**Pour AUTRES UTILISATEURS** :
+- ✅ Peuvent créer grille personnalisée (ex: Créativité, Analyse, Synthèse, Méthodologie)
+- ✅ Système détecte automatiquement forces/défis/patterns
+- ✅ Recommandations génériques automatiques OU configurables
+
+**Exemple grille personnalisée** :
+```javascript
+{
+    nom: "Créativité",
+    ponderation: 25,
+    // Optionnel : Interventions RàI personnalisées
+    interventions: {
+        niveau3: {
+            cible: "Stimulation créative intensive",
+            strategies: [
+                "Exercices de brainstorming guidés",
+                "Exposition à exemples créatifs variés",
+                "Rencontre individuelle déblocage"
+            ]
+        },
+        niveau2: {...},
+        niveau1: {...}
+    }
+}
+```
+
+### Statistiques Beta 93
+
+| Métrique | Valeur |
+|----------|--------|
+| **Sessions** | 1 (3 décembre) |
+| **Commits** | 2 commits |
+| **Fichiers modifiés** | 6 fichiers JS + 1 HTML |
+| **Lignes ajoutées** | ~500 lignes |
+| **Bugs corrigés** | 3 bugs statutRemise + 1 bug navigation |
+
+**Commits** :
+1. `1c42472` - Correction statutRemise et système universel de critères
+2. `0253b5d` - Déplacement scripts de build vers racine du projet
+
+---
+
+**Fichier précédent: Beta 92 (Primo Assistant)**
+
+**Nom**: `index 92.html`
+**Date de création**: 27 novembre 2025
+**Version actuelle**: Beta 92
+**Statut**: ✅ Prêt pour distribution
 
 ---
 
