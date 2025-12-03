@@ -351,25 +351,96 @@ function chargerEchellePerformance() {
  */
 function chargerEvaluationsEtudiant() {
     const etudiantDA = document.getElementById('selectEtudiantEval').value;
+    const btnVoirProfil = document.getElementById('btnVoirProfilDepuisEval');
 
     if (!etudiantDA) {
-        // Masquer l'interface si aucun étudiant
+        // Masquer le bouton de profil si aucun étudiant
+        if (btnVoirProfil) btnVoirProfil.style.display = 'none';
         return;
     }
 
-    // Initialiser evaluationEnCours
+    // Afficher le bouton de profil
+    if (btnVoirProfil) btnVoirProfil.style.display = 'block';
+
+    // ✅ FIX: Préserver les sélections actuelles (production, grille, échelle, cartouche)
+    const selectProduction = document.getElementById('selectProduction1');
+    const selectGrille = document.getElementById('selectGrille1');
+    const selectEchelle = document.getElementById('selectEchelle1');
+    const selectCartouche = document.getElementById('selectCartoucheEval');
+    const selectRemise = document.getElementById('remiseProduction1');
+
+    const productionActuelle = selectProduction?.value || null;
+    const grilleActuelle = selectGrille?.value || null;
+    const echelleActuelle = selectEchelle?.value || null;
+    const cartoucheActuelle = selectCartouche?.value || null;
+    const remiseActuelle = selectRemise?.value || 'non-remis';
+
+    // ✅ Vider IMMÉDIATEMENT les critères AVANT de changer quoi que ce soit
+    // (important pour éviter que les valeurs de l'étudiant précédent persistent)
+    const selects = document.querySelectorAll('#listeCriteresGrille1 select[id^="eval_"]');
+    selects.forEach(select => {
+        select.value = '';
+        // ✅ Réinitialiser aussi la couleur de fond (enlever les couleurs vert/jaune/etc.)
+        select.style.backgroundColor = '';
+        select.style.borderColor = '#ddd';
+        select.style.fontWeight = 'normal';
+
+        // ✅ Vider aussi le commentaire de rétroaction du critère
+        const critereId = select.id.replace('eval_', '');
+        const commDiv = document.getElementById(`comm_${critereId}`);
+        if (commDiv) {
+            commDiv.textContent = 'Sélectionnez un niveau';
+            commDiv.style.fontStyle = 'italic';
+            commDiv.style.color = '#999';
+        }
+    });
+
+    // Réinitialiser la note et le niveau
+    const noteElem = document.getElementById('noteProduction1');
+    const niveauElem = document.getElementById('niveauProduction1');
+    if (noteElem) noteElem.textContent = '--';
+    if (niveauElem) niveauElem.textContent = '--';
+
+    // Vider la rétroaction finale
+    const retroaction = document.getElementById('retroactionFinale1');
+    if (retroaction) retroaction.value = '';
+
+    // Initialiser evaluationEnCours avec le nouvel étudiant mais préserver les sélections
     evaluationEnCours = {
         etudiantDA: etudiantDA,
-        productionId: null,
-        grilleId: null,
-        echelleId: null,
-        cartoucheId: null,
-        criteres: {},
-        statutRemise: 'non-remis'
+        productionId: productionActuelle,
+        grilleId: grilleActuelle,
+        echelleId: echelleActuelle,
+        cartoucheId: cartoucheActuelle,
+        criteres: {},  // ✅ Réinitialiser SEULEMENT les critères évalués
+        statutRemise: remiseActuelle
     };
 
-    // Charger les productions
+    // Charger les productions pour le nouvel étudiant (réinitialise le select)
     chargerProductionsDansSelect();
+
+    // ✅ IMPORTANT: Restaurer la production sélectionnée APRÈS le rechargement du select
+    setTimeout(() => {
+        if (productionActuelle && selectProduction) {
+            selectProduction.value = productionActuelle;
+        }
+        if (grilleActuelle && selectGrille) {
+            selectGrille.value = grilleActuelle;
+        }
+        if (echelleActuelle && selectEchelle) {
+            selectEchelle.value = echelleActuelle;
+        }
+        if (cartoucheActuelle && selectCartouche) {
+            selectCartouche.value = cartoucheActuelle;
+        }
+        if (remiseActuelle && selectRemise) {
+            selectRemise.value = remiseActuelle;
+        }
+
+        // Vérifier si une évaluation existe déjà pour ce nouvel étudiant
+        // (Si oui, elle sera chargée et remplacera les critères vides)
+        verifierEtChargerEvaluationExistante();
+    }, 100);
 }
 
 /**
@@ -3449,28 +3520,15 @@ function naviguerEtudiantPrecedent() {
     const selectEtudiant = document.getElementById('selectEtudiantEval');
     if (!selectEtudiant || !selectEtudiant.value) return;
 
-    // CORRECTION : Sauvegarder les sélections actuelles avant de changer d'étudiant
-    sauvegarderSelectionsEvaluation();
-
     const options = Array.from(selectEtudiant.options).filter(opt => opt.value !== '');
     const indexActuel = options.findIndex(opt => opt.value === selectEtudiant.value);
 
     if (indexActuel > 0) {
+        // Changer l'étudiant sélectionné
         selectEtudiant.value = options[indexActuel - 1].value;
-        // NE PAS déclencher 'change' qui réinitialise le formulaire
-        // selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
 
-        // Mettre à jour evaluationEnCours avec le nouvel étudiant
-        if (evaluationEnCours) {
-            evaluationEnCours.etudiantDA = selectEtudiant.value;
-        }
-
-        // Restaurer les sélections
-        setTimeout(() => {
-            restaurerSelectionsEvaluation();
-            // Forcer le chargement de l'évaluation après restauration
-            setTimeout(() => verifierEtChargerEvaluationExistante(), 500);
-        }, 100);
+        // ✅ Charger le nouvel étudiant (préserve production/grille/échelle, réinitialise critères)
+        chargerEvaluationsEtudiant();
 
         mettreAJourIndicateurProgression();
     }
@@ -3483,28 +3541,15 @@ function naviguerEtudiantSuivant() {
     const selectEtudiant = document.getElementById('selectEtudiantEval');
     if (!selectEtudiant || !selectEtudiant.value) return;
 
-    // CORRECTION : Sauvegarder les sélections actuelles avant de changer d'étudiant
-    sauvegarderSelectionsEvaluation();
-
     const options = Array.from(selectEtudiant.options).filter(opt => opt.value !== '');
     const indexActuel = options.findIndex(opt => opt.value === selectEtudiant.value);
 
     if (indexActuel >= 0 && indexActuel < options.length - 1) {
+        // Changer l'étudiant sélectionné
         selectEtudiant.value = options[indexActuel + 1].value;
-        // NE PAS déclencher 'change' qui réinitialise le formulaire
-        // selectEtudiant.dispatchEvent(new Event('change', { bubbles: true }));
 
-        // Mettre à jour evaluationEnCours avec le nouvel étudiant
-        if (evaluationEnCours) {
-            evaluationEnCours.etudiantDA = selectEtudiant.value;
-        }
-
-        // Restaurer les sélections
-        setTimeout(() => {
-            restaurerSelectionsEvaluation();
-            // Forcer le chargement de l'évaluation après restauration
-            setTimeout(() => verifierEtChargerEvaluationExistante(), 500);
-        }, 100);
+        // ✅ Charger le nouvel étudiant (préserve production/grille/échelle, réinitialise critères)
+        chargerEvaluationsEtudiant();
 
         mettreAJourIndicateurProgression();
     }
@@ -3611,21 +3656,28 @@ function insererNavigationEvaluationSerie() {
     nav.style.cssText = 'display: flex; gap: 10px; align-items: center; margin: 15px 0; justify-content: center;';
 
     nav.innerHTML = `
-        <button class="btn btn-principal" onclick="naviguerEtudiantPrecedent()"
+        <button class="btn btn-principal btn-compact" onclick="naviguerEtudiantPrecedent()"
                 title="Évaluer l'étudiant·e précédent·e"
-                style="padding: 8px 12px; min-width: auto;">
+                style="padding: 6px 10px; min-width: auto; font-size: 0.9rem;">
             ←
         </button>
 
         <span id="indicateurProgressionEval"
-              style="font-weight: 600; color: var(--bleu-principal); padding: 0 15px; display: none;">
-            Étudiant·e 1/25
+              style="font-weight: 400; color: var(--gris-moyen); padding: 0 10px; display: inline-block; font-size: 0.85rem;">
+            0/0 évaluations
         </span>
 
-        <button class="btn btn-principal" onclick="naviguerEtudiantSuivant()"
+        <button class="btn btn-principal btn-compact" onclick="naviguerEtudiantSuivant()"
                 title="Évaluer l'étudiant·e suivant·e"
-                style="padding: 8px 12px; min-width: auto;">
+                style="padding: 6px 10px; min-width: auto; font-size: 0.9rem;">
             →
+        </button>
+
+        <button id="btnVoirProfilDepuisEval" class="btn btn-secondaire btn-compact"
+                onclick="ouvrirProfilDepuisEvaluation()"
+                style="margin-left: 10px; display: none; padding: 6px 10px; min-width: auto; font-size: 0.85rem;"
+                title="Voir le profil de l'étudiant·e">
+            👤
         </button>
     `;
 
@@ -5295,11 +5347,61 @@ function ouvrirBanqueAvecRecherche() {
     }, 100);
 }
 
+/**
+ * Ouvre le profil de l'étudiant depuis le formulaire d'évaluation
+ */
+function ouvrirProfilDepuisEvaluation() {
+    const etudiantDA = document.getElementById('selectEtudiantEval').value;
+
+    if (!etudiantDA) {
+        alert('Veuillez sélectionner un·e étudiant·e');
+        return;
+    }
+
+    // Naviguer vers la section Tableau de bord > Profil
+    afficherSection('tableau-bord');
+
+    // Attendre que la section soit chargée
+    setTimeout(() => {
+        // Afficher la sous-section profil
+        if (typeof afficherSousSection === 'function') {
+            afficherSousSection('tableau-bord-profil');
+        }
+
+        // Attendre un peu puis charger le profil de l'étudiant
+        setTimeout(() => {
+            if (typeof afficherProfilComplet === 'function') {
+                afficherProfilComplet(etudiantDA);
+
+                // Attendre que le profil soit généré, puis scroller vers la section Productions
+                setTimeout(() => {
+                    const sectionProductions = document.querySelector('#contenuProfilEtudiant h3:contains("Productions")');
+                    if (sectionProductions) {
+                        sectionProductions.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        // Fallback: chercher par texte
+                        const allH3 = document.querySelectorAll('#contenuProfilEtudiant h3');
+                        for (let h3 of allH3) {
+                            if (h3.textContent.includes('Productions')) {
+                                h3.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                break;
+                            }
+                        }
+                    }
+                }, 300);
+            } else {
+                console.error('❌ Fonction afficherProfilComplet non disponible');
+            }
+        }, 100);
+    }, 200);
+}
+
 // Exporter les fonctions
 // window.filtrerListeEvaluations = filtrerListeEvaluations; // DÉSACTIVÉ : Géré par liste-evaluations.js
 window.filtrerBanqueEvaluations = filtrerBanqueEvaluations;
 window.ouvrirBanqueAvecRecherche = ouvrirBanqueAvecRecherche;
 window.modifierEvaluationParId = modifierEvaluation; // Export sous un nom différent pour éviter conflit avec liste-evaluations.js
+window.ouvrirProfilDepuisEvaluation = ouvrirProfilDepuisEvaluation;
 // window.gererCheckboxJetonDelai = gererCheckboxJetonDelai; // FIXME: Fonctions non définies dans ce fichier
 // window.gererCheckboxJetonReprise = gererCheckboxJetonReprise; // FIXME: Fonctions non définies dans ce fichier
 

@@ -2,17 +2,17 @@
  * PRATIQUE PAN-MAÎTRISE - Implémentation complète
  *
  * Pratique PAN (Plan d'apprentissage numérique) selon l'approche de Grégoire Bédard.
- * Évaluation formative basée sur les N meilleurs artefacts de portfolio avec critères SRPNF.
+ * Évaluation formative basée sur les N meilleurs artefacts de portfolio.
  *
  * CARACTÉRISTIQUES :
  * - Échelle IDME (Insuffisant, Développement, Maîtrisé, Étendu)
- * - Critères SRPNF (Structure, Rigueur, Plausibilité, Nuance, Français)
+ * - ✅ Critères d'évaluation configurables (grille de référence)
  * - Performance calculée sur N meilleurs artefacts (configurable: 3, 7 ou 12 cours)
  * - Détection défis spécifiques par critère
  * - Cibles RàI personnalisées selon pattern et défi principal
  *
- * VERSION : 1.0
- * DATE : 11 novembre 2025
+ * VERSION : 1.1 (Universelle)
+ * DATE : 3 décembre 2025
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
@@ -36,7 +36,7 @@ class PratiquePANMaitrise {
 
     obtenirDescription() {
         return "Pratique PAN-Maîtrise basée sur les N meilleurs artefacts de portfolio " +
-               "avec évaluation formative selon l'échelle IDME et les critères SRPNF.";
+               "avec évaluation formative selon l'échelle IDME et la grille de critères configurée.";
     }
 
     // ========================================================================
@@ -476,16 +476,97 @@ class PratiquePANMaitrise {
     }
 
     /**
-     * Calcule les moyennes SRPNF sur les N derniers artefacts
+     * Obtient la grille de référence configurée pour le dépistage
+     * @private
+     * @returns {Object|null} Grille avec critères ou null si non configurée
+     */
+    _obtenirGrilleReference() {
+        const modalites = db.getSync('modalitesEvaluation', {});
+        const grilleId = modalites.grilleReferenceDepistage;
+
+        if (!grilleId) {
+            console.warn('⚠️ [PAN-Maîtrise] Aucune grille de référence configurée');
+            return null;
+        }
+
+        const grilles = db.getSync('grillesTemplates', []);
+        const grille = grilles.find(g => g.id === grilleId);
+
+        if (!grille) {
+            console.error(`❌ [PAN-Maîtrise] Grille "${grilleId}" introuvable`);
+            return null;
+        }
+
+        return grille;
+    }
+
+    /**
+     * Cherche les interventions RàI configurées pour un critère spécifique
+     * Supporte le nouveau format avec interventions{} dans la grille
      *
-     * Extrait les critères depuis retroactionFinale avec regex :
+     * @private
+     * @param {string} nomCritere - Nom du critère (ex: "Français", "Structure")
+     * @param {number} niveau - Niveau RàI (1, 2 ou 3)
+     * @returns {Object|null} { cible, strategies } ou null si non configuré
+     */
+    _obtenirInterventionConfiguree(nomCritere, niveau) {
+        const grille = this._obtenirGrilleReference();
+        if (!grille || !grille.criteres) {
+            return null;
+        }
+
+        // Trouver le critère correspondant (insensible aux accents/casse)
+        const critere = grille.criteres.find(c => {
+            const nomRef = c.nom.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, '');
+            const nomRecherche = nomCritere.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, '');
+
+            return nomRef === nomRecherche ||
+                   nomRef.startsWith(nomRecherche) ||
+                   nomRecherche.startsWith(nomRef);
+        });
+
+        if (!critere || !critere.interventions) {
+            return null;
+        }
+
+        // Chercher l'intervention pour le niveau spécifique
+        const interventionNiveau = critere.interventions[`niveau${niveau}`];
+
+        if (interventionNiveau && interventionNiveau.cible && interventionNiveau.strategies) {
+            return {
+                cible: interventionNiveau.cible,
+                strategies: interventionNiveau.strategies
+            };
+        }
+
+        return null;
+    }
+
+    /**
+     * Calcule les moyennes des critères sur les N derniers artefacts
+     * ✅ VERSION UNIVERSELLE - Utilise la grille de référence configurée
+     *
+     * Extrait les critères depuis retroactionFinale avec regex dynamique
      * Format attendu: "CRITÈRE (NIVEAU)" ex: "STRUCTURE (M)"
      *
      * @private
      * @param {string} da - Numéro DA
-     * @returns {Object|null} { Structure, Rigueur, Plausibilite, Nuance, Francais } ou null
+     * @returns {Object|null} Moyennes par critère (clés capitalisées) ou null
      */
     _calculerMoyennesCriteresRecents(da) {
+        // ✅ Obtenir la grille de référence configurée
+        const grille = this._obtenirGrilleReference();
+        if (!grille || !grille.criteres || grille.criteres.length === 0) {
+            console.warn('⚠️ [PAN-Maîtrise] Pas de grille de référence - calcul impossible');
+            return null;
+        }
+
         const config = this._lireConfiguration();
         const nombreArtefacts = config.nombreCours * 2; // 3 cours = 6 artefacts
 
@@ -517,18 +598,30 @@ class PratiquePANMaitrise {
         // Obtenir table de conversion IDME
         const tableConversion = this._obtenirTableConversionIDME();
 
-        // Accumuler scores par critère
-        const scoresCriteres = {
-            structure: [],
-            rigueur: [],
-            plausibilite: [],
-            nuance: [],
-            francais: []
-        };
+        // ✅ Initialiser accumulateurs dynamiquement selon la grille
+        const scoresCriteres = {};
+        grille.criteres.forEach(c => {
+            const cleNormalisee = c.nom.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, '');
+            scoresCriteres[cleNormalisee] = [];
+        });
 
-        // Regex pour extraire: CRITÈRE (NIVEAU)
-        // Support I/D/M/E + niveau "0" (Aucun) ajouté Beta 89
-        const regexCritere = /(STRUCTURE|RIGUEUR|PLAUSIBILIT[ÉE]|NUANCE|FRAN[ÇC]AIS\s+[ÉE]CRIT)\s*\(([IDME0])\)/gi;
+        // ✅ Construire regex dynamique depuis les noms de critères de la grille
+        // Ex: (STRUCTURE|RIGUEUR|PLAUSIBILITE|NUANCE|FRANCAIS)\s*\(([IDME0])\)
+        const nomsRegex = grille.criteres.map(c => {
+            // Échapper les caractères spéciaux et supporter les variantes accentuées
+            return c.nom.toUpperCase()
+                .replace(/É/g, '[ÉE]')
+                .replace(/È/g, '[ÈE]')
+                .replace(/Ç/g, '[ÇC]')
+                .replace(/\s+/g, '\\s+');
+        }).join('|');
+
+        const regexCritere = new RegExp(`(${nomsRegex})\\s*\\(([IDME0])\\)`, 'gi');
+
+        console.log(`✅ [PAN-Maîtrise] Regex dynamique: ${regexCritere.source}`);
 
         derniersArtefacts.forEach(evaluation => {
             const retroaction = evaluation.retroactionFinale || '';
@@ -540,16 +633,28 @@ class PratiquePANMaitrise {
                 const score = this._convertirNiveauIDMEEnScore(niveauIDME, tableConversion);
 
                 if (score !== null) {
-                    if (nomCritere === 'STRUCTURE') {
-                        scoresCriteres.structure.push(score);
-                    } else if (nomCritere === 'RIGUEUR') {
-                        scoresCriteres.rigueur.push(score);
-                    } else if (nomCritere.startsWith('PLAUSIBILIT')) {
-                        scoresCriteres.plausibilite.push(score);
-                    } else if (nomCritere === 'NUANCE') {
-                        scoresCriteres.nuance.push(score);
-                    } else if (nomCritere.startsWith('FRAN')) {
-                        scoresCriteres.francais.push(score);
+                    // ✅ Trouver le critère correspondant dans la grille
+                    const critereReference = grille.criteres.find(c => {
+                        const nomRef = c.nom.toUpperCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/\s+/g, '');
+                        const nomMatch = nomCritere
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/\s+/g, '');
+
+                        return nomRef === nomMatch ||
+                               nomRef.startsWith(nomMatch) ||
+                               nomMatch.startsWith(nomRef);
+                    });
+
+                    if (critereReference) {
+                        const cleNormalisee = critereReference.nom.toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/\s+/g, '');
+                        scoresCriteres[cleNormalisee].push(score);
                     }
                 }
             }
@@ -559,9 +664,19 @@ class PratiquePANMaitrise {
         const moyennes = {};
         let aucuneDonnee = true;
 
-        Object.keys(scoresCriteres).forEach(critere => {
-            const scores = scoresCriteres[critere];
-            const cleFormatee = critere.charAt(0).toUpperCase() + critere.slice(1);
+        Object.keys(scoresCriteres).forEach(cleNormalisee => {
+            const scores = scoresCriteres[cleNormalisee];
+
+            // Trouver le nom original du critère pour la clé capitalisée
+            const critereOriginal = grille.criteres.find(c => {
+                const cle = c.nom.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/\s+/g, '');
+                return cle === cleNormalisee;
+            });
+
+            const cleFormatee = critereOriginal ? critereOriginal.nom : cleNormalisee;
 
             if (scores.length > 0) {
                 moyennes[cleFormatee] = scores.reduce((sum, s) => sum + s, 0) / scores.length;
@@ -575,10 +690,11 @@ class PratiquePANMaitrise {
     }
 
     /**
-     * Diagnostique forces et défis selon moyennes SRPNF
+     * Diagnostique forces et défis selon moyennes des critères
+     * ✅ VERSION UNIVERSELLE - Utilise la grille de référence configurée
      *
      * @private
-     * @param {Object} moyennes - { Structure, Rigueur, Plausibilite, Nuance, Francais }
+     * @param {Object} moyennes - Moyennes par critère (clés = noms des critères)
      * @returns {Object} { forces[], defis[], principaleForce, principalDefi }
      */
     _diagnostiquerForcesChallenges(moyennes) {
@@ -594,13 +710,21 @@ class PratiquePANMaitrise {
             };
         }
 
-        const criteres = [
-            { nom: 'Structure', cle: 'structure', score: moyennes.Structure },
-            { nom: 'Rigueur', cle: 'rigueur', score: moyennes.Rigueur },
-            { nom: 'Plausibilité', cle: 'plausibilite', score: moyennes.Plausibilite },
-            { nom: 'Nuance', cle: 'nuance', score: moyennes.Nuance },
-            { nom: 'Français', cle: 'francais', score: moyennes.Francais }
-        ].filter(c => c.score !== null);
+        // ✅ Construire dynamiquement le tableau de critères depuis moyennes
+        const criteres = Object.keys(moyennes)
+            .filter(nom => moyennes[nom] !== null)
+            .map(nom => {
+                const cleNormalisee = nom.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/\s+/g, '');
+
+                return {
+                    nom: nom,
+                    cle: cleNormalisee,
+                    score: moyennes[nom]
+                };
+            });
 
         const forces = criteres
             .filter(c => c.score >= seuil)
@@ -735,18 +859,21 @@ class PratiquePANMaitrise {
 
     /**
      * Détermine la cible d'intervention RàI selon pattern et défi principal
+     * ✅ VERSION UNIVERSELLE - Système à 2 niveaux :
+     *    1. Cherche interventions configurées dans la grille
+     *    2. Sinon, utilise recommandations génériques intelligentes
      *
      * @private
      * @param {string} pattern - Pattern actuel
-     * @param {string} defiPrincipal - Nom du défi principal SRPNF
-     * @param {number} francaisMoyen - Moyenne français (0-100)
+     * @param {string} defiPrincipal - Nom du défi principal (critère de la grille)
+     * @param {number} francaisMoyen - Moyenne du critère de langue (0-100)
      * @param {number} performance - Performance actuelle (0-1)
      * @returns {Object} { type, cible, strategies, ressources, niveau, couleur, emoji }
      */
     _determinerCibleIntervention(pattern, defiPrincipal, francaisMoyen, performance) {
         // Cible par défaut
         let cible = {
-            type: 'critere-srpnf',
+            type: 'critere-grille',
             cible: defiPrincipal,
             strategies: [],
             ressources: [],
@@ -761,33 +888,19 @@ class PratiquePANMaitrise {
             cible.couleur = '#dc3545';
             cible.emoji = '🔴';
 
-            if (defiPrincipal === 'Français' && francaisMoyen <= 17) {
-                cible.cible = 'Rencontre individuelle | CAF | Dépistage';
-                cible.strategies = [
-                    'Rencontre individuelle pour comprendre les difficultés',
-                    'Référence au Centre d\'aide en français (CAF)',
-                    'Évaluation possible par le service adapté (SA)'
-                ];
-            } else if (defiPrincipal === 'Structure') {
-                cible.cible = 'Remédiation en Structure | Exercice supplémentaire | CAF';
-                cible.strategies = [
-                    'Exercices de structuration guidés',
-                    'Modèles annotés de textes bien structurés',
-                    'Rencontre au CAF pour stratégies organisationnelles'
-                ];
-            } else if (defiPrincipal === 'Rigueur') {
-                cible.cible = 'Remédiation en Rigueur | CAF';
-                cible.strategies = [
-                    'Exercices d\'observation détaillée',
-                    'Checklist d\'exhaustivité',
-                    'Révision méthodique avec pairs'
-                ];
+            // ✅ NIVEAU 1 : Chercher intervention configurée dans la grille
+            const interventionConfig = this._obtenirInterventionConfiguree(defiPrincipal, 3);
+            if (interventionConfig) {
+                cible.cible = interventionConfig.cible;
+                cible.strategies = interventionConfig.strategies;
             } else {
-                cible.cible = 'Rencontre individuelle | CAF | Dépistage';
+                // ✅ NIVEAU 2 : Recommandations génériques intelligentes
+                cible.cible = `Remédiation intensive en ${defiPrincipal}`;
                 cible.strategies = [
-                    'Diagnostic approfondi des difficultés',
-                    'Plan d\'action personnalisé',
-                    'Suivi hebdomadaire intensif'
+                    `Rencontre individuelle pour diagnostic approfondi`,
+                    `Exercices de remédiation ciblés sur ${defiPrincipal}`,
+                    `Référence aux ressources d'aide disponibles`,
+                    `Plan d'action personnalisé avec suivi hebdomadaire`
                 ];
             }
         }
@@ -798,33 +911,19 @@ class PratiquePANMaitrise {
             cible.couleur = '#ff9800';
             cible.emoji = '🟠';
 
-            if (defiPrincipal === 'Français' && francaisMoyen >= 18 && francaisMoyen <= 20) {
-                cible.cible = 'Remédiation en stratégie de révision ciblée | CAF recommandé';
-                cible.strategies = [
-                    'Stratégies de révision linguistique',
-                    'Utilisation d\'outils d\'aide (Antidote)',
-                    'Consultation ponctuelle au CAF'
-                ];
-            } else if (defiPrincipal === 'Structure') {
-                cible.cible = 'Remédiation en Structure';
-                cible.strategies = [
-                    'Pratique de plans détaillés',
-                    'Feedback formatif sur la structure',
-                    'Comparaison de textes exemplaires'
-                ];
-            } else if (defiPrincipal === 'Rigueur') {
-                cible.cible = 'Remédiation en Rigueur';
-                cible.strategies = [
-                    'Exercices de lecture analytique',
-                    'Grille d\'auto-évaluation de l\'exhaustivité',
-                    'Révision par les pairs axée sur la rigueur'
-                ];
+            // ✅ NIVEAU 1 : Chercher intervention configurée dans la grille
+            const interventionConfig = this._obtenirInterventionConfiguree(defiPrincipal, 2);
+            if (interventionConfig) {
+                cible.cible = interventionConfig.cible;
+                cible.strategies = interventionConfig.strategies;
             } else {
-                cible.cible = 'Intervention préventive sur ' + defiPrincipal;
+                // ✅ NIVEAU 2 : Recommandations génériques intelligentes
+                cible.cible = `Intervention préventive sur ${defiPrincipal}`;
                 cible.strategies = [
-                    'Renforcement ciblé sur le critère faible',
-                    'Pratique délibérée avec feedback',
-                    'Suivi régulier des progrès'
+                    `Renforcement ciblé sur ${defiPrincipal}`,
+                    `Pratique délibérée avec feedback formatif`,
+                    `Suivi régulier des progrès`,
+                    `Consultation ressources d'aide si disponibles`
                 ];
             }
         }
@@ -834,12 +933,21 @@ class PratiquePANMaitrise {
             cible.niveau = 1;
             cible.couleur = '#ffc107';
             cible.emoji = '🟡';
-            cible.cible = 'Renforcement sur ' + defiPrincipal;
-            cible.strategies = [
-                'Exercices supplémentaires ciblés sur ' + defiPrincipal,
-                'Feedback formatif régulier',
-                'Auto-évaluation guidée'
-            ];
+
+            // ✅ NIVEAU 1 : Chercher intervention configurée dans la grille
+            const interventionConfig = this._obtenirInterventionConfiguree(defiPrincipal, 1);
+            if (interventionConfig) {
+                cible.cible = interventionConfig.cible;
+                cible.strategies = interventionConfig.strategies;
+            } else {
+                // ✅ NIVEAU 2 : Recommandations génériques intelligentes
+                cible.cible = `Renforcement sur ${defiPrincipal}`;
+                cible.strategies = [
+                    `Exercices supplémentaires ciblés sur ${defiPrincipal}`,
+                    `Feedback formatif régulier`,
+                    `Auto-évaluation guidée`
+                ];
+            }
         }
 
         // STABLE (Niveau 1 RàI - Universel)
@@ -858,7 +966,7 @@ class PratiquePANMaitrise {
         // Ajouter ressources génériques
         cible.ressources = [
             'Guide de rétroaction formative',
-            'Capsules vidéo sur les critères SRPNF',
+            'Capsules vidéo sur les critères d\'évaluation',
             'Grilles d\'auto-évaluation'
         ];
 

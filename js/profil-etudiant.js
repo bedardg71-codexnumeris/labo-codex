@@ -136,6 +136,41 @@ function obtenirGrilleReferenceDepistage() {
 }
 
 /**
+ * Obtient la liste des critères de la grille de référence avec leurs valeurs pour un étudiant
+ * Cette fonction remplace le tableau SRPNF codé en dur par une extraction dynamique
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {Array} - Tableau de { nom, valeur, cleNormalisee } ou tableau vide si erreur
+ */
+function obtenirCriteresAvecValeurs(da) {
+    const grille = obtenirGrilleReferenceDepistage();
+    if (!grille || !grille.criteres || grille.criteres.length === 0) {
+        console.warn('⚠️ Pas de grille de référence - impossible d\'obtenir les critères');
+        return [];
+    }
+
+    const moyennesCriteres = calculerMoyennesCriteres(da);
+    if (!moyennesCriteres) {
+        console.warn('⚠️ Pas de moyennes calculées pour DA', da);
+        return [];
+    }
+
+    // Construire le tableau dynamiquement depuis la grille
+    return grille.criteres.map(critere => {
+        const cleNormalisee = critere.nom.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, '');
+
+        return {
+            nom: critere.nom,
+            valeur: moyennesCriteres[cleNormalisee] ?? 0,
+            cleNormalisee: cleNormalisee
+        };
+    });
+}
+
+/**
  * Initialise le module de profil étudiant
  * Appelée automatiquement par 99-main.js au chargement
  * 
@@ -762,13 +797,18 @@ function genererSectionMobilisationEngagement(da) {
             }
         }
 
+        // Vérifier le statut de remise (source unique de vérité)
+        const statutRemise = evaluation?.statutRemise || 'non-remis';
+        const estRemis = evaluation && (statutRemise !== 'non-remis' && statutRemise !== 'retard');
+
         return {
             id: art.id,
             titre: art.titre,
             description: art.description || art.titre, // Utiliser description ou fallback sur titre
-            remis: !!evaluation,
+            remis: estRemis,
             note: evaluation?.noteFinale ?? null,  // Utiliser ?? pour supporter la note 0
             niveau: evaluation?.niveauFinal ?? null,
+            statutRemise: statutRemise,
             jetonReprise: evaluation?.repriseDeId ? true : false,
             jetonDelai: evaluation?.jetonDelaiApplique ? true : false,
             retenu: false // Par défaut, sera mis à true pour les meilleurs
@@ -1508,26 +1548,20 @@ function genererSectionAccompagnement(da) {
         texteProgression = `Apprentissage : ${progression.interpretation}`;
     }
 
-    // Analyser les forces et défis (critères SRPNF)
-    const moyennesCriteres = calculerMoyennesCriteres(da);
+    // Analyser les forces et défis (critères de la grille de référence)
     const seuilMaitrise = obtenirSeuil('idme.maitrise');
     const seuilDeveloppement = obtenirSeuil('idme.developpement');
 
-    const criteresSRPNF = [
-        { nom: 'Structure', valeur: moyennesCriteres?.structure ?? 0 },
-        { nom: 'Rigueur', valeur: moyennesCriteres?.rigueur ?? 0 },
-        { nom: 'Plausibilité', valeur: moyennesCriteres?.plausibilite ?? 0 },
-        { nom: 'Nuance', valeur: moyennesCriteres?.nuance ?? 0 },
-        { nom: 'Français', valeur: moyennesCriteres?.francais ?? 0 }
-    ];
+    // ✅ Utiliser la fonction dynamique au lieu du tableau SRPNF codé en dur
+    const criteres = obtenirCriteresAvecValeurs(da);
 
     // CORRECTION: Inclure TOUS les niveaux IDME (I, D, M, E)
     // Forces: M (>=75%) et E (>=85%)
-    const forces = criteresSRPNF.filter(c => c.valeur >= seuilMaitrise);
+    const forces = criteres.filter(c => c.valeur >= seuilMaitrise);
     // Défis: I (<65%) ET D (65-75%)
-    const defis = criteresSRPNF.filter(c => c.valeur > 0 && c.valeur < seuilMaitrise);
+    const defis = criteres.filter(c => c.valeur > 0 && c.valeur < seuilMaitrise);
 
-    console.log('Forces et défis pour DA', da, { forces, defis, seuilMaitrise, seuilDeveloppement, moyennesCriteres });
+    console.log('Forces et défis pour DA', da, { forces, defis, seuilMaitrise, seuilDeveloppement, criteres });
 
     // Badge RàI avec classes CSS
     let badgeClasse = '';
@@ -1594,9 +1628,9 @@ function genererSectionAccompagnement(da) {
                     })()}
                 </p>
 
-                <p class="profil-texte-paragraphe"><strong>Critères SRPNF :</strong></p>
+                <p class="profil-texte-paragraphe"><strong>Critères d'évaluation :</strong></p>
                 <ul style="margin-left: 20px; color: #495057; font-size: 0.9rem;">
-                    ${criteresSRPNF.map(c => {
+                    ${criteres.map(c => {
                         const pct = c.valeur * 100;
                         const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
                         return `<li>${c.nom} : ${niveau} ${pct.toFixed(0)}%</li>`;
@@ -3489,12 +3523,17 @@ function genererSectionProductions(da) {
                 badgeType = 'delai';
             }
 
+            // Déterminer le statut final basé sur statutRemise (priorité)
+            const statutRemise = evaluation.statutRemise || 'remis';
+            const estNonRemis = statutRemise === 'non-remis' || statutRemise === 'retard';
+
             return {
                 production: production.titre,
                 description: production.description || production.titre,
                 note: `${evaluation.niveauFinal} ${evaluation.noteFinale}%`,
                 date: dateFormatee,
-                statut: 'evalue',
+                statut: estNonRemis ? 'non-remis' : 'evalue',
+                statutRemise: statutRemise,
                 verrouille: evaluation.verrouillee || false,
                 evaluationId: evaluation.id,
                 productionId: production.id,
@@ -3509,6 +3548,7 @@ function genererSectionProductions(da) {
                 note: null,
                 date: '—',
                 statut: 'non-evalue',
+                statutRemise: 'non-remis',
                 verrouille: false,
                 evaluationId: null,
                 productionId: production.id,
@@ -3559,26 +3599,35 @@ function genererSectionProductions(da) {
                                     ${badgeJeton}
                                 </td>
                                 <td style="padding: 12px; text-align: center;">
-                                    ${ligne.statut === 'evalue'
-                                        ? `<strong>${ligne.note}</strong>`
-                                        : '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>'
+                                    ${(ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard')
+                                        ? '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>'
+                                        : (ligne.statut === 'evalue'
+                                            ? `<strong>${ligne.note}</strong>`
+                                            : '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>')
                                     }
                                 </td>
                                 <td style="padding: 12px; text-align: center; color: #666;">${ligne.date}</td>
                                 <td style="padding: 12px; text-align: center; white-space: nowrap;">
-                                    ${ligne.statut === 'evalue'
+                                    ${(ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard')
                                         ? `
-                                        <button class="btn btn-secondaire btn-compact"
-                                                onclick="consulterEvaluation('${da}', '${ligne.productionId}')">
-                                            Consulter
-                                        </button>
-                                        `
-                                        : `
                                         <button class="btn btn-principal btn-compact"
                                                 onclick="evaluerProduction('${da}', '${ligne.productionId}')">
                                             Évaluer
                                         </button>
                                         `
+                                        : (ligne.statut === 'evalue'
+                                            ? `
+                                            <button class="btn btn-secondaire btn-compact"
+                                                    onclick="consulterEvaluation('${da}', '${ligne.productionId}')">
+                                                Consulter
+                                            </button>
+                                            `
+                                            : `
+                                            <button class="btn btn-principal btn-compact"
+                                                    onclick="evaluerProduction('${da}', '${ligne.productionId}')">
+                                                Évaluer
+                                            </button>
+                                            `)
                                     }
                                 </td>
                             </tr>
@@ -5743,14 +5792,24 @@ function genererDiagnosticSRPNF(da, defisInfo) {
 
         <!-- Résumé forces et défis par niveau IDME -->
         ${(() => {
-            // Classifier tous les critères par niveau IDME
-            const criteresSRPNF = [
-                { nom: 'Structure', score: diagnostic.moyennesCriteres?.structure ?? 0 },
-                { nom: 'Rigueur', score: diagnostic.moyennesCriteres?.rigueur ?? 0 },
-                { nom: 'Plausibilité', score: diagnostic.moyennesCriteres?.plausibilite ?? 0 },
-                { nom: 'Nuance', score: diagnostic.moyennesCriteres?.nuance ?? 0 },
-                { nom: 'Français', score: diagnostic.moyennesCriteres?.francais ?? 0 }
-            ].filter(c => c.score > 0); // Exclure les critères sans données
+            // ✅ Extraire dynamiquement les critères depuis la grille de référence
+            const grille = obtenirGrilleReferenceDepistage();
+            if (!grille || !grille.criteres || grille.criteres.length === 0) {
+                return `<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 10px;">
+                    <div style="font-weight: bold; color: #856404;">⚠️ Aucune grille de référence configurée</div>
+                </div>`;
+            }
+
+            const criteresDynamiques = grille.criteres.map(c => {
+                const cleNormalisee = c.nom.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/\s+/g, '');
+                return {
+                    nom: c.nom,
+                    score: diagnostic.moyennesCriteres?.[cleNormalisee] ?? 0
+                };
+            }).filter(c => c.score > 0); // Exclure les critères sans données
 
             // Grouper par niveau IDME
             const parNiveau = {
@@ -5760,7 +5819,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
                 'I': []
             };
 
-            criteresSRPNF.forEach(critere => {
+            criteresDynamiques.forEach(critere => {
                 const pourcentage = critere.score * 100;
                 const niveau = obtenirNiveauIDMEDepuisPourcentage(pourcentage);
                 parNiveau[niveau].push({ ...critere, pourcentage });
@@ -5837,7 +5896,7 @@ function genererDiagnosticSRPNF(da, defisInfo) {
             }
 
             // Message si aucun critère avec données
-            if (criteresSRPNF.length === 0) {
+            if (criteresDynamiques.length === 0) {
                 html = `
                     <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 10px;">
                         <div style="font-weight: bold; color: #856404;">

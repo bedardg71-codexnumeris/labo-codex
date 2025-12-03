@@ -3335,11 +3335,13 @@
                             <label for="filtre-statut-eval">Filtrer par statut</label>
                             <select id="filtre-statut-eval" class="controle-form" onchange="filtrerListeEvaluations()">
                                 <option value="">Tous</option>
-                                <option value="actives">Actives</option>
+                                <option value="remis">Remis</option>
+                                <option value="non-remis">Non remis</option>
                                 <option value="evalue">Évalués seulement</option>
                                 <option value="non-evalue">Non évalués</option>
                                 <option value="jeton-delai">Jeton de délai</option>
                                 <option value="jeton-reprise">Jeton de reprise</option>
+                                <option value="jeton-reprise-ciblee">Jeton de reprise ciblée</option>
                                 <option value="tous-jetons">Tous les jetons</option>
                                 <option value="remplacees">Remplacées</option>
                             </select>
@@ -3532,7 +3534,6 @@
                                 <select id="remiseProduction1" class="controle-form" onchange="changerStatutRemise(1)">
                                     <option value="non-remis">Non remis</option>
                                     <option value="remis">Remis</option>
-                                    <option value="en-retard">En retard</option>
                                 </select>
                             </div>
 
@@ -3627,8 +3628,11 @@
 
                             <!-- RÉTROACTION FINALE (déplacée sous la prévisualisation) -->
                             <div class="zone-retroaction" style="margin-top: 20px;">
-                                <div class="zone-retroaction-header">
+                                <div class="zone-retroaction-header" style="display: flex; justify-content: space-between; align-items: center;">
                                     <h4>Rétroaction finale</h4>
+                                    <button class="btn btn-confirmer btn-compact" onclick="copierRetroaction(1)">
+                                        Copier dans le presse-papier
+                                    </button>
                                 </div>
 
                                 <!-- Options à inclure (TOUTES COCHÉES PAR DÉFAUT) -->
@@ -3663,11 +3667,6 @@
         border: 1px solid var(--bordure-claire); font-family: inherit; resize: vertical;
         font-size: 0.85rem; line-height: 1.5; background: white;">
 </textarea>
-
-                                <button class="btn btn-confirmer btn-compact" onclick="copierRetroaction(1)"
-                                    class="mt-10">
-                                    Copier dans le presse-papier
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -9994,7 +9993,7 @@ Exemple :
     <script src="js/pratiques/pratique-registre.js"></script>
     <script src="js/pratiques/migration-pratiques.js"></script>
     <script src="js/pratiques/pratique-test.js"></script>
-    <script src="js/pratiques/pratique-pan-maitrise.js?v=2025112001"></script>
+    <script src="js/pratiques/pratique-pan-maitrise.js?v=2025120302"></script>
     <script src="js/pratiques/pratique-sommative.js?v=2025112001"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=2025112600"></script>
     <script src="js/pratiques/config-francois-chimie.js?v=2025112600"></script>
@@ -10015,12 +10014,12 @@ Exemple :
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025111830"></script>
-    <script src="js/profil-etudiant.js?v=2025113026"></script>
+    <script src="js/profil-etudiant.js?v=2025120303"></script>
     <script src="js/presences-apercu.js?v=2025111029"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
-    <script src="js/calendrier-vue.js?v=2025112112"></script>
+    <script src="js/calendrier-vue.js?v=2025120201"></script>
     <script src="js/horaire.js?v=2025111328"></script>
     <script src="js/groupe.js?v=2025120208"></script>
     <script src="js/interventions.js?v=2025120125"></script>
@@ -10028,11 +10027,11 @@ Exemple :
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
     <script src="js/import-export.js?v=2025112700"></script>
     <script src="js/statistiques.js?v=2025113016"></script>
-    <script src="js/liste-evaluations.js?v=2025113002"></script>
+    <script src="js/liste-evaluations.js?v=2025120207"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2025113013"></script>
-    <script src="js/evaluation.js?v=2025113003"></script>
+    <script src="js/evaluation.js?v=2025120216"></script>
 
     <!-- PRIMO - Système conversationnel de configuration (Beta 92) -->
     <script src="js/primo-questions.js?v=2025120109"></script>
