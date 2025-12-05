@@ -2373,7 +2373,7 @@ function convertirNoteEnValeur(note) {
 }
 
 /**
- * Calcule le risque d'échec selon la formule : 1 - (A × C × P)
+ * Calcule l'engagement selon la formule : E = ∛(A × C × P)
  */
 function calculerRisqueEchec(assiduite, completion, performance) {
     if (assiduite === 0 || completion === 0 || performance === 0) {

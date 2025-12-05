@@ -1084,7 +1084,9 @@ function afficherListeEtudiantsConsultation() {
         // Rendre la ligne cliquable
         tr.style.cursor = 'pointer';
         tr.onclick = function () {
-            afficherPortfolio(etudiant.da);
+            // Afficher le profil ET basculer vers la sous-section Profil
+            afficherSousSection('tableau-bord', 'profil');
+            afficherProfilComplet(etudiant.da);
         };
 
         // Effet de survol géré par CSS (plus fiable pour adaptation par mode)

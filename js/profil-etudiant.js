@@ -48,6 +48,62 @@
    🎨 FONCTIONS HELPER POUR COULEURS IDME
    =============================== */
 
+/* ===============================
+   📚 FONCTION HELPER POUR TERMINOLOGIE CONFIGURABLE
+   =============================== */
+
+/**
+ * Retourne le terme approprié pour désigner les productions évaluées selon la pratique de notation
+ * Évite le terme "artefact" codé en dur qui est spécifique au portfolio
+ *
+ * DISTINCTION IMPORTANTE :
+ * - Production = Travail soumis par l'élève (objet évalué)
+ * - Évaluation = Acte pédagogique de l'enseignant (porter un jugement)
+ *
+ * @param {string} context - Contexte d'utilisation: 'singulier', 'pluriel', 'partitif' (d'artefact)
+ * @param {boolean} majuscule - Mettre une majuscule (défaut: false)
+ * @returns {string} - Le terme approprié ("artefact", "production", "travail", etc.)
+ */
+function obtenirTermeProduction(context = 'singulier', majuscule = false) {
+    const config = db.getSync('modalitesEvaluation', {});
+    const pratique = config.pratique || 'pan-maitrise';
+
+    // Définir les termes selon la pratique
+    let termes = {
+        singulier: 'artefact',
+        pluriel: 'artefacts',
+        partitif: "d'artefact"
+    };
+
+    // PAN-Maîtrise : terme "artefact" (portfolio d'apprentissage)
+    if (pratique === 'pan-maitrise') {
+        // Configuration personnalisée possible dans le futur
+        const termePerso = config.termeProduction || 'artefact';
+        termes = {
+            singulier: termePerso,
+            pluriel: termePerso + 's',
+            partitif: "d'" + termePerso
+        };
+    }
+    // Sommative ou autre : terme "production" (neutre et non ambigu)
+    else {
+        termes = {
+            singulier: 'production',
+            pluriel: 'productions',
+            partitif: 'de production'
+        };
+    }
+
+    let terme = termes[context] || termes.singulier;
+
+    // Appliquer majuscule si demandé
+    if (majuscule) {
+        terme = terme.charAt(0).toUpperCase() + terme.slice(1);
+    }
+
+    return terme;
+}
+
 /**
  * Obtient la couleur d'un niveau IDME depuis l'échelle configurée
  * @param {string} codeNiveau - Code du niveau (I, D, M, E, 0)
@@ -107,6 +163,22 @@ function obtenirNombreProductionsPourPatterns() {
 }
 
 /**
+ * Obtient la pratique actuelle configurée (SOM ou PAN)
+ * @returns {string} - 'SOM' ou 'PAN' (défaut: 'PAN')
+ */
+function obtenirPratiqueActuelle() {
+    const modalites = db.getSync('modalitesEvaluation', {});
+    const pratique = modalites.pratique || 'pan-maitrise';
+
+    // Convertir en format attendu par calculerDirectionsCriteres
+    if (pratique === 'sommative') {
+        return 'SOM';
+    } else {
+        return 'PAN';
+    }
+}
+
+/**
  * Obtient la grille de référence configurée pour le dépistage
  * Cette grille définit les critères utilisés pour identifier forces/défis
  *
@@ -162,9 +234,16 @@ function obtenirCriteresAvecValeurs(da) {
             .replace(/[\u0300-\u036f]/g, '')
             .replace(/\s+/g, '');
 
+        // Standardiser la clé pour correspondre au format de calculerMoyennesCriteres()
+        // "francaisecrit" → "francais" pour éviter les 0% incorrects
+        let cleStandard = cleNormalisee;
+        if (cleNormalisee.startsWith('francais')) {
+            cleStandard = 'francais';
+        }
+
         return {
             nom: critere.nom,
-            valeur: moyennesCriteres[cleNormalisee] ?? 0,
+            valeur: moyennesCriteres[cleStandard] ?? 0,
             cleNormalisee: cleNormalisee
         };
     });
@@ -292,8 +371,7 @@ function genererBadgePatternProfil(pattern) {
  *   C: 67,              // % complétion (selon pratique)
  *   P: 72,              // % performance (selon pratique)
  *   M: 0.760,           // Mobilisation (composite)
- *   E: 0.516,           // Engagement (composite)
- *   R: 0.484,           // Risque (composite)
+ *   E: 0.781,           // Engagement (composite, racine cubique)
  *   pratique: 'SOM'     // Pratique utilisée pour le calcul
  * }
  */
@@ -332,13 +410,8 @@ function calculerTousLesIndices(da, pratique = null) {
             P = indicesCP.P / 100;
             P_pourRisque = P; // Par défaut, P_pourRisque = P
 
-            // ========================================
-            // DÉCOUPLAGE P/R : Utiliser P_recent pour le calcul de R si activé
-            // ========================================
-            if (indicesCP.details && indicesCP.details.decouplerPR && indicesCP.details.P_recent !== null && indicesCP.details.P_recent !== undefined) {
-                P_pourRisque = indicesCP.details.P_recent / 100; // Convertir en proportion 0-1
-                console.log(`[Découplage P/R] DA ${da}: P=${Math.round(P*100)}% (notation), P_recent=${indicesCP.details.P_recent}% (risque)`);
-            }
+            // Note: P_pourRisque est conservé comme nom de variable pour compatibilité historique
+            // mais n'est plus utilisé pour calculer un "risque" - il sert uniquement pour E
         } else {
             // Fallback : calculer à la volée si pas encore généré
             console.warn(`⚠️ indicesCP non trouvé pour ${da} (${pratique}) - Calcul à la volée`);
@@ -356,21 +429,8 @@ function calculerTousLesIndices(da, pratique = null) {
 
     // INDICES COMPOSITES
     const M = (A + C) / 2;          // Mobilisation
-    const E = A * C * P_pourRisque; // Engagement (indicateur contextuel)
-
-    // ========================================
-    // CALCUL DE R : Formule expérimentale basée sur données empiriques
-    // Seuil critique à 65% : P < 65% → échec probable (cours 101→102)
-    // R basé sur P uniquement (prédicteur validé)
-    // A et C servent de contexte diagnostique (flags), pas de prédiction
-    // Décroissance cubique pour P ≥ 65%
-    // ========================================
-    let R;
-    if (P_pourRisque < 0.65) {
-        R = 1.0;  // 100% - Risque critique (données empiriques)
-    } else {
-        R = Math.pow((1.0 - P_pourRisque) / 0.35, 3);  // Décroissance cubique sur plage 65-100%
-    }
+    const E_brut = A * C * P_pourRisque;
+    const E = Math.pow(E_brut, 1/3); // Engagement (racine cubique = moyenne géométrique)
 
     return {
         // Indices primaires (en pourcentage pour compatibilité affichage)
@@ -381,7 +441,6 @@ function calculerTousLesIndices(da, pratique = null) {
         // Indices composites (valeurs normalisées 0-1 avec 3 décimales)
         M: parseFloat(M.toFixed(3)),
         E: parseFloat(E.toFixed(3)),
-        R: parseFloat(R.toFixed(3)),
 
         // Traçabilité de la pratique utilisée
         pratique: pratique
@@ -515,48 +574,6 @@ function interpreterEngagement(valeur) {
         niveau: 'Engagement très faible',
         emoji: '🔴',
         couleur: '#dc3545' // Rouge
-    };
-}
-
-/**
- * Interprète l'indice R (Risque) selon les seuils du guide de monitorage
- * @param {number} valeur - Valeur normalisée entre 0 et 1
- * @returns {Object} - { niveau, emoji, couleur }
- */
-function interpreterRisque(valeur) {
-    // Seuils selon l'échelle de risque : 0-0.19, 0.20-0.34, 0.35-0.49, 0.50-0.69, ≥0.70
-    if (valeur >= 0.70) {
-        return {
-            niveau: 'CRITIQUE',
-            emoji: '🔴',
-            couleur: '#dc3545' // Rouge
-        };
-    }
-    if (valeur >= 0.50) {
-        return {
-            niveau: 'ÉLEVÉ',
-            emoji: '🟠',
-            couleur: '#ff9800' // Orange
-        };
-    }
-    if (valeur >= 0.35) {
-        return {
-            niveau: 'MODÉRÉ',
-            emoji: '🟡',
-            couleur: '#ffc107' // Jaune
-        };
-    }
-    if (valeur >= 0.20) {
-        return {
-            niveau: 'FAIBLE',
-            emoji: '🟢',
-            couleur: '#4caf50' // Vert
-        };
-    }
-    return {
-        niveau: 'MINIMAL',
-        emoji: '🔵',
-        couleur: '#2196F3' // Bleu
     };
 }
 
@@ -945,9 +962,9 @@ function genererSectionMobilisationEngagement(da) {
             <br><br>
             <strong>Assiduité (A) :</strong> Indice A = ${indices.A}% — ${detailsA.heuresPresentes}h présentes / ${detailsA.heuresOffertes}h offertes
             <br><br>
-            <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${nbRemis} artefacts remis / ${nbTotal} artefacts totaux
+            <strong>Complétion (C) :</strong> Indice C = ${indices.C}% — ${nbRemis} ${obtenirTermeProduction('pluriel')} remis / ${nbTotal} ${obtenirTermeProduction('pluriel')} totaux
             <br><br>
-            <strong>Performance (P) :</strong> Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} meilleurs artefacts
+            <strong>Performance (P) :</strong> Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} meilleurs ${obtenirTermeProduction('pluriel')}
             <br><br>
             <strong>Engagement (E) :</strong> Formule E = (A × C × P)^(1/3) (racine cubique)
             <br>
@@ -1394,6 +1411,29 @@ function genererSectionMobilisationEngagement(da) {
                         ${genererValeursComparatives(Math.round(E_SOM * 100), Math.round(E_PAN * 100), modeComparatif)}
                     </div>
 
+                    <div style="margin-bottom: 15px; font-size: 0.9rem; color: #555;">
+                        Formule : E = ∛(A × C × P)
+                        <span class="primo-aide" data-target="conseil-formule-engagement-mobilisation" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">😎</span>
+                    </div>
+
+                    <!-- Conseil Primo: Explication de la formule d'engagement (section Mobilisation) -->
+                    <div id="conseil-formule-engagement-mobilisation" class="carte-info-toggle carte-info-conseil" style="display: none; margin-bottom: 15px;">
+                        <strong>Pourquoi la racine cubique ?</strong>
+                        <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
+
+                        <p><strong>Exemple concret :</strong></p>
+                        <ul style="margin-left: 20px; line-height: 1.6;">
+                            <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
+                            <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
+                        </ul>
+
+                        <p><strong>Pourquoi utiliser la multiplication ?</strong></p>
+                        <p>La multiplication (plutôt qu'une simple moyenne) permet de <strong>pénaliser les déséquilibres</strong>. Un étudiant qui excelle en assiduité (90%) mais échoue en performance (30%) aura un engagement plus faible qu'un étudiant équilibré à 60% partout.</p>
+
+                        <p><strong>En résumé :</strong></p>
+                        <p>La racine cubique compense la décroissance multiplicative tout en préservant l'effet punitif sur les déséquilibres importants. C'est la <strong>moyenne géométrique</strong> des trois indices A-C-P.</p>
+                    </div>
+
                     <div class="profil-echelle-risque">
                         <div class="profil-echelle-barre" style="background: linear-gradient(to right,
                                     #ff9800 0%,
@@ -1527,23 +1567,18 @@ function genererSectionAccompagnement(da) {
     const indices = calculerTousLesIndices(da);
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
     const cibleInfo = determinerCibleIntervention(da); // Conservé pour compatibilité (sera retiré plus tard)
-    const interpR = interpreterRisque(indices.R);
     const progression = calculerProgressionEleve(da);
     const defiSpecifique = identifierDefiSpecifique(da);
     const directionRisque = calculerDirectionRisque(da);
 
-    // Récupérer le seuil de progression configurable
-    const seuilProgression = obtenirSeuil('progressionArtefacts');
-    const seuilPourcentage = (seuilProgression * 100).toFixed(0);
-
-    // Construire le texte de progression au format du rapport
+    // Construire le texte de progression au format du rapport (basé sur les critères)
     let texteProgression = '';
     if (progression.direction === '↗') {
-        texteProgression = `Apprentissage : présentement en amélioration (variation supérieure à ${seuilPourcentage}%)`;
+        texteProgression = `Apprentissage : présentement en amélioration (${progression.nbAmelioration}/${progression.nbCriteres} critères en progression)`;
     } else if (progression.direction === '↘') {
-        texteProgression = `Apprentissage : présentement en baisse (variation supérieure à ${seuilPourcentage}%)`;
+        texteProgression = `Apprentissage : présentement en baisse (${progression.nbBaisse}/${progression.nbCriteres} critères en régression)`;
     } else if (progression.direction === '—') {
-        texteProgression = `Apprentissage : présentement en plateau (variation inférieure à ${seuilPourcentage}%)`;
+        texteProgression = `Apprentissage : présentement en plateau (évolution stable sur ${progression.nbCriteres} critères)`;
     } else {
         texteProgression = `Apprentissage : ${progression.interpretation}`;
     }
@@ -1621,14 +1656,31 @@ function genererSectionAccompagnement(da) {
                 </div>
 
                 <p class="profil-texte-paragraphe">
-                    <strong>Performance (P) :</strong> ${(() => {
+                    <strong>Performance globale (P) :</strong> ${(() => {
                         const pct = indices.P;
                         const niveau = pct >= 85 ? 'E' : pct >= 75 ? 'M' : pct >= 65 ? 'D' : 'I';
-                        return `${niveau} ${pct.toFixed(0)}%`;
+
+                        // Obtenir la configuration pour afficher le nombre d'artefacts retenus
+                        const config = db.getSync('modalitesEvaluation', {});
+                        const pratique = config.pratique || 'pan-maitrise';
+
+                        let noteExplicative = '';
+                        if (pratique === 'pan-maitrise') {
+                            const nombreARetenir = config.nombreARetenir || 3;
+                            const methodeSelection = config.methodeSelectionArtefacts || 'meilleurs';
+                            const methodeTexte = methodeSelection === 'meilleurs' ? 'meilleurs' :
+                                               methodeSelection === 'recents' ? 'plus récents' :
+                                               methodeSelection === 'recents-meilleurs' ? 'meilleurs récents' : 'tous';
+                            noteExplicative = `<span style="font-size: 0.8rem; color: #6c757d; font-weight: normal; display: block; margin-top: 2px;">Calculée sur les ${nombreARetenir} ${methodeTexte} artefacts</span>`;
+                        } else {
+                            noteExplicative = `<span style="font-size: 0.8rem; color: #6c757d; font-weight: normal; display: block; margin-top: 2px;">Calculée sur toutes les évaluations</span>`;
+                        }
+
+                        return `${niveau} ${pct.toFixed(0)}%${noteExplicative}`;
                     })()}
                 </p>
 
-                <p class="profil-texte-paragraphe"><strong>Critères d'évaluation :</strong></p>
+                <p class="profil-texte-paragraphe" style="margin-top: 12px;"><strong>Progression par critère :</strong> <span style="font-size: 0.8rem; color: #6c757d; font-weight: normal;">(moyennes sur tous les ${obtenirTermeProduction('pluriel')})</span></p>
                 <ul style="margin-left: 20px; color: #495057; font-size: 0.9rem;">
                     ${criteres.map(c => {
                         const pct = c.valeur * 100;
@@ -2071,7 +2123,29 @@ function genererSectionEngagement(da) {
                     <span class="profil-texte-detail">Engagement (E)</span>
                     <strong class="profil-valeur-grande-bleu">${indices.E}</strong>
                 </div>
+                <div style="margin-top: 8px; font-size: 0.85rem; color: #555;">
+                    E = ∛(A × C × P)
+                    <span class="primo-aide" data-target="conseil-formule-engagement-carte" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">😎</span>
+                </div>
             </div>
+        </div>
+
+        <!-- Conseil Primo: Explication de la formule d'engagement (dans la carte) -->
+        <div id="conseil-formule-engagement-carte" class="carte-info-toggle carte-info-conseil" style="display: none; margin-top: 10px;">
+            <strong>Pourquoi la racine cubique ?</strong>
+            <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
+
+            <p><strong>Exemple concret :</strong></p>
+            <ul style="margin-left: 20px; line-height: 1.6;">
+                <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
+                <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
+            </ul>
+
+            <p><strong>Pourquoi utiliser la multiplication ?</strong></p>
+            <p>La multiplication (plutôt qu'une simple moyenne) permet de <strong>pénaliser les déséquilibres</strong>. Un étudiant qui excelle en assiduité (90%) mais échoue en performance (30%) aura un engagement plus faible qu'un étudiant équilibré à 60% partout.</p>
+
+            <p><strong>En résumé :</strong></p>
+            <p>La racine cubique compense la décroissance multiplicative tout en préservant l'effet punitif sur les déséquilibres importants. C'est la <strong>moyenne géométrique</strong> des trois indices A-C-P.</p>
         </div>
 
         <!-- INTERPRÉTATION QUALITATIVE -->
@@ -2095,19 +2169,38 @@ function genererSectionEngagement(da) {
 
         <!-- DÉCOMPOSITION VISUELLE -->
         <h4 class="profil-titre-bleu-compact">
-            Décomposition de l'indice E (effet multiplicatif)
+            Décomposition de l'indice E
         </h4>
         <div class="profil-carte-simple">
             <div class="profil-texte-mono-centre-bleu">
-                E = A × C × P
+                E = ∛(A × C × P)
+                <span class="primo-aide" data-target="conseil-formule-engagement-principale" style="display: inline-block !important; cursor: pointer;">😎</span>
             </div>
             <div class="profil-texte-mono-centre-bleu">
-                E = ${A.toFixed(2)} × ${C.toFixed(2)} × ${P.toFixed(2)} = ${indices.E}
+                E = ∛(${A.toFixed(2)} × ${C.toFixed(2)} × ${P.toFixed(2)}) = ${indices.E}
             </div>
             <div style="background: #f0f7ff; padding: 12px; border-radius: 4px; font-size: 0.9rem; color: #555; line-height: 1.6;">
                 <strong>⚠️ Nature multiplicative :</strong> Si un seul composant est faible, l'engagement global chute drastiquement.
                 ${indices.E < 0.50 ? `<br><strong>Facteur limitant identifié :</strong> ${facteurLimitant.nom} (${facteurLimitant.pourcentage}%)` : ''}
             </div>
+        </div>
+
+        <!-- Conseil Primo: Explication de la formule d'engagement -->
+        <div id="conseil-formule-engagement-principale" class="carte-info-toggle carte-info-conseil" style="display: none; margin-top: 10px;">
+            <strong>Pourquoi la racine cubique ?</strong>
+            <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
+
+            <p><strong>Exemple concret :</strong></p>
+            <ul style="margin-left: 20px; line-height: 1.6;">
+                <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
+                <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
+            </ul>
+
+            <p><strong>Pourquoi utiliser la multiplication ?</strong></p>
+            <p>La multiplication (plutôt qu'une simple moyenne) permet de <strong>pénaliser les déséquilibres</strong>. Un étudiant qui excelle en assiduité (90%) mais échoue en performance (30%) aura un engagement plus faible qu'un étudiant équilibré à 60% partout.</p>
+
+            <p><strong>En résumé :</strong></p>
+            <p>La racine cubique compense la décroissance multiplicative tout en préservant l'effet punitif sur les déséquilibres importants. C'est la <strong>moyenne géométrique</strong> des trois indices A-C-P.</p>
         </div>
 
         <!-- PROCHAIN SEUIL -->
@@ -2162,48 +2255,41 @@ function genererSectionEngagement(da) {
  */
 function genererSectionRisque(da) {
     const indices = calculerTousLesIndices(da);
-    const interpR = interpreterRisque(indices.R);
     const interpE = interpreterEngagement(indices.E);
 
-    // Déterminer le niveau RàI (Réponse à l'Intervention)
+    // Déterminer le niveau RàI basé sur l'engagement (E)
     let niveauRaI = 1;
     let descriptionRaI = 'Niveau 1 - Surveillance universelle';
     let urgence = 'Aucune action immédiate requise';
     let couleurUrgence = '#28a745';
 
-    const seuilEleve = obtenirSeuil('risque.eleve');
-    const seuilModere = obtenirSeuil('risque.faible');  // 0.35 pour modéré ou plus
-    const seuilMinimal = obtenirSeuil('risque.minimal'); // 0.20 pour faible ou plus
-
-    if (indices.R >= seuilEleve) {
+    // Seuils basés sur l'engagement (inversé par rapport au risque)
+    if (indices.E < 0.30) {
         niveauRaI = 3;
         descriptionRaI = 'Niveau 3 - Intervention intensive individuelle';
         urgence = '🚨 URGENCE MAXIMALE - Intervention immédiate requise';
         couleurUrgence = '#dc3545';
-    } else if (indices.R >= seuilModere) {
+    } else if (indices.E < 0.50) {
         niveauRaI = 2;
         descriptionRaI = 'Niveau 2 - Intervention ciblée en petit groupe';
         urgence = '⚠️ Intervention prioritaire dans les prochains jours';
         couleurUrgence = '#ff9800';
-    } else if (indices.R >= seuilMinimal) {
+    } else if (indices.E < 0.65) {
         niveauRaI = 2;
         descriptionRaI = 'Niveau 2 - Surveillance accrue';
         urgence = '⚡ Attention requise - Surveillance renforcée';
         couleurUrgence = '#ffc107';
     }
 
-    // Calculer la "marge de sécurité" (distance avant zone rouge)
-    const margeSécurité = Math.max(0, 0.60 - indices.R);
-    const pourcentageSécurité = ((1 - indices.R) * 100).toFixed(0);
+    const pourcentageEngagement = (indices.E * 100).toFixed(0);
 
     return `
-        <!-- BADGE NIVEAU RISQUE -->
-        <div class="badge" style="background-color: ${interpR.couleur}22; color: ${interpR.couleur}; border: 1px solid ${interpR.couleur};">
-            ${interpR.niveau} (${indices.R})
+        <!-- BADGE NIVEAU ENGAGEMENT -->
+        <div class="badge" style="background-color: ${interpE.couleur}22; color: ${interpE.couleur}; border: 1px solid ${interpE.couleur};">
+            ${interpE.niveau} (${pourcentageEngagement}%)
         </div>
 
         <ul class="info-liste">
-            <li><strong>Pattern :</strong> ${interpR.pattern || 'Analyse en cours'}</li>
             <li><strong>Niveau RàI :</strong> ${descriptionRaI}</li>
             <li><strong>Urgence :</strong> <span style="color: ${couleurUrgence};">${urgence}</span></li>
         </ul>
@@ -2250,8 +2336,31 @@ function genererSectionRisque(da) {
         </div>
 
         <div class="profil-formule-explications">
-            Le risque d'échec est <strong>inversement proportionnel</strong> à l'engagement global.
+            L'engagement mesure la <strong>mobilisation globale</strong> de l'étudiant selon la formule : E = ∛(A × C × P)
+            <span class="primo-aide" data-target="conseil-formule-engagement">😎</span>
             <br>Engagement actuel : <strong style="color: ${interpE.couleur};">${interpE.niveau}</strong>
+        </div>
+
+        <!-- Conseil Primo: Explication de la formule d'engagement -->
+        <div id="conseil-formule-engagement" class="carte-info-toggle carte-info-conseil" style="display: none; margin-top: 10px;">
+            <strong>Pourquoi la racine cubique ?</strong>
+            <p>La racine cubique (∛) est une <strong>transformation normalisante</strong> qui préserve l'échelle d'origine tout en combinant les trois indices.</p>
+
+            <p><strong>Exemple concret :</strong></p>
+            <ul style="margin-left: 20px; line-height: 1.6;">
+                <li><strong>Sans racine cubique :</strong> Un étudiant à 70% sur A, C et P aurait : 0.7 × 0.7 × 0.7 = <strong>34%</strong> d'engagement ← Trop punitif !</li>
+                <li><strong>Avec racine cubique :</strong> Le même étudiant obtient : ∛(0.7 × 0.7 × 0.7) = <strong>70%</strong> d'engagement ← Cohérent et intuitif !</li>
+            </ul>
+
+            <p><strong>Avantages de cette approche :</strong></p>
+            <ul style="margin-left: 20px; line-height: 1.6;">
+                <li>✅ L'engagement reste sur la même échelle que A, C et P (0-100%)</li>
+                <li>✅ Un étudiant équilibré conserve son niveau moyen</li>
+                <li>✅ Les déséquilibres importants restent pénalisés (ex: A=100%, C=100%, P=0% → E=0%)</li>
+                <li>✅ Plus intuitif qu'une moyenne arithmétique qui ne pénaliserait pas assez les lacunes</li>
+            </ul>
+
+            <p style="margin-top: 10px; color: #666; font-style: italic;">💡 C'est une moyenne géométrique qui mesure la mobilisation globale tout en respectant l'interdépendance des trois dimensions.</p>
         </div>
 
         <div class="section-titre u-mt-25">Indicateurs clés</div>
@@ -2578,7 +2687,7 @@ function genererCarteCibleIntervention(da) {
             <br><br>
             <strong>Niveaux RàI :</strong> Niveau 1 (Universel) : suivi régulier en classe • Niveau 2 (Préventif) : interventions préventives ciblées • Niveau 3 (Intensif) : interventions intensives individuelles hors classe
             <br><br>
-            <strong>Méthodologie :</strong> Le système analyse l'engagement (E = A × C × P), le pattern d'apprentissage actuel (basé sur les ${nbArtefacts} dernier${nbArtefacts > 1 ? 's' : ''} artefact${nbArtefacts > 1 ? 's' : ''}), et les défis identifiés sur les critères de la grille de référence. La logique de décision priorise les situations de décrochage, puis les blocages critiques et émergents, avant de recommander des cibles d'enrichissement ou de maintien.
+            <strong>Méthodologie :</strong> Le système analyse l'engagement (E = A × C × P), le pattern d'apprentissage actuel (basé sur les ${nbArtefacts} dernier${nbArtefacts > 1 ? 's' : ''} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}), et les défis identifiés sur les critères de la grille de référence. La logique de décision priorise les situations de décrochage, puis les blocages critiques et émergents, avant de recommander des cibles d'enrichissement ou de maintien.
             <br><br>
             <strong>Utilisation :</strong> Cette section vous guide dans le choix d'interventions appropriées. Les recommandations sont contextualisées selon les besoins spécifiques de l'étudiant. Consultez la section Accompagnement pour planifier et documenter vos interventions.
         </div>
@@ -2600,7 +2709,7 @@ function genererCarteCibleIntervention(da) {
 
             <div class="carte-cible-meta">
                 <strong>Pattern actuel :</strong> ${patternInfo.type} ·
-                <strong>Basé sur :</strong> ${nbArtefacts} dernier${nbArtefacts > 1 ? 's' : ''} artefact${nbArtefacts > 1 ? 's' : ''}
+                <strong>Basé sur :</strong> ${nbArtefacts} dernier${nbArtefacts > 1 ? 's' : ''} ${obtenirTermeProduction(nbArtefacts > 1 ? 'pluriel' : 'singulier')}
             </div>
 
             <div class="carte-cible-description">
@@ -2745,6 +2854,10 @@ function changerSectionProfil(section) {
         case 'cible':
             titre = 'Suivi de l\'apprentissage';
             contenu = genererContenuCibleIntervention(da);
+            break;
+        case 'progression':
+            titre = 'Progression temporelle';
+            contenu = genererSectionProgression(da);
             break;
         case 'performance':
             titre = 'Développement des habiletés et compétences';
@@ -3171,7 +3284,6 @@ function afficherProfilComplet(da) {
     const C = indices.C / 100;
     const interpM = interpreterMobilisation(A, C);
     const interpE = interpreterEngagement(indices.E);
-    const interpR = interpreterRisque(indices.R);
 
     // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
     const config = db.getSync('modalitesEvaluation', {});
@@ -3279,6 +3391,11 @@ function afficherProfilComplet(da) {
                     <!-- 2. Engagement -->
                     <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" onclick="changerSectionProfil('mobilisation')">
                         <div class="sidebar-item-titre">Engagement</div>
+                    </div>
+
+                    <!-- 2b. Progression temporelle -->
+                    <div class="sidebar-item ${sectionAffichee === 'progression' ? 'active' : ''}" onclick="changerSectionProfil('progression')">
+                        <div class="sidebar-item-titre">Progression temporelle</div>
                     </div>
 
                     <!-- 3. Développement des habiletés -->
@@ -3830,6 +3947,96 @@ function genererTableauObjectifs(da, ensembleId, noteFinaleMultiObjectifs) {
     `;
 }
 
+/**
+ * Génère la section Progression temporelle avec graphiques Chart.js
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {string} HTML de la section
+ */
+function genererSectionProgression(da) {
+    // Vérifier si le module de captures existe
+    if (typeof obtenirSnapshotsEtudiant !== 'function') {
+        return `
+            <div class="profil-zone-moyenne-bleu">
+                <p style="color: #666; font-size: 0.95rem;">
+                    Le module de captures n'est pas encore initialisé.
+                </p>
+                <p style="color: #999; margin-top: 10px; font-size: 0.85rem;">
+                    Les graphiques de progression seront disponibles une fois que des données auront été collectées.
+                </p>
+            </div>
+        `;
+    }
+
+    // Récupérer les captures de l'étudiant
+    const snapshots = obtenirSnapshotsEtudiant(da);
+
+    // Vérifier s'il y a des données
+    if (!snapshots || snapshots.length === 0) {
+        return `
+            <div class="profil-zone-moyenne-bleu">
+                <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
+                    📊 Aucune donnée de progression disponible
+                </h4>
+                <p style="color: #666; font-size: 0.95rem; margin-bottom: 10px;">
+                    Les graphiques de progression afficheront l'évolution temporelle des indices A-C-P-E une fois que des données auront été collectées.
+                </p>
+                <p style="color: #999; font-size: 0.85rem;">
+                    Les captures sont enregistrées automatiquement chaque semaine et lors d'interventions RàI complétées.
+                </p>
+            </div>
+        `;
+    }
+
+    // Générer un ID unique pour le canvas
+    const canvasId = `graphique-progression-${da}`;
+
+    // Créer le HTML avec le canvas
+    const html = `
+        <div class="profil-zone-moyenne-bleu">
+            <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
+                📊 Évolution des indices A-C-P-E
+            </h4>
+
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
+                Ce graphique montre l'évolution temporelle des indices Assiduité (A), Complétion (C),
+                Performance (P) et Engagement (E) depuis le début de la session.
+                Les zones colorées représentent les niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu).
+            </p>
+
+            <!-- Canvas pour le graphique Chart.js -->
+            <div style="background: white; padding: 20px; border-radius: 6px; height: 500px;">
+                <canvas id="${canvasId}"></canvas>
+            </div>
+
+            <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: #666;">
+                <div><strong>Légende :</strong></div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
+                    <div><span style="color: #2196F3; font-weight: bold;">━━</span> Assiduité (A)</div>
+                    <div><span style="color: #4CAF50; font-weight: bold;">━━</span> Complétion (C)</div>
+                    <div><span style="color: #FF9800; font-weight: bold;">━━</span> Performance (P)</div>
+                    <div><span style="color: #9C27B0; font-weight: bold;">━━</span> Engagement (E)</div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <strong>Zones colorées :</strong> Rouge (Insuffisant < 40%), Orange (Réussite 40-65%),
+                    Jaune (Développement 65-75%), Vert (Maîtrisé 75-85%), Bleu (Étendu ≥ 85%)
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Utiliser setTimeout pour créer le graphique après l'insertion du DOM
+    setTimeout(() => {
+        if (typeof creerGraphiqueIndividuel === 'function') {
+            const canvas = document.getElementById(canvasId);
+            if (canvas) {
+                creerGraphiqueIndividuel(canvasId, da);
+            }
+        }
+    }, 100);
+
+    return html;
+}
+
 function genererSectionPerformance(da) {
     // 🎯 DÉTECTION PRATIQUE MULTI-OBJECTIFS
     const statusPratiqueMultiObjectifs = verifierPratiqueMultiObjectifs();
@@ -3906,7 +4113,7 @@ function genererSectionPerformance(da) {
             `).join('')}
 
             <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9rem; color: #666;">
-                <strong>Principe PAN :</strong> La note finale est calculée sur la moyenne des 3 meilleurs artefacts
+                <strong>Principe PAN :</strong> La note finale est calculée sur la moyenne des 3 meilleurs ${obtenirTermeProduction('pluriel')}
                 plutôt que sur la moyenne de tous les artefacts.
             </div>
         </div>
@@ -3992,9 +4199,6 @@ function toggleDetailIndice(indice, da) {
             break;
         case 'P':
             html = `
-                <h3 class="profil-titre-bleu-large-pr40">
-                    📝 Développement des habiletés et compétences
-                </h3>
                 ${genererSectionPerformance(da)}
             `;
             break;
@@ -4017,7 +4221,7 @@ function toggleDetailIndice(indice, da) {
         case 'R':
             html = `
                 <h3 class="profil-titre-bleu-large-pr40">
-                    ⚠️ Risque d'échec détaillé
+                    ⚡ Engagement détaillé
                 </h3>
                 ${genererSectionRisque(da)}
             `;
@@ -4868,60 +5072,49 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
  * @returns {Object} - { direction: '↗'|'→'|'↘', interpretation, AM, AL, difference }
  */
 function calculerProgressionEleve(da) {
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = db.getSync('productions', []);
+    // 🆕 NOUVELLE LOGIQUE : Basée sur les critères individuels plutôt que sur la note globale
+    // Obtenir les directions pour chaque critère
+    const pratique = obtenirPratiqueActuelle();
+    const directionsCriteres = calculerDirectionsCriteres(da, pratique);
 
-    // Obtenir le nombre de productions configuré pour l'analyse des patterns
-    const N = obtenirNombreProductionsPourPatterns() || 3;
+    // Vérifier si nous avons suffisamment de données
+    const criteres = Object.keys(directionsCriteres);
+    const criteresAvecDonnees = criteres.filter(c => directionsCriteres[c].symbole !== '');
 
-    // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
-    const artefactsPortfolio = productions
-        .filter(p => p.type === 'artefact-portfolio')
-        .map(p => p.id);
-
-    const evaluationsEleve = evaluations.filter(e =>
-        e.etudiantDA === da &&
-        artefactsPortfolio.includes(e.productionId) &&
-        e.noteFinale !== null &&
-        e.noteFinale !== undefined
-    );
-
-    // Pas assez de données pour calculer la progression (besoin de N+1 artefacts minimum)
-    if (evaluationsEleve.length < N + 1) {
+    if (criteresAvecDonnees.length === 0) {
         return {
             direction: null,
-            interpretation: `Données insuffisantes (${N + 1} artefacts requis)`,
+            interpretation: 'Données insuffisantes',
             AM: null,
             AL: null,
             difference: null,
-            nbArtefacts: evaluationsEleve.length
+            nbCriteres: 0,
+            criteresDetail: directionsCriteres
         };
     }
 
-    // Trier par date (plus récent d'abord)
-    evaluationsEleve.sort((a, b) => {
-        const dateA = a.dateEvaluation || a.dateCreation || 0;
-        const dateB = b.dateEvaluation || b.dateCreation || 0;
-        return new Date(dateB) - new Date(dateA);
+    // Compter les critères en amélioration, en baisse, et en plateau
+    let nbAmelioration = 0;
+    let nbBaisse = 0;
+    let nbPlateau = 0;
+
+    criteresAvecDonnees.forEach(critere => {
+        const symbole = directionsCriteres[critere].symbole;
+        if (symbole === '→') {
+            nbAmelioration++;
+        } else if (symbole === '←') {
+            nbBaisse++;
+        } else if (symbole === '—') {
+            nbPlateau++;
+        }
     });
 
-    // AM: Moyenne des N plus récents
-    const artefactsRecents = evaluationsEleve.slice(0, N);
-    const AM = artefactsRecents.reduce((sum, e) => sum + e.noteFinale, 0) / artefactsRecents.length / 100;
-
-    // AL: Moyenne des N suivants avec chevauchement
-    const artefactsSuivants = evaluationsEleve.slice(1, N + 1);
-    const AL = artefactsSuivants.reduce((sum, e) => sum + e.noteFinale, 0) / artefactsSuivants.length / 100;
-
-    const difference = AM - AL;
-
-    // Déterminer la direction selon le seuil configurable
-    const seuilProgression = obtenirSeuil('progressionArtefacts');
+    // Déterminer la direction globale selon la majorité
     let direction, interpretation;
-    if (difference > seuilProgression) {
+    if (nbAmelioration > nbBaisse && nbAmelioration > nbPlateau) {
         direction = '↗';
         interpretation = 'Progression';
-    } else if (difference < -seuilProgression) {
+    } else if (nbBaisse > nbAmelioration && nbBaisse > nbPlateau) {
         direction = '↘';
         interpretation = 'Régression';
     } else {
@@ -4929,21 +5122,38 @@ function calculerProgressionEleve(da) {
         interpretation = 'Plateau';
     }
 
+    // Calculer une moyenne pondérée des différences pour information
+    let sommeDifferences = 0;
+    let nbDifferences = 0;
+    criteresAvecDonnees.forEach(critere => {
+        const diff = parseFloat(directionsCriteres[critere].difference);
+        if (!isNaN(diff)) {
+            sommeDifferences += diff;
+            nbDifferences++;
+        }
+    });
+    const differenceGlobale = nbDifferences > 0 ? (sommeDifferences / nbDifferences).toFixed(1) : '0.0';
+
     console.log(`Progression pour DA ${da}:`, {
         direction,
         interpretation,
-        AM: (AM * 100).toFixed(1) + '%',
-        AL: (AL * 100).toFixed(1) + '%',
-        difference: (difference * 100).toFixed(1) + ' points'
+        nbAmelioration,
+        nbBaisse,
+        nbPlateau,
+        differenceGlobale: differenceGlobale + ' points (moyenne des critères)'
     });
 
     return {
         direction,
         interpretation,
-        AM: (AM * 100).toFixed(1),
-        AL: (AL * 100).toFixed(1),
-        difference: (difference * 100).toFixed(1),
-        nbArtefacts: evaluationsEleve.length
+        AM: null, // Non utilisé dans la nouvelle logique
+        AL: null, // Non utilisé dans la nouvelle logique
+        difference: differenceGlobale,
+        nbCriteres: criteresAvecDonnees.length,
+        nbAmelioration,
+        nbBaisse,
+        nbPlateau,
+        criteresDetail: directionsCriteres
     };
 }
 
@@ -5328,12 +5538,9 @@ function determinerCibleIntervention(da) {
     const diagnostic = diagnostiquerForcesChallenges(moyennes);
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true); // true = dépistage (3 artefacts)
     const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100);
-    const interpRisque = interpreterRisque(indices.R);
 
     // Variables pour la formule (correspondance avec Excel)
     const E = interpMobilisation.niveau; // Mobilisation
-    const F = interpRisque.niveau; // Risque sommatif (1-ACP)
-    const G = interpRisque.niveau; // Risque PAN (simplifié pour l'instant)
     const I = indices3Derniers.francaisMoyen; // Moyenne français N derniers artefacts
     const M = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null); // Pattern actuel
     const N = diagnostic.principalDefi ? diagnostic.principalDefi.nom : 'Aucun'; // Défi principal
@@ -5341,7 +5548,7 @@ function determinerCibleIntervention(da) {
 
     console.log('🎯 Détermination cible pour DA', da, {
         mobilisation: E,
-        risque: F,
+        engagement: indices.E,
         pattern: M,
         defi: N,
         francais: I.toFixed(1) + '%',
@@ -5351,7 +5558,8 @@ function determinerCibleIntervention(da) {
     // LOGIQUE DE DÉCISION (formule Excel traduite en JavaScript)
 
     // 1. Vérifier décrochage (priorité absolue)
-    if (E === 'Décrochage' || F.includes('très élevé') || G.includes('très élevé')) {
+    // Note: Remplacé "risque élevé" par "engagement très faible" (< 0.3)
+    if (E === 'Décrochage' || indices.E < 0.3) {
         return {
             cible: 'Décrochage',
             pattern: M,
@@ -6079,7 +6287,7 @@ function genererSectionPerformance(da) {
     if (tousLesArtefactsPortfolio.length === 0) {
         return `
             <div class="text-muted profil-zone-centre-p30">
-                <p>📝 Aucun artefact de portfolio créé</p>
+                <p>📝 Aucun ${obtenirTermeProduction('singulier')} de portfolio créé</p>
             </div>
         `;
     }
@@ -6259,15 +6467,15 @@ function genererSectionPerformance(da) {
                 return textes[methodeSelection] || textes['meilleurs'];
             })()}
             <br><br>
-            <strong>Artefacts retenus :</strong> ${artefactsRetenus.length > 0 ? artefactsRetenus.map((art, idx) =>
+            <strong>${obtenirTermeProduction('pluriel', true)} retenus :</strong> ${artefactsRetenus.length > 0 ? artefactsRetenus.map((art, idx) =>
                 `${idx + 1}. ${art.description} → ${art.note.toFixed(1)}/100`
             ).join(' • ') : 'Aucun artefact évalué'}
             <br><br>
             <strong>Calcul de l'indice P :</strong> ${artefactsRetenus.length > 0 ? `
-                Moyenne des ${artefactsRetenus.length} artefact${artefactsRetenus.length > 1 ? 's' : ''} retenu${artefactsRetenus.length > 1 ? 's' : ''} — P = (${notesRetenues.map(n => n.toFixed(1)).join(' + ')}) / ${artefactsRetenus.length} = <strong>${indices.P}%</strong>
+                Moyenne des ${artefactsRetenus.length} ${obtenirTermeProduction(artefactsRetenus.length > 1 ? 'pluriel' : 'singulier')} retenu${artefactsRetenus.length > 1 ? 's' : ''} — P = (${notesRetenues.map(n => n.toFixed(1)).join(' + ')}) / ${artefactsRetenus.length} = <strong>${indices.P}%</strong>
             ` : 'Calcul impossible : aucune évaluation disponible'}
             <br><br>
-            <strong>Calcul de la note de chaque artefact :</strong> ${(() => {
+            <strong>Calcul de la note de chaque ${obtenirTermeProduction('singulier')} :</strong> ${(() => {
                 const grilles = db.getSync('grillesTemplates', []);
                 const grilleActive = grilles.find(g => g.active) || grilles[0];
                 if (grilleActive && grilleActive.criteres) {
@@ -6285,42 +6493,34 @@ function genererSectionPerformance(da) {
 
             <!-- En-tête avec indice P -->
             <div class="u-flex-between-mb15">
-                <div>
-                    <h3 style="margin: 0 0 5px 0; color: var(--bleu-principal); font-size: 1.1rem;">Développement des habiletés et compétences</h3>
-                    <strong style="font-size: 0.95rem; color: ${interpP.couleur};">${interpP.niveau}</strong>
-                </div>
                 ${modeComparatif ? `
-                    <div class="profil-flex-gap15-baseline">
+                    <div class="profil-flex-gap15-baseline" style="margin-left: auto;">
                         <strong class="profil-valeur-grande-orange">${lettreIDME_SOM} ${indicesSOM.P}%</strong>
                         <strong class="profil-valeur-grande-bleu-pan">${lettreIDME_PAN} ${indicesPAN.P}%</strong>
                     </div>
                 ` : `
-                    <strong class="profil-valeur-grande-bleu">${lettreIDME} ${indices.P}%</strong>
+                    <strong class="profil-valeur-grande-bleu" style="margin-left: auto;">${lettreIDME} ${indices.P}%</strong>
                 `}
             </div>
 
             <!-- 🆕 MÉTHODE DE CALCUL EXPLICITE -->
-            ${indices.pratique === 'PAN' ? `
-                <div style="background: #f0f8ff; border-left: 4px solid var(--pan-bleu); padding: 10px 15px; margin-bottom: 15px;">
-                    <div style="font-size: 0.85rem; color: #555; line-height: 1.5;">
-                        ${(() => {
-                            if (!portfolioActif) {
-                                return '📊 <strong>Productions indépendantes</strong> : Chaque production a sa propre pondération dans le calcul final';
-                            }
+            <ul class="profil-liste-simple" style="margin-bottom: 15px;">
+                <li><strong>• ${(() => {
+                    if (!portfolioActif) {
+                        return 'Performance des productions indépendantes';
+                    }
 
-                            // Textes explicites selon la modalité
-                            const textesExplicites = {
-                                'meilleurs': `📊 Note calculée sur <strong>les ${nombreARetenirConfig} meilleures productions</strong> (note maximale atteinte)`,
-                                'recents': `📊 Note calculée sur <strong>les ${nombreARetenirConfig} plus récentes productions</strong> (niveau terminal actuel)`,
-                                'recents-meilleurs': `📊 Note calculée sur <strong>les ${nombreARetenirConfig} plus récentes parmi les 50% meilleures</strong> (approche hybride)`,
-                                'tous': `📊 Note calculée sur <strong>toutes les productions</strong> (moyenne complète)`
-                            };
+                    // Textes selon la modalité de sélection (format uniforme avec section Engagement)
+                    const textesPerformance = {
+                        'meilleurs': `Performance du portfolio actuel (${nombreARetenirConfig} meilleur${nombreARetenirConfig > 1 ? 's' : ''}, maîtrise de standards)`,
+                        'recents': `Performance du portfolio actuel (${nombreARetenirConfig} plus récent${nombreARetenirConfig > 1 ? 's' : ''}, niveau terminal)`,
+                        'recents-meilleurs': `Performance du portfolio actuel (${nombreARetenirConfig} récent${nombreARetenirConfig > 1 ? 's' : ''} parmi les meilleurs, hybride)`,
+                        'tous': `Performance du portfolio actuel (tous les ${obtenirTermeProduction('pluriel')}, moyenne complète)`
+                    };
 
-                            return textesExplicites[methodeSelection] || textesExplicites['meilleurs'];
-                        })()}
-                    </div>
-                </div>
-            ` : ''}
+                    return textesPerformance[methodeSelection] || textesPerformance['meilleurs'];
+                })()}</strong></li>
+            </ul>
 
             <hr class="profil-separateur">
 
@@ -6981,15 +7181,8 @@ function genererRapportAPI(da, options = {}) {
         rapport += `\n`;
     }
 
-    // 5. APPRENTISSAGE (incluant risque, évolution et défi)
+    // 5. APPRENTISSAGE (incluant évolution et défi)
     if (opts.apprentissage) {
-        // Risque d'échec
-        rapport += `Risque d'échec : ${interpRisque.niveau} (${(risque * 100).toFixed(0)}%)`;
-        if (opts.afficherDetails) {
-            rapport += ` - Calculé selon 1 - (A × C × P)`;
-        }
-        rapport += `\n`;
-
         // Évolution
         const progression = calculerProgressionEleve(da);
         if (progression) {
@@ -6997,8 +7190,15 @@ function genererRapportAPI(da, options = {}) {
                           : progression.direction === '↘' ? 'en baisse'
                           : 'en plateau';
             rapport += `Apprentissage : présentement ${tendance}`;
-            if (opts.afficherDetails) {
-                rapport += ` (${progression.AM}% vs ${progression.AL}%)`;
+            if (opts.afficherDetails && progression.nbCriteres) {
+                // Nouvelle logique : afficher la répartition des critères
+                if (progression.direction === '↗') {
+                    rapport += ` (${progression.nbAmelioration}/${progression.nbCriteres} critères en progression)`;
+                } else if (progression.direction === '↘') {
+                    rapport += ` (${progression.nbBaisse}/${progression.nbCriteres} critères en régression)`;
+                } else {
+                    rapport += ` (${progression.nbPlateau}/${progression.nbCriteres} critères stables)`;
+                }
             }
             rapport += `\n`;
         }
@@ -7186,7 +7386,6 @@ function genererSectionRapport(da) {
             <div class="profil-carte">
                 <!-- En-tête minimaliste -->
                 <h3 style="margin: 0 0 20px 0; color: var(--bleu-principal); font-size: 1.1rem; border-bottom: 2px solid var(--bleu-pale); padding-bottom: 10px;">
-                    Rapport de bilan pédagogique
                     <span class="primo-aide" data-target="conseil-rapport">😎</span>
                 </h3>
 
@@ -7644,4 +7843,7 @@ function obtenirPatternEtudiant(da) {
 // 🆕 BETA 91: Exporter les fonctions de patterns de groupe
 window.calculerEtStockerPatternsGroupe = calculerEtStockerPatternsGroupe;
 window.obtenirPatternEtudiant = obtenirPatternEtudiant;
+
+// 🆕 BETA 93: Exporter afficherProfilComplet pour accès depuis autres modules
+window.afficherProfilComplet = afficherProfilComplet;
 window.calculerTousLesIndices = calculerTousLesIndices; // Utilisé par etudiants.js pour cohérence pratique SOM/PAN

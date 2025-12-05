@@ -299,9 +299,6 @@ class PratiqueSommative {
         // Calculer engagement E = (A × C × P)^(1/3)
         const engagement = Math.pow(indiceA * indiceC * indiceP, 1/3);
 
-        // Calculer risque R = 1 - (A × C × P)
-        const risque = 1 - (indiceA * indiceC * indiceP);
-
         // Détecter défis
         const defis = this.detecterDefis(da);
         const aDesDefis = defis.defis.length > 0;
@@ -347,8 +344,7 @@ class PratiqueSommative {
             indices: {
                 A: indiceA,
                 C: indiceC,
-                P: indiceP,
-                R: risque
+                P: indiceP
             },
             couleur: couleur,
             recommandation: recommandation

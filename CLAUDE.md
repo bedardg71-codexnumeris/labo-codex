@@ -54,7 +54,7 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
 - `VALIDATION_PHASE_2.md` : Rapport final tests
 
 **Principes** :
-- **Universel** : A-C-P-R, niveaux de risque, niveaux RàI → identiques pour toutes les pratiques
+- **Universel** : A-C-P-E (Engagement), niveaux RàI → identiques pour toutes les pratiques
 - **Spécifique** : Calcul de P, détection défis, cibles RàI → propre à chaque pratique
 - **Interface** : Chaque pratique implémente le contrat `IPratique`
 - **Séparation** : portfolio.js orchestre, pratiques calculent (Single Source of Truth)
@@ -371,7 +371,7 @@ localStorage.seancesCompletes             // horaire.js (futur)
 - Layout 2 colonnes : sidebar de navigation + zone de contenu principale
 - Navigation Précédent/Suivant entre étudiants (boutons centrés)
 - 3 sections structurées :
-  1. Suivi de l'apprentissage (indices R, RàI, échelle de risque visuelle)
+  1. Suivi de l'apprentissage (engagement E, patterns, niveaux RàI)
   2. Développement des habiletés et compétences (performance SRPNF)
   3. Mobilisation (assiduité, complétion, artefacts)
 - Système d'interprétation harmonisé (seuils A/C/M : 70%, 80%, 85%)
@@ -446,7 +446,7 @@ localStorage.seancesCompletes             // horaire.js (futur)
   - API : `obtenirIndicesCP(da, 'SOM')` ou `obtenirIndicesCP(da, 'PAN')`
 - ✅ **Bénéfices** :
   - Permet comparaison expérimentale des deux pratiques
-  - Dépistage A-C-P-R fonctionne dans les deux modes
+  - Dépistage A-C-P-E (Engagement) fonctionne dans les deux modes
   - Checkboxes contrôlent l'affichage, pas le calcul
 
 **REFONTE COMPLÈTE AFFICHAGE HYBRIDE SOM-PAN** (Session 26 octobre suite - Beta 72)

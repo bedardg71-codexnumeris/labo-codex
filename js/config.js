@@ -62,6 +62,7 @@ const configurationsOnglets = {
         { id: 'groupe', label: 'Groupe' },
         { id: 'pratique-notation', label: 'Pratique de notation' },
         { id: 'interpretation', label: 'Interprétation des données' },
+        { id: 'snapshots', label: 'Captures de progression' },
         { id: 'import-export', label: 'Import/Export' }
     ],
   'aide': [

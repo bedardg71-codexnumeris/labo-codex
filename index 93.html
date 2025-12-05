@@ -2852,7 +2852,7 @@
                             <br><br>
                             <strong>Performance (P)</strong> : Calculé selon la pratique de notation en vigueur (Sommative : moyenne pondérée provisoire de toutes les évaluations, ou PAN-Maîtrise : moyenne des N meilleurs artefacts selon l'échelle IDME).
                             <br><br>
-                            <strong>Engagement (E)</strong> : Moyenne géométrique des trois indices, E = (A × C × P)^(1/3). Mesure l'engagement global combinant assiduité, complétion et performance.
+                            <strong>Engagement (E)</strong> : Racine cubique du produit des trois indices, E = ∛(A × C × P). La racine cubique normalise le résultat pour préserver l'échelle d'origine : un étudiant à 70% sur les trois indices aura un engagement de 70% (au lieu de 34% avec une multiplication directe). Cette transformation compense la décroissance multiplicative tout en pénalisant les déséquilibres importants.
                             <br><br>
                             <em style="color: var(--gris-moyen); font-size: 0.9rem;">💡 Les corrélations affichées (r) mesurent la force de la relation linéaire entre deux indices. L'interprétation suit les conventions de Cohen (1988) : |r| < 0.3 = très faible, 0.3-0.5 = faible, 0.5-0.7 = modérée, 0.7-0.9 = forte, ≥ 0.9 = très forte.</em>
                         </div>
@@ -6938,7 +6938,102 @@ Exemple :
 
                 </div><!--fin sous-section reglages-interpretation-->
 
-                <!-- Sous-section : Productions -->
+                <!-- Sous-section: Captures de progression -->
+                <div id="reglages-snapshots" class="sous-section">
+                    <h2>Captures de progression</h2>
+                    <p class="text-muted">
+                        Gestion des captures automatiques et manuelles des données de progression longitudinale
+                    </p>
+
+                    <!-- Carte d'explication -->
+                    <div class="carte-info-toggle carte-info-conseil" style="display: block; margin-bottom: 20px;">
+                        <strong>Système de captures :</strong>
+                        <p style="margin-top: 10px; line-height: 1.6;">
+                            Les captures enregistrent automatiquement l'état des indices A-C-P-E à des moments clés :
+                        </p>
+                        <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                            <li><strong>Hebdomadaires :</strong> Chaque semaine, une capture est créée avec les indices actuels de tous les étudiants</li>
+                            <li><strong>Interventions :</strong> Lors de la complétion d'une intervention RàI, une capture "après" est enregistrée pour mesurer l'impact</li>
+                            <li><strong>Reconstruction rétroactive :</strong> Recalcule les captures historiques à partir des données existantes</li>
+                        </ul>
+                    </div>
+
+                    <!-- Statut actuel -->
+                    <div class="carte">
+                        <h3>Statut actuel du système</h3>
+                        <div class="grille-cartes-metriques" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
+                            <div class="carte-metrique-bleue">
+                                <div class="carte-metrique-contenu">
+                                    <span class="carte-metrique-label">Captures hebdomadaires</span>
+                                    <strong id="stat-snapshots-hebdo" class="carte-metrique-valeur">—</strong>
+                                </div>
+                            </div>
+                            <div class="carte-metrique-bleue">
+                                <div class="carte-metrique-contenu">
+                                    <span class="carte-metrique-label">Captures interventions</span>
+                                    <strong id="stat-snapshots-interventions" class="carte-metrique-valeur">—</strong>
+                                </div>
+                            </div>
+                            <div class="carte-metrique-bleue">
+                                <div class="carte-metrique-contenu">
+                                    <span class="carte-metrique-label">Dernière capture</span>
+                                    <strong id="stat-derniere-capture" class="carte-metrique-valeur">—</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="info-snapshots-status" class="text-muted" style="font-size: 0.9rem;">
+                            Chargement des informations...
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="carte">
+                        <h3>Actions disponibles</h3>
+
+                        <!-- Capture manuelle -->
+                        <div class="carte-bleu-pale-p15-mb20">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Capture manuelle</h4>
+                            <p>
+                                Capture immédiate de tous les étudiants avec les indices actuels.
+                                Utile pour marquer un moment important dans la session.
+                            </p>
+                            <button class="btn btn-principal" onclick="capturerSnapshotManuel()" style="margin-top: 10px;">
+                                Capturer maintenant
+                            </button>
+                        </div>
+
+                        <!-- Reconstruction rétroactive -->
+                        <div class="carte-bleu-pale-p15-mb20">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Reconstruction rétroactive</h4>
+                            <p>
+                                Recalcule toutes les captures hebdomadaires depuis le début du trimestre en utilisant
+                                les données d'évaluations et de présences existantes. Cette opération peut prendre quelques secondes.
+                            </p>
+                            <p class="text-muted" style="font-size: 0.85rem; margin-top: 10px;">
+                                ⚠️ Attention : Cette action va recalculer et remplacer les captures hebdomadaires existantes.
+                            </p>
+                            <button class="btn btn-secondaire" onclick="lancerReconstructionRetroactive()" style="margin-top: 10px;">
+                                Lancer la reconstruction
+                            </button>
+                        </div>
+
+                        <!-- Nettoyage -->
+                        <div class="carte-bleu-pale-p15-mb20" style="background: #fff3e0;">
+                            <h4 style="color: #ff6f00; margin-bottom: 10px;">Nettoyage des données</h4>
+                            <p>
+                                Supprime toutes les captures enregistrées. Cette action est irréversible.
+                            </p>
+                            <p class="text-muted" style="font-size: 0.85rem; margin-top: 10px;">
+                                ⚠️ Les graphiques de progression seront vides après cette opération.
+                            </p>
+                            <button class="btn btn-secondaire" onclick="confirmerNettoyageSnapshots()" style="margin-top: 10px; border-color: #ff6f00; color: #ff6f00;">
+                                Supprimer toutes les captures
+                            </button>
+                        </div>
+                    </div>
+
+                </div><!--fin sous-section reglages-snapshots-->
 
                 <!-- Sous-section: Import/Export des données -->
                 <div id="reglages-import-export" class="sous-section">
@@ -9969,14 +10064,18 @@ Exemple :
     <!-- PRIORITÉ 0: Couche de stockage (Migration IndexedDB - Beta 91.5) -->
     <script src="js/db.js?v=2025112401"></script>
 
+    <!-- Bibliothèque externe: Chart.js pour graphiques progression (Beta 93) -->
+    <script src="libs/chart.min.js"></script>
+    <script src="libs/chartjs-plugin-annotation.min.js"></script>
+
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>
-    <script src="js/navigation.js?v=2025120101"></script>
+    <script src="js/navigation.js?v=2025120322"></script>
     <script src="js/modes.js?v=2025113001"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025111325"></script>
-    <script src="js/etudiants.js?v=2025113029"></script>
+    <script src="js/etudiants.js?v=2025120403"></script>
     <script src="js/productions.js?v=2025113003"></script>
     <script src="js/grilles.js?v=2025113001"></script>
     <script src="js/echelles.js?v=2025113001"></script>
@@ -9994,7 +10093,7 @@ Exemple :
     <script src="js/pratiques/migration-pratiques.js"></script>
     <script src="js/pratiques/pratique-test.js"></script>
     <script src="js/pratiques/pratique-pan-maitrise.js?v=2025120302"></script>
-    <script src="js/pratiques/pratique-sommative.js?v=2025112001"></script>
+    <script src="js/pratiques/pratique-sommative.js?v=2025120401"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=2025112600"></script>
     <script src="js/pratiques/config-francois-chimie.js?v=2025112600"></script>
 
@@ -10010,11 +10109,11 @@ Exemple :
     <script src="js/objectifs.js?v=2025120124"></script>
 
     <script src="js/portfolio.js?v=2025112701"></script>
-    <script src="js/saisie-presences.js?v=2025113008"></script>
+    <script src="js/saisie-presences.js?v=2025120405"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=2025111830"></script>
-    <script src="js/profil-etudiant.js?v=2025120303"></script>
+    <script src="js/tableau-bord-apercu.js?v=2025120301"></script>
+    <script src="js/profil-etudiant.js?v=2025120404"></script>
     <script src="js/presences-apercu.js?v=2025111029"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
 
@@ -10028,10 +10127,12 @@ Exemple :
     <script src="js/import-export.js?v=2025112700"></script>
     <script src="js/statistiques.js?v=2025113016"></script>
     <script src="js/liste-evaluations.js?v=2025120207"></script>
+    <script src="js/snapshots.js?v=2025120410"></script>
+    <script src="js/graphiques-progression.js?v=2025120408"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2025113013"></script>
-    <script src="js/evaluation.js?v=2025120216"></script>
+    <script src="js/evaluation.js?v=2025120302"></script>
 
     <!-- PRIMO - Système conversationnel de configuration (Beta 92) -->
     <script src="js/primo-questions.js?v=2025120109"></script>

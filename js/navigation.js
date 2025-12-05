@@ -355,6 +355,13 @@ function afficherSousSection(idSousSection) {
                 chargerMaterielConfigure();
             }
             break;
+
+        case 'reglages-snapshots':
+            console.log('🔄 Affichage du statut des snapshots...');
+            if (typeof afficherStatutSnapshots === 'function') {
+                setTimeout(afficherStatutSnapshots, 100);
+            }
+            break;
     }
 
         // Recharger le tableau de bord selon la sous-section
