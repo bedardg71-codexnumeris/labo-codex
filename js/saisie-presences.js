@@ -178,6 +178,92 @@ function calculerAssiduiteSommative(da) {
 }
 
 /**
+ * ✨ NOUVELLE FONCTION (Beta 93): Calcule l'assiduité jusqu'à une date limite
+ * Utilisée pour la reconstruction rétroactive des snapshots historiques
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {string} dateLimite - Date limite au format 'YYYY-MM-DD' (incluse)
+ * @returns {Object} - {indice, heuresPresentes, heuresOffertes, nombreSeances}
+ */
+function calculerAssiduiteJusquADate(da, dateLimite) {
+    const presences = obtenirDonneesSelonMode('presences') || [];
+
+    // Filtrer seulement les présences JUSQU'À la date limite
+    const presencesFiltrees = presences.filter(p => p.date <= dateLimite);
+    const datesSaisies = [...new Set(presencesFiltrees.map(p => p.date))].sort();
+
+    if (datesSaisies.length === 0) {
+        return {
+            indice: 1,
+            heuresPresentes: 0,
+            heuresOffertes: 0,
+            nombreSeances: 0
+        };
+    }
+
+    const presencesEtudiant = presencesFiltrees.filter(p => p.da === da);
+    let totalHeuresDonnees = 0;
+    let totalHeuresPresentes = 0;
+    const seancesNonFacultatives = new Set();
+
+    datesSaisies.forEach(date => {
+        const presenceDate = presencesEtudiant.find(p => p.date === date);
+
+        if (presenceDate) {
+            const estFacultatif = presenceDate.facultatif === true;
+            const heuresPresence = presenceDate.heures || 0;
+
+            if (estFacultatif && heuresPresence === 0) {
+                // Séance facultative absente: non comptabilisée
+            } else if (estFacultatif && heuresPresence > 0) {
+                // Séance facultative présente
+                totalHeuresDonnees += heuresPresence;
+                totalHeuresPresentes += heuresPresence;
+            } else {
+                // Séance normale
+                seancesNonFacultatives.add(date);
+                const heuresCours = 2;
+                if (heuresPresence > heuresCours) {
+                    totalHeuresDonnees += heuresPresence;
+                    totalHeuresPresentes += heuresPresence;
+                } else {
+                    totalHeuresDonnees += heuresCours;
+                    totalHeuresPresentes += heuresPresence;
+                }
+            }
+        } else {
+            // Étudiant absent
+            const presencesDate = presencesFiltrees.filter(p => p.date === date);
+            const estSeanceFacultative = presencesDate.length > 0 &&
+                                         presencesDate.every(p => p.facultatif === true);
+
+            if (!estSeanceFacultative) {
+                seancesNonFacultatives.add(date);
+                totalHeuresDonnees += 2;
+            }
+        }
+    });
+
+    if (totalHeuresDonnees === 0) {
+        return {
+            indice: 1,
+            heuresPresentes: 0,
+            heuresOffertes: 0,
+            nombreSeances: 0
+        };
+    }
+
+    const indice = totalHeuresPresentes / totalHeuresDonnees;
+
+    return {
+        indice: Math.min(indice, 1),
+        heuresPresentes: totalHeuresPresentes,
+        heuresOffertes: totalHeuresDonnees,
+        nombreSeances: seancesNonFacultatives.size
+    };
+}
+
+/**
  * Calcule l'assiduité ALTERNATIVE (sur les N dernières séances)
  * Formule : Heures présentes sur N dernières séances ÷ heures données (excluant facultatif absent)
  *
@@ -1622,6 +1708,7 @@ window.initialiserModuleSaisiePresences = initialiserModuleSaisiePresences;
 window.chargerGroupesPresences = chargerGroupesPresences;
 window.initialiserSaisiePresences = initialiserSaisiePresences;
 window.enregistrerPresences = enregistrerPresences;
+window.calculerAssiduiteJusquADate = calculerAssiduiteJusquADate; // ✨ NOUVEAU (Beta 93)
 /**
  * Filtre le tableau de saisie des présences selon la recherche
  */

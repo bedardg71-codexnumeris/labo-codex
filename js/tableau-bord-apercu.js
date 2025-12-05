@@ -1665,7 +1665,7 @@ function afficherAlertesPrioritairesCompteurs(etudiants) {
     let carteEngagement = null;
     cartes.forEach(carte => {
         const h3 = carte.querySelector('h3 span');
-        if (h3 && (h3.textContent.includes("Niveau d'engagement") || h3.textContent.includes("Risque d'échec"))) {
+        if (h3 && h3.textContent.includes("Niveau d'engagement")) {
             carteEngagement = carte;
         }
     });

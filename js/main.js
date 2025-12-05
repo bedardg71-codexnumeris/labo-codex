@@ -356,6 +356,12 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModuleInterventions();
     }
 
+    // MODULE: Snapshots progression longitudinale (Beta 93)
+    if (typeof initialiserModuleSnapshots === 'function') {
+        console.log('   → Module Snapshots détecté');
+        initialiserModuleSnapshots();
+    }
+
     // ===============================
     // PRIORITÉ 5 : UTILITAIRES
     // ===============================

@@ -151,7 +151,7 @@ Le **monitorage pédagogique** est une approche de suivi formative qui vise à d
 3. **Performance (P)** : Mesure la maîtrise par la qualité des productions
 
 L'application calcule également un indice dérivé :
-- **Engagement (E)** : Produit des trois indices (E = A × C × P)
+- **Engagement (E)** : Moyenne géométrique des trois indices (E = ∛(A × C × P))
 
 ### Réponse à l'intervention (RàI)
 
