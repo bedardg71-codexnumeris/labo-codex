@@ -165,14 +165,16 @@ function creerGraphiqueIndividuel(canvasId, da) {
         }
 
         // Préparer les données
+        // ✅ CORRECTION (Beta 93) : Gérer null pour P et E (pas encore d'évaluation)
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
         const donneesA = snapshots.map(s => s.A / 100); // Convertir en 0-1
         const donneesC = snapshots.map(s => s.C / 100);
-        const donneesP = snapshots.map(s => s.P / 100);
-        const donneesE = snapshots.map(s => s.E);
+        const donneesP = snapshots.map(s => s.P !== null ? s.P / 100 : null); // null si pas d'évaluation
+        const donneesE = snapshots.map(s => s.E); // Déjà en 0-1 ou null
 
         // Calculer min/max pour ajuster l'échelle Y
-        const toutesValeurs = [...donneesA, ...donneesC, ...donneesP, ...donneesE];
+        // ✅ CORRECTION (Beta 93) : Filtrer les valeurs null avant calcul min/max
+        const toutesValeurs = [...donneesA, ...donneesC, ...donneesP, ...donneesE].filter(v => v !== null);
         const valeurMin = Math.min(...toutesValeurs);
         const valeurMax = Math.max(...toutesValeurs);
 
@@ -376,10 +378,11 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
         snapshots.sort((a, b) => a.numSemaine - b.numSemaine);
 
         // Préparer les données
+        // ✅ CORRECTION (Beta 93) : Gérer null pour P et E (pas encore d'évaluation)
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
         const donneesA = snapshots.map(s => s.groupe.moyenneA / 100);
         const donneesC = snapshots.map(s => s.groupe.moyenneC / 100);
-        const donneesP = snapshots.map(s => s.groupe.moyenneP / 100);
+        const donneesP = snapshots.map(s => s.groupe.moyenneP !== null ? s.groupe.moyenneP / 100 : null);
         const donneesE = snapshots.map(s => s.groupe.moyenneE);
 
         // Obtenir le canvas

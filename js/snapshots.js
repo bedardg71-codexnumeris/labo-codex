@@ -138,22 +138,30 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null) {
         const sommeNotes = evaluationsEvaluees.reduce((sum, e) => sum + parseFloat(e.note || 0), 0);
         indiceP = Math.round(sommeNotes / evaluationsEvaluees.length);
     } else {
-        // Aucune note disponible = 100% (début de session, aucun travail évalué)
-        indiceP = 100;
+        // ✅ CORRECTION (Beta 93) : null au lieu de 100% quand aucune évaluation
+        // Évite d'afficher une fausse "chute" dans les graphiques (ex: 100% → 76%)
+        indiceP = null;
     }
 
     // Engagement (E) : Moyenne géométrique de A, C, P
-    const A_decimal = indiceA / 100;
-    const C_decimal = indiceC / 100;
-    const P_decimal = indiceP / 100;
-    const E_brut = A_decimal * C_decimal * P_decimal;
-    const E = Math.pow(E_brut, 1/3); // Racine cubique
+    // ✅ CORRECTION (Beta 93) : Si P est null, E est aussi null
+    let indiceE;
+    if (indiceP === null) {
+        indiceE = null;
+    } else {
+        const A_decimal = indiceA / 100;
+        const C_decimal = indiceC / 100;
+        const P_decimal = indiceP / 100;
+        const E_brut = A_decimal * C_decimal * P_decimal;
+        const E = Math.pow(E_brut, 1/3); // Racine cubique
+        indiceE = parseFloat(E.toFixed(3));
+    }
 
     const resultat = {
         A: indiceA,
         C: indiceC,
         P: indiceP,
-        E: parseFloat(E.toFixed(3))
+        E: indiceE
     };
 
     // 🐛 DEBUG
@@ -225,7 +233,9 @@ async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = 
         // Calculer indices pour chaque étudiant JUSQU'À LA DATE DE FIN DE SEMAINE
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const snapshotsEtudiants = [];
+        // ✅ CORRECTION (Beta 93) : Compteurs séparés pour gérer les valeurs null
         let sommeA = 0, sommeC = 0, sommeP = 0, sommeE = 0;
+        let nbAvecP = 0, nbAvecE = 0; // Compter étudiants avec valeurs non-null
         const valeursA = [], valeursC = [], valeursP = [];
 
         // ⚡ CORRECTION (Beta 93) : Charger depuis IndexedDB par défaut (évite QuotaExceededError localStorage)
@@ -280,34 +290,45 @@ async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = 
                 A: indices.A,
                 C: indices.C,
                 P: indices.P,
-                E: parseFloat(indices.E),
+                E: indices.E, // ✅ Ne plus parser, déjà géré dans calculerIndicesHistoriques
                 pattern: pattern,
                 rai: rai
             });
 
-            // Accumuler pour moyennes
+            // ✅ CORRECTION (Beta 93) : Accumuler pour moyennes (gérer null)
             sommeA += indices.A;
             sommeC += indices.C;
-            sommeP += indices.P;
-            sommeE += parseFloat(indices.E);
+
+            // P et E peuvent être null si aucune évaluation
+            if (indices.P !== null) {
+                sommeP += indices.P;
+                nbAvecP++;
+            }
+            if (indices.E !== null) {
+                sommeE += indices.E;
+                nbAvecE++;
+            }
 
             valeursA.push(indices.A);
             valeursC.push(indices.C);
-            valeursP.push(indices.P);
+            if (indices.P !== null) {
+                valeursP.push(indices.P);
+            }
         });
 
         const nbEtudiants = etudiants.length;
 
-        // Calculer statistiques groupe
+        // ✅ CORRECTION (Beta 93) : Calculer statistiques groupe (gérer null)
         const groupe = {
             moyenneA: Math.round(sommeA / nbEtudiants),
             moyenneC: Math.round(sommeC / nbEtudiants),
-            moyenneP: Math.round(sommeP / nbEtudiants),
-            moyenneE: parseFloat((sommeE / nbEtudiants).toFixed(2)),
+            // P et E = null si aucun étudiant n'a de valeur (pas encore d'évaluation)
+            moyenneP: nbAvecP > 0 ? Math.round(sommeP / nbAvecP) : null,
+            moyenneE: nbAvecE > 0 ? parseFloat((sommeE / nbAvecE).toFixed(2)) : null,
             nbEtudiants: nbEtudiants,
             dispersionA: calculerEcartType(valeursA),
             dispersionC: calculerEcartType(valeursC),
-            dispersionP: calculerEcartType(valeursP)
+            dispersionP: valeursP.length > 0 ? calculerEcartType(valeursP) : null
         };
 
         // Créer snapshot
@@ -498,6 +519,8 @@ async function reconstruireSnapshotsHistoriques() {
         // Effacer snapshots existants (reconstruction complète)
         const snapshots = db.getSync('snapshots', { hebdomadaires: [], interventions: [], metadata: {} });
         snapshots.hebdomadaires = [];
+        db.setSync('snapshots', snapshots); // ⚡ CORRECTION : Sauvegarder le vidage AVANT la boucle
+        console.log('✓ Snapshots existants effacés');
 
         // Capturer snapshot pour chaque semaine
         let nbSnapshots = 0;
