@@ -504,12 +504,14 @@ async function reconstruireSnapshotsHistoriques() {
         let nbEchecs = 0;
         const nbSemainesTotal = semainesSortees.length;
 
-        semainesSortees.forEach((numSemaine, index) => {
+        // ⚡ CORRECTION (Beta 93) : Utiliser for...of au lieu de forEach pour supporter async/await
+        for (let index = 0; index < semainesSortees.length; index++) {
+            const numSemaine = semainesSortees[index];
             const progression = Math.round(((index + 1) / nbSemainesTotal) * 100);
             console.log(`📸 [${index + 1}/${nbSemainesTotal}] Semaine ${numSemaine} (${progression}%)...`);
 
-            // ⚡ NOUVEAU : Passer le cache d'évaluations IndexedDB
-            const snapshot = capturerSnapshotHebdomadaire(numSemaine, evaluationsCache);
+            // ⚡ NOUVEAU : Passer le cache d'évaluations IndexedDB + AWAIT car fonction async
+            const snapshot = await capturerSnapshotHebdomadaire(numSemaine, evaluationsCache);
             if (snapshot) {
                 nbSnapshots++;
                 console.log(`  ✅ Semaine ${numSemaine} capturée (${snapshot.etudiants.length} étudiants)`);
@@ -517,7 +519,7 @@ async function reconstruireSnapshotsHistoriques() {
                 nbEchecs++;
                 console.warn(`  ⚠️ Semaine ${numSemaine} échec`);
             }
-        });
+        }
 
         console.log(`✅ Reconstruction terminée : ${nbSnapshots} captures créées, ${nbEchecs} échecs`);
         return {
