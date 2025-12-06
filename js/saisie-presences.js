@@ -185,6 +185,86 @@ function calculerAssiduiteSommative(da) {
  * @param {string} dateLimite - Date limite au format 'YYYY-MM-DD' (incluse)
  * @returns {Object} - {indice, heuresPresentes, heuresOffertes, nombreSeances}
  */
+/**
+ * Calcule l'assiduité PONCTUELLE pour une séance spécifique
+ * (Beta 93 - Système de snapshots par séance)
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {string} dateSeance - Date de la séance au format YYYY-MM-DD
+ * @returns {Object} - { indice, heuresPresentes, heuresOffertes }
+ */
+function calculerAssiduiteSeance(da, dateSeance) {
+    const presences = obtenirDonneesSelonMode('presences') || [];
+
+    // Trouver la présence pour cette séance spécifique
+    const presenceSeance = presences.find(p => p.da === da && p.date === dateSeance);
+
+    // Si aucune donnée de présence, considérer comme absent (indice = 0)
+    if (!presenceSeance) {
+        // Vérifier si c'était une séance facultative pour tous
+        const presencesDate = presences.filter(p => p.date === dateSeance);
+        const estSeanceFacultative = presencesDate.length > 0 &&
+                                     presencesDate.every(p => p.facultatif === true);
+
+        if (estSeanceFacultative) {
+            // Séance facultative non suivie = ne pénalise pas (indice = 1, 0h données)
+            return {
+                indice: 1,
+                heuresPresentes: 0,
+                heuresOffertes: 0
+            };
+        } else {
+            // Séance normale non enregistrée = absent (indice = 0)
+            return {
+                indice: 0,
+                heuresPresentes: 0,
+                heuresOffertes: 2 // Heures théoriques par défaut
+            };
+        }
+    }
+
+    const estFacultatif = presenceSeance.facultatif === true;
+    const heuresPresence = presenceSeance.heures || 0;
+
+    // Séance facultative où l'étudiant était absent
+    if (estFacultatif && heuresPresence === 0) {
+        return {
+            indice: 1, // Ne pénalise pas
+            heuresPresentes: 0,
+            heuresOffertes: 0
+        };
+    }
+
+    // Séance facultative où l'étudiant était présent
+    if (estFacultatif && heuresPresence > 0) {
+        return {
+            indice: 1, // Présent = 100%
+            heuresPresentes: heuresPresence,
+            heuresOffertes: heuresPresence
+        };
+    }
+
+    // Séance normale
+    const heuresCours = 2; // Heures théoriques par défaut
+
+    if (heuresPresence > heuresCours) {
+        // Étudiant présent avec heures supplémentaires (ex: récupération)
+        return {
+            indice: 1,
+            heuresPresentes: heuresPresence,
+            heuresOffertes: heuresPresence
+        };
+    } else {
+        // Séance normale avec présence partielle ou complète
+        const indice = heuresPresence / heuresCours;
+        return {
+            indice: Math.min(indice, 1),
+            heuresPresentes: heuresPresence,
+            heuresOffertes: heuresCours
+        };
+    }
+}
+
 function calculerAssiduiteJusquADate(da, dateLimite) {
     const presences = obtenirDonneesSelonMode('presences') || [];
 
