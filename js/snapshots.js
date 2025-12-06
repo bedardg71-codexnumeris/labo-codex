@@ -359,17 +359,23 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
             groupe: groupe
         };
 
-        // Sauvegarder (utilise la même structure 'hebdomadaires' pour rétrocompatibilité)
-        const snapshots = db.getSync('snapshots', {
-            hebdomadaires: [],
-            interventions: [],
-            metadata: {
-                version: '1.0.0',
-                dateCreation: new Date().toISOString(),
-                dernierSnapshotHebdo: null,
-                dernierSnapshotIntervention: null
-            }
-        });
+        // ⚡ SAUVEGARDE DANS INDEXEDDB (pas localStorage - trop grand!)
+        // Lire depuis IndexedDB (async)
+        let snapshots = await db.get('snapshots');
+
+        // Initialiser structure si première utilisation
+        if (!snapshots) {
+            snapshots = {
+                hebdomadaires: [],
+                interventions: [],
+                metadata: {
+                    version: '1.0.0',
+                    dateCreation: new Date().toISOString(),
+                    dernierSnapshotHebdo: null,
+                    dernierSnapshotIntervention: null
+                }
+            };
+        }
 
         // Vérifier que la structure metadata existe (compatibilité anciennes versions)
         if (!snapshots.metadata) {
@@ -383,7 +389,9 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
 
         snapshots.hebdomadaires.push(snapshot);
         snapshots.metadata.dernierSnapshotHebdo = snapshot.timestamp;
-        db.setSync('snapshots', snapshots);
+
+        // ⚡ Sauvegarder dans IndexedDB (plusieurs GB disponibles)
+        await db.set('snapshots', snapshots);
 
         console.log(`✅ Snapshot séance ${dateSeance} capturé (${nbEtudiants} étudiants)`);
         return snapshot;
@@ -583,10 +591,18 @@ async function reconstruireSnapshotsHistoriques() {
         }
 
         // Effacer snapshots existants (reconstruction complète)
-        const snapshots = db.getSync('snapshots', { hebdomadaires: [], interventions: [], metadata: {} });
-        snapshots.hebdomadaires = [];
-        db.setSync('snapshots', snapshots);
-        console.log('✓ Snapshots existants effacés');
+        // ⚡ Utiliser IndexedDB (pas localStorage - trop grand!)
+        await db.set('snapshots', {
+            hebdomadaires: [],
+            interventions: [],
+            metadata: {
+                version: '1.0.0',
+                dateCreation: new Date().toISOString(),
+                dernierSnapshotHebdo: null,
+                dernierSnapshotIntervention: null
+            }
+        });
+        console.log('✓ Snapshots existants effacés (IndexedDB)');
 
         // ✨ NOUVEAU : Capturer snapshot pour CHAQUE SÉANCE
         let nbSnapshots = 0;
