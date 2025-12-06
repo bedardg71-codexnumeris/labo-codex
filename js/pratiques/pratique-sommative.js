@@ -98,6 +98,65 @@ class PratiqueSommative {
     }
 
     /**
+     * Calcule la performance HISTORIQUE jusqu'à une date spécifique (pour snapshots)
+     * Applique la logique Sommative avec filtrage temporel
+     *
+     * @param {string} da - Numéro de dossier d'admission
+     * @param {string} dateLimite - Date limite au format 'YYYY-MM-DD' (incluse)
+     * @param {Array} evaluationsCache - Cache des évaluations (evaluationsEtudiants)
+     * @returns {number} Indice P entre 0 et 1, ou null si pas de données
+     */
+    calculerPerformanceHistorique(da, dateLimite, evaluationsCache = null) {
+        if (!da || da.length !== 7) {
+            console.warn('[SOM-Historique] DA invalide:', da);
+            return null;
+        }
+
+        // Utiliser le cache fourni (evaluationsEtudiants)
+        if (!evaluationsCache || evaluationsCache.length === 0) {
+            console.warn('[SOM-Historique] Cache évaluations vide ou manquant');
+            return null;
+        }
+
+        const productions = this._lireProductions();
+
+        // Filtrer évaluations de cet étudiant jusqu'à dateLimite
+        const evaluationsEleve = evaluationsCache.filter(e =>
+            e.da === da &&
+            e.dateEvaluation && e.dateEvaluation <= dateLimite && // ✅ Filtrage temporel
+            e.statutRemise !== 'non-remis' && // ✅ Exclure non-remis
+            e.note !== null &&
+            e.note !== undefined
+        );
+
+        if (evaluationsEleve.length === 0) {
+            console.log(`[SOM-Historique] Aucune évaluation pour DA ${da} jusqu'à ${dateLimite}`);
+            return null;
+        }
+
+        // Calculer score pondéré total
+        let scoreTotal = 0;
+        let pondTotal = 0;
+
+        evaluationsEleve.forEach(evaluation => {
+            // Trouver la production correspondante
+            const production = productions.find(p => p.id === evaluation.productionId);
+            const ponderation = production?.ponderation || 1;
+
+            scoreTotal += parseFloat(evaluation.note) * ponderation;
+            pondTotal += ponderation;
+        });
+
+        // Calculer moyenne pondérée
+        const moyennePonderee = pondTotal > 0 ? scoreTotal / pondTotal : 0;
+        const indiceP = moyennePonderee / 100;
+
+        console.log(`[SOM-Historique] DA ${da}: ${moyennePonderee.toFixed(1)}% (${evaluationsEleve.length} évaluations)`);
+
+        return indiceP;
+    }
+
+    /**
      * Calcule l'indice C (Complétion) selon pratique sommative
      *
      * Formule : Nombre de productions remises / Nombre de productions évaluées

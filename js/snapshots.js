@@ -105,7 +105,6 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null) {
 
     // Complétion (C) et Performance (P) : Filtrer les évaluations jusqu'à dateLimite
     let indiceC = 100;
-    let indiceP = 100;
 
     // ⚡ OPTIMISATION : Utiliser le cache si fourni
     const evaluations = evaluationsCache || obtenirDonneesSelonMode('evaluationsEtudiants') || [];
@@ -131,16 +130,28 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null) {
         indiceC = Math.round((nbRemis / nbTotal) * 100);
     }
 
-    // Calculer P : Moyenne cumulative des notes (persiste entre les évaluations)
-    // ⚠️ IMPORTANT : On calcule la moyenne de TOUTES les évaluations notées jusqu'à maintenant
-    // P ne retombe jamais à 100% entre deux artefacts, il garde la moyenne historique
-    const evaluationsEvaluees = evaluationsFiltrees.filter(e => e.statut === 'evalue' && e.note !== null);
-    if (evaluationsEvaluees.length > 0) {
-        const sommeNotes = evaluationsEvaluees.reduce((sum, e) => sum + parseFloat(e.note || 0), 0);
-        indiceP = Math.round(sommeNotes / evaluationsEvaluees.length);
+    // Calculer P : Déléguer à la pratique de notation configurée
+    // ✅ CORRECTION (Beta 93) : Respect de l'architecture modulaire
+    let indiceP = null;
+
+    if (typeof obtenirPratiqueActuelle === 'function') {
+        try {
+            const pratique = obtenirPratiqueActuelle();
+            if (pratique && typeof pratique.calculerPerformanceHistorique === 'function') {
+                // Déléguer le calcul historique à la pratique
+                const indiceP_decimal = pratique.calculerPerformanceHistorique(da, dateLimite, evaluations);
+                // Convertir de 0-1 vers 0-100 (arrondi)
+                indiceP = indiceP_decimal !== null ? Math.round(indiceP_decimal * 100) : null;
+            } else {
+                console.warn('[calculerIndicesHistoriques] Pratique ou méthode calculerPerformanceHistorique() manquante');
+                indiceP = null;
+            }
+        } catch (error) {
+            console.error('[calculerIndicesHistoriques] Erreur lors du calcul de P:', error);
+            indiceP = null;
+        }
     } else {
-        // ✅ CORRECTION (Beta 93) : null au lieu de 100% quand aucune évaluation
-        // Évite d'afficher une fausse "chute" dans les graphiques (ex: 100% → 76%)
+        console.warn('[calculerIndicesHistoriques] obtenirPratiqueActuelle() non disponible');
         indiceP = null;
     }
 
@@ -816,6 +827,7 @@ window.importerSnapshots = importerSnapshots;
 window.obtenirSnapshotsHebdomadaires = obtenirSnapshotsHebdomadaires;
 window.obtenirSnapshotsEtudiant = obtenirSnapshotsEtudiant;
 window.obtenirSnapshotsInterventions = obtenirSnapshotsInterventions;
+window.calculerIndicesHistoriques = calculerIndicesHistoriques; // Export pour tests
 
 // Fonctions UI
 window.afficherStatutSnapshots = afficherStatutSnapshots;

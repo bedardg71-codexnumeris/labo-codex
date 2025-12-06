@@ -137,6 +137,112 @@ class PratiquePANMaitrise {
     }
 
     /**
+     * Calcule la performance HISTORIQUE jusqu'à une date spécifique (pour snapshots)
+     * Applique la logique PAN avec filtrage temporel
+     *
+     * Règle : Si < N artefacts évalués, moyenne de TOUS. Si >= N, sélection des N meilleurs.
+     *
+     * @param {string} da - Numéro de dossier d'admission
+     * @param {string} dateLimite - Date limite au format 'YYYY-MM-DD' (incluse)
+     * @param {Array} evaluationsCache - Cache des évaluations (evaluationsEtudiants)
+     * @returns {number} Indice P entre 0 et 1, ou null si pas de données
+     */
+    calculerPerformanceHistorique(da, dateLimite, evaluationsCache = null) {
+        if (!da || da.length !== 7) {
+            console.warn('[PAN-Historique] DA invalide:', da);
+            return null;
+        }
+
+        // Lire configuration
+        const config = this._lireConfiguration();
+        const portfolioActif = config.portfolioActif;
+        const nombreARetenir = config.nombreARetenir;
+        const methodeSelection = config.methodeSelection;
+
+        // Si portfolio désactivé, retourner null
+        if (!portfolioActif) {
+            console.log('[PAN-Historique] Portfolio désactivé');
+            return null;
+        }
+
+        // Lire artefacts portfolio
+        const artefactsIds = this._lireArtefactsPortfolio();
+
+        // Utiliser le cache fourni (evaluationsEtudiants)
+        if (!evaluationsCache || evaluationsCache.length === 0) {
+            console.warn('[PAN-Historique] Cache évaluations vide ou manquant');
+            return null;
+        }
+
+        // Filtrer évaluations de cet étudiant sur artefacts portfolio jusqu'à dateLimite
+        const evaluationsEleve = evaluationsCache.filter(e =>
+            e.da === da &&
+            artefactsIds.includes(e.productionId) &&
+            e.dateEvaluation && e.dateEvaluation <= dateLimite && // ✅ Filtrage temporel
+            e.statutRemise !== 'non-remis' && // ✅ Exclure non-remis
+            e.note !== null &&
+            e.note !== undefined
+        );
+
+        if (evaluationsEleve.length === 0) {
+            console.log(`[PAN-Historique] Aucune évaluation pour DA ${da} jusqu'à ${dateLimite}`);
+            return null;
+        }
+
+        // ✅ RÈGLE CRITIQUE : Si < N artefacts, moyenne de TOUS
+        if (evaluationsEleve.length < nombreARetenir) {
+            const somme = evaluationsEleve.reduce((acc, e) => acc + parseFloat(e.note || 0), 0);
+            const moyenne = somme / evaluationsEleve.length;
+            const indiceP = moyenne / 100;
+
+            console.log(`[PAN-Historique] DA ${da}: ${moyenne.toFixed(1)}% (${evaluationsEleve.length}/${nombreARetenir} artefacts - moyenne de TOUS)`);
+            return indiceP;
+        }
+
+        // ✅ Si >= N artefacts : Appliquer logique de sélection
+        let artefactsRetenus = [];
+
+        switch (methodeSelection) {
+            case 'meilleurs':
+                evaluationsEleve.sort((a, b) => parseFloat(b.note) - parseFloat(a.note));
+                artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
+                break;
+
+            case 'recents':
+                evaluationsEleve.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+                artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
+                break;
+
+            case 'recents-meilleurs':
+                const nombreMeilleurs = Math.max(1, Math.ceil(evaluationsEleve.length * 0.5));
+                evaluationsEleve.sort((a, b) => parseFloat(b.note) - parseFloat(a.note));
+                const topMeilleurs = evaluationsEleve.slice(0, nombreMeilleurs);
+                topMeilleurs.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+                artefactsRetenus = topMeilleurs.slice(0, nombreARetenir);
+                break;
+
+            case 'tous':
+                artefactsRetenus = evaluationsEleve;
+                break;
+
+            default:
+                console.warn(`[PAN-Historique] Modalité inconnue: ${methodeSelection}, utilisation de 'meilleurs'`);
+                evaluationsEleve.sort((a, b) => parseFloat(b.note) - parseFloat(a.note));
+                artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
+                break;
+        }
+
+        // Calculer la moyenne
+        const somme = artefactsRetenus.reduce((acc, e) => acc + parseFloat(e.note || 0), 0);
+        const moyenne = somme / artefactsRetenus.length;
+        const indiceP = moyenne / 100;
+
+        console.log(`[PAN-Historique] DA ${da}: ${moyenne.toFixed(1)}% (${artefactsRetenus.length} artefacts - modalité: ${methodeSelection})`);
+
+        return indiceP;
+    }
+
+    /**
      * Calcule la performance RÉCENTE (P_recent) pour le calcul du risque
      * Toujours basé sur les N dernières productions, peu importe la modalité choisie
      *

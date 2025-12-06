@@ -163,18 +163,23 @@ function obtenirNombreProductionsPourPatterns() {
 }
 
 /**
- * Obtient la pratique actuelle configurée (SOM ou PAN)
- * @returns {string} - 'SOM' ou 'PAN' (défaut: 'PAN')
+ * Obtient l'instance de la pratique actuelle configurée
+ * @returns {Object} - Instance de la pratique (PratiquePANMaitrise ou PratiqueSommative)
  */
 function obtenirPratiqueActuelle() {
     const modalites = db.getSync('modalitesEvaluation', {});
-    const pratique = modalites.pratique || 'pan-maitrise';
+    const pratiqueId = modalites.pratique || 'pan-maitrise';
 
-    // Convertir en format attendu par calculerDirectionsCriteres
-    if (pratique === 'sommative') {
-        return 'SOM';
+    // Obtenir l'instance depuis le registre
+    if (typeof obtenirPratiqueParId === 'function') {
+        return obtenirPratiqueParId(pratiqueId);
+    }
+
+    // Fallback : créer une instance directement
+    if (pratiqueId === 'sommative') {
+        return new PratiqueSommative();
     } else {
-        return 'PAN';
+        return new PratiquePANMaitrise();
     }
 }
 
