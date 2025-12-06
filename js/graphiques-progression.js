@@ -187,10 +187,11 @@ function creerGraphiqueIndividuel(canvasId, da) {
         const valeurMin = Math.min(...toutesValeurs);
         const valeurMax = Math.max(...toutesValeurs);
 
-        // Échelle fixe pour contexte pédagogique (60-100%)
+        // Échelle fixe pour contexte pédagogique (60-105%)
         // La plupart des étudiants se situent dans cette plage
+        // Max à 105% pour accommoder l'offset visuel (+0.5-1.5%)
         let yMin = 0.60;  // 60%
-        let yMax = 1.00;  // 100%
+        let yMax = 1.05;  // 105% (permet affichage avec offset)
 
         // Si des valeurs descendent sous 60%, ajuster yMin dynamiquement
         if (valeurMin < 0.60) {
@@ -314,7 +315,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         max: yMax,
                         title: {
                             display: true,
-                            text: 'Indices (0.60 à 1.00)'  // ✨ Échelle optimisée pour contexte pédagogique
+                            text: 'Indices (0.60 à 1.05)'  // ✨ Échelle étendue pour offset visuel
                         },
                         ticks: {
                             callback: function(value) {
@@ -500,11 +501,11 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         }
                     },
                     y: {
-                        min: 0.60,  // ✨ AMÉLIORATION (Beta 93) : Échelle 60-100% pour meilleure lisibilité
-                        max: 1.00,
+                        min: 0.60,  // ✨ AMÉLIORATION (Beta 93) : Échelle 60-105% pour meilleure lisibilité
+                        max: 1.05,  // 105% pour accommoder l'offset visuel (+0.5-1.5%)
                         title: {
                             display: true,
-                            text: 'Indices (0.60 à 1.00)'
+                            text: 'Indices (0.60 à 1.05)'
                         },
                         ticks: {
                             callback: function(value) {
