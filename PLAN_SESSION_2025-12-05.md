@@ -94,6 +94,26 @@
      * Plus de fausse impression de "chute" de performance
    - **Impact** : Visualisation honnête de la progression étudiante
 
+4. **Amélioration UX : Offset visuel des courbes (Beta 93)**
+   - **Problème** : Courbes superposées se cachent mutuellement
+   - **Exemple** : Assiduité 85% et Complétion 87% → lignes superposées
+   - **Solution appliquée** :
+     * Offset vertical léger pour chaque courbe (quelques pixels)
+     * A: +0% (baseline), C: +0.5%, P: +1.0%, E: +1.5%
+     * Équivalent à ~2-6px de décalage sur graphique 400px
+     * Tooltips affichent valeurs réelles (offset soustrait)
+   - **Fichiers modifiés** :
+     * `js/graphiques-progression.js` (v=2025120605)
+       - Lignes 170-181 : Offset individuel (OFFSET_VISUEL)
+       - Lignes 291-296 : Tooltips avec soustraction offset (×2 occurrences)
+       - Lignes 391-402 : Offset groupe (moyennes)
+     * `index 93.html` (cache buster mis à jour)
+   - **Résultat** :
+     * Courbes légèrement décalées verticalement
+     * Toutes les courbes restent visibles même si valeurs similaires
+     * Tooltips affichent les vraies valeurs (pas l'offset)
+   - **Impact** : Meilleure lisibilité des graphiques de progression
+
 ### ⚠️ Problèmes identifiés NON résolus
 
 1. **Reconstruction en boucle infinie**

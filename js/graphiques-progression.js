@@ -166,11 +166,19 @@ function creerGraphiqueIndividuel(canvasId, da) {
 
         // Préparer les données
         // ✅ CORRECTION (Beta 93) : Gérer null pour P et E (pas encore d'évaluation)
+        // ✨ AMÉLIORATION (Beta 93) : Offset vertical léger pour éviter superposition des courbes
+        const OFFSET_VISUEL = {
+            A: 0.000,   // Baseline (pas de décalage)
+            C: 0.005,   // +0.5% (~2px sur graphique 400px)
+            P: 0.010,   // +1.0% (~4px)
+            E: 0.015    // +1.5% (~6px)
+        };
+
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
-        const donneesA = snapshots.map(s => s.A / 100); // Convertir en 0-1
-        const donneesC = snapshots.map(s => s.C / 100);
-        const donneesP = snapshots.map(s => s.P !== null ? s.P / 100 : null); // null si pas d'évaluation
-        const donneesE = snapshots.map(s => s.E); // Déjà en 0-1 ou null
+        const donneesA = snapshots.map(s => (s.A / 100) + OFFSET_VISUEL.A);
+        const donneesC = snapshots.map(s => (s.C / 100) + OFFSET_VISUEL.C);
+        const donneesP = snapshots.map(s => s.P !== null ? (s.P / 100) + OFFSET_VISUEL.P : null);
+        const donneesE = snapshots.map(s => s.E !== null ? s.E + OFFSET_VISUEL.E : null);
 
         // Calculer min/max pour ajuster l'échelle Y
         // ✅ CORRECTION (Beta 93) : Filtrer les valeurs null avant calcul min/max
@@ -282,7 +290,11 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         callbacks: {
                             label: function(context) {
                                 const label = context.dataset.label || '';
-                                const value = (context.parsed.y * 100).toFixed(0);
+                                // ✨ Soustraire l'offset visuel pour afficher la valeur réelle
+                                const offsets = [0.000, 0.005, 0.010, 0.015]; // A, C, P, E
+                                const offset = offsets[context.datasetIndex] || 0;
+                                const valeurReelle = context.parsed.y - offset;
+                                const value = (valeurReelle * 100).toFixed(0);
                                 return `${label}: ${value}%`;
                             }
                         }
@@ -379,11 +391,19 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
 
         // Préparer les données
         // ✅ CORRECTION (Beta 93) : Gérer null pour P et E (pas encore d'évaluation)
+        // ✨ AMÉLIORATION (Beta 93) : Offset vertical léger pour éviter superposition des courbes
+        const OFFSET_VISUEL = {
+            A: 0.000,   // Baseline (pas de décalage)
+            C: 0.005,   // +0.5% (~2px sur graphique 400px)
+            P: 0.010,   // +1.0% (~4px)
+            E: 0.015    // +1.5% (~6px)
+        };
+
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
-        const donneesA = snapshots.map(s => s.groupe.moyenneA / 100);
-        const donneesC = snapshots.map(s => s.groupe.moyenneC / 100);
-        const donneesP = snapshots.map(s => s.groupe.moyenneP !== null ? s.groupe.moyenneP / 100 : null);
-        const donneesE = snapshots.map(s => s.groupe.moyenneE);
+        const donneesA = snapshots.map(s => (s.groupe.moyenneA / 100) + OFFSET_VISUEL.A);
+        const donneesC = snapshots.map(s => (s.groupe.moyenneC / 100) + OFFSET_VISUEL.C);
+        const donneesP = snapshots.map(s => s.groupe.moyenneP !== null ? (s.groupe.moyenneP / 100) + OFFSET_VISUEL.P : null);
+        const donneesE = snapshots.map(s => s.groupe.moyenneE !== null ? s.groupe.moyenneE + OFFSET_VISUEL.E : null);
 
         // Obtenir le canvas
         const canvas = document.getElementById(canvasId);
@@ -460,7 +480,11 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         callbacks: {
                             label: function(context) {
                                 const label = context.dataset.label || '';
-                                const value = (context.parsed.y * 100).toFixed(0);
+                                // ✨ Soustraire l'offset visuel pour afficher la valeur réelle
+                                const offsets = [0.000, 0.005, 0.010, 0.015]; // A, C, P, E
+                                const offset = offsets[context.datasetIndex] || 0;
+                                const valeurReelle = context.parsed.y - offset;
+                                const value = (valeurReelle * 100).toFixed(0);
                                 return `${label}: ${value}%`;
                             }
                         }
