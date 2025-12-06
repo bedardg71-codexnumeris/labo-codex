@@ -182,20 +182,19 @@ function creerGraphiqueIndividuel(canvasId, da) {
 
         // Calculer min/max pour ajuster l'échelle Y
         // ✅ CORRECTION (Beta 93) : Filtrer les valeurs null avant calcul min/max
+        // ✨ AMÉLIORATION (Beta 93) : Échelle fixe 60-100% pour meilleure lisibilité
         const toutesValeurs = [...donneesA, ...donneesC, ...donneesP, ...donneesE].filter(v => v !== null);
         const valeurMin = Math.min(...toutesValeurs);
         const valeurMax = Math.max(...toutesValeurs);
 
-        // Ajouter une marge de 10% pour la lisibilité
-        const marge = (valeurMax - valeurMin) * 0.1 || 0.1; // Au moins 0.1 si toutes les valeurs sont identiques
-        let yMin = Math.max(0, valeurMin - marge);
-        let yMax = Math.min(1, valeurMax + marge);
+        // Échelle fixe pour contexte pédagogique (60-100%)
+        // La plupart des étudiants se situent dans cette plage
+        let yMin = 0.60;  // 60%
+        let yMax = 1.00;  // 100%
 
-        // S'assurer qu'il y a une plage minimale de 0.2
-        if (yMax - yMin < 0.2) {
-            const centre = (yMax + yMin) / 2;
-            yMin = Math.max(0, centre - 0.1);
-            yMax = Math.min(1, centre + 0.1);
+        // Si des valeurs descendent sous 60%, ajuster yMin dynamiquement
+        if (valeurMin < 0.60) {
+            yMin = Math.max(0, Math.floor(valeurMin * 10) / 10); // Arrondir vers le bas (ex: 0.53 → 0.50)
         }
 
         // Obtenir le canvas
@@ -315,7 +314,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         max: yMax,
                         title: {
                             display: true,
-                            text: 'Indices (0.00 à 1.00)'
+                            text: 'Indices (0.60 à 1.00)'  // ✨ Échelle optimisée pour contexte pédagogique
                         },
                         ticks: {
                             callback: function(value) {
@@ -501,11 +500,11 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         }
                     },
                     y: {
-                        min: 0,
-                        max: 1,
+                        min: 0.60,  // ✨ AMÉLIORATION (Beta 93) : Échelle 60-100% pour meilleure lisibilité
+                        max: 1.00,
                         title: {
                             display: true,
-                            text: 'Indices (0.00 à 1.00)'
+                            text: 'Indices (0.60 à 1.00)'
                         },
                         ticks: {
                             callback: function(value) {
