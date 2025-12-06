@@ -70,6 +70,30 @@
      * ✅ Graphiques affichent vraies courbes de progression A-C-P-E
    - **Impact** : Reconstruction historique complète maintenant fonctionnelle
 
+3. **Correction CRITIQUE : P=null avant première évaluation (Beta 93)**
+   - **Problème** : Graphiques affichaient P=100% avant la première évaluation
+   - **Impact visuel** : Fausse "chute brutale" (ex: Émile F. 100%→76%)
+   - **Réalité** : Première évaluation était à 76%, aucune chute
+   - **Cause racine** : `calculerIndicesHistoriques()` retournait 100 par défaut
+   - **Solution appliquée** :
+     * `snapshots.js` ligne 143 : `indiceP = null` au lieu de `100`
+     * `snapshots.js` lignes 148-158 : `indiceE = null` si `indiceP = null`
+     * `snapshots.js` lignes 237-332 : Calcul moyennes groupe avec gestion null
+       - Compteurs `nbAvecP` et `nbAvecE` pour moyennes correctes
+       - `moyenneP = null` si aucun étudiant n'a d'évaluation
+     * `graphiques-progression.js` ligne 172 : Conversion avec vérification null
+     * `graphiques-progression.js` ligne 177 : Filtrage null avant min/max
+     * `graphiques-progression.js` ligne 385 : Moyennes groupe avec null
+   - **Fichiers modifiés** :
+     * `js/snapshots.js` (v=2025120604)
+     * `js/graphiques-progression.js` (v=2025120604)
+     * `index 93.html` (cache busters mis à jour)
+   - **Résultat attendu** :
+     * Graphiques commencent à la première évaluation réelle
+     * Chart.js ignore automatiquement les valeurs null
+     * Plus de fausse impression de "chute" de performance
+   - **Impact** : Visualisation honnête de la progression étudiante
+
 ### ⚠️ Problèmes identifiés NON résolus
 
 1. **Reconstruction en boucle infinie**
