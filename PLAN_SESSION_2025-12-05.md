@@ -31,20 +31,41 @@
    - Solution : Script de déduplication (garde le plus récent par semaine)
    - Résultat : 120 → 15 snapshots
 
+---
+
+## 📋 Session du 6 décembre 2025
+
+### ✅ Travaux complétés
+
+1. **Correction CRITIQUE : Snapshots - Indices undefined (Beta 93)**
+   - **Problème** : Les snapshots affichaient P=100% au lieu des vraies notes
+   - **Cause racine** : Cache coherency issue
+     * IndexedDB contient 194 évaluations (données correctes)
+     * localStorage limité à ~5-10 MB → QuotaExceededError
+     * `capturerSnapshotHebdomadaire()` utilisait `obtenirDonneesSelonMode()` qui lit localStorage
+     * Résultat : Données incomplètes/null → calculs incorrects (P=100% par défaut)
+   - **Solution appliquée** :
+     * `capturerSnapshotHebdomadaire()` → async, charge depuis IndexedDB par défaut
+     * `verifierEtCapturerSnapshotHebdomadaire()` → async avec await
+     * `capturerSnapshotManuel()` → async avec await
+     * Lignes 236-245 de `snapshots.js` : `await db.get('evaluationsEtudiants')`
+   - **Fichiers modifiés** :
+     * `js/snapshots.js` (v=2025120601)
+     * `index 93.html` (cache buster mis à jour)
+   - **Test validé** :
+     * AVANT : P=100 (cache localStorage incomplet)
+     * APRÈS : P=69 pour Maïka (données correctes depuis IndexedDB)
+     * Console : `✓ 194 évaluations chargées depuis IndexedDB`
+   - **Impact** : Graphiques progression temporelle maintenant fonctionnels avec données réelles
+
 ### ⚠️ Problèmes identifiés NON résolus
 
-1. **Snapshots - Indices undefined**
-   - Symptôme : Les 15 snapshots ont `indiceA`, `indiceC`, `indiceP` = undefined
-   - Cause : Reconstruction crée structure mais ne calcule pas les indices
-   - Impact : Graphiques progression temporelle non fonctionnels
-   - **Statut : En attente** (non prioritaire pour l'utilisateur)
-
-2. **Reconstruction en boucle infinie**
+1. **Reconstruction en boucle infinie**
    - Symptôme : Reconstruction continue après semaine 15, crée duplicatas
    - Impact : 9680+ messages console, snapshots multiples
    - **Statut : En attente** (nécessite debug approfondi de `snapshots.js`)
 
-3. **Testeuse - Interface ne charge pas correctement**
+2. **Testeuse - Interface ne charge pas correctement**
    - Symptôme : Voit page minimale ("Aucun cours", boutons visibles mais Primo absent)
    - Contexte : Beta 92, nouvel utilisateur
    - **Statut : À investiguer** (besoin info navigateur/OS, console errors)

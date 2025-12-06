@@ -93,6 +93,9 @@ let _cacheEvaluations = null;
  * @returns {Object} - {A: number, C: number, P: number, E: number}
  */
 function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null) {
+    // 🐛 DEBUG
+    console.log(`[calculerIndicesHistoriques] DA: ${da}, Date: ${dateLimite}, Cache: ${evaluationsCache ? evaluationsCache.length : 'null'}`);
+
     // Assiduité (A) : Utilise la nouvelle fonction de filtrage temporel
     let indiceA = 100;
     if (typeof calculerAssiduiteJusquADate === 'function') {
@@ -107,6 +110,7 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null) {
     // ⚡ OPTIMISATION : Utiliser le cache si fourni
     const evaluations = evaluationsCache || obtenirDonneesSelonMode('evaluationsEtudiants') || [];
     const evaluationsEtudiant = evaluations.filter(e => e.da === da);
+    console.log(`[calculerIndicesHistoriques] Évaluations étudiant: ${evaluationsEtudiant.length}`);
 
     // Filtrer seulement les évaluations JUSQU'À la date limite
     const evaluationsFiltrees = evaluationsEtudiant.filter(e => {
@@ -145,12 +149,17 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null) {
     const E_brut = A_decimal * C_decimal * P_decimal;
     const E = Math.pow(E_brut, 1/3); // Racine cubique
 
-    return {
+    const resultat = {
         A: indiceA,
         C: indiceC,
         P: indiceP,
         E: parseFloat(E.toFixed(3))
     };
+
+    // 🐛 DEBUG
+    console.log(`[calculerIndicesHistoriques] RETOUR: A=${resultat.A}, C=${resultat.C}, P=${resultat.P}, E=${resultat.E}`);
+
+    return resultat;
 }
 
 /* ===============================
@@ -161,7 +170,7 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null) {
  * Vérifie si un nouveau snapshot hebdomadaire est nécessaire
  * Appelé automatiquement au chargement de l'application
  */
-function verifierEtCapturerSnapshotHebdomadaire() {
+async function verifierEtCapturerSnapshotHebdomadaire() {
     const snapshots = db.getSync('snapshots', null);
     if (!snapshots) return;
 
@@ -181,7 +190,7 @@ function verifierEtCapturerSnapshotHebdomadaire() {
 
     if (!snapshotExiste) {
         console.log(`📸 Capture snapshot hebdomadaire semaine ${numSemaineActuelle}...`);
-        capturerSnapshotHebdomadaire(numSemaineActuelle);
+        await capturerSnapshotHebdomadaire(numSemaineActuelle);
     }
 }
 
@@ -191,7 +200,7 @@ function verifierEtCapturerSnapshotHebdomadaire() {
  * @param {Array} evaluationsCacheParam - Cache optionnel des évaluations (pour éviter QuotaExceededError)
  * @returns {Object|null} - Snapshot créé ou null si erreur
  */
-function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = null) {
+async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = null) {
     try {
         // Récupérer la date de fin de semaine depuis le calendrier
         const calendrier = obtenirCalendrierComplet();
@@ -219,16 +228,18 @@ function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = null) 
         let sommeA = 0, sommeC = 0, sommeP = 0, sommeE = 0;
         const valeursA = [], valeursC = [], valeursP = [];
 
-        // ⚡ OPTIMISATION : Utiliser le cache fourni ou charger depuis localStorage
-        // Note: Le cache fourni vient d'IndexedDB (évite QuotaExceededError)
+        // ⚡ CORRECTION (Beta 93) : Charger depuis IndexedDB par défaut (évite QuotaExceededError localStorage)
+        // Note: Le cache fourni vient d'IndexedDB lors de la reconstruction
         let evaluationsCache = evaluationsCacheParam;
 
         if (!evaluationsCache) {
-            // Fallback : charger depuis localStorage si pas de cache fourni
+            // Charger depuis IndexedDB au lieu de localStorage (194 évaluations > quota localStorage)
             try {
-                evaluationsCache = obtenirDonneesSelonMode('evaluationsEtudiants') || [];
+                console.log('⚡ Chargement évaluations depuis IndexedDB...');
+                evaluationsCache = await db.get('evaluationsEtudiants');
+                console.log(`✓ ${evaluationsCache ? evaluationsCache.length : 0} évaluations chargées depuis IndexedDB`);
             } catch (e) {
-                console.warn('Impossible de charger depuis localStorage:', e.message);
+                console.warn('Impossible de charger depuis IndexedDB:', e.message);
                 evaluationsCache = [];
             }
         }
@@ -651,7 +662,7 @@ function afficherStatutSnapshots() {
 /**
  * Capture manuelle (déclenchée par bouton UI)
  */
-function capturerSnapshotManuel() {
+async function capturerSnapshotManuel() {
     try {
         const semaine = obtenirNumeroSemaineActuelle();
         if (!semaine) {
@@ -659,7 +670,7 @@ function capturerSnapshotManuel() {
             return;
         }
 
-        capturerSnapshotHebdomadaire(semaine);
+        await capturerSnapshotHebdomadaire(semaine);
 
         alert(`Capture manuelle réussie pour la semaine ${semaine}!`);
         afficherStatutSnapshots();
