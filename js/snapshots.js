@@ -360,7 +360,27 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
         };
 
         // Sauvegarder (utilise la même structure 'hebdomadaires' pour rétrocompatibilité)
-        const snapshots = db.getSync('snapshots');
+        const snapshots = db.getSync('snapshots', {
+            hebdomadaires: [],
+            interventions: [],
+            metadata: {
+                version: '1.0.0',
+                dateCreation: new Date().toISOString(),
+                dernierSnapshotHebdo: null,
+                dernierSnapshotIntervention: null
+            }
+        });
+
+        // Vérifier que la structure metadata existe (compatibilité anciennes versions)
+        if (!snapshots.metadata) {
+            snapshots.metadata = {
+                version: '1.0.0',
+                dateCreation: new Date().toISOString(),
+                dernierSnapshotHebdo: null,
+                dernierSnapshotIntervention: null
+            };
+        }
+
         snapshots.hebdomadaires.push(snapshot);
         snapshots.metadata.dernierSnapshotHebdo = snapshot.timestamp;
         db.setSync('snapshots', snapshots);
