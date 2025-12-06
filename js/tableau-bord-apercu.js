@@ -465,6 +465,13 @@ function chargerTableauBordApercu() {
             afficherNiveauxRaI(etudiantsAvecIndices);
         }
 
+        // 🆕 BETA 93: Afficher le graphique d'évolution temporelle (moyennes groupe)
+        if (typeof creerGraphiqueGroupeMoyennes === 'function') {
+            creerGraphiqueGroupeMoyennes('graphique-groupe-moyennes');
+        } else {
+            console.warn('⚠️ creerGraphiqueGroupeMoyennes non disponible - Module graphiques-progression.js non chargé ?');
+        }
+
         console.log('✅ Tableau de bord chargé (aperçu anonyme)');
 
         // 🆕 BETA 91: Initialiser les événements toggle après génération du HTML

@@ -2861,6 +2861,25 @@
                         <!-- Barres de distribution avec nuages de points pour A, C, P, E -->
                     </div>
 
+                    <!-- ========== GRAPHIQUE ÉVOLUTION TEMPORELLE ========== -->
+                    <div class="carte" style="margin-top: 2rem;">
+                        <h3 class="carte-titre-bleu">
+                            📈 Évolution temporelle des indices (moyennes de groupe)
+                        </h3>
+                        <p class="text-muted" style="margin-bottom: 1.5rem;">
+                            Progression hebdomadaire des indices A-C-P-E depuis le début de la session
+                        </p>
+
+                        <div style="position: relative; height: 400px; width: 100%;">
+                            <canvas id="graphique-groupe-moyennes"></canvas>
+                        </div>
+
+                        <p class="text-muted" style="margin-top: 1rem; font-size: 0.85rem; font-style: italic;">
+                            💡 Les courbes sont légèrement décalées verticalement (+0.5-1.5%) pour éviter la superposition.
+                            Les valeurs affichées dans les infobulle sont les valeurs réelles (sans décalage).
+                        </p>
+                    </div>
+
                 </div>
                 <!-- FIN sous-section tableau-bord-apercu -->
 
@@ -10112,7 +10131,7 @@ Exemple :
     <script src="js/saisie-presences.js?v=2025120405"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=2025120301"></script>
+    <script src="js/tableau-bord-apercu.js?v=2025120606"></script>
     <script src="js/profil-etudiant.js?v=2025120404"></script>
     <script src="js/presences-apercu.js?v=2025111029"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>

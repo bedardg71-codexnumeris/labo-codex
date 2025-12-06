@@ -114,6 +114,28 @@
      * Tooltips affichent les vraies valeurs (pas l'offset)
    - **Impact** : Meilleure lisibilité des graphiques de progression
 
+5. **Ajout interface : Graphique évolution temporelle dans Aperçu (Beta 93)**
+   - **Objectif** : Afficher l'évolution des moyennes de groupe dans la page Aperçu
+   - **Emplacement** : Sous les barres de distribution (snapshot actuel + évolution)
+   - **Implémentation** :
+     * Nouvelle carte avec canvas en bas de la section Aperçu
+     * Canvas ID: `graphique-groupe-moyennes` (400px hauteur)
+     * Appel automatique `creerGraphiqueGroupeMoyennes()` au chargement
+     * Note explicative sur l'offset visuel des courbes
+   - **Fichiers modifiés** :
+     * `index 93.html` (lignes 2864-2881)
+       - Nouvelle carte "Évolution temporelle des indices"
+       - Canvas responsive avec conteneur positionné
+     * `js/tableau-bord-apercu.js` (v=2025120606, lignes 468-473)
+       - Appel graphique après affichage RàI/Patterns
+       - Gestion erreur si module graphiques non chargé
+     * `index 93.html` (cache buster mis à jour)
+   - **Résultat** :
+     * Graphique moyennes groupe visible dans Aperçu
+     * Vue complète : distribution actuelle + évolution temporelle
+     * Chargement automatique avec les autres métriques
+   - **Impact** : Vision longitudinale accessible dès la page Aperçu
+
 ### ⚠️ Problèmes identifiés NON résolus
 
 1. **Reconstruction en boucle infinie**
