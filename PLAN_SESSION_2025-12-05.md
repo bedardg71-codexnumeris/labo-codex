@@ -58,6 +58,18 @@
      * Console : `✓ 194 évaluations chargées depuis IndexedDB`
    - **Impact** : Graphiques progression temporelle maintenant fonctionnels avec données réelles
 
+2. **Correction CRITIQUE : Reconstruction snapshots - Boucle async (Beta 93)**
+   - **Problème** : `reconstruireSnapshotsHistoriques()` plantait avec TypeError
+   - **Cause** : `forEach()` ne supporte pas async/await, fonction appelée sans `await`
+   - **Solution** : `forEach()` → boucle `for` avec `await capturerSnapshotHebdomadaire()`
+   - **Fichiers modifiés** :
+     * `js/snapshots.js` (v=2025120602) - Lignes 507-522
+     * `index 93.html` (cache buster mis à jour)
+   - **Test validé** :
+     * ✅ 15 snapshots reconstruits avec succès, 0 échecs
+     * ✅ Graphiques affichent vraies courbes de progression A-C-P-E
+   - **Impact** : Reconstruction historique complète maintenant fonctionnelle
+
 ### ⚠️ Problèmes identifiés NON résolus
 
 1. **Reconstruction en boucle infinie**
