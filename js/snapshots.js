@@ -90,17 +90,26 @@ let _cacheEvaluations = null;
  * @param {string} da - Numéro DA de l'étudiant
  * @param {string} dateLimite - Date limite au format 'YYYY-MM-DD' (incluse)
  * @param {Array} evaluationsCache - Cache optionnel des évaluations (pour performance)
+ * @param {boolean} usePonctualA - Si true, utilise assiduité ponctuelle de la séance au lieu de cumulative
  * @returns {Object} - {A: number, C: number, P: number, E: number}
  */
-function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null) {
+function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, usePonctualA = false) {
     // 🐛 DEBUG
-    console.log(`[calculerIndicesHistoriques] DA: ${da}, Date: ${dateLimite}, Cache: ${evaluationsCache ? evaluationsCache.length : 'null'}`);
+    console.log(`[calculerIndicesHistoriques] DA: ${da}, Date: ${dateLimite}, Cache: ${evaluationsCache ? evaluationsCache.length : 'null'}, Ponctuel: ${usePonctualA}`);
 
-    // Assiduité (A) : Utilise la nouvelle fonction de filtrage temporel
+    // Assiduité (A) : Ponctuelle (séance uniquement) OU cumulative (depuis le début)
     let indiceA = 100;
-    if (typeof calculerAssiduiteJusquADate === 'function') {
+
+    if (usePonctualA && typeof calculerAssiduiteSeance === 'function') {
+        // ✨ NOUVEAU (Beta 93) : Assiduité PONCTUELLE pour cette séance uniquement
+        const resultA = calculerAssiduiteSeance(da, dateLimite);
+        indiceA = Math.round(resultA.indice * 100);
+        console.log(`[calculerIndicesHistoriques] A ponctuel (séance ${dateLimite}): ${indiceA}%`);
+    } else if (typeof calculerAssiduiteJusquADate === 'function') {
+        // Assiduité CUMULATIVE jusqu'à cette date
         const resultA = calculerAssiduiteJusquADate(da, dateLimite);
         indiceA = Math.round(resultA.indice * 100);
+        console.log(`[calculerIndicesHistoriques] A cumulatif (jusqu'à ${dateLimite}): ${indiceA}%`);
     }
 
     // Complétion (C) et Performance (P) : Filtrer les évaluations jusqu'à dateLimite
@@ -215,47 +224,39 @@ async function verifierEtCapturerSnapshotHebdomadaire() {
 }
 
 /**
- * Capture un snapshot hebdomadaire pour une semaine donnée
- * @param {number} numSemaine - Numéro de la semaine à capturer
+ * ✨ REFONTE (Beta 93) : Capture un snapshot pour UNE séance spécifique
+ * @param {string} dateSeance - Date de la séance au format 'YYYY-MM-DD'
  * @param {Array} evaluationsCacheParam - Cache optionnel des évaluations (pour éviter QuotaExceededError)
  * @returns {Object|null} - Snapshot créé ou null si erreur
  */
-async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = null) {
+async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) {
     try {
-        // Récupérer la date de fin de semaine depuis le calendrier
+        // Vérifier que la date est valide
         const calendrier = obtenirCalendrierComplet();
+        const infoJour = calendrier[dateSeance];
 
-        // ✨ CORRECTION (Beta 93) : Les dates sont les CLÉS du calendrier, pas une propriété
-        // Filtrer les dates (clés) dont l'objet correspond à la semaine demandée
-        const datesSemaine = Object.keys(calendrier).filter(date => {
-            const jour = calendrier[date];
-            return jour.numeroSemaine === numSemaine && jour.statut === 'cours';
-        });
-
-        if (datesSemaine.length === 0) {
-            console.warn(`⚠️ Aucun jour de cours trouvé pour semaine ${numSemaine}`);
+        if (!infoJour || (infoJour.statut !== 'cours' && infoJour.statut !== 'reprise')) {
+            console.warn(`⚠️ Date ${dateSeance} n'est pas un jour de cours`);
             return null;
         }
 
-        // Trier les dates et prendre première et dernière
-        datesSemaine.sort();
-        const dateDebut = datesSemaine[0];
-        const dateFin = datesSemaine[datesSemaine.length - 1];
+        const numeroSemaine = infoJour.numeroSemaine;
 
-        // Calculer indices pour chaque étudiant JUSQU'À LA DATE DE FIN DE SEMAINE
+        console.log(`📸 Capture snapshot pour séance du ${dateSeance} (semaine ${numeroSemaine})`);
+
+        // Calculer indices pour chaque étudiant
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const snapshotsEtudiants = [];
-        // ✅ CORRECTION (Beta 93) : Compteurs séparés pour gérer les valeurs null
-        let sommeA = 0, sommeC = 0, sommeP = 0, sommeE = 0;
-        let nbAvecC = 0, nbAvecP = 0, nbAvecE = 0; // Compter étudiants avec valeurs non-null
+
+        // ✅ Compteurs séparés pour gérer les valeurs null
+        let sommeA_ponctuel = 0, sommeC_cumul = 0, sommeP_cumul = 0, sommeE = 0;
+        let nbAvecC = 0, nbAvecP = 0, nbAvecE = 0;
         const valeursA = [], valeursC = [], valeursP = [];
 
-        // ⚡ CORRECTION (Beta 93) : Charger depuis IndexedDB par défaut (évite QuotaExceededError localStorage)
-        // Note: Le cache fourni vient d'IndexedDB lors de la reconstruction
+        // ⚡ Charger depuis IndexedDB par défaut (évite QuotaExceededError localStorage)
         let evaluationsCache = evaluationsCacheParam;
 
         if (!evaluationsCache) {
-            // Charger depuis IndexedDB au lieu de localStorage (194 évaluations > quota localStorage)
             try {
                 console.log('⚡ Chargement évaluations depuis IndexedDB...');
                 evaluationsCache = await db.get('evaluationsEtudiants');
@@ -269,8 +270,9 @@ async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = 
         etudiants.forEach(etudiant => {
             const da = etudiant.da;
 
-            // ✨ NOUVEAU (Beta 93) : Calcul historique avec filtrage temporel + cache
-            const indices = calculerIndicesHistoriques(da, dateFin, evaluationsCache);
+            // ✨ NOUVEAU (Beta 93) : A ponctuel, C et P cumulatifs
+            // usePonctualA = true pour obtenir l'assiduité de CETTE séance uniquement
+            const indices = calculerIndicesHistoriques(da, dateSeance, evaluationsCache, true);
 
             // Obtenir pattern et niveau RàI (si module disponible)
             let pattern = 'Non calculé';
@@ -299,24 +301,24 @@ async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = 
             snapshotsEtudiants.push({
                 da: da,
                 nom: `${etudiant.prenom} ${etudiant.nom}`,
-                A: indices.A,
-                C: indices.C,
-                P: indices.P,
-                E: indices.E, // ✅ Ne plus parser, déjà géré dans calculerIndicesHistoriques
+                A: indices.A, // ✨ A ponctuel (cette séance uniquement)
+                C: indices.C, // C cumulatif
+                P: indices.P, // P cumulatif
+                E: indices.E, // E calculé avec A ponctuel × C cumul × P cumul
                 pattern: pattern,
                 rai: rai
             });
 
-            // ✅ CORRECTION (Beta 93) : Accumuler pour moyennes (gérer null)
-            sommeA += indices.A;
+            // Accumuler pour moyennes (gérer null)
+            sommeA_ponctuel += indices.A;
 
             // C, P et E peuvent être null si aucune évaluation
             if (indices.C !== null) {
-                sommeC += indices.C;
+                sommeC_cumul += indices.C;
                 nbAvecC++;
             }
             if (indices.P !== null) {
-                sommeP += indices.P;
+                sommeP_cumul += indices.P;
                 nbAvecP++;
             }
             if (indices.E !== null) {
@@ -335,12 +337,11 @@ async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = 
 
         const nbEtudiants = etudiants.length;
 
-        // ✅ CORRECTION (Beta 93) : Calculer statistiques groupe (gérer null)
+        // Calculer statistiques groupe (gérer null)
         const groupe = {
-            moyenneA: Math.round(sommeA / nbEtudiants),
-            // C, P et E = null si aucun étudiant n'a de valeur (pas encore d'évaluation)
-            moyenneC: nbAvecC > 0 ? Math.round(sommeC / nbAvecC) : null,
-            moyenneP: nbAvecP > 0 ? Math.round(sommeP / nbAvecP) : null,
+            moyenneA: Math.round(sommeA_ponctuel / nbEtudiants), // Moyenne A ponctuel
+            moyenneC: nbAvecC > 0 ? Math.round(sommeC_cumul / nbAvecC) : null,
+            moyenneP: nbAvecP > 0 ? Math.round(sommeP_cumul / nbAvecP) : null,
             moyenneE: nbAvecE > 0 ? parseFloat((sommeE / nbAvecE).toFixed(2)) : null,
             nbEtudiants: nbEtudiants,
             dispersionA: calculerEcartType(valeursA),
@@ -348,30 +349,56 @@ async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = 
             dispersionP: valeursP.length > 0 ? calculerEcartType(valeursP) : null
         };
 
-        // Créer snapshot
+        // Créer snapshot (ID basé sur la date de la séance)
         const snapshot = {
-            id: `2025-S${String(numSemaine).padStart(2, '0')}`,
-            numSemaine: numSemaine,
-            dateDebut: dateDebut,
-            dateFin: dateFin,
+            id: `SEANCE-${dateSeance}`,
+            dateSeance: dateSeance,
+            numeroSemaine: numeroSemaine, // Conservé pour référence
             timestamp: new Date().toISOString(),
             etudiants: snapshotsEtudiants,
             groupe: groupe
         };
 
-        // Sauvegarder
+        // Sauvegarder (utilise la même structure 'hebdomadaires' pour rétrocompatibilité)
         const snapshots = db.getSync('snapshots');
         snapshots.hebdomadaires.push(snapshot);
         snapshots.metadata.dernierSnapshotHebdo = snapshot.timestamp;
         db.setSync('snapshots', snapshots);
 
-        console.log(`✅ Snapshot semaine ${numSemaine} capturé (${nbEtudiants} étudiants)`);
+        console.log(`✅ Snapshot séance ${dateSeance} capturé (${nbEtudiants} étudiants)`);
         return snapshot;
 
     } catch (error) {
-        console.error('❌ Erreur capture snapshot hebdomadaire:', error);
+        console.error('❌ Erreur capture snapshot séance:', error);
         return null;
     }
+}
+
+/**
+ * [LEGACY] Capture un snapshot hebdomadaire pour une semaine donnée
+ * ⚠️ OBSOLÈTE : Utilisez capturerSnapshotSeance() à la place
+ * Conservé pour compatibilité avec ancien code
+ */
+async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = null) {
+    console.warn('⚠️ capturerSnapshotHebdomadaire() est obsolète. Utilisez capturerSnapshotSeance().');
+
+    // Trouver les dates de cette semaine
+    const calendrier = obtenirCalendrierComplet();
+    const datesSemaine = Object.keys(calendrier).filter(date => {
+        const jour = calendrier[date];
+        return jour.numeroSemaine === numSemaine && jour.statut === 'cours';
+    }).sort();
+
+    if (datesSemaine.length === 0) return null;
+
+    // Capturer un snapshot pour chaque date de cours de cette semaine
+    const snapshots = [];
+    for (const date of datesSemaine) {
+        const snapshot = await capturerSnapshotSeance(date, evaluationsCacheParam);
+        if (snapshot) snapshots.push(snapshot);
+    }
+
+    return snapshots.length > 0 ? snapshots[snapshots.length - 1] : null;
 }
 
 /**
@@ -492,19 +519,20 @@ function mettreAJourSnapshotIntervention(interventionId) {
    =============================== */
 
 /**
- * Reconstruit tous les snapshots hebdomadaires depuis le début du trimestre
+ * ✨ REFONTE (Beta 93) : Reconstruit tous les snapshots PAR SÉANCE depuis le début du trimestre
  * ATTENTION : Opération coûteuse, à n'exécuter qu'une seule fois au début
  *
  * @returns {Object} - { succes: boolean, nbSnapshots: number, message: string }
  */
 async function reconstruireSnapshotsHistoriques() {
-    console.log('🔄 Début reconstruction snapshots historiques...');
+    console.log('🔄 Début reconstruction snapshots historiques (PAR SÉANCE)...');
 
     try {
-        // ⚡ NOUVEAU : Charger les évaluations depuis IndexedDB (évite QuotaExceededError)
+        // ⚡ Charger les évaluations depuis IndexedDB (évite QuotaExceededError)
         console.log('⚡ Chargement évaluations depuis IndexedDB...');
         const evaluationsCache = await db.get('evaluationsEtudiants');
         console.log(`✓ ${evaluationsCache ? evaluationsCache.length : 0} évaluations chargées`);
+
         const calendrier = obtenirCalendrierComplet();
         if (!calendrier) {
             console.error('❌ Calendrier non disponible');
@@ -513,59 +541,59 @@ async function reconstruireSnapshotsHistoriques() {
 
         console.log(`✓ Calendrier chargé: ${Object.keys(calendrier).length} jours`);
 
-        // Extraire toutes les semaines du calendrier
-        const semaines = new Set();
-        Object.values(calendrier).forEach(jour => {
-            if (jour.statut === 'cours' && jour.numeroSemaine) {
-                semaines.add(jour.numeroSemaine);
-            }
-        });
+        // ✨ NOUVEAU (Beta 93) : Extraire toutes les DATES de cours (pas les semaines)
+        const datesCours = Object.keys(calendrier).filter(date => {
+            const jour = calendrier[date];
+            return (jour.statut === 'cours' || jour.statut === 'reprise');
+        }).sort();
 
-        const semainesSortees = Array.from(semaines).sort((a, b) => a - b);
-        console.log(`✓ Semaines détectées: ${semainesSortees.join(', ')}`);
+        console.log(`✓ Dates de cours détectées: ${datesCours.length}`);
+        if (datesCours.length > 0) {
+            console.log(`  Première séance: ${datesCours[0]}`);
+            console.log(`  Dernière séance: ${datesCours[datesCours.length - 1]}`);
+        }
 
-        if (semainesSortees.length === 0) {
-            console.warn('⚠️ Aucune semaine de cours trouvée dans le calendrier');
+        if (datesCours.length === 0) {
+            console.warn('⚠️ Aucune date de cours trouvée dans le calendrier');
             return {
                 succes: false,
                 nbSnapshots: 0,
-                message: 'Aucune semaine de cours trouvée dans le calendrier. Vérifiez la configuration du trimestre.'
+                message: 'Aucune date de cours trouvée dans le calendrier. Vérifiez la configuration du trimestre.'
             };
         }
 
         // Effacer snapshots existants (reconstruction complète)
         const snapshots = db.getSync('snapshots', { hebdomadaires: [], interventions: [], metadata: {} });
         snapshots.hebdomadaires = [];
-        db.setSync('snapshots', snapshots); // ⚡ CORRECTION : Sauvegarder le vidage AVANT la boucle
+        db.setSync('snapshots', snapshots);
         console.log('✓ Snapshots existants effacés');
 
-        // Capturer snapshot pour chaque semaine
+        // ✨ NOUVEAU : Capturer snapshot pour CHAQUE SÉANCE
         let nbSnapshots = 0;
         let nbEchecs = 0;
-        const nbSemainesTotal = semainesSortees.length;
+        const nbSeancesTotal = datesCours.length;
 
-        // ⚡ CORRECTION (Beta 93) : Utiliser for...of au lieu de forEach pour supporter async/await
-        for (let index = 0; index < semainesSortees.length; index++) {
-            const numSemaine = semainesSortees[index];
-            const progression = Math.round(((index + 1) / nbSemainesTotal) * 100);
-            console.log(`📸 [${index + 1}/${nbSemainesTotal}] Semaine ${numSemaine} (${progression}%)...`);
+        for (let index = 0; index < datesCours.length; index++) {
+            const dateSeance = datesCours[index];
+            const progression = Math.round(((index + 1) / nbSeancesTotal) * 100);
+            console.log(`📸 [${index + 1}/${nbSeancesTotal}] Séance ${dateSeance} (${progression}%)...`);
 
-            // ⚡ NOUVEAU : Passer le cache d'évaluations IndexedDB + AWAIT car fonction async
-            const snapshot = await capturerSnapshotHebdomadaire(numSemaine, evaluationsCache);
+            // Capturer snapshot pour cette séance
+            const snapshot = await capturerSnapshotSeance(dateSeance, evaluationsCache);
             if (snapshot) {
                 nbSnapshots++;
-                console.log(`  ✅ Semaine ${numSemaine} capturée (${snapshot.etudiants.length} étudiants)`);
+                console.log(`  ✅ Séance ${dateSeance} capturée (${snapshot.etudiants.length} étudiants)`);
             } else {
                 nbEchecs++;
-                console.warn(`  ⚠️ Semaine ${numSemaine} échec`);
+                console.warn(`  ⚠️ Séance ${dateSeance} échec`);
             }
         }
 
-        console.log(`✅ Reconstruction terminée : ${nbSnapshots} captures créées, ${nbEchecs} échecs`);
+        console.log(`✅ Reconstruction terminée : ${nbSnapshots} captures par séance créées, ${nbEchecs} échecs`);
         return {
             succes: true,
             nbSnapshots: nbSnapshots,
-            message: `${nbSnapshots} captures hebdomadaires reconstruites avec succès${nbEchecs > 0 ? ` (${nbEchecs} échecs)` : ''}`
+            message: `${nbSnapshots} captures par séance reconstruites avec succès${nbEchecs > 0 ? ` (${nbEchecs} échecs)` : ''}`
         };
 
     } catch (error) {
