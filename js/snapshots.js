@@ -120,8 +120,9 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null) {
 
     // Calculer C : Proportion de travaux remis (parmi ceux attendus jusqu'à maintenant)
     if (evaluationsFiltrees.length === 0) {
-        // Aucune évaluation attendue = 100% (début de session)
-        indiceC = 100;
+        // ✅ CORRECTION (Beta 93) : null au lieu de 100% quand aucune évaluation
+        // Cohérence avec P: les graphiques ne doivent afficher C qu'à partir de la première évaluation
+        indiceC = null;
     } else {
         const nbTotal = evaluationsFiltrees.length;
         const nbRemis = evaluationsFiltrees.filter(e =>
@@ -144,9 +145,9 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null) {
     }
 
     // Engagement (E) : Moyenne géométrique de A, C, P
-    // ✅ CORRECTION (Beta 93) : Si P est null, E est aussi null
+    // ✅ CORRECTION (Beta 93) : Si C ou P sont null, E est aussi null
     let indiceE;
-    if (indiceP === null) {
+    if (indiceC === null || indiceP === null) {
         indiceE = null;
     } else {
         const A_decimal = indiceA / 100;
@@ -235,7 +236,7 @@ async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = 
         const snapshotsEtudiants = [];
         // ✅ CORRECTION (Beta 93) : Compteurs séparés pour gérer les valeurs null
         let sommeA = 0, sommeC = 0, sommeP = 0, sommeE = 0;
-        let nbAvecP = 0, nbAvecE = 0; // Compter étudiants avec valeurs non-null
+        let nbAvecC = 0, nbAvecP = 0, nbAvecE = 0; // Compter étudiants avec valeurs non-null
         const valeursA = [], valeursC = [], valeursP = [];
 
         // ⚡ CORRECTION (Beta 93) : Charger depuis IndexedDB par défaut (évite QuotaExceededError localStorage)
@@ -297,9 +298,12 @@ async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = 
 
             // ✅ CORRECTION (Beta 93) : Accumuler pour moyennes (gérer null)
             sommeA += indices.A;
-            sommeC += indices.C;
 
-            // P et E peuvent être null si aucune évaluation
+            // C, P et E peuvent être null si aucune évaluation
+            if (indices.C !== null) {
+                sommeC += indices.C;
+                nbAvecC++;
+            }
             if (indices.P !== null) {
                 sommeP += indices.P;
                 nbAvecP++;
@@ -310,7 +314,9 @@ async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = 
             }
 
             valeursA.push(indices.A);
-            valeursC.push(indices.C);
+            if (indices.C !== null) {
+                valeursC.push(indices.C);
+            }
             if (indices.P !== null) {
                 valeursP.push(indices.P);
             }
@@ -321,13 +327,13 @@ async function capturerSnapshotHebdomadaire(numSemaine, evaluationsCacheParam = 
         // ✅ CORRECTION (Beta 93) : Calculer statistiques groupe (gérer null)
         const groupe = {
             moyenneA: Math.round(sommeA / nbEtudiants),
-            moyenneC: Math.round(sommeC / nbEtudiants),
-            // P et E = null si aucun étudiant n'a de valeur (pas encore d'évaluation)
+            // C, P et E = null si aucun étudiant n'a de valeur (pas encore d'évaluation)
+            moyenneC: nbAvecC > 0 ? Math.round(sommeC / nbAvecC) : null,
             moyenneP: nbAvecP > 0 ? Math.round(sommeP / nbAvecP) : null,
             moyenneE: nbAvecE > 0 ? parseFloat((sommeE / nbAvecE).toFixed(2)) : null,
             nbEtudiants: nbEtudiants,
             dispersionA: calculerEcartType(valeursA),
-            dispersionC: calculerEcartType(valeursC),
+            dispersionC: valeursC.length > 0 ? calculerEcartType(valeursC) : null,
             dispersionP: valeursP.length > 0 ? calculerEcartType(valeursP) : null
         };
 

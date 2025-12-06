@@ -136,6 +136,31 @@
      * Chargement automatique avec les autres métriques
    - **Impact** : Vision longitudinale accessible dès la page Aperçu
 
+6. **Correction CRITIQUE : C=null avant première évaluation (Beta 93)**
+   - **Problème** : C (Complétion) affichait 100% dès la semaine 1, avant toute évaluation
+   - **Impact visuel** : Graphiques montraient C=100% puis "chute" à la vraie valeur
+   - **Réalité** : Avant la semaine 7 (première évaluation), seul A (Assiduité) existe
+   - **Cause racine** : `calculerIndicesHistoriques()` retournait C=100 par défaut (ligne 124)
+   - **Solution appliquée** :
+     * `snapshots.js` ligne 125 : `indiceC = null` au lieu de `100`
+     * `snapshots.js` lignes 150 : `if (indiceC === null || indiceP === null)` pour E
+     * `snapshots.js` lignes 239-322 : Gestion null pour accumulation moyennes groupe
+       - Compteur `nbAvecC` ajouté (comme `nbAvecP` et `nbAvecE`)
+       - Accumulation C avec vérification null
+       - `valeursC.push()` seulement si non-null
+     * `snapshots.js` lignes 331, 336 : Moyennes et dispersions avec null
+       - `moyenneC = nbAvecC > 0 ? ... : null`
+       - `dispersionC = valeursC.length > 0 ? ... : null`
+   - **Fichiers modifiés** :
+     * `js/snapshots.js` (v=2025120607)
+     * `index 93.html` (cache buster mis à jour)
+   - **Résultat attendu** :
+     * Graphiques commencent à la semaine 7 pour C (première évaluation)
+     * Semaines 1-6 : seulement A affiché, C/P/E = null
+     * Chart.js ignore automatiquement les valeurs null
+     * Plus de fausse impression de "chute" de complétion
+   - **Impact** : Visualisation honnête de l'évolution de la complétion
+
 ### ⚠️ Problèmes identifiés NON résolus
 
 1. **Reconstruction en boucle infinie**
