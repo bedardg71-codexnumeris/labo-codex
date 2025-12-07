@@ -1128,6 +1128,18 @@ function confirmerAjoutSeance() {
         return;
     }
 
+    // ✅ VALIDATION: Vérifier si une séance identique existe déjà
+    const seanceExistante = seances.find(s =>
+        s.jour === jour &&
+        s.debut === debut &&
+        s.duree === parseFloat(duree)
+    );
+
+    if (seanceExistante) {
+        alert(`Une séance identique existe déjà (${seanceExistante.lettre} : ${jour} ${debut}, ${duree}h).\nUtilisez le bouton "Supprimer" pour retirer les doublons.`);
+        return;
+    }
+
     // Calculer la lettre pour la nouvelle séance
     const lettres = ['A', 'B', 'C', 'D', 'E', 'F'];
     const lettre = lettres[seances.length] || `S${seances.length + 1}`;
@@ -1156,6 +1168,70 @@ function confirmerAjoutSeance() {
     afficherSeancesExistantes();
 
     afficherNotificationSucces('Séance ajoutée');
+}
+
+/**
+ * ✅ UTILITAIRE: Nettoie les doublons dans seancesHoraire
+ * Garde la première occurrence de chaque séance unique (jour+debut+duree)
+ * et supprime les duplicatas
+ */
+function nettoyerDoublons() {
+    const seances = db.getSync('seancesHoraire', []);
+
+    if (seances.length === 0) {
+        alert('Aucune séance à nettoyer');
+        return;
+    }
+
+    const seancesUniques = [];
+    const doublonsTrouves = [];
+
+    seances.forEach((seance, index) => {
+        // Vérifier si une séance identique existe déjà dans seancesUniques
+        const existe = seancesUniques.find(s =>
+            s.jour === seance.jour &&
+            s.debut === seance.debut &&
+            s.duree === seance.duree
+        );
+
+        if (!existe) {
+            seancesUniques.push(seance);
+        } else {
+            doublonsTrouves.push(`${seance.lettre} (${seance.jour} ${seance.debut})`);
+        }
+    });
+
+    if (doublonsTrouves.length === 0) {
+        alert('Aucun doublon détecté');
+        return;
+    }
+
+    const confirmation = confirm(
+        `${doublonsTrouves.length} doublon(s) détecté(s):\n` +
+        `${doublonsTrouves.join('\n')}\n\n` +
+        `Voulez-vous les supprimer ?`
+    );
+
+    if (!confirmation) {
+        return;
+    }
+
+    // Recalculer les lettres pour les séances uniques
+    const lettres = ['A', 'B', 'C', 'D', 'E', 'F'];
+    seancesUniques.forEach((seance, i) => {
+        seance.lettre = lettres[i] || `S${i + 1}`;
+    });
+
+    // Sauvegarder
+    db.setSync('seancesHoraire', seancesUniques);
+
+    // Régénérer
+    genererSeancesCompletes();
+
+    // Recharger
+    afficherSeancesExistantes();
+
+    afficherNotificationSucces(`${doublonsTrouves.length} doublon(s) supprimé(s)`);
 }
 
 /* ===============================
@@ -1239,3 +1315,5 @@ window.supprimerFormulaireSeance = supprimerFormulaireSeance;
 window.confirmerSeances = confirmerSeances;
 window.annulerAjoutSeance = annulerAjoutSeance;
 window.afficherSeancesExistantes = afficherSeancesExistantes;
+window.supprimerSeance = supprimerSeance;
+window.nettoyerDoublons = nettoyerDoublons;

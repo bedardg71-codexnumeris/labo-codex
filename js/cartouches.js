@@ -62,7 +62,7 @@
  * RETOUR:
  * - Sortie silencieuse si les éléments n'existent pas
  */
-function initialiserModuleCartouches() {
+async function initialiserModuleCartouches() {
     console.log('💬 Initialisation du module Cartouches de rétroaction');
 
     // Vérifier que nous sommes dans la bonne section
@@ -73,13 +73,13 @@ function initialiserModuleCartouches() {
     }
 
     // NOUVELLE INTERFACE (Beta 80.2): Banque + import unifiés
-    chargerFiltreGrillesCartouche();
-    afficherBanqueCartouches();
+    await chargerFiltreGrillesCartouche();
+    await afficherBanqueCartouches();
 
     // Charger aussi l'ancien système pour compatibilité interne (caché)
     const selectGrille = document.getElementById('selectGrilleRetroaction');
     if (selectGrille) {
-        chargerSelectGrillesRetroaction();
+        await chargerSelectGrillesRetroaction();
     }
 
     // Gestionnaire d'événements pour le bouton d'export global (Beta 92 - fix async)
@@ -120,8 +120,8 @@ function initialiserModuleCartouches() {
  * CLÉ LOCALSTORAGE:
  * - 'grillesTemplates' : Array des grilles créées dans module 05
  */
-function chargerSelectGrillesRetroaction() {
-    const grilles = db.getSync('grillesTemplates', []);
+async function chargerSelectGrillesRetroaction() {
+    const grilles = await db.get('grillesTemplates') || [];
     const select = document.getElementById('selectGrilleRetroaction');
     
     if (!select) return;
@@ -147,7 +147,7 @@ function chargerSelectGrillesRetroaction() {
  * GÈRE:
  * - Changement d'événement sur #selectGrilleRetroaction
  */
-function chargerCartouchesRetroaction() {
+async function chargerCartouchesRetroaction() {
     const grilleId = document.getElementById('selectGrilleRetroaction').value;
     const selectCartouche = document.getElementById('selectCartouche');
     
@@ -162,7 +162,7 @@ function chargerCartouchesRetroaction() {
     }
     
     // Charger les cartouches existantes pour cette grille
-    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
     
     selectCartouche.innerHTML = '<option value="">-- Nouvelle cartouche --</option>';
     cartouches.forEach(cartouche => {
@@ -187,7 +187,7 @@ function chargerCartouchesRetroaction() {
     if (listeAncienne) listeAncienne.style.display = 'none';
     
     // Initialiser une nouvelle cartouche par défaut
-    initialiserNouveauCartouche(grilleId);
+    await initialiserNouveauCartouche(grilleId);
 }
 
 /* ===============================
@@ -209,8 +209,8 @@ function chargerCartouchesRetroaction() {
  * @param {string} grilleId - ID de la grille de critères
  * 
  * UTILISÉ PAR:
- * - chargerCartouchesRetroaction() (création par défaut)
- * - chargerMatriceRetroaction() (si aucune cartouche sélectionnée)
+ * - await chargerCartouchesRetroaction() (création par défaut)
+ * - await chargerMatriceRetroaction() (si aucune cartouche sélectionnée)
  * 
  * STRUCTURE CARTOUCHE:
  * {
@@ -224,9 +224,9 @@ function chargerCartouchesRetroaction() {
  *   verrouille: boolean
  * }
  */
-function initialiserNouveauCartouche(grilleId) {
+async function initialiserNouveauCartouche(grilleId) {
     // Récupérer la grille sélectionnée
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = await db.get('grillesTemplates') || [];
     const grille = grilles.find(g => g.id === grilleId);
     
     if (!grille) {
@@ -238,12 +238,12 @@ function initialiserNouveauCartouche(grilleId) {
     const criteres = grille.criteres || [];
     
     // Récupérer l'échelle de performance globale
-    const niveaux = db.getSync('niveauxEchelle', [
+    const niveaux = await db.get('niveauxEchelle') || [
         { code: 'I', nom: 'Incomplet', min: 0, max: 64 },
         { code: 'D', nom: 'En Développement', min: 65, max: 74 },
         { code: 'M', nom: 'Maîtrisé', min: 75, max: 84 },
         { code: 'E', nom: 'Étendu', min: 85, max: 100 }
-    ]);
+    ];
     
     // Créer la structure de cartouche
     cartoucheActuel = {
@@ -262,7 +262,7 @@ function initialiserNouveauCartouche(grilleId) {
     document.getElementById('contexteCartouche').value = '';
     
     // Afficher la matrice et l'aperçu
-    afficherMatriceRetroaction();
+    await afficherMatriceRetroaction();
     mettreAJourMetriques();
     document.getElementById('matriceRetroaction').style.display = 'block';
     document.getElementById('apercuRetroaction').style.display = 'block';
@@ -283,8 +283,8 @@ function initialiserNouveauCartouche(grilleId) {
  * GÈRE:
  * - Changement d'événement sur #selectCartouche
  */
-function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam = null) {
-    console.log('📋 chargerMatriceRetroaction() appelé avec params:', cartoucheIdParam, grilleIdParam);
+async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam = null) {
+    console.log('📋 await chargerMatriceRetroaction() appelé avec params:', cartoucheIdParam, grilleIdParam);
 
     // Si appelé avec paramètres (nouvelle interface sidebar), utiliser directement
     let grilleId = grilleIdParam;
@@ -307,12 +307,12 @@ function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam = null
     if (!cartoucheId) {
         console.log('⚠️ Pas de cartouche sélectionnée, initialisation nouvelle cartouche');
         // Nouvelle cartouche
-        initialiserNouveauCartouche(grilleId);
+        await initialiserNouveauCartouche(grilleId);
         return;
     }
 
     // Charger la cartouche existante
-    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
     console.log('Cartouches trouvées:', cartouches.length);
 
     cartoucheActuel = cartouches.find(c => c.id === cartoucheId);
@@ -333,8 +333,8 @@ function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam = null
         console.log('Champs nom/contexte remplis');
 
         // Afficher la matrice
-        afficherMatriceRetroaction();
-        calculerPourcentageComplete();
+        await afficherMatriceRetroaction();
+        await calculerPourcentageComplete();
 
         document.getElementById('matriceRetroaction').style.display = 'block';
         document.getElementById('apercuRetroaction').style.display = 'block';
@@ -360,8 +360,8 @@ function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam = null
  * 5. Clé unique: critereId_niveauCode
  * 
  * UTILISÉ PAR:
- * - initialiserNouveauCartouche()
- * - chargerMatriceRetroaction()
+ * - await initialiserNouveauCartouche()
+ * - await chargerMatriceRetroaction()
  * - importerCommentaires()
  * 
  * FORMAT CLÉS:
@@ -373,14 +373,14 @@ function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam = null
  * - Textarea avec onchange pour sauvegarde auto
  * - Placeholder descriptif
  */
-function afficherMatriceRetroaction() {
+async function afficherMatriceRetroaction() {
     if (!cartoucheActuel) return;
 
     const container = document.getElementById('matriceContainer');
 
     // NOUVELLE LOGIQUE: Lire les niveaux depuis toutes les échelles disponibles
     // pour permettre d'ajouter des niveaux manquants (ex: niveau "0")
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = await db.get('echellesTemplates') || [];
 
     // Créer un Set de tous les niveaux disponibles (fusionner toutes les échelles)
     const niveauxDisponiblesMap = new Map(); // code -> {code, nom, couleur}
@@ -511,15 +511,15 @@ function afficherMatriceRetroaction() {
  * 
  * NOTE:
  * - Sauvegarde en mémoire uniquement
- * - Persistance complète via sauvegarderCartouche()
+ * - Persistance complète via await sauvegarderCartouche()
  */
-function sauvegarderCommentaire(key) {
+async function sauvegarderCommentaire(key) {
     if (!cartoucheActuel) return;
-    
+
     const textarea = document.getElementById(`comm_${key}`);
     if (textarea) {
         cartoucheActuel.commentaires[key] = textarea.value;
-        calculerPourcentageComplete();
+        await calculerPourcentageComplete();
     }
 }
 
@@ -552,7 +552,7 @@ function sauvegarderCommentaire(key) {
  * - Notification de succès
  * - Sélection automatique de la cartouche sauvegardée
  */
-function sauvegarderCartouche() {
+async function sauvegarderCartouche() {
     if (!cartoucheActuel) return;
     
     const nom = document.getElementById('nomCartouche').value.trim();
@@ -566,7 +566,7 @@ function sauvegarderCartouche() {
     cartoucheActuel.contexte = document.getElementById('contexteCartouche').value.trim();
     
     const grilleId = cartoucheActuel.grilleId;
-    let cartouches = db.getSync(`cartouches_${grilleId}`, []);
+    let cartouches = await db.get(`cartouches_${grilleId}`) || [];
     
     // Vérifier si la cartouche existe déjà
     const index = cartouches.findIndex(c => c.id === cartoucheActuel.id);
@@ -579,23 +579,23 @@ function sauvegarderCartouche() {
     }
     
     // Sauvegarder
-    db.setSync(`cartouches_${grilleId}`, cartouches);
+    await db.set(`cartouches_${grilleId}`, cartouches);
 
     // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
-    afficherBanqueCartouches();
+    await afficherBanqueCartouches();
     definirCartoucheActive(cartoucheActuel.id);
 
     // Rafraîchir l'interface (ancien système - compatibilité)
-    chargerCartouchesRetroaction();
+    await chargerCartouchesRetroaction();
     document.getElementById('selectCartouche').value = cartoucheActuel.id;
 
     // Rafraîchir la nouvelle vue (ancien système)
     // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
-    // afficherToutesLesGrillesEtCartouches();
+    // await afficherToutesLesGrillesEtCartouches();
 
     // Rafraîchir la banque sidebar (Beta 80.5+)
     if (typeof afficherBanqueCartouches === 'function') {
-        afficherBanqueCartouches();
+        await afficherBanqueCartouches();
     }
 
     console.log('✅ Cartouche sauvegardée avec succès');
@@ -667,7 +667,7 @@ function annulerImportCommentaires() {
  * - Notification avec nombre de commentaires importés
  * - Retour automatique à la matrice
  */
-function importerCommentaires() {
+async function importerCommentaires() {
     const texte = document.getElementById('commentairesColles').value.trim();
     
     if (!texte) {
@@ -724,8 +724,8 @@ function importerCommentaires() {
         }
         
         // Rafraîchir l'affichage
-        afficherMatriceRetroaction();
-        calculerPourcentageComplete();
+        await afficherMatriceRetroaction();
+        await calculerPourcentageComplete();
         annulerImportCommentaires();
         
         afficherNotificationSucces(`${compteur} commentaire(s) importé(s) avec succès !`);
@@ -806,10 +806,10 @@ function genererApercuAleatoire() {
  * 1. Compte les critères
  * 2. Compte les niveaux
  * 3. Calcule le total de commentaires à remplir
- * 4. Appelle calculerPourcentageComplete()
+ * 4. Appelle await calculerPourcentageComplete()
  * 
  * UTILISÉ PAR:
- * - afficherMatriceRetroaction()
+ * - await afficherMatriceRetroaction()
  * 
  * MÉTRIQUES AFFICHÉES:
  * - #nbCriteres : Nombre de critères
@@ -817,7 +817,7 @@ function genererApercuAleatoire() {
  * - #nbCommentaires : Total de cases à remplir (critères × niveaux)
  * - #pctComplete : Pourcentage (via calculerPourcentageComplete)
  */
-function mettreAJourMetriques() {
+async function mettreAJourMetriques() {
     if (!cartoucheActuel) return;
     
     const nbCriteres = cartoucheActuel.criteres.length;
@@ -833,7 +833,7 @@ function mettreAJourMetriques() {
     if (elemNbNiveaux) elemNbNiveaux.textContent = nbNiveaux;
     if (elemNbCommentaires) elemNbCommentaires.textContent = nbTotal;
 
-    calculerPourcentageComplete();
+    await calculerPourcentageComplete();
 }
 
 /**
@@ -851,7 +851,7 @@ function mettreAJourMetriques() {
  * 
  * UTILISÉ PAR:
  * - sauvegarderCommentaire()
- * - chargerMatriceRetroaction()
+ * - await chargerMatriceRetroaction()
  * - importerCommentaires()
  * - mettreAJourMetriques()
  * 
@@ -862,12 +862,12 @@ function mettreAJourMetriques() {
  * CRITÈRE DE REMPLISSAGE:
  * - Commentaire non vide après trim()
  */
-function calculerPourcentageComplete() {
+async function calculerPourcentageComplete() {
     if (!cartoucheActuel) return;
 
-    // CRITIQUE: Utiliser la même logique que afficherMatriceRetroaction()
+    // CRITIQUE: Utiliser la même logique que await afficherMatriceRetroaction()
     // pour compter tous les niveaux disponibles (pas seulement ceux de la cartouche)
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = await db.get('echellesTemplates') || [];
 
     const niveauxDisponiblesMap = new Map();
 
@@ -955,8 +955,8 @@ function calculerPourcentageComplete() {
  * @param {string} grilleId - ID de la grille parente
  * 
  * UTILISÉ PAR:
- * - chargerCartouchesRetroaction()
- * - basculerVerrouillageCartouche()
+ * - await chargerCartouchesRetroaction()
+ * - await basculerVerrouillageCartouche()
  * 
  * AFFICHAGE PAR CARTOUCHE:
  * - Nom
@@ -1036,11 +1036,11 @@ function afficherListeCartouches(cartouches, grilleId) {
  * - Navigation par scroll au lieu de select
  * - Actions contextuelles par grille
  */
-function afficherToutesLesGrillesEtCartouches() {
+async function afficherToutesLesGrillesEtCartouches() {
     const container = document.getElementById('vueGrillesCartouches');
     if (!container) return;
 
-    const grilles = db.getSync('grillesTemplates', []);
+    const grilles = await db.get('grillesTemplates') || [];
 
     if (grilles.length === 0) {
         container.innerHTML = `
@@ -1052,11 +1052,13 @@ function afficherToutesLesGrillesEtCartouches() {
         return;
     }
 
-    container.innerHTML = grilles.map(grille => {
-        const cartouches = db.getSync(`cartouches_${grille.id}`, []);
+    // ✅ CORRECTION: Utiliser for...of au lieu de map() pour supporter await
+    const htmlSections = [];
+    for (const grille of grilles) {
+        const cartouches = await db.get(`cartouches_${grille.id}`) || [];
         const nomGrilleEchappe = echapperHtml(grille.nom);
 
-        return `
+        htmlSections.push(`
             <details class="grille-section" open style="margin-bottom: 20px; border: 2px solid var(--bleu-moyen);
                      border-radius: 8px; background: white; overflow: hidden;">
                 <summary style="padding: 15px; background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-moyen) 100%);
@@ -1123,8 +1125,10 @@ function afficherToutesLesGrillesEtCartouches() {
                     </button>
                 </div>
             </details>
-        `;
-    }).join('');
+        `);
+    }
+
+    container.innerHTML = htmlSections.join('');
 }
 
 /* ===============================
@@ -1153,14 +1157,14 @@ function afficherToutesLesGrillesEtCartouches() {
  * - Désactive/active les boutons Modifier et Supprimer
  * - Change l'opacité des boutons
  */
-function basculerVerrouillageCartouche(cartoucheId, grilleId) {
-    let cartouches = db.getSync(`cartouches_${grilleId}`, []);
+async function basculerVerrouillageCartouche(cartoucheId, grilleId) {
+    let cartouches = await db.get(`cartouches_${grilleId}`) || [];
     const index = cartouches.findIndex(c => c.id === cartoucheId);
 
     if (index !== -1) {
         // Basculer directement l'état (pas de checkbox, juste un span cliquable)
         cartouches[index].verrouille = !cartouches[index].verrouille;
-        db.setSync(`cartouches_${grilleId}`, cartouches);
+        await db.set(`cartouches_${grilleId}`, cartouches);
 
         // Afficher une notification spécifique
         const statut = cartouches[index].verrouille ? 'verrouillée' : 'déverrouillée';
@@ -1168,11 +1172,11 @@ function basculerVerrouillageCartouche(cartoucheId, grilleId) {
 
         // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
         // afficherListeCartouches(cartouches, grilleId);
-        // afficherToutesLesGrillesEtCartouches();
+        // await afficherToutesLesGrillesEtCartouches();
 
         // Rafraîchir la banque sidebar (Beta 80.5+)
         if (typeof afficherBanqueCartouches === 'function') {
-            afficherBanqueCartouches();
+            await afficherBanqueCartouches();
         }
     }
 }
@@ -1203,8 +1207,8 @@ function basculerVerrouillageCartouche(cartoucheId, grilleId) {
  * - Notification de succès
  * - Chargement automatique de la copie
  */
-function dupliquerCartouche(cartoucheId, grilleId) {
-    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+async function dupliquerCartouche(cartoucheId, grilleId) {
+    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
     const cartoucheOriginal = cartouches.find(c => c.id === cartoucheId);
     
     if (cartoucheOriginal) {
@@ -1217,14 +1221,14 @@ function dupliquerCartouche(cartoucheId, grilleId) {
         };
 
         cartouches.push(nouveauCartouche);
-        db.setSync(`cartouches_${grilleId}`, cartouches);
+        await db.set(`cartouches_${grilleId}`, cartouches);
 
         // NOUVELLE INTERFACE (Beta 80.5+): Charger directement la copie
-        chargerCartouchePourModif(nouveauCartouche.id, grilleId);
+        await chargerCartouchePourModif(nouveauCartouche.id, grilleId);
 
         // Rafraîchir la banque sidebar (Beta 80.5+)
         if (typeof afficherBanqueCartouches === 'function') {
-            afficherBanqueCartouches();
+            await afficherBanqueCartouches();
         }
 
         console.log('✅ Cartouche dupliquée avec succès');
@@ -1242,10 +1246,10 @@ function dupliquerCartouche(cartoucheId, grilleId) {
  * UTILISÉ PAR:
  * - Bouton «Modifier» dans afficherListeCartouches()
  */
-function chargerCartouchePourModif(cartoucheId, grilleId) {
+async function chargerCartouchePourModif(cartoucheId, grilleId) {
     console.log('📝 Chargement cartouche:', cartoucheId, 'de la grille:', grilleId);
 
-    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     console.log('Cartouche trouvée:', cartouche ? 'OUI' : 'NON');
@@ -1271,7 +1275,7 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
         if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
         // NOUVELLE INTERFACE (Beta 80.5+): Passer les paramètres directement
-        chargerMatriceRetroaction(cartoucheId, grilleId);
+        await chargerMatriceRetroaction(cartoucheId, grilleId);
 
         // NOUVELLE INTERFACE (Beta 80.2): Highlight dans la banque
         definirCartoucheActive(cartoucheId);
@@ -1320,10 +1324,10 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
 
             // Attacher l'événement au bouton
             if (btnDeverrouiller) {
-                btnDeverrouiller.onclick = function() {
-                    basculerVerrouillageCartouche(cartoucheId, grilleId);
+                btnDeverrouiller.onclick = async function() {
+                    await basculerVerrouillageCartouche(cartoucheId, grilleId);
                     // Recharger la cartouche pour mettre à jour l'affichage
-                    setTimeout(() => chargerCartouchePourModif(cartoucheId, grilleId), 100);
+                    setTimeout(async () => await chargerCartouchePourModif(cartoucheId, grilleId), 100);
                 };
             }
         } else {
@@ -1360,8 +1364,8 @@ function chargerCartouchePourModif(cartoucheId, grilleId) {
  * - Bloquée si verrouillée (alerte)
  * - Confirmation obligatoire
  */
-function supprimerCartoucheConfirm(cartoucheId, grilleId) {
-    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
+    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     if (cartouche && cartouche.verrouille) {
@@ -1371,21 +1375,21 @@ function supprimerCartoucheConfirm(cartoucheId, grilleId) {
 
     if (confirm(`Êtes-vous sûr de vouloir supprimer la cartouche «${cartouche?.nom}» ?`)) {
         const nouveauxCartouches = cartouches.filter(c => c.id !== cartoucheId);
-        db.setSync(`cartouches_${grilleId}`, nouveauxCartouches);
+        await db.set(`cartouches_${grilleId}`, nouveauxCartouches);
 
         // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
-        afficherBanqueCartouches();
+        await afficherBanqueCartouches();
 
         // Ancien système (compatibilité)
-        chargerCartouchesRetroaction();
+        await chargerCartouchesRetroaction();
 
         // Rafraîchir la nouvelle vue
         // DÉSACTIVÉ Beta 80.5+ : ancienne interface remplacée par sidebar
-        // afficherToutesLesGrillesEtCartouches();
+        // await afficherToutesLesGrillesEtCartouches();
 
         // Rafraîchir la banque sidebar (Beta 80.5+)
         if (typeof afficherBanqueCartouches === 'function') {
-            afficherBanqueCartouches();
+            await afficherBanqueCartouches();
         }
 
         console.log('✅ Cartouche supprimée');
@@ -1399,11 +1403,11 @@ function supprimerCartoucheConfirm(cartoucheId, grilleId) {
  * UTILISÉ PAR:
  * - Bouton «Supprimer» dans la zone d'édition
  */
-function supprimerCartouche() {
+async function supprimerCartouche() {
     if (!cartoucheActuel) return;
-    
+
     const grilleId = cartoucheActuel.grilleId;
-    supprimerCartoucheConfirm(cartoucheActuel.id, grilleId);
+    await supprimerCartoucheConfirm(cartoucheActuel.id, grilleId);
 }
 
 /* ===============================
@@ -1475,7 +1479,7 @@ async function exporterCartouches() {
         const key = allKeys[i];
         if (key && key.startsWith('cartouches_')) {
             const grilleId = key.replace('cartouches_', '');
-            cartouches[grilleId] = db.getSync(key, []);
+            cartouches[grilleId] = await db.get(key) || [];
         }
     }
 
@@ -1555,7 +1559,7 @@ async function exporterCartouches() {
  * - Propose de remplacer ou fusionner
  * - Les cartouches avec même ID sont remplacées
  */
-function importerCartouches(event) {
+async function importerCartouches(event) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -1613,7 +1617,7 @@ function importerCartouches(event) {
  * Fonction helper appelée depuis le modal de confirmation
  * PHASE 3.3: Détection de dépendances manquantes (Beta 91)
  */
-window.confirmerImportCartouches = function(donnees) {
+window.confirmerImportCartouches = async function(donnees) {
     try {
         let cartouchesData;
         let metadata = null;
@@ -1657,7 +1661,7 @@ window.confirmerImportCartouches = function(donnees) {
         }
 
         // PHASE 3.3: Détecter les dépendances manquantes (grilles référencées)
-        const grillesExistantes = db.getSync('grillesTemplates', []);
+        const grillesExistantes = await db.get('grillesTemplates') || [];
         const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
         const grillesManquantes = [];
 
@@ -1687,9 +1691,10 @@ window.confirmerImportCartouches = function(donnees) {
         let compteur = 0;
 
         // Importer chaque grille de cartouches
-        Object.keys(cartouchesData).forEach(grilleId => {
+        // ✅ CORRECTION: Utiliser for...of au lieu de forEach pour supporter await
+        for (const grilleId of Object.keys(cartouchesData)) {
             const cartouchesImportees = cartouchesData[grilleId];
-            const cartouchesExistantes = db.getSync(`cartouches_${grilleId}`, []);
+            const cartouchesExistantes = await db.get(`cartouches_${grilleId}`) || [];
 
             // Fusionner : remplacer si même ID, sinon ajouter
             cartouchesImportees.forEach(importee => {
@@ -1712,13 +1717,13 @@ window.confirmerImportCartouches = function(donnees) {
                 compteur++;
             });
 
-            db.setSync(`cartouches_${grilleId}`, cartouchesExistantes);
-        });
+            await db.set(`cartouches_${grilleId}`, cartouchesExistantes);
+        }
 
         // Rafraîchir l'interface si on est dans la section
         const selectGrille = document.getElementById('selectGrilleRetroaction');
         if (selectGrille && selectGrille.value) {
-            chargerCartouchesRetroaction();
+            await chargerCartouchesRetroaction();
         }
 
         afficherNotificationSucces(`✅ Import réussi ! ${compteur} cartouche(s) importée(s).`);
@@ -1770,7 +1775,7 @@ function importerCartoucheDepuisTxt(event) {
     }
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             let texte = e.target.result.trim();
 
@@ -1975,8 +1980,8 @@ function importerCartoucheDepuisTxt(event) {
             }
 
             // Rafraîchir l'affichage
-            afficherMatriceRetroaction();
-            calculerPourcentageComplete();
+            await afficherMatriceRetroaction();
+            await calculerPourcentageComplete();
 
             afficherNotificationSucces(`${compteur} commentaire(s) importé(s) depuis le fichier !`);
 
@@ -2004,10 +2009,10 @@ function importerCartoucheDepuisTxt(event) {
  *
  * FONCTIONNEMENT:
  * 1. Sélectionne la grille dans le select (pour compatibilité avec l'ancien système)
- * 2. Appelle initialiserNouveauCartouche() pour créer une nouvelle cartouche
+ * 2. Appelle await initialiserNouveauCartouche() pour créer une nouvelle cartouche
  * 3. Affiche le formulaire d'édition
  */
-function ajouterCartoucheAGrille(grilleId) {
+async function ajouterCartoucheAGrille(grilleId) {
     // Sélectionner la grille dans le select (si existant, pour compatibilité)
     const selectGrille = document.getElementById('selectGrilleRetroaction');
     if (selectGrille) {
@@ -2027,7 +2032,7 @@ function ajouterCartoucheAGrille(grilleId) {
     if (btnSupprimer) btnSupprimer.style.display = 'none';
 
     // Initialiser une nouvelle cartouche pour cette grille
-    initialiserNouveauCartouche(grilleId);
+    await initialiserNouveauCartouche(grilleId);
 
     // Afficher les sections nécessaires
     document.getElementById('aucuneEvalRetroaction').style.display = 'none';
@@ -2050,12 +2055,12 @@ function ajouterCartoucheAGrille(grilleId) {
 /**
  * Duplique la cartouche actuellement en cours d'édition
  */
-function dupliquerCartoucheActive() {
+async function dupliquerCartoucheActive() {
     if (!cartoucheActuel || !cartoucheActuel.id || !cartoucheActuel.grilleId) {
         alert('Aucune cartouche à dupliquer');
         return;
     }
-    dupliquerCartouche(cartoucheActuel.id, cartoucheActuel.grilleId);
+    await dupliquerCartouche(cartoucheActuel.id, cartoucheActuel.grilleId);
 }
 
 /**
@@ -2071,7 +2076,7 @@ async function exporterCartoucheActive() {
     const cartoucheId = cartoucheActuel.id;
 
     // Récupérer la cartouche
-    const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
     const cartouche = cartouches.find(c => c.id === cartoucheId);
 
     if (!cartouche) {
@@ -2144,7 +2149,7 @@ function importerDansCartoucheActive(event) {
     const cartoucheId = cartoucheActuel.id;
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const donnees = JSON.parse(e.target.result);
 
@@ -2190,7 +2195,7 @@ function importerDansCartoucheActive(event) {
             }
 
             // Récupérer les cartouches
-            const cartouches = db.getSync(`cartouches_${grilleId}`, []);
+            const cartouches = await db.get(`cartouches_${grilleId}`) || [];
             const index = cartouches.findIndex(c => c.id === cartoucheId);
 
             if (index === -1) {
@@ -2215,10 +2220,10 @@ function importerDansCartoucheActive(event) {
             cartouches[index] = cartoucheMiseAJour;
 
             // Sauvegarder
-            db.setSync(`cartouches_${grilleId}`, cartouches);
+            await db.set(`cartouches_${grilleId}`, cartouches);
 
             // Recharger la cartouche dans le formulaire
-            chargerCartouchePourModif(cartoucheId, grilleId);
+            await chargerCartouchePourModif(cartoucheId, grilleId);
 
             console.log('✅ Cartouche importée et remplacée avec succès');
             if (typeof afficherNotificationSucces === 'function') {
@@ -2241,12 +2246,12 @@ function importerDansCartoucheActive(event) {
 /**
  * Supprime la cartouche actuellement en cours d'édition
  */
-function supprimerCartoucheActive() {
+async function supprimerCartoucheActive() {
     if (!cartoucheActuel || !cartoucheActuel.id || !cartoucheActuel.grilleId) {
         alert('Aucune cartouche à supprimer');
         return;
     }
-    supprimerCartoucheConfirm(cartoucheActuel.id, cartoucheActuel.grilleId);
+    await supprimerCartoucheConfirm(cartoucheActuel.id, cartoucheActuel.grilleId);
 }
 
 /**
@@ -2274,9 +2279,9 @@ function annulerFormCartouche() {
 /**
  * Sauvegarde complète de la cartouche en cours d'édition
  */
-function sauvegarderCartoucheComplete() {
+async function sauvegarderCartoucheComplete() {
     // Sauvegarder avec la fonction existante
-    sauvegarderCartouche();
+    await sauvegarderCartouche();
 
     // Message de confirmation (déjà géré par sauvegarderCartouche)
     console.log('Cartouche sauvegardée avec succès');
@@ -2381,8 +2386,8 @@ window.sauvegarderCartoucheComplete = sauvegarderCartoucheComplete;
  * Charge le filtre des grilles dans la sidebar
  * Remplit le select avec toutes les grilles disponibles
  */
-function chargerFiltreGrillesCartouche() {
-    const grilles = db.getSync('grillesTemplates', []);
+async function chargerFiltreGrillesCartouche() {
+    const grilles = await db.get('grillesTemplates') || [];
     const selectFiltre = document.getElementById('filtreGrilleCartouche');
 
     if (!selectFiltre) return;
@@ -2404,13 +2409,16 @@ function chargerFiltreGrillesCartouche() {
  *
  * @param {string} grilleIdFiltre - ID de la grille à filtrer (optionnel)
  */
-function afficherBanqueCartouches(grilleIdFiltre = '') {
-    const grilles = db.getSync('grillesTemplates', []);
+async function afficherBanqueCartouches(grilleIdFiltre = '') {
+    const grilles = await db.get('grillesTemplates') || [];
+    console.log('💬 afficherBanqueCartouches - Nombre de grilles:', grilles.length);
     let toutesLesCartouches = [];
 
     // Récupérer toutes les cartouches de toutes les grilles
-    grilles.forEach(grille => {
-        const cartouches = db.getSync(`cartouches_${grille.id}`, []);
+    // ✅ CORRECTION: Utiliser for...of au lieu de forEach pour supporter await
+    for (const grille of grilles) {
+        const cartouches = await db.get(`cartouches_${grille.id}`) || [];
+        console.log(`   Grille "${grille.nom}": ${cartouches.length} cartouche(s)`);
         cartouches.forEach(cart => {
             toutesLesCartouches.push({
                 ...cart,
@@ -2418,16 +2426,21 @@ function afficherBanqueCartouches(grilleIdFiltre = '') {
                 grilleNom: grille.nom
             });
         });
-    });
+    }
 
     // Filtrer si nécessaire
     if (grilleIdFiltre) {
         toutesLesCartouches = toutesLesCartouches.filter(c => c.grilleId === grilleIdFiltre);
     }
 
+    console.log('   Total cartouches:', toutesLesCartouches.length);
+
     // Générer HTML de la liste
     const container = document.getElementById('listeCartouchesBanque');
-    if (!container) return;
+    if (!container) {
+        console.warn('   ⚠️ Élément listeCartouchesBanque introuvable');
+        return;
+    }
 
     if (toutesLesCartouches.length === 0) {
         container.innerHTML = '<p class="banque-vide">Aucune cartouche disponible</p>';
@@ -2450,6 +2463,7 @@ function afficherBanqueCartouches(grilleIdFiltre = '') {
     }).join('');
 
     container.innerHTML = html;
+    console.log('   ✅ Banque cartouches affichée avec succès');
 }
 
 /**
@@ -2462,7 +2476,7 @@ function filtrerCartouchesBanque() {
     const selectFiltre = document.getElementById('filtreGrilleCartouche');
     const grilleId = selectFiltre ? selectFiltre.value : '';
 
-    afficherBanqueCartouches(grilleId);
+    await afficherBanqueCartouches(grilleId);
 }
 */
 
@@ -2470,8 +2484,8 @@ function filtrerCartouchesBanque() {
  * Crée une nouvelle cartouche vide
  * Demande à l'utilisateur de choisir une grille
  */
-function creerNouvelleCartouche() {
-    const grilles = db.getSync('grillesTemplates', []);
+async function creerNouvelleCartouche() {
+    const grilles = await db.get('grillesTemplates') || [];
 
     if (grilles.length === 0) {
         alert('Vous devez d\'abord créer au moins une grille de critères dans la section « Critères d\'évaluation »');
@@ -2671,7 +2685,7 @@ function importerCartoucheJSON(event) {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const cartouches = JSON.parse(e.target.result);
 
@@ -2683,7 +2697,7 @@ function importerCartoucheJSON(event) {
             const cartouche = cartouches[0]; // Prendre la première
 
             // Demander quelle grille utiliser
-            const grilles = db.getSync('grillesTemplates', []);
+            const grilles = await db.get('grillesTemplates') || [];
             if (grilles.length === 0) {
                 alert('Créez d\'abord une grille de critères');
                 return;
@@ -2696,13 +2710,13 @@ function importerCartoucheJSON(event) {
             cartouche.grilleId = grilleId;
 
             // Sauvegarder
-            const cartouchesExistantes = db.getSync(`cartouches_${grilleId}`, []);
+            const cartouchesExistantes = await db.get(`cartouches_${grilleId}`) || [];
             cartouchesExistantes.push(cartouche);
-            db.setSync(`cartouches_${grilleId}`, cartouchesExistantes);
+            await db.set(`cartouches_${grilleId}`, cartouchesExistantes);
 
             // Rafraîchir l'affichage
-            afficherBanqueCartouches();
-            chargerCartouchePourModif(cartouche.id, grilleId);
+            await afficherBanqueCartouches();
+            await chargerCartouchePourModif(cartouche.id, grilleId);
 
             afficherNotificationSucces('Cartouche importée avec succès !');
 

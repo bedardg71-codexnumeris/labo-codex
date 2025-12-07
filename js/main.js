@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 0. ÉCOUTER LA SYNCHRONISATION IndexedDB
     // ===============================
     // Recharger les données quand la synchronisation IndexedDB → localStorage est terminée
-    window.addEventListener('db-ready', function(event) {
+    window.addEventListener('db-ready', async function(event) {
         console.log('🔄 [Main] Données synchronisées, rechargement...');
 
         // Recharger les données de toutes les sections affichées
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
             chargerListeEtudiants();
         }
         if (typeof afficherTableauProductions === 'function') {
-            afficherTableauProductions();
+            await afficherTableauProductions();
         }
     });
 

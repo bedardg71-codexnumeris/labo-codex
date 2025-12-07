@@ -301,6 +301,36 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
+        case 'materiel-grille-criteres':
+            console.log('🔄 Rafraîchissement du module Grilles...');
+            if (typeof initialiserModuleGrilles === 'function') {
+                setTimeout(async () => {
+                    await initialiserModuleGrilles();
+                    console.log('   ✅ Module Grilles initialisé');
+                }, 100);
+            }
+            break;
+
+        case 'materiel-echelle-performance':
+            console.log('🔄 Rafraîchissement du module Échelles...');
+            if (typeof initialiserModuleEchelles === 'function') {
+                setTimeout(async () => {
+                    await initialiserModuleEchelles();
+                    console.log('   ✅ Module Échelles initialisé');
+                }, 100);
+            }
+            break;
+
+        case 'materiel-retroactions':
+            console.log('🔄 Rafraîchissement du module Cartouches...');
+            if (typeof initialiserModuleCartouches === 'function') {
+                setTimeout(async () => {
+                    await initialiserModuleCartouches();
+                    console.log('   ✅ Module Cartouches initialisé');
+                }, 100);
+            }
+            break;
+
         case 'reglages-trimestre':
             console.log('🔄 Rafraîchissement du module Trimestre...');
             if (typeof initialiserModuleTrimestre === 'function') {
