@@ -1206,15 +1206,36 @@ function chargerModalites() {
     }
 
     // Charger les options d'affichage
-    if (modalites.affichageTableauBord) {
-        const checkComparatif = document.getElementById('modeComparatif');
-
-        if (checkComparatif) {
-            // Mode comparatif activé si les deux sont affichés
-            const modeComparatif = modalites.affichageTableauBord.afficherSommatif &&
-                                   modalites.affichageTableauBord.afficherAlternatif;
-            checkComparatif.checked = modeComparatif;
+    // Si affichageTableauBord n'existe pas, l'initialiser selon la pratique choisie
+    if (!modalites.affichageTableauBord) {
+        console.log('[chargerModalites] Initialisation affichageTableauBord par défaut');
+        if (modalites.pratique === 'sommative') {
+            modalites.affichageTableauBord = {
+                afficherSommatif: true,
+                afficherAlternatif: false
+            };
+        } else if (modalites.pratique === 'pan-maitrise') {
+            modalites.affichageTableauBord = {
+                afficherSommatif: false,
+                afficherAlternatif: true
+            };
+        } else {
+            // Par défaut : aucun affichage
+            modalites.affichageTableauBord = {
+                afficherSommatif: false,
+                afficherAlternatif: false
+            };
         }
+        db.setSync('modalitesEvaluation', modalites);
+    }
+
+    // Initialiser la checkbox mode comparatif
+    const checkComparatif = document.getElementById('modeComparatif');
+    if (checkComparatif) {
+        // Mode comparatif activé si les deux sont affichés
+        const modeComparatif = modalites.affichageTableauBord.afficherSommatif &&
+                               modalites.affichageTableauBord.afficherAlternatif;
+        checkComparatif.checked = modeComparatif;
     }
 
     // Charger l'option d'affichage des descriptions SOLO
