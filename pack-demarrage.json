@@ -1,0 +1,930 @@
+{
+  "_metadata": {
+    "nom": "Pack de démarrage - Écriture et littérature",
+    "version": "1.0",
+    "date": "2025-12-06",
+    "description": "Pack de démonstration préchargé avec 10 étudiants, données sur 15 semaines, matériel pédagogique complet",
+    "auteur": "Grégoire Bédard",
+    "cours": "601-101 - Écriture et littérature"
+  },
+
+  "infoCours": {
+    "sigle": "601-101",
+    "titre": "Écriture et littérature",
+    "competence": "4EF0",
+    "enseignant": "Grégoire Bédard",
+    "session": "H2026",
+    "groupe": "01",
+    "heuresHebdo": 4,
+    "actif": true
+  },
+
+  "listeCours": [
+    {
+      "id": "601-101-h2026-01",
+      "sigle": "601-101",
+      "titre": "Écriture et littérature",
+      "competence": "4EF0",
+      "enseignant": "Grégoire Bédard",
+      "session": "H2026",
+      "annee": "2026",
+      "groupe": "01",
+      "heuresHebdo": 4,
+      "actif": true,
+      "pratiqueId": "sommative"
+    }
+  ],
+
+  "groupeEtudiants": [
+    {
+      "da": "2234567",
+      "prenom": "Émilie",
+      "nom": "Tremblay",
+      "programme": "500.A1",
+      "sa": false
+    },
+    {
+      "da": "2234568",
+      "prenom": "Antoine",
+      "nom": "Gagnon",
+      "programme": "200.B0",
+      "sa": true
+    },
+    {
+      "da": "2234569",
+      "prenom": "Léa",
+      "nom": "Roy",
+      "programme": "300.A0",
+      "sa": false
+    },
+    {
+      "da": "2234570",
+      "prenom": "Thomas",
+      "nom": "Côté",
+      "programme": "420.B0",
+      "sa": false
+    },
+    {
+      "da": "2234571",
+      "prenom": "Camille",
+      "nom": "Bouchard",
+      "programme": "180.A0",
+      "sa": true
+    },
+    {
+      "da": "2234572",
+      "prenom": "Gabriel",
+      "nom": "Lavoie",
+      "programme": "410.B0",
+      "sa": false
+    },
+    {
+      "da": "2234573",
+      "prenom": "Juliette",
+      "nom": "Bergeron",
+      "programme": "500.A1",
+      "sa": false
+    },
+    {
+      "da": "2234574",
+      "prenom": "Samuel",
+      "nom": "Morin",
+      "programme": "200.B0",
+      "sa": false
+    },
+    {
+      "da": "2234575",
+      "prenom": "Rosalie",
+      "nom": "Pelletier",
+      "programme": "300.A0",
+      "sa": true
+    },
+    {
+      "da": "2234576",
+      "prenom": "Alexandre",
+      "nom": "Gauthier",
+      "programme": "420.B0",
+      "sa": false
+    }
+  ],
+
+  "modalitesEvaluation": {
+    "pratique": "sommative",
+    "affichageTableauBord": {
+      "afficherSommatif": true,
+      "afficherAlternatif": false
+    },
+    "afficherDescriptionsSOLO": true,
+    "activerRai": true,
+    "activerCategorisationErreurs": false,
+    "grilleReferenceDepistage": "GRILLE1759243306842",
+    "seuilsInterpretation": {
+      "fragile": 0.70,
+      "acceptable": 0.80,
+      "bon": 0.85
+    }
+  },
+
+  "grillesTemplates": [
+    {
+      "id": "GRILLE1759243306842",
+      "nom": "Global-5 FR-HOLIS",
+      "criteres": [
+        {
+          "nom": "Structure",
+          "description": "Capacité à organiser sa pensée de manière logique et cohérente",
+          "ponderation": 15,
+          "type": "holistique",
+          "formule": "",
+          "verrouille": false,
+          "id": "CR1759243306842"
+        },
+        {
+          "nom": "Rigueur",
+          "description": "Qualité et exhaustivité du travail d'analyse",
+          "ponderation": 20,
+          "type": "holistique",
+          "formule": "",
+          "verrouille": true,
+          "id": "CR1759243331050"
+        },
+        {
+          "nom": "Plausibilité",
+          "description": "Crédibilité et pertinence des interprétations proposées",
+          "ponderation": 10,
+          "type": "holistique",
+          "formule": "",
+          "verrouille": true,
+          "id": "CR1759243365467"
+        },
+        {
+          "nom": "Nuance",
+          "description": "Capacité à percevoir et exprimer les subtilités du texte littéraire",
+          "ponderation": 25,
+          "type": "holistique",
+          "formule": "",
+          "verrouille": true,
+          "id": "CR1759243379949"
+        },
+        {
+          "nom": "Français écrit",
+          "description": "Maîtrise de la langue et qualité de l'expression",
+          "ponderation": 30,
+          "type": "holistique",
+          "formule": "",
+          "verrouille": true,
+          "id": "CR1759243428715"
+        }
+      ],
+      "dateCreation": "2025-09-30T14:41:46.842Z",
+      "dateModification": "2025-10-28T23:55:19.392Z"
+    }
+  ],
+
+  "configEchelle": {
+    "type": "IDME",
+    "niveaux": 5,
+    "echelle": "ECH1759264511178"
+  },
+
+  "echellesTemplates": [
+    {
+      "id": "ECH1759264511178",
+      "nom": "IDME et niv 0",
+      "niveaux": [
+        {
+          "code": "0",
+          "nom": "Aucun",
+          "min": 0,
+          "max": 0,
+          "valeurCalcul": 0,
+          "couleur": "#831100"
+        },
+        {
+          "code": "I",
+          "nom": "Incomplet ou insuffisant",
+          "description": "Préstructurel, unistructurel",
+          "min": 0,
+          "max": 64.99,
+          "couleur": "#e67e22",
+          "valeurCalcul": "40"
+        },
+        {
+          "code": "D",
+          "nom": "En Développement",
+          "description": "Multistructurel",
+          "min": 65,
+          "max": 74.99,
+          "couleur": "#f1c40f",
+          "valeurCalcul": "65"
+        },
+        {
+          "code": "M",
+          "nom": "Maîtrisé",
+          "description": "Relationnel acquis",
+          "min": 75,
+          "max": 84.99,
+          "couleur": "#27ae60",
+          "valeurCalcul": "75"
+        },
+        {
+          "code": "E",
+          "nom": "Étendu",
+          "description": "Abstrait étendu",
+          "min": 85,
+          "max": 100,
+          "couleur": "#3498db",
+          "valeurCalcul": "100"
+        }
+      ],
+      "config": {
+        "typeEchelle": "lettres",
+        "seuilReussite": 60,
+        "notePassage": "",
+        "codesPersonnalises": ""
+      },
+      "dateCreation": "2025-09-30T20:35:11.178Z",
+      "dateModification": "2025-11-22T12:19:33.703Z"
+    }
+  ],
+
+  "productions": [
+    {
+      "id": "A1",
+      "code": "A1",
+      "titre": "Artefact 1",
+      "description": "Analyse d'un poème romantique",
+      "type": "artefact-portfolio",
+      "ponderation": 0,
+      "grilleId": "GRILLE1759243306842",
+      "objectif": "Analyser un texte poétique en identifiant les procédés stylistiques et leur fonction.",
+      "tache": "Rédiger une analyse de 500 mots d'un poème romantique en identifiant au moins 5 procédés littéraires et en expliquant leur contribution au sens global.",
+      "verrouille": false
+    },
+    {
+      "id": "A2",
+      "code": "A2",
+      "titre": "Artefact 2",
+      "description": "Dissertation sur un texte narratif",
+      "type": "artefact-portfolio",
+      "ponderation": 0,
+      "grilleId": "GRILLE1759243306842",
+      "objectif": "Développer une argumentation cohérente sur l'interprétation d'un texte narratif.",
+      "tache": "Rédiger une dissertation de 800 mots sur la structure narrative et les thèmes d'un extrait de roman.",
+      "verrouille": false
+    },
+    {
+      "id": "A3",
+      "code": "A3",
+      "titre": "Artefact 3",
+      "description": "Carte mentale collaborative",
+      "type": "artefact-portfolio",
+      "ponderation": 0,
+      "grilleId": "GRILLE1759243306842",
+      "objectif": "Développer sa capacité à analyser collaborativement un texte et à représenter les relations entre objectif, mécanismes et procédés.",
+      "tache": "En binôme, construire une carte mentale qui organise visuellement l'analyse du texte, en délibérant sur chaque élément pour arriver à une interprétation commune.",
+      "verrouille": false
+    },
+    {
+      "id": "A4",
+      "code": "A4",
+      "titre": "Artefact 4",
+      "description": "Analyse comparée de deux textes",
+      "type": "artefact-portfolio",
+      "ponderation": 0,
+      "grilleId": "GRILLE1759243306842",
+      "objectif": "Comparer deux textes littéraires en mettant en lumière leurs similitudes et différences thématiques et stylistiques.",
+      "tache": "Rédiger une analyse comparée de 1000 mots entre deux textes du corpus en explorant leurs convergences et divergences.",
+      "verrouille": false
+    }
+  ],
+
+  "cartouches_GRILLE1759243306842": [
+    {
+      "id": "CART_GLOBAL5_2025",
+      "grilleId": "GRILLE1759243306842",
+      "nom": "Rétroactions Global-5 FR-HOLIS",
+      "contexte": "Rétroactions personnalisées pour la grille Global-5 FR-HOLIS utilisée en écriture et littérature.",
+      "criteres": [
+        {"id": "CR1759243306842", "nom": "Structure"},
+        {"id": "CR1759243331050", "nom": "Rigueur"},
+        {"id": "CR1759243365467", "nom": "Plausibilité"},
+        {"id": "CR1759243379949", "nom": "Nuance"},
+        {"id": "CR1759243428715", "nom": "Français écrit"}
+      ],
+      "niveaux": [
+        {"code": "I", "nom": "Incomplet ou insuffisant"},
+        {"code": "D", "nom": "En Développement"},
+        {"code": "M", "nom": "Maîtrisé"},
+        {"code": "E", "nom": "Étendu"}
+      ],
+      "commentaires": {
+        "CR1759243306842_I": "La structure de ton texte manque de clarté. L'organisation des idées est confuse et il est difficile de suivre le fil de ta pensée. Je te suggère de travailler avec un plan détaillé avant de rédiger et de vérifier que chaque paragraphe développe une idée claire.",
+        "CR1759243306842_D": "La structure de ton texte est en développement. On perçoit une certaine organisation, mais la progression logique n'est pas toujours évidente. Certains paragraphes gagneraient à être réorganisés pour améliorer la cohérence d'ensemble.",
+        "CR1759243306842_M": "La structure de ton texte est claire et efficace. Tes idées sont bien organisées et la progression logique est facile à suivre. Les transitions entre les paragraphes sont bien réussies et contribuent à la fluidité de la lecture.",
+        "CR1759243306842_E": "La structure de ton texte est remarquable. L'organisation est non seulement logique, mais aussi stratégique, servant parfaitement ton propos. Les transitions sont subtiles et enrichissent la compréhension globale du texte.",
+
+        "CR1759243331050_I": "Ton analyse manque de rigueur. Les observations sont superficielles et les preuves textuelles sont insuffisantes. Je t'encourage à prendre le temps d'explorer le texte plus en profondeur et à appuyer chaque affirmation avec des citations précises.",
+        "CR1759243331050_D": "Ton analyse est en développement. Certains éléments sont bien identifiés, mais l'ensemble manque de profondeur. Tes preuves textuelles pourraient être plus nombreuses et mieux exploitées pour soutenir ton interprétation.",
+        "CR1759243331050_M": "Ton analyse est rigoureuse. Tu identifies les éléments importants du texte et tu les appuies avec des preuves textuelles pertinentes et bien choisies. Ton interprétation est solide et bien étayée.",
+        "CR1759243331050_E": "Ton analyse est d'une rigueur exemplaire. Chaque observation est méthodiquement étayée par des preuves textuelles précises et judicieusement sélectionnées. Ton travail d'analyse révèle une compréhension approfondie du texte.",
+
+        "CR1759243365467_I": "Ton interprétation manque de plausibilité. Les liens que tu établis entre les éléments du texte et ta thèse sont faibles ou forcés. Je te suggère de t'assurer que chaque élément de ton analyse contribue logiquement à ton interprétation globale.",
+        "CR1759243365467_D": "Ton interprétation est en développement. Certains liens sont pertinents, mais d'autres semblent moins solides. Travaille à renforcer la cohérence entre tes observations et l'interprétation que tu en fais.",
+        "CR1759243365467_M": "Ton interprétation est plausible et bien construite. Les liens que tu établis entre les différents éléments du texte sont logiques et contribuent à une compréhension cohérente de l'œuvre. Ton argumentation est crédible.",
+        "CR1759243365467_E": "Ton interprétation est non seulement plausible, mais aussi éclairante. Les liens que tu tisses entre les éléments révèlent une compréhension fine et nuancée du texte. Ton analyse offre une perspective originale et convaincante.",
+
+        "CR1759243379949_I": "Ton analyse manque de nuance. Tu tends à simplifier les enjeux du texte et à présenter une vision binaire. Je t'encourage à explorer les subtilités, les ambiguïtés et les différentes couches de sens que peut receler un texte littéraire.",
+        "CR1759243379949_D": "Ton analyse gagne en nuance, mais certains aspects demeurent un peu simplistes. Tu commences à percevoir les subtilités du texte, mais il y aurait lieu d'approfondir davantage l'exploration de ses complexités.",
+        "CR1759243379949_M": "Ton analyse démontre une bonne capacité à percevoir les nuances du texte. Tu explores les subtilités de l'œuvre et tu évites les raccourcis simplificateurs. Ton interprétation révèle une compréhension fine du texte.",
+        "CR1759243379949_E": "Ton analyse révèle une sensibilité remarquable aux nuances du texte. Tu explores avec finesse les ambiguïtés, les paradoxes et les multiples couches de signification. Ton interprétation témoigne d'une compréhension profonde et subtile de l'œuvre.",
+
+        "CR1759243428715_I": "Ton texte comporte de nombreuses erreurs de français qui nuisent à la compréhension. Je te recommande de consacrer plus de temps à la révision linguistique et de consulter des ressources d'aide à la rédaction.",
+        "CR1759243428715_D": "Ton français s'améliore, mais des erreurs persistent (syntaxe, orthographe, vocabulaire). Une révision plus attentive et l'utilisation d'outils de correction te permettraient d'améliorer significativement la qualité de ta langue.",
+        "CR1759243428715_M": "Ton français est de bonne qualité. Le texte se lit bien et les erreurs sont peu nombreuses. Tu maîtrises la langue et l'expression est généralement claire et appropriée.",
+        "CR1759243428715_E": "Ton français est impeccable. L'expression est soignée, précise et élégante. Tu maîtrises parfaitement la langue et tu l'utilises avec aisance pour exprimer des idées complexes avec clarté."
+      },
+      "verrouille": false
+    }
+  ],
+
+  "calendrierComplet": {
+    "dateDebut": "2026-01-19",
+    "dateFin": "2026-05-08",
+    "totalJours": 109,
+    "totalSemaines": 15,
+    "totalJoursCours": 60,
+    "conges": [
+      {"date": "2026-03-02", "description": "Semaine de lecture", "type": "prevu"},
+      {"date": "2026-03-03", "description": "Semaine de lecture", "type": "prevu"},
+      {"date": "2026-03-04", "description": "Semaine de lecture", "type": "prevu"},
+      {"date": "2026-03-05", "description": "Semaine de lecture", "type": "prevu"},
+      {"date": "2026-03-06", "description": "Semaine de lecture", "type": "prevu"},
+      {"date": "2026-04-03", "description": "Vendredi saint", "type": "prevu"},
+      {"date": "2026-04-06", "description": "Lundi de Pâques", "type": "prevu"}
+    ],
+    "joursCours": [
+      "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23",
+      "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30",
+      "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06",
+      "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13",
+      "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20",
+      "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27",
+      "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13",
+      "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20",
+      "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27",
+      "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07",
+      "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14",
+      "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21"
+    ]
+  },
+
+  "seancesCompletes": {
+    "lundi": {"actif": true, "heureDebut": "08:30", "heureFin": "10:30", "local": "C-234"},
+    "mardi": {"actif": true, "heureDebut": "13:00", "heureFin": "15:00", "local": "C-234"},
+    "mercredi": {"actif": false},
+    "jeudi": {"actif": false},
+    "vendredi": {"actif": false}
+  },
+
+  "evaluations": {
+    "2234567": {
+      "A1": {
+        "id": "EVAL_2234567_A1",
+        "productionId": "A1",
+        "da": "2234567",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-02-10",
+        "criteres": {
+          "Structure": 3.2,
+          "Rigueur": 3.0,
+          "Plausibilité": 2.8,
+          "Nuance": 3.1,
+          "Français écrit": 3.3
+        },
+        "niveauFinal": "M",
+        "noteFinale": 78.5
+      },
+      "A2": {
+        "id": "EVAL_2234567_A2",
+        "productionId": "A2",
+        "da": "2234567",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-05",
+        "criteres": {
+          "Structure": 3.4,
+          "Rigueur": 3.2,
+          "Plausibilité": 3.0,
+          "Nuance": 3.3,
+          "Français écrit": 3.5
+        },
+        "niveauFinal": "M",
+        "noteFinale": 82.0
+      },
+      "A3": {
+        "id": "EVAL_2234567_A3",
+        "productionId": "A3",
+        "da": "2234567",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-28",
+        "criteres": {
+          "Structure": 3.5,
+          "Rigueur": 3.4,
+          "Plausibilité": 3.2,
+          "Nuance": 3.4,
+          "Français écrit": 3.6
+        },
+        "niveauFinal": "E",
+        "noteFinale": 85.5
+      }
+    },
+    "2234568": {
+      "A1": {
+        "id": "EVAL_2234568_A1",
+        "productionId": "A1",
+        "da": "2234568",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-02-10",
+        "criteres": {
+          "Structure": 2.8,
+          "Rigueur": 2.6,
+          "Plausibilité": 2.5,
+          "Nuance": 2.7,
+          "Français écrit": 2.9
+        },
+        "niveauFinal": "D",
+        "noteFinale": 68.0
+      },
+      "A2": {
+        "id": "EVAL_2234568_A2",
+        "productionId": "A2",
+        "da": "2234568",
+        "statut": "non-evalue",
+        "statutRemise": "non-remis",
+        "dateEvaluation": null
+      },
+      "A3": {
+        "id": "EVAL_2234568_A3",
+        "productionId": "A3",
+        "da": "2234568",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-28",
+        "criteres": {
+          "Structure": 2.9,
+          "Rigueur": 2.7,
+          "Plausibilité": 2.6,
+          "Nuance": 2.8,
+          "Français écrit": 3.0
+        },
+        "niveauFinal": "D",
+        "noteFinale": 70.5
+      }
+    },
+    "2234569": {
+      "A1": {
+        "id": "EVAL_2234569_A1",
+        "productionId": "A1",
+        "da": "2234569",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-02-10",
+        "criteres": {
+          "Structure": 3.6,
+          "Rigueur": 3.7,
+          "Plausibilité": 3.5,
+          "Nuance": 3.8,
+          "Français écrit": 3.7
+        },
+        "niveauFinal": "E",
+        "noteFinale": 92.0
+      },
+      "A2": {
+        "id": "EVAL_2234569_A2",
+        "productionId": "A2",
+        "da": "2234569",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-05",
+        "criteres": {
+          "Structure": 3.7,
+          "Rigueur": 3.8,
+          "Plausibilité": 3.6,
+          "Nuance": 3.9,
+          "Français écrit": 3.8
+        },
+        "niveauFinal": "E",
+        "noteFinale": 94.0
+      },
+      "A3": {
+        "id": "EVAL_2234569_A3",
+        "productionId": "A3",
+        "da": "2234569",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-28",
+        "criteres": {
+          "Structure": 3.8,
+          "Rigueur": 3.9,
+          "Plausibilité": 3.7,
+          "Nuance": 4.0,
+          "Français écrit": 3.9
+        },
+        "niveauFinal": "E",
+        "noteFinale": 96.5
+      }
+    },
+    "2234570": {
+      "A1": {
+        "id": "EVAL_2234570_A1",
+        "productionId": "A1",
+        "da": "2234570",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-02-10",
+        "criteres": {
+          "Structure": 2.2,
+          "Rigueur": 2.0,
+          "Plausibilité": 1.8,
+          "Nuance": 2.1,
+          "Français écrit": 2.3
+        },
+        "niveauFinal": "I",
+        "noteFinale": 52.0
+      },
+      "A2": {
+        "id": "EVAL_2234570_A2",
+        "productionId": "A2",
+        "da": "2234570",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-05",
+        "criteres": {
+          "Structure": 2.4,
+          "Rigueur": 2.2,
+          "Plausibilité": 2.0,
+          "Nuance": 2.3,
+          "Français écrit": 2.5
+        },
+        "niveauFinal": "I",
+        "noteFinale": 58.0
+      },
+      "A3": {
+        "id": "EVAL_2234570_A3",
+        "productionId": "A3",
+        "da": "2234570",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-28",
+        "criteres": {
+          "Structure": 2.6,
+          "Rigueur": 2.5,
+          "Plausibilité": 2.3,
+          "Nuance": 2.5,
+          "Français écrit": 2.7
+        },
+        "niveauFinal": "D",
+        "noteFinale": 65.0
+      }
+    },
+    "2234571": {
+      "A1": {
+        "id": "EVAL_2234571_A1",
+        "productionId": "A1",
+        "da": "2234571",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-02-10",
+        "criteres": {
+          "Structure": 3.3,
+          "Rigueur": 3.1,
+          "Plausibilité": 2.9,
+          "Nuance": 3.2,
+          "Français écrit": 3.4
+        },
+        "niveauFinal": "M",
+        "noteFinale": 80.0
+      },
+      "A2": {
+        "id": "EVAL_2234571_A2",
+        "productionId": "A2",
+        "da": "2234571",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-05",
+        "criteres": {
+          "Structure": 3.4,
+          "Rigueur": 3.3,
+          "Plausibilité": 3.1,
+          "Nuance": 3.4,
+          "Français écrit": 3.5
+        },
+        "niveauFinal": "M",
+        "noteFinale": 83.5
+      },
+      "A3": {
+        "id": "EVAL_2234571_A3",
+        "productionId": "A3",
+        "da": "2234571",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-28",
+        "criteres": {
+          "Structure": 3.5,
+          "Rigueur": 3.4,
+          "Plausibilité": 3.3,
+          "Nuance": 3.5,
+          "Français écrit": 3.6
+        },
+        "niveauFinal": "E",
+        "noteFinale": 86.0
+      }
+    },
+    "2234572": {
+      "A1": {
+        "id": "EVAL_2234572_A1",
+        "productionId": "A1",
+        "da": "2234572",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-02-10",
+        "criteres": {
+          "Structure": 3.0,
+          "Rigueur": 2.9,
+          "Plausibilité": 2.7,
+          "Nuance": 3.0,
+          "Français écrit": 3.1
+        },
+        "niveauFinal": "M",
+        "noteFinale": 75.0
+      },
+      "A2": {
+        "id": "EVAL_2234572_A2",
+        "productionId": "A2",
+        "da": "2234572",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-05",
+        "criteres": {
+          "Structure": 3.1,
+          "Rigueur": 3.0,
+          "Plausibilité": 2.9,
+          "Nuance": 3.2,
+          "Français écrit": 3.3
+        },
+        "niveauFinal": "M",
+        "noteFinale": 78.5
+      },
+      "A3": {
+        "id": "EVAL_2234572_A3",
+        "productionId": "A3",
+        "da": "2234572",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-28",
+        "criteres": {
+          "Structure": 3.2,
+          "Rigueur": 3.1,
+          "Plausibilité": 3.0,
+          "Nuance": 3.3,
+          "Français écrit": 3.4
+        },
+        "niveauFinal": "M",
+        "noteFinale": 81.0
+      }
+    },
+    "2234573": {
+      "A1": {
+        "id": "EVAL_2234573_A1",
+        "productionId": "A1",
+        "da": "2234573",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-02-10",
+        "criteres": {
+          "Structure": 3.5,
+          "Rigueur": 3.3,
+          "Plausibilité": 3.2,
+          "Nuance": 3.4,
+          "Français écrit": 3.6
+        },
+        "niveauFinal": "E",
+        "noteFinale": 85.0
+      },
+      "A2": {
+        "id": "EVAL_2234573_A2",
+        "productionId": "A2",
+        "da": "2234573",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-05",
+        "criteres": {
+          "Structure": 3.6,
+          "Rigueur": 3.5,
+          "Plausibilité": 3.4,
+          "Nuance": 3.6,
+          "Français écrit": 3.7
+        },
+        "niveauFinal": "E",
+        "noteFinale": 89.0
+      },
+      "A3": {
+        "id": "EVAL_2234573_A3",
+        "productionId": "A3",
+        "da": "2234573",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-28",
+        "criteres": {
+          "Structure": 3.7,
+          "Rigueur": 3.6,
+          "Plausibilité": 3.5,
+          "Nuance": 3.7,
+          "Français écrit": 3.8
+        },
+        "niveauFinal": "E",
+        "noteFinale": 91.5
+      }
+    },
+    "2234574": {
+      "A1": {
+        "id": "EVAL_2234574_A1",
+        "productionId": "A1",
+        "da": "2234574",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-02-10",
+        "criteres": {
+          "Structure": 2.9,
+          "Rigueur": 2.8,
+          "Plausibilité": 2.6,
+          "Nuance": 2.9,
+          "Français écrit": 3.0
+        },
+        "niveauFinal": "D",
+        "noteFinale": 72.0
+      },
+      "A2": {
+        "id": "EVAL_2234574_A2",
+        "productionId": "A2",
+        "da": "2234574",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-05",
+        "criteres": {
+          "Structure": 3.0,
+          "Rigueur": 2.9,
+          "Plausibilité": 2.8,
+          "Nuance": 3.0,
+          "Français écrit": 3.2
+        },
+        "niveauFinal": "M",
+        "noteFinale": 76.0
+      },
+      "A3": {
+        "id": "EVAL_2234574_A3",
+        "productionId": "A3",
+        "da": "2234574",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-28",
+        "criteres": {
+          "Structure": 3.1,
+          "Rigueur": 3.0,
+          "Plausibilité": 2.9,
+          "Nuance": 3.2,
+          "Français écrit": 3.3
+        },
+        "niveauFinal": "M",
+        "noteFinale": 79.0
+      }
+    },
+    "2234575": {
+      "A1": {
+        "id": "EVAL_2234575_A1",
+        "productionId": "A1",
+        "da": "2234575",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-02-10",
+        "criteres": {
+          "Structure": 3.1,
+          "Rigueur": 3.0,
+          "Plausibilité": 2.8,
+          "Nuance": 3.1,
+          "Français écrit": 3.2
+        },
+        "niveauFinal": "M",
+        "noteFinale": 77.0
+      },
+      "A2": {
+        "id": "EVAL_2234575_A2",
+        "productionId": "A2",
+        "da": "2234575",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-05",
+        "criteres": {
+          "Structure": 3.2,
+          "Rigueur": 3.1,
+          "Plausibilité": 3.0,
+          "Nuance": 3.3,
+          "Français écrit": 3.4
+        },
+        "niveauFinal": "M",
+        "noteFinale": 81.5
+      },
+      "A3": {
+        "id": "EVAL_2234575_A3",
+        "productionId": "A3",
+        "da": "2234575",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-28",
+        "criteres": {
+          "Structure": 3.4,
+          "Rigueur": 3.3,
+          "Plausibilité": 3.2,
+          "Nuance": 3.5,
+          "Français écrit": 3.6
+        },
+        "niveauFinal": "E",
+        "noteFinale": 85.5
+      }
+    },
+    "2234576": {
+      "A1": {
+        "id": "EVAL_2234576_A1",
+        "productionId": "A1",
+        "da": "2234576",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-02-10",
+        "criteres": {
+          "Structure": 2.7,
+          "Rigueur": 2.5,
+          "Plausibilité": 2.4,
+          "Nuance": 2.6,
+          "Français écrit": 2.8
+        },
+        "niveauFinal": "D",
+        "noteFinale": 66.0
+      },
+      "A2": {
+        "id": "EVAL_2234576_A2",
+        "productionId": "A2",
+        "da": "2234576",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-05",
+        "criteres": {
+          "Structure": 2.8,
+          "Rigueur": 2.7,
+          "Plausibilité": 2.5,
+          "Nuance": 2.8,
+          "Français écrit": 3.0
+        },
+        "niveauFinal": "D",
+        "noteFinale": 70.0
+      },
+      "A3": {
+        "id": "EVAL_2234576_A3",
+        "productionId": "A3",
+        "da": "2234576",
+        "statut": "evalue",
+        "statutRemise": "remis",
+        "dateEvaluation": "2026-03-28",
+        "criteres": {
+          "Structure": 3.0,
+          "Rigueur": 2.9,
+          "Plausibilité": 2.7,
+          "Nuance": 3.0,
+          "Français écrit": 3.2
+        },
+        "niveauFinal": "M",
+        "noteFinale": 75.5
+      }
+    }
+  },
+
+  "presences": {
+    "2026-01-19": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": true, "heures": 2.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": true, "heures": 2.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": true, "heures": 2.0}},
+    "2026-01-20": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": false, "heures": 0.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": true, "heures": 2.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": false, "heures": 0.0}},
+    "2026-01-26": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": true, "heures": 2.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": false, "heures": 0.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": true, "heures": 2.0}},
+    "2026-02-02": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": true, "heures": 2.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": false, "heures": 0.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": true, "heures": 2.0}},
+    "2026-02-09": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": false, "heures": 0.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": true, "heures": 2.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": false, "heures": 0.0}},
+    "2026-02-16": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": true, "heures": 2.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": false, "heures": 0.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": true, "heures": 2.0}},
+    "2026-02-23": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": false, "heures": 0.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": false, "heures": 0.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": false, "heures": 0.0}},
+    "2026-03-09": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": true, "heures": 2.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": true, "heures": 2.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": true, "heures": 2.0}},
+    "2026-03-16": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": false, "heures": 0.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": false, "heures": 0.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": false, "heures": 0.0}},
+    "2026-03-23": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": true, "heures": 2.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": false, "heures": 0.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": true, "heures": 2.0}},
+    "2026-03-30": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": false, "heures": 0.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": false, "heures": 0.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": false, "heures": 0.0}},
+    "2026-04-07": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": true, "heures": 2.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": true, "heures": 2.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": true, "heures": 2.0}},
+    "2026-04-13": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": false, "heures": 0.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": false, "heures": 0.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": false, "heures": 0.0}},
+    "2026-04-20": {"2234567": {"present": true, "heures": 2.0}, "2234568": {"present": true, "heures": 2.0}, "2234569": {"present": true, "heures": 2.0}, "2234570": {"present": true, "heures": 2.0}, "2234571": {"present": true, "heures": 2.0}, "2234572": {"present": true, "heures": 2.0}, "2234573": {"present": true, "heures": 2.0}, "2234574": {"present": true, "heures": 2.0}, "2234575": {"present": true, "heures": 2.0}, "2234576": {"present": true, "heures": 2.0}}
+  }
+}
