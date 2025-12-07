@@ -165,11 +165,11 @@ let echelleTemplateActuelle = null;
  * - Bouton contextuel pour ajouter un niveau à l'échelle
  * - Affiche aperçu visuel de l'échelle
  */
-function afficherToutesLesEchellesNiveaux() {
+async function afficherToutesLesEchellesNiveaux() {
     const container = document.getElementById('vueEchellesNiveaux');
     if (!container) return;
 
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = await db.get('echellesTemplates') ||  [];
 
     if (echelles.length === 0) {
         container.innerHTML = `
@@ -276,13 +276,13 @@ function afficherToutesLesEchellesNiveaux() {
                     `}
 
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-modifier" onclick="chargerEchelleTemplate('${echelle.id}')">
+                        <button class="btn btn-modifier" onclick="(async () => { await chargerEchelleTemplate('${echelle.id}'); })()">
                             Modifier
                         </button>
-                        <button class="btn btn-principal" onclick="dupliquerEchelle('${echelle.id}')">
+                        <button class="btn btn-principal" onclick="(async () => { await dupliquerEchelle('${echelle.id}'); })()">
                             Dupliquer
                         </button>
-                        <button class="btn btn-supprimer" onclick="supprimerEchelle('${echelle.id}')">
+                        <button class="btn btn-supprimer" onclick="(async () => { await supprimerEchelle('${echelle.id}'); })()">
                             Supprimer
                         </button>
                     </div>
@@ -304,12 +304,12 @@ function afficherToutesLesEchellesNiveaux() {
  * 2. Affiche le formulaire de niveau
  * 3. Scroll vers le formulaire
  */
-function ajouterNiveauAEchelle(echelleId) {
+async function ajouterNiveauAEchelle(echelleId) {
     // Charger l'échelle dans le select
     const select = document.getElementById('selectEchelleTemplate');
     if (select) {
         select.value = echelleId;
-        chargerEchelleTemplate();
+        await chargerEchelleTemplate();
     }
 
     // Scroll vers le tableau des niveaux
@@ -330,8 +330,8 @@ function ajouterNiveauAEchelle(echelleId) {
  * 3. Sauvegarde la copie
  * 4. Rafraîchit l'affichage
  */
-function dupliquerEchelle(echelleId) {
-    const echelles = db.getSync('echellesTemplates', []);
+async function dupliquerEchelle(echelleId) {
+    const echelles = await db.get('echellesTemplates') ||  [];
     const echelle = echelles.find(e => e.id === echelleId);
 
     if (!echelle) {
@@ -353,11 +353,11 @@ function dupliquerEchelle(echelleId) {
     };
 
     echelles.push(nouvelleEchelle);
-    db.setSync('echellesTemplates', echelles);
+    await db.set('echellesTemplates',  echelles);
 
     // Mettre à jour l'interface
-    chargerEchellesTemplates();
-    afficherToutesLesEchellesNiveaux();
+    await chargerEchellesTemplates();
+    await afficherToutesLesEchellesNiveaux();
 
     afficherNotificationSucces(`📑 Échelle «${nouvelleEchelle.nom}» créée avec succès !`);
 }
@@ -379,12 +379,12 @@ function dupliquerEchelle(echelleId) {
  * RETOUR:
  * - Sortie silencieuse si les éléments n'existent pas
  */
-function initialiserModuleEchelles() {
+async function initialiserModuleEchelles() {
     console.log('📈 Initialisation du module Échelles de performance');
 
     // Afficher la sidebar avec la liste des échelles (Beta 80.5+)
     if (typeof afficherListeEchelles === 'function') {
-        afficherListeEchelles();
+        await afficherListeEchelles();
     }
 
     // Vérifier que nous sommes dans la bonne section
@@ -395,13 +395,13 @@ function initialiserModuleEchelles() {
     }
 
     // Charger les échelles templates
-    chargerEchellesTemplates();
+    await chargerEchellesTemplates();
 
     // Afficher la nouvelle vue hiérarchique
-    afficherToutesLesEchellesNiveaux();
+    await afficherToutesLesEchellesNiveaux();
 
     // Charger la configuration
-    chargerConfigurationEchelle();
+    await chargerConfigurationEchelle();
 
     console.log('   ✅ Module Échelles initialisé avec nouvelle vue hiérarchique');
 }
@@ -420,13 +420,13 @@ function initialiserModuleEchelles() {
  * 
  * UTILISÉ PAR:
  * - initialiserModuleEchelles()
- * - enregistrerCommeEchelle()
+ * - await enregistrerCommeEchelle()
  */
-function chargerEchellesTemplates() {
+async function chargerEchellesTemplates() {
     const select = document.getElementById('selectEchelleTemplate');
     if (!select) return;
 
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = await db.get('echellesTemplates') ||  [];
 
     let options = '<option value="">-- Nouvelle échelle --</option>';
     options += '<option value="new">➕ Créer une nouvelle échelle</option>';
@@ -454,7 +454,7 @@ function chargerEchellesTemplates() {
  * GÈRE:
  * - Changement d'événement sur #selectEchelleTemplate
  */
-function chargerEchelleTemplate(echelleId) {
+async function chargerEchelleTemplate(echelleId) {
     const select = document.getElementById('selectEchelleTemplate');
     const selectValue = echelleId || (select ? select.value : '');
     const nomContainer = document.getElementById('nomEchelleContainer');
@@ -469,7 +469,7 @@ function chargerEchelleTemplate(echelleId) {
         document.getElementById('nomEchelleTemplate').value = '';
 
         // Réinitialiser aux valeurs par défaut
-        reinitialiserNiveauxDefaut();
+        await reinitialiserNiveauxDefaut();
         echelleTemplateActuelle = null;
 
         // Masquer les boutons dupliquer, exporter, importer et supprimer
@@ -480,7 +480,7 @@ function chargerEchelleTemplate(echelleId) {
 
     } else {
         // Charger une échelle existante
-        const echelles = db.getSync('echellesTemplates', []);
+        const echelles = await db.get('echellesTemplates') ||  [];
         const echelle = echelles.find(e => e.id === selectValue);
 
         if (echelle) {
@@ -493,13 +493,13 @@ function chargerEchelleTemplate(echelleId) {
             document.getElementById('nomEchelleTemplate').value = echelle.nom;
 
             // Charger les niveaux
-            db.setSync('niveauxEchelle', echelle.niveaux);
+            await db.set('niveauxEchelle',  echelle.niveaux);
             afficherTableauNiveaux(echelle.niveaux);
             afficherApercuEchelle(echelle.niveaux);
 
             // Charger la configuration
             if (echelle.config) {
-                db.setSync('configEchelle', echelle.config);
+                await db.set('configEchelle',  echelle.config);
 
                 const elementTypeEchelle = document.getElementById('typeEchelle');
                 const elementSeuilReussite = document.getElementById('seuilReussite');
@@ -538,11 +538,11 @@ function chargerEchelleTemplate(echelleId) {
  * FONCTIONNEMENT:
  * Met à jour le nom de l'échelle en mémoire ET dans localStorage
  */
-function sauvegarderNomEchelle() {
+async function sauvegarderNomEchelle() {
     const nom = document.getElementById('nomEchelleTemplate')?.value?.trim();
     if (echelleTemplateActuelle && echelleTemplateActuelle.id && nom) {
         // CRITIQUE: Vérifier la synchronisation avec localStorage pour éviter perte de données
-        const echellesActuelles = db.getSync('echellesTemplates', []);
+        const echellesActuelles = await db.get('echellesTemplates') ||  [];
         const echelleActuelleEnStorage = echellesActuelles.find(e => e.id === echelleTemplateActuelle.id);
 
         // Protection: Si désynchronisation détectée, resynchroniser depuis localStorage
@@ -557,16 +557,16 @@ function sauvegarderNomEchelle() {
         echelleTemplateActuelle.dateModification = new Date().toISOString();
 
         // Mettre à jour dans localStorage - SAUVEGARDER TOUTE L'ÉCHELLE (y compris les niveaux)
-        let echelles = db.getSync('echellesTemplates', []);
+        let echelles = await db.get('echellesTemplates') ||  [];
         const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
         if (index !== -1) {
             echelles[index] = { ...echelleTemplateActuelle };
-            db.setSync('echellesTemplates', echelles);
+            await db.set('echellesTemplates',  echelles);
 
             // Recharger la sidebar ET le select pour afficher le nouveau nom
-            afficherListeEchelles();
-            definirEchelleActive(echelleTemplateActuelle.id);
-            chargerEchellesTemplates();
+            await afficherListeEchelles();
+            await definirEchelleActive(echelleTemplateActuelle.id);
+            await chargerEchellesTemplates();
             document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
         }
     }
@@ -590,7 +590,7 @@ function sauvegarderNomEchelle() {
  * - Nom obligatoire
  * - Niveaux valides (via localStorage)
  */
-function enregistrerCommeEchelle() {
+async function enregistrerCommeEchelle() {
     const nomEchelle = document.getElementById('nomEchelleTemplate')?.value?.trim();
 
     if (!nomEchelle) {
@@ -598,7 +598,7 @@ function enregistrerCommeEchelle() {
         return;
     }
 
-    let echelles = db.getSync('echellesTemplates', []);
+    let echelles = await db.get('echellesTemplates') ||  [];
 
     // Vérifier si on modifie une échelle existante
     if (echelleTemplateActuelle && echelleTemplateActuelle.id) {
@@ -616,8 +616,8 @@ function enregistrerCommeEchelle() {
         }
     } else {
         // Nouvelle échelle - utiliser niveauxEchelle de localStorage (comportement normal pour création)
-        const niveaux = db.getSync('niveauxEchelle', niveauxDefaut);
-        const config = db.getSync('configEchelle', {});
+        const niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
+        const config = await db.get('configEchelle') ||  {};
 
         const nouvelleEchelle = {
             id: 'ECH' + Date.now(),
@@ -633,11 +633,11 @@ function enregistrerCommeEchelle() {
     }
 
     // Sauvegarder
-    db.setSync('echellesTemplates', echelles);
+    await db.set('echellesTemplates',  echelles);
 
     // Recharger le select et sélectionner l'échelle actuelle
-    chargerEchellesTemplates();
-    afficherToutesLesEchellesNiveaux();
+    await chargerEchellesTemplates();
+    await afficherToutesLesEchellesNiveaux();
     document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
 
     afficherNotificationSucces(`Échelle «${nomEchelle}» enregistrée avec succès !`);
@@ -661,7 +661,7 @@ function enregistrerCommeEchelle() {
  * UTILISÉ PAR:
  * - Bouton «Dupliquer» (visible seulement si échelle sélectionnée)
  */
-function dupliquerEchelleActuelle() {
+async function dupliquerEchelleActuelle() {
     if (!echelleTemplateActuelle) return;
 
     const nouveauNom = prompt('Nom de la nouvelle échelle :', echelleTemplateActuelle.nom + ' (copie)');
@@ -677,14 +677,14 @@ function dupliquerEchelleActuelle() {
         baseSur: echelleTemplateActuelle.nom
     };
 
-    let echelles = db.getSync('echellesTemplates', []);
+    let echelles = await db.get('echellesTemplates') ||  [];
     echelles.push(nouvelleEchelle);
-    db.setSync('echellesTemplates', echelles);
+    await db.set('echellesTemplates',  echelles);
 
     // Mettre à jour l'interface
     echelleTemplateActuelle = nouvelleEchelle;
-    chargerEchellesTemplates();
-    afficherToutesLesEchellesNiveaux();
+    await chargerEchellesTemplates();
+    await afficherToutesLesEchellesNiveaux();
     document.getElementById('selectEchelleTemplate').value = nouvelleEchelle.id;
     document.getElementById('nomEchelleTemplate').value = nouvelleEchelle.nom;
 
@@ -706,15 +706,15 @@ function dupliquerEchelleActuelle() {
  * SÉCURITÉ:
  * - Confirmation obligatoire avant suppression
  */
-function supprimerEchelle(echelleId) {
+async function supprimerEchelle(echelleId) {
     if (!confirm('Supprimer cette échelle ?')) return;
 
-    let echelles = db.getSync('echellesTemplates', []);
+    let echelles = await db.get('echellesTemplates') ||  [];
     echelles = echelles.filter(e => e.id !== echelleId);
-    db.setSync('echellesTemplates', echelles);
+    await db.set('echellesTemplates',  echelles);
 
-    chargerEchellesTemplates();
-    afficherToutesLesEchellesNiveaux();
+    await chargerEchellesTemplates();
+    await afficherToutesLesEchellesNiveaux();
     afficherEchellesPerformance();
     afficherNotificationSucces('Échelle supprimée');
 }
@@ -739,8 +739,8 @@ function supprimerEchelle(echelleId) {
  * - seuilReussite: pourcentage (défaut: 60)
  * - codesPersonnalises: string (optionnel)
  */
-function chargerConfigurationEchelle() {
-    const config = db.getSync('configEchelle', {});
+async function chargerConfigurationEchelle() {
+    const config = await db.get('configEchelle') ||  {};
 
     // Charger le type d'échelle
     const elementTypeEchelle = document.getElementById('typeEchelle');
@@ -763,7 +763,7 @@ function chargerConfigurationEchelle() {
     changerTypeEchelle();
 
     // Charger les niveaux
-    const niveaux = db.getSync('niveauxEchelle', niveauxDefaut);
+    const niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
 }
@@ -776,7 +776,7 @@ function chargerConfigurationEchelle() {
  * 
  * APPELÉE PAR:
  * - Changement dans les champs de configuration
- * - enregistrerCommeEchelle()
+ * - await enregistrerCommeEchelle()
  * 
  * CONFIG SAUVEGARDÉE:
  * - typeEchelle
@@ -784,7 +784,7 @@ function chargerConfigurationEchelle() {
  * - notePassage (optionnel)
  * - codesPersonnalises (optionnel)
  */
-function sauvegarderConfigEchelle() {
+async function sauvegarderConfigEchelle() {
     const config = {
         typeEchelle: document.getElementById('typeEchelle').value,
         seuilReussite: parseInt(document.getElementById('seuilReussite').value) || 60,
@@ -792,28 +792,28 @@ function sauvegarderConfigEchelle() {
         codesPersonnalises: document.getElementById('codesPersonnalises')?.value || ''
     };
 
-    db.setSync('configEchelle', config);
+    await db.set('configEchelle',  config);
 }
 
 /**
  * Gère le changement de type d'échelle
  * Adapte l'interface selon le type sélectionné
- * 
+ *
  * FONCTIONNEMENT:
  * 1. Récupère le type sélectionné
  * 2. Affiche/masque les champs conditionnels
  * 3. Si type «autre»: affiche champ personnalisé
  * 4. Sauvegarde la configuration
- * 
+ *
  * TYPES D'ÉCHELLE:
  * - lettres: A, B, C, D, E, F
  * - pourcentage: 0-100%
  * - autre: personnalisé
- * 
+ *
  * APPELÉE PAR:
  * - Changement dans #typeEchelle
  */
-function changerTypeEchelle() {
+async function changerTypeEchelle() {
     const elementType = document.getElementById('typeEchelle');
     if (!elementType) return;
 
@@ -834,7 +834,7 @@ function changerTypeEchelle() {
         notePassageContainer.innerHTML = '';
     }
 
-    sauvegarderConfigEchelle();
+    await sauvegarderConfigEchelle();
 }
 
 /* ===============================
@@ -854,12 +854,12 @@ function changerTypeEchelle() {
  * @param {Array} niveaux - Array d'objets niveau
  * 
  * UTILISÉ PAR:
- * - chargerConfigurationEchelle()
- * - chargerEchelleTemplate()
- * - modifierNiveau()
- * - ajouterNiveau()
- * - supprimerNiveau()
- * - reinitialiserNiveauxDefaut()
+ * - await chargerConfigurationEchelle()
+ * - await chargerEchelleTemplate()
+ * - await modifierNiveau()
+ * - await ajouterNiveau()
+ * - await supprimerNiveau()
+ * - await reinitialiserNiveauxDefaut()
  * 
  * STRUCTURE TABLEAU:
  * Code | Nom | Description | Min(%) | Max(%) | Couleur | Actions
@@ -888,14 +888,14 @@ function afficherTableauNiveaux(niveaux) {
                     <tr style="opacity: ${niveau.verrouille ? '0.7' : '1'};">
                         <td class="echelle-text-center">
                             <div style="display: flex; gap: 4px; justify-content: center;">
-                                <button onclick="deplacerNiveauHaut(${index})"
+                                <button onclick="(async () => { await deplacerNiveauHaut(${index}); })()"
                                         class="btn btn-compact"
                                         ${index === 0 ? 'disabled' : ''}
                                         title="Déplacer vers le haut"
                                         class="echelle-padding-compact">
                                     ↑
                                 </button>
-                                <button onclick="deplacerNiveauBas(${index})"
+                                <button onclick="(async () => { await deplacerNiveauBas(${index}); })()"
                                         class="btn btn-compact"
                                         ${index === niveaux.length - 1 ? 'disabled' : ''}
                                         title="Déplacer vers le bas"
@@ -968,7 +968,7 @@ function afficherTableauNiveaux(niveaux) {
 </td>
                         <td class="echelle-text-center">
                             ${niveaux.length > 1 ?
-            `<button onclick="supprimerNiveau(${index})"
+            `<button onclick="(async () => { await supprimerNiveau(${index}); })()"
                                          class="btn btn-supprimer btn-compact"
                                          ${niveau.verrouille ? 'disabled' : ''}
                                          title="${niveau.verrouille ? 'Déverrouillez d\'abord pour supprimer' : 'Supprimer ce niveau'}">
@@ -976,7 +976,7 @@ function afficherTableauNiveaux(niveaux) {
                                 </button>`
             : ''}
                             <span id="cadenas-niveau-${index}"
-                                  onclick="basculerVerrouillageNiveau(${index})"
+                                  onclick="(async () => { await basculerVerrouillageNiveau(${index}); })()"
                                   style="font-size: 1.2rem; cursor: pointer; user-select: none; margin-left: 8px;"
                                   title="${niveau.verrouille ? 'Verrouillé - Cliquez pour déverrouiller' : 'Modifiable - Cliquez pour verrouiller'}">
                                 ${niveau.verrouille ? '🔒' : '🔓'}
@@ -986,7 +986,7 @@ function afficherTableauNiveaux(niveaux) {
                 `).join('')}
             </tbody>
         </table>
-        <button class="btn btn-confirmer mt-2" onclick="ajouterNiveau()">
+        <button class="btn btn-confirmer mt-2" onclick="(async () => { await ajouterNiveau(); })()">
             + Ajouter un niveau
         </button>
     `;
@@ -1014,10 +1014,10 @@ function afficherTableauNiveaux(niveaux) {
  * - min/max convertis en entiers
  * - Autres champs en string
  */
-function modifierNiveau(index, champ, valeur) {
-    let niveaux = db.getSync('niveauxEchelle', niveauxDefaut);
+async function modifierNiveau(index, champ, valeur) {
+    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
     niveaux[index][champ] = valeur;
-    db.setSync('niveauxEchelle', niveaux);
+    await db.set('niveauxEchelle',  niveaux);
     
     // Mise à jour immédiate de l'aperçu de couleur sans recharger tout le tableau
     if (champ === 'couleur') {
@@ -1049,19 +1049,19 @@ function modifierNiveau(index, champ, valeur) {
  * - Min/Max: 0-100
  * - Couleur: bleu moyen
  */
-function ajouterNiveau() {
-    // ⚠️ REDIRECTION : Cette fonction est obsolète, utiliser ajouterNiveauEchelle() à la place
-    console.warn('⚠️ ajouterNiveau() est obsolète. Utilisez ajouterNiveauEchelle() à la place.');
+async function ajouterNiveau() {
+    // ⚠️ REDIRECTION : Cette fonction est obsolète, utiliser await ajouterNiveauEchelle() à la place
+    console.warn('⚠️ await ajouterNiveau() est obsolète. Utilisez await ajouterNiveauEchelle() à la place.');
 
     // Si on est dans le contexte d'une échelle de la sidebar, rediriger vers la nouvelle fonction
     if (echelleTemplateActuelle && echelleTemplateActuelle.id) {
-        console.log('🔄 Redirection vers ajouterNiveauEchelle()');
-        ajouterNiveauEchelle(echelleTemplateActuelle.id);
+        console.log('🔄 Redirection vers await ajouterNiveauEchelle()');
+        await ajouterNiveauEchelle(echelleTemplateActuelle.id);
         return;
     }
 
     // Sinon, comportement ancien (pour compatibilité)
-    let niveaux = db.getSync('niveauxEchelle', niveauxDefaut);
+    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
 
     niveaux.push({
         code: 'N',
@@ -1073,7 +1073,7 @@ function ajouterNiveau() {
         couleur: 'var(--bleu-moyen)'
     });
 
-    db.setSync('niveauxEchelle', niveaux);
+    await db.set('niveauxEchelle',  niveaux);
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
 }
@@ -1096,12 +1096,12 @@ function ajouterNiveau() {
  * - Confirmation obligatoire
  * - Désactivé s'il reste un seul niveau (minimum requis)
  */
-function supprimerNiveau(index) {
+async function supprimerNiveau(index) {
     if (!confirm('Supprimer ce niveau ?')) return;
 
-    let niveaux = db.getSync('niveauxEchelle', niveauxDefaut);
+    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
     niveaux.splice(index, 1);
-    db.setSync('niveauxEchelle', niveaux);
+    await db.set('niveauxEchelle',  niveaux);
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
 }
@@ -1123,15 +1123,15 @@ function supprimerNiveau(index) {
  * SÉCURITÉ:
  * - Désactivé pour le premier niveau (index 0)
  */
-function deplacerNiveauHaut(index) {
+async function deplacerNiveauHaut(index) {
     if (index === 0) return;
 
-    let niveaux = db.getSync('niveauxEchelle', niveauxDefaut);
+    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
 
     // Échanger avec le niveau précédent
     [niveaux[index - 1], niveaux[index]] = [niveaux[index], niveaux[index - 1]];
 
-    db.setSync('niveauxEchelle', niveaux);
+    await db.set('niveauxEchelle',  niveaux);
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
 }
@@ -1153,15 +1153,15 @@ function deplacerNiveauHaut(index) {
  * SÉCURITÉ:
  * - Désactivé pour le dernier niveau
  */
-function deplacerNiveauBas(index) {
-    let niveaux = db.getSync('niveauxEchelle', niveauxDefaut);
+async function deplacerNiveauBas(index) {
+    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
 
     if (index === niveaux.length - 1) return;
 
     // Échanger avec le niveau suivant
     [niveaux[index], niveaux[index + 1]] = [niveaux[index + 1], niveaux[index]];
 
-    db.setSync('niveauxEchelle', niveaux);
+    await db.set('niveauxEchelle',  niveaux);
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
 }
@@ -1187,15 +1187,15 @@ function deplacerNiveauBas(index) {
  * - Inputs disabled si verrouillé
  * - Opacité réduite si verrouillé
  */
-function basculerVerrouillageNiveau(index) {
-    let niveaux = db.getSync('niveauxEchelle', niveauxDefaut);
+async function basculerVerrouillageNiveau(index) {
+    let niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
 
     // Toggle le verrouillage
     niveaux[index].verrouille = !niveaux[index].verrouille;
     const estVerrouille = niveaux[index].verrouille;
 
     // Sauvegarder dans localStorage
-    db.setSync('niveauxEchelle', niveaux);
+    await db.set('niveauxEchelle',  niveaux);
 
     // Mettre à jour le cadenas dans le DOM immédiatement
     const cadenasElement = document.getElementById(`cadenas-niveau-${index}`);
@@ -1219,16 +1219,16 @@ function basculerVerrouillageNiveau(index) {
  *
  * UTILISÉ PAR:
  * - Bouton «Réinitialiser»
- * - chargerEchelleTemplate() (nouvelle échelle)
+ * - await chargerEchelleTemplate() (nouvelle échelle)
  *
  * SÉCURITÉ:
  * - Confirmation obligatoire
  * - Perte des modifications actuelles
  */
-function reinitialiserNiveauxDefaut() {
+async function reinitialiserNiveauxDefaut() {
     if (!confirm('Réinitialiser aux niveaux par défaut ? Les modifications seront perdues.')) return;
 
-    db.setSync('niveauxEchelle', niveauxDefaut);
+    await db.set('niveauxEchelle',  niveauxDefaut);
     afficherTableauNiveaux(niveauxDefaut);
     afficherApercuEchelle(niveauxDefaut);
     afficherNotificationSucces('Échelle réinitialisée aux valeurs par défaut');
@@ -1255,8 +1255,8 @@ function reinitialiserNiveauxDefaut() {
  * - Alerte avec liste d'erreurs si invalide
  * - Notification de succès si valide
  */
-function sauvegarderNiveaux() {
-    const niveaux = db.getSync('niveauxEchelle', niveauxDefaut);
+async function sauvegarderNiveaux() {
+    const niveaux = await db.get('niveauxEchelle') ||  niveauxDefaut;
 
     // Vérifier la cohérence
     let erreurs = [];
@@ -1296,12 +1296,12 @@ function sauvegarderNiveaux() {
  * @param {Array} niveaux - Array d'objets niveau
  * 
  * UTILISÉ PAR:
- * - chargerConfigurationEchelle()
- * - chargerEchelleTemplate()
- * - modifierNiveau()
- * - ajouterNiveau()
- * - supprimerNiveau()
- * - reinitialiserNiveauxDefaut()
+ * - await chargerConfigurationEchelle()
+ * - await chargerEchelleTemplate()
+ * - await modifierNiveau()
+ * - await ajouterNiveau()
+ * - await supprimerNiveau()
+ * - await reinitialiserNiveauxDefaut()
  * 
  * STYLE VISUEL:
  * - Fond semi-transparent (couleur + 20 opacity)
@@ -1357,7 +1357,7 @@ function afficherApercuEchelle(niveaux) {
  * - MOY: Moyen (50-75%)
  * - FAI: Faible (75-100%)
  */
-function genererNiveauxPersonnalises() {
+async function genererNiveauxPersonnalises() {
     const codes = document.getElementById('codesPersonnalises').value
         .split(',')
         .map(c => c.trim())
@@ -1381,10 +1381,10 @@ function genererNiveauxPersonnalises() {
         };
     });
 
-    db.setSync('niveauxEchelle', niveaux);
+    await db.set('niveauxEchelle',  niveaux);
     afficherTableauNiveaux(niveaux);
     afficherApercuEchelle(niveaux);
-    sauvegarderConfigEchelle();
+    await sauvegarderConfigEchelle();
 }
 
 /* ===============================
@@ -1408,8 +1408,8 @@ function genererNiveauxPersonnalises() {
  * ÉLÉMENT REQUIS:
  * - #selectEchelle1 (ou autre numéro selon la production)
  */
-function chargerEchellePerformance() {
-    const echelles = db.getSync('echellesTemplates', []);
+async function chargerEchellePerformance() {
+    const echelles = await db.get('echellesTemplates') ||  [];
     const selectEchelle = document.getElementById('selectEchelle1');
 
     if (!selectEchelle) return;
@@ -1557,7 +1557,7 @@ function afficherNotificationSucces(message) {
  * }
  */
 async function exporterEchelles() {
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = await db.get('echellesTemplates') ||  [];
 
     if (echelles.length === 0) {
         alert('Aucune échelle à exporter.');
@@ -1617,7 +1617,7 @@ async function exporterEchelleActive() {
         return;
     }
 
-    const echelles = db.getSync('echellesTemplates', []);
+    const echelles = await db.get('echellesTemplates') ||  [];
     const echelle = echelles.find(e => e.id === echelleTemplateActuelle.id);
 
     if (!echelle) {
@@ -1688,7 +1688,7 @@ async function exporterEchelleActive() {
  * Importe un fichier JSON pour remplacer l'échelle actuellement en cours d'édition
  * NOUVEAU (Beta 92): Support métadonnées Creative Commons
  */
-function importerDansEchelleActive(event) {
+async function importerDansEchelleActive(event) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -1700,7 +1700,7 @@ function importerDansEchelleActive(event) {
     }
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const donnees = JSON.parse(e.target.result);
 
@@ -1746,7 +1746,7 @@ function importerDansEchelleActive(event) {
             }
 
             // Récupérer les échelles
-            const echelles = db.getSync('echellesTemplates', []);
+            const echelles = await db.get('echellesTemplates') ||  [];
             const index = echelles.findIndex(e => e.id === echelleTemplateActuelle.id);
 
             if (index === -1) {
@@ -1770,10 +1770,10 @@ function importerDansEchelleActive(event) {
             echelles[index] = echelleMiseAJour;
 
             // Sauvegarder
-            db.setSync('echellesTemplates', echelles);
+            await db.set('echellesTemplates',  echelles);
 
             // Recharger l'échelle dans le formulaire
-            chargerEchellePourModif(echelleTemplateActuelle.id);
+            await chargerEchellePourModif(echelleTemplateActuelle.id);
 
             // Rafraîchir la liste
             afficherEchellesExistantes();
@@ -1813,7 +1813,7 @@ function importerDansEchelleActive(event) {
  *
  * @param {Event} event - Événement de changement du file input
  */
-function importerEchelles(event) {
+async function importerEchelles(event) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -1869,7 +1869,7 @@ function importerEchelles(event) {
  * Confirme l'import et fusionne les échelles
  * Fonction helper appelée depuis le modal de confirmation
  */
-window.confirmerImportEchelles = function(donnees) {
+window.confirmerImportEchelles = async function(donnees) {
     try {
         // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata)
         let echellesImportees;
@@ -1896,7 +1896,7 @@ window.confirmerImportEchelles = function(donnees) {
         }
 
         // Charger échelles existantes
-        const echellesExistantes = db.getSync('echellesTemplates', []);
+        const echellesExistantes = await db.get('echellesTemplates') ||  [];
 
         // Fusionner (remplacer si même ID, sinon ajouter)
         echellesImportees.forEach(echelle => {
@@ -1909,11 +1909,11 @@ window.confirmerImportEchelles = function(donnees) {
         });
 
         // Sauvegarder
-        db.setSync('echellesTemplates', echellesExistantes);
+        await db.set('echellesTemplates',  echellesExistantes);
 
         // Rafraîchir l'affichage
         if (typeof afficherToutesLesEchellesNiveaux === 'function') {
-            afficherToutesLesEchellesNiveaux();
+            await afficherToutesLesEchellesNiveaux();
         }
 
         alert(`✅ Import réussi !\n\n${echellesImportees.length} échelle(s) importée(s).`);
@@ -1967,22 +1967,30 @@ window.importerEchelles = importerEchelles;
    Layout 2 colonnes - Stubs minimaux
    =============================== */
 
-function afficherListeEchelles() {
-    const echelles = db.getSync('echellesTemplates', []);
+async function afficherListeEchelles() {
+    const echelles = await db.get('echellesTemplates') ||  [];
+    console.log('📊 afficherListeEchelles - Nombre d\'échelles:', echelles.length);
+
     const container = document.getElementById('sidebarListeEchelles');
-    if (!container) return;
+    if (!container) {
+        console.warn('   ⚠️ Élément sidebarListeEchelles introuvable');
+        return;
+    }
 
     // Ajouter l'échelle par défaut si aucune échelle n'existe
     if (echelles.length === 0) {
+        console.log('   ℹ️ Aucune échelle dans IndexedDB');
         container.innerHTML = '<p class="sidebar-vide">Aucune échelle disponible</p>';
         return;
     }
+
+    console.log('   ✅ Affichage de', echelles.length, 'échelle(s)');
 
     const html = echelles.map(echelle => {
         const nomEchelle = echelle.nom || 'Sans titre';
         const nbNiveaux = echelle.niveaux?.length || 0;
         return `
-            <div class="sidebar-item" data-id="${echelle.id}" onclick="chargerEchellePourModif('${echelle.id}')">
+            <div class="sidebar-item" data-id="${echelle.id}" onclick="(async () => { await chargerEchellePourModif('${echelle.id}'); })()">
                 <div class="sidebar-item-titre">${nomEchelle}</div>
                 <div class="sidebar-item-badge">${nbNiveaux} niveaux</div>
             </div>
@@ -1992,7 +2000,7 @@ function afficherListeEchelles() {
     container.innerHTML = html;
 }
 
-function creerNouvelleEchelle() {
+async function creerNouvelleEchelle() {
     document.getElementById('accueilEchelles').style.display = 'none';
     document.getElementById('conteneurEditionEchelle').style.display = 'block';
 
@@ -2038,8 +2046,8 @@ function annulerFormEchelle() {
     console.log('Édition annulée - Retour à l\'accueil');
 }
 
-function chargerEchellePourModif(id) {
-    const echelles = db.getSync('echellesTemplates', []);
+async function chargerEchellePourModif(id) {
+    const echelles = await db.get('echellesTemplates') ||  [];
     const echelle = echelles.find(e => e.id === id);
 
     if (!echelle) return;
@@ -2070,8 +2078,8 @@ function chargerEchellePourModif(id) {
     afficherNiveauxEchelle(echelle);
 
     // Mettre le highlight et rafraîchir la sidebar
-    definirEchelleActive(id);
-    afficherListeEchelles();
+    await definirEchelleActive(id);
+    await afficherListeEchelles();
 }
 
 function afficherNiveauxEchelle(echelle) {
@@ -2104,14 +2112,14 @@ function afficherNiveauxEchelle(echelle) {
                 <div class="groupe-form echelle-text-center">
                     <label class="echelle-texte-detail">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <button onclick="deplacerNiveauEchelleHaut('${echelle.id}', ${index})"
+                        <button onclick="(async () => { await deplacerNiveauEchelleHaut('${echelle.id}', ${index}); })()"
                                 class="btn btn-compact"
                                 ${index === 0 ? 'disabled' : ''}
                                 title="Déplacer vers le haut"
                                 class="echelle-padding-compact">
                             ↑
                         </button>
-                        <button onclick="deplacerNiveauEchelleBas('${echelle.id}', ${index})"
+                        <button onclick="(async () => { await deplacerNiveauEchelleBas('${echelle.id}', ${index}); })()"
                                 class="btn btn-compact"
                                 ${index === echelle.niveaux.length - 1 ? 'disabled' : ''}
                                 title="Déplacer vers le bas"
@@ -2176,7 +2184,7 @@ function afficherNiveauxEchelle(echelle) {
                 <div class="groupe-form">
                     <label class="echelle-texte-detail">Actions</label>
                     ${echelle.niveaux.length > 1 ? `
-                        <button onclick="supprimerNiveauEchelle('${echelle.id}', ${index})"
+                        <button onclick="(async () => { await supprimerNiveauEchelle('${echelle.id}', ${index}); })()"
                                 class="btn btn-supprimer btn-compact"
                                 title="Supprimer ce niveau"
                                 class="u-w-100">
@@ -2194,7 +2202,7 @@ function afficherNiveauxEchelle(echelle) {
 
     // Ajouter un bouton pour ajouter un nouveau niveau
     const btnAjouterNiveau = `
-        <button class="sidebar-btn-ajouter" onclick="ajouterNiveauEchelle('${echelle.id}')">
+        <button class="sidebar-btn-ajouter" onclick="(async () => { await ajouterNiveauEchelle('${echelle.id}'); })()">
             + Ajouter un niveau
         </button>
     `;
@@ -2220,8 +2228,8 @@ function afficherNiveauxEchelle(echelle) {
  * @param {string} champ - Nom du champ à modifier
  * @param {any} valeur - Nouvelle valeur
  */
-function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
-    const echelles = db.getSync('echellesTemplates', []);
+async function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
+    const echelles = await db.get('echellesTemplates') ||  [];
     const echelleIndex = echelles.findIndex(e => e.id === echelleId);
 
     if (echelleIndex === -1) {
@@ -2243,16 +2251,16 @@ function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
     echelles[echelleIndex] = echelle;
 
     // Sauvegarder dans localStorage
-    db.setSync('echellesTemplates', echelles);
+    await db.set('echellesTemplates',  echelles);
 
     // CRITIQUE: Recharger echelleTemplateActuelle depuis localStorage (évite références obsolètes)
-    const echellesRecharge = db.getSync('echellesTemplates', []);
+    const echellesRecharge = await db.get('echellesTemplates') ||  [];
     echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
 
     // Mettre à jour db.setSync('niveauxEchelle') si c'est l'échelle active (compatibilité ancienne logique)
-    const niveauxEchelle = db.getSync('niveauxEchelle', []);
+    const niveauxEchelle = await db.get('niveauxEchelle') ||  [];
     if (niveauxEchelle.length > 0 && niveauxEchelle[0].echelleId === echelleId) {
-        db.setSync('niveauxEchelle', echelleTemplateActuelle.niveaux);
+        await db.set('niveauxEchelle',  echelleTemplateActuelle.niveaux);
     }
 
     // Réafficher pour mettre à jour l'aperçu visuel et les bordures colorées
@@ -2263,8 +2271,8 @@ function modifierNiveauEchelle(echelleId, niveauIndex, champ, valeur) {
  * Ajoute un nouveau niveau à une échelle
  * @param {string} echelleId - ID de l'échelle
  */
-function ajouterNiveauEchelle(echelleId) {
-    let echelles = db.getSync('echellesTemplates', []);
+async function ajouterNiveauEchelle(echelleId) {
+    let echelles = await db.get('echellesTemplates') ||  [];
     const index = echelles.findIndex(e => e.id === echelleId);
 
     if (index === -1) {
@@ -2297,10 +2305,10 @@ function ajouterNiveauEchelle(echelleId) {
     echelles[index] = echelle;
 
     // Sauvegarder dans localStorage
-    db.setSync('echellesTemplates', echelles);
+    await db.set('echellesTemplates',  echelles);
 
     // Recharger l'échelle depuis localStorage pour avoir la bonne référence
-    const echellesRecharge = db.getSync('echellesTemplates', []);
+    const echellesRecharge = await db.get('echellesTemplates') ||  [];
     echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
 
     // Réafficher la liste des niveaux
@@ -2308,7 +2316,7 @@ function ajouterNiveauEchelle(echelleId) {
 
     // Mettre à jour les métriques et la sidebar
     document.getElementById('nbNiveauxEchelle').textContent = echelleTemplateActuelle.niveaux.length;
-    afficherListeEchelles();
+    await afficherListeEchelles();
 
     // Notification de succès
     alert(`✅ Niveau ajouté avec succès !\n\nL'échelle contient maintenant ${echelleTemplateActuelle.niveaux.length} niveau(x).\nModifiez les propriétés du niveau (code, nom, min, max, etc.) puis continuez votre travail.`);
@@ -2319,10 +2327,10 @@ function ajouterNiveauEchelle(echelleId) {
  * @param {string} echelleId - ID de l'échelle
  * @param {number} index - Index du niveau à supprimer
  */
-function supprimerNiveauEchelle(echelleId, index) {
+async function supprimerNiveauEchelle(echelleId, index) {
     if (!confirm('Supprimer ce niveau ?')) return;
 
-    let echelles = db.getSync('echellesTemplates', []);
+    let echelles = await db.get('echellesTemplates') ||  [];
     const echelleIndex = echelles.findIndex(e => e.id === echelleId);
 
     if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return;
@@ -2342,10 +2350,10 @@ function supprimerNiveauEchelle(echelleId, index) {
     echelles[echelleIndex] = echelle;
 
     // Sauvegarder dans localStorage
-    db.setSync('echellesTemplates', echelles);
+    await db.set('echellesTemplates',  echelles);
 
     // Recharger echelleTemplateActuelle depuis localStorage
-    const echellesRecharge = db.getSync('echellesTemplates', []);
+    const echellesRecharge = await db.get('echellesTemplates') ||  [];
     echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
 
     // Réafficher la liste des niveaux
@@ -2353,7 +2361,7 @@ function supprimerNiveauEchelle(echelleId, index) {
 
     // Mettre à jour les métriques et la sidebar
     document.getElementById('nbNiveauxEchelle').textContent = echelleTemplateActuelle.niveaux.length;
-    afficherListeEchelles();
+    await afficherListeEchelles();
 }
 
 /**
@@ -2361,10 +2369,10 @@ function supprimerNiveauEchelle(echelleId, index) {
  * @param {string} echelleId - ID de l'échelle
  * @param {number} index - Index du niveau à déplacer
  */
-function deplacerNiveauEchelleHaut(echelleId, index) {
+async function deplacerNiveauEchelleHaut(echelleId, index) {
     if (index === 0) return;
 
-    let echelles = db.getSync('echellesTemplates', []);
+    let echelles = await db.get('echellesTemplates') ||  [];
     const echelleIndex = echelles.findIndex(e => e.id === echelleId);
 
     if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return;
@@ -2378,10 +2386,10 @@ function deplacerNiveauEchelleHaut(echelleId, index) {
     echelles[echelleIndex] = echelle;
 
     // Sauvegarder dans localStorage
-    db.setSync('echellesTemplates', echelles);
+    await db.set('echellesTemplates',  echelles);
 
     // Recharger echelleTemplateActuelle depuis localStorage
-    const echellesRecharge = db.getSync('echellesTemplates', []);
+    const echellesRecharge = await db.get('echellesTemplates') ||  [];
     echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
 
     // Réafficher
@@ -2395,8 +2403,8 @@ function deplacerNiveauEchelleHaut(echelleId, index) {
  * @param {string} echelleId - ID de l'échelle
  * @param {number} index - Index du niveau à déplacer
  */
-function deplacerNiveauEchelleBas(echelleId, index) {
-    let echelles = db.getSync('echellesTemplates', []);
+async function deplacerNiveauEchelleBas(echelleId, index) {
+    let echelles = await db.get('echellesTemplates') ||  [];
     const echelleIndex = echelles.findIndex(e => e.id === echelleId);
 
     if (echelleIndex === -1 || !echelles[echelleIndex].niveaux) return;
@@ -2412,10 +2420,10 @@ function deplacerNiveauEchelleBas(echelleId, index) {
     echelles[echelleIndex] = echelle;
 
     // Sauvegarder dans localStorage
-    db.setSync('echellesTemplates', echelles);
+    await db.set('echellesTemplates',  echelles);
 
     // Recharger echelleTemplateActuelle depuis localStorage
-    const echellesRecharge = db.getSync('echellesTemplates', []);
+    const echellesRecharge = await db.get('echellesTemplates') ||  [];
     echelleTemplateActuelle = echellesRecharge.find(e => e.id === echelleId);
 
     // Réafficher
@@ -2424,7 +2432,7 @@ function deplacerNiveauEchelleBas(echelleId, index) {
     console.log('Niveau déplacé vers le bas');
 }
 
-function definirEchelleActive(id) {
+async function definirEchelleActive(id) {
     document.querySelectorAll('.sidebar-item').forEach(item => {
         item.classList.remove('active');
     });
@@ -2435,8 +2443,8 @@ function definirEchelleActive(id) {
     }
 }
 
-function dupliquerEchelleDepuisSidebar(id) {
-    const echelles = db.getSync('echellesTemplates', []);
+async function dupliquerEchelleDepuisSidebar(id) {
+    const echelles = await db.get('echellesTemplates') ||  [];
     const echelle = echelles.find(e => e.id === id);
 
     if (!echelle) return;
@@ -2449,10 +2457,10 @@ function dupliquerEchelleDepuisSidebar(id) {
     };
 
     echelles.push(copie);
-    db.setSync('echellesTemplates', echelles);
+    await db.set('echellesTemplates',  echelles);
 
-    afficherListeEchelles();
-    chargerEchellePourModif(copie.id);
+    await afficherListeEchelles();
+    await chargerEchellePourModif(copie.id);
 
     alert('Échelle "' + copie.nom + '" dupliquée avec succès');
 }
@@ -2462,9 +2470,9 @@ function dupliquerEchelleDepuisSidebar(id) {
  * @param {string} echelleId - ID de l'échelle à vérifier
  * @returns {Object} {utilisee: boolean, nbEvaluations: number, evaluations: Array}
  */
-function verifierUtilisationEchelle(echelleId) {
+async function verifierUtilisationEchelle(echelleId) {
     // Récupérer toutes les évaluations
-    const evaluations = db.getSync('evaluations', []);
+    const evaluations = await db.get('evaluations') ||  [];
 
     // Filtrer les évaluations qui utilisent cette échelle
     const evaluationsUtilisant = evaluations.filter(eval => eval.echelleId === echelleId);
@@ -2482,8 +2490,8 @@ function verifierUtilisationEchelle(echelleId) {
  * @param {string} nouvelleEchelleId - ID de la nouvelle échelle
  * @returns {number} Nombre d'évaluations migrées
  */
-function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleEchelleId) {
-    const evaluations = db.getSync('evaluations', []);
+async function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleEchelleId) {
+    const evaluations = await db.get('evaluations') ||  [];
     let nbMigrees = 0;
 
     evaluations.forEach(eval => {
@@ -2493,17 +2501,17 @@ function migrerEvaluationsVersNouvelleEchelle(ancienneEchelleId, nouvelleEchelle
         }
     });
 
-    db.setSync('evaluations', evaluations);
+    await db.set('evaluations',  evaluations);
     return nbMigrees;
 }
 
-function supprimerEchelleDepuisSidebar(id) {
+async function supprimerEchelleDepuisSidebar(id) {
     // Vérifier si l'échelle est utilisée
-    const utilisation = verifierUtilisationEchelle(id);
+    const utilisation = await verifierUtilisationEchelle(id);
 
     if (utilisation.utilisee) {
         // L'échelle est utilisée, offrir des choix à l'utilisateur
-        const echelles = db.getSync('echellesTemplates', []);
+        const echelles = await db.get('echellesTemplates') ||  [];
         const echelle = echelles.find(e => e.id === id);
         const nomEchelle = echelle?.nom || 'cette échelle';
 
@@ -2532,14 +2540,14 @@ function supprimerEchelleDepuisSidebar(id) {
 
                 if (numeroChoisi && numeroChoisi >= 1 && numeroChoisi <= autresEchelles.length) {
                     const nouvelleEchelle = autresEchelles[numeroChoisi - 1];
-                    const nbMigrees = migrerEvaluationsVersNouvelleEchelle(id, nouvelleEchelle.id);
+                    const nbMigrees = await migrerEvaluationsVersNouvelleEchelle(id, nouvelleEchelle.id);
 
                     // Maintenant supprimer l'échelle
                     const index = echelles.findIndex(e => e.id === id);
                     if (index !== -1) {
                         echelles.splice(index, 1);
-                        db.setSync('echellesTemplates', echelles);
-                        afficherListeEchelles();
+                        await db.set('echellesTemplates',  echelles);
+                        await afficherListeEchelles();
                         document.getElementById('conteneurEditionEchelle').style.display = 'none';
                         // Note: Section optionsImportExportEchelles supprimée (Beta 92)
                         document.getElementById('accueilEchelles').style.display = 'block';
@@ -2561,13 +2569,13 @@ function supprimerEchelleDepuisSidebar(id) {
         // L'échelle n'est pas utilisée, suppression directe
         if (!confirm('Supprimer cette échelle ?')) return;
 
-        const echelles = db.getSync('echellesTemplates', []);
+        const echelles = await db.get('echellesTemplates') ||  [];
         const index = echelles.findIndex(e => e.id === id);
 
         if (index !== -1) {
             echelles.splice(index, 1);
-            db.setSync('echellesTemplates', echelles);
-            afficherListeEchelles();
+            await db.set('echellesTemplates',  echelles);
+            await afficherListeEchelles();
             document.getElementById('conteneurEditionEchelle').style.display = 'none';
             // Note: Section optionsImportExportEchelles supprimée (Beta 92)
             document.getElementById('accueilEchelles').style.display = 'block';
@@ -2579,37 +2587,37 @@ function supprimerEchelleDepuisSidebar(id) {
 /**
  * Duplique l'échelle actuellement en cours d'édition
  */
-function dupliquerEchelleActive() {
+async function dupliquerEchelleActive() {
     if (!echelleTemplateActuelle) {
         alert('Aucune échelle à dupliquer');
         return;
     }
-    dupliquerEchelleDepuisSidebar(echelleTemplateActuelle.id);
+    await dupliquerEchelleDepuisSidebar(echelleTemplateActuelle.id);
 }
 
 /**
  * Supprime l'échelle actuellement en cours d'édition
  */
-function supprimerEchelleActive() {
+async function supprimerEchelleActive() {
     if (!echelleTemplateActuelle) {
         alert('Aucune échelle à supprimer');
         return;
     }
-    supprimerEchelleDepuisSidebar(echelleTemplateActuelle.id);
+    await supprimerEchelleDepuisSidebar(echelleTemplateActuelle.id);
 }
 
 /**
  * Sauvegarde complète de l'échelle en cours d'édition
  */
-function sauvegarderEchelleComplete() {
+async function sauvegarderEchelleComplete() {
     // Sauvegarder le nom si modifié
-    sauvegarderNomEchelle();
+    await sauvegarderNomEchelle();
 
     // Message de confirmation
     alert('Échelle sauvegardée avec succès');
 
     // Recharger la liste pour refléter les changements
-    afficherListeEchelles();
+    await afficherListeEchelles();
 }
 
 // Export global

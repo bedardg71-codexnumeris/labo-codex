@@ -184,44 +184,70 @@ function previsualiserImport(event) {
     lecteur.readAsText(fichier);
 }
 
-function executerImport() {
+async function executerImport() {
     if (!donneesImportEnAttente) return;
 
     if (!confirm('Confirmer l\'importation ? Les données existantes seront écrasées pour les clés importées.')) {
         return;
     }
 
-    let nbCles = 0;
-    Object.keys(donneesImportEnAttente).forEach(cle => {
-        // IMPORTANT : Utiliser db.setSync pour écrire dans localStorage ET IndexedDB
-        // Pas besoin de JSON.stringify - db.setSync le fait automatiquement
-        db.setSync(cle, donneesImportEnAttente[cle]);
-        nbCles++;
-    });
+    try {
+        // ✅ CORRECTION: Utiliser db.set() (async/IndexedDB) au lieu de db.setSync()
+        // Pour éviter QuotaExceededError sur localStorage avec gros fichiers
+        const cles = Object.keys(donneesImportEnAttente);
+        let nbCles = 0;
 
-    // Détecter si ce sont les données de démo (pour déclencher tutoriel)
-    // On vérifie la présence de clés caractéristiques des données démo
-    const clesDemoPresentes = ['groupeEtudiants', 'artefacts', 'modalitesEvaluation'].every(cle =>
-        donneesImportEnAttente.hasOwnProperty(cle)
-    );
+        for (const cle of cles) {
+            let valeur = donneesImportEnAttente[cle];
 
-    if (clesDemoPresentes && donneesImportEnAttente.groupeEtudiants &&
-        Array.isArray(donneesImportEnAttente.groupeEtudiants) &&
-        donneesImportEnAttente.groupeEtudiants.length > 0) {
-        // Marquer que les données de démo ont été chargées
-        db.setSync('donnees_demo_chargees', true);
-    }
+            // ✅ CORRECTION: Parser les strings JSON (backups de l'ancienne version localStorage)
+            // Si la valeur est une string JSON, la parser avant de stocker
+            if (typeof valeur === 'string') {
+                try {
+                    valeur = JSON.parse(valeur);
+                } catch (e) {
+                    // Si ce n'est pas du JSON valide, garder la string telle quelle
+                    console.log(`[Import] Clé "${cle}" n'est pas du JSON, stockage comme string`);
+                }
+            }
 
-    fermerModalImport();
+            await db.set(cle, valeur);
+            nbCles++;
+        }
 
-    if (typeof afficherNotificationSucces === 'function') {
-        afficherNotificationSucces(`Import réussi : ${nbCles} clé(s) importée(s)`);
-    } else {
-        console.log(`Import réussi: ${nbCles} clés`);
-    }
+        // Détecter si ce sont les données de démo (pour déclencher tutoriel)
+        const clesDemoPresentes = ['groupeEtudiants', 'artefacts', 'modalitesEvaluation'].every(cle =>
+            donneesImportEnAttente.hasOwnProperty(cle)
+        );
 
-    if (confirm('Import terminé ! Recharger la page pour appliquer les changements ?')) {
-        location.reload();
+        if (clesDemoPresentes && donneesImportEnAttente.groupeEtudiants &&
+            Array.isArray(donneesImportEnAttente.groupeEtudiants) &&
+            donneesImportEnAttente.groupeEtudiants.length > 0) {
+            // Marquer que les données de démo ont été chargées
+            await db.set('donnees_demo_chargees', true);
+        }
+
+        // ✅ CRITIQUE: Synchroniser le cache localStorage avec IndexedDB
+        // Les modules utilisent db.getSync() qui lit depuis le cache localStorage
+        console.log('🔄 Synchronisation du cache localStorage...');
+        await db.syncToLocalStorageCache();
+        console.log('✅ Cache synchronisé');
+
+        fermerModalImport();
+
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(`Import réussi : ${nbCles} clé(s) importée(s)`);
+        } else {
+            console.log(`Import réussi: ${nbCles} clés`);
+        }
+
+        if (confirm('Import terminé ! Recharger la page pour appliquer les changements ?')) {
+            location.reload();
+        }
+    } catch (erreur) {
+        console.error('❌ Erreur lors de l\'import:', erreur);
+        alert(`Erreur lors de l'import : ${erreur.message}`);
+        fermerModalImport();
     }
 }
 
@@ -751,3 +777,16 @@ async function exporterConfigurationComplete() {
         console.log('✅ Configuration complète exportée:', nomFichierJSON, '+', nomFichierTXT);
     }, 500);
 }
+
+/* ===============================
+   EXPORTS VERS WINDOW (ACCESSIBLE DEPUIS HTML)
+   =============================== */
+
+// Fonctions appelées depuis le HTML (onclick)
+window.executerImport = executerImport;
+window.fermerModalImport = fermerModalImport;
+// window.exporterDonneesJSON = exporterDonneesJSON; // ❌ Fonction n'existe plus
+window.reinitialiserDonnees = reinitialiserDonnees;
+// window.importerConfigComplete = importerConfigComplete; // ❌ Fonction n'existe plus
+window.executerImportConfigComplete = executerImportConfigComplete;
+window.exporterConfigurationComplete = exporterConfigurationComplete;

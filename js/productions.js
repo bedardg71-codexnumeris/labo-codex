@@ -70,9 +70,9 @@
  * 5. Met à jour les statistiques (nombre, types)
  * 6. Gère l'affichage spécial pour les portfolios
  */
-function afficherTableauProductions() {
-    const evaluations = db.getSync('productions', []);
-    const grilles = db.getSync('grillesTemplates', []);
+async function afficherTableauProductions() {
+    const evaluations = await db.get('productions') || [];
+    const grilles = await db.get('grillesTemplates') || [];
     const container = document.getElementById('tableauEvaluationsContainer');
 
     if (evaluations.length === 0) {
@@ -175,7 +175,7 @@ function afficherTableauProductions() {
  *    - Titre "Nouvelle production"
  * 5. Charge la liste des grilles disponibles
  */
-function afficherFormProduction(id) {
+async function afficherFormProduction(id) {
     console.log('📝 afficherFormProduction appelée avec ID:', id, 'type:', typeof id);
 
     const form = document.getElementById('formulaireProduction');
@@ -196,7 +196,7 @@ function afficherFormProduction(id) {
     console.log('   - selectGrilleInline trouvé?', !!selectGrilleInline);
 
     if (selectGrille || selectGrilleInline) {
-        const grilles = db.getSync('grillesTemplates', []);
+        const grilles = await db.get('grillesTemplates') || [];
         console.log('   - Nombre de grilles:', grilles.length);
         console.log('   - Grilles:', grilles.map(g => ({ id: g.id, nom: g.nom })));
 
@@ -213,7 +213,7 @@ function afficherFormProduction(id) {
 
     if (id) {
         // Mode modification
-        const evaluations = db.getSync('productions', []);
+        const evaluations = await db.get('productions') || [];
         console.log('📦 Nombre de productions:', evaluations.length);
         console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
 
@@ -319,7 +319,7 @@ function afficherFormProduction(id) {
  * 9. Affiche une notification de succès
  */
 
-function sauvegarderProduction() {
+async function sauvegarderProduction() {
     const titre = document.getElementById('productionTitre').value.trim();
     const description = document.getElementById('productionDescription').value.trim();
     const type = document.getElementById('productionType').value;
@@ -343,7 +343,7 @@ function sauvegarderProduction() {
         return;
     }
 
-    let evaluations = db.getSync('productions', []);
+    let evaluations = await db.get('productions') || [];
 
     // Préparer l'objet de base
     let productionData = {
@@ -390,14 +390,14 @@ function sauvegarderProduction() {
         console.log('   - Nouveau ID:', productionData.id);
     }
 
-    console.log('💾 Sauvegarde dans db.setSync...');
-    db.setSync('productions', evaluations);
+    console.log('💾 Sauvegarde dans db.set...');
+    await db.set('productions', evaluations);
     console.log('✅ Sauvegarde terminée');
 
     annulerFormProduction();
-    afficherTableauProductions();
-    afficherToutesLesProductionsParType();
-    mettreAJourPonderationTotale();
+    await afficherTableauProductions();
+    await afficherToutesLesProductionsParType();
+    await mettreAJourPonderationTotale();
 
     // Afficher la notification de succès si la fonction existe
     if (typeof afficherNotificationSucces === 'function') {
@@ -465,8 +465,8 @@ function annulerFormProduction() {
  * NOTE: Renommée de modifierEvaluation() en modifierProduction()
  * pour éviter conflit avec la fonction du même nom dans evaluation.js
  */
-function modifierProduction(id) {
-    afficherFormProduction(id);
+async function modifierProduction(id) {
+    await afficherFormProduction(id);
 }
 
 /* ===============================
@@ -491,15 +491,15 @@ function modifierProduction(id) {
  * 5. Rafraîchit l'affichage
  * 6. Met à jour les pondérations
  */
-function supprimerProduction(id) {
+async function supprimerProduction(id) {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette production ?')) {
-        let evaluations = db.getSync('productions', []);
+        let evaluations = await db.get('productions') || [];
         evaluations = evaluations.filter(e => e.id !== id);
 
-        db.setSync('productions', evaluations);
-        afficherTableauProductions();
-        afficherToutesLesProductionsParType();
-        mettreAJourPonderationTotale();
+        await db.set('productions', evaluations);
+        await afficherTableauProductions();
+        await afficherToutesLesProductionsParType();
+        await mettreAJourPonderationTotale();
 
         // Mettre à jour le statut des modalités si la fonction existe
         if (typeof mettreAJourStatutModalites === 'function') {
@@ -529,10 +529,10 @@ function supprimerProduction(id) {
  * 4. Sauvegarde dans localStorage
  * 5. Rafraîchit l'affichage
  */
-function verrouillerEvaluation(id) {
+async function verrouillerEvaluation(id) {
     console.log('🔐 verrouillerEvaluation appelée avec ID:', id, 'type:', typeof id);
 
-    let evaluations = db.getSync('productions', []);
+    let evaluations = await db.get('productions') || [];
     console.log('📦 Nombre de productions:', evaluations.length);
     console.log('🔑 IDs disponibles:', evaluations.map(e => e.id));
 
@@ -547,9 +547,9 @@ function verrouillerEvaluation(id) {
 
     if (index !== -1) {
         evaluations[index].verrouille = !evaluations[index].verrouille;
-        db.setSync('productions', evaluations);
-        afficherTableauProductions();
-        afficherToutesLesProductionsParType();
+        await db.set('productions', evaluations);
+        await afficherTableauProductions();
+        await afficherToutesLesProductionsParType();
 
         // Notification de succès
         if (typeof afficherNotificationSucces === 'function') {
@@ -591,15 +591,15 @@ function verrouillerEvaluation(id) {
  * 4. Sauvegarde dans localStorage
  * 5. Rafraîchit l'affichage
  */
-function monterEvaluation(id) {
-    let evaluations = db.getSync('productions', []);
+async function monterEvaluation(id) {
+    let evaluations = await db.get('productions') || [];
     const index = evaluations.findIndex(e => e.id === id);
 
     if (index > 0) {
         [evaluations[index - 1], evaluations[index]] = [evaluations[index], evaluations[index - 1]];
-        db.setSync('productions', evaluations);
-        afficherTableauProductions();
-        afficherToutesLesProductionsParType();
+        await db.set('productions', evaluations);
+        await afficherTableauProductions();
+        await afficherToutesLesProductionsParType();
     }
 }
 
@@ -624,15 +624,15 @@ function monterEvaluation(id) {
  * 4. Sauvegarde dans localStorage
  * 5. Rafraîchit l'affichage
  */
-function descendreEvaluation(id) {
-    let evaluations = db.getSync('productions', []);
+async function descendreEvaluation(id) {
+    let evaluations = await db.get('productions') || [];
     const index = evaluations.findIndex(e => e.id === id);
 
     if (index < evaluations.length - 1) {
         [evaluations[index], evaluations[index + 1]] = [evaluations[index + 1], evaluations[index]];
-        db.setSync('productions', evaluations);
-        afficherTableauProductions();
-        afficherToutesLesProductionsParType();
+        await db.set('productions', evaluations);
+        await afficherTableauProductions();
+        await afficherToutesLesProductionsParType();
     }
 }
 
@@ -727,8 +727,8 @@ function synchroniserGrilles() {
  * 3. Si aucun : affiche un message
  * 4. Sinon : génère des checkboxes pour chaque artefact
  */
-function chargerArtefactsDisponibles() {
-    const evaluations = db.getSync('productions', []);
+async function chargerArtefactsDisponibles() {
+    const evaluations = await db.get('productions') || [];
     const artefacts = evaluations.filter(p => p.type === 'artefact-portfolio');
     const container = document.getElementById('listeArtefactsDisponibles');
 
@@ -773,8 +773,8 @@ function chargerArtefactsDisponibles() {
  *    - Rouge si > 100%
  *    - Orange si < 100%
  */
-function mettreAJourPonderationTotale() {
-    const productions = db.getSync('productions', []);
+async function mettreAJourPonderationTotale() {
+    const productions = await db.get('productions') || [];
 
     // Ignorer les artefacts-portfolio dans le calcul (ils font partie du Portfolio)
     const productionsComptees = productions.filter(p => p.type !== 'artefact-portfolio');
@@ -906,12 +906,12 @@ function gererPortfolio(id) {
  * - Chaque section affiche ses productions
  * - Bouton contextuel pour ajouter une production au type
  */
-function afficherToutesLesProductionsParType() {
+async function afficherToutesLesProductionsParType() {
     const container = document.getElementById('vueProductionsParType');
     if (!container) return;
 
-    const productions = db.getSync('productions', []);
-    const grilles = db.getSync('grillesTemplates', []);
+    const productions = await db.get('productions') || [];
+    const grilles = await db.get('grillesTemplates') || [];
 
     if (productions.length === 0) {
         container.innerHTML = `
@@ -1087,9 +1087,9 @@ function afficherToutesLesProductionsParType() {
  * 2. Pré-sélectionne le type
  * 3. Scroll vers le formulaire
  */
-function ajouterProductionAuType(type) {
+async function ajouterProductionAuType(type) {
     // Ouvrir le formulaire d'ajout
-    afficherFormProduction(null);
+    await afficherFormProduction(null);
 
     // Pré-sélectionner le type
     const selectType = document.getElementById('productionType');
@@ -1172,7 +1172,7 @@ function initialiserModuleProductions() {
  * }
  */
 async function exporterProductions() {
-    const productions = db.getSync('productions', []);
+    const productions = await db.get('productions') || [];
 
     if (productions.length === 0) {
         alert('Aucune production à exporter.');
@@ -1239,7 +1239,7 @@ async function exporterProductionActive() {
         return;
     }
 
-    const productions = db.getSync('productions', []);
+    const productions = await db.get('productions') || [];
     const production = productions.find(p => p.id === productionId);
 
     if (!production) {
@@ -1315,7 +1315,7 @@ async function exporterProductionActive() {
  * Importe un fichier JSON pour remplacer la production actuellement en cours d'édition
  * NOUVEAU (Beta 92): Support métadonnées Creative Commons
  */
-function importerDansProductionActive(event) {
+async function importerDansProductionActive(event) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -1335,7 +1335,7 @@ function importerDansProductionActive(event) {
     }
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const donnees = JSON.parse(e.target.result);
 
@@ -1381,7 +1381,7 @@ function importerDansProductionActive(event) {
             }
 
             // Récupérer les productions
-            const productions = db.getSync('productions', []);
+            const productions = await db.get('productions') || [];
             const index = productions.findIndex(p => p.id === productionId);
 
             if (index === -1) {
@@ -1405,13 +1405,13 @@ function importerDansProductionActive(event) {
             productions[index] = productionMiseAJour;
 
             // Sauvegarder
-            db.setSync('productions', productions);
+            await db.set('productions', productions);
 
             // Recharger la production dans le formulaire
-            afficherFormProduction(productionId);
+            await afficherFormProduction(productionId);
 
             // Rafraîchir la liste
-            afficherListeProductions();
+            await afficherListeProductions();
 
             console.log('✅ Production importée et remplacée avec succès');
             if (typeof afficherNotificationSucces === 'function') {
@@ -1502,7 +1502,7 @@ function importerProductions(event) {
  * Fonction helper appelée depuis le modal de confirmation
  * PHASE 3.3: Détection de dépendances manquantes (Beta 91)
  */
-window.confirmerImportProductions = function(donnees) {
+window.confirmerImportProductions = async function(donnees) {
     try {
         // Extraire le contenu (supporter ancien format direct et nouveau format avec metadata)
         let productionsImportees;
@@ -1529,7 +1529,7 @@ window.confirmerImportProductions = function(donnees) {
         }
 
         // PHASE 3.3: Détecter les dépendances manquantes (grilles référencées)
-        const grillesExistantes = db.getSync('grillesTemplates', []);
+        const grillesExistantes = await db.get('grillesTemplates') || [];
         const idsGrillesExistants = new Set(grillesExistantes.map(g => g.id));
         const grillesManquantes = [];
 
@@ -1560,7 +1560,7 @@ window.confirmerImportProductions = function(donnees) {
         }
 
         // Charger productions existantes
-        const productionsExistantes = db.getSync('productions', []);
+        const productionsExistantes = await db.get('productions') || [];
 
         // Fusionner (remplacer si même ID, sinon ajouter)
         productionsImportees.forEach(prod => {
@@ -1573,11 +1573,11 @@ window.confirmerImportProductions = function(donnees) {
         });
 
         // Sauvegarder
-        db.setSync('productions', productionsExistantes);
+        await db.set('productions', productionsExistantes);
 
         // Rafraîchir l'affichage
         if (typeof afficherTableauProductions === 'function') {
-            afficherTableauProductions();
+            await afficherTableauProductions();
         }
 
         alert(`✅ Import réussi !\n\n${productionsImportees.length} production(s) importée(s).`);
@@ -1694,9 +1694,9 @@ window.chargerGrillesDisponiblesPourProduction = chargerGrillesDisponiblesPourPr
  * 4. Affiche le badge de type et la pondération
  * 5. Boutons Dupliquer (violet) et Supprimer (rouge)
  */
-function afficherListeProductions(filtreType = '') {
-    const productions = db.getSync('productions', []);
-    const grilles = db.getSync('grillesTemplates', []);
+async function afficherListeProductions(filtreType = '') {
+    const productions = await db.get('productions') || [];
+    const grilles = await db.get('grillesTemplates') || [];
     const container = document.getElementById('sidebarListeProductions');
 
     if (!container) return;
@@ -1755,7 +1755,7 @@ function filtrerListeProductions() {
  * Charge une production pour modification dans le formulaire
  * Appelée par le clic sur un item de la sidebar
  */
-function chargerProductionPourModif(id) {
+async function chargerProductionPourModif(id) {
     console.log('🔄 chargerProductionPourModif appelée avec ID:', id);
 
     // Masquer le message d'accueil
@@ -1780,7 +1780,7 @@ function chargerProductionPourModif(id) {
     if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
     // Appeler afficherFormProduction pour charger les données
-    afficherFormProduction(id);
+    await afficherFormProduction(id);
 
     // Highlighter l'item actif
     document.querySelectorAll('.sidebar-item').forEach(item => {
@@ -1851,8 +1851,8 @@ function creerNouvelleProduction() {
     });
 
     // Charger les grilles disponibles (avec petit délai pour laisser le DOM se mettre à jour)
-    setTimeout(() => {
-        chargerGrillesDisponiblesPourProduction();
+    setTimeout(async () => {
+        await chargerGrillesDisponiblesPourProduction();
     }, 50);
 }
 
@@ -1915,8 +1915,8 @@ function mettreAJourMetriquesProduction(production) {
  * (Fonction helper pour éviter la duplication de code)
  * NOTE: Renommée pour éviter conflit avec chargerGrillesDisponibles() de pratiques.js
  */
-function chargerGrillesDisponiblesPourProduction() {
-    const grilles = db.getSync('grillesTemplates', []);
+async function chargerGrillesDisponiblesPourProduction() {
+    const grilles = await db.get('grillesTemplates') || [];
     const selectStandard = document.getElementById('productionGrille');
     const selectInline = document.getElementById('productionGrilleInline');
 
@@ -1949,8 +1949,8 @@ function chargerGrillesDisponiblesPourProduction() {
  *
  * @param {string} id - ID de la production à dupliquer
  */
-function dupliquerProduction(id) {
-    const productions = db.getSync('productions', []);
+async function dupliquerProduction(id) {
+    const productions = await db.get('productions') || [];
     const production = productions.find(p => p.id === id);
 
     if (!production) return;
@@ -1964,11 +1964,11 @@ function dupliquerProduction(id) {
     };
 
     productions.push(copie);
-    db.setSync('productions', productions);
+    await db.set('productions', productions);
 
     // Recharger la liste
-    afficherListeProductions();
-    chargerProductionPourModif(copie.id);
+    await afficherListeProductions();
+    await chargerProductionPourModif(copie.id);
 
     alert(`Production "${copie.description}" dupliquée avec succès`);
 }
@@ -1977,19 +1977,19 @@ function dupliquerProduction(id) {
  * Duplique la production actuellement en édition
  * Appelée par le bouton "Dupliquer" dans le formulaire
  */
-function dupliquerProductionActive() {
+async function dupliquerProductionActive() {
     if (!productionEnEdition) {
         alert('Aucune production en cours d\'édition');
         return;
     }
-    dupliquerProduction(productionEnEdition);
+    await dupliquerProduction(productionEnEdition);
 }
 
 /**
  * Supprime la production actuellement en édition
  * Appelée par le bouton "Supprimer" dans le formulaire
  */
-function supprimerProductionActive() {
+async function supprimerProductionActive() {
     if (!productionEnEdition) {
         alert('Aucune production en cours d\'édition');
         return;
@@ -1999,18 +1999,18 @@ function supprimerProductionActive() {
         return;
     }
 
-    let productions = db.getSync('productions', []);
+    let productions = await db.get('productions') || [];
     productions = productions.filter(e => e.id !== productionEnEdition);
 
-    db.setSync('productions', productions);
+    await db.set('productions', productions);
 
     // Fermer le formulaire et retourner à l'accueil
     annulerFormProduction();
 
     // Recharger la liste
-    afficherListeProductions();
-    afficherToutesLesProductionsParType();
-    mettreAJourPonderationTotale();
+    await afficherListeProductions();
+    await afficherToutesLesProductionsParType();
+    await mettreAJourPonderationTotale();
 
     // Mettre à jour le statut des modalités si la fonction existe
     if (typeof mettreAJourStatutModalites === 'function') {
@@ -2025,19 +2025,19 @@ function supprimerProductionActive() {
  * Cette fonction override la fonction originale pour ajouter le support sidebar
  */
 const sauvegarderProductionOriginale = window.sauvegarderProduction;
-window.sauvegarderProduction = function() {
+window.sauvegarderProduction = async function() {
     // Appeler la fonction originale
     if (typeof sauvegarderProductionOriginale === 'function') {
-        sauvegarderProductionOriginale();
+        await sauvegarderProductionOriginale();
     }
 
     // Recharger la sidebar
-    afficherListeProductions();
+    await afficherListeProductions();
 
     // Mettre à jour les métriques
     const id = window.productionEnCoursEdition;
     if (id) {
-        const productions = db.getSync('productions', []);
+        const productions = await db.get('productions') || [];
         const production = productions.find(p => p.id === id);
         if (production) {
             // mettreAJourMetriquesProduction(production); // DÉSACTIVÉ (cartes métriques supprimées)
@@ -2075,19 +2075,19 @@ window.annulerFormProduction = function() {
  * Adapte la fonction supprimerProduction pour le nouveau layout
  */
 const supprimerProductionOriginale = window.supprimerProduction;
-window.supprimerProduction = function(id) {
+window.supprimerProduction = async function(id) {
     if (!confirm('Supprimer cette production ?')) return;
 
-    const productions = db.getSync('productions', []);
+    const productions = await db.get('productions') || [];
     const index = productions.findIndex(p => p.id === id);
 
     if (index === -1) return;
 
     productions.splice(index, 1);
-    db.setSync('productions', productions);
+    await db.set('productions', productions);
 
     // Recharger la sidebar
-    afficherListeProductions();
+    await afficherListeProductions();
 
     // Masquer le formulaire si c'était la production affichée
     if (window.productionEnCoursEdition === id) {

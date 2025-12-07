@@ -5281,6 +5281,11 @@
                             + Ajouter une séance
                         </button>
 
+                        <!-- Bouton utilitaire pour nettoyer les doublons -->
+                        <button class="btn btn-modifier mb-30" onclick="nettoyerDoublons()" style="margin-left: 10px;">
+                            🧹 Nettoyer les doublons
+                        </button>
+
                         <!-- FORMULAIRE D'AJOUT SÉANCE (caché par défaut) -->
                         <div id="formAjoutSeance" class="item-carte form-cache">
                             <div class="item-carte-header">
@@ -10089,16 +10094,16 @@ Exemple :
 
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>
-    <script src="js/navigation.js?v=2025120322"></script>
+    <script src="js/navigation.js?v=2025120601"></script>
     <script src="js/modes.js?v=2025113001"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025111325"></script>
     <script src="js/etudiants.js?v=2025120403"></script>
-    <script src="js/productions.js?v=2025113003"></script>
-    <script src="js/grilles.js?v=2025113001"></script>
-    <script src="js/echelles.js?v=2025113001"></script>
-    <script src="js/cartouches.js?v=2025120208"></script>
+    <script src="js/productions.js?v=2025120600"></script>
+    <script src="js/grilles.js?v=2025120613"></script>
+    <script src="js/echelles.js?v=2025120606"></script>
+    <script src="js/cartouches.js?v=2025120612"></script>
     <script src="js/cours.js?v=2025120115"></script>
     <script src="js/contexte.js?v=2025111201"></script>
 
@@ -10138,12 +10143,12 @@ Exemple :
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=2025120201"></script>
-    <script src="js/horaire.js?v=2025111328"></script>
+    <script src="js/horaire.js?v=2025120601"></script>
     <script src="js/groupe.js?v=2025120208"></script>
     <script src="js/interventions.js?v=2025120125"></script>
 
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
-    <script src="js/import-export.js?v=2025112700"></script>
+    <script src="js/import-export.js?v=2025120608"></script>
     <script src="js/statistiques.js?v=2025113016"></script>
     <script src="js/liste-evaluations.js?v=2025120207"></script>
     <script src="js/snapshots.js?v=2025120615"></script>
@@ -10167,7 +10172,7 @@ Exemple :
     <script src="js/tutoriel-interactif.js?v=2025120102"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=2025111400"></script>
+    <script src="js/main.js?v=2025120600"></script>
 
     <!-- Script de débogage additionnel (optionnel) -->
     <script>
@@ -10719,6 +10724,16 @@ Exemple :
             const coursActif = listeCours.find(c => c.actif) || listeCours[0] || null;
             const nomCours = coursActif ? (coursActif.nomCours || coursActif.codeCours || 'Aucun cours') : 'Aucun cours';
 
+            // 1b. Récupérer la pratique de notation active
+            const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
+            const pratiqueId = modalites.pratique || 'sommative';
+            const nomsConviviaux = {
+                'sommative': 'Sommative',
+                'pan-maitrise': 'PAN-Maîtrise',
+                'alternative': 'PAN-Maîtrise'  // Ancien nom (rétrocompatibilité)
+            };
+            const nomPratique = nomsConviviaux[pratiqueId] || pratiqueId;
+
             // 2. Calculer la semaine actuelle depuis calendrierComplet (trimestre.js)
             const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
             const aujourdhuiISO = new Date().toISOString().split('T')[0];
@@ -10752,6 +10767,7 @@ Exemple :
             // 5. Mettre à jour le HTML dans la navigation
             container.innerHTML = `
                 <br>${nomCours}
+                <br><span style="font-size: 0.85em; opacity: 0.85;">Pratique : ${nomPratique}</span>
                 <br>${groupeInfo}${semaine} · ${dateFormatee}${seanceInfo}
             `;
         }
