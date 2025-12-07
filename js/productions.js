@@ -411,6 +411,16 @@ async function sauvegarderProduction() {
         mettreAJourStatutModalites();
     }
 
+    // Mettre à jour le select des productions dans le module Évaluation
+    if (typeof window.chargerProductionsDansSelect === 'function') {
+        window.chargerProductionsDansSelect();
+    }
+
+    // Mettre à jour le filtre de production dans la liste des évaluations
+    if (typeof window.rechargerFiltreProduction === 'function') {
+        window.rechargerFiltreProduction();
+    }
+
     productionEnEdition = null;
 }
 
@@ -1970,6 +1980,16 @@ async function dupliquerProduction(id) {
     await afficherListeProductions();
     await chargerProductionPourModif(copie.id);
 
+    // Mettre à jour le select des productions dans le module Évaluation
+    if (typeof window.chargerProductionsDansSelect === 'function') {
+        window.chargerProductionsDansSelect();
+    }
+
+    // Mettre à jour le filtre de production dans la liste des évaluations
+    if (typeof window.rechargerFiltreProduction === 'function') {
+        window.rechargerFiltreProduction();
+    }
+
     alert(`Production "${copie.description}" dupliquée avec succès`);
 }
 
@@ -2015,6 +2035,16 @@ async function supprimerProductionActive() {
     // Mettre à jour le statut des modalités si la fonction existe
     if (typeof mettreAJourStatutModalites === 'function') {
         mettreAJourStatutModalites();
+    }
+
+    // Mettre à jour le select des productions dans le module Évaluation
+    if (typeof window.chargerProductionsDansSelect === 'function') {
+        window.chargerProductionsDansSelect();
+    }
+
+    // Mettre à jour le filtre de production dans la liste des évaluations
+    if (typeof window.rechargerFiltreProduction === 'function') {
+        window.rechargerFiltreProduction();
     }
 
     alert('Production supprimée avec succès');
