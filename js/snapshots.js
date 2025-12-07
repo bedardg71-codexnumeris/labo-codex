@@ -128,17 +128,47 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         return e.dateEvaluation <= dateLimite;
     });
 
-    // Calculer C : Proportion de travaux remis (parmi ceux attendus jusqu'à maintenant)
-    if (evaluationsFiltrees.length === 0) {
-        // ✅ CORRECTION (Beta 93) : null au lieu de 100% quand aucune évaluation
-        // Cohérence avec P: les graphiques ne doivent afficher C qu'à partir de la première évaluation
+    // Calculer C : Proportion de PRODUCTIONS remises (pas évaluations)
+    // ✅ CORRECTION (7 déc 2025) : Aligner avec pratique-sommative.js
+    // Compter PRODUCTIONS, pas ÉVALUATIONS (évite double comptage avec reprises)
+
+    // Lire les productions
+    const productions = obtenirDonneesSelonMode('productions') || [];
+
+    // Filtrer évaluations jusqu'à la date limite
+    const evaluationsFiltrees = evaluations.filter(e => {
+        if (!e.dateEvaluation) return false;
+        return e.dateEvaluation <= dateLimite;
+    });
+
+    // 1. Identifier les productions QUI ONT ÉTÉ ÉVALUÉES jusqu'à cette date
+    const productionsEvaluees = productions.filter(production => {
+        // Exclure les productions facultatives
+        if (production.facultatif) return false;
+
+        // Vérifier qu'au moins une évaluation existe pour cette production jusqu'à dateLimite
+        return evaluationsFiltrees.some(e =>
+            e.productionId === production.id &&
+            !e.remplaceeParId &&
+            e.noteFinale !== null
+        );
+    });
+
+    if (productionsEvaluees.length === 0) {
+        // ✅ CORRECTION (Beta 93) : null au lieu de 100% quand aucune production évaluée
         indiceC = null;
     } else {
-        const nbTotal = evaluationsFiltrees.length;
-        const nbRemis = evaluationsFiltrees.filter(e =>
-            e.statutRemise === 'remis' || e.statut === 'evalue'
-        ).length;
-        indiceC = Math.round((nbRemis / nbTotal) * 100);
+        // 2. Compter combien CET ÉTUDIANT a remis parmi les productions évaluées
+        const productionsRemises = productionsEvaluees.filter(production => {
+            return evaluationsFiltrees.some(e =>
+                e.etudiantDA === da &&
+                e.productionId === production.id &&
+                !e.remplaceeParId &&
+                e.noteFinale !== null
+            );
+        });
+
+        indiceC = Math.round((productionsRemises.length / productionsEvaluees.length) * 100);
     }
 
     // Calculer P : Déléguer à la pratique de notation configurée
