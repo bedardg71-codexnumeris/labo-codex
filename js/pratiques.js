@@ -1174,8 +1174,16 @@ function chargerModalites() {
         return;
     }
 
-    // Si pas de données sauvegardées, tout remettre à zéro
+    // Si pas de données sauvegardées, initialiser avec pratique par défaut
     if (!modalites.pratique) {
+        console.log('[chargerModalites] Aucune pratique configurée, initialisation avec sommative par défaut');
+        modalites.pratique = 'sommative';
+        modalites.affichageTableauBord = {
+            afficherSommatif: true,
+            afficherAlternatif: false
+        };
+        db.setSync('modalitesEvaluation', modalites);
+
         selectPratique.value = '';
         colonnePAN.style.display = 'none';
         selectPAN.value = '';
