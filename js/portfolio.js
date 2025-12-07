@@ -675,6 +675,32 @@ function calculerEtStockerIndicesCP() {
         }
 
         // ========================================
+        // CALCUL ENGAGEMENT (E) - PRINCIPE SST
+        // ========================================
+        // ✅ NOUVEAU (7 déc 2025): Calculer E ici pour respecter Single Source of Truth
+        // E est maintenant stocké dans indicesCP au lieu d'être recalculé partout
+
+        // Lire A depuis indicesAssiduite (calculé par saisie-presences.js)
+        const indicesAssiduite = db.getSync('indicesAssiduite', {});
+        const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
+
+        // Extraire l'indice A (gérer ancien format nombre et nouveau format objet)
+        let A = 0;
+        if (typeof assiduiteSommatif === 'object' && assiduiteSommatif.indice !== undefined) {
+            A = assiduiteSommatif.indice; // Déjà en proportion 0-1
+        } else if (typeof assiduiteSommatif === 'number') {
+            A = assiduiteSommatif; // Ancien format, déjà en proportion 0-1
+        }
+
+        // Calculer E pour SOM: E = (A × C × P)^(1/3)
+        const E_brut_som = A * (C_som / 100) * (P_som / 100);
+        const E_som = Math.pow(E_brut_som, 1/3); // Racine cubique
+
+        // Calculer E pour PAN: E = (A × C × P)^(1/3)
+        const E_brut_pan = A * (C_pan / 100) * (P_pan / 100);
+        const E_pan = Math.pow(E_brut_pan, 1/3); // Racine cubique
+
+        // ========================================
         // STRUCTURE À DEUX BRANCHES
         // ========================================
 
@@ -683,6 +709,7 @@ function calculerEtStockerIndicesCP() {
             SOM: {
                 C: C_som,
                 P: P_som,
+                E: parseFloat(E_som.toFixed(3)), // ✅ NOUVEAU (7 déc 2025): Engagement stocké ici (SST)
                 details: {
                     calculViaPratique: true,
                     pratique: 'sommative'
@@ -691,6 +718,7 @@ function calculerEtStockerIndicesCP() {
             PAN: {
                 C: C_pan,
                 P: P_pan,
+                E: parseFloat(E_pan.toFixed(3)), // ✅ NOUVEAU (7 déc 2025): Engagement stocké ici (SST)
                 details: {
                     calculViaPratique: true,
                     pratique: 'pan-maitrise',
@@ -721,8 +749,10 @@ function calculerEtStockerIndicesCP() {
         const aDiffere = !dernierHistorique ||
             dernierHistorique.SOM?.C !== C_som ||
             dernierHistorique.SOM?.P !== P_som ||
+            dernierHistorique.SOM?.E !== parseFloat(E_som.toFixed(3)) ||  // ✅ NOUVEAU (7 déc 2025)
             dernierHistorique.PAN?.C !== C_pan ||
-            dernierHistorique.PAN?.P !== P_pan;
+            dernierHistorique.PAN?.P !== P_pan ||
+            dernierHistorique.PAN?.E !== parseFloat(E_pan.toFixed(3));  // ✅ NOUVEAU (7 déc 2025)
 
         if (aDiffere) {
             indicesCP[da].historique.push(entreeActuelle);

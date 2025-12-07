@@ -403,39 +403,39 @@ function calculerTousLesIndices(da, pratique = null) {
         pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
     }
 
-    // INDICES C et P : Lire depuis db.getSync('indicesCP') (Single Source of Truth)
+    // INDICES C, P, E : Lire depuis db.getSync('indicesCP') (Single Source of Truth)
     let C = 0;
     let P = 0;
-    let P_pourRisque = 0; // P à utiliser pour le calcul de R (peut être P_recent si découplage activé)
+    let E = 0; // ✅ NOUVEAU (7 déc 2025): E lu depuis indicesCP au lieu d'être recalculé
 
     if (typeof obtenirIndicesCP === 'function') {
         const indicesCP = obtenirIndicesCP(da, pratique); // Lire la branche spécifique
         if (indicesCP) {
             C = indicesCP.C / 100; // Convertir en proportion 0-1
             P = indicesCP.P / 100;
-            P_pourRisque = P; // Par défaut, P_pourRisque = P
-
-            // Note: P_pourRisque est conservé comme nom de variable pour compatibilité historique
-            // mais n'est plus utilisé pour calculer un "risque" - il sert uniquement pour E
+            // ✅ NOUVEAU (7 déc 2025): Lire E depuis indicesCP (SST)
+            E = indicesCP.E !== undefined ? indicesCP.E : 0;
         } else {
             // Fallback : calculer à la volée si pas encore généré
             console.warn(`⚠️ indicesCP non trouvé pour ${da} (${pratique}) - Calcul à la volée`);
             C = calculerTauxCompletion(da) / 100;
             P = calculerPerformancePAN(da);
-            P_pourRisque = P;
+            // Fallback E: calculer si pas disponible
+            const E_brut = A * C * P;
+            E = Math.pow(E_brut, 1/3);
         }
     } else {
         // Fallback : fonctions anciennes si module portfolio.js pas chargé
         console.warn('⚠️ obtenirIndicesCP non disponible - Calcul à la volée');
         C = calculerTauxCompletion(da) / 100;
         P = calculerPerformancePAN(da);
-        P_pourRisque = P;
+        // Fallback E: calculer si pas disponible
+        const E_brut = A * C * P;
+        E = Math.pow(E_brut, 1/3);
     }
 
     // INDICES COMPOSITES
-    const M = (A + C) / 2;          // Mobilisation
-    const E_brut = A * C * P_pourRisque;
-    const E = Math.pow(E_brut, 1/3); // Engagement (racine cubique = moyenne géométrique)
+    const M = (A + C) / 2;  // Mobilisation (conservé pour compatibilité, mais plus utilisé)
 
     return {
         // Indices primaires (en pourcentage pour compatibilité affichage)
@@ -746,13 +746,39 @@ function genererSectionMobilisationEngagement(da) {
     // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif !== false;
-    const afficherPan = affichage.afficherAlternatif !== false;
+
+    // ✅ CORRECTION (7 déc 2025): Vérifier explicitement === true pour éviter mode comparatif par défaut
+    const afficherSom = affichage.afficherSommatif === true;
+    const afficherPan = affichage.afficherAlternatif === true;
     const modeComparatif = afficherSom && afficherPan;
 
-    // Calculer indices pour les deux pratiques
-    const indicesSOM = calculerTousLesIndices(da, 'SOM');
-    const indicesPAN = calculerTousLesIndices(da, 'PAN');
+    // ✅ OPTIMISATION (7 déc 2025): Calculer uniquement la pratique active sauf en mode comparatif
+    let indicesSOM, indicesPAN, directionSOM, directionPAN;
+
+    if (modeComparatif) {
+        // Mode comparatif: calculer les deux pratiques
+        indicesSOM = calculerTousLesIndices(da, 'SOM');
+        indicesPAN = calculerTousLesIndices(da, 'PAN');
+        directionSOM = calculerDirectionEngagement(da, 'SOM');
+        directionPAN = calculerDirectionEngagement(da, 'PAN');
+    } else {
+        // Mode normal: calculer seulement la pratique active
+        const indicesActifs = calculerTousLesIndices(da);
+        const directionActive = calculerDirectionEngagement(da);
+
+        // Assigner aux bonnes variables selon la pratique active
+        if (config.pratique === 'sommative') {
+            indicesSOM = indicesActifs;
+            indicesPAN = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour PAN
+            directionSOM = directionActive;
+            directionPAN = { direction: 'stable', emoji: '→' };
+        } else {
+            indicesPAN = indicesActifs;
+            indicesSOM = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour SOM
+            directionPAN = directionActive;
+            directionSOM = { direction: 'stable', emoji: '→' };
+        }
+    }
 
     // Calculer engagement pour les deux pratiques (E = racine cubique de A × C × P)
     const A_pct = indicesSOM.A / 100; // A est identique pour les deux pratiques
@@ -765,10 +791,6 @@ function genererSectionMobilisationEngagement(da) {
     const P_PAN = indicesPAN.P / 100;
     const E_brut_PAN = A_pct * C_PAN * P_PAN;
     const E_PAN = Math.pow(E_brut_PAN, 1/3); // Racine cubique
-
-    // Calculer les directions d'engagement (tendance de mobilisation)
-    const directionSOM = calculerDirectionEngagement(da, 'SOM');
-    const directionPAN = calculerDirectionEngagement(da, 'PAN');
 
     // Récupérer les données pour les trois sections
     const detailsA = obtenirDetailsAssiduite(da);
@@ -3293,16 +3315,35 @@ function afficherProfilComplet(da) {
     // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif !== false;
-    const afficherPan = affichage.afficherAlternatif !== false;
+
+    // ✅ CORRECTION (7 déc 2025): Vérifier explicitement === true pour éviter mode comparatif par défaut
+    const afficherSom = affichage.afficherSommatif === true;
+    const afficherPan = affichage.afficherAlternatif === true;
     const modeComparatif = afficherSom && afficherPan;
 
     // Vérifier si le modèle RàI est activé
     const activerRai = config.activerRai !== false; // Par défaut true (rétrocompatibilité)
 
-    // Calculer indices pour les deux pratiques
-    const indicesSOM = calculerTousLesIndices(da, 'SOM');
-    const indicesPAN = calculerTousLesIndices(da, 'PAN');
+    // ✅ OPTIMISATION (7 déc 2025): Calculer uniquement la pratique active sauf en mode comparatif
+    let indicesSOM, indicesPAN;
+
+    if (modeComparatif) {
+        // Mode comparatif: calculer les deux pratiques
+        indicesSOM = calculerTousLesIndices(da, 'SOM');
+        indicesPAN = calculerTousLesIndices(da, 'PAN');
+    } else {
+        // Mode normal: calculer seulement la pratique active
+        const indicesActifs = calculerTousLesIndices(da);
+
+        // Assigner aux bonnes variables selon la pratique active
+        if (config.pratique === 'sommative') {
+            indicesSOM = indicesActifs;
+            indicesPAN = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour PAN
+        } else {
+            indicesPAN = indicesActifs;
+            indicesSOM = { A: indicesActifs.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour SOM
+        }
+    }
 
     // Trouver l'index de l'élève dans la liste pour navigation
     const indexActuel = etudiants.findIndex(e => e.da === da);
@@ -6373,16 +6414,33 @@ function genererSectionPerformance(da) {
     // NOUVEAU (Beta 90): Calcul dual pour mode comparatif
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif !== false;
-    const afficherPan = affichage.afficherAlternatif !== false;
+
+    // ✅ CORRECTION (7 déc 2025): Vérifier explicitement === true pour éviter mode comparatif par défaut
+    const afficherSom = affichage.afficherSommatif === true;
+    const afficherPan = affichage.afficherAlternatif === true;
     const modeComparatif = afficherSom && afficherPan;
 
-    // Calculer indices pour les deux pratiques
-    const indicesSOM = calculerTousLesIndices(da, 'SOM');
-    const indicesPAN = calculerTousLesIndices(da, 'PAN');
+    // ✅ OPTIMISATION (7 déc 2025): Calculer uniquement la pratique active sauf en mode comparatif
+    let indicesSOM, indicesPAN, indices;
 
-    // Pour compatibilité avec le code existant, utiliser la pratique courante
-    const indices = modeComparatif ? indicesSOM : calculerTousLesIndices(da);
+    if (modeComparatif) {
+        // Mode comparatif: calculer les deux pratiques
+        indicesSOM = calculerTousLesIndices(da, 'SOM');
+        indicesPAN = calculerTousLesIndices(da, 'PAN');
+        indices = indicesSOM; // Pour compatibilité avec le code existant
+    } else {
+        // Mode normal: calculer seulement la pratique active
+        indices = calculerTousLesIndices(da);
+
+        // Assigner aux bonnes variables selon la pratique active
+        if (config.pratique === 'sommative') {
+            indicesSOM = indices;
+            indicesPAN = { A: indices.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour PAN
+        } else {
+            indicesPAN = indices;
+            indicesSOM = { A: indices.A, C: 0, P: 0, M: 0, E: 0 }; // Valeurs nulles pour SOM
+        }
+    }
 
     // 🎯 UTILISER LES DONNÉES DE LA SOURCE UNIQUE (portfolio.js)
     let artefactsRetenus = [];

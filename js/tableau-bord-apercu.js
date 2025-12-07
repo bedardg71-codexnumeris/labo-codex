@@ -695,40 +695,23 @@ function calculerIndicesEtudiant(da) {
         sommatif: {
             assiduite: (typeof assiduiteSommatif === 'object') ? assiduiteSommatif.indice : (assiduiteSommatif || 0),
             completion: indicesSOM ? indicesSOM.C / 100 : 0,
-            performance: indicesSOM ? indicesSOM.P / 100 : 0
+            performance: indicesSOM ? indicesSOM.P / 100 : 0,
+            // ✅ NOUVEAU (7 déc 2025): Lire E depuis indicesCP (SST) au lieu de recalculer
+            engagement: indicesSOM && indicesSOM.E !== undefined ? indicesSOM.E : 0
         },
         alternatif: {
             assiduite: (typeof assiduiteAlternatif === 'object') ? assiduiteAlternatif.indice : (assiduiteAlternatif || 0),
             completion: indicesPAN ? indicesPAN.C / 100 : 0,
-            performance: indicesPAN ? indicesPAN.P / 100 : 0
+            performance: indicesPAN ? indicesPAN.P / 100 : 0,
+            // ✅ NOUVEAU (7 déc 2025): Lire E depuis indicesCP (SST) au lieu de recalculer
+            engagement: indicesPAN && indicesPAN.E !== undefined ? indicesPAN.E : 0
         }
     };
 
     // ========================================
-    // DÉCOUPLAGE P/R : Lire P_recent si activé pour PAN
+    // NIVEAU D'ENGAGEMENT (basé sur E lu depuis indicesCP)
     // ========================================
-    let P_recent_PAN = null;
-    if (indicesPAN && indicesPAN.details && indicesPAN.details.decouplerPR &&
-        indicesPAN.details.P_recent !== null && indicesPAN.details.P_recent !== undefined) {
-        P_recent_PAN = indicesPAN.details.P_recent / 100; // Convertir en proportion 0-1
-        console.log(`[Découplage P/R] DA ${da}: P_recent=${indicesPAN.details.P_recent}% utilisé pour calcul risque PAN`);
-    }
-
-    // Calculer l'engagement pour les deux pratiques (E = racine cubique de A × C × P)
-    indices.sommatif.engagement = calculerEngagement(
-        indices.sommatif.assiduite,
-        indices.sommatif.completion,
-        indices.sommatif.performance
-    );
     indices.sommatif.niveauEngagement = determinerNiveauEngagement(indices.sommatif.engagement);
-
-    // Pour PAN: utiliser P_recent si découplage activé, sinon P normal
-    const P_pour_engagement_PAN = P_recent_PAN !== null ? P_recent_PAN : indices.alternatif.performance;
-    indices.alternatif.engagement = calculerEngagement(
-        indices.alternatif.assiduite,
-        indices.alternatif.completion,
-        P_pour_engagement_PAN
-    );
     indices.alternatif.niveauEngagement = determinerNiveauEngagement(indices.alternatif.engagement);
 
     return indices;

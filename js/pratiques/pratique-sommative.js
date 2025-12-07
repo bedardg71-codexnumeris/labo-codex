@@ -20,7 +20,8 @@
 class PratiqueSommative {
 
     constructor() {
-        console.log('📊 Initialisation de la pratique Sommative');
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log('📊 Initialisation de la pratique Sommative');
     }
 
     // ========================================================================
@@ -54,7 +55,7 @@ class PratiqueSommative {
      */
     calculerPerformance(da) {
         if (!da || da.length !== 7) {
-            console.warn('[SOM] DA invalide:', da);
+            // console.warn('[SOM] DA invalide:', da);
             return null;
         }
 
@@ -71,7 +72,7 @@ class PratiqueSommative {
         );
 
         if (evaluationsEleve.length === 0) {
-            console.log('[SOM] Aucune évaluation pour DA', da);
+            // console.log('[SOM] Aucune évaluation pour DA', da);
             return null;
         }
 
@@ -92,7 +93,8 @@ class PratiqueSommative {
         const moyennePonderee = pondTotal > 0 ? scoreTotal / pondTotal : 0;
         const indiceP = moyennePonderee / 100;
 
-        console.log(`[SOM] Performance DA ${da}: ${moyennePonderee.toFixed(1)}% (${evaluationsEleve.length} évaluations)`);
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log(`[SOM] Performance DA ${da}: ${moyennePonderee.toFixed(1)}% (${evaluationsEleve.length} évaluations)`);
 
         return indiceP;
     }
@@ -130,7 +132,8 @@ class PratiqueSommative {
         );
 
         if (evaluationsEleve.length === 0) {
-            console.log(`[SOM-Historique] Aucune évaluation pour DA ${da} jusqu'à ${dateLimite}`);
+            // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+            // console.log(`[SOM-Historique] Aucune évaluation pour DA ${da} jusqu'à ${dateLimite}`);
             return null;
         }
 
@@ -151,7 +154,8 @@ class PratiqueSommative {
         const moyennePonderee = pondTotal > 0 ? scoreTotal / pondTotal : 0;
         const indiceP = moyennePonderee / 100;
 
-        console.log(`[SOM-Historique] DA ${da}: ${moyennePonderee.toFixed(1)}% (${evaluationsEleve.length} évaluations)`);
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log(`[SOM-Historique] DA ${da}: ${moyennePonderee.toFixed(1)}% (${evaluationsEleve.length} évaluations)`);
 
         return indiceP;
     }
@@ -168,7 +172,7 @@ class PratiqueSommative {
      */
     calculerCompletion(da) {
         if (!da || da.length !== 7) {
-            console.warn('[SOM] DA invalide:', da);
+            // console.warn('[SOM] DA invalide:', da);
             return null;
         }
 
@@ -190,7 +194,7 @@ class PratiqueSommative {
         });
 
         if (productionsEvaluees.length === 0) {
-            console.log('[SOM] Aucune production évaluée pour DA', da);
+            // console.log('[SOM] Aucune production évaluée pour DA', da);
             return null;
         }
 
@@ -206,7 +210,8 @@ class PratiqueSommative {
 
         const indiceC = productionsRemises.length / productionsEvaluees.length;
 
-        console.log(`[SOM] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${productionsRemises.length}/${productionsEvaluees.length} évaluées)`);
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log(`[SOM] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${productionsRemises.length}/${productionsEvaluees.length} évaluées)`);
 
         return indiceC;
     }
@@ -228,7 +233,7 @@ class PratiqueSommative {
      */
     detecterDefis(da) {
         if (!da || da.length !== 7) {
-            console.warn('[SOM] DA invalide:', da);
+            // console.warn('[SOM] DA invalide:', da);
             return { type: 'generique', defis: [], tendance: {} };
         }
 
@@ -324,7 +329,7 @@ class PratiqueSommative {
      */
     identifierPattern(da) {
         if (!da || da.length !== 7) {
-            console.warn('[SOM] DA invalide:', da);
+            // console.warn('[SOM] DA invalide:', da);
             return {
                 type: 'inconnu',
                 description: 'DA invalide',
@@ -352,7 +357,7 @@ class PratiqueSommative {
                 indiceA = indicesAssiduite[da].actuel.A / 100;
             }
         } catch (error) {
-            console.warn('[SOM] Erreur lecture assiduité:', error);
+            // console.warn('[SOM] Erreur lecture assiduité:', error);
         }
 
         // Calculer engagement E = (A × C × P)^(1/3)
@@ -423,14 +428,14 @@ class PratiqueSommative {
      */
     genererCibleIntervention(da) {
         if (!da || da.length !== 7) {
-            console.warn('[SOM] DA invalide:', da);
+            // console.warn('[SOM] DA invalide:', da);
             return null;
         }
 
         const pattern = this.identifierPattern(da);
         const defis = this.detecterDefis(da);
 
-        console.log('[SOM] Génération cible RàI pour DA', da, {
+        // console.log('[SOM] Génération cible RàI pour DA', da, {
             pattern: pattern.type,
             nbDefis: defis.defis.length
         });
@@ -693,7 +698,8 @@ class PratiqueSommative {
 
     try {
         window.enregistrerPratique('sommative', instance);
-        console.log('✅ [SOM] Pratique Sommative enregistrée avec succès');
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log('✅ [SOM] Pratique Sommative enregistrée avec succès');
     } catch (error) {
         console.error('[SOM] Erreur lors de l\'enregistrement:', error);
     }
@@ -702,4 +708,5 @@ class PratiqueSommative {
 // Export pour utilisation directe
 window.PratiqueSommative = PratiqueSommative;
 
-console.log('✅ Module pratique-sommative.js chargé');
+// ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+// console.log('✅ Module pratique-sommative.js chargé');
