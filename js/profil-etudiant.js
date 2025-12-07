@@ -4084,6 +4084,54 @@ function genererSectionProgression(da) {
 }
 
 function genererSectionPerformance(da) {
+    // ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères
+    const canvasIdCriteres = `graphique-criteres-${da}`;
+    let graphiqueCriteres = '';
+
+    // Vérifier si l'étudiant a des évaluations avec détails critères
+    if (typeof creerGraphiqueCriteres === 'function') {
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        const evaluationsAvecCriteres = evaluations.filter(e =>
+            e.etudiantDA === da &&
+            e.statut === 'evalue' &&
+            e.detailsCriteres &&
+            Object.keys(e.detailsCriteres).length > 0
+        );
+
+        if (evaluationsAvecCriteres.length > 0) {
+            graphiqueCriteres = `
+                <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
+                    <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
+                        📈 Évolution des critères au fil des productions
+                    </h4>
+
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
+                        Ce graphique montre la progression de chaque critère d'évaluation à travers les productions.
+                        Cliquez sur un critère dans la légende pour le masquer/afficher.
+                    </p>
+
+                    <!-- Canvas pour le graphique Chart.js -->
+                    <div style="background: white; padding: 20px; border-radius: 6px; height: 450px;">
+                        <canvas id="${canvasIdCriteres}"></canvas>
+                    </div>
+
+                    <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: #666;">
+                        <strong>Conseil :</strong> Cliquez sur un critère dans la légende pour le masquer ou l'afficher.
+                        Survolez les points pour voir les détails.
+                    </div>
+                </div>
+            `;
+
+            // Utiliser setTimeout pour créer le graphique après l'insertion du DOM
+            setTimeout(() => {
+                const canvas = document.getElementById(canvasIdCriteres);
+                if (canvas) {
+                    creerGraphiqueCriteres(canvasIdCriteres, da);
+                }
+            }, 100);
+        }
+    }
+
     // 🎯 DÉTECTION PRATIQUE MULTI-OBJECTIFS
     const statusPratiqueMultiObjectifs = verifierPratiqueMultiObjectifs();
 
@@ -4093,12 +4141,14 @@ function genererSectionPerformance(da) {
 
         if (noteFinale && noteFinale.noteFinale !== null) {
             return `
+                ${graphiqueCriteres}
                 <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
                     ${genererTableauObjectifs(da, statusPratiqueMultiObjectifs.ensembleId, noteFinale)}
                 </div>
             `;
         } else {
             return `
+                ${graphiqueCriteres}
                 <div class="profil-zone-moyenne-bleu">
                     <p style="color: #666;">Pratique multi-objectifs activée avec l'ensemble «${echapperHtml(statusPratiqueMultiObjectifs.ensemble.nom)}»</p>
                     <p style="color: #999; margin-top: 10px;">Aucune évaluation disponible pour le moment</p>
@@ -4112,6 +4162,7 @@ function genererSectionPerformance(da) {
 
     if (meilleures.length === 0) {
         return `
+            ${graphiqueCriteres}
             <div class="profil-zone-moyenne-bleu">
                 <p style="color: #666;">Aucune évaluation disponible pour le moment</p>
             </div>
@@ -4121,6 +4172,7 @@ function genererSectionPerformance(da) {
     const moyenne = meilleures.reduce((sum, m) => sum + m.note, 0) / meilleures.length;
 
     return `
+        ${graphiqueCriteres}
         <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
             <div style="background: white; padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
                 <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">

@@ -706,6 +706,250 @@ function detruireGraphique(chart) {
 }
 
 /* ===============================
+   GRAPHIQUE ÉVOLUTION DES CRITÈRES
+   =============================== */
+
+/**
+ * Récupère les données d'évolution des critères pour un étudiant
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {Object|null} - { labels: [], datasets: [] } ou null si erreur
+ */
+function obtenirDonneesCriteres(da) {
+    try {
+        // Récupérer les évaluations de l'étudiant
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        const evaluationsEtudiant = evaluations.filter(e =>
+            e.etudiantDA === da &&
+            e.statut === 'evalue' &&
+            e.detailsCriteres &&
+            Object.keys(e.detailsCriteres).length > 0
+        );
+
+        if (evaluationsEtudiant.length === 0) {
+            console.warn(`Aucune évaluation avec détails critères pour DA ${da}`);
+            return null;
+        }
+
+        // Trier par date d'évaluation
+        evaluationsEtudiant.sort((a, b) => {
+            const dateA = a.dateEvaluation || '';
+            const dateB = b.dateEvaluation || '';
+            return dateA.localeCompare(dateB);
+        });
+
+        // Récupérer les productions pour les noms
+        const productions = obtenirDonneesSelonMode('productions') || [];
+
+        // Extraire les critères uniques (depuis la première évaluation)
+        const premiereEval = evaluationsEtudiant[0];
+        const criteresUniques = Object.keys(premiereEval.detailsCriteres).sort();
+
+        // Préparer les labels (noms des productions)
+        const labels = evaluationsEtudiant.map(e => {
+            const production = productions.find(p => p.id === e.productionId);
+            return production?.description || production?.nom || `Prod. ${e.productionId}`;
+        });
+
+        // Préparer les données par critère
+        const donneesCriteres = {};
+
+        criteresUniques.forEach(critere => {
+            donneesCriteres[critere] = evaluationsEtudiant.map(e => {
+                const detailCritere = e.detailsCriteres[critere];
+                if (!detailCritere || detailCritere.note === null) return null;
+
+                // Convertir en pourcentage (0-100)
+                const note = detailCritere.note;
+
+                // Si c'est une lettre IDME, convertir
+                if (typeof note === 'string') {
+                    const niveau = note.trim().toUpperCase();
+                    if (niveau === '0') return 0;
+                    if (niveau === 'I') return 40;
+                    if (niveau === 'D') return 65;
+                    if (niveau === 'M') return 75;
+                    if (niveau === 'E') return 100;
+                }
+
+                // Si c'est un nombre sur 4, convertir en pourcentage
+                const noteNum = parseFloat(note);
+                if (isNaN(noteNum)) return null;
+                return noteNum <= 4 ? (noteNum / 4) * 100 : noteNum;
+            });
+        });
+
+        return {
+            labels,
+            criteres: donneesCriteres,
+            criteresUniques
+        };
+    } catch (error) {
+        console.error('[obtenirDonneesCriteres] Erreur:', error);
+        return null;
+    }
+}
+
+/**
+ * Crée un graphique d'évolution des critères pour un étudiant
+ *
+ * @param {string} canvasId - ID de l'élément canvas
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {Chart|null} - Instance Chart.js ou null si erreur
+ */
+function creerGraphiqueCriteres(canvasId, da) {
+    try {
+        // Récupérer les données
+        const donnees = obtenirDonneesCriteres(da);
+
+        if (!donnees) {
+            console.warn(`Impossible de créer le graphique critères pour DA ${da}`);
+            return null;
+        }
+
+        // Palette de couleurs pour les critères (distinctes et contrastées)
+        const COULEURS_CRITERES = [
+            '#E91E63',  // Rose foncé
+            '#9C27B0',  // Violet
+            '#3F51B5',  // Indigo
+            '#00BCD4',  // Cyan
+            '#4CAF50',  // Vert
+            '#FF9800',  // Orange
+            '#795548',  // Brun
+            '#607D8B'   // Bleu-gris
+        ];
+
+        // Créer les datasets (une courbe par critère)
+        const datasets = donnees.criteresUniques.map((critere, index) => {
+            const couleur = COULEURS_CRITERES[index % COULEURS_CRITERES.length];
+
+            return {
+                label: critere,
+                data: donnees.criteres[critere],
+                borderColor: couleur,
+                backgroundColor: couleur + '20', // Transparence 20%
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: couleur,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                spanGaps: false
+            };
+        });
+
+        // Obtenir le canvas
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            console.error(`Canvas ${canvasId} introuvable`);
+            return null;
+        }
+        const ctx = canvas.getContext('2d');
+
+        // Configuration du graphique
+        const config = {
+            type: 'line',
+            data: {
+                labels: donnees.labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Évolution des critères au fil des productions',
+                        font: { size: 16, weight: 'bold' }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: { size: 12 }
+                        },
+                        onClick: function(e, legendItem, legend) {
+                            // Comportement par défaut : cliquer pour masquer/afficher
+                            const index = legendItem.datasetIndex;
+                            const chart = legend.chart;
+                            const meta = chart.getDatasetMeta(index);
+                            meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+                            chart.update();
+                        }
+                    },
+                    tooltip: {
+                        mode: 'point',
+                        intersect: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        callbacks: {
+                            label: function(context) {
+                                const critere = context.dataset.label;
+                                const valeur = context.parsed.y;
+                                return valeur !== null ? `${critere}: ${valeur.toFixed(1)}%` : `${critere}: —`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Productions',
+                            font: { size: 13, weight: 'bold' }
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: { size: 11 }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Performance (%)',
+                            font: { size: 13, weight: 'bold' }
+                        },
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            stepSize: 10,
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        },
+                        grid: {
+                            color: function(context) {
+                                // Lignes de grille aux seuils clés
+                                if (context.tick.value === 40) return 'rgba(255, 0, 0, 0.2)'; // Insuffisant
+                                if (context.tick.value === 65) return 'rgba(255, 152, 0, 0.2)'; // Développement
+                                if (context.tick.value === 75) return 'rgba(76, 175, 80, 0.2)'; // Maîtrisé
+                                return 'rgba(0, 0, 0, 0.1)';
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        };
+
+        return new Chart(ctx, config);
+    } catch (error) {
+        console.error('[creerGraphiqueCriteres] Erreur:', error);
+        return null;
+    }
+}
+
+/* ===============================
    EXPORTS
    =============================== */
 
@@ -713,6 +957,7 @@ function detruireGraphique(chart) {
 window.creerGraphiqueIndividuel = creerGraphiqueIndividuel;
 window.creerGraphiqueGroupeMoyennes = creerGraphiqueGroupeMoyennes;
 window.creerGraphiqueGroupeSpaghetti = creerGraphiqueGroupeSpaghetti;
+window.creerGraphiqueCriteres = creerGraphiqueCriteres;
 window.detruireGraphique = detruireGraphique;
 
 console.log('📊 Module graphiques-progression.js chargé');
