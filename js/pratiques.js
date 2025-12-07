@@ -156,7 +156,7 @@ function getPratiqueCours(coursId) {
 
     if (!coursActuel) {
         console.warn(`[getPratiqueCours] Cours introuvable: ${coursId}, utilisation pratique par défaut`);
-        return 'pan-maitrise'; // Pratique par défaut
+        return 'sommative'; // Pratique par défaut
     }
 
     // Si le cours a une pratique définie, la retourner
@@ -166,8 +166,8 @@ function getPratiqueCours(coursId) {
     }
 
     // Sinon, utiliser la pratique par défaut
-    console.log(`[getPratiqueCours] Cours ${coursId} n'a pas de pratique définie, utilisation de pan-maitrise par défaut`);
-    return 'pan-maitrise'; // Pratique par défaut
+    console.log(`[getPratiqueCours] Cours ${coursId} n'a pas de pratique définie, utilisation de sommative par défaut`);
+    return 'sommative'; // Pratique par défaut
 }
 
 /**
@@ -587,7 +587,7 @@ function sauvegarderOptionsAffichage() {
     let modalites = db.getSync('modalitesEvaluation', {});
 
     // Récupérer la pratique active depuis modalites (nouvelle architecture Beta 91)
-    const pratique = modalites.pratique || 'pan-maitrise';
+    const pratique = modalites.pratique || 'sommative';
 
     // Définir l'affichage selon le mode comparatif
     if (modeComparatif) {
