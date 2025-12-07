@@ -4093,9 +4093,9 @@ function genererSectionPerformance(da) {
         const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         const evaluationsAvecCriteres = evaluations.filter(e =>
             e.etudiantDA === da &&
-            e.statut === 'evalue' &&
-            e.detailsCriteres &&
-            Object.keys(e.detailsCriteres).length > 0
+            e.criteres &&
+            Array.isArray(e.criteres) &&
+            e.criteres.length > 0
         );
 
         if (evaluationsAvecCriteres.length > 0) {

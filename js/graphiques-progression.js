@@ -721,9 +721,9 @@ function obtenirDonneesCriteres(da) {
         const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
         const evaluationsEtudiant = evaluations.filter(e =>
             e.etudiantDA === da &&
-            e.statut === 'evalue' &&
-            e.detailsCriteres &&
-            Object.keys(e.detailsCriteres).length > 0
+            e.criteres &&
+            Array.isArray(e.criteres) &&
+            e.criteres.length > 0
         );
 
         if (evaluationsEtudiant.length === 0) {
@@ -741,9 +741,23 @@ function obtenirDonneesCriteres(da) {
         // Récupérer les productions pour les noms
         const productions = obtenirDonneesSelonMode('productions') || [];
 
-        // Extraire les critères uniques (depuis la première évaluation)
-        const premiereEval = evaluationsEtudiant[0];
-        const criteresUniques = Object.keys(premiereEval.detailsCriteres).sort();
+        // Extraire les critères uniques depuis toutes les évaluations
+        const criteresSet = new Set();
+        evaluationsEtudiant.forEach(e => {
+            if (e.criteres && Array.isArray(e.criteres)) {
+                e.criteres.forEach(c => {
+                    if (c.critereNom) {
+                        criteresSet.add(c.critereNom);
+                    }
+                });
+            }
+        });
+        const criteresUniques = Array.from(criteresSet).sort();
+
+        if (criteresUniques.length === 0) {
+            console.warn(`Aucun critère trouvé dans les évaluations pour DA ${da}`);
+            return null;
+        }
 
         // Préparer les labels (noms des productions)
         const labels = evaluationsEtudiant.map(e => {
@@ -754,26 +768,26 @@ function obtenirDonneesCriteres(da) {
         // Préparer les données par critère
         const donneesCriteres = {};
 
-        criteresUniques.forEach(critere => {
-            donneesCriteres[critere] = evaluationsEtudiant.map(e => {
-                const detailCritere = e.detailsCriteres[critere];
-                if (!detailCritere || detailCritere.note === null) return null;
+        criteresUniques.forEach(nomCritere => {
+            donneesCriteres[nomCritere] = evaluationsEtudiant.map(e => {
+                // Trouver le critère dans l'array
+                const critere = e.criteres.find(c => c.critereNom === nomCritere);
+                if (!critere || !critere.niveauSelectionne) return null;
 
-                // Convertir en pourcentage (0-100)
-                const note = detailCritere.note;
+                const niveau = critere.niveauSelectionne;
 
-                // Si c'est une lettre IDME, convertir
-                if (typeof note === 'string') {
-                    const niveau = note.trim().toUpperCase();
-                    if (niveau === '0') return 0;
-                    if (niveau === 'I') return 40;
-                    if (niveau === 'D') return 65;
-                    if (niveau === 'M') return 75;
-                    if (niveau === 'E') return 100;
+                // Si c'est une lettre IDME, convertir en pourcentage
+                if (typeof niveau === 'string') {
+                    const niveauUpper = niveau.trim().toUpperCase();
+                    if (niveauUpper === '0') return 0;
+                    if (niveauUpper === 'I') return 40;
+                    if (niveauUpper === 'D') return 65;
+                    if (niveauUpper === 'M') return 75;
+                    if (niveauUpper === 'E') return 100;
                 }
 
                 // Si c'est un nombre sur 4, convertir en pourcentage
-                const noteNum = parseFloat(note);
+                const noteNum = parseFloat(niveau);
                 if (isNaN(noteNum)) return null;
                 return noteNum <= 4 ? (noteNum / 4) * 100 : noteNum;
             });
