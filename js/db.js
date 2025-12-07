@@ -228,7 +228,25 @@
             }
 
             if (this.useIndexedDB) {
+                // Écrire dans IndexedDB (stockage persistant)
                 await this._setIndexedDB(key, value);
+
+                // AUSSI écrire dans localStorage (cache synchrone) si la donnée n'est pas trop grande
+                // Pour que les lectures getSync() voient immédiatement les nouvelles données
+                try {
+                    this._setLocalStorage(key, value);
+                } catch (e) {
+                    // Si QuotaExceededError (données trop grandes pour localStorage),
+                    // continuer sans cache localStorage (IndexedDB suffit)
+                    if (e.name === 'QuotaExceededError' || e.code === 22) {
+                        console.warn(`[DB] ⚠️ Clé "${key}" trop grande pour localStorage (${this._estimateSize(value)} bytes), stockée uniquement dans IndexedDB`);
+                        // Supprimer du cache localStorage si elle y était
+                        try { localStorage.removeItem(key); } catch (ex) { /* ignore */ }
+                    } else {
+                        // Autre erreur, la remonter
+                        throw e;
+                    }
+                }
             } else {
                 this._setLocalStorage(key, value);
             }
@@ -258,11 +276,18 @@
          * Écriture vers localStorage
          */
         _setLocalStorage(key, value) {
+            const jsonString = JSON.stringify(value);
+            localStorage.setItem(key, jsonString);
+        }
+
+        /**
+         * Estime la taille d'une valeur en bytes
+         */
+        _estimateSize(value) {
             try {
-                localStorage.setItem(key, JSON.stringify(value));
+                return new Blob([JSON.stringify(value)]).size;
             } catch (e) {
-                console.error(`[DB] Erreur écriture localStorage clé "${key}":`, e);
-                throw e;
+                return -1;
             }
         }
 
@@ -277,7 +302,16 @@
             }
 
             if (this.useIndexedDB) {
+                // Supprimer d'IndexedDB (stockage persistant)
                 await this._removeIndexedDB(key);
+
+                // AUSSI supprimer de localStorage (cache synchrone) si elle y est
+                try {
+                    this._removeLocalStorage(key);
+                } catch (e) {
+                    // Si erreur (clé inexistante dans localStorage), ignorer
+                    console.warn(`[DB] Note: clé "${key}" n'était pas dans localStorage (normal pour grandes données)`);
+                }
             } else {
                 this._removeLocalStorage(key);
             }
