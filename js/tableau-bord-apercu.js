@@ -331,8 +331,8 @@ function genererBadgePratique() {
 function genererBadgeSourceDonnees() {
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-    const afficherSommatif = affichage.afficherSommatif !== false;
-    const afficherAlternatif = affichage.afficherAlternatif !== false;
+    const afficherSommatif = affichage.afficherSommatif === true;
+    const afficherAlternatif = affichage.afficherAlternatif === true;
 
     let texte = '';
     let couleur = '';
@@ -435,8 +435,8 @@ function chargerTableauBordApercu() {
 
             // NOUVEAU Beta 90 : Détection automatique du mode comparatif
             // Si les deux pratiques sont affichées (OU si le flag explicite est true), c'est comparatif
-            const afficherSom = affichage.afficherSommatif !== false;
-            const afficherPan = affichage.afficherAlternatif !== false;
+            const afficherSom = affichage.afficherSommatif === true;
+            const afficherPan = affichage.afficherAlternatif === true;
             const modeComparatif = (afficherSom && afficherPan) || affichage.modeComparatif === true;
 
             titre.innerHTML = '';
@@ -631,8 +631,8 @@ function initialiserEvenementsToggle() {
 function genererIndicateurPratiqueOuCheckboxes() {
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif !== false;
-    const afficherPan = affichage.afficherAlternatif !== false;
+    const afficherSom = affichage.afficherSommatif === true;
+    const afficherPan = affichage.afficherAlternatif === true;
 
     // NOUVEAU Beta 90 : Détection automatique du mode comparatif
     // Si les deux pratiques sont affichées, c'est le mode comparatif
@@ -789,8 +789,8 @@ function determinerNiveauEngagement(engagement) {
 function afficherMetriquesGlobales(etudiants) {
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif !== false;
-    const afficherPan = affichage.afficherAlternatif !== false;
+    const afficherSom = affichage.afficherSommatif === true;
+    const afficherPan = affichage.afficherAlternatif === true;
 
     // Préparer les données pour chaque métrique
     const etudiantsSOM_A = etudiants.map(e => ({
@@ -1641,8 +1641,8 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
 function afficherAlertesPrioritairesCompteurs(etudiants) {
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif !== false;
-    const afficherPan = affichage.afficherAlternatif !== false;
+    const afficherSom = affichage.afficherSommatif === true;
+    const afficherPan = affichage.afficherAlternatif === true;
     const nbTotal = etudiants.length;
 
     // Calculer les statistiques pour SOM
@@ -1809,8 +1809,8 @@ function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, af
 function afficherPatternsApprentissage(etudiants) {
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif !== false;
-    const afficherPan = affichage.afficherAlternatif !== false;
+    const afficherSom = affichage.afficherSommatif === true;
+    const afficherPan = affichage.afficherAlternatif === true;
 
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
     // IMPORTANT : Utiliser determinerCibleIntervention() pour garantir la cohérence
@@ -1925,8 +1925,8 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
 function afficherNiveauxRaI(etudiants) {
     const config = db.getSync('modalitesEvaluation', {});
     const affichage = config.affichageTableauBord || {};
-    const afficherSom = affichage.afficherSommatif !== false;
-    const afficherPan = affichage.afficherAlternatif !== false;
+    const afficherSom = affichage.afficherSommatif === true;
+    const afficherPan = affichage.afficherAlternatif === true;
 
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
     const pratiqueSOM = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('sommative') : null;
@@ -2040,7 +2040,7 @@ function afficherActionsRecommandees(etudiants) {
     if (!container) return;
 
     const config = db.getSync('modalitesEvaluation', {});
-    const afficherSommatif = config.affichageTableauBord?.afficherSommatif !== false;
+    const afficherSommatif = config.affichageTableauBord?.afficherSommatif === true;
 
     // Filtrer étudiants à engagement faible et trier par priorité (engagement croissant)
     const etudiantsAEngagementFaible = etudiants
