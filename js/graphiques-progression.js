@@ -176,7 +176,8 @@ function creerGraphiqueIndividuel(canvasId, da) {
 
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
         const donneesA = snapshots.map(s => (s.A / 100) + OFFSET_VISUEL.A);
-        const donneesC = snapshots.map(s => (s.C / 100) + OFFSET_VISUEL.C);
+        // ✅ CORRECTION (7 déc 2025) : C doit être null si pas encore d'évaluation (comme P et E)
+        const donneesC = snapshots.map(s => s.C !== null && s.C !== 0 ? (s.C / 100) + OFFSET_VISUEL.C : null);
         const donneesP = snapshots.map(s => s.P !== null ? (s.P / 100) + OFFSET_VISUEL.P : null);
         const donneesE = snapshots.map(s => s.E !== null ? s.E + OFFSET_VISUEL.E : null);
 
@@ -239,7 +240,8 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         pointHoverRadius: 7,
                         pointBackgroundColor: COULEURS_INDICES.C,
                         pointBorderColor: '#fff',
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
                     },
                     {
                         label: 'Performance (P)',
@@ -253,7 +255,8 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         pointHoverRadius: 8,
                         pointBackgroundColor: COULEURS_INDICES.P,
                         pointBorderColor: '#fff',
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
                     },
                     {
                         label: 'Engagement (E)',
@@ -267,7 +270,8 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         pointHoverRadius: 7,
                         pointBackgroundColor: COULEURS_INDICES.E,
                         pointBorderColor: '#fff',
-                        pointBorderWidth: 2
+                        pointBorderWidth: 2,
+                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
                     }
                 ]
             },
@@ -401,7 +405,8 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
 
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
         const donneesA = snapshots.map(s => (s.groupe.moyenneA / 100) + OFFSET_VISUEL.A);
-        const donneesC = snapshots.map(s => (s.groupe.moyenneC / 100) + OFFSET_VISUEL.C);
+        // ✅ CORRECTION (7 déc 2025) : C doit être null si pas encore d'évaluation (comme P et E)
+        const donneesC = snapshots.map(s => s.groupe.moyenneC !== null && s.groupe.moyenneC !== 0 ? (s.groupe.moyenneC / 100) + OFFSET_VISUEL.C : null);
         const donneesP = snapshots.map(s => s.groupe.moyenneP !== null ? (s.groupe.moyenneP / 100) + OFFSET_VISUEL.P : null);
         const donneesE = snapshots.map(s => s.groupe.moyenneE !== null ? s.groupe.moyenneE + OFFSET_VISUEL.E : null);
 
@@ -437,7 +442,8 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         borderWidth: 3,
                         tension: 0.4,
                         pointRadius: 5,
-                        pointHoverRadius: 7
+                        pointHoverRadius: 7,
+                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
                     },
                     {
                         label: 'Performance (P)',
@@ -447,7 +453,8 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         borderWidth: 3,
                         tension: 0.4,
                         pointRadius: 5,
-                        pointHoverRadius: 7
+                        pointHoverRadius: 7,
+                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
                     },
                     {
                         label: 'Engagement (E)',
@@ -457,7 +464,8 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         borderWidth: 3,
                         tension: 0.4,
                         pointRadius: 5,
-                        pointHoverRadius: 7
+                        pointHoverRadius: 7,
+                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
                     }
                 ]
             },
