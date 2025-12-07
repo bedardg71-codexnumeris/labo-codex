@@ -19,7 +19,8 @@
 class PratiquePANMaitrise {
 
     constructor() {
-        console.log('🎯 Initialisation de la pratique PAN-Maîtrise');
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log('🎯 Initialisation de la pratique PAN-Maîtrise');
     }
 
     // ========================================================================
@@ -53,7 +54,7 @@ class PratiquePANMaitrise {
      */
     calculerPerformance(da) {
         if (!da || da.length !== 7) {
-            console.warn('[PAN] DA invalide:', da);
+            // console.warn('[PAN] DA invalide:', da);
             return null;
         }
 
@@ -65,7 +66,7 @@ class PratiquePANMaitrise {
 
         // Si portfolio désactivé, retourner null (productions indépendantes)
         if (!portfolioActif) {
-            console.log('[PAN] Portfolio désactivé - productions indépendantes');
+            // console.log('[PAN] Portfolio désactivé - productions indépendantes');
             return null;
         }
 
@@ -83,7 +84,7 @@ class PratiquePANMaitrise {
         );
 
         if (evaluationsEleve.length === 0) {
-            console.log('[PAN] Aucune évaluation pour DA', da);
+            // console.log('[PAN] Aucune évaluation pour DA', da);
             return null;
         }
 
@@ -131,7 +132,8 @@ class PratiquePANMaitrise {
         // Convertir en indice 0-1
         const indiceP = moyenne / 100;
 
-        console.log(`[PAN] Performance DA ${da}: ${(indiceP * 100).toFixed(1)}% (${artefactsRetenus.length} artefacts - modalité: ${methodeSelection})`);
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log(`[PAN] Performance DA ${da}: ${(indiceP * 100).toFixed(1)}% (${artefactsRetenus.length} artefacts - modalité: ${methodeSelection})`);
 
         return indiceP;
     }
@@ -161,7 +163,8 @@ class PratiquePANMaitrise {
 
         // Si portfolio désactivé, retourner null
         if (!portfolioActif) {
-            console.log('[PAN-Historique] Portfolio désactivé');
+            // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+            // console.log('[PAN-Historique] Portfolio désactivé');
             return null;
         }
 
@@ -185,7 +188,8 @@ class PratiquePANMaitrise {
         );
 
         if (evaluationsEleve.length === 0) {
-            console.log(`[PAN-Historique] Aucune évaluation pour DA ${da} jusqu'à ${dateLimite}`);
+            // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+            // console.log(`[PAN-Historique] Aucune évaluation pour DA ${da} jusqu'à ${dateLimite}`);
             return null;
         }
 
@@ -195,7 +199,8 @@ class PratiquePANMaitrise {
             const moyenne = somme / evaluationsEleve.length;
             const indiceP = moyenne / 100;
 
-            console.log(`[PAN-Historique] DA ${da}: ${moyenne.toFixed(1)}% (${evaluationsEleve.length}/${nombreARetenir} artefacts - moyenne de TOUS)`);
+            // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+            // console.log(`[PAN-Historique] DA ${da}: ${moyenne.toFixed(1)}% (${evaluationsEleve.length}/${nombreARetenir} artefacts - moyenne de TOUS)`);
             return indiceP;
         }
 
@@ -237,7 +242,8 @@ class PratiquePANMaitrise {
         const moyenne = somme / artefactsRetenus.length;
         const indiceP = moyenne / 100;
 
-        console.log(`[PAN-Historique] DA ${da}: ${moyenne.toFixed(1)}% (${artefactsRetenus.length} artefacts - modalité: ${methodeSelection})`);
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log(`[PAN-Historique] DA ${da}: ${moyenne.toFixed(1)}% (${artefactsRetenus.length} artefacts - modalité: ${methodeSelection})`);
 
         return indiceP;
     }
@@ -251,7 +257,7 @@ class PratiquePANMaitrise {
      */
     calculerPerformanceRecente(da) {
         if (!da || da.length !== 7) {
-            console.warn('[PAN] DA invalide:', da);
+            // console.warn('[PAN] DA invalide:', da);
             return null;
         }
 
@@ -262,7 +268,7 @@ class PratiquePANMaitrise {
 
         // Si portfolio désactivé, retourner null (productions indépendantes)
         if (!portfolioActif) {
-            console.log('[PAN] Portfolio désactivé - productions indépendantes');
+            // console.log('[PAN] Portfolio désactivé - productions indépendantes');
             return null;
         }
 
@@ -280,7 +286,7 @@ class PratiquePANMaitrise {
         );
 
         if (evaluationsEleve.length === 0) {
-            console.log('[PAN] Aucune évaluation récente pour DA', da);
+            // console.log('[PAN] Aucune évaluation récente pour DA', da);
             return null;
         }
 
@@ -295,7 +301,8 @@ class PratiquePANMaitrise {
         // Convertir en indice 0-1
         const indicePRecent = moyenne / 100;
 
-        console.log(`[PAN] Performance récente DA ${da}: ${(indicePRecent * 100).toFixed(1)}% (${artefactsRecents.length} derniers artefacts)`);
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log(`[PAN] Performance récente DA ${da}: ${(indicePRecent * 100).toFixed(1)}% (${artefactsRecents.length} derniers artefacts)`);
 
         return indicePRecent;
     }
@@ -312,7 +319,7 @@ class PratiquePANMaitrise {
      */
     calculerCompletion(da) {
         if (!da || da.length !== 7) {
-            console.warn('[PAN] DA invalide:', da);
+            // console.warn('[PAN] DA invalide:', da);
             return null;
         }
 
@@ -333,7 +340,7 @@ class PratiquePANMaitrise {
         });
 
         if (artefactsEvalues.length === 0) {
-            console.log('[PAN] Aucun artefact portfolio évalué');
+            // console.log('[PAN] Aucun artefact portfolio évalué');
             return null;
         }
 
@@ -349,7 +356,8 @@ class PratiquePANMaitrise {
 
         const indiceC = artefactsRemis.length / artefactsEvalues.length;
 
-        console.log(`[PAN] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${artefactsRemis.length}/${artefactsEvalues.length} évalués)`);
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log(`[PAN] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${artefactsRemis.length}/${artefactsEvalues.length} évalués)`);
 
         return indiceC;
     }
@@ -366,7 +374,7 @@ class PratiquePANMaitrise {
      */
     detecterDefis(da) {
         if (!da || da.length !== 7) {
-            console.warn('[PAN] DA invalide:', da);
+            // console.warn('[PAN] DA invalide:', da);
             return { type: 'srpnf', defis: [], forces: [] };
         }
 
@@ -374,7 +382,7 @@ class PratiquePANMaitrise {
         const moyennes = this._calculerMoyennesCriteresRecents(da);
 
         if (!moyennes) {
-            console.log('[PAN] Pas de moyennes calculables pour DA', da);
+            // console.log('[PAN] Pas de moyennes calculables pour DA', da);
             return { type: 'srpnf', defis: [], forces: [] };
         }
 
@@ -404,7 +412,7 @@ class PratiquePANMaitrise {
      */
     identifierPattern(da) {
         if (!da || da.length !== 7) {
-            console.warn('[PAN] DA invalide:', da);
+            // console.warn('[PAN] DA invalide:', da);
             return {
                 type: 'inconnu',
                 description: 'DA invalide',
@@ -482,7 +490,7 @@ class PratiquePANMaitrise {
      */
     genererCibleIntervention(da) {
         if (!da || da.length !== 7) {
-            console.warn('[PAN] DA invalide:', da);
+            // console.warn('[PAN] DA invalide:', da);
             return null;
         }
 
@@ -494,7 +502,7 @@ class PratiquePANMaitrise {
         const defiPrincipal = defis.principalDefi ? defis.principalDefi.nom : 'Aucun';
         const francaisMoyen = indices3Derniers.francaisMoyen;
 
-        console.log('[PAN] Génération cible RàI pour DA', da, {
+        // console.log('[PAN] Génération cible RàI pour DA', da, {
             pattern: pattern.type,
             defi: defiPrincipal,
             francais: francaisMoyen.toFixed(1) + '%'
@@ -727,7 +735,8 @@ class PratiquePANMaitrise {
 
         const regexCritere = new RegExp(`(${nomsRegex})\\s*\\(([IDME0])\\)`, 'gi');
 
-        console.log(`✅ [PAN-Maîtrise] Regex dynamique: ${regexCritere.source}`);
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log(`✅ [PAN-Maîtrise] Regex dynamique: ${regexCritere.source}`);
 
         derniersArtefacts.forEach(evaluation => {
             const retroaction = evaluation.retroactionFinale || '';
@@ -1167,7 +1176,8 @@ class PratiquePANMaitrise {
 
     try {
         window.enregistrerPratique('pan-maitrise', instance);
-        console.log('✅ [PAN] Pratique PAN-Maîtrise enregistrée avec succès');
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // console.log('✅ [PAN] Pratique PAN-Maîtrise enregistrée avec succès');
     } catch (error) {
         console.error('[PAN] Erreur lors de l\'enregistrement:', error);
     }
@@ -1176,4 +1186,5 @@ class PratiquePANMaitrise {
 // Export pour utilisation directe
 window.PratiquePANMaitrise = PratiquePANMaitrise;
 
-console.log('✅ Module pratique-pan-maitrise.js chargé');
+// ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+// console.log('✅ Module pratique-pan-maitrise.js chargé');
