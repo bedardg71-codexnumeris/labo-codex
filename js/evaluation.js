@@ -2910,6 +2910,21 @@ function chargerFiltresEvaluations() {
 }
 
 /**
+ * Recharge le filtre de production
+ * (Appelée depuis productions.js après ajout/modification d'une production)
+ */
+function rechargerFiltreProduction() {
+    const selectProduction = document.getElementById('filtre-production-eval');
+    if (selectProduction) {
+        const productions = db.getSync('productions', []);
+        selectProduction.innerHTML = '<option value="">Toutes les productions</option>';
+        productions.forEach(prod => {
+            selectProduction.innerHTML += `<option value="${prod.id}">${echapperHtml(prod.titre || prod.nom)}</option>`;
+        });
+    }
+}
+
+/**
  * Filtre la liste selon les critères sélectionnés
  */
 function filtrerListeEvaluations() {
@@ -5403,6 +5418,7 @@ window.ouvrirBanqueAvecRecherche = ouvrirBanqueAvecRecherche;
 window.modifierEvaluationParId = modifierEvaluation; // Export sous un nom différent pour éviter conflit avec liste-evaluations.js
 window.ouvrirProfilDepuisEvaluation = ouvrirProfilDepuisEvaluation;
 window.chargerProductionsDansSelect = chargerProductionsDansSelect; // Pour mise à jour après duplication/modification de productions
+window.rechargerFiltreProduction = rechargerFiltreProduction; // Pour mise à jour du filtre après ajout/modification de productions
 // window.gererCheckboxJetonDelai = gererCheckboxJetonDelai; // FIXME: Fonctions non définies dans ce fichier
 // window.gererCheckboxJetonReprise = gererCheckboxJetonReprise; // FIXME: Fonctions non définies dans ce fichier
 
