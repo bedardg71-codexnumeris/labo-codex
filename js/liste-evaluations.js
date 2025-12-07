@@ -294,6 +294,36 @@ function genererOptionsFiltres(groupes, productions) {
     }
 }
 
+/**
+ * Recharge uniquement le filtre de production
+ * Appelée après création/modification/suppression d'une production
+ */
+function rechargerFiltreProduction() {
+    const productions = db.getSync('productions', []);
+    const selectProduction = document.getElementById('filtre-production-eval');
+
+    if (!selectProduction) return;
+
+    // Sauvegarder la valeur actuellement sélectionnée
+    const valeurActuelle = selectProduction.value;
+
+    // Recharger les options
+    selectProduction.innerHTML = '<option value="">Toutes les productions</option>';
+    productions.forEach(prod => {
+        if (prod.type !== 'portfolio') { // Exclure le portfolio lui-même
+            const option = document.createElement('option');
+            option.value = prod.id;
+            option.textContent = prod.titre;
+            selectProduction.appendChild(option);
+        }
+    });
+
+    // Restaurer la sélection si elle existe toujours
+    if (valeurActuelle && productions.some(p => p.id === valeurActuelle)) {
+        selectProduction.value = valeurActuelle;
+    }
+}
+
 // ============================================
 // PERSISTANCE DES FILTRES
 // ============================================
@@ -1445,6 +1475,7 @@ window.toggleVerrouillerEvaluation = toggleVerrouillerEvaluation;
 window.calculerEtSauvegarderIndiceCompletion = calculerEtSauvegarderIndiceCompletion;
 window.trierListeEvaluations = trierListeEvaluations;
 window.trierTableauParColonne = trierTableauParColonne;
+window.rechargerFiltreProduction = rechargerFiltreProduction; // Pour mise à jour après duplication/modification de productions
 
 // Alias pour compatibilité avec le HTML
 window.appliquerFiltres = appliquerFiltres;
