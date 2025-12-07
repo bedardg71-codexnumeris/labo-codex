@@ -94,8 +94,8 @@ let _cacheEvaluations = null;
  * @returns {Object} - {A: number, C: number, P: number, E: number}
  */
 function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, usePonctualA = false) {
-    // 🐛 DEBUG
-    console.log(`[calculerIndicesHistoriques] DA: ${da}, Date: ${dateLimite}, Cache: ${evaluationsCache ? evaluationsCache.length : 'null'}, Ponctuel: ${usePonctualA}`);
+    // 🐛 DEBUG - Désactivé pour performance (30 snapshots × 30 étudiants = 900 appels)
+    // console.log(`[calculerIndicesHistoriques] DA: ${da}, Date: ${dateLimite}, Cache: ${evaluationsCache ? evaluationsCache.length : 'null'}, Ponctuel: ${usePonctualA}`);
 
     // Assiduité (A) : Ponctuelle (séance uniquement) OU cumulative (depuis le début)
     let indiceA = 100;
@@ -104,21 +104,23 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         // ✨ NOUVEAU (Beta 93) : Assiduité PONCTUELLE pour cette séance uniquement
         const resultA = calculerAssiduiteSeance(da, dateLimite);
         indiceA = Math.round(resultA.indice * 100);
-        console.log(`[calculerIndicesHistoriques] A ponctuel (séance ${dateLimite}): ${indiceA}%`);
+        // console.log(`[calculerIndicesHistoriques] A ponctuel (séance ${dateLimite}): ${indiceA}%`);
     } else if (typeof calculerAssiduiteJusquADate === 'function') {
         // Assiduité CUMULATIVE jusqu'à cette date
         const resultA = calculerAssiduiteJusquADate(da, dateLimite);
         indiceA = Math.round(resultA.indice * 100);
-        console.log(`[calculerIndicesHistoriques] A cumulatif (jusqu'à ${dateLimite}): ${indiceA}%`);
+        // console.log(`[calculerIndicesHistoriques] A cumulatif (jusqu'à ${dateLimite}): ${indiceA}%`);
     }
 
     // Complétion (C) et Performance (P) : Filtrer les évaluations jusqu'à dateLimite
     let indiceC = 100;
 
     // ⚡ OPTIMISATION : Utiliser le cache si fourni
-    const evaluations = evaluationsCache || obtenirDonneesSelonMode('evaluationsEtudiants') || [];
-    const evaluationsEtudiant = evaluations.filter(e => e.da === da);
-    console.log(`[calculerIndicesHistoriques] Évaluations étudiant: ${evaluationsEtudiant.length}`);
+    // ✅ CORRECTION (7 déc 2025): Utiliser 'evaluationsSauvegardees' (clé correcte)
+    const evaluations = evaluationsCache || obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    // ✅ CORRECTION (7 déc 2025): Propriété correcte 'etudiantDA' au lieu de 'da'
+    const evaluationsEtudiant = evaluations.filter(e => e.etudiantDA === da);
+    // console.log(`[DEBUG] DA=${da}, evaluations=${evaluations.length}, pour cet étud=${evaluationsEtudiant.length}`);
 
     // Filtrer seulement les évaluations JUSQU'À la date limite
     const evaluationsFiltrees = evaluationsEtudiant.filter(e => {
@@ -150,18 +152,80 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
                 // Déléguer le calcul historique à la pratique
                 const indiceP_decimal = pratique.calculerPerformanceHistorique(da, dateLimite, evaluations);
                 // Convertir de 0-1 vers 0-100 (arrondi)
-                indiceP = indiceP_decimal !== null ? Math.round(indiceP_decimal * 100) : null;
-            } else {
-                console.warn('[calculerIndicesHistoriques] Pratique ou méthode calculerPerformanceHistorique() manquante');
-                indiceP = null;
+                if (indiceP_decimal !== null) {
+                    indiceP = Math.round(indiceP_decimal * 100);
+                }
+            }
+
+            // ✅ CORRECTION (7 déc): Fallback si méthode manquante OU retourne null
+            if (indiceP === null) {
+                // ⚡ FALLBACK: Si méthode manquante, calculer moyenne simple des évaluations
+                // (désactivation warning pour éviter 870 logs: 29 snapshots × 30 étudiants)
+                // console.warn('[calculerIndicesHistoriques] Pratique ou méthode calculerPerformanceHistorique() manquante');
+
+                // Calcul fallback simple: moyenne de toutes les évaluations jusqu'à cette date
+                if (evaluationsFiltrees.length > 0) {
+                    const notesValides = evaluationsFiltrees
+                        .filter(e => e.niveauFinal !== null && e.niveauFinal !== undefined && e.niveauFinal !== '--')
+                        .map(e => {
+                            // ✅ CORRECTION (7 déc): Gérer échelle IDME (lettres) et nombres
+                            const niveau = String(e.niveauFinal).trim().toUpperCase();
+
+                            // Si c'est une lettre IDME, utiliser valeurs configurées
+                            // (40% pour I, 65% pour D, 75% pour M, 100% pour E selon l'échelle utilisateur)
+                            if (niveau === '0') return 0;       // Aucun/Plagiat
+                            if (niveau === 'I') return 40;      // Insuffisant
+                            if (niveau === 'D') return 65;      // Développement
+                            if (niveau === 'M') return 75;      // Maîtrisé
+                            if (niveau === 'E') return 100;     // Étendu
+
+                            // Sinon, nombre: convertir 0-4 → 0-100, ou garder si déjà 0-100
+                            const note = parseFloat(e.niveauFinal);
+                            if (isNaN(note)) return null;
+                            return note <= 4 ? (note / 4) * 100 : note;
+                        })
+                        .filter(note => note !== null && !isNaN(note));
+
+                    if (notesValides.length > 0) {
+                        const somme = notesValides.reduce((acc, val) => acc + val, 0);
+                        indiceP = Math.round(somme / notesValides.length);
+                    }
+                }
             }
         } catch (error) {
-            console.error('[calculerIndicesHistoriques] Erreur lors du calcul de P:', error);
+            // console.error('[calculerIndicesHistoriques] Erreur lors du calcul de P:', error);
             indiceP = null;
         }
     } else {
-        console.warn('[calculerIndicesHistoriques] obtenirPratiqueActuelle() non disponible');
-        indiceP = null;
+        // console.warn('[calculerIndicesHistoriques] obtenirPratiqueActuelle() non disponible');
+
+        // Même fallback si fonction pas disponible
+        if (evaluationsFiltrees.length > 0) {
+            const notesValides = evaluationsFiltrees
+                .filter(e => e.niveauFinal !== null && e.niveauFinal !== undefined && e.niveauFinal !== '--')
+                .map(e => {
+                    // ✅ CORRECTION (7 déc): Gérer échelle IDME (lettres) et nombres
+                    const niveau = String(e.niveauFinal).trim().toUpperCase();
+
+                    // Si c'est une lettre IDME, utiliser valeurs configurées
+                    if (niveau === '0') return 0;       // Aucun/Plagiat
+                    if (niveau === 'I') return 40;      // Insuffisant
+                    if (niveau === 'D') return 65;      // Développement
+                    if (niveau === 'M') return 75;      // Maîtrisé
+                    if (niveau === 'E') return 100;     // Étendu
+
+                    // Sinon, nombre: convertir 0-4 → 0-100, ou garder si déjà 0-100
+                    const note = parseFloat(e.niveauFinal);
+                    if (isNaN(note)) return null;
+                    return note <= 4 ? (note / 4) * 100 : note;
+                })
+                .filter(note => note !== null && !isNaN(note));
+
+            if (notesValides.length > 0) {
+                const somme = notesValides.reduce((acc, val) => acc + val, 0);
+                indiceP = Math.round(somme / notesValides.length);
+            }
+        }
     }
 
     // Engagement (E) : Moyenne géométrique de A, C, P
@@ -185,8 +249,8 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         E: indiceE
     };
 
-    // 🐛 DEBUG
-    console.log(`[calculerIndicesHistoriques] RETOUR: A=${resultat.A}, C=${resultat.C}, P=${resultat.P}, E=${resultat.E}`);
+    // 🐛 DEBUG - Désactivé pour performance
+    // console.log(`[calculerIndicesHistoriques] RETOUR: A=${resultat.A}, C=${resultat.C}, P=${resultat.P}, E=${resultat.E}`);
 
     return resultat;
 }
@@ -259,7 +323,8 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
         if (!evaluationsCache) {
             try {
                 console.log('⚡ Chargement évaluations depuis IndexedDB...');
-                evaluationsCache = await db.get('evaluationsEtudiants');
+                // ✅ CORRECTION (7 déc 2025): Utiliser 'evaluationsSauvegardees' (clé correcte)
+                evaluationsCache = await db.get('evaluationsSauvegardees');
                 console.log(`✓ ${evaluationsCache ? evaluationsCache.length : 0} évaluations chargées depuis IndexedDB`);
             } catch (e) {
                 console.warn('Impossible de charger depuis IndexedDB:', e.message);
@@ -274,10 +339,14 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
             // usePonctualA = true pour obtenir l'assiduité de CETTE séance uniquement
             const indices = calculerIndicesHistoriques(da, dateSeance, evaluationsCache, true);
 
-            // Obtenir pattern et niveau RàI (si module disponible)
+            // ⚡ OPTIMISATION PERFORMANCE: Désactivé pendant reconstruction
+            // Patterns et RàI génèrent beaucoup de logs console (× 900 étudiants = saturation Safari)
+            // Ces valeurs peuvent être recalculées à la volée lors de la consultation d'un profil
+            // Si besoin de ces données dans les snapshots, réactiver après avoir désactivé les logs
             let pattern = 'Non calculé';
             let rai = 'Non calculé';
 
+            /* DÉSACTIVÉ TEMPORAIREMENT POUR PERFORMANCE
             if (typeof obtenirPratiqueActuelle === 'function') {
                 const pratique = obtenirPratiqueActuelle();
                 if (typeof calculerDirectionsCriteres === 'function') {
@@ -297,6 +366,7 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
                 const niveauRaiObj = determinerNiveauRaiPedagogique(da);
                 rai = niveauRaiObj.niveau || 'Niveau 1';
             }
+            */
 
             snapshotsEtudiants.push({
                 da: da,
@@ -350,10 +420,14 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
         };
 
         // Créer snapshot (ID basé sur la date de la séance)
+        // ✨ CORRECTION (7 déc 2025): Ajouter propriétés pour compatibilité avec graphiques
         const snapshot = {
             id: `SEANCE-${dateSeance}`,
             dateSeance: dateSeance,
-            numeroSemaine: numeroSemaine, // Conservé pour référence
+            numeroSemaine: numeroSemaine, // Conservé pour référence (horaire.js)
+            numSemaine: numeroSemaine,    // ✨ Pour compatibilité graphiques
+            dateDebut: dateSeance,         // ✨ Pour compatibilité obtenirSnapshotsEtudiant()
+            dateFin: dateSeance,           // ✨ Pour compatibilité obtenirSnapshotsEtudiant()
             timestamp: new Date().toISOString(),
             etudiants: snapshotsEtudiants,
             groupe: groupe
@@ -558,36 +632,40 @@ async function reconstruireSnapshotsHistoriques() {
     try {
         // ⚡ Charger les évaluations depuis IndexedDB (évite QuotaExceededError)
         console.log('⚡ Chargement évaluations depuis IndexedDB...');
-        const evaluationsCache = await db.get('evaluationsEtudiants');
+        // ✅ CORRECTION (7 déc 2025): Utiliser 'evaluationsSauvegardees' (clé correcte)
+        const evaluationsCache = await db.get('evaluationsSauvegardees');
         console.log(`✓ ${evaluationsCache ? evaluationsCache.length : 0} évaluations chargées`);
 
-        const calendrier = obtenirCalendrierComplet();
-        if (!calendrier) {
-            console.error('❌ Calendrier non disponible');
-            return { succes: false, nbSnapshots: 0, message: 'Calendrier non disponible' };
-        }
-
-        console.log(`✓ Calendrier chargé: ${Object.keys(calendrier).length} jours`);
-
-        // ✨ NOUVEAU (Beta 93) : Extraire toutes les DATES de cours (pas les semaines)
-        const datesCours = Object.keys(calendrier).filter(date => {
-            const jour = calendrier[date];
-            return (jour.statut === 'cours' || jour.statut === 'reprise');
-        }).sort();
-
-        console.log(`✓ Dates de cours détectées: ${datesCours.length}`);
-        if (datesCours.length > 0) {
-            console.log(`  Première séance: ${datesCours[0]}`);
-            console.log(`  Dernière séance: ${datesCours[datesCours.length - 1]}`);
-        }
-
-        if (datesCours.length === 0) {
-            console.warn('⚠️ Aucune date de cours trouvée dans le calendrier');
+        // ✨ CORRECTION (7 déc 2025): Utiliser seancesCompletes au lieu du calendrier brut
+        // seancesCompletes contient SEULEMENT les dates où le groupe a effectivement cours
+        // (ex: 2 séances/semaine × 15 semaines = ~30 snapshots au lieu de ~75)
+        const seancesCompletes = obtenirSeancesCompletes();
+        if (!seancesCompletes || Object.keys(seancesCompletes).length === 0) {
+            console.error('❌ Aucune séance configurée dans l\'horaire');
             return {
                 succes: false,
                 nbSnapshots: 0,
-                message: 'Aucune date de cours trouvée dans le calendrier. Vérifiez la configuration du trimestre.'
+                message: 'Aucune séance configurée. Configurez d\'abord l\'horaire du groupe dans Réglages → Horaire.'
             };
+        }
+
+        // ✨ CORRECTIF CRITIQUE (7 déc 2025): Filtrer SEULEMENT les dates avec séances configurées
+        // seancesCompletes contient aussi des dates VIDES (tableaux vides []) pour tous les jours
+        // de cours du calendrier. On ne veut PAS créer de snapshots pour ces jours vides.
+        // Avant: 75 dates (tous les jours de cours) → Après: ~30 dates (seulement jours avec séances)
+        const datesCours = Object.keys(seancesCompletes)
+            .filter(date => seancesCompletes[date] && seancesCompletes[date].length > 0)
+            .sort();
+
+        // ✨ Charger les étudiants pour estimation précise (universel, pas codé en dur)
+        const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+        const nbEtudiants = etudiants.length;
+
+        console.log(`✓ Séances du groupe détectées: ${datesCours.length}`);
+        if (datesCours.length > 0) {
+            console.log(`  Première séance: ${datesCours[0]}`);
+            console.log(`  Dernière séance: ${datesCours[datesCours.length - 1]}`);
+            console.log(`  📊 Estimation: ${datesCours.length} snapshots × ${nbEtudiants} étudiants × ~2 KB = ~${Math.round(datesCours.length * nbEtudiants * 2 / 1024)} MB`);
         }
 
         // Effacer snapshots existants (reconstruction complète)
