@@ -4,7 +4,7 @@
     "version": "2.0",
     "date": "2025-12-06",
     "description": "Pack de démonstration avec formats corrects - 10 étudiants fictifs, 7 artefacts évalués, 15 semaines de données",
-    "auteur": "Grégoire Bédard",
+    "auteur": "Primo Primavera",
     "cours": "601-101 - Écriture et littérature",
     "formats": "Basé sur structures réelles de l'application"
   },
@@ -12,7 +12,7 @@
     "sigle": "601-101",
     "titre": "Écriture et littérature",
     "competence": "4EF0",
-    "enseignant": "Grégoire Bédard",
+    "enseignant": "Primo Primavera",
     "session": "H2026",
     "groupe": "01",
     "heuresHebdo": 4,
@@ -24,7 +24,7 @@
       "sigle": "601-101",
       "titre": "Écriture et littérature",
       "competence": "4EF0",
-      "enseignant": "Grégoire Bédard",
+      "enseignant": "Primo Primavera",
       "session": "H2026",
       "annee": "2026",
       "groupe": "01",
@@ -567,7 +567,7 @@
     {
       "date": "2026-01-19",
       "da": "2234570",
-      "heures": 2,
+      "heures": 0,
       "notes": ""
     },
     {
@@ -627,7 +627,7 @@
     {
       "date": "2026-01-20",
       "da": "2234570",
-      "heures": 2,
+      "heures": 0,
       "notes": ""
     },
     {
@@ -675,23 +675,23 @@
     {
       "date": "2026-01-27",
       "da": "2234568",
-      "heures": 2,
-      "notes": ""
-    },
-    {
-      "date": "2026-01-27",
-      "da": "2234569",
-      "heures": 2,
-      "notes": ""
-    },
-    {
-      "date": "2026-01-27",
-      "da": "2234570",
       "heures": 0,
       "notes": ""
     },
     {
       "date": "2026-01-27",
+      "da": "2234569",
+      "heures": 2,
+      "notes": ""
+    },
+    {
+      "date": "2026-01-27",
+      "da": "2234570",
+      "heures": 2,
+      "notes": ""
+    },
+    {
+      "date": "2026-01-27",
       "da": "2234571",
       "heures": 2,
       "notes": ""
@@ -735,19 +735,19 @@
     {
       "date": "2026-01-28",
       "da": "2234568",
-      "heures": 0,
-      "notes": ""
-    },
-    {
-      "date": "2026-01-28",
-      "da": "2234569",
       "heures": 2,
       "notes": ""
     },
     {
       "date": "2026-01-28",
-      "da": "2234570",
+      "da": "2234569",
       "heures": 2,
+      "notes": ""
+    },
+    {
+      "date": "2026-01-28",
+      "da": "2234570",
+      "heures": 0,
       "notes": ""
     },
     {
@@ -783,7 +783,7 @@
     {
       "date": "2026-01-28",
       "da": "2234576",
-      "heures": 0,
+      "heures": 2,
       "notes": ""
     },
     {
@@ -795,7 +795,7 @@
     {
       "date": "2026-02-10",
       "da": "2234568",
-      "heures": 0,
+      "heures": 2,
       "notes": ""
     },
     {
@@ -975,7 +975,7 @@
     {
       "date": "2026-02-25",
       "da": "2234568",
-      "heures": 0,
+      "heures": 2,
       "notes": ""
     },
     {
@@ -987,7 +987,7 @@
     {
       "date": "2026-02-25",
       "da": "2234570",
-      "heures": 2,
+      "heures": 0,
       "notes": ""
     },
     {
@@ -1083,7 +1083,7 @@
     {
       "date": "2026-03-10",
       "da": "2234576",
-      "heures": 0,
+      "heures": 2,
       "notes": ""
     },
     {
@@ -1107,7 +1107,7 @@
     {
       "date": "2026-03-11",
       "da": "2234570",
-      "heures": 0,
+      "heures": 2,
       "notes": ""
     },
     {
@@ -1215,7 +1215,7 @@
     {
       "date": "2026-03-25",
       "da": "2234568",
-      "heures": 0,
+      "heures": 2,
       "notes": ""
     },
     {
@@ -1263,7 +1263,7 @@
     {
       "date": "2026-03-25",
       "da": "2234576",
-      "heures": 0,
+      "heures": 2,
       "notes": ""
     },
     {
@@ -1275,7 +1275,7 @@
     {
       "date": "2026-04-07",
       "da": "2234568",
-      "heures": 0,
+      "heures": 2,
       "notes": ""
     },
     {
@@ -1287,7 +1287,7 @@
     {
       "date": "2026-04-07",
       "da": "2234570",
-      "heures": 2,
+      "heures": 0,
       "notes": ""
     },
     {
@@ -1323,7 +1323,7 @@
     {
       "date": "2026-04-07",
       "da": "2234576",
-      "heures": 2,
+      "heures": 0,
       "notes": ""
     },
     {
@@ -1335,7 +1335,7 @@
     {
       "date": "2026-04-08",
       "da": "2234568",
-      "heures": 2,
+      "heures": 0,
       "notes": ""
     },
     {
@@ -1347,7 +1347,7 @@
     {
       "date": "2026-04-08",
       "da": "2234570",
-      "heures": 0,
+      "heures": 2,
       "notes": ""
     },
     {
@@ -1383,7 +1383,7 @@
     {
       "date": "2026-04-08",
       "da": "2234576",
-      "heures": 0,
+      "heures": 2,
       "notes": ""
     }
   ],
@@ -1405,7 +1405,7 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 15
         },
@@ -1433,12 +1433,12 @@
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 81,
+      "noteFinale": 83,
       "niveauFinal": "M",
       "retroactionFinale": "Évaluation de A1 pour Émilie Tremblay. Niveau global: M",
       "optionsAffichage": {
@@ -1488,7 +1488,7 @@
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 25
         },
@@ -1500,7 +1500,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 65,
+      "noteFinale": 72,
       "niveauFinal": "D",
       "retroactionFinale": "Évaluation de A1 pour Antoine Gagnon. Niveau global: D",
       "optionsAffichage": {
@@ -1562,7 +1562,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 95,
+      "noteFinale": 97,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A1 pour Léa Roy. Niveau global: E",
       "optionsAffichage": {
@@ -1598,7 +1598,7 @@
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "I",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 20
         },
@@ -1612,14 +1612,14 @@
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "I",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "I",
           "retroaction": "",
           "ponderation": 30
         }
@@ -1653,42 +1653,42 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 10
         },
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 86,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A1 pour Camille Bouchard. Niveau global: E",
+      "noteFinale": 79,
+      "niveauFinal": "M",
+      "retroactionFinale": "Évaluation de A1 pour Camille Bouchard. Niveau global: M",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -1736,7 +1736,7 @@
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 25
         },
@@ -1748,7 +1748,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 74,
+      "noteFinale": 73,
       "niveauFinal": "D",
       "retroactionFinale": "Évaluation de A1 pour Gabriel Lavoie. Niveau global: D",
       "optionsAffichage": {
@@ -1784,7 +1784,7 @@
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 20
         },
@@ -1810,7 +1810,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 85,
+      "noteFinale": 87,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A1 pour Juliette Bergeron. Niveau global: E",
       "optionsAffichage": {
@@ -1846,21 +1846,21 @@
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 10
         },
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 25
         },
@@ -1872,9 +1872,9 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 71,
-      "niveauFinal": "D",
-      "retroactionFinale": "Évaluation de A1 pour Samuel Morin. Niveau global: D",
+      "noteFinale": 80,
+      "niveauFinal": "M",
+      "retroactionFinale": "Évaluation de A1 pour Samuel Morin. Niveau global: M",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -1901,7 +1901,7 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
@@ -1934,7 +1934,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 82,
+      "noteFinale": 78,
       "niveauFinal": "M",
       "retroactionFinale": "Évaluation de A1 pour Rosalie Pelletier. Niveau global: M",
       "optionsAffichage": {
@@ -1963,7 +1963,7 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
@@ -1984,7 +1984,7 @@
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 25
         },
@@ -1996,7 +1996,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 72,
+      "noteFinale": 74,
       "niveauFinal": "D",
       "retroactionFinale": "Évaluation de A1 pour Alexandre Gauthier. Niveau global: D",
       "optionsAffichage": {
@@ -2046,19 +2046,19 @@
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 85,
+      "noteFinale": 80,
       "niveauFinal": "M",
       "retroactionFinale": "Évaluation de A2 pour Émilie Tremblay. Niveau global: M",
       "optionsAffichage": {
@@ -2087,7 +2087,7 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 15
         },
@@ -2108,19 +2108,19 @@
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "I",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "I",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 73,
+      "noteFinale": 66,
       "niveauFinal": "D",
       "retroactionFinale": "Évaluation de A2 pour Antoine Gagnon. Niveau global: D",
       "optionsAffichage": {
@@ -2182,7 +2182,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 99,
+      "noteFinale": 96,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A2 pour Léa Roy. Niveau global: E",
       "optionsAffichage": {
@@ -2218,14 +2218,14 @@
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 10
         },
@@ -2244,7 +2244,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 71,
+      "noteFinale": 72,
       "niveauFinal": "D",
       "retroactionFinale": "Évaluation de A2 pour Thomas Côté. Niveau global: D",
       "optionsAffichage": {
@@ -2280,35 +2280,35 @@
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 10
         },
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 84,
-      "niveauFinal": "M",
-      "retroactionFinale": "Évaluation de A2 pour Camille Bouchard. Niveau global: M",
+      "noteFinale": 90,
+      "niveauFinal": "E",
+      "retroactionFinale": "Évaluation de A2 pour Camille Bouchard. Niveau global: E",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -2342,7 +2342,7 @@
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 20
         },
@@ -2363,12 +2363,12 @@
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 79,
+      "noteFinale": 84,
       "niveauFinal": "M",
       "retroactionFinale": "Évaluation de A2 pour Gabriel Lavoie. Niveau global: M",
       "optionsAffichage": {
@@ -2430,7 +2430,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 93,
+      "noteFinale": 87,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A2 pour Juliette Bergeron. Niveau global: E",
       "optionsAffichage": {
@@ -2459,14 +2459,14 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
@@ -2480,7 +2480,7 @@
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 25
         },
@@ -2492,7 +2492,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 83,
+      "noteFinale": 77,
       "niveauFinal": "M",
       "retroactionFinale": "Évaluation de A2 pour Samuel Morin. Niveau global: M",
       "optionsAffichage": {
@@ -2583,42 +2583,42 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 10
         },
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 71,
-      "niveauFinal": "D",
-      "retroactionFinale": "Évaluation de A2 pour Alexandre Gauthier. Niveau global: D",
+      "noteFinale": 80,
+      "niveauFinal": "M",
+      "retroactionFinale": "Évaluation de A2 pour Alexandre Gauthier. Niveau global: M",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -2678,7 +2678,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 91,
+      "noteFinale": 92,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A3 pour Émilie Tremblay. Niveau global: E",
       "optionsAffichage": {
@@ -2714,14 +2714,14 @@
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 10
         },
@@ -2735,12 +2735,12 @@
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "I",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 73,
+      "noteFinale": 68,
       "niveauFinal": "D",
       "retroactionFinale": "Évaluation de A3 pour Antoine Gagnon. Niveau global: D",
       "optionsAffichage": {
@@ -2802,7 +2802,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 98,
+      "noteFinale": 100,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A3 pour Léa Roy. Niveau global: E",
       "optionsAffichage": {
@@ -2831,7 +2831,7 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 15
         },
@@ -2852,7 +2852,7 @@
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 25
         },
@@ -2864,9 +2864,9 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 75,
-      "niveauFinal": "M",
-      "retroactionFinale": "Évaluation de A3 pour Thomas Côté. Niveau global: M",
+      "noteFinale": 72,
+      "niveauFinal": "D",
+      "retroactionFinale": "Évaluation de A3 pour Thomas Côté. Niveau global: D",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -2962,7 +2962,7 @@
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 20
         },
@@ -2983,7 +2983,7 @@
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 30
         }
@@ -3050,7 +3050,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 95,
+      "noteFinale": 90,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A3 pour Juliette Bergeron. Niveau global: E",
       "optionsAffichage": {
@@ -3079,42 +3079,42 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 10
         },
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 88,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A3 pour Samuel Morin. Niveau global: E",
+      "noteFinale": 78,
+      "niveauFinal": "M",
+      "retroactionFinale": "Évaluation de A3 pour Samuel Morin. Niveau global: M",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -3141,7 +3141,7 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
@@ -3169,12 +3169,12 @@
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 92,
+      "noteFinale": 88,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A3 pour Rosalie Pelletier. Niveau global: E",
       "optionsAffichage": {
@@ -3203,42 +3203,42 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 10
         },
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 85,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A3 pour Alexandre Gauthier. Niveau global: E",
+      "noteFinale": 84,
+      "niveauFinal": "M",
+      "retroactionFinale": "Évaluation de A3 pour Alexandre Gauthier. Niveau global: M",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -3327,40 +3327,40 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 10
         },
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "D",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 74,
+      "noteFinale": 75,
       "niveauFinal": "D",
       "retroactionFinale": "Évaluation de A4 pour Antoine Gagnon. Niveau global: D",
       "optionsAffichage": {
@@ -3422,7 +3422,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 97,
+      "noteFinale": 100,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A4 pour Léa Roy. Niveau global: E",
       "optionsAffichage": {
@@ -3484,7 +3484,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 86,
+      "noteFinale": 87,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A4 pour Thomas Côté. Niveau global: E",
       "optionsAffichage": {
@@ -3575,7 +3575,7 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
@@ -3603,12 +3603,12 @@
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 91,
+      "noteFinale": 86,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A4 pour Gabriel Lavoie. Niveau global: E",
       "optionsAffichage": {
@@ -3670,7 +3670,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 100,
+      "noteFinale": 97,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A4 pour Juliette Bergeron. Niveau global: E",
       "optionsAffichage": {
@@ -3706,7 +3706,7 @@
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 20
         },
@@ -3720,7 +3720,7 @@
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 25
         },
@@ -3732,9 +3732,9 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 82,
-      "niveauFinal": "M",
-      "retroactionFinale": "Évaluation de A4 pour Samuel Morin. Niveau global: M",
+      "noteFinale": 86,
+      "niveauFinal": "E",
+      "retroactionFinale": "Évaluation de A4 pour Samuel Morin. Niveau global: E",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -3794,7 +3794,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 93,
+      "noteFinale": 96,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A4 pour Rosalie Pelletier. Niveau global: E",
       "optionsAffichage": {
@@ -3823,14 +3823,14 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 15
         },
         {
           "critereId": "CR1759243331050",
           "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 20
         },
@@ -3851,12 +3851,12 @@
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
+          "niveauSelectionne": "M",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 88,
+      "noteFinale": 85,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A4 pour Alexandre Gauthier. Niveau global: E",
       "optionsAffichage": {
@@ -3947,7 +3947,7 @@
         {
           "critereId": "CR1759243306842",
           "critereNom": "Structure",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 15
         },
@@ -3961,28 +3961,28 @@
         {
           "critereId": "CR1759243365467",
           "critereNom": "Plausibilité",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 10
         },
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "D",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 78,
-      "niveauFinal": "M",
-      "retroactionFinale": "Évaluation de A5 pour Antoine Gagnon. Niveau global: M",
+      "noteFinale": 71,
+      "niveauFinal": "D",
+      "retroactionFinale": "Évaluation de A5 pour Antoine Gagnon. Niveau global: D",
       "optionsAffichage": {
         "description": true,
         "objectif": true,
@@ -4104,7 +4104,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 88,
+      "noteFinale": 95,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A5 pour Thomas Côté. Niveau global: E",
       "optionsAffichage": {
@@ -4166,7 +4166,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 95,
+      "noteFinale": 100,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A5 pour Camille Bouchard. Niveau global: E",
       "optionsAffichage": {
@@ -4216,19 +4216,19 @@
         {
           "critereId": "CR1759243379949",
           "critereNom": "Nuance",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 25
         },
         {
           "critereId": "CR1759243428715",
           "critereNom": "Français écrit",
-          "niveauSelectionne": "M",
+          "niveauSelectionne": "E",
           "retroaction": "",
           "ponderation": 30
         }
       ],
-      "noteFinale": 87,
+      "noteFinale": 91,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A5 pour Gabriel Lavoie. Niveau global: E",
       "optionsAffichage": {
@@ -4290,7 +4290,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 98,
+      "noteFinale": 100,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A5 pour Juliette Bergeron. Niveau global: E",
       "optionsAffichage": {
@@ -4352,7 +4352,7 @@
           "ponderation": 30
         }
       ],
-      "noteFinale": 92,
+      "noteFinale": 95,
       "niveauFinal": "E",
       "retroactionFinale": "Évaluation de A5 pour Samuel Morin. Niveau global: E",
       "optionsAffichage": {
