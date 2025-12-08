@@ -4088,17 +4088,25 @@ function genererSectionPerformance(da) {
     const canvasIdCriteres = `graphique-criteres-${da}`;
     let graphiqueCriteres = '';
 
+    // 🐛 DEBUG (8 déc 2025) : Tracer exécution
+    console.log(`[DEBUG Graphique Critères] DA: ${da}`);
+    console.log(`[DEBUG Graphique Critères] Fonction creerGraphiqueCriteres existe: ${typeof creerGraphiqueCriteres === 'function'}`);
+
     // Vérifier si l'étudiant a des évaluations avec détails critères
     if (typeof creerGraphiqueCriteres === 'function') {
         const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        console.log(`[DEBUG Graphique Critères] Total évaluations: ${evaluations.length}`);
+
         const evaluationsAvecCriteres = evaluations.filter(e =>
             e.etudiantDA === da &&
             e.criteres &&
             Array.isArray(e.criteres) &&
             e.criteres.length > 0
         );
+        console.log(`[DEBUG Graphique Critères] Évaluations avec critères: ${evaluationsAvecCriteres.length}`);
 
         if (evaluationsAvecCriteres.length > 0) {
+            console.log(`[DEBUG Graphique Critères] Première évaluation critères:`, evaluationsAvecCriteres[0].criteres);
             graphiqueCriteres = `
                 <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
                     <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
@@ -6368,6 +6376,69 @@ function genererDiagnosticGenerique(da, defisInfo) {
  * @returns {string} - HTML de la section
  */
 function genererSectionPerformance(da) {
+    // ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères
+    const canvasIdCriteres = `graphique-criteres-${da}`;
+    let graphiqueCriteres = '';
+
+    // 🐛 DEBUG (8 déc 2025) : Tracer exécution
+    console.log(`[DEBUG Graphique Critères] DA: ${da}`);
+    console.log(`[DEBUG Graphique Critères] Fonction creerGraphiqueCriteres existe: ${typeof creerGraphiqueCriteres === 'function'}`);
+
+    // Vérifier si l'étudiant a des évaluations avec détails critères
+    if (typeof creerGraphiqueCriteres === 'function') {
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        console.log(`[DEBUG Graphique Critères] Total évaluations: ${evaluations.length}`);
+
+        const evaluationsAvecCriteres = evaluations.filter(e =>
+            e.etudiantDA === da &&
+            e.criteres &&
+            Array.isArray(e.criteres) &&
+            e.criteres.length > 0
+        );
+        console.log(`[DEBUG Graphique Critères] Évaluations avec critères: ${evaluationsAvecCriteres.length}`);
+
+        if (evaluationsAvecCriteres.length > 0) {
+            console.log(`[DEBUG Graphique Critères] Première évaluation critères:`, evaluationsAvecCriteres[0].criteres);
+            graphiqueCriteres = `
+                <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
+                    <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
+                        📈 Évolution des critères au fil des productions
+                    </h4>
+
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
+                        Ce graphique montre la progression de chaque critère d'évaluation à travers les productions.
+                        Cliquez sur un critère dans la légende pour le masquer/afficher.
+                    </p>
+
+                    <!-- Canvas pour le graphique Chart.js -->
+                    <div style="background: white; padding: 20px; border-radius: 6px; height: 450px;">
+                        <canvas id="${canvasIdCriteres}"></canvas>
+                    </div>
+
+                    <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: #666;">
+                        <strong>Conseil :</strong> Cliquez sur un critère dans la légende pour le masquer ou l'afficher.
+                        Survolez les points pour voir les détails.
+                    </div>
+                </div>
+            `;
+
+            // Utiliser setTimeout pour créer le graphique après l'insertion du DOM
+            setTimeout(() => {
+                const canvas = document.getElementById(canvasIdCriteres);
+                if (canvas) {
+                    console.log(`[DEBUG Graphique Critères] Canvas trouvé, création du graphique...`);
+                    creerGraphiqueCriteres(canvasIdCriteres, da);
+                } else {
+                    console.error(`[DEBUG Graphique Critères] Canvas #${canvasIdCriteres} introuvable dans le DOM`);
+                }
+            }, 100);
+        } else {
+            console.log(`[DEBUG Graphique Critères] Aucune évaluation avec critères, graphique non généré`);
+        }
+    } else {
+        console.error(`[DEBUG Graphique Critères] Fonction creerGraphiqueCriteres non disponible`);
+    }
+
     const productions = db.getSync('productions', []);
     const portfolio = productions.find(p => p.type === 'portfolio');
 
@@ -6638,6 +6709,9 @@ function genererSectionPerformance(da) {
             </ul>
 
             <hr class="profil-separateur">
+
+            <!-- ✨ NOUVEAU (7 déc 2025) : Graphique d'évolution des critères -->
+            ${graphiqueCriteres}
 
             <!-- Diagnostic SRPNF -->
             <div class="section-titre">

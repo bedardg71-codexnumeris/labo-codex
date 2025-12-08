@@ -908,6 +908,56 @@ function creerGraphiqueCriteres(canvasId, da) {
                                 return valeur !== null ? `${critere}: ${valeur.toFixed(1)}%` : `${critere}: —`;
                             }
                         }
+                    },
+                    annotation: {
+                        annotations: {
+                            // ✨ NOUVEAU (8 déc 2025) : Zones colorées IDME en arrière-plan
+                            zone0: {
+                                type: 'box',
+                                yMin: 0,
+                                yMax: 40,
+                                backgroundColor: 'rgba(244, 67, 54, 0.15)',  // Rouge pâle
+                                borderColor: 'rgba(244, 67, 54, 0.3)',
+                                borderWidth: 0,
+                                drawTime: 'beforeDatasetsDraw'
+                            },
+                            zone1: {
+                                type: 'box',
+                                yMin: 40,
+                                yMax: 65,
+                                backgroundColor: 'rgba(255, 152, 0, 0.15)',  // Orange pâle
+                                borderColor: 'rgba(255, 152, 0, 0.3)',
+                                borderWidth: 0,
+                                drawTime: 'beforeDatasetsDraw'
+                            },
+                            zone2: {
+                                type: 'box',
+                                yMin: 65,
+                                yMax: 75,
+                                backgroundColor: 'rgba(255, 235, 59, 0.15)', // Jaune pâle
+                                borderColor: 'rgba(255, 235, 59, 0.3)',
+                                borderWidth: 0,
+                                drawTime: 'beforeDatasetsDraw'
+                            },
+                            zone3: {
+                                type: 'box',
+                                yMin: 75,
+                                yMax: 85,
+                                backgroundColor: 'rgba(139, 195, 74, 0.15)', // Vert clair pâle
+                                borderColor: 'rgba(139, 195, 74, 0.3)',
+                                borderWidth: 0,
+                                drawTime: 'beforeDatasetsDraw'
+                            },
+                            zone4: {
+                                type: 'box',
+                                yMin: 85,
+                                yMax: 100,
+                                backgroundColor: 'rgba(100, 181, 246, 0.15)', // Bleu clair pâle
+                                borderColor: 'rgba(100, 181, 246, 0.3)',
+                                borderWidth: 0,
+                                drawTime: 'beforeDatasetsDraw'
+                            }
+                        }
                     }
                 },
                 scales: {
