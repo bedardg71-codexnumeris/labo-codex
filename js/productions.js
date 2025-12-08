@@ -354,7 +354,8 @@ async function sauvegarderProduction() {
         objectif,
         tache,
         grilleId,
-        verrouille: false
+        verrouille: false,
+        dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Nouvelle production dans bibliothèque par défaut
     };
 
     // Si c'est un Portfolio, ajouter les données spécifiques
@@ -1140,8 +1141,35 @@ async function ajouterProductionAuType(type) {
  * - Les événements sont inline dans le HTML (onclick)
  * - À moderniser éventuellement avec addEventListener
  */
+/**
+ * Migration des productions existantes vers le système de bibliothèque
+ * ✅ AJOUT (8 décembre 2025) : Support système bibliothèque avec sidebar
+ *
+ * Ajoute le flag dansBibliotheque: true à toutes les productions existantes
+ * qui n'ont pas encore ce flag (migration une seule fois)
+ */
+async function migrerProductionsVersBibliotheque() {
+    const productions = await db.get('productions') || [];
+
+    let nbMigrees = 0;
+    productions.forEach(prod => {
+        if (prod.dansBibliotheque === undefined) {
+            prod.dansBibliotheque = true;
+            nbMigrees++;
+        }
+    });
+
+    if (nbMigrees > 0) {
+        await db.set('productions', productions);
+        console.log(`✅ Migration bibliothèque: ${nbMigrees} production(s) ajoutée(s) à la bibliothèque`);
+    }
+}
+
 function initialiserModuleProductions() {
     console.log('Initialisation du module Productions');
+
+    // ✅ AJOUT (8 décembre 2025) : Migration vers système bibliothèque
+    migrerProductionsVersBibliotheque();
 
     // Charger automatiquement si on est sur la page productions
     const sousSection = document.querySelector('#materiel-productions');
@@ -1158,6 +1186,444 @@ function initialiserModuleProductions() {
     // Les événements sont gérés via les attributs onclick dans le HTML
 
     console.log('✅ Module Productions initialisé avec layout sidebar (Beta 80.5)');
+}
+
+/* ===============================
+   GESTIONNAIRE DE BIBLIOTHÈQUE
+   ✅ AJOUT (8 décembre 2025)
+   =============================== */
+
+/**
+ * Affiche le modal gestionnaire de bibliothèque de productions
+ * Permet d'ajouter/retirer des productions de la sidebar
+ *
+ * SECTIONS:
+ * 1. Productions dans ma sélection (avec bouton "Retirer")
+ * 2. Productions disponibles à ajouter (bibliothèque + productions retirées)
+ */
+async function afficherBibliothequeProductions() {
+    // Vérifier que PRODUCTIONS_BIBLIOTHEQUE existe
+    if (!window.PRODUCTIONS_BIBLIOTHEQUE) {
+        alert('❌ Erreur : La bibliothèque de productions n\'est pas chargée.\n\nVérifiez que le fichier productions-bibliotheque.js est bien chargé.');
+        return;
+    }
+
+    // Récupérer les productions existantes de l'utilisateur
+    const productionsUtilisateur = await db.get('productions') || [];
+
+    // Séparer productions dans sélection vs retirées
+    const productionsDansSelection = productionsUtilisateur.filter(p => p.dansBibliotheque !== false);
+    const productionsRetirees = productionsUtilisateur.filter(p => p.dansBibliotheque === false);
+
+    // Construire le HTML du modal
+    let modalHTML = `
+        <div id="modalBibliothequeProductions" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        ">
+            <div style="
+                background: white;
+                border-radius: 8px;
+                padding: 30px;
+                max-width: 800px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            ">
+                <h2 style="margin-top: 0; color: #2c3e50;">Bibliothèque de productions</h2>
+                <p style="color: #7f8c8d; margin-bottom: 20px;">
+                    Gérez les productions affichées dans la barre latérale.
+                </p>
+    `;
+
+    // SECTION 1 : Productions dans ma sélection
+    if (productionsDansSelection.length > 0) {
+        modalHTML += `
+                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                    Productions dans votre sélection (${productionsDansSelection.length})
+                </h3>
+                <div style="margin-bottom: 30px;">`;
+
+        productionsDansSelection.forEach(prod => {
+            const typeLabel = getTypeLabel(prod.type);
+            modalHTML += `
+                <div style="
+                    border: 1px solid var(--bleu-clair);
+                    border-radius: 6px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    background: var(--bleu-tres-pale);
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
+                                ${prod.titre} ${prod.description ? '- ' + prod.description : ''}
+                            </div>
+                            <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">
+                                Type: ${typeLabel} • Pondération: ${prod.ponderation}%
+                            </div>
+                            ${prod.objectif ? `<div style="color: #95a5a6; font-size: 0.85em;">Objectif: ${prod.objectif}</div>` : ''}
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-left: 10px;">
+                            <button
+                                onclick="partagerProduction('${prod.id}')"
+                                class="btn btn-secondaire btn-tres-compact"
+                                title="Partager avec la communauté">
+                                Partager
+                            </button>
+                            <button
+                                onclick="retirerProductionDeBibliotheque('${prod.id}')"
+                                class="btn btn-supprimer btn-tres-compact"
+                                title="Retirer de votre sélection">
+                                Retirer
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+        });
+
+        modalHTML += `</div>`;
+    }
+
+    // Bouton "Partager toutes mes productions" après la Section 1
+    modalHTML += `
+                <div style="margin-top: 15px; text-align: center;">
+                    <button onclick="exporterProductions()" class="btn btn-secondaire">
+                        Partager toutes mes productions
+                    </button>
+                </div>
+            </div>
+
+    // SECTION 2 : Productions disponibles
+    // Obtenir toutes les productions de la bibliothèque
+    const toutesProductionsBibliotheque = obtenirToutesLesProductionsBibliotheque();
+
+    // Combiner avec les productions retirées
+    const toutesProductionsDisponibles = [...toutesProductionsBibliotheque, ...productionsRetirees];
+
+    // Obtenir la liste des disciplines disponibles
+    const disciplinesSet = new Set();
+    toutesProductionsDisponibles.forEach(prod => {
+        if (!productionsDansSelection.find(p => p.id === prod.id)) {
+            disciplinesSet.add(prod.discipline || 'Autres');
+        }
+    });
+    const disciplinesDisponibles = Array.from(disciplinesSet).sort();
+
+    modalHTML += `
+                <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                    Productions disponibles à ajouter
+                </h3>
+
+                <!-- Filtre par discipline -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
+                        Filtrer par discipline :
+                    </label>
+                    <select id="filtreDisciplineProductions" onchange="filtrerProductionsParDiscipline()" class="controle-form" style="max-width: 300px;">
+                        <option value="">Toutes les disciplines</option>
+                        ${disciplinesDisponibles.map(d => `<option value="${d}">${d}</option>`).join('')}
+                    </select>
+                </div>
+
+                <div id="listeProductionsDisponibles" style="margin-bottom: 20px;">
+    `;
+
+    // Grouper par discipline
+    const parDiscipline = {};
+    toutesProductionsDisponibles.forEach(prod => {
+        // Vérifier si déjà dans la sélection
+        if (productionsDansSelection.find(p => p.id === prod.id)) {
+            return;
+        }
+
+        const discipline = prod.discipline || 'Autres';
+        if (!parDiscipline[discipline]) {
+            parDiscipline[discipline] = [];
+        }
+        parDiscipline[discipline].push(prod);
+    });
+
+    // Afficher par discipline
+    Object.keys(parDiscipline).sort().forEach(discipline => {
+        modalHTML += `
+                    <h4 style="color: #555; font-size: 0.95rem; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+                        ${discipline}
+                    </h4>
+        `;
+
+        parDiscipline[discipline].forEach(prod => {
+            const typeLabel = getTypeLabel(prod.type);
+            const estRetiree = productionsRetirees.find(p => p.id === prod.id);
+            const badgeRetiree = estRetiree
+                ? '<span style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 8px;">Retirée</span>'
+                : '';
+
+            modalHTML += `
+                <div class="production-disponible-item" data-discipline="${prod.discipline || 'Autres'}" style="
+                    border: 1px solid #ddd;
+                    border-radius: 6px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    background: white;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
+                                ${prod.titre} ${prod.description ? '- ' + prod.description : ''}
+                                ${badgeRetiree}
+                            </div>
+                            <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">
+                                Type: ${typeLabel} • Pondération: ${prod.ponderation}%
+                                ${prod.auteur ? ` • Par ${prod.auteur}` : ''}
+                            </div>
+                            ${prod.objectif ? `<div style="color: #95a5a6; font-size: 0.85em;">Objectif: ${prod.objectif}</div>` : ''}
+                        </div>
+                        <button
+                            onclick="ajouterProductionIndividuelle('${prod.id}')"
+                            class="btn btn-confirmer btn-tres-compact"
+                            title="Ajouter cette production à votre sélection">
+                            Ajouter à ma sélection
+                        </button>
+                    </div>
+                </div>`;
+        });
+    });
+
+    modalHTML += `
+                </div>
+
+                <!-- Bouton "Ajouter des productions" après la Section 2 -->
+                <div style="margin-top: 15px; text-align: center;">
+                    <button onclick="document.getElementById('fichier-import-productions-modal').click()" class="btn btn-secondaire">
+                        Ajouter des productions
+                    </button>
+                    <input type="file" id="fichier-import-productions-modal" accept=".json" style="display: none;" onchange="importerProductions(event)">
+                </div>
+
+                <!-- Bouton Fermer -->
+                <div style="display: flex; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                    <button onclick="fermerModalBibliothequeProductions()" class="btn btn-annuler">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Ajouter le modal au DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+/**
+ * Ajoute une production individuelle à la bibliothèque (ma sélection)
+ */
+async function ajouterProductionIndividuelle(id) {
+    try {
+        const productions = await db.get('productions') || [];
+        const prod = productions.find(p => p.id === id);
+
+        if (!prod) {
+            alert('Production introuvable');
+            return;
+        }
+
+        // Marquer comme dans la bibliothèque
+        prod.dansBibliotheque = true;
+
+        // Sauvegarder
+        await db.set('productions', productions);
+
+        // Rafraîchir modal et sidebar
+        fermerModalBibliothequeProductions();
+        await afficherListeProductions();
+        await afficherBibliothequeProductions();
+
+        alert('Production ajoutée à votre sélection avec succès !');
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout:', error);
+        alert('Erreur lors de l\'ajout de la production');
+    }
+}
+
+/**
+ * Partage une production avec la communauté
+ * Demande les métadonnées CC enrichies et marque la production comme partagée
+ */
+async function partagerProduction(id) {
+    try {
+        const productions = await db.get('productions') || [];
+        const prod = productions.find(p => p.id === id);
+
+        if (!prod) {
+            alert('Production introuvable');
+            return;
+        }
+
+        // Demander métadonnées CC enrichies
+        const metadata = await demanderMetadonneesEnrichies('production', prod.titre);
+        if (!metadata) {
+            return; // Annulé par l'utilisateur
+        }
+
+        // Marquer comme partagée (retirer de ma sélection)
+        prod.dansBibliotheque = false;
+
+        // Ajouter métadonnées CC
+        prod.metadata_cc = metadata;
+
+        // Sauvegarder
+        await db.set('productions', productions);
+
+        // Rafraîchir modal et sidebar
+        fermerModalBibliothequeProductions();
+        await afficherListeProductions();
+        await afficherBibliothequeProductions();
+
+        alert('Production partagée avec succès !\n\nElle est maintenant disponible dans la section "Productions disponibles à ajouter".');
+    } catch (error) {
+        console.error('Erreur lors du partage:', error);
+        alert('Erreur lors du partage de la production');
+    }
+}
+
+/**
+ * Retire une production de la bibliothèque (soft delete)
+ */
+async function retirerProductionDeBibliotheque(id) {
+    if (!confirm('Retirer cette production de votre sélection ?\n\nElle ne sera plus affichée dans la barre latérale mais restera disponible dans le gestionnaire.')) {
+        return;
+    }
+
+    try {
+        const productions = await db.get('productions') || [];
+        const production = productions.find(p => p.id === id);
+
+        if (!production) {
+            throw new Error('Production introuvable');
+        }
+
+        production.dansBibliotheque = false;
+
+        await db.set('productions', productions);
+
+        console.log('✅ Production retirée de la sélection:', id);
+
+        fermerModalBibliothequeProductions();
+        await afficherBibliothequeProductions();
+        await afficherListeProductions();
+
+    } catch (error) {
+        console.error('Erreur lors du retrait:', error);
+        alert(`❌ Erreur : ${error.message}`);
+    }
+}
+
+/**
+ * Ajoute les productions sélectionnées à la bibliothèque
+ */
+async function ajouterProductionsABibliotheque() {
+    const checkboxes = document.querySelectorAll('#listeProductionsDisponibles input[type="checkbox"]:checked');
+
+    if (checkboxes.length === 0) {
+        alert('Veuillez sélectionner au moins une production à ajouter.');
+        return;
+    }
+
+    try {
+        const productions = await db.get('productions') || [];
+        let ajoutees = 0;
+
+        checkboxes.forEach(checkbox => {
+            const id = checkbox.value;
+            const productionData = JSON.parse(checkbox.dataset.production);
+
+            // Vérifier si la production existe déjà
+            const prodExistante = productions.find(p => p.id === id);
+            if (prodExistante) {
+                // Réactiver si elle était retirée
+                if (prodExistante.dansBibliotheque === false) {
+                    prodExistante.dansBibliotheque = true;
+                    ajoutees++;
+                    console.log(`✅ Réajoutée à la sélection : ${prodExistante.titre}`);
+                } else {
+                    console.log(`Production déjà dans la sélection : ${id}`);
+                }
+            } else {
+                // Ajouter nouvelle production de la bibliothèque
+                productions.push({
+                    ...productionData,
+                    dansBibliotheque: true
+                });
+                ajoutees++;
+                console.log(`✅ Ajoutée à la sélection : ${productionData.titre}`);
+            }
+        });
+
+        await db.set('productions', productions);
+
+        console.log(`✅ ${ajoutees} production(s) ajoutée(s) à la sélection`);
+
+        fermerModalBibliothequeProductions();
+        await afficherListeProductions();
+        await afficherTableauProductions();
+        await mettreAJourPonderationTotale();
+
+        if (ajoutees > 0) {
+            alert(`${ajoutees} production(s) ajoutée(s) avec succès !`);
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout:', error);
+        alert(`❌ Erreur : ${error.message}`);
+    }
+}
+
+/**
+ * Filtre les productions disponibles par discipline
+ * ✅ AJOUT (8 décembre 2025)
+ */
+function filtrerProductionsParDiscipline() {
+    const select = document.getElementById('filtreDisciplineProductions');
+    const disciplineSelectionnee = select ? select.value : '';
+
+    const items = document.querySelectorAll('.production-disponible-item');
+    const titresDisciplines = document.querySelectorAll('#listeProductionsDisponibles h4');
+
+    if (!disciplineSelectionnee) {
+        // Afficher tout
+        items.forEach(item => item.style.display = 'block');
+        titresDisciplines.forEach(titre => titre.style.display = 'block');
+    } else {
+        // Filtrer par discipline
+        items.forEach(item => {
+            const discipline = item.dataset.discipline;
+            item.style.display = discipline === disciplineSelectionnee ? 'block' : 'none';
+        });
+
+        // Afficher/cacher les titres de discipline selon le filtre
+        titresDisciplines.forEach(titre => {
+            const disciplineTitre = titre.textContent.trim();
+            titre.style.display = disciplineTitre === disciplineSelectionnee ? 'block' : 'none';
+        });
+    }
+}
+
+/**
+ * Ferme le modal bibliothèque
+ */
+function fermerModalBibliothequeProductions() {
+    const modal = document.getElementById('modalBibliothequeProductions');
+    if (modal) {
+        modal.remove();
+    }
 }
 
 /* ===============================
@@ -1574,6 +2040,11 @@ window.confirmerImportProductions = async function(donnees) {
 
         // Fusionner (remplacer si même ID, sinon ajouter)
         productionsImportees.forEach(prod => {
+            // ✅ AJOUT (8 décembre 2025) : Productions importées vont dans la bibliothèque, pas dans la sidebar automatiquement
+            if (prod.dansBibliotheque === undefined) {
+                prod.dansBibliotheque = false;
+            }
+
             const index = productionsExistantes.findIndex(p => p.id === prod.id);
             if (index >= 0) {
                 productionsExistantes[index] = prod;
@@ -1585,12 +2056,16 @@ window.confirmerImportProductions = async function(donnees) {
         // Sauvegarder
         await db.set('productions', productionsExistantes);
 
-        // Rafraîchir l'affichage
+        // ✅ MODIFICATION (8 décembre 2025) : Rafraîchir sidebar et tableau
+        if (typeof afficherListeProductions === 'function') {
+            await afficherListeProductions();
+        }
         if (typeof afficherTableauProductions === 'function') {
             await afficherTableauProductions();
         }
 
-        alert(`✅ Import réussi !\n\n${productionsImportees.length} production(s) importée(s).`);
+        // Message informatif sur la bibliothèque
+        alert(`Import réussi !\n\n${productionsImportees.length} production(s) importée(s) dans la bibliothèque.\n\nUtilisez "Consulter la bibliothèque" pour les ajouter à la barre latérale.`);
         console.log('✅ Productions importées:', productionsImportees.length);
 
     } catch (error) {
@@ -1636,6 +2111,13 @@ window.dupliquerProduction = dupliquerProduction;
 window.dupliquerProductionActive = dupliquerProductionActive;
 window.supprimerProductionActive = supprimerProductionActive;
 window.chargerGrillesDisponiblesPourProduction = chargerGrillesDisponiblesPourProduction;
+
+// Gestionnaire de bibliothèque (Beta 93)
+window.afficherBibliothequeProductions = afficherBibliothequeProductions;
+window.retirerProductionDeBibliotheque = retirerProductionDeBibliotheque;
+window.ajouterProductionsABibliotheque = ajouterProductionsABibliotheque;
+window.filtrerProductionsParDiscipline = filtrerProductionsParDiscipline;
+window.fermerModalBibliothequeProductions = fermerModalBibliothequeProductions;
 
 /* ===============================
    📌 NOTES D'UTILISATION
@@ -1711,28 +2193,41 @@ async function afficherListeProductions(filtreType = '') {
 
     if (!container) return;
 
+    // ✅ AJOUT (8 décembre 2025) : Filtrer uniquement les productions dans la bibliothèque
+    const productionsDansBibliotheque = productions.filter(p => p.dansBibliotheque !== false);
+
     // Filtrer selon le type si nécessaire
-    let productionsFiltrees = productions;
+    let productionsFiltrees = productionsDansBibliotheque;
     if (filtreType) {
         if (filtreType === 'sommative') {
-            productionsFiltrees = productions.filter(p =>
+            productionsFiltrees = productionsDansBibliotheque.filter(p =>
                 !p.type.includes('formatif') && p.type !== 'portfolio' && p.type !== 'artefact-portfolio'
             );
         } else if (filtreType === 'formative') {
-            productionsFiltrees = productions.filter(p => p.type.includes('formatif'));
+            productionsFiltrees = productionsDansBibliotheque.filter(p => p.type.includes('formatif'));
         } else if (filtreType === 'portfolio') {
-            productionsFiltrees = productions.filter(p =>
+            productionsFiltrees = productionsDansBibliotheque.filter(p =>
                 p.type === 'portfolio' || p.type === 'artefact-portfolio'
             );
         }
     }
 
+    // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
+    let html = `
+        <div style="margin-bottom: 15px;">
+            <button onclick="afficherBibliothequeProductions()" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
+                Consulter la bibliothèque
+            </button>
+        </div>
+    `;
+
     if (productionsFiltrees.length === 0) {
-        container.innerHTML = '<p class="sidebar-vide">Aucune production disponible</p>';
+        html += '<p class="sidebar-vide">Créez une nouvelle production ou puisez dans la bibliothèque</p>';
+        container.innerHTML = html;
         return;
     }
 
-    const html = productionsFiltrees.map(prod => {
+    html += productionsFiltrees.map(prod => {
         const typeLabel = getTypeLabel(prod.type);
 
         return `
@@ -1777,16 +2272,11 @@ async function chargerProductionPourModif(id) {
     if (formulaire) formulaire.style.display = 'block';
 
     // Note: Section optionsImportExportProductions supprimée (Beta 92)
-    // Les boutons Import/Export sont maintenant dans l'en-tête
-
-    // Afficher les boutons Dupliquer, Exporter, Importer et Supprimer (mode édition)
+    // Afficher les boutons Dupliquer et Supprimer (mode édition)
+    // Note: Export/Import se font maintenant via la bibliothèque
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
-    const btnExporter = document.getElementById('btnExporterProduction');
-    const btnImporter = document.getElementById('btnImporterProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
     if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
-    if (btnExporter) btnExporter.style.display = 'inline-block';
-    if (btnImporter) btnImporter.style.display = 'inline-block';
     if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
     // Appeler afficherFormProduction pour charger les données
@@ -1821,16 +2311,11 @@ function creerNouvelleProduction() {
     if (formulaire) formulaire.style.display = 'block';
 
     // Note: Section optionsImportExportProductions supprimée (Beta 92)
-    // Les boutons Import/Export sont maintenant dans l'en-tête
-
-    // Cacher les boutons Dupliquer, Exporter, Importer et Supprimer (mode création)
+    // Cacher les boutons Dupliquer et Supprimer (mode création)
+    // Note: Export/Import se font maintenant via la bibliothèque
     const btnDupliquer = document.getElementById('btnDupliquerProduction');
-    const btnExporter = document.getElementById('btnExporterProduction');
-    const btnImporter = document.getElementById('btnImporterProduction');
     const btnSupprimer = document.getElementById('btnSupprimerProduction');
     if (btnDupliquer) btnDupliquer.style.display = 'none';
-    if (btnExporter) btnExporter.style.display = 'none';
-    if (btnImporter) btnImporter.style.display = 'none';
     if (btnSupprimer) btnSupprimer.style.display = 'none';
 
     // Réinitialiser le formulaire

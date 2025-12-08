@@ -618,7 +618,8 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
             nom: nomGrille,
             criteres: window.tempCriteres || [],
             dateCreation: new Date().toISOString(),
-            dateModification: new Date().toISOString()
+            dateModification: new Date().toISOString(),
+            dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Nouvelle grille dans bibliothèque par défaut
         };
         grilles.push(nouvelleGrille);
         grilleTemplateActuelle = nouvelleGrille;
@@ -634,6 +635,9 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
 
     // Rafraîchir la nouvelle vue hiérarchique
     await afficherToutesLesGrillesCriteres();
+
+    // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
+    await afficherListeGrilles();
 
     // Sélectionner la grille actuelle
     const select = document.getElementById('selectGrilleTemplate');
@@ -840,6 +844,9 @@ async function supprimerGrille(grilleId) {
     // Rafraîchir la nouvelle vue hiérarchique
     await afficherToutesLesGrillesCriteres();
 
+    // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
+    await afficherListeGrilles();
+
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Grille supprimée');
     }
@@ -953,7 +960,8 @@ async function dupliquerGrilleActuelle() {
         })),
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString(),
-        baseSur: grilleTemplateActuelle.nom
+        baseSur: grilleTemplateActuelle.nom,
+        dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Grille dupliquée dans bibliothèque par défaut
     };
 
     // Sauvegarder la nouvelle grille
@@ -965,6 +973,10 @@ async function dupliquerGrilleActuelle() {
     grilleTemplateActuelle = nouvelleGrille;
     await chargerListeGrillesTemplates();
     await afficherToutesLesGrillesCriteres();
+
+    // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
+    await afficherListeGrilles();
+
     const select = document.getElementById('selectGrilleTemplate');
     const nomInput = document.getElementById('nomGrilleTemplate');
     if (select) select.value = nouvelleGrille.id;
@@ -1375,8 +1387,36 @@ function retourVueHierarchique() {
  * 4. Si oui : initialise l'interface
  * 5. Log de succès
  */
+
+/**
+ * Migration des grilles existantes vers le système de bibliothèque
+ * ✅ AJOUT (8 décembre 2025) : Support système bibliothèque avec sidebar
+ *
+ * Ajoute le flag dansBibliotheque: true à toutes les grilles existantes
+ * qui n'ont pas encore ce flag (migration une seule fois)
+ */
+async function migrerGrillesVersBibliotheque() {
+    const grilles = await db.get('grillesTemplates') || [];
+
+    let nbMigrees = 0;
+    grilles.forEach(grille => {
+        if (grille.dansBibliotheque === undefined) {
+            grille.dansBibliotheque = true;
+            nbMigrees++;
+        }
+    });
+
+    if (nbMigrees > 0) {
+        await db.set('grillesTemplates', grilles);
+        console.log(`✅ Migration bibliothèque: ${nbMigrees} grille(s) ajoutée(s) à la bibliothèque`);
+    }
+}
+
 async function initialiserModuleGrilles() {
     console.log('Initialisation du module Grilles');
+
+    // ✅ AJOUT (8 décembre 2025) : Migration vers système bibliothèque
+    await migrerGrillesVersBibliotheque();
 
     // Charger la liste des grilles
     await chargerListeGrillesTemplates();
@@ -1824,6 +1864,10 @@ window.confirmerImportGrilles = async function(donnees) {
 
         // Fusionner (remplacer si même ID, sinon ajouter)
         grillesImportees.forEach(grille => {
+            // ✅ AJOUT (8 décembre 2025) : Les grilles importées ne sont pas automatiquement dans la bibliothèque
+            // L'utilisateur doit utiliser "Gérer la bibliothèque" pour les ajouter à la barre latérale
+            grille.dansBibliotheque = false;
+
             // Préserver les métadonnées CC dans la grille importée
             if (metadata && metadata.licence) {
                 grille.metadata_cc = {
@@ -1850,7 +1894,8 @@ window.confirmerImportGrilles = async function(donnees) {
             await afficherToutesLesGrillesCriteres();
         }
 
-        alert(`✅ Import réussi !\n\n${grillesImportees.length} grille(s) importée(s).`);
+        // ✅ AJOUT (8 décembre 2025) : Mention de la bibliothèque dans le message de succès
+        alert(`✅ Import réussi !\n\n${grillesImportees.length} grille(s) importée(s).\n\nUtilisez "Consulter la bibliothèque" pour les ajouter à la barre latérale.`);
         console.log('✅ Grilles importées:', grillesImportees.length);
 
     } catch (error) {
@@ -1899,6 +1944,13 @@ window.importerGrilles = importerGrilles;
 window.enregistrerCommeGrille = enregistrerCommeGrille;
 window.initialiserModuleGrilles = initialiserModuleGrilles;
 
+// ✅ AJOUT (8 décembre 2025) : Exports fonctions bibliothèque
+window.afficherBibliothequeGrilles = afficherBibliothequeGrilles;
+window.retirerGrilleDeBibliotheque = retirerGrilleDeBibliotheque;
+window.ajouterGrillesABibliotheque = ajouterGrillesABibliotheque;
+window.filtrerGrillesParDiscipline = filtrerGrillesParDiscipline;
+window.fermerModalBibliothequeGrilles = fermerModalBibliothequeGrilles;
+
 /* ===============================
    FONCTIONS SIDEBAR (Beta 80.5+)
    Layout 2 colonnes - Stubs minimaux
@@ -1909,12 +1961,25 @@ async function afficherListeGrilles() {
     const container = document.getElementById('sidebarListeGrilles');
     if (!container) return;
 
-    if (grilles.length === 0) {
-        container.innerHTML = '<p class="sidebar-vide">Aucune grille disponible</p>';
+    // ✅ AJOUT (8 décembre 2025) : Filtrer uniquement les grilles dans la bibliothèque
+    const grillesDansBibliotheque = grilles.filter(g => g.dansBibliotheque !== false);
+
+    // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
+    let html = `
+        <div style="margin-bottom: 15px;">
+            <button onclick="afficherBibliothequeGrilles()" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
+                Consulter la bibliothèque
+            </button>
+        </div>
+    `;
+
+    if (grillesDansBibliotheque.length === 0) {
+        html += '<p class="sidebar-vide">Créez une nouvelle grille ou puisez dans la bibliothèque</p>';
+        container.innerHTML = html;
         return;
     }
 
-    const html = grilles.map(grille => {
+    html += grillesDansBibliotheque.map(grille => {
         const nomGrille = grille.nom || 'Sans titre';
         const nbCriteres = grille.criteres?.length || 0;
         return `
@@ -1928,21 +1993,432 @@ async function afficherListeGrilles() {
     container.innerHTML = html;
 }
 
+/**
+ * ✅ AJOUT (8 décembre 2025) : Afficher le modal de gestion de la bibliothèque de grilles
+ * Permet d'ajouter/retirer des grilles de la barre latérale
+ * Avec filtre par discipline
+ */
+async function afficherBibliothequeGrilles() {
+    const grilles = await db.get('grillesTemplates') || [];
+
+    // Séparer grilles dans la bibliothèque vs disponibles
+    const grillesDansBibliotheque = grilles.filter(g => g.dansBibliotheque !== false);
+    const grillesDisponibles = obtenirToutesLesGrillesBibliotheque();
+
+    // Obtenir les disciplines disponibles
+    const disciplines = obtenirDisciplinesDisponiblesGrilles();
+
+    let html = `
+        <div id="modalBibliothequeGrilles" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        ">
+            <div style="
+                background: white;
+                border-radius: 8px;
+                padding: 30px;
+                max-width: 800px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            ">
+                <h2 style="margin-top: 0; color: #2c3e50;">Bibliothèque de grilles de critères</h2>
+                <p style="color: #7f8c8d; margin-bottom: 20px;">
+                    Gérez les grilles de critères affichées dans la barre latérale.
+                </p>
+
+                <!-- Section 1 : Grilles dans votre sélection -->
+                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                    Grilles dans la barre latérale
+                </h3>
+                <div style="margin-bottom: 30px;">
+                    <div id="listeGrillesDansBibliotheque">
+    `;
+
+    if (grillesDansBibliotheque.length === 0) {
+        html += '<p style="color: #999; font-style: italic;">Aucune grille dans la barre latérale</p>';
+    } else {
+        grillesDansBibliotheque.forEach(grille => {
+            const nomGrille = grille.nom || 'Sans titre';
+            const nbCriteres = grille.criteres?.length || 0;
+            const discipline = grille.discipline || '';
+
+            html += `
+                <div style="
+                    border: 1px solid var(--bleu-clair);
+                    border-radius: 6px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    background: var(--bleu-tres-pale);
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
+                                ${nomGrille}
+                            </div>
+                            <div style="color: #7f8c8d; font-size: 0.9em;">
+                                ${nbCriteres} critère(s)${discipline ? ' • ' + discipline : ''}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-left: 10px;">
+                            <button
+                                onclick="partagerGrille('${grille.id}')"
+                                class="btn btn-secondaire btn-tres-compact"
+                                title="Partager avec la communauté">
+                                Partager
+                            </button>
+                            <button
+                                onclick="retirerGrilleDeBibliotheque('${grille.id}')"
+                                class="btn btn-supprimer btn-tres-compact"
+                                title="Retirer de votre sélection">
+                                Retirer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    html += `
+                    </div>
+
+                    <!-- Bouton "Partager toutes mes grilles" après la Section 1 -->
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button onclick="exporterGrilles()" class="btn btn-secondaire">
+                            Partager toutes mes grilles
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section 2 : Grilles disponibles -->
+                <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                    Grilles disponibles à ajouter
+                </h3>
+
+                <!-- Filtre par discipline -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
+                        Filtrer par discipline :
+                    </label>
+                    <select id="filtreDisciplineGrilles"
+                            class="controle-form"
+                            onchange="filtrerGrillesParDiscipline()"
+                            style="max-width: 300px;">
+                        <option value="">Toutes les disciplines</option>
+    `;
+
+    disciplines.forEach(discipline => {
+        html += `<option value="${discipline}">${discipline}</option>`;
+    });
+
+    html += `
+                        </select>
+                    </div>
+
+                    <div id="listeGrillesDisponibles">
+    `;
+
+    // Organiser par discipline
+    const grillesParDiscipline = {};
+    grillesDisponibles.forEach(grille => {
+        const disc = grille.discipline || 'Autre';
+        if (!grillesParDiscipline[disc]) {
+            grillesParDiscipline[disc] = [];
+        }
+        grillesParDiscipline[disc].push(grille);
+    });
+
+    // Afficher par discipline
+    Object.keys(grillesParDiscipline).sort().forEach(discipline => {
+        html += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: #666;">${discipline}</h4>`;
+
+        grillesParDiscipline[discipline].forEach(grille => {
+            const nomGrille = grille.nom || 'Sans titre';
+            const nbCriteres = grille.criteres?.length || 0;
+            const description = grille.description || '';
+            const auteur = grille.auteur || '';
+
+            // Vérifier si déjà dans la bibliothèque
+            const dejaPresent = grilles.some(g => g.id === grille.id && g.dansBibliotheque !== false);
+
+            html += `
+                <div class="grille-disponible-item" data-discipline="${discipline}" style="
+                    padding: 12px;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 6px;
+                    margin-bottom: 10px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: start;
+                    gap: 12px;
+                    ${dejaPresent ? 'opacity: 0.5;' : ''}
+                ">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 500; margin-bottom: 4px;">${nomGrille}</div>
+                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 4px;">
+                            ${nbCriteres} critère(s)${auteur ? ' • ' + auteur : ''}
+                        </div>
+                        ${description ? `<div style="font-size: 0.85rem; color: #888;">${description}</div>` : ''}
+                        ${dejaPresent ? '<div style="font-size: 0.8rem; color: var(--bleu-clair); font-style: italic; margin-top: 4px;">Déjà dans la barre latérale</div>' : ''}
+                    </div>
+                    ${!dejaPresent ? `
+                        <button
+                            onclick="ajouterGrilleIndividuelle('${grille.id}')"
+                            class="btn btn-confirmer btn-tres-compact"
+                            title="Ajouter cette grille à votre sélection">
+                            Ajouter à ma sélection
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+        });
+    });
+
+    html += `
+                    </div>
+
+                    <!-- Bouton "Ajouter des grilles" après la Section 2 -->
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button onclick="document.getElementById('fichier-import-grilles-modal').click()" class="btn btn-secondaire">
+                            Ajouter des grilles
+                        </button>
+                        <input type="file" id="fichier-import-grilles-modal" accept=".json" style="display: none;" onchange="importerGrilles(event)">
+                    </div>
+
+                <!-- Bouton Fermer -->
+                <div style="display: flex; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                    <button onclick="fermerModalBibliothequeGrilles()" class="btn btn-annuler">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+/**
+ * ✅ AJOUT (8 décembre 2025) : Ajoute une grille individuelle à la bibliothèque
+ * @param {string} id - ID de la grille à ajouter
+ */
+async function ajouterGrilleIndividuelle(id) {
+    try {
+        const grilles = await db.get('grillesTemplates') || [];
+
+        // Vérifier si la grille existe déjà
+        let grille = grilles.find(g => g.id === id);
+
+        if (!grille) {
+            // C'est une grille de la bibliothèque externe, il faut l'importer
+            const toutesGrilles = obtenirToutesLesGrillesBibliotheque();
+            const grilleSource = toutesGrilles.find(g => g.id === id);
+
+            if (grilleSource) {
+                // Créer une copie avec un nouvel ID local
+                grille = { ...grilleSource };
+                grille.dansBibliotheque = true;
+                grilles.push(grille);
+            } else {
+                alert('Grille introuvable');
+                return;
+            }
+        } else {
+            // Grille existante, simplement la marquer comme dans la bibliothèque
+            grille.dansBibliotheque = true;
+        }
+
+        // Sauvegarder
+        await db.set('grillesTemplates', grilles);
+
+        // Rafraîchir modal et sidebar
+        fermerModalBibliothequeGrilles();
+        await afficherListeGrilles();
+        await afficherBibliothequeGrilles();
+
+        alert('Grille ajoutée à votre sélection avec succès !');
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout:', error);
+        alert('Erreur lors de l\'ajout de la grille');
+    }
+}
+
+/**
+ * ✅ AJOUT (8 décembre 2025) : Partage une grille avec la communauté
+ * @param {string} id - ID de la grille à partager
+ */
+async function partagerGrille(id) {
+    try {
+        const grilles = await db.get('grillesTemplates') || [];
+        const grille = grilles.find(g => g.id === id);
+
+        if (!grille) {
+            alert('Grille introuvable');
+            return;
+        }
+
+        // Demander métadonnées CC enrichies
+        const metadata = await demanderMetadonneesEnrichies('grille', grille.nom);
+        if (!metadata) {
+            return; // Annulé par l'utilisateur
+        }
+
+        // Marquer comme partagée (retirer de ma sélection)
+        grille.dansBibliotheque = false;
+
+        // Ajouter métadonnées CC
+        grille.metadata_cc = metadata;
+
+        // Sauvegarder
+        await db.set('grillesTemplates', grilles);
+
+        // Rafraîchir modal et sidebar
+        fermerModalBibliothequeGrilles();
+        await afficherListeGrilles();
+        await afficherBibliothequeGrilles();
+
+        alert('Grille partagée avec succès !\n\nElle est maintenant disponible dans la section "Grilles disponibles à ajouter".');
+    } catch (error) {
+        console.error('Erreur lors du partage:', error);
+        alert('Erreur lors du partage de la grille');
+    }
+}
+
+/**
+ * ✅ AJOUT (8 décembre 2025) : Retirer une grille de la bibliothèque (soft delete)
+ * @param {string} id - ID de la grille à retirer
+ */
+async function retirerGrilleDeBibliotheque(id) {
+    const grilles = await db.get('grillesTemplates') || [];
+    const grille = grilles.find(g => g.id === id);
+
+    if (!grille) return;
+
+    // Soft delete : marquer comme non présente dans la bibliothèque
+    grille.dansBibliotheque = false;
+
+    await db.set('grillesTemplates', grilles);
+
+    // Rafraîchir les affichages
+    await afficherListeGrilles();
+    fermerModalBibliothequeGrilles();
+    await afficherBibliothequeGrilles();
+
+    console.log(`Grille "${grille.nom}" retirée de la barre latérale`);
+}
+
+/**
+ * ✅ AJOUT (8 décembre 2025) : Ajouter les grilles sélectionnées à la bibliothèque
+ */
+async function ajouterGrillesABibliotheque() {
+    const checkboxes = document.querySelectorAll('#listeGrillesDisponibles input[type="checkbox"]:checked');
+
+    if (checkboxes.length === 0) {
+        alert('Veuillez sélectionner au moins une grille à ajouter');
+        return;
+    }
+
+    const grilles = await db.get('grillesTemplates') || [];
+    const grillesBibliotheque = obtenirToutesLesGrillesBibliotheque();
+
+    let nbAjoutees = 0;
+
+    checkboxes.forEach(checkbox => {
+        const grilleId = checkbox.value;
+
+        // Trouver la grille dans la bibliothèque
+        const grilleBiblio = grillesBibliotheque.find(g => g.id === grilleId);
+        if (!grilleBiblio) return;
+
+        // Vérifier si déjà présente
+        const grilleExistante = grilles.find(g => g.id === grilleId);
+
+        if (grilleExistante) {
+            // Réactiver une grille retirée
+            grilleExistante.dansBibliotheque = true;
+            nbAjoutees++;
+        } else {
+            // Ajouter nouvelle grille
+            const nouvelleGrille = {
+                ...grilleBiblio,
+                id: grilleId + '-local',  // Ajouter suffix pour éviter conflits
+                dansBibliotheque: true
+            };
+            grilles.push(nouvelleGrille);
+            nbAjoutees++;
+        }
+    });
+
+    await db.set('grillesTemplates', grilles);
+
+    // Rafraîchir les affichages
+    await afficherListeGrilles();
+    fermerModalBibliothequeGrilles();
+
+    if (nbAjoutees > 0) {
+        alert(`${nbAjoutees} grille(s) ajoutée(s) à la barre latérale`);
+    }
+}
+
+/**
+ * ✅ AJOUT (8 décembre 2025) : Filtrer les grilles disponibles par discipline
+ */
+function filtrerGrillesParDiscipline() {
+    const select = document.getElementById('filtreDisciplineGrilles');
+    const disciplineSelectionnee = select ? select.value : '';
+
+    const items = document.querySelectorAll('.grille-disponible-item');
+    const titresDisciplines = document.querySelectorAll('#listeGrillesDisponibles h4');
+
+    if (!disciplineSelectionnee) {
+        // Afficher tout
+        items.forEach(item => item.style.display = 'flex');
+        titresDisciplines.forEach(titre => titre.style.display = 'block');
+    } else {
+        // Filtrer par discipline
+        items.forEach(item => {
+            const discipline = item.dataset.discipline;
+            item.style.display = discipline === disciplineSelectionnee ? 'flex' : 'none';
+        });
+
+        titresDisciplines.forEach(titre => {
+            const disciplineTitre = titre.textContent.trim();
+            titre.style.display = disciplineTitre === disciplineSelectionnee ? 'block' : 'none';
+        });
+    }
+}
+
+/**
+ * ✅ AJOUT (8 décembre 2025) : Fermer le modal de bibliothèque
+ */
+function fermerModalBibliothequeGrilles() {
+    const modal = document.getElementById('modalBibliothequeGrilles');
+    if (modal) {
+        modal.remove();
+    }
+}
+
 function creerNouvelleGrille() {
     document.getElementById('accueilGrilles').style.display = 'none';
     document.getElementById('conteneurEditionGrille').style.display = 'block';
 
     // Note: Section optionsImportExportGrilles supprimée (Beta 92)
-    // Les boutons Import/Export sont maintenant dans l'en-tête
+    // Note: Export/Import se font maintenant via la bibliothèque
 
-    // Cacher les boutons Dupliquer, Exporter, Importer et Supprimer (mode création)
+    // Cacher les boutons Dupliquer et Supprimer (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerGrille');
-    const btnExporter = document.getElementById('btnExporterGrille');
-    const btnImporter = document.getElementById('btnImporterGrille');
     const btnSupprimer = document.getElementById('btnSupprimerGrille');
     if (btnDupliquer) btnDupliquer.style.display = 'none';
-    if (btnExporter) btnExporter.style.display = 'none';
-    if (btnImporter) btnImporter.style.display = 'none';
     if (btnSupprimer) btnSupprimer.style.display = 'none';
 
     // Réinitialiser grilleTemplateActuelle
@@ -1976,17 +2452,12 @@ async function chargerGrillePourModif(id) {
     document.getElementById('accueilGrilles').style.display = 'none';
     document.getElementById('conteneurEditionGrille').style.display = 'block';
 
-    // Note: Section optionsImportExportGrilles supprimée (Beta 92)
-    // Les boutons Import/Export sont maintenant dans l'en-tête
+    // Note: Export/Import se font maintenant via la bibliothèque
 
-    // Afficher les boutons Dupliquer, Exporter, Importer et Supprimer (mode édition)
+    // Afficher les boutons Dupliquer et Supprimer (mode édition)
     const btnDupliquer = document.getElementById('btnDupliquerGrille');
-    const btnExporter = document.getElementById('btnExporterGrille');
-    const btnImporter = document.getElementById('btnImporterGrille');
     const btnSupprimer = document.getElementById('btnSupprimerGrille');
     if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
-    if (btnExporter) btnExporter.style.display = 'inline-block';
-    if (btnImporter) btnImporter.style.display = 'inline-block';
     if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
     // Définir la grille actuelle
