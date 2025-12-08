@@ -66,6 +66,14 @@ function initialiserModulePratiques() {
         return;
     }
 
+    // ✅ AJOUT (8 décembre 2025) : Migration vers système bibliothèque
+    if (PratiqueManager && PratiqueManager.migrerVersBibliotheque) {
+        PratiqueManager.migrerVersBibliotheque();
+    }
+
+    // ✅ AJOUT (8 décembre 2025) : Afficher la sidebar avec les pratiques de la bibliothèque
+    afficherListePratiquesSidebar();
+
     // BETA 92: Afficher la liste des pratiques configurables
     afficherListePratiques();
 
@@ -1727,9 +1735,11 @@ async function afficherListePratiques() {
             });
         }
 
-        // 2. Pratiques configurables
+        // 2. Pratiques configurables (filtrer seulement celles dans la bibliothèque)
+        // ✅ MODIFICATION (8 décembre 2025) : Afficher seulement les pratiques avec dansBibliotheque !== false
         if (pratiques.configurables && pratiques.configurables.length > 0) {
-            pratiques.configurables.forEach(p => {
+            const pratiquesDansBibliotheque = pratiques.configurables.filter(p => p.dansBibliotheque !== false);
+            pratiquesDansBibliotheque.forEach(p => {
                 const estActive = p.id === pratiqueActiveId;
                 htmlConfigurables += genererCartePratique(p, estActive, true); // true = modifiable
             });
@@ -1744,7 +1754,7 @@ async function afficherListePratiques() {
                     <!-- Colonne 1: Pratiques de notation -->
                     <div>
                         <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 15px;">
-                            Pratiques de notation (non modifiables)
+                            Structures de pratiques (non modifiables)
                         </h4>
 
                         <!-- Sélecteur de pratique par défaut -->
@@ -1755,11 +1765,25 @@ async function afficherListePratiques() {
                         </div>
                     </div>
 
-                    <!-- Colonne 2: Configuration personnalisée -->
+                    <!-- Colonne 2: Bibliothèque de pratiques personnalisées -->
                     <div>
                         <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 15px;">
-                            Configuration personnalisée (modifiable)
+                            Bibliothèque de pratiques personnalisées (modifiables)
                         </h4>
+
+                        <!-- Actions pour gérer les configurations personnalisées -->
+                        <div class="btn-groupe" style="margin-bottom: 15px;">
+                            <button class="btn btn-confirmer" onclick="creerNouvellePratique()">
+                                Créer une pratique
+                            </button>
+                            <button class="btn btn-secondaire" onclick="importerPratiqueJSON()">
+                                Importer une pratique
+                            </button>
+                            <button class="btn btn-ajouter" onclick="afficherPratiquesPredefines()">
+                                Charger une pratique
+                            </button>
+                        </div>
+
                         <div style="display: flex; flex-direction: column; gap: 15px;">
                             ${htmlConfigurables || '<p style="color: var(--gris-moyen); font-style: italic;">Aucune pratique personnalisée</p>'}
                         </div>
@@ -1840,7 +1864,8 @@ function genererSelecteurPratiqueParDefaut() {
 }
 
 /**
- * Génère le HTML d'une carte de pratique
+ * Génère le HTML d'une carte de pratique (avec toggle collapsible)
+ * ✅ MODIFICATION (8 décembre 2025) : Carte collapsible pour optimiser l'espace vertical
  * @param {object} pratique - Objet pratique {id, nom, description, auteur}
  * @param {boolean} estActive - True si c'est la pratique active
  * @param {boolean} modifiable - True si la pratique peut être éditée/supprimée
@@ -1873,35 +1898,70 @@ function genererCartePratique(pratique, estActive, modifiable) {
     const auteur = pratique.auteur ?
         `Par ${pratique.auteur}${pratique.etablissement ? ` (${pratique.etablissement})` : ''}` : '';
 
+    // Par défaut : la pratique ACTIVE est ouverte, les autres sont fermées
+    const estOuvert = estActive;
+    const iconeToggle = estOuvert ? '▲' : '▼';
+    const displayDetails = estOuvert ? 'block' : 'none';
+
     return `
-        <div class="carte">
-            <!-- En-tête avec titre à gauche et compteur à droite (style carte métrique) -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div class="carte pratique-carte" data-pratique-id="${pratique.id}">
+            <!-- Header cliquable (toujours visible) -->
+            <div class="pratique-header" onclick="togglePratique('${pratique.id}')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
                     <strong style="font-size: 1rem; color: var(--bleu-principal);">${pratique.nom}</strong>
                     ${badgeActif}
                     ${badgeParDefaut}
                 </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 1.2rem; font-weight: 600; color: var(--bleu-principal);">${nbCours}</div>
-                    <div style="font-size: 0.75rem; color: var(--gris-moyen);">cours</div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: var(--bleu-principal);">${nbCours}</div>
+                        <div style="font-size: 0.75rem; color: var(--gris-moyen);">cours</div>
+                    </div>
+                    <div class="pratique-toggle-icon" style="font-size: 1.2rem; color: var(--bleu-principal); user-select: none;">
+                        ${iconeToggle}
+                    </div>
                 </div>
             </div>
 
-            <!-- Détails sous le titre -->
-            <div style="margin-bottom: 12px;">
-                ${auteur ? `<div style="margin-bottom: 6px; color: var(--gris-moyen); font-size: 0.85rem;">${auteur}</div>` : ''}
-                ${pratique.description ? `<p style="color: var(--gris-moyen); font-size: 0.85rem; margin: 0; line-height: 1.4;">${pratique.description}</p>` : ''}
-                ${nbCours > 0 ? `<div style="margin-top: 8px; color: var(--gris-moyen); font-size: 0.85rem;">${coursUtilisant.map(c => c.sigle).join(', ')}</div>` : ''}
-            </div>
+            <!-- Détails collapsibles -->
+            <div class="pratique-details" id="pratique-details-${pratique.id}" style="display: ${displayDetails}; transition: all 0.3s ease;">
+                <!-- Séparateur visuel -->
+                <div style="border-top: 1px solid var(--gris-leger); margin-bottom: 12px; padding-top: 12px;">
+                    ${auteur ? `<div style="margin-bottom: 6px; color: var(--gris-moyen); font-size: 0.85rem;">${auteur}</div>` : ''}
+                    ${pratique.description ? `<p style="color: var(--gris-moyen); font-size: 0.85rem; margin: 0; line-height: 1.4;">${pratique.description}</p>` : ''}
+                    ${nbCours > 0 ? `<div style="margin-top: 8px; color: var(--gris-moyen); font-size: 0.85rem;"><strong>Cours :</strong> ${coursUtilisant.map(c => c.sigle).join(', ')}</div>` : ''}
+                </div>
 
-            <!-- Boutons d'action -->
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                ${boutonActiver}
-                ${boutonsModification}
+                <!-- Boutons d'action -->
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    ${boutonActiver}
+                    ${boutonsModification}
+                </div>
             </div>
         </div>
     `;
+}
+
+/**
+ * Toggle l'affichage des détails d'une carte de pratique
+ * ✅ AJOUT (8 décembre 2025) : Gestion collapsible des cartes
+ * @param {string} pratiqueId - ID de la pratique à toggle
+ */
+function togglePratique(pratiqueId) {
+    const details = document.getElementById(`pratique-details-${pratiqueId}`);
+    const carte = document.querySelector(`[data-pratique-id="${pratiqueId}"]`);
+
+    if (!details || !carte) return;
+
+    // Toggle display
+    const estOuvert = details.style.display !== 'none';
+    details.style.display = estOuvert ? 'none' : 'block';
+
+    // Mettre à jour l'icône
+    const icone = carte.querySelector('.pratique-toggle-icon');
+    if (icone) {
+        icone.textContent = estOuvert ? '▼' : '▲';
+    }
 }
 
 /**
@@ -3582,7 +3642,11 @@ async function traiterImportPratique(event) {
 
 /**
  * Afficher et initialiser les pratiques prédéfinies
- * Affiche un modal de sélection pour choisir les pratiques à charger
+ * ✅ MODIFICATION (8 décembre 2025) : Modal gestionnaire de bibliothèque
+ *
+ * Affiche un modal avec deux sections:
+ * 1. Pratiques dans la bibliothèque (avec bouton "Retirer")
+ * 2. Pratiques disponibles à ajouter (PRATIQUES_PREDEFINES + pratiques retirées)
  */
 async function afficherPratiquesPredefines() {
     // Vérifier que PRATIQUES_PREDEFINES existe
@@ -3594,6 +3658,10 @@ async function afficherPratiquesPredefines() {
     // Récupérer les pratiques déjà chargées
     const pratiquesExistantes = db.getSync('pratiquesConfigurables', []);
     const idsExistants = new Set(pratiquesExistantes.map(p => p.id));
+
+    // ✅ AJOUT (8 décembre 2025) : Séparer pratiques dans bibliothèque vs retirées
+    const pratiquesDansBibliotheque = pratiquesExistantes.filter(p => p.dansBibliotheque !== false);
+    const pratiquesRetirees = pratiquesExistantes.filter(p => p.dansBibliotheque === false);
 
     // Construire le HTML du modal
     let modalHTML = `
@@ -3618,22 +3686,74 @@ async function afficherPratiquesPredefines() {
                 overflow-y: auto;
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             ">
-                <h2 style="margin-top: 0; color: #2c3e50;">📦 Sélectionner les pratiques à charger</h2>
+                <h2 style="margin-top: 0; color: #2c3e50;">📚 Gestionnaire de bibliothèque</h2>
                 <p style="color: #7f8c8d; margin-bottom: 20px;">
-                    Cochez les pratiques que vous souhaitez ajouter à votre bibliothèque.
-                    Les pratiques déjà chargées sont grisées.
+                    Gérez les pratiques affichées dans votre bibliothèque personnalisée.
                 </p>
+    `;
 
+    // ✅ AJOUT (8 décembre 2025) : Section pratiques dans la bibliothèque
+    if (pratiquesDansBibliotheque.length > 0) {
+        modalHTML += `
+                <h3 style="color: #27ae60; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                    ✓ Pratiques dans votre bibliothèque (${pratiquesDansBibliotheque.length})
+                </h3>
+                <div style="margin-bottom: 30px;">`;
+
+        pratiquesDansBibliotheque.forEach(pratique => {
+            modalHTML += `
+                <div style="
+                    border: 1px solid #27ae60;
+                    border-radius: 6px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    background: #f0f9f4;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
+                                ${pratique.nom}
+                            </div>
+                            <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">
+                                Par ${pratique.auteur || 'Auteur inconnu'} ${pratique.etablissement ? '(' + pratique.etablissement + ')' : ''}
+                            </div>
+                            <div style="color: #95a5a6; font-size: 0.85em;">
+                                ${pratique.description || ''}
+                            </div>
+                        </div>
+                        <button
+                            onclick="retirerDeBibliotheque('${pratique.id}')"
+                            class="btn btn-tres-compact"
+                            style="background: #e74c3c; color: white; margin-left: 10px;">
+                            Retirer
+                        </button>
+                    </div>
+                </div>`;
+        });
+
+        modalHTML += `</div>`;
+    }
+
+    modalHTML += `
+                <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                    📦 Pratiques disponibles à ajouter
+                </h3>
                 <div id="listePratiquesPredefines" style="margin-bottom: 20px;">
     `;
 
-    // Ajouter chaque pratique prédéfinie
-    Object.entries(window.PRATIQUES_PREDEFINES).forEach(([key, pratique]) => {
-        const dejaChargee = idsExistants.has(pratique.id);
-        const disabled = dejaChargee ? 'disabled' : '';
-        const checked = dejaChargee ? '' : 'checked';
-        const opacity = dejaChargee ? '0.5' : '1';
-        const statut = dejaChargee ? '<span style="color: #27ae60; font-weight: bold;">✓ Déjà chargée</span>' : '<span style="color: #3498db;">Nouvelle</span>';
+    // ✅ MODIFICATION (8 décembre 2025) : Inclure aussi les pratiques retirées
+    const toutesLesPratiquesDisponibles = [...Object.values(window.PRATIQUES_PREDEFINES), ...pratiquesRetirees];
+
+    toutesLesPratiquesDisponibles.forEach(pratique => {
+        // Ne pas afficher si déjà dans la bibliothèque
+        if (pratiquesDansBibliotheque.find(p => p.id === pratique.id)) {
+            return;
+        }
+
+        // Badge pour indiquer si c'est une pratique retirée (peut être réajoutée)
+        const badgeRetiree = pratiquesRetirees.find(p => p.id === pratique.id)
+            ? '<span style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 8px;">Retirée</span>'
+            : '';
 
         modalHTML += `
             <div style="
@@ -3641,29 +3761,25 @@ async function afficherPratiquesPredefines() {
                 border-radius: 6px;
                 padding: 15px;
                 margin-bottom: 10px;
-                opacity: ${opacity};
-                background: ${dejaChargee ? '#f8f9fa' : 'white'};
+                background: white;
             ">
-                <label style="display: flex; align-items: flex-start; cursor: ${dejaChargee ? 'not-allowed' : 'pointer'};">
+                <label style="display: flex; align-items: flex-start; cursor: pointer;">
                     <input
                         type="checkbox"
                         value="${pratique.id}"
-                        ${checked}
-                        ${disabled}
+                        checked
                         style="margin-right: 12px; margin-top: 4px;"
                     >
                     <div style="flex: 1;">
                         <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
                             ${pratique.nom}
+                            ${badgeRetiree}
                         </div>
                         <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">
-                            Par ${pratique.auteur} ${pratique.etablissement ? '(' + pratique.etablissement + ')' : ''}
+                            Par ${pratique.auteur || 'Auteur inconnu'} ${pratique.etablissement ? '(' + pratique.etablissement + ')' : ''}
                         </div>
                         <div style="color: #95a5a6; font-size: 0.85em;">
-                            ${pratique.description}
-                        </div>
-                        <div style="margin-top: 6px;">
-                            ${statut}
+                            ${pratique.description || ''}
                         </div>
                     </div>
                 </label>
@@ -3676,10 +3792,10 @@ async function afficherPratiquesPredefines() {
 
                 <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #ddd;">
                     <button onclick="fermerModalPratiques()" class="btn" style="background: #95a5a6;">
-                        Annuler
+                        Fermer
                     </button>
                     <button onclick="chargerPratiqueSelectionnees()" class="btn btn-ajouter">
-                        Charger les pratiques sélectionnées
+                        Ajouter à la bibliothèque
                     </button>
                 </div>
             </div>
@@ -3697,6 +3813,45 @@ function fermerModalPratiques() {
     const modal = document.getElementById('modalSelectionPratiques');
     if (modal) {
         modal.remove();
+    }
+}
+
+/**
+ * Retire une pratique de la bibliothèque (ne la supprime pas, la masque juste)
+ * ✅ AJOUT (8 décembre 2025)
+ * @param {string} pratiqueId - ID de la pratique à retirer
+ */
+async function retirerDeBibliotheque(pratiqueId) {
+    if (!confirm('Retirer cette pratique de votre bibliothèque ?\n\nElle ne sera plus affichée mais restera disponible dans le gestionnaire.')) {
+        return;
+    }
+
+    try {
+        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratique = pratiques.find(p => p.id === pratiqueId);
+
+        if (!pratique) {
+            throw new Error('Pratique introuvable');
+        }
+
+        // Marquer comme retirée de la bibliothèque
+        pratique.dansBibliotheque = false;
+
+        // Sauvegarder
+        db.setSync('pratiquesConfigurables', pratiques);
+
+        console.log('✅ Pratique retirée de la bibliothèque:', pratiqueId);
+
+        // Fermer et rouvrir le modal pour rafraîchir
+        fermerModalPratiques();
+        await afficherPratiquesPredefines();
+
+        // Recharger aussi l'affichage principal
+        await afficherListePratiques();
+
+    } catch (error) {
+        console.error('Erreur lors du retrait:', error);
+        alert(`❌ Erreur : ${error.message}`);
     }
 }
 
@@ -3728,9 +3883,17 @@ async function chargerPratiqueSelectionnees() {
                 continue;
             }
 
-            // Vérifier qu'elle n'existe pas déjà
-            if (pratiques.find(p => p.id === id)) {
-                console.log(`Pratique déjà présente : ${id}`);
+            // Vérifier si elle existe déjà (peut-être retirée de la bibliothèque)
+            const pratiqueExistante = pratiques.find(p => p.id === id);
+            if (pratiqueExistante) {
+                // Si elle était retirée, la remettre dans la bibliothèque
+                if (pratiqueExistante.dansBibliotheque === false) {
+                    pratiqueExistante.dansBibliotheque = true;
+                    ajoutees++;
+                    console.log(`✅ Réajoutée à la bibliothèque : ${pratiqueExistante.nom}`);
+                } else {
+                    console.log(`Pratique déjà présente dans la bibliothèque : ${id}`);
+                }
                 continue;
             }
 
@@ -3744,7 +3907,8 @@ async function chargerPratiqueSelectionnees() {
                 discipline: pratiquePredefinie.discipline || '',
                 version: pratiquePredefinie.version || '1.0',
                 date_creation: pratiquePredefinie.date_creation || new Date().toISOString().split('T')[0],
-                config: pratiquePredefinie
+                config: pratiquePredefinie,
+                dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) : Flag bibliothèque
             };
 
             // Ajouter à la liste
@@ -3806,6 +3970,329 @@ window.traiterImportPratique = traiterImportPratique;
 window.afficherPratiquesPredefines = afficherPratiquesPredefines;
 
 // Wizard de création de pratique
+/* ===============================
+   📚 SIDEBAR : AFFICHAGE LISTE PRATIQUES
+   ✅ AJOUT (8 décembre 2025) - Pattern bibliothèque
+   =============================== */
+
+/**
+ * Affiche la liste des pratiques dans la sidebar
+ * Filtre uniquement les pratiques avec dansBibliotheque !== false
+ */
+async function afficherListePratiquesSidebar() {
+    const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+    const pratiquesDansBibliotheque = pratiquesConfigurables.filter(p => p.dansBibliotheque !== false);
+    const container = document.getElementById('listePratiquesSidebar');
+
+    if (!container) return;
+
+    const modalites = db.getSync('modalitesEvaluation', {});
+    const pratiqueActiveId = modalites.pratique;
+
+    if (pratiquesDansBibliotheque.length === 0) {
+        container.innerHTML = '<p class="text-muted text-italic">Créez une nouvelle pratique ou puisez dans la bibliothèque</p>';
+        return;
+    }
+
+    let html = '';
+    pratiquesDansBibliotheque.forEach(p => {
+        const estActive = p.id === pratiqueActiveId;
+        const activeClass = estActive ? ' active' : '';
+        const nomAffiche = p.nom || p.id;
+        const auteur = p.auteur ? `par ${p.auteur}` : '';
+
+        html += `
+            <div class="sidebar-item${activeClass}" onclick="chargerPratiquePourModif('${p.id}')">
+                <div class="sidebar-item-titre">${echapperHtml(nomAffiche)}</div>
+                ${auteur ? `<div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 3px;">${echapperHtml(auteur)}</div>` : ''}
+                ${estActive ? '<div style="margin-top: 5px;"><span class="sidebar-item-badge">Active</span></div>' : ''}
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+/**
+ * Charge une pratique pour modification dans le formulaire
+ * Appelée par le clic sur un item de la sidebar
+ */
+async function chargerPratiquePourModif(pratiqueId) {
+    console.log('🔄 chargerPratiquePourModif appelée avec ID:', pratiqueId);
+
+    // Masquer le message d'accueil s'il existe
+    const messageSelection = document.getElementById('messageSelectionPratique');
+    if (messageSelection) messageSelection.style.display = 'none';
+
+    // Afficher le wizard en mode édition
+    await ouvrirWizardPratique(pratiqueId);
+}
+
+/**
+ * Ouvre le modal de bibliothèque de pratiques
+ * ✅ AVEC Creative Commons (pratiques personnalisées)
+ */
+async function ouvrirModalBibliothequePratiques() {
+    const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+    const pratiquesDansBibliotheque = pratiquesConfigurables.filter(p => p.dansBibliotheque !== false);
+    const pratiquesDisponibles = pratiquesConfigurables.filter(p => p.dansBibliotheque === false);
+
+    const modalHTML = `
+        <div id="modalBibliothequePratiques" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+            <div style="background: white; border-radius: 8px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+
+                <!-- En-tête -->
+                <div style="padding: 20px; border-bottom: 1px solid var(--gris-clair); display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0; color: var(--bleu-principal);">Bibliothèque de pratiques</h2>
+                    <button onclick="fermerModalBibliothequePratiques()" class="btn-icon" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gris-fonce);">&times;</button>
+                </div>
+
+                <!-- Corps -->
+                <div style="padding: 20px;">
+
+                    <!-- SECTION 1 : Ma sélection -->
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="color: var(--bleu-principal); margin-bottom: 15px;">
+                            Ma sélection (${pratiquesDansBibliotheque.length})
+                        </h3>
+
+                        <div id="listePratiquesSelection" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                            ${pratiquesDansBibliotheque.length === 0 ?
+                                '<p class="text-muted text-italic">Aucune pratique dans votre sélection</p>' :
+                                pratiquesDansBibliotheque.map(p => {
+                                    const nomAffiche = p.nom || p.id;
+                                    const auteur = p.auteur ? `par ${p.auteur}` : '';
+                                    return `
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bleu-tres-pale); border-radius: 4px;">
+                                            <div>
+                                                <div style="font-weight: 500;">${echapperHtml(nomAffiche)}</div>
+                                                ${auteur ? `<div style="font-size: 0.85rem; color: var(--gris-moyen);">${echapperHtml(auteur)}</div>` : ''}
+                                            </div>
+                                            <div style="display: flex; gap: 5px;">
+                                                <button onclick="exporterPratiqueActive('${p.id}')" class="btn btn-principal btn-tres-compact">
+                                                    📤 Partager
+                                                </button>
+                                                <button onclick="retirerPratiqueDeBibliotheque('${p.id}')" class="btn btn-secondaire btn-tres-compact">
+                                                    Retirer
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')
+                            }
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2 : Disponibles à ajouter -->
+                    <div>
+                        <h3 style="color: var(--bleu-principal); margin-bottom: 15px;">
+                            Disponibles à ajouter (${pratiquesDisponibles.length})
+                        </h3>
+
+                        <div id="listePratiquesDisponibles" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                            ${pratiquesDisponibles.length === 0 ?
+                                '<p class="text-muted text-italic">Aucune pratique disponible</p>' :
+                                pratiquesDisponibles.map(p => {
+                                    const nomAffiche = p.nom || p.id;
+                                    const auteur = p.auteur ? `par ${p.auteur}` : '';
+                                    return `
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--gris-tres-pale); border-radius: 4px;">
+                                            <div>
+                                                <div style="font-weight: 500;">${echapperHtml(nomAffiche)}</div>
+                                                ${auteur ? `<div style="font-size: 0.85rem; color: var(--gris-moyen);">${echapperHtml(auteur)}</div>` : ''}
+                                            </div>
+                                            <button onclick="ajouterPratiqueIndividuelle('${p.id}')" class="btn btn-ajouter btn-tres-compact">
+                                                Ajouter
+                                            </button>
+                                        </div>
+                                    `;
+                                }).join('')
+                            }
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="importerPratiqueJSON()" class="btn btn-secondaire">
+                                📥 Importer une pratique
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Pied de page -->
+                <div style="padding: 15px 20px; border-top: 1px solid var(--gris-clair); text-align: right;">
+                    <button onclick="fermerModalBibliothequePratiques()" class="btn btn-secondaire">
+                        Fermer
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+/**
+ * Ferme le modal de bibliothèque de pratiques
+ */
+function fermerModalBibliothequePratiques() {
+    const modal = document.getElementById('modalBibliothequePratiques');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+/**
+ * Retire une pratique de la bibliothèque
+ */
+async function retirerPratiqueDeBibliotheque(pratiqueId) {
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratique = pratiques.find(p => p.id === pratiqueId);
+
+    if (!pratique) {
+        alert('Pratique introuvable');
+        return;
+    }
+
+    pratique.dansBibliotheque = false;
+    db.setSync('pratiquesConfigurables', pratiques);
+
+    console.log('✅ Pratique retirée de la bibliothèque:', pratiqueId);
+
+    // Rafraîchir le modal et la sidebar
+    fermerModalBibliothequePratiques();
+    await ouvrirModalBibliothequePratiques();
+    await afficherListePratiquesSidebar();
+}
+
+/**
+ * Ajoute une pratique individuelle à la bibliothèque
+ */
+async function ajouterPratiqueIndividuelle(pratiqueId) {
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratique = pratiques.find(p => p.id === pratiqueId);
+
+    if (!pratique) {
+        alert('Pratique introuvable');
+        return;
+    }
+
+    pratique.dansBibliotheque = true;
+    db.setSync('pratiquesConfigurables', pratiques);
+
+    console.log('✅ Pratique ajoutée à la bibliothèque:', pratiqueId);
+
+    // Rafraîchir le modal et la sidebar
+    fermerModalBibliothequePratiques();
+    await ouvrirModalBibliothequePratiques();
+    await afficherListePratiquesSidebar();
+}
+
+/**
+ * Partage une pratique avec métadonnées Creative Commons
+ * ✅ AJOUT (8 décembre 2025) - Pattern matériel pédagogique
+ */
+async function partagerPratique(pratiqueId) {
+    try {
+        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratique = pratiques.find(p => p.id === pratiqueId);
+
+        if (!pratique) {
+            alert('Pratique introuvable');
+            return;
+        }
+
+        // Demander métadonnées CC enrichies
+        const nomAffiche = pratique.nom || pratique.id;
+        const metadata = await demanderMetadonneesEnrichies('pratique', nomAffiche);
+        if (!metadata) {
+            return; // Annulé par l'utilisateur
+        }
+
+        // Marquer comme partagée (retirer de ma sélection)
+        pratique.dansBibliotheque = false;
+
+        // Ajouter métadonnées CC
+        pratique.metadata_cc = metadata;
+
+        // Sauvegarder
+        db.setSync('pratiquesConfigurables', pratiques);
+
+        // Rafraîchir modal et sidebar
+        fermerModalBibliothequePratiques();
+        await afficherListePratiquesSidebar();
+        await ouvrirModalBibliothequePratiques();
+
+        alert('Pratique partagée avec succès !\n\nElle est maintenant disponible dans la section "Disponibles à ajouter".');
+    } catch (error) {
+        console.error('Erreur lors du partage:', error);
+        alert('Erreur lors du partage de la pratique');
+    }
+}
+
+/**
+ * Exporte une pratique active avec métadonnées CC
+ * ✅ AJOUT (8 décembre 2025) - Pattern matériel pédagogique
+ */
+async function exporterPratiqueActive(pratiqueId) {
+    try {
+        const pratiques = db.getSync('pratiquesConfigurables', []);
+        const pratique = pratiques.find(p => p.id === pratiqueId);
+
+        if (!pratique) {
+            alert('Pratique introuvable');
+            return;
+        }
+
+        // Demander métadonnées CC enrichies
+        const nomAffiche = pratique.nom || pratique.id;
+        const metadata = await demanderMetadonneesEnrichies('pratique', nomAffiche);
+        if (!metadata) {
+            return; // Annulé par l'utilisateur
+        }
+
+        // Créer l'objet d'export avec métadonnées
+        const pratiqueExport = {
+            ...pratique,
+            metadata_cc: metadata,
+            dateExport: new Date().toISOString()
+        };
+
+        // Créer le fichier JSON
+        const dataStr = JSON.stringify(pratiqueExport, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const nomFichier = `pratique-${pratique.id}-${new Date().toISOString().split('T')[0]}.json`;
+
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = nomFichier;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        console.log('✅ Pratique exportée:', nomFichier);
+        alert('Pratique exportée avec succès !');
+
+    } catch (error) {
+        console.error('Erreur lors de l\'export:', error);
+        alert('Erreur lors de l\'export de la pratique');
+    }
+}
+
+/* ===============================
+   EXPORTS WINDOW
+   =============================== */
+
+window.afficherListePratiquesSidebar = afficherListePratiquesSidebar;
+window.chargerPratiquePourModif = chargerPratiquePourModif;
+window.ouvrirModalBibliothequePratiques = ouvrirModalBibliothequePratiques;
+window.fermerModalBibliothequePratiques = fermerModalBibliothequePratiques;
+window.retirerPratiqueDeBibliotheque = retirerPratiqueDeBibliotheque;
+window.ajouterPratiqueIndividuelle = ajouterPratiqueIndividuelle;
+window.partagerPratique = partagerPratique;
+window.exporterPratiqueActive = exporterPratiqueActive;
+
 window.fermerWizardPratique = fermerWizardPratique;
 window.suivantEtapeWizard = suivantEtapeWizard;
 window.precedentEtapeWizard = precedentEtapeWizard;

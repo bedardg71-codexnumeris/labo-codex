@@ -3865,7 +3865,7 @@
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                                 <!-- Boutons Import/Export à gauche -->
                                 <div style="display: flex; gap: 10px;">
-                                    <button class="btn btn-confirmer" onclick="exporterProductions()">
+                                    <button class="btn btn-principal" onclick="exporterProductions()">
                                         Exporter toutes les productions
                                     </button>
                                     <button class="btn btn-principal" onclick="document.getElementById('fichier-import-productions-local').click()">
@@ -3881,7 +3881,7 @@
 
                             <!-- Message d'accueil initial -->
                             <div class="zone-principale-accueil" id="accueilProductions">
-                                <p>Sélectionnez une production dans la liste</p>
+                                <p>Sélectionnez une production dans la barre latérale</p>
                             </div>
 
                             <!-- Formulaire d'édition -->
@@ -3980,13 +3980,6 @@
                                 <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
                                     <!-- Boutons gauche (actions sur la production) -->
                                     <div style="display: flex; gap: 10px;">
-                                        <button id="btnExporterProduction" class="btn btn-secondaire" onclick="exporterProductionActive()" style="display: none;" title="Exporter cette production en JSON">
-                                            Exporter cette production
-                                        </button>
-                                        <button id="btnImporterProduction" class="btn btn-secondaire" onclick="document.getElementById('fichier-import-production-individuelle').click()" style="display: none;" title="Importer pour remplacer cette production">
-                                            Importer dans cette production
-                                        </button>
-                                        <input type="file" id="fichier-import-production-individuelle" accept=".json" style="display: none;" onchange="importerDansProductionActive(event)">
                                         <button id="btnDupliquerProduction" class="btn btn-secondaire" onclick="dupliquerProductionActive()" style="display: none;" title="Créer une copie de cette production">
                                             Dupliquer
                                         </button>
@@ -4086,7 +4079,7 @@
 
                             <!-- Message d'accueil initial -->
                             <div class="zone-principale-accueil" id="accueilGrilles">
-                                <p>Sélectionnez une grille dans la liste</p>
+                                <p>Sélectionnez une grille dans la barre latérale</p>
                             </div>
 
                             <!-- Formulaire d'édition de grille -->
@@ -4113,14 +4106,8 @@
                                 <!-- Boutons du formulaire -->
                                 <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
                                     <!-- Boutons gauche (actions sur la grille) -->
+                                    <!-- Note: Export/Import se font maintenant via la bibliothèque -->
                                     <div style="display: flex; gap: 10px;">
-                                        <button id="btnExporterGrille" class="btn btn-secondaire" onclick="exporterGrilleActive()" style="display: none;" title="Exporter cette grille en JSON">
-                                            Exporter cette grille
-                                        </button>
-                                        <button id="btnImporterGrille" class="btn btn-secondaire" onclick="document.getElementById('fichier-import-grille-individuelle').click()" style="display: none;" title="Importer pour remplacer cette grille">
-                                            Importer dans cette grille
-                                        </button>
-                                        <input type="file" id="fichier-import-grille-individuelle" accept=".json" style="display: none;" onchange="importerDansGrilleActive(event)">
                                         <button id="btnDupliquerGrille" class="btn btn-secondaire" onclick="dupliquerGrilleActive()" style="display: none;" title="Créer une copie de cette grille">
                                             Dupliquer
                                         </button>
@@ -4211,7 +4198,7 @@
 
                             <!-- Message d'accueil initial -->
                             <div class="zone-principale-accueil" id="accueilEchelles">
-                                <p>Sélectionnez une échelle dans la liste</p>
+                                <p>Sélectionnez une échelle dans la barre latérale</p>
                             </div>
 
                             <!-- Formulaire d'édition -->
@@ -4238,14 +4225,8 @@
                                 <!-- Boutons du formulaire -->
                                 <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
                                     <!-- Boutons gauche (actions sur l'échelle) -->
+                                    <!-- Note: Export/Import se font maintenant via la bibliothèque -->
                                     <div style="display: flex; gap: 10px;">
-                                        <button id="btnExporterEchelle" class="btn btn-secondaire" onclick="exporterEchelleActive()" style="display: none;" title="Exporter cette échelle en JSON">
-                                            Exporter cette échelle
-                                        </button>
-                                        <button id="btnImporterEchelle" class="btn btn-secondaire" onclick="document.getElementById('fichier-import-echelle-individuelle').click()" style="display: none;" title="Importer pour remplacer cette échelle">
-                                            Importer dans cette échelle
-                                        </button>
-                                        <input type="file" id="fichier-import-echelle-individuelle" accept=".json" style="display: none;" onchange="importerDansEchelleActive(event)">
                                         <button id="btnDupliquerEchelle" class="btn btn-secondaire" onclick="dupliquerEchelleActive()" style="display: none;" title="Créer une copie de cette échelle">
                                             Dupliquer
                                         </button>
@@ -4509,7 +4490,7 @@
 
                                 <!-- Message d'accueil initial -->
                                 <div class="zone-principale-accueil" id="messageAccueilCartouche">
-                                    <p>Sélectionnez une cartouche dans la liste</p>
+                                    <p>Sélectionnez une cartouche dans la barre latérale</p>
                                 </div>
 
                                 <!-- ANCIEN SYSTÈME (Caché, gardé pour compatibilité interne) -->
@@ -4585,18 +4566,8 @@
                                 <!-- Boutons du formulaire -->
                                 <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
                                     <!-- Boutons gauche (actions sur la cartouche) -->
+                                    <!-- Note: Export/Import se font maintenant via la bibliothèque -->
                                     <div style="display: flex; gap: 10px;">
-                                        <button id="btnExporterCartouche" class="btn btn-secondaire" style="display: none;" title="Exporter cette cartouche en JSON">
-                                            Exporter cette cartouche
-                                        </button>
-                                        <button id="btnImporterCartouche" class="btn btn-secondaire" onclick="document.getElementById('fichier-import-cartouche-individuelle').click()" style="display: none;" title="Importer pour remplacer cette cartouche">
-                                            Importer dans cette cartouche
-                                        </button>
-                                        <input type="file" id="fichier-import-cartouche-individuelle" accept=".json" style="display: none;" onchange="importerDansCartoucheActive(event)">
-                                        <button id="btnImporterCartoucheTxt" class="btn btn-secondaire" onclick="document.getElementById('fichier-import-cartouche-txt').click()" style="display: none;" title="Importer commentaires depuis fichier .txt">
-                                            Importer depuis fichier .txt
-                                        </button>
-                                        <input type="file" id="fichier-import-cartouche-txt" accept=".txt" style="display: none;" onchange="importerCartoucheDepuisTxt(event)">
                                         <button id="btnDupliquerCartouche" class="btn btn-secondaire" onclick="dupliquerCartoucheActive()" style="display: none;" title="Créer une copie de cette cartouche">
                                             Dupliquer
                                         </button>
@@ -4680,7 +4651,7 @@
 
                                 <!-- Message d'accueil initial -->
                                 <div class="zone-principale-accueil" id="messageAccueilObjectifs">
-                                    <p>Sélectionnez un ensemble dans la liste</p>
+                                    <p>Sélectionnez un ensemble dans la barre latérale</p>
                                 </div>
 
                                 <!-- Zone d'édition d'un ensemble -->
@@ -4796,25 +4767,58 @@
                         </ul>
                     </div>
 
-                    <div class="carte">
-                        <h3>Cours configurés</h3>
+                    <!-- LAYOUT SIDEBAR + ZONE PRINCIPALE (conforme Design System) -->
+                    <div class="layout-sidebar-2col">
 
-                        <!-- TABLEAU/CONTENEUR DES COURS -->
-                        <div id="tableauCoursContainer" class="mb-20">
-                            <p class="text-muted" class="text-italic">
-                                Aucun cours configuré.
-                            </p>
+                        <!-- SIDEBAR (Gauche) - Liste des cours -->
+                        <div class="sidebar-navigation">
+
+                            <!-- En-tête -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h3 style="margin: 0; font-size: 1rem; color: var(--bleu-principal);">Mes cours</h3>
+                            </div>
+
+                            <!-- Bouton Consulter bibliothèque -->
+                            <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
+                                <button onclick="ouvrirModalBibliothequeCours()"
+                                        class="btn btn-principal"
+                                        style="width: 100%;"
+                                        title="Consulter la bibliothèque de cours">
+                                    Consulter la bibliothèque
+                                </button>
+                            </div>
+
+                            <!-- Liste des cours (sera remplie par JS) -->
+                            <div class="sidebar-liste">
+                                <div id="listeCoursSidebar">
+                                    <p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">
+                                        Créez un nouveau cours ou puisez dans la bibliothèque
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Bouton nouveau cours -->
+                            <button onclick="afficherFormCours()"
+                                    class="btn btn-confirmer"
+                                    style="width: 100%; margin-top: 15px;">
+                                + Nouveau cours
+                            </button>
                         </div>
 
-                        <!-- BOUTON AJOUTER UN COURS -->
-                        <button id="btnAjouterCours" class="btn btn-confirmer" onclick="afficherFormCours()"
-                            class="mb-20">
-                            + Ajouter un cours
-                        </button>
+                        <!-- ZONE PRINCIPALE (Droite) - Formulaire -->
+                        <div style="flex: 1; min-width: 0;">
+                            <div class="carte">
 
-                        <!-- FORMULAIRE D'AJOUT/MODIFICATION (caché par défaut) -->
-                        <div id="formulaireCours" class="form-cache-mt"
-                             style="padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px;">
+                                <!-- Message par défaut (si aucun cours sélectionné) -->
+                                <div id="messageSelectionCours" style="padding: 40px; text-align: center;">
+                                    <p class="text-muted" style="font-size: 1rem;">
+                                        Sélectionnez un cours dans la barre latérale
+                                    </p>
+                                </div>
+
+                                <!-- FORMULAIRE D'AJOUT/MODIFICATION (caché par défaut) -->
+                                <div id="formulaireCours" class="form-cache-mt"
+                                     style="padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px; display: none;">
 
                             <h4 id="titreFormCours" class="titre-bleu-mb-20">
                                 Nouvelle configuration de cours
@@ -4879,8 +4883,8 @@
                             <!-- Ligne 2: Discipline, Département, Local -->
                             <div class="grille-3col-form" style="margin-bottom: 15px;">
                                 <div class="groupe-form">
-                                    <label>Discipline <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
-                                    <input type="text" id="disciplineEnseignant" class="controle-form controle-form-compact"
+                                    <label>Discipline <span style="color: var(--rouge-erreur); font-weight: normal;">*</span></label>
+                                    <input type="text" id="disciplineEnseignant" class="controle-form controle-form-compact" required
                                         placeholder="Ex: Littérature, Philosophie">
                                 </div>
                                 <div class="groupe-form">
@@ -4984,7 +4988,14 @@
                                 </button>
                             </div>
                         </div>
+                                <!-- Fin formulaireCours -->
+
+                            </div>
+                        </div>
+                        <!-- Fin zone principale -->
+
                     </div>
+                    <!-- Fin layout sidebar + zone principale -->
 
                 </div><!--fin sous-section cours-->
 
@@ -5691,10 +5702,51 @@ Exemple :
                     <h2>Configuration de la pratique de notation</h2>
                     <p class="text-muted">Configuration du système de notation du cours</p>
 
+                    <!-- LAYOUT SIDEBAR 2 COLONNES -->
+                    <div class="layout-sidebar-2col">
+
+                        <!-- SIDEBAR GAUCHE (280px, sticky) -->
+                        <div class="sidebar-navigation">
+
+                            <!-- En-tête -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h3 style="margin: 0; font-size: 1rem; color: var(--bleu-principal);">Mes pratiques</h3>
+                            </div>
+
+                            <!-- Bouton Consulter bibliothèque -->
+                            <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
+                                <button onclick="ouvrirModalBibliothequePratiques()"
+                                        class="btn btn-principal"
+                                        style="width: 100%;"
+                                        title="Consulter la bibliothèque de pratiques">
+                                    Consulter la bibliothèque
+                                </button>
+                            </div>
+
+                            <!-- Liste des pratiques (sera remplie par JS) -->
+                            <div class="sidebar-liste">
+                                <div id="listePratiquesSidebar">
+                                    <p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">
+                                        Créez une nouvelle pratique ou puisez dans la bibliothèque
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Bouton nouvelle pratique -->
+                            <button onclick="ouvrirWizardPratique()"
+                                    class="btn btn-confirmer"
+                                    style="width: 100%; margin-top: 15px;">
+                                + Nouvelle pratique
+                            </button>
+                        </div>
+
+                        <!-- ZONE PRINCIPALE (centrale, scroll) -->
+                        <div class="zone-principale">
+
                     <!-- Configuration de la notation (colonne unique) -->
                     <div style="margin-bottom: 20px;">
 
-                        <h3>Configuration de la notation</h3>
+                        <h3>Conversion de la note</h3>
 
                         <!-- NOTE RREC -->
                             <div style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
@@ -5709,21 +5761,8 @@ Exemple :
 
                             <div style="margin-bottom: 25px;">
                                 <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--bleu-principal);">
-                                    Pratiques d'évaluation disponibles
+                                    Pratiques de notation disponibles
                                 </h3>
-
-                                <!-- Actions globales -->
-                                <div class="btn-groupe">
-                                    <button class="btn btn-confirmer" onclick="creerNouvellePratique()">
-                                        Créer une pratique
-                                    </button>
-                                    <button class="btn btn-secondaire" onclick="importerPratiqueJSON()">
-                                        Importer JSON
-                                    </button>
-                                    <button class="btn btn-ajouter" onclick="afficherPratiquesPredefines()">
-                                        Exemples de pratiques
-                                    </button>
-                                </div>
 
                                 <!-- Liste des pratiques (sera remplie dynamiquement) -->
                                 <div id="listePratiques">
@@ -6741,6 +6780,12 @@ Exemple :
                             <!-- Reste du contenu (jeton personnalisé si nécessaire) -->
                         </div>
                         <!-- FIN SECTION CONFIGURATION PAN -->
+
+                    </div>
+                    <!-- Fin zone-principale -->
+
+                    </div>
+                    <!-- Fin layout-sidebar-2col -->
 
                 </div><!--fin sous-section pratique-notation-->
 
@@ -10110,10 +10155,14 @@ Exemple :
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025111325"></script>
     <script src="js/etudiants.js?v=2025120403"></script>
-    <script src="js/productions.js?v=2025120600"></script>
-    <script src="js/grilles.js?v=2025120613"></script>
-    <script src="js/echelles.js?v=2025120606"></script>
-    <script src="js/cartouches.js?v=2025120612"></script>
+    <script src="js/productions-bibliotheque.js?v=2025120826"></script>
+    <script src="js/productions.js?v=2025120826"></script>
+    <script src="js/grilles-bibliotheque.js?v=2025120826"></script>
+    <script src="js/grilles.js?v=2025120827"></script>
+    <script src="js/echelles-bibliotheque.js?v=2025120826"></script>
+    <script src="js/echelles.js?v=2025120827"></script>
+    <script src="js/cartouches-bibliotheque.js?v=2025120827"></script>
+    <script src="js/cartouches.js?v=2025120827"></script>
     <script src="js/cours.js?v=2025120815"></script>
     <script src="js/contexte.js?v=2025120815"></script>
 
@@ -10139,7 +10188,7 @@ Exemple :
     <script src="js/cc-license.js?v=2025120118"></script>
 
     <!-- Interface de gestion des pratiques configurables -->
-    <script src="js/pratiques.js?v=2025120816"></script>
+    <script src="js/pratiques.js?v=2025120819"></script>
     <script src="js/objectifs.js?v=2025120124"></script>
 
     <script src="js/portfolio.js?v=2025120703"></script>

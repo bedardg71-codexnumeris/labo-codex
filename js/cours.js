@@ -79,31 +79,68 @@ function migrerCoursVersPratiques() {
 }
 
 /**
+ * Migre les cours existants pour ajouter le flag dansBibliotheque
+ *
+ * CONTEXTE:
+ * Avec le nouveau système de bibliothèque, tous les cours doivent avoir
+ * un flag dansBibliotheque pour contrôler leur visibilité.
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère tous les cours
+ * 2. Pour chaque cours sans flag, ajoute dansBibliotheque: true (visible par défaut)
+ * 3. Sauvegarde les cours modifiés
+ *
+ * @returns {number} - Nombre de cours migrés
+ */
+function migrerCoursDansBibliotheque() {
+    const cours = db.getSync('listeCours', []);
+    let nbMigres = 0;
+
+    cours.forEach(c => {
+        if (c.dansBibliotheque === undefined) {
+            c.dansBibliotheque = true; // Par défaut, tous les cours existants restent visibles
+            nbMigres++;
+        }
+    });
+
+    if (nbMigres > 0) {
+        db.setSync('listeCours', cours);
+        console.log(`[Migration cours] ✅ ${nbMigres} cours migré(s) avec flag dansBibliotheque`);
+    } else {
+        console.log(`[Migration cours] Tous les cours ont déjà le flag dansBibliotheque`);
+    }
+
+    return nbMigres;
+}
+
+/**
  * Initialise le module de gestion des cours
  * Appelée automatiquement par 99-main.js au chargement
- * 
+ *
  * FONCTIONNEMENT:
  * 1. Vérifie que les éléments DOM existent (section active)
- * 2. Charge et affiche le tableau des cours
- * 
+ * 2. Exécute les migrations nécessaires
+ * 3. Charge et affiche le tableau des cours
+ *
  * RETOUR:
  * - Sortie silencieuse si les éléments n'existent pas
  */
 function initialiserModuleCours() {
     console.log('📚 Initialisation du module Cours');
 
+    // Exécuter les migrations
+    migrerCoursVersPratiques();
+    migrerCoursDansBibliotheque();
+
     // Vérifier que nous sommes dans la bonne section
-    const tableauContainer = document.getElementById('tableauCoursContainer');
+    const tableauContainer = document.getElementById('listeCoursSidebar');
     if (!tableauContainer) {
         console.log('   ⚠️  Section cours non active, initialisation reportée');
         return;
     }
 
-    // Migrer les cours existants (ajouter pratiqueId si manquant)
-    migrerCoursVersPratiques();
-
-    // Afficher le tableau des cours
-    afficherTableauCours();
+    // Afficher la liste des cours dans la sidebar
+    afficherListeCoursSidebar();
 
     console.log('   ✅ Module Cours initialisé');
 }
@@ -253,6 +290,76 @@ function afficherTableauCours() {
             elemResumeCours.textContent = `${coursActif.codeCours} - ${coursActif.nomCours}`;
         }
     }
+}
+
+/* ===============================
+   AFFICHAGE SIDEBAR
+   =============================== */
+
+/**
+ * Affiche la liste des cours dans la sidebar
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère les cours avec dansBibliotheque === true
+ * 2. Génère la liste HTML avec items cliquables
+ * 3. Met en surbrillance le cours actif
+ *
+ * UTILISÉ PAR:
+ * - initialiserModuleCours()
+ * - sauvegarderCours()
+ * - retirerCoursDeBibliotheque()
+ * - ajouterCoursIndividuel()
+ */
+async function afficherListeCoursSidebar() {
+    const tousLesCours = await db.get('listeCours') || [];
+    const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
+    const container = document.getElementById('listeCoursSidebar');
+
+    if (!container) return;
+
+    if (coursDansBibliotheque.length === 0) {
+        container.innerHTML = `
+            <p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">
+                Créez un nouveau cours ou puisez dans la bibliothèque
+            </p>
+        `;
+        return;
+    }
+
+    let html = '';
+    coursDansBibliotheque.forEach(c => {
+        const activeClass = c.actif ? ' active' : '';
+
+        html += `
+            <div class="sidebar-item${activeClass}" onclick="afficherFormCours('${c.id}')">
+                <div class="sidebar-item-titre">
+                    ${echapperHtml(c.codeCours)}
+                </div>
+                <div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 3px;">
+                    ${echapperHtml(c.session)}${echapperHtml(c.annee)}
+                </div>
+                ${c.actif ? '<div style="margin-top: 5px;"><span class="sidebar-item-badge">Actif</span></div>' : ''}
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+/**
+ * Récupère tous les cours de la bibliothèque (disponibles à ajouter)
+ *
+ * FONCTIONNEMENT:
+ * - Retourne les cours avec dansBibliotheque === false
+ *
+ * UTILISÉ PAR:
+ * - ouvrirModalBibliothequeCours()
+ *
+ * @returns {Array} - Cours disponibles dans la bibliothèque
+ */
+function obtenirTousLesCoursBibliotheque() {
+    const tousLesCours = db.getSync('listeCours', []);
+    return tousLesCours.filter(c => c.dansBibliotheque === false);
 }
 
 /* ===============================
@@ -534,17 +641,19 @@ function sauvegarderCours() {
         heuresParSemaine: document.getElementById('heuresParSemaine').value,
         formatHoraire: document.getElementById('formatHoraire').value,
         pratiqueId: pratiqueId, // ✅ NOUVEAU : Association à une pratique
+        dansBibliotheque: true, // ✅ NOUVEAU : Visible dans sidebar par défaut
         verrouille: false,
         actif: false,
         dateEnregistrement: new Date().toISOString()
     };
     
     if (coursEnEdition) {
-        // Modification - conserver l'état de verrouillage, actif et pratiqueId si non modifié
+        // Modification - conserver l'état de verrouillage, actif, dansBibliotheque et pratiqueId si non modifié
         const index = cours.findIndex(c => c.id === coursEnEdition);
         if (index !== -1) {
             nouveauCours.verrouille = cours[index].verrouille;
             nouveauCours.actif = cours[index].actif;
+            nouveauCours.dansBibliotheque = cours[index].dansBibliotheque; // Conserver flag bibliothèque
             // Si aucune pratique sélectionnée, conserver l'ancienne
             if (!nouveauCours.pratiqueId && cours[index].pratiqueId) {
                 nouveauCours.pratiqueId = cours[index].pratiqueId;
@@ -560,10 +669,11 @@ function sauvegarderCours() {
     }
     
     db.setSync('listeCours', cours);
-    
-    afficherTableauCours();
+
+    // Mettre à jour la sidebar au lieu du tableau
+    afficherListeCoursSidebar();
     annulerFormCours();
-    
+
     // Notification
     if (coursEnEdition) {
         afficherNotificationSucces('Configuration du cours modifiée avec succès !');
@@ -616,13 +726,14 @@ function modifierCours(id) {
 function dupliquerCours(id) {
     const cours = db.getSync('listeCours', []);
     const coursOriginal = cours.find(c => c.id === id);
-    
+
     if (coursOriginal) {
         const nouveauCours = {
             ...coursOriginal,
             id: 'COURS' + Date.now(),
             codeCours: coursOriginal.codeCours + ' (copie)',
             dateEnregistrement: new Date().toISOString(),
+            dansBibliotheque: true, // ✅ NOUVEAU : Copie visible par défaut
             actif: false,
             verrouille: false
         };
@@ -819,6 +930,340 @@ function afficherNotificationSucces(message) {
  */
 
 /* ===============================
+   MODAL BIBLIOTHÈQUE (Simplifié, sans CC)
+   =============================== */
+
+/**
+ * Ouvre le modal de la bibliothèque de cours
+ *
+ * FONCTIONNEMENT:
+ * - Section 1 : Cours dans ma sélection (dansBibliotheque === true)
+ * - Section 2 : Cours disponibles à ajouter (dansBibliotheque === false)
+ * - Boutons simplifiés (sans export/import avec métadonnées CC)
+ *
+ * NOTE: Contrairement aux productions/grilles, les cours ne nécessitent
+ * PAS de métadonnées CC car il s'agit de données ministérielles publiques
+ */
+async function ouvrirModalBibliothequeCours() {
+    const tousLesCours = await db.get('listeCours') || [];
+    const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
+    const coursDisponibles = tousLesCours.filter(c => c.dansBibliotheque === false);
+
+    let modalHTML = `
+        <div id="modalBibliothequeCours" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        ">
+            <div style="
+                background: white;
+                border-radius: 12px;
+                width: 90%;
+                max-width: 900px;
+                max-height: 85vh;
+                overflow-y: auto;
+                padding: 30px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            ">
+                <h2 style="margin-top: 0; color: var(--bleu-principal);">Bibliothèque de cours</h2>
+                <p class="text-muted">Gérez vos configurations de cours</p>
+
+                <!-- SECTION 1 : Ma sélection -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-principal); padding-bottom: 8px;">
+                        Ma sélection (${coursDansBibliotheque.length})
+                    </h3>
+    `;
+
+    if (coursDansBibliotheque.length === 0) {
+        modalHTML += `<p class="text-muted" style="font-style: italic; padding: 20px 0;">Aucun cours dans votre sélection</p>`;
+    } else {
+        coursDansBibliotheque.forEach(cours => {
+            const actifBadge = cours.actif ? '<span class="badge-info" style="margin-left: 10px;">Actif</span>' : '';
+
+            modalHTML += `
+                <div style="padding: 15px; margin-bottom: 10px; background: var(--gris-tres-pale); border-radius: 8px; border-left: 4px solid var(--bleu-principal);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 5px;">
+                                ${echapperHtml(cours.codeCours)} - ${echapperHtml(cours.nomCours)}${actifBadge}
+                            </div>
+                            <div style="font-size: 0.9rem; color: var(--gris-moyen); margin-bottom: 3px;">
+                                ${echapperHtml(cours.competence || '')}
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--gris-moyen);">
+                                ${echapperHtml(cours.prenomEnseignant)} ${echapperHtml(cours.nomEnseignant)} • ${echapperHtml(cours.session)}${echapperHtml(cours.annee)}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-left: 10px;">
+                            <button onclick="retirerCoursDeBibliotheque('${cours.id}')"
+                                    class="btn btn-supprimer btn-tres-compact"
+                                    title="Retirer de votre sélection">
+                                Retirer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    modalHTML += `
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button onclick="exporterCoursSimple()" class="btn btn-secondaire">
+                            Exporter mes cours
+                        </button>
+                    </div>
+                </div>
+    `;
+
+    // SECTION 2 : Disponibles à ajouter
+    modalHTML += `
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: var(--vert-confirmer); border-bottom: 2px solid var(--vert-confirmer); padding-bottom: 8px;">
+                        Disponibles à ajouter (${coursDisponibles.length})
+                    </h3>
+    `;
+
+    if (coursDisponibles.length === 0) {
+        modalHTML += `<p class="text-muted" style="font-style: italic; padding: 20px 0;">Aucun cours disponible</p>`;
+    } else {
+        coursDisponibles.forEach(cours => {
+            modalHTML += `
+                <div style="padding: 15px; margin-bottom: 10px; background: var(--gris-tres-pale); border-radius: 8px; border-left: 4px solid var(--vert-confirmer);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 5px;">
+                                ${echapperHtml(cours.codeCours)} - ${echapperHtml(cours.nomCours)}
+                            </div>
+                            <div style="font-size: 0.9rem; color: var(--gris-moyen); margin-bottom: 3px;">
+                                ${echapperHtml(cours.competence || '')}
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--gris-moyen);">
+                                ${echapperHtml(cours.session)}${echapperHtml(cours.annee)}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-left: 10px;">
+                            <button onclick="ajouterCoursIndividuel('${cours.id}')"
+                                    class="btn btn-confirmer btn-tres-compact"
+                                    title="Ajouter ce cours à votre sélection">
+                                Ajouter à ma sélection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    modalHTML += `
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button onclick="document.getElementById('fichier-import-cours-modal').click()"
+                                class="btn btn-secondaire">
+                            Importer des cours
+                        </button>
+                        <input type="file" id="fichier-import-cours-modal" accept=".json"
+                               style="display: none;" onchange="importerCoursSimple(event)">
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="display: flex; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                    <button onclick="fermerModalBibliothequeCours()" class="btn btn-annuler">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Insérer le modal dans le body
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHTML;
+    document.body.appendChild(modalContainer);
+}
+
+/**
+ * Ferme le modal de la bibliothèque
+ */
+function fermerModalBibliothequeCours() {
+    const modal = document.getElementById('modalBibliothequeCours');
+    if (modal && modal.parentElement) {
+        modal.parentElement.remove();
+    }
+}
+
+/**
+ * Retire un cours de la sélection (passe dansBibliotheque à false)
+ *
+ * @param {string} id - ID du cours à retirer
+ */
+async function retirerCoursDeBibliotheque(id) {
+    const cours = await db.get('listeCours') || [];
+    const coursIndex = cours.findIndex(c => c.id === id);
+
+    if (coursIndex !== -1) {
+        cours[coursIndex].dansBibliotheque = false;
+        cours[coursIndex].actif = false; // Un cours retiré ne peut plus être actif
+
+        await db.set('listeCours', cours);
+        fermerModalBibliothequeCours();
+        await afficherListeCoursSidebar();
+        alert('Cours retiré de votre sélection');
+    }
+}
+
+/**
+ * Ajoute un cours à la sélection (passe dansBibliotheque à true)
+ *
+ * @param {string} id - ID du cours à ajouter
+ */
+async function ajouterCoursIndividuel(id) {
+    const cours = await db.get('listeCours') || [];
+    const coursIndex = cours.findIndex(c => c.id === id);
+
+    if (coursIndex !== -1) {
+        cours[coursIndex].dansBibliotheque = true;
+
+        await db.set('listeCours', cours);
+        fermerModalBibliothequeCours();
+        await afficherListeCoursSidebar();
+        alert('Cours ajouté à votre sélection avec succès !');
+    }
+}
+
+/* ===============================
+   EXPORT/IMPORT SIMPLIFIÉS (Sans métadonnées CC)
+   =============================== */
+
+/**
+ * Exporte les cours de la sélection au format JSON simple
+ *
+ * FONCTIONNEMENT:
+ * - Exporte tous les cours avec dansBibliotheque === true
+ * - Format JSON simple sans métadonnées CC (données ministérielles)
+ * - Nom fichier : cours-YYYY-MM-DD.json
+ */
+async function exporterCoursSimple() {
+    const tousLesCours = await db.get('listeCours') || [];
+    const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
+
+    if (coursDansBibliotheque.length === 0) {
+        alert('Aucun cours à exporter dans votre sélection');
+        return;
+    }
+
+    // Créer le JSON
+    const dataStr = JSON.stringify(coursDansBibliotheque, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+    // Générer nom de fichier avec date
+    const dateStr = new Date().toISOString().split('T')[0];
+    const nomFichier = `cours-${dateStr}.json`;
+
+    // Télécharger
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomFichier;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    alert(`${coursDansBibliotheque.length} cours exportés avec succès !`);
+}
+
+/**
+ * Importe des cours depuis un fichier JSON
+ *
+ * FONCTIONNEMENT:
+ * - Lit le fichier JSON
+ * - Vérifie les doublons par codeCours + session + annee
+ * - Ajoute les cours (dansBibliotheque = false par défaut)
+ * - Génère de nouveaux IDs pour éviter conflits
+ *
+ * @param {Event} event - Événement de changement du input file
+ */
+async function importerCoursSimple(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = async function(e) {
+        try {
+            const coursImportes = JSON.parse(e.target.result);
+
+            if (!Array.isArray(coursImportes)) {
+                alert('Format de fichier invalide : doit être un tableau de cours');
+                return;
+            }
+
+            const coursExistants = await db.get('listeCours') || [];
+            let nbAjoutes = 0;
+            let nbDoublons = 0;
+
+            coursImportes.forEach(coursImporte => {
+                // Vérifier doublon (même code + session + année)
+                const doublon = coursExistants.find(c =>
+                    c.codeCours === coursImporte.codeCours &&
+                    c.session === coursImporte.session &&
+                    c.annee === coursImporte.annee
+                );
+
+                if (doublon) {
+                    nbDoublons++;
+                } else {
+                    // Ajouter avec nouvel ID et flag dansBibliotheque = false
+                    const nouveauCours = {
+                        ...coursImporte,
+                        id: 'COURS' + Date.now() + '_' + nbAjoutes,
+                        dansBibliotheque: false, // Disponible à ajouter
+                        actif: false, // Les cours importés ne sont jamais actifs par défaut
+                        dateEnregistrement: new Date().toISOString()
+                    };
+
+                    coursExistants.push(nouveauCours);
+                    nbAjoutes++;
+                }
+            });
+
+            if (nbAjoutes > 0) {
+                await db.set('listeCours', coursExistants);
+            }
+
+            // Message récapitulatif
+            let message = `Import terminé :\n`;
+            message += `✓ ${nbAjoutes} cours ajoutés\n`;
+            if (nbDoublons > 0) {
+                message += `• ${nbDoublons} doublon(s) ignoré(s)`;
+            }
+
+            alert(message);
+
+            // Fermer et rafraîchir
+            fermerModalBibliothequeCours();
+            await ouvrirModalBibliothequeCours();
+
+        } catch (error) {
+            console.error('Erreur lors de l\'import :', error);
+            alert('Erreur lors de l\'import du fichier. Vérifiez le format JSON.');
+        }
+    };
+
+    reader.readAsText(file);
+
+    // Réinitialiser l'input pour permettre de réimporter le même fichier
+    event.target.value = '';
+}
+
+/* ===============================
    EXPORTS - Rendre les fonctions accessibles globalement
    =============================== */
 
@@ -831,4 +1276,11 @@ window.supprimerCours = supprimerCours;
 window.activerCours = activerCours;
 window.afficherTableauCours = afficherTableauCours;
 window.initialiserModuleCours = initialiserModuleCours;
+window.afficherListeCoursSidebar = afficherListeCoursSidebar;
+window.ouvrirModalBibliothequeCours = ouvrirModalBibliothequeCours;
+window.fermerModalBibliothequeCours = fermerModalBibliothequeCours;
+window.retirerCoursDeBibliotheque = retirerCoursDeBibliotheque;
+window.ajouterCoursIndividuel = ajouterCoursIndividuel;
+window.exporterCoursSimple = exporterCoursSimple;
+window.importerCoursSimple = importerCoursSimple;
 window.naviguerVersPratiqueNotation = naviguerVersPratiqueNotation;
