@@ -4036,36 +4036,37 @@ function genererSectionProgression(da) {
     // Générer un ID unique pour le canvas
     const canvasId = `graphique-progression-${da}`;
 
+    // ✨ AMÉLIORATION (8 déc 2025) : Lire dynamiquement l'échelle de performance configurée
+    const echelles = db.getSync('echellesTemplates', []);
+    const echelleActive = echelles.find(e => e.active) || echelles[0];
+
+    let texteZones = 'Zones colorées basées sur l\'échelle IDME par défaut';
+    if (echelleActive && echelleActive.niveaux && echelleActive.niveaux.length > 0) {
+        texteZones = echelleActive.niveaux.map(niveau => {
+            const nom = niveau.nom;
+            const min = niveau.min;
+            const max = niveau.max;
+
+            if (min === 0) {
+                return `${nom} < ${max}%`;
+            } else if (max === 100) {
+                return `${nom} ≥ ${min}%`;
+            } else {
+                return `${nom} ${min}-${max}%`;
+            }
+        }).join(', ');
+    }
+
     // Créer le HTML avec le canvas
     const html = `
         <div class="profil-zone-moyenne-bleu">
-            <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
-                📊 Évolution des indices A-C-P-E
-            </h4>
-
-            <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
-                Ce graphique montre l'évolution temporelle des indices Assiduité (A), Complétion (C),
-                Performance (P) et Engagement (E) depuis le début de la session.
-                Les zones colorées représentent les niveaux IDME (Insuffisant, Développement, Maîtrisé, Étendu).
-            </p>
-
             <!-- Canvas pour le graphique Chart.js -->
             <div style="background: white; padding: 20px; border-radius: 6px; height: 500px;">
                 <canvas id="${canvasId}"></canvas>
             </div>
 
             <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; color: #666;">
-                <div><strong>Légende :</strong></div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
-                    <div><span style="color: #2196F3; font-weight: bold;">━━</span> Assiduité (A)</div>
-                    <div><span style="color: #4CAF50; font-weight: bold;">━━</span> Complétion (C)</div>
-                    <div><span style="color: #FF9800; font-weight: bold;">━━</span> Performance (P)</div>
-                    <div><span style="color: #9C27B0; font-weight: bold;">━━</span> Engagement (E)</div>
-                </div>
-                <div style="margin-top: 10px;">
-                    <strong>Zones colorées :</strong> Rouge (Insuffisant < 40%), Orange (Réussite 40-65%),
-                    Jaune (Développement 65-75%), Vert (Maîtrisé 75-85%), Bleu (Étendu ≥ 85%)
-                </div>
+                <strong>Zones colorées :</strong> ${texteZones}
             </div>
         </div>
     `;
@@ -4109,15 +4110,6 @@ function genererSectionPerformance(da) {
             console.log(`[DEBUG Graphique Critères] Première évaluation critères:`, evaluationsAvecCriteres[0].criteres);
             graphiqueCriteres = `
                 <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
-                    <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
-                        📈 Évolution des critères au fil des productions
-                    </h4>
-
-                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
-                        Ce graphique montre la progression de chaque critère d'évaluation à travers les productions.
-                        Cliquez sur un critère dans la légende pour le masquer/afficher.
-                    </p>
-
                     <!-- Canvas pour le graphique Chart.js -->
                     <div style="background: white; padding: 20px; border-radius: 6px; height: 450px;">
                         <canvas id="${canvasIdCriteres}"></canvas>
@@ -6401,15 +6393,6 @@ function genererSectionPerformance(da) {
             console.log(`[DEBUG Graphique Critères] Première évaluation critères:`, evaluationsAvecCriteres[0].criteres);
             graphiqueCriteres = `
                 <div class="profil-zone-moyenne-bleu" style="margin-bottom: 20px;">
-                    <h4 class="profil-section-titre-large" style="margin-bottom: 15px;">
-                        📈 Évolution des critères au fil des productions
-                    </h4>
-
-                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
-                        Ce graphique montre la progression de chaque critère d'évaluation à travers les productions.
-                        Cliquez sur un critère dans la légende pour le masquer/afficher.
-                    </p>
-
                     <!-- Canvas pour le graphique Chart.js -->
                     <div style="background: white; padding: 20px; border-radius: 6px; height: 450px;">
                         <canvas id="${canvasIdCriteres}"></canvas>
@@ -7295,16 +7278,14 @@ document.addEventListener('DOMContentLoaded', function() {
  * @returns {string} - Rapport en texte brut
  */
 function genererRapportAPI(da, options = {}) {
+    // ✨ REFONTE (8 déc 2025) : Format simplifié avec détails des meilleurs artefacts
     // Options par défaut
     const opts = {
         identification: true,
         assiduite: true,
         completion: true,
         performance: true,
-        apprentissage: true,
-        interventions: true,
-        date: true,
-        afficherDetails: true,
+        jetons: true,
         ...options
     };
 
@@ -7318,105 +7299,103 @@ function genererRapportAPI(da, options = {}) {
 
     const indices = calculerTousLesIndices(da);
     const detailsA = obtenirDetailsAssiduite(da);
-    const moyennes = calculerMoyennesCriteres(da);
-    const diagnostic = diagnostiquerForcesChallenges(moyennes);
-    const risque = indices.R;
-    const interpRisque = interpreterRisque(risque);
-    const interpA = interpreterAssiduite(indices.A);
-    const interpC = interpreterCompletion(indices.C);
-    const interpP = interpreterPerformance(indices.P);
 
     const productions = obtenirDonneesSelonMode('productions') || [];
-    const artefacts = productions.filter(p => p.type === 'artefact-portfolio');
+    const artefacts = productions.filter(p => p.type === 'artefact-portfolio' && !p.facultatif);
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const nbRemis = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId).length;
-    const nbManquants = artefacts.length - nbRemis;
 
-    const maintenant = new Date();
-    const dateRapport = maintenant.toLocaleDateString('fr-CA');
+    // Compter les productions remises (avec évaluations)
+    const nbRemis = artefacts.filter(art => {
+        return evaluations.some(e =>
+            e.etudiantDA === da &&
+            e.productionId === art.id &&
+            !e.remplaceeParId &&
+            e.statutRemise !== 'non-remis'
+        );
+    }).length;
 
     let rapport = '';
 
     // 1. IDENTIFICATION
     if (opts.identification) {
-        rapport += `${etudiant.prenom} ${etudiant.nom} (DA: ${etudiant.da})\n`;
+        rapport += `${etudiant.prenom} ${etudiant.nom} (DA: ${etudiant.da})\n\n`;
     }
 
     // 2. ASSIDUITÉ
     if (opts.assiduite) {
-        rapport += `Taux de présence au cours : ${interpA.niveau.toLowerCase()} (${indices.A}%)`;
-        if (opts.afficherDetails) {
-            rapport += ` - ${detailsA.heuresPresentes}h/${detailsA.heuresOffertes}h, ${detailsA.absences.length} absence(s)`;
-        }
-        rapport += `\n`;
+        rapport += `Assiduité : ${indices.A}% (${detailsA.heuresPresentes}h / ${detailsA.heuresOffertes}h)\n\n`;
     }
 
     // 3. COMPLÉTION
     if (opts.completion) {
-        rapport += `Taux de complétion des travaux : ${interpC.niveau.toLowerCase()} (${indices.C}%)`;
-        if (opts.afficherDetails) {
-            rapport += ` - ${nbRemis}/${artefacts.length} artefacts remis`;
-            if (nbManquants > 0) rapport += `, ${nbManquants} manquant(s)`;
-        }
-        rapport += `\n`;
+        rapport += `Complétion : ${indices.C}% (${nbRemis} remises / ${artefacts.length} productions)\n\n`;
     }
 
-    // 4. PERFORMANCE
+    // 4. PERFORMANCE avec détails des meilleurs artefacts
     if (opts.performance) {
-        rapport += `Performance : ${interpP.niveau.toLowerCase()} (${indices.P}%)`;
-        if (opts.afficherDetails) {
-            rapport += ` - Détails SRPNF disponibles`;
-        }
+        // Obtenir la pratique active et le nombre d'artefacts
+        const modalites = obtenirDonneesSelonMode('modalitesEvaluation') || {};
+        const nbArtefacts = modalites.nbArtefactsPortfolio || 4;
+
+        // ✨ CORRECTION (8 déc 2025) : Utiliser noteFinale (pourcentage réel) au lieu de recalculer
+        // Obtenir les évaluations de l'étudiant avec notes
+        const evaluationsEleve = evaluations.filter(e => {
+            if (e.etudiantDA !== da || !e.productionId || e.remplaceeParId) return false;
+            if (e.statutRemise === 'non-remis') return false;
+
+            // Vérifier que noteFinale existe et est valide
+            return e.noteFinale !== null &&
+                   e.noteFinale !== undefined &&
+                   !isNaN(parseFloat(e.noteFinale));
+        });
+
+        // Utiliser directement noteFinale (pourcentage réel) et trier
+        const evaluationsAvecNotes = evaluationsEleve.map(e => {
+            const production = productions.find(p => p.id === e.productionId);
+
+            return {
+                productionNom: production?.description || production?.nom || `Artefact ${e.productionId}`,
+                niveauFinal: e.niveauFinal, // La lettre (I, D, M, E)
+                notePct: parseFloat(e.noteFinale) // Le pourcentage réel (60.5, 73.5, 79.7, etc.)
+            };
+        }).sort((a, b) => b.notePct - a.notePct);
+
+        // Prendre les N meilleurs
+        const meilleursArtefacts = evaluationsAvecNotes.slice(0, nbArtefacts);
+        const moyenneP = meilleursArtefacts.length > 0
+            ? Math.round(meilleursArtefacts.reduce((sum, a) => sum + a.notePct, 0) / meilleursArtefacts.length)
+            : 0;
+
+        rapport += `Performance : ${moyenneP}% (${meilleursArtefacts.length} meilleurs artefacts actuels)\n\n`;
+
+        // Liste des meilleurs artefacts
+        meilleursArtefacts.forEach((art, idx) => {
+            rapport += `${idx + 1}- ${art.productionNom} : ${art.niveauFinal} (${art.notePct.toFixed(1)})\n`;
+        });
         rapport += `\n`;
     }
 
-    // 5. APPRENTISSAGE (incluant évolution et défi)
-    if (opts.apprentissage) {
-        // Évolution
-        const progression = calculerProgressionEleve(da);
-        if (progression) {
-            const tendance = progression.direction === '↗' ? 'en amélioration'
-                          : progression.direction === '↘' ? 'en baisse'
-                          : 'en plateau';
-            rapport += `Apprentissage : présentement ${tendance}`;
-            if (opts.afficherDetails && progression.nbCriteres) {
-                // Nouvelle logique : afficher la répartition des critères
-                if (progression.direction === '↗') {
-                    rapport += ` (${progression.nbAmelioration}/${progression.nbCriteres} critères en progression)`;
-                } else if (progression.direction === '↘') {
-                    rapport += ` (${progression.nbBaisse}/${progression.nbCriteres} critères en régression)`;
-                } else {
-                    rapport += ` (${progression.nbPlateau}/${progression.nbCriteres} critères stables)`;
-                }
+    // 5. GESTION DES JETONS
+    if (opts.jetons) {
+        // Obtenir les jetons depuis le profil étudiant
+        const jetons = etudiant.jetons || {};
+        const configJetons = obtenirDonneesSelonMode('modalitesEvaluation')?.jetons || {};
+
+        // Compter les jetons utilisés par type
+        let nbUtilises = 0;
+        let nbDisponibles = 0;
+
+        Object.keys(configJetons).forEach(type => {
+            const config = configJetons[type];
+            if (config && config.actif) {
+                const utilises = jetons[type]?.utilises || 0;
+                const max = config.quantite || 0;
+                nbUtilises += utilises;
+                nbDisponibles += max;
             }
-            rapport += `\n`;
-        }
+        });
 
-        // Défi principal
-        if (diagnostic.principalDefi) {
-            rapport += `Défi principal : ${diagnostic.principalDefi.nom}\n`;
-        }
-    }
-
-    // 6. INTERVENTIONS
-    if (opts.interventions) {
-        const interventions = typeof obtenirInterventionsEtudiant === 'function'
-            ? obtenirInterventionsEtudiant(da).filter(i => i.statut === 'completee')
-            : [];
-
-        if (interventions.length > 0) {
-            rapport += `Interventions complétées : ${interventions.length}\n`;
-            interventions.slice(-2).forEach(inter => {
-                const date = new Date(inter.date + 'T12:00:00');
-                const dateStr = date.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' });
-                rapport += `- ${dateStr}: ${inter.titre || 'Soutien pédagogique'}\n`;
-            });
-        }
-    }
-
-    // 7. DATE
-    if (opts.date) {
-        rapport += `Date : ${dateRapport}\n`;
+        rapport += `Gestion des jetons : ${nbUtilises} / ${nbDisponibles} utilisés\n`;
     }
 
     return rapport.trim();
