@@ -502,11 +502,12 @@ class PratiquePANMaitrise {
         const defiPrincipal = defis.principalDefi ? defis.principalDefi.nom : 'Aucun';
         const francaisMoyen = indices3Derniers.francaisMoyen;
 
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
         // console.log('[PAN] Génération cible RàI pour DA', da, {
-            pattern: pattern.type,
-            defi: defiPrincipal,
-            francais: francaisMoyen.toFixed(1) + '%'
-        });
+        //     pattern: pattern.type,
+        //     defi: defiPrincipal,
+        //     francais: francaisMoyen.toFixed(1) + '%'
+        // });
 
         // Logique de décision selon pattern et défi principal
         return this._determinerCibleIntervention(

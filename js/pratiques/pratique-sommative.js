@@ -435,10 +435,11 @@ class PratiqueSommative {
         const pattern = this.identifierPattern(da);
         const defis = this.detecterDefis(da);
 
+        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
         // console.log('[SOM] Génération cible RàI pour DA', da, {
-            pattern: pattern.type,
-            nbDefis: defis.defis.length
-        });
+        //     pattern: pattern.type,
+        //     nbDefis: defis.defis.length
+        // });
 
         // Identifier la production la plus faible
         const productionFaible = defis.defis.find(d => d.type === 'note-faible');
