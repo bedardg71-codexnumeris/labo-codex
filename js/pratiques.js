@@ -195,16 +195,31 @@ function getCoursActifId() {
 /**
  * Liste les cours utilisant une pratique donnée
  *
+ * ✅ MODIFICATION (8 décembre 2025) : Single Source of Truth
+ * Puisque la pratique est définie globalement dans modalitesEvaluation,
+ * tous les cours utilisent la même pratique.
+ *
  * FONCTIONNEMENT:
  * 1. Récupère tous les cours
- * 2. Filtre ceux qui ont le pratiqueId spécifié
- * 3. Retourne la liste
+ * 2. Récupère la pratique active depuis modalitesEvaluation
+ * 3. Si pratiqueId correspond à la pratique active, retourne tous les cours
+ * 4. Sinon, retourne les cours ayant explicitement ce pratiqueId (compatibilité)
  *
  * @param {string} pratiqueId - ID de la pratique ('pan-maitrise' ou 'sommative')
  * @returns {Array} - Tableau des cours utilisant cette pratique
  */
 function getCoursUtilisantPratique(pratiqueId) {
     const cours = db.getSync('listeCours', []);
+    const modalites = db.getSync('modalitesEvaluation', {});
+    const pratiqueActive = modalites.pratique || 'pan-maitrise';
+
+    // Si cette pratique est la pratique active, tous les cours l'utilisent
+    if (pratiqueId === pratiqueActive) {
+        return cours;
+    }
+
+    // Sinon, chercher les cours qui auraient explicitement ce pratiqueId
+    // (pour compatibilité avec anciennes données)
     return cours.filter(c => c.pratiqueId === pratiqueId);
 }
 
@@ -1726,10 +1741,10 @@ async function afficherListePratiques() {
         if (htmlIntegrees || htmlConfigurables) {
             html = `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
-                    <!-- Colonne 1: Pratiques intégrées -->
+                    <!-- Colonne 1: Pratiques de notation -->
                     <div>
                         <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 15px;">
-                            Pratiques intégrées (non modifiables)
+                            Pratiques de notation (non modifiables)
                         </h4>
 
                         <!-- Sélecteur de pratique par défaut -->
@@ -1740,10 +1755,10 @@ async function afficherListePratiques() {
                         </div>
                     </div>
 
-                    <!-- Colonne 2: Pratiques configurables -->
+                    <!-- Colonne 2: Configuration personnalisée -->
                     <div>
                         <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 15px;">
-                            Pratiques configurables
+                            Configuration personnalisée (modifiable)
                         </h4>
                         <div style="display: flex; flex-direction: column; gap: 15px;">
                             ${htmlConfigurables || '<p style="color: var(--gris-moyen); font-style: italic;">Aucune pratique personnalisée</p>'}
@@ -1843,7 +1858,10 @@ function genererCartePratique(pratique, estActive, modifiable) {
     const badgeParDefaut = (getPratiqueParDefaut() === pratique.id) ?
         `<span class="badge-pratique badge-pratique-defaut">PAR DÉFAUT</span>` : '';
 
-    const boutonActiver = !estActive ? `<button class="btn btn-tres-compact btn-confirmer" onclick="activerPratique('${pratique.id}')">Activer</button>` : '';
+    // ✅ AJOUT (8 décembre 2025) : Bouton Activer OU Désactiver selon l'état
+    const boutonActiver = !estActive
+        ? `<button class="btn btn-tres-compact btn-confirmer" onclick="activerPratique('${pratique.id}')">Activer</button>`
+        : `<button class="btn btn-tres-compact btn-secondaire" onclick="desactiverPratique('${pratique.id}')">Désactiver</button>`;
 
     const boutonsModification = modifiable ? `
         <button class="btn btn-tres-compact btn-modifier" onclick="editerPratique('${pratique.id}')">Éditer</button>
@@ -1906,6 +1924,34 @@ async function activerPratique(id) {
         alert(`✅ Pratique activée avec succès !\n\nLes évaluations futures utiliseront cette pratique.`);
     } catch (error) {
         console.error('Erreur lors de l\'activation:', error);
+        alert(`❌ Erreur : ${error.message}`);
+    }
+}
+
+/**
+ * Désactive une pratique (revient à la pratique par défaut)
+ * ✅ AJOUT (8 décembre 2025)
+ * @param {string} id - ID de la pratique à désactiver
+ */
+async function desactiverPratique(id) {
+    const pratiqueDefaut = getPratiqueParDefaut();
+
+    if (!confirm(`Désactiver cette pratique ?\n\nLa pratique par défaut (${pratiqueDefaut === 'pan-maitrise' ? 'PAN-Maîtrise' : 'Sommative'}) sera activée à la place.`)) {
+        return;
+    }
+
+    try {
+        // Activer la pratique par défaut à la place
+        await PratiqueManager.changerPratiqueActive(pratiqueDefaut);
+        console.log('✅ Pratique désactivée, retour à la pratique par défaut:', pratiqueDefaut);
+
+        // Recharger l'affichage
+        await afficherListePratiques();
+
+        // Notification
+        alert(`✅ Pratique désactivée avec succès !\n\nLa pratique par défaut est maintenant active.`);
+    } catch (error) {
+        console.error('Erreur lors de la désactivation:', error);
         alert(`❌ Erreur : ${error.message}`);
     }
 }
