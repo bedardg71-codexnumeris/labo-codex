@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 93 - Correctifs export</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2025120209">
+    <link rel="stylesheet" href="styles.css?v=2025120811">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -2715,7 +2715,7 @@
 </head>
 
 <body>
-        <!-- EN-TÊTE -->
+        <!-- EN-TÊTE - Layout compact Option 1 (8 décembre 2025) -->
         <header class="entete">
             <!-- Bulles flottantes animées (générées dynamiquement par JS) -->
             <div id="bulles-container" class="bulles-container">
@@ -2723,82 +2723,86 @@
             </div>
 
             <div class="entete-conteneur">
-                <!-- Logo et métadonnées -->
-                <div class="logo-section">
-                    <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="logo-link">
-                        <div class="logo">
-                            <img src="logo-codex-numeris.png" alt="Logo Codex Numeris">
+                <!-- LIGNE 1 : Logo + Titre + Version + Boutons -->
+                <div class="entete-ligne1">
+                    <!-- Logo et métadonnées -->
+                    <div class="logo-section">
+                        <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="logo-link">
+                            <div class="logo">
+                                <img src="logo-codex-numeris.png" alt="Logo Codex Numeris">
+                            </div>
+                        </a>
+                        <div class="logo-meta">
+                            <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer"
+                                class="site-link">codexnumeris.org</a>
+                            <br>
+                            Réfléchir, expérimenter, partager.
                         </div>
-                    </a>
-                    <div class="logo-meta">
+                    </div>
 
-                        <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer"
-                            class="site-link">codexnumeris.org</a>
-                        <br>
-                        Réfléchir, expérimenter, partager.
+                    <!-- Titre et version -->
+                    <div class="titre-section">
+                        <h1>Système de suivi des apprentissages</h1>
+                        <p class="meta">Beta 93 par Grégoire Bédard (6 décembre 2025 - Stabilisation)</p>
+                    </div>
+
+                    <!-- Boutons d'action à droite -->
+                    <div class="info-legales-section">
+                        <!-- Bouton Soutenir le projet (visible en mode Normal uniquement) -->
+                        <a id="btn-soutenir-projet"
+                           href="https://codexnumeris.org/#/portal/support"
+                           target="_blank" rel="noopener noreferrer"
+                           class="btn-action-header"
+                           title="Soutenir financièrement le développement">
+                            Soutenir le projet
+                        </a>
+
+                        <!-- Bouton Feedback testeurs (visible en mode Normal uniquement) -->
+                        <a id="btn-feedback"
+                           href="https://forms.office.com/Pages/ResponsePage.aspx?id=ISONVhCY_k-ORNlO_ecv4ZE_a9_snRBOtx0ASfcIqmBUNUoxMzIzQ0wySVJEQzI3R1E0VlU3MFQ1TS4u"
+                           target="_blank" rel="noopener noreferrer"
+                           class="btn-action-header"
+                           title="Donner votre feedback sur cette version Beta">
+                            Fournir un feedback
+                        </a>
+
+                        <!-- Bouton Assistance Primo rond (visible uniquement en mode Assisté) -->
+                        <button id="btn-assistance-primo"
+                           onclick="reafficherAccueilPrimo()"
+                           style="
+                               width: 50px;
+                               height: 50px;
+                               border-radius: 50%;
+                               background: linear-gradient(135deg, #1a5266, #2d7a8c);
+                               color: white;
+                               border: none;
+                               cursor: pointer;
+                               font-size: 1.8rem;
+                               display: none;
+                               box-shadow: 0 4px 12px rgba(26, 82, 102, 0.3);
+                               transition: all 0.2s;
+                               animation: scintillement-primo 3s ease-in-out infinite;
+                               position: relative;
+                           "
+                           onmouseover="this.style.transform='translateY(-2px) scale(1.05)';"
+                           onmouseout="this.style.transform='translateY(0) scale(1)';"
+                           title="Obtenir de l'aide avec Primo">
+                            😎
+                        </button>
                     </div>
                 </div>
 
-                <!-- Titre et description centrés -->
-                <div class="titre-section">
-                    <h1>Système de suivi des apprentissages</h1>
-                    <p class="meta">Beta 93 par Grégoire Bédard (6 décembre 2025 - Stabilisation)</p>
-
-                    <!-- Sélecteur de mode au centre (sera généré par 17-modes.js) -->
-                    <div id="selecteur-mode" class="selecteur-mode-centre" style="margin-top: 10px;">
-                        <!-- Sera généré dynamiquement -->
-                    </div>
-
-                    <!-- Informations contextuelles au centre (cours, semaine, date) -->
+                <!-- LIGNE 2 : Informations contextuelles + Mode -->
+                <div class="entete-ligne2">
+                    <!-- Informations contextuelles (cours, semaine, date) -->
                     <div id="info-contextuelles-centre" class="info-contextuelles-centre">
                         <!-- Sera rempli dynamiquement par JavaScript -->
                     </div>
-                </div>
 
-                <!-- Boutons d'action en haut à droite -->
-                <div class="info-legales-section">
-
-                <!-- Bouton Soutenir le projet (visible en mode Normal uniquement) -->
-                    <a id="btn-soutenir-projet"
-                       href="https://codexnumeris.org/#/portal/support"
-                       target="_blank" rel="noopener noreferrer"
-                       class="btn-action-header"
-                       title="Soutenir financièrement le développement">
-                        Soutenir le projet
-                    </a>
-
-                    <!-- Bouton Feedback testeurs (visible en mode Normal uniquement) -->
-                    <a id="btn-feedback"
-                       href="https://forms.office.com/Pages/ResponsePage.aspx?id=ISONVhCY_k-ORNlO_ecv4ZE_a9_snRBOtx0ASfcIqmBUNUoxMzIzQ0wySVJEQzI3R1E0VlU3MFQ1TS4u"
-                       target="_blank" rel="noopener noreferrer"
-                       class="btn-action-header"
-                       title="Donner votre feedback sur cette version Beta">
-                        Fournir un feedback
-                    </a>
-
-                    <!-- Bouton Assistance Primo rond (visible uniquement en mode Assisté) -->
-                    <button id="btn-assistance-primo"
-                       onclick="reafficherAccueilPrimo()"
-                       style="
-                           width: 80px;
-                           height: 80px;
-                           border-radius: 50%;
-                           background: linear-gradient(135deg, #1a5266, #2d7a8c);
-                           color: white;
-                           border: none;
-                           cursor: pointer;
-                           font-size: 3rem;
-                           display: none;
-                           box-shadow: 0 4px 12px rgba(26, 82, 102, 0.3);
-                           transition: all 0.2s;
-                           animation: scintillement-primo 3s ease-in-out infinite;
-                           position: relative;
-                       "
-                       onmouseover="this.style.transform='translateY(-2px) scale(1.05)';"
-                       onmouseout="this.style.transform='translateY(0) scale(1)';"
-                       title="Obtenir de l'aide avec Primo">
-                        😎
-                    </button>
+                    <!-- Sélecteur de mode à droite -->
+                    <div id="selecteur-mode" class="selecteur-mode-centre">
+                        <!-- Sera généré dynamiquement par 17-modes.js -->
+                    </div>
                 </div>
             </div>
         </header>
@@ -4940,7 +4944,7 @@
                                 </div>
                             </div>
 
-                            <!-- Pratique de notation -->
+                            <!-- Pratique de notation (lecture seule - Single Source of Truth) -->
                             <h5 class="sous-titre-section" style="margin-top: 25px;">
                                 Pratique de notation
                             </h5>
@@ -4948,12 +4952,25 @@
                                 <label>
                                     Pratique de notation mise en place pour ce cours
                                     <small style="display: block; color: var(--gris-moyen); font-weight: normal; margin-top: 3px;">
-                                        La pratique par défaut est présélectionnée. Vous pouvez en choisir une autre.
+                                        Cette information est définie dans Réglages → Pratique de notation
                                     </small>
                                 </label>
-                                <select id="pratiqueCours" class="controle-form controle-form-compact">
-                                    <!-- Options chargées dynamiquement par JavaScript -->
-                                </select>
+                                <div id="pratiqueCoursAffichage" style="
+                                    padding: 10px 15px;
+                                    background: var(--bleu-tres-pale);
+                                    border: 1px solid var(--bleu-leger);
+                                    border-radius: 6px;
+                                    color: var(--bleu-principal);
+                                    font-weight: 500;
+                                    font-size: 0.95rem;
+                                ">
+                                    <!-- Sera rempli dynamiquement par JavaScript -->
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <button type="button" class="btn btn-modifier" onclick="naviguerVersPratiqueNotation()" style="font-size: 0.85rem; padding: 6px 12px;">
+                                        Modifier la pratique de notation
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Boutons d'action -->
@@ -10097,8 +10114,8 @@ Exemple :
     <script src="js/grilles.js?v=2025120613"></script>
     <script src="js/echelles.js?v=2025120606"></script>
     <script src="js/cartouches.js?v=2025120612"></script>
-    <script src="js/cours.js?v=2025120115"></script>
-    <script src="js/contexte.js?v=2025111201"></script>
+    <script src="js/cours.js?v=2025120815"></script>
+    <script src="js/contexte.js?v=2025120815"></script>
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
     <script src="js/interpretation-config.js?v=2025111501"></script>
@@ -10122,7 +10139,7 @@ Exemple :
     <script src="js/cc-license.js?v=2025120118"></script>
 
     <!-- Interface de gestion des pratiques configurables -->
-    <script src="js/pratiques.js?v=2025120615"></script>
+    <script src="js/pratiques.js?v=2025120816"></script>
     <script src="js/objectifs.js?v=2025120124"></script>
 
     <script src="js/portfolio.js?v=2025120703"></script>

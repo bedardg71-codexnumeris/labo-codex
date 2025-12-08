@@ -18,6 +18,43 @@ function mettreAJourContexteEntete() {
         const infoCours = db.getSync('infoCours', {});
         const nomCours = infoCours.nomCours || '';
 
+        // Obtenir la pratique active
+        const modalites = db.getSync('modalitesEvaluation', {});
+        const pratiqueId = modalites.pratique || 'pan-maitrise';
+
+        // ✅ CORRECTION (8 décembre 2025) : Lire le nom depuis PratiqueManager
+        let pratiqueName = 'Chargement...';
+
+        // Fonction pour obtenir le nom de la pratique (synchrone avec fallback)
+        const obtenirNomPratiqueSync = () => {
+            if (typeof PratiqueManager !== 'undefined' && PratiqueManager.listerPratiques) {
+                // Utiliser une approche synchrone avec gestion d'erreur
+                PratiqueManager.listerPratiques().then(toutesLesPratiques => {
+                    let pratiqueTrouvee = toutesLesPratiques.codees?.find(p => p.id === pratiqueId);
+                    if (!pratiqueTrouvee) {
+                        pratiqueTrouvee = toutesLesPratiques.configurables?.find(p => p.id === pratiqueId);
+                    }
+                    if (pratiqueTrouvee) {
+                        // Mettre à jour l'affichage avec le nom réel
+                        const conteneur = document.getElementById('info-contextuelles-centre');
+                        if (conteneur) {
+                            const ancienTexte = conteneur.innerHTML;
+                            const nouveauTexte = ancienTexte.replace(/Pratique : [^•]+/, `Pratique : ${pratiqueTrouvee.nom}`);
+                            if (nouveauTexte !== ancienTexte) {
+                                conteneur.innerHTML = nouveauTexte;
+                            }
+                        }
+                    }
+                }).catch(err => {
+                    console.warn('Erreur lors du chargement du nom de pratique:', err);
+                });
+            }
+            // Fallback immédiat pour affichage initial
+            return pratiqueId === 'sommative' ? 'Sommative' : 'PAN-Maîtrise';
+        };
+
+        pratiqueName = obtenirNomPratiqueSync();
+
         // Obtenir la date actuelle
         const aujourdhui = new Date();
         const dateStr = `${aujourdhui.getFullYear()}-${String(aujourdhui.getMonth() + 1).padStart(2, '0')}-${String(aujourdhui.getDate()).padStart(2, '0')}`;
@@ -26,17 +63,18 @@ function mettreAJourContexteEntete() {
         const calendrier = db.getSync('calendrierComplet', {});
         const infoJour = calendrier[dateStr];
 
-        // Obtenir les séances
-        const seancesCompletes = db.getSync('seancesCompletes', {});
+        // Construire le contexte sur une seule ligne
+        let parties = [];
 
-        let html = '';
-
-        // Afficher le nom du cours
+        // 1. Nom du cours
         if (nomCours) {
-            html += `<div style="font-size: 1.1rem; font-weight: 500; margin-bottom: 4px;">${echapperHtml(nomCours)}</div>`;
+            parties.push(echapperHtml(nomCours));
         }
 
-        // Si nous sommes dans un jour de cours ou de reprise
+        // 2. Pratique
+        parties.push(`Pratique : ${pratiqueName}`);
+
+        // 3. Date et semaine
         if (infoJour && (infoJour.statut === 'cours' || infoJour.statut === 'reprise')) {
             const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
                          'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -51,23 +89,24 @@ function mettreAJourContexteEntete() {
             // Calculer le rang de la séance (source unique: horaire.js)
             const rangSeance = obtenirRangSeanceDansSemaine(dateStr);
 
-            let contexte = `Semaine ${infoJour.numeroSemaine} • ${jourSemainenom} ${jour} ${moisNom} ${annee}`;
+            let dateComplete = `Semaine ${infoJour.numeroSemaine} · ${jourSemainenom} ${jour} ${moisNom} ${annee}`;
 
             // Ajouter le rang de la séance
             if (rangSeance) {
-                contexte += ` • ${rangSeance.ordinal} séance`;
+                dateComplete += ` · ${rangSeance.ordinal} séance`;
             }
 
-            html += `<div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.9);">${contexte}</div>`;
+            parties.push(dateComplete);
         }
         // Sinon, afficher juste la date
         else {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateFr = aujourdhui.toLocaleDateString('fr-CA', options);
-            html += `<div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.9);">${dateFr}</div>`;
+            parties.push(dateFr);
         }
 
-        conteneur.innerHTML = html;
+        // Assembler toutes les parties avec des séparateurs (le style est géré par CSS)
+        conteneur.innerHTML = parties.join(' • ');
 
     } catch (error) {
         console.warn('⚠️ Erreur mise à jour contexte en-tête:', error);
