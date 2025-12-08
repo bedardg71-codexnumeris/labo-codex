@@ -1660,6 +1660,15 @@ body[data-mode="anonymisation"] .sidebar-navigation {
                 <strong>(3)</strong> retirés temporairement de la vue.
             </p>
 
+            <div class="guide-specs" style="background: #e8f5e9; border-left: 4px solid #4caf50; margin-bottom: 20px;">
+                <div class="guide-specs-title">👁️ Exemple interactif</div>
+                <p style="margin: 10px 0 0 0; line-height: 1.6;">
+                    L'exemple ci-dessous est <strong>interactif</strong> : cliquez sur le bouton
+                    <strong>"Consulter la bibliothèque"</strong> dans la sidebar pour voir le modal
+                    de bibliothèque en action avec des données de démonstration.
+                </p>
+            </div>
+
             <div class="guide-example">
                 <div style="display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: 600px;">
                     <!-- Sidebar -->
@@ -1670,7 +1679,7 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
                         <!-- Bouton bibliothèque -->
                         <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
-                            <button class="btn btn-principal" style="width: 100%;">
+                            <button onclick="afficherModalBibliothequeDemo()" class="btn btn-principal" style="width: 100%;">
                                 Consulter la bibliothèque
                             </button>
                         </div>
@@ -2200,20 +2209,6 @@ body[data-mode="anonymisation"] .sidebar-navigation {
                             </ul>
                         </li>
                     </ol>
-                </div>
-            </div>
-
-            <!-- Exemple interactif -->
-            <div class="guide-specs" style="margin-top: 30px; background: #e8f5e9; border-left: 4px solid #4caf50;">
-                <div class="guide-specs-title">👁️ Exemple visuel interactif</div>
-                <p style="margin: 10px 0; line-height: 1.6;">
-                    Cliquez sur le bouton ci-dessous pour voir un exemple fonctionnel du modal de bibliothèque
-                    avec des données de démonstration.
-                </p>
-                <div style="text-align: center; margin-top: 15px;">
-                    <button onclick="afficherModalBibliothequeDemo()" class="btn btn-principal">
-                        Voir l'exemple de modal
-                    </button>
                 </div>
             </div>
 
