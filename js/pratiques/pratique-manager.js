@@ -92,6 +92,27 @@ const PratiqueManager = {
     },
 
     /**
+     * Migration : Ajoute le flag dansBibliotheque à toutes les pratiques configurables
+     * Appelée automatiquement au chargement de pratiques.js
+     */
+    migrerVersBibliotheque() {
+        const pratiques = db.getSync('pratiquesConfigurables', []);
+        let nbMigrees = 0;
+
+        pratiques.forEach(p => {
+            if (p.dansBibliotheque === undefined) {
+                p.dansBibliotheque = true; // Par défaut, toutes les pratiques existantes restent visibles
+                nbMigrees++;
+            }
+        });
+
+        if (nbMigrees > 0) {
+            db.setSync('pratiquesConfigurables', pratiques);
+            console.log(`[PratiqueManager] ✅ Migration bibliothèque: ${nbMigrees} pratique(s) ajoutée(s)`);
+        }
+    },
+
+    /**
      * Sauvegarde une nouvelle pratique configurable
      * @param {object} pratique - Objet { id, nom, auteur, description, config }
      */
