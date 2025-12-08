@@ -1919,6 +1919,290 @@ body[data-mode="anonymisation"] .sidebar-navigation {
                 </ul>
             </div>
 
+            <!-- Modal de bibliothèque -->
+            <div class="guide-component">
+                <h3 class="guide-component-title">Modal de bibliothèque</h3>
+                <p class="guide-component-description">
+                    Modal centralisé pour gérer les éléments affichés dans la sidebar.
+                    Structure en 2 sections : "Ma sélection" (visible dans sidebar) + "Disponibles à ajouter" (masqués).
+                </p>
+
+                <div class="guide-specs">
+                    <div class="guide-specs-title">🎯 Objectif</div>
+                    <p style="margin: 10px 0 0 0; line-height: 1.6;">
+                        Permettre à l'utilisateur de gérer ses éléments actifs/archivés,
+                        partager ses créations avec métadonnées CC, et importer du matériel partagé par la communauté.
+                    </p>
+                </div>
+
+                <div class="guide-specs">
+                    <div class="guide-specs-title">📐 Structure HTML</div>
+                    <div class="guide-code">
+                        <pre><code>&lt;!-- Modal plein écran avec overlay --&gt;
+&lt;div id="modalBibliotheque[Type]" style="
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;"&gt;
+
+    &lt;!-- Conteneur central --&gt;
+    &lt;div style="
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);"&gt;
+
+        &lt;!-- En-tête --&gt;
+        &lt;h2 style="margin-top: 0; color: #2c3e50;"&gt;
+            Bibliothèque de [Type]
+        &lt;/h2&gt;
+        &lt;p style="color: #7f8c8d; margin-bottom: 20px;"&gt;
+            Gérez les [type] affichées dans la barre latérale.
+        &lt;/p&gt;
+
+        &lt;!-- SECTION 1 : Ma sélection --&gt;
+        &lt;h3 style="color: var(--bleu-clair); font-size: 1.1rem;"&gt;
+            [Type] dans votre sélection (X)
+        &lt;/h3&gt;
+        &lt;div style="margin-bottom: 30px;"&gt;
+            &lt;!-- Items avec fond bleu très pâle --&gt;
+            &lt;div style="
+                border: 1px solid var(--bleu-clair);
+                border-radius: 6px;
+                padding: 15px;
+                margin-bottom: 10px;
+                background: var(--bleu-tres-pale);"&gt;
+
+                &lt;div style="display: flex; justify-content: space-between;"&gt;
+                    &lt;div style="flex: 1;"&gt;
+                        &lt;!-- Titre et métadonnées --&gt;
+                    &lt;/div&gt;
+                    &lt;div style="display: flex; gap: 8px;"&gt;
+                        &lt;button class="btn btn-secondaire btn-tres-compact"&gt;
+                            Partager
+                        &lt;/button&gt;
+                        &lt;button class="btn btn-supprimer btn-tres-compact"&gt;
+                            Retirer
+                        &lt;/button&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Bouton global après Section 1 --&gt;
+        &lt;div style="text-align: center;"&gt;
+            &lt;button class="btn btn-secondaire"&gt;
+                Partager tous mes [type]
+            &lt;/button&gt;
+        &lt;/div&gt;
+
+        &lt;!-- SECTION 2 : Disponibles à ajouter --&gt;
+        &lt;h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px;"&gt;
+            [Type] disponibles à ajouter
+        &lt;/h3&gt;
+
+        &lt;!-- Filtre optionnel par discipline --&gt;
+        &lt;div style="margin-bottom: 15px;"&gt;
+            &lt;label style="font-weight: 500;"&gt;
+                Filtrer par discipline :
+            &lt;/label&gt;
+            &lt;select class="controle-form"&gt;
+                &lt;option&gt;Toutes les disciplines&lt;/option&gt;
+            &lt;/select&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Items disponibles groupés par discipline --&gt;
+        &lt;h4 style="color: #555; border-bottom: 1px solid #ddd;"&gt;
+            [Discipline]
+        &lt;/h4&gt;
+        &lt;div style="
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            background: white;"&gt;
+
+            &lt;div style="display: flex; justify-content: space-between;"&gt;
+                &lt;div style="flex: 1;"&gt;
+                    &lt;!-- Titre + badge "Retirée" si applicable --&gt;
+                &lt;/div&gt;
+                &lt;button class="btn btn-confirmer btn-tres-compact"&gt;
+                    Ajouter à ma sélection
+                &lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Bouton import après Section 2 --&gt;
+        &lt;div style="text-align: center; margin-top: 15px;"&gt;
+            &lt;button class="btn btn-secondaire"&gt;
+                Ajouter des [type]
+            &lt;/button&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Pied de page --&gt;
+        &lt;div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 20px; text-align: right;"&gt;
+            &lt;button class="btn btn-annuler"&gt;
+                Fermer
+            &lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-specs">
+                    <div class="guide-specs-title">🎨 Codes couleur</div>
+                    <table class="guide-table" style="margin-top: 10px;">
+                        <thead>
+                            <tr>
+                                <th>Section</th>
+                                <th>Bordure</th>
+                                <th>Fond</th>
+                                <th>Titre</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Ma sélection</strong></td>
+                                <td><code>var(--bleu-clair)</code></td>
+                                <td><code>var(--bleu-tres-pale)</code></td>
+                                <td><code>var(--bleu-clair)</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Disponibles</strong></td>
+                                <td><code>#ddd</code></td>
+                                <td><code>white</code></td>
+                                <td><code>#3498db</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Badge "Retirée"</strong></td>
+                                <td>—</td>
+                                <td><code>#ff9800</code></td>
+                                <td><code>white</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="guide-specs">
+                    <div class="guide-specs-title">🔧 Fonctionnalités</div>
+                    <table class="guide-table" style="margin-top: 10px;">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Bouton</th>
+                                <th>Effet</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Partager (individuel)</strong></td>
+                                <td><code>btn-secondaire btn-tres-compact</code></td>
+                                <td>Demande métadonnées CC → Export JSON avec metadata_cc</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Retirer</strong></td>
+                                <td><code>btn-supprimer btn-tres-compact</code></td>
+                                <td>dansBibliotheque = false → Masqué de sidebar</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Partager tous</strong></td>
+                                <td><code>btn-secondaire</code></td>
+                                <td>Export JSON de tous les éléments sélectionnés</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ajouter à ma sélection</strong></td>
+                                <td><code>btn-confirmer btn-tres-compact</code></td>
+                                <td>dansBibliotheque = true → Visible dans sidebar</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ajouter des [type]</strong></td>
+                                <td><code>btn-secondaire</code></td>
+                                <td>Déclenche input file pour import JSON</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fermer</strong></td>
+                                <td><code>btn-annuler</code></td>
+                                <td>Supprime le modal du DOM</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="guide-specs">
+                    <div class="guide-specs-title">📊 Filtrage par discipline</div>
+                    <p style="margin: 10px 0 0 0; line-height: 1.6;">
+                        <strong>Section 2 uniquement</strong> : Filtre dynamique regroupant les éléments par discipline.
+                        <br>Utilise un <code>&lt;select&gt;</code> qui appelle <code>filtrer[Type]ParDiscipline()</code>.
+                        <br>Les items sont groupés sous des <code>&lt;h4&gt;</code> par discipline avec <code>data-discipline="[nom]"</code>.
+                    </p>
+                </div>
+
+                <div class="guide-specs">
+                    <div class="guide-specs-title">🏷️ Badge "Retirée"</div>
+                    <p style="margin: 10px 0 0 0; line-height: 1.6;">
+                        Dans Section 2, si un élément a été retiré de la sélection (dansBibliotheque = false),
+                        afficher un badge orange "Retirée" pour indiquer qu'il était précédemment dans ma sélection.
+                    </p>
+                    <div class="guide-code" style="margin-top: 10px;">
+                        <pre><code>&lt;span style="
+    background: #ff9800;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    margin-left: 8px;"&gt;
+    Retirée
+&lt;/span&gt;</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-specs">
+                    <div class="guide-specs-title">⚡ Workflow JavaScript</div>
+                    <ol style="margin: 10px 0 0 20px; line-height: 1.8;">
+                        <li><strong>Ouverture modal</strong> : <code>afficherBibliotheque[Type]()</code>
+                            <ul style="margin-top: 5px;">
+                                <li>Récupère tous les éléments utilisateur</li>
+                                <li>Filtre en 2 groupes : dansBibliotheque !== false vs = false</li>
+                                <li>Récupère bibliothèque partagée (window.[TYPE]_BIBLIOTHEQUE)</li>
+                                <li>Génère HTML complet avec compteurs dynamiques</li>
+                                <li>Insère dans DOM avec insertAdjacentHTML('beforeend')</li>
+                            </ul>
+                        </li>
+                        <li><strong>Partager</strong> : <code>partager[Type](id)</code>
+                            <ul style="margin-top: 5px;">
+                                <li>Appelle <code>demanderMetadonneesEnrichies()</code></li>
+                                <li>Ajoute metadata_cc à l'objet</li>
+                                <li>Change dansBibliotheque = false (retire de sélection)</li>
+                                <li>Sauvegarde et rafraîchit modal + sidebar</li>
+                            </ul>
+                        </li>
+                        <li><strong>Retirer</strong> : <code>retirer[Type]DeBibliotheque(id)</code>
+                            <ul style="margin-top: 5px;">
+                                <li>Change dansBibliotheque = false</li>
+                                <li>Sauvegarde et rafraîchit modal + sidebar</li>
+                            </ul>
+                        </li>
+                        <li><strong>Ajouter</strong> : <code>ajouter[Type]Individuelle(id)</code>
+                            <ul style="margin-top: 5px;">
+                                <li>Change dansBibliotheque = true</li>
+                                <li>Sauvegarde et rafraîchit modal + sidebar</li>
+                            </ul>
+                        </li>
+                        <li><strong>Fermer</strong> : <code>fermerModalBibliotheque[Type]()</code>
+                            <ul style="margin-top: 5px;">
+                                <li>Supprime le modal du DOM avec .remove()</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
             <div class="guide-do-dont">
                 <div class="guide-do">
                     <div class="guide-do-title">✅ À FAIRE</div>
@@ -1928,6 +2212,9 @@ body[data-mode="anonymisation"] .sidebar-navigation {
                         <li>Générer de nouveaux IDs lors de l'import pour éviter conflits</li>
                         <li>Afficher un message "Sélectionnez..." quand aucun item actif</li>
                         <li>Utiliser les classes .sidebar-item, .sidebar-item-titre, .sidebar-item-badge</li>
+                        <li>Grouper les items par discipline dans Section 2</li>
+                        <li>Afficher badge "Retirée" pour items précédemment sélectionnés</li>
+                        <li>Rafraîchir modal ET sidebar après chaque action</li>
                     </ul>
                 </div>
                 <div class="guide-dont">
@@ -1938,6 +2225,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
                         <li>Réutiliser les IDs lors de l'import (risque de collision)</li>
                         <li>Laisser le formulaire visible par défaut (UX déroutante)</li>
                         <li>Créer des styles custom inline au lieu d'utiliser les classes</li>
+                        <li>Oublier de rafraîchir le modal après modification</li>
+                        <li>Mélanger les éléments retirés avec ceux jamais utilisés</li>
                     </ul>
                 </div>
             </div>
