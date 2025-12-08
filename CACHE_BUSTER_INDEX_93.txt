@@ -1,0 +1,41 @@
+===============================================
+CACHE BUSTER À METTRE À JOUR DANS INDEX 93.HTML
+===============================================
+
+Date: 6 décembre 2025
+Fichier: index 93.html
+Ligne: 10105
+
+CHERCHER:
+---------
+<script src="js/echelles.js?v=2025113001"></script>
+
+REMPLACER PAR:
+--------------
+<script src="js/echelles.js?v=2025120601"></script>
+
+RAISON:
+-------
+Migration echelles.js vers IndexedDB async
+- 71 remplacements db.getSync/setSync → await db.get/set
+- 41 fonctions converties en async
+- Tous les onclick wrappés en async
+
+TESTS:
+------
+1. Ouvrir index 93.html
+2. Console F12 : vérifier aucune erreur
+3. Aller dans Matériel → Échelles de performance
+4. Tester création/modification/suppression d'échelles
+
+BACKUP:
+-------
+Version originale sauvegardée dans:
+js/echelles-original-backup.js
+
+ROLLBACK (si problème):
+-----------------------
+cp js/echelles-original-backup.js js/echelles.js
+Puis remettre v=2025113001 dans index 93.html
+
+===============================================
