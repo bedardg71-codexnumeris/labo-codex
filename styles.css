@@ -357,41 +357,48 @@ body {
 }
 
 /* ===============================
-   EN-TÊTE
+   EN-TÊTE - Layout compact horizontal (Option 1)
+   8 décembre 2025
    =============================== */
 
 .entete {
     background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
     color: white;
-    padding: 30px 40px;
+    padding: 15px 30px;
     position: relative;
 }
 
 .entete-conteneur {
     display: flex;
-    align-items: center;
-    gap: 30px;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* === LOGO ET MÉTADONNÉES === */
+/* === LIGNE 1 : Logo + Titre + Version + Boutons === */
+
+.entete-ligne1 {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    justify-content: space-between;
+}
 
 .logo-section {
     flex-shrink: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
     gap: 12px;
 }
 
 .logo {
-    width: 70px;
-    height: 70px;
+    width: 50px;
+    height: 50px;
     background: white;
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    padding: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -402,62 +409,67 @@ body {
 }
 
 .logo-meta {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: #9fc5e8;
-    text-align: center;
     line-height: 1.2;
-    max-width: 200px;
+    max-width: 150px;
 }
 
 /* === TITRE ET DESCRIPTION === */
 
 .titre-section {
-    position: absolute;
-    left: 50%;
-    top: 45%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    z-index: 1;
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 15px;
 }
 
 .titre-section h1 {
-    font-size: 2rem;
+    font-size: 1.4rem;
     font-weight: bold;
-    margin: 0 0 3px 0;
+    margin: 0;
     letter-spacing: 0px;
     color: white;
-}
-
-.titre-section .sous-titre {
-    font-size: 1.05rem;
-    color: #d0e4f5;
-    margin: 0 0 5px 0;
+    white-space: nowrap;
 }
 
 .titre-section .meta {
     font-size: 0.7rem;
     color: #9fc5e8;
     margin: 0;
+    white-space: nowrap;
 }
 
-/* === INFORMATIONS LÉGALES (à droite) === */
+/* === INFORMATIONS LÉGALES (boutons à droite) === */
 
 .info-legales-section {
     flex-shrink: 0;
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: center;
-    margin-left: auto;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
 }
 
-/* Informations contextuelles au centre (sous le titre) */
+/* === LIGNE 2 : Informations contextuelles + Mode === */
+
+.entete-ligne2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 8px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .info-contextuelles-centre {
+    flex: 1;
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.85);
-    text-align: center;
-    line-height: 1.6;
-    margin-top: 10px;
+    color: rgba(255, 255, 255, 0.90);
+    text-align: left;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Sélecteur de mode dans la navigation (à droite) */
@@ -487,14 +499,59 @@ body {
 
 /* === RESPONSIVE === */
 
-@media (max-width: 768px) {
-    .entete-conteneur {
-        flex-direction: column;
-        text-align: center;
+@media (max-width: 1024px) {
+    /* Tablettes : réduire les gaps et tailles */
+    .entete-ligne1 {
+        gap: 15px;
     }
 
     .titre-section h1 {
-        font-size: 1.8rem;
+        font-size: 1.2rem;
+    }
+
+    .titre-section .meta {
+        font-size: 0.65rem;
+    }
+
+    .logo-meta {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Mobile : empiler verticalement */
+    .entete {
+        padding: 12px 20px;
+    }
+
+    .entete-ligne1 {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .entete-ligne2 {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .logo-section {
+        flex-direction: column;
+    }
+
+    .titre-section {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .titre-section h1 {
+        font-size: 1.3rem;
+        white-space: normal;
+    }
+
+    .titre-section .meta {
+        white-space: normal;
     }
 
     .logo-meta {
@@ -502,11 +559,12 @@ body {
     }
 
     .info-legales-section {
+        flex-direction: column;
         align-items: center;
-        margin-left: 0;
+        gap: 6px;
     }
 
-    .info-legales-section .meta {
+    .info-contextuelles-centre {
         text-align: center;
     }
 }

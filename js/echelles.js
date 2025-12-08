@@ -349,7 +349,8 @@ async function dupliquerEchelle(echelleId) {
         config: JSON.parse(JSON.stringify(echelle.config || {})),
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString(),
-        baseSur: echelle.nom
+        baseSur: echelle.nom,
+        dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Échelle dupliquée dans bibliothèque par défaut
     };
 
     echelles.push(nouvelleEchelle);
@@ -358,6 +359,9 @@ async function dupliquerEchelle(echelleId) {
     // Mettre à jour l'interface
     await chargerEchellesTemplates();
     await afficherToutesLesEchellesNiveaux();
+
+    // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
+    await afficherListeEchelles();
 
     afficherNotificationSucces(`📑 Échelle «${nouvelleEchelle.nom}» créée avec succès !`);
 }
@@ -379,8 +383,32 @@ async function dupliquerEchelle(echelleId) {
  * RETOUR:
  * - Sortie silencieuse si les éléments n'existent pas
  */
+/**
+ * ✅ AJOUT (8 décembre 2025) : Migration des échelles existantes vers le système de bibliothèque
+ * Ajoute le flag dansBibliotheque=true à toutes les échelles existantes qui n'ont pas ce flag
+ */
+async function migrerEchellesVersBibliotheque() {
+    const echelles = await db.get('echellesTemplates') || [];
+
+    let nbMigrees = 0;
+    echelles.forEach(echelle => {
+        if (echelle.dansBibliotheque === undefined) {
+            echelle.dansBibliotheque = true;
+            nbMigrees++;
+        }
+    });
+
+    if (nbMigrees > 0) {
+        await db.set('echellesTemplates', echelles);
+        console.log(`✅ Migration bibliothèque: ${nbMigrees} échelle(s) ajoutée(s) à la bibliothèque`);
+    }
+}
+
 async function initialiserModuleEchelles() {
     console.log('📈 Initialisation du module Échelles de performance');
+
+    // ✅ AJOUT (8 décembre 2025) : Migration vers système de bibliothèque
+    await migrerEchellesVersBibliotheque();
 
     // Afficher la sidebar avec la liste des échelles (Beta 80.5+)
     if (typeof afficherListeEchelles === 'function') {
@@ -459,8 +487,6 @@ async function chargerEchelleTemplate(echelleId) {
     const selectValue = echelleId || (select ? select.value : '');
     const nomContainer = document.getElementById('nomEchelleContainer');
     const btnDupliquer = document.getElementById('btnDupliquerEchelle');
-    const btnExporter = document.getElementById('btnExporterEchelle');
-    const btnImporter = document.getElementById('btnImporterEchelle');
     const btnSupprimer = document.getElementById('btnSupprimerEchelle');
 
     if (!selectValue || selectValue === 'new') {
@@ -472,10 +498,9 @@ async function chargerEchelleTemplate(echelleId) {
         await reinitialiserNiveauxDefaut();
         echelleTemplateActuelle = null;
 
-        // Masquer les boutons dupliquer, exporter, importer et supprimer
+        // Note: Export/Import se font maintenant via la bibliothèque
+        // Masquer les boutons dupliquer et supprimer
         if (btnDupliquer) btnDupliquer.style.display = 'none';
-        if (btnExporter) btnExporter.style.display = 'none';
-        if (btnImporter) btnImporter.style.display = 'none';
         if (btnSupprimer) btnSupprimer.style.display = 'none';
 
     } else {
@@ -625,7 +650,8 @@ async function enregistrerCommeEchelle() {
             niveaux: niveaux.map(n => ({ ...n })),
             config: { ...config },
             dateCreation: new Date().toISOString(),
-            dateModification: new Date().toISOString()
+            dateModification: new Date().toISOString(),
+            dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Nouvelle échelle dans bibliothèque par défaut
         };
 
         echelles.push(nouvelleEchelle);
@@ -638,6 +664,10 @@ async function enregistrerCommeEchelle() {
     // Recharger le select et sélectionner l'échelle actuelle
     await chargerEchellesTemplates();
     await afficherToutesLesEchellesNiveaux();
+
+    // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
+    await afficherListeEchelles();
+
     document.getElementById('selectEchelleTemplate').value = echelleTemplateActuelle.id;
 
     afficherNotificationSucces(`Échelle «${nomEchelle}» enregistrée avec succès !`);
@@ -715,6 +745,10 @@ async function supprimerEchelle(echelleId) {
 
     await chargerEchellesTemplates();
     await afficherToutesLesEchellesNiveaux();
+
+    // ✅ AJOUT (8 décembre 2025) : Rafraîchir la barre latérale
+    await afficherListeEchelles();
+
     afficherEchellesPerformance();
     afficherNotificationSucces('Échelle supprimée');
 }
@@ -1900,6 +1934,10 @@ window.confirmerImportEchelles = async function(donnees) {
 
         // Fusionner (remplacer si même ID, sinon ajouter)
         echellesImportees.forEach(echelle => {
+            // ✅ AJOUT (8 décembre 2025) : Les échelles importées ne sont pas automatiquement dans la bibliothèque
+            // L'utilisateur doit utiliser "Gérer la bibliothèque" pour les ajouter à la barre latérale
+            echelle.dansBibliotheque = false;
+
             const index = echellesExistantes.findIndex(e => e.id === echelle.id);
             if (index >= 0) {
                 echellesExistantes[index] = echelle;
@@ -1916,7 +1954,8 @@ window.confirmerImportEchelles = async function(donnees) {
             await afficherToutesLesEchellesNiveaux();
         }
 
-        alert(`✅ Import réussi !\n\n${echellesImportees.length} échelle(s) importée(s).`);
+        // ✅ AJOUT (8 décembre 2025) : Mention de la bibliothèque dans le message de succès
+        alert(`✅ Import réussi !\n\n${echellesImportees.length} échelle(s) importée(s).\n\nUtilisez "Consulter la bibliothèque" pour les ajouter à la barre latérale.`);
         console.log('✅ Échelles importées:', echellesImportees.length);
 
     } catch (error) {
@@ -1977,16 +2016,27 @@ async function afficherListeEchelles() {
         return;
     }
 
-    // Ajouter l'échelle par défaut si aucune échelle n'existe
-    if (echelles.length === 0) {
-        console.log('   ℹ️ Aucune échelle dans IndexedDB');
-        container.innerHTML = '<p class="sidebar-vide">Aucune échelle disponible</p>';
+    // ✅ AJOUT (8 décembre 2025) : Filtrer uniquement les échelles dans la bibliothèque
+    const echellesDansBibliotheque = echelles.filter(e => e.dansBibliotheque !== false);
+
+    // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
+    let html = `
+        <div style="margin-bottom: 15px;">
+            <button onclick="afficherBibliothequeEchelles()" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
+                Consulter la bibliothèque
+            </button>
+        </div>
+    `;
+
+    if (echellesDansBibliotheque.length === 0) {
+        html += '<p class="sidebar-vide">Créez une nouvelle échelle ou puisez dans la bibliothèque</p>';
+        container.innerHTML = html;
         return;
     }
 
-    console.log('   ✅ Affichage de', echelles.length, 'échelle(s)');
+    console.log('   ✅ Affichage de', echellesDansBibliotheque.length, 'échelle(s) dans la bibliothèque');
 
-    const html = echelles.map(echelle => {
+    html += echellesDansBibliotheque.map(echelle => {
         const nomEchelle = echelle.nom || 'Sans titre';
         const nbNiveaux = echelle.niveaux?.length || 0;
         return `
@@ -2000,6 +2050,400 @@ async function afficherListeEchelles() {
     container.innerHTML = html;
 }
 
+/**
+ * ✅ AJOUT (8 décembre 2025) : Afficher le modal de gestion de la bibliothèque d'échelles
+ * Permet d'ajouter/retirer des échelles de la barre latérale
+ * Avec filtre par discipline
+ */
+async function afficherBibliothequeEchelles() {
+    const echelles = await db.get('echellesTemplates') || [];
+
+    // Séparer échelles dans la bibliothèque vs disponibles
+    const echellesDansBibliotheque = echelles.filter(e => e.dansBibliotheque !== false);
+    const echellesDisponibles = obtenirToutesLesEchellesBibliotheque();
+
+    // Obtenir les disciplines disponibles
+    const disciplines = obtenirDisciplinesDisponiblesEchelles();
+
+    let html = `
+        <div id="modalBibliothequeEchelles" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        ">
+            <div style="
+                background: white;
+                border-radius: 8px;
+                padding: 30px;
+                max-width: 800px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            ">
+                <h2 style="margin-top: 0; color: #2c3e50;">Bibliothèque d'échelles de performance</h2>
+                <p style="color: #7f8c8d; margin-bottom: 20px;">
+                    Gérez les échelles de performance affichées dans la barre latérale.
+                </p>
+
+                <!-- Section 1 : Échelles dans votre sélection -->
+                <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                    Échelles dans la barre latérale
+                </h3>
+                <div style="margin-bottom: 30px;">
+                    <div id="listeEchellesDansBibliotheque">
+    `;
+
+    if (echellesDansBibliotheque.length === 0) {
+        html += '<p style="color: #999; font-style: italic;">Aucune échelle dans la barre latérale</p>';
+    } else {
+        echellesDansBibliotheque.forEach(echelle => {
+            const nomEchelle = echelle.nom || 'Sans titre';
+            const nbNiveaux = echelle.niveaux?.length || 0;
+            const discipline = echelle.discipline || '';
+
+            html += `
+                <div style="
+                    border: 1px solid var(--bleu-clair);
+                    border-radius: 6px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    background: var(--bleu-tres-pale);
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
+                                ${nomEchelle}
+                            </div>
+                            <div style="color: #7f8c8d; font-size: 0.9em;">
+                                ${nbNiveaux} niveau(x)${discipline ? ' • ' + discipline : ''}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-left: 10px;">
+                            <button
+                                onclick="partagerEchelle('${echelle.id}')"
+                                class="btn btn-secondaire btn-tres-compact"
+                                title="Partager avec la communauté">
+                                Partager
+                            </button>
+                            <button
+                                onclick="retirerEchelleDeBibliotheque('${echelle.id}')"
+                                class="btn btn-supprimer btn-tres-compact"
+                                title="Retirer de votre sélection">
+                                Retirer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    html += `
+                    </div>
+
+                    <!-- Bouton "Partager toutes mes échelles" après la Section 1 -->
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button onclick="exporterEchelles()" class="btn btn-secondaire">
+                            Partager toutes mes échelles
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section 2 : Échelles disponibles -->
+                <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                    Échelles disponibles à ajouter
+                </h3>
+
+                <!-- Filtre par discipline -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
+                        Filtrer par discipline :
+                    </label>
+                    <select id="filtreDisciplineEchelles"
+                            class="controle-form"
+                            onchange="filtrerEchellesParDiscipline()"
+                            style="max-width: 300px;">
+                        <option value="">Toutes les disciplines</option>
+    `;
+
+    disciplines.forEach(discipline => {
+        html += `<option value="${discipline}">${discipline}</option>`;
+    });
+
+    html += `
+                        </select>
+                    </div>
+
+                    <div id="listeEchellesDisponibles">
+    `;
+
+    // Organiser par discipline
+    const echellesParDiscipline = {};
+    echellesDisponibles.forEach(echelle => {
+        const disc = echelle.discipline || 'Autre';
+        if (!echellesParDiscipline[disc]) {
+            echellesParDiscipline[disc] = [];
+        }
+        echellesParDiscipline[disc].push(echelle);
+    });
+
+    // Afficher par discipline
+    Object.keys(echellesParDiscipline).sort().forEach(discipline => {
+        html += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: #666;">${discipline}</h4>`;
+
+        echellesParDiscipline[discipline].forEach(echelle => {
+            const nomEchelle = echelle.nom || 'Sans titre';
+            const nbNiveaux = echelle.niveaux?.length || 0;
+            const description = echelle.description || '';
+            const auteur = echelle.auteur || '';
+
+            // Vérifier si déjà dans la bibliothèque
+            const dejaPresent = echelles.some(e => e.id === echelle.id && e.dansBibliotheque !== false);
+
+            html += `
+                <div class="echelle-disponible-item" data-discipline="${discipline}" style="
+                    padding: 12px;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 6px;
+                    margin-bottom: 10px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: start;
+                    gap: 12px;
+                    ${dejaPresent ? 'opacity: 0.5;' : ''}
+                ">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 500; margin-bottom: 4px;">${nomEchelle}</div>
+                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 4px;">
+                            ${nbNiveaux} niveau(x)${auteur ? ' • ' + auteur : ''}
+                        </div>
+                        ${description ? `<div style="font-size: 0.85rem; color: #888;">${description}</div>` : ''}
+                        ${dejaPresent ? '<div style="font-size: 0.8rem; color: var(--bleu-clair); font-style: italic; margin-top: 4px;">Déjà dans la barre latérale</div>' : ''}
+                    </div>
+                    ${!dejaPresent ? `
+                        <button
+                            onclick="ajouterEchelleIndividuelle('${echelle.id}')"
+                            class="btn btn-confirmer btn-tres-compact"
+                            title="Ajouter cette échelle à votre sélection">
+                            Ajouter à ma sélection
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+        });
+    });
+
+    html += `
+                    </div>
+
+                    <!-- Bouton "Ajouter des échelles" après la Section 2 -->
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button onclick="document.getElementById('fichier-import-echelles-modal').click()" class="btn btn-secondaire">
+                            Ajouter des échelles
+                        </button>
+                        <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" onchange="importerEchelles(event)">
+                    </div>
+
+                <!-- Bouton Fermer -->
+                <div style="display: flex; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                    <button onclick="fermerModalBibliothequeEchelles()" class="btn btn-annuler">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+/**
+ * ✅ AJOUT (8 décembre 2025) : Retirer une échelle de la bibliothèque (soft delete)
+ * @param {string} id - ID de l'échelle à retirer
+ */
+/**
+ * ✅ AJOUT (8 décembre 2025) : Ajoute une échelle individuelle à la bibliothèque
+ */
+async function ajouterEchelleIndividuelle(id) {
+    try {
+        const echelles = await db.get('echellesTemplates') || [];
+        let echelle = echelles.find(e => e.id === id);
+
+        if (!echelle) {
+            const toutesEchelles = obtenirToutesLesEchellesBibliotheque();
+            const echelleSource = toutesEchelles.find(e => e.id === id);
+            if (echelleSource) {
+                echelle = { ...echelleSource };
+                echelle.dansBibliotheque = true;
+                echelles.push(echelle);
+            } else {
+                alert('Échelle introuvable');
+                return;
+            }
+        } else {
+            echelle.dansBibliotheque = true;
+        }
+
+        await db.set('echellesTemplates', echelles);
+        fermerModalBibliothequeEchelles();
+        await afficherListeEchelles();
+        await afficherBibliothequeEchelles();
+        alert('Échelle ajoutée à votre sélection avec succès !');
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout:', error);
+        alert('Erreur lors de l\'ajout de l\'échelle');
+    }
+}
+
+/**
+ * ✅ AJOUT (8 décembre 2025) : Partage une échelle avec la communauté
+ */
+async function partagerEchelle(id) {
+    try {
+        const echelles = await db.get('echellesTemplates') || [];
+        const echelle = echelles.find(e => e.id === id);
+
+        if (!echelle) {
+            alert('Échelle introuvable');
+            return;
+        }
+
+        const metadata = await demanderMetadonneesEnrichies('echelle', echelle.nom);
+        if (!metadata) return;
+
+        echelle.dansBibliotheque = false;
+        echelle.metadata_cc = metadata;
+
+        await db.set('echellesTemplates', echelles);
+        fermerModalBibliothequeEchelles();
+        await afficherListeEchelles();
+        await afficherBibliothequeEchelles();
+
+        alert('Échelle partagée avec succès !\n\nElle est maintenant disponible dans la section "Échelles disponibles à ajouter".');
+    } catch (error) {
+        console.error('Erreur lors du partage:', error);
+        alert('Erreur lors du partage de l\'échelle');
+    }
+}
+
+async function retirerEchelleDeBibliotheque(id) {
+    const echelles = await db.get('echellesTemplates') || [];
+    const echelle = echelles.find(e => e.id === id);
+
+    if (!echelle) return;
+
+    // Soft delete : marquer comme non présente dans la bibliothèque
+    echelle.dansBibliotheque = false;
+
+    await db.set('echellesTemplates', echelles);
+
+    // Rafraîchir les affichages
+    await afficherListeEchelles();
+    fermerModalBibliothequeEchelles();
+    await afficherBibliothequeEchelles();
+
+    console.log(`Échelle "${echelle.nom}" retirée de la barre latérale`);
+}
+
+/**
+ * ✅ AJOUT (8 décembre 2025) : Ajouter les échelles sélectionnées à la bibliothèque
+ */
+async function ajouterEchellesABibliotheque() {
+    const checkboxes = document.querySelectorAll('#listeEchellesDisponibles input[type="checkbox"]:checked');
+
+    if (checkboxes.length === 0) {
+        alert('Veuillez sélectionner au moins une échelle à ajouter');
+        return;
+    }
+
+    const echelles = await db.get('echellesTemplates') || [];
+    const echellesBibliotheque = obtenirToutesLesEchellesBibliotheque();
+
+    let nbAjoutees = 0;
+
+    checkboxes.forEach(checkbox => {
+        const echelleId = checkbox.value;
+
+        // Trouver l'échelle dans la bibliothèque
+        const echelleBiblio = echellesBibliotheque.find(e => e.id === echelleId);
+        if (!echelleBiblio) return;
+
+        // Vérifier si déjà présente
+        const echelleExistante = echelles.find(e => e.id === echelleId);
+
+        if (echelleExistante) {
+            // Réactiver une échelle retirée
+            echelleExistante.dansBibliotheque = true;
+            nbAjoutees++;
+        } else {
+            // Ajouter nouvelle échelle
+            const nouvelleEchelle = {
+                ...echelleBiblio,
+                id: echelleId + '-local',  // Ajouter suffix pour éviter conflits
+                dansBibliotheque: true
+            };
+            echelles.push(nouvelleEchelle);
+            nbAjoutees++;
+        }
+    });
+
+    await db.set('echellesTemplates', echelles);
+
+    // Rafraîchir les affichages
+    await afficherListeEchelles();
+    fermerModalBibliothequeEchelles();
+
+    if (nbAjoutees > 0) {
+        alert(`${nbAjoutees} échelle(s) ajoutée(s) à la barre latérale`);
+    }
+}
+
+/**
+ * ✅ AJOUT (8 décembre 2025) : Filtrer les échelles disponibles par discipline
+ */
+function filtrerEchellesParDiscipline() {
+    const select = document.getElementById('filtreDisciplineEchelles');
+    const disciplineSelectionnee = select ? select.value : '';
+
+    const items = document.querySelectorAll('.echelle-disponible-item');
+    const titresDisciplines = document.querySelectorAll('#listeEchellesDisponibles h4');
+
+    if (!disciplineSelectionnee) {
+        // Afficher tout
+        items.forEach(item => item.style.display = 'flex');
+        titresDisciplines.forEach(titre => titre.style.display = 'block');
+    } else {
+        // Filtrer par discipline
+        items.forEach(item => {
+            const discipline = item.dataset.discipline;
+            item.style.display = discipline === disciplineSelectionnee ? 'flex' : 'none';
+        });
+
+        titresDisciplines.forEach(titre => {
+            const disciplineTitre = titre.textContent.trim();
+            titre.style.display = disciplineTitre === disciplineSelectionnee ? 'block' : 'none';
+        });
+    }
+}
+
+/**
+ * ✅ AJOUT (8 décembre 2025) : Fermer le modal de bibliothèque
+ */
+function fermerModalBibliothequeEchelles() {
+    const modal = document.getElementById('modalBibliothequeEchelles');
+    if (modal) {
+        modal.remove();
+    }
+}
+
 async function creerNouvelleEchelle() {
     document.getElementById('accueilEchelles').style.display = 'none';
     document.getElementById('conteneurEditionEchelle').style.display = 'block';
@@ -2008,12 +2452,9 @@ async function creerNouvelleEchelle() {
     // Les boutons Import/Export sont maintenant dans l'en-tête
 
     // Masquer les boutons Exporter, Importer, Dupliquer et Supprimer (mode création)
-    const btnExporter = document.getElementById('btnExporterEchelle');
-    const btnImporter = document.getElementById('btnImporterEchelle');
+    // Note: Export/Import se font maintenant via la bibliothèque
     const btnDupliquer = document.getElementById('btnDupliquerEchelle');
     const btnSupprimer = document.getElementById('btnSupprimerEchelle');
-    if (btnExporter) btnExporter.style.display = 'none';
-    if (btnImporter) btnImporter.style.display = 'none';
     if (btnDupliquer) btnDupliquer.style.display = 'none';
     if (btnSupprimer) btnSupprimer.style.display = 'none';
 
@@ -2061,13 +2502,10 @@ async function chargerEchellePourModif(id) {
     // Note: Section optionsImportExportEchelles supprimée (Beta 92)
     // Les boutons Import/Export sont maintenant dans l'en-tête
 
-    // Afficher les boutons Exporter, Importer, Dupliquer et Supprimer (mode édition)
-    const btnExporter = document.getElementById('btnExporterEchelle');
-    const btnImporter = document.getElementById('btnImporterEchelle');
+    // Note: Export/Import se font maintenant via la bibliothèque
+    // Afficher les boutons Dupliquer et Supprimer (mode édition)
     const btnDupliquer = document.getElementById('btnDupliquerEchelle');
     const btnSupprimer = document.getElementById('btnSupprimerEchelle');
-    if (btnExporter) btnExporter.style.display = 'inline-block';
-    if (btnImporter) btnImporter.style.display = 'inline-block';
     if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
     if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
@@ -2639,3 +3077,10 @@ window.supprimerNiveauEchelle = supprimerNiveauEchelle;
 window.modifierNiveauEchelle = modifierNiveauEchelle;
 window.verifierUtilisationEchelle = verifierUtilisationEchelle;
 window.migrerEvaluationsVersNouvelleEchelle = migrerEvaluationsVersNouvelleEchelle;
+
+// ✅ AJOUT (8 décembre 2025) : Exports fonctions bibliothèque
+window.afficherBibliothequeEchelles = afficherBibliothequeEchelles;
+window.retirerEchelleDeBibliotheque = retirerEchelleDeBibliotheque;
+window.ajouterEchellesABibliotheque = ajouterEchellesABibliotheque;
+window.filtrerEchellesParDiscipline = filtrerEchellesParDiscipline;
+window.fermerModalBibliothequeEchelles = fermerModalBibliothequeEchelles;
