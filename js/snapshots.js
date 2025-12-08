@@ -118,15 +118,6 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     // ⚡ OPTIMISATION : Utiliser le cache si fourni
     // ✅ CORRECTION (7 déc 2025): Utiliser 'evaluationsSauvegardees' (clé correcte)
     const evaluations = evaluationsCache || obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    // ✅ CORRECTION (7 déc 2025): Propriété correcte 'etudiantDA' au lieu de 'da'
-    const evaluationsEtudiant = evaluations.filter(e => e.etudiantDA === da);
-    // console.log(`[DEBUG] DA=${da}, evaluations=${evaluations.length}, pour cet étud=${evaluationsEtudiant.length}`);
-
-    // Filtrer seulement les évaluations JUSQU'À la date limite
-    const evaluationsFiltrees = evaluationsEtudiant.filter(e => {
-        if (!e.dateEvaluation) return false;
-        return e.dateEvaluation <= dateLimite;
-    });
 
     // Calculer C : Proportion de PRODUCTIONS remises (pas évaluations)
     // ✅ CORRECTION (7 déc 2025) : Aligner avec pratique-sommative.js
