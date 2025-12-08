@@ -126,10 +126,25 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     // Lire les productions
     const productions = obtenirDonneesSelonMode('productions') || [];
 
-    // Filtrer évaluations jusqu'à la date limite
+    // ✨ AMÉLIORATION (8 déc 2025) : Filtrer basé sur dateRemise (échéance) plutôt que dateEvaluation
+    // Associe la performance à la semaine de remise, pas à la semaine d'évaluation
+    // ✨ CORRECTION (8 déc 2025) : N'inclure que les productions RÉELLEMENT évaluées
     const evaluationsFiltrees = evaluations.filter(e => {
-        if (!e.dateEvaluation) return false;
-        return e.dateEvaluation <= dateLimite;
+        if (!e.productionId || e.remplaceeParId) return false;
+
+        // ✅ NOUVEAU : Vérifier que l'évaluation a bien une note ET n'est pas "non remis"
+        if (e.statutRemise === 'non-remis') return false;
+        if (e.noteFinale === null || e.noteFinale === undefined) return false;
+
+        // Trouver la production associée
+        const production = productions.find(p => p.id === e.productionId);
+        if (!production) return false;
+
+        // Utiliser dateRemise (échéance) en priorité, sinon dateEvaluation comme fallback
+        const dateReference = production.dateRemise || e.dateEvaluation;
+        if (!dateReference) return false;
+
+        return dateReference <= dateLimite;
     });
 
     // 1. Identifier les productions QUI ONT ÉTÉ ÉVALUÉES jusqu'à cette date
@@ -316,6 +331,13 @@ async function verifierEtCapturerSnapshotHebdomadaire() {
  */
 async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) {
     try {
+        // ✨ NOUVEAU (8 déc 2025) : Empêcher la capture de snapshots pour dates futures
+        const aujourdhui = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        if (dateSeance > aujourdhui) {
+            console.warn(`⚠️ Date ${dateSeance} est dans le futur, impossible de capturer un snapshot`);
+            return null;
+        }
+
         // Vérifier que la date est valide
         const calendrier = obtenirCalendrierComplet();
         const infoJour = calendrier[dateSeance];
@@ -674,8 +696,14 @@ async function reconstruireSnapshotsHistoriques() {
         // seancesCompletes contient aussi des dates VIDES (tableaux vides []) pour tous les jours
         // de cours du calendrier. On ne veut PAS créer de snapshots pour ces jours vides.
         // Avant: 75 dates (tous les jours de cours) → Après: ~30 dates (seulement jours avec séances)
+
+        // ✨ NOUVEAU (8 déc 2025) : Ne créer des snapshots QUE pour les séances passées
+        // Empêche l'affichage de données futures dans les graphiques
+        const aujourdhui = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
         const datesCours = Object.keys(seancesCompletes)
             .filter(date => seancesCompletes[date] && seancesCompletes[date].length > 0)
+            .filter(date => date <= aujourdhui)  // ✨ NOUVEAU : Ne garder que les dates passées
             .sort();
 
         // ✨ Charger les étudiants pour estimation précise (universel, pas codé en dur)

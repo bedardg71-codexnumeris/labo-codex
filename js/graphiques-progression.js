@@ -10,8 +10,8 @@
  * 3. Graphique groupe spaghetti : Tous les étudiants avec zones colorées
  *
  * @author Grégoire Bédard
- * @date 3 décembre 2025
- * @version 1.0.0
+ * @date 8 décembre 2025
+ * @version 1.1.0 - Uniformisation visuelle + persistance légende
  */
 
 /* ===============================
@@ -20,7 +20,6 @@
 
 /**
  * Couleurs standardisées pour les indices
- * ✨ AMÉLIORATION (Beta 93) : Couleurs plus contrastées et épaisseurs différenciées
  */
 const COULEURS_INDICES = {
     A: '#1976D2',      // Bleu foncé (Assiduité)
@@ -30,24 +29,17 @@ const COULEURS_INDICES = {
 };
 
 /**
- * Épaisseurs de ligne pour différencier visuellement les indices
+ * ✨ UNIFORMISATION (8 déc 2025) : Épaisseur unique pour toutes les courbes
+ * Style simple et professionnel (comme graphique critères)
  */
-const EPAISSEURS_INDICES = {
-    A: 3,   // Assiduité : ligne épaisse
-    C: 2,   // Complétion : ligne moyenne
-    P: 4,   // Performance : ligne très épaisse (indice principal)
-    E: 2.5  // Engagement : ligne moyenne-épaisse
-};
+const EPAISSEUR_LIGNE_STANDARD = 2;
 
 /**
- * Styles de pointillés pour différencier encore plus
+ * ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Persistance de l'état de la légende
+ * Permet de comparer le même critère/indice entre plusieurs élèves
  */
-const STYLES_LIGNE = {
-    A: [],          // Ligne pleine
-    C: [5, 3],      // Tirets moyens
-    P: [],          // Ligne pleine
-    E: [2, 2]       // Petits pointillés
-};
+let etatLegendeGraphiqueACPE = {}; // { 'A': true, 'C': false, 'P': true, 'E': true }
+let etatLegendeGraphiqueCriteres = {}; // { 'Structure': true, 'Rigueur': false, ... }
 
 /**
  * Zones colorées selon échelle IDME (0.00 à 1.00)
@@ -175,11 +167,11 @@ function creerGraphiqueIndividuel(canvasId, da) {
         };
 
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
-        const donneesA = snapshots.map(s => (s.A / 100) + OFFSET_VISUEL.A);
-        // ✅ CORRECTION (7 déc 2025) : C doit être null si pas encore d'évaluation (comme P et E)
+        // ✅ CORRECTION (8 déc 2025) : Ne pas afficher les valeurs à 0 ou null (semaines sans données ou futures)
+        const donneesA = snapshots.map(s => s.A !== null && s.A !== 0 ? (s.A / 100) + OFFSET_VISUEL.A : null);
         const donneesC = snapshots.map(s => s.C !== null && s.C !== 0 ? (s.C / 100) + OFFSET_VISUEL.C : null);
-        const donneesP = snapshots.map(s => s.P !== null ? (s.P / 100) + OFFSET_VISUEL.P : null);
-        const donneesE = snapshots.map(s => s.E !== null ? s.E + OFFSET_VISUEL.E : null);
+        const donneesP = snapshots.map(s => s.P !== null && s.P !== 0 ? (s.P / 100) + OFFSET_VISUEL.P : null);
+        const donneesE = snapshots.map(s => s.E !== null && s.E !== 0 ? s.E + OFFSET_VISUEL.E : null);
 
         // Calculer min/max pour ajuster l'échelle Y
         // ✅ CORRECTION (Beta 93) : Filtrer les valeurs null avant calcul min/max
@@ -219,8 +211,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         data: donneesA,
                         borderColor: COULEURS_INDICES.A,
                         backgroundColor: 'transparent',
-                        borderWidth: EPAISSEURS_INDICES.A,
-                        borderDash: STYLES_LIGNE.A,
+                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
                         tension: 0.4, // Courbes lisses
                         pointRadius: 5,
                         pointHoverRadius: 7,
@@ -233,45 +224,42 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         data: donneesC,
                         borderColor: COULEURS_INDICES.C,
                         backgroundColor: 'transparent',
-                        borderWidth: EPAISSEURS_INDICES.C,
-                        borderDash: STYLES_LIGNE.C,
+                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
                         tension: 0.4,
                         pointRadius: 5,
                         pointHoverRadius: 7,
                         pointBackgroundColor: COULEURS_INDICES.C,
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
-                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
+                        spanGaps: false
                     },
                     {
                         label: 'Performance (P)',
                         data: donneesP,
                         borderColor: COULEURS_INDICES.P,
                         backgroundColor: 'transparent',
-                        borderWidth: EPAISSEURS_INDICES.P,
-                        borderDash: STYLES_LIGNE.P,
+                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
                         tension: 0.4,
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
                         pointBackgroundColor: COULEURS_INDICES.P,
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
-                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
+                        spanGaps: false
                     },
                     {
                         label: 'Engagement (E)',
                         data: donneesE,
                         borderColor: COULEURS_INDICES.E,
                         backgroundColor: 'transparent',
-                        borderWidth: EPAISSEURS_INDICES.E,
-                        borderDash: STYLES_LIGNE.E,
+                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
                         tension: 0.4,
                         pointRadius: 5,
                         pointHoverRadius: 7,
                         pointBackgroundColor: COULEURS_INDICES.E,
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
-                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
+                        spanGaps: false
                     }
                 ]
             },
@@ -286,7 +274,28 @@ function creerGraphiqueIndividuel(canvasId, da) {
                     },
                     legend: {
                         display: true,
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: { size: 12 }
+                        },
+                        onClick: function(e, legendItem, legend) {
+                            // ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Persistance de la légende
+                            const index = legendItem.datasetIndex;
+                            const chart = legend.chart;
+                            const meta = chart.getDatasetMeta(index);
+
+                            // Toggle visibilité
+                            meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+
+                            // Sauvegarder l'état (extraire la lettre de l'étiquette)
+                            const match = legendItem.text.match(/\(([A-Z])\)/);
+                            const indice = match ? match[1] : legendItem.text;
+                            etatLegendeGraphiqueACPE[indice] = meta.hidden === null ? true : false;
+
+                            chart.update();
+                        }
                     },
                     tooltip: {
                         mode: 'index',
@@ -338,6 +347,18 @@ function creerGraphiqueIndividuel(canvasId, da) {
 
         // Créer le graphique
         const chart = new Chart(ctx, config);
+
+        // ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Restaurer l'état de la légende
+        // Permet de comparer le même indice entre plusieurs élèves
+        const indices = ['A', 'C', 'P', 'E'];
+        indices.forEach((indice, index) => {
+            if (etatLegendeGraphiqueACPE[indice] === false) {
+                const meta = chart.getDatasetMeta(index);
+                meta.hidden = true;
+            }
+        });
+        chart.update();
+
         console.log(`✅ Graphique individuel créé pour DA ${da}`);
         return chart;
 
@@ -404,11 +425,11 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
         };
 
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
-        const donneesA = snapshots.map(s => (s.groupe.moyenneA / 100) + OFFSET_VISUEL.A);
-        // ✅ CORRECTION (7 déc 2025) : C doit être null si pas encore d'évaluation (comme P et E)
+        // ✅ CORRECTION (8 déc 2025) : Ne pas afficher les valeurs à 0 ou null (semaines sans données ou futures)
+        const donneesA = snapshots.map(s => s.groupe.moyenneA !== null && s.groupe.moyenneA !== 0 ? (s.groupe.moyenneA / 100) + OFFSET_VISUEL.A : null);
         const donneesC = snapshots.map(s => s.groupe.moyenneC !== null && s.groupe.moyenneC !== 0 ? (s.groupe.moyenneC / 100) + OFFSET_VISUEL.C : null);
-        const donneesP = snapshots.map(s => s.groupe.moyenneP !== null ? (s.groupe.moyenneP / 100) + OFFSET_VISUEL.P : null);
-        const donneesE = snapshots.map(s => s.groupe.moyenneE !== null ? s.groupe.moyenneE + OFFSET_VISUEL.E : null);
+        const donneesP = snapshots.map(s => s.groupe.moyenneP !== null && s.groupe.moyenneP !== 0 ? (s.groupe.moyenneP / 100) + OFFSET_VISUEL.P : null);
+        const donneesE = snapshots.map(s => s.groupe.moyenneE !== null && s.groupe.moyenneE !== 0 ? s.groupe.moyenneE + OFFSET_VISUEL.E : null);
 
         // Obtenir le canvas
         const canvas = document.getElementById(canvasId);
@@ -429,43 +450,55 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         data: donneesA,
                         borderColor: COULEURS_INDICES.A,
                         backgroundColor: 'transparent',
-                        borderWidth: 3,
+                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
                         tension: 0.4,
                         pointRadius: 5,
-                        pointHoverRadius: 7
+                        pointHoverRadius: 7,
+                        pointBackgroundColor: COULEURS_INDICES.A,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
                     },
                     {
                         label: 'Complétion (C)',
                         data: donneesC,
                         borderColor: COULEURS_INDICES.C,
                         backgroundColor: 'transparent',
-                        borderWidth: 3,
+                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
                         tension: 0.4,
                         pointRadius: 5,
                         pointHoverRadius: 7,
-                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
+                        pointBackgroundColor: COULEURS_INDICES.C,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        spanGaps: false
                     },
                     {
                         label: 'Performance (P)',
                         data: donneesP,
                         borderColor: COULEURS_INDICES.P,
                         backgroundColor: 'transparent',
-                        borderWidth: 3,
+                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
                         tension: 0.4,
                         pointRadius: 5,
                         pointHoverRadius: 7,
-                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
+                        pointBackgroundColor: COULEURS_INDICES.P,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        spanGaps: false
                     },
                     {
                         label: 'Engagement (E)',
                         data: donneesE,
                         borderColor: COULEURS_INDICES.E,
                         backgroundColor: 'transparent',
-                        borderWidth: 3,
+                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
                         tension: 0.4,
                         pointRadius: 5,
                         pointHoverRadius: 7,
-                        spanGaps: false  // ✅ CORRECTION (7 déc 2025) : Ne pas connecter les points si données manquantes
+                        pointBackgroundColor: COULEURS_INDICES.E,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        spanGaps: false
                     }
                 ]
             },
@@ -480,7 +513,28 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                     },
                     legend: {
                         display: true,
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: { size: 12 }
+                        },
+                        onClick: function(e, legendItem, legend) {
+                            // ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Persistance de la légende
+                            const index = legendItem.datasetIndex;
+                            const chart = legend.chart;
+                            const meta = chart.getDatasetMeta(index);
+
+                            // Toggle visibilité
+                            meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+
+                            // Sauvegarder l'état (extraire la lettre de l'étiquette)
+                            const match = legendItem.text.match(/\(([A-Z])\)/);
+                            const indice = match ? match[1] : legendItem.text;
+                            etatLegendeGraphiqueACPE[indice] = meta.hidden === null ? true : false;
+
+                            chart.update();
+                        }
                     },
                     tooltip: {
                         mode: 'index',
@@ -532,6 +586,18 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
 
         // Créer le graphique
         const chart = new Chart(ctx, config);
+
+        // ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Restaurer l'état de la légende
+        // Permet de comparer le même indice entre plusieurs vues
+        const indices = ['A', 'C', 'P', 'E'];
+        indices.forEach((indice, index) => {
+            if (etatLegendeGraphiqueACPE[indice] === false) {
+                const meta = chart.getDatasetMeta(index);
+                meta.hidden = true;
+            }
+        });
+        chart.update();
+
         console.log('✅ Graphique groupe moyennes créé');
         return chart;
 
@@ -886,11 +952,18 @@ function creerGraphiqueCriteres(canvasId, da) {
                             font: { size: 12 }
                         },
                         onClick: function(e, legendItem, legend) {
-                            // Comportement par défaut : cliquer pour masquer/afficher
+                            // ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Persistance de la légende
                             const index = legendItem.datasetIndex;
                             const chart = legend.chart;
                             const meta = chart.getDatasetMeta(index);
+
+                            // Toggle visibilité
                             meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+
+                            // Sauvegarder l'état (nom du critère)
+                            const nomCritere = legendItem.text;
+                            etatLegendeGraphiqueCriteres[nomCritere] = meta.hidden === null ? true : false;
+
                             chart.update();
                         }
                     },
@@ -1006,7 +1079,22 @@ function creerGraphiqueCriteres(canvasId, da) {
             }
         };
 
-        return new Chart(ctx, config);
+        // Créer le graphique
+        const chart = new Chart(ctx, config);
+
+        // ✨ NOUVELLE FONCTIONNALITÉ (8 déc 2025) : Restaurer l'état de la légende
+        // Permet de comparer le même critère entre plusieurs élèves
+        donnees.criteresUniques.forEach((critere, index) => {
+            if (etatLegendeGraphiqueCriteres[critere] === false) {
+                const meta = chart.getDatasetMeta(index);
+                meta.hidden = true;
+            }
+        });
+        chart.update();
+
+        console.log(`✅ Graphique critères créé avec ${donnees.criteresUniques.length} critères`);
+        return chart;
+
     } catch (error) {
         console.error('[creerGraphiqueCriteres] Erreur:', error);
         return null;
