@@ -2203,6 +2203,20 @@ body[data-mode="anonymisation"] .sidebar-navigation {
                 </div>
             </div>
 
+            <!-- Exemple interactif -->
+            <div class="guide-specs" style="margin-top: 30px; background: #e8f5e9; border-left: 4px solid #4caf50;">
+                <div class="guide-specs-title">👁️ Exemple visuel interactif</div>
+                <p style="margin: 10px 0; line-height: 1.6;">
+                    Cliquez sur le bouton ci-dessous pour voir un exemple fonctionnel du modal de bibliothèque
+                    avec des données de démonstration.
+                </p>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button onclick="afficherModalBibliothequeDemo()" class="btn btn-principal">
+                        Voir l'exemple de modal
+                    </button>
+                </div>
+            </div>
+
             <div class="guide-do-dont">
                 <div class="guide-do">
                     <div class="guide-do-title">✅ À FAIRE</div>
@@ -3789,6 +3803,167 @@ body[data-mode="anonymisation"] .entete {
             card.style.animation = 'slideDown 0.3s ease';
         } else {
             card.style.display = 'none';
+        }
+    }
+
+    // Modal de bibliothèque - Exemple interactif
+    function afficherModalBibliothequeDemo() {
+        // Données de démonstration
+        const productionsDansSelection = [
+            { id: 1, titre: "Analyse de texte", description: "Roman contemporain", type: "Travail", ponderation: 20, objectif: "Analyser les procédés narratifs" },
+            { id: 2, titre: "Dissertation", description: "Essai argumentatif", type: "Examen", ponderation: 30, objectif: "Développer une argumentation" }
+        ];
+
+        const productionsDisponibles = {
+            "Français (601)": [
+                { id: 3, titre: "Commentaire de texte", description: "Poésie", type: "Travail", ponderation: 15, auteur: "Marie Tremblay" },
+                { id: 4, titre: "Rédaction libre", description: "Texte créatif", type: "Portfolio", ponderation: 10, auteur: "Jean Dupont" }
+            ],
+            "Littérature (602)": [
+                { id: 5, titre: "Analyse comparative", description: "Deux œuvres", type: "Travail", ponderation: 25, auteur: "Sophie Martin", retiree: true }
+            ]
+        };
+
+        const modalHTML = `
+            <div id="modalBibliothequeDemo" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;">
+
+                <div style="
+                    background: white;
+                    border-radius: 8px;
+                    padding: 30px;
+                    max-width: 800px;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);">
+
+                    <h2 style="margin-top: 0; color: #2c3e50;">Bibliothèque de productions</h2>
+                    <p style="color: #7f8c8d; margin-bottom: 20px;">
+                        Gérez les productions affichées dans la barre latérale.
+                    </p>
+
+                    <h3 style="color: var(--bleu-clair); font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                        Productions dans votre sélection (${productionsDansSelection.length})
+                    </h3>
+                    <div style="margin-bottom: 30px;">
+                        ${productionsDansSelection.map(prod => `
+                            <div style="
+                                border: 1px solid var(--bleu-clair);
+                                border-radius: 6px;
+                                padding: 15px;
+                                margin-bottom: 10px;
+                                background: var(--bleu-tres-pale);">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
+                                            ${prod.titre} - ${prod.description}
+                                        </div>
+                                        <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">
+                                            Type: ${prod.type} • Pondération: ${prod.ponderation}%
+                                        </div>
+                                        <div style="color: #95a5a6; font-size: 0.85em;">
+                                            Objectif: ${prod.objectif}
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px; margin-left: 10px;">
+                                        <button class="btn btn-secondaire btn-tres-compact" onclick="alert('Fonction Partager (démo)')">
+                                            Partager
+                                        </button>
+                                        <button class="btn btn-supprimer btn-tres-compact" onclick="alert('Fonction Retirer (démo)')">
+                                            Retirer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <button class="btn btn-secondaire" onclick="alert('Export de toutes les productions (démo)')">
+                            Partager toutes mes productions
+                        </button>
+                    </div>
+
+                    <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
+                        Productions disponibles à ajouter
+                    </h3>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
+                            Filtrer par discipline :
+                        </label>
+                        <select class="controle-form" style="max-width: 300px;">
+                            <option value="">Toutes les disciplines</option>
+                            <option value="français">Français (601)</option>
+                            <option value="litterature">Littérature (602)</option>
+                        </select>
+                    </div>
+
+                    ${Object.keys(productionsDisponibles).map(discipline => `
+                        <h4 style="color: #555; font-size: 0.95rem; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;">
+                            ${discipline}
+                        </h4>
+                        ${productionsDisponibles[discipline].map(prod => {
+                            const badgeRetiree = prod.retiree
+                                ? '<span style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 8px;">Retirée</span>'
+                                : '';
+                            return `
+                                <div style="
+                                    border: 1px solid #ddd;
+                                    border-radius: 6px;
+                                    padding: 15px;
+                                    margin-bottom: 10px;
+                                    background: white;">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
+                                                ${prod.titre} - ${prod.description}
+                                                ${badgeRetiree}
+                                            </div>
+                                            <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">
+                                                Type: ${prod.type} • Pondération: ${prod.ponderation}% • Par ${prod.auteur}
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-confirmer btn-tres-compact" onclick="alert('Ajouter à ma sélection (démo)')">
+                                            Ajouter à ma sélection
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    `).join('')}
+
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button class="btn btn-secondaire" onclick="alert('Import de productions (démo)')">
+                            Ajouter des productions
+                        </button>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                        <button onclick="fermerModalBibliothequeDemo()" class="btn btn-annuler">
+                            Fermer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    function fermerModalBibliothequeDemo() {
+        const modal = document.getElementById('modalBibliothequeDemo');
+        if (modal) {
+            modal.remove();
         }
     }
 </script>
