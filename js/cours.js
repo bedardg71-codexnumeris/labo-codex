@@ -260,52 +260,76 @@ function afficherTableauCours() {
    =============================== */
 
 /**
- * Charge les pratiques disponibles dans le sélecteur du formulaire
+ * Affiche la pratique active en lecture seule (Single Source of Truth)
+ *
+ * ✅ MODIFICATION (8 décembre 2025) : La pratique n'est plus modifiable ici
+ * Elle doit être définie uniquement dans Réglages → Pratique de notation
+ *
+ * ✅ CORRECTION (8 décembre 2025) : Lecture du nom réel depuis PratiqueManager
+ * au lieu d'un mapping codé en dur
  *
  * FONCTIONNEMENT:
- * 1. Récupère toutes les pratiques intégrées disponibles
- * 2. Détermine quelle pratique est marquée comme "par défaut"
- * 3. Remplit le <select id="pratiqueCours">
- * 4. Présélectionne la pratique par défaut
+ * 1. Lit la pratique active depuis modalitesEvaluation
+ * 2. Récupère le nom réel depuis PratiqueManager.listerPratiques()
+ * 3. Affiche le nom de la pratique en lecture seule
+ * 4. Ajoute [PAR DÉFAUT] si applicable
  */
-function chargerSelecteurPratiques() {
-    const selectPratique = document.getElementById('pratiqueCours');
-    if (!selectPratique) return;
+async function afficherPratiqueEnLectureSeule() {
+    const affichage = document.getElementById('pratiqueCoursAffichage');
+    if (!affichage) return;
 
-    // Obtenir la pratique par défaut depuis le storage
-    const pratiqueParDefaut = getPratiqueParDefaut ? getPratiqueParDefaut() : 'pan-maitrise';
+    // Lire la pratique depuis la source unique
+    const modalites = db.getSync('modalitesEvaluation', {});
+    const pratiqueId = modalites.pratique || 'pan-maitrise';
 
-    // Liste des pratiques intégrées (codées en dur pour Beta 91)
-    const pratiquesIntegrees = [
-        {
-            id: 'pan-maitrise',
-            nom: 'PAN-Maîtrise (IDME 4 niveaux)',
-            description: 'Échelle IDME, critères SRPNF, N meilleurs artefacts'
-        },
-        {
-            id: 'sommative',
-            nom: 'Sommative traditionnelle',
-            description: 'Moyenne pondérée de toutes les évaluations'
+    // Obtenir toutes les pratiques disponibles (codées + configurables)
+    let nomPratique = 'Chargement...';
+
+    try {
+        if (typeof PratiqueManager !== 'undefined' && PratiqueManager.listerPratiques) {
+            const toutesLesPratiques = await PratiqueManager.listerPratiques();
+
+            // Chercher dans les pratiques codées
+            let pratiqueTrouvee = toutesLesPratiques.codees?.find(p => p.id === pratiqueId);
+
+            // Si pas trouvée, chercher dans les pratiques configurables
+            if (!pratiqueTrouvee) {
+                pratiqueTrouvee = toutesLesPratiques.configurables?.find(p => p.id === pratiqueId);
+            }
+
+            // Utiliser le nom de la pratique trouvée
+            if (pratiqueTrouvee) {
+                nomPratique = pratiqueTrouvee.nom;
+
+                // Ajouter [PAR DÉFAUT] si c'est la pratique par défaut
+                const pratiqueDefaut = db.getSync('pratiqueParDefaut', 'pan-maitrise');
+                if (pratiqueId === pratiqueDefaut) {
+                    nomPratique += ' [PAR DÉFAUT]';
+                }
+            } else {
+                // Fallback si la pratique n'est pas trouvée
+                nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Maîtrise';
+            }
+        } else {
+            // Fallback si PratiqueManager n'est pas disponible
+            nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Maîtrise';
         }
-    ];
+    } catch (error) {
+        console.error('Erreur lors de la lecture de la pratique:', error);
+        // Fallback en cas d'erreur
+        nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Maîtrise';
+    }
 
-    // Vider le sélecteur
-    selectPratique.innerHTML = '';
+    affichage.textContent = nomPratique;
+}
 
-    // Ajouter les options
-    pratiquesIntegrees.forEach(pratique => {
-        const option = document.createElement('option');
-        option.value = pratique.id;
-        option.textContent = pratique.nom;
-
-        // Marquer la pratique par défaut
-        if (pratique.id === pratiqueParDefaut) {
-            option.textContent += ' [PAR DÉFAUT]';
-            option.selected = true;
-        }
-
-        selectPratique.appendChild(option);
-    });
+/**
+ * Navigue vers la section Pratique de notation
+ * Appelée par le bouton "Modifier la pratique de notation"
+ */
+function naviguerVersPratiqueNotation() {
+    // Naviguer vers Réglages → Pratique de notation
+    afficherSousSection('reglages-pratique-notation');
 }
 
 /**
@@ -339,8 +363,8 @@ function afficherFormCours(id = null) {
     formulaire.style.display = 'block';
     if (btnAjouter) btnAjouter.style.display = 'none';
 
-    // Charger les pratiques disponibles dans le sélecteur
-    chargerSelecteurPratiques();
+    // Afficher la pratique active en lecture seule (Single Source of Truth)
+    afficherPratiqueEnLectureSeule();
     
     if (id) {
         // Mode édition
@@ -372,11 +396,7 @@ function afficherFormCours(id = null) {
             document.getElementById('heuresParSemaine').value = c.heuresParSemaine || '4';
             document.getElementById('formatHoraire').value = c.formatHoraire || '2x2';
 
-            // Charger la pratique associée
-            const selectPratique = document.getElementById('pratiqueCours');
-            if (selectPratique && c.pratiqueId) {
-                selectPratique.value = c.pratiqueId;
-            }
+            // La pratique est affichée en lecture seule (pas modifiable ici)
         }
     } else {
         // Mode ajout - MAIS vérifier s'il y a déjà un cours (créé par Primo par ex)
@@ -400,10 +420,7 @@ function afficherFormCours(id = null) {
             document.getElementById('heuresParSemaine').value = premierCours.heuresParSemaine || '4';
             document.getElementById('formatHoraire').value = premierCours.formatHoraire || '2x2';
 
-            const selectPratique = document.getElementById('pratiqueCours');
-            if (selectPratique && premierCours.pratiqueId) {
-                selectPratique.value = premierCours.pratiqueId;
-            }
+            // La pratique est affichée en lecture seule (pas modifiable ici)
 
             if (titre) titre.textContent = 'Configuration du cours';
             coursEnEdition = premierCours.id; // Permettre la modification
@@ -490,10 +507,11 @@ function annulerFormCours() {
  */
 function sauvegarderCours() {
     let cours = db.getSync('listeCours', []);
-    
-    // Récupérer la pratique sélectionnée (ou pratique par défaut si non spécifiée)
-    const selectPratique = document.getElementById('pratiqueCours');
-    const pratiqueId = selectPratique ? selectPratique.value : null;
+
+    // ✅ SINGLE SOURCE OF TRUTH (8 décembre 2025)
+    // Lire la pratique depuis modalitesEvaluation (source unique)
+    const modalites = db.getSync('modalitesEvaluation', {});
+    const pratiqueId = modalites.pratique || 'pan-maitrise';
 
     const nouveauCours = {
         id: coursEnEdition || 'COURS' + Date.now(),
@@ -813,3 +831,4 @@ window.supprimerCours = supprimerCours;
 window.activerCours = activerCours;
 window.afficherTableauCours = afficherTableauCours;
 window.initialiserModuleCours = initialiserModuleCours;
+window.naviguerVersPratiqueNotation = naviguerVersPratiqueNotation;
