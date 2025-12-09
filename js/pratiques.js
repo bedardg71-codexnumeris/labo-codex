@@ -3362,12 +3362,14 @@ async function creerPratiqueDepuisWizard() {
             }
         } else {
             // Mode création : Sauvegarder via PratiqueManager
+            // ✅ Les pratiques créées par l'utilisateur sont directement dans la bibliothèque
             await PratiqueManager.sauvegarderPratique({
                 id: pratiqueConfig.id,
                 nom: pratiqueConfig.nom,
                 auteur: pratiqueConfig.auteur,
                 description: pratiqueConfig.description,
-                config: pratiqueConfig
+                config: pratiqueConfig,
+                dansBibliotheque: true  // Ajout immédiat à la sidebar
             });
             console.log('✅ Pratique créée:', pratiqueConfig.id);
         }
