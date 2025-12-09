@@ -1723,9 +1723,8 @@ async function afficherListePratiques() {
         const modalites = db.getSync('modalitesEvaluation', {});
         const pratiqueActiveId = modalites.pratique;
 
-        // Structure en 2 colonnes pour séparer pratiques intégrées et configurables
+        // Générer uniquement les pratiques intégrées (les configurables sont dans la sidebar)
         let htmlIntegrees = '';
-        let htmlConfigurables = '';
 
         // 1. Pratiques codées (intégrées - non modifiables)
         if (pratiques.codees && pratiques.codees.length > 0) {
@@ -1735,55 +1734,31 @@ async function afficherListePratiques() {
             });
         }
 
-        // 2. Pratiques configurables (filtrer seulement celles dans la bibliothèque)
-        // ✅ MODIFICATION (8 décembre 2025) : Afficher seulement les pratiques avec dansBibliotheque !== false
-        if (pratiques.configurables && pratiques.configurables.length > 0) {
-            const pratiquesDansBibliotheque = pratiques.configurables.filter(p => p.dansBibliotheque !== false);
-            pratiquesDansBibliotheque.forEach(p => {
-                const estActive = p.id === pratiqueActiveId;
-                htmlConfigurables += genererCartePratique(p, estActive, true); // true = modifiable
-            });
-        }
-
-        // 3. Assembler le HTML final en 2 colonnes
+        // 3. Assembler le HTML final (une seule colonne : pratiques intégrées)
         let html = '';
 
-        if (htmlIntegrees || htmlConfigurables) {
+        if (htmlIntegrees) {
             html = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
-                    <!-- Colonne 1: Pratiques de notation -->
-                    <div>
-                        <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 15px;">
-                            Structures de pratiques (non modifiables)
-                        </h4>
+                <div>
+                    <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 15px;">
+                        Structures de pratiques (non modifiables)
+                    </h4>
 
-                        <!-- Sélecteur de pratique par défaut -->
-                        ${genererSelecteurPratiqueParDefaut()}
+                    <!-- Sélecteur de pratique par défaut -->
+                    ${genererSelecteurPratiqueParDefaut()}
 
-                        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
-                            ${htmlIntegrees || '<p style="color: var(--gris-moyen); font-style: italic;">Aucune pratique intégrée</p>'}
-                        </div>
+                    <!-- Actions pour gérer les pratiques personnalisées -->
+                    <div class="btn-groupe" style="margin: 15px 0;">
+                        <button class="btn btn-confirmer" onclick="creerNouvellePratique()">
+                            Créer une pratique
+                        </button>
+                        <button class="btn btn-secondaire" onclick="importerPratiqueJSON()">
+                            Importer une pratique
+                        </button>
                     </div>
 
-                    <!-- Colonne 2: Bibliothèque de pratiques personnalisées -->
-                    <div>
-                        <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 15px;">
-                            Bibliothèque de pratiques personnalisées (modifiables)
-                        </h4>
-
-                        <!-- Actions pour gérer les configurations personnalisées -->
-                        <div class="btn-groupe" style="margin-bottom: 15px;">
-                            <button class="btn btn-confirmer" onclick="creerNouvellePratique()">
-                                Créer une pratique
-                            </button>
-                            <button class="btn btn-secondaire" onclick="importerPratiqueJSON()">
-                                Importer une pratique
-                            </button>
-                        </div>
-
-                        <div style="display: flex; flex-direction: column; gap: 15px;">
-                            ${htmlConfigurables || '<p style="color: var(--gris-moyen); font-style: italic;">Aucune pratique personnalisée</p>'}
-                        </div>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        ${htmlIntegrees}
                     </div>
                 </div>
             `;
