@@ -2029,7 +2029,29 @@ async function afficherBibliothequeGrilles() {
                 max-height: 80vh;
                 overflow-y: auto;
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                position: relative;
             ">
+                <!-- Bouton X sticky -->
+                <button onclick="fermerModalBibliothequeGrilles()" style="
+                    position: sticky;
+                    top: 0;
+                    right: 0;
+                    float: right;
+                    background: transparent;
+                    border: none;
+                    font-size: 28px;
+                    color: #999;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1;
+                " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
+                    ×
+                </button>
                 <h2 style="margin-top: 0; color: #2c3e50;">Bibliothèque de grilles de critères</h2>
                 <p style="color: #7f8c8d; margin-bottom: 20px;">
                     Gérez les grilles de critères affichées dans la barre latérale.
@@ -2194,13 +2216,6 @@ async function afficherBibliothequeGrilles() {
                         </button>
                         <input type="file" id="fichier-import-grilles-modal" accept=".json" style="display: none;" onchange="importerGrilles(event)">
                     </div>
-
-                <!-- Bouton Fermer -->
-                <div style="display: flex; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
-                    <button onclick="fermerModalBibliothequeGrilles()" class="btn btn-annuler">
-                        Fermer
-                    </button>
-                </div>
             </div>
         </div>
     `;

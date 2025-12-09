@@ -971,7 +971,29 @@ async function ouvrirModalBibliothequeCours() {
                 overflow-y: auto;
                 padding: 30px;
                 box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                position: relative;
             ">
+                <!-- Bouton X sticky -->
+                <button onclick="fermerModalBibliothequeCours()" style="
+                    position: sticky;
+                    top: 0;
+                    right: 0;
+                    float: right;
+                    background: transparent;
+                    border: none;
+                    font-size: 28px;
+                    color: #999;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1;
+                " onmouseover="this.style.color='#333'" onmouseout="this.style.color='#999'">
+                    ×
+                </button>
                 <h2 style="margin-top: 0; color: var(--bleu-principal);">Bibliothèque de cours</h2>
                 <p class="text-muted">Gérez vos configurations de cours</p>
 
@@ -1085,13 +1107,6 @@ async function ouvrirModalBibliothequeCours() {
                     </button>
                     <input type="file" id="fichier-import-cours-modal" accept=".json"
                            style="display: none;" onchange="importerCoursSimple(event)">
-                </div>
-
-                <!-- Pied de page -->
-                <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 20px; text-align: right;">
-                    <button onclick="fermerModalBibliothequeCours()" class="btn btn-annuler">
-                        Fermer
-                    </button>
                 </div>
             </div>
         </div>
