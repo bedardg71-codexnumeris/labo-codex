@@ -4797,22 +4797,26 @@
                                 </div>
                             </div>
 
-                            <!-- Bouton nouveau cours -->
-                            <button onclick="afficherFormCours()"
-                                    class="btn btn-confirmer"
-                                    style="width: 100%; margin-top: 15px;">
-                                + Nouveau cours
-                            </button>
                         </div>
 
                         <!-- ZONE PRINCIPALE (Droite) - Formulaire -->
                         <div style="flex: 1; min-width: 0;">
+
+                            <!-- Bouton nouveau cours en haut -->
+                            <div style="margin-bottom: 20px;">
+                                <button onclick="afficherFormCours()"
+                                        id="btnAjouterCours"
+                                        class="btn btn-confirmer">
+                                    + Nouveau cours
+                                </button>
+                            </div>
+
                             <div class="carte">
 
                                 <!-- Message par défaut (si aucun cours sélectionné) -->
                                 <div id="messageSelectionCours" style="padding: 40px; text-align: center;">
                                     <p class="text-muted" style="font-size: 1rem;">
-                                        Sélectionnez un cours dans la barre latérale
+                                        Sélectionnez un cours dans la barre latérale ou créez un nouveau cours
                                     </p>
                                 </div>
 
