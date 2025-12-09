@@ -2787,25 +2787,9 @@
             </div>
         </header>
 
-        <!-- MODAL NOUVEAUTÉS BETA (conforme DESIGN_SYSTEM.html) -->
-        <div id="modalNouveautes" style="
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;">
-
-            <div style="
-                background: white;
-                border-radius: 8px;
-                padding: 30px;
-                max-width: 700px;
-                max-height: 80vh;
-                overflow-y: auto;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-                position: relative;">
+        <!-- MODAL NOUVEAUTÉS BETA -->
+        <div id="modalNouveautes" class="modal-overlay">
+            <div class="modal-contenu" style="max-width: 600px;">
 
                 <!-- Bouton fermer -->
                 <button onclick="fermerModalNouveautes()" style="
@@ -2815,7 +2799,7 @@
                     background: none;
                     border: none;
                     font-size: 1.5rem;
-                    color: #999;
+                    color: var(--gris-moyen);
                     cursor: pointer;
                     width: 30px;
                     height: 30px;
@@ -2826,54 +2810,49 @@
                     transition: all 0.2s;">✕</button>
 
                 <!-- Titre principal -->
-                <h2 style="margin-top: 0; color: #2c3e50; font-size: 1.5rem; margin-bottom: 20px;">
-                    🎉 Nouveautés - Beta 93
-                </h2>
+                <h2>Nouveautés - Beta 93</h2>
 
                 <!-- Message de Grégoire -->
                 <div style="margin-bottom: 25px;">
-                    <h3 style="color: #065dbb; font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">
-                        Message de Grégoire
-                    </h3>
-                    <div style="
-                        background: #f0f8ff;
-                        padding: 15px;
-                        border-radius: 8px;
-                        border-left: 4px solid #065dbb;">
-                        <p style="color: #2c3e50; line-height: 1.6; margin: 0;">
-                            Bonjour à tous ! Cette version apporte plusieurs améliorations importantes à l'interface et au système de contexte.
-                            N'hésitez pas à me faire part de vos commentaires et suggestions !
-                        </p>
-                    </div>
+                    <h3>Message de Grégoire</h3>
+                    <p style="line-height: 1.6;">
+                        Bonjour ! La Beta 93 représente une étape importante vers l'universalité et la collaboration. Cette version vous permet maintenant d'utiliser vos propres critères d'évaluation et offre de nouveaux outils de partage entre collègues. Merci de votre patience et de votre confiance !
+                    </p>
                 </div>
 
                 <!-- Principales nouveautés -->
                 <div style="margin-bottom: 25px;">
-                    <h3 style="color: #065dbb; font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">
-                        ✨ Principales nouveautés
-                    </h3>
-                    <ul style="color: #2c3e50; line-height: 1.8; padding-left: 20px; margin: 0;">
-                        <li><strong>Affichage contextuel amélioré</strong> : Le numéro de semaine et la séance n'apparaissent que pendant le trimestre actif</li>
-                        <li><strong>Titre centré</strong> : Meilleure présentation visuelle de l'en-tête principal</li>
-                        <li><strong>Système de notifications</strong> : Cette pastille rouge vous permet de suivre les nouveautés facilement</li>
+                    <h3>Nouveautés pour vous</h3>
+                    <ul style="line-height: 1.8; padding-left: 20px; margin-top: 10px;">
+                        <li><strong>Système 100% universel</strong> : Vous pouvez maintenant utiliser vos propres critères d'évaluation (pas seulement SRPNF). Le système s'adapte automatiquement à votre grille personnalisée.</li>
+                        <li><strong>Nouvelle pratique disponible</strong> : PAN-Objectifs, conçue pour les cours basés sur des objectifs d'apprentissage avec seuils de réussite.</li>
+                        <li><strong>Organisation repensée</strong> : La page des pratiques de notation est maintenant plus claire avec une séparation entre pratiques prédéfinies et vos pratiques personnalisées.</li>
+                        <li><strong>Performance améliorée</strong> : Les calculs sont maintenant plus rapides grâce à l'optimisation des indicateurs (jusqu'à 50% plus rapide).</li>
+                        <li><strong>Interface épurée</strong> : 21 sections ont été harmonisées avec des en-têtes bleus cohérents pour une meilleure lisibilité.</li>
                     </ul>
                 </div>
 
-                <!-- Corrections techniques -->
+                <!-- Nouveautés techniques (pour utilisateurs avancés) -->
                 <div style="margin-bottom: 25px;">
-                    <h3 style="color: #065dbb; font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">
-                        🔧 Corrections techniques
-                    </h3>
-                    <ul style="color: #2c3e50; line-height: 1.8; padding-left: 20px; margin: 0;">
-                        <li>Correction de l'affichage "0ème séance" les jours sans cours</li>
-                        <li>Amélioration du calcul des semaines de trimestre</li>
-                        <li>Optimisation du centrage des éléments d'interface</li>
+                    <h3>Améliorations techniques</h3>
+                    <ul style="line-height: 1.8; padding-left: 20px; margin-top: 10px;">
+                        <li><strong>Bibliothèque de matériel</strong> : Importez et exportez facilement vos grilles, échelles, cartouches et pratiques pour collaborer avec vos collègues.</li>
+                        <li><strong>Snapshots par séance</strong> : Le système capture maintenant l'état de vos étudiants à chaque séance pour un suivi longitudinal plus précis.</li>
+                        <li><strong>Stockage amélioré</strong> : Migration vers IndexedDB pour supporter des volumes de données beaucoup plus importants.</li>
+                        <li><strong>Corrections importantes</strong> : 6 bugs corrigés incluant l'affichage correct du statut «Non remis» et l'optimisation des calculs.</li>
                     </ul>
+                </div>
+
+                <!-- En savoir plus -->
+                <div style="margin-bottom: 10px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--bleu-principal);">
+                    <p style="margin: 0; line-height: 1.6;">
+                        <strong>Pour en savoir plus</strong> : Consultez le fichier <code>BETA_93_CHANGELOG.md</code> pour tous les détails techniques de cette version.
+                    </p>
                 </div>
 
                 <!-- Bouton fermer en bas -->
-                <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e0e0e0; margin-top: 30px;">
-                    <button onclick="fermerModalNouveautes()" class="btn" style="min-width: 120px;">
+                <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--gris-pale); margin-top: 30px;">
+                    <button onclick="fermerModalNouveautes()" class="btn btn-principal">
                         Fermer
                     </button>
                 </div>
@@ -3159,7 +3138,7 @@
 
                     <!-- STATISTIQUES GLOBALES -->
                     <div class="carte">
-                        <h3>Statistiques du groupe</h3>
+                        <h3 class="carte-titre-bleu">Statistiques du groupe</h3>
 
                         <div class="grille-cartes-metriques" class="mt-15">
                             <!-- Taux d'assiduité moyen du groupe -->
@@ -3200,7 +3179,7 @@
                 <!-- Sous-section: Vue calendaire -->
                 <div id="presences-calendrier" class="sous-section">
                     <div class="carte">
-                        <h3>Vue calendaire</h3>
+                        <h3 class="carte-titre-bleu">Vue calendaire</h3>
                         <div id="conteneur-calendrier">
                             [Le calendrier sera généré ici]
                         </div>
@@ -3271,10 +3250,10 @@
 
                         <!-- Tableau de saisie -->
                         <div class="carte">
-                            <h3>
+                            <h3 class="carte-titre-bleu">
                                 Liste des étudiant·es
                                 <span id="nbEtudiantsPresences"
-                                    class="fw-normal-bleu-moyen-sm">
+                                    style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; font-weight: normal;">
                                     (0 étudiant·e)
                                 </span>
                             </h3>
@@ -3376,7 +3355,7 @@
 
                     <!-- STATISTIQUES GLOBALES -->
                     <div class="carte">
-                        <h3>Statistiques du groupe</h3>
+                        <h3 class="carte-titre-bleu">Statistiques du groupe</h3>
 
                         <div class="grille-cartes-metriques" class="mt-15">
                             <!-- Taux de complétion -->
@@ -3413,7 +3392,7 @@
 
                 <!-- Filtres -->
                 <div class="carte">
-                    <h3>Filtres</h3>
+                    <h3 class="carte-titre-bleu">Filtres</h3>
                     <div class="grille-filtres">
                         <div class="groupe-form">
                             <label for="filtre-groupe-eval">Filtrer par groupe</label>
@@ -3861,7 +3840,7 @@
                     </div>
 
                     <div class="carte">
-                        <h3>Matériel configuré</h3>
+                        <h3 class="carte-titre-bleu">Matériel configuré</h3>
 
                         <div class="grid-auto-200-mt15">
                             <!-- Productions -->
@@ -4768,7 +4747,7 @@
 
                     <!-- Carte informations légales -->
                     <div class="carte" style="margin-top: 25px;">
-                        <h3>Informations légales et crédits</h3>
+                        <h3 class="carte-titre-bleu">Informations légales et crédits</h3>
                         <div style="line-height: 1.8; color: #555;">
                             <p><strong>Auteur :</strong> Grégoire Bédard</p>
                             <p><strong>Codé avec :</strong> Claude Code (Anthropic)</p>
@@ -5060,7 +5039,7 @@
 
                     <!-- CARTE: CADRE RÉGULIER -->
                     <div class="carte">
-                        <h3>Cadre régulier</h3>
+                        <h3 class="carte-titre-bleu">Cadre régulier</h3>
 
                         <!-- Grille 2 colonnes : Bornes et Semaines spéciales -->
                         <div class="grille-2col">
@@ -5160,7 +5139,7 @@
 
                     <!-- CARTE: AMÉNAGEMENTS -->
                     <div class="carte mt-3">
-                        <h3>Aménagements</h3>
+                        <h3 class="carte-titre-bleu">Aménagements</h3>
 
                         <!-- Grille 2 colonnes : Événements prévus et Événements imprévus -->
                         <div class="grille-2col">
@@ -5335,7 +5314,7 @@
                     <!-- Sélecteur de format horaire -->
                     <!-- Configuration des séances -->
                     <div class="carte">
-                        <h3>Horaire des séances</h3>
+                        <h3 class="carte-titre-bleu">Horaire des séances</h3>
                         <p class="text-muted" style="margin-bottom: 15px;">
                             Configure tes séances de cours de la semaine (de 1 à 6 séances). Chaque séance peut avoir une durée différente (de 1h à 6h).
                         </p>
@@ -5462,7 +5441,7 @@
                     </div>
 
                     <div class="carte">
-                        <h3>Groupe d'étudiants</h3>
+                        <h3 class="carte-titre-bleu">Groupe d'étudiants</h3>
 
                         <!-- VUE D'ENSEMBLE -->
                         <div class="grille-cartes-metriques mb-20">
@@ -6949,7 +6928,7 @@ Exemple :
 
                             <!-- Fenêtre d'analyse pour les patterns -->
                             <div class="carte" style="margin-bottom: 0;">
-                                <h3>Fenêtre d'analyse des patterns</h3>
+                                <h3 class="carte-titre-bleu">Fenêtre d'analyse des patterns</h3>
                                 <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
                                     Nombre de productions récentes à analyser pour détecter les patterns d'apprentissage
                                     (progression, stagnation, difficulté croissante).
@@ -6991,7 +6970,7 @@ Exemple :
 
                             <!-- Progression des artefacts -->
                             <div class="carte" style="margin-bottom: 0;">
-                                <h3>Détection de la progression</h3>
+                                <h3 class="carte-titre-bleu">Détection de la progression</h3>
                                 <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
                                     Différence minimale entre moyennes pour considérer qu'il y a progression (↗) ou régression (↘).
                                 </p>
@@ -7028,7 +7007,7 @@ Exemple :
 
                             <!-- Direction du risque -->
                             <div class="carte" style="margin-bottom: 0;">
-                                <h3>Évolution du risque</h3>
+                                <h3 class="carte-titre-bleu">Évolution du risque</h3>
                                 <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
                                     Variation minimale du risque pour afficher une flèche (→ ou ←). En dessous, un tiret (—) indique un plateau.
                                 </p>
@@ -7059,7 +7038,7 @@ Exemple :
 
                             <!-- Défi spécifique -->
                             <div class="carte" style="margin-bottom: 0;">
-                                <h3>Identification des défis SRPNF</h3>
+                                <h3 class="carte-titre-bleu">Identification des défis SRPNF</h3>
                                 <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
                                     Score en dessous duquel un critère SRPNF est considéré comme un défi spécifique nécessitant une attention particulière.
                                 </p>
@@ -7095,7 +7074,7 @@ Exemple :
 
                     <!-- Actions -->
                     <div class="carte">
-                        <h3>Actions</h3>
+                        <h3 class="carte-titre-bleu">Actions</h3>
                         <div class="d-flex-gap15-wrap">
                             <button class="btn btn-principal" onclick="chargerSeuilsInterpretationUI()">
                                 Actualiser
@@ -7130,7 +7109,7 @@ Exemple :
 
                     <!-- Statut actuel -->
                     <div class="carte">
-                        <h3>Statut actuel du système</h3>
+                        <h3 class="carte-titre-bleu">Statut actuel du système</h3>
                         <div class="grille-cartes-metriques" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
                             <div class="carte-metrique-bleue">
                                 <div class="carte-metrique-contenu">
@@ -7159,7 +7138,7 @@ Exemple :
 
                     <!-- Actions -->
                     <div class="carte">
-                        <h3>Actions disponibles</h3>
+                        <h3 class="carte-titre-bleu">Actions disponibles</h3>
 
                         <!-- Capture manuelle -->
                         <div class="carte-bleu-pale-p15-mb20">
@@ -7211,7 +7190,7 @@ Exemple :
                     <p class="text-muted">Sauvegarde et restauration des données locales</p>
 
                     <div class="carte">
-                        <h3>Sauvegarde et restauration</h3>
+                        <h3 class="carte-titre-bleu">Sauvegarde et restauration</h3>
                         <p class="text-muted" class="mb-25">
                             Gère tes données locales : exporte pour sauvegarder, importe pour restaurer.
                         </p>
@@ -7249,7 +7228,7 @@ Exemple :
 
                     <!-- Configuration pédagogique complète -->
                     <div class="carte">
-                        <h3>Configuration pédagogique complète (Beta 91)</h3>
+                        <h3 class="carte-titre-bleu">Configuration pédagogique complète (Beta 91)</h3>
                         <p class="text-muted" class="mb-25">
                             Exporte ou importe une pratique pédagogique complète avec tous ses outils :
                             échelles, grilles, productions, cartouches et paramètres du cours.
@@ -7293,7 +7272,7 @@ Exemple :
 
                     <!-- Informations sur les backups -->
                     <div class="carte">
-                        <h3>À propos des sauvegardes</h3>
+                        <h3 class="carte-titre-bleu">À propos des sauvegardes</h3>
                         <div class="carte-info-bleu-clair">
                             <h4 style="color: var(--bleu-clair); margin-bottom: 10px;"> Backup complet vs Configuration pédagogique vs Import/Export partiel</h4>
                             <p class="mb-15">
@@ -10270,6 +10249,7 @@ Exemple :
     <script src="js/pratiques/pratique-pan-maitrise.js?v=2025120706"></script>
     <script src="js/pratiques/pratique-sommative.js?v=2025120706"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=2025112600"></script>
+    <script src="js/pratiques/pratique-pan-objectifs.js?v=2025120901"></script>
     <script src="js/pratiques/config-francois-chimie.js?v=2025112600"></script>
 
     <!-- Pratiques prédéfinies (Beta 92 - Jour 1) -->
@@ -10333,7 +10313,7 @@ Exemple :
         function afficherModalNouveautes() {
             const modal = document.getElementById('modalNouveautes');
             if (modal) {
-                modal.style.display = 'flex';
+                modal.classList.add('actif');
                 // Marquer comme vu dans localStorage
                 localStorage.setItem('nouveautes-beta-93-vue', 'true');
             }
@@ -10345,7 +10325,7 @@ Exemple :
         function fermerModalNouveautes() {
             const modal = document.getElementById('modalNouveautes');
             if (modal) {
-                modal.style.display = 'none';
+                modal.classList.remove('actif');
             }
         }
 
