@@ -1779,9 +1779,6 @@ async function afficherListePratiques() {
                             <button class="btn btn-secondaire" onclick="importerPratiqueJSON()">
                                 Importer une pratique
                             </button>
-                            <button class="btn btn-ajouter" onclick="ouvrirModalBibliothequePratiques()">
-                                Charger une pratique
-                            </button>
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 15px;">
