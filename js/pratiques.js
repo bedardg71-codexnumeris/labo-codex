@@ -43,15 +43,80 @@
    =============================== */
 
 /**
+ * Migre les pratiques existantes pour ajouter les configurations spécifiques
+ * ✅ NOUVEAU (9 décembre 2025)
+ *
+ * Ajoute les champs affichage, portfolio et jetons à toutes les pratiques
+ * qui n'en ont pas encore, avec des valeurs par défaut.
+ */
+function migrerConfigurationsSpecifiques() {
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const migrationEffectuee = db.getSync('migrationConfigsSpecifiques', false);
+
+    if (migrationEffectuee) {
+        console.log('[migrerConfigurationsSpecifiques] Migration déjà effectuée');
+        return;
+    }
+
+    let nbMigrees = 0;
+
+    pratiques.forEach(p => {
+        if (!p.config) {
+            p.config = {};
+        }
+
+        // Ajouter affichage si manquant
+        if (!p.config.affichage) {
+            p.config.affichage = {
+                modeComparatif: false
+            };
+            nbMigrees++;
+        }
+
+        // Ajouter portfolio si manquant
+        if (!p.config.portfolio) {
+            p.config.portfolio = {
+                actif: true,
+                nombreARetenir: 5,
+                minimumCompletion: 7,
+                nombreTotal: 10,
+                methodeSelection: 'meilleurs',
+                decouplerPR: false
+            };
+        }
+
+        // Ajouter jetons si manquant
+        if (!p.config.jetons) {
+            p.config.jetons = {
+                actif: true,
+                delai: { nombre: 2, dureeJours: 7 },
+                reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
+                nombreParEleve: 4,
+                typesPersonnalises: []
+            };
+        }
+    });
+
+    if (nbMigrees > 0) {
+        db.setSync('pratiquesConfigurables', pratiques);
+        db.setSync('migrationConfigsSpecifiques', true);
+        console.log(`[migrerConfigurationsSpecifiques] ✅ ${nbMigrees} pratique(s) migrée(s)`);
+    } else {
+        db.setSync('migrationConfigsSpecifiques', true);
+        console.log('[migrerConfigurationsSpecifiques] ✅ Aucune migration nécessaire');
+    }
+}
+
+/**
  * Initialise le module des pratiques de notation
  * Appelée automatiquement par 99-main.js au chargement
- * 
+ *
  * FONCTIONNEMENT:
  * 1. Vérifie que les éléments DOM existent (section active)
  * 2. Attache les événements aux éléments
  * 3. Charge les modalités sauvegardées
  * 4. Met à jour le statut d'affichage
- * 
+ *
  * RETOUR:
  * - Sortie silencieuse si les éléments n'existent pas
  */
@@ -59,9 +124,9 @@ function initialiserModulePratiques() {
     console.log('Initialisation du module Pratiques de notation');
 
     // Vérifier que nous sommes dans la bonne section
-    // BETA 92: Nouveau conteneur pour la gestion des pratiques configurables
-    const listePratiques = document.getElementById('listePratiques');
-    if (!listePratiques) {
+    // ✅ MODIFIÉ (9 décembre 2025) : Vérifier listePratiquesSidebar au lieu de listePratiques
+    const listePratiquesSidebar = document.getElementById('listePratiquesSidebar');
+    if (!listePratiquesSidebar) {
         console.log('   ⚠️  Section pratiques non active, initialisation reportée');
         return;
     }
@@ -70,6 +135,9 @@ function initialiserModulePratiques() {
     if (PratiqueManager && PratiqueManager.migrerVersBibliotheque) {
         PratiqueManager.migrerVersBibliotheque();
     }
+
+    // ✅ NOUVEAU (9 décembre 2025) : Migration configs spécifiques par pratique
+    migrerConfigurationsSpecifiques();
 
     // ✅ AJOUT (8 décembre 2025) : Afficher la sidebar avec les pratiques de la bibliothèque
     afficherListePratiquesSidebar();
@@ -236,12 +304,12 @@ function getCoursUtilisantPratique(pratiqueId) {
  *
  * FONCTIONNEMENT:
  * 1. Lit depuis localStorage 'pratiqueParDefaut'
- * 2. Si non définie, retourne 'pan-maitrise'
+ * 2. Si non définie, retourne 'sommative' (pratique par défaut)
  *
  * @returns {string} - ID de la pratique par défaut
  */
 function getPratiqueParDefaut() {
-    const pratiqueParDefaut = db.getSync('pratiqueParDefaut', 'pan-maitrise');
+    const pratiqueParDefaut = db.getSync('pratiqueParDefaut', 'sommative');
     return pratiqueParDefaut;
 }
 
@@ -626,7 +694,8 @@ function sauvegarderOptionsAffichage() {
                 afficherSommatif: true,
                 afficherAlternatif: false
             };
-        } else if (pratique === 'pan-maitrise') {
+        } else if (pratique && pratique.startsWith('pan-maitrise')) {
+            // ✅ CORRECTION (9 déc 2025) : Support des variantes pan-maitrise-json, pan-maitrise-*
             modalites.affichageTableauBord = {
                 afficherSommatif: false,
                 afficherAlternatif: true
@@ -635,6 +704,9 @@ function sauvegarderOptionsAffichage() {
     }
 
     db.setSync('modalitesEvaluation', modalites);
+
+    // ✅ NOUVEAU (9 décembre 2025) : Sauvegarder aussi dans la pratique active
+    sauvegarderDansConfiguration('affichage', { modeComparatif });
 
     console.log('Options d\'affichage sauvegardées:', modalites.affichageTableauBord);
 }
@@ -1051,6 +1123,11 @@ function sauvegarderConfigurationPAN() {
     };
 
     db.setSync('modalitesEvaluation', modalites);
+
+    // ✅ NOUVEAU (9 décembre 2025) : Sauvegarder aussi dans la pratique active
+    sauvegarderDansConfiguration('portfolio', modalites.configPAN.portfolio);
+    sauvegarderDansConfiguration('jetons', modalites.configPAN.jetons);
+
     console.log('✅ Configuration PAN sauvegardée:', modalites.configPAN);
 }
 
@@ -1104,28 +1181,29 @@ function sauvegarderPratiqueNotation() {
         console.log('[sauvegarderPratiqueNotation] Grille de référence:', selectGrilleRef.value);
     }
 
-    // S'assurer que les options d'affichage sont incluses
-    if (!modalites.affichageTableauBord) {
-        const checkComparatif = document.getElementById('modeComparatif');
-        const modeComparatif = checkComparatif ? checkComparatif.checked : false;
+    // ✅ CORRECTION (9 décembre 2025) : Toujours lire l'état de la checkbox modeComparatif
+    const checkComparatif = document.getElementById('modeComparatif');
+    const modeComparatif = checkComparatif ? checkComparatif.checked : false;
 
-        if (modeComparatif) {
+    if (modeComparatif) {
+        // Mode comparatif : afficher les deux pratiques
+        modalites.affichageTableauBord = {
+            afficherSommatif: true,
+            afficherAlternatif: true
+        };
+    } else {
+        // Mode normal : afficher uniquement la pratique principale
+        if (pratique === 'sommative') {
             modalites.affichageTableauBord = {
                 afficherSommatif: true,
+                afficherAlternatif: false
+            };
+        } else if (pratique && pratique.startsWith('pan-maitrise')) {
+            // ✅ CORRECTION (9 déc 2025) : Support des variantes pan-maitrise-json, pan-maitrise-*
+            modalites.affichageTableauBord = {
+                afficherSommatif: false,
                 afficherAlternatif: true
             };
-        } else {
-            if (pratique === 'sommative') {
-                modalites.affichageTableauBord = {
-                    afficherSommatif: true,
-                    afficherAlternatif: false
-                };
-            } else if (pratique === 'pan-maitrise') {
-                modalites.affichageTableauBord = {
-                    afficherSommatif: false,
-                    afficherAlternatif: true
-                };
-            }
         }
     }
 
@@ -1718,65 +1796,8 @@ async function afficherListePratiques() {
     if (!container) return;
 
     try {
-        // Obtenir toutes les pratiques
-        const pratiques = await PratiqueManager.listerPratiques();
-        const modalites = db.getSync('modalitesEvaluation', {});
-        const pratiqueActiveId = modalites.pratique;
-
-        // Générer uniquement les pratiques intégrées (les configurables sont dans la sidebar)
-        let htmlIntegrees = '';
-
-        // 1. Pratiques codées (intégrées - non modifiables)
-        if (pratiques.codees && pratiques.codees.length > 0) {
-            pratiques.codees.forEach(p => {
-                const estActive = p.id === pratiqueActiveId;
-                htmlIntegrees += genererCartePratique(p, estActive, false); // false = non modifiable
-            });
-        }
-
-        // 3. Assembler le HTML final (une seule colonne : pratiques intégrées)
-        let html = '';
-
-        if (htmlIntegrees) {
-            html = `
-                <div>
-                    <h4 style="font-size: 0.95rem; color: var(--gris-fonce); margin-bottom: 15px;">
-                        Structures de pratiques (non modifiables)
-                    </h4>
-
-                    <!-- Sélecteur de pratique par défaut -->
-                    ${genererSelecteurPratiqueParDefaut()}
-
-                    <!-- Actions pour gérer les pratiques personnalisées -->
-                    <div class="btn-groupe" style="margin: 15px 0;">
-                        <button class="btn btn-confirmer" onclick="creerNouvellePratique()">
-                            Créer une pratique
-                        </button>
-                        <button class="btn btn-secondaire" onclick="importerPratiqueJSON()">
-                            Importer une pratique
-                        </button>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
-                        ${htmlIntegrees}
-                    </div>
-                </div>
-            `;
-        } else {
-            // Message si aucune pratique du tout
-            html = `
-                <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 6px; text-align: center;">
-                    <p style="color: var(--gris-moyen); margin-bottom: 10px;">
-                        Aucune pratique disponible
-                    </p>
-                    <button class="btn btn-ajouter" onclick="ouvrirModalBibliothequePratiques()">
-                        Charger les exemples
-                    </button>
-                </div>
-            `;
-        }
-
-        container.innerHTML = html;
+        // Cette section n'affiche plus rien - tout est dans le modal "Bibliothèque de pratiques"
+        container.innerHTML = '';
     } catch (error) {
         console.error('Erreur lors de l\'affichage des pratiques:', error);
         container.innerHTML = `
@@ -1940,8 +1961,19 @@ function togglePratique(pratiqueId) {
  * Active une pratique
  * @param {string} id - ID de la pratique à activer
  */
-async function activerPratique(id) {
-    if (!confirm(`Activer cette pratique ?\n\nToutes les évaluations futures utiliseront cette pratique.`)) {
+async function activerPratique(id, confirmer = true) {
+    // Vérifier si la pratique est déjà active
+    const modalites = db.getSync('modalitesEvaluation', {});
+    if (modalites.pratique === id) {
+        console.log('Pratique déjà active:', id);
+        // ✅ NOUVEAU (9 décembre 2025) : Même si déjà active, recharger sa config
+        // pour afficher ses options spécifiques à droite
+        chargerConfigurationPratique(id);
+        return;
+    }
+
+    // Demander confirmation seulement si demandé (ex: depuis un bouton "Activer")
+    if (confirmer && !confirm(`Activer cette pratique ?\n\nToutes les évaluations futures utiliseront cette pratique.`)) {
         return;
     }
 
@@ -1949,15 +1981,247 @@ async function activerPratique(id) {
         await PratiqueManager.changerPratiqueActive(id);
         console.log('✅ Pratique activée:', id);
 
-        // Recharger l'affichage
+        // ✅ NOUVEAU (9 décembre 2025) : Charger la configuration spécifique de cette pratique
+        chargerConfigurationPratique(id);
+
+        // Recharger l'affichage de la sidebar
+        await afficherListePratiquesSidebar();
+
+        // Recharger l'affichage principal si nécessaire
         await afficherListePratiques();
 
-        // Notification
-        alert(`✅ Pratique activée avec succès !\n\nLes évaluations futures utiliseront cette pratique.`);
+        // Notification seulement si confirmation était demandée
+        if (confirmer) {
+            alert(`✅ Pratique activée avec succès !\n\nLes évaluations futures utiliseront cette pratique.`);
+        }
     } catch (error) {
         console.error('Erreur lors de l\'activation:', error);
         alert(`❌ Erreur : ${error.message}`);
     }
+}
+
+/**
+ * Sauvegarde une partie de la configuration dans la pratique active
+ * ✅ NOUVEAU (9 décembre 2025)
+ * @param {string} cle - Nom de la clé à sauvegarder ('affichage', 'portfolio', 'jetons')
+ * @param {object} valeur - Valeur à sauvegarder
+ */
+function sauvegarderDansConfiguration(cle, valeur) {
+    const modalites = db.getSync('modalitesEvaluation', {});
+    const pratiqueActiveId = modalites.pratique;
+
+    if (!pratiqueActiveId) {
+        console.warn('[sauvegarderDansConfiguration] Aucune pratique active');
+        return;
+    }
+
+    // Charger la pratique depuis pratiquesConfigurables
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const index = pratiques.findIndex(p => p.id === pratiqueActiveId);
+
+    if (index === -1) {
+        console.warn('[sauvegarderDansConfiguration] Pratique introuvable:', pratiqueActiveId);
+        return;
+    }
+
+    // Initialiser config si nécessaire
+    if (!pratiques[index].config) {
+        pratiques[index].config = {};
+    }
+
+    // Sauvegarder la valeur dans la config de la pratique
+    pratiques[index].config[cle] = valeur;
+
+    // Sauvegarder les pratiques
+    db.setSync('pratiquesConfigurables', pratiques);
+
+    console.log(`[sauvegarderDansConfiguration] ✅ ${cle} sauvegardé dans pratique ${pratiqueActiveId}:`, valeur);
+}
+
+/**
+ * Charge la configuration spécifique d'une pratique et l'applique à l'interface
+ * ✅ NOUVEAU (9 décembre 2025)
+ * @param {string} id - ID de la pratique dont on veut charger la config
+ */
+function chargerConfigurationPratique(id) {
+    console.log('[chargerConfigurationPratique] Chargement config pour:', id);
+
+    // Charger la pratique depuis pratiquesConfigurables
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratique = pratiques.find(p => p.id === id);
+
+    if (!pratique || !pratique.config) {
+        console.warn('[chargerConfigurationPratique] Pratique ou config introuvable:', id);
+        // Si la pratique n'a pas de config personnalisée, utiliser les valeurs par défaut
+        chargerModalites();
+        return;
+    }
+
+    const config = pratique.config;
+    const modalites = db.getSync('modalitesEvaluation', {});
+
+    // ✅ NOUVEAU (9 décembre 2025) : Stocker l'ID de la pratique sélectionnée pour l'affichage sidebar
+    sessionStorage.setItem('pratiqueSelectionnee', id);
+
+    // ✅ NOUVEAU : Afficher la zone de configuration et masquer l'accueil
+    const zoneAccueil = document.getElementById('accueilPratiques');
+    const zoneConfiguration = document.getElementById('zoneConfigurationPratique');
+
+    if (zoneAccueil) zoneAccueil.style.display = 'none';
+    if (zoneConfiguration) zoneConfiguration.style.display = 'block';
+
+    // ✅ NOUVEAU : Remplir l'en-tête avec les infos de la pratique
+    const nomPratique = document.getElementById('nomPratiqueSelectionnee');
+    const descriptionPratique = document.getElementById('descriptionPratiqueSelectionnee');
+
+    if (nomPratique) {
+        nomPratique.textContent = pratique.nom || 'Sans nom';
+        nomPratique.dataset.pratiqueId = id; // Stocker l'ID pour le bouton "Activer"
+    }
+    if (descriptionPratique) {
+        descriptionPratique.textContent = pratique.description || 'Aucune description';
+    }
+
+    // ✅ NOUVEAU (9 décembre 2025) : Rafraîchir la sidebar pour mettre à jour le style de sélection
+    afficherListePratiquesSidebar();
+
+    // ✅ 1. Appliquer la configuration d'affichage
+    if (config.affichage) {
+        const modeComparatif = config.affichage.modeComparatif || false;
+
+        if (modeComparatif) {
+            // Mode comparatif : afficher les deux
+            modalites.affichageTableauBord = {
+                afficherSommatif: true,
+                afficherAlternatif: true
+            };
+        } else {
+            // Mode normal : afficher uniquement la pratique principale
+            if (modalites.pratique === 'sommative') {
+                modalites.affichageTableauBord = {
+                    afficherSommatif: true,
+                    afficherAlternatif: false
+                };
+            } else if (modalites.pratique === 'pan-maitrise') {
+                modalites.affichageTableauBord = {
+                    afficherSommatif: false,
+                    afficherAlternatif: true
+                };
+            }
+        }
+
+        // Mettre à jour la checkbox dans l'interface
+        const checkComparatif = document.getElementById('modeComparatif');
+        if (checkComparatif) {
+            checkComparatif.checked = modeComparatif;
+        }
+    }
+
+    // ✅ 2. Appliquer la configuration du portfolio
+    if (config.portfolio) {
+        if (!modalites.configPAN) {
+            modalites.configPAN = {};
+        }
+        modalites.configPAN.portfolio = config.portfolio;
+    }
+
+    // ✅ 3. Appliquer la configuration des jetons
+    if (config.jetons) {
+        if (!modalites.configPAN) {
+            modalites.configPAN = {};
+        }
+        modalites.configPAN.jetons = config.jetons;
+    }
+
+    // Sauvegarder dans modalitesEvaluation
+    db.setSync('modalitesEvaluation', modalites);
+
+    // ✅ 4. Masquer/afficher les sections selon la configuration
+    afficherSectionsSelonConfig(config);
+
+    // Recharger l'interface pour afficher la config
+    chargerModalites();
+    chargerConfigurationPAN();
+
+    console.log('[chargerConfigurationPratique] ✅ Config appliquée:', {
+        affichage: config.affichage,
+        portfolio: config.portfolio,
+        jetons: config.jetons
+    });
+}
+
+/**
+ * Affiche ou masque les sections selon la configuration de la pratique
+ * ✅ NOUVEAU (9 décembre 2025)
+ * @param {object} config - Configuration de la pratique
+ */
+function afficherSectionsSelonConfig(config) {
+    // Section Options d'affichage : toujours visible
+    const carteOptionsAffichage = document.getElementById('carteOptionsAffichage');
+    if (carteOptionsAffichage) {
+        carteOptionsAffichage.style.display = 'block';
+        // Fermer l'accordéon par défaut
+        const accordeonOptions = document.getElementById('accordeonOptionsAffichage');
+        const iconeOptions = carteOptionsAffichage.querySelector('.accordeon-icone');
+        if (accordeonOptions) {
+            accordeonOptions.classList.remove('ouvert');
+            if (iconeOptions) iconeOptions.classList.remove('ouvert');
+        }
+    }
+
+    // Section Évaluation du français : toujours visible
+    const carteEvaluationFrancais = document.getElementById('carteEvaluationFrancais');
+    if (carteEvaluationFrancais) {
+        carteEvaluationFrancais.style.display = 'block';
+        // Fermer l'accordéon par défaut
+        const accordeonFrancais = document.getElementById('accordeonEvaluationFrancais');
+        const iconeFrancais = carteEvaluationFrancais.querySelector('.accordeon-icone');
+        if (accordeonFrancais) {
+            accordeonFrancais.classList.remove('ouvert');
+            if (iconeFrancais) iconeFrancais.classList.remove('ouvert');
+        }
+    }
+
+    // Section Portfolio : afficher seulement si actif
+    const cartePortfolio = document.getElementById('cartePortfolio');
+    if (cartePortfolio) {
+        const portfolioActif = config.portfolio && config.portfolio.actif !== false;
+        cartePortfolio.style.display = portfolioActif ? 'block' : 'none';
+
+        if (portfolioActif) {
+            // Fermer l'accordéon par défaut
+            const accordeonPortfolio = document.getElementById('accordeonPortfolio');
+            const iconePortfolio = cartePortfolio.querySelector('.accordeon-icone');
+            if (accordeonPortfolio) {
+                accordeonPortfolio.classList.remove('ouvert');
+                if (iconePortfolio) iconePortfolio.classList.remove('ouvert');
+            }
+        }
+    }
+
+    // Section Jetons : afficher seulement si actif
+    const carteJetons = document.getElementById('carteJetons');
+    if (carteJetons) {
+        const jetonsActif = config.jetons && config.jetons.actif !== false;
+        carteJetons.style.display = jetonsActif ? 'block' : 'none';
+
+        if (jetonsActif) {
+            // Fermer l'accordéon par défaut
+            const accordeonJetons = document.getElementById('accordeonJetons');
+            const iconeJetons = carteJetons.querySelector('.accordeon-icone');
+            if (accordeonJetons) {
+                accordeonJetons.classList.remove('ouvert');
+                if (iconeJetons) iconeJetons.classList.remove('ouvert');
+            }
+        }
+    }
+
+    console.log('[afficherSectionsSelonConfig] ✅ Sections mises à jour:', {
+        optionsAffichage: 'visible',
+        evaluationFrancais: 'visible',
+        portfolio: config.portfolio?.actif ? 'visible' : 'masquée',
+        jetons: config.jetons?.actif ? 'visible' : 'masquée'
+    });
 }
 
 /**
@@ -1986,6 +2250,47 @@ async function desactiverPratique(id) {
         console.error('Erreur lors de la désactivation:', error);
         alert(`❌ Erreur : ${error.message}`);
     }
+}
+
+/**
+ * Ouvre le wizard pour éditer la pratique actuellement active
+ */
+async function editerPratiqueActive() {
+    const modalites = db.getSync('modalitesEvaluation', {});
+    const pratiqueActiveId = modalites.pratique;
+
+    if (!pratiqueActiveId) {
+        alert('❌ Aucune pratique active\n\nVeuillez d\'abord activer une pratique dans la sidebar.');
+        return;
+    }
+
+    // Vérifier si c'est une pratique codée (canevas de base)
+    const pratiquesCodees = ['pan-maitrise', 'sommative', 'specifications'];
+    if (pratiquesCodees.includes(pratiqueActiveId)) {
+        alert('❌ Impossible de modifier un canevas de base\n\nLes canevas de base (PAN-Maîtrise, Sommative, PAN-Spécifications) ne peuvent pas être modifiés.\n\nVous pouvez créer une nouvelle pratique basée sur ces canevas.');
+        return;
+    }
+
+    // Éditer la pratique configurable
+    await editerPratique(pratiqueActiveId);
+}
+
+/**
+ * Active la pratique actuellement affichée dans la zone de configuration
+ * Wrapper qui récupère l'ID depuis le DOM et appelle la fonction activerPratique principale
+ */
+async function activerPratiqueAffichee() {
+    // Récupérer l'ID de la pratique affichée
+    const nomElement = document.getElementById('nomPratiqueSelectionnee');
+    if (!nomElement || !nomElement.dataset.pratiqueId) {
+        alert('❌ Erreur\n\nImpossible d\'identifier la pratique à activer.');
+        return;
+    }
+
+    const pratiqueId = nomElement.dataset.pratiqueId;
+
+    // Appeler la fonction activerPratique existante avec confirmation
+    await activerPratique(pratiqueId, true);
 }
 
 /**
@@ -2041,6 +2346,12 @@ function ouvrirWizardPratique(modeEdition = false, idPratique = null) {
     const btnCreer = document.getElementById('wizard-btn-creer');
     if (btnCreer) {
         btnCreer.textContent = modeEdition ? '✓ Sauvegarder' : '✓ Créer la pratique';
+    }
+
+    // Afficher/masquer le bouton Supprimer selon le mode
+    const btnSupprimer = document.getElementById('wizard-btn-supprimer');
+    if (btnSupprimer) {
+        btnSupprimer.style.display = modeEdition ? 'inline-block' : 'none';
     }
 
     // Réinitialiser si mode création
@@ -2167,6 +2478,86 @@ function preremplirWizardPourEdition(config) {
             document.getElementById('wizard-terme-critere').value = config.interface.terminologie.critere || 'Critère';
             document.getElementById('wizard-terme-note').value = config.interface.terminologie.note_finale || 'Note finale';
             document.getElementById('wizard-terme-reprise').value = config.interface.terminologie.reprise || 'Reprise';
+        }
+    }
+
+    // Étape 9 : Spécifications (optionnel)
+    if (config.specifications) {
+        const selectTypeEval = document.getElementById('wizard-spec-type-evaluation');
+
+        if (selectTypeEval && config.specifications.type) {
+            setTimeout(() => {
+                selectTypeEval.value = config.specifications.type;
+                afficherConfigSpecType();
+
+                // Attendre que les sections soient affichées
+                setTimeout(() => {
+                    if (config.specifications.type === 'binaire') {
+                        // Pré-remplir les types de travaux
+                        if (config.specifications.typesTravaux && config.specifications.typesTravaux.length > 0) {
+                            // Vider la liste existante
+                            const liste = document.getElementById('wizard-spec-types-travaux-liste');
+                            if (liste) liste.innerHTML = '';
+
+                            // Ajouter chaque type de travail
+                            config.specifications.typesTravaux.forEach(type => {
+                                ajouterTypeTravailSpec();
+                                const items = document.querySelectorAll('#wizard-spec-types-travaux-liste .spec-type-travail-item');
+                                const dernierItem = items[items.length - 1];
+
+                                if (dernierItem) {
+                                    dernierItem.querySelector('.spec-type-id').value = type.id || '';
+                                    dernierItem.querySelector('.spec-type-nom').value = type.nom || '';
+                                    dernierItem.querySelector('.spec-type-seuil').value = type.seuilAcceptable || 75;
+                                    dernierItem.querySelector('.spec-type-specifications').value = (type.specifications || []).join('\n');
+                                }
+                            });
+                        }
+
+                        // Pré-remplir les bundles
+                        if (config.specifications.tableBundles && config.specifications.tableBundles.length > 0) {
+                            // Vider la liste existante
+                            const listeBundles = document.getElementById('wizard-spec-bundles-liste');
+                            if (listeBundles) listeBundles.innerHTML = '';
+
+                            // Ajouter chaque bundle
+                            config.specifications.tableBundles.forEach(bundle => {
+                                ajouterPalierBundle();
+                                const items = document.querySelectorAll('#wizard-spec-bundles-liste .spec-bundle-item');
+                                const dernierItem = items[items.length - 1];
+
+                                if (dernierItem) {
+                                    dernierItem.querySelector('.bundle-note-fixe').value = bundle.noteFixe || '';
+                                    dernierItem.querySelector('.bundle-label').value = bundle.label || '';
+                                    dernierItem.querySelector('.bundle-description').value = bundle.description || '';
+                                    dernierItem.querySelector('.bundle-requis').value = bundle.requis ? JSON.stringify(bundle.requis, null, 2) : '';
+                                }
+                            });
+                        }
+
+                    } else if (config.specifications.type === 'niveaux') {
+                        // Pré-remplir les objectifs
+                        if (config.specifications.objectifs && config.specifications.objectifs.length > 0) {
+                            const inputNbObjectifs = document.getElementById('wizard-spec-nb-objectifs');
+                            if (inputNbObjectifs) {
+                                inputNbObjectifs.value = config.specifications.objectifs.length;
+                                genererObjectifsSpec();
+
+                                // Attendre que les objectifs soient générés
+                                setTimeout(() => {
+                                    const items = document.querySelectorAll('#wizard-spec-objectifs-liste .spec-objectif-item');
+                                    config.specifications.objectifs.forEach((objectif, index) => {
+                                        if (items[index]) {
+                                            items[index].querySelector('.spec-objectif-nom').value = objectif.nom || '';
+                                            items[index].querySelector('.spec-objectif-description').value = objectif.description || '';
+                                        }
+                                    });
+                                }, 100);
+                            }
+                        }
+                    }
+                }, 200);
+            }, 200);
         }
     }
 
@@ -3313,7 +3704,31 @@ async function creerPratiqueDepuisWizard() {
             seuils: construireSeuils(),
 
             // Étape 8: Interface
-            interface: construireInterface()
+            interface: construireInterface(),
+
+            // Étape 9: Spécifications (optionnel)
+            specifications: construireSpecifications(),
+
+            // ✅ NOUVEAU (9 décembre 2025) : Configuration spécifique à cette pratique
+            // Ces options sont propres à chaque pratique et s'affichent quand on clique sur la carte
+            affichage: {
+                modeComparatif: false  // Par défaut, affichage normal (non comparatif)
+            },
+            portfolio: {
+                actif: true,
+                nombreARetenir: 5,
+                minimumCompletion: 7,
+                nombreTotal: 10,
+                methodeSelection: 'meilleurs',
+                decouplerPR: false
+            },
+            jetons: {
+                actif: true,
+                delai: { nombre: 2, dureeJours: 7 },
+                reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
+                nombreParEleve: 4,
+                typesPersonnalises: []
+            }
         };
 
         if (modeEdition) {
@@ -3341,7 +3756,8 @@ async function creerPratiqueDepuisWizard() {
                 auteur: pratiqueConfig.auteur,
                 description: pratiqueConfig.description,
                 config: pratiqueConfig,
-                dansBibliotheque: true  // Ajout immédiat à la sidebar
+                dansBibliotheque: true,  // Ajout immédiat à la sidebar
+                estDeLUtilisateur: true  // ✅ NOUVEAU (9 décembre 2025) : Flag pour distinguer les pratiques créées vs importées
             });
             console.log('✅ Pratique créée:', pratiqueConfig.id);
         }
@@ -3570,6 +3986,123 @@ function construireInterface() {
 }
 
 /**
+ * Construit la configuration des spécifications (PAN-Spécifications)
+ * @returns {Object|null} Configuration ou null si pas de type d'évaluation choisi
+ */
+function construireSpecifications() {
+    const typeEval = document.getElementById('wizard-spec-type-evaluation')?.value;
+
+    if (!typeEval) {
+        // Pas de configuration de spécifications
+        return null;
+    }
+
+    if (typeEval === 'binaire') {
+        // Configuration binaire (François A.-H. style)
+        const typesTravaux = [];
+        const typesTravauxListe = document.getElementById('wizard-spec-types-travaux-liste');
+
+        if (typesTravauxListe) {
+            const items = typesTravauxListe.querySelectorAll('.spec-type-travail-item');
+            items.forEach(item => {
+                const id = item.querySelector('.spec-type-id')?.value.trim();
+                const nom = item.querySelector('.spec-type-nom')?.value.trim();
+                const seuil = parseInt(item.querySelector('.spec-type-seuil')?.value) || 75;
+                const specifications = item.querySelector('.spec-type-specifications')?.value
+                    .split('\n')
+                    .map(s => s.trim())
+                    .filter(s => s.length > 0);
+
+                if (id && nom) {
+                    typesTravaux.push({
+                        id: id,
+                        nom: nom,
+                        seuilAcceptable: seuil,
+                        specifications: specifications || []
+                    });
+                }
+            });
+        }
+
+        const tableBundles = [];
+        const bundlesListe = document.getElementById('wizard-spec-bundles-liste');
+
+        if (bundlesListe) {
+            const items = bundlesListe.querySelectorAll('.spec-bundle-item');
+            items.forEach(item => {
+                const noteFixe = parseInt(item.querySelector('.bundle-note-fixe')?.value);
+                const label = item.querySelector('.bundle-label')?.value.trim();
+                const description = item.querySelector('.bundle-description')?.value.trim();
+                const requisJSON = item.querySelector('.bundle-requis')?.value.trim();
+
+                if (!isNaN(noteFixe) && label) {
+                    let requis = null;
+                    if (requisJSON) {
+                        try {
+                            requis = JSON.parse(requisJSON);
+                        } catch (e) {
+                            console.warn('Format JSON invalide pour requis:', requisJSON);
+                        }
+                    }
+
+                    tableBundles.push({
+                        noteFixe: noteFixe,
+                        label: label,
+                        description: description || '',
+                        requis: requis
+                    });
+                }
+            });
+        }
+
+        return {
+            type: 'binaire',
+            typesTravaux: typesTravaux,
+            tableBundles: tableBundles.sort((a, b) => b.noteFixe - a.noteFixe), // Trier par note décroissante
+            seuilReussite: 60,
+            seuilExcellence: 80
+        };
+
+    } else if (typeEval === 'niveaux') {
+        // Configuration niveaux (Xavier C.-T. style)
+        const nbObjectifs = parseInt(document.getElementById('wizard-spec-nb-objectifs')?.value) || 6;
+        const objectifs = [];
+
+        const objectifsListe = document.getElementById('wizard-spec-objectifs-liste');
+        if (objectifsListe) {
+            const items = objectifsListe.querySelectorAll('.spec-objectif-item');
+            items.forEach((item, index) => {
+                const nom = item.querySelector('.spec-objectif-nom')?.value.trim();
+                const description = item.querySelector('.spec-objectif-description')?.value.trim();
+
+                if (nom) {
+                    objectifs.push({
+                        id: `objectif-${index + 1}`,
+                        nom: nom,
+                        description: description || '',
+                        niveaux: [1, 2, 3, 4] // Niveaux standard
+                    });
+                }
+            });
+        }
+
+        return {
+            type: 'niveaux',
+            objectifs: objectifs,
+            // Logique de calcul Xavier (tous niveau 3+ = 80%, chaque niveau 4 = +3.33%)
+            calculNote: {
+                baseNiveau3: 80,
+                bonusNiveau4: 3.33,
+                penaliteNiveau2: 25, // 1 obj niveau 2 → 55%
+                penaliteNiveau1: 30  // 1 obj niveau 1 → 50%
+            }
+        };
+    }
+
+    return null;
+}
+
+/**
  * Déclencher l'input file pour importer JSON
  */
 function importerPratiqueJSON() {
@@ -3649,6 +4182,7 @@ window.mettreAJourUIPratiqueDefaut = mettreAJourUIPratiqueDefaut;
 window.afficherListePratiques = afficherListePratiques;
 window.activerPratique = activerPratique;
 window.editerPratique = editerPratique;
+window.editerPratiqueActive = editerPratiqueActive;
 window.dupliquerPratique = dupliquerPratique;
 window.supprimerPratique = supprimerPratique;
 window.exporterPratiqueVersJSON = exporterPratiqueVersJSON;
@@ -3669,13 +4203,39 @@ window.afficherPratiquesPredefines = afficherPratiquesPredefines;
  */
 async function afficherListePratiquesSidebar() {
     const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
-    const pratiquesDansBibliotheque = pratiquesConfigurables.filter(p => p.dansBibliotheque !== false);
+
+    // IDs des 3 CANEVAS DE BASE (pratiques codées) qui ne doivent PAS apparaître dans la sidebar
+    // (ils sont dans le modal "Bibliothèque de pratiques" > section "Canevas de base")
+    // Les autres pratiques sont des configurations dérivées qui peuvent apparaître dans la sidebar
+    const idsCanevasDeBase = [
+        'pan-maitrise',
+        'specifications',
+        'sommative'
+    ];
+
+    // DEBUG: Afficher les flags dansBibliotheque de toutes les pratiques
+    console.log('[afficherListePratiquesSidebar] Toutes les pratiques:', pratiquesConfigurables.map(p => ({
+        id: p.id,
+        nom: p.nom,
+        dansBibliotheque: p.dansBibliotheque
+    })));
+
+    // Filtrer les pratiques : dans bibliothèque ET pas un canevas de base
+    const pratiquesDansBibliotheque = pratiquesConfigurables.filter(p =>
+        p.dansBibliotheque !== false && !idsCanevasDeBase.includes(p.id)
+    );
+
+    console.log('[afficherListePratiquesSidebar] Pratiques filtrées pour sidebar:', pratiquesDansBibliotheque.length);
+
     const container = document.getElementById('listePratiquesSidebar');
 
     if (!container) return;
 
     const modalites = db.getSync('modalitesEvaluation', {});
     const pratiqueActiveId = modalites.pratique;
+
+    // ✅ NOUVEAU (9 décembre 2025) : Récupérer la pratique sélectionnée pour l'affichage
+    const pratiqueSelectionneeId = sessionStorage.getItem('pratiqueSelectionnee');
 
     if (pratiquesDansBibliotheque.length === 0) {
         container.innerHTML = '<p class="text-muted text-italic">Créez une nouvelle pratique ou puisez dans la bibliothèque</p>';
@@ -3684,16 +4244,17 @@ async function afficherListePratiquesSidebar() {
 
     let html = '';
     pratiquesDansBibliotheque.forEach(p => {
-        const estActive = p.id === pratiqueActiveId;
-        const activeClass = estActive ? ' active' : '';
+        const estActiveSysteme = p.id === pratiqueActiveId;
+        const estSelectionnee = p.id === pratiqueSelectionneeId;
+        const activeClass = estSelectionnee ? ' active' : '';
         const nomAffiche = p.nom || p.id;
         const auteur = p.auteur ? `par ${p.auteur}` : '';
 
         html += `
-            <div class="sidebar-item${activeClass}" onclick="editerPratique('${p.id}')">
+            <div class="sidebar-item${activeClass}" onclick="chargerConfigurationPratique('${p.id}')">
                 <div class="sidebar-item-titre">${echapperHtml(nomAffiche)}</div>
                 ${auteur ? `<div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 3px;">${echapperHtml(auteur)}</div>` : ''}
-                ${estActive ? '<div style="margin-top: 5px;"><span class="sidebar-item-badge">Active</span></div>' : ''}
+                ${estActiveSysteme ? '<div style="margin-top: 5px;"><span class="sidebar-item-badge">Active</span></div>' : ''}
             </div>
         `;
     });
@@ -3707,8 +4268,40 @@ async function afficherListePratiquesSidebar() {
  */
 async function ouvrirModalBibliothequePratiques() {
     const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
-    const pratiquesDansBibliotheque = pratiquesConfigurables.filter(p => p.dansBibliotheque !== false);
-    const pratiquesDisponibles = pratiquesConfigurables.filter(p => p.dansBibliotheque === false);
+
+    // Définir les 3 CANEVAS DE BASE (structures fondamentales codées - templates immuables)
+    // Ces IDs correspondent aux pratiques codées en JavaScript (pas aux configurations JSON)
+    const canevasDeBase = [
+        {
+            id: 'pan-maitrise',
+            nom: 'PAN-Maîtrise',
+            description: 'Pratique alternative basée sur les N meilleurs artefacts de portfolio avec évaluation formative selon l\'échelle IDME et la grille de critères configurée',
+            type: 'canevas'
+        },
+        {
+            id: 'specifications',
+            nom: 'PAN par contrat (Spécifications)',
+            description: 'Pratique par contrat (Specification Grading) avec objectifs réussite/échec. Les étudiants atteignent des paliers de notes fixes en réussissant des ensembles d\'objectifs mesurables',
+            type: 'canevas'
+        },
+        {
+            id: 'sommative',
+            nom: 'Sommative traditionnelle',
+            description: 'Pratique sommative traditionnelle avec moyenne pondérée de toutes les évaluations. Approche centrée sur la note finale avec prise en compte des pondérations',
+            type: 'canevas'
+        }
+    ];
+
+    // IDs des canevas de base à exclure des sections configurables
+    const idsCanevasDeBase = canevasDeBase.map(c => c.id);
+
+    // Filtrer les pratiques configurables pour exclure les canevas de base
+    const pratiquesDansBibliotheque = pratiquesConfigurables.filter(p =>
+        p.dansBibliotheque !== false && !idsCanevasDeBase.includes(p.id)
+    );
+    const pratiquesDisponibles = pratiquesConfigurables.filter(p =>
+        p.dansBibliotheque === false && !idsCanevasDeBase.includes(p.id)
+    );
 
     const modalHTML = `
         <div id="modalBibliothequePratiques" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;">
@@ -3723,6 +4316,44 @@ async function ouvrirModalBibliothequePratiques() {
                 <!-- Corps -->
                 <div style="padding: 20px;">
 
+                    <!-- SECTION 0 : Canevas de base (templates) -->
+                    <div style="margin-bottom: 30px;">
+                        <h3 style="color: var(--bleu-principal); margin-bottom: 10px;">
+                            Canevas de base (${canevasDeBase.length})
+                        </h3>
+                        <p style="color: var(--gris-fonce); font-size: 0.9em; margin-bottom: 15px; font-style: italic;">
+                            Structures de référence pour créer vos configurations personnalisées
+                        </p>
+
+                        <!-- Sélecteur de pratique par défaut -->
+                        ${genererSelecteurPratiqueParDefaut()}
+
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                            ${canevasDeBase.map(c => {
+                                const nomAffiche = c.nom || c.id;
+                                const auteur = c.auteur ? `Par ${c.auteur}${c.etablissement ? ' (' + c.etablissement + ')' : ''}` : '';
+                                const description = c.description || '';
+                                return `
+                                    <div style="border: 2px solid var(--bleu-principal); border-radius: 6px; padding: 15px; background: #f0f7ff;">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                            <div style="flex: 1;">
+                                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                                    <div style="font-weight: bold; color: var(--bleu-principal);">${echapperHtml(nomAffiche)}</div>
+                                                    <span style="background: var(--bleu-principal); color: white; font-size: 0.75em; padding: 2px 8px; border-radius: 10px; font-weight: 600;">CANEVAS</span>
+                                                </div>
+                                                ${auteur ? `<div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
+                                                ${description ? `<div style="color: #5a6c7d; font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
+                                            </div>
+                                            <button onclick="alert('Fonctionnalité à venir : Créer une configuration basée sur ce canevas')" class="btn btn-secondaire btn-tres-compact" style="margin-left: 10px;">
+                                                Utiliser
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
                     <!-- SECTION 1 : Ma sélection -->
                     <div style="margin-bottom: 30px;">
                         <h3 style="color: var(--bleu-principal); margin-bottom: 15px;">
@@ -3736,6 +4367,8 @@ async function ouvrirModalBibliothequePratiques() {
                                     const nomAffiche = p.nom || p.id;
                                     const auteur = p.auteur ? `Par ${p.auteur}${p.etablissement ? ' (' + p.etablissement + ')' : ''}` : '';
                                     const description = p.description || '';
+                                    // ✅ NOUVEAU (9 décembre 2025) : Afficher "Partager" seulement pour les pratiques créées par l'utilisateur
+                                    const estDeLUtilisateur = p.estDeLUtilisateur === true;
                                     return `
                                         <div style="border: 1px solid var(--bleu-clair); border-radius: 6px; padding: 15px; background: var(--bleu-tres-pale);">
                                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -3745,10 +4378,12 @@ async function ouvrirModalBibliothequePratiques() {
                                                     ${description ? `<div style="color: #95a5a6; font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
                                                 </div>
                                                 <div style="display: flex; gap: 5px; margin-left: 10px;">
-                                                    <button onclick="exporterPratiqueActive('${p.id}')" class="btn btn-principal btn-tres-compact">
-                                                        Partager
-                                                    </button>
-                                                    <button onclick="retirerPratiqueDeBibliotheque('${p.id}')" class="btn btn-supprimer btn-tres-compact">
+                                                    ${estDeLUtilisateur ? `
+                                                        <button onclick="exporterPratiqueActive('${p.id}')" class="btn btn-principal btn-tres-compact">
+                                                            Partager
+                                                        </button>
+                                                    ` : ''}
+                                                    <button onclick="retirerPratiqueDeBibliotheque('${p.id}')" class="btn btn-secondaire btn-tres-compact">
                                                         Retirer
                                                     </button>
                                                 </div>
@@ -3782,7 +4417,7 @@ async function ouvrirModalBibliothequePratiques() {
                                                     ${description ? `<div style="color: #95a5a6; font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
                                                 </div>
                                                 <button onclick="ajouterPratiqueIndividuelle('${p.id}')" class="btn btn-ajouter btn-tres-compact" style="margin-left: 10px;">
-                                                    Ajouter
+                                                    Ajouter à ma sélection
                                                 </button>
                                             </div>
                                         </div>
@@ -3841,9 +4476,34 @@ async function retirerPratiqueDeBibliotheque(pratiqueId) {
 
     console.log('✅ Pratique retirée de la bibliothèque:', pratiqueId);
 
-    // Rafraîchir le modal et la sidebar
+    // Rafraîchir la sidebar d'abord
+    await afficherListePratiquesSidebar();
+
+    // Puis rafraîchir le modal
     fermerModalBibliothequePratiques();
     await ouvrirModalBibliothequePratiques();
+}
+
+/**
+ * Supprime définitivement une pratique depuis le wizard (modal d'édition)
+ */
+async function supprimerPratiqueDepuisWizard() {
+    const modal = document.getElementById('modalWizardPratique');
+    if (!modal) return;
+
+    const pratiqueId = modal.dataset.idPratique;
+    if (!pratiqueId) {
+        alert('❌ Erreur : Impossible d\'identifier la pratique à supprimer');
+        return;
+    }
+
+    // Appeler la fonction de suppression existante
+    await supprimerPratique(pratiqueId);
+
+    // Fermer le wizard
+    fermerWizardPratique();
+
+    // Rafraîchir la sidebar
     await afficherListePratiquesSidebar();
 }
 
@@ -3864,10 +4524,12 @@ async function ajouterPratiqueIndividuelle(pratiqueId) {
 
     console.log('✅ Pratique ajoutée à la bibliothèque:', pratiqueId);
 
-    // Rafraîchir le modal et la sidebar
+    // Rafraîchir la sidebar d'abord
+    await afficherListePratiquesSidebar();
+
+    // Puis rafraîchir le modal
     fermerModalBibliothequePratiques();
     await ouvrirModalBibliothequePratiques();
-    await afficherListePratiquesSidebar();
 }
 
 /**
@@ -3962,6 +4624,164 @@ async function exporterPratiqueActive(pratiqueId) {
 }
 
 /* ===============================
+   GESTION WIZARD SPÉCIFICATIONS
+   =============================== */
+
+/**
+ * Affiche/masque les sections selon le type d'évaluation choisi (binaire vs niveaux)
+ */
+function afficherConfigSpecType() {
+    const typeEval = document.getElementById('wizard-spec-type-evaluation').value;
+    const configBinaire = document.getElementById('wizard-spec-config-binaire');
+    const configNiveaux = document.getElementById('wizard-spec-config-niveaux');
+
+    if (typeEval === 'binaire') {
+        configBinaire.style.display = 'block';
+        configNiveaux.style.display = 'none';
+        // Initialiser avec un type de travail et un palier par défaut
+        if (document.getElementById('wizard-spec-types-travaux-liste').children.length === 0) {
+            ajouterTypeTravailSpec();
+            ajouterPalierBundle();
+        }
+    } else if (typeEval === 'niveaux') {
+        configBinaire.style.display = 'none';
+        configNiveaux.style.display = 'block';
+        // Générer les objectifs par défaut
+        genererObjectifsSpec();
+    } else {
+        configBinaire.style.display = 'none';
+        configNiveaux.style.display = 'none';
+    }
+}
+
+/**
+ * Ajoute un type de travail dans la configuration binaire (François)
+ */
+function ajouterTypeTravailSpec() {
+    const liste = document.getElementById('wizard-spec-types-travaux-liste');
+    const index = liste.children.length;
+
+    const div = document.createElement('div');
+    div.className = 'wizard-item-liste';
+    div.style.cssText = 'padding: 15px; margin-bottom: 12px; background: white; border: 1px solid var(--gris-clair); border-radius: 6px;';
+    div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+            <h5 style="margin: 0; color: var(--bleu-principal);">Type de travail ${index + 1}</h5>
+            <button type="button" class="btn-icon" onclick="retirerTypeTravailSpec(this)" style="color: var(--rouge-erreur);">✕</button>
+        </div>
+        <div class="groupe-form">
+            <label>ID (identifiant unique)</label>
+            <input type="text" class="controle-form spec-type-id" placeholder="Ex: prise-position" required>
+            <small style="color: var(--gris-moyen); font-size: 0.85rem; margin-top: 4px; display: block;">
+                Sans espaces, avec tirets. Ex: prise-position, test, portfolio
+            </small>
+        </div>
+        <div class="groupe-form">
+            <label>Nom d'affichage</label>
+            <input type="text" class="controle-form spec-type-nom" placeholder="Ex: Prise de position" required>
+        </div>
+        <div class="groupe-form">
+            <label>Seuil acceptable (%)</label>
+            <input type="number" class="controle-form spec-type-seuil" min="0" max="100" value="75" required>
+            <small style="color: var(--gris-moyen); font-size: 0.85rem; margin-top: 4px; display: block;">
+                Note minimale pour qu'un travail soit considéré "acceptable" (défaut: 75%)
+            </small>
+        </div>
+        <div class="groupe-form">
+            <label>Spécifications (une par ligne)</label>
+            <textarea class="controle-form spec-type-specifications" rows="4" placeholder="Ex:\n- Équivalent à environ 750 mots\n- Au moins 2 sources fiables citées\n- Faits établis tirés des sources"></textarea>
+        </div>
+    `;
+
+    liste.appendChild(div);
+}
+
+/**
+ * Retire un type de travail
+ */
+function retirerTypeTravailSpec(btn) {
+    btn.closest('.wizard-item-liste').remove();
+}
+
+/**
+ * Ajoute un palier de bundle dans la table de correspondance
+ */
+function ajouterPalierBundle() {
+    const liste = document.getElementById('wizard-spec-bundles-liste');
+    const index = liste.children.length;
+
+    const div = document.createElement('div');
+    div.className = 'wizard-item-liste';
+    div.style.cssText = 'padding: 15px; margin-bottom: 12px; background: white; border: 1px solid var(--gris-clair); border-radius: 6px;';
+    div.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+            <h5 style="margin: 0; color: var(--bleu-principal);">Palier ${index + 1}</h5>
+            <button type="button" class="btn-icon" onclick="retirerPalierBundle(this)" style="color: var(--rouge-erreur);">✕</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div class="groupe-form">
+                <label>Note fixe (%)</label>
+                <input type="number" class="controle-form bundle-note-fixe" min="0" max="100" placeholder="Ex: 100" required>
+            </div>
+            <div class="groupe-form">
+                <label>Label</label>
+                <input type="text" class="controle-form bundle-label" placeholder="Ex: A" required>
+            </div>
+        </div>
+        <div class="groupe-form">
+            <label>Description</label>
+            <input type="text" class="controle-form bundle-description" placeholder="Ex: Excellence" required>
+        </div>
+        <div class="groupe-form">
+            <label>Requis (format JSON : {"type-travail": nombre})</label>
+            <textarea class="controle-form bundle-requis" rows="3" placeholder='Ex: {"prise-position": 2, "test": 2, "portfolio": 1}'></textarea>
+            <small style="color: var(--gris-moyen); font-size: 0.85rem; margin-top: 4px; display: block;">
+                Laisse vide pour le palier d'échec (F). Sinon, indique combien de travaux acceptables de chaque type sont requis.
+            </small>
+        </div>
+    `;
+
+    liste.appendChild(div);
+}
+
+/**
+ * Retire un palier de bundle
+ */
+function retirerPalierBundle(btn) {
+    btn.closest('.wizard-item-liste').remove();
+}
+
+/**
+ * Génère la liste des objectifs d'apprentissage (Xavier - niveaux)
+ */
+function genererObjectifsSpec() {
+    const nbObjectifs = parseInt(document.getElementById('wizard-spec-nb-objectifs').value) || 6;
+    const liste = document.getElementById('wizard-spec-objectifs-liste');
+
+    // Vider la liste existante
+    liste.innerHTML = '';
+
+    for (let i = 1; i <= nbObjectifs; i++) {
+        const div = document.createElement('div');
+        div.className = 'wizard-item-liste';
+        div.style.cssText = 'padding: 15px; margin-bottom: 12px; background: white; border: 1px solid var(--gris-clair); border-radius: 6px;';
+        div.innerHTML = `
+            <h5 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Objectif ${i}</h5>
+            <div class="groupe-form">
+                <label>Nom de l'objectif</label>
+                <input type="text" class="controle-form spec-objectif-nom" placeholder="Ex: Normalisation des bases de données" required>
+            </div>
+            <div class="groupe-form">
+                <label>Description (critères)</label>
+                <textarea class="controle-form spec-objectif-description" rows="3" placeholder="Liste des critères à respecter pour cet objectif..."></textarea>
+            </div>
+        `;
+
+        liste.appendChild(div);
+    }
+}
+
+/* ===============================
    EXPORTS WINDOW
    =============================== */
 
@@ -3973,7 +4793,16 @@ window.ajouterPratiqueIndividuelle = ajouterPratiqueIndividuelle;
 window.partagerPratique = partagerPratique;
 window.exporterPratiqueActive = exporterPratiqueActive;
 
+// Exports pour wizard de spécifications
+window.afficherConfigSpecType = afficherConfigSpecType;
+window.ajouterTypeTravailSpec = ajouterTypeTravailSpec;
+window.retirerTypeTravailSpec = retirerTypeTravailSpec;
+window.ajouterPalierBundle = ajouterPalierBundle;
+window.retirerPalierBundle = retirerPalierBundle;
+window.genererObjectifsSpec = genererObjectifsSpec;
+
 window.fermerWizardPratique = fermerWizardPratique;
+window.supprimerPratiqueDepuisWizard = supprimerPratiqueDepuisWizard;
 window.suivantEtapeWizard = suivantEtapeWizard;
 window.precedentEtapeWizard = precedentEtapeWizard;
 window.chargerEchellesWizard = chargerEchellesWizard;
@@ -3995,3 +4824,90 @@ window.ajouterObjectifWizard = ajouterObjectifWizard;
 window.retirerObjectifWizard = retirerObjectifWizard;
 window.calculerTotalPoidsObjectifs = calculerTotalPoidsObjectifs;
 window.creerPratiqueDepuisWizard = creerPratiqueDepuisWizard;
+
+// ============================================
+// UTILITAIRES DE GESTION DES PRATIQUES
+// ============================================
+
+/**
+ * Utilitaire : Liste toutes les pratiques configurables dans la console
+ * Utile pour identifier les IDs de pratiques à supprimer
+ */
+function listerPratiquesConfigurables() {
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    console.log('📋 Pratiques configurables (' + pratiques.length + ') :');
+    console.table(pratiques.map(p => ({
+        id: p.id,
+        nom: p.nom,
+        auteur: p.auteur,
+        dansBibliotheque: p.dansBibliotheque
+    })));
+    return pratiques;
+}
+
+/**
+ * Utilitaire : Supprime une pratique par recherche de nom
+ * @param {string} nomRecherche - Partie du nom à rechercher (ex: "Littérature")
+ */
+async function supprimerPratiqueParNom(nomRecherche) {
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    const pratiqueTrouvee = pratiques.find(p =>
+        p.nom && p.nom.toLowerCase().includes(nomRecherche.toLowerCase())
+    );
+
+    if (!pratiqueTrouvee) {
+        console.error('❌ Aucune pratique trouvée avec le nom contenant:', nomRecherche);
+        console.log('💡 Pratiques disponibles:');
+        listerPratiquesConfigurables();
+        return;
+    }
+
+    console.log('✅ Pratique trouvée:', pratiqueTrouvee.nom, '(ID:', pratiqueTrouvee.id + ')');
+
+    if (confirm(`Supprimer la pratique "${pratiqueTrouvee.nom}" ?\n\nCette action est irréversible.`)) {
+        await supprimerPratique(pratiqueTrouvee.id);
+    }
+}
+
+window.listerPratiquesConfigurables = listerPratiquesConfigurables;
+window.supprimerPratiqueParNom = supprimerPratiqueParNom;
+
+/* ===============================
+   🎨 ACCORDÉONS POUR SECTIONS CONFIGURABLES
+   =============================== */
+
+/**
+ * Toggle un accordéon (ouvre/ferme)
+ * ✅ NOUVEAU (9 décembre 2025)
+ * @param {string} id - ID du contenu de l'accordéon
+ */
+function toggleAccordeon(id) {
+    const contenu = document.getElementById(id);
+    if (!contenu) {
+        console.error('[toggleAccordeon] Élément introuvable:', id);
+        return;
+    }
+
+    // Trouver le titre h3 (élément précédent)
+    const titre = contenu.previousElementSibling;
+    if (!titre) {
+        console.error('[toggleAccordeon] Titre introuvable pour:', id);
+        return;
+    }
+
+    const icone = titre.querySelector('.accordeon-icone');
+
+    if (contenu.classList.contains('ouvert')) {
+        // Fermer
+        contenu.classList.remove('ouvert');
+        if (icone) icone.classList.remove('ouvert');
+        console.log('[toggleAccordeon] Fermé:', id);
+    } else {
+        // Ouvrir
+        contenu.classList.add('ouvert');
+        if (icone) icone.classList.add('ouvert');
+        console.log('[toggleAccordeon] Ouvert:', id);
+    }
+}
+
+window.toggleAccordeon = toggleAccordeon;

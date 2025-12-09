@@ -80,6 +80,8 @@ function gererClicPrimo(event) {
     const icone = event.currentTarget;
     const targetId = icone.dataset.target;
 
+    console.log('[Primo] Clic sur icône, target:', targetId);
+
     if (!targetId) {
         console.warn('[Primo] Pas de data-target sur l\'icône', icone);
         return;
@@ -89,8 +91,11 @@ function gererClicPrimo(event) {
     const contenuElement = document.getElementById(targetId);
     if (!contenuElement) {
         console.warn('[Primo] Élément target non trouvé:', targetId);
+        console.warn('[Primo] IDs disponibles:', Array.from(document.querySelectorAll('[id^="conseil-"], [id^="details-calculs"]')).map(el => el.id));
         return;
     }
+
+    console.log('[Primo] Élément trouvé, innerHTML length:', contenuElement.innerHTML.length);
 
     // Afficher le popup avec le contenu
     afficherPopupPrimo(contenuElement.innerHTML);

@@ -142,9 +142,10 @@ function chargerListeEtudiants() {
  */
 function chargerOptionsFiltres() {
     const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const etudiants = typeof filtrerEtudiantsParMode === 'function'
-        ? filtrerEtudiantsParMode(tousEtudiants)
-        : tousEtudiants.filter(e => e.groupe !== '9999');
+    // ✅ NOUVEAU (9 décembre 2025) : Filtrer le groupe demo (99) selon le mode
+    const etudiants = typeof filtrerEtudiantsDemo === 'function'
+        ? filtrerEtudiantsDemo(tousEtudiants)
+        : tousEtudiants;
 
     // Charger les groupes
     const filtreGroupe = document.getElementById('filtre-groupe-liste');
@@ -865,9 +866,10 @@ function afficherListeEtudiantsConsultation() {
 
     // Charger les étudiants
     const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const etudiants = typeof filtrerEtudiantsParMode === 'function'
-        ? filtrerEtudiantsParMode(tousEtudiants)
-        : tousEtudiants.filter(e => e.groupe !== '9999');
+    // ✅ NOUVEAU (9 décembre 2025) : Filtrer le groupe demo (99) selon le mode
+    const etudiants = typeof filtrerEtudiantsDemo === 'function'
+        ? filtrerEtudiantsDemo(tousEtudiants)
+        : tousEtudiants;
 
     console.log('Nombre total d\'étudiants:', etudiants.length);
 
@@ -1272,9 +1274,10 @@ function afficherPortfolio(da) {
         console.warn('⚠️ Module profil-etudiant.js non chargé, affichage basique');
 
         const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        const etudiants = typeof filtrerEtudiantsParMode === 'function'
-            ? filtrerEtudiantsParMode(tousEtudiants)
-            : tousEtudiants.filter(e => e.groupe !== '9999');
+        // ✅ NOUVEAU (9 décembre 2025) : Filtrer le groupe demo (99) selon le mode
+        const etudiants = typeof filtrerEtudiantsDemo === 'function'
+            ? filtrerEtudiantsDemo(tousEtudiants)
+            : tousEtudiants;
         const etudiant = etudiants.find(e => e.da === da);
 
         if (!etudiant) {

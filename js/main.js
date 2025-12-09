@@ -280,6 +280,12 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModuleContexte();
     }
 
+    // MODULE DONNÉES DEMO: Chargement données demo en mode Assisté (9 déc 2025)
+    if (typeof initialiserModuleDonneesDemo === 'function') {
+        console.log('   → Module Données Demo détecté');
+        initialiserModuleDonneesDemo();
+    }
+
     // MODULE 11: Gestion du groupe
     if (typeof initialiserModuleGroupe === 'function') {
         console.log('   → Module 11-groupe détecté');

@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 93 - Correctifs export</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2025120811">
+    <link rel="stylesheet" href="styles.css?v=2025120908">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -2742,70 +2742,124 @@
 
                     <!-- Titre et version -->
                     <div class="titre-section">
-                        <h1>Système de suivi des apprentissages</h1>
-                        <p class="meta">Beta 93 par Grégoire Bédard (8 décembre 2025 - Stabilisation)</p>
+                        <h1>Système de suivi des apprentissages et de gestion de la notation</h1>
+                        <p class="meta">
+                            Beta 93 - 9 décembre 2025
+                            <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés"></span>
+                        </p>
                     </div>
 
-                    <!-- Boutons d'action à droite -->
+                    <!-- Sélecteur de mode déplacé à droite -->
                     <div class="info-legales-section">
-                        <!-- Bouton Soutenir le projet (visible en mode Normal uniquement) -->
-                        <a id="btn-soutenir-projet"
-                           href="https://codexnumeris.org/#/portal/support"
-                           target="_blank" rel="noopener noreferrer"
-                           class="btn-action-header"
-                           title="Soutenir financièrement le développement">
-                            Soutenir le projet
-                        </a>
-
-                        <!-- Bouton Feedback testeurs (visible en mode Normal uniquement) -->
-                        <a id="btn-feedback"
-                           href="https://forms.office.com/Pages/ResponsePage.aspx?id=ISONVhCY_k-ORNlO_ecv4ZE_a9_snRBOtx0ASfcIqmBUNUoxMzIzQ0wySVJEQzI3R1E0VlU3MFQ1TS4u"
-                           target="_blank" rel="noopener noreferrer"
-                           class="btn-action-header"
-                           title="Donner votre feedback sur cette version Beta">
-                            Fournir un feedback
-                        </a>
-
-                        <!-- Bouton Assistance Primo rond (visible uniquement en mode Assisté) -->
-                        <button id="btn-assistance-primo"
-                           onclick="reafficherAccueilPrimo()"
-                           style="
-                               width: 50px;
-                               height: 50px;
-                               border-radius: 50%;
-                               background: linear-gradient(135deg, #1a5266, #2d7a8c);
-                               color: white;
-                               border: none;
-                               cursor: pointer;
-                               font-size: 1.8rem;
-                               display: none;
-                               box-shadow: 0 4px 12px rgba(26, 82, 102, 0.3);
-                               transition: all 0.2s;
-                               animation: scintillement-primo 3s ease-in-out infinite;
-                               position: relative;
-                           "
-                           onmouseover="this.style.transform='translateY(-2px) scale(1.05)';"
-                           onmouseout="this.style.transform='translateY(0) scale(1)';"
-                           title="Obtenir de l'aide avec Primo">
-                            😎
-                        </button>
+                        <!-- Sélecteur de mode -->
+                        <div id="selecteur-mode" class="selecteur-mode-centre">
+                            <!-- Sera généré dynamiquement par 17-modes.js -->
+                        </div>
                     </div>
                 </div>
 
-                <!-- LIGNE 2 : Informations contextuelles + Mode -->
+                <!-- LIGNE 2 : Informations contextuelles -->
                 <div class="entete-ligne2">
                     <!-- Informations contextuelles (cours, semaine, date) -->
                     <div id="info-contextuelles-centre" class="info-contextuelles-centre">
                         <!-- Sera rempli dynamiquement par JavaScript -->
                     </div>
-
-                    <!-- Sélecteur de mode à droite -->
-                    <div id="selecteur-mode" class="selecteur-mode-centre">
-                        <!-- Sera généré dynamiquement par 17-modes.js -->
-                    </div>
                 </div>
             </div>
         </header>
+
+        <!-- MODAL NOUVEAUTÉS BETA (conforme DESIGN_SYSTEM.html) -->
+        <div id="modalNouveautes" style="
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;">
+
+            <div style="
+                background: white;
+                border-radius: 8px;
+                padding: 30px;
+                max-width: 700px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                position: relative;">
+
+                <!-- Bouton fermer -->
+                <button onclick="fermerModalNouveautes()" style="
+                    position: absolute;
+                    top: 15px;
+                    right: 15px;
+                    background: none;
+                    border: none;
+                    font-size: 1.5rem;
+                    color: #999;
+                    cursor: pointer;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    transition: all 0.2s;">✕</button>
+
+                <!-- Titre principal -->
+                <h2 style="margin-top: 0; color: #2c3e50; font-size: 1.5rem; margin-bottom: 20px;">
+                    🎉 Nouveautés - Beta 93
+                </h2>
+
+                <!-- Message de Grégoire -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: #065dbb; font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">
+                        Message de Grégoire
+                    </h3>
+                    <div style="
+                        background: #f0f8ff;
+                        padding: 15px;
+                        border-radius: 8px;
+                        border-left: 4px solid #065dbb;">
+                        <p style="color: #2c3e50; line-height: 1.6; margin: 0;">
+                            Bonjour à tous ! Cette version apporte plusieurs améliorations importantes à l'interface et au système de contexte.
+                            N'hésitez pas à me faire part de vos commentaires et suggestions !
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Principales nouveautés -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: #065dbb; font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">
+                        ✨ Principales nouveautés
+                    </h3>
+                    <ul style="color: #2c3e50; line-height: 1.8; padding-left: 20px; margin: 0;">
+                        <li><strong>Affichage contextuel amélioré</strong> : Le numéro de semaine et la séance n'apparaissent que pendant le trimestre actif</li>
+                        <li><strong>Titre centré</strong> : Meilleure présentation visuelle de l'en-tête principal</li>
+                        <li><strong>Système de notifications</strong> : Cette pastille rouge vous permet de suivre les nouveautés facilement</li>
+                    </ul>
+                </div>
+
+                <!-- Corrections techniques -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="color: #065dbb; font-size: 1.1rem; margin-bottom: 15px; font-weight: 600;">
+                        🔧 Corrections techniques
+                    </h3>
+                    <ul style="color: #2c3e50; line-height: 1.8; padding-left: 20px; margin: 0;">
+                        <li>Correction de l'affichage "0ème séance" les jours sans cours</li>
+                        <li>Amélioration du calcul des semaines de trimestre</li>
+                        <li>Optimisation du centrage des éléments d'interface</li>
+                    </ul>
+                </div>
+
+                <!-- Bouton fermer en bas -->
+                <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e0e0e0; margin-top: 30px;">
+                    <button onclick="fermerModalNouveautes()" class="btn" style="min-width: 120px;">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- NAVIGATION PRINCIPALE -->
         <nav class="navigation-principale">
@@ -2816,6 +2870,14 @@
                 <button data-onglet="evaluations">Évaluations</button>
                 <button data-onglet="materiel">Matériel</button>
                 <button data-onglet="reglages">Réglages</button>
+
+                <!-- Bouton Assistance Primo (visible uniquement en mode Assisté) -->
+                <button id="btn-assistance-primo"
+                       onclick="reafficherAccueilPrimo()"
+                       style="display: none;"
+                       title="Obtenir de l'aide avec Primo">
+                    😎 Primo
+                </button>
             </div>
         </nav>
 
@@ -3852,11 +3914,6 @@
                         <!-- SIDEBAR GAUCHE (280px, sticky) -->
                         <div class="sidebar-navigation">
 
-                            <!-- En-tête -->
-                            <div style="margin-bottom: 15px;">
-                                <h3 style="margin: 0; font-size: 1rem; color: var(--bleu-principal);">Mes productions</h3>
-                            </div>
-
                             <!-- Bouton Consulter bibliothèque -->
                             <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
                                 <button onclick="afficherBibliothequeProductions()"
@@ -4745,11 +4802,6 @@
 
                         <!-- SIDEBAR (Gauche) - Liste des cours -->
                         <div class="sidebar-navigation">
-
-                            <!-- En-tête -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                <h3 style="margin: 0; font-size: 1rem; color: var(--bleu-principal);">Mes cours</h3>
-                            </div>
 
                             <!-- Bouton Consulter bibliothèque -->
                             <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
@@ -5673,22 +5725,37 @@ Exemple :
                 </div><!-- FIN sous-section reglages-groupe -->
 
                 <!-- Sous-section : Pratique de notation -->
-                <!-- Sous-section : Pratique de notation -->
-                <!-- Sous-section : Pratique de notation -->
                 <div id="reglages-pratique-notation" class="sous-section">
-                    <h2>Configuration de la pratique de notation</h2>
-                    <p class="text-muted">Configuration du système de notation du cours</p>
+                    <h2 class="titre-avec-emoji-toggles">
+                        <span>Pratiques de notation</span>
+                        <span class="titre-emoji-container">
+                            <span class="primo-aide" data-target="note-pratiques">😎</span>
+                            <span class="primo-aide" data-target="conseil-pratiques">😎</span>
+                        </span>
+                    </h2>
+                    <p class="text-muted">Configurer la pratique d'évaluation du cours</p>
+
+                    <!-- Carte Note -->
+                    <div id="note-pratiques" class="carte-info-toggle carte-info-note" style="display: none;">
+                        <strong>Note :</strong> Les pratiques de notation définissent comment les performances des étudiants sont
+                        évaluées et calculées. Vous pouvez utiliser une pratique sommative traditionnelle (moyenne pondérée) ou
+                        une pratique alternative comme le PAN-Maîtrise (N meilleurs artefacts). Chaque pratique peut avoir ses
+                        propres options d'affichage, configuration de portfolio et système de jetons.
+                    </div>
+
+                    <!-- Carte Conseil pratique -->
+                    <div id="conseil-pratiques" class="carte-info-toggle carte-info-conseil" style="display: none;">
+                        <strong>Conseil pratique :</strong> Commencez par choisir une des pratiques prédéfinies dans la bibliothèque
+                        (Sommative, PAN-Maîtrise, PAN par contrat). Vous pourrez ensuite la personnaliser selon vos besoins en ajustant
+                        les options d'affichage, le portfolio et les jetons. Créez votre propre pratique uniquement si aucune des pratiques
+                        prédéfinies ne correspond à vos besoins.
+                    </div>
 
                     <!-- LAYOUT SIDEBAR 2 COLONNES -->
                     <div class="layout-sidebar-2col">
 
                         <!-- SIDEBAR GAUCHE (280px, sticky) -->
                         <div class="sidebar-navigation">
-
-                            <!-- En-tête -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                <h3 style="margin: 0; font-size: 1rem; color: var(--bleu-principal);">Mes pratiques</h3>
-                            </div>
 
                             <!-- Bouton Consulter bibliothèque -->
                             <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
@@ -5703,50 +5770,42 @@ Exemple :
                             <!-- Liste des pratiques (sera remplie par JS) -->
                             <div class="sidebar-liste">
                                 <div id="listePratiquesSidebar">
-                                    <p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">
-                                        Créez une nouvelle pratique ou puisez dans la bibliothèque
-                                    </p>
+                                    <!-- Généré par afficherListePratiquesSidebar() -->
                                 </div>
                             </div>
-
-                            <!-- Bouton nouvelle pratique -->
-                            <button onclick="ouvrirWizardPratique()"
-                                    class="btn btn-confirmer"
-                                    style="width: 100%; margin-top: 15px;">
-                                + Nouvelle pratique
-                            </button>
                         </div>
 
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
-                    <!-- Configuration de la notation (colonne unique) -->
-                    <div style="margin-bottom: 20px;">
-
-                        <h3>Conversion de la note</h3>
-
-                        <!-- NOTE RREC -->
-                            <div style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
-                                    Pendant l'apprentissage, vous pouvez mettre en place une pratique alternative de notation (PAN) qui favorise un parcours formatif. Cependant, le Règlement sur le régime des études collégiales (RREC) exige une note finale chiffrée en pourcentage à la fin du trimestre. Votre évaluation non chiffrée doit être convertie en note chiffrée (%) à la fin du parcours.
-                                </p>
+                            <!-- Bouton création en haut à droite -->
+                            <div style="margin-bottom: 20px; text-align: right;">
+                                <button onclick="ouvrirWizardPratique()" class="btn btn-principal">
+                                    + Nouvelle pratique
+                                </button>
                             </div>
 
-                            <!-- ========================================= -->
-                            <!-- GESTION DES PRATIQUES CONFIGURABLES (Beta 92) -->
-                            <!-- ========================================= -->
+                            <!-- Message d'accueil initial -->
+                            <div class="zone-principale-accueil" id="accueilPratiques">
+                                <p>Sélectionnez une pratique dans la barre latérale ou créez une nouvelle pratique</p>
+                            </div>
 
-                            <div style="margin-bottom: 25px;">
-                                <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--bleu-principal);">
-                                    Pratiques de notation disponibles
-                                </h3>
+                            <!-- Zone de configuration (affichée quand une pratique est sélectionnée) -->
+                            <div id="zoneConfigurationPratique" style="display: none;">
 
-                                <!-- Liste des pratiques (sera remplie dynamiquement) -->
-                                <div id="listePratiques">
-                                    <!-- Les cartes de pratiques seront insérées ici en 2 colonnes -->
-                                    <p style="color: var(--gris-moyen); font-style: italic;">
-                                        Chargement des pratiques...
-                                    </p>
+                            <!-- En-tête de la pratique sélectionnée -->
+                            <div style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px; display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div style="flex: 1;">
+                                    <h3 id="nomPratiqueSelectionnee" style="margin: 0 0 5px 0; color: var(--bleu-principal);"></h3>
+                                    <p id="descriptionPratiqueSelectionnee" class="text-muted" style="margin: 0; font-size: 0.9rem;"></p>
+                                </div>
+                                <div style="display: flex; gap: 10px; margin-left: 15px;">
+                                    <button id="btnActiverPratique" onclick="activerPratiqueAffichee()" class="btn btn-principal">
+                                        Activer cette pratique
+                                    </button>
+                                    <button id="btnConfigurerPratique" onclick="editerPratiqueActive()" class="btn btn-modifier">
+                                        Configurer la pratique
+                                    </button>
                                 </div>
                             </div>
 
@@ -5754,9 +5813,13 @@ Exemple :
                             <!-- OPTIONS D'AFFICHAGE ET CONFIGURATION -->
                             <!-- ========================================= -->
 
-                            <div class="carte" style="margin-bottom: 25px;">
-                                <h3>Options d'affichage</h3>
+                            <div class="carte carte-accordeon" id="carteOptionsAffichage">
+                                <h3 class="accordeon-titre" onclick="toggleAccordeon('accordeonOptionsAffichage')">
+                                    <span>Options d'affichage</span>
+                                    <span class="accordeon-icone">▼</span>
+                                </h3>
 
+                                <div id="accordeonOptionsAffichage" class="accordeon-contenu">
                                 <!-- Option : Mode comparatif -->
                                 <div class="form-group" style="margin-bottom: 15px;">
                                     <label style="cursor: pointer; display: flex; align-items: center;">
@@ -5807,7 +5870,255 @@ Exemple :
                                         Tu dois utiliser cette même grille pour toutes les évaluations afin que le dépistage soit efficace.
                                     </small>
                                 </div>
+                                </div><!-- Fin accordeonOptionsAffichage -->
                             </div>
+
+                            <!-- ========================================= -->
+                            <!-- ÉVALUATION DU FRANÇAIS -->
+                            <!-- ========================================= -->
+
+                            <div class="carte carte-accordeon" id="carteEvaluationFrancais">
+                                <h3 class="accordeon-titre" onclick="toggleAccordeon('accordeonEvaluationFrancais')">
+                                    <span>Évaluation du français</span>
+                                    <span class="accordeon-icone">▼</span>
+                                </h3>
+
+                                <div id="accordeonEvaluationFrancais" class="accordeon-contenu">
+                                <p class="text-muted" style="margin-bottom: 12px; font-size: 0.8rem; line-height: 1.5;">
+                                    Ces options s'appliquent aux critères de type <strong>Algorithmique</strong> (calcul automatique basé sur le nombre d'erreurs et de mots).
+                                </p>
+
+                                <!-- Option : Catégorisation des erreurs -->
+                                <div class="form-group">
+                                    <label style="cursor: pointer; display: flex; align-items: center;">
+                                        <input type="checkbox" id="activerCategorisationErreurs">
+                                        <strong style="margin-left: 8px;">Activer la catégorisation des erreurs de français</strong>
+                                    </label>
+                                    <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.8rem; line-height: 1.5;">
+                                        Permet de catégoriser les erreurs selon 11 codes (0-10) et de fournir une rétroaction différenciée selon le type d'erreur dominant.
+                                        <strong>Si désactivé :</strong> L'enseignant saisit simplement le nombre total d'erreurs sans les catégoriser, et reçoit une rétroaction générique.
+                                    </small>
+                                </div>
+                                </div><!-- Fin accordeonEvaluationFrancais -->
+                            </div>
+
+                            <!-- ========================================= -->
+                            <!-- CONFIGURATION DU PORTFOLIO D'ARTEFACTS -->
+                            <!-- ========================================= -->
+
+                            <div class="carte carte-accordeon" id="cartePortfolio">
+                                <h3 class="accordeon-titre" onclick="toggleAccordeon('accordeonPortfolio')">
+                                    <span>Configuration du portfolio d'artefacts</span>
+                                    <span class="accordeon-icone">▼</span>
+                                </h3>
+
+                                <div id="accordeonPortfolio" class="accordeon-contenu">
+                                <!-- Description du portfolio -->
+                                <div style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                    <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                        Un portfolio est un dossier d'apprentissage que l'apprenant·e monte tout au long du trimestre et qui a sa pondération propre dans la construction de la note finale. Si tu utilises un portfolio (ex: ELLAC en littérature), coche cette case. Sinon, les productions des apprenant·es demeurent indépendantes et ont leur propre pondération.
+                                    </p>
+                                </div>
+
+                                <!-- Configuration détaillée du portfolio -->
+                                <div id="detailsConfigPortfolio">
+
+                                    <!-- Modalité de sélection -->
+                                    <div class="groupe-form" style="margin-bottom: 10px;">
+                                        <label for="configMethodeSelection" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                            Modalité de sélection des artefacts
+                                        </label>
+                                        <select id="configMethodeSelection" class="controle-form" style="max-width: 100%;">
+                                            <option value="meilleurs" selected>N meilleurs artefacts (note maximale atteinte)</option>
+                                            <option value="recents">N récents artefacts (niveau terminal actuel)</option>
+                                            <option value="recents-meilleurs">N récents parmi les meilleurs (hybride)</option>
+                                            <option value="tous">Tous les artefacts (moyenne complète)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Description dynamique -->
+                                    <div id="descriptionModalite" class="text-muted" style="margin-bottom: 20px; padding: 12px; background: var(--gris-tres-pale); border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
+                                        Dans ma pratique de notation basée sur la maîtrise de standards, le portfolio contient les N meilleures productions de l'apprenant·e.
+                                    </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                    <div class="groupe-form" id="groupeNombreARetenir">
+                                        <label for="configNombreARetenir" style="font-weight: 500; display: block; margin-bottom: 5px;">
+                                            Artefacts à retenir
+                                        </label>
+                                        <input type="number" id="configNombreARetenir" class="controle-form"
+                                               value="5" min="1" max="20">
+                                        <small id="labelNombreARetenir" style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
+                                            N meilleurs
+                                        </small>
+                                    </div>
+
+                                    <div class="groupe-form">
+                                        <label for="configMinimumCompletion" style="font-weight: 500; display: block; margin-bottom: 5px;">
+                                            Minimum requis
+                                        </label>
+                                        <input type="number" id="configMinimumCompletion" class="controle-form"
+                                               value="7" min="1" max="20">
+                                        <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
+                                            Seuil complétion
+                                        </small>
+                                    </div>
+
+                                    <div class="groupe-form">
+                                        <label for="configNombreTotal" style="font-weight: 500; display: block; margin-bottom: 5px;">
+                                            Total prévus
+                                        </label>
+                                        <input type="number" id="configNombreTotal" class="controle-form"
+                                               value="10" min="1" max="50">
+                                        <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
+                                            Nombre artefacts
+                                        </small>
+                                    </div>
+                                </div>
+                                </div>
+                                <!-- FIN détailsConfigPortfolio -->
+                                </div><!-- Fin accordeonPortfolio -->
+
+                            </div>
+
+                            <!-- ========================================= -->
+                            <!-- SYSTÈME DE JETONS -->
+                            <!-- ========================================= -->
+
+                            <div class="carte carte-accordeon" id="carteJetons">
+                                <h3 class="accordeon-titre" onclick="toggleAccordeon('accordeonJetons')">
+                                    <span>Système de jetons</span>
+                                    <span class="accordeon-icone">▼</span>
+                                </h3>
+
+                                <div id="accordeonJetons" class="accordeon-contenu">
+                                <!-- Description des jetons -->
+                                <div style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                    <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                        Les jetons sont des ressources limitées que l'apprenant·e peut utiliser pour adapter son parcours d'apprentissage. Chaque élève reçoit un nombre fixe de jetons par trimestre qu'il peut choisir d'utiliser selon ses besoins (prolonger une échéance, refaire une évaluation, etc.).
+                                    </p>
+                                </div>
+
+                                <!-- Grille 2 colonnes : Nombre de jetons et Types personnalisés -->
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+
+                                    <!-- Colonne gauche : Nombre de jetons par élève -->
+                                    <div class="groupe-form">
+                                        <label for="nombreJetonsParEleve" style="font-weight: 500; display: block; margin-bottom: 5px;">
+                                            Nombre de jetons alloués par élève
+                                        </label>
+                                        <input type="number" id="nombreJetonsParEleve" class="controle-form"
+                                               min="0" max="20" value="4">
+                                        <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
+                                            Chaque élève peut utiliser ses jetons comme il le souhaite (délai, reprise, ou autres types que vous créez)
+                                        </small>
+                                    </div>
+
+                                    <!-- Colonne droite : Types de jetons personnalisés -->
+                                    <div>
+                                        <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--bleu-principal); font-weight: 500;">
+                                            Types de jetons personnalisés
+                                        </h4>
+
+                                        <!-- Bouton pour ajouter un nouveau type -->
+                                        <button type="button" id="btnAjouterTypeJeton" class="btn btn-secondaire" style="width: 100%;">
+                                            Ajouter un type de jeton
+                                        </button>
+
+                                        <p class="text-muted" style="margin-top: 8px; margin-bottom: 0; font-size: 0.8rem;">
+                                            Créez vos propres types de jetons adaptés à votre pratique pédagogique
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                                <!-- Grille 3 colonnes : Délai, Reprise, Reprise ciblée -->
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+
+                                    <!-- Colonne 1 : Jetons de délai -->
+                                    <div id="configJetonsDelai" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                        <div class="form-group" style="margin-bottom: 8px;">
+                                            <label style="cursor: pointer;">
+                                                <input type="checkbox" id="jetonDelaiActif" checked>
+                                                <strong style="margin-left: 8px;">Jetons de délai</strong>
+                                            </label>
+                                        </div>
+                                        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
+                                            Permettent de prolonger l'échéance d'une évaluation
+                                        </p>
+                                        <div class="groupe-form">
+                                            <label for="dureeDelai" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
+                                                Durée du délai :
+                                            </label>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <input type="number" id="dureeDelai" class="controle-form"
+                                                       min="1" max="30" value="7" style="width: 70px;">
+                                                <span style="font-size: 0.9rem;">jours</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Colonne 2 : Jetons de reprise -->
+                                    <div id="configJetonsReprise" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                        <div class="form-group" style="margin-bottom: 8px;">
+                                            <label style="cursor: pointer;">
+                                                <input type="checkbox" id="jetonRepriseActif" checked>
+                                                <strong style="margin-left: 8px;">Jetons de reprise</strong>
+                                            </label>
+                                        </div>
+                                        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
+                                            Permettent de refaire une évaluation pour améliorer la maîtrise
+                                        </p>
+                                        <div class="groupe-form">
+                                            <label style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 8px;">
+                                                Que fait-on avec l'évaluation originale?
+                                            </label>
+                                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                                <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
+                                                    <input type="radio" id="archiverOriginale" name="gestionOriginale" value="archiver" checked>
+                                                    <span style="margin-left: 6px;">On la garde en archive</span>
+                                                </label>
+                                                <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
+                                                    <input type="radio" id="supprimerOriginale" name="gestionOriginale" value="supprimer">
+                                                    <span style="margin-left: 6px;">On la supprime</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Colonne 3 : Jetons de reprise ciblée -->
+                                    <div id="configJetonsRepriseCiblee" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                        <div class="form-group" style="margin-bottom: 8px;">
+                                            <label style="cursor: pointer;">
+                                                <input type="checkbox" id="jetonRepriseCibleeActif" checked>
+                                                <strong style="margin-left: 8px;">Jetons de reprise ciblée</strong>
+                                            </label>
+                                        </div>
+                                        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
+                                            Permettent de refaire une évaluation en ciblant <strong>UN SEUL critère spécifique</strong> (ex: Français, Rigueur, Structure). La correction apportée doit être justifiée.
+                                        </p>
+                                        <div class="groupe-form" style="margin-bottom: 12px;">
+                                            <label for="plafondNoteCiblee" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
+                                                Note maximale du critère ciblé :
+                                            </label>
+                                            <input type="text" id="plafondNoteCiblee" class="controle-form"
+                                                   value="D (Développement)" style="width: 100%;">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                </div><!-- Fin accordeonJetons -->
+                            </div>
+
+                            <!-- Bouton Sauvegarder -->
+                            <div style="margin-top: 20px;">
+                                <button class="btn btn-confirmer" id="btnSauvegarderPratiqueNotation" style="width: 100%;">
+                                    Sauvegarder toutes les configurations
+                                </button>
+                                <span id="statutModalites" style="display: none;"></span>
+                            </div>
+
+                            </div><!-- FIN zoneConfigurationPratique -->
 
                             <!-- Input caché pour import JSON -->
                             <input type="file" id="inputImportPratique" accept=".json" style="display: none;" onchange="traiterImportPratique(event)">
@@ -6022,32 +6333,89 @@ Exemple :
                                             <div id="wizard-config-specifications" style="display: none;">
                                                 <div style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
                                                     <p class="text-muted" style="margin: 0 0 10px 0; font-size: 0.85rem; line-height: 1.5;">
-                                                        <strong>Notation par contrat (Specification Grading)</strong> :
-                                                        Les étudiants atteignent des paliers de notes fixes (ex: 60%, 80%, 100%) en réussissant
-                                                        des ensembles d'objectifs mesurables. Chaque objectif est évalué réussite/échec selon des
-                                                        critères clairs communiqués à l'avance.
+                                                        <strong>Notation par spécifications (Specification Grading)</strong> :
+                                                        Les étudiants atteignent des paliers de notes fixes (ex: 50%, 60%, 80%, 100%) selon le nombre
+                                                        de travaux acceptables remis. Note = f(bundles de travaux acceptables).
                                                     </p>
                                                     <p class="text-muted" style="margin: 10px 0 0 0; font-size: 0.85rem; line-height: 1.5;">
-                                                        Cette approche clarifie les attentes, responsabilise les étudiants, réduit le stress
-                                                        et encourage l'orientation vers l'apprentissage plutôt que vers la note. Les étudiants
-                                                        peuvent réviser leur travail via le système de jetons pour atteindre les paliers supérieurs.
+                                                        Approche basée sur Nilson (2014) : évaluation binaire (acceptable/non-acceptable),
+                                                        spécifications claires, révisions multiples via jetons.
                                                     </p>
                                                 </div>
 
-                                                <div style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                                    <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
-                                                        <strong>Recommandation de Primo</strong> :
-                                                        Cette pratique nécessite une configuration avancée après la création initiale.
-                                                        Tu devras définir tes objectifs, les regrouper par palier de note, et les relier
-                                                        à tes évaluations. Un exemple complet basé sur une pratique réelle (Chimie 202) est
-                                                        disponible dans la documentation.
-                                                    </p>
+                                                <!-- ÉTAPE 1 : Choix du type d'évaluation -->
+                                                <div class="groupe-form">
+                                                    <label>Type d'évaluation *</label>
+                                                    <select id="wizard-spec-type-evaluation" class="controle-form" onchange="afficherConfigSpecType()">
+                                                        <option value="">Choisir un type...</option>
+                                                        <option value="binaire">Évaluation binaire (acceptable / non-acceptable)</option>
+                                                        <option value="niveaux">Niveaux de performance (1-2-3-4 ou similaire)</option>
+                                                    </select>
+                                                    <small style="color: var(--gris-moyen); font-size: 0.85rem; margin-top: 6px; display: block;">
+                                                        <strong>Binaire</strong> : François (Chimie) - Travail acceptable si TOUTES les spécifications respectées<br>
+                                                        <strong>Niveaux</strong> : Xavier (Info) - Objectifs avec niveaux 1-4 de maîtrise
+                                                    </small>
                                                 </div>
 
-                                                <p style="color: var(--gris-moyen); font-size: 0.9rem; margin: 0;">
-                                                    La structure de base sera créée automatiquement. Consulte la documentation pour configurer
-                                                    tes objectifs et paliers de notes.
-                                                </p>
+                                                <!-- Configuration BINAIRE (François) -->
+                                                <div id="wizard-spec-config-binaire" style="display: none;">
+                                                    <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Types de travaux</h4>
+                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: 4px;">
+                                                        <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                                            Définis les types de travaux avec leurs spécifications. Un travail est <strong>acceptable</strong>
+                                                            si TOUTES les spécifications sont respectées (évaluation binaire).
+                                                        </p>
+                                                    </div>
+
+                                                    <div id="wizard-spec-types-travaux-liste"></div>
+                                                    <button type="button" class="btn btn-tres-compact" onclick="ajouterTypeTravailSpec()">+ Ajouter un type de travail</button>
+
+                                                    <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Table de correspondance (Bundles → Notes)</h4>
+                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: 4px;">
+                                                        <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                                            Définis les paliers de notes selon le nombre de travaux acceptables de chaque type.
+                                                            Exemple : A (100%) = 2 prises de position + 2 tests + 1 portfolio.
+                                                        </p>
+                                                    </div>
+
+                                                    <div id="wizard-spec-bundles-liste"></div>
+                                                    <button type="button" class="btn btn-tres-compact" onclick="ajouterPalierBundle()">+ Ajouter un palier</button>
+                                                </div>
+
+                                                <!-- Configuration NIVEAUX (Xavier) -->
+                                                <div id="wizard-spec-config-niveaux" style="display: none;">
+                                                    <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Objectifs d'apprentissage</h4>
+                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: 4px;">
+                                                        <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                                            Définis tes objectifs d'apprentissage techniques. Chaque objectif sera évalué selon des niveaux
+                                                            de performance (ex: 1-Insuffisant, 2-Acceptable, 3-Maîtrisé, 4-Excellence).
+                                                        </p>
+                                                    </div>
+
+                                                    <div class="groupe-form">
+                                                        <label>Nombre d'objectifs</label>
+                                                        <input type="number" id="wizard-spec-nb-objectifs" class="controle-form" min="1" max="20" value="6" onchange="genererObjectifsSpec()">
+                                                    </div>
+
+                                                    <div id="wizard-spec-objectifs-liste"></div>
+
+                                                    <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal);">Calcul de la note finale</h4>
+                                                    <div style="margin-bottom: 15px; padding: 12px; background: var(--orange-tres-pale); border-left: 4px solid var(--orange-accent); border-radius: 4px;">
+                                                        <p class="text-muted" style="margin: 0 0 10px 0; font-size: 0.85rem; line-height: 1.5;">
+                                                            <strong>Logique de Xavier</strong> : La note finale dépend des niveaux atteints pour chaque objectif.
+                                                        </p>
+                                                        <ul class="text-muted" style="margin: 0; padding-left: 20px; font-size: 0.85rem; line-height: 1.5;">
+                                                            <li>Tous objectifs niveau 3+ → 80%</li>
+                                                            <li>Chaque niveau 4 ajoute → 3.33% (max 100%)</li>
+                                                            <li>1 objectif niveau 2 → 55%</li>
+                                                            <li>2 objectifs niveau 2 OU 1 niveau 1 → 50%</li>
+                                                        </ul>
+                                                    </div>
+
+                                                    <p style="color: var(--gris-moyen); font-size: 0.9rem; margin: 0;">
+                                                        Cette logique sera implémentée automatiquement dans le calcul de la performance.
+                                                    </p>
+                                                </div>
                                             </div>
 
                                             <!-- Configuration Multi-objectifs -->
@@ -6355,9 +6723,14 @@ Exemple :
 
                                     <!-- Boutons navigation -->
                                     <div class="footer-border-top" style="display: flex; justify-content: space-between;">
-                                        <button class="btn btn-compact btn-annuler" onclick="fermerWizardPratique()">
-                                            Annuler
-                                        </button>
+                                        <div style="display: flex; gap: 10px;">
+                                            <button class="btn btn-compact btn-annuler" onclick="fermerWizardPratique()">
+                                                Annuler
+                                            </button>
+                                            <button id="wizard-btn-supprimer" class="btn btn-compact btn-supprimer" onclick="supprimerPratiqueDepuisWizard()" style="display: none;">
+                                                🗑️ Supprimer
+                                            </button>
+                                        </div>
                                         <div style="display: flex; gap: 10px;">
                                             <button id="wizard-btn-precedent" class="btn btn-compact" onclick="precedentEtapeWizard()" style="display: none;">
                                                 ← Précédent
@@ -6479,284 +6852,6 @@ Exemple :
                                     </small>
                                 </div>
                             </div>
-
-                            <!-- Évaluation du français -->
-                            <div style="margin-top: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--bleu-principal);">Évaluation du français</h4>
-
-                                <p class="text-muted" style="margin-bottom: 12px; font-size: 0.8rem; line-height: 1.5;">
-                                    Ces options s'appliquent aux critères de type <strong>Algorithmique</strong> (calcul automatique basé sur le nombre d'erreurs et de mots).
-                                </p>
-
-                                <!-- Option : Catégorisation des erreurs -->
-                                <div class="form-group">
-                                    <label style="cursor: pointer; display: flex; align-items: center;">
-                                        <input type="checkbox" id="activerCategorisationErreurs">
-                                        <strong style="margin-left: 8px;">Activer la catégorisation des erreurs de français</strong>
-                                    </label>
-                                    <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.8rem; line-height: 1.5;">
-                                        Permet de catégoriser les erreurs selon 11 codes (0-10) et de fournir une rétroaction différenciée selon le type d'erreur dominant.
-                                        <strong>Si désactivé :</strong> L'enseignant saisit simplement le nombre total d'erreurs sans les catégoriser, et reçoit une rétroaction générique.
-                                    </small>
-                                </div>
-                            </div>
-
-                            <!-- ========================================= -->
-                            <!-- CARTES PAN (Portfolio + Jetons) -->
-                            <!-- ========================================= -->
-                            <div id="colonneCartesExtras" style="margin-top: 20px;">
-                                <!-- Les cartes Portfolio et Jetons seront affichées ici dynamiquement -->
-                            </div>
-
-                            <!-- Bouton Sauvegarder -->
-                            <div style="margin-top: 20px;">
-                                <button class="btn btn-confirmer" id="btnSauvegarderPratiqueNotation" style="width: 100%;">
-                                    Sauvegarder toutes les configurations
-                                </button>
-                                <span id="statutModalites" style="display: none;"></span>
-                            </div>
-
-                    </div>
-
-                        <!-- ==========================================
-             SECTION : CONFIGURATION PAN
-             ========================================== -->
-                        <div id="configurationPAN" style="display: none; margin-top: 20px;">
-
-                            <!-- Grille 2 colonnes pour optimisation espace -->
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
-
-                                <!-- Colonne gauche -->
-                                <div style="display: flex; flex-direction: column; gap: 20px;">
-
-                                    <!-- Configuration du portfolio d'artefacts -->
-                                    <div class="carte" id="cartePortfolio" style="margin-bottom: 0; display: none;">
-                                        <h3>Configuration du portfolio d'artefacts</h3>
-
-                                        <!-- Description du portfolio -->
-                                        <div style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                            <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
-                                                Un portfolio est un dossier d'apprentissage que l'apprenant·e monte tout au long du trimestre et qui a sa pondération propre dans la construction de la note finale. Si tu utilises un portfolio (ex: ELLAC en littérature), coche cette case. Sinon, les productions des apprenant·es demeurent indépendantes et ont leur propre pondération.
-                                            </p>
-                                        </div>
-
-                                        <!-- Configuration détaillée du portfolio -->
-                                        <div id="detailsConfigPortfolio">
-
-                                            <!-- Modalité de sélection -->
-                                            <div class="groupe-form" style="margin-bottom: 10px;">
-                                                <label for="configMethodeSelection" style="font-weight: 600; display: block; margin-bottom: 8px;">
-                                                    Modalité de sélection des artefacts
-                                                </label>
-                                                <select id="configMethodeSelection" class="controle-form" style="max-width: 100%;">
-                                                    <option value="meilleurs" selected>N meilleurs artefacts (note maximale atteinte)</option>
-                                                    <option value="recents">N récents artefacts (niveau terminal actuel)</option>
-                                                    <option value="recents-meilleurs">N récents parmi les meilleurs (hybride)</option>
-                                                    <option value="tous">Tous les artefacts (moyenne complète)</option>
-                                                </select>
-                                            </div>
-
-                                            <!-- Description dynamique -->
-                                            <div id="descriptionModalite" class="text-muted" style="margin-bottom: 20px; padding: 12px; background: var(--gris-tres-pale); border-radius: 4px; font-size: 0.9rem; line-height: 1.6;">
-                                                Dans ma pratique de notation basée sur la maîtrise de standards, le portfolio contient les N meilleures productions de l'apprenant·e.
-                                            </div>
-
-                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                            <div class="groupe-form" id="groupeNombreARetenir">
-                                                <label for="configNombreARetenir" style="font-weight: 500; display: block; margin-bottom: 5px;">
-                                                    Artefacts à retenir
-                                                </label>
-                                                <input type="number" id="configNombreARetenir" class="controle-form"
-                                                       value="5" min="1" max="20">
-                                                <small id="labelNombreARetenir" style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
-                                                    N meilleurs
-                                                </small>
-                                            </div>
-
-                                            <div class="groupe-form">
-                                                <label for="configMinimumCompletion" style="font-weight: 500; display: block; margin-bottom: 5px;">
-                                                    Minimum requis
-                                                </label>
-                                                <input type="number" id="configMinimumCompletion" class="controle-form"
-                                                       value="7" min="1" max="20">
-                                                <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
-                                                    Seuil complétion
-                                                </small>
-                                            </div>
-
-                                            <div class="groupe-form">
-                                                <label for="configNombreTotal" style="font-weight: 500; display: block; margin-bottom: 5px;">
-                                                    Total prévus
-                                                </label>
-                                                <input type="number" id="configNombreTotal" class="controle-form"
-                                                       value="10" min="1" max="50">
-                                                <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
-                                                    Nombre artefacts
-                                                </small>
-                                            </div>
-                                        </div>
-                                        </div>
-                                        <!-- FIN détailsConfigPortfolio -->
-
-                                    </div>
-
-                                </div>
-
-                                <!-- Colonne droite -->
-                                <div style="display: flex; flex-direction: column; gap: 20px;">
-
-                                    <!-- Système de jetons -->
-                                    <div class="carte" id="carteJetons" style="margin-bottom: 0; display: none;">
-                                        <h3>Système de jetons</h3>
-
-                                        <!-- Description des jetons -->
-                                        <div style="margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                            <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
-                                                Les jetons sont des ressources limitées que l'apprenant·e peut utiliser pour adapter son parcours d'apprentissage. Chaque élève reçoit un nombre fixe de jetons par trimestre qu'il peut choisir d'utiliser selon ses besoins (prolonger une échéance, refaire une évaluation, etc.).
-                                            </p>
-                                        </div>
-
-                                        <!-- Grille 2 colonnes : Nombre de jetons et Types personnalisés -->
-                                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
-
-                                            <!-- Colonne gauche : Nombre de jetons par élève -->
-                                            <div class="groupe-form">
-                                                <label for="nombreJetonsParEleve" style="font-weight: 500; display: block; margin-bottom: 5px;">
-                                                    Nombre de jetons alloués par élève
-                                                </label>
-                                                <input type="number" id="nombreJetonsParEleve" class="controle-form"
-                                                       min="0" max="20" value="4">
-                                                <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
-                                                    Chaque élève peut utiliser ses jetons comme il le souhaite (délai, reprise, ou autres types que vous créez)
-                                                </small>
-                                            </div>
-
-                                            <!-- Colonne droite : Types de jetons personnalisés -->
-                                            <div>
-                                                <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--bleu-principal); font-weight: 500;">
-                                                    Types de jetons personnalisés
-                                                </h4>
-
-                                                <!-- Bouton pour ajouter un nouveau type -->
-                                                <button type="button" id="btnAjouterTypeJeton" class="btn btn-secondaire" style="width: 100%;">
-                                                    Ajouter un type de jeton
-                                                </button>
-
-                                                <p class="text-muted" style="margin-top: 8px; margin-bottom: 0; font-size: 0.8rem;">
-                                                    Créez vos propres types de jetons adaptés à votre pratique pédagogique
-                                                </p>
-                                            </div>
-
-                                        </div>
-
-                                        <!-- Grille 3 colonnes : Délai, Reprise, Reprise ciblée -->
-                                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-
-                                            <!-- Colonne 1 : Jetons de délai -->
-                                            <div id="configJetonsDelai" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                                <div class="form-group" style="margin-bottom: 8px;">
-                                                    <label style="cursor: pointer;">
-                                                        <input type="checkbox" id="jetonDelaiActif" checked>
-                                                        <strong style="margin-left: 8px;">Jetons de délai</strong>
-                                                    </label>
-                                                </div>
-                                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
-                                                    Permettent de prolonger l'échéance d'une évaluation
-                                                </p>
-                                                <div class="groupe-form">
-                                                    <label for="dureeDelai" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
-                                                        Durée du délai :
-                                                    </label>
-                                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                                        <input type="number" id="dureeDelai" class="controle-form"
-                                                               min="1" max="30" value="7" style="width: 70px;">
-                                                        <span style="font-size: 0.9rem;">jours</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Colonne 2 : Jetons de reprise -->
-                                            <div id="configJetonsReprise" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                                <div class="form-group" style="margin-bottom: 8px;">
-                                                    <label style="cursor: pointer;">
-                                                        <input type="checkbox" id="jetonRepriseActif" checked>
-                                                        <strong style="margin-left: 8px;">Jetons de reprise</strong>
-                                                    </label>
-                                                </div>
-                                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
-                                                    Permettent de refaire une évaluation pour améliorer la maîtrise
-                                                </p>
-                                                <div class="groupe-form">
-                                                    <label style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 8px;">
-                                                        Que fait-on avec l'évaluation originale?
-                                                    </label>
-                                                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                                                        <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
-                                                            <input type="radio" id="archiverOriginale" name="gestionOriginale" value="archiver" checked>
-                                                            <span style="margin-left: 6px;">On la garde en archive</span>
-                                                        </label>
-                                                        <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
-                                                            <input type="radio" id="supprimerOriginale" name="gestionOriginale" value="supprimer">
-                                                            <span style="margin-left: 6px;">On la supprime</span>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Colonne 3 : Jetons de reprise ciblée -->
-                                            <div id="configJetonsRepriseCiblee" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                                <div class="form-group" style="margin-bottom: 8px;">
-                                                    <label style="cursor: pointer;">
-                                                        <input type="checkbox" id="jetonRepriseCibleeActif" checked>
-                                                        <strong style="margin-left: 8px;">Jetons de reprise ciblée</strong>
-                                                    </label>
-                                                </div>
-                                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
-                                                    Permettent de refaire une évaluation en ciblant <strong>UN SEUL critère spécifique</strong> (ex: Français, Rigueur, Structure). La correction apportée doit être justifiée.
-                                                </p>
-                                                <div class="groupe-form" style="margin-bottom: 12px;">
-                                                    <label for="plafondNoteCiblee" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
-                                                        Note maximale du critère ciblé :
-                                                    </label>
-                                                    <select id="plafondNoteCiblee" class="controle-form" style="width: 100%; font-size: 0.85rem;">
-                                                        <option value="M" selected>M (Maîtrisé) - 75-84%</option>
-                                                        <option value="D">D (Développement) - 65-74%</option>
-                                                        <option value="aucun">Aucun plafond (selon pratique)</option>
-                                                    </select>
-                                                </div>
-                                                <div class="groupe-form">
-                                                    <label style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 8px;">
-                                                        Que fait-on avec l'évaluation originale?
-                                                    </label>
-                                                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                                                        <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
-                                                            <input type="radio" id="archiverOriginaleCiblee" name="gestionOriginaleCiblee" value="archiver" checked>
-                                                            <span style="margin-left: 6px;">On la garde en archive</span>
-                                                        </label>
-                                                        <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
-                                                            <input type="radio" id="supprimerOriginaleCiblee" name="gestionOriginaleCiblee" value="supprimer">
-                                                            <span style="margin-left: 6px;">On la supprime</span>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-                                        <!-- Liste des types de jetons personnalisés créés -->
-                                        <div id="listeJetonsPersonnalises" style="margin-top: 15px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                                            <!-- Les types personnalisés seront ajoutés ici dynamiquement -->
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <!-- Reste du contenu (jeton personnalisé si nécessaire) -->
-                        </div>
-                        <!-- FIN SECTION CONFIGURATION PAN -->
 
                     </div>
                     <!-- Fin zone-principale -->
@@ -10118,7 +10213,7 @@ Exemple :
      =================================== -->
 
     <!-- PRIORITÉ 0: Couche de stockage (Migration IndexedDB - Beta 91.5) -->
-    <script src="js/db.js?v=2025112401"></script>
+    <script src="js/db.js?v=2025120904"></script>
 
     <!-- Bibliothèque externe: Chart.js pour graphiques progression (Beta 93) -->
     <script src="libs/chart.min.js"></script>
@@ -10127,11 +10222,12 @@ Exemple :
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js"></script>
     <script src="js/navigation.js?v=2025120601"></script>
-    <script src="js/modes.js?v=2025113001"></script>
+    <script src="js/modes.js?v=2025120906"></script>
+    <script src="js/donnees-demo.js?v=2025120905"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025111325"></script>
-    <script src="js/etudiants.js?v=2025120403"></script>
+    <script src="js/etudiants.js?v=2025120901"></script>
     <script src="js/productions-bibliotheque.js?v=2025120826"></script>
     <script src="js/productions.js?v=2025120826"></script>
     <script src="js/grilles-bibliotheque.js?v=2025120826"></script>
@@ -10140,8 +10236,8 @@ Exemple :
     <script src="js/echelles.js?v=2025120827"></script>
     <script src="js/cartouches-bibliotheque.js?v=2025120827"></script>
     <script src="js/cartouches.js?v=2025120827"></script>
-    <script src="js/cours.js?v=2025120815"></script>
-    <script src="js/contexte.js?v=2025120815"></script>
+    <script src="js/cours.js?v=2025120901"></script>
+    <script src="js/contexte.js?v=2025120907"></script>
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
     <script src="js/interpretation-config.js?v=2025111501"></script>
@@ -10165,10 +10261,10 @@ Exemple :
     <script src="js/cc-license.js?v=2025120118"></script>
 
     <!-- Interface de gestion des pratiques configurables -->
-    <script src="js/pratiques.js?v=2025120819"></script>
+    <script src="js/pratiques.js?v=2025120908"></script>
     <script src="js/objectifs.js?v=2025120124"></script>
 
-    <script src="js/portfolio.js?v=2025120703"></script>
+    <script src="js/portfolio.js?v=2025120908"></script>
     <script src="js/saisie-presences.js?v=2025120613"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
@@ -10199,7 +10295,7 @@ Exemple :
     <script src="js/primo-modal.js?v=2025120106"></script>
     <script src="js/primo-accueil.js?v=2025112809"></script>
     <script src="js/primo-validation-champs.js?v=2025112727"></script>
-    <script src="js/primo-tooltips.js?v=2025112903"></script>
+    <script src="js/primo-tooltips.js?v=2025120901"></script>
 
     <!-- GUIDAGE - Système d'assistance contextuelle en mode Assisté (Beta 92) -->
     <script src="js/guidage.js?v=2025112706"></script>
@@ -10208,7 +10304,56 @@ Exemple :
     <script src="js/tutoriel-interactif.js?v=2025120102"></script>
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=2025120600"></script>
+    <script src="js/main.js?v=2025120901"></script>
+
+    <!-- Script de gestion du modal des nouveautés -->
+    <script>
+        /**
+         * Affiche le modal des nouveautés
+         */
+        function afficherModalNouveautes() {
+            const modal = document.getElementById('modalNouveautes');
+            if (modal) {
+                modal.style.display = 'flex';
+                // Marquer comme vu dans localStorage
+                localStorage.setItem('nouveautes-beta-93-vue', 'true');
+            }
+        }
+
+        /**
+         * Ferme le modal des nouveautés
+         */
+        function fermerModalNouveautes() {
+            const modal = document.getElementById('modalNouveautes');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Fermer le modal si on clique sur l'overlay
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('modalNouveautes');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        fermerModalNouveautes();
+                    }
+                });
+            }
+
+            // Rendre la pastille grise pâle si les nouveautés ont déjà été vues
+            const nouveautesVues = localStorage.getItem('nouveautes-beta-93-vue');
+            const pastille = document.querySelector('.pastille-nouveautes');
+            if (nouveautesVues === 'true' && pastille) {
+                pastille.style.background = 'rgba(200, 200, 200, 0.5)';
+                pastille.style.animation = 'none';
+            }
+        });
+
+        // Export des fonctions pour usage global
+        window.afficherModalNouveautes = afficherModalNouveautes;
+        window.fermerModalNouveautes = fermerModalNouveautes;
+    </script>
 
     <!-- Script de débogage additionnel (optionnel) -->
     <script>
@@ -10746,74 +10891,7 @@ Exemple :
     </script>
 
     <!-- Script pour afficher les informations contextuelles dans la navigation -->
-    <script>
-        /**
-         * Affiche les informations contextuelles au centre sous le titre (cours, semaine, date)
-         * Sources : cours.js (listeCours), calendrierComplet (semaine), Date système
-         */
-        function afficherInfosContextuelles() {
-            const container = document.getElementById('info-contextuelles-centre');
-            if (!container) return;
-
-            // 1. Récupérer le cours actif depuis cours.js (localStorage)
-            const listeCours = JSON.parse(localStorage.getItem('listeCours') || '[]');
-            const coursActif = listeCours.find(c => c.actif) || listeCours[0] || null;
-            const nomCours = coursActif ? (coursActif.nomCours || coursActif.codeCours || 'Aucun cours') : 'Aucun cours';
-
-            // 1b. Récupérer la pratique de notation active
-            const modalites = JSON.parse(localStorage.getItem('modalitesEvaluation') || '{}');
-            const pratiqueId = modalites.pratique || 'sommative';
-            const nomsConviviaux = {
-                'sommative': 'Sommative',
-                'pan-maitrise': 'PAN-Maîtrise',
-                'alternative': 'PAN-Maîtrise'  // Ancien nom (rétrocompatibilité)
-            };
-            const nomPratique = nomsConviviaux[pratiqueId] || pratiqueId;
-
-            // 2. Calculer la semaine actuelle depuis calendrierComplet (trimestre.js)
-            const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
-            const aujourdhuiISO = new Date().toISOString().split('T')[0];
-            const infoJour = calendrier[aujourdhuiISO] || null;
-
-            const semaine = infoJour && infoJour.numeroSemaine ? `Semaine ${infoJour.numeroSemaine}` : 'Semaine non définie';
-
-            // 3. Formater la date d'aujourd'hui (format: lundi 3 novembre 2025)
-            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-            const dateFormatee = new Date().toLocaleDateString('fr-CA', options);
-
-            // 4. Récupérer le groupe et le rang de la séance
-            let groupeInfo = '';
-            let seanceInfo = '';
-            if (infoJour && (infoJour.statut === 'cours' || infoJour.statut === 'reprise')) {
-                const seancesCompletes = JSON.parse(localStorage.getItem('seancesCompletes') || '{}');
-                const seancesDuJour = seancesCompletes[aujourdhuiISO];
-
-                // Récupérer le groupe de la première séance du jour
-                if (seancesDuJour && seancesDuJour.length > 0 && seancesDuJour[0].groupe) {
-                    groupeInfo = `Groupe ${seancesDuJour[0].groupe} : `;
-                }
-
-                // Utiliser la fonction source unique définie dans horaire.js
-                const rangSeance = window.obtenirRangSeanceDansSemaine(aujourdhuiISO);
-                if (rangSeance && rangSeance.ordinal) {
-                    seanceInfo = ` · ${rangSeance.ordinal} séance`;
-                }
-            }
-
-            // 5. Mettre à jour le HTML dans la navigation
-            container.innerHTML = `
-                <br>${nomCours}
-                <br><span style="font-size: 0.85em; opacity: 0.85;">Pratique : ${nomPratique}</span>
-                <br>${groupeInfo}${semaine} · ${dateFormatee}${seanceInfo}
-            `;
-        }
-
-        // Appeler au chargement de la page
-        document.addEventListener('DOMContentLoaded', afficherInfosContextuelles);
-
-        // Rafraîchir si changement de cours ou calendrier
-        window.addEventListener('storage', afficherInfosContextuelles);
-    </script>
+    <!-- ✅ SUPPRIMÉ (9 décembre 2025) : Remplacé par contexte.js qui gère l'affichage horizontal centré -->
 </body>
 
 </html>

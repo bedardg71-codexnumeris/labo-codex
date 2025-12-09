@@ -530,12 +530,19 @@
 
                 console.log(`✅ [DB] Synchronisation terminée: ${synced} clés synchronisées, ${skipped} déjà en cache`);
 
+                // ✅ Définir flag global pour indiquer que la DB est prête
+                window.dbReady = true;
+
                 // Émettre événement pour notifier que les données sont prêtes
                 window.dispatchEvent(new CustomEvent('db-ready', {
                     detail: { synced, skipped, total: indexedDBKeys.length }
                 }));
             } catch (error) {
                 console.error('❌ [DB] Erreur synchronisation cache:', error);
+
+                // ✅ Définir flag même en cas d'erreur (fallback localStorage)
+                window.dbReady = true;
+
                 // Émettre événement même en cas d'erreur
                 window.dispatchEvent(new CustomEvent('db-ready', {
                     detail: { error: error.message }
