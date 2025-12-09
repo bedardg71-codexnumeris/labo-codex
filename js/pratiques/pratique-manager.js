@@ -94,27 +94,81 @@ const PratiqueManager = {
     /**
      * Migration : Ajoute le flag dansBibliotheque à toutes les pratiques configurables
      * Appelée automatiquement au chargement de pratiques.js
+     *
+     * ✅ MODIFICATION (9 décembre 2025) :
+     * - Pratiques PRÉDÉFINIES → dansBibliotheque = false (disponibles dans modal)
+     * - Pratiques CRÉÉES PAR UTILISATEUR → dansBibliotheque = true (visibles dans sidebar)
      */
     migrerVersBibliotheque() {
         const pratiques = db.getSync('pratiquesConfigurables', []);
-        let nbMigrees = 0;
+
+        // Vérifier si migration v2 déjà effectuée
+        const migrationV2Effectuee = db.getSync('migrationBibliothequeV2', false);
+
+        if (migrationV2Effectuee) {
+            // Migration v2 déjà faite, juste gérer les nouvelles pratiques sans flag
+            let nbMigrees = 0;
+            pratiques.forEach(p => {
+                if (p.dansBibliotheque === undefined) {
+                    p.dansBibliotheque = false; // Par défaut false (seront ajoutées manuellement)
+                    nbMigrees++;
+                }
+            });
+
+            if (nbMigrees > 0) {
+                db.setSync('pratiquesConfigurables', pratiques);
+                console.log(`[PratiqueManager] ✅ ${nbMigrees} nouvelle(s) pratique(s) ajoutée(s)`);
+            }
+            return;
+        }
+
+        // MIGRATION V2 : Corriger les pratiques prédéfinies existantes
+        let nbCorrigees = 0;
+        let nbPredefinesRetirees = 0;
+        let nbUtilisateurGardees = 0;
+
+        // Obtenir la liste des IDs de pratiques prédéfinies
+        const idsPredefinis = window.PRATIQUES_PREDEFINES
+            ? Object.keys(window.PRATIQUES_PREDEFINES)
+            : [];
 
         pratiques.forEach(p => {
-            if (p.dansBibliotheque === undefined) {
-                p.dansBibliotheque = true; // Par défaut, toutes les pratiques existantes restent visibles
-                nbMigrees++;
+            // Traiter toutes les pratiques, même celles qui ont déjà un flag
+            const estPredefinie = idsPredefinis.includes(p.id);
+
+            if (estPredefinie && p.dansBibliotheque !== false) {
+                // Pratique prédéfinie incorrectement marquée comme dans la bibliothèque
+                p.dansBibliotheque = false;
+                nbPredefinesRetirees++;
+                nbCorrigees++;
+            } else if (!estPredefinie && p.dansBibliotheque === undefined) {
+                // Pratique créée par utilisateur sans flag → garder dans sidebar
+                p.dansBibliotheque = true;
+                nbUtilisateurGardees++;
+                nbCorrigees++;
             }
         });
 
-        if (nbMigrees > 0) {
+        if (nbCorrigees > 0) {
             db.setSync('pratiquesConfigurables', pratiques);
-            console.log(`[PratiqueManager] ✅ Migration bibliothèque: ${nbMigrees} pratique(s) ajoutée(s)`);
+            db.setSync('migrationBibliothequeV2', true); // Marquer migration comme effectuée
+            console.log(`[PratiqueManager] ✅ Migration bibliothèque V2: ${nbCorrigees} pratique(s) corrigée(s)`);
+            if (nbPredefinesRetirees > 0) {
+                console.log(`[PratiqueManager]    → ${nbPredefinesRetirees} prédéfinie(s) retirée(s) de la sidebar`);
+            }
+            if (nbUtilisateurGardees > 0) {
+                console.log(`[PratiqueManager]    → ${nbUtilisateurGardees} créée(s) par utilisateur gardée(s) dans sidebar`);
+            }
+        } else {
+            // Aucune correction nécessaire, mais marquer migration comme effectuée
+            db.setSync('migrationBibliothequeV2', true);
+            console.log(`[PratiqueManager] ✅ Migration bibliothèque V2: Aucune correction nécessaire`);
         }
     },
 
     /**
      * Sauvegarde une nouvelle pratique configurable
-     * @param {object} pratique - Objet { id, nom, auteur, description, config }
+     * @param {object} pratique - Objet { id, nom, auteur, description, config, dansBibliotheque }
      */
     async sauvegarderPratique(pratique) {
         const pratiques = db.getSync('pratiquesConfigurables', []);
@@ -127,10 +181,15 @@ const PratiqueManager = {
         // Valider la pratique
         new PratiqueConfigurable(pratique.config); // Lance une erreur si invalide
 
+        // Si dansBibliotheque n'est pas défini, définir à false pour les pratiques prédéfinies
+        if (pratique.dansBibliotheque === undefined) {
+            pratique.dansBibliotheque = false;
+        }
+
         pratiques.push(pratique);
         db.setSync('pratiquesConfigurables', pratiques);
 
-        console.log(`[PratiqueManager] ✅ Pratique sauvegardée : ${pratique.id}`);
+        console.log(`[PratiqueManager] ✅ Pratique sauvegardée : ${pratique.id} (dansBibliotheque: ${pratique.dansBibliotheque})`);
     },
 
     /**
