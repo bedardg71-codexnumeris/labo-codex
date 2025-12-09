@@ -3861,19 +3861,8 @@
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
-                            <!-- Barre d'en-tête avec boutons (toujours visible) -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <!-- Boutons Import/Export à gauche -->
-                                <div style="display: flex; gap: 10px;">
-                                    <button class="btn btn-principal" onclick="exporterProductions()">
-                                        Exporter toutes les productions
-                                    </button>
-                                    <button class="btn btn-principal" onclick="document.getElementById('fichier-import-productions-local').click()">
-                                        Importer des productions
-                                    </button>
-                                    <input type="file" id="fichier-import-productions-local" accept=".json" style="display: none;" onchange="importerProductions(event)">
-                                </div>
-                                <!-- Bouton Nouvelle production à droite -->
+                            <!-- Bouton création en haut à droite -->
+                            <div style="margin-bottom: 20px; text-align: right;">
                                 <button onclick="creerNouvelleProduction()" class="btn btn-principal">
                                     + Nouvelle production
                                 </button>
@@ -4059,19 +4048,8 @@
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
-                            <!-- Barre d'en-tête avec boutons (toujours visible) -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <!-- Boutons Import/Export à gauche -->
-                                <div style="display: flex; gap: 10px;">
-                                    <button class="btn btn-confirmer" onclick="exporterGrilles()">
-                                        Exporter toutes les grilles
-                                    </button>
-                                    <button class="btn btn-principal" onclick="document.getElementById('fichier-import-grilles-local').click()">
-                                        Importer des grilles
-                                    </button>
-                                    <input type="file" id="fichier-import-grilles-local" accept=".json" style="display: none;" onchange="importerGrilles(event)">
-                                </div>
-                                <!-- Bouton Nouvelle grille à droite -->
+                            <!-- Bouton création en haut à droite -->
+                            <div style="margin-bottom: 20px; text-align: right;">
                                 <button onclick="creerNouvelleGrille()" class="btn btn-principal">
                                     + Nouvelle grille
                                 </button>
@@ -4178,19 +4156,8 @@
                         <!-- ZONE PRINCIPALE (centrale, scroll) -->
                         <div class="zone-principale">
 
-                            <!-- Barre d'en-tête avec boutons (toujours visible) -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <!-- Boutons Import/Export à gauche -->
-                                <div style="display: flex; gap: 10px;">
-                                    <button class="btn btn-confirmer" onclick="exporterEchelles()">
-                                        Exporter toutes les échelles
-                                    </button>
-                                    <button class="btn btn-principal" onclick="document.getElementById('fichier-import-echelles-local').click()">
-                                        Importer des échelles
-                                    </button>
-                                    <input type="file" id="fichier-import-echelles-local" accept=".json" style="display: none;" onchange="importerEchelles(event)">
-                                </div>
-                                <!-- Bouton Nouvelle échelle à droite -->
+                            <!-- Bouton création en haut à droite -->
+                            <div style="margin-bottom: 20px; text-align: right;">
                                 <button onclick="creerNouvelleEchelle()" class="btn btn-principal">
                                     + Nouvelle échelle
                                 </button>
@@ -4470,19 +4437,8 @@
                             <!-- ZONE PRINCIPALE (centrale, scroll) -->
                             <div class="zone-principale">
 
-                                <!-- Barre d'en-tête avec boutons (toujours visible) -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                    <!-- Boutons Import/Export à gauche -->
-                                    <div style="display: flex; gap: 10px;">
-                                        <button id="btnExporterToutesCartouches" class="btn btn-confirmer">
-                                            Exporter toutes les cartouches
-                                        </button>
-                                        <button class="btn btn-principal" onclick="document.getElementById('fichier-import-cartouches-all').click()">
-                                            Importer des cartouches
-                                        </button>
-                                        <input type="file" id="fichier-import-cartouches-all" accept=".json" style="display: none;" onchange="importerCartouches(event)">
-                                    </div>
-                                    <!-- Bouton Nouvelle cartouche à droite -->
+                                <!-- Bouton création en haut à droite -->
+                                <div style="margin-bottom: 20px; text-align: right;">
                                     <button onclick="creerNouvelleCartouche()" class="btn btn-principal">
                                         + Nouvelle cartouche
                                     </button>
