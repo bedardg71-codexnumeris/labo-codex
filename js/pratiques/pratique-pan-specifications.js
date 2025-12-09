@@ -1,55 +1,76 @@
 /**
- * PRATIQUE PAN PAR CONTRAT (SPÉCIFICATIONS) - Implémentation complète
+ * PRATIQUE PAN PAR SPÉCIFICATIONS - Implémentation complète V2.0
  *
- * Pratique par contrat (Specification Grading) avec objectifs réussite/échec.
- * Approche motivante basée sur l'atteinte d'objectifs mesurables.
+ * Pratique par spécifications (Specification Grading) basée sur les principes
+ * de Linda B. Nilson (2014) et François A.-H. (2025).
  *
- * CARACTÉRISTIQUES :
- * - Notes fixes prédéfinies (ex: 50%, 60%, 80%, 100%)
- * - Objectifs évalués réussite/échec (réussi/non réussi)
- * - Progression par paliers (plus d'objectifs = note supérieure)
- * - Secondes chances via jetons
- * - Critères clairs et détaillés (niveau B+ minimum)
- * - Lien direct avec résultats d'apprentissage
+ * PRINCIPES FONDAMENTAUX :
+ * - Évaluation BINAIRE : Travail acceptable ou non acceptable (pas de niveaux)
+ * - BUNDLES : Note = f(ensembles de travaux acceptables), pas f(objectifs)
+ * - SPÉCIFICATIONS : Caractéristiques observables qui définissent l'acceptable
+ * - RÉVISIONS MULTIPLES : Jetons pour reprises et extensions de délais
+ * - CLARTÉ : Spécifications rédigées à l'avance, compréhensibles par tous
+ *
+ * ARCHITECTURE :
+ * - UNIVERSEL (codé en dur) : Évaluation binaire, logique bundles, calcul completion
+ * - CONFIGURABLE (via wizard) : Types de travaux, spécifications, table de correspondance, jetons
  *
  * RÉFÉRENCES :
  * - Nilson, L. B. (2014). Specifications Grading: Restoring Rigor, Motivating Students, and Saving Faculty Time
- * - François A.-H. (2024). Pratique Chimie 202
+ * - François A.-H. (2025). Exploration au pays des spécifications (article AQPC)
  *
- * VERSION : 1.0
- * DATE : 26 novembre 2025
+ * VERSION : 2.0
+ * DATE : 9 décembre 2025
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
 class PratiquePanSpecifications {
 
     constructor() {
-        console.log('📋 Initialisation de la pratique PAN-Spécifications');
+        console.log('📋 Initialisation de la pratique PAN-Spécifications V2.0');
 
-        // Configuration par défaut (peut être surchargée par pratique spécifique)
+        // =====================================================================
+        // CONFIGURATION PAR DÉFAUT (surchargée par wizard)
+        // =====================================================================
         this.config = {
-            notesFixes: [50, 60, 80, 100], // Notes possibles
-            seuilReussite: 60, // Seuil minimal de réussite
-            seuilExcellence: 80, // Seuil d'excellence
+            // Types de travaux avec leurs spécifications
+            typesTravaux: [
+                // EXEMPLE (cours François A.-H.) :
+                // {
+                //     id: 'prise-position',
+                //     nom: 'Prise de position',
+                //     seuilAcceptable: 75, // Note minimale pour être "acceptable"
+                //     specifications: [
+                //         'Équivalent à environ 750 mots',
+                //         'Au moins 2 sources fiables citées convenablement',
+                //         'Faits établis tirés des sources et utilisés pour étayer arguments',
+                //         '...'
+                //     ]
+                // },
+                // { id: 'test', nom: 'Test', seuilAcceptable: 75, specifications: [...] },
+                // { id: 'portfolio', nom: 'Portfolio des activités', seuilAcceptable: 75, specifications: [...] }
+            ],
 
-            // Objectifs par palier (exemple générique)
-            objectifsParNote: {
-                60: {
-                    requis: [],
-                    description: "Note de passage - maîtrise des bases"
-                },
-                80: {
-                    requis: [],
-                    description: "Bonne performance - maîtrise complète"
-                },
-                100: {
-                    requis: [],
-                    description: "Excellence - maîtrise avancée"
-                }
+            // Table de correspondance : bundles → notes
+            tableBundles: [
+                // EXEMPLE (cours François) :
+                // { noteFixe: 100, label: 'A', requis: {'prise-position': 2, 'test': 2, 'portfolio': 1}, description: 'Excellence' },
+                // { noteFixe: 80, label: 'B', requis: {'prise-position': 2, 'test': 1, 'portfolio': 1}, description: 'Bonne performance' },
+                // { noteFixe: 70, label: 'C+', requis: {'prise-position': 1, 'test': 1, 'portfolio': 1}, description: 'Maîtrise acceptable' },
+                // { noteFixe: 60, label: 'C', requis: {'prise-position': 1, 'test': 1}, description: 'Réussite minimale' },
+                // { noteFixe: 50, label: 'F', requis: null, description: 'Échec' }
+            ],
+
+            // Configuration jetons (délai, reprise)
+            jetons: {
+                actif: true,
+                delai: { nombre: 2, dureeJours: 7 },
+                reprise: { nombre: 2, maxParProduction: 1 }
             },
 
-            // Mapping objectifs → productions (sera configuré par enseignant)
-            mappingObjectifs: {}
+            // Métadonnées
+            seuilReussite: 60,
+            seuilExcellence: 80
         };
     }
 
@@ -58,7 +79,7 @@ class PratiquePanSpecifications {
     // ========================================================================
 
     obtenirNom() {
-        return "PAN par contrat (Spécifications)";
+        return "PAN par spécifications";
     }
 
     obtenirId() {
@@ -66,10 +87,10 @@ class PratiquePanSpecifications {
     }
 
     obtenirDescription() {
-        return "Pratique par contrat (Specification Grading) avec objectifs réussite/échec. " +
-               "Les étudiants atteignent des paliers de notes fixes (ex: 60%, 80%, 100%) " +
-               "en réussissant des ensembles d'objectifs mesurables. Approche motivante " +
-               "qui clarifie les attentes et responsabilise les étudiants.";
+        return "Pratique par spécifications (Specification Grading) basée sur Nilson (2014). " +
+               "Évaluation binaire (acceptable/non-acceptable) de travaux selon des spécifications claires. " +
+               "Note finale = f(ensembles de travaux acceptables). Révisions multiples via jetons. " +
+               "Approche qui clarifie les attentes, responsabilise les étudiants, et valorise la persévérance.";
     }
 
     // ========================================================================
@@ -80,21 +101,29 @@ class PratiquePanSpecifications {
      * Configure la pratique avec des paramètres spécifiques
      *
      * @param {Object} configuration - Configuration de la pratique
-     * @param {Array<number>} configuration.notesFixes - Notes fixes possibles
-     * @param {Object} configuration.objectifsParNote - Objectifs requis par note
-     * @param {Object} configuration.mappingObjectifs - Mapping objectifs → productions
+     * @param {Array} configuration.typesTravaux - Types de travaux avec spécifications
+     * @param {Array} configuration.tableBundles - Table de correspondance bundles → notes
+     * @param {Object} configuration.jetons - Configuration des jetons
      */
     configurerPratique(configuration) {
-        if (configuration.notesFixes) {
-            this.config.notesFixes = configuration.notesFixes;
+        if (configuration.typesTravaux) {
+            this.config.typesTravaux = configuration.typesTravaux;
         }
 
-        if (configuration.objectifsParNote) {
-            this.config.objectifsParNote = configuration.objectifsParNote;
+        if (configuration.tableBundles) {
+            this.config.tableBundles = configuration.tableBundles;
         }
 
-        if (configuration.mappingObjectifs) {
-            this.config.mappingObjectifs = configuration.mappingObjectifs;
+        if (configuration.jetons) {
+            this.config.jetons = { ...this.config.jetons, ...configuration.jetons };
+        }
+
+        if (configuration.seuilReussite !== undefined) {
+            this.config.seuilReussite = configuration.seuilReussite;
+        }
+
+        if (configuration.seuilExcellence !== undefined) {
+            this.config.seuilExcellence = configuration.seuilExcellence;
         }
 
         console.log('[SPEC] Pratique configurée:', this.config);
@@ -105,12 +134,17 @@ class PratiquePanSpecifications {
     // ========================================================================
 
     /**
-     * Calcule l'indice P (Performance) selon pratique PAN-Spécifications
+     * Calcule l'indice P (Performance) selon pratique PAN-Spécifications V2.0
      *
-     * Logique :
-     * 1. Vérifier quels objectifs sont atteints (réussite/échec)
-     * 2. Déterminer le palier de note le plus élevé atteint
+     * LOGIQUE BUNDLES (universel, codé en dur) :
+     * 1. Compter les travaux acceptables par type (évaluation binaire)
+     * 2. Déterminer le palier de note le plus élevé dont tous les requis sont satisfaits
      * 3. Retourner cette note fixe
+     *
+     * PRINCIPE CLÉS :
+     * - Note = f(bundles de travaux acceptables), PAS f(objectifs)
+     * - Évaluation binaire : acceptable si TOUTES les spécifications sont respectées
+     * - Révisions incluses dans le comptage (jetons utilisés = travaux révisés)
      *
      * @param {string} da - Numéro de dossier d'admission
      * @returns {number} Indice P entre 0 et 1, ou null si pas de données
@@ -135,23 +169,29 @@ class PratiquePanSpecifications {
             return null;
         }
 
-        // Vérifier quels objectifs sont atteints
-        const objectifsAtteints = this._verifierObjectifsAtteints(da, evaluationsEleve);
+        // ÉTAPE 1 : Compter travaux acceptables par type
+        const comptesAcceptables = this._compterTravauxAcceptables(da, evaluationsEleve);
 
-        console.log(`[SPEC] Objectifs atteints pour DA ${da}:`, objectifsAtteints);
+        console.log(`[SPEC] Travaux acceptables pour DA ${da}:`, comptesAcceptables);
 
-        // Déterminer la note la plus élevée atteinte
-        const noteAtteinte = this._determinerNotePalier(objectifsAtteints);
+        // ÉTAPE 2 : Déterminer palier de note atteint (logique bundles)
+        const noteAtteinte = this._determinerPalierBundle(comptesAcceptables);
 
-        console.log(`[SPEC] Performance DA ${da}: ${noteAtteinte}% (${objectifsAtteints.length} objectifs atteints)`);
+        console.log(`[SPEC] Performance DA ${da}: ${noteAtteinte}%`, comptesAcceptables);
 
         return noteAtteinte / 100;
     }
 
     /**
-     * Calcule l'indice C (Complétion) selon pratique PAN-Spécifications
+     * Calcule l'indice C (Complétion) selon pratique PAN-Spécifications V2.0
      *
-     * Formule : Nombre d'objectifs atteints / Nombre total d'objectifs configurés
+     * LOGIQUE (universel, codé en dur) :
+     * Formule : Nombre de travaux acceptables remis / Nombre total de travaux attendus
+     *
+     * PRINCIPE :
+     * - Complétion = proportion de travaux acceptables dans le bundle le plus élevé
+     * - Un travail "remis mais non acceptable" compte dans le dénominateur (attendu) mais pas dans le numérateur
+     * - Les révisions sont comptées (si un travail devient acceptable après révision)
      *
      * @param {string} da - Numéro de dossier d'admission
      * @returns {number} Indice C entre 0 et 1, ou null si pas de données
@@ -174,25 +214,33 @@ class PratiquePanSpecifications {
             return null;
         }
 
-        // Compter objectifs atteints
-        const objectifsAtteints = this._verifierObjectifsAtteints(da, evaluationsEleve);
+        // Compter travaux acceptables par type
+        const comptesAcceptables = this._compterTravauxAcceptables(da, evaluationsEleve);
 
-        // Compter objectifs totaux (tous les objectifs de tous les paliers)
-        const tousObjectifs = new Set();
-        Object.values(this.config.objectifsParNote).forEach(palier => {
-            palier.requis.forEach(obj => tousObjectifs.add(obj));
-        });
+        // Calculer total travaux attendus (bundle le plus élevé, ou bundle A)
+        const palierMax = this.config.tableBundles
+            .filter(p => p.requis)
+            .sort((a, b) => b.noteFixe - a.noteFixe)[0];
 
-        const nbObjectifsTotaux = tousObjectifs.size;
-
-        if (nbObjectifsTotaux === 0) {
-            console.warn('[SPEC] Aucun objectif configuré');
+        if (!palierMax || !palierMax.requis) {
+            console.warn('[SPEC] Aucun palier avec requis configuré');
             return null;
         }
 
-        const indiceC = objectifsAtteints.length / nbObjectifsTotaux;
+        // Total attendu = somme des requis du palier max
+        const totalAttendu = Object.values(palierMax.requis).reduce((sum, nb) => sum + nb, 0);
 
-        console.log(`[SPEC] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${objectifsAtteints.length}/${nbObjectifsTotaux} objectifs)`);
+        // Total acceptable = somme des comptesAcceptables
+        const totalAcceptable = Object.values(comptesAcceptables).reduce((sum, nb) => sum + nb, 0);
+
+        if (totalAttendu === 0) {
+            console.warn('[SPEC] Aucun travail attendu configuré');
+            return null;
+        }
+
+        const indiceC = Math.min(totalAcceptable / totalAttendu, 1.0);
+
+        console.log(`[SPEC] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${totalAcceptable}/${totalAttendu} travaux acceptables)`);
 
         return indiceC;
     }
@@ -202,20 +250,20 @@ class PratiquePanSpecifications {
     // ========================================================================
 
     /**
-     * Détecte les défis spécifiques à la pratique PAN-Spécifications
+     * Détecte les défis spécifiques à la pratique PAN-Spécifications V2.0
      *
-     * Défis spécifiques :
-     * - Objectifs non atteints (blocage pour palier supérieur)
-     * - Objectifs critiques manquants (requis pour réussite)
-     * - Objectifs facultatifs non tentés (opportunités perdues)
+     * LOGIQUE BUNDLES :
+     * - Travaux non acceptables (blocage pour palier supérieur)
+     * - Travaux critiques manquants (requis pour réussite)
+     * - Opportunités de révision disponibles (jetons restants)
      *
      * @param {string} da - Numéro de dossier d'admission
-     * @returns {Object} { type: 'specifications', defis: [], objectifsAtteints: [], objectifsManquants: [] }
+     * @returns {Object} { type: 'specifications', defis: [], travauxAcceptables: {}, prochainPalier: null }
      */
     detecterDefis(da) {
         if (!da || da.length !== 7) {
             console.warn('[SPEC] DA invalide:', da);
-            return { type: 'specifications', defis: [], objectifsAtteints: [], objectifsManquants: [] };
+            return { type: 'specifications', defis: [], travauxAcceptables: {}, prochainPalier: null };
         }
 
         const evaluations = this._lireEvaluations();
@@ -226,57 +274,69 @@ class PratiquePanSpecifications {
         );
 
         if (evaluationsEleve.length === 0) {
-            return { type: 'specifications', defis: [], objectifsAtteints: [], objectifsManquants: [] };
+            return { type: 'specifications', defis: [], travauxAcceptables: {}, prochainPalier: null };
         }
 
-        // Vérifier objectifs atteints
-        const objectifsAtteints = this._verifierObjectifsAtteints(da, evaluationsEleve);
-        const noteActuelle = this._determinerNotePalier(objectifsAtteints);
+        // Compter travaux acceptables
+        const comptesAcceptables = this._compterTravauxAcceptables(da, evaluationsEleve);
+        const noteActuelle = this._determinerPalierBundle(comptesAcceptables);
 
-        // Identifier objectifs manquants pour palier supérieur
+        // Identifier défis pour palier supérieur
         const defis = [];
-        const notesFixes = [...this.config.notesFixes].sort((a, b) => b - a);
+        const paliers = [...this.config.tableBundles]
+            .filter(p => p.requis)
+            .sort((a, b) => b.noteFixe - a.noteFixe);
 
         // Trouver le prochain palier
-        const prochainPalier = notesFixes.find(note => note > noteActuelle);
+        const prochainPalier = paliers.find(p => p.noteFixe > noteActuelle);
 
-        if (prochainPalier && this.config.objectifsParNote[prochainPalier]) {
-            const objectifsRequis = this.config.objectifsParNote[prochainPalier].requis;
-            const objectifsManquants = objectifsRequis.filter(obj => !objectifsAtteints.includes(obj));
+        if (prochainPalier) {
+            // Pour chaque type de travail requis
+            Object.entries(prochainPalier.requis).forEach(([typeTravail, nbRequis]) => {
+                const nbAcceptables = comptesAcceptables[typeTravail] || 0;
+                const manque = nbRequis - nbAcceptables;
 
-            objectifsManquants.forEach(obj => {
-                const mapping = this.config.mappingObjectifs[obj];
-                defis.push({
-                    type: 'objectif-manquant',
-                    objectif: obj,
-                    palier: prochainPalier,
-                    mapping: mapping,
-                    priorite: noteActuelle < this.config.seuilReussite ? 'haute' : 'moyenne'
-                });
+                if (manque > 0) {
+                    const typeTravailConfig = this.config.typesTravaux.find(t => t.id === typeTravail);
+                    defis.push({
+                        type: 'travaux-manquants',
+                        typeTravail: typeTravail,
+                        nomTravail: typeTravailConfig?.nom || typeTravail,
+                        nbManquants: manque,
+                        nbAcceptables: nbAcceptables,
+                        nbRequis: nbRequis,
+                        palier: prochainPalier.noteFixe,
+                        priorite: noteActuelle < this.config.seuilReussite ? 'haute' : 'moyenne'
+                    });
+                }
             });
         }
 
-        // Identifier objectifs critiques (requis pour réussite)
+        // Identifier défis critiques (requis pour réussite)
         if (noteActuelle < this.config.seuilReussite) {
-            const objectifsReussite = this.config.objectifsParNote[this.config.seuilReussite]?.requis || [];
-            const objectifsCritiquesManquants = objectifsReussite.filter(obj => !objectifsAtteints.includes(obj));
-
-            objectifsCritiquesManquants.forEach(obj => {
-                const mapping = this.config.mappingObjectifs[obj];
-                defis.push({
-                    type: 'objectif-critique',
-                    objectif: obj,
-                    mapping: mapping,
-                    priorite: 'haute',
-                    message: 'Requis pour la réussite du cours'
+            const palierReussite = paliers.find(p => p.noteFixe >= this.config.seuilReussite);
+            if (palierReussite && palierReussite.requis) {
+                Object.entries(palierReussite.requis).forEach(([typeTravail, nbRequis]) => {
+                    const nbAcceptables = comptesAcceptables[typeTravail] || 0;
+                    if (nbAcceptables < nbRequis) {
+                        const typeTravailConfig = this.config.typesTravaux.find(t => t.id === typeTravail);
+                        defis.push({
+                            type: 'travaux-critiques',
+                            typeTravail: typeTravail,
+                            nomTravail: typeTravailConfig?.nom || typeTravail,
+                            nbManquants: nbRequis - nbAcceptables,
+                            priorite: 'haute',
+                            message: 'Requis pour la réussite du cours'
+                        });
+                    }
                 });
-            });
+            }
         }
 
         return {
             type: 'specifications',
             defis: defis,
-            objectifsAtteints: objectifsAtteints,
+            travauxAcceptables: comptesAcceptables,
             noteActuelle: noteActuelle,
             prochainPalier: prochainPalier
         };
@@ -285,11 +345,11 @@ class PratiquePanSpecifications {
     /**
      * Identifie le pattern actuel de l'étudiant
      *
-     * Pour PAN-Spécifications, les patterns sont basés sur la progression
-     * entre les paliers de notes.
+     * Pour PAN-Spécifications V2.0, les patterns sont basés sur le palier de note atteint
+     * et le nombre de travaux acceptables.
      *
      * @param {string} da - Numéro de dossier d'admission
-     * @returns {string} Pattern identifié: 'progression', 'stagnation', 'stable', 'risque'
+     * @returns {string} Pattern identifié: 'excellence', 'stable', 'difficulte', 'risque'
      */
     identifierPattern(da) {
         if (!da || da.length !== 7) {
@@ -308,11 +368,11 @@ class PratiquePanSpecifications {
             return 'stable';
         }
 
-        // Calculer note actuelle
-        const objectifsAtteints = this._verifierObjectifsAtteints(da, evaluationsEleve);
-        const noteActuelle = this._determinerNotePalier(objectifsAtteints);
+        // Calculer note actuelle selon logique bundles
+        const comptesAcceptables = this._compterTravauxAcceptables(da, evaluationsEleve);
+        const noteActuelle = this._determinerPalierBundle(comptesAcceptables);
 
-        // Déterminer pattern selon note et nombre d'objectifs
+        // Déterminer pattern selon note atteinte
         if (noteActuelle >= this.config.seuilExcellence) {
             return 'excellence'; // 80%+
         } else if (noteActuelle >= this.config.seuilReussite) {
@@ -424,133 +484,142 @@ class PratiquePanSpecifications {
             e.noteFinale !== null
         );
 
-        const objectifsAtteints = this._verifierObjectifsAtteints(da, evaluationsEleve);
-        const noteActuelle = this._determinerNotePalier(objectifsAtteints);
+        const comptesAcceptables = this._compterTravauxAcceptables(da, evaluationsEleve);
+        const noteActuelle = this._determinerPalierBundle(comptesAcceptables);
         const defis = this.detecterDefis(da);
+
+        // Calculer total travaux acceptables et attendus
+        const totalAcceptables = Object.values(comptesAcceptables).reduce((sum, nb) => sum + nb, 0);
+        const palierMax = this.config.tableBundles
+            .filter(p => p.requis)
+            .sort((a, b) => b.noteFixe - a.noteFixe)[0];
+        const totalAttendus = palierMax && palierMax.requis
+            ? Object.values(palierMax.requis).reduce((sum, nb) => sum + nb, 0)
+            : 0;
 
         return {
             noteFinale: noteActuelle,
-            objectifsAtteints: objectifsAtteints.length,
-            objectifsTotaux: Object.keys(this.config.mappingObjectifs).length,
+            travauxAcceptables: totalAcceptables,
+            travauxTotaux: totalAttendus,
+            detailsTravauxAcceptables: comptesAcceptables,
             palierActuel: this._obtenirDescriptionPalier(noteActuelle),
-            prochainPalier: defis.prochainPalier ? this._obtenirDescriptionPalier(defis.prochainPalier) : null,
-            objectifsManquants: defis.defis.filter(d => d.type === 'objectif-manquant'),
-            objectifsCritiques: defis.defis.filter(d => d.type === 'objectif-critique')
+            prochainPalier: defis.prochainPalier ? this._obtenirDescriptionPalier(defis.prochainPalier.noteFixe) : null,
+            travauxManquants: defis.defis.filter(d => d.type === 'travaux-manquants'),
+            travauxCritiques: defis.defis.filter(d => d.type === 'travaux-critiques')
         };
     }
 
     // ========================================================================
-    // MÉTHODES PRIVÉES (Logique interne)
+    // MÉTHODES PRIVÉES (Logique interne - UNIVERSELLE)
     // ========================================================================
 
     /**
-     * Vérifie quels objectifs sont atteints par l'étudiant
+     * Compte le nombre de travaux acceptables par type
+     *
+     * PRINCIPE UNIVERSEL (codé en dur) :
+     * Pour chaque type de travail configuré, compte combien de travaux sont acceptables
+     * selon les spécifications définies.
      *
      * @param {string} da - Numéro de dossier d'admission
      * @param {Array} evaluations - Évaluations de l'étudiant
-     * @returns {Array<string>} Liste des objectifs atteints
+     * @returns {Object} { 'type-travail-1': 2, 'type-travail-2': 1, ... }
      * @private
      */
-    _verifierObjectifsAtteints(da, evaluations) {
-        const objectifsAtteints = [];
+    _compterTravauxAcceptables(da, evaluations) {
+        const comptes = {};
 
-        // Parcourir tous les objectifs configurés
-        for (const [objectifId, mapping] of Object.entries(this.config.mappingObjectifs)) {
-            if (this._verifierObjectif(objectifId, mapping, evaluations)) {
-                objectifsAtteints.push(objectifId);
-            }
-        }
+        // Lire les productions pour avoir accès aux types
+        const productions = this._lireProductions();
 
-        return objectifsAtteints;
+        // Pour chaque type de travail configuré
+        this.config.typesTravaux.forEach(typeTravail => {
+            comptes[typeTravail.id] = 0;
+
+            // Filtrer les évaluations de ce type
+            const evaluationsCeType = evaluations.filter(e => {
+                const prod = productions.find(p => p.id === e.productionId);
+                return prod && (prod.type === typeTravail.id || prod.identifiant === typeTravail.id);
+            });
+
+            // Compter celles qui sont acceptables
+            evaluationsCeType.forEach(evaluation => {
+                if (this._estTravailAcceptable(evaluation, typeTravail)) {
+                    comptes[typeTravail.id]++;
+                }
+            });
+        });
+
+        return comptes;
     }
 
     /**
-     * Vérifie si un objectif spécifique est atteint
+     * Vérifie si un travail est acceptable selon les spécifications (ÉVALUATION BINAIRE)
      *
-     * @param {string} objectifId - Identifiant de l'objectif
-     * @param {Object} mapping - Configuration du mapping
-     * @param {Array} evaluations - Évaluations de l'étudiant
-     * @returns {boolean} True si objectif atteint
+     * PRINCIPE UNIVERSEL (codé en dur) :
+     * Un travail est acceptable SI ET SEULEMENT SI toutes les spécifications sont respectées.
+     * Pas de niveaux intermédiaires : c'est tout ou rien.
+     *
+     * @param {Object} evaluation - Évaluation à vérifier
+     * @param {Object} typeTravail - Type de travail avec ses spécifications
+     * @returns {boolean} True si toutes les spécifications sont respectées
      * @private
      */
-    _verifierObjectif(objectifId, mapping, evaluations) {
-        if (!mapping) {
-            console.warn('[SPEC] Mapping introuvable pour objectif:', objectifId);
+    _estTravailAcceptable(evaluation, typeTravail) {
+        if (!evaluation || !typeTravail) {
             return false;
         }
 
-        // CAS 1 : Objectif simple (une production spécifique)
-        if (mapping.type && mapping.identifiant) {
-            const evaluation = evaluations.find(e => {
-                const production = this._lireProductions().find(p => p.id === e.productionId);
-                return production &&
-                       production.type === mapping.type &&
-                       (production.identifiant === mapping.identifiant || production.titre === mapping.identifiant);
-            });
-
-            if (!evaluation) return false;
-
-            // Vérifier seuil de réussite (par défaut 60%)
-            const seuilReussite = mapping.seuilReussite || 60;
-            return evaluation.noteFinale >= seuilReussite;
+        // Si le travail a un statut "non remis" ou null, il n'est pas acceptable
+        if (!evaluation.noteFinale && evaluation.noteFinale !== 0) {
+            return false;
         }
 
-        // CAS 2 : Objectif composé avec opérateur logique (OU, ET)
-        if (mapping.operateur && mapping.objectifs) {
-            const resultatsObjectifs = mapping.objectifs.map(objId => {
-                const subMapping = this.config.mappingObjectifs[objId];
-                return this._verifierObjectif(objId, subMapping, evaluations);
-            });
-
-            if (mapping.operateur === 'OU') {
-                return resultatsObjectifs.some(r => r === true);
-            } else if (mapping.operateur === 'ET') {
-                return resultatsObjectifs.every(r => r === true);
-            }
+        if (evaluation.statutRemise === 'non-remis') {
+            return false;
         }
 
-        // CAS 3 : Objectif basé sur nombre d'occurrences
-        if (mapping.type && mapping.nombreMinimum) {
-            const evaluationsType = evaluations.filter(e => {
-                const production = this._lireProductions().find(p => p.id === e.productionId);
-                return production && production.type === mapping.type;
-            });
+        // LOGIQUE BINAIRE : Vérifier toutes les spécifications
+        // Pour l'instant, on utilise un seuil simple (sera raffiné avec vraies spécifications)
+        const seuil = typeTravail.seuilAcceptable || 60; // Seuil par défaut B+ (75-80%)
 
-            const seuilReussite = mapping.seuilReussite || 60;
-            const evaluationsReussies = evaluationsType.filter(e => e.noteFinale >= seuilReussite);
-
-            return evaluationsReussies.length >= mapping.nombreMinimum;
-        }
-
-        console.warn('[SPEC] Type de mapping non reconnu:', mapping);
-        return false;
+        return evaluation.noteFinale >= seuil;
     }
 
+
     /**
-     * Détermine le palier de note atteint selon objectifs
+     * Détermine le palier de note atteint selon les bundles de travaux acceptables
      *
-     * @param {Array<string>} objectifsAtteints - Liste des objectifs atteints
-     * @returns {number} Note du palier atteint
+     * PRINCIPE UNIVERSEL (codé en dur) :
+     * Trouver le palier le plus élevé dont TOUS les requis sont satisfaits.
+     * Si aucun palier n'est atteint, retourner la note d'échec.
+     *
+     * @param {Object} comptesAcceptables - Comptes de travaux acceptables par type
+     * @returns {number} Note fixe du palier atteint
      * @private
      */
-    _determinerNotePalier(objectifsAtteints) {
-        // Trier notes par ordre décroissant
-        const notesFixes = [...this.config.notesFixes].sort((a, b) => b - a);
+    _determinerPalierBundle(comptesAcceptables) {
+        // Trier paliers par ordre décroissant (A → B → C → F)
+        const paliers = [...this.config.tableBundles].sort((a, b) => b.noteFixe - a.noteFixe);
 
-        // Trouver le palier le plus élevé dont tous les objectifs sont atteints
-        for (const note of notesFixes) {
-            const objectifsRequis = this.config.objectifsParNote[note]?.requis || [];
+        // Trouver le palier le plus élevé dont TOUS les requis sont satisfaits
+        for (const palier of paliers) {
+            // Skip palier échec (pas de requis)
+            if (!palier.requis) continue;
 
-            // Vérifier si tous les objectifs requis sont atteints
-            const tousAtteints = objectifsRequis.every(obj => objectifsAtteints.includes(obj));
+            // Vérifier si tous les requis de ce palier sont satisfaits
+            const tousRequisSatisfaits = Object.entries(palier.requis).every(([typeTravail, nbRequis]) => {
+                const nbAcceptables = comptesAcceptables[typeTravail] || 0;
+                return nbAcceptables >= nbRequis;
+            });
 
-            if (tousAtteints) {
-                return note;
+            if (tousRequisSatisfaits) {
+                return palier.noteFixe;
             }
         }
 
-        // Aucun palier atteint, retourner note minimale
-        return Math.min(...this.config.notesFixes);
+        // Aucun palier atteint : retourner note d'échec
+        const palierEchec = this.config.tableBundles.find(p => !p.requis);
+        return palierEchec ? palierEchec.noteFixe : 50;
     }
 
     /**
@@ -561,7 +630,11 @@ class PratiquePanSpecifications {
      * @private
      */
     _obtenirDescriptionPalier(note) {
-        return this.config.objectifsParNote[note]?.description || `Note de ${note}%`;
+        const palier = this.config.tableBundles.find(p => p.noteFixe === note);
+        if (palier) {
+            return palier.description || `${palier.label} (${note}%)`;
+        }
+        return `Note de ${note}%`;
     }
 
     /**

@@ -128,7 +128,7 @@ function creerSelecteurMode() {
  * Change le mode actif
  * @param {string} nouveauMode - Le nouveau mode à activer
  */
-function changerMode(nouveauMode) {
+async function changerMode(nouveauMode) {
     if (nouveauMode === modeActuel) return;
 
     console.log(`🔄 Changement de mode: ${modeActuel} → ${nouveauMode}`);
@@ -145,6 +145,19 @@ function changerMode(nouveauMode) {
 
     // Afficher/masquer le bouton Assistance Primo selon le mode
     gererAffichageBoutonPrimo(nouveauMode);
+
+    // ✅ NOUVEAU (9 décembre 2025) : Gérer les données demo selon le mode
+    if (typeof chargerDonneesDemo === 'function' && typeof dechargerDonneesDemo === 'function') {
+        if (nouveauMode === 'simulation') {  // ✅ CORRIGÉ : 'simulation' pas 'assiste'
+            // Charger les données demo en mode Assisté
+            console.log('   → Chargement données demo (mode Assisté)...');
+            await chargerDonneesDemo();
+        } else {
+            // Décharger les données demo en mode Normal/Anonymisé
+            console.log('   → Déchargement données demo...');
+            await dechargerDonneesDemo();
+        }
+    }
 
     // Recharger les données affichées selon le nouveau mode
     // SANS recharger toute la page
@@ -250,6 +263,19 @@ function rafraichirContenuSelonMode() {
 function appliquerTheme(mode) {
     // Ajouter l'attribut data-mode sur le body
     document.body.setAttribute('data-mode', mode);
+
+    // ✅ NOUVEAU (9 décembre 2025) : Ajouter classe pour compatibilité CSS Primo
+    // Retirer toutes les classes de mode
+    document.body.classList.remove('mode-normal', 'mode-assiste', 'mode-anonymise');
+
+    // Ajouter la classe appropriée
+    if (mode === MODES.SIMULATION) {
+        document.body.classList.add('mode-assiste');
+    } else if (mode === MODES.ANONYMISATION) {
+        document.body.classList.add('mode-anonymise');
+    } else {
+        document.body.classList.add('mode-normal');
+    }
 
     const couleur = THEMES[mode].couleur;
 

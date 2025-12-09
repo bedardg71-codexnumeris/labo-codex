@@ -381,6 +381,7 @@ body {
     align-items: center;
     gap: 20px;
     justify-content: space-between;
+    position: relative;
 }
 
 .logo-section {
@@ -388,6 +389,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+    z-index: 1;
 }
 
 .logo {
@@ -418,14 +420,18 @@ body {
 /* === TITRE ET DESCRIPTION === */
 
 .titre-section {
-    flex: 1;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
-    align-items: baseline;
-    gap: 15px;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
 }
 
 .titre-section h1 {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: bold;
     margin: 0;
     letter-spacing: 0px;
@@ -434,10 +440,42 @@ body {
 }
 
 .titre-section .meta {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     color: #9fc5e8;
     margin: 0;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Pastille de notification rouge (nouveautés) */
+.pastille-nouveautes {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #ff3b30;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    animation: pulse-notification 2s ease-in-out infinite;
+    pointer-events: auto;
+}
+
+.pastille-nouveautes:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 8px rgba(255, 59, 48, 0.6);
+}
+
+@keyframes pulse-notification {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.15);
+    }
 }
 
 /* === INFORMATIONS LÉGALES (boutons à droite) === */
@@ -448,6 +486,7 @@ body {
     flex-direction: row;
     gap: 8px;
     align-items: center;
+    z-index: 1;
 }
 
 /* === LIGNE 2 : Informations contextuelles + Mode === */
@@ -455,8 +494,7 @@ body {
 .entete-ligne2 {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+    justify-content: center;
     padding: 8px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -465,11 +503,35 @@ body {
     flex: 1;
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.90);
-    text-align: left;
+    text-align: center;
     line-height: 1.4;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.info-contexte-ligne {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+}
+
+.info-contexte-item {
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.90);
+    font-size: inherit;
+    font-weight: normal;
+    line-height: inherit;
+}
+
+.separateur-contexte {
+    margin: 0 8px;
+    color: rgba(255, 255, 255, 0.60);
+    font-weight: normal;
 }
 
 /* Sélecteur de mode dans la navigation (à droite) */
@@ -565,7 +627,13 @@ body {
     }
 
     .info-contextuelles-centre {
+        flex-direction: column;
+        gap: 5px;
         text-align: center;
+    }
+
+    .separateur-contexte {
+        display: none; /* Masquer les séparateurs sur mobile */
     }
 }
 
@@ -873,6 +941,53 @@ body {
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 2px solid var(--bleu-pale);
+}
+
+/* ✅ NOUVEAU (9 décembre 2025) : Accordéons pour sections configurables */
+.carte-accordeon {
+    margin-bottom: var(--espacement-moyen);
+}
+
+/* Sections masquées par défaut (Portfolio, Jetons) */
+#cartePortfolio,
+#carteJetons {
+    display: none;
+}
+
+.carte-accordeon h3.accordeon-titre {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+
+.carte-accordeon h3.accordeon-titre:hover {
+    color: var(--bleu-fonce);
+}
+
+.carte-accordeon .accordeon-icone {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+    color: var(--gris-moyen);
+}
+
+.carte-accordeon .accordeon-icone.ouvert {
+    transform: rotate(180deg);
+}
+
+.carte-accordeon .accordeon-contenu {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    max-height: 0;
+    opacity: 0;
+}
+
+.carte-accordeon .accordeon-contenu.ouvert {
+    max-height: 2000px; /* Ajuster selon le contenu */
+    opacity: 1;
+    padding-top: var(--espacement-petit);
 }
 
 /* Titre avec fond bleu dégradé (comme l'en-tête) */

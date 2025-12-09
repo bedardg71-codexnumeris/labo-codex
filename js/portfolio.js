@@ -578,8 +578,6 @@ function convertirNiveauEnPourcentage(niveau, echelleId = null) {
  * @returns {Object} - Structure complète avec indices SOM et PAN pour chaque étudiant
  */
 function calculerEtStockerIndicesCP() {
-    console.log('🔄 Calcul DUAL des indices C et P (SOM + PAN) via registre de pratiques...');
-
     // IMPORTANT : Utiliser obtenirDonneesSelonMode pour respecter le mode actuel
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const productions = obtenirDonneesSelonMode('productions');
@@ -587,14 +585,39 @@ function calculerEtStockerIndicesCP() {
     // Récupérer l'historique existant ou initialiser
     const indicesCP = obtenirDonneesSelonMode('indicesCP');
 
-    // 🎯 OBTENIR LES PRATIQUES DEPUIS LE REGISTRE
-    const pratiqueSommative = obtenirPratiqueParId('sommative');
-    const pratiquePAN = obtenirPratiqueParId('pan-maitrise');
+    // ✅ VÉRIFIER CONFIGURATION AFFICHAGE (mode comparatif ou non)
+    const modalites = db.getSync('modalitesEvaluation', {});
+    const affichage = modalites.affichageTableauBord || {};
+    const calculerSOM = affichage.afficherSommatif === true;
+    const calculerPAN = affichage.afficherAlternatif === true;
 
-    if (!pratiqueSommative || !pratiquePAN) {
-        console.error('❌ Pratiques non disponibles dans le registre');
-        console.error('   Sommative:', !!pratiqueSommative);
-        console.error('   PAN-Maîtrise:', !!pratiquePAN);
+    // ⚠️ Log de débogage pour voir ce qui est lu
+    console.log('[calculerEtStockerIndicesCP] Configuration lue:', {
+        affichage,
+        calculerSOM,
+        calculerPAN
+    });
+
+    // Log approprié selon le mode
+    if (calculerSOM && calculerPAN) {
+        console.log('🔄 Calcul DUAL des indices C et P (SOM + PAN) - Mode comparatif actif');
+    } else if (calculerSOM) {
+        console.log('🔄 Calcul des indices C et P (SOM uniquement)');
+    } else if (calculerPAN) {
+        console.log('🔄 Calcul des indices C et P (PAN uniquement)');
+    } else {
+        console.warn('⚠️ Aucune pratique à calculer');
+        return indicesCP;
+    }
+
+    // 🎯 OBTENIR LES PRATIQUES DEPUIS LE REGISTRE (seulement si nécessaire)
+    const pratiqueSommative = calculerSOM ? obtenirPratiqueParId('sommative') : null;
+    const pratiquePAN = calculerPAN ? obtenirPratiqueParId('pan-maitrise') : null;
+
+    if ((calculerSOM && !pratiqueSommative) || (calculerPAN && !pratiquePAN)) {
+        console.error('❌ Pratiques requises non disponibles dans le registre');
+        console.error('   Sommative:', calculerSOM ? !!pratiqueSommative : 'non requise');
+        console.error('   PAN-Maîtrise:', calculerPAN ? !!pratiquePAN : 'non requise');
         return indicesCP;
     }
 
@@ -620,44 +643,52 @@ function calculerEtStockerIndicesCP() {
         const modalites = db.getSync('modalitesEvaluation', {});
 
         // ========================================
-        // CALCUL PRATIQUE SOM (via registre)
+        // CALCUL PRATIQUE SOM (via registre) - Si activé
         // ========================================
 
-        const C_som_decimal = pratiqueSommative.calculerCompletion(da);
-        const P_som_decimal = pratiqueSommative.calculerPerformance(da);
+        let C_som = 0, P_som = 0;
+        if (calculerSOM) {
+            const C_som_decimal = pratiqueSommative.calculerCompletion(da);
+            const P_som_decimal = pratiqueSommative.calculerPerformance(da);
 
-        // Convertir 0-1 → 0-100
-        const C_som = C_som_decimal !== null ? Math.round(C_som_decimal * 100) : 0;
-        const P_som = P_som_decimal !== null ? Math.round(P_som_decimal * 100) : 0;
-
-        // ========================================
-        // CALCUL PRATIQUE PAN (via registre)
-        // ========================================
-
-        const C_pan_decimal = pratiquePAN.calculerCompletion(da);
-        let P_pan_decimal = pratiquePAN.calculerPerformance(da);
-
-        // 🎯 DÉTECTION PRATIQUE MULTI-OBJECTIFS
-        // Si un ensemble d'objectifs est configuré, utiliser le calcul par pratique multi-objectifs
-        const ensembleObjectifsId = modalites.configPAN?.ensembleObjectifsId || null;
-        let performancesObjectifs = null;
-        let noteFinaleMultiObjectifs = null;
-
-        if (ensembleObjectifsId && typeof calculerNoteFinaleMultiObjectifs === 'function') {
-            console.log(`[Multi-Objectifs] Calcul pour DA ${da} avec ensemble ${ensembleObjectifsId}`);
-            noteFinaleMultiObjectifs = calculerNoteFinaleMultiObjectifs(da, ensembleObjectifsId);
-            performancesObjectifs = calculerPerformanceParObjectif(da, ensembleObjectifsId);
-
-            if (noteFinaleMultiObjectifs && noteFinaleMultiObjectifs.noteFinale !== null) {
-                // Utiliser la note de la pratique multi-objectifs au lieu de P_pan global
-                P_pan_decimal = noteFinaleMultiObjectifs.noteFinale / 100;
-                console.log(`[Multi-Objectifs] Note finale DA ${da}: ${noteFinaleMultiObjectifs.noteFinale.toFixed(1)}%`);
-            }
+            // Convertir 0-1 → 0-100
+            C_som = C_som_decimal !== null ? Math.round(C_som_decimal * 100) : 0;
+            P_som = P_som_decimal !== null ? Math.round(P_som_decimal * 100) : 0;
         }
 
-        // Convertir 0-1 → 0-100
-        const C_pan = C_pan_decimal !== null ? Math.round(C_pan_decimal * 100) : 0;
-        const P_pan = P_pan_decimal !== null ? Math.round(P_pan_decimal * 100) : 0;
+        // ========================================
+        // CALCUL PRATIQUE PAN (via registre) - Si activé
+        // ========================================
+
+        let C_pan = 0, P_pan = 0, P_pan_decimal = null;
+        let performancesObjectifs = null;
+        let noteFinaleMultiObjectifs = null;
+        let ensembleObjectifsId = null; // ✅ CORRECTION (9 déc 2025) : Déclarer en dehors du if
+
+        if (calculerPAN) {
+            const C_pan_decimal = pratiquePAN.calculerCompletion(da);
+            P_pan_decimal = pratiquePAN.calculerPerformance(da);
+
+            // 🎯 DÉTECTION PRATIQUE MULTI-OBJECTIFS
+            // Si un ensemble d'objectifs est configuré, utiliser le calcul par pratique multi-objectifs
+            ensembleObjectifsId = modalites.configPAN?.ensembleObjectifsId || null;
+
+            if (ensembleObjectifsId && typeof calculerNoteFinaleMultiObjectifs === 'function') {
+                console.log(`[Multi-Objectifs] Calcul pour DA ${da} avec ensemble ${ensembleObjectifsId}`);
+                noteFinaleMultiObjectifs = calculerNoteFinaleMultiObjectifs(da, ensembleObjectifsId);
+                performancesObjectifs = calculerPerformanceParObjectif(da, ensembleObjectifsId);
+
+                if (noteFinaleMultiObjectifs && noteFinaleMultiObjectifs.noteFinale !== null) {
+                    // Utiliser la note de la pratique multi-objectifs au lieu de P_pan global
+                    P_pan_decimal = noteFinaleMultiObjectifs.noteFinale / 100;
+                    console.log(`[Multi-Objectifs] Note finale DA ${da}: ${noteFinaleMultiObjectifs.noteFinale.toFixed(1)}%`);
+                }
+            }
+
+            // Convertir 0-1 → 0-100
+            C_pan = C_pan_decimal !== null ? Math.round(C_pan_decimal * 100) : 0;
+            P_pan = P_pan_decimal !== null ? Math.round(P_pan_decimal * 100) : 0;
+        }
 
         // ========================================
         // CALCUL P_RECENT POUR LE RISQUE (si découplage activé)
@@ -667,9 +698,9 @@ function calculerEtStockerIndicesCP() {
         const configPortfolio = modalites.configPAN?.portfolio || {};
         const decouplerPR = configPortfolio.decouplerPR || false;
 
-        // Calculer P_recent si découplage activé ET que la pratique supporte cette méthode
+        // Calculer P_recent si découplage activé ET que la pratique supporte cette méthode ET que PAN est calculé
         let P_recent = null;
-        if (decouplerPR && typeof pratiquePAN.calculerPerformanceRecente === 'function') {
+        if (calculerPAN && decouplerPR && pratiquePAN && typeof pratiquePAN.calculerPerformanceRecente === 'function') {
             const P_recent_decimal = pratiquePAN.calculerPerformanceRecente(da);
             P_recent = P_recent_decimal !== null ? Math.round(P_recent_decimal * 100) : null;
         }
