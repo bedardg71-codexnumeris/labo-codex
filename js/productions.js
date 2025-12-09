@@ -2194,10 +2194,20 @@ async function afficherListeProductions(filtreType = '') {
     const grilles = await db.get('grillesTemplates') || [];
     const container = document.getElementById('sidebarListeProductions');
 
-    if (!container) return;
+    console.log('[Productions] Total productions:', productions.length);
+    console.log('[Productions] Productions détails:', productions.map(p => ({
+        description: p.description,
+        dansBibliotheque: p.dansBibliotheque
+    })));
+
+    if (!container) {
+        console.log('[Productions] ⚠️ Container sidebarListeProductions introuvable');
+        return;
+    }
 
     // ✅ AJOUT (8 décembre 2025) : Filtrer uniquement les productions dans la bibliothèque
     const productionsDansBibliotheque = productions.filter(p => p.dansBibliotheque !== false);
+    console.log('[Productions] Dans bibliothèque:', productionsDansBibliotheque.length);
 
     // Filtrer selon le type si nécessaire
     let productionsFiltrees = productionsDansBibliotheque;
