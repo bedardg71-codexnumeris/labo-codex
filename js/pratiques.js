@@ -3715,7 +3715,7 @@ async function afficherListePratiquesSidebar() {
         const auteur = p.auteur ? `par ${p.auteur}` : '';
 
         html += `
-            <div class="sidebar-item${activeClass}" onclick="chargerPratiquePourModif('${p.id}')">
+            <div class="sidebar-item${activeClass}" onclick="editerPratique('${p.id}')">
                 <div class="sidebar-item-titre">${echapperHtml(nomAffiche)}</div>
                 ${auteur ? `<div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 3px;">${echapperHtml(auteur)}</div>` : ''}
                 ${estActive ? '<div style="margin-top: 5px;"><span class="sidebar-item-badge">Active</span></div>' : ''}
@@ -3724,21 +3724,6 @@ async function afficherListePratiquesSidebar() {
     });
 
     container.innerHTML = html;
-}
-
-/**
- * Charge une pratique pour modification dans le formulaire
- * Appelée par le clic sur un item de la sidebar
- */
-async function chargerPratiquePourModif(pratiqueId) {
-    console.log('🔄 chargerPratiquePourModif appelée avec ID:', pratiqueId);
-
-    // Masquer le message d'accueil s'il existe
-    const messageSelection = document.getElementById('messageSelectionPratique');
-    if (messageSelection) messageSelection.style.display = 'none';
-
-    // Afficher le wizard en mode édition
-    await ouvrirWizardPratique(pratiqueId);
 }
 
 /**
@@ -4006,7 +3991,6 @@ async function exporterPratiqueActive(pratiqueId) {
    =============================== */
 
 window.afficherListePratiquesSidebar = afficherListePratiquesSidebar;
-window.chargerPratiquePourModif = chargerPratiquePourModif;
 window.ouvrirModalBibliothequePratiques = ouvrirModalBibliothequePratiques;
 window.fermerModalBibliothequePratiques = fermerModalBibliothequePratiques;
 window.retirerPratiqueDeBibliotheque = retirerPratiqueDeBibliotheque;
