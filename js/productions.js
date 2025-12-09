@@ -1174,8 +1174,12 @@ function initialiserModuleProductions() {
     // ✅ CORRECTION (8 décembre 2025) : Afficher la sidebar sans condition
     // comme pour les autres sections (Cours, Grilles, Échelles, Cartouches)
     const container = document.getElementById('sidebarListeProductions');
+    console.log('[Productions] Container trouvé:', !!container);
     if (container) {
+        console.log('[Productions] Appel afficherListeProductions()');
         afficherListeProductions();
+    } else {
+        console.log('[Productions] ⚠️ Container sidebarListeProductions non trouvé au chargement');
     }
 
     // Afficher aussi l'ancienne vue si on est sur la page productions
