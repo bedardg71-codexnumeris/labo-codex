@@ -1779,7 +1779,7 @@ async function afficherListePratiques() {
                             <button class="btn btn-secondaire" onclick="importerPratiqueJSON()">
                                 Importer une pratique
                             </button>
-                            <button class="btn btn-ajouter" onclick="afficherPratiquesPredefines()">
+                            <button class="btn btn-ajouter" onclick="ouvrirModalBibliothequePratiques()">
                                 Charger une pratique
                             </button>
                         </div>
@@ -1797,7 +1797,7 @@ async function afficherListePratiques() {
                     <p style="color: var(--gris-moyen); margin-bottom: 10px;">
                         Aucune pratique disponible
                     </p>
-                    <button class="btn btn-ajouter" onclick="afficherPratiquesPredefines()">
+                    <button class="btn btn-ajouter" onclick="ouvrirModalBibliothequePratiques()">
                         Charger les exemples
                     </button>
                 </div>
@@ -3642,305 +3642,19 @@ async function traiterImportPratique(event) {
     event.target.value = '';
 }
 
-/**
- * Afficher et initialiser les pratiques prédéfinies
- * ✅ MODIFICATION (8 décembre 2025) : Modal gestionnaire de bibliothèque
- *
- * Affiche un modal avec deux sections:
- * 1. Pratiques dans la bibliothèque (avec bouton "Retirer")
- * 2. Pratiques disponibles à ajouter (PRATIQUES_PREDEFINES + pratiques retirées)
- */
-async function afficherPratiquesPredefines() {
-    // Vérifier que PRATIQUES_PREDEFINES existe
-    if (!window.PRATIQUES_PREDEFINES) {
-        alert('❌ Erreur : Les pratiques prédéfinies ne sont pas chargées.\n\nVérifiez que le fichier pratiques-predefines.js est bien chargé.');
-        return;
-    }
-
-    // Récupérer les pratiques déjà chargées
-    const pratiquesExistantes = db.getSync('pratiquesConfigurables', []);
-    const idsExistants = new Set(pratiquesExistantes.map(p => p.id));
-
-    // ✅ AJOUT (8 décembre 2025) : Séparer pratiques dans bibliothèque vs retirées
-    const pratiquesDansBibliotheque = pratiquesExistantes.filter(p => p.dansBibliotheque !== false);
-    const pratiquesRetirees = pratiquesExistantes.filter(p => p.dansBibliotheque === false);
-
-    // Construire le HTML du modal
-    let modalHTML = `
-        <div id="modalSelectionPratiques" style="
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        ">
-            <div style="
-                background: white;
-                border-radius: 8px;
-                padding: 30px;
-                max-width: 700px;
-                max-height: 80vh;
-                overflow-y: auto;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            ">
-                <h2 style="margin-top: 0; color: #2c3e50;">📚 Gestionnaire de bibliothèque</h2>
-                <p style="color: #7f8c8d; margin-bottom: 20px;">
-                    Gérez les pratiques affichées dans votre bibliothèque personnalisée.
-                </p>
-    `;
-
-    // ✅ AJOUT (8 décembre 2025) : Section pratiques dans la bibliothèque
-    if (pratiquesDansBibliotheque.length > 0) {
-        modalHTML += `
-                <h3 style="color: #27ae60; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    ✓ Pratiques dans votre bibliothèque (${pratiquesDansBibliotheque.length})
-                </h3>
-                <div style="margin-bottom: 30px;">`;
-
-        pratiquesDansBibliotheque.forEach(pratique => {
-            modalHTML += `
-                <div style="
-                    border: 1px solid #27ae60;
-                    border-radius: 6px;
-                    padding: 15px;
-                    margin-bottom: 10px;
-                    background: #f0f9f4;
-                ">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
-                                ${pratique.nom}
-                            </div>
-                            <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">
-                                Par ${pratique.auteur || 'Auteur inconnu'} ${pratique.etablissement ? '(' + pratique.etablissement + ')' : ''}
-                            </div>
-                            <div style="color: #95a5a6; font-size: 0.85em;">
-                                ${pratique.description || ''}
-                            </div>
-                        </div>
-                        <button
-                            onclick="retirerDeBibliotheque('${pratique.id}')"
-                            class="btn btn-tres-compact"
-                            style="background: #e74c3c; color: white; margin-left: 10px;">
-                            Retirer
-                        </button>
-                    </div>
-                </div>`;
-        });
-
-        modalHTML += `</div>`;
-    }
-
-    modalHTML += `
-                <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    📦 Pratiques disponibles à ajouter
-                </h3>
-                <div id="listePratiquesPredefines" style="margin-bottom: 20px;">
-    `;
-
-    // ✅ MODIFICATION (8 décembre 2025) : Inclure aussi les pratiques retirées
-    const toutesLesPratiquesDisponibles = [...Object.values(window.PRATIQUES_PREDEFINES), ...pratiquesRetirees];
-
-    toutesLesPratiquesDisponibles.forEach(pratique => {
-        // Ne pas afficher si déjà dans la bibliothèque
-        if (pratiquesDansBibliotheque.find(p => p.id === pratique.id)) {
-            return;
-        }
-
-        // Badge pour indiquer si c'est une pratique retirée (peut être réajoutée)
-        const badgeRetiree = pratiquesRetirees.find(p => p.id === pratique.id)
-            ? '<span style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 8px;">Retirée</span>'
-            : '';
-
-        modalHTML += `
-            <div style="
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                padding: 15px;
-                margin-bottom: 10px;
-                background: white;
-            ">
-                <label style="display: flex; align-items: flex-start; cursor: pointer;">
-                    <input
-                        type="checkbox"
-                        value="${pratique.id}"
-                        checked
-                        style="margin-right: 12px; margin-top: 4px;"
-                    >
-                    <div style="flex: 1;">
-                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
-                            ${pratique.nom}
-                            ${badgeRetiree}
-                        </div>
-                        <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">
-                            Par ${pratique.auteur || 'Auteur inconnu'} ${pratique.etablissement ? '(' + pratique.etablissement + ')' : ''}
-                        </div>
-                        <div style="color: #95a5a6; font-size: 0.85em;">
-                            ${pratique.description || ''}
-                        </div>
-                    </div>
-                </label>
-            </div>
-        `;
-    });
-
-    modalHTML += `
-                </div>
-
-                <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #ddd;">
-                    <button onclick="fermerModalPratiques()" class="btn" style="background: #95a5a6;">
-                        Fermer
-                    </button>
-                    <button onclick="chargerPratiqueSelectionnees()" class="btn btn-ajouter">
-                        Ajouter à la bibliothèque
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Ajouter le modal au DOM
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-}
-
-/**
- * Fermer le modal de sélection des pratiques
- */
-function fermerModalPratiques() {
-    const modal = document.getElementById('modalSelectionPratiques');
-    if (modal) {
-        modal.remove();
-    }
-}
-
-/**
- * Retire une pratique de la bibliothèque (ne la supprime pas, la masque juste)
- * ✅ AJOUT (8 décembre 2025)
- * @param {string} pratiqueId - ID de la pratique à retirer
- */
-async function retirerDeBibliotheque(pratiqueId) {
-    if (!confirm('Retirer cette pratique de votre bibliothèque ?\n\nElle ne sera plus affichée mais restera disponible dans le gestionnaire.')) {
-        return;
-    }
-
-    try {
-        const pratiques = db.getSync('pratiquesConfigurables', []);
-        const pratique = pratiques.find(p => p.id === pratiqueId);
-
-        if (!pratique) {
-            throw new Error('Pratique introuvable');
-        }
-
-        // Marquer comme retirée de la bibliothèque
-        pratique.dansBibliotheque = false;
-
-        // Sauvegarder
-        db.setSync('pratiquesConfigurables', pratiques);
-
-        console.log('✅ Pratique retirée de la bibliothèque:', pratiqueId);
-
-        // Fermer et rouvrir le modal pour rafraîchir
-        fermerModalPratiques();
-        await afficherPratiquesPredefines();
-
-        // Recharger aussi l'affichage principal
-        await afficherListePratiques();
-
-    } catch (error) {
-        console.error('Erreur lors du retrait:', error);
-        alert(`❌ Erreur : ${error.message}`);
-    }
-}
-
-/**
- * Charger les pratiques sélectionnées
- */
-async function chargerPratiqueSelectionnees() {
-    const checkboxes = document.querySelectorAll('#listePratiquesPredefines input[type="checkbox"]:checked:not(:disabled)');
-    const idsACharger = Array.from(checkboxes).map(cb => cb.value);
-
-    if (idsACharger.length === 0) {
-        alert('Aucune nouvelle pratique sélectionnée.');
-        fermerModalPratiques();
-        return;
-    }
-
-    try {
-        // Récupérer les pratiques existantes
-        const pratiques = db.getSync('pratiquesConfigurables', []);
-        let ajoutees = 0;
-
-        // Ajouter chaque pratique sélectionnée
-        for (const id of idsACharger) {
-            // Trouver la pratique dans PRATIQUES_PREDEFINES
-            const pratiquePredefinie = Object.values(window.PRATIQUES_PREDEFINES).find(p => p.id === id);
-
-            if (!pratiquePredefinie) {
-                console.warn(`Pratique introuvable : ${id}`);
-                continue;
-            }
-
-            // Vérifier si elle existe déjà (peut-être retirée de la bibliothèque)
-            const pratiqueExistante = pratiques.find(p => p.id === id);
-            if (pratiqueExistante) {
-                // Si elle était retirée, la remettre dans la bibliothèque
-                if (pratiqueExistante.dansBibliotheque === false) {
-                    pratiqueExistante.dansBibliotheque = true;
-                    ajoutees++;
-                    console.log(`✅ Réajoutée à la bibliothèque : ${pratiqueExistante.nom}`);
-                } else {
-                    console.log(`Pratique déjà présente dans la bibliothèque : ${id}`);
-                }
-                continue;
-            }
-
-            // Créer l'objet pratique à sauvegarder
-            const pratique = {
-                id: pratiquePredefinie.id,
-                nom: pratiquePredefinie.nom,
-                auteur: pratiquePredefinie.auteur,
-                etablissement: pratiquePredefinie.etablissement || '',
-                description: pratiquePredefinie.description,
-                discipline: pratiquePredefinie.discipline || '',
-                version: pratiquePredefinie.version || '1.0',
-                date_creation: pratiquePredefinie.date_creation || new Date().toISOString().split('T')[0],
-                config: pratiquePredefinie,
-                dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) : Flag bibliothèque
-            };
-
-            // Ajouter à la liste
-            pratiques.push(pratique);
-            ajoutees++;
-            console.log(`✅ Ajoutée : ${pratique.nom}`);
-        }
-
-        // Sauvegarder dans IndexedDB
-        if (ajoutees > 0) {
-            db.setSync('pratiquesConfigurables', pratiques);
-
-            // Fermer le modal
-            fermerModalPratiques();
-
-            // Recharger l'affichage
-            await afficherListePratiques();
-
-            // Message de succès
-            alert(`✅ ${ajoutees} pratique(s) chargée(s) avec succès !\n\nVous pouvez maintenant les activer, les modifier ou les dupliquer.`);
-        } else {
-            fermerModalPratiques();
-            alert('Aucune nouvelle pratique n\'a été ajoutée.');
-        }
-    } catch (error) {
-        console.error('Erreur lors du chargement des pratiques:', error);
-        alert(`❌ Erreur : ${error.message}`);
-        fermerModalPratiques();
-    }
-}
+// ============================================
+// ANCIENNES FONCTIONS SUPPRIMÉES (9 décembre 2025)
+// ============================================
+// Les fonctions suivantes ont été supprimées car elles utilisaient l'ancien modal
+// "Gestionnaire de bibliothèque". Le nouveau modal "Bibliothèque de pratiques"
+// (ouvrirModalBibliothequePratiques) les remplace.
+//
+// Fonctions supprimées :
+// - afficherPratiquesPredefines()
+// - fermerModalPratiques()
+// - retirerDeBibliotheque()
+// - chargerPratiqueSelectionnees()
+// ============================================
 
 // ============================================
 // EXPORT DES FONCTIONS GLOBALES
@@ -4063,20 +3777,24 @@ async function ouvrirModalBibliothequePratiques() {
                                 '<p class="text-muted text-italic">Aucune pratique dans votre sélection</p>' :
                                 pratiquesDansBibliotheque.map(p => {
                                     const nomAffiche = p.nom || p.id;
-                                    const auteur = p.auteur ? `par ${p.auteur}` : '';
+                                    const auteur = p.auteur ? `Par ${p.auteur}${p.etablissement ? ' (' + p.etablissement + ')' : ''}` : '';
+                                    const description = p.description || '';
                                     return `
-                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bleu-tres-pale); border-radius: 4px;">
-                                            <div>
-                                                <div style="font-weight: 500;">${echapperHtml(nomAffiche)}</div>
-                                                ${auteur ? `<div style="font-size: 0.85rem; color: var(--gris-moyen);">${echapperHtml(auteur)}</div>` : ''}
-                                            </div>
-                                            <div style="display: flex; gap: 5px;">
-                                                <button onclick="exporterPratiqueActive('${p.id}')" class="btn btn-principal btn-tres-compact">
-                                                    📤 Partager
-                                                </button>
-                                                <button onclick="retirerPratiqueDeBibliotheque('${p.id}')" class="btn btn-secondaire btn-tres-compact">
-                                                    Retirer
-                                                </button>
+                                        <div style="border: 1px solid var(--bleu-clair); border-radius: 6px; padding: 15px; background: var(--bleu-tres-pale);">
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                <div style="flex: 1;">
+                                                    <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">${echapperHtml(nomAffiche)}</div>
+                                                    ${auteur ? `<div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
+                                                    ${description ? `<div style="color: #95a5a6; font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
+                                                </div>
+                                                <div style="display: flex; gap: 5px; margin-left: 10px;">
+                                                    <button onclick="exporterPratiqueActive('${p.id}')" class="btn btn-principal btn-tres-compact">
+                                                        Partager
+                                                    </button>
+                                                    <button onclick="retirerPratiqueDeBibliotheque('${p.id}')" class="btn btn-supprimer btn-tres-compact">
+                                                        Retirer
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     `;
@@ -4096,16 +3814,20 @@ async function ouvrirModalBibliothequePratiques() {
                                 '<p class="text-muted text-italic">Aucune pratique disponible</p>' :
                                 pratiquesDisponibles.map(p => {
                                     const nomAffiche = p.nom || p.id;
-                                    const auteur = p.auteur ? `par ${p.auteur}` : '';
+                                    const auteur = p.auteur ? `Par ${p.auteur}${p.etablissement ? ' (' + p.etablissement + ')' : ''}` : '';
+                                    const description = p.description || '';
                                     return `
-                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--gris-tres-pale); border-radius: 4px;">
-                                            <div>
-                                                <div style="font-weight: 500;">${echapperHtml(nomAffiche)}</div>
-                                                ${auteur ? `<div style="font-size: 0.85rem; color: var(--gris-moyen);">${echapperHtml(auteur)}</div>` : ''}
+                                        <div style="border: 1px solid var(--bleu-clair); border-radius: 6px; padding: 15px; background: white;">
+                                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                <div style="flex: 1;">
+                                                    <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">${echapperHtml(nomAffiche)}</div>
+                                                    ${auteur ? `<div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 4px;">${echapperHtml(auteur)}</div>` : ''}
+                                                    ${description ? `<div style="color: #95a5a6; font-size: 0.85em;">${echapperHtml(description)}</div>` : ''}
+                                                </div>
+                                                <button onclick="ajouterPratiqueIndividuelle('${p.id}')" class="btn btn-ajouter btn-tres-compact" style="margin-left: 10px;">
+                                                    Ajouter
+                                                </button>
                                             </div>
-                                            <button onclick="ajouterPratiqueIndividuelle('${p.id}')" class="btn btn-ajouter btn-tres-compact">
-                                                Ajouter
-                                            </button>
                                         </div>
                                     `;
                                 }).join('')
