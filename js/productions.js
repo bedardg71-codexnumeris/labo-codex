@@ -2215,22 +2215,15 @@ async function afficherListeProductions(filtreType = '') {
         }
     }
 
-    // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
-    let html = `
-        <div style="margin-bottom: 15px;">
-            <button onclick="afficherBibliothequeProductions()" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
-                Consulter la bibliothèque
-            </button>
-        </div>
-    `;
+    // ✅ CORRECTION (8 décembre 2025) : Ne plus générer le bouton bibliothèque
+    // car il est maintenant dans le HTML (comme pour Cours, Grilles, etc.)
 
     if (productionsFiltrees.length === 0) {
-        html += '<p class="sidebar-vide">Créez une nouvelle production ou puisez dans la bibliothèque</p>';
-        container.innerHTML = html;
+        container.innerHTML = '<p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">Créez une nouvelle production ou puisez dans la bibliothèque</p>';
         return;
     }
 
-    html += productionsFiltrees.map(prod => {
+    const html = productionsFiltrees.map(prod => {
         const typeLabel = getTypeLabel(prod.type);
 
         return `

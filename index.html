@@ -3852,9 +3852,26 @@
                         <!-- SIDEBAR GAUCHE (280px, sticky) -->
                         <div class="sidebar-navigation">
 
+                            <!-- En-tête -->
+                            <div style="margin-bottom: 15px;">
+                                <h3 style="margin: 0; font-size: 1rem; color: var(--bleu-principal);">Mes productions</h3>
+                            </div>
+
+                            <!-- Bouton Consulter bibliothèque -->
+                            <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
+                                <button onclick="afficherBibliothequeProductions()"
+                                        class="btn btn-principal"
+                                        style="width: 100%;"
+                                        title="Consulter la bibliothèque de productions">
+                                    Consulter la bibliothèque
+                                </button>
+                            </div>
+
                             <!-- Liste des productions -->
-                            <div class="sidebar-liste" id="sidebarListeProductions">
-                                <!-- Généré par afficherListeProductions() -->
+                            <div class="sidebar-liste">
+                                <div id="sidebarListeProductions">
+                                    <!-- Généré par afficherListeProductions() -->
+                                </div>
                             </div>
                         </div>
 
