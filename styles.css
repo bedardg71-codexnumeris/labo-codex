@@ -492,6 +492,7 @@ body {
 /* === LIGNE 2 : Informations contextuelles + Mode === */
 
 .entete-ligne2 {
+    position: relative; /* Pour positionner l'émoji Primo */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -992,11 +993,11 @@ body {
 
 /* Titre avec fond bleu dégradé (comme l'en-tête) */
 .carte h3.carte-titre-bleu {
-    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%) !important;
+    color: white !important;
     margin: -20px -20px 15px -20px;
     padding: 15px 20px;
-    border-bottom: none;
+    border-bottom: none !important;
     border-radius: 8px 8px 0 0;
     font-weight: 600;
 }
