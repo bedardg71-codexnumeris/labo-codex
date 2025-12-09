@@ -2764,6 +2764,25 @@
                     <div id="info-contextuelles-centre" class="info-contextuelles-centre">
                         <!-- Sera rempli dynamiquement par JavaScript -->
                     </div>
+
+                    <!-- Émoji Assistance Primo avec cercle et pulsation (visible uniquement en mode Assisté) -->
+                    <div id="btn-assistance-primo"
+                         onclick="reafficherAccueilPrimo()"
+                         style="display: none; position: absolute; right: 20px; top: 60%; transform: translateY(-50%); cursor: pointer;"
+                         title="Obtenir de l'aide avec Primo">
+                        <div style="
+                            width: 60px;
+                            height: 60px;
+                            background: linear-gradient(135deg, #2d7a8c 0%, #45a8a0 100%);
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            animation: highlight-glow 3s ease-in-out infinite;
+                            box-shadow: 0 4px 15px rgba(45, 122, 140, 0.3);">
+                            <span style="font-size: 2rem;">😎</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -2871,14 +2890,6 @@
                 <button data-onglet="materiel">Matériel</button>
                 <button data-onglet="reglages">Réglages</button>
 
-                <!-- Bouton Assistance Primo (visible uniquement en mode Assisté) -->
-                <button id="btn-assistance-primo"
-                       onclick="reafficherAccueilPrimo()"
-                       style="display: none;"
-                       title="Obtenir de l'aide avec Primo">
-                    😎 Primo
-                </button>
-
                 <!-- Bouton Aide (visible uniquement en mode Assisté) -->
                 <button id="btn-section-aide"
                        data-onglet="aide"
@@ -2909,7 +2920,7 @@
 
                     <!-- ========== MÉTRIQUES GLOBALES DU GROUPE ========== -->
                     <div class="carte">
-                        <h3 class="carte-titre-avec-toggle">
+                        <h3 class="carte-titre-bleu carte-titre-avec-toggle">
                             <span>Indicateurs globaux du groupe</span>
                             <span class="emoji-container">
                                 <span class="primo-aide" data-target="note-indicateurs">😎</span>
@@ -2969,9 +2980,9 @@
                     </div>
 
                     <div class="carte">
-                        <h3>Étudiant·es inscrit·es
+                        <h3 class="carte-titre-bleu">Étudiant·es inscrit·es
                             <span id="compteur-tableau-bord-liste"
-                                style="color: var(--gris-moyen); font-size: 0.9rem; font-weight: normal;">
+                                style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; font-weight: normal;">
                                 (0 étudiant·e)
                             </span>
                         </h3>
