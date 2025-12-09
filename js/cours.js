@@ -976,10 +976,10 @@ async function ouvrirModalBibliothequeCours() {
                 <p class="text-muted">Gérez vos configurations de cours</p>
 
                 <!-- SECTION 1 : Ma sélection -->
+                <h3 style="color: var(--bleu-clair); font-size: 1.1rem;">
+                    Cours dans votre sélection (${coursDansBibliotheque.length})
+                </h3>
                 <div style="margin-bottom: 30px;">
-                    <h3 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-principal); padding-bottom: 8px;">
-                        Ma sélection (${coursDansBibliotheque.length})
-                    </h3>
     `;
 
     if (coursDansBibliotheque.length === 0) {
@@ -989,8 +989,13 @@ async function ouvrirModalBibliothequeCours() {
             const actifBadge = cours.actif ? '<span class="badge-info" style="margin-left: 10px;">Actif</span>' : '';
 
             modalHTML += `
-                <div style="padding: 15px; margin-bottom: 10px; background: var(--gris-tres-pale); border-radius: 8px; border-left: 4px solid var(--bleu-principal);">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="
+                    border: 1px solid var(--bleu-clair);
+                    border-radius: 6px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    background: var(--bleu-tres-pale);">
+                    <div style="display: flex; justify-content: space-between;">
                         <div style="flex: 1;">
                             <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 5px;">
                                 ${echapperHtml(cours.codeCours)} - ${echapperHtml(cours.nomCours)}${actifBadge}
@@ -1002,7 +1007,12 @@ async function ouvrirModalBibliothequeCours() {
                                 ${echapperHtml(cours.prenomEnseignant)} ${echapperHtml(cours.nomEnseignant)} • ${echapperHtml(cours.session)}${echapperHtml(cours.annee)}
                             </div>
                         </div>
-                        <div style="display: flex; gap: 8px; margin-left: 10px;">
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="partagerCours('${cours.id}')"
+                                    class="btn btn-secondaire btn-tres-compact"
+                                    title="Partager ce cours">
+                                Partager
+                            </button>
                             <button onclick="retirerCoursDeBibliotheque('${cours.id}')"
                                     class="btn btn-supprimer btn-tres-compact"
                                     title="Retirer de votre sélection">
@@ -1016,20 +1026,19 @@ async function ouvrirModalBibliothequeCours() {
     }
 
     modalHTML += `
-                    <div style="margin-top: 15px; text-align: center;">
-                        <button onclick="exporterCoursSimple()" class="btn btn-secondaire">
-                            Exporter mes cours
-                        </button>
-                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button onclick="partagerTousLesCours()" class="btn btn-secondaire">
+                        Partager tous mes cours
+                    </button>
                 </div>
     `;
 
     // SECTION 2 : Disponibles à ajouter
     modalHTML += `
-                <div style="margin-bottom: 30px;">
-                    <h3 style="color: var(--vert-confirmer); border-bottom: 2px solid var(--vert-confirmer); padding-bottom: 8px;">
-                        Disponibles à ajouter (${coursDisponibles.length})
-                    </h3>
+                <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px;">
+                    Cours disponibles à ajouter
+                </h3>
     `;
 
     if (coursDisponibles.length === 0) {
@@ -1037,8 +1046,13 @@ async function ouvrirModalBibliothequeCours() {
     } else {
         coursDisponibles.forEach(cours => {
             modalHTML += `
-                <div style="padding: 15px; margin-bottom: 10px; background: var(--gris-tres-pale); border-radius: 8px; border-left: 4px solid var(--vert-confirmer);">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="
+                    border: 1px solid #ddd;
+                    border-radius: 6px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    background: white;">
+                    <div style="display: flex; justify-content: space-between;">
                         <div style="flex: 1;">
                             <div style="font-weight: 600; color: var(--bleu-principal); margin-bottom: 5px;">
                                 ${echapperHtml(cours.codeCours)} - ${echapperHtml(cours.nomCours)}
@@ -1050,7 +1064,7 @@ async function ouvrirModalBibliothequeCours() {
                                 ${echapperHtml(cours.session)}${echapperHtml(cours.annee)}
                             </div>
                         </div>
-                        <div style="display: flex; gap: 8px; margin-left: 10px;">
+                        <div style="display: flex; gap: 8px;">
                             <button onclick="ajouterCoursIndividuel('${cours.id}')"
                                     class="btn btn-confirmer btn-tres-compact"
                                     title="Ajouter ce cours à votre sélection">
@@ -1064,18 +1078,17 @@ async function ouvrirModalBibliothequeCours() {
     }
 
     modalHTML += `
-                    <div style="margin-top: 15px; text-align: center;">
-                        <button onclick="document.getElementById('fichier-import-cours-modal').click()"
-                                class="btn btn-secondaire">
-                            Importer des cours
-                        </button>
-                        <input type="file" id="fichier-import-cours-modal" accept=".json"
-                               style="display: none;" onchange="importerCoursSimple(event)">
-                    </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button onclick="document.getElementById('fichier-import-cours-modal').click()"
+                            class="btn btn-secondaire">
+                        Ajouter des cours
+                    </button>
+                    <input type="file" id="fichier-import-cours-modal" accept=".json"
+                           style="display: none;" onchange="importerCoursSimple(event)">
                 </div>
 
-                <!-- Footer -->
-                <div style="display: flex; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                <!-- Pied de page -->
+                <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 20px; text-align: right;">
                     <button onclick="fermerModalBibliothequeCours()" class="btn btn-annuler">
                         Fermer
                     </button>
@@ -1264,6 +1277,110 @@ async function importerCoursSimple(event) {
 }
 
 /* ===============================
+   PARTAGE AVEC MÉTADONNÉES CC
+   =============================== */
+
+/**
+ * Partage un cours individuel avec métadonnées Creative Commons
+ *
+ * FONCTIONNEMENT:
+ * 1. Demande les métadonnées CC enrichies à l'utilisateur
+ * 2. Marque le cours comme partagé (dansBibliotheque = false)
+ * 3. Ajoute les métadonnées CC au cours
+ * 4. Rafraîchit le modal et la sidebar
+ *
+ * @param {string} id - ID du cours à partager
+ */
+async function partagerCours(id) {
+    try {
+        const cours = await db.get('listeCours') || [];
+        const coursAPartager = cours.find(c => c.id === id);
+
+        if (!coursAPartager) {
+            alert('Cours introuvable');
+            return;
+        }
+
+        // Demander métadonnées CC enrichies
+        const nomAffiche = `${coursAPartager.codeCours} - ${coursAPartager.nomCours}`;
+        const metadata = await demanderMetadonneesEnrichies('cours', nomAffiche);
+        if (!metadata) {
+            return; // Annulé par l'utilisateur
+        }
+
+        // Marquer comme partagé (retirer de ma sélection)
+        coursAPartager.dansBibliotheque = false;
+
+        // Ajouter métadonnées CC
+        coursAPartager.metadata_cc = metadata;
+
+        // Sauvegarder
+        await db.set('listeCours', cours);
+
+        // Rafraîchir modal et sidebar
+        fermerModalBibliothequeCours();
+        await afficherListeCoursSidebar();
+        await ouvrirModalBibliothequeCours();
+
+        alert('Cours partagé avec succès !\n\nIl est maintenant disponible dans la section "Cours disponibles à ajouter".');
+    } catch (error) {
+        console.error('Erreur lors du partage:', error);
+        alert('Erreur lors du partage du cours');
+    }
+}
+
+/**
+ * Partage tous les cours de la sélection avec métadonnées Creative Commons
+ *
+ * FONCTIONNEMENT:
+ * 1. Demande les métadonnées CC globales
+ * 2. Exporte tous les cours avec métadonnées
+ * 3. Génère fichier JSON téléchargeable
+ */
+async function partagerTousLesCours() {
+    const tousLesCours = await db.get('listeCours') || [];
+    const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
+
+    if (coursDansBibliotheque.length === 0) {
+        alert('Aucun cours à partager dans votre sélection');
+        return;
+    }
+
+    // Demander métadonnées CC pour l'export global
+    const metadata = await demanderMetadonneesEnrichies('cours', 'Mes cours');
+    if (!metadata) {
+        return; // Annulé par l'utilisateur
+    }
+
+    // Créer le wrapper avec métadonnées
+    const exportData = {
+        metadata_cc: metadata,
+        type: 'cours',
+        nbCours: coursDansBibliotheque.length,
+        dateExport: new Date().toISOString(),
+        cours: coursDansBibliotheque
+    };
+
+    // Créer le JSON
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+    // Générer nom de fichier avec date
+    const dateStr = new Date().toISOString().split('T')[0];
+    const nomFichier = `cours-${dateStr}.json`;
+
+    // Télécharger
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomFichier;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    alert(`${coursDansBibliotheque.length} cours exportés avec métadonnées Creative Commons !`);
+}
+
+/* ===============================
    EXPORTS - Rendre les fonctions accessibles globalement
    =============================== */
 
@@ -1284,3 +1401,5 @@ window.ajouterCoursIndividuel = ajouterCoursIndividuel;
 window.exporterCoursSimple = exporterCoursSimple;
 window.importerCoursSimple = importerCoursSimple;
 window.naviguerVersPratiqueNotation = naviguerVersPratiqueNotation;
+window.partagerCours = partagerCours;
+window.partagerTousLesCours = partagerTousLesCours;
