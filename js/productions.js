@@ -1171,13 +1171,16 @@ function initialiserModuleProductions() {
     // ✅ AJOUT (8 décembre 2025) : Migration vers système bibliothèque
     migrerProductionsVersBibliotheque();
 
-    // Charger automatiquement si on est sur la page productions
+    // ✅ CORRECTION (8 décembre 2025) : Afficher la sidebar sans condition
+    // comme pour les autres sections (Cours, Grilles, Échelles, Cartouches)
+    const container = document.getElementById('sidebarListeProductions');
+    if (container) {
+        afficherListeProductions();
+    }
+
+    // Afficher aussi l'ancienne vue si on est sur la page productions
     const sousSection = document.querySelector('#materiel-productions');
     if (sousSection && sousSection.classList.contains('active')) {
-        // Afficher la sidebar avec la liste des productions (Beta 80.5+)
-        afficherListeProductions();
-
-        // Afficher aussi l'ancienne vue (cachée) pour compatibilité
         afficherTableauProductions();
         mettreAJourPonderationTotale();
     }
