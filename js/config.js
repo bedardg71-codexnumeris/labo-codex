@@ -56,8 +56,8 @@ const configurationsOnglets = {
     ],
     'reglages': [
         { id: 'apercu', label: 'Aperçu' },
-        { id: 'cours', label: 'Cours' },
         { id: 'trimestre', label: 'Trimestre' },
+        { id: 'cours', label: 'Cours' },
         { id: 'horaire', label: 'Horaire' },
         { id: 'groupe', label: 'Groupe' },
         { id: 'pratique-notation', label: 'Pratique de notation' },

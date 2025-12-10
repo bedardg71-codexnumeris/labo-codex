@@ -50,6 +50,13 @@ window.genererBadgePratique = function(type, compact = false) {
     return `<span class="${classe}">${texte}</span>`;
 };
 
+// ✅ Fonction reactiverGroupeDemo() supprimée (Beta 93.5)
+// Le groupe démo est maintenant géré via checkbox dans le formulaire Trimestre
+
+// ✅ Fonction prechargerGroupeDemo() supprimée (Beta 93.5)
+// Le groupe démo est maintenant géré via checkbox dans le formulaire Trimestre
+// L'import s'effectue uniquement quand l'utilisateur coche la checkbox
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 Initialisation du système de monitorage v3.0');
     console.log('📦 Modules chargés : 01-config, 02-navigation');
@@ -433,6 +440,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
     console.log('   ✅ Événement affichage cours attaché');
+
+    // ===============================
+    // 3.5 EXÉCUTION DES MIGRATIONS (Beta 93.5)
+    // ===============================
+    // Ajouter coursId aux données existantes si nécessaire
+    if (typeof executerMigrationsBeta935 === 'function') {
+        executerMigrationsBeta935();
+    }
+
+    // ===============================
+    // 3.6 GROUPE DÉMO (Beta 93.5)
+    // ===============================
+    // ✅ Préchargement automatique supprimé
+    // Le groupe démo est maintenant géré via checkbox dans Réglages → Trimestre
+    // Voir fonction basculerDonneesDemo() dans trimestre.js
 
     // ===============================
     // 4. FIN D'INITIALISATION

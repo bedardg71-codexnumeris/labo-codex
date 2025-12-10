@@ -259,35 +259,26 @@ function sontDonnesDemoChargees() {
 
 /**
  * Filtre les étudiants pour exclure le groupe 9999 si non en mode Assisté
- * ⚠️ NOTE : Cette fonction est maintenant REDONDANTE avec filtrerEtudiantsParMode() dans modes.js
- * Elle est conservée pour compatibilité mais filtrerEtudiantsParMode devrait être utilisée
+ * ⚠️ MODIFIÉ Beta 93.5 : Le groupe 9999 est maintenant TOUJOURS visible
+ * C'est un bac à sable permanent pour explorer l'application
  * @param {Array} etudiants - Liste complète des étudiants
- * @returns {Array} Liste filtrée
+ * @returns {Array} Liste filtrée (retourne tous les étudiants)
  */
 function filtrerEtudiantsDemo(etudiants) {
-    const modeActuel = localStorage.getItem('modeApplication') || 'normal';
-
-    if (modeActuel === 'simulation') {
-        return etudiants; // Tout afficher
-    } else {
-        return etudiants.filter(e => e.groupe !== '9999'); // Exclure groupe 9999
-    }
+    // ✅ Beta 93.5 : Groupe 9999 visible dans tous les modes
+    return etudiants; // Tout afficher
 }
 
 /**
  * Filtre les cours pour exclure le groupe 9999 si non en mode Assisté
- * ⚠️ NOTE : Cette fonction est redondante avec le filtrage dans modes.js
+ * ⚠️ MODIFIÉ Beta 93.5 : Le groupe 9999 est maintenant TOUJOURS visible
+ * C'est un bac à sable permanent pour explorer l'application
  * @param {Array} cours - Liste complète des cours
- * @returns {Array} Liste filtrée
+ * @returns {Array} Liste filtrée (retourne tous les cours)
  */
 function filtrerCoursDemo(cours) {
-    const modeActuel = localStorage.getItem('modeApplication') || 'normal';
-
-    if (modeActuel === 'simulation') {
-        return cours; // Tout afficher
-    } else {
-        return cours.filter(c => c.groupe !== '9999'); // Exclure groupe 9999
-    }
+    // ✅ Beta 93.5 : Groupe 9999 visible dans tous les modes
+    return cours; // Tout afficher
 }
 
 /**

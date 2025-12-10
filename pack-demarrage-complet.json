@@ -1,9 +1,9 @@
 {
   "_metadata": {
     "nom": "Pack de démarrage - Écriture et littérature",
-    "version": "2.0",
-    "date": "2025-12-06",
-    "description": "Pack de démonstration avec formats corrects - 10 étudiants fictifs, 7 artefacts évalués, 15 semaines de données",
+    "version": "3.0",
+    "date": "2025-12-10",
+    "description": "Pack de démonstration - 10 étudiants, 4 artefacts, 8 semaines de données (Beta 93.5)",
     "auteur": "Primo Primavera",
     "cours": "601-101 - Écriture et littérature",
     "formats": "Basé sur structures réelles de l'application"
@@ -20,17 +20,18 @@
   },
   "listeCours": [
     {
-      "id": "601-101-h2026-01",
+      "id": "601-101-h2026-9999",
       "sigle": "601-101",
       "titre": "Écriture et littérature",
       "competence": "4EF0",
       "enseignant": "Primo Primavera",
-      "session": "H2026",
+      "session": "H",
       "annee": "2026",
       "groupe": "9999",
       "heuresHebdo": 4,
       "actif": true,
-      "pratiqueId": "sommative"
+      "pratiqueId": "sommative",
+      "trimestreId": "h2026"
     }
   ],
   "groupeEtudiants": [
@@ -40,7 +41,8 @@
       "nom": "Tremblay",
       "programme": "500.A1",
       "sa": false,
-      "groupe": "9999"
+      "groupe": "9999",
+      "coursId": "601-101-h2026-9999"
     },
     {
       "da": "2234568",
@@ -48,7 +50,8 @@
       "nom": "Gagnon",
       "programme": "200.B0",
       "sa": true,
-      "groupe": "9999"
+      "groupe": "9999",
+      "coursId": "601-101-h2026-9999"
     },
     {
       "da": "2234569",
@@ -56,7 +59,8 @@
       "nom": "Roy",
       "programme": "300.A0",
       "sa": false,
-      "groupe": "9999"
+      "groupe": "9999",
+      "coursId": "601-101-h2026-9999"
     },
     {
       "da": "2234570",
@@ -64,7 +68,8 @@
       "nom": "Côté",
       "programme": "420.B0",
       "sa": false,
-      "groupe": "9999"
+      "groupe": "9999",
+      "coursId": "601-101-h2026-9999"
     },
     {
       "da": "2234571",
@@ -72,7 +77,8 @@
       "nom": "Bouchard",
       "programme": "180.A0",
       "sa": true,
-      "groupe": "9999"
+      "groupe": "9999",
+      "coursId": "601-101-h2026-9999"
     },
     {
       "da": "2234572",
@@ -80,7 +86,8 @@
       "nom": "Lavoie",
       "programme": "410.B0",
       "sa": false,
-      "groupe": "9999"
+      "groupe": "9999",
+      "coursId": "601-101-h2026-9999"
     },
     {
       "da": "2234573",
@@ -88,7 +95,8 @@
       "nom": "Bergeron",
       "programme": "500.A1",
       "sa": false,
-      "groupe": "9999"
+      "groupe": "9999",
+      "coursId": "601-101-h2026-9999"
     },
     {
       "da": "2234574",
@@ -96,7 +104,8 @@
       "nom": "Morin",
       "programme": "200.B0",
       "sa": false,
-      "groupe": "9999"
+      "groupe": "9999",
+      "coursId": "601-101-h2026-9999"
     },
     {
       "da": "2234575",
@@ -104,7 +113,8 @@
       "nom": "Pelletier",
       "programme": "300.A0",
       "sa": true,
-      "groupe": "9999"
+      "groupe": "9999",
+      "coursId": "601-101-h2026-9999"
     },
     {
       "da": "2234576",
@@ -112,7 +122,8 @@
       "nom": "Gauthier",
       "programme": "420.B0",
       "sa": false,
-      "groupe": "9999"
+      "groupe": "9999",
+      "coursId": "601-101-h2026-9999"
     }
   ],
   "modalitesEvaluation": {
@@ -263,11 +274,12 @@
       "verrouille": false,
       "regles": {
         "nombreARetenir": 4,
-        "minimumCompletion": 7,
-        "nombreTotal": 7
+        "minimumCompletion": 4,
+        "nombreTotal": 4
       },
       "modeCalcul": "provisoire",
-      "id": "PROD_PORTFOLIO"
+      "id": "PROD_PORTFOLIO",
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "A1",
@@ -278,7 +290,8 @@
       "objectif": "Développer sa capacité à utiliser efficacement différentes stratégies de lecture et à documenter de manière claire et méthodique son processus d'analyse.",
       "tache": "Appliquer au moins trois stratégies de lecture différentes sur un texte littéraire et laisser des traces visibles et organisées de cette analyse.",
       "grilleId": "GRILLE1759243306842",
-      "verrouille": false
+      "verrouille": false,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "A2",
@@ -289,7 +302,8 @@
       "grilleId": "GRILLE1759243306842",
       "objectif": "Développer ta capacité d'observation détaillée des personnages tout en renforçant ta maîtrise de la grammaire française.",
       "tache": "Décrire un personnage en observant systématiquement toutes ses dimensions et faire une analyse grammaticale complète de ton texte.",
-      "verrouille": false
+      "verrouille": false,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "A3",
@@ -300,7 +314,8 @@
       "grilleId": "GRILLE1759243306842",
       "objectif": "Développer sa capacité à analyser collaborativement un texte et à représenter les relations entre objectif, mécanismes et procédés.",
       "tache": "En binôme, construire une carte mentale qui organise visuellement l'analyse du texte, en délibérant sur chaque élément pour arriver à une interprétation commune.",
-      "verrouille": false
+      "verrouille": false,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "A4",
@@ -311,48 +326,16 @@
       "objectif": "Développer ta capacité à reconnaître les intentions d'un auteur, ses stratégies d'écriture et les liens qui unissent différents récits d'une même œuvre.",
       "tache": "Analyser dix récits du recueil pour identifier leurs objectifs de communication, mécanismes littéraires et preuves textuelles, puis synthétiser les patterns observés.",
       "grilleId": "GRILLE1759243306842",
-      "verrouille": false
-    },
-    {
-      "id": "A5",
-      "titre": "Artefact 5",
-      "description": "Faire un plan de rédaction",
-      "type": "artefact-portfolio",
-      "ponderation": 0,
-      "objectif": "Développer ta capacité à structurer une analyse littéraire cohérente en établissant des liens logiques clairs entre tous les éléments.",
-      "tache": "Transformer ta carte mentale en plan d'analyse détaillé en organisant logiquement les idées principales, secondaires, les preuves, les mini-conclusions et la transition.",
-      "grilleId": "GRILLE1759243306842",
-      "verrouille": false
-    },
-    {
-      "id": "A6",
-      "titre": "Artefact 6",
-      "description": "Rédaction d'un texte suivi",
-      "type": "artefact-portfolio",
-      "ponderation": 0,
-      "objectif": "Démontrer ta capacité à développer une analyse littéraire structurée, argumentée et bien écrite.",
-      "tache": "Rédiger une analyse littéraire à partir de ton plan détaillé.",
-      "grilleId": "GRILLE1759243306842",
-      "verrouille": false
-    },
-    {
-      "id": "A7",
-      "titre": "Artefact 7",
-      "description": "Révision d'un texte suivi",
-      "type": "artefact-portfolio",
-      "ponderation": 0,
-      "objectif": "Développer ta capacité à réviser de manière systématique et approfondie un texte d'analyse littéraire.",
-      "tache": "Réviser ton analyse littéraire en appliquant une méthode rigoureuse de correction.",
-      "grilleId": "GRILLE1759243306842",
-      "verrouille": false
+      "verrouille": false,
+      "coursId": "601-101-h2026-9999"
     }
   ],
   "calendrierComplet": {
     "dateDebut": "2026-01-19",
-    "dateFin": "2026-05-08",
+    "dateFin": "2026-03-20",
     "totalJours": 109,
-    "totalSemaines": 15,
-    "totalJoursCours": 60,
+    "totalSemaines": 8,
+    "totalJoursCours": 40,
     "conges": [
       {
         "date": "2026-03-02",
@@ -430,27 +413,7 @@
       "2026-03-17",
       "2026-03-18",
       "2026-03-19",
-      "2026-03-20",
-      "2026-03-23",
-      "2026-03-24",
-      "2026-03-25",
-      "2026-03-26",
-      "2026-03-27",
-      "2026-03-30",
-      "2026-03-31",
-      "2026-04-01",
-      "2026-04-02",
-      "2026-04-07",
-      "2026-04-08",
-      "2026-04-09",
-      "2026-04-10",
-      "2026-04-13",
-      "2026-04-14",
-      "2026-04-15",
-      "2026-04-16",
-      "2026-04-17",
-      "2026-04-20",
-      "2026-04-21"
+      "2026-03-20"
     ]
   },
   "seancesCompletes": {
@@ -1448,7 +1411,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_2",
@@ -1510,7 +1474,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_3",
@@ -1572,7 +1537,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_4",
@@ -1634,7 +1600,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_5",
@@ -1696,7 +1663,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_6",
@@ -1758,7 +1726,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_7",
@@ -1820,7 +1789,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_8",
@@ -1882,7 +1852,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_9",
@@ -1944,7 +1915,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_10",
@@ -2006,7 +1978,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_11",
@@ -2068,7 +2041,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_12",
@@ -2130,7 +2104,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_13",
@@ -2192,7 +2167,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_14",
@@ -2254,7 +2230,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_15",
@@ -2316,7 +2293,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_16",
@@ -2378,7 +2356,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_17",
@@ -2440,7 +2419,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_18",
@@ -2502,7 +2482,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_19",
@@ -2564,7 +2545,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_20",
@@ -2626,7 +2608,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_21",
@@ -2688,7 +2671,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_22",
@@ -2750,7 +2734,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_23",
@@ -2812,7 +2797,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_24",
@@ -2874,7 +2860,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_25",
@@ -2936,7 +2923,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_26",
@@ -2998,7 +2986,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_27",
@@ -3060,7 +3049,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_28",
@@ -3122,7 +3112,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_29",
@@ -3184,7 +3175,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_30",
@@ -3246,7 +3238,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_31",
@@ -3308,7 +3301,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_32",
@@ -3370,7 +3364,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_33",
@@ -3432,7 +3427,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_34",
@@ -3494,7 +3490,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_35",
@@ -3556,7 +3553,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_36",
@@ -3618,7 +3616,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_37",
@@ -3680,7 +3679,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_38",
@@ -3742,7 +3742,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_39",
@@ -3804,7 +3805,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     },
     {
       "id": "EVAL_DEMO_40",
@@ -3866,627 +3868,8 @@
         "adresse": true,
         "contexte": true
       },
-      "verrouillee": true
-    },
-    {
-      "id": "EVAL_DEMO_41",
-      "etudiantDA": "2234567",
-      "etudiantNom": "Émilie Tremblay",
-      "groupe": "9999",
-      "productionId": "A5",
-      "productionNom": "Artefact 5",
-      "grilleId": "GRILLE1759243306842",
-      "grilleNom": "Global-5 FR-HOLIS",
-      "echelleId": "ECH1759264511178",
-      "cartoucheId": "CART_DEMO_2025",
-      "dateEvaluation": "2026-03-16T04:00:00.000Z",
-      "statutRemise": "remis",
-      "criteres": [
-        {
-          "critereId": "CR1759243306842",
-          "critereNom": "Structure",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 15
-        },
-        {
-          "critereId": "CR1759243331050",
-          "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 20
-        },
-        {
-          "critereId": "CR1759243365467",
-          "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 10
-        },
-        {
-          "critereId": "CR1759243379949",
-          "critereNom": "Nuance",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 25
-        },
-        {
-          "critereId": "CR1759243428715",
-          "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 30
-        }
-      ],
-      "noteFinale": 100,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A5 pour Émilie Tremblay. Niveau global: E",
-      "optionsAffichage": {
-        "description": true,
-        "objectif": true,
-        "tache": true,
-        "adresse": true,
-        "contexte": true
-      },
-      "verrouillee": true
-    },
-    {
-      "id": "EVAL_DEMO_42",
-      "etudiantDA": "2234568",
-      "etudiantNom": "Antoine Gagnon",
-      "groupe": "9999",
-      "productionId": "A5",
-      "productionNom": "Artefact 5",
-      "grilleId": "GRILLE1759243306842",
-      "grilleNom": "Global-5 FR-HOLIS",
-      "echelleId": "ECH1759264511178",
-      "cartoucheId": "CART_DEMO_2025",
-      "dateEvaluation": "2026-03-16T04:00:00.000Z",
-      "statutRemise": "remis",
-      "criteres": [
-        {
-          "critereId": "CR1759243306842",
-          "critereNom": "Structure",
-          "niveauSelectionne": "D",
-          "retroaction": "",
-          "ponderation": 15
-        },
-        {
-          "critereId": "CR1759243331050",
-          "critereNom": "Rigueur",
-          "niveauSelectionne": "M",
-          "retroaction": "",
-          "ponderation": 20
-        },
-        {
-          "critereId": "CR1759243365467",
-          "critereNom": "Plausibilité",
-          "niveauSelectionne": "D",
-          "retroaction": "",
-          "ponderation": 10
-        },
-        {
-          "critereId": "CR1759243379949",
-          "critereNom": "Nuance",
-          "niveauSelectionne": "D",
-          "retroaction": "",
-          "ponderation": 25
-        },
-        {
-          "critereId": "CR1759243428715",
-          "critereNom": "Français écrit",
-          "niveauSelectionne": "D",
-          "retroaction": "",
-          "ponderation": 30
-        }
-      ],
-      "noteFinale": 71,
-      "niveauFinal": "D",
-      "retroactionFinale": "Évaluation de A5 pour Antoine Gagnon. Niveau global: D",
-      "optionsAffichage": {
-        "description": true,
-        "objectif": true,
-        "tache": true,
-        "adresse": true,
-        "contexte": true
-      },
-      "verrouillee": true
-    },
-    {
-      "id": "EVAL_DEMO_43",
-      "etudiantDA": "2234569",
-      "etudiantNom": "Léa Roy",
-      "groupe": "9999",
-      "productionId": "A5",
-      "productionNom": "Artefact 5",
-      "grilleId": "GRILLE1759243306842",
-      "grilleNom": "Global-5 FR-HOLIS",
-      "echelleId": "ECH1759264511178",
-      "cartoucheId": "CART_DEMO_2025",
-      "dateEvaluation": "2026-03-16T04:00:00.000Z",
-      "statutRemise": "remis",
-      "criteres": [
-        {
-          "critereId": "CR1759243306842",
-          "critereNom": "Structure",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 15
-        },
-        {
-          "critereId": "CR1759243331050",
-          "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 20
-        },
-        {
-          "critereId": "CR1759243365467",
-          "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 10
-        },
-        {
-          "critereId": "CR1759243379949",
-          "critereNom": "Nuance",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 25
-        },
-        {
-          "critereId": "CR1759243428715",
-          "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 30
-        }
-      ],
-      "noteFinale": 100,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A5 pour Léa Roy. Niveau global: E",
-      "optionsAffichage": {
-        "description": true,
-        "objectif": true,
-        "tache": true,
-        "adresse": true,
-        "contexte": true
-      },
-      "verrouillee": true
-    },
-    {
-      "id": "EVAL_DEMO_44",
-      "etudiantDA": "2234570",
-      "etudiantNom": "Thomas Côté",
-      "groupe": "9999",
-      "productionId": "A5",
-      "productionNom": "Artefact 5",
-      "grilleId": "GRILLE1759243306842",
-      "grilleNom": "Global-5 FR-HOLIS",
-      "echelleId": "ECH1759264511178",
-      "cartoucheId": "CART_DEMO_2025",
-      "dateEvaluation": "2026-03-16T04:00:00.000Z",
-      "statutRemise": "remis",
-      "criteres": [
-        {
-          "critereId": "CR1759243306842",
-          "critereNom": "Structure",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 15
-        },
-        {
-          "critereId": "CR1759243331050",
-          "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 20
-        },
-        {
-          "critereId": "CR1759243365467",
-          "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 10
-        },
-        {
-          "critereId": "CR1759243379949",
-          "critereNom": "Nuance",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 25
-        },
-        {
-          "critereId": "CR1759243428715",
-          "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 30
-        }
-      ],
-      "noteFinale": 95,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A5 pour Thomas Côté. Niveau global: E",
-      "optionsAffichage": {
-        "description": true,
-        "objectif": true,
-        "tache": true,
-        "adresse": true,
-        "contexte": true
-      },
-      "verrouillee": true
-    },
-    {
-      "id": "EVAL_DEMO_45",
-      "etudiantDA": "2234571",
-      "etudiantNom": "Camille Bouchard",
-      "groupe": "9999",
-      "productionId": "A5",
-      "productionNom": "Artefact 5",
-      "grilleId": "GRILLE1759243306842",
-      "grilleNom": "Global-5 FR-HOLIS",
-      "echelleId": "ECH1759264511178",
-      "cartoucheId": "CART_DEMO_2025",
-      "dateEvaluation": "2026-03-16T04:00:00.000Z",
-      "statutRemise": "remis",
-      "criteres": [
-        {
-          "critereId": "CR1759243306842",
-          "critereNom": "Structure",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 15
-        },
-        {
-          "critereId": "CR1759243331050",
-          "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 20
-        },
-        {
-          "critereId": "CR1759243365467",
-          "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 10
-        },
-        {
-          "critereId": "CR1759243379949",
-          "critereNom": "Nuance",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 25
-        },
-        {
-          "critereId": "CR1759243428715",
-          "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 30
-        }
-      ],
-      "noteFinale": 100,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A5 pour Camille Bouchard. Niveau global: E",
-      "optionsAffichage": {
-        "description": true,
-        "objectif": true,
-        "tache": true,
-        "adresse": true,
-        "contexte": true
-      },
-      "verrouillee": true
-    },
-    {
-      "id": "EVAL_DEMO_46",
-      "etudiantDA": "2234572",
-      "etudiantNom": "Gabriel Lavoie",
-      "groupe": "9999",
-      "productionId": "A5",
-      "productionNom": "Artefact 5",
-      "grilleId": "GRILLE1759243306842",
-      "grilleNom": "Global-5 FR-HOLIS",
-      "echelleId": "ECH1759264511178",
-      "cartoucheId": "CART_DEMO_2025",
-      "dateEvaluation": "2026-03-16T04:00:00.000Z",
-      "statutRemise": "remis",
-      "criteres": [
-        {
-          "critereId": "CR1759243306842",
-          "critereNom": "Structure",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 15
-        },
-        {
-          "critereId": "CR1759243331050",
-          "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 20
-        },
-        {
-          "critereId": "CR1759243365467",
-          "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 10
-        },
-        {
-          "critereId": "CR1759243379949",
-          "critereNom": "Nuance",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 25
-        },
-        {
-          "critereId": "CR1759243428715",
-          "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 30
-        }
-      ],
-      "noteFinale": 91,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A5 pour Gabriel Lavoie. Niveau global: E",
-      "optionsAffichage": {
-        "description": true,
-        "objectif": true,
-        "tache": true,
-        "adresse": true,
-        "contexte": true
-      },
-      "verrouillee": true
-    },
-    {
-      "id": "EVAL_DEMO_47",
-      "etudiantDA": "2234573",
-      "etudiantNom": "Juliette Bergeron",
-      "groupe": "9999",
-      "productionId": "A5",
-      "productionNom": "Artefact 5",
-      "grilleId": "GRILLE1759243306842",
-      "grilleNom": "Global-5 FR-HOLIS",
-      "echelleId": "ECH1759264511178",
-      "cartoucheId": "CART_DEMO_2025",
-      "dateEvaluation": "2026-03-16T04:00:00.000Z",
-      "statutRemise": "remis",
-      "criteres": [
-        {
-          "critereId": "CR1759243306842",
-          "critereNom": "Structure",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 15
-        },
-        {
-          "critereId": "CR1759243331050",
-          "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 20
-        },
-        {
-          "critereId": "CR1759243365467",
-          "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 10
-        },
-        {
-          "critereId": "CR1759243379949",
-          "critereNom": "Nuance",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 25
-        },
-        {
-          "critereId": "CR1759243428715",
-          "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 30
-        }
-      ],
-      "noteFinale": 100,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A5 pour Juliette Bergeron. Niveau global: E",
-      "optionsAffichage": {
-        "description": true,
-        "objectif": true,
-        "tache": true,
-        "adresse": true,
-        "contexte": true
-      },
-      "verrouillee": true
-    },
-    {
-      "id": "EVAL_DEMO_48",
-      "etudiantDA": "2234574",
-      "etudiantNom": "Samuel Morin",
-      "groupe": "9999",
-      "productionId": "A5",
-      "productionNom": "Artefact 5",
-      "grilleId": "GRILLE1759243306842",
-      "grilleNom": "Global-5 FR-HOLIS",
-      "echelleId": "ECH1759264511178",
-      "cartoucheId": "CART_DEMO_2025",
-      "dateEvaluation": "2026-03-16T04:00:00.000Z",
-      "statutRemise": "remis",
-      "criteres": [
-        {
-          "critereId": "CR1759243306842",
-          "critereNom": "Structure",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 15
-        },
-        {
-          "critereId": "CR1759243331050",
-          "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 20
-        },
-        {
-          "critereId": "CR1759243365467",
-          "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 10
-        },
-        {
-          "critereId": "CR1759243379949",
-          "critereNom": "Nuance",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 25
-        },
-        {
-          "critereId": "CR1759243428715",
-          "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 30
-        }
-      ],
-      "noteFinale": 95,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A5 pour Samuel Morin. Niveau global: E",
-      "optionsAffichage": {
-        "description": true,
-        "objectif": true,
-        "tache": true,
-        "adresse": true,
-        "contexte": true
-      },
-      "verrouillee": true
-    },
-    {
-      "id": "EVAL_DEMO_49",
-      "etudiantDA": "2234575",
-      "etudiantNom": "Rosalie Pelletier",
-      "groupe": "9999",
-      "productionId": "A5",
-      "productionNom": "Artefact 5",
-      "grilleId": "GRILLE1759243306842",
-      "grilleNom": "Global-5 FR-HOLIS",
-      "echelleId": "ECH1759264511178",
-      "cartoucheId": "CART_DEMO_2025",
-      "dateEvaluation": "2026-03-16T04:00:00.000Z",
-      "statutRemise": "remis",
-      "criteres": [
-        {
-          "critereId": "CR1759243306842",
-          "critereNom": "Structure",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 15
-        },
-        {
-          "critereId": "CR1759243331050",
-          "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 20
-        },
-        {
-          "critereId": "CR1759243365467",
-          "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 10
-        },
-        {
-          "critereId": "CR1759243379949",
-          "critereNom": "Nuance",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 25
-        },
-        {
-          "critereId": "CR1759243428715",
-          "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 30
-        }
-      ],
-      "noteFinale": 100,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A5 pour Rosalie Pelletier. Niveau global: E",
-      "optionsAffichage": {
-        "description": true,
-        "objectif": true,
-        "tache": true,
-        "adresse": true,
-        "contexte": true
-      },
-      "verrouillee": true
-    },
-    {
-      "id": "EVAL_DEMO_50",
-      "etudiantDA": "2234576",
-      "etudiantNom": "Alexandre Gauthier",
-      "groupe": "9999",
-      "productionId": "A5",
-      "productionNom": "Artefact 5",
-      "grilleId": "GRILLE1759243306842",
-      "grilleNom": "Global-5 FR-HOLIS",
-      "echelleId": "ECH1759264511178",
-      "cartoucheId": "CART_DEMO_2025",
-      "dateEvaluation": "2026-03-16T04:00:00.000Z",
-      "statutRemise": "remis",
-      "criteres": [
-        {
-          "critereId": "CR1759243306842",
-          "critereNom": "Structure",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 15
-        },
-        {
-          "critereId": "CR1759243331050",
-          "critereNom": "Rigueur",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 20
-        },
-        {
-          "critereId": "CR1759243365467",
-          "critereNom": "Plausibilité",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 10
-        },
-        {
-          "critereId": "CR1759243379949",
-          "critereNom": "Nuance",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 25
-        },
-        {
-          "critereId": "CR1759243428715",
-          "critereNom": "Français écrit",
-          "niveauSelectionne": "E",
-          "retroaction": "",
-          "ponderation": 30
-        }
-      ],
-      "noteFinale": 91,
-      "niveauFinal": "E",
-      "retroactionFinale": "Évaluation de A5 pour Alexandre Gauthier. Niveau global: E",
-      "optionsAffichage": {
-        "description": true,
-        "objectif": true,
-        "tache": true,
-        "adresse": true,
-        "contexte": true
-      },
-      "verrouillee": true
+      "verrouillee": true,
+      "coursId": "601-101-h2026-9999"
     }
   ]
 }

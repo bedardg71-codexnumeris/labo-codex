@@ -173,14 +173,14 @@ function chargerInfosSysteme() {
     if (metaElement) {
         const texte = metaElement.textContent;
 
-        // Extraire le numéro de beta (ex: "Beta 90" → "90")
-        const matchBeta = texte.match(/Beta\s+(\d+)/i);
+        // Extraire le numéro de beta (ex: "Beta 90" → "90", "Beta 93.5" → "93.5")
+        const matchBeta = texte.match(/Beta\s+([\d.]+)/i);
         if (matchBeta) {
             versionBeta = `β ${matchBeta[1]}`;
         }
 
-        // Extraire la date (ex: "(5 novembre 2025)" ou "(30 novembre 2025 - Primo Assistant)" → "5 nov. 2025")
-        const matchDate = texte.match(/\((\d+)\s+(\w+)\s+(\d{4})/);
+        // Extraire la date (ex: "10 décembre 2025" ou "(5 novembre 2025)" → "10 déc. 2025")
+        const matchDate = texte.match(/[-\(]?\s*(\d+)\s+(\w+)\s+(\d{4})/);
         if (matchDate) {
             const jour = matchDate[1];
             const mois = matchDate[2];
