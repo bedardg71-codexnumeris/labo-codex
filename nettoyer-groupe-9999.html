@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Nettoyage Groupe 9999</title>
+</head>
+<body>
+    <h1>Script de nettoyage - Groupe 9999</h1>
+    <p>Ce script supprime UNIQUEMENT les données du groupe 9999</p>
+    <button onclick="nettoyerGroupe9999()" style="padding: 10px 20px; font-size: 16px; background: #d32f2f; color: white; border: none; cursor: pointer;">
+        🗑️ Supprimer toutes les données du groupe 9999
+    </button>
+
+    <div id="resultat" style="margin-top: 20px; padding: 10px; background: #f5f5f5;"></div>
+
+    <script src="js/db.js"></script>
+    <script>
+        function nettoyerGroupe9999() {
+            if (!confirm('⚠️ ATTENTION ⚠️\n\nCette action va supprimer TOUTES les données du groupe 9999 :\n• Le cours 601-101-h2026-9999\n• Les 10 étudiants du groupe 9999\n• Toutes les évaluations associées\n• Toutes les présences associées\n\nVos autres données (groupe 00001, etc.) seront PRÉSERVÉES.\n\nContinuer ?')) {
+                return;
+            }
+
+            const resultat = document.getElementById('resultat');
+            resultat.innerHTML = '<h2>Nettoyage en cours...</h2>';
+
+            let rapport = [];
+
+            // 1. Supprimer le cours démo
+            let cours = db.getSync('listeCours', []);
+            const nbCoursAvant = cours.length;
+            cours = cours.filter(c => c.id !== '601-101-h2026-9999' && c.groupe !== '9999');
+            db.setSync('listeCours', cours);
+            rapport.push(`✅ Cours : ${nbCoursAvant - cours.length} supprimé(s)`);
+
+            // 2. Supprimer les étudiants du groupe 9999
+            let etudiants = db.getSync('groupeEtudiants', []);
+            const nbEtudiantsAvant = etudiants.length;
+            etudiants = etudiants.filter(e => e.groupe !== '9999' && e.coursId !== '601-101-h2026-9999');
+            db.setSync('groupeEtudiants', etudiants);
+            rapport.push(`✅ Étudiants : ${nbEtudiantsAvant - etudiants.length} supprimé(s)`);
+
+            // 3. Supprimer les productions du cours démo
+            let productions = db.getSync('productions', []);
+            const nbProductionsAvant = productions.length;
+            productions = productions.filter(p => p.coursId !== '601-101-h2026-9999');
+            db.setSync('productions', productions);
+            rapport.push(`✅ Productions : ${nbProductionsAvant - productions.length} supprimée(s)`);
+
+            // 4. Supprimer les évaluations du groupe démo
+            let evaluations = db.getSync('evaluationsSauvegardees', []);
+            const nbEvalsAvant = evaluations.length;
+            evaluations = evaluations.filter(e => e.coursId !== '601-101-h2026-9999');
+            db.setSync('evaluationsSauvegardees', evaluations);
+            rapport.push(`✅ Évaluations : ${nbEvalsAvant - evaluations.length} supprimée(s)`);
+
+            // 5. Supprimer les présences du groupe démo
+            // Trouver les DA du groupe 9999
+            const dasDemoSupprimes = db.getSync('groupeEtudiants', [])
+                .filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999')
+                .map(e => e.da);
+
+            let presences = db.getSync('presences', []);
+            const nbPresencesAvant = presences.length;
+
+            // Liste des DA du groupe démo (au cas où ils auraient déjà été supprimés)
+            const dasDemo = ['2234567', '2234568', '2234569', '2234570', '2234571',
+                             '2234572', '2234573', '2234574', '2234575', '2234576'];
+
+            presences = presences.filter(p => !dasDemo.includes(p.da) && !dasDemoSupprimes.includes(p.da));
+            db.setSync('presences', presences);
+            rapport.push(`✅ Présences : ${nbPresencesAvant - presences.length} supprimée(s)`);
+
+            // 6. Effacer le flag de démonstration
+            db.setSync('donneesDemo', false);
+            rapport.push(`✅ Flag donneesDemo effacé`);
+
+            // Afficher le rapport
+            resultat.innerHTML = '<h2>✅ Nettoyage terminé !</h2>' +
+                '<ul style="text-align: left; max-width: 500px; margin: 20px auto;">' +
+                rapport.map(r => `<li>${r}</li>`).join('') +
+                '</ul>' +
+                '<p style="margin-top: 20px;"><strong>Rechargez la page pour voir les changements.</strong></p>' +
+                '<button onclick="window.location.reload()" style="padding: 10px 20px; background: #2196F3; color: white; border: none; cursor: pointer; font-size: 16px;">🔄 Recharger la page</button>';
+        }
+
+        // Attendre que db.js soit chargé
+        window.addEventListener('db-ready', function() {
+            console.log('✅ DB prêt pour nettoyage');
+        });
+    </script>
+</body>
+</html>
