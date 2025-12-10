@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 93 - Correctifs export</title>
+    <title>Système de suivi Beta 93.5 - Groupe démo</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2025120908">
@@ -2744,7 +2744,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de gestion de la notation</h1>
                         <p class="meta">
-                            Beta 93 - 9 décembre 2025
+                            Beta 93.5 - 10 décembre 2025
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés"></span>
                         </p>
                     </div>
@@ -4745,6 +4745,9 @@
                     </div>
                     <!-- fin grille cartes métriques -->
 
+                    <!-- ✅ Carte groupe démo supprimée (Beta 93.5) -->
+                    <!-- Le groupe démo est maintenant géré via checkbox dans Réglages → Trimestre -->
+
                     <!-- Carte informations légales -->
                     <div class="carte" style="margin-top: 25px;">
                         <h3 class="carte-titre-bleu">Informations légales et crédits</h3>
@@ -4767,269 +4770,6 @@
                 <!-- fin sous-section reglages-apercu -->
 
                 <!-- Sous-section : Cours -->
-                <div id="reglages-cours" class="sous-section">
-                    <h2 class="titre-avec-emoji-toggles">
-                        <span>Configuration du cours</span>
-                        <span class="titre-emoji-container">
-                            <span class="primo-aide" data-target="conseil-cours">😎</span>
-                        </span>
-                    </h2>
-                    <p class="text-muted">Informations techniques du cours : code, nom, compétences, enseignant·e,
-                        trimestre,
-                        format horaire</p>
-
-                    <!-- Carte Conseil pratique (masquée par défaut) -->
-                    <div id="conseil-cours" class="carte-info-toggle carte-info-conseil" style="display: none;">
-                        <strong>Conseil pratique :</strong>
-                        <ul class="m-0-pl-20-lh">
-                            <li><strong>Cours actif :</strong> Un seul cours peut être actif à la fois. Le cours
-                                actif est utilisé comme référence dans toute l'application</li>
-                            <li><strong>Verrouillage :</strong> Verrouillez un cours terminé pour éviter les
-                                modifications accidentelles</li>
-                            <li><strong>Duplication :</strong> Dupliquez un cours pour créer rapidement une
-                                nouvelle session en modifiant seulement l'année</li>
-                            <li><strong>Code de cours :</strong> Format habituel : XXX-XXX-XX
-                                (département-numéro-pondération)</li>
-                            <li><strong>Format horaire :</strong> Définit comment les heures sont réparties dans
-                                la semaine (utilisé pour le calendrier)</li>
-                        </ul>
-                    </div>
-
-                    <!-- LAYOUT SIDEBAR + ZONE PRINCIPALE (conforme Design System) -->
-                    <div class="layout-sidebar-2col">
-
-                        <!-- SIDEBAR (Gauche) - Liste des cours -->
-                        <div class="sidebar-navigation">
-
-                            <!-- Bouton Consulter bibliothèque -->
-                            <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
-                                <button onclick="ouvrirModalBibliothequeCours()"
-                                        class="btn btn-principal"
-                                        style="width: 100%;"
-                                        title="Consulter la bibliothèque de cours">
-                                    Consulter la bibliothèque
-                                </button>
-                            </div>
-
-                            <!-- Liste des cours (sera remplie par JS) -->
-                            <div class="sidebar-liste">
-                                <div id="listeCoursSidebar">
-                                    <p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">
-                                        Créez un nouveau cours ou puisez dans la bibliothèque
-                                    </p>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <!-- ZONE PRINCIPALE (Droite) - Formulaire -->
-                        <div style="flex: 1; min-width: 0;">
-
-                            <!-- Bouton nouveau cours en haut -->
-                            <div style="margin-bottom: 20px;">
-                                <button onclick="afficherFormCours()"
-                                        id="btnAjouterCours"
-                                        class="btn btn-confirmer">
-                                    + Nouveau cours
-                                </button>
-                            </div>
-
-                            <div class="carte">
-
-                                <!-- Message par défaut (si aucun cours sélectionné) -->
-                                <div id="messageSelectionCours" style="padding: 40px; text-align: center;">
-                                    <p class="text-muted" style="font-size: 1rem;">
-                                        Sélectionnez un cours dans la barre latérale ou créez un nouveau cours
-                                    </p>
-                                </div>
-
-                                <!-- FORMULAIRE D'AJOUT/MODIFICATION (caché par défaut) -->
-                                <div id="formulaireCours" class="form-cache-mt"
-                                     style="padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px; display: none;">
-
-                            <h4 id="titreFormCours" class="titre-bleu-mb-20">
-                                Nouvelle configuration de cours
-                            </h4>
-
-                            <!-- Informations générales -->
-                            <h5 class="sous-titre-section">
-                                Informations générales
-                            </h5>
-                            <div class="grille-4col-form" style="margin-bottom: 20px;">
-                                <div class="groupe-form">
-                                    <label>Code du cours</label>
-                                    <input type="text" id="codeCours" class="controle-form controle-form-compact"
-                                        placeholder="Ex: 601-101-MQ">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Nom du cours</label>
-                                    <input type="text" id="nomCours" class="controle-form controle-form-compact"
-                                        placeholder="Ex: Écriture et littérature">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>N° de la compétence</label>
-                                    <input type="text" id="numeroCompetence" class="controle-form controle-form-compact"
-                                        placeholder="Ex: 4EF0">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Compétence</label>
-                                    <input type="text" id="competence" class="controle-form controle-form-compact"
-                                        placeholder="Ex: Analyser des textes littéraires">
-                                </div>
-                            </div>
-
-                            <div class="groupe-form" class="mb-20">
-                                <label>Éléments de compétence</label>
-                                <textarea id="elementsCompetence" class="controle-form controle-form-compact" rows="4"
-                                    placeholder="• Reconnaître le propos du texte&#10;• Repérer et classer des thèmes et procédés stylistiques&#10;• Choisir les éléments de l'analyse"></textarea>
-                            </div>
-
-                            <!-- Enseignant·e -->
-                            <h5 class="sous-titre-section" style="margin-top: 25px;">
-                                Enseignant·e
-                            </h5>
-                            <!-- Ligne 1: Prénom, Nom, Courriel -->
-                            <div class="grille-3col-form" style="margin-bottom: 15px;">
-                                <div class="groupe-form">
-                                    <label>Prénom</label>
-                                    <input type="text" id="prenomEnseignant" class="controle-form controle-form-compact"
-                                        placeholder="Ex: Grégoire">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Nom</label>
-                                    <input type="text" id="nomEnseignant" class="controle-form controle-form-compact"
-                                        placeholder="Ex: Bédard">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Courriel <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
-                                    <input type="email" id="courrielEnseignant" class="controle-form controle-form-compact"
-                                        placeholder="Ex: prenom.nom@cegep.qc.ca">
-                                </div>
-                            </div>
-
-                            <!-- Ligne 2: Discipline, Département, Local -->
-                            <div class="grille-3col-form" style="margin-bottom: 15px;">
-                                <div class="groupe-form">
-                                    <label>Discipline <span style="color: var(--rouge-erreur); font-weight: normal;">*</span></label>
-                                    <input type="text" id="disciplineEnseignant" class="controle-form controle-form-compact" required
-                                        placeholder="Ex: Littérature, Philosophie">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Département</label>
-                                    <input type="text" id="departement" class="controle-form controle-form-compact"
-                                        placeholder="Ex: Littérature et communication">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Local</label>
-                                    <input type="text" id="local" class="controle-form controle-form-compact" placeholder="Ex: 2314">
-                                </div>
-                            </div>
-
-                            <!-- Ligne 3: Institution, Site web -->
-                            <div class="grille-3col-form" style="margin-bottom: 20px;">
-                                <div class="groupe-form">
-                                    <label>Institution <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
-                                    <input type="text" id="institutionEnseignant" class="controle-form controle-form-compact"
-                                        placeholder="Ex: Cégep de Drummondville">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Site web <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
-                                    <input type="url" id="siteWebEnseignant" class="controle-form controle-form-compact"
-                                        placeholder="Ex: https://monsite.com">
-                                </div>
-                                <div class="groupe-form">
-                                    <!-- Colonne vide pour garder l'alignement -->
-                                </div>
-                            </div>
-
-                            <!-- Session et horaire -->
-                            <h5 class="sous-titre-section" style="margin-top: 25px;">
-                                Session et horaire
-                            </h5>
-                            <div
-                                class="grid-4-gap15-mb20">
-                                <div class="groupe-form">
-                                    <label>Session</label>
-                                    <select id="session" class="controle-form controle-form-compact">
-                                        <option value="H">Hiver</option>
-                                        <option value="A">Automne</option>
-                                    </select>
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Année</label>
-                                    <input type="number" id="annee" class="controle-form controle-form-compact" value="2025" min="2020"
-                                        max="2030">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Heures/semaine</label>
-                                    <input type="number" id="heuresParSemaine" class="controle-form controle-form-compact" value="4" min="1"
-                                        max="10">
-                                </div>
-                                <div class="groupe-form">
-                                    <label>Format horaire</label>
-                                    <select id="formatHoraire" class="controle-form controle-form-compact">
-                                        <option value="1x4">1 période de 4h</option>
-                                        <option value="2x2" selected>2 périodes de 2h</option>
-                                        <option value="4x1">4 périodes de 1h</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Pratique de notation (lecture seule - Single Source of Truth) -->
-                            <h5 class="sous-titre-section" style="margin-top: 25px;">
-                                Pratique de notation
-                            </h5>
-                            <div class="groupe-form" style="margin-bottom: 20px;">
-                                <label>
-                                    Pratique de notation mise en place pour ce cours
-                                    <small style="display: block; color: var(--gris-moyen); font-weight: normal; margin-top: 3px;">
-                                        Cette information est définie dans Réglages → Pratique de notation
-                                    </small>
-                                </label>
-                                <div id="pratiqueCoursAffichage" style="
-                                    padding: 10px 15px;
-                                    background: var(--bleu-tres-pale);
-                                    border: 1px solid var(--bleu-leger);
-                                    border-radius: 6px;
-                                    color: var(--bleu-principal);
-                                    font-weight: 500;
-                                    font-size: 0.95rem;
-                                ">
-                                    <!-- Sera rempli dynamiquement par JavaScript -->
-                                </div>
-                                <div style="margin-top: 10px;">
-                                    <button type="button" class="btn btn-modifier" onclick="naviguerVersPratiqueNotation()" style="font-size: 0.85rem; padding: 6px 12px;">
-                                        Modifier la pratique de notation
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Boutons d'action -->
-                            <div class="btn-groupe btn-groupe-droite"
-                                 style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--bleu-leger);">
-                                <button class="btn btn-annuler" onclick="annulerFormCours()">
-                                    Annuler
-                                </button>
-                                <button class="btn btn-confirmer" onclick="sauvegarderCours()">
-                                    <span id="btnTexteCours">Ajouter</span>
-                                </button>
-                            </div>
-                        </div>
-                                <!-- Fin formulaireCours -->
-
-                            </div>
-                        </div>
-                        <!-- Fin zone principale -->
-
-                    </div>
-                    <!-- Fin layout sidebar + zone principale -->
-
-                </div><!--fin sous-section cours-->
-
-                <!-- SECTION TRIMESTRE (Réglages > Trimestre) -->
-                <!-- Cette section gère les DONNÉES ADMINISTRATIVES du trimestre -->
-                <!-- Module associé: trimestre.js -->
-
                 <div id="reglages-trimestre" class="sous-section">
                     <h2>Configuration du trimestre</h2>
                     <p class="text-muted">
@@ -5278,12 +5018,316 @@
 
                         </div><!-- FIN grille 2 colonnes -->
 
+                        <!-- ✅ NOUVEAU Beta 93.5 : Données de démonstration -->
+                        <div style="margin-top: 30px; padding-top: 25px; border-top: 1px solid #ddd;">
+                            <h5 class="sous-titre-section">
+                                Données de démonstration
+                            </h5>
+                            <p class="text-muted texte-desc" style="margin-bottom: 15px;">
+                                Utilisez le groupe 9999 comme bac à sable pour explorer l'application avec des données réalistes.
+                                Vous pouvez activer ou désactiver ces données à tout moment.
+                            </p>
+
+                            <div class="groupe-form">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="checkboxDonneesDemo"
+                                           onchange="basculerDonneesDemo(this.checked)">
+                                    <span class="checkmark"></span>
+                                    Utiliser les données de démonstration (groupe 9999)
+                                </label>
+                                <small style="display: block; color: var(--gris-moyen); margin-top: 8px; margin-left: 28px;">
+                                    <strong>Contenu :</strong> 10 étudiants • 4 artefacts • 40 évaluations • 8 semaines de données
+                                </small>
+                            </div>
+                        </div>
+
                     </div><!-- FIN carte Aménagements -->
 
                 </div><!-- FIN sous-section reglages-trimestre -->
 
 
                 <!-- Sous-section: Horaire -->
+                <div id="reglages-cours" class="sous-section">
+                    <h2 class="titre-avec-emoji-toggles">
+                        <span>Configuration du cours</span>
+                        <span class="titre-emoji-container">
+                            <span class="primo-aide" data-target="conseil-cours">😎</span>
+                        </span>
+                    </h2>
+                    <p class="text-muted">Informations techniques du cours : code, nom, compétences, enseignant·e,
+                        trimestre,
+                        format horaire</p>
+
+                    <!-- Carte Conseil pratique (masquée par défaut) -->
+                    <div id="conseil-cours" class="carte-info-toggle carte-info-conseil" style="display: none;">
+                        <strong>Conseil pratique :</strong>
+                        <ul class="m-0-pl-20-lh">
+                            <li><strong>Cours actif :</strong> Un seul cours peut être actif à la fois. Le cours
+                                actif est utilisé comme référence dans toute l'application</li>
+                            <li><strong>Verrouillage :</strong> Verrouillez un cours terminé pour éviter les
+                                modifications accidentelles</li>
+                            <li><strong>Duplication :</strong> Dupliquez un cours pour créer rapidement une
+                                nouvelle session en modifiant seulement l'année</li>
+                            <li><strong>Code de cours :</strong> Format habituel : XXX-XXX-XX
+                                (département-numéro-pondération)</li>
+                            <li><strong>Format horaire :</strong> Définit comment les heures sont réparties dans
+                                la semaine (utilisé pour le calendrier)</li>
+                        </ul>
+                    </div>
+
+                    <!-- LAYOUT SIDEBAR + ZONE PRINCIPALE (conforme Design System) -->
+                    <div class="layout-sidebar-2col">
+
+                        <!-- SIDEBAR (Gauche) - Liste des cours -->
+                        <div class="sidebar-navigation">
+
+                            <!-- Bouton Consulter bibliothèque -->
+                            <div class="sidebar-nav-buttons" style="margin-bottom: 15px;">
+                                <button onclick="ouvrirModalBibliothequeCours()"
+                                        class="btn btn-principal"
+                                        style="width: 100%;"
+                                        title="Consulter la bibliothèque de cours">
+                                    Consulter la bibliothèque
+                                </button>
+                            </div>
+
+                            <!-- Liste des cours (sera remplie par JS) -->
+                            <div class="sidebar-liste">
+                                <div id="listeCoursSidebar">
+                                    <p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">
+                                        Créez un nouveau cours ou puisez dans la bibliothèque
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- ZONE PRINCIPALE (Droite) - Formulaire -->
+                        <div style="flex: 1; min-width: 0;">
+
+                            <!-- Bouton nouveau cours en haut -->
+                            <div style="margin-bottom: 20px;">
+                                <button onclick="afficherFormCours()"
+                                        id="btnAjouterCours"
+                                        class="btn btn-confirmer">
+                                    + Nouveau cours
+                                </button>
+                            </div>
+
+                            <div class="carte">
+
+                                <!-- Message par défaut (si aucun cours sélectionné) -->
+                                <div id="messageSelectionCours" style="padding: 40px; text-align: center;">
+                                    <p class="text-muted" style="font-size: 1rem;">
+                                        Sélectionnez un cours dans la barre latérale ou créez un nouveau cours
+                                    </p>
+                                </div>
+
+                                <!-- FORMULAIRE D'AJOUT/MODIFICATION (caché par défaut) -->
+                                <div id="formulaireCours" class="form-cache-mt"
+                                     style="padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px; display: none;">
+
+                            <h4 id="titreFormCours" class="titre-bleu-mb-20">
+                                Nouvelle configuration de cours
+                            </h4>
+
+                            <!-- Informations générales -->
+                            <h5 class="sous-titre-section">
+                                Informations générales
+                            </h5>
+                            <div class="grille-4col-form" style="margin-bottom: 20px;">
+                                <div class="groupe-form">
+                                    <label>Code du cours</label>
+                                    <input type="text" id="codeCours" class="controle-form controle-form-compact"
+                                        placeholder="Ex: 601-101-MQ">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Nom du cours</label>
+                                    <input type="text" id="nomCours" class="controle-form controle-form-compact"
+                                        placeholder="Ex: Écriture et littérature">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>N° de la compétence</label>
+                                    <input type="text" id="numeroCompetence" class="controle-form controle-form-compact"
+                                        placeholder="Ex: 4EF0">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Compétence</label>
+                                    <input type="text" id="competence" class="controle-form controle-form-compact"
+                                        placeholder="Ex: Analyser des textes littéraires">
+                                </div>
+                            </div>
+
+                            <div class="groupe-form" class="mb-20">
+                                <label>Éléments de compétence</label>
+                                <textarea id="elementsCompetence" class="controle-form controle-form-compact" rows="4"
+                                    placeholder="• Reconnaître le propos du texte&#10;• Repérer et classer des thèmes et procédés stylistiques&#10;• Choisir les éléments de l'analyse"></textarea>
+                            </div>
+
+                            <!-- Enseignant·e -->
+                            <h5 class="sous-titre-section" style="margin-top: 25px;">
+                                Enseignant·e
+                            </h5>
+                            <!-- Ligne 1: Prénom, Nom, Courriel -->
+                            <div class="grille-3col-form" style="margin-bottom: 15px;">
+                                <div class="groupe-form">
+                                    <label>Prénom</label>
+                                    <input type="text" id="prenomEnseignant" class="controle-form controle-form-compact"
+                                        placeholder="Ex: Grégoire">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Nom</label>
+                                    <input type="text" id="nomEnseignant" class="controle-form controle-form-compact"
+                                        placeholder="Ex: Bédard">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Courriel <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
+                                    <input type="email" id="courrielEnseignant" class="controle-form controle-form-compact"
+                                        placeholder="Ex: prenom.nom@cegep.qc.ca">
+                                </div>
+                            </div>
+
+                            <!-- Ligne 2: Discipline, Département, Local -->
+                            <div class="grille-3col-form" style="margin-bottom: 15px;">
+                                <div class="groupe-form">
+                                    <label>Discipline <span style="color: var(--rouge-erreur); font-weight: normal;">*</span></label>
+                                    <input type="text" id="disciplineEnseignant" class="controle-form controle-form-compact" required
+                                        placeholder="Ex: Littérature, Philosophie">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Département</label>
+                                    <input type="text" id="departement" class="controle-form controle-form-compact"
+                                        placeholder="Ex: Littérature et communication">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Local</label>
+                                    <input type="text" id="local" class="controle-form controle-form-compact" placeholder="Ex: 2314">
+                                </div>
+                            </div>
+
+                            <!-- Ligne 3: Institution, Site web -->
+                            <div class="grille-3col-form" style="margin-bottom: 20px;">
+                                <div class="groupe-form">
+                                    <label>Institution <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
+                                    <input type="text" id="institutionEnseignant" class="controle-form controle-form-compact"
+                                        placeholder="Ex: Cégep de Drummondville">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Site web <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
+                                    <input type="url" id="siteWebEnseignant" class="controle-form controle-form-compact"
+                                        placeholder="Ex: https://monsite.com">
+                                </div>
+                                <div class="groupe-form">
+                                    <!-- Colonne vide pour garder l'alignement -->
+                                </div>
+                            </div>
+
+                            <!-- Trimestre (Beta 93.5 - Association Trimestre ↔ Cours) -->
+                            <h5 class="sous-titre-section" style="margin-top: 25px;">
+                                Trimestre
+                            </h5>
+                            <div class="groupe-form" style="margin-bottom: 20px;">
+                                <label>
+                                    Trimestre associé
+                                    <span style="color: var(--rouge-erreur); font-weight: normal;">*</span>
+                                </label>
+                                <select id="trimestreId" class="controle-form controle-form-compact" required>
+                                    <option value="">-- Sélectionner un trimestre --</option>
+                                    <!-- Options générées dynamiquement par cours.js -->
+                                </select>
+                                <small style="display: block; color: var(--gris-moyen); margin-top: 5px;">
+                                    Chaque cours doit être associé à un trimestre configuré dans Réglages → Trimestre
+                                </small>
+                            </div>
+
+                            <!-- Session et horaire -->
+                            <h5 class="sous-titre-section" style="margin-top: 25px;">
+                                Session et horaire
+                            </h5>
+                            <div
+                                class="grid-4-gap15-mb20">
+                                <div class="groupe-form">
+                                    <label>Session</label>
+                                    <select id="session" class="controle-form controle-form-compact">
+                                        <option value="H">Hiver</option>
+                                        <option value="A">Automne</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Année</label>
+                                    <input type="number" id="annee" class="controle-form controle-form-compact" value="2025" min="2020"
+                                        max="2030">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Heures/semaine</label>
+                                    <input type="number" id="heuresParSemaine" class="controle-form controle-form-compact" value="4" min="1"
+                                        max="10">
+                                </div>
+                                <div class="groupe-form">
+                                    <label>Format horaire</label>
+                                    <select id="formatHoraire" class="controle-form controle-form-compact">
+                                        <option value="1x4">1 période de 4h</option>
+                                        <option value="2x2" selected>2 périodes de 2h</option>
+                                        <option value="4x1">4 périodes de 1h</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Pratique de notation (lecture seule - Single Source of Truth) -->
+                            <h5 class="sous-titre-section" style="margin-top: 25px;">
+                                Pratique de notation
+                            </h5>
+                            <div class="groupe-form" style="margin-bottom: 20px;">
+                                <label>
+                                    Pratique de notation mise en place pour ce cours
+                                    <small style="display: block; color: var(--gris-moyen); font-weight: normal; margin-top: 3px;">
+                                        Cette information est définie dans Réglages → Pratique de notation
+                                    </small>
+                                </label>
+                                <div id="pratiqueCoursAffichage" style="
+                                    padding: 10px 15px;
+                                    background: var(--bleu-tres-pale);
+                                    border: 1px solid var(--bleu-leger);
+                                    border-radius: 6px;
+                                    color: var(--bleu-principal);
+                                    font-weight: 500;
+                                    font-size: 0.95rem;
+                                ">
+                                    <!-- Sera rempli dynamiquement par JavaScript -->
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <button type="button" class="btn btn-modifier" onclick="naviguerVersPratiqueNotation()" style="font-size: 0.85rem; padding: 6px 12px;">
+                                        Modifier la pratique de notation
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Boutons d'action -->
+                            <div class="btn-groupe btn-groupe-droite"
+                                 style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--bleu-leger);">
+                                <button class="btn btn-annuler" onclick="annulerFormCours()">
+                                    Annuler
+                                </button>
+                                <button class="btn btn-confirmer" onclick="sauvegarderCours()">
+                                    <span id="btnTexteCours">Ajouter</span>
+                                </button>
+                            </div>
+                        </div>
+                                <!-- Fin formulaireCours -->
+
+                            </div>
+                        </div>
+                        <!-- Fin zone principale -->
+
+                    </div>
+                    <!-- Fin layout sidebar + zone principale -->
+
+                </div><!--fin sous-section cours-->
+
+                <!-- SECTION TRIMESTRE (Réglages > Trimestre) -->
+                <!-- Cette section gère les DONNÉES ADMINISTRATIVES du trimestre -->
+                <!-- Module associé: trimestre.js -->
+
                 <div id="reglages-horaire" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration de l'horaire</span>
@@ -10218,13 +10262,16 @@ Exemple :
     <script src="libs/chartjs-plugin-annotation.min.js"></script>
 
     <!-- PRIORITÉ 1: Fondations -->
-    <script src="js/config.js"></script>
+    <script src="js/config.js?v=2025121004"></script>
     <script src="js/navigation.js?v=2025120601"></script>
     <script src="js/modes.js?v=2025120906"></script>
-    <script src="js/donnees-demo.js?v=2025120905"></script>
+    <script src="js/donnees-demo.js?v=2025121009"></script>
+
+    <!-- ✅ NOUVEAU Beta 93.5 : Pack de démarrage (groupe 9999) -->
+    <script src="js/pack-demarrage.js"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
-    <script src="js/trimestre.js?v=2025111325"></script>
+    <script src="js/trimestre.js?v=2025121011"></script>
     <script src="js/etudiants.js?v=2025120901"></script>
     <script src="js/productions-bibliotheque.js?v=2025120826"></script>
     <script src="js/productions.js?v=2025120826"></script>
@@ -10234,7 +10281,7 @@ Exemple :
     <script src="js/echelles.js?v=2025120827"></script>
     <script src="js/cartouches-bibliotheque.js?v=2025120827"></script>
     <script src="js/cartouches.js?v=2025120827"></script>
-    <script src="js/cours.js?v=2025120901"></script>
+    <script src="js/cours.js?v=2025121003"></script>
     <script src="js/contexte.js?v=2025120907"></script>
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
@@ -10260,7 +10307,7 @@ Exemple :
     <script src="js/cc-license.js?v=2025120118"></script>
 
     <!-- Interface de gestion des pratiques configurables -->
-    <script src="js/pratiques.js?v=2025120908"></script>
+    <script src="js/pratiques.js?v=2025121020"></script>
     <script src="js/objectifs.js?v=2025120124"></script>
 
     <script src="js/portfolio.js?v=2025120908"></script>
@@ -10269,21 +10316,21 @@ Exemple :
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025120703"></script>
     <script src="js/profil-etudiant.js?v=2025120808"></script>
-    <script src="js/presences-apercu.js?v=2025111029"></script>
+    <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
 
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=2025120201"></script>
     <script src="js/horaire.js?v=2025120601"></script>
     <script src="js/groupe.js?v=2025120208"></script>
-    <script src="js/interventions.js?v=2025120125"></script>
+    <script src="js/interventions.js?v=2025121015"></script>
 
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
     <script src="js/import-export.js?v=2025120608"></script>
-    <script src="js/statistiques.js?v=2025113016"></script>
+    <script src="js/statistiques.js?v=2025121001"></script>
     <script src="js/liste-evaluations.js?v=2025120207"></script>
     <script src="js/snapshots.js?v=2025120803"></script>
-    <script src="js/graphiques-progression.js?v=2025120804"></script>
+    <script src="js/graphiques-progression.js?v=2025121019"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2025113013"></script>
@@ -10302,8 +10349,11 @@ Exemple :
     <!-- TUTORIEL INTERACTIF - Guide après données démo (Beta 92) -->
     <script src="js/tutoriel-interactif.js?v=2025120102"></script>
 
+    <!-- MIGRATIONS BETA 93.5 - Ajout coursId aux données (Beta 93.5) -->
+    <script src="js/migrations.js?v=2025121101"></script>
+
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
-    <script src="js/main.js?v=2025120901"></script>
+    <script src="js/main.js?v=2025121006"></script>
 
     <!-- Script de gestion du modal des nouveautés -->
     <script>

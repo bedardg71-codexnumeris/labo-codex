@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Vérification Calendrier</title>
+</head>
+<body>
+    <h1>Vérification du calendrier</h1>
+    <button onclick="verifier()" style="padding: 10px 20px; font-size: 16px; background: #2196F3; color: white; border: none; cursor: pointer; margin-right: 10px;">
+        🔍 Analyser le calendrier
+    </button>
+    <button onclick="verifierPresences()" style="padding: 10px 20px; font-size: 16px; background: #4CAF50; color: white; border: none; cursor: pointer;">
+        📋 Vérifier les présences
+    </button>
+
+    <div id="resultat" style="margin-top: 20px; padding: 10px; background: #f5f5f5; font-family: monospace;"></div>
+
+    <script src="js/db.js"></script>
+    <script>
+        function verifier() {
+            const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+            const joursCours = [];
+            const joursReprise = [];
+            const semainesUniques = new Set();
+
+            Object.keys(calendrier).sort().forEach(date => {
+                const jour = calendrier[date];
+
+                if (jour.statut === 'cours') {
+                    joursCours.push({
+                        date,
+                        semaine: jour.numeroSemaine,
+                        jour: jour.numeroJour,
+                        jourSemaine: jour.jourSemaine
+                    });
+                    if (jour.numeroSemaine) {
+                        semainesUniques.add(jour.numeroSemaine);
+                    }
+                }
+
+                if (jour.statut === 'reprise') {
+                    joursReprise.push({
+                        date,
+                        semaine: jour.numeroSemaine,
+                        description: jour.description
+                    });
+                }
+            });
+
+            let html = '<h2>📊 Analyse du calendrier</h2>';
+            html += '<p><strong>Total jours de cours :</strong> ' + joursCours.length + '</p>';
+            html += '<p><strong>Total jours de reprise :</strong> ' + joursReprise.length + '</p>';
+            html += '<p><strong>Total jours (cours + reprise) :</strong> ' + (joursCours.length + joursReprise.length) + '</p>';
+            html += '<p><strong>Semaines uniques :</strong> ' + semainesUniques.size + '</p>';
+            html += '<p><strong>Théorique (15 sem × 2) :</strong> 30 jours</p>';
+
+            html += '<h3>📅 Liste des jours de cours</h3>';
+            html += '<table border="1" cellpadding="5" style="border-collapse: collapse;">';
+            html += '<tr><th>Date</th><th>Jour</th><th>Semaine</th><th>Jour #</th></tr>';
+            joursCours.forEach(j => {
+                html += '<tr><td>' + j.date + '</td><td>' + j.jourSemaine + '</td><td>S' + j.semaine + '</td><td>J' + j.jour + '</td></tr>';
+            });
+            html += '</table>';
+
+            if (joursReprise.length > 0) {
+                html += '<h3>🔄 Liste des reprises</h3>';
+                html += '<table border="1" cellpadding="5" style="border-collapse: collapse;">';
+                html += '<tr><th>Date</th><th>Semaine</th><th>Description</th></tr>';
+                joursReprise.forEach(j => {
+                    html += '<tr><td>' + j.date + '</td><td>S' + j.semaine + '</td><td>' + j.description + '</td></tr>';
+                });
+                html += '</table>';
+            }
+
+            document.getElementById('resultat').innerHTML = html;
+        }
+
+        function verifierPresences() {
+            const presences = JSON.parse(localStorage.getItem('presences') || '[]');
+            const calendrier = JSON.parse(localStorage.getItem('calendrierComplet') || '{}');
+            const datesPresences = new Set();
+            const datesNonCours = [];
+
+            presences.forEach(p => {
+                if (p.date) {
+                    datesPresences.add(p.date);
+                }
+            });
+
+            const datesSorted = Array.from(datesPresences).sort();
+
+            let html = '<h2>📋 Analyse des présences</h2>';
+            html += '<p><strong>Dates uniques avec présences :</strong> ' + datesSorted.length + '</p>';
+
+            html += '<h3>📅 Liste des dates de présences</h3>';
+            html += '<table border="1" cellpadding="5" style="border-collapse: collapse;">';
+            html += '<tr><th>Date</th><th>Dans calendrier?</th><th>Statut</th></tr>';
+
+            datesSorted.forEach(date => {
+                const infosJour = calendrier[date];
+                const dansCal = infosJour ? 'Oui' : 'NON';
+                const statut = infosJour ? infosJour.statut : '—';
+                const style = (!infosJour || (statut !== 'cours' && statut !== 'reprise')) ? 'background: #ffcccc;' : '';
+
+                html += '<tr style="' + style + '"><td>' + date + '</td><td>' + dansCal + '</td><td>' + statut + '</td></tr>';
+
+                if (!infosJour || (statut !== 'cours' && statut !== 'reprise')) {
+                    datesNonCours.push(date);
+                }
+            });
+            html += '</table>';
+
+            if (datesNonCours.length > 0) {
+                html += '<p style="color: red;"><strong>⚠️ PROBLÈME : ' + datesNonCours.length + ' date(s) de présences ne correspondent pas à un jour de cours :</strong></p>';
+                html += '<ul>';
+                datesNonCours.forEach(d => html += '<li>' + d + '</li>');
+                html += '</ul>';
+            }
+
+            document.getElementById('resultat').innerHTML = html;
+        }
+
+        window.addEventListener('db-ready', function() {
+            console.log('✅ DB prêt');
+        });
+    </script>
+</body>
+</html>

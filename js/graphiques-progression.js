@@ -403,6 +403,16 @@ function creerAnnotationsZones() {
  */
 function creerGraphiqueGroupeMoyennes(canvasId) {
     try {
+        // Détruire le graphique existant si présent (évite l'erreur "Canvas already in use")
+        const canvas = document.getElementById(canvasId);
+        if (canvas) {
+            const existingChart = Chart.getChart(canvas);
+            if (existingChart) {
+                existingChart.destroy();
+                console.log('🗑️ Graphique existant détruit');
+            }
+        }
+
         // Récupérer tous les snapshots hebdomadaires
         const snapshots = obtenirSnapshotsHebdomadaires();
 
@@ -431,8 +441,7 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
         const donneesP = snapshots.map(s => s.groupe.moyenneP !== null && s.groupe.moyenneP !== 0 ? (s.groupe.moyenneP / 100) + OFFSET_VISUEL.P : null);
         const donneesE = snapshots.map(s => s.groupe.moyenneE !== null && s.groupe.moyenneE !== 0 ? s.groupe.moyenneE + OFFSET_VISUEL.E : null);
 
-        // Obtenir le canvas
-        const canvas = document.getElementById(canvasId);
+        // Vérifier que le canvas existe toujours (déjà récupéré en haut de la fonction)
         if (!canvas) {
             console.error(`Canvas ${canvasId} introuvable`);
             return null;
