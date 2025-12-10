@@ -4189,7 +4189,7 @@ window.exporterPratiqueVersJSON = exporterPratiqueVersJSON;
 window.creerNouvellePratique = creerNouvellePratique;
 window.importerPratiqueJSON = importerPratiqueJSON;
 window.traiterImportPratique = traiterImportPratique;
-window.afficherPratiquesPredefines = afficherPratiquesPredefines;
+// window.afficherPratiquesPredefines = afficherPratiquesPredefines; // Fonction supprimée
 
 // Wizard de création de pratique
 /* ===============================

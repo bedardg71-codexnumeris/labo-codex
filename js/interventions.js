@@ -1414,16 +1414,18 @@ function transfererPresencesVersModule(interventionId) {
     const dureeIntervention = intervention.duree || 2;
 
     // RÈGLE IMPORTANTE :
-    // - Niveau 2 (préventif en classe) : Créer entrée pour TOUS (absents = motivés)
-    // - Niveau 3 (intensif hors classe) : Créer entrée UNIQUEMENT pour participants
+    // - Niveau 2 (préventif en classe) : Si checkbox cochée, créer entrée pour TOUS (absents = motivés)
+    // - Niveau 3 (intensif hors classe) : Si checkbox cochée, créer entrée pour TOUS (absents = motivés)
+    // - Si checkbox NON cochée : Créer entrée UNIQUEMENT pour participants
     const estNiveau3 = intervention.niveauRai === 3;
+    const marquerMotives = intervention.marquerNonParticipantsMotives === true;
 
     etudiants.forEach(etudiant => {
         const estPresent = intervention.etudiants.includes(etudiant.da);
 
-        // Pour interventions niveau 3 : ignorer les non-participants
-        if (estNiveau3 && !estPresent) {
-            console.log(`   ⊘ ${etudiant.prenom} ${etudiant.nom}: NON CONCERNÉ (intervention individuelle)`);
+        // Si checkbox NON cochée : ignorer les non-participants (pas d'entrée de présence créée)
+        if (!marquerMotives && !estPresent) {
+            console.log(`   ⊘ ${etudiant.prenom} ${etudiant.nom}: NON CONCERNÉ (checkbox non cochée)`);
             return; // Ne pas créer d'entrée de présence
         }
 

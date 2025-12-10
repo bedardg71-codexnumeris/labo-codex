@@ -156,10 +156,23 @@ function calculerHeuresManquees(presences, etudiants) {
  */
 function calculerSeancesCompletees(presences) {
     const datesUniques = new Set();
+    const aujourdhui = new Date().toISOString().split('T')[0];
+    const calendrier = db.getSync('calendrierComplet', {});
 
     presences.forEach(p => {
         if (p.date) {
-            datesUniques.add(p.date);
+            // Ne compter que les dates de cours déjà passées ou d'aujourd'hui
+            if (p.date <= aujourdhui) {
+                // Vérifier que c'est un vrai jour de cours dans le calendrier
+                const infosJour = calendrier[p.date];
+                if (infosJour && (infosJour.statut === 'cours' || infosJour.statut === 'reprise')) {
+                    // Exclure les présences facultatives (rattrapages individuels RàI)
+                    // qui ne correspondent pas à une séance officielle du groupe
+                    if (!p.facultatif) {
+                        datesUniques.add(p.date);
+                    }
+                }
+            }
         }
     });
 
@@ -167,23 +180,38 @@ function calculerSeancesCompletees(presences) {
 }
 
 /**
- * Calcule le nombre total de séances prévues
+ * Calcule le nombre total de séances prévues (jusqu'à aujourd'hui inclusivement)
  * @returns {number} Total de séances
  */
 function calculerTotalSeances() {
     try {
         const calendrier = db.getSync('calendrierComplet', {});
-        const semainesUniques = new Set();
+        const seancesHoraire = db.getSync('seancesHoraire', []);
+        const aujourdhui = new Date().toISOString().split('T')[0];
 
-        Object.values(calendrier).forEach(jour => {
-            // Compter les semaines uniques avec cours ou reprises
-            if ((jour.statut === 'cours' || jour.statut === 'reprise') && jour.numeroSemaine) {
-                semainesUniques.add(jour.numeroSemaine);
+        // Obtenir les jours de la semaine où il y a cours (ex: ["Lundi", "Mercredi"])
+        const joursCours = seancesHoraire.map(seance => seance.jour);
+
+        let totalJoursCours = 0;
+
+        // Compter les jours de cours et reprises jusqu'à aujourd'hui
+        // en filtrant uniquement les jours où ce groupe a cours
+        Object.entries(calendrier).forEach(([date, jour]) => {
+            if ((jour.statut === 'cours' || jour.statut === 'reprise') && date <= aujourdhui) {
+                // Pour les reprises, vérifier le jour remplacé (ex: cours du lundi → vendredi)
+                // Pour les cours normaux, vérifier le jour de la semaine
+                const jourAVerifier = (jour.statut === 'reprise' && jour.jourRemplace)
+                    ? jour.jourRemplace
+                    : jour.jourSemaine;
+
+                // Ne compter que si c'est un jour où ce groupe a cours
+                if (joursCours.includes(jourAVerifier)) {
+                    totalJoursCours++;
+                }
             }
         });
 
-        // Retourner le nombre de semaines × 2 (2 séances par semaine)
-        return semainesUniques.size * 2;
+        return totalJoursCours;
     } catch (error) {
         console.warn('⚠️ Erreur calcul total séances:', error);
         return 0;
