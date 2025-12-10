@@ -113,6 +113,66 @@ function migrerCoursDansBibliotheque() {
     return nbMigres;
 }
 
+/* ===============================
+   HELPER: Peupler sélecteur trimestre (Beta 93.5)
+   =============================== */
+/**
+ * Peuple le sélecteur de trimestre dans le formulaire cours
+ *
+ * BETA 93.5: Version simplifiée - génère options depuis cours existants
+ * BETA 94: Lira depuis une liste de trimestres configurés
+ */
+function peupleSelecteurTrimestre() {
+    const select = document.getElementById('trimestreId');
+    if (!select) return;
+
+    const cours = db.getSync('listeCours', []);
+
+    // Extraire trimestres uniques
+    const trimestres = new Set();
+    cours.forEach(c => {
+        if (c.trimestreId) {
+            trimestres.add(c.trimestreId);
+        }
+    });
+
+    // Effacer options existantes (sauf la première)
+    while (select.options.length > 1) {
+        select.remove(1);
+    }
+
+    // Ajouter les trimestres existants
+    Array.from(trimestres).sort().forEach(tId => {
+        const option = document.createElement('option');
+        option.value = tId;
+
+        // Formater le label: "h2026" → "Hiver 2026"
+        const session = tId.charAt(0).toUpperCase() === 'H' ? 'Hiver' : 'Automne';
+        const annee = tId.substring(1);
+        option.textContent = `${session} ${annee}`;
+
+        select.appendChild(option);
+    });
+
+    // Si aucun trimestre, ajouter un par défaut depuis le calendrier
+    if (trimestres.size === 0) {
+        const calendrier = db.getSync('calendrierComplet', {});
+        if (calendrier.dateDebut) {
+            // Extraire année depuis dateDebut (format: YYYY-MM-DD)
+            const annee = calendrier.dateDebut.substring(0, 4);
+            // Déduire session: Janvier-Juin = Hiver, Juillet-Décembre = Automne
+            const mois = parseInt(calendrier.dateDebut.substring(5, 7));
+            const session = mois <= 6 ? 'h' : 'a';
+            const trimestreId = session + annee;
+
+            const option = document.createElement('option');
+            option.value = trimestreId;
+            option.textContent = `${session === 'h' ? 'Hiver' : 'Automne'} ${annee}`;
+            select.appendChild(option);
+        }
+    }
+}
+
 /**
  * Initialise le module de gestion des cours
  * Appelée automatiquement par 99-main.js au chargement
@@ -474,6 +534,9 @@ function afficherFormCours(id = null) {
     formulaire.style.display = 'block';
     if (btnAjouter) btnAjouter.style.display = 'none';
 
+    // Peupler le sélecteur de trimestre (Beta 93.5)
+    peupleSelecteurTrimestre();
+
     // Afficher la pratique active en lecture seule (Single Source of Truth)
     afficherPratiqueEnLectureSeule();
     
@@ -506,6 +569,10 @@ function afficherFormCours(id = null) {
             document.getElementById('annee').value = c.annee || '2025';
             document.getElementById('heuresParSemaine').value = c.heuresParSemaine || '4';
             document.getElementById('formatHoraire').value = c.formatHoraire || '2x2';
+            // Beta 93.5: Charger trimestreId
+            if (document.getElementById('trimestreId')) {
+                document.getElementById('trimestreId').value = c.trimestreId || '';
+            }
 
             // La pratique est affichée en lecture seule (pas modifiable ici)
         }
@@ -645,6 +712,7 @@ function sauvegarderCours() {
         heuresParSemaine: document.getElementById('heuresParSemaine').value,
         formatHoraire: document.getElementById('formatHoraire').value,
         pratiqueId: pratiqueId, // ✅ NOUVEAU : Association à une pratique
+        trimestreId: document.getElementById('trimestreId')?.value || '', // ✅ BETA 93.5 : Association à un trimestre
         dansBibliotheque: true, // ✅ NOUVEAU : Visible dans sidebar par défaut
         verrouille: false,
         actif: false,
@@ -824,18 +892,108 @@ function activerCours(id) {
 function supprimerCours(id) {
     const cours = db.getSync('listeCours', []);
     const coursASupprimer = cours.find(c => c.id === id);
-    
-    if (coursASupprimer && coursASupprimer.verrouille) {
+
+    if (!coursASupprimer) {
+        alert('Cours introuvable');
+        return;
+    }
+
+    if (coursASupprimer.verrouille) {
         alert('Déverrouillez ce cours (🔓) avant de le supprimer');
         return;
     }
-    
-    if (confirm(`Êtes-vous sûr de vouloir supprimer le cours ${coursASupprimer?.codeCours} ?`)) {
-        const coursFiltre = cours.filter(c => c.id !== id);
-        db.setSync('listeCours', coursFiltre);
-        afficherTableauCours();
-        afficherNotificationSucces('Cours supprimé');
+
+    // ===============================
+    // COMPTER LES DONNÉES LIÉES (Beta 93.5)
+    // ===============================
+    const etudiants = db.getSync('groupeEtudiants', []);
+    const productions = db.getSync('productions', []);
+    const evaluations = db.getSync('evaluationsDetaillees', []);
+    const presences = db.getSync('presences', {});
+
+    const nbEtudiants = etudiants.filter(e => e.coursId === id).length;
+    const nbProductions = productions.filter(p => p.coursId === id).length;
+    const productionsIds = productions.filter(p => p.coursId === id).map(p => p.id);
+    const nbEvaluations = evaluations.filter(e => productionsIds.includes(e.productionId)).length;
+    const nbPresences = Object.keys(presences).filter(date => presences[date].coursId === id).length;
+
+    // ===============================
+    // CONFIRMATION DÉTAILLÉE (Beta 93.5)
+    // ===============================
+    const message = `Supprimer le cours ${coursASupprimer.sigle || coursASupprimer.codeCours} - ${coursASupprimer.titre || coursASupprimer.nomCours} (Groupe ${coursASupprimer.groupe}) ?\n\n` +
+        `Cette action supprimera :\n` +
+        `• ${nbEtudiants} étudiant(s)\n` +
+        `• ${nbProductions} production(s)\n` +
+        `• ${nbEvaluations} évaluation(s)\n` +
+        `• ${nbPresences} date(s) de présences\n\n` +
+        `⚠️ Cette action est IRRÉVERSIBLE !`;
+
+    if (!confirm(message)) return;
+
+    // ===============================
+    // SUPPRESSION EN CASCADE (Beta 93.5)
+    // ===============================
+
+    // 1. Supprimer les étudiants du cours
+    const nouveauxEtudiants = etudiants.filter(e => e.coursId !== id);
+    db.setSync('groupeEtudiants', nouveauxEtudiants);
+    console.log(`✅ [Suppression] ${nbEtudiants} étudiant(s) supprimé(s)`);
+
+    // 2. Supprimer les productions du cours
+    const nouvellesProductions = productions.filter(p => p.coursId !== id);
+    db.setSync('productions', nouvellesProductions);
+    console.log(`✅ [Suppression] ${nbProductions} production(s) supprimée(s)`);
+
+    // 3. Supprimer les évaluations liées aux productions supprimées
+    const nouvellesEvaluations = evaluations.filter(e => !productionsIds.includes(e.productionId));
+    db.setSync('evaluationsDetaillees', nouvellesEvaluations);
+    console.log(`✅ [Suppression] ${nbEvaluations} évaluation(s) supprimée(s)`);
+
+    // 4. Supprimer les présences du cours
+    const nouvellesPresences = {};
+    Object.keys(presences).forEach(date => {
+        if (presences[date].coursId !== id) {
+            nouvellesPresences[date] = presences[date];
+        }
+    });
+    db.setSync('presences', nouvellesPresences);
+    console.log(`✅ [Suppression] ${nbPresences} date(s) de présences supprimée(s)`);
+
+    // 5. Supprimer le cours lui-même
+    const nouveauxCours = cours.filter(c => c.id !== id);
+
+    // 6. Activer un autre cours si nécessaire
+    if (coursASupprimer.actif && nouveauxCours.length > 0) {
+        nouveauxCours[0].actif = true;
+        console.log(`✅ [Suppression] Cours ${nouveauxCours[0].id} activé automatiquement`);
     }
+
+    db.setSync('listeCours', nouveauxCours);
+
+    // ✅ BETA 93.5: Si suppression du groupe démo (9999), mémoriser le choix
+    if (id === '601-101-h2026-9999' || coursASupprimer.groupe === '9999') {
+        db.setSync('groupeDemoSupprime', true);
+        console.log('✅ [Suppression] Groupe démo supprimé - préférence mémorisée');
+    }
+
+    // 7. Rafraîchir l'affichage
+    afficherTableauCours();
+    afficherNotificationSucces('Cours et toutes ses données supprimés !');
+
+    // 8. Recharger les vues si une fonction globale existe
+    if (typeof rafraichirToutesLesVues === 'function') {
+        rafraichirToutesLesVues();
+    } else {
+        // Sinon, recharger manuellement les principales vues
+        if (typeof afficherListeEtudiants === 'function') {
+            afficherListeEtudiants();
+        }
+        if (typeof afficherTableauProductions === 'function') {
+            afficherTableauProductions();
+        }
+    }
+
+    console.log(`✅ [Suppression] Cours ${id} et toutes ses données supprimés avec succès`);
 }
 
 /* ===============================

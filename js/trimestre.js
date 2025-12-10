@@ -161,7 +161,28 @@ function initialiserModuleTrimestre() {
     // Afficher les statistiques
     afficherStatistiquesTrimestre();
 
+    // ✅ Beta 93.5 : Charger l'état de la checkbox données démo
+    chargerEtatCheckboxDemo();
+
     console.log('   ✅ Module Trimestre initialisé avec calendrier complet');
+}
+
+/**
+ * Charge l'état initial de la checkbox données de démonstration
+ * Vérifie si le groupe 9999 existe pour déterminer l'état
+ */
+function chargerEtatCheckboxDemo() {
+    const checkbox = document.getElementById('checkboxDonneesDemo');
+    if (!checkbox) return;
+
+    // Vérifier si le groupe 9999 existe
+    const cours = db.getSync('listeCours', []);
+    const groupeDemo = cours.find(c => c.id === '601-101-h2026-9999' || c.groupe === '9999');
+
+    // Cocher la checkbox si le groupe existe
+    checkbox.checked = !!groupeDemo;
+
+    console.log(`   → Checkbox données démo: ${checkbox.checked ? 'cochée' : 'décochée'}`);
 }
 
 /* ===============================
@@ -1038,8 +1059,285 @@ function obtenirInfosJour(date) {
 }
 
 /* ===============================
+   📊 FONCTION: Génération dynamique présences démo
+   Beta 93.5 - Pattern 92% d'assiduité
+   =============================== */
+
+/**
+ * Génère dynamiquement les présences pour le groupe 9999
+ * Pattern : 92% d'assiduité répartie de façon réaliste
+ *
+ * @param {Array} etudiants - Liste des étudiants du groupe 9999
+ * @returns {Array} Présences générées
+ */
+function genererPresencesDemo(etudiants) {
+    const presences = [];
+    const calendrier = db.getSync('calendrierComplet', {});
+
+    // Récupérer le nombre d'heures par séance depuis le cours
+    const cours = db.getSync('listeCours', []).find(c => c.id === '601-101-h2026-9999');
+    const heuresParSeance = cours?.heuresHebdo || 4;
+
+    // Extraire les jours de cours
+    const joursCours = Object.keys(calendrier)
+        .filter(date => calendrier[date].statut === 'cours')
+        .sort();
+
+    if (joursCours.length === 0) {
+        console.log('⚠️ [Démo] Aucun jour de cours dans le calendrier');
+        return presences;
+    }
+
+    console.log(`📊 [Démo] Génération présences : ${joursCours.length} jours de cours`);
+
+    // Pour chaque étudiant, générer un pattern d'assiduité de 92%
+    etudiants.forEach((etudiant, index) => {
+        const nbAbsences = Math.round(joursCours.length * 0.08); // 8% d'absences = 92% de présence
+
+        // Générer des absences aléatoires mais réalistes
+        const joursAbsence = new Set();
+
+        // Pattern réaliste : quelques absences en début de session, quelques en fin
+        // et quelques éparpillées au milieu
+        const patterns = [
+            Math.floor(joursCours.length * 0.1),  // Début (10%)
+            Math.floor(joursCours.length * 0.5),  // Milieu (50%)
+            Math.floor(joursCours.length * 0.9)   // Fin (90%)
+        ];
+
+        for (let i = 0; i < nbAbsences; i++) {
+            let indexAbsence;
+            if (i < patterns.length) {
+                // Utiliser les patterns prédéfinis
+                indexAbsence = patterns[i] + Math.floor(Math.random() * 3) - 1; // ±1 jour
+            } else {
+                // Absences aléatoires pour le reste
+                indexAbsence = Math.floor(Math.random() * joursCours.length);
+            }
+
+            // S'assurer que l'index est valide
+            indexAbsence = Math.max(0, Math.min(joursCours.length - 1, indexAbsence));
+            joursAbsence.add(indexAbsence);
+        }
+
+        // Générer les présences pour tous les jours sauf les absences
+        joursCours.forEach((date, i) => {
+            if (!joursAbsence.has(i)) {
+                presences.push({
+                    date: date,
+                    da: etudiant.da,
+                    heures: heuresParSeance,
+                    notes: '',
+                    coursId: '601-101-h2026-9999'
+                });
+            }
+        });
+    });
+
+    console.log(`   ✅ ${presences.length} présences générées (92% d'assiduité)`);
+    return presences;
+}
+
+/* ===============================
+   📦 FONCTION: Bascule données de démonstration
+   Beta 93.5 - Gestion du groupe 9999 via checkbox
+   =============================== */
+
+/**
+ * Active ou désactive les données de démonstration (groupe 9999)
+ * Appelée par la checkbox dans Réglages → Trimestre
+ *
+ * @param {boolean} activer - true pour charger les données, false pour les supprimer
+ */
+async function basculerDonneesDemo(activer) {
+    if (activer) {
+        // ACTIVER : Charger les données démo
+        console.log('📚 [Démo] Chargement des données de démonstration...');
+
+        try {
+            // Attendre que le module soit chargé (max 3 secondes)
+            let pack = window.PACK_DEMARRAGE;
+            let tentatives = 0;
+
+            while (!pack && tentatives < 30) {
+                await new Promise(resolve => setTimeout(resolve, 100)); // Attendre 100ms
+                pack = window.PACK_DEMARRAGE;
+                tentatives++;
+            }
+
+            if (!pack) {
+                throw new Error('Le module pack-demarrage.js n\'est pas chargé dans index.html');
+            }
+
+            console.log('✅ [Démo] Pack chargé avec succès');
+            console.log(`   → ${pack.groupeEtudiants?.length || 0} étudiants`);
+            console.log(`   → ${pack.productions?.length || 0} productions`);
+            console.log(`   → ${pack.evaluationsSauvegardees?.length || 0} évaluations`);
+
+            // FUSIONNER les données (ne pas écraser les données existantes)
+
+            // 1. Ajouter le cours démo s'il n'existe pas
+            const coursExistants = db.getSync('listeCours', []);
+            const coursDemo = pack.listeCours?.find(c => c.id === '601-101-h2026-9999');
+            if (coursDemo && !coursExistants.find(c => c.id === coursDemo.id)) {
+                coursExistants.push(coursDemo);
+                db.setSync('listeCours', coursExistants);
+                console.log(`   ✅ Cours démo ajouté`);
+            }
+
+            // 2. Ajouter les étudiants du groupe 9999
+            const etudiantsExistants = db.getSync('groupeEtudiants', []);
+            const etudiantsDemo = pack.groupeEtudiants?.filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999') || [];
+            etudiantsDemo.forEach(e => {
+                if (!etudiantsExistants.find(ex => ex.da === e.da)) {
+                    etudiantsExistants.push(e);
+                }
+            });
+            db.setSync('groupeEtudiants', etudiantsExistants);
+            console.log(`   ✅ ${etudiantsDemo.length} étudiants démo ajoutés`);
+
+            // 3. Ajouter les productions du cours démo
+            const productionsExistantes = db.getSync('productions', []);
+            const productionsDemo = pack.productions?.filter(p => p.coursId === '601-101-h2026-9999') || [];
+            productionsDemo.forEach(p => {
+                if (!productionsExistantes.find(ex => ex.id === p.id)) {
+                    productionsExistantes.push(p);
+                }
+            });
+            db.setSync('productions', productionsExistantes);
+            console.log(`   ✅ ${productionsDemo.length} productions démo ajoutées`);
+
+            // 4. Ajouter les évaluations du groupe démo
+            const evalsExistantes = db.getSync('evaluationsSauvegardees', []);
+            const evalsDemo = pack.evaluationsSauvegardees?.filter(e => e.coursId === '601-101-h2026-9999') || [];
+            evalsDemo.forEach(e => {
+                if (!evalsExistantes.find(ex => ex.da === e.da && ex.productionId === e.productionId)) {
+                    evalsExistantes.push(e);
+                }
+            });
+            db.setSync('evaluationsSauvegardees', evalsExistantes);
+            console.log(`   ✅ ${evalsDemo.length} évaluations démo ajoutées`);
+
+            // 5. GÉNÉRER dynamiquement les présences (92% d'assiduité)
+            console.log('📊 [Démo] Génération dynamique des présences...');
+            const presencesGenerees = genererPresencesDemo(etudiantsDemo);
+
+            // Ajouter les présences générées (sans écraser les existantes)
+            const presencesExistantes = db.getSync('presences', []);
+            presencesGenerees.forEach(p => {
+                if (!presencesExistantes.find(ex => ex.da === p.da && ex.date === p.date)) {
+                    presencesExistantes.push(p);
+                }
+            });
+            db.setSync('presences', presencesExistantes);
+            console.log(`   ✅ ${presencesGenerees.length} présences générées (pattern 92%)`);
+
+            // 6. Ajouter grilles/échelles/cartouches si absentes
+            const sectionsPartagees = [
+                { cle: 'grillesTemplates', label: 'grilles' },
+                { cle: 'echellesTemplates', label: 'échelles' }
+            ];
+
+            sectionsPartagees.forEach(({ cle, label }) => {
+                const existantes = db.getSync(cle, []);
+                const nouvelles = pack[cle] || [];
+                nouvelles.forEach(item => {
+                    if (!existantes.find(ex => ex.id === item.id)) {
+                        existantes.push(item);
+                    }
+                });
+                db.setSync(cle, existantes);
+                console.log(`   ✅ ${label} fusionnées`);
+            });
+
+            // Cartouches (format spécial)
+            Object.keys(pack).forEach(cle => {
+                if (cle.startsWith('cartouches_') && !db.getSync(cle)) {
+                    db.setSync(cle, pack[cle]);
+                    console.log(`   ✅ ${cle}`);
+                }
+            });
+
+            // Marquer comme activé
+            db.setSync('donneesDemo', true);
+
+            // Notification succès
+            alert('✅ Données de démonstration chargées avec succès !\n\nGroupe 9999 : 10 étudiants, 4 artefacts, 40 évaluations');
+
+            // Recharger la page pour afficher les nouvelles données
+            window.location.reload();
+
+        } catch (error) {
+            console.error('❌ [Démo] Erreur lors du chargement:', error);
+            alert('❌ Erreur lors du chargement des données de démonstration.\n\nVeuillez vérifier que le module pack-demarrage.js est chargé dans index.html.');
+            // Décocher la checkbox en cas d'erreur
+            document.getElementById('checkboxDonneesDemo').checked = false;
+        }
+
+    } else {
+        // DÉSACTIVER : Supprimer toutes les données du groupe 9999
+        if (!confirm('Supprimer toutes les données de démonstration (groupe 9999) ?\n\nCette action supprimera :\n• Le cours 601-101-h2026-9999\n• Les 10 étudiants du groupe 9999\n• Toutes les évaluations associées\n• Toutes les présences associées\n\nCette action est irréversible.')) {
+            // Recocher la checkbox si l'utilisateur annule
+            document.getElementById('checkboxDonneesDemo').checked = true;
+            return;
+        }
+
+        console.log('🗑️ [Démo] Suppression des données de démonstration...');
+
+        // 1. Supprimer le cours démo
+        let cours = db.getSync('listeCours', []);
+        cours = cours.filter(c => c.id !== '601-101-h2026-9999' && c.groupe !== '9999');
+        db.setSync('listeCours', cours);
+        console.log('   ✅ Cours démo supprimé');
+
+        // 2. Supprimer les étudiants du groupe 9999
+        let etudiants = db.getSync('groupeEtudiants', []);
+        const nbEtudiants = etudiants.filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999').length;
+        etudiants = etudiants.filter(e => e.groupe !== '9999' && e.coursId !== '601-101-h2026-9999');
+        db.setSync('groupeEtudiants', etudiants);
+        console.log(`   ✅ ${nbEtudiants} étudiants démo supprimés`);
+
+        // 3. Supprimer les productions du cours démo
+        let productions = db.getSync('productions', []);
+        const nbProductions = productions.filter(p => p.coursId === '601-101-h2026-9999').length;
+        productions = productions.filter(p => p.coursId !== '601-101-h2026-9999');
+        db.setSync('productions', productions);
+        console.log(`   ✅ ${nbProductions} productions démo supprimées`);
+
+        // 4. Supprimer les évaluations du groupe démo
+        let evaluations = db.getSync('evaluationsSauvegardees', []);
+        const nbEvals = evaluations.filter(e => e.coursId === '601-101-h2026-9999').length;
+        evaluations = evaluations.filter(e => e.coursId !== '601-101-h2026-9999');
+        db.setSync('evaluationsSauvegardees', evaluations);
+        console.log(`   ✅ ${nbEvals} évaluations démo supprimées`);
+
+        // 5. Supprimer les présences du groupe démo
+        let presences = db.getSync('presences', []);
+        const dasDemoSuppression = db.getSync('groupeEtudiants', [])
+            .filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999')
+            .map(e => e.da);
+        const nbPresences = presences.filter(p => dasDemoSuppression.includes(p.da)).length;
+        presences = presences.filter(p => !dasDemoSuppression.includes(p.da));
+        db.setSync('presences', presences);
+        console.log(`   ✅ ${nbPresences} présences démo supprimées`);
+
+        // Marquer comme désactivé
+        db.setSync('donneesDemo', false);
+
+        // Notification succès
+        alert('✅ Données de démonstration supprimées avec succès !');
+
+        // Recharger la page pour refléter les changements
+        window.location.reload();
+    }
+}
+
+/* ===============================
    🌐 EXPORTS GLOBAUX
    =============================== */
 
 // Export de la fonction d'initialisation pour main.js
 window.initialiserModuleTrimestre = initialiserModuleTrimestre;
+
+// ✅ Export fonction bascule données démo (Beta 93.5)
+window.basculerDonneesDemo = basculerDonneesDemo;
