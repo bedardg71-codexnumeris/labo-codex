@@ -1,23 +1,9 @@
-# macOS
+# Fichiers système macOS
 .DS_Store
-.AppleDouble
-.LSOverride
 
-# Backups et données sensibles
-*.backup-*
-*.old
-*.bak
-backups-donnees/
-Documents de travail (privé)/
+# Fichiers temporaires
+*.backup.json
+*obsolètes*/
 
-# Données de test OK (déjà fictives)
-# donnees-demo.json
-# matériel beta 92/
-
-# Temporary
-*.tmp
-*.temp
-~*
-
-# Node modules (si on en ajoute plus tard)
-node_modules/
+# Calendriers institutionnels (fichiers locaux)
+>DE_*.pdf
