@@ -1,0 +1,427 @@
+# 🗺️ ROADMAP VERSION 2.0 - AQPC JUIN 2026
+
+**Contexte technique** : localStorage est déjà à 2.6 MB pour 1 groupe (2/3 trimestre), limite 5-10 MB. IndexedDB est **techniquement justifiée**, pas juste aspirationnelle.
+
+**Réalité terrain** : Tu es prof à temps plein. Les contributeurs seront rares et sporadiques. La majorité du code restera sur tes épaules.
+
+---
+
+## 📅 PHASE 1 : PRÉSENTATION (11-19 NOVEMBRE 2025)
+
+**Durée** : 9 jours
+**Objectif** : Présentation convaincante + sondage stratégique
+
+### Livrables (inchangés)
+
+1. **Récit de pratique pédagogique** (80% du temps)
+   - Ta pratique PAN-Maîtrise sur 2 ans
+   - Fondements SOLO/IDME/SRPNF
+   - Défis et solutions
+
+2. **Démonstration de l'outil** (5 min, fin de présentation)
+   - Mode comparatif SOM/PAN
+   - Tableau de bord engagement
+   - Planification interventions
+
+3. **Sondage post-présentation**
+   - Section A : Cartographie (10 questions)
+   - Section B : Intérêt collaboration (5 questions)
+   - **Question clé ajoutée** : "Combien de groupes suivez-vous simultanément?" (pour valider besoin multi-groupes)
+
+4. **Structure Teams préparée** (Labo Codex)
+   - Canal #annonces
+   - Canal #tests-beta
+   - Canal #discussions-pédagogiques
+   
+### Attentes réalistes
+
+- **Audience** : 80-120 personnes en ligne (pas 387)
+- **Répondants au sondage** : 30-50 personnes (25-40%)
+- **Taux d'engagement réel** : 10-15 personnes intéressées (10% des répondants)
+
+**Date clé** : **19 novembre 2025** - Présentation
+
+---
+
+## 📊 PHASE 2 : POST-PRÉSENTATION (19 NOV - 8 DÉC 2025)
+
+**Durée** : 3 semaines (au lieu de 2)
+**Objectif** : Analyse réaliste + décisions stratégiques
+
+### Livrables ajustés
+
+1. **Analyse du sondage** (1 semaine)
+   - Rapport quantitatif
+   - **Attentes réalistes** :
+     * 30-50 répondants (pas 100+)
+     * 70%+ utilisent sommative pure
+     * 20-30% utilisent PAN-Maîtrise ou variantes
+     * <10% utilisent Spécifications ou Dénotation
+   - **Nombre moyen de groupes** : probablement 2-3 (valide le besoin IndexedDB mais pas 10-15 groupes)
+
+2. **Segmentation des contributeurs**
+   
+   **Testeurs** : 5-8 personnes (pas 15-20)
+   - Organisation en 2 squads de 3-4 personnes
+   - Squad 1 : PAN-Maîtrise (ta pratique)
+   - Squad 2 : Sommative ou mixte
+   
+   **Développeurs** : 1-2 personnes (pas 3-5)
+   - Probablement débutants ou intermédiaires
+   - Contributions sporadiques (1-2h/semaine max)
+   - Réalité : **tu resteras le développeur principal**
+   
+   **Documenteurs** : 2-3 personnes (pas 5-8)
+   - Relecture de docs existants
+   - Quelques tutoriels vidéo
+   - Pas de rédaction massive
+   
+   **Ambassadeurs** : 3-5 cégeps (pas 10-15)
+   - Collègues enthousiastes qui vont essayer l'outil
+   - Pas nécessairement des "ambassadeurs" actifs
+
+3. **Décision critique : Libération**
+   
+   **Scénario A : Libération obtenue** (5-10h/semaine)
+   - Timeline : Migration IndexedDB faisable en 12-16 semaines
+   - Lancement V1.0 : **Septembre 2026** (colloque automne)
+   
+   **Scénario B : Pas de libération** (travail en soirées/fins de semaine)
+   - Timeline : Migration prendra 20-24 semaines
+   - Lancement V1.0 : **Hiver 2027**
+   - **Alternative** : Optimiser localStorage pour V1.0 (juin 2026), migrer après
+
+4. **Définition minimaliste V1.0**
+
+   **V1.0 = Beta 90 + ces 4 choses SEULEMENT** :
+   - Support 3-5 groupes simultanés (IndexedDB)
+   - Migration données localStorage → IndexedDB (outil automatisé)
+   - Tous bugs critiques corrigés
+   - Documentation complète (guide 30-40 pages + 5-7 vidéos)
+   
+   **TOUT LE RESTE = V1.1-1.2+** (post-juin 2026)
+
+5. **Ajustement du roadmap**
+   - Si libération : go pour IndexedDB
+   - Si pas libération : **Plan B** activé (voir ci-dessous)
+
+### Date clé : **8 décembre 2025** - Décisions stratégiques prises
+
+---
+
+## 🚀 PHASE 3 : BETA 91 - MIGRATION INDEXEDDB (9 DÉC 2025 - 16 MARS 2026)
+
+**Durée** : **14 semaines** (pas 7 semaines)
+**Condition** : Libération partielle obtenue (5-10h/semaine)
+
+### Pourquoi 14 semaines et pas 7 ?
+
+1. Vacances de Noël (2 semaines perdues)
+2. Retour session hiver (2 semaines d'adaptation)
+3. Imprévus techniques (bugs, cas limites non prévus)
+4. Tests avec vraies données (découverte de problèmes non anticipés)
+
+### Jalons réajustés
+
+**Semaines 1-3 (9-29 déc)** : Phase 1 - Storage Adapter
+- Interface StorageAdapter
+- LocalStorageAdapter (backend actuel)
+- IndexedDBAdapter (nouveau)
+- Tests unitaires
+- **Réalité** : Vacances de Noël au milieu, donc 2 semaines de travail effectif
+
+**Semaines 4-7 (30 déc - 26 jan)** : Phase 2 - Modules de lecture
+- Migration 25 modules de lecture
+- Conversion async/await
+- Tests avec IndexedDB
+- **Validation Squad 1** (3-4 personnes)
+- **Réalité** : Début session hiver = tu seras occupé
+
+**Semaines 8-10 (27 jan - 16 fév)** : Phase 3 - Modules d'écriture
+- Migration 15 modules d'écriture
+- Transactions et rollbacks
+- Tests intégrité données
+- **Validation Squad 2** (3-4 personnes)
+
+**Semaines 11-14 (17 fév - 16 mars)** : Tests, optimisation, release
+- Tests de charge (3-5 groupes, 100-150 étudiants) - **pas 10-15 groupes**
+- Outil migration localStorage → IndexedDB
+- Documentation technique
+- Correction bugs découverts en tests
+- **Validation tous testeurs** (5-8 personnes)
+
+### Livrables
+
+- ✅ Beta 91 avec support 3-5 groupes
+- ✅ Outil de migration automatisée
+- ✅ Documentation technique
+- ✅ Rapport de performance (benchmarks)
+- ✅ 5-8 testeurs ayant validé
+
+### Date clé : **16 mars 2026** - Release Beta 91
+
+---
+
+## 🛠️ PHASE 4 : VERSION 1.0 (17 MARS - 25 MAI 2026)
+
+**Durée** : 10 semaines (pas 16 semaines)
+**Objectif** : Stabilisation + Documentation
+
+### Pourquoi scope réduit ?
+
+Tu ne peux pas développer ET stabiliser ET documenter en 16 semaines. Il faut choisir. Pour juin 2026, tu choisis **stabilité + documentation**.
+
+---
+
+### Cycle 1 (17 mars - 6 avril) : Stabilisation
+
+**Objectifs** :
+- Correction de TOUS les bugs identifiés en Beta 91
+- Optimisation performances multi-groupes
+- Amélioration UX sur base des retours testeurs
+
+**Fonctionnalités** :
+1. **Gestion multi-groupes simplifiée**
+   - Sélecteur de groupe dans navigation
+   - Tableau de bord agrégé (tous groupes)
+   - ✅ Faisable en 3 semaines
+
+2. **Export de base**
+   - Export CSV des présences
+   - Export CSV des évaluations
+   - ❌ PDF complexes reportés à V1.1
+   - ✅ Faisable en 3 semaines
+
+**Tests** : Squad 1 + Squad 2 (5-8 personnes, 1 semaine)
+
+---
+
+### Cycle 2 (7 avril - 27 avril) : Documentation
+
+**Objectifs** :
+- Guide utilisateur complet
+- Tutoriels vidéo essentiels
+- FAQ
+
+**Livrables** :
+
+1. **Guide utilisateur** (30-40 pages, pas 50-80)
+   - Installation et configuration
+   - Création d'un cours
+   - Import des étudiants
+   - Saisie présences et évaluations
+   - Consultation profils
+   - Planification interventions
+   - Migration depuis localStorage
+
+2. **Tutoriels vidéo** (5-7 vidéos de 3-5 min, pas 10-15)
+   - Installation première utilisation
+   - Import des étudiants
+   - Saisie d'une évaluation
+   - Consultation profil étudiant
+   - Planification intervention
+   - Migration des données
+   - Dépannage courant
+
+3. **FAQ** (15-20 questions, pas 30-40)
+   - Basée sur questions réelles des testeurs
+   - Troubleshooting commun
+
+**Réalité** : Les 2-3 documenteurs vont relire et suggérer, mais **tu vas rédiger 80% toi-même**.
+
+---
+
+### Cycle 3 (28 avril - 25 mai) : Finalisation
+
+**Objectifs** :
+- Tests exhaustifs par tous testeurs
+- Correction bugs découverts
+- Préparation matériel colloque
+
+**Activités** :
+
+1. **Tests finaux** (2 semaines)
+   - Session complète avec 5-8 testeurs (vraies classes)
+   - Scénarios d'utilisation réelle
+   - Tests de régression
+   - Tests de charge (3-5 groupes)
+
+2. **Corrections et polish** (1 semaine)
+   - Bugs critiques/majeurs
+   - Améliorations UX mineures
+   - Validation finale
+
+3. **Préparation colloque** (1 semaine)
+   - Diaporama de présentation (20-25 diapos)
+   - Vidéo de démonstration (5 min)
+   - Site web simple (présentation + téléchargement)
+   - Dépliant PDF
+
+**Date clé** : **25 mai 2026** - V1.0 Release Candidate finalisée
+
+---
+
+## 🎯 PHASE 5 : COLLOQUE AQPC (3-5 JUIN 2026)
+
+**Objectif** : Présenter le projet + recueillir intérêt
+
+### Livrables
+
+1. **Présentation/atelier au colloque**
+   - Diaporama (20-25 diapos)
+   - Démonstration live Beta 91 ou V1.0
+   - Cas d'usage documentés (3-5 testeurs témoignent)
+   - Feuille de route post-colloque claire
+
+2. **Positionnement honnête**
+   - "Ceci est une Version 1.0 - fondations solides"
+   - "Support 3-5 groupes, pas 10-15 (pour l'instant)"
+   - "2 pratiques : PAN-Maîtrise + Sommative"
+   - "Extensions viennent dans V1.1-2.0 selon vos besoins"
+
+3. **Lancement progressif** (pas lancement public immédiat)
+   - Mise à disposition pour early adopters
+   - Recrutement d'utilisateurs pilotes (10-15 profs)
+   - Support via Teams
+   - **Vrai lancement public : Automne 2026** (après été de stabilisation)
+
+### Attentes réalistes
+
+- **Audience** : 50-100 personnes
+- **Téléchargements immédiats** : 10-20 personnes
+- **Utilisateurs actifs automne 2026** : 5-10 profs
+
+---
+
+## 🔄 PLAN B : Si pas de libération
+
+**Décision** : Début décembre 2025
+
+### Timeline ajustée
+
+**Décembre 2025 - Mai 2026** : Stabilisation Beta 90
+- Optimisation localStorage (compression données)
+- Support 2-3 groupes (limite technique)
+- Correction tous bugs
+- Documentation complète
+
+**Juin 2026 - Colloque**
+- Présentation Beta 90 stable et documentée
+- "Fonctionne parfaitement pour 2-3 groupes"
+- "Migration IndexedDB prévue automne 2026"
+
+**Été 2026** : Migration IndexedDB
+- Moins de pression (pas de deadline colloque)
+- Travail tranquille en soirées/fins de semaine
+
+**Septembre 2026** : Lancement V1.0 (colloque automne)
+- Support 5-10 groupes
+- Testée tout l'été
+- Vraiment prête
+
+### Avantages Plan B
+
+- Moins de stress et de pression
+- Plus de temps pour faire les choses bien
+- Libère ton hiver de session
+- Lancement plus crédible en automne
+
+---
+
+## 📊 INDICATEURS DE SUCCÈS RÉALISTES
+
+### Phase 2 (Recrutement)
+- ✅ 10-15 personnes engagées (pas 30-50)
+- ✅ 5-8 testeurs actifs
+- ✅ 1-2 développeurs sporadiques
+- ✅ 3-5 cégeps représentés
+
+### Phase 3 (Beta 91)
+- ✅ Support 3-5 groupes (pas 10-15)
+- ✅ Performances 3-4x supérieures (pas 6-8x)
+- ✅ 0 bugs critiques, <10 bugs majeurs
+- ✅ 5-8 testeurs validant
+
+### Phase 4 (V1.0)
+- ✅ Tous bugs critiques corrigés
+- ✅ Documentation complète
+- ✅ 3-5 témoignages d'utilisateurs
+- ✅ 5-8 testeurs ayant validé
+
+### Phase 5 (Colloque)
+- ✅ Présentation devant 50-100 participants
+- ✅ 10-20 téléchargements immédiats
+- ✅ 5-10 utilisateurs actifs automne 2026
+
+---
+
+## ⚠️ FACTEURS CRITIQUES DE SUCCÈS
+
+### 1. Libération partielle (5-10h/semaine déc-mars)
+**Sans ça** : Plan B automatique, lancement reporté à automne 2026
+
+### 2. Accepter le scope minimaliste
+**V1.0 = Beta 90 + IndexedDB + Docs**
+- Pas de bibliothèques partagées
+- Pas d'analyse prédictive
+- Pas de mode cohorte
+- Pas d'intégration calendrier
+
+**Tout ça = V1.1-2.0** (2026-2027)
+
+### 3. Compter sur toi-même
+- 80-90% du code : toi
+- 80-90% de la documentation : toi
+- Les contributeurs sont un **bonus**, pas la base
+
+### 4. Tester avec vraies données
+- Les testeurs doivent utiliser dans leurs **vraies classes**
+- Pas juste des tests avec données fictives
+- Ça va révéler les vrais bugs
+
+### 5. Documentation dès le début
+- Ne pas accumuler la "dette de documentation"
+- Écrire le guide en parallèle du développement
+- Chaque fonctionnalité = section de doc immédiate
+
+---
+
+## 🎯 RÉCAPITULATIF TIMELINE RÉALISTE
+
+| Phase | Période | Durée | Condition | Jalon |
+|-------|---------|-------|-----------|-------|
+| **1. Présentation** | 11-19 nov 2025 | 9 jours | - | Sondage diffusé |
+| **2. Recrutement** | 19 nov - 8 déc | 3 semaines | - | Décisions stratégiques |
+| **3. Beta 91** | 9 déc - 16 mars | 14 semaines | Libération partielle | Release Beta 91 |
+| **4. Version 1.0** | 17 mars - 25 mai | 10 semaines | - | V1.0 RC |
+| **5. Colloque** | 3-5 juin 2026 | 3 jours | - | Présentation |
+| **6. Stabilisation** | Juin-août 2026 | 3 mois | - | Corrections été |
+| **7. Lancement** | Sept 2026 | - | - | Vrai lancement public |
+
+**Total** : 10 mois (nov 2025 → sept 2026) pour un vrai lancement stable
+
+---
+
+## 💡 RECOMMANDATIONS FINALES
+
+### Pour le 19 novembre
+
+**Ne promets pas la lune**. Dis plutôt :
+
+> "J'ai développé cet outil pour ma pratique depuis 2 ans. Il fonctionne très bien pour suivre un groupe. Je travaille à le rendre utilisable pour plusieurs groupes simultanés. Si ça vous intéresse, j'aimerais avoir vos retours pour m'assurer que ça répond à vos besoins réels."
+
+### Pour le colloque juin 2026
+
+**Sois transparent sur l'état** :
+
+> "Voici la Version 1.0 - elle fait bien 3-5 choses essentielles. Elle n'est pas parfaite, mais elle est stable. Je prévois des extensions selon vos besoins. L'outil évolue avec la communauté."
+
+### Pour ton santé mentale
+
+- Un bon produit livré vaut mieux qu'un produit parfait jamais terminé
+- Ne sacrifie pas ta vie personnelle pour des deadlines artificielles
+- Le projet évoluera sur des **années**, pas des mois
+
+---
+
+Voilà. C'est moins sexy, mais c'est **livrable** et **crédible**. Qu'en penses-tu ?

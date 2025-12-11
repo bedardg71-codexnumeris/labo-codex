@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 93.5 - Groupe démo</title>
+    <title>Système de suivi Beta 94 - Groupe démo</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2025120908">
@@ -2744,7 +2744,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de gestion de la notation</h1>
                         <p class="meta">
-                            Beta 93.5 - 10 décembre 2025
+                            Beta 94 - 10 décembre 2025
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés"></span>
                         </p>
                     </div>
@@ -2810,13 +2810,13 @@
                     transition: all 0.2s;">✕</button>
 
                 <!-- Titre principal -->
-                <h2>Nouveautés - Beta 93</h2>
+                <h2>Nouveautés - Beta 94</h2>
 
                 <!-- Message de Grégoire -->
                 <div style="margin-bottom: 25px;">
                     <h3>Message de Grégoire</h3>
                     <p style="line-height: 1.6;">
-                        Bonjour ! La Beta 93 représente une étape importante vers l'universalité et la collaboration. Cette version vous permet maintenant d'utiliser vos propres critères d'évaluation et offre de nouveaux outils de partage entre collègues. Merci de votre patience et de votre confiance !
+                        Bonjour ! La Beta 94 améliore la gestion des productions avec l'ajout de dates d'assignation et d'échéance. Ces dates permettent un suivi longitudinal plus précis de la complétion et tiennent compte des jetons de délai accordés aux étudiants. Merci de votre patience et de votre confiance !
                     </p>
                 </div>
 
@@ -2824,29 +2824,16 @@
                 <div style="margin-bottom: 25px;">
                     <h3>Nouveautés pour vous</h3>
                     <ul style="line-height: 1.8; padding-left: 20px; margin-top: 10px;">
-                        <li><strong>Système 100% universel</strong> : Vous pouvez maintenant utiliser vos propres critères d'évaluation (pas seulement SRPNF). Le système s'adapte automatiquement à votre grille personnalisée.</li>
-                        <li><strong>Nouvelle pratique disponible</strong> : PAN-Objectifs, conçue pour les cours basés sur des objectifs d'apprentissage avec seuils de réussite.</li>
-                        <li><strong>Organisation repensée</strong> : La page des pratiques de notation est maintenant plus claire avec une séparation entre pratiques prédéfinies et vos pratiques personnalisées.</li>
-                        <li><strong>Performance améliorée</strong> : Les calculs sont maintenant plus rapides grâce à l'optimisation des indicateurs (jusqu'à 50% plus rapide).</li>
-                        <li><strong>Interface épurée</strong> : 21 sections ont été harmonisées avec des en-têtes bleus cohérents pour une meilleure lisibilité.</li>
-                    </ul>
-                </div>
-
-                <!-- Nouveautés techniques (pour utilisateurs avancés) -->
-                <div style="margin-bottom: 25px;">
-                    <h3>Améliorations techniques</h3>
-                    <ul style="line-height: 1.8; padding-left: 20px; margin-top: 10px;">
-                        <li><strong>Bibliothèque de matériel</strong> : Importez et exportez facilement vos grilles, échelles, cartouches et pratiques pour collaborer avec vos collègues.</li>
-                        <li><strong>Snapshots par séance</strong> : Le système capture maintenant l'état de vos étudiants à chaque séance pour un suivi longitudinal plus précis.</li>
-                        <li><strong>Stockage amélioré</strong> : Migration vers IndexedDB pour supporter des volumes de données beaucoup plus importants.</li>
-                        <li><strong>Corrections importantes</strong> : 6 bugs corrigés incluant l'affichage correct du statut «Non remis» et l'optimisation des calculs.</li>
+                        <li><strong>Date d'échéance obligatoire</strong> : Chaque production doit maintenant avoir une date d'échéance. Cette date fixe dans le temps les indices C (Complétion) et P (Performance) pour les suivis longitudinaux.</li>
+                        <li><strong>Jetons comptabilisés automatiquement</strong> : Les jetons de délai servent à comptabiliser leur utilisation par les étudiants, sans modifier l'échéance dans les calculs de suivi.</li>
+                        <li><strong>Performance associée à l'échéance</strong> : Les notes sont maintenant associées à la date d'échéance du travail (et non à la date où vous corrigez), pour un suivi longitudinal cohérent même si vous prenez plusieurs jours pour corriger un groupe.</li>
                     </ul>
                 </div>
 
                 <!-- En savoir plus -->
                 <div style="margin-bottom: 10px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--bleu-principal);">
                     <p style="margin: 0; line-height: 1.6;">
-                        <strong>Pour en savoir plus</strong> : Consultez le fichier <code>BETA_93_CHANGELOG.md</code> pour tous les détails techniques de cette version.
+                        <strong>Pour en savoir plus</strong> : Consultez le fichier <code>BETA_94_CHANGELOG.md</code> pour tous les détails techniques de cette version.
                     </p>
                 </div>
 
@@ -4034,6 +4021,19 @@
                                         <label>Description de la tâche</label>
                                         <textarea id="productionTache" class="controle-form" rows="3"
                                             placeholder="Ex: Rédiger un texte de 500 mots..."></textarea>
+                                    </div>
+
+                                    <!-- ✨ NOUVEAU (Beta 94 - 10 déc 2025): Date d'échéance -->
+                                    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 20px; margin-top: 15px; align-items: start;">
+                                        <div class="groupe-form" style="margin: 0;">
+                                            <label for="productionDateEcheance">Date d'échéance <span style="color: var(--rouge-principal);">*</span></label>
+                                            <input type="date" id="productionDateEcheance" class="controle-form" required
+                                                title="Date limite de remise du travail (obligatoire)">
+                                        </div>
+                                        <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 30px; line-height: 1.4;">
+                                            Cette date fixe dans le temps les indices C (Complétion) et P (Performance) pour les suivis longitudinaux.
+                                            Les jetons de délai permettent une autre échéance, mais celle-ci est certifiée manuellement par l'utilisateur lors de l'évaluation en cochant la case appropriée dans le statut de remise.
+                                        </p>
                                     </div>
                                 </div>
 
@@ -10274,7 +10274,7 @@ Exemple :
     <script src="js/trimestre.js?v=2025121011"></script>
     <script src="js/etudiants.js?v=2025120901"></script>
     <script src="js/productions-bibliotheque.js?v=2025120826"></script>
-    <script src="js/productions.js?v=2025120826"></script>
+    <script src="js/productions.js?v=2025121003"></script>
     <script src="js/grilles-bibliotheque.js?v=2025120826"></script>
     <script src="js/grilles.js?v=2025120827"></script>
     <script src="js/echelles-bibliotheque.js?v=2025120826"></script>
@@ -10293,8 +10293,8 @@ Exemple :
     <script src="js/pratiques/pratique-registre.js?v=2025120705"></script>
     <script src="js/pratiques/migration-pratiques.js?v=2025120705"></script>
     <script src="js/pratiques/pratique-test.js?v=2025120705"></script>
-    <script src="js/pratiques/pratique-pan-maitrise.js?v=2025120706"></script>
-    <script src="js/pratiques/pratique-sommative.js?v=2025120706"></script>
+    <script src="js/pratiques/pratique-pan-maitrise.js?v=2025121006"></script>
+    <script src="js/pratiques/pratique-sommative.js?v=2025121003"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=2025112600"></script>
     <script src="js/pratiques/pratique-pan-objectifs.js?v=2025120901"></script>
     <script src="js/pratiques/config-francois-chimie.js?v=2025112600"></script>
@@ -10315,7 +10315,7 @@ Exemple :
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025120703"></script>
-    <script src="js/profil-etudiant.js?v=2025120808"></script>
+    <script src="js/profil-etudiant.js?v=2025121004"></script>
     <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
 
@@ -10329,7 +10329,7 @@ Exemple :
     <script src="js/import-export.js?v=2025120608"></script>
     <script src="js/statistiques.js?v=2025121001"></script>
     <script src="js/liste-evaluations.js?v=2025120207"></script>
-    <script src="js/snapshots.js?v=2025120803"></script>
+    <script src="js/snapshots.js?v=2025121008"></script>
     <script src="js/graphiques-progression.js?v=2025121019"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->

@@ -239,6 +239,9 @@ async function afficherFormProduction(id) {
             document.getElementById('productionObjectif').value = prod.objectif || '';
             document.getElementById('productionTache').value = prod.tache || '';
 
+            // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Charger date d'échéance
+            document.getElementById('productionDateEcheance').value = prod.dateEcheance || '';
+
             // Gérer l'affichage des champs spécifiques au type
             gererChangementTypeProduction();
 
@@ -279,6 +282,9 @@ async function afficherFormProduction(id) {
         if (selectGrille) selectGrille.value = '';
         document.getElementById('productionObjectif').value = '';
         document.getElementById('productionTache').value = '';
+
+        // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Réinitialiser date d'échéance
+        document.getElementById('productionDateEcheance').value = '';
 
         // Réinitialiser les champs portfolio
         const portfolioNombreRetenir = document.getElementById('portfolioNombreRetenir');
@@ -327,6 +333,9 @@ async function sauvegarderProduction() {
     const objectif = document.getElementById('productionObjectif').value.trim();
     const tache = document.getElementById('productionTache').value.trim();
 
+    // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Date d'échéance
+    const dateEcheance = document.getElementById('productionDateEcheance').value || null;
+
     // Lire la grille depuis le bon select selon le type
     let grilleId = '';
     if (type === 'artefact-portfolio') {
@@ -337,9 +346,14 @@ async function sauvegarderProduction() {
         grilleId = grille ? grille.value : '';
     }
 
-    // Validation : artefact-portfolio n'a pas besoin de pondération
+    // ✅ NOUVEAU (Beta 94): Validation incluant dateEcheance obligatoire
     if (!titre || !type || (type !== 'artefact-portfolio' && ponderation === 0)) {
         alert('Veuillez remplir tous les champs obligatoires (Titre, Type et Pondération)');
+        return;
+    }
+
+    if (!dateEcheance) {
+        alert('La date d\'échéance est obligatoire pour toutes les productions');
         return;
     }
 
@@ -354,6 +368,7 @@ async function sauvegarderProduction() {
         objectif,
         tache,
         grilleId,
+        dateEcheance,     // ✨ NOUVEAU (Beta 94 - 10 déc 2025)
         verrouille: false,
         dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Nouvelle production dans bibliothèque par défaut
     };

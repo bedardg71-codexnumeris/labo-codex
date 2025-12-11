@@ -122,14 +122,30 @@ class PratiqueSommative {
 
         const productions = this._lireProductions();
 
+        // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Fonction helper pour obtenir dateEcheance
+        // Les jetons servent uniquement à comptabiliser, pas à modifier l'échéance
+        const obtenirDateEcheance = (evaluation) => {
+            const production = productions.find(p => p.id === evaluation.productionId);
+            if (!production || !production.dateEcheance) {
+                // Fallback: utiliser dateEvaluation si pas de dateEcheance configurée
+                return evaluation.dateEvaluation;
+            }
+            return production.dateEcheance;
+        };
+
         // Filtrer évaluations de cet étudiant jusqu'à dateLimite
-        const evaluationsEleve = evaluationsCache.filter(e =>
-            e.da === da &&
-            e.dateEvaluation && e.dateEvaluation <= dateLimite && // ✅ Filtrage temporel
-            e.statutRemise !== 'non-remis' && // ✅ Exclure non-remis
-            e.note !== null &&
-            e.note !== undefined
-        );
+        // ✅ NOUVEAU (Beta 94): Utiliser dateEcheance de la production (jetons = compteur seulement)
+        const evaluationsEleve = evaluationsCache.filter(e => {
+            if (e.da !== da) return false;
+            if (e.statutRemise === 'non-remis') return false;
+            if (e.note === null || e.note === undefined) return false;
+
+            // ✅ NOUVEAU (Beta 94): Filtrer par dateEcheance de la production
+            const dateEcheance = obtenirDateEcheance(e);
+            if (!dateEcheance) return false;
+
+            return dateEcheance <= dateLimite;
+        });
 
         if (evaluationsEleve.length === 0) {
             // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari

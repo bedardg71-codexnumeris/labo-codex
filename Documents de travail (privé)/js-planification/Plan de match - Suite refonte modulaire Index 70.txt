@@ -1,0 +1,350 @@
+# Plan de match - Suite refonte modulaire Index 70
+
+## 📍 Où nous en sommes
+
+### ✅ COMMIT 1 COMPLÉTÉ
+**Module trimestre.js refondé - Source unique calendrier**
+
+**Ce qui fonctionne :**
+- ✅ Module `trimestre.js` est la **source unique de vérité**
+- ✅ Fonction `genererCalendrierComplet()` génère tous les jours du trimestre
+- ✅ Stockage dans `localStorage.calendrierComplet` (124 jours générés)
+- ✅ Statistiques correctes : 16 semaines | 75 jours de cours | 2 congés
+- ✅ API publique : `obtenirCalendrierComplet()` et `obtenirInfosJour(date)`
+- ✅ Interface HTML clarifiée : "Trimestre" (admin) vs "Calendrier" (pédago)
+- ✅ Fix conflit de noms : `formaterDateTrimestreYMD()` au lieu de `formaterDate()`
+
+**Fichiers modifiés :**
+- `js/trimestre.js` (refonte complète - 638 lignes)
+- `index 70 (refonte des modules).html` (section renommée)
+- `js/config.js` (label bouton navigation)
+- `js/navigation.js` (ajout initialisation module Trimestre)
+
+---
+
+## 🎯 PROCHAINE ÉTAPE : Module calendrier-vue.js
+
+### Objectif
+Adapter `calendrier-vue.js` pour qu'il **LISE** le `calendrierComplet` au lieu de **RECALCULER** les dates.
+
+### Principe architectural (CRUCIAL)
+```
+trimestre.js (RÉGLAGES)
+    ↓ produit
+calendrierComplet (localStorage)
+    ↓ lu par
+calendrier-vue.js (PRÉSENCES › Vue calendaire)
+    ↓ affiche
+Calendrier visuel avec couleurs et liens
+```
+
+**RÈGLE D'OR** : `calendrier-vue.js` ne doit **JAMAIS** :
+- Calculer le statut d'un jour
+- Déterminer si c'est un weekend, congé, reprise
+- Compter les semaines ou jours de cours
+- Appeler des fonctions comme `genererSemainesScolaires()`
+
+Il doit **UNIQUEMENT** :
+- Lire `calendrierComplet` via `obtenirCalendrierComplet()`
+- Générer le HTML d'affichage
+- Appliquer les couleurs CSS selon les statuts
+
+---
+
+## 📋 Structure du calendrierComplet
+
+### Format des données (localStorage)
+```javascript
+{
+  "2025-08-21": { 
+    statut: "cours",
+    numeroSemaine: 1,
+    numeroJour: 1,
+    jourSemaine: "Jeudi"
+  },
+  "2025-08-22": { 
+    statut: "cours",
+    numeroSemaine: 1,
+    numeroJour: 2,
+    jourSemaine: "Vendredi"
+  },
+  "2025-08-23": { 
+    statut: "weekend",
+    jourSemaine: "Samedi"
+  },
+  "2025-09-01": { 
+    statut: "conge",
+    motif: "Fête du travail",
+    jourSemaine: "Lundi"
+  },
+  "2025-09-04": { 
+    statut: "reprise",
+    numeroSemaine: 3,
+    numeroJour: 12,
+    jourSemaine: "Jeudi"
+  },
+  "2025-10-13": { 
+    statut: "semaine-planification",
+    jourSemaine: "Lundi"
+  },
+  "2025-12-15": { 
+    statut: "semaine-examens",
+    jourSemaine: "Lundi"
+  }
+}
+```
+
+### Statuts possibles
+- `"cours"` : jour de cours normal
+- `"reprise"` : jour de reprise d'un congé
+- `"conge"` : congé (avec motif)
+- `"weekend"` : samedi ou dimanche
+- `"semaine-planification"` : semaine de planification
+- `"semaine-examens"` : semaine d'examens
+- `"hors-cours"` : après la fin des cours mais avant la fin du trimestre
+
+---
+
+## 🔧 Approche de refonte de calendrier-vue.js
+
+### Étape 1 : Analyse du code actuel
+Identifier dans `calendrier-vue.js` :
+1. Toutes les fonctions qui **calculent** au lieu de **lire**
+2. Les appels à `genererSemainesScolaires()` (à supprimer)
+3. Les vérifications de statut (weekend, congé, etc.) - à remplacer par lecture
+4. La génération HTML du calendrier (à garder mais simplifier)
+
+### Étape 2 : Simplification radicale
+Remplacer la logique complexe par :
+```javascript
+function afficherCalendrierScolaire() {
+    // 1. Récupérer le calendrier complet (lecture seule)
+    const calendrier = obtenirCalendrierComplet();
+    
+    // 2. Récupérer les paramètres d'affichage
+    const cadre = JSON.parse(localStorage.getItem('cadreCalendrier') || '{}');
+    
+    // 3. Générer le HTML mois par mois
+    const htmlCalendrier = genererHtmlCalendrier(calendrier, cadre);
+    
+    // 4. Injecter dans le DOM
+    document.getElementById('conteneur-calendrier').innerHTML = htmlCalendrier;
+}
+```
+
+### Étape 3 : Fonction de génération HTML
+```javascript
+function genererHtmlCalendrier(calendrier, cadre) {
+    // Déterminer les mois à afficher (session A ou H)
+    const moisAAfficher = determinerMoisSession(cadre);
+    
+    let html = '<div class="grille-mois">';
+    
+    moisAAfficher.forEach(mois => {
+        html += genererHtmlMois(mois.annee, mois.mois, calendrier);
+    });
+    
+    html += '</div>';
+    return html;
+}
+
+function genererHtmlMois(annee, mois, calendrier) {
+    // Pour chaque jour du mois
+    // Chercher dans calendrier[dateStr]
+    // Appliquer la couleur CSS selon infosJour.statut
+    // Créer le HTML avec les classes appropriées
+}
+```
+
+### Étape 4 : Mapping statut → CSS
+```javascript
+const CLASSES_CSS_PAR_STATUT = {
+    'cours': 'cal-jour-cours',
+    'reprise': 'cal-reprise',
+    'conge': 'cal-conge',
+    'weekend': 'cal-weekend',
+    'semaine-planification': 'cal-planification',
+    'semaine-examens': 'cal-examens',
+    'hors-cours': 'cal-hors-cours'
+};
+```
+
+---
+
+## ⚠️ Pièges à éviter
+
+### 1. Ne pas recréer de logique de calcul
+❌ **INTERDIT** :
+```javascript
+if (estWeekend(date)) { ... }
+if (estConge(date, config)) { ... }
+```
+
+✅ **CORRECT** :
+```javascript
+const infos = calendrier[dateStr];
+if (infos.statut === 'weekend') { ... }
+```
+
+### 2. Ne pas recalculer les semaines
+❌ **INTERDIT** :
+```javascript
+const semaines = genererSemainesScolaires(config);
+```
+
+✅ **CORRECT** :
+```javascript
+// Les numéros de semaine sont déjà dans calendrier[date].numeroSemaine
+```
+
+### 3. Conflit de noms de fonctions
+Si tu rencontres des erreurs "Invalid Date", vérifie qu'il n'y a pas de **conflit de noms** entre :
+- Les fonctions de `calendrier-vue.js`
+- Les fonctions globales d'autres modules
+
+**Solution** : Préfixer les fonctions du module (ex: `calendrierVue_genererHtml()`)
+
+---
+
+## 🧪 Tests à faire après refonte
+
+### Test 1 : Vérifier la lecture
+```javascript
+// Dans la console
+const cal = obtenirCalendrierComplet();
+console.log('Nombre de jours:', Object.keys(cal).length); // Doit être 124
+console.log('Premier jour:', cal['2025-08-21']); // Doit avoir statut "cours"
+console.log('Weekend:', cal['2025-08-23']); // Doit avoir statut "weekend"
+```
+
+### Test 2 : Affichage visuel
+- Le calendrier s'affiche-t-il correctement ?
+- Les couleurs correspondent-elles aux statuts ?
+- Les weekends sont-ils grisés ?
+- Les congés sont-ils visibles ?
+- Les reprises ont-elles leur couleur spécifique ?
+
+### Test 3 : Statistiques
+Les cartes de statistiques doivent afficher :
+- 16 semaines scolaires
+- 75 jours de cours
+- 2 congés avec reprises
+
+---
+
+## 📁 Fichiers concernés
+
+### À modifier
+- `js/calendrier-vue.js` (refonte complète)
+
+### À NE PAS toucher
+- `js/trimestre.js` (déjà refait, fonctionne parfaitement)
+- `localStorage.calendrierComplet` (source unique de vérité)
+
+### Dépendances
+Le module `calendrier-vue.js` dépend de :
+- `trimestre.js` (pour `obtenirCalendrierComplet()`)
+- `config.js` (variables CSS)
+- `styles.css` (classes de couleurs)
+
+---
+
+## 🎯 Critères de réussite
+
+Le module `calendrier-vue.js` sera considéré comme réussi quand :
+
+1. ✅ Il lit `calendrierComplet` sans recalculer
+2. ✅ Il affiche le calendrier visuel avec les bonnes couleurs
+3. ✅ Il n'y a aucune incohérence de données
+4. ✅ Les logs montrent qu'il ne fait que de la lecture
+5. ✅ Aucune erreur dans la console
+6. ✅ Le code est plus court et plus simple que l'original
+
+---
+
+## 🚀 Ordre des opérations
+
+1. **Analyser** `calendrier-vue.js` actuel (identifier la logique à supprimer)
+2. **Créer** la nouvelle version simplifiée
+3. **Tester** étape par étape
+4. **Valider** avec les tests ci-dessus
+5. **Commit 2** : "Refonte calendrier-vue.js - Lecture seule du calendrier complet"
+
+---
+
+## 💡 Principes à retenir
+
+### Architecture globale
+```
+RÉGLAGES (modules "sources")
+├─ trimestre.js → génère calendrierComplet
+├─ horaire.js → générera seancesCompletes (à venir)
+└─ groupe.js → gère les élèves
+
+PRÉSENCES (modules "lecteurs")
+├─ calendrier-vue.js → lit calendrierComplet
+├─ calendrier-saisie.js → lit seancesCompletes
+└─ assiduite (dans tableau-bord) → lit tout
+
+TABLEAU DE BORD (module "synthèse")
+└─ Calcule les indices en lisant toutes les sources
+```
+
+### Règle d'or
+**Les modules ne se parlent JAMAIS directement.**
+Ils communiquent via **localStorage** uniquement.
+
+---
+
+## 📞 Si tu rencontres un problème
+
+### Symptômes courants
+
+**"Invalid Date" dans le calendrier**
+→ Conflit de noms de fonctions (vérifier `formaterDate`)
+
+**Calendrier vide**
+→ Vérifier que `calendrierComplet` existe dans localStorage
+
+**Mauvaises couleurs**
+→ Vérifier le mapping statut → classe CSS
+
+**Erreur "function not defined"**
+→ Vérifier l'ordre de chargement des scripts dans index 70
+
+### Debug général
+```javascript
+// Console du navigateur
+console.log('calendrierComplet existe?', !!localStorage.getItem('calendrierComplet'));
+console.log('Nombre de jours:', Object.keys(JSON.parse(localStorage.getItem('calendrierComplet'))).length);
+console.log('API disponible?', typeof obtenirCalendrierComplet);
+```
+
+---
+
+## 🎓 Contexte du projet
+
+**Système** : Application web de suivi des apprentissages (monitorage pédagogique)
+
+**Origine** : Tableur Numbers fonctionnel mais maintenance laborieuse
+
+**Objectif** : Application web avec interface efficace, logique de tableur sous-jacente
+
+**Problème résolu** : Modularisation anarchique créait incohérences de données
+
+**Solution** : Architecture "Single Source of Truth" - chaque donnée a UNE source
+
+**Guide de collaboration** : Voir "Guide Claude - Instructions de collaboration.md" dans la base de connaissances
+
+---
+
+## ✅ Checklist avant de commencer
+
+- [ ] Lire ce document en entier
+- [ ] Vérifier que le commit 1 est fait
+- [ ] Vérifier que `calendrierComplet` existe dans localStorage
+- [ ] Tester `obtenirCalendrierComplet()` dans la console
+- [ ] Ouvrir `calendrier-vue.js` dans l'éditeur
+- [ ] Commencer l'analyse du code actuel
+
+**Bon courage pour la suite ! 🚀**

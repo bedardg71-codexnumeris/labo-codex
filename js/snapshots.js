@@ -126,9 +126,18 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     // Lire les productions
     const productions = obtenirDonneesSelonMode('productions') || [];
 
-    // ✨ AMÉLIORATION (8 déc 2025) : Filtrer basé sur dateRemise (échéance) plutôt que dateEvaluation
-    // Associe la performance à la semaine de remise, pas à la semaine d'évaluation
-    // ✨ CORRECTION (8 déc 2025) : N'inclure que les productions RÉELLEMENT évaluées
+    // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Utiliser dateEcheance de la production
+    // Les jetons servent uniquement à comptabiliser, pas à modifier l'échéance
+    const obtenirDateEcheance = (evaluation) => {
+        const production = productions.find(p => p.id === evaluation.productionId);
+        if (!production || !production.dateEcheance) {
+            // Fallback: utiliser dateEvaluation si pas de dateEcheance configurée
+            return evaluation.dateEvaluation;
+        }
+        return production.dateEcheance;
+    };
+
+    // Filtrer les évaluations complétées avant la date limite
     const evaluationsFiltrees = evaluations.filter(e => {
         if (!e.productionId || e.remplaceeParId) return false;
 
@@ -136,15 +145,11 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         if (e.statutRemise === 'non-remis') return false;
         if (e.noteFinale === null || e.noteFinale === undefined) return false;
 
-        // Trouver la production associée
-        const production = productions.find(p => p.id === e.productionId);
-        if (!production) return false;
+        // ✅ NOUVEAU (Beta 94): Utiliser dateEcheance de la production (jetons = compteur seulement)
+        const dateEcheance = obtenirDateEcheance(e);
+        if (!dateEcheance) return false;
 
-        // Utiliser dateRemise (échéance) en priorité, sinon dateEvaluation comme fallback
-        const dateReference = production.dateRemise || e.dateEvaluation;
-        if (!dateReference) return false;
-
-        return dateReference <= dateLimite;
+        return dateEcheance <= dateLimite;
     });
 
     // 1. Identifier les productions QUI ONT ÉTÉ ÉVALUÉES jusqu'à cette date
@@ -753,6 +758,13 @@ async function reconstruireSnapshotsHistoriques() {
         }
 
         console.log(`✅ Reconstruction terminée : ${nbSnapshots} captures par séance créées, ${nbEchecs} échecs`);
+
+        // ✅ CORRECTIF CRITIQUE (10 déc 2025): Synchroniser IndexedDB → localStorage cache
+        // Les graphiques lisent via db.getSync() qui utilise le cache localStorage
+        console.log('🔄 Synchronisation du cache localStorage...');
+        await db.syncToLocalStorageCache();
+        console.log('✅ Cache synchronisé');
+
         return {
             succes: true,
             nbSnapshots: nbSnapshots,
