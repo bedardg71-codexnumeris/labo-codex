@@ -125,15 +125,58 @@ class PratiquePANMaitrise {
                 break;
         }
 
-        // Calculer la moyenne
+        // Calculer la moyenne du portfolio (N meilleurs artefacts)
         const somme = artefactsRetenus.reduce((acc, e) => acc + e.noteFinale, 0);
-        const moyenne = somme / artefactsRetenus.length;
+        const moyennePortfolio = somme / artefactsRetenus.length;
 
-        // Convertir en indice 0-1
-        const indiceP = moyenne / 100;
+        // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Intégrer évaluation terminale avec pondération
+        const productions = db.getSync('productions', []);
 
-        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log(`[PAN] Performance DA ${da}: ${(indiceP * 100).toFixed(1)}% (${artefactsRetenus.length} artefacts - modalité: ${methodeSelection})`);
+        // Trouver la production portfolio (conteneur)
+        const productionPortfolio = productions.find(p => p.type === 'portfolio');
+
+        // Trouver l'évaluation terminale (production avec pondération > 0 qui n'est ni portfolio ni artefact)
+        const productionTerminale = productions.find(p =>
+            p.ponderation > 0 &&
+            p.type !== 'portfolio' &&
+            p.type !== 'artefact-portfolio'
+        );
+
+        // Si pas de pondérations configurées, retourner juste la moyenne du portfolio
+        if (!productionPortfolio || !productionTerminale) {
+            const indiceP = moyennePortfolio / 100;
+            return indiceP;
+        }
+
+        // Trouver l'évaluation de l'étudiant sur l'évaluation terminale
+        const evalTerminale = evaluations.find(e =>
+            e.etudiantDA === da &&
+            e.productionId === productionTerminale.id &&
+            !e.remplaceeParId &&
+            e.noteFinale !== null &&
+            e.noteFinale !== undefined
+        );
+
+        // Si l'évaluation terminale n'est pas encore faite, retourner seulement le portfolio
+        if (!evalTerminale) {
+            const indiceP = moyennePortfolio / 100;
+            return indiceP;
+        }
+
+        // Calculer P pondéré : (Portfolio × pond%) + (Terminale × pond%)
+        const ponderationPortfolio = productionPortfolio.ponderation || 60;
+        const ponderationTerminale = productionTerminale.ponderation || 40;
+        const totalPonderation = ponderationPortfolio + ponderationTerminale;
+
+        const moyennePonderee = (
+            (moyennePortfolio * ponderationPortfolio / totalPonderation) +
+            (evalTerminale.noteFinale * ponderationTerminale / totalPonderation)
+        );
+
+        const indiceP = moyennePonderee / 100;
+
+        // ✅ DÉSACTIVÉ (10 déc 2025): Pour performance Safari
+        // console.log(`[PAN] Performance DA ${da}: ${(indiceP * 100).toFixed(1)}% (Portfolio: ${moyennePortfolio.toFixed(1)}% × ${ponderationPortfolio}%, Terminale: ${evalTerminale.noteFinale}% × ${ponderationTerminale}%)`);
 
         return indiceP;
     }
@@ -177,15 +220,37 @@ class PratiquePANMaitrise {
             return null;
         }
 
+        // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Lire productions pour dateEcheance
+        const productions = this._lireProductions();
+
+        // Fonction helper pour obtenir dateEcheance de la production
+        // Les jetons servent uniquement à comptabiliser, pas à modifier l'échéance
+        const obtenirDateEcheance = (evaluation) => {
+            const production = productions.find(p => p.id === evaluation.productionId);
+            if (!production || !production.dateEcheance) {
+                // Fallback: utiliser dateEvaluation si pas de dateEcheance configurée
+                return evaluation.dateEvaluation;
+            }
+            return production.dateEcheance;
+        };
+
         // Filtrer évaluations de cet étudiant sur artefacts portfolio jusqu'à dateLimite
-        const evaluationsEleve = evaluationsCache.filter(e =>
-            e.da === da &&
-            artefactsIds.includes(e.productionId) &&
-            e.dateEvaluation && e.dateEvaluation <= dateLimite && // ✅ Filtrage temporel
-            e.statutRemise !== 'non-remis' && // ✅ Exclure non-remis
-            e.note !== null &&
-            e.note !== undefined
-        );
+        // ✅ CORRECTIF CRITIQUE (10 déc 2025): Utiliser les bons noms de champs
+        // etudiantDA (pas da) et noteFinale (pas note) - alignement avec calculerPerformance()
+        // ✅ NOUVEAU (Beta 94): Utiliser dateEcheance de la production (jetons = compteur seulement)
+        const evaluationsEleve = evaluationsCache.filter(e => {
+            if (e.etudiantDA !== da) return false;
+            if (!artefactsIds.includes(e.productionId)) return false;
+            if (e.statutRemise === 'non-remis') return false;
+            if (e.remplaceeParId) return false;
+            if (e.noteFinale === null || e.noteFinale === undefined) return false;
+
+            // ✅ NOUVEAU (Beta 94): Filtrer par dateEcheance de la production
+            const dateEcheance = obtenirDateEcheance(e);
+            if (!dateEcheance) return false;
+
+            return dateEcheance <= dateLimite;
+        });
 
         if (evaluationsEleve.length === 0) {
             // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
@@ -195,7 +260,8 @@ class PratiquePANMaitrise {
 
         // ✅ RÈGLE CRITIQUE : Si < N artefacts, moyenne de TOUS
         if (evaluationsEleve.length < nombreARetenir) {
-            const somme = evaluationsEleve.reduce((acc, e) => acc + parseFloat(e.note || 0), 0);
+            // ✅ CORRECTIF (10 déc 2025): Utiliser noteFinale au lieu de note
+            const somme = evaluationsEleve.reduce((acc, e) => acc + parseFloat(e.noteFinale || 0), 0);
             const moyenne = somme / evaluationsEleve.length;
             const indiceP = moyenne / 100;
 
@@ -209,7 +275,8 @@ class PratiquePANMaitrise {
 
         switch (methodeSelection) {
             case 'meilleurs':
-                evaluationsEleve.sort((a, b) => parseFloat(b.note) - parseFloat(a.note));
+                // ✅ CORRECTIF (10 déc 2025): Utiliser noteFinale au lieu de note
+                evaluationsEleve.sort((a, b) => parseFloat(b.noteFinale) - parseFloat(a.noteFinale));
                 artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
                 break;
 
@@ -220,7 +287,8 @@ class PratiquePANMaitrise {
 
             case 'recents-meilleurs':
                 const nombreMeilleurs = Math.max(1, Math.ceil(evaluationsEleve.length * 0.5));
-                evaluationsEleve.sort((a, b) => parseFloat(b.note) - parseFloat(a.note));
+                // ✅ CORRECTIF (10 déc 2025): Utiliser noteFinale au lieu de note
+                evaluationsEleve.sort((a, b) => parseFloat(b.noteFinale) - parseFloat(a.noteFinale));
                 const topMeilleurs = evaluationsEleve.slice(0, nombreMeilleurs);
                 topMeilleurs.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
                 artefactsRetenus = topMeilleurs.slice(0, nombreARetenir);
@@ -232,18 +300,71 @@ class PratiquePANMaitrise {
 
             default:
                 console.warn(`[PAN-Historique] Modalité inconnue: ${methodeSelection}, utilisation de 'meilleurs'`);
-                evaluationsEleve.sort((a, b) => parseFloat(b.note) - parseFloat(a.note));
+                // ✅ CORRECTIF (10 déc 2025): Utiliser noteFinale au lieu de note
+                evaluationsEleve.sort((a, b) => parseFloat(b.noteFinale) - parseFloat(a.noteFinale));
                 artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
                 break;
         }
 
-        // Calculer la moyenne
-        const somme = artefactsRetenus.reduce((acc, e) => acc + parseFloat(e.note || 0), 0);
-        const moyenne = somme / artefactsRetenus.length;
-        const indiceP = moyenne / 100;
+        // Calculer la moyenne du portfolio (N meilleurs artefacts)
+        // ✅ CORRECTIF (10 déc 2025): Utiliser noteFinale au lieu de note
+        const somme = artefactsRetenus.reduce((acc, e) => acc + parseFloat(e.noteFinale || 0), 0);
+        const moyennePortfolio = somme / artefactsRetenus.length;
+
+        // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Intégrer évaluation terminale avec pondération
+        // Trouver la production portfolio (conteneur)
+        const productionPortfolio = productions.find(p => p.type === 'portfolio');
+
+        // Trouver l'évaluation terminale (production avec pondération > 0 qui n'est ni portfolio ni artefact)
+        const productionTerminale = productions.find(p =>
+            p.ponderation > 0 &&
+            p.type !== 'portfolio' &&
+            p.type !== 'artefact-portfolio'
+        );
+
+        // Si pas de pondérations configurées, retourner juste la moyenne du portfolio
+        if (!productionPortfolio || !productionTerminale) {
+            const indiceP = moyennePortfolio / 100;
+            return indiceP;
+        }
+
+        // Vérifier si l'évaluation terminale était due avant dateLimite
+        const dateEcheanceTerminale = productionTerminale.dateEcheance;
+        if (!dateEcheanceTerminale || dateEcheanceTerminale > dateLimite) {
+            // L'évaluation terminale n'était pas encore due, retourner seulement le portfolio
+            const indiceP = moyennePortfolio / 100;
+            return indiceP;
+        }
+
+        // Trouver l'évaluation de l'étudiant sur l'évaluation terminale
+        const evalTerminale = evaluationsCache.find(e =>
+            e.etudiantDA === da &&
+            e.productionId === productionTerminale.id &&
+            !e.remplaceeParId &&
+            e.noteFinale !== null &&
+            e.noteFinale !== undefined
+        );
+
+        // Si l'évaluation terminale n'est pas encore faite, retourner seulement le portfolio
+        if (!evalTerminale) {
+            const indiceP = moyennePortfolio / 100;
+            return indiceP;
+        }
+
+        // Calculer P pondéré : (Portfolio × pond%) + (Terminale × pond%)
+        const ponderationPortfolio = productionPortfolio.ponderation || 60;
+        const ponderationTerminale = productionTerminale.ponderation || 40;
+        const totalPonderation = ponderationPortfolio + ponderationTerminale;
+
+        const moyennePonderee = (
+            (moyennePortfolio * ponderationPortfolio / totalPonderation) +
+            (parseFloat(evalTerminale.noteFinale) * ponderationTerminale / totalPonderation)
+        );
+
+        const indiceP = moyennePonderee / 100;
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log(`[PAN-Historique] DA ${da}: ${moyenne.toFixed(1)}% (${artefactsRetenus.length} artefacts - modalité: ${methodeSelection})`);
+        // console.log(`[PAN-Historique] DA ${da}: ${moyennePonderee.toFixed(1)}% (Portfolio: ${moyennePortfolio.toFixed(1)}% × ${ponderationPortfolio}%, Terminale: ${evalTerminale.noteFinale}% × ${ponderationTerminale}%)`);
 
         return indiceP;
     }

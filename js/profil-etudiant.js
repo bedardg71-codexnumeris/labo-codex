@@ -172,13 +172,23 @@ function obtenirPratiqueActuelle() {
 
     // Obtenir l'instance depuis le registre
     if (typeof obtenirPratiqueParId === 'function') {
-        return obtenirPratiqueParId(pratiqueId);
+        const pratique = obtenirPratiqueParId(pratiqueId);
+        // ✅ CORRECTIF (10 déc 2025): Ne retourner que si non-null
+        if (pratique) {
+            return pratique;
+        }
+        // Sinon, continuer vers le fallback
     }
 
     // Fallback : créer une instance directement
+    // ✅ CORRECTIF (10 déc 2025): Reconnaître les variantes d'ID
     if (pratiqueId === 'sommative') {
         return new PratiqueSommative();
+    } else if (pratiqueId.startsWith('pan-maitrise')) {
+        // Reconnaît: pan-maitrise, pan-maitrise-json, etc.
+        return new PratiquePANMaitrise();
     } else {
+        // Par défaut, utiliser PAN-Maîtrise
         return new PratiquePANMaitrise();
     }
 }
@@ -8015,3 +8025,4 @@ window.obtenirPatternEtudiant = obtenirPatternEtudiant;
 // 🆕 BETA 93: Exporter afficherProfilComplet pour accès depuis autres modules
 window.afficherProfilComplet = afficherProfilComplet;
 window.calculerTousLesIndices = calculerTousLesIndices; // Utilisé par etudiants.js pour cohérence pratique SOM/PAN
+window.obtenirPratiqueActuelle = obtenirPratiqueActuelle; // ✅ BETA 93.5 (10 déc): Utilisé par snapshots.js pour calcul historique P
