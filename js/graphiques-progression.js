@@ -157,26 +157,29 @@ function creerGraphiqueIndividuel(canvasId, da) {
         }
 
         // Préparer les données
-        // ✅ CORRECTION (Beta 93) : Gérer null pour P et E (pas encore d'évaluation)
+        // ✅ NOUVEAU (Beta 94 - 10 déc 2025) : Snapshots ponctuals A-C-P uniquement (E retiré)
+        // ✅ CORRECTION (Beta 93) : Gérer null pour P (pas encore d'évaluation)
         // ✨ AMÉLIORATION (Beta 93) : Offset vertical léger pour éviter superposition des courbes
         const OFFSET_VISUEL = {
             A: 0.000,   // Baseline (pas de décalage)
             C: 0.005,   // +0.5% (~2px sur graphique 400px)
-            P: 0.010,   // +1.0% (~4px)
-            E: 0.015    // +1.5% (~6px)
+            P: 0.010    // +1.0% (~4px)
         };
 
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
-        // ✅ CORRECTION (8 déc 2025) : Ne pas afficher les valeurs à 0 ou null (semaines sans données ou futures)
-        const donneesA = snapshots.map(s => s.A !== null && s.A !== 0 ? (s.A / 100) + OFFSET_VISUEL.A : null);
+        // ✅ NOUVEAU (Beta 94 - 10 déc 2025) : Utiliser A_cumulatif pour le graphique individuel
+        // A_cumulatif = assiduité depuis le début (cohérent avec C et P cumulatifs)
+        const donneesA = snapshots.map(s => {
+            const valeur = s.A_cumulatif !== undefined ? s.A_cumulatif : s.A; // Fallback si ancien snapshot
+            return valeur !== null && valeur !== 0 ? (valeur / 100) + OFFSET_VISUEL.A : null;
+        });
         const donneesC = snapshots.map(s => s.C !== null && s.C !== 0 ? (s.C / 100) + OFFSET_VISUEL.C : null);
         const donneesP = snapshots.map(s => s.P !== null && s.P !== 0 ? (s.P / 100) + OFFSET_VISUEL.P : null);
-        const donneesE = snapshots.map(s => s.E !== null && s.E !== 0 ? s.E + OFFSET_VISUEL.E : null);
 
         // Calculer min/max pour ajuster l'échelle Y
         // ✅ CORRECTION (Beta 93) : Filtrer les valeurs null avant calcul min/max
         // ✨ AMÉLIORATION (Beta 93) : Échelle fixe 60-100% pour meilleure lisibilité
-        const toutesValeurs = [...donneesA, ...donneesC, ...donneesP, ...donneesE].filter(v => v !== null);
+        const toutesValeurs = [...donneesA, ...donneesC, ...donneesP].filter(v => v !== null);
         const valeurMin = Math.min(...toutesValeurs);
         const valeurMax = Math.max(...toutesValeurs);
 
@@ -246,20 +249,6 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         spanGaps: false
-                    },
-                    {
-                        label: 'Engagement (E)',
-                        data: donneesE,
-                        borderColor: COULEURS_INDICES.E,
-                        backgroundColor: 'transparent',
-                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        pointBackgroundColor: COULEURS_INDICES.E,
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        spanGaps: false
                     }
                 ]
             },
@@ -269,8 +258,13 @@ function creerGraphiqueIndividuel(canvasId, da) {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Évolution des indices A-C-P-E',
-                        font: { size: 16, weight: 'bold' }
+                        text: ['Évolution des indices A-C-P (par séance)', 'Indices cumulatifs depuis le début du trimestre'],
+                        font: [
+                            { size: 16, weight: 'bold' },
+                            { size: 11, weight: 'normal', style: 'italic' }
+                        ],
+                        color: ['#333', '#777'],
+                        padding: { top: 10, bottom: 20 }
                     },
                     legend: {
                         display: true,
@@ -425,13 +419,13 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
         snapshots.sort((a, b) => a.numSemaine - b.numSemaine);
 
         // Préparer les données
-        // ✅ CORRECTION (Beta 93) : Gérer null pour P et E (pas encore d'évaluation)
+        // ✅ NOUVEAU (Beta 94 - 10 déc 2025) : Snapshots ponctuals A-C-P uniquement (E retiré)
+        // ✅ CORRECTION (Beta 93) : Gérer null pour P (pas encore d'évaluation)
         // ✨ AMÉLIORATION (Beta 93) : Offset vertical léger pour éviter superposition des courbes
         const OFFSET_VISUEL = {
             A: 0.000,   // Baseline (pas de décalage)
             C: 0.005,   // +0.5% (~2px sur graphique 400px)
-            P: 0.010,   // +1.0% (~4px)
-            E: 0.015    // +1.5% (~6px)
+            P: 0.010    // +1.0% (~4px)
         };
 
         const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
@@ -439,7 +433,6 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
         const donneesA = snapshots.map(s => s.groupe.moyenneA !== null && s.groupe.moyenneA !== 0 ? (s.groupe.moyenneA / 100) + OFFSET_VISUEL.A : null);
         const donneesC = snapshots.map(s => s.groupe.moyenneC !== null && s.groupe.moyenneC !== 0 ? (s.groupe.moyenneC / 100) + OFFSET_VISUEL.C : null);
         const donneesP = snapshots.map(s => s.groupe.moyenneP !== null && s.groupe.moyenneP !== 0 ? (s.groupe.moyenneP / 100) + OFFSET_VISUEL.P : null);
-        const donneesE = snapshots.map(s => s.groupe.moyenneE !== null && s.groupe.moyenneE !== 0 ? s.groupe.moyenneE + OFFSET_VISUEL.E : null);
 
         // Vérifier que le canvas existe toujours (déjà récupéré en haut de la fonction)
         if (!canvas) {
@@ -494,20 +487,6 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         spanGaps: false
-                    },
-                    {
-                        label: 'Engagement (E)',
-                        data: donneesE,
-                        borderColor: COULEURS_INDICES.E,
-                        backgroundColor: 'transparent',
-                        borderWidth: EPAISSEUR_LIGNE_STANDARD,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        pointBackgroundColor: COULEURS_INDICES.E,
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        spanGaps: false
                     }
                 ]
             },
@@ -517,8 +496,13 @@ function creerGraphiqueGroupeMoyennes(canvasId) {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Évolution du groupe - Moyennes A-C-P-E',
-                        font: { size: 16, weight: 'bold' }
+                        text: ['Évolution du groupe - Moyennes A-C-P (par séance)', 'A et C : ponctuals (cette séance) • P : cumulatif (depuis le début)'],
+                        font: [
+                            { size: 16, weight: 'bold' },
+                            { size: 11, weight: 'normal', style: 'italic' }
+                        ],
+                        color: ['#333', '#777'],
+                        padding: { top: 10, bottom: 20 }
                     },
                     legend: {
                         display: true,
