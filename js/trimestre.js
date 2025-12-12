@@ -1260,6 +1260,7 @@ async function basculerDonneesDemo(activer) {
 
             // Marquer comme activé
             db.setSync('donneesDemo', true);
+            localStorage.setItem('demo-chargees', 'true'); // ✅ Flag pour test de validation
 
             // Notification succès
             alert('✅ Données de démonstration chargées avec succès !\n\nGroupe 9999 : 10 étudiants, 4 artefacts, 40 évaluations');
@@ -1323,6 +1324,7 @@ async function basculerDonneesDemo(activer) {
 
         // Marquer comme désactivé
         db.setSync('donneesDemo', false);
+        localStorage.removeItem('demo-chargees'); // ✅ Retirer flag de validation
 
         // Notification succès
         alert('✅ Données de démonstration supprimées avec succès !');
