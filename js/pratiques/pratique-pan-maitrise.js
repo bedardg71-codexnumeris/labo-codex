@@ -234,6 +234,25 @@ class PratiquePANMaitrise {
             return production.dateEcheance;
         };
 
+        // ✅ DEBUG TEMPORAIRE (10 déc 2025): Vérifier filtrage pour DA spécifique
+        if (da === '9000116') {
+            const toutes = evaluationsCache.filter(e => e.etudiantDA === da);
+            console.log(`[PAN-Historique-DEBUG] DA ${da} @ ${dateLimite}:`);
+            console.log(`  - Total évaluations: ${toutes.length}`);
+            console.log(`  - Artefacts IDs portfolio: [${artefactsIds.join(', ')}]`);
+
+            const avecDateEcheance = toutes.map(e => {
+                const prod = productions.find(p => p.id === e.productionId);
+                return {
+                    prodId: e.productionId,
+                    dateEcheance: prod?.dateEcheance || 'N/A',
+                    statutRemise: e.statutRemise,
+                    noteFinale: e.noteFinale
+                };
+            });
+            console.log(`  - Productions avec dates:`, avecDateEcheance);
+        }
+
         // Filtrer évaluations de cet étudiant sur artefacts portfolio jusqu'à dateLimite
         // ✅ CORRECTIF CRITIQUE (10 déc 2025): Utiliser les bons noms de champs
         // etudiantDA (pas da) et noteFinale (pas note) - alignement avec calculerPerformance()
@@ -363,8 +382,10 @@ class PratiquePANMaitrise {
 
         const indiceP = moyennePonderee / 100;
 
-        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log(`[PAN-Historique] DA ${da}: ${moyennePonderee.toFixed(1)}% (Portfolio: ${moyennePortfolio.toFixed(1)}% × ${ponderationPortfolio}%, Terminale: ${evalTerminale.noteFinale}% × ${ponderationTerminale}%)`);
+        // ✅ DEBUG TEMPORAIRE (10 déc 2025): Vérifier calcul historique
+        if (da === '9000116') {
+            console.log(`[PAN-Historique] DA ${da} @ ${dateLimite}: ${moyennePonderee.toFixed(1)}% (Portfolio: ${moyennePortfolio.toFixed(1)}% × ${ponderationPortfolio}%, Terminale: ${evalTerminale ? evalTerminale.noteFinale : 'N/A'}% × ${ponderationTerminale}%)`);
+        }
 
         return indiceP;
     }
@@ -444,41 +465,41 @@ class PratiquePANMaitrise {
             return null;
         }
 
-        // Lire les productions artefacts
-        const productions = db.getSync('productions', []);
-        const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
+        // ✅ CORRECTION (11 déc 2025): Utiliser dateEcheance pour identifier les travaux assignés
+        // C = travaux certifiés remis / travaux assignés (avec dateEcheance)
+
+        // Lire les productions
+        const productions = this._lireProductions();
 
         // Lire les évaluations
         const evaluations = this._lireEvaluations();
 
-        // 1. Identifier les artefacts QUI ONT ÉTÉ ÉVALUÉS (au moins 1 évaluation existe)
-        const artefactsEvalues = artefactsPortfolio.filter(artefact => {
-            return evaluations.some(e =>
-                e.productionId === artefact.id &&
-                !e.remplaceeParId &&
-                e.noteFinale !== null
-            );
+        // 1. Identifier les travaux ASSIGNÉS (ont une dateEcheance et ne sont pas facultatifs)
+        const travauxAssignes = productions.filter(p => {
+            return p.dateEcheance && !p.facultatif;
         });
 
-        if (artefactsEvalues.length === 0) {
-            // console.log('[PAN] Aucun artefact portfolio évalué');
+        if (travauxAssignes.length === 0) {
+            // console.log('[PAN] Aucun travail assigné avec dateEcheance');
             return null;
         }
 
-        // 2. Compter combien CET ÉTUDIANT a remis parmi les artefacts évalués
-        const artefactsRemis = artefactsEvalues.filter(artefact => {
+        // 2. Compter combien CET ÉTUDIANT a remis (certifié avec statutRemise='remis')
+        const travauxRemis = travauxAssignes.filter(travail => {
             return evaluations.some(e =>
                 e.etudiantDA === da &&
-                e.productionId === artefact.id &&
+                e.productionId === travail.id &&
+                e.statutRemise === 'remis' &&
                 !e.remplaceeParId &&
-                e.noteFinale !== null
+                e.noteFinale !== null &&
+                e.noteFinale !== undefined
             );
         });
 
-        const indiceC = artefactsRemis.length / artefactsEvalues.length;
+        const indiceC = travauxRemis.length / travauxAssignes.length;
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log(`[PAN] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${artefactsRemis.length}/${artefactsEvalues.length} évalués)`);
+        // console.log(`[PAN] Complétion DA ${da}: ${(indiceC * 100).toFixed(1)}% (${travauxRemis.length}/${travauxAssignes.length} assignés)`);
 
         return indiceC;
     }
@@ -709,6 +730,15 @@ class PratiquePANMaitrise {
         return productions
             .filter(p => p.type === 'artefact-portfolio')
             .map(p => p.id);
+    }
+
+    /**
+     * Lit toutes les productions depuis le stockage
+     * @private
+     * @returns {Array} Liste des productions
+     */
+    _lireProductions() {
+        return obtenirDonneesSelonMode('productions') || [];
     }
 
     /**
