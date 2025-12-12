@@ -7660,6 +7660,62 @@ Exemple :
                         </div>
                     </div>
 
+                    <!-- Carte: 2b. Données de démonstration -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">2b. Utiliser les données de démonstration (optionnel)</h3>
+                        <p><strong>Navigation :</strong> Réglages → Trimestre → Section «Données de démonstration»</p>
+
+                        <p>Pour explorer l'application avec des données réalistes <strong>avant de configurer vos propres données</strong>, activez le groupe de démonstration.</p>
+
+                        <div class="carte-gradient-bleu">
+                            <p class="titre-11-bold-bleu-mb15">Activation :</p>
+                            <ol class="lh-2">
+                                <li>Allez dans <strong>Réglages → Trimestre</strong></li>
+                                <li>Descendez à la section «Données de démonstration»</li>
+                                <li>Cochez la case «Utiliser les données de démonstration (groupe 9999)»</li>
+                                <li>Le groupe demo est immédiatement chargé dans l'application</li>
+                            </ol>
+                        </div>
+
+                        <p><strong>Contenu du groupe demo (groupe 9999) :</strong></p>
+                        <ul>
+                            <li><strong>Cours</strong> : 601-101 Écriture et littérature (H2026)</li>
+                            <li><strong>Enseignant</strong> : Primo Primavera (fictif)</li>
+                            <li><strong>10 étudiants</strong> : Noms fictifs avec programmes variés (500.A1, 200.B0, 300.A0, etc.)</li>
+                            <li><strong>4 productions</strong> : Artefacts portfolio avec échéances échelonnées</li>
+                            <li><strong>40 évaluations</strong> : Notes réalistes selon l'échelle IDME (réparties sur les 4 artefacts)</li>
+                            <li><strong>8 semaines de présences</strong> : Générées dynamiquement avec pattern réaliste (92% assiduité moyenne)</li>
+                            <li><strong>Grilles et échelles</strong> : Grille SRPNF + Échelle IDME + cartouches de rétroaction</li>
+                        </ul>
+
+                        <div class="alerte alerte-information">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Expérience complète du système</h4>
+                            <p>Avec le groupe demo, vous pouvez :</p>
+                            <ul class="m-10-0-0-0">
+                                <li><strong>Tableau de bord</strong> : Visualiser les indices A-C-P de 10 étudiants</li>
+                                <li><strong>Profils individuels</strong> : Explorer les diagnostics, patterns, niveaux RàI</li>
+                                <li><strong>Graphiques de progression</strong> : Voir l'évolution sur 8 semaines</li>
+                                <li><strong>Liste des étudiants</strong> : Trier, filtrer, identifier les patterns</li>
+                                <li><strong>Système de dépistage</strong> : Comprendre la détection des risques</li>
+                            </ul>
+                        </div>
+
+                        <p><strong>Désactivation :</strong></p>
+                        <ul>
+                            <li>Décochez la case dans Réglages → Trimestre</li>
+                            <li>Toutes les données du groupe 9999 sont supprimées automatiquement</li>
+                            <li>Vos données personnelles (si présentes) restent intactes</li>
+                        </ul>
+
+                        <div class="alerte alerte-attention">
+                            <strong>Important :</strong> Le groupe demo (9999) et vos données réelles coexistent. Vous pouvez avoir le groupe demo activé en même temps que votre propre cours-groupe. Utilisez les filtres de groupe pour basculer entre les deux.
+                        </div>
+
+                        <div class="alerte alerte-succes">
+                            <strong>💡 Astuce pédagogique :</strong> Utilisez le groupe demo pour vous familiariser avec les fonctionnalités avant de saisir vos vraies données. C'est aussi utile pour expérimenter des configurations (seuils, pratiques de notation) sans risquer d'affecter vos données réelles.
+                        </div>
+                    </div>
+
                     <!-- Carte: 3. Groupe -->
                     <div class="carte">
                         <h3 class="carte-titre-bleu">3. Créer le groupe</h3>
@@ -8597,9 +8653,77 @@ Exemple :
                         </div>
                     </div>
 
+                    <!-- Carte: Captures de progression (Snapshots) -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">6. Captures de progression (Snapshots hebdomadaires)</h3>
+                        <p><strong>Navigation :</strong> Réglages → Captures de progression</p>
+
+                        <p>Le système capture automatiquement l'état des indices A-C-P de chaque étudiant à chaque séance, créant un historique longitudinal complet pour l'analyse de la progression.</p>
+
+                        <div class="carte-gradient-bleu">
+                            <p class="titre-11-bold-bleu-mb15">Fonctionnement automatique :</p>
+                            <ol class="lh-2">
+                                <li><strong>Capture automatique</strong> : À chaque saisie de présences, un snapshot est créé automatiquement</li>
+                                <li><strong>Données capturées</strong> : A ponctuel, A cumulatif, C cumulatif, P cumulatif, pattern, niveau RàI</li>
+                                <li><strong>Graphiques générés</strong> : Évolution individuelle et évolution du groupe</li>
+                                <li><strong>Reconstruction possible</strong> : Recalcul rétroactif de tous les snapshots historiques</li>
+                            </ol>
+                        </div>
+
+                        <p><strong>Distinction ponctuel vs cumulatif :</strong></p>
+
+                        <div class="alerte alerte-information">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Graphique INDIVIDUEL (Profil étudiant)</h4>
+                            <p><strong>Tous les indices sont CUMULATIFS</strong> (depuis le début du trimestre) :</p>
+                            <ul class="m-10-0-0-0">
+                                <li><strong>A cumulatif</strong> : Assiduité totale depuis le début (ex: 24h présentes / 26h offertes = 92%)</li>
+                                <li><strong>C cumulatif</strong> : Travaux remis / travaux dus jusqu'à cette date (ex: 7/9 = 78%)</li>
+                                <li><strong>P cumulatif</strong> : Moyenne des évaluations jusqu'à cette date (ex: 73.5%)</li>
+                            </ul>
+                            <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem"><em>Rationale pédagogique : Les indices cumulatifs permettent de mieux dépister l'impact à long terme sur l'apprentissage. Une absence passée ou un travail non remis peuvent avoir des conséquences durables.</em></p>
+                        </div>
+
+                        <div class="alerte alerte-information">
+                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Graphique GROUPE (Tableau de bord)</h4>
+                            <p><strong>Indices mixtes</strong> pour détecter les variations récentes :</p>
+                            <ul class="m-10-0-0-0">
+                                <li><strong>A ponctuel</strong> : Taux de présence à cette séance spécifique (ex: 28/30 présents = 93%)</li>
+                                <li><strong>C ponctuel</strong> : Taux de remise du dernier artefact dû (ex: 25/30 remis = 83%)</li>
+                                <li><strong>P cumulatif</strong> : Moyenne des évaluations jusqu'à cette date (ex: 75.2%)</li>
+                            </ul>
+                            <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem"><em>Rationale pédagogique : Les indices ponctuals permettent de détecter rapidement les problèmes émergents dans le groupe (ex: séance difficile, échéance problématique).</em></p>
+                        </div>
+
+                        <p><strong>Reconstruction des snapshots :</strong></p>
+                        <p>Si vous modifiez rétroactivement des présences ou des évaluations, vous devez reconstruire les snapshots pour mettre à jour les graphiques :</p>
+                        <ol class="lh-relaxed">
+                            <li>Allez dans <strong>Réglages → Captures de progression</strong></li>
+                            <li>Cliquez sur <strong>«Reconstruire les snapshots historiques»</strong></li>
+                            <li>Le système recalcule tous les snapshots depuis le début du trimestre</li>
+                            <li>Les graphiques sont mis à jour avec les données corrigées</li>
+                        </ol>
+
+                        <div class="alerte alerte-attention">
+                            <strong>Important :</strong> Si vous corrigez une erreur de saisie (ex: séance fantôme un jour sans cours, absence motivée non marquée), pensez à reconstruire les snapshots pour que les graphiques reflètent les données correctes.
+                        </div>
+
+                        <p><strong>Exemple concret :</strong></p>
+                        <p>Eve a été présente à tous les cours mais son graphique affichait 92% d'assiduité. Investigation a révélé une «séance fantôme» le 30 septembre (un mardi sans cours). Après suppression de cette séance et reconstruction des snapshots, son assiduité est correctement affichée à 100%.</p>
+
+                        <div class="alerte alerte-succes">
+                            <strong>Avantages des snapshots :</strong>
+                            <ul class="m-10-0-0-0">
+                                <li><strong>Historique complet</strong> : Visualisation de la progression semaine par semaine</li>
+                                <li><strong>Détection patterns</strong> : Identification des moments critiques (chutes, paliers, rebonds)</li>
+                                <li><strong>Comparaison groupe</strong> : Analyse des tendances collectives vs individuelles</li>
+                                <li><strong>Reconstruction rétroactive</strong> : Correction d'erreurs sans perte de données</li>
+                            </ul>
+                        </div>
+                    </div>
+
                     <!-- Carte: Collaboration entre collègues -->
                     <div class="carte" class="border-left-purple">
-                        <h3 class="carte-titre-bleu">6. Collaboration entre collègues</h3>
+                        <h3 class="carte-titre-bleu">7. Collaboration entre collègues</h3>
                         <p><strong>Partage de matériel pédagogique via Import/Export</strong></p>
 
                         <p>Le système permet de partager facilement du matériel pédagogique entre enseignant·es, favorisant la collaboration départementale et l'harmonisation des pratiques.</p>
@@ -10271,7 +10395,7 @@ Exemple :
     <script src="js/pack-demarrage.js"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
-    <script src="js/trimestre.js?v=2025121011"></script>
+    <script src="js/trimestre.js?v=2025121201"></script>
     <script src="js/etudiants.js?v=2025120901"></script>
     <script src="js/productions-bibliotheque.js?v=2025120826"></script>
     <script src="js/productions.js?v=2025121003"></script>
@@ -10293,7 +10417,7 @@ Exemple :
     <script src="js/pratiques/pratique-registre.js?v=2025120705"></script>
     <script src="js/pratiques/migration-pratiques.js?v=2025120705"></script>
     <script src="js/pratiques/pratique-test.js?v=2025120705"></script>
-    <script src="js/pratiques/pratique-pan-maitrise.js?v=2025121006"></script>
+    <script src="js/pratiques/pratique-pan-maitrise.js?v=2025121101"></script>
     <script src="js/pratiques/pratique-sommative.js?v=2025121003"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=2025112600"></script>
     <script src="js/pratiques/pratique-pan-objectifs.js?v=2025120901"></script>
@@ -10311,11 +10435,11 @@ Exemple :
     <script src="js/objectifs.js?v=2025120124"></script>
 
     <script src="js/portfolio.js?v=2025120908"></script>
-    <script src="js/saisie-presences.js?v=2025120613"></script>
+    <script src="js/saisie-presences.js?v=2025121202"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025120703"></script>
-    <script src="js/profil-etudiant.js?v=2025121004"></script>
+    <script src="js/profil-etudiant.js?v=2025121105"></script>
     <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
 
@@ -10329,8 +10453,8 @@ Exemple :
     <script src="js/import-export.js?v=2025120608"></script>
     <script src="js/statistiques.js?v=2025121001"></script>
     <script src="js/liste-evaluations.js?v=2025120207"></script>
-    <script src="js/snapshots.js?v=2025121008"></script>
-    <script src="js/graphiques-progression.js?v=2025121019"></script>
+    <script src="js/snapshots.js?v=2025121108"></script>
+    <script src="js/graphiques-progression.js?v=2025121108"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
     <script src="js/evaluation-jetons.js?v=2025113013"></script>
