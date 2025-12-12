@@ -1,11 +1,27 @@
 /**
- * MODULE SNAPSHOTS - Capture longitudinale progression étudiants (Beta 93)
+ * MODULE SNAPSHOTS - Capture longitudinale progression étudiants (Beta 94)
  *
  * Fonctionnalités :
  * 1. Snapshots hebdomadaires : Portrait complet du groupe chaque semaine
  * 2. Snapshots interventions : Capture avant/après interventions RàI
  * 3. Reconstruction rétroactive : Recalcul des semaines passées
  * 4. Export/Import : Sauvegarde et restauration des snapshots
+ *
+ * IMPORTANT (10 décembre 2025) : Distinction ponctuel vs cumulatif
+ *
+ * GRAPHIQUE INDIVIDUEL (profil étudiant) :
+ * - A : CUMULATIF (assiduité depuis le début du trimestre)
+ * - C : CUMULATIF (travaux remis / travaux dus jusqu'à cette date)
+ * - P : CUMULATIF (moyenne des évaluations jusqu'à cette date)
+ * → Tous cumulatifs pour mieux dépister l'impact à long terme sur l'apprentissage
+ *
+ * GRAPHIQUE GROUPE (tableau de bord) :
+ * - A : PONCTUEL (taux de présence à cette séance)
+ * - C : PONCTUEL (taux de remise du dernier artefact dû)
+ * - P : CUMULATIF (moyenne des évaluations jusqu'à cette date)
+ *
+ * - L'indice E (engagement) est EXCLU des snapshots (trop peu informatif en ponctuel)
+ * - E reste disponible dans le profil étudiant comme indicateur LONGITUDINAL/CUMULATIF
  *
  * Structure de données :
  * localStorage.snapshots = {
@@ -17,10 +33,10 @@
  *       dateFin: "2025-01-12",
  *       timestamp: "2025-01-12T23:59:59Z",
  *       etudiants: [
- *         { da: "1234567", A: 85, C: 90, P: 75, E: 0.82, pattern: "Stable", rai: "Niveau 1" }
+ *         { da: "1234567", A: 85, C: 90, P: 75, pattern: "Stable", rai: "Niveau 1" }
  *       ],
  *       groupe: {
- *         moyenneA: 82, moyenneC: 88, moyenneP: 71, moyenneE: 0.77,
+ *         moyenneA: 82, moyenneC: 88, moyenneP: 71,
  *         nbEtudiants: 30, dispersionA: 15.2, dispersionC: 12.5, dispersionP: 18.3
  *       }
  *     }
@@ -32,15 +48,15 @@
  *       type: "niveau2",
  *       titre: "Soutien Structure",
  *       etudiantsDA: ["1234567", "2345678"],
- *       avant: { "1234567": { A: 75, C: 60, P: 65, E: 0.66 } },
+ *       avant: { "1234567": { A: 75, C: 60, P: 65 } },
  *       apres: null  // Sera rempli 2-3 semaines plus tard
  *     }
  *   ]
  * }
  *
  * @author Grégoire Bédard
- * @date 3 décembre 2025
- * @version 1.0.0
+ * @date 10 décembre 2025
+ * @version 1.1.0 (Beta 94 - Snapshots ponctuals A-C-P uniquement)
  */
 
 /* ===============================
@@ -84,14 +100,18 @@ function initialiserModuleSnapshots() {
 let _cacheEvaluations = null;
 
 /**
- * ✨ NOUVEAU (Beta 93) : Calcule les indices A-C-P-E jusqu'à une date limite
+ * ✨ NOUVEAU (Beta 94) : Calcule les indices A-C-P jusqu'à une date limite
  * Permet la reconstruction rétroactive fidèle à l'historique
+ *
+ * IMPORTANT (10 déc 2025) : L'indice E n'est PLUS calculé dans les snapshots
+ * - Les snapshots sont PONCTUALS (photo à un moment précis)
+ * - E reste disponible dans le profil étudiant comme indicateur LONGITUDINAL
  *
  * @param {string} da - Numéro DA de l'étudiant
  * @param {string} dateLimite - Date limite au format 'YYYY-MM-DD' (incluse)
  * @param {Array} evaluationsCache - Cache optionnel des évaluations (pour performance)
  * @param {boolean} usePonctualA - Si true, utilise assiduité ponctuelle de la séance au lieu de cumulative
- * @returns {Object} - {A: number, C: number, P: number, E: number}
+ * @returns {Object} - {A: number, C: number, P: number}
  */
 function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, usePonctualA = false) {
     // 🐛 DEBUG - Désactivé pour performance (30 snapshots × 30 étudiants = 900 appels)
@@ -152,34 +172,36 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         return dateEcheance <= dateLimite;
     });
 
-    // 1. Identifier les productions QUI ONT ÉTÉ ÉVALUÉES jusqu'à cette date
-    const productionsEvaluees = productions.filter(production => {
+    // ✅ CORRECTION (10 déc 2025): Identifier les productions DUES jusqu'à cette date (dateEcheance)
+    // Au lieu de "productions évaluées", on regarde les productions dont l'échéance est passée
+    const productionsDues = productions.filter(production => {
         // Exclure les productions facultatives
         if (production.facultatif) return false;
 
-        // Vérifier qu'au moins une évaluation existe pour cette production jusqu'à dateLimite
-        return evaluationsFiltrees.some(e =>
-            e.productionId === production.id &&
-            !e.remplaceeParId &&
-            e.noteFinale !== null
-        );
+        // Vérifier que la production a une dateEcheance passée
+        return production.dateEcheance && production.dateEcheance <= dateLimite;
     });
 
-    if (productionsEvaluees.length === 0) {
-        // ✅ CORRECTION (Beta 93) : null au lieu de 100% quand aucune production évaluée
+    if (productionsDues.length === 0) {
+        // ✅ CORRECTION (Beta 93) : null au lieu de 100% quand aucune production due
         indiceC = null;
     } else {
-        // 2. Compter combien CET ÉTUDIANT a remis parmi les productions évaluées
-        const productionsRemises = productionsEvaluees.filter(production => {
-            return evaluationsFiltrees.some(e =>
+        // 2. Compter combien CET ÉTUDIANT a remis (évaluation certifiée) parmi les productions dues
+        // ✅ IMPORTANT (Beta 94 - 10 déc): Option B - Considérer dateEcheance, pas dateEvaluation
+        // Un travail remis en retard est compté rétroactivement dès son échéance
+        // Cela rend C monotone croissant (jamais de baisse) et fidèle aux échéances
+        const productionsRemises = productionsDues.filter(production => {
+            return evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === production.id &&
+                e.statutRemise === 'remis' &&
                 !e.remplaceeParId &&
-                e.noteFinale !== null
+                e.noteFinale !== null &&
+                e.noteFinale !== undefined
             );
         });
 
-        indiceC = Math.round((productionsRemises.length / productionsEvaluees.length) * 100);
+        indiceC = Math.round((productionsRemises.length / productionsDues.length) * 100);
     }
 
     // Calculer P : Déléguer à la pratique de notation configurée
@@ -269,29 +291,18 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         }
     }
 
-    // Engagement (E) : Moyenne géométrique de A, C, P
-    // ✅ CORRECTION (Beta 93) : Si C ou P sont null, E est aussi null
-    let indiceE;
-    if (indiceC === null || indiceP === null) {
-        indiceE = null;
-    } else {
-        const A_decimal = indiceA / 100;
-        const C_decimal = indiceC / 100;
-        const P_decimal = indiceP / 100;
-        const E_brut = A_decimal * C_decimal * P_decimal;
-        const E = Math.pow(E_brut, 1/3); // Racine cubique
-        indiceE = parseFloat(E.toFixed(3));
-    }
+    // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Engagement (E) n'est PLUS calculé dans les snapshots
+    // Les snapshots sont PONCTUALS (A-C-P uniquement)
+    // E reste disponible dans le profil étudiant comme indicateur LONGITUDINAL/CUMULATIF
 
     const resultat = {
         A: indiceA,
         C: indiceC,
-        P: indiceP,
-        E: indiceE
+        P: indiceP
     };
 
     // 🐛 DEBUG - Désactivé pour performance
-    // console.log(`[calculerIndicesHistoriques] RETOUR: A=${resultat.A}, C=${resultat.C}, P=${resultat.P}, E=${resultat.E}`);
+    // console.log(`[calculerIndicesHistoriques] RETOUR: A=${resultat.A}, C=${resultat.C}, P=${resultat.P}`);
 
     return resultat;
 }
@@ -361,9 +372,18 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
         const snapshotsEtudiants = [];
 
         // ✅ Compteurs séparés pour gérer les valeurs null
-        let sommeA_ponctuel = 0, sommeC_cumul = 0, sommeP_cumul = 0, sommeE = 0;
-        let nbAvecC = 0, nbAvecP = 0, nbAvecE = 0;
+        // ✅ NOUVEAU (Beta 94 - 10 déc 2025): Retrait de E (snapshots ponctuals A-C-P uniquement)
+        let sommeA_ponctuel = 0, sommeC_cumul = 0, sommeP_cumul = 0;
+        let nbAvecC = 0, nbAvecP = 0;
         const valeursA = [], valeursC = [], valeursP = [];
+
+        // ✅ NOUVEAU (11 déc 2025): Charger productions pour calculer C global
+        const productions = obtenirDonneesSelonMode('productions') || [];
+
+        // ✅ NOUVEAU (11 déc 2025): C global = taux de remise du DERNIER artefact dû
+        // Identifier le dernier travail dont l'échéance est passée
+        const productionsDues = productions.filter(p => !p.facultatif && p.dateEcheance && p.dateEcheance <= dateSeance);
+        const dernierTravail = productionsDues.sort((a, b) => b.dateEcheance.localeCompare(a.dateEcheance))[0];
 
         // ⚡ Charger depuis IndexedDB par défaut (évite QuotaExceededError localStorage)
         let evaluationsCache = evaluationsCacheParam;
@@ -383,9 +403,12 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
         etudiants.forEach(etudiant => {
             const da = etudiant.da;
 
-            // ✨ NOUVEAU (Beta 93) : A ponctuel, C et P cumulatifs
-            // usePonctualA = true pour obtenir l'assiduité de CETTE séance uniquement
-            const indices = calculerIndicesHistoriques(da, dateSeance, evaluationsCache, true);
+            // ✅ NOUVEAU (Beta 94 - 10 déc 2025) : Calculer A ponctuel ET cumulatif
+            // - A ponctuel : Pour le graphique de groupe (taux de présence à cette séance)
+            // - A cumulatif : Pour le graphique individuel (assiduité depuis le début)
+            // - C et P : Toujours cumulatifs
+            const indicesPonctuel = calculerIndicesHistoriques(da, dateSeance, evaluationsCache, true);
+            const indicesCumulatif = calculerIndicesHistoriques(da, dateSeance, evaluationsCache, false);
 
             // ⚡ OPTIMISATION PERFORMANCE: Désactivé pendant reconstruction
             // Patterns et RàI génèrent beaucoup de logs console (× 900 étudiants = saturation Safari)
@@ -419,48 +442,58 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
             snapshotsEtudiants.push({
                 da: da,
                 nom: `${etudiant.prenom} ${etudiant.nom}`,
-                A: indices.A, // ✨ A ponctuel (cette séance uniquement)
-                C: indices.C, // C cumulatif
-                P: indices.P, // P cumulatif
-                E: indices.E, // E calculé avec A ponctuel × C cumul × P cumul
+                A: indicesPonctuel.A, // ✅ A ponctuel (pour graphique groupe)
+                A_cumulatif: indicesCumulatif.A, // ✅ A cumulatif (pour graphique individuel)
+                C: indicesPonctuel.C, // ✅ C cumulatif
+                P: indicesPonctuel.P, // ✅ P cumulatif
                 pattern: pattern,
                 rai: rai
             });
 
             // Accumuler pour moyennes (gérer null)
-            sommeA_ponctuel += indices.A;
+            sommeA_ponctuel += indicesPonctuel.A;
 
-            // C, P et E peuvent être null si aucune évaluation
-            if (indices.C !== null) {
-                sommeC_cumul += indices.C;
+            // C et P peuvent être null si aucune évaluation
+            if (indicesPonctuel.C !== null) {
+                sommeC_cumul += indicesPonctuel.C;
                 nbAvecC++;
             }
-            if (indices.P !== null) {
-                sommeP_cumul += indices.P;
+            if (indicesPonctuel.P !== null) {
+                sommeP_cumul += indicesPonctuel.P;
                 nbAvecP++;
             }
-            if (indices.E !== null) {
-                sommeE += indices.E;
-                nbAvecE++;
+
+            valeursA.push(indicesPonctuel.A);
+            if (indicesPonctuel.C !== null) {
+                valeursC.push(indicesPonctuel.C);
+            }
+            if (indicesPonctuel.P !== null) {
+                valeursP.push(indicesPonctuel.P);
             }
 
-            valeursA.push(indices.A);
-            if (indices.C !== null) {
-                valeursC.push(indices.C);
-            }
-            if (indices.P !== null) {
-                valeursP.push(indices.P);
-            }
         });
 
         const nbEtudiants = etudiants.length;
 
+        // ✅ NOUVEAU (11 déc 2025): Calculer C global = taux de remise du dernier travail
+        let cGlobal = null;
+        if (dernierTravail) {
+            const nbRemis = evaluationsCache.filter(e =>
+                e.productionId === dernierTravail.id &&
+                e.statutRemise === 'remis' &&
+                !e.remplaceeParId &&
+                e.noteFinale !== null &&
+                e.noteFinale !== undefined
+            ).length;
+            cGlobal = Math.round((nbRemis / nbEtudiants) * 100);
+        }
+
         // Calculer statistiques groupe (gérer null)
+        // ✅ CLARIFICATION (Beta 94 - 10 déc 2025): Distinction ponctuel vs cumulatif
         const groupe = {
-            moyenneA: Math.round(sommeA_ponctuel / nbEtudiants), // Moyenne A ponctuel
-            moyenneC: nbAvecC > 0 ? Math.round(sommeC_cumul / nbAvecC) : null,
-            moyenneP: nbAvecP > 0 ? Math.round(sommeP_cumul / nbAvecP) : null,
-            moyenneE: nbAvecE > 0 ? parseFloat((sommeE / nbAvecE).toFixed(2)) : null,
+            moyenneA: Math.round(sommeA_ponctuel / nbEtudiants), // ✅ A ponctuel (taux de présence à cette séance)
+            moyenneC: cGlobal, // ✅ C ponctuel (taux de remise du dernier artefact dû)
+            moyenneP: nbAvecP > 0 ? Math.round(sommeP_cumul / nbAvecP) : null, // ✅ P cumulatif (moyenne jusqu'à cette date)
             nbEtudiants: nbEtudiants,
             dispersionA: calculerEcartType(valeursA),
             dispersionC: valeursC.length > 0 ? calculerEcartType(valeursC) : null,
@@ -571,6 +604,8 @@ function calculerEcartType(valeurs) {
  * Capture un snapshot "avant intervention" pour un groupe d'étudiants
  * Appelé lors de la planification d'une intervention RàI
  *
+ * ✅ NOUVEAU (Beta 94 - 10 déc 2025): Snapshots ponctuals A-C-P uniquement (E retiré)
+ *
  * @param {string} interventionId - ID de l'intervention
  * @param {string[]} etudiantsDA - Liste des DA des étudiants concernés
  * @param {string} type - Type d'intervention (niveau1/niveau2/niveau3)
@@ -586,8 +621,7 @@ function capturerSnapshotIntervention(interventionId, etudiantsDA, type, titre) 
             avant[da] = {
                 A: indices.A,
                 C: indices.C,
-                P: indices.P,
-                E: parseFloat(indices.E)
+                P: indices.P
             };
         });
 
@@ -620,6 +654,8 @@ function capturerSnapshotIntervention(interventionId, etudiantsDA, type, titre) 
  * Met à jour un snapshot intervention avec les données "après"
  * Appelé 2-3 semaines après l'intervention (manuel ou automatique)
  *
+ * ✅ NOUVEAU (Beta 94 - 10 déc 2025): Snapshots ponctuals A-C-P uniquement (E retiré)
+ *
  * @param {string} interventionId - ID de l'intervention
  * @returns {boolean} - true si succès, false sinon
  */
@@ -645,8 +681,7 @@ function mettreAJourSnapshotIntervention(interventionId) {
             apres[da] = {
                 A: indices.A,
                 C: indices.C,
-                P: indices.P,
-                E: parseFloat(indices.E)
+                P: indices.P
             };
         });
 

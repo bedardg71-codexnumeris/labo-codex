@@ -2164,6 +2164,9 @@ function genererSectionEngagement(da) {
                     E = ∛(A × C × P)
                     <span class="primo-aide" data-target="conseil-formule-engagement-carte" style="margin-left: 5px; display: inline-block !important; cursor: pointer;">😎</span>
                 </div>
+                <div style="margin-top: 8px; padding: 6px 10px; background: #fff9e6; border-left: 3px solid #ffa000; font-size: 0.8rem; color: #555;">
+                    <strong>💡 Note :</strong> Indice longitudinal (historique complet depuis le début du trimestre)
+                </div>
             </div>
         </div>
 

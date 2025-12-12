@@ -1789,6 +1789,7 @@ window.chargerGroupesPresences = chargerGroupesPresences;
 window.initialiserSaisiePresences = initialiserSaisiePresences;
 window.enregistrerPresences = enregistrerPresences;
 window.calculerAssiduiteJusquADate = calculerAssiduiteJusquADate; // ✨ NOUVEAU (Beta 93)
+window.calculerEtSauvegarderIndicesAssiduite = calculerEtSauvegarderIndicesAssiduite; // ✅ Export pour recalcul global
 /**
  * Filtre le tableau de saisie des présences selon la recherche
  */
