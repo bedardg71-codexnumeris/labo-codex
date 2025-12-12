@@ -607,6 +607,45 @@
     }
 
     // ============================================
+    // Fonctions utilitaires globales
+    // ============================================
+
+    /**
+     * Obtient les données selon le mode actif (normal, simulation, anonymisation)
+     * Fonction utilitaire pour simplifier l'accès aux données dans tous les modules
+     *
+     * @param {string} cle - Clé de stockage (ex: 'groupeEtudiants', 'evaluationsSauvegardees')
+     * @param {*} defaut - Valeur par défaut si la clé n'existe pas (défaut: [])
+     * @returns {*} Les données parsées ou la valeur par défaut
+     *
+     * USAGE:
+     * const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+     * const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees', []);
+     */
+    function obtenirDonneesSelonMode(cle, defaut = []) {
+        // Lecture depuis db.getSync (cache hybride localStorage + IndexedDB)
+        const donnees = db.getSync(cle, null);
+
+        // Si pas de données, retourner la valeur par défaut
+        if (!donnees) {
+            return defaut;
+        }
+
+        // Si les données sont déjà un objet/array, les retourner directement
+        if (typeof donnees === 'object') {
+            return donnees;
+        }
+
+        // Sinon, tenter de parser le JSON (pour compatibilité avec anciens modules)
+        try {
+            return JSON.parse(donnees);
+        } catch (e) {
+            console.warn(`[obtenirDonneesSelonMode] Impossible de parser la clé "${cle}":`, e);
+            return defaut;
+        }
+    }
+
+    // ============================================
     // Initialisation et export global
     // ============================================
 
@@ -627,6 +666,7 @@
 
     // Exporter globalement
     window.db = db;
+    window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
 
     // Export pour modules ES6 (futur)
     if (typeof module !== 'undefined' && module.exports) {
