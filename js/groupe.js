@@ -88,20 +88,12 @@ let tempImportData = [];
 // function obtenirDonneesSelonMode(cle) - SUPPRIMÉE, utiliser celle de modes.js
 
 /**
- * Sauvegarde les données dans localStorage selon la clé spécifiée
- * @param {string} cle - Clé localStorage (ex: 'groupeEtudiants')
- * @param {Array} donnees - Données à sauvegarder
- * @returns {boolean} - true si succès, false sinon
+ * sauvegarderDonneesSelonMode() - SUPPRIMÉE, utiliser celle de modes.js
+ * La vraie fonction est définie dans modes.js et gère correctement :
+ * - Le blocage en mode Anonymisation
+ * - Les erreurs de quota (QuotaExceededError)
  */
-function sauvegarderDonneesSelonMode(cle, donnees) {
-    try {
-        db.setSync(cle, donnees);
-        return true;
-    } catch (error) {
-        console.error(`Erreur sauvegarde ${cle}:`, error);
-        return false;
-    }
-}
+// function sauvegarderDonneesSelonMode(cle, donnees) - SUPPRIMÉE
 
 /**
  * Filtre les étudiants selon le mode (exclut le groupe 9999 par défaut)
