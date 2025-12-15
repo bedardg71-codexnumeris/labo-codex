@@ -3734,8 +3734,87 @@ function genererSectionProductions(da) {
         }
     });
 
+    // Calculer les détails de la note finale de session
+    const detailsNoteFinale = calculerDetailsNoteFinale(da);
+
+    // Générer le HTML de la section Note finale
+    let htmlNoteFinale = '';
+    if (detailsNoteFinale) {
+        const portfolio = detailsNoteFinale.portfolio;
+        const terminal = detailsNoteFinale.terminal;
+
+        // Construire la liste des artefacts retenus (format liste verticale)
+        let listeArtefacts = '';
+        if (portfolio.artefactsRetenus.length > 0) {
+            const productionsMap = {};
+            productions.forEach(p => { productionsMap[p.id] = p; });
+
+            listeArtefacts = '<ul class="note-finale-liste-artefacts">' +
+                portfolio.artefactsRetenus.map((art, i) => {
+                    const prod = productionsMap[art.productionId];
+                    const titre = prod?.description || prod?.titre || `Artefact ${i + 1}`;
+                    return `<li>${titre} <strong>${art.niveau} ${art.note.toFixed(1)}%</strong></li>`;
+                }).join('') +
+                '</ul>';
+        }
+
+        htmlNoteFinale = `
+        <!-- Note finale de session -->
+        <div class="note-finale-section">
+            <h3 class="note-finale-titre">
+                Note finale de session
+                ${detailsNoteFinale.estProvisoire ? '<span class="note-finale-badge-provisoire">(provisoire)</span>' : ''}
+            </h3>
+
+            <div class="note-finale-grid">
+                <!-- Portfolio -->
+                <div class="note-finale-composante">
+                    <div class="note-finale-composante-titre">
+                        Portfolio (${portfolio.nombreRetenus} ${portfolio.methodeSelection} artefacts sur ${portfolio.nombreEvalues} évalués)
+                    </div>
+                    <div class="note-finale-artefacts">
+                        ${listeArtefacts || '<span class="note-finale-non-evalue">Aucun artefact retenu</span>'}
+                    </div>
+                    <div class="note-finale-valeur-ligne">
+                        <span class="note-finale-valeur">
+                            ${portfolio.moyenne !== null ? portfolio.moyenne.toFixed(1) + '%' : '<span class="note-finale-tiret">—</span>'}
+                        </span>
+                        <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
+                    </div>
+                </div>
+
+                <!-- Évaluation terminale -->
+                <div class="note-finale-composante">
+                    <div class="note-finale-composante-titre">${terminal.nom}</div>
+                    <div class="note-finale-artefacts">
+                        ${terminal.niveau ? `Niveau atteint : <strong>${terminal.niveau}</strong>` : '<span class="note-finale-non-evalue">Non évaluée</span>'}
+                    </div>
+                    <div class="note-finale-valeur-ligne">
+                        <span class="note-finale-valeur ${terminal.note === null ? 'note-finale-tiret' : ''}">
+                            ${terminal.note !== null ? terminal.note.toFixed(1) + '%' : '—'}
+                        </span>
+                        <span class="note-finale-ponderation">× ${terminal.ponderationNormalisee}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Note finale agrégée -->
+            <div class="note-finale-resultat">
+                <div class="note-finale-formule">
+                    Note finale pondérée (${portfolio.ponderationNormalisee}% + ${terminal.ponderationNormalisee}% = 100%)
+                </div>
+                <div class="note-finale-total ${detailsNoteFinale.noteFinale === null ? 'note-finale-tiret' : ''}">
+                    ${detailsNoteFinale.noteFinale !== null ? detailsNoteFinale.noteFinale.toFixed(1) + '%' : '—'}
+                </div>
+                ${detailsNoteFinale.estProvisoire ? '<div class="note-finale-message-provisoire">Basée uniquement sur le portfolio (évaluation terminale non complétée)</div>' : ''}
+            </div>
+        </div>
+        `;
+    }
+
     // Générer le HTML
     return `
+        ${htmlNoteFinale}
         <!-- Tableau des productions -->
         <div class="profil-carte">
             <h3 style="color: var(--bleu-principal); margin: 0 0 15px 0;">Liste des productions</h3>
@@ -7895,6 +7974,188 @@ function supprimerEvaluationDepuisProfil(evaluationId) {
     } else {
         alert('Fonction de suppression non disponible');
     }
+}
+
+/**
+ * Calcule les détails de la note finale de session pour un étudiant (pratique PAN-Maîtrise)
+ * Retourne les informations nécessaires pour afficher la construction de la note
+ *
+ * @param {string} da - Numéro DA de l'étudiant
+ * @returns {Object|null} - Détails de la note finale ou null si pas de données
+ */
+function calculerDetailsNoteFinale(da) {
+    const modalites = db.getSync('modalitesEvaluation', {});
+    const pratique = modalites.pratique || 'pan-maitrise';
+
+    // Pour l'instant, on gère seulement PAN-Maîtrise (accepter toutes les variantes qui contiennent "pan")
+    const pratiqueLower = pratique.toLowerCase();
+    if (!pratiqueLower.includes('pan') && pratiqueLower !== 'alternative') {
+        return null;
+    }
+
+    const configPAN = modalites.configPAN || {};
+    const configPortfolio = configPAN.portfolio || {};
+    const nombreARetenir = configPortfolio.nombreARetenir || 4;
+    const methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
+
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const productions = obtenirDonneesSelonMode('productions') || [];
+
+    // Trouver la production portfolio (conteneur)
+    const productionPortfolio = productions.find(p => p.type === 'portfolio');
+
+    // Trouver la production terminale EN PREMIER (pour l'exclure des artefacts)
+    // La production terminale est celle qui :
+    // 1. A un type contenant 'terminal' ou 'examen' ou 'final'
+    // 2. OU a un titre/description contenant 'terminal' ou 'finale'
+    // 3. OU a une pondération > 0 (et n'est pas portfolio)
+    const productionTerminale = productions.find(p => {
+        // Exclure portfolio et artefacts explicites
+        if (p.type === 'portfolio' || p.type === 'artefact-portfolio') return false;
+
+        // Chercher par type explicite
+        const typeLC = (p.type || '').toLowerCase();
+        if (typeLC.includes('terminal') || typeLC.includes('examen') || typeLC.includes('final')) {
+            return true;
+        }
+
+        // Chercher par titre/description
+        const titreLC = (p.titre || '').toLowerCase();
+        const descLC = (p.description || '').toLowerCase();
+        if (titreLC.includes('terminal') || titreLC.includes('finale') ||
+            descLC.includes('terminal') || descLC.includes('finale')) {
+            return true;
+        }
+
+        // Sinon, prendre la première production avec pondération > 0
+        return p.ponderation > 0;
+    });
+
+    // ID de la production terminale (pour l'exclure des artefacts)
+    const terminalId = productionTerminale?.id || null;
+
+    // Trouver les artefacts portfolio (type 'artefact-portfolio')
+    // EXCLURE la production terminale
+    let artefactsIds = productions
+        .filter(p => p.type === 'artefact-portfolio' && p.id !== terminalId)
+        .map(p => p.id);
+
+    // Si pas d'artefacts explicites, chercher toutes les productions à pondération 0
+    // qui ne sont pas le portfolio conteneur NI la production terminale
+    if (artefactsIds.length === 0) {
+        artefactsIds = productions
+            .filter(p =>
+                p.type !== 'portfolio' &&
+                p.id !== terminalId &&
+                (p.ponderation === 0 || p.ponderation === undefined || p.ponderation === null)
+            )
+            .map(p => p.id);
+    }
+
+    // Filtrer les évaluations de l'étudiant sur les artefacts (EXCLURE l'évaluation terminale)
+    const evaluationsArtefacts = evaluations.filter(e =>
+        e.etudiantDA === da &&
+        artefactsIds.includes(e.productionId) &&
+        e.productionId !== terminalId &&
+        !e.remplaceeParId &&
+        e.noteFinale !== null &&
+        e.noteFinale !== undefined
+    );
+
+    // Sélectionner les N meilleurs selon la méthode
+    let artefactsRetenus = [...evaluationsArtefacts];
+
+    if (methodeSelection === 'meilleurs') {
+        artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
+    } else if (methodeSelection === 'recents') {
+        artefactsRetenus.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+    } else if (methodeSelection === 'recents-meilleurs') {
+        const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRetenus.length * 0.5));
+        artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
+        artefactsRetenus = artefactsRetenus.slice(0, nombreMeilleurs);
+        artefactsRetenus.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
+    }
+
+    // Limiter au nombre à retenir
+    artefactsRetenus = artefactsRetenus.slice(0, nombreARetenir);
+
+    // Calculer la moyenne du portfolio
+    let moyennePortfolio = null;
+    if (artefactsRetenus.length > 0) {
+        const somme = artefactsRetenus.reduce((acc, e) => acc + e.noteFinale, 0);
+        moyennePortfolio = somme / artefactsRetenus.length;
+    }
+
+    // Pondérations
+    const ponderationPortfolio = productionPortfolio?.ponderation || 60;
+    const ponderationTerminale = productionTerminale?.ponderation || 40;
+    const totalPonderation = ponderationPortfolio + ponderationTerminale;
+
+    // Trouver l'évaluation terminale de l'étudiant
+    let noteTerminale = null;
+    let evaluationTerminale = null;
+    if (productionTerminale) {
+        evaluationTerminale = evaluations.find(e =>
+            e.etudiantDA === da &&
+            e.productionId === productionTerminale.id &&
+            !e.remplaceeParId &&
+            e.noteFinale !== null &&
+            e.noteFinale !== undefined
+        );
+        if (evaluationTerminale) {
+            noteTerminale = evaluationTerminale.noteFinale;
+        }
+    }
+
+    // Calculer la note finale pondérée
+    let noteFinale = null;
+    if (moyennePortfolio !== null) {
+        if (noteTerminale !== null) {
+            // Les deux composantes sont disponibles
+            noteFinale = (
+                (moyennePortfolio * ponderationPortfolio / totalPonderation) +
+                (noteTerminale * ponderationTerminale / totalPonderation)
+            );
+        } else {
+            // Seulement le portfolio (provisoire)
+            noteFinale = moyennePortfolio;
+        }
+    }
+
+    // Méthode de sélection en français
+    const methodesLabels = {
+        'meilleurs': 'meilleurs',
+        'recents': 'plus récents',
+        'recents-meilleurs': 'récents parmi les meilleurs',
+        'tous': 'tous'
+    };
+
+    return {
+        pratique: 'PAN-Maîtrise',
+        portfolio: {
+            nombreARetenir: nombreARetenir,
+            nombreEvalues: evaluationsArtefacts.length,
+            nombreRetenus: artefactsRetenus.length,
+            methodeSelection: methodesLabels[methodeSelection] || methodeSelection,
+            moyenne: moyennePortfolio,
+            ponderation: ponderationPortfolio,
+            ponderationNormalisee: (ponderationPortfolio / totalPonderation * 100).toFixed(0),
+            artefactsRetenus: artefactsRetenus.map(e => ({
+                productionId: e.productionId,
+                note: e.noteFinale,
+                niveau: e.niveauFinal
+            }))
+        },
+        terminal: {
+            nom: productionTerminale?.titre || productionTerminale?.description || 'Évaluation terminale',
+            note: noteTerminale,
+            niveau: evaluationTerminale?.niveauFinal || null,
+            ponderation: ponderationTerminale,
+            ponderationNormalisee: (ponderationTerminale / totalPonderation * 100).toFixed(0)
+        },
+        noteFinale: noteFinale,
+        estProvisoire: noteTerminale === null
+    };
 }
 
 /* ===============================
