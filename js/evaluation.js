@@ -1636,17 +1636,11 @@ function sauvegarderEvaluation() {
     let evaluations = db.getSync('evaluationsSauvegardees', []);
     evaluations.push(evaluation);
 
-    // Protection : bloquer en mode anonymisation, rediriger en mode simulation
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur('Modification impossible', 'Impossible de sauvegarder en mode anonymisation');
-        return;
-    }
-
-    // Protection : bloquer en mode anonymisation, rediriger en mode simulation
+    // Protection : bloquer en mode anonymisation
     if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
         afficherNotificationErreur(
             'Modification impossible',
-            'Les modifications sont impossibles en mode anonymisation.'
+            'Les modifications sont impossibles en mode Anonymisé. Passez en mode Normal pour sauvegarder.'
         );
         return;
     }
