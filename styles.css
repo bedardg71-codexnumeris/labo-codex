@@ -8199,3 +8199,155 @@ body[data-mode="simulation"] table tr:hover {
     background: var(--vert-tres-pale-assiste);
 }
 */
+
+/* ============================================================================
+   NOTE FINALE DE SESSION (PROFIL ÉTUDIANT)
+   Section affichant la construction de la note finale (Portfolio + Terminal)
+   Date: 15 décembre 2025
+   ============================================================================ */
+
+/* Conteneur principal de la section note finale */
+.note-finale-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* Titre de la section */
+.note-finale-titre {
+    color: var(--bleu-principal);
+    margin: 0 0 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Badge provisoire */
+.note-finale-badge-provisoire {
+    font-size: 0.8rem;
+    color: var(--orange-accent);
+    font-weight: normal;
+}
+
+/* Grille 2 colonnes pour Portfolio + Terminal */
+.note-finale-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+    .note-finale-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Carte composante (Portfolio ou Terminal) */
+.note-finale-composante {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Titre de la composante */
+.note-finale-composante-titre {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+/* Liste des artefacts */
+.note-finale-artefacts {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+/* Liste verticale des artefacts retenus */
+.note-finale-liste-artefacts {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.note-finale-liste-artefacts li {
+    padding: 4px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.note-finale-liste-artefacts li:last-child {
+    border-bottom: none;
+}
+
+.note-finale-liste-artefacts li strong {
+    color: #333;
+    float: right;
+}
+
+/* Ligne valeur + pondération */
+.note-finale-valeur-ligne {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Grande valeur numérique */
+.note-finale-valeur {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+/* Badge de pondération */
+.note-finale-ponderation {
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    background: #333;
+}
+
+/* Carte de résultat final */
+.note-finale-resultat {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    border: 2px solid #333;
+}
+
+/* Formule de calcul */
+.note-finale-formule {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+/* Grande valeur finale */
+.note-finale-total {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+/* Message provisoire */
+.note-finale-message-provisoire {
+    font-size: 0.85rem;
+    color: var(--orange-accent);
+    margin-top: 5px;
+}
+
+/* Texte non évalué */
+.note-finale-non-evalue {
+    color: #999;
+    font-style: italic;
+}
+
+/* Texte tiret (valeur manquante) */
+.note-finale-tiret {
+    color: #999;
+}
