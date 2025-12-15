@@ -94,10 +94,11 @@ function creerSelecteurMode() {
     };
 
     // Ordre souhaité : Normal → Assisté → Anonymisé
+    // Note: Anonymisé en dernier pour éviter activation accidentelle
     const ordreAffichage = [
         MODES.NORMAL,
-        MODES.ANONYMISATION,
-        MODES.SIMULATION
+        MODES.SIMULATION,
+        MODES.ANONYMISATION
     ];
 
     ordreAffichage.forEach(mode => {
