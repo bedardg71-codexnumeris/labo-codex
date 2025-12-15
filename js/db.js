@@ -39,6 +39,9 @@
             this.db = null;
             this.ready = false;
             this.initPromise = null;
+            // Cache mémoire pour les clés trop grandes pour localStorage
+            // Permet un accès synchrone même si la donnée n'est pas dans localStorage
+            this.memoryCache = new Map();
         }
 
         /**
@@ -494,6 +497,51 @@
         }
 
         /**
+         * Libère de l'espace dans le cache localStorage
+         * Supprime les grosses clés du cache (elles restent dans IndexedDB)
+         * @param {number} seuilOctets - Taille minimale pour supprimer (défaut: 100KB)
+         * @returns {Object} Résultat avec clés supprimées et espace libéré
+         */
+        async libereCacheLocalStorage(seuilOctets = 100000) {
+            if (!this.useIndexedDB) {
+                console.warn('[DB] Impossible de libérer le cache sans IndexedDB');
+                return { success: false, message: 'IndexedDB non disponible' };
+            }
+
+            console.log(`🧹 [DB] Nettoyage cache localStorage (seuil: ${(seuilOctets/1024).toFixed(0)} KB)...`);
+
+            const clesSupprimes = [];
+            let espaceLibere = 0;
+
+            // Parcourir toutes les clés localStorage
+            const keys = Object.keys(localStorage);
+            for (const key of keys) {
+                const value = localStorage.getItem(key);
+                if (value && value.length > seuilOctets) {
+                    // Vérifier que la clé existe dans IndexedDB avant de supprimer
+                    const existsInIndexedDB = await this.get(key) !== null;
+                    if (existsInIndexedDB) {
+                        espaceLibere += value.length;
+                        localStorage.removeItem(key);
+                        clesSupprimes.push({ key, size: value.length });
+                        console.log(`   🗑️ Supprimé du cache: "${key}" (${(value.length/1024).toFixed(1)} KB)`);
+                    }
+                }
+            }
+
+            const result = {
+                success: true,
+                clesSupprimes: clesSupprimes.length,
+                espaceLibere: espaceLibere,
+                espaceLibereKB: (espaceLibere / 1024).toFixed(1),
+                details: clesSupprimes
+            };
+
+            console.log(`✅ [DB] Cache nettoyé: ${clesSupprimes.length} clés, ${result.espaceLibereKB} KB libérés`);
+            return result;
+        }
+
+        /**
          * Synchronisation IndexedDB → localStorage au démarrage
          * Charge toutes les données d'IndexedDB dans le cache localStorage
          * pour permettre un accès synchrone rapide
@@ -510,6 +558,7 @@
                 const indexedDBKeys = await this.keys();
                 let synced = 0;
                 let skipped = 0;
+                let inMemory = 0;
 
                 for (const key of indexedDBKeys) {
                     // Lire depuis IndexedDB
@@ -519,23 +568,35 @@
                     const existsInCache = localStorage.getItem(key) !== null;
 
                     if (!existsInCache) {
-                        // Clé manquante dans cache, synchroniser
-                        this._setLocalStorage(key, value);
-                        synced++;
+                        // Clé manquante dans cache, essayer de synchroniser
+                        try {
+                            this._setLocalStorage(key, value);
+                            synced++;
+                        } catch (e) {
+                            // Quota dépassé - stocker dans le cache mémoire
+                            if (e.name === 'QuotaExceededError' || e.code === 22 ||
+                                (e.message && e.message.toLowerCase().includes('quota'))) {
+                                console.warn(`[DB] ⚠️ Clé "${key}" trop grande pour localStorage (${this._estimateSize(value)} bytes), utilisation cache mémoire`);
+                                this.memoryCache.set(key, value);
+                                inMemory++;
+                            } else {
+                                throw e;
+                            }
+                        }
                     } else {
                         // Clé déjà présente, on garde la version localStorage (cache chaud)
                         skipped++;
                     }
                 }
 
-                console.log(`✅ [DB] Synchronisation terminée: ${synced} clés synchronisées, ${skipped} déjà en cache`);
+                console.log(`✅ [DB] Synchronisation terminée: ${synced} clés localStorage, ${skipped} déjà en cache, ${inMemory} en mémoire`);
 
                 // ✅ Définir flag global pour indiquer que la DB est prête
                 window.dbReady = true;
 
                 // Émettre événement pour notifier que les données sont prêtes
                 window.dispatchEvent(new CustomEvent('db-ready', {
-                    detail: { synced, skipped, total: indexedDBKeys.length }
+                    detail: { synced, skipped, inMemory, total: indexedDBKeys.length }
                 }));
             } catch (error) {
                 console.error('❌ [DB] Erreur synchronisation cache:', error);
@@ -557,13 +618,26 @@
         // pour permettre une migration progressive sans tout casser
 
         /**
-         * Lecture synchrone (utilise toujours localStorage)
+         * Lecture synchrone (cache hybride)
+         * Cherche d'abord dans localStorage, puis dans le cache mémoire
          * @param {string} key - Clé de la donnée
          * @param {*} defaultValue - Valeur par défaut
          * @returns {*} Valeur stockée ou valeur par défaut
          */
         getSync(key, defaultValue = null) {
-            return this._getLocalStorage(key, defaultValue);
+            // 1. Chercher dans localStorage (cache principal)
+            const localValue = this._getLocalStorage(key, null);
+            if (localValue !== null) {
+                return localValue;
+            }
+
+            // 2. Chercher dans le cache mémoire (pour les grosses clés)
+            if (this.memoryCache.has(key)) {
+                return this.memoryCache.get(key);
+            }
+
+            // 3. Non trouvé, retourner la valeur par défaut
+            return defaultValue;
         }
 
         /**
@@ -572,35 +646,65 @@
          * et déclenche écriture asynchrone dans IndexedDB si disponible
          * @param {string} key - Clé de la donnée
          * @param {*} value - Valeur à stocker
+         * @throws {Error} Si IndexedDB non disponible ET localStorage plein
          */
         setSync(key, value) {
-            // 1. Écriture synchrone dans localStorage (cache rapide)
-            this._setLocalStorage(key, value);
+            // 1. Essayer d'écrire dans localStorage (cache rapide)
+            let writtenToLocalStorage = false;
+            try {
+                this._setLocalStorage(key, value);
+                writtenToLocalStorage = true;
+                // Supprimer du cache mémoire si la donnée est maintenant dans localStorage
+                this.memoryCache.delete(key);
+            } catch (e) {
+                // Quota localStorage dépassé
+                if (e.name === 'QuotaExceededError' || e.code === 22 ||
+                    (e.message && e.message.toLowerCase().includes('quota'))) {
+
+                    // Si IndexedDB est disponible, on peut continuer sans cache localStorage
+                    if (this.ready && this.useIndexedDB) {
+                        console.warn(`[DB] ⚠️ Quota localStorage dépassé pour "${key}" (${this._estimateSize(value)} bytes), utilisation cache mémoire + IndexedDB`);
+                        // Supprimer du localStorage pour libérer de l'espace
+                        try { localStorage.removeItem(key); } catch (ex) { /* ignore */ }
+                        // Stocker dans le cache mémoire pour accès synchrone
+                        this.memoryCache.set(key, value);
+                    } else {
+                        // Pas d'IndexedDB disponible, on ne peut pas sauvegarder
+                        console.error(`[DB] ❌ Quota localStorage dépassé et IndexedDB non disponible pour "${key}"`);
+                        throw e;
+                    }
+                } else {
+                    // Autre erreur, la remonter
+                    throw e;
+                }
+            }
 
             // 2. Écriture asynchrone dans IndexedDB si disponible (en arrière-plan)
             if (this.ready && this.useIndexedDB) {
                 this._setIndexedDB(key, value).catch(error => {
                     console.warn(`[DB] Erreur écriture async IndexedDB clé "${key}":`, error);
-                    // localStorage a déjà la valeur, on continue
+                    // Si localStorage ou memoryCache a la valeur, on continue
                 });
             }
         }
 
         /**
          * Suppression synchrone (cache hybride)
-         * Supprime immédiatement de localStorage (synchrone, cache rapide)
-         * et déclenche suppression asynchrone d'IndexedDB si disponible
+         * Supprime de localStorage, du cache mémoire, et d'IndexedDB
          * @param {string} key - Clé à supprimer
          */
         removeSync(key) {
             // 1. Suppression synchrone de localStorage (cache rapide)
             this._removeLocalStorage(key);
 
-            // 2. Suppression asynchrone d'IndexedDB si disponible (en arrière-plan)
+            // 2. Suppression du cache mémoire
+            this.memoryCache.delete(key);
+
+            // 3. Suppression asynchrone d'IndexedDB si disponible (en arrière-plan)
             if (this.ready && this.useIndexedDB) {
                 this._removeIndexedDB(key).catch(error => {
                     console.warn(`[DB] Erreur suppression async IndexedDB clé "${key}":`, error);
-                    // localStorage a déjà supprimé, on continue
+                    // caches déjà vidés, on continue
                 });
             }
         }

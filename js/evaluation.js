@@ -395,6 +395,24 @@ function chargerEvaluationsEtudiant() {
         }
     });
 
+    // ✅ Vider les champs algorithmiques (codes d'erreurs, nombre de mots)
+    // IDs: eval_categories_*, eval_erreurs_*, eval_mots_*, resultat_algo_*
+    const champsCategories = document.querySelectorAll('input[id^="eval_categories_"]');
+    const champsErreurs = document.querySelectorAll('input[id^="eval_erreurs_"]');
+    const champsMots = document.querySelectorAll('input[id^="eval_mots_"]');
+    const zonesResultat = document.querySelectorAll('div[id^="resultat_algo_"]');
+
+    champsCategories.forEach(input => input.value = '');
+    champsErreurs.forEach(input => input.value = '');
+    champsMots.forEach(input => input.value = '');
+    zonesResultat.forEach(div => {
+        // Réinitialiser le contenu avec les placeholders
+        const spans = div.querySelectorAll('span');
+        spans.forEach(span => span.textContent = '--');
+    });
+
+    console.log(`🧹 Champs algorithmiques vidés: ${champsCategories.length} catégories, ${champsErreurs.length} erreurs, ${champsMots.length} mots`);
+
     // Réinitialiser la note et le niveau
     const noteElem = document.getElementById('noteProduction1');
     const niveauElem = document.getElementById('niveauProduction1');
@@ -413,6 +431,7 @@ function chargerEvaluationsEtudiant() {
         echelleId: echelleActuelle,
         cartoucheId: cartoucheActuelle,
         criteres: {},  // ✅ Réinitialiser SEULEMENT les critères évalués
+        donneesAlgorithmiques: {},  // ✅ Réinitialiser les données algorithmiques (codes erreurs, nb mots)
         statutRemise: remiseActuelle
     };
 
@@ -1636,12 +1655,25 @@ function sauvegarderEvaluation() {
     let evaluations = db.getSync('evaluationsSauvegardees', []);
     evaluations.push(evaluation);
 
-    // Protection : bloquer en mode anonymisation
-    if (!sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations)) {
-        afficherNotificationErreur(
-            'Modification impossible',
-            'Les modifications sont impossibles en mode Anonymisé. Passez en mode Normal pour sauvegarder.'
-        );
+    // Protection : bloquer en mode anonymisation ou quota dépassé
+    const resultatSauvegarde = sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations);
+    if (resultatSauvegarde !== true) {
+        if (resultatSauvegarde === 'quota') {
+            afficherNotificationErreur(
+                'Espace de stockage insuffisant',
+                'Le quota de stockage du navigateur est dépassé. Exportez vos données (Réglages → Gestion des données) puis supprimez des évaluations anciennes.'
+            );
+        } else if (resultatSauvegarde === false) {
+            afficherNotificationErreur(
+                'Modification impossible',
+                'Les modifications sont impossibles en mode Anonymisé. Passez en mode Normal pour sauvegarder.'
+            );
+        } else {
+            afficherNotificationErreur(
+                'Erreur de sauvegarde',
+                'Une erreur inattendue s\'est produite. Consultez la console pour plus de détails.'
+            );
+        }
         return;
     }
 
@@ -3367,6 +3399,28 @@ function verifierEtChargerEvaluationExistante() {
             delete window.evaluationEnCours.idModification;
         }
 
+        // Réinitialiser les données algorithmiques (codes d'erreurs, nombre de mots)
+        if (window.evaluationEnCours) {
+            window.evaluationEnCours.donneesAlgorithmiques = {};
+        }
+
+        // Vider les champs algorithmiques dans le DOM
+        // IDs: eval_categories_*, eval_erreurs_*, eval_mots_*, resultat_algo_*
+        const champsCategories = document.querySelectorAll('input[id^="eval_categories_"]');
+        const champsErreurs = document.querySelectorAll('input[id^="eval_erreurs_"]');
+        const champsMots = document.querySelectorAll('input[id^="eval_mots_"]');
+        const zonesResultat = document.querySelectorAll('div[id^="resultat_algo_"]');
+
+        champsCategories.forEach(input => input.value = '');
+        champsErreurs.forEach(input => input.value = '');
+        champsMots.forEach(input => input.value = '');
+        zonesResultat.forEach(div => {
+            const spans = div.querySelectorAll('span');
+            spans.forEach(span => span.textContent = '--');
+        });
+
+        console.log(`🧹 Champs algorithmiques réinitialisés: ${champsCategories.length + champsErreurs.length} champs erreurs, ${champsMots.length} champs mots`);
+
         // Masquer les badges de jetons
         const section = document.getElementById('gestionJetonsEvaluation');
         if (section) section.style.display = 'none';
@@ -3413,7 +3467,20 @@ function verifierEtChargerEvaluationExistante() {
             const selectCritere = document.getElementById(selectId);
 
             if (selectCritere) {
-                selectCritere.value = critere.niveauSelectionne;
+                // Vérifier si c'est un critère algorithmique avec données sauvegardées
+                const estAlgorithmique = evaluationExistante.donneesAlgorithmiques &&
+                                         evaluationExistante.donneesAlgorithmiques[critere.critereId] &&
+                                         evaluationExistante.donneesAlgorithmiques[critere.critereId].pourcentage !== undefined;
+
+                if (estAlgorithmique) {
+                    // Pour les critères algorithmiques, laisser le select VIDE
+                    // Le niveau sera calculé automatiquement à partir des données algorithmiques
+                    selectCritere.value = '';
+                    console.log(`  ⚙️ Critère algorithmique ${critere.critereId}: select laissé vide (niveau calculé: ${critere.niveauSelectionne})`);
+                } else {
+                    // Pour les critères normaux, restaurer le niveau sélectionné
+                    selectCritere.value = critere.niveauSelectionne;
+                }
                 selectCritere.dispatchEvent(new Event('change', { bubbles: true }));
                 criteresCharges++;
             }
@@ -3512,13 +3579,15 @@ function verifierEtChargerEvaluationExistante() {
             afficherBadgesJetons();
         }
 
-        // Recalculer la note
+        // Recalculer la note APRÈS restauration des données algorithmiques
+        // IMPORTANT: Délai de 350ms pour s'assurer que les données algorithmiques
+        // sont restaurées (100ms) et que leur recalcul est déclenché (100ms de plus)
         setTimeout(() => {
             if (typeof calculerNote === 'function') {
                 calculerNote();
-                console.log('✅ Note finale recalculée après restauration critères');
+                console.log('✅ Note finale recalculée après restauration critères et données algorithmiques');
             }
-        }, 100);
+        }, 350);
     }, 300);
 }
 

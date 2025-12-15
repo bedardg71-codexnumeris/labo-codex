@@ -462,10 +462,10 @@ function obtenirDonneesSelonMode(cle) {
 /**
  * Sauvegarde des données selon le mode actif
  * FONCTION CENTRALE - À utiliser partout où on fait db.setSync()
- * 
+ *
  * @param {string} cle - Clé de base (ex: 'groupeEtudiants')
  * @param {*} donnees - Données à sauvegarder
- * @returns {boolean} - true si sauvegarde réussie, false si bloquée
+ * @returns {boolean|string} - true si succès, false si bloqué (mode anonymisation), 'quota' si quota dépassé
  */
 function sauvegarderDonneesSelonMode(cle, donnees) {
     const mode = modeActuel;
@@ -478,9 +478,21 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
 
     // MODE ASSISTÉ et NORMAL : Sauvegarder dans les mêmes clés réelles
     // Depuis Beta 92, le mode Assisté partage les données avec Normal
-    db.setSync(cle, donnees);
-    console.log(`[${mode === MODES.SIMULATION ? 'Assisté' : 'Normal'}] Sauvegarde dans ${cle}`);
-    return true;
+    try {
+        db.setSync(cle, donnees);
+        console.log(`[${mode === MODES.SIMULATION ? 'Assisté' : 'Normal'}] Sauvegarde dans ${cle}`);
+        return true;
+    } catch (error) {
+        // Détecter erreur de quota dépassé
+        if (error.name === 'QuotaExceededError' ||
+            (error.message && error.message.includes('quota'))) {
+            console.error('❌ Quota de stockage dépassé:', error);
+            return 'quota';
+        }
+        // Autre erreur
+        console.error(`❌ Erreur sauvegarde ${cle}:`, error);
+        return 'error';
+    }
 }
 
 /**
