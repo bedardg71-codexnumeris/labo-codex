@@ -276,12 +276,8 @@ function afficherTableauCours() {
         const sessionEchappe = echapperHtml(c.session + c.annee);
 
         // Afficher le nom de la pratique
-        let pratiqueNom = 'PAN-Maîtrise'; // Par défaut
-        if (c.pratiqueId === 'sommative') {
-            pratiqueNom = 'Sommative';
-        } else if (c.pratiqueId === 'pan-maitrise') {
-            pratiqueNom = 'PAN-Maîtrise';
-        }
+        // ✅ CORRECTION BUG (16 décembre 2025) : Support de toutes les pratiques
+        const pratiqueNom = obtenirNomPratiqueFallback(c.pratiqueId);
 
         html += `
         <tr>
@@ -431,6 +427,22 @@ function obtenirTousLesCoursBibliotheque() {
    =============================== */
 
 /**
+ * Helper: Obtient le nom de la pratique en fallback (sans PratiqueManager)
+ * ✅ AJOUT (16 décembre 2025) : Support de toutes les pratiques de base
+ *
+ * @param {string} pratiqueId - ID de la pratique
+ * @returns {string} - Nom de la pratique
+ */
+function obtenirNomPratiqueFallback(pratiqueId) {
+    const noms = {
+        'sommative': 'Sommative traditionnelle',
+        'pan-maitrise': 'PAN-Maîtrise',
+        'specifications': 'PAN-Spécifications'
+    };
+    return noms[pratiqueId] || pratiqueId || 'PAN-Maîtrise';
+}
+
+/**
  * Affiche la pratique active en lecture seule (Single Source of Truth)
  *
  * ✅ MODIFICATION (8 décembre 2025) : La pratique n'est plus modifiable ici
@@ -439,8 +451,10 @@ function obtenirTousLesCoursBibliotheque() {
  * ✅ CORRECTION (8 décembre 2025) : Lecture du nom réel depuis PratiqueManager
  * au lieu d'un mapping codé en dur
  *
+ * ✅ CORRECTION BUG (16 décembre 2025) : Lire depuis pratiqueParDefaut
+ *
  * FONCTIONNEMENT:
- * 1. Lit la pratique active depuis modalitesEvaluation
+ * 1. Lit la pratique depuis pratiqueParDefaut (pas modalitesEvaluation)
  * 2. Récupère le nom réel depuis PratiqueManager.listerPratiques()
  * 3. Affiche le nom de la pratique en lecture seule
  * 4. Ajoute [PAR DÉFAUT] si applicable
@@ -449,9 +463,9 @@ async function afficherPratiqueEnLectureSeule() {
     const affichage = document.getElementById('pratiqueCoursAffichage');
     if (!affichage) return;
 
-    // Lire la pratique depuis la source unique
-    const modalites = db.getSync('modalitesEvaluation', {});
-    const pratiqueId = modalites.pratique || 'pan-maitrise';
+    // ✅ CORRECTION BUG (16 décembre 2025) : Lire depuis pratiqueParDefaut, pas modalitesEvaluation
+    // Le modal "Bibliothèque de pratiques" sauvegarde dans pratiqueParDefaut
+    const pratiqueId = db.getSync('pratiqueParDefaut', 'pan-maitrise');
 
     // Obtenir toutes les pratiques disponibles (codées + configurables)
     let nomPratique = 'Chargement...';
@@ -479,16 +493,16 @@ async function afficherPratiqueEnLectureSeule() {
                 }
             } else {
                 // Fallback si la pratique n'est pas trouvée
-                nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Maîtrise';
+                nomPratique = obtenirNomPratiqueFallback(pratiqueId);
             }
         } else {
             // Fallback si PratiqueManager n'est pas disponible
-            nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Maîtrise';
+            nomPratique = obtenirNomPratiqueFallback(pratiqueId);
         }
     } catch (error) {
         console.error('Erreur lors de la lecture de la pratique:', error);
         // Fallback en cas d'erreur
-        nomPratique = pratiqueId === 'sommative' ? 'Sommative traditionnelle' : 'PAN-Maîtrise';
+        nomPratique = obtenirNomPratiqueFallback(pratiqueId);
     }
 
     affichage.textContent = nomPratique;
@@ -686,10 +700,9 @@ function annulerFormCours() {
 function sauvegarderCours() {
     let cours = db.getSync('listeCours', []);
 
-    // ✅ SINGLE SOURCE OF TRUTH (8 décembre 2025)
-    // Lire la pratique depuis modalitesEvaluation (source unique)
-    const modalites = db.getSync('modalitesEvaluation', {});
-    const pratiqueId = modalites.pratique || 'pan-maitrise';
+    // ✅ CORRECTION BUG (16 décembre 2025) : Lire depuis pratiqueParDefaut
+    // Le modal "Bibliothèque de pratiques" sauvegarde dans pratiqueParDefaut, pas modalitesEvaluation
+    const pratiqueId = db.getSync('pratiqueParDefaut', 'pan-maitrise');
 
     const nouveauCours = {
         id: coursEnEdition || 'COURS' + Date.now(),
