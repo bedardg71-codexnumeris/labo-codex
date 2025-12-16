@@ -853,7 +853,13 @@ function genererSectionMobilisationEngagement(da) {
 
         // Vérifier le statut de remise (source unique de vérité)
         const statutRemise = evaluation?.statutRemise || 'non-remis';
-        const estRemis = evaluation && (statutRemise !== 'non-remis' && statutRemise !== 'retard');
+        const statutIntegrite = evaluation?.statutIntegrite || 'recevable';
+
+        // Un travail non-recevable (plagiat, IA) n'est PAS considéré comme remis
+        const estNonRecevable = statutIntegrite === 'plagiat' || statutIntegrite === 'ia';
+        const estRemis = evaluation &&
+            (statutRemise !== 'non-remis' && statutRemise !== 'retard') &&
+            !estNonRecevable;
 
         return {
             id: art.id,
@@ -863,6 +869,8 @@ function genererSectionMobilisationEngagement(da) {
             note: evaluation?.noteFinale ?? null,  // Utiliser ?? pour supporter la note 0
             niveau: evaluation?.niveauFinal ?? null,
             statutRemise: statutRemise,
+            statutIntegrite: statutIntegrite,
+            estNonRecevable: estNonRecevable,
             jetonReprise: evaluation?.repriseDeId ? true : false,
             jetonDelai: evaluation?.jetonDelaiApplique ? true : false,
             retenu: false // Par défaut, sera mis à true pour les meilleurs
@@ -1162,9 +1170,9 @@ function genererSectionMobilisationEngagement(da) {
                     </div>
                 `}
 
-                <!-- Artefacts non remis (format badge comme Assiduité) -->
+                <!-- Artefacts non remis ou non recevables (format badge comme Assiduité) -->
                 <h4 class="profil-section-titre">
-                    ${artefactsNonRemis.length} production${artefactsNonRemis.length > 1 ? 's' : ''} non remise${artefactsNonRemis.length > 1 ? 's' : ''}
+                    ${artefactsNonRemis.length} production${artefactsNonRemis.length > 1 ? 's' : ''} non remise${artefactsNonRemis.length > 1 ? 's' : ''} ou non recevable${artefactsNonRemis.length > 1 ? 's' : ''}
                 </h4>
                 ${artefactsNonRemis.length > 0 ? `
                     <div class="badges-centres u-mb-20">
@@ -1176,13 +1184,14 @@ function genererSectionMobilisationEngagement(da) {
                             })
                             .sort((a, b) => a.indexOriginal - b.indexOriginal) // Trier par numéro croissant
                             .map(art => `
-                                <span class="badge-completion-non-remis"
-                                      onclick="evaluerProduction('${da}', '${art.id}')">
+                                <span class="${art.estNonRecevable ? 'badge-completion-non-recevable' : 'badge-completion-non-remis'}"
+                                      onclick="evaluerProduction('${da}', '${art.id}')"
+                                      title="${art.estNonRecevable ? (art.statutIntegrite === 'plagiat' ? 'Plagiat détecté' : 'Utilisation IA non autorisée') : 'Non remis'}">
                                     <span class="badge-completion-titre">
                                         ${echapperHtml(art.description)}
                                     </span>
                                     <span class="badge-completion-numero">
-                                        A${art.indexOriginal}
+                                        ${art.estNonRecevable ? '⚠️' : ''} A${art.indexOriginal}
                                     </span>
                                 </span>
                             `).join('')}
@@ -3701,7 +3710,9 @@ function genererSectionProductions(da) {
 
             // Déterminer le statut final basé sur statutRemise (priorité)
             const statutRemise = evaluation.statutRemise || 'remis';
+            const statutIntegrite = evaluation.statutIntegrite || 'recevable';
             const estNonRemis = statutRemise === 'non-remis' || statutRemise === 'retard';
+            const estNonRecevable = statutIntegrite === 'plagiat' || statutIntegrite === 'ia';
 
             return {
                 production: production.titre,
@@ -3710,6 +3721,8 @@ function genererSectionProductions(da) {
                 date: dateFormatee,
                 statut: estNonRemis ? 'non-remis' : 'evalue',
                 statutRemise: statutRemise,
+                statutIntegrite: statutIntegrite,
+                estNonRecevable: estNonRecevable,
                 verrouille: evaluation.verrouillee || false,
                 evaluationId: evaluation.id,
                 productionId: production.id,
@@ -3725,6 +3738,8 @@ function genererSectionProductions(da) {
                 date: '—',
                 statut: 'non-evalue',
                 statutRemise: 'non-remis',
+                statutIntegrite: 'recevable',
+                estNonRecevable: false,
                 verrouille: false,
                 evaluationId: null,
                 productionId: production.id,
@@ -3766,21 +3781,40 @@ function genererSectionProductions(da) {
                 ${detailsNoteFinale.estProvisoire ? '<span class="note-finale-badge-provisoire">(provisoire)</span>' : ''}
             </h3>
 
+            ${portfolio.plafonnement ? `
+                <div class="alerte alerte-attention" style="margin-bottom: 15px;">
+                    ${portfolio.plafonnement.echec
+                        ? `<strong>Échec automatique :</strong> L'élève n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} ou plus entraîne un échec automatique.`
+                        : `<strong>Note plafonnée :</strong> L'élève n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} plafonne la note du portfolio au niveau ${portfolio.plafonnement.niveauCode} (maximum ${portfolio.plafonnement.seuilMax}%).`
+                    }
+                </div>
+            ` : ''}
+
             <div class="note-finale-grid">
                 <!-- Portfolio -->
-                <div class="note-finale-composante">
+                <div class="note-finale-composante ${portfolio.plafonnement ? 'note-finale-composante-plafonnee' : ''}">
                     <div class="note-finale-composante-titre">
                         Portfolio (${portfolio.nombreRetenus} ${portfolio.methodeSelection} artefacts sur ${portfolio.nombreEvalues} évalués)
                     </div>
                     <div class="note-finale-artefacts">
                         ${listeArtefacts || '<span class="note-finale-non-evalue">Aucun artefact retenu</span>'}
                     </div>
-                    <div class="note-finale-valeur-ligne">
-                        <span class="note-finale-valeur">
-                            ${portfolio.moyenne !== null ? portfolio.moyenne.toFixed(1) + '%' : '<span class="note-finale-tiret">—</span>'}
-                        </span>
-                        <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
-                    </div>
+                    ${portfolio.plafonnement ? `
+                        <div class="note-finale-valeur-ligne">
+                            <span class="note-finale-valeur">
+                                <span class="note-finale-valeur-originale">${portfolio.plafonnement.moyenneOriginale.toFixed(1)}%</span>
+                                → ${portfolio.moyenne !== null ? portfolio.moyenne.toFixed(1) + '%' : '0%'}
+                            </span>
+                            <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
+                        </div>
+                    ` : `
+                        <div class="note-finale-valeur-ligne">
+                            <span class="note-finale-valeur">
+                                ${portfolio.moyenne !== null ? portfolio.moyenne.toFixed(1) + '%' : '<span class="note-finale-tiret">—</span>'}
+                            </span>
+                            <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
+                        </div>
+                    `}
                 </div>
 
                 <!-- Évaluation terminale -->
@@ -3812,9 +3846,8 @@ function genererSectionProductions(da) {
         `;
     }
 
-    // Générer le HTML
+    // Générer le HTML (productions d'abord, puis note finale)
     return `
-        ${htmlNoteFinale}
         <!-- Tableau des productions -->
         <div class="profil-carte">
             <h3 style="color: var(--bleu-principal); margin: 0 0 15px 0;">Liste des productions</h3>
@@ -3856,9 +3889,11 @@ function genererSectionProductions(da) {
                                 <td style="padding: 12px; text-align: center;">
                                     ${(ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard')
                                         ? '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>'
-                                        : (ligne.statut === 'evalue'
-                                            ? `<strong>${ligne.note}</strong>`
-                                            : '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>')
+                                        : (ligne.estNonRecevable
+                                            ? `<span class="badge-non-recevable-wrapper" title="${ligne.statutIntegrite === 'plagiat' ? 'Plagiat détecté' : 'Utilisation IA non autorisée'}"><span class="badge-jeton-titre">Non recevable</span></span>`
+                                            : (ligne.statut === 'evalue'
+                                                ? `<strong>${ligne.note}</strong>`
+                                                : '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>'))
                                     }
                                 </td>
                                 <td style="padding: 12px; text-align: center; color: #666;">${ligne.date}</td>
@@ -3892,6 +3927,7 @@ function genererSectionProductions(da) {
                 </table>
             </div>
         </div>
+        ${htmlNoteFinale}
     `;
 }
 
@@ -7996,7 +8032,9 @@ function calculerDetailsNoteFinale(da) {
     const configPAN = modalites.configPAN || {};
     const configPortfolio = configPAN.portfolio || {};
     const nombreARetenir = configPortfolio.nombreARetenir || 4;
+    const minimumRequis = configPortfolio.minimumCompletion || 7;
     const methodeSelection = configPortfolio.methodeSelection || 'meilleurs';
+    const reglesConformite = configPortfolio.reglesConformite || { actif: false };
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = obtenirDonneesSelonMode('productions') || [];
@@ -8052,15 +8090,21 @@ function calculerDetailsNoteFinale(da) {
             .map(p => p.id);
     }
 
-    // Filtrer les évaluations de l'étudiant sur les artefacts (EXCLURE l'évaluation terminale)
-    const evaluationsArtefacts = evaluations.filter(e =>
-        e.etudiantDA === da &&
-        artefactsIds.includes(e.productionId) &&
-        e.productionId !== terminalId &&
-        !e.remplaceeParId &&
-        e.noteFinale !== null &&
-        e.noteFinale !== undefined
-    );
+    // Filtrer les évaluations de l'étudiant sur les artefacts
+    // EXCLURE : évaluation terminale, remplacées, non-recevables (plagiat, IA)
+    const evaluationsArtefacts = evaluations.filter(e => {
+        if (e.etudiantDA !== da) return false;
+        if (!artefactsIds.includes(e.productionId)) return false;
+        if (e.productionId === terminalId) return false;
+        if (e.remplaceeParId) return false;
+        if (e.noteFinale === null || e.noteFinale === undefined) return false;
+
+        // Exclure les évaluations non-recevables (plagiat, IA)
+        const statutIntegrite = e.statutIntegrite || 'recevable';
+        if (statutIntegrite === 'plagiat' || statutIntegrite === 'ia') return false;
+
+        return true;
+    });
 
     // Sélectionner les N meilleurs selon la méthode
     let artefactsRetenus = [...evaluationsArtefacts];
@@ -8084,6 +8128,57 @@ function calculerDetailsNoteFinale(da) {
     if (artefactsRetenus.length > 0) {
         const somme = artefactsRetenus.reduce((acc, e) => acc + e.noteFinale, 0);
         moyennePortfolio = somme / artefactsRetenus.length;
+    }
+
+    // ========================================
+    // RÈGLES DE CONFORMITÉ - Plafonnement
+    // ========================================
+    let plafonnement = null;
+    const nombreEvalues = evaluationsArtefacts.length;
+    const deficit = minimumRequis - nombreEvalues;
+
+    if (reglesConformite.actif && deficit > 0 && moyennePortfolio !== null) {
+        console.log(`[calculerDetailsNoteFinale] Déficit détecté: ${deficit} (${nombreEvalues}/${minimumRequis})`);
+
+        // Trouver le plafond applicable selon le déficit
+        const plafonds = reglesConformite.plafonds || [];
+        let plafondApplicable = null;
+
+        if (deficit >= 3) {
+            // Déficit 3+
+            plafondApplicable = plafonds.find(p => p.deficit === 3);
+        } else {
+            // Déficit 1 ou 2
+            plafondApplicable = plafonds.find(p => p.deficit === deficit);
+        }
+
+        if (plafondApplicable) {
+            if (plafondApplicable.echec) {
+                // Échec automatique
+                plafonnement = {
+                    actif: true,
+                    deficit: deficit,
+                    niveauCode: null,
+                    seuilMax: 0,
+                    echec: true,
+                    moyenneOriginale: moyennePortfolio
+                };
+                moyennePortfolio = 0;
+                console.log(`[calculerDetailsNoteFinale] Échec automatique appliqué`);
+            } else if (plafondApplicable.seuilMax !== null && moyennePortfolio > plafondApplicable.seuilMax) {
+                // Plafonnement au niveau
+                plafonnement = {
+                    actif: true,
+                    deficit: deficit,
+                    niveauCode: plafondApplicable.niveauCode,
+                    seuilMax: plafondApplicable.seuilMax,
+                    echec: false,
+                    moyenneOriginale: moyennePortfolio
+                };
+                moyennePortfolio = plafondApplicable.seuilMax;
+                console.log(`[calculerDetailsNoteFinale] Plafonnement à ${plafondApplicable.seuilMax}% (niveau ${plafondApplicable.niveauCode})`);
+            }
+        }
     }
 
     // Pondérations
@@ -8136,6 +8231,7 @@ function calculerDetailsNoteFinale(da) {
             nombreARetenir: nombreARetenir,
             nombreEvalues: evaluationsArtefacts.length,
             nombreRetenus: artefactsRetenus.length,
+            minimumRequis: minimumRequis,
             methodeSelection: methodesLabels[methodeSelection] || methodeSelection,
             moyenne: moyennePortfolio,
             ponderation: ponderationPortfolio,
@@ -8144,7 +8240,8 @@ function calculerDetailsNoteFinale(da) {
                 productionId: e.productionId,
                 note: e.noteFinale,
                 niveau: e.niveauFinal
-            }))
+            })),
+            plafonnement: plafonnement
         },
         terminal: {
             nom: productionTerminale?.titre || productionTerminale?.description || 'Évaluation terminale',

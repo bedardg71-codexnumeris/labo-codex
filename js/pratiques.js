@@ -166,6 +166,9 @@ function initialiserModulePratiques() {
         console.log('[initialiserModulePratiques] Pas de configPAN à charger');
     }
 
+    // Initialiser les règles de conformité (événements checkbox)
+    initialiserReglesConformite();
+
     console.log('   ✅ Module Pratiques initialisé');
 
     // 🔄 Migration automatique de la configuration (Phase 3)
@@ -1092,7 +1095,8 @@ function sauvegarderConfigurationPAN() {
             minimumCompletion: minimumCompletion,
             nombreTotal: nombreTotal,
             methodeSelection: methodeSelection,
-            decouplerPR: decouplerPR
+            decouplerPR: decouplerPR,
+            reglesConformite: getReglesConformiteConfig()
         },
 
         jetons: {
@@ -1441,6 +1445,14 @@ function chargerConfigurationPAN(configPAN) {
         const checkDecoupler = document.getElementById('decouplerPR');
         if (checkDecoupler) {
             checkDecoupler.checked = configPAN.portfolio.decouplerPR === true;
+        }
+
+        // Charger les règles de conformité
+        if (configPAN.portfolio.reglesConformite) {
+            // D'abord peupler les sélecteurs avec les niveaux de l'échelle
+            populerSelecteursNiveaux();
+            // Puis charger les valeurs sauvegardées
+            chargerReglesConformiteConfig(configPAN.portfolio.reglesConformite);
         }
 
         // Mettre à jour l'affichage des détails
@@ -4911,3 +4923,291 @@ function toggleAccordeon(id) {
 }
 
 window.toggleAccordeon = toggleAccordeon;
+
+/* ===============================
+   RÈGLES DE CONFORMITÉ
+   =============================== */
+
+/**
+ * Initialise les règles de conformité
+ * - Peuple les sélecteurs avec les niveaux de l'échelle
+ * - Gère la checkbox pour afficher/masquer les détails
+ * ✅ NOUVEAU (15 décembre 2025)
+ */
+function initialiserReglesConformite() {
+    console.log('[initialiserReglesConformite] Initialisation...');
+
+    const checkbox = document.getElementById('activerReglesConformite');
+    const details = document.getElementById('detailsReglesConformite');
+
+    if (!checkbox || !details) {
+        console.log('[initialiserReglesConformite] Éléments non trouvés');
+        return;
+    }
+
+    // Gérer la checkbox
+    checkbox.addEventListener('change', function() {
+        details.style.display = this.checked ? 'block' : 'none';
+        console.log('[initialiserReglesConformite] Checkbox changée:', this.checked);
+        // Peupler les sélecteurs quand on affiche les détails
+        if (this.checked) {
+            populerSelecteursNiveaux();
+        }
+    });
+
+    // Peupler les sélecteurs avec les niveaux de l'échelle (si déjà configurée)
+    populerSelecteursNiveaux();
+}
+
+/**
+ * Peuple les sélecteurs de plafond avec les niveaux de l'échelle configurée
+ */
+function populerSelecteursNiveaux() {
+    console.log('[populerSelecteursNiveaux] Peuplement du sélecteur d\'échelles...');
+
+    const selectEchelle = document.getElementById('echelleConformite');
+    if (!selectEchelle) {
+        console.log('[populerSelecteursNiveaux] Sélecteur echelleConformite non trouvé');
+        return;
+    }
+
+    // Charger les échelles disponibles (clé: echellesTemplates)
+    const echelles = db.getSync('echellesTemplates', []);
+    console.log('[populerSelecteursNiveaux] Nombre d\'échelles disponibles:', echelles.length);
+
+    // Vider et repeupler le sélecteur d'échelles
+    selectEchelle.innerHTML = '<option value="">-- Choisir une échelle --</option>';
+
+    if (!echelles || echelles.length === 0) {
+        console.log('[populerSelecteursNiveaux] Aucune échelle disponible');
+        selectEchelle.innerHTML = '<option value="" disabled selected>Créez d\'abord une échelle</option>';
+        return;
+    }
+
+    // Ajouter chaque échelle comme option
+    echelles.forEach(echelle => {
+        const option = document.createElement('option');
+        option.value = echelle.id;
+        option.textContent = `${echelle.nom} (${echelle.niveaux?.length || 0} niveaux)`;
+        selectEchelle.appendChild(option);
+    });
+
+    console.log('[populerSelecteursNiveaux] Sélecteur d\'échelles peuplé avec', echelles.length, 'échelles');
+}
+
+/**
+ * Appelé quand l'utilisateur change l'échelle de conformité
+ */
+function onEchelleConformiteChange() {
+    const selectEchelle = document.getElementById('echelleConformite');
+    const echelleId = selectEchelle?.value;
+
+    console.log('[onEchelleConformiteChange] Échelle sélectionnée:', echelleId);
+
+    const selecteurs = ['plafondDeficit1', 'plafondDeficit2', 'plafondDeficit3'];
+
+    if (!echelleId) {
+        // Vider les sélecteurs de plafonds
+        selecteurs.slice(0, 2).forEach(selecteurId => {
+            const select = document.getElementById(selecteurId);
+            if (select) {
+                select.innerHTML = '<option value="" disabled selected>Choisissez d\'abord une échelle</option>';
+            }
+        });
+        return;
+    }
+
+    // Charger l'échelle sélectionnée (clé: echellesTemplates)
+    const echelles = db.getSync('echellesTemplates', []);
+    const echelle = echelles.find(e => e.id === echelleId);
+
+    if (!echelle || !echelle.niveaux) {
+        console.log('[onEchelleConformiteChange] Échelle non trouvée:', echelleId);
+        return;
+    }
+
+    console.log('[onEchelleConformiteChange] Peuplement des sélecteurs avec:', echelle.nom);
+    populerSelecteursAvecEchelle(echelle, selecteurs);
+}
+
+/**
+ * Peuple les sélecteurs avec les niveaux d'une échelle donnée
+ * @param {Object} echelle - L'échelle à utiliser
+ * @param {Array} selecteurs - Les IDs des sélecteurs à peupler
+ */
+function populerSelecteursAvecEchelle(echelle, selecteurs) {
+
+    // Trier les niveaux par valeur décroissante (du plus haut au plus bas)
+    const niveauxTries = [...echelle.niveaux].sort((a, b) => b.valeur - a.valeur);
+
+    console.log('[populerSelecteursNiveaux] Niveaux trouvés:', niveauxTries.map(n => n.code));
+
+    // Peupler les sélecteurs avec les niveaux
+    selecteurs.forEach((selecteurId, index) => {
+        const select = document.getElementById(selecteurId);
+        if (!select) return;
+
+        // Vider le sélecteur (sauf pour déficit 3 qui a déjà "Échec automatique")
+        if (index < 2) {
+            select.innerHTML = '';
+        }
+
+        // Ajouter les niveaux (sauf le plus élevé qui n'a pas de sens comme plafond)
+        niveauxTries.forEach((niveau, niveauIndex) => {
+            // Pour déficit 1, on peut plafonner à tous sauf le plus haut
+            // Pour déficit 2, on propose les niveaux plus bas
+            // Pour déficit 3, on ajoute les niveaux après "Échec automatique"
+
+            // Calculer le seuil maximum du niveau (borne supérieure de la plage)
+            const seuilMax = calculerSeuilMaxNiveau(niveau, echelle);
+
+            const option = document.createElement('option');
+            option.value = niveau.code;
+            option.textContent = `${niveau.nom} (max ${seuilMax}%)`;
+            option.dataset.seuilMax = seuilMax;
+
+            select.appendChild(option);
+        });
+    });
+
+    console.log('[populerSelecteursNiveaux] Sélecteurs peuplés');
+}
+
+/**
+ * Calcule le seuil maximum d'un niveau (borne supérieure de sa plage)
+ * @param {Object} niveau - Le niveau de l'échelle
+ * @param {Object} echelle - L'échelle complète
+ * @returns {number} Le seuil maximum en pourcentage
+ */
+function calculerSeuilMaxNiveau(niveau, echelle) {
+    // Structure des niveaux IDME : { code, nom, min, max, valeurCalcul, couleur }
+
+    // Si le niveau a une propriété 'max' définie, l'utiliser directement
+    if (niveau.max !== undefined && niveau.max !== null) {
+        // Arrondir à l'entier inférieur pour avoir un seuil propre
+        return Math.floor(niveau.max);
+    }
+
+    // Fallback : trier les niveaux par min croissant et calculer
+    const niveauxTries = [...echelle.niveaux].sort((a, b) => {
+        const minA = a.min ?? a.valeurCalcul ?? 0;
+        const minB = b.min ?? b.valeurCalcul ?? 0;
+        return minA - minB;
+    });
+
+    // Trouver l'index du niveau actuel
+    const index = niveauxTries.findIndex(n => n.code === niveau.code);
+
+    if (index === niveauxTries.length - 1) {
+        // C'est le niveau le plus haut, pas de plafond (100%)
+        return 100;
+    }
+
+    // Le seuil max est juste en dessous du seuil min du niveau suivant
+    const niveauSuivant = niveauxTries[index + 1];
+    const minSuivant = niveauSuivant.min ?? niveauSuivant.valeurCalcul;
+
+    if (minSuivant !== undefined) {
+        return Math.floor(minSuivant) - 1;
+    }
+
+    // Dernier recours : utiliser valeurCalcul
+    return Math.floor(niveau.valeurCalcul ?? 50);
+}
+
+/**
+ * Récupère la configuration des règles de conformité depuis les champs
+ * @returns {Object} Configuration des règles de conformité
+ */
+function getReglesConformiteConfig() {
+    const checkbox = document.getElementById('activerReglesConformite');
+    const selectEchelle = document.getElementById('echelleConformite');
+    const select1 = document.getElementById('plafondDeficit1');
+    const select2 = document.getElementById('plafondDeficit2');
+    const select3 = document.getElementById('plafondDeficit3');
+
+    return {
+        actif: checkbox ? checkbox.checked : false,
+        echelleId: selectEchelle ? selectEchelle.value : null,
+        condition: {
+            type: 'nombre',
+            cible: 'productions'
+            // Le minimum est lu depuis configMinimumCompletion
+        },
+        plafonds: [
+            {
+                deficit: 1,
+                niveauCode: select1 ? select1.value : null,
+                seuilMax: select1 ? parseFloat(select1.selectedOptions[0]?.dataset?.seuilMax) : null
+            },
+            {
+                deficit: 2,
+                niveauCode: select2 ? select2.value : null,
+                seuilMax: select2 ? parseFloat(select2.selectedOptions[0]?.dataset?.seuilMax) : null
+            },
+            {
+                deficit: 3,
+                echec: select3 ? select3.value === 'echec' : true,
+                niveauCode: select3 && select3.value !== 'echec' ? select3.value : null,
+                seuilMax: select3 && select3.value !== 'echec' ? parseFloat(select3.selectedOptions[0]?.dataset?.seuilMax) : 0
+            }
+        ]
+    };
+}
+
+/**
+ * Charge la configuration des règles de conformité dans les champs
+ * @param {Object} regles - Configuration des règles de conformité
+ */
+function chargerReglesConformiteConfig(regles) {
+    console.log('[chargerReglesConformiteConfig] Chargement:', regles);
+
+    if (!regles) return;
+
+    const checkbox = document.getElementById('activerReglesConformite');
+    const details = document.getElementById('detailsReglesConformite');
+    const selectEchelle = document.getElementById('echelleConformite');
+
+    if (checkbox) {
+        checkbox.checked = regles.actif === true;
+    }
+
+    if (details) {
+        details.style.display = regles.actif ? 'block' : 'none';
+    }
+
+    // D'ABORD peupler le sélecteur d'échelles avec les options
+    populerSelecteursNiveaux();
+
+    // ENSUITE charger l'échelle sélectionnée
+    if (selectEchelle && regles.echelleId) {
+        selectEchelle.value = regles.echelleId;
+        console.log('[chargerReglesConformiteConfig] Échelle définie:', regles.echelleId);
+        // Déclencher le peuplement des sélecteurs de plafonds
+        onEchelleConformiteChange();
+    }
+
+    // Charger les plafonds (après un court délai pour laisser le temps aux sélecteurs de se peupler)
+    setTimeout(() => {
+        if (regles.plafonds && Array.isArray(regles.plafonds)) {
+            regles.plafonds.forEach(plafond => {
+                const selectId = `plafondDeficit${plafond.deficit}`;
+                const select = document.getElementById(selectId);
+
+                if (select && plafond.niveauCode) {
+                    select.value = plafond.niveauCode;
+                } else if (select && plafond.echec) {
+                    select.value = 'echec';
+                }
+            });
+        }
+        console.log('[chargerReglesConformiteConfig] Plafonds chargés');
+    }, 50);
+}
+
+// Exporter les fonctions
+window.initialiserReglesConformite = initialiserReglesConformite;
+window.populerSelecteursNiveaux = populerSelecteursNiveaux;
+window.onEchelleConformiteChange = onEchelleConformiteChange;
+window.getReglesConformiteConfig = getReglesConformiteConfig;
+window.chargerReglesConformiteConfig = chargerReglesConformiteConfig;
