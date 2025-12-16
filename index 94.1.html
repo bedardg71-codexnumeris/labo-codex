@@ -2755,6 +2755,10 @@
                         <div id="selecteur-mode" class="selecteur-mode-centre">
                             <!-- Sera généré dynamiquement par 17-modes.js -->
                         </div>
+                        <!-- Bouton Signaler un bug (Beta 94) -->
+                        <button onclick="ouvrirModalRapportBug()" class="btn-action-header" title="Signaler un problème">
+                            Signaler un bug
+                        </button>
                     </div>
                 </div>
 
@@ -10450,6 +10454,9 @@ Exemple :
 
     <!-- PRIORITÉ 0: Couche de stockage (Migration IndexedDB - Beta 91.5) -->
     <script src="js/db.js?v=2025121203"></script>
+
+    <!-- Rapport de bug pour testeurs (Beta 94) - Chargé tôt pour capturer les erreurs -->
+    <script src="js/rapport-bug.js?v=2025121601"></script>
 
     <!-- Bibliothèque externe: Chart.js pour graphiques progression (Beta 93) -->
     <script src="libs/chart.min.js"></script>
