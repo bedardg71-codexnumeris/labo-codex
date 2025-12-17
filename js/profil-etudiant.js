@@ -3294,6 +3294,9 @@ function afficherProfilComplet(da) {
     profilActuelDA = da;
     window.profilActuelDA = da;
 
+    // ✅ CORRECTIF (17 déc 2025): Mémoriser le dernier profil consulté pour navigation directe
+    localStorage.setItem('dernierProfilDA', da);
+
     const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiants = typeof filtrerEtudiantsParMode === 'function'
         ? filtrerEtudiantsParMode(tousEtudiants)

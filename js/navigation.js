@@ -406,8 +406,37 @@ function afficherSousSection(idSousSection) {
             setTimeout(() => chargerListeEtudiants(), 100);
         }
     } else if (idSousSection === 'tableau-bord-profil') {
-        // Le profil se charge quand on clique sur un étudiant
-        // Pas besoin de recharger automatiquement
+        // ✅ CORRECTIF (17 déc 2025): Charger automatiquement un profil
+        // - Première visite : charger le premier étudiant de la liste
+        // - Visites suivantes : charger le dernier profil consulté
+        setTimeout(() => {
+            const dernierDA = localStorage.getItem('dernierProfilDA');
+            const etudiants = JSON.parse(localStorage.getItem('groupeEtudiants')) || [];
+
+            // Filtrer selon le mode (exclure groupe 9999 si pas en mode démo)
+            const modeApplication = localStorage.getItem('modeApplication');
+            const etudiantsFiltres = modeApplication === 'demo'
+                ? etudiants
+                : etudiants.filter(e => e.groupe !== '9999');
+
+            // Trier par nom de famille
+            etudiantsFiltres.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
+            if (etudiantsFiltres.length === 0) {
+                console.log('⚠️ Aucun étudiant disponible pour afficher un profil');
+                return;
+            }
+
+            // Vérifier si le dernier DA est toujours valide
+            const daValide = dernierDA && etudiantsFiltres.some(e => e.da === dernierDA);
+            const daACcharger = daValide ? dernierDA : etudiantsFiltres[0].da;
+
+            console.log('👤 Chargement automatique du profil:', daACcharger, daValide ? '(dernier consulté)' : '(premier de la liste)');
+
+            if (typeof afficherProfilComplet === 'function') {
+                afficherProfilComplet(daACcharger);
+            }
+        }, 100);
     }
 
         // Recharger le tableau de bord selon la sous-section
