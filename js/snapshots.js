@@ -878,6 +878,7 @@ function obtenirSnapshotsEtudiant(da) {
             if (!etudiant) return null;
             return {
                 numSemaine: s.numSemaine,
+                dateSeance: s.dateSeance || s.dateDebut, // ✨ AJOUT pour marqueurs jetons/RàI
                 dateDebut: s.dateDebut,
                 dateFin: s.dateFin,
                 ...etudiant
