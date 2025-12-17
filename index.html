@@ -159,6 +159,14 @@
         }
 
         /* ===============================
+           LEGACY - Anciennes sous-sections masquées (Beta 95)
+           À supprimer après migration complète
+           =============================== */
+        .sous-section.legacy-hidden {
+            display: none !important;
+        }
+
+        /* ===============================
            MODE ASSISTÉ - CONVERSION BLEU → SARCELLE
            =============================== */
         body[data-mode="simulation"] {
@@ -4869,7 +4877,7 @@
                      ======================================== -->
 
                 <!-- Sous-section: Aperçu des réglages (LEGACY) -->
-                <div id="reglages-apercu" class="sous-section">
+                <div id="reglages-apercu" class="sous-section legacy-hidden">
                     <h2>Aperçu de la configuration</h2>
                     <p class="text-muted">
                         Résumé de la configuration actuelle du système. Les statistiques sont calculées en temps réel depuis les données stockées localement.
@@ -4936,7 +4944,7 @@
                 <!-- fin sous-section reglages-apercu -->
 
                 <!-- Sous-section : Cours -->
-                <div id="reglages-trimestre" class="sous-section">
+                <div id="reglages-trimestre" class="sous-section legacy-hidden">
                     <h2>Configuration du trimestre</h2>
                     <p class="text-muted">
                         Définissez les paramètres administratifs du trimestre : dates de début et de fin,
@@ -5213,7 +5221,7 @@
 
 
                 <!-- Sous-section: Horaire -->
-                <div id="reglages-cours" class="sous-section">
+                <div id="reglages-cours" class="sous-section legacy-hidden">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration du cours</span>
                         <span class="titre-emoji-container">
@@ -5494,7 +5502,7 @@
                 <!-- Cette section gère les DONNÉES ADMINISTRATIVES du trimestre -->
                 <!-- Module associé: trimestre.js -->
 
-                <div id="reglages-horaire" class="sous-section">
+                <div id="reglages-horaire" class="sous-section legacy-hidden">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration de l'horaire</span>
                         <span class="titre-emoji-container">
@@ -5615,7 +5623,7 @@
                 </div><!-- FIN sous-section reglages-horaire -->
 
                 <!-- Sous-section : Groupe -->
-                <div id="reglages-groupe" class="sous-section">
+                <div id="reglages-groupe" class="sous-section legacy-hidden">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration du groupe d'étudiants</span>
                         <span class="titre-emoji-container">
@@ -5933,7 +5941,7 @@ Exemple :
                 </div><!-- FIN sous-section reglages-groupe -->
 
                 <!-- Sous-section : Pratique de notation -->
-                <div id="reglages-pratique-notation" class="sous-section">
+                <div id="reglages-pratique-notation" class="sous-section legacy-hidden">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Pratiques de notation</span>
                         <span class="titre-emoji-container">
@@ -7140,7 +7148,7 @@ Exemple :
                 </div><!--fin sous-section pratique-notation-->
 
                 <!-- Sous-section : Interprétation des données -->
-                <div id="reglages-interpretation" class="sous-section">
+                <div id="reglages-interpretation" class="sous-section legacy-hidden">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration des seuils d'interprétation</span>
                         <span class="titre-emoji-container">
@@ -7368,7 +7376,7 @@ Exemple :
                 </div><!--fin sous-section reglages-interpretation-->
 
                 <!-- Sous-section: Captures de progression -->
-                <div id="reglages-snapshots" class="sous-section">
+                <div id="reglages-snapshots" class="sous-section legacy-hidden">
                     <h2>Captures de progression</h2>
                     <p class="text-muted">
                         Gestion des captures automatiques et manuelles des données de progression longitudinale
@@ -7465,7 +7473,7 @@ Exemple :
                 </div><!--fin sous-section reglages-snapshots-->
 
                 <!-- Sous-section: Import/Export des données -->
-                <div id="reglages-import-export" class="sous-section">
+                <div id="reglages-import-export" class="sous-section legacy-hidden">
                     <h2>Gestion des données</h2>
                     <p class="text-muted">Sauvegarde et restauration des données locales</p>
 
@@ -10626,7 +10634,7 @@ Exemple :
 
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js?v=2025121004"></script>
-    <script src="js/navigation.js?v=2025121700"></script>
+    <script src="js/navigation.js?v=2025121701"></script>
     <script src="js/modes.js?v=2025121500"></script>
     <script src="js/donnees-demo.js?v=2025121009"></script>
 

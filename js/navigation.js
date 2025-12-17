@@ -338,6 +338,35 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
+        // ✨ NOUVEAUX ONGLETS RÉGLAGES (Beta 95)
+        case 'reglages-trimestres':
+            console.log('🔄 Chargement de Mes trimestres...');
+            if (typeof chargerVueTrimestres === 'function') {
+                setTimeout(chargerVueTrimestres, 100);
+            }
+            break;
+
+        case 'reglages-cours-actif':
+            console.log('🔄 Chargement du Cours actif...');
+            if (typeof chargerVueCoursActif === 'function') {
+                setTimeout(chargerVueCoursActif, 100);
+            }
+            break;
+
+        case 'reglages-preferences':
+            console.log('🔄 Chargement des Préférences...');
+            if (typeof chargerVuePreferences === 'function') {
+                setTimeout(chargerVuePreferences, 100);
+            }
+            break;
+
+        case 'reglages-donnees':
+            console.log('🔄 Chargement de Données...');
+            if (typeof chargerVueDonnees === 'function') {
+                setTimeout(chargerVueDonnees, 100);
+            }
+            break;
+
         case 'reglages-groupe':
             console.log('🔄 Initialisation du module Groupe...');
             if (typeof initialiserModuleGroupe === 'function') {
