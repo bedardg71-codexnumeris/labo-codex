@@ -8396,3 +8396,12 @@ window.obtenirPatternEtudiant = obtenirPatternEtudiant;
 window.afficherProfilComplet = afficherProfilComplet;
 window.calculerTousLesIndices = calculerTousLesIndices; // Utilisé par etudiants.js pour cohérence pratique SOM/PAN
 window.obtenirPratiqueActuelle = obtenirPratiqueActuelle; // ✅ BETA 93.5 (10 déc): Utilisé par snapshots.js pour calcul historique P
+
+// ✅ CORRECTIF (17 déc 2025): Exporter les fonctions utilisées dans les onclick du profil
+window.changerSectionProfil = changerSectionProfil;
+window.toggleSectionCollapsible = toggleSectionCollapsible;
+window.naviguerVersPresenceAvecDate = naviguerVersPresenceAvecDate;
+window.genererEtAfficherRapport = genererEtAfficherRapport;
+window.copierRapport = copierRapport;
+window.consulterEvaluation = consulterEvaluation;
+window.evaluerProduction = evaluerProduction;
