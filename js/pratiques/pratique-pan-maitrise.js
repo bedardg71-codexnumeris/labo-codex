@@ -475,8 +475,9 @@ class PratiquePANMaitrise {
         const evaluations = this._lireEvaluations();
 
         // 1. Identifier les travaux ASSIGNÉS (ont une dateEcheance et ne sont pas facultatifs)
+        // ✅ CORRECTIF (17 déc 2025): Exclure les portfolios (conteneurs, pas des productions individuelles)
         const travauxAssignes = productions.filter(p => {
-            return p.dateEcheance && !p.facultatif;
+            return p.dateEcheance && !p.facultatif && p.type !== 'portfolio';
         });
 
         if (travauxAssignes.length === 0) {

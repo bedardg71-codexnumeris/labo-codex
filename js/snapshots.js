@@ -178,6 +178,9 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         // Exclure les productions facultatives
         if (production.facultatif) return false;
 
+        // ✅ CORRECTIF (17 déc 2025): Exclure les portfolios (conteneurs, pas des productions individuelles)
+        if (production.type === 'portfolio') return false;
+
         // Vérifier que la production a une dateEcheance passée
         return production.dateEcheance && production.dateEcheance <= dateLimite;
     });
