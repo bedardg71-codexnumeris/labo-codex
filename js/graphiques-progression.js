@@ -109,8 +109,9 @@ function obtenirJetonsParDate(da, snapshots) {
     const jetonsParDate = {};
 
     try {
-        const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees')) || [];
-        const productions = JSON.parse(localStorage.getItem('productions')) || [];
+        // ✨ CORRECTION (17 déc 2025) : Utiliser obtenirDonneesSelonMode pour compatibilité IndexedDB
+        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        const productions = obtenirDonneesSelonMode('productions') || [];
 
         // Filtrer les évaluations de cet étudiant avec jetons
         const evalsAvecJetons = evaluations.filter(e =>
@@ -119,17 +120,25 @@ function obtenirJetonsParDate(da, snapshots) {
             (e.jetonDelaiApplique || e.jetonRepriseApplique || e.repriseDeId)
         );
 
+        console.log(`🎫 Jetons pour DA ${da}: ${evalsAvecJetons.length} évaluations avec jetons trouvées`);
+
         evalsAvecJetons.forEach(evaluation => {
             // Trouver la production pour obtenir le titre et la date d'échéance
             const production = productions.find(p => p.id === evaluation.productionId);
-            const titreProduction = production?.titre || production?.nom || 'Production';
+            const titreProduction = production?.description || production?.titre || production?.nom || 'Production';
             const dateEcheance = production?.dateEcheance;
 
-            if (!dateEcheance) return;
+            if (!dateEcheance) {
+                console.warn(`  ⚠️ Production ${evaluation.productionId} sans dateEcheance`);
+                return;
+            }
 
             // Trouver le snapshot dont la dateSeance correspond ou est la plus proche après l'échéance
             const snapshotCorrespondant = snapshots.find(s => s.dateSeance >= dateEcheance);
-            if (!snapshotCorrespondant) return;
+            if (!snapshotCorrespondant) {
+                console.warn(`  ⚠️ Pas de snapshot après ${dateEcheance}`);
+                return;
+            }
 
             const dateSeance = snapshotCorrespondant.dateSeance;
 
@@ -142,6 +151,7 @@ function obtenirJetonsParDate(da, snapshots) {
             }
 
             if (typeJeton) {
+                console.log(`  ✅ Jeton ${typeJeton} sur "${titreProduction}" → séance ${dateSeance}`);
                 // Stocker (prioriser reprise sur délai)
                 if (!jetonsParDate[dateSeance] || typeJeton === 'jetonReprise') {
                     jetonsParDate[dateSeance] = {
@@ -484,6 +494,23 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         mode: 'index',
                         intersect: false,
                         callbacks: {
+                            // ✨ NOUVEAU (17 déc 2025) : Afficher la date de la séance dans le titre
+                            title: function(tooltipItems) {
+                                if (!tooltipItems.length) return '';
+                                const index = tooltipItems[0].dataIndex;
+                                const snapshot = infosEvenements.snapshots[index];
+                                if (!snapshot) return tooltipItems[0].label;
+
+                                // Formater la date (YYYY-MM-DD → JJ mois AAAA)
+                                const dateSeance = snapshot.dateSeance;
+                                if (dateSeance) {
+                                    const date = new Date(dateSeance + 'T12:00:00');
+                                    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                                    const dateFormatee = date.toLocaleDateString('fr-CA', options);
+                                    return `Sem. ${snapshot.numSemaine} (${dateFormatee})`;
+                                }
+                                return tooltipItems[0].label;
+                            },
                             label: function(context) {
                                 const label = context.dataset.label || '';
                                 // ✨ Soustraire l'offset visuel pour afficher la valeur réelle
