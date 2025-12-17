@@ -54,17 +54,26 @@ const configurationsOnglets = {
         { id: 'retroactions', label: 'Cartouches de rétroaction' },
         { id: 'objectifs', label: 'Ensembles d\'objectifs' }
     ],
+    // ✨ REFONTE UX (17 déc 2025) : 4 onglets au lieu de 9
+    // Structure hiérarchique pour multi-cours et archivage
     'reglages': [
-        { id: 'apercu', label: 'Aperçu' },
-        { id: 'trimestre', label: 'Trimestre' },
-        { id: 'cours', label: 'Cours' },
-        { id: 'horaire', label: 'Horaire' },
-        { id: 'groupe', label: 'Groupe' },
-        { id: 'pratique-notation', label: 'Pratique de notation' },
-        { id: 'interpretation', label: 'Interprétation des données' },
-        { id: 'snapshots', label: 'Captures de progression' },
-        { id: 'import-export', label: 'Import/Export' }
+        { id: 'trimestres', label: 'Mes trimestres' },
+        { id: 'cours-actif', label: 'Cours actif' },
+        { id: 'preferences', label: 'Préférences' },
+        { id: 'donnees', label: 'Données' }
     ],
+    // Anciennes sous-sections (conservées pour référence, à migrer)
+    // 'reglages-legacy': [
+    //     { id: 'apercu', label: 'Aperçu' },
+    //     { id: 'trimestre', label: 'Trimestre' },
+    //     { id: 'cours', label: 'Cours' },
+    //     { id: 'horaire', label: 'Horaire' },
+    //     { id: 'groupe', label: 'Groupe' },
+    //     { id: 'pratique-notation', label: 'Pratique de notation' },
+    //     { id: 'interpretation', label: 'Interprétation des données' },
+    //     { id: 'snapshots', label: 'Captures de progression' },
+    //     { id: 'import-export', label: 'Import/Export' }
+    // ],
   'aide': [
       { id: 'introduction', label: 'Introduction' },
       { id: 'configuration', label: 'Configuration' },

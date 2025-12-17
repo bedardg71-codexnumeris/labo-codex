@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 94 - Groupe démo</title>
+    <title>Système de suivi Beta 95 - Refonte UX Réglages</title>
 
     <!-- CSS externe requis pour styles complets -->
     <link rel="stylesheet" href="styles.css?v=2025121601">
@@ -2744,7 +2744,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de gestion de la notation</h1>
                         <p class="meta">
-                            Beta 94 - 10 décembre 2025
+                            Beta 95 - 17 décembre 2025
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés"></span>
                         </p>
                     </div>
@@ -2755,7 +2755,7 @@
                         <div id="selecteur-mode" class="selecteur-mode-centre">
                             <!-- Sera généré dynamiquement par 17-modes.js -->
                         </div>
-                        <!-- Bouton Signaler un bug (Beta 94) -->
+                        <!-- Bouton Signaler un bug (Beta 95) -->
                         <button onclick="ouvrirModalRapportBug()" class="btn-action-header" title="Signaler un problème">
                             Signaler un bug
                         </button>
@@ -2814,13 +2814,13 @@
                     transition: all 0.2s;">✕</button>
 
                 <!-- Titre principal -->
-                <h2>Nouveautés - Beta 94</h2>
+                <h2>Nouveautés - Beta 95</h2>
 
                 <!-- Message de Grégoire -->
                 <div style="margin-bottom: 25px;">
                     <h3>Message de Grégoire</h3>
                     <p style="line-height: 1.6;">
-                        Bonjour ! La Beta 94 améliore la gestion des productions avec l'ajout de dates d'assignation et d'échéance. Ces dates permettent un suivi longitudinal plus précis de la complétion et tiennent compte des jetons de délai accordés aux étudiants. Merci de votre patience et de votre confiance !
+                        Bonjour ! La Beta 95 commence une refonte majeure de l'expérience utilisateur dans les Réglages. L'objectif : rendre l'application plus intuitive pour gérer plusieurs cours et archiver vos trimestres passés. Cette version est en cours de développement.
                     </p>
                 </div>
 
@@ -2828,9 +2828,10 @@
                 <div style="margin-bottom: 25px;">
                     <h3>Nouveautés pour vous</h3>
                     <ul style="line-height: 1.8; padding-left: 20px; margin-top: 10px;">
-                        <li><strong>Date d'échéance obligatoire</strong> : Chaque production doit maintenant avoir une date d'échéance. Cette date fixe dans le temps les indices C (Complétion) et P (Performance) pour les suivis longitudinaux.</li>
-                        <li><strong>Jetons comptabilisés automatiquement</strong> : Les jetons de délai servent à comptabiliser leur utilisation par les étudiants, sans modifier l'échéance dans les calculs de suivi.</li>
-                        <li><strong>Performance associée à l'échéance</strong> : Les notes sont maintenant associées à la date d'échéance du travail (et non à la date où vous corrigez), pour un suivi longitudinal cohérent même si vous prenez plusieurs jours pour corriger un groupe.</li>
+                        <li><strong>Nouvelle navigation Réglages</strong> : 4 onglets simplifiés au lieu de 9 (Mes trimestres, Cours actif, Préférences, Données).</li>
+                        <li><strong>Gestion multi-trimestres</strong> : Visualisez tous vos trimestres et cours dans une interface hiérarchique.</li>
+                        <li><strong>Préférences par cours</strong> : Chaque cours peut avoir sa propre pratique de notation.</li>
+                        <li><strong>Marqueurs sur les graphiques</strong> : Les jetons et interventions RàI sont maintenant visibles sur le graphique de progression.</li>
                     </ul>
                 </div>
 
@@ -4709,10 +4710,165 @@
 
             <!-- ===================================
                  SECTION: RÉGLAGES
+                 ✨ REFONTE UX (17 déc 2025) : 4 onglets hiérarchiques
                  =================================== -->
             <section id="section-reglages" class="section">
 
-                <!-- Sous-section: Aperçu des réglages -->
+                <!-- ========================================
+                     NOUVELLE STRUCTURE (4 onglets)
+                     ======================================== -->
+
+                <!-- Sous-section: Mes trimestres -->
+                <div id="reglages-trimestres" class="sous-section">
+                    <h2>Mes trimestres</h2>
+                    <p class="text-muted">
+                        Gérez vos trimestres et vos cours. Sélectionnez un cours pour le rendre actif, archivez les sessions passées.
+                    </p>
+
+                    <div id="liste-trimestres-container">
+                        <!-- Contenu généré dynamiquement par trimestres-vue.js -->
+                        <p class="text-muted" style="text-align: center; padding: 40px;">
+                            Chargement des trimestres...
+                        </p>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button class="btn btn-principal" onclick="afficherFormulaireNouveauTrimestre()">
+                            + Nouveau trimestre
+                        </button>
+                    </div>
+                </div>
+                <!-- fin sous-section reglages-trimestres -->
+
+                <!-- Sous-section: Cours actif -->
+                <div id="reglages-cours-actif" class="sous-section">
+                    <h2>Cours actif</h2>
+
+                    <div id="cours-actif-header" class="carte" style="margin-bottom: 20px; background: linear-gradient(135deg, var(--bleu-tres-pale), white);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 id="cours-actif-titre" style="margin: 0; color: var(--bleu-fonce);">Aucun cours sélectionné</h3>
+                                <p id="cours-actif-details" class="text-muted" style="margin: 5px 0 0 0;">
+                                    Sélectionnez un cours dans « Mes trimestres »
+                                </p>
+                            </div>
+                            <button class="btn btn-secondaire" onclick="afficherSousSection('reglages-trimestres')">
+                                Changer de cours
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Section Horaire -->
+                    <div class="carte" style="margin-bottom: 20px;">
+                        <h3 class="carte-titre-bleu">Horaire des séances</h3>
+                        <div id="cours-actif-horaire">
+                            <!-- Contenu migré depuis reglages-horaire -->
+                            <p class="text-muted">Chargement de l'horaire...</p>
+                        </div>
+                    </div>
+
+                    <!-- Section Étudiants -->
+                    <div class="carte" style="margin-bottom: 20px;">
+                        <h3 class="carte-titre-bleu">Liste des étudiants</h3>
+                        <div id="cours-actif-etudiants">
+                            <!-- Contenu migré depuis reglages-groupe -->
+                            <p class="text-muted">Chargement des étudiants...</p>
+                        </div>
+                    </div>
+
+                    <!-- Section Calendrier -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Calendrier du trimestre</h3>
+                        <div id="cours-actif-calendrier">
+                            <!-- Aperçu du calendrier -->
+                            <p class="text-muted">Chargement du calendrier...</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- fin sous-section reglages-cours-actif -->
+
+                <!-- Sous-section: Préférences -->
+                <div id="reglages-preferences" class="sous-section">
+                    <h2>Préférences</h2>
+                    <p class="text-muted">
+                        Configurez la pratique de notation et les paramètres d'interprétation pour le cours actif.
+                    </p>
+
+                    <!-- Section Pratique de notation -->
+                    <div class="carte" style="margin-bottom: 20px;">
+                        <h3 class="carte-titre-bleu">Pratique de notation</h3>
+                        <div id="preferences-notation">
+                            <!-- Contenu migré depuis reglages-pratique-notation -->
+                            <p class="text-muted">Chargement des paramètres de notation...</p>
+                        </div>
+                    </div>
+
+                    <!-- Section Interprétation -->
+                    <div class="carte" style="margin-bottom: 20px;">
+                        <h3 class="carte-titre-bleu">Interprétation des données</h3>
+                        <div id="preferences-interpretation">
+                            <!-- Contenu migré depuis reglages-interpretation -->
+                            <p class="text-muted">Chargement des paramètres d'interprétation...</p>
+                        </div>
+                    </div>
+
+                    <!-- Section Affichage -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Options d'affichage</h3>
+                        <div id="preferences-affichage">
+                            <p class="text-muted">Options d'affichage (mode comparatif, etc.)</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- fin sous-section reglages-preferences -->
+
+                <!-- Sous-section: Données -->
+                <div id="reglages-donnees" class="sous-section">
+                    <h2>Données</h2>
+                    <p class="text-muted">
+                        Sauvegardez vos données, exportez votre configuration ou réinitialisez l'application.
+                    </p>
+
+                    <!-- Section Import/Export -->
+                    <div class="carte" style="margin-bottom: 20px;">
+                        <h3 class="carte-titre-bleu">Sauvegarde et restauration</h3>
+                        <div id="donnees-import-export">
+                            <!-- Contenu migré depuis reglages-import-export -->
+                            <p class="text-muted">Chargement des options de sauvegarde...</p>
+                        </div>
+                    </div>
+
+                    <!-- Section Snapshots -->
+                    <div class="carte" style="margin-bottom: 20px;">
+                        <h3 class="carte-titre-bleu">Captures de progression</h3>
+                        <div id="donnees-snapshots">
+                            <!-- Contenu migré depuis reglages-snapshots -->
+                            <p class="text-muted">Chargement des captures...</p>
+                        </div>
+                    </div>
+
+                    <!-- Section Réinitialisation -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu" style="color: var(--rouge-accent);">Zone dangereuse</h3>
+                        <div id="donnees-reinitialisation">
+                            <p class="text-muted" style="margin-bottom: 15px;">
+                                Supprimez toutes les données de l'application. Cette action est irréversible.
+                            </p>
+                            <button class="btn" style="background-color: var(--rouge-accent); color: white;"
+                                    onclick="confirmerReinitialisation()">
+                                Réinitialiser l'application
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- fin sous-section reglages-donnees -->
+
+                <!-- ========================================
+                     ANCIENNES SOUS-SECTIONS (LEGACY)
+                     À migrer progressivement vers la nouvelle structure
+                     ======================================== -->
+
+                <!-- Sous-section: Aperçu des réglages (LEGACY) -->
                 <div id="reglages-apercu" class="sous-section">
                     <h2>Aperçu de la configuration</h2>
                     <p class="text-muted">
