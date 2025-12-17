@@ -159,15 +159,17 @@ function initialiserModulePratiques() {
     console.log('[initialiserModulePratiques] modalites:', modalites);
     console.log('[initialiserModulePratiques] configPAN:', modalites.configPAN);
 
+    // Initialiser les règles de conformité (événements checkbox) - AVANT chargerConfigurationPAN
+    // ✅ CORRECTIF (16 déc 2025) : Doit être appelé AVANT chargerConfigurationPAN sinon
+    // populerSelecteursNiveaux() écrase la valeur de l'échelle restaurée
+    initialiserReglesConformite();
+
     if (modalites.configPAN) {
         console.log('[initialiserModulePratiques] Appel de chargerConfigurationPAN()');
         chargerConfigurationPAN(modalites.configPAN);
     } else {
         console.log('[initialiserModulePratiques] Pas de configPAN à charger');
     }
-
-    // Initialiser les règles de conformité (événements checkbox)
-    initialiserReglesConformite();
 
     console.log('   ✅ Module Pratiques initialisé');
 

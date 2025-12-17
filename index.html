@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 94 - Groupe démo</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2025120908">
+    <link rel="stylesheet" href="styles.css?v=2025121601">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -6021,6 +6021,76 @@ Exemple :
                                         </small>
                                     </div>
                                 </div>
+
+                                <!-- Règles de conformité -->
+                                <div id="reglesConformite" style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px;">
+                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                        <input type="checkbox" id="activerReglesConformite" style="width: 18px; height: 18px;">
+                                        <label for="activerReglesConformite" style="font-weight: 600; margin: 0; cursor: pointer;">
+                                            Activer les règles de conformité
+                                        </label>
+                                    </div>
+
+                                    <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.85rem; line-height: 1.5;">
+                                        Si l'élève ne remet pas le minimum requis de productions, sa note est plafonnée au seuil maximum du niveau spécifié dans l'échelle.
+                                    </p>
+
+                                    <div id="detailsReglesConformite" style="display: none;">
+                                        <!-- Sélecteur d'échelle -->
+                                        <div class="groupe-form" style="margin-bottom: 15px;">
+                                            <label for="echelleConformite" style="font-weight: 500; display: block; margin-bottom: 5px;">
+                                                Échelle de référence
+                                            </label>
+                                            <select id="echelleConformite" class="controle-form" onchange="onEchelleConformiteChange()">
+                                                <option value="">-- Choisir une échelle --</option>
+                                                <!-- Options populées dynamiquement -->
+                                            </select>
+                                            <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
+                                                L'échelle définit les niveaux de plafonnement disponibles
+                                            </small>
+                                        </div>
+
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                            <div class="groupe-form">
+                                                <label for="plafondDeficit1" style="font-weight: 500; display: block; margin-bottom: 5px;">
+                                                    Déficit 1 production
+                                                </label>
+                                                <select id="plafondDeficit1" class="controle-form">
+                                                    <!-- Options populées dynamiquement depuis l'échelle -->
+                                                </select>
+                                                <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
+                                                    Plafond si 1 production manquante
+                                                </small>
+                                            </div>
+
+                                            <div class="groupe-form">
+                                                <label for="plafondDeficit2" style="font-weight: 500; display: block; margin-bottom: 5px;">
+                                                    Déficit 2 productions
+                                                </label>
+                                                <select id="plafondDeficit2" class="controle-form">
+                                                    <!-- Options populées dynamiquement depuis l'échelle -->
+                                                </select>
+                                                <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
+                                                    Plafond si 2 productions manquantes
+                                                </small>
+                                            </div>
+
+                                            <div class="groupe-form">
+                                                <label for="plafondDeficit3" style="font-weight: 500; display: block; margin-bottom: 5px;">
+                                                    Déficit 3+ productions
+                                                </label>
+                                                <select id="plafondDeficit3" class="controle-form">
+                                                    <option value="echec">Échec automatique (0%)</option>
+                                                    <!-- Options supplémentaires populées dynamiquement -->
+                                                </select>
+                                                <small style="display: block; color: var(--gris-moyen); margin-top: 3px; font-size: 0.8rem;">
+                                                    Plafond si 3+ productions manquantes
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 </div>
                                 <!-- FIN détailsConfigPortfolio -->
                                 </div><!-- Fin accordeonPortfolio -->
@@ -10424,7 +10494,7 @@ Exemple :
     <script src="js/pratiques/pratique-registre.js?v=2025120705"></script>
     <script src="js/pratiques/migration-pratiques.js?v=2025120705"></script>
     <script src="js/pratiques/pratique-test.js?v=2025120705"></script>
-    <script src="js/pratiques/pratique-pan-maitrise.js?v=2025121101"></script>
+    <script src="js/pratiques/pratique-pan-maitrise.js?v=2025121601"></script>
     <script src="js/pratiques/pratique-sommative.js?v=2025121003"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=2025112600"></script>
     <script src="js/pratiques/pratique-pan-objectifs.js?v=2025120901"></script>
@@ -10438,7 +10508,7 @@ Exemple :
     <script src="js/cc-license.js?v=2025120118"></script>
 
     <!-- Interface de gestion des pratiques configurables -->
-    <script src="js/pratiques.js?v=2025121020"></script>
+    <script src="js/pratiques.js?v=2025121602"></script>
     <script src="js/objectifs.js?v=2025120124"></script>
 
     <script src="js/portfolio.js?v=2025120908"></script>
@@ -10446,7 +10516,7 @@ Exemple :
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
     <script src="js/tableau-bord-apercu.js?v=2025120703"></script>
-    <script src="js/profil-etudiant.js?v=2025121105"></script>
+    <script src="js/profil-etudiant.js?v=2025121603"></script>
     <script src="js/presences-apercu.js?v=2025121017"></script>
     <script src="js/evaluations-apercu.js?v=2025111026"></script>
 
@@ -10460,7 +10530,7 @@ Exemple :
     <script src="js/import-export.js?v=2025120608"></script>
     <script src="js/statistiques.js?v=2025121001"></script>
     <script src="js/liste-evaluations.js?v=2025120207"></script>
-    <script src="js/snapshots.js?v=2025121108"></script>
+    <script src="js/snapshots.js?v=2025121601"></script>
     <script src="js/graphiques-progression.js?v=2025121108"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
