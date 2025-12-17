@@ -83,6 +83,183 @@ const ZONES_IDME = [
 ];
 
 /* ===============================
+   ✨ NOUVEAU (17 déc 2025) : MARQUEURS JETONS ET RÀI
+   Détecte les événements pédagogiques pour affichage sur le graphique
+   =============================== */
+
+/**
+ * Styles de points pour les événements spéciaux
+ */
+const STYLES_EVENEMENTS = {
+    normal: { style: 'circle', radius: 5, color: null }, // null = utilise couleur de la courbe
+    jetonDelai: { style: 'star', radius: 8, color: '#FF6F00' }, // Orange vif
+    jetonReprise: { style: 'rectRot', radius: 8, color: '#9C27B0' }, // Violet (losange)
+    raiNiveau2: { style: 'triangle', radius: 8, color: '#FFC107' }, // Jaune/Ambre
+    raiNiveau3: { style: 'rect', radius: 8, color: '#F44336' } // Rouge
+};
+
+/**
+ * Obtient les événements jetons pour un étudiant, groupés par semaine
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {Array} snapshots - Snapshots de l'étudiant (pour les dates de référence)
+ * @returns {Object} - { numSemaine: { type: 'jetonDelai'|'jetonReprise', details: {...} } }
+ */
+function obtenirJetonsParSemaine(da, snapshots) {
+    const jetonsParSemaine = {};
+
+    try {
+        const evaluations = JSON.parse(localStorage.getItem('evaluationsSauvegardees')) || [];
+        const productions = JSON.parse(localStorage.getItem('productions')) || [];
+        const calendrier = JSON.parse(localStorage.getItem('calendrierComplet')) || {};
+
+        // Filtrer les évaluations de cet étudiant avec jetons
+        const evalsAvecJetons = evaluations.filter(e =>
+            e.etudiantDA === da &&
+            !e.remplaceeParId &&
+            (e.jetonDelaiApplique || e.jetonRepriseApplique || e.repriseDeId)
+        );
+
+        evalsAvecJetons.forEach(evaluation => {
+            // Trouver la production pour obtenir le titre
+            const production = productions.find(p => p.id === evaluation.productionId);
+            const titreProduction = production?.titre || production?.nom || 'Production';
+
+            // Déterminer la date de référence (dateEcheance de la production ou dateEvaluation)
+            const dateRef = production?.dateEcheance || evaluation.dateEvaluation;
+            if (!dateRef) return;
+
+            // Trouver le numéro de semaine correspondant
+            const infoJour = calendrier[dateRef];
+            let numSemaine = infoJour?.numeroSemaine;
+
+            // Si pas trouvé directement, chercher dans les snapshots
+            if (!numSemaine) {
+                const snapshotProche = snapshots.find(s => s.dateSeance >= dateRef);
+                numSemaine = snapshotProche?.numSemaine;
+            }
+
+            if (!numSemaine) return;
+
+            // Déterminer le type de jeton
+            let typeJeton = null;
+            if (evaluation.jetonDelaiApplique) {
+                typeJeton = 'jetonDelai';
+            } else if (evaluation.jetonRepriseApplique || evaluation.repriseDeId) {
+                typeJeton = 'jetonReprise';
+            }
+
+            if (typeJeton) {
+                // Stocker (peut écraser si plusieurs jetons même semaine - prioriser reprise)
+                if (!jetonsParSemaine[numSemaine] || typeJeton === 'jetonReprise') {
+                    jetonsParSemaine[numSemaine] = {
+                        type: typeJeton,
+                        production: titreProduction,
+                        date: dateRef
+                    };
+                }
+            }
+        });
+    } catch (e) {
+        console.warn('Erreur lors de la récupération des jetons:', e);
+    }
+
+    return jetonsParSemaine;
+}
+
+/**
+ * Obtient les interventions RàI pour un étudiant, groupées par semaine
+ * @param {string} da - Numéro DA de l'étudiant
+ * @param {Array} snapshots - Snapshots de l'étudiant (pour les dates de référence)
+ * @returns {Object} - { numSemaine: { niveau: 2|3, titre: '...', date: '...' } }
+ */
+function obtenirRaiParSemaine(da, snapshots) {
+    const raiParSemaine = {};
+
+    try {
+        // Utiliser la fonction globale si disponible
+        const interventions = typeof obtenirInterventionsEtudiant === 'function'
+            ? obtenirInterventionsEtudiant(da)
+            : [];
+
+        const calendrier = JSON.parse(localStorage.getItem('calendrierComplet')) || {};
+
+        // Filtrer les interventions complétées
+        const interventionsCompletees = interventions.filter(i => i.statut === 'completee');
+
+        interventionsCompletees.forEach(intervention => {
+            const dateIntervention = intervention.date;
+            if (!dateIntervention) return;
+
+            // Trouver le numéro de semaine
+            const infoJour = calendrier[dateIntervention];
+            let numSemaine = infoJour?.numeroSemaine;
+
+            // Si pas trouvé directement, chercher le snapshot le plus proche
+            if (!numSemaine) {
+                const snapshotProche = snapshots.find(s => s.dateSeance >= dateIntervention);
+                numSemaine = snapshotProche?.numSemaine;
+            }
+
+            if (!numSemaine) return;
+
+            // Stocker (prioriser niveau 3 sur niveau 2)
+            const niveauActuel = raiParSemaine[numSemaine]?.niveau || 0;
+            if (intervention.niveauRai > niveauActuel) {
+                raiParSemaine[numSemaine] = {
+                    niveau: intervention.niveauRai,
+                    titre: intervention.titre || `Intervention niveau ${intervention.niveauRai}`,
+                    date: dateIntervention
+                };
+            }
+        });
+    } catch (e) {
+        console.warn('Erreur lors de la récupération des interventions RàI:', e);
+    }
+
+    return raiParSemaine;
+}
+
+/**
+ * Génère les tableaux de styles de points pour un dataset
+ * @param {Array} snapshots - Snapshots avec numSemaine
+ * @param {Object} evenementsParSemaine - { numSemaine: { type, ... } }
+ * @param {string} typeEvenement - 'jeton' ou 'rai'
+ * @param {string} couleurBase - Couleur par défaut de la courbe
+ * @returns {Object} - { pointStyle: [], pointRadius: [], pointBackgroundColor: [] }
+ */
+function genererStylesPoints(snapshots, evenementsParSemaine, typeEvenement, couleurBase) {
+    const pointStyle = [];
+    const pointRadius = [];
+    const pointBackgroundColor = [];
+
+    snapshots.forEach(snapshot => {
+        const numSemaine = snapshot.numSemaine;
+        const evenement = evenementsParSemaine[numSemaine];
+
+        if (evenement) {
+            let style;
+            if (typeEvenement === 'jeton') {
+                style = STYLES_EVENEMENTS[evenement.type] || STYLES_EVENEMENTS.normal;
+            } else if (typeEvenement === 'rai') {
+                style = evenement.niveau === 3
+                    ? STYLES_EVENEMENTS.raiNiveau3
+                    : STYLES_EVENEMENTS.raiNiveau2;
+            }
+
+            pointStyle.push(style.style);
+            pointRadius.push(style.radius);
+            pointBackgroundColor.push(style.color || couleurBase);
+        } else {
+            pointStyle.push(STYLES_EVENEMENTS.normal.style);
+            pointRadius.push(STYLES_EVENEMENTS.normal.radius);
+            pointBackgroundColor.push(couleurBase);
+        }
+    });
+
+    return { pointStyle, pointRadius, pointBackgroundColor };
+}
+
+/* ===============================
    PLUGIN ÉTIQUETTES DE COURBES
    =============================== */
 
@@ -176,6 +353,20 @@ function creerGraphiqueIndividuel(canvasId, da) {
         const donneesC = snapshots.map(s => s.C !== null && s.C !== 0 ? (s.C / 100) + OFFSET_VISUEL.C : null);
         const donneesP = snapshots.map(s => s.P !== null && s.P !== 0 ? (s.P / 100) + OFFSET_VISUEL.P : null);
 
+        // ✨ NOUVEAU (17 déc 2025) : Récupérer les événements pédagogiques pour marqueurs visuels
+        const jetonsParSemaine = obtenirJetonsParSemaine(da, snapshots);
+        const raiParSemaine = obtenirRaiParSemaine(da, snapshots);
+
+        // Générer les styles de points personnalisés
+        // - Courbe A : marqueurs RàI (triangle niveau 2, carré niveau 3)
+        // - Courbe P : marqueurs jetons (étoile délai, losange reprise)
+        const stylesA = genererStylesPoints(snapshots, raiParSemaine, 'rai', COULEURS_INDICES.A);
+        const stylesC = genererStylesPoints(snapshots, {}, 'none', COULEURS_INDICES.C); // Pas de marqueurs sur C
+        const stylesP = genererStylesPoints(snapshots, jetonsParSemaine, 'jeton', COULEURS_INDICES.P);
+
+        // Stocker les infos pour les tooltips enrichis
+        const infosEvenements = { jetonsParSemaine, raiParSemaine, snapshots };
+
         // Calculer min/max pour ajuster l'échelle Y
         // ✅ CORRECTION (Beta 93) : Filtrer les valeurs null avant calcul min/max
         // ✨ AMÉLIORATION (Beta 93) : Échelle fixe 60-100% pour meilleure lisibilité
@@ -216,9 +407,11 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         backgroundColor: 'transparent',
                         borderWidth: EPAISSEUR_LIGNE_STANDARD,
                         tension: 0.4, // Courbes lisses
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        pointBackgroundColor: COULEURS_INDICES.A,
+                        // ✨ NOUVEAU (17 déc 2025) : Styles personnalisés pour marqueurs RàI
+                        pointStyle: stylesA.pointStyle,
+                        pointRadius: stylesA.pointRadius,
+                        pointHoverRadius: 9,
+                        pointBackgroundColor: stylesA.pointBackgroundColor,
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2
                     },
@@ -229,9 +422,10 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         backgroundColor: 'transparent',
                         borderWidth: EPAISSEUR_LIGNE_STANDARD,
                         tension: 0.4,
-                        pointRadius: 5,
+                        pointStyle: stylesC.pointStyle,
+                        pointRadius: stylesC.pointRadius,
                         pointHoverRadius: 7,
-                        pointBackgroundColor: COULEURS_INDICES.C,
+                        pointBackgroundColor: stylesC.pointBackgroundColor,
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         spanGaps: false
@@ -243,9 +437,11 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         backgroundColor: 'transparent',
                         borderWidth: EPAISSEUR_LIGNE_STANDARD,
                         tension: 0.4,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        pointBackgroundColor: COULEURS_INDICES.P,
+                        // ✨ NOUVEAU (17 déc 2025) : Styles personnalisés pour marqueurs jetons
+                        pointStyle: stylesP.pointStyle,
+                        pointRadius: stylesP.pointRadius,
+                        pointHoverRadius: 9,
+                        pointBackgroundColor: stylesP.pointBackgroundColor,
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         spanGaps: false
@@ -303,6 +499,35 @@ function creerGraphiqueIndividuel(canvasId, da) {
                                 const valeurReelle = context.parsed.y - offset;
                                 const value = (valeurReelle * 100).toFixed(0);
                                 return `${label}: ${value}%`;
+                            },
+                            // ✨ NOUVEAU (17 déc 2025) : Afficher les détails des événements pédagogiques
+                            afterBody: function(tooltipItems) {
+                                if (!tooltipItems.length) return [];
+
+                                const index = tooltipItems[0].dataIndex;
+                                const snapshot = infosEvenements.snapshots[index];
+                                if (!snapshot) return [];
+
+                                const numSemaine = snapshot.numSemaine;
+                                const lignes = [];
+
+                                // Vérifier s'il y a un jeton cette semaine
+                                const jeton = infosEvenements.jetonsParSemaine[numSemaine];
+                                if (jeton) {
+                                    const typeLabel = jeton.type === 'jetonDelai' ? '⭐ Jeton délai' : '◆ Jeton reprise';
+                                    lignes.push('');
+                                    lignes.push(`${typeLabel} sur "${jeton.production}"`);
+                                }
+
+                                // Vérifier s'il y a une intervention RàI
+                                const rai = infosEvenements.raiParSemaine[numSemaine];
+                                if (rai) {
+                                    const niveauLabel = rai.niveau === 3 ? '■ RàI Niveau 3' : '▲ RàI Niveau 2';
+                                    lignes.push('');
+                                    lignes.push(`${niveauLabel}: ${rai.titre}`);
+                                }
+
+                                return lignes;
                             }
                         }
                     },
