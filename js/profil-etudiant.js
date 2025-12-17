@@ -3687,8 +3687,10 @@ function genererSectionProductions(da) {
 
         if (evaluation) {
             // Production évaluée
-            const dateEval = evaluation.dateEvaluation || evaluation.dateCreation || '';
-            const dateFormatee = dateEval ? new Date(dateEval).toLocaleDateString('fr-CA') : '—';
+            // ✅ CORRECTIF (16 déc 2025) : Utiliser dateEcheance de la production, pas dateEvaluation
+            // Note: +T12:00:00 évite le décalage de fuseau horaire (UTC vs local)
+            const dateEcheance = production.dateEcheance || '';
+            const dateFormatee = dateEcheance ? new Date(dateEcheance + 'T12:00:00').toLocaleDateString('fr-CA') : '—';
 
             // Détecter les jetons appliqués
             const estOriginaleRemplacee = evaluation.remplaceeParId ? true : false;
@@ -3731,11 +3733,15 @@ function genererSectionProductions(da) {
             };
         } else {
             // Production non remise
+            // ✅ CORRECTIF (16 déc 2025) : Afficher dateEcheance même si non évaluée
+            // Note: +T12:00:00 évite le décalage de fuseau horaire (UTC vs local)
+            const dateEcheance = production.dateEcheance || '';
+            const dateFormateeNonEval = dateEcheance ? new Date(dateEcheance + 'T12:00:00').toLocaleDateString('fr-CA') : '—';
             return {
                 production: production.titre,
                 description: production.description || production.titre,
                 note: null,
-                date: '—',
+                date: dateFormateeNonEval,
                 statut: 'non-evalue',
                 statutRemise: 'non-remis',
                 statutIntegrite: 'recevable',
