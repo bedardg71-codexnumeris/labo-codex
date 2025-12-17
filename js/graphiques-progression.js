@@ -236,7 +236,7 @@ function genererStylesPoints(snapshots, evenementsParSemaine, typeEvenement, cou
         const numSemaine = snapshot.numSemaine;
         const evenement = evenementsParSemaine[numSemaine];
 
-        if (evenement) {
+        if (evenement && typeEvenement !== 'none') {
             let style;
             if (typeEvenement === 'jeton') {
                 style = STYLES_EVENEMENTS[evenement.type] || STYLES_EVENEMENTS.normal;
@@ -244,6 +244,8 @@ function genererStylesPoints(snapshots, evenementsParSemaine, typeEvenement, cou
                 style = evenement.niveau === 3
                     ? STYLES_EVENEMENTS.raiNiveau3
                     : STYLES_EVENEMENTS.raiNiveau2;
+            } else {
+                style = STYLES_EVENEMENTS.normal;
             }
 
             pointStyle.push(style.style);
