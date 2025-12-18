@@ -1244,5 +1244,170 @@ Données
 - Bibliothèque des pratiques
 - Configuration avancée (règles de conformité, catégorisation erreurs)
 
-**Prochaine étape** : Phase 4 - Implémenter l'onglet Préférences
+---
+
+## Phase 2 : Reconnexion des fonctionnalités (18 décembre 2025)
+
+### Contexte
+
+Les Phases 1-5 ont créé la structure visuelle des 4 onglets mais plusieurs fonctionnalités existantes dans les sections legacy ne sont pas reconnectées. L'application a perdu des capacités fonctionnelles.
+
+### Analyse des écarts
+
+#### ✅ Fonctionnel (9 éléments)
+- Trimestre : bornes du trimestre, semaines spéciales
+- Préférences : mode comparatif, SOLO, RàI, grille référence
+- Données : import/export complet, config pédagogique, stats snapshots
+
+#### ⚠️ Placeholders - HTML existe, JS incomplet (5 éléments)
+- Pratique : type de pratique, échelle, configuration portfolio
+- Données : boutons d'action snapshots (dans accordéon mais non connectés)
+
+#### ❌ Absentes de v2 (13 éléments)
+
+| Section legacy | Fonctionnalités manquantes |
+|----------------|---------------------------|
+| `reglages-cours-legacy` | Configuration cours, bibliothèque cours |
+| `reglages-horaire-legacy` | Gestion des séances, ajout/suppression |
+| `reglages-groupe-legacy` | Gestion étudiants, import CSV, export, filtrage |
+| `reglages-interpretation-legacy` | Seuils configurables, découpler P/R, fenêtre patterns |
+| `reglages-snapshots-legacy` | Actions : capture manuelle, reconstruction, nettoyage |
+| `reglages-pratique-notation-legacy` | Bibliothèque pratiques, wizard, catégorisation erreurs |
+
+---
+
+### Plan de reconnexion
+
+#### R1. Onglet Trimestre - Accordéon Cours
+**Objectif** : Reconnecter la configuration du cours actif
+
+**Fonctions à connecter** :
+- `afficherFormCours()` : Formulaire création/édition cours
+- `sauvegarderCours()` : Sauvegarde configuration
+- `ouvrirModalBibliothequeCours()` : Bibliothèque de cours
+
+**Tâches** :
+- [ ] R1.1 Ajouter formulaire cours dans accordéon (sigle, titre, pondération, enseignant)
+- [ ] R1.2 Connecter bouton "Modifier" au formulaire
+- [ ] R1.3 Connecter bouton "Bibliothèque" à `ouvrirModalBibliothequeCours()`
+- [ ] R1.4 Afficher résumé du cours actif quand accordéon fermé
+
+---
+
+#### R2. Onglet Trimestre - Accordéon Groupes
+**Objectif** : Reconnecter la gestion des étudiants
+
+**Fonctions à connecter** :
+- `ouvrirImportEtudiants()` : Import CSV/TSV
+- `exporterEtudiants()` : Export liste étudiants
+- `ajouterEtudiant()` : Ajout manuel
+- `filtrerParGroupe()` : Filtrage par groupe
+
+**Tâches** :
+- [ ] R2.1 Ajouter boutons "Importer CSV" et "Exporter" dans chaque carte groupe
+- [ ] R2.2 Connecter bouton "Gérer étudiants" vers section Étudiants ou modal
+- [ ] R2.3 Afficher compteur étudiants dans résumé groupe
+
+---
+
+#### R3. Onglet Trimestre - Accordéon Horaire
+**Objectif** : Reconnecter la configuration des séances
+
+**Fonctions à connecter** :
+- `afficherFormAjoutSeance()` : Formulaire ajout séance
+- `sauvegarderSeance()` : Sauvegarde séance
+- `supprimerSeance()` : Suppression séance
+- `nettoyerDoublons()` : Nettoyage doublons
+
+**Tâches** :
+- [ ] R3.1 Afficher liste des séances configurées dans accordéon
+- [ ] R3.2 Ajouter bouton "+ Ajouter une séance"
+- [ ] R3.3 Connecter formulaire (jour, heure début, durée)
+- [ ] R3.4 Permettre suppression de séances existantes
+
+---
+
+#### R4. Onglet Trimestre - Aménagements
+**Objectif** : Reconnecter la gestion des congés et reprises
+
+**Fonctions à connecter** :
+- `ajouterEvenementPrevu()` : Ajout congé prévu
+- `ajouterEvenementImprevu()` : Ajout congé imprévu
+- `supprimerEvenement()` : Suppression événement
+
+**Tâches** :
+- [ ] R4.1 Vérifier que les listes d'événements s'affichent
+- [ ] R4.2 Connecter boutons "+ Ajouter" aux fonctions existantes
+- [ ] R4.3 Permettre suppression d'événements
+
+---
+
+#### R5. Onglet Pratique de notation
+**Objectif** : Compléter les fonctionnalités de configuration
+
+**Fonctions à connecter** :
+- `ouvrirModalBibliothequePratiques()` : Bibliothèque pratiques
+- `ouvrirWizardPratique()` : Assistant création pratique
+- `activerPratiqueAffichee()` : Activation pratique
+
+**Tâches** :
+- [ ] R5.1 Ajouter bouton "Bibliothèque des pratiques"
+- [ ] R5.2 Ajouter bouton "Assistant de création" (wizard)
+- [ ] R5.3 Compléter `sauvegarderStructureV2()` pour portfolio
+- [ ] R5.4 Compléter `sauvegarderJetonsV2()` pour système jetons
+- [ ] R5.5 Vérifier synchronisation avec `modalitesEvaluation`
+
+---
+
+#### R6. Onglet Préférences - Seuils d'interprétation
+**Objectif** : Reconnecter la configuration des seuils
+
+**Fonctions à connecter** :
+- `sauvegarderSeuil()` : Sauvegarde seuil individuel
+- `mettreAJourAffichageSeuil()` : Mise à jour affichage slider
+
+**Tâches** :
+- [ ] R6.1 Vérifier que les inputs seuils (fragile, acceptable, bon) fonctionnent
+- [ ] R6.2 Ajouter slider "Fenêtre d'analyse patterns" (nombre productions)
+- [ ] R6.3 Ajouter option "Découpler P et R" si pertinent
+- [ ] R6.4 Connecter bouton "Restaurer défauts"
+
+---
+
+#### R7. Onglet Données - Actions Snapshots
+**Objectif** : Reconnecter les actions sur les snapshots
+
+**Fonctions à connecter** :
+- `capturerSnapshotManuel()` : Capture immédiate
+- `lancerReconstructionRetroactive()` : Reconstruction historique
+- `confirmerNettoyageSnapshots()` : Suppression avec confirmation
+
+**Tâches** :
+- [ ] R7.1 Vérifier que les boutons dans l'accordéon appellent les bonnes fonctions
+- [ ] R7.2 Tester capture manuelle
+- [ ] R7.3 Tester reconstruction rétroactive
+- [ ] R7.4 Tester suppression avec confirmation
+
+---
+
+### Ordre de priorité recommandé
+
+| Priorité | Phase | Raison |
+|----------|-------|--------|
+| 1 | R7 (Snapshots) | Boutons déjà présents, juste vérifier connexion |
+| 2 | R6 (Seuils) | Éléments déjà présents dans Préférences |
+| 3 | R4 (Aménagements) | Partiellement fonctionnel |
+| 4 | R3 (Horaire) | Nécessaire pour calendrier/présences |
+| 5 | R2 (Groupes) | Nécessaire pour gestion étudiants |
+| 6 | R1 (Cours) | Configuration de base |
+| 7 | R5 (Pratique) | Fonctionnalités avancées |
+
+---
+
+### Critères de succès global
+
+- [ ] Toutes les fonctionnalités de Beta 94 sont accessibles dans Beta 95
+- [ ] Aucune section legacy n'est nécessaire pour l'usage quotidien
+- [ ] Les données existantes restent compatibles
+- [ ] Pas de régression fonctionnelle
 
