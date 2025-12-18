@@ -54,11 +54,11 @@ const configurationsOnglets = {
         { id: 'retroactions', label: 'Cartouches de rétroaction' },
         { id: 'objectifs', label: 'Ensembles d\'objectifs' }
     ],
-    // ✨ REFONTE UX (17 déc 2025) : 4 onglets au lieu de 9
-    // Structure hiérarchique pour multi-cours et archivage
+    // ✨ REFONTE UX (18 déc 2025) : 4 onglets au lieu de 9
+    // Structure : Trimestre, Pratique de notation, Préférences, Données
     'reglages': [
-        { id: 'trimestres', label: 'Mes trimestres' },
-        { id: 'cours-actif', label: 'Cours actif' },
+        { id: 'trimestre', label: 'Trimestre' },
+        { id: 'pratique-notation', label: 'Pratique de notation' },
         { id: 'preferences', label: 'Préférences' },
         { id: 'donnees', label: 'Données' }
     ],

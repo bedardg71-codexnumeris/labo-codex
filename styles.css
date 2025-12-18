@@ -294,6 +294,7 @@
 
 /* === DISPLAY === */
 .u-hide { display: none; }
+.legacy-hidden { display: none !important; } /* Beta 95 : Masque les anciennes sous-sections */
 .u-block { display: block; }
 .u-inline-block { display: inline-block; }
 
@@ -989,6 +990,57 @@ body {
     max-height: 2000px; /* Ajuster selon le contenu */
     opacity: 1;
     padding-top: var(--espacement-petit);
+}
+
+/* ✅ BETA 95 : Accordéons pour onglet Trimestre */
+.carte.accordeon {
+    overflow: hidden;
+}
+
+.carte.accordeon .accordeon-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    margin: -20px -20px 0 -20px;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
+    border-radius: 8px 8px 0 0;
+}
+
+.carte.accordeon .accordeon-header h3 {
+    color: white !important;
+    background: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.carte.accordeon .accordeon-header .btn {
+    flex-shrink: 0;
+}
+
+.carte.accordeon .accordeon-chevron {
+    display: inline-block;
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+}
+
+.carte.accordeon.ferme .accordeon-chevron {
+    transform: rotate(-90deg);
+}
+
+.carte.accordeon .accordeon-contenu {
+    padding: 20px 0 0 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    overflow: hidden;
+}
+
+.carte.accordeon.ferme .accordeon-contenu {
+    max-height: 0;
+    opacity: 0;
+    padding: 0;
 }
 
 /* Titre avec fond bleu dégradé (comme l'en-tête) */
