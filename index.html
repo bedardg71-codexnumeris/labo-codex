@@ -159,14 +159,6 @@
         }
 
         /* ===============================
-           LEGACY - Anciennes sous-sections masquées (Beta 95)
-           À supprimer après migration complète
-           =============================== */
-        .sous-section.legacy-hidden {
-            display: none !important;
-        }
-
-        /* ===============================
            MODE ASSISTÉ - CONVERSION BLEU → SARCELLE
            =============================== */
         body[data-mode="simulation"] {
@@ -2752,7 +2744,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de gestion de la notation</h1>
                         <p class="meta">
-                            Beta 95 - 17 décembre 2025
+                            Beta 95 - 18 décembre 2025
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés"></span>
                         </p>
                     </div>
@@ -2828,7 +2820,7 @@
                 <div style="margin-bottom: 25px;">
                     <h3>Message de Grégoire</h3>
                     <p style="line-height: 1.6;">
-                        Bonjour ! La Beta 95 commence une refonte majeure de l'expérience utilisateur dans les Réglages. L'objectif : rendre l'application plus intuitive pour gérer plusieurs cours et archiver vos trimestres passés. Cette version est en cours de développement.
+                        Bonjour ! La Beta 95 simplifie la section Réglages avec une nouvelle organisation en 4 onglets clairs : Trimestre, Pratique de notation, Préférences et Données. L'interface est plus intuitive et les configurations structurantes sont maintenant accessibles directement, sans passer par le wizard. Merci de votre patience et de votre confiance !
                     </p>
                 </div>
 
@@ -2836,10 +2828,10 @@
                 <div style="margin-bottom: 25px;">
                     <h3>Nouveautés pour vous</h3>
                     <ul style="line-height: 1.8; padding-left: 20px; margin-top: 10px;">
-                        <li><strong>Nouvelle navigation Réglages</strong> : 4 onglets simplifiés au lieu de 9 (Mes trimestres, Cours actif, Préférences, Données).</li>
-                        <li><strong>Gestion multi-trimestres</strong> : Visualisez tous vos trimestres et cours dans une interface hiérarchique.</li>
-                        <li><strong>Préférences par cours</strong> : Chaque cours peut avoir sa propre pratique de notation.</li>
-                        <li><strong>Marqueurs sur les graphiques</strong> : Les jetons et interventions RàI sont maintenant visibles sur le graphique de progression.</li>
+                        <li><strong>Navigation simplifiée</strong> : Les 9 sous-sections de Réglages sont maintenant regroupées en 4 onglets logiques pour une navigation plus fluide.</li>
+                        <li><strong>Onglet Trimestre</strong> : Configuration temporelle complète (cadre, aménagements, cours, groupes, horaire) dans une seule vue.</li>
+                        <li><strong>Onglet Pratique de notation</strong> : Accès direct aux configurations structurantes du wizard (type, échelle, structure, jetons).</li>
+                        <li><strong>Onglet Préférences</strong> : Options d'affichage regroupées (mode comparatif, SOLO, RàI, seuils d'interprétation).</li>
                     </ul>
                 </div>
 
@@ -4718,166 +4710,11 @@
 
             <!-- ===================================
                  SECTION: RÉGLAGES
-                 ✨ REFONTE UX (17 déc 2025) : 4 onglets hiérarchiques
                  =================================== -->
             <section id="section-reglages" class="section">
 
-                <!-- ========================================
-                     NOUVELLE STRUCTURE (4 onglets)
-                     ======================================== -->
-
-                <!-- Sous-section: Mes trimestres -->
-                <div id="reglages-trimestres" class="sous-section">
-                    <h2>Mes trimestres</h2>
-                    <p class="text-muted">
-                        Gérez vos trimestres et vos cours. Sélectionnez un cours pour le rendre actif, archivez les sessions passées.
-                    </p>
-
-                    <div id="liste-trimestres-container">
-                        <!-- Contenu généré dynamiquement par trimestres-vue.js -->
-                        <p class="text-muted" style="text-align: center; padding: 40px;">
-                            Chargement des trimestres...
-                        </p>
-                    </div>
-
-                    <div style="margin-top: 20px; text-align: center;">
-                        <button class="btn btn-principal" onclick="afficherFormulaireNouveauTrimestre()">
-                            + Nouveau trimestre
-                        </button>
-                    </div>
-                </div>
-                <!-- fin sous-section reglages-trimestres -->
-
-                <!-- Sous-section: Cours actif -->
-                <div id="reglages-cours-actif" class="sous-section">
-                    <h2>Cours actif</h2>
-
-                    <div id="cours-actif-header" class="carte" style="margin-bottom: 20px; background: linear-gradient(135deg, var(--bleu-tres-pale), white);">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <h3 id="cours-actif-titre" style="margin: 0; color: var(--bleu-fonce);">Aucun cours sélectionné</h3>
-                                <p id="cours-actif-details" class="text-muted" style="margin: 5px 0 0 0;">
-                                    Sélectionnez un cours dans « Mes trimestres »
-                                </p>
-                            </div>
-                            <button class="btn btn-secondaire" onclick="afficherSousSection('reglages-trimestres')">
-                                Changer de cours
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Section Horaire -->
-                    <div class="carte" style="margin-bottom: 20px;">
-                        <h3 class="carte-titre-bleu">Horaire des séances</h3>
-                        <div id="cours-actif-horaire">
-                            <!-- Contenu migré depuis reglages-horaire -->
-                            <p class="text-muted">Chargement de l'horaire...</p>
-                        </div>
-                    </div>
-
-                    <!-- Section Étudiants -->
-                    <div class="carte" style="margin-bottom: 20px;">
-                        <h3 class="carte-titre-bleu">Liste des étudiants</h3>
-                        <div id="cours-actif-etudiants">
-                            <!-- Contenu migré depuis reglages-groupe -->
-                            <p class="text-muted">Chargement des étudiants...</p>
-                        </div>
-                    </div>
-
-                    <!-- Section Calendrier -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Calendrier du trimestre</h3>
-                        <div id="cours-actif-calendrier">
-                            <!-- Aperçu du calendrier -->
-                            <p class="text-muted">Chargement du calendrier...</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- fin sous-section reglages-cours-actif -->
-
-                <!-- Sous-section: Préférences -->
-                <div id="reglages-preferences" class="sous-section">
-                    <h2>Préférences</h2>
-                    <p class="text-muted">
-                        Configurez la pratique de notation et les paramètres d'interprétation pour le cours actif.
-                    </p>
-
-                    <!-- Section Pratique de notation -->
-                    <div class="carte" style="margin-bottom: 20px;">
-                        <h3 class="carte-titre-bleu">Pratique de notation</h3>
-                        <div id="preferences-notation">
-                            <!-- Contenu migré depuis reglages-pratique-notation -->
-                            <p class="text-muted">Chargement des paramètres de notation...</p>
-                        </div>
-                    </div>
-
-                    <!-- Section Interprétation -->
-                    <div class="carte" style="margin-bottom: 20px;">
-                        <h3 class="carte-titre-bleu">Interprétation des données</h3>
-                        <div id="preferences-interpretation">
-                            <!-- Contenu migré depuis reglages-interpretation -->
-                            <p class="text-muted">Chargement des paramètres d'interprétation...</p>
-                        </div>
-                    </div>
-
-                    <!-- Section Affichage -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Options d'affichage</h3>
-                        <div id="preferences-affichage">
-                            <p class="text-muted">Options d'affichage (mode comparatif, etc.)</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- fin sous-section reglages-preferences -->
-
-                <!-- Sous-section: Données -->
-                <div id="reglages-donnees" class="sous-section">
-                    <h2>Données</h2>
-                    <p class="text-muted">
-                        Sauvegardez vos données, exportez votre configuration ou réinitialisez l'application.
-                    </p>
-
-                    <!-- Section Import/Export -->
-                    <div class="carte" style="margin-bottom: 20px;">
-                        <h3 class="carte-titre-bleu">Sauvegarde et restauration</h3>
-                        <div id="donnees-import-export">
-                            <!-- Contenu migré depuis reglages-import-export -->
-                            <p class="text-muted">Chargement des options de sauvegarde...</p>
-                        </div>
-                    </div>
-
-                    <!-- Section Snapshots -->
-                    <div class="carte" style="margin-bottom: 20px;">
-                        <h3 class="carte-titre-bleu">Captures de progression</h3>
-                        <div id="donnees-snapshots">
-                            <!-- Contenu migré depuis reglages-snapshots -->
-                            <p class="text-muted">Chargement des captures...</p>
-                        </div>
-                    </div>
-
-                    <!-- Section Réinitialisation -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu" style="color: var(--rouge-accent);">Zone dangereuse</h3>
-                        <div id="donnees-reinitialisation">
-                            <p class="text-muted" style="margin-bottom: 15px;">
-                                Supprimez toutes les données de l'application. Cette action est irréversible.
-                            </p>
-                            <button class="btn" style="background-color: var(--rouge-accent); color: white;"
-                                    onclick="confirmerReinitialisation()">
-                                Réinitialiser l'application
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <!-- fin sous-section reglages-donnees -->
-
-                <!-- ========================================
-                     ANCIENNES SOUS-SECTIONS (LEGACY)
-                     À migrer progressivement vers la nouvelle structure
-                     ======================================== -->
-
-                <!-- Sous-section: Aperçu des réglages (LEGACY) -->
-                <div id="reglages-apercu" class="sous-section legacy-hidden">
+                <!-- Sous-section: Aperçu des réglages (LEGACY - masqué Beta 95) -->
+                <div id="reglages-apercu-legacy" class="sous-section legacy-hidden">
                     <h2>Aperçu de la configuration</h2>
                     <p class="text-muted">
                         Résumé de la configuration actuelle du système. Les statistiques sont calculées en temps réel depuis les données stockées localement.
@@ -4943,8 +4780,8 @@
                 </div>
                 <!-- fin sous-section reglages-apercu -->
 
-                <!-- Sous-section : Cours -->
-                <div id="reglages-trimestre" class="sous-section legacy-hidden">
+                <!-- Sous-section : Cours (LEGACY - masqué Beta 95) -->
+                <div id="reglages-trimestre-legacy" class="sous-section legacy-hidden">
                     <h2>Configuration du trimestre</h2>
                     <p class="text-muted">
                         Définissez les paramètres administratifs du trimestre : dates de début et de fin,
@@ -5220,8 +5057,8 @@
                 </div><!-- FIN sous-section reglages-trimestre -->
 
 
-                <!-- Sous-section: Horaire -->
-                <div id="reglages-cours" class="sous-section legacy-hidden">
+                <!-- Sous-section: Cours (LEGACY - masqué Beta 95) -->
+                <div id="reglages-cours-legacy" class="sous-section legacy-hidden">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration du cours</span>
                         <span class="titre-emoji-container">
@@ -5502,7 +5339,8 @@
                 <!-- Cette section gère les DONNÉES ADMINISTRATIVES du trimestre -->
                 <!-- Module associé: trimestre.js -->
 
-                <div id="reglages-horaire" class="sous-section legacy-hidden">
+                <!-- Sous-section: Horaire (LEGACY - masqué Beta 95) -->
+                <div id="reglages-horaire-legacy" class="sous-section legacy-hidden">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration de l'horaire</span>
                         <span class="titre-emoji-container">
@@ -5622,8 +5460,8 @@
 
                 </div><!-- FIN sous-section reglages-horaire -->
 
-                <!-- Sous-section : Groupe -->
-                <div id="reglages-groupe" class="sous-section legacy-hidden">
+                <!-- Sous-section : Groupe (LEGACY - masqué Beta 95) -->
+                <div id="reglages-groupe-legacy" class="sous-section legacy-hidden">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration du groupe d'étudiants</span>
                         <span class="titre-emoji-container">
@@ -5940,8 +5778,8 @@ Exemple :
 
                 </div><!-- FIN sous-section reglages-groupe -->
 
-                <!-- Sous-section : Pratique de notation -->
-                <div id="reglages-pratique-notation" class="sous-section legacy-hidden">
+                <!-- Sous-section : Pratique de notation (LEGACY - masqué Beta 95) -->
+                <div id="reglages-pratique-notation-legacy" class="sous-section legacy-hidden">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Pratiques de notation</span>
                         <span class="titre-emoji-container">
@@ -7147,8 +6985,8 @@ Exemple :
 
                 </div><!--fin sous-section pratique-notation-->
 
-                <!-- Sous-section : Interprétation des données -->
-                <div id="reglages-interpretation" class="sous-section legacy-hidden">
+                <!-- Sous-section : Interprétation des données (LEGACY - masqué Beta 95) -->
+                <div id="reglages-interpretation-legacy" class="sous-section legacy-hidden">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Configuration des seuils d'interprétation</span>
                         <span class="titre-emoji-container">
@@ -7375,8 +7213,8 @@ Exemple :
 
                 </div><!--fin sous-section reglages-interpretation-->
 
-                <!-- Sous-section: Captures de progression -->
-                <div id="reglages-snapshots" class="sous-section legacy-hidden">
+                <!-- Sous-section: Captures de progression (LEGACY - masqué Beta 95) -->
+                <div id="reglages-snapshots-legacy" class="sous-section legacy-hidden">
                     <h2>Captures de progression</h2>
                     <p class="text-muted">
                         Gestion des captures automatiques et manuelles des données de progression longitudinale
@@ -7472,8 +7310,8 @@ Exemple :
 
                 </div><!--fin sous-section reglages-snapshots-->
 
-                <!-- Sous-section: Import/Export des données -->
-                <div id="reglages-import-export" class="sous-section legacy-hidden">
+                <!-- Sous-section: Import/Export des données (LEGACY - masqué Beta 95) -->
+                <div id="reglages-import-export-legacy" class="sous-section legacy-hidden">
                     <h2>Gestion des données</h2>
                     <p class="text-muted">Sauvegarde et restauration des données locales</p>
 
@@ -7612,7 +7450,769 @@ Exemple :
                     </div>
 
                 </div>
-                <!-- fin sous-section import-export -->
+                <!-- fin sous-section import-export (legacy) -->
+
+                <!-- ===================================
+                     NOUVEAUX ONGLETS BETA 95
+                     =================================== -->
+
+                <!-- Onglet 1: Trimestre (Beta 95) -->
+                <div id="reglages-trimestre" class="sous-section">
+                    <h2>Trimestre</h2>
+                    <p class="text-muted">
+                        Configuration du cadre temporel et organisationnel du trimestre actif.
+                    </p>
+
+                    <!-- ========== DROPDOWN SÉLECTION TRIMESTRE ========== -->
+                    <div class="carte" style="margin-bottom: 20px;">
+                        <div class="d-flex-gap-10-center">
+                            <label style="font-weight: 600; white-space: nowrap;">Trimestre actif :</label>
+                            <select id="selectTrimestreActif" class="controle-form" style="max-width: 300px;" onchange="changerTrimestreActif(this.value)">
+                                <!-- Options générées dynamiquement par JS -->
+                                <option value="">Chargement...</option>
+                            </select>
+                            <button class="btn btn-secondaire btn-sm" onclick="ouvrirModalNouveauTrimestre()" title="Créer un nouveau trimestre">
+                                + Nouveau
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ========== CARTE: CADRE RÉGULIER ========== -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Cadre régulier</h3>
+
+                        <!-- Grille 2 colonnes : Bornes et Semaines spéciales -->
+                        <div class="grille-2col">
+
+                            <!-- COLONNE GAUCHE: Bornes du trimestre -->
+                            <div>
+                                <h5 class="sous-titre-section">Bornes du trimestre</h5>
+                                <div class="grille-2col-gap15">
+                                    <div class="groupe-form">
+                                        <label>Début du trimestre :</label>
+                                        <input type="date" class="controle-form" id="v2-debutTrimestre"
+                                            onchange="sauvegarderCadreCalendrierV2()">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Fin des cours réguliers :</label>
+                                        <input type="date" class="controle-form" id="v2-finCours"
+                                            onchange="sauvegarderCadreCalendrierV2()">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Fin du trimestre :</label>
+                                        <input type="date" class="controle-form" id="v2-finTrimestre"
+                                            onchange="sauvegarderCadreCalendrierV2()">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Remise des notes :</label>
+                                        <input type="date" class="controle-form" id="v2-remiseNotes"
+                                            onchange="sauvegarderCadreCalendrierV2()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- COLONNE DROITE: Semaines spéciales -->
+                            <div>
+                                <h5 class="sous-titre-section">Semaines spéciales</h5>
+                                <div class="grille-2col-gap15">
+                                    <!-- Semaine de planification -->
+                                    <div>
+                                        <h6>Semaine de planification</h6>
+                                        <div class="d-flex-gap-10-center">
+                                            <div class="groupe-form flex-1">
+                                                <label>Du :</label>
+                                                <input type="date" class="controle-form" id="v2-semainePlanificationDebut"
+                                                    onchange="sauvegarderCadreCalendrierV2()">
+                                            </div>
+                                            <span class="pt-20">au</span>
+                                            <div class="groupe-form flex-1">
+                                                <label>&nbsp;</label>
+                                                <input type="date" class="controle-form" id="v2-semainePlanificationFin"
+                                                    onchange="sauvegarderCadreCalendrierV2()">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Semaine d'examens -->
+                                    <div>
+                                        <h6>Semaine d'examens</h6>
+                                        <div class="d-flex-gap-10-center">
+                                            <div class="groupe-form flex-1">
+                                                <label>Du :</label>
+                                                <input type="date" class="controle-form" id="v2-semaineExamensDebut"
+                                                    onchange="sauvegarderCadreCalendrierV2()">
+                                            </div>
+                                            <span class="pt-20">au</span>
+                                            <div class="groupe-form flex-1">
+                                                <label>&nbsp;</label>
+                                                <input type="date" class="controle-form" id="v2-semaineExamensFin"
+                                                    onchange="sauvegarderCadreCalendrierV2()">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Statistiques calculées -->
+                                <div class="info-box" style="margin-top: 15px;">
+                                    <p>
+                                        <strong>Trimestre :</strong>
+                                        <span id="v2-nombreSemaines">0</span> semaines •
+                                        <span id="v2-nombreJoursCours">0</span> jours de cours •
+                                        <span id="v2-totalConges">0</span> congés
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bouton de sauvegarde -->
+                        <div class="btn-groupe" style="justify-content: flex-end; margin-top: 15px;">
+                            <button class="btn btn-confirmer" onclick="sauvegarderCadreCalendrierV2()">
+                                Sauvegarder le cadre
+                            </button>
+                        </div>
+                    </div><!-- FIN carte Cadre régulier -->
+
+                    <!-- ========== CARTE: AMÉNAGEMENTS ========== -->
+                    <div class="carte" style="margin-top: 20px;">
+                        <h3 class="carte-titre-bleu">Aménagements</h3>
+
+                        <!-- Grille 2 colonnes : Événements prévus et imprévus -->
+                        <div class="grille-2col">
+
+                            <!-- COLONNE GAUCHE: Congés prévus -->
+                            <div>
+                                <h5 class="sous-titre-section">Congés fériés et activités institutionnelles</h5>
+                                <p class="text-muted texte-desc">
+                                    Congés fériés, journées pédagogiques, journée Carrière, etc.
+                                </p>
+                                <div id="v2-congesPrevusContainer" class="mb-20">
+                                    <p class="text-muted text-italic">Aucun événement prévu déclaré.</p>
+                                </div>
+                                <button class="btn btn-confirmer" onclick="afficherFormEvenementV2('prevu')">
+                                    + Ajouter un événement prévu
+                                </button>
+                            </div>
+
+                            <!-- COLONNE DROITE: Événements imprévus -->
+                            <div>
+                                <h5 class="sous-titre-section">Événements imprévus</h5>
+                                <p class="text-muted texte-desc">
+                                    Maladie, conditions météo, urgences, etc.
+                                </p>
+                                <div id="v2-congesImprevusContainer" class="mb-20">
+                                    <p class="text-muted text-italic">Aucun événement imprévu déclaré.</p>
+                                </div>
+                                <button class="btn btn-confirmer" onclick="afficherFormEvenementV2('imprevu')">
+                                    + Ajouter un événement imprévu
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Données de démonstration -->
+                        <div style="margin-top: 30px; padding-top: 25px; border-top: 1px solid #ddd;">
+                            <h5 class="sous-titre-section">Données de démonstration</h5>
+                            <p class="text-muted texte-desc" style="margin-bottom: 15px;">
+                                Utilisez le groupe 9999 comme bac à sable pour explorer l'application.
+                            </p>
+                            <div class="groupe-form">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="v2-checkboxDonneesDemo"
+                                           onchange="basculerDonneesDemoV2(this.checked)">
+                                    <span class="checkmark"></span>
+                                    Utiliser les données de démonstration (groupe 9999)
+                                </label>
+                            </div>
+                        </div>
+                    </div><!-- FIN carte Aménagements -->
+
+                    <!-- ========== ACCORDÉON: COURS ========== -->
+                    <div class="carte accordeon" style="margin-top: 20px;">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">
+                                <span class="accordeon-chevron">▼</span> Cours
+                            </h3>
+                            <button class="btn btn-secondaire btn-sm" onclick="event.stopPropagation(); ouvrirModalNouveauCours()">
+                                + Ajouter
+                            </button>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <div class="d-flex-gap-10-center" style="margin-bottom: 15px;">
+                                <label style="font-weight: 500;">Cours sélectionné :</label>
+                                <select id="v2-selectCours" class="controle-form" style="max-width: 400px;" onchange="changerCoursSelectionneV2(this.value)">
+                                    <option value="">Aucun cours</option>
+                                </select>
+                            </div>
+                            <div id="v2-detailsCours" class="carte-bleu-pale-p15">
+                                <p class="text-muted">Sélectionnez un cours pour voir ses détails.</p>
+                            </div>
+                        </div>
+                    </div><!-- FIN accordéon Cours -->
+
+                    <!-- ========== ACCORDÉON: GROUPES ========== -->
+                    <div class="carte accordeon" style="margin-top: 20px;">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">
+                                <span class="accordeon-chevron">▼</span> Groupes
+                            </h3>
+                            <button class="btn btn-secondaire btn-sm" onclick="event.stopPropagation(); ouvrirModalNouveauGroupe()">
+                                + Ajouter
+                            </button>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <div id="v2-listeGroupes">
+                                <p class="text-muted">Sélectionnez un cours pour voir ses groupes.</p>
+                            </div>
+                        </div>
+                    </div><!-- FIN accordéon Groupes -->
+
+                    <!-- ========== ACCORDÉON: HORAIRE ========== -->
+                    <div class="carte accordeon" style="margin-top: 20px;">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">
+                                <span class="accordeon-chevron">▼</span> Horaire
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <div id="v2-horaireGroupeActif">
+                                <p class="text-muted">Activez un groupe pour voir et modifier son horaire.</p>
+                            </div>
+                        </div>
+                    </div><!-- FIN accordéon Horaire -->
+
+                </div>
+
+                <!-- Onglet 2: Pratique de notation (Beta 95) -->
+                <div id="reglages-pratique-notation" class="sous-section">
+                    <h2>Pratique de notation</h2>
+                    <p class="text-muted">
+                        Configuration pédagogique : comment évaluer les apprentissages de ce groupe-cours.
+                    </p>
+
+                    <!-- Carte : Informations de base -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Informations de base</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="groupe-form">
+                                <label for="v2-pratique-nom" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                    Nom de la pratique
+                                </label>
+                                <input type="text" id="v2-pratique-nom" class="controle-form" placeholder="Ex: PAN-Maîtrise Littérature" onchange="sauvegarderPratiqueBaseV2()">
+                            </div>
+                            <div class="groupe-form">
+                                <label for="v2-pratique-type" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                    Type de pratique
+                                </label>
+                                <select id="v2-pratique-type" class="controle-form" onchange="changerTypePratiqueV2()">
+                                    <option value="">-- Choisir un type --</option>
+                                    <option value="sommative">Sommative traditionnelle</option>
+                                    <option value="pan-maitrise">PAN-Maîtrise (portfolio)</option>
+                                    <option value="pan-objectifs">PAN-Objectifs (compétences)</option>
+                                    <option value="specifications">Notation par spécifications</option>
+                                    <option value="standards">Notation par maîtrise (SBG)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="groupe-form" style="margin-top: 15px;">
+                            <label for="v2-pratique-description" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                Description
+                            </label>
+                            <textarea id="v2-pratique-description" class="controle-form" rows="2" placeholder="Brève description de cette pratique d'évaluation" onchange="sauvegarderPratiqueBaseV2()"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Carte : Échelle de performance -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Échelle de performance</h3>
+                        <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
+                            L'échelle définit les niveaux de performance utilisés pour évaluer les productions.
+                        </p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: start;">
+                            <div class="groupe-form">
+                                <label for="v2-echelle-id" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                    Échelle à utiliser
+                                </label>
+                                <select id="v2-echelle-id" class="controle-form" onchange="afficherPreviewEchelleV2()">
+                                    <option value="">-- Sélectionner une échelle --</option>
+                                    <!-- Options chargées dynamiquement -->
+                                </select>
+                                <small style="display: block; color: var(--gris-moyen); margin-top: 6px; font-size: 0.85rem;">
+                                    Gérer les échelles dans <strong>Matériel → Échelles de performance</strong>
+                                </small>
+                            </div>
+                            <!-- Aperçu de l'échelle -->
+                            <div id="v2-preview-echelle" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px; display: none;">
+                                <p style="margin: 0 0 8px 0; font-weight: 600; font-size: 0.9rem;">Aperçu</p>
+                                <div id="v2-preview-echelle-contenu" class="text-muted" style="font-size: 0.85rem;">
+                                    <!-- Niveaux affichés ici -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte : Structure des évaluations (conditionnelle selon le type) -->
+                    <div class="carte" id="v2-carte-structure">
+                        <h3 class="carte-titre-bleu">Structure des évaluations</h3>
+
+                        <!-- Configuration Portfolio (PAN-Maîtrise) -->
+                        <div id="v2-config-portfolio" style="display: none;">
+                            <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                    <strong>Portfolio</strong> : Les artefacts n'ont pas de pondération individuelle.
+                                    La note finale est basée sur les N meilleurs ou N derniers artefacts.
+                                </p>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                <div class="groupe-form">
+                                    <label for="v2-portfolio-selection" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                        Mode de sélection
+                                    </label>
+                                    <select id="v2-portfolio-selection" class="controle-form" onchange="sauvegarderStructureV2()">
+                                        <option value="meilleurs">N meilleurs artefacts</option>
+                                        <option value="derniers">N derniers artefacts</option>
+                                        <option value="tous">Tous les artefacts</option>
+                                    </select>
+                                </div>
+                                <div class="groupe-form">
+                                    <label for="v2-portfolio-nombre" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                        Nombre d'artefacts à retenir
+                                    </label>
+                                    <input type="number" id="v2-portfolio-nombre" class="controle-form" min="1" max="20" value="5" onchange="sauvegarderStructureV2()">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+                                <div class="groupe-form">
+                                    <label for="v2-portfolio-minimum" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                        Minimum requis (seuil complétion)
+                                    </label>
+                                    <input type="number" id="v2-portfolio-minimum" class="controle-form" min="1" max="20" value="7" onchange="sauvegarderStructureV2()">
+                                </div>
+                                <div class="groupe-form">
+                                    <label for="v2-portfolio-total" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                        Total d'artefacts prévus
+                                    </label>
+                                    <input type="number" id="v2-portfolio-total" class="controle-form" min="1" max="50" value="10" onchange="sauvegarderStructureV2()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configuration Sommative -->
+                        <div id="v2-config-sommative" style="display: none;">
+                            <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                    <strong>Évaluations traditionnelles</strong> : Chaque évaluation a sa propre pondération.
+                                    La note finale est la moyenne pondérée (total = 100%).
+                                </p>
+                            </div>
+                            <p class="text-muted" style="font-size: 0.9rem;">
+                                Les évaluations et leurs pondérations sont configurées dans <strong>Matériel → Productions étudiantes</strong>.
+                            </p>
+                        </div>
+
+                        <!-- Configuration Standards (SBG) -->
+                        <div id="v2-config-standards" style="display: none;">
+                            <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                    <strong>Notation par maîtrise (SBG)</strong> : Les étudiants progressent à travers des standards numérotés.
+                                    Les standards terminaux doivent être maîtrisés pour réussir.
+                                </p>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                <div class="groupe-form">
+                                    <label for="v2-standards-nombre" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                        Nombre de standards
+                                    </label>
+                                    <input type="number" id="v2-standards-nombre" class="controle-form" min="1" max="20" value="10" onchange="sauvegarderStructureV2()">
+                                </div>
+                                <div class="groupe-form">
+                                    <label for="v2-standards-terminaux" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                        Standards terminaux (séparés par virgules)
+                                    </label>
+                                    <input type="text" id="v2-standards-terminaux" class="controle-form" placeholder="Ex: 7, 8, 9, 10" onchange="sauvegarderStructureV2()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configuration Spécifications -->
+                        <div id="v2-config-specifications" style="display: none;">
+                            <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                    <strong>Notation par spécifications</strong> : Les étudiants atteignent des paliers de notes fixes
+                                    selon le nombre de travaux acceptables remis.
+                                </p>
+                            </div>
+                            <div class="groupe-form">
+                                <label for="v2-spec-type" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                    Type d'évaluation
+                                </label>
+                                <select id="v2-spec-type" class="controle-form" onchange="sauvegarderStructureV2()">
+                                    <option value="binaire">Binaire (acceptable / non-acceptable)</option>
+                                    <option value="niveaux">Niveaux de performance (1-2-3-4)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Configuration PAN-Objectifs -->
+                        <div id="v2-config-objectifs" style="display: none;">
+                            <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                    <strong>PAN-Objectifs</strong> : Évaluation par compétences avec seuils critiques.
+                                    Chaque objectif doit atteindre un niveau minimum.
+                                </p>
+                            </div>
+                            <p class="text-muted" style="font-size: 0.9rem;">
+                                Les objectifs sont configurés dans <strong>Matériel → Ensembles d'objectifs</strong>.
+                            </p>
+                        </div>
+
+                        <!-- Message par défaut -->
+                        <div id="v2-config-defaut">
+                            <p class="text-muted" style="font-size: 0.9rem;">
+                                Sélectionnez un type de pratique pour configurer la structure des évaluations.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Carte : Système de jetons -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Système de jetons</h3>
+                        <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
+                            Les jetons sont des ressources limitées que l'apprenant·e peut utiliser pour adapter son parcours.
+                        </p>
+
+                        <!-- Nombre de jetons -->
+                        <div class="groupe-form" style="margin-bottom: 20px;">
+                            <label for="v2-jetons-nombre" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                Nombre de jetons alloués par élève
+                            </label>
+                            <input type="number" id="v2-jetons-nombre" class="controle-form" value="4" min="0" max="20" style="max-width: 100px;" onchange="sauvegarderJetonsV2()">
+                        </div>
+
+                        <!-- Types de jetons -->
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                            <!-- Jetons délai -->
+                            <div style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                <div class="form-group" style="margin-bottom: 8px;">
+                                    <label style="cursor: pointer;">
+                                        <input type="checkbox" id="v2-jeton-delai-actif" checked onchange="sauvegarderJetonsV2()">
+                                        <strong style="margin-left: 8px;">Jetons de délai</strong>
+                                    </label>
+                                </div>
+                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
+                                    Prolonger l'échéance d'une remise.
+                                </p>
+                                <div class="groupe-form">
+                                    <label for="v2-delai-duree" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
+                                        Durée du délai :
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="number" id="v2-delai-duree" class="controle-form" min="1" max="30" value="7" style="width: 70px;" onchange="sauvegarderJetonsV2()">
+                                        <span style="font-size: 0.9rem;">jours</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Jetons reprise -->
+                            <div style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                <div class="form-group" style="margin-bottom: 8px;">
+                                    <label style="cursor: pointer;">
+                                        <input type="checkbox" id="v2-jeton-reprise-actif" checked onchange="sauvegarderJetonsV2()">
+                                        <strong style="margin-left: 8px;">Jetons de reprise</strong>
+                                    </label>
+                                </div>
+                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
+                                    Refaire une évaluation complète.
+                                </p>
+                                <div class="groupe-form">
+                                    <label style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
+                                        Évaluation originale :
+                                    </label>
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
+                                            <input type="radio" name="v2-reprise-originale" value="archiver" checked onchange="sauvegarderJetonsV2()">
+                                            <span style="margin-left: 6px;">Garder en archive</span>
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
+                                            <input type="radio" name="v2-reprise-originale" value="supprimer" onchange="sauvegarderJetonsV2()">
+                                            <span style="margin-left: 6px;">Supprimer</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Jetons reprise ciblée -->
+                            <div style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                <div class="form-group" style="margin-bottom: 8px;">
+                                    <label style="cursor: pointer;">
+                                        <input type="checkbox" id="v2-jeton-ciblee-actif" checked onchange="sauvegarderJetonsV2()">
+                                        <strong style="margin-left: 8px;">Reprise ciblée</strong>
+                                    </label>
+                                </div>
+                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
+                                    Refaire UN critère spécifique.
+                                </p>
+                                <div class="groupe-form">
+                                    <label for="v2-ciblee-plafond" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
+                                        Note maximale :
+                                    </label>
+                                    <input type="text" id="v2-ciblee-plafond" class="controle-form" value="D (Développement)" style="width: 100%;" onchange="sauvegarderJetonsV2()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bouton sauvegarder -->
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-confirmer" onclick="sauvegarderToutePratiqueV2()" style="width: 100%;">
+                            Sauvegarder la pratique de notation
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Onglet 3: Préférences (Beta 95) -->
+                <div id="reglages-preferences" class="sous-section">
+                    <h2>Préférences</h2>
+                    <p class="text-muted">
+                        Personnalisez votre expérience : outils à exploiter, affichage et seuils d'interprétation.
+                    </p>
+
+                    <!-- Carte : Outils à exploiter -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Outils à exploiter</h3>
+                        <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
+                            Activez ou désactivez les fonctionnalités selon vos besoins. Les outils désactivés seront masqués.
+                        </p>
+
+                        <!-- Dépistage A-C-P -->
+                        <div class="form-group" style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-depistage-acp" checked onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Dépistage A-C-P</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Indices prédictifs : Assiduité, Complétion, Performance
+                            </small>
+                        </div>
+
+                        <!-- Détection des patterns -->
+                        <div class="form-group" style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-patterns" checked onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Détection des patterns</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Identification des tendances récurrentes (progression, stagnation, régression)
+                            </small>
+                        </div>
+
+                        <!-- Système RàI -->
+                        <div class="form-group" style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-rai" checked onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Système RàI (Réponse à l'Intervention)</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Niveaux d'intervention et recommandations personnalisées
+                            </small>
+                        </div>
+
+                        <!-- Mode comparatif -->
+                        <div class="form-group" style="padding: 12px; background: var(--alerte-fond-attention); border-radius: 6px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-comparatif" onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Mode comparatif SOM/PAN (expérimental)</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Afficher les deux pratiques côte à côte pour comparer les approches
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Carte : Affichage des ressources -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Affichage des ressources</h3>
+                        <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
+                            Choisissez ce que vous voulez voir dans l'interface.
+                        </p>
+
+                        <!-- Analyse SOLO -->
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-solo" checked onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Observation de la structure des résultats (SOLO)</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Affiche une carte supplémentaire avec les descriptions détaillées basées sur la taxonomie SOLO
+                            </small>
+                        </div>
+
+                        <!-- Snapshots -->
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-snapshots" checked onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Snapshots (captures de progression)</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Historique hebdomadaire des indices A-C-P
+                            </small>
+                        </div>
+
+                        <!-- Graphiques -->
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-graphiques" checked onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Graphiques d'évolution</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Visualisation de la progression dans le temps (Chart.js)
+                            </small>
+                        </div>
+
+                        <!-- Seuils d'interprétation visuels -->
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-seuils-visuels" checked onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Indicateurs visuels des seuils</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Couleurs Fragile / Acceptable / Bon selon les seuils configurés
+                            </small>
+                        </div>
+
+                        <!-- Détails techniques -->
+                        <div class="form-group">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-details-techniques" onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Détails techniques</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Afficher les formules de calcul et données brutes
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Carte : Configuration du dépistage -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Configuration du dépistage</h3>
+                        <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
+                            Paramètres utilisés pour la détection des patterns et l'identification des forces/défis.
+                        </p>
+
+                        <!-- Grille de référence -->
+                        <div class="groupe-form" style="margin-bottom: 15px;">
+                            <label for="v2-pref-grille-reference" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                Grille de critères pour le dépistage
+                            </label>
+                            <select id="v2-pref-grille-reference" class="controle-form" onchange="sauvegarderPreferencesV2()">
+                                <option value="">-- Sélectionner une grille --</option>
+                                <!-- Options chargées dynamiquement -->
+                            </select>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 6px; font-size: 0.85rem;">
+                                Cette grille définit les critères utilisés pour identifier les forces et défis des étudiants.
+                            </small>
+                        </div>
+
+                        <!-- Note sur les patterns -->
+                        <div style="padding: 12px; background: var(--alerte-fond-attention); border-left: 4px solid #ffc107; border-radius: 4px;">
+                            <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                <strong>Rappel :</strong> La détection des patterns nécessite d'utiliser <strong>la même grille et la même échelle</strong> pour tous les artefacts évalués durant le trimestre.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Accordéon : Seuils d'interprétation -->
+                    <div class="carte accordeon" id="v2-accordeon-seuils">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 style="margin: 0; font-size: 1rem;">Seuils d'interprétation</h3>
+                            <span class="accordeon-chevron">▼</span>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
+                                Personnalisez les seuils pour l'interprétation des indices A-C-P.
+                            </p>
+
+                            <!-- Grille des seuils -->
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                                <!-- Seuil Fragile -->
+                                <div class="groupe-form" style="padding: 12px; background: #ffebee; border-radius: 6px; border-left: 4px solid #f44336;">
+                                    <label for="v2-seuil-fragile" style="font-weight: 600; display: block; margin-bottom: 8px; color: #c62828;">
+                                        Fragile si inférieur à
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="number" id="v2-seuil-fragile" class="controle-form" value="70" min="50" max="80" style="width: 80px;" onchange="sauvegarderSeuilsV2()">
+                                        <span>%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Seuil Acceptable -->
+                                <div class="groupe-form" style="padding: 12px; background: #fff8e1; border-radius: 6px; border-left: 4px solid #ffc107;">
+                                    <label for="v2-seuil-acceptable" style="font-weight: 600; display: block; margin-bottom: 8px; color: #f57f17;">
+                                        Acceptable si inférieur à
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="number" id="v2-seuil-acceptable" class="controle-form" value="80" min="60" max="90" style="width: 80px;" onchange="sauvegarderSeuilsV2()">
+                                        <span>%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Seuil Bon -->
+                                <div class="groupe-form" style="padding: 12px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #4caf50;">
+                                    <label for="v2-seuil-bon" style="font-weight: 600; display: block; margin-bottom: 8px; color: #2e7d32;">
+                                        Bon si supérieur ou égal à
+                                    </label>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="number" id="v2-seuil-bon" class="controle-form" value="85" min="70" max="95" style="width: 80px;" onchange="sauvegarderSeuilsV2()">
+                                        <span>%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fenêtre d'analyse patterns -->
+                            <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                <label for="v2-fenetre-patterns" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                    Fenêtre d'analyse des patterns
+                                </label>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="number" id="v2-fenetre-patterns" class="controle-form" value="3" min="3" max="12" style="width: 80px;" onchange="sauvegarderSeuilsV2()">
+                                    <span style="font-size: 0.9rem;">dernières productions</span>
+                                </div>
+                                <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
+                                    Valeur basse = détection précoce | Valeur élevée = détection plus fiable
+                                </small>
+                            </div>
+
+                            <!-- Bouton restaurer défauts -->
+                            <button class="btn btn-secondaire" onclick="restaurerSeuilsDefautV2()">
+                                Restaurer les valeurs par défaut
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bouton sauvegarder -->
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-confirmer" onclick="sauvegarderToutesPreferencesV2()" style="width: 100%;">
+                            Sauvegarder toutes les préférences
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Onglet 4: Données -->
+                <div id="reglages-donnees" class="sous-section">
+                    <h2>Données</h2>
+                    <p class="text-muted">
+                        Gestion des données : import/export, snapshots et réinitialisation.
+                    </p>
+
+                    <!-- Placeholder pour le contenu Phase 5 -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Onglet en cours de développement</h3>
+                        <p>
+                            Cet onglet regroupera la gestion des données : sauvegarde/restauration,
+                            consultation des snapshots et réinitialisation.
+                        </p>
+                        <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem;">
+                            En attendant, utilisez les anciennes sous-sections Import/Export et Captures de progression.
+                        </p>
+                    </div>
+                </div>
 
             </section><!-- fin section-reglages -->
 
@@ -10633,8 +11233,8 @@ Exemple :
     <script src="libs/chartjs-plugin-annotation.min.js"></script>
 
     <!-- PRIORITÉ 1: Fondations -->
-    <script src="js/config.js?v=2025121701"></script>
-    <script src="js/navigation.js?v=2025121701"></script>
+    <script src="js/config.js?v=2025121004"></script>
+    <script src="js/navigation.js?v=2025121700"></script>
     <script src="js/modes.js?v=2025121500"></script>
     <script src="js/donnees-demo.js?v=2025121009"></script>
 
@@ -10643,6 +11243,9 @@ Exemple :
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestre.js?v=2025121201"></script>
+    <script src="js/trimestre-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Trimestre restructuré -->
+    <script src="js/pratique-notation-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Pratique de notation restructuré -->
+    <script src="js/preferences-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Préférences restructuré -->
     <script src="js/etudiants.js?v=2025120901"></script>
     <script src="js/productions-bibliotheque.js?v=2025120826"></script>
     <script src="js/productions.js?v=2025121003"></script>
