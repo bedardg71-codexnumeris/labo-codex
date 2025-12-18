@@ -8198,20 +8198,203 @@ Exemple :
                 <div id="reglages-donnees" class="sous-section">
                     <h2>Données</h2>
                     <p class="text-muted">
-                        Gestion des données : import/export, snapshots et réinitialisation.
+                        Gestion des données : sauvegarde, restauration, snapshots et réinitialisation.
                     </p>
 
-                    <!-- Placeholder pour le contenu Phase 5 -->
+                    <!-- ========================================
+                         CARTE : SAUVEGARDE ET RESTAURATION
+                         ======================================== -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Onglet en cours de développement</h3>
-                        <p>
-                            Cet onglet regroupera la gestion des données : sauvegarde/restauration,
-                            consultation des snapshots et réinitialisation.
+                        <h3 class="carte-titre-bleu">Sauvegarde et restauration</h3>
+                        <p class="text-muted" style="margin-bottom: 20px;">
+                            Exporte tes données pour les sauvegarder, importe pour les restaurer.
                         </p>
-                        <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem;">
-                            En attendant, utilisez les anciennes sous-sections Import/Export et Captures de progression.
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <!-- Export -->
+                            <div class="carte-bleu-pale-p15">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Exporter les données</h4>
+                                <p style="font-size: 0.9rem; margin-bottom: 15px;">
+                                    Sauvegarde tes données dans un fichier JSON.
+                                </p>
+                                <button class="btn btn-principal" onclick="ouvrirModalExport()">
+                                    Ouvrir l'exportation
+                                </button>
+                            </div>
+
+                            <!-- Import -->
+                            <div class="carte-bleu-pale-p15">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px;">Importer des données</h4>
+                                <p style="font-size: 0.9rem; margin-bottom: 15px;">
+                                    Restaure des données depuis un fichier JSON.
+                                </p>
+                                <button class="btn btn-principal" onclick="ouvrirModalImport()">
+                                    Ouvrir l'importation
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="badge-alerte" style="margin-top: 20px;">
+                            <strong>Important :</strong> L'import écrasera les données existantes pour les clés importées. Exporte d'abord si nécessaire.
+                        </div>
+                    </div>
+
+                    <!-- ========================================
+                         CARTE : CONFIGURATION PÉDAGOGIQUE
+                         ======================================== -->
+                    <div class="carte">
+                        <h3 class="carte-titre-bleu">Configuration pédagogique complète</h3>
+                        <p class="text-muted" style="margin-bottom: 20px;">
+                            Package complet avec échelles, grilles, productions, cartouches et paramètres.
+                        </p>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <!-- Export config -->
+                            <div class="carte-bleu-pale-p15">
+                                <h4 style="color: var(--bleu-moyen); margin-bottom: 10px;">Exporter ma configuration</h4>
+                                <p style="font-size: 0.9rem; margin-bottom: 15px;">
+                                    Génère un package partageable avec métadonnées CC BY-NC-SA 4.0.
+                                </p>
+                                <button class="btn btn-principal" onclick="exporterConfigurationComplete()">
+                                    Exporter la configuration
+                                </button>
+                            </div>
+
+                            <!-- Import config -->
+                            <div class="carte-bleu-pale-p15">
+                                <h4 style="color: var(--bleu-moyen); margin-bottom: 10px;">Importer une configuration</h4>
+                                <p style="font-size: 0.9rem; margin-bottom: 15px;">
+                                    Importe une configuration pédagogique partagée.
+                                </p>
+                                <button class="btn btn-principal" onclick="ouvrirImportConfigComplete()">
+                                    Importer une configuration
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="text-muted" style="margin-top: 15px; font-size: 0.85rem;">
+                            Idéal pour partager une pratique pédagogique avec des collègues ou conserver une configuration de cours.
                         </p>
                     </div>
+
+                    <!-- ========================================
+                         CARTE : CAPTURES DE PROGRESSION
+                         ======================================== -->
+                    <div class="carte accordeon ferme">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this.parentElement)">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">Captures de progression (Snapshots)</h3>
+                            <span class="accordeon-chevron">▼</span>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p class="text-muted" style="margin: 15px 0;">
+                                Les captures enregistrent l'état des indices A-C-P-E à des moments clés pour le suivi longitudinal.
+                            </p>
+
+                            <!-- Statistiques -->
+                            <div class="grille-cartes-metriques" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
+                                <div class="carte-metrique-bleue">
+                                    <div class="carte-metrique-contenu">
+                                        <span class="carte-metrique-label">Captures hebdomadaires</span>
+                                        <strong id="v2-stat-snapshots-hebdo" class="carte-metrique-valeur">—</strong>
+                                    </div>
+                                </div>
+                                <div class="carte-metrique-bleue">
+                                    <div class="carte-metrique-contenu">
+                                        <span class="carte-metrique-label">Captures interventions</span>
+                                        <strong id="v2-stat-snapshots-interventions" class="carte-metrique-valeur">—</strong>
+                                    </div>
+                                </div>
+                                <div class="carte-metrique-bleue">
+                                    <div class="carte-metrique-contenu">
+                                        <span class="carte-metrique-label">Dernière capture</span>
+                                        <strong id="v2-stat-derniere-capture" class="carte-metrique-valeur">—</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <button class="btn btn-secondaire" onclick="capturerSnapshotManuel()" style="width: 100%;">
+                                        Capturer maintenant
+                                    </button>
+                                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
+                                        Capture manuelle immédiate
+                                    </p>
+                                </div>
+                                <div>
+                                    <button class="btn btn-secondaire" onclick="lancerReconstructionRetroactive()" style="width: 100%;">
+                                        Reconstruire l'historique
+                                    </button>
+                                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
+                                        Recalcule depuis le début
+                                    </p>
+                                </div>
+                                <div>
+                                    <button class="btn btn-secondaire" onclick="confirmerNettoyageSnapshots()" style="width: 100%; border-color: #ff6f00; color: #ff6f00;">
+                                        Supprimer les captures
+                                    </button>
+                                    <p class="text-muted" style="font-size: 0.8rem; margin-top: 5px; text-align: center;">
+                                        Efface toutes les captures
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========================================
+                         CARTE : RÉINITIALISATION
+                         ======================================== -->
+                    <div class="carte accordeon ferme">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this.parentElement)" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);">
+                            <h3 style="margin: 0; color: #c62828;">Réinitialisation</h3>
+                            <span class="accordeon-chevron" style="color: #c62828;">▼</span>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <div style="padding: 15px; background: #fff3e0; border-radius: 8px; margin-top: 15px;">
+                                <h4 style="color: #e65100; margin-bottom: 10px;">Réinitialisation complète</h4>
+                                <p style="margin-bottom: 15px;">
+                                    Efface <strong>toutes</strong> les données et revient à l'état initial.
+                                    <strong>Cette action est irréversible.</strong>
+                                </p>
+                                <button class="btn btn-supprimer" onclick="reinitialiserDonnees()">
+                                    Réinitialiser toutes les données
+                                </button>
+                                <p class="text-muted" style="margin-top: 10px; font-size: 0.85rem;">
+                                    Triple confirmation requise + mot de passe «EFFACER» pour sécurité
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========================================
+                         CARTE : INFORMATIONS TECHNIQUES
+                         ======================================== -->
+                    <div class="carte accordeon ferme">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this.parentElement)">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">Informations techniques</h3>
+                            <span class="accordeon-chevron">▼</span>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <ul style="margin: 15px 0 0 20px; line-height: 1.8;">
+                                <li><strong>Stockage :</strong> Local dans le navigateur (IndexedDB + localStorage)</li>
+                                <li><strong>Format :</strong> Fichiers JSON lisibles</li>
+                                <li><strong>Compatibilité :</strong> Fonctionne sur tous appareils</li>
+                                <li><strong>Sécurité :</strong> Aucune donnée envoyée sur internet</li>
+                                <li><strong>Capacité :</strong> Plusieurs Go (IndexedDB)</li>
+                            </ul>
+
+                            <div class="carte-info-bleu-clair" style="margin-top: 15px;">
+                                <h4 style="color: var(--bleu-clair); margin-bottom: 10px;">Types de sauvegarde</h4>
+                                <ul style="margin-left: 15px; line-height: 1.6;">
+                                    <li><strong>Backup complet :</strong> Toutes les données (étudiants, notes, présences, etc.)</li>
+                                    <li><strong>Configuration pédagogique :</strong> Matériel réutilisable uniquement</li>
+                                    <li><strong>Export partiel :</strong> Ressources individuelles depuis Matériel pédagogique</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
             </section><!-- fin section-reglages -->
@@ -11246,6 +11429,7 @@ Exemple :
     <script src="js/trimestre-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Trimestre restructuré -->
     <script src="js/pratique-notation-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Pratique de notation restructuré -->
     <script src="js/preferences-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Préférences restructuré -->
+    <script src="js/donnees-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Données restructuré -->
     <script src="js/etudiants.js?v=2025120901"></script>
     <script src="js/productions-bibliotheque.js?v=2025120826"></script>
     <script src="js/productions.js?v=2025121003"></script>
