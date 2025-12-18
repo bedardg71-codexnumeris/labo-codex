@@ -4926,6 +4926,22 @@ function toggleAccordeon(id) {
 
 window.toggleAccordeon = toggleAccordeon;
 
+/**
+ * ✅ BETA 95 : Toggle accordéon v2 (structure avec header cliquable)
+ * @param {HTMLElement} headerElement - L'élément .accordeon-header cliqué
+ */
+function toggleAccordeonV2(headerElement) {
+    const carte = headerElement.closest('.carte.accordeon');
+    if (!carte) {
+        console.error('[toggleAccordeonV2] Carte accordéon introuvable');
+        return;
+    }
+
+    carte.classList.toggle('ferme');
+}
+
+window.toggleAccordeonV2 = toggleAccordeonV2;
+
 /* ===============================
    RÈGLES DE CONFORMITÉ
    =============================== */
