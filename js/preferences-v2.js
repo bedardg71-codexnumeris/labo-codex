@@ -97,7 +97,7 @@
 
         const patterns = document.getElementById('v2-pref-patterns');
         if (patterns) {
-            depistageAcp.checked = preferences.patterns !== false;
+            patterns.checked = preferences.patterns !== false;
         }
 
         const rai = document.getElementById('v2-pref-rai');
@@ -168,6 +168,25 @@
         const fenetrePatterns = document.getElementById('v2-fenetre-patterns');
         if (fenetrePatterns) {
             fenetrePatterns.value = seuils.nombreProductionsAnalyse || 3;
+        }
+
+        // Seuils avancés de détection
+        const seuilProgression = document.getElementById('v2-seuil-progression');
+        if (seuilProgression) {
+            seuilProgression.value = seuils.progressionArtefacts || 0.10;
+            mettreAJourAffichageSeuilV2('progression', seuilProgression.value);
+        }
+
+        const seuilRisque = document.getElementById('v2-seuil-risque');
+        if (seuilRisque) {
+            seuilRisque.value = seuils.directionRisque || 0.05;
+            mettreAJourAffichageSeuilV2('risque', seuilRisque.value);
+        }
+
+        const seuilDefi = document.getElementById('v2-seuil-defi');
+        if (seuilDefi) {
+            seuilDefi.value = seuils.defiSpecifique || 0.70;
+            mettreAJourAffichageSeuilV2('defi', seuilDefi.value);
         }
     }
 
@@ -258,6 +277,22 @@
         seuils.bon = bon / 100;
         seuils.nombreProductionsAnalyse = parseInt(document.getElementById('v2-fenetre-patterns')?.value) || 3;
 
+        // Seuils avancés de détection
+        const seuilProgression = document.getElementById('v2-seuil-progression');
+        if (seuilProgression) {
+            seuils.progressionArtefacts = parseFloat(seuilProgression.value) || 0.10;
+        }
+
+        const seuilRisque = document.getElementById('v2-seuil-risque');
+        if (seuilRisque) {
+            seuils.directionRisque = parseFloat(seuilRisque.value) || 0.05;
+        }
+
+        const seuilDefi = document.getElementById('v2-seuil-defi');
+        if (seuilDefi) {
+            seuils.defiSpecifique = parseFloat(seuilDefi.value) || 0.70;
+        }
+
         db.setSync('seuilsInterpretation', seuils);
         console.log('[preferences-v2] Seuils sauvegardés');
     }
@@ -276,8 +311,46 @@
         if (seuilBon) seuilBon.value = 85;
         if (fenetrePatterns) fenetrePatterns.value = 3;
 
+        // Seuils avancés - valeurs par défaut
+        const seuilProgression = document.getElementById('v2-seuil-progression');
+        const seuilRisque = document.getElementById('v2-seuil-risque');
+        const seuilDefi = document.getElementById('v2-seuil-defi');
+
+        if (seuilProgression) {
+            seuilProgression.value = 0.10;
+            mettreAJourAffichageSeuilV2('progression', 0.10);
+        }
+        if (seuilRisque) {
+            seuilRisque.value = 0.05;
+            mettreAJourAffichageSeuilV2('risque', 0.05);
+        }
+        if (seuilDefi) {
+            seuilDefi.value = 0.70;
+            mettreAJourAffichageSeuilV2('defi', 0.70);
+        }
+
         sauvegarderSeuilsV2();
         afficherNotificationSuccesV2('Seuils restaurés aux valeurs par défaut');
+    }
+
+    /**
+     * Met à jour l'affichage de la valeur d'un seuil slider
+     * @param {string} type - Type de seuil ('progression', 'risque', 'defi')
+     * @param {number} valeur - Valeur du seuil (0-1)
+     */
+    function mettreAJourAffichageSeuilV2(type, valeur) {
+        const valeurNum = parseFloat(valeur);
+
+        if (type === 'progression') {
+            const elem = document.getElementById('v2-valeur-progression');
+            if (elem) elem.textContent = `${Math.round(valeurNum * 100)} points (%)`;
+        } else if (type === 'risque') {
+            const elem = document.getElementById('v2-valeur-risque');
+            if (elem) elem.textContent = `${Math.round(valeurNum * 100)} points (%)`;
+        } else if (type === 'defi') {
+            const elem = document.getElementById('v2-valeur-defi');
+            if (elem) elem.textContent = `${Math.round(valeurNum * 100)}%`;
+        }
     }
 
     /**
@@ -315,6 +388,7 @@
     window.sauvegarderSeuilsV2 = sauvegarderSeuilsV2;
     window.restaurerSeuilsDefautV2 = restaurerSeuilsDefautV2;
     window.sauvegarderToutesPreferencesV2 = sauvegarderToutesPreferencesV2;
+    window.mettreAJourAffichageSeuilV2 = mettreAJourAffichageSeuilV2;
 
     // =========================================================================
     // INITIALISATION AU CHARGEMENT
