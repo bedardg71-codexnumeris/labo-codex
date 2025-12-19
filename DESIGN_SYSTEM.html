@@ -2983,6 +2983,149 @@ body[data-mode="anonymisation"] .sous-navigation {
     color: var(--etat-verrouille-texte);
 }</div>
         </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Panneaux de formulaire avec fond bleu</h3>
+            <p class="guide-component-description">
+                Conteneur visuel pour regrouper des champs de formulaire connexes. Utilise un fond bleu très pâle
+                pour délimiter visuellement la zone de saisie et inclut un bouton X pour fermer ou réinitialiser.
+            </p>
+
+            <div class="guide-example">
+                <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; position: relative; max-width: 500px;">
+                    <button style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;" title="Réinitialiser">✕</button>
+                    <h5 style="margin-top: 0; margin-bottom: 15px; color: var(--bleu-principal);">Titre du panneau</h5>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="groupe-form">
+                            <label style="font-size: 0.8rem; font-weight: 500;">Champ 1</label>
+                            <input type="text" class="controle-form controle-form-compact" placeholder="Valeur...">
+                        </div>
+                        <div class="groupe-form">
+                            <label style="font-size: 0.8rem; font-weight: 500;">Champ 2</label>
+                            <input type="text" class="controle-form controle-form-compact" placeholder="Valeur...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">🎨 Spécifications</div>
+                <ul>
+                    <li><strong>Background:</strong> var(--bleu-tres-pale) (#f0f8ff)</li>
+                    <li><strong>Padding:</strong> 12px</li>
+                    <li><strong>Border-radius:</strong> 8px</li>
+                    <li><strong>Position:</strong> relative (pour permettre le positionnement absolu du X)</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; position: relative;"&gt;
+    &lt;button onclick="reinitialiser()" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;" title="Réinitialiser"&gt;✕&lt;/button&gt;
+    &lt;h5 style="margin-top: 0;"&gt;Titre du panneau&lt;/h5&gt;
+    &lt;!-- Contenu du formulaire --&gt;
+&lt;/div&gt;</div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Boutons X de fermeture et réinitialisation</h3>
+            <p class="guide-component-description">
+                Deux types de boutons X sont utilisés dans l'interface, avec des couleurs différentes selon leur fonction :
+                <strong>orange</strong> pour la réinitialisation (action réversible) et <strong>rouge</strong> pour l'annulation/fermeture (action immédiate).
+            </p>
+
+            <div class="guide-example">
+                <div style="display: flex; gap: 40px; align-items: flex-start;">
+                    <div style="text-align: center;">
+                        <div style="background: var(--bleu-tres-pale); padding: 30px 50px; border-radius: 8px; position: relative; margin-bottom: 10px;">
+                            <button style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;" title="Réinitialiser">✕</button>
+                            <span style="color: var(--gris-moyen);">Panneau</span>
+                        </div>
+                        <strong style="color: var(--orange-accent);">X Orange</strong><br>
+                        <small>Réinitialisation (avec confirmation)</small>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="background: var(--bleu-tres-pale); padding: 30px 50px; border-radius: 8px; position: relative; margin-bottom: 10px;">
+                            <button style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--rouge-danger); padding: 0; line-height: 1;" title="Annuler">✕</button>
+                            <span style="color: var(--gris-moyen);">Formulaire</span>
+                        </div>
+                        <strong style="color: var(--rouge-danger);">X Rouge</strong><br>
+                        <small>Annulation/Fermeture (immédiat)</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">🎨 Spécifications des boutons X</div>
+                <ul>
+                    <li><strong>Position:</strong> absolute, top: 8px, right: 8px</li>
+                    <li><strong>Style:</strong> background: none, border: none, font-size: 1.2rem</li>
+                    <li><strong>Cursor:</strong> pointer</li>
+                    <li><strong>X Orange (réinitialisation):</strong> color: var(--orange-accent) #ff6b35 - Utilisé pour réinitialiser des données (avec confirmation)</li>
+                    <li><strong>X Rouge (annulation):</strong> color: var(--rouge-danger) #dc3545 - Utilisé pour fermer un formulaire ou annuler une action</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code CSS inline</div>
+            <div class="guide-code">/* X Orange - Réinitialisation */
+style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;"
+
+/* X Rouge - Annulation/Fermeture */
+style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--rouge-danger); padding: 0; line-height: 1;"</div>
+
+            <div class="guide-specs" style="background: #fff8f0; border-color: var(--orange-accent);">
+                <div class="guide-specs-title">⚠️ Bonnes pratiques</div>
+                <ul>
+                    <li>Le X orange doit toujours déclencher une confirmation avant l'action (ex: "Voulez-vous vraiment réinitialiser...")</li>
+                    <li>Le X rouge ferme/annule immédiatement sans confirmation</li>
+                    <li>Le X doit avoir un attribut title descriptif (ex: "Réinitialiser", "Annuler", "Fermer")</li>
+                    <li>Le conteneur parent doit avoir position: relative pour le positionnement absolu</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Encadré de statistiques avec bouton d'action</h3>
+            <p class="guide-component-description">
+                Encadré compact qui affiche des statistiques à gauche et un bouton d'action à droite. Utilisé pour résumer
+                une section et permettre une action rapide (sauvegarder, ajouter, etc.).
+            </p>
+
+            <div class="guide-example">
+                <div class="info-box" style="max-width: 600px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <p style="margin: 0;">
+                            <strong>Trimestre :</strong>
+                            <span>15</span> semaines •
+                            <span>75</span> jours de cours •
+                            <span>3</span> congés
+                        </p>
+                        <button class="btn btn-confirmer btn-tres-compact">Sauvegarder</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">🎨 Spécifications</div>
+                <ul>
+                    <li><strong>Container:</strong> .info-box (fond gris clair, padding 15px, border-radius 6px)</li>
+                    <li><strong>Layout:</strong> display: flex, justify-content: space-between, align-items: center</li>
+                    <li><strong>Texte:</strong> &lt;p style="margin: 0;"&gt; avec &lt;strong&gt; pour le label</li>
+                    <li><strong>Bouton:</strong> .btn .btn-confirmer .btn-tres-compact</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;div class="info-box"&gt;
+    &lt;div style="display: flex; justify-content: space-between; align-items: center;"&gt;
+        &lt;p style="margin: 0;"&gt;
+            &lt;strong&gt;Label :&lt;/strong&gt;
+            &lt;span id="compteur1"&gt;0&lt;/span&gt; items •
+            &lt;span id="compteur2"&gt;0&lt;/span&gt; autres
+        &lt;/p&gt;
+        &lt;button class="btn btn-confirmer btn-tres-compact"&gt;Action&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</div>
+        </div>
     </section>
 
     <!-- SECTION 10: MESSAGES ET ALERTES -->

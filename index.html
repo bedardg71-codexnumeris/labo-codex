@@ -7485,89 +7485,87 @@ Exemple :
                         <div class="grille-2col">
 
                             <!-- COLONNE GAUCHE: Bornes du trimestre -->
-                            <div>
-                                <h5 class="sous-titre-section">Bornes du trimestre</h5>
+                            <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; position: relative;">
+                                <button onclick="reinitialiserBornesTrimestreV2()" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;" title="Réinitialiser les bornes">✕</button>
+                                <h5 class="sous-titre-section" style="margin-top: 0;">Bornes du trimestre</h5>
                                 <div class="grille-2col-gap15">
                                     <div class="groupe-form">
-                                        <label>Début du trimestre :</label>
-                                        <input type="date" class="controle-form" id="v2-debutTrimestre"
+                                        <label style="font-size: 0.8rem; font-weight: 500;">Début du trimestre :</label>
+                                        <input type="date" class="controle-form controle-form-compact" id="v2-debutTrimestre"
                                             onchange="sauvegarderCadreCalendrierV2()">
                                     </div>
                                     <div class="groupe-form">
-                                        <label>Fin des cours réguliers :</label>
-                                        <input type="date" class="controle-form" id="v2-finCours"
+                                        <label style="font-size: 0.8rem; font-weight: 500;">Fin des cours réguliers :</label>
+                                        <input type="date" class="controle-form controle-form-compact" id="v2-finCours"
                                             onchange="sauvegarderCadreCalendrierV2()">
                                     </div>
                                     <div class="groupe-form">
-                                        <label>Fin du trimestre :</label>
-                                        <input type="date" class="controle-form" id="v2-finTrimestre"
+                                        <label style="font-size: 0.8rem; font-weight: 500;">Fin du trimestre :</label>
+                                        <input type="date" class="controle-form controle-form-compact" id="v2-finTrimestre"
                                             onchange="sauvegarderCadreCalendrierV2()">
                                     </div>
                                     <div class="groupe-form">
-                                        <label>Remise des notes :</label>
-                                        <input type="date" class="controle-form" id="v2-remiseNotes"
+                                        <label style="font-size: 0.8rem; font-weight: 500;">Remise des notes :</label>
+                                        <input type="date" class="controle-form controle-form-compact" id="v2-remiseNotes"
                                             onchange="sauvegarderCadreCalendrierV2()">
                                     </div>
                                 </div>
                             </div>
 
                             <!-- COLONNE DROITE: Semaines spéciales -->
-                            <div>
-                                <h5 class="sous-titre-section">Semaines spéciales</h5>
+                            <div style="background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; position: relative;">
+                                <button onclick="reinitialiserSemainesSpecialesV2()" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--orange-accent); padding: 0; line-height: 1;" title="Réinitialiser les semaines spéciales">✕</button>
+                                <h5 class="sous-titre-section" style="margin-top: 0;">Semaines spéciales</h5>
                                 <div class="grille-2col-gap15">
                                     <!-- Semaine de planification -->
                                     <div>
-                                        <h6>Semaine de planification</h6>
+                                        <label style="font-size: 0.8rem; font-weight: 500;">Semaine de planification</label>
                                         <div class="d-flex-gap-10-center">
                                             <div class="groupe-form flex-1">
-                                                <label>Du :</label>
-                                                <input type="date" class="controle-form" id="v2-semainePlanificationDebut"
+                                                <label style="font-size: 0.75rem;">Du :</label>
+                                                <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationDebut"
                                                     onchange="sauvegarderCadreCalendrierV2()">
                                             </div>
-                                            <span class="pt-20">au</span>
+                                            <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
                                             <div class="groupe-form flex-1">
-                                                <label>&nbsp;</label>
-                                                <input type="date" class="controle-form" id="v2-semainePlanificationFin"
+                                                <label style="font-size: 0.75rem;">&nbsp;</label>
+                                                <input type="date" class="controle-form controle-form-compact" id="v2-semainePlanificationFin"
                                                     onchange="sauvegarderCadreCalendrierV2()">
                                             </div>
                                         </div>
                                     </div>
                                     <!-- Semaine d'examens -->
                                     <div>
-                                        <h6>Semaine d'examens</h6>
+                                        <label style="font-size: 0.8rem; font-weight: 500;">Semaine d'examens</label>
                                         <div class="d-flex-gap-10-center">
                                             <div class="groupe-form flex-1">
-                                                <label>Du :</label>
-                                                <input type="date" class="controle-form" id="v2-semaineExamensDebut"
+                                                <label style="font-size: 0.75rem;">Du :</label>
+                                                <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensDebut"
                                                     onchange="sauvegarderCadreCalendrierV2()">
                                             </div>
-                                            <span class="pt-20">au</span>
+                                            <span style="padding-top: 15px; font-size: 0.8rem;">au</span>
                                             <div class="groupe-form flex-1">
-                                                <label>&nbsp;</label>
-                                                <input type="date" class="controle-form" id="v2-semaineExamensFin"
+                                                <label style="font-size: 0.75rem;">&nbsp;</label>
+                                                <input type="date" class="controle-form controle-form-compact" id="v2-semaineExamensFin"
                                                     onchange="sauvegarderCadreCalendrierV2()">
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Statistiques calculées -->
-                                <div class="info-box" style="margin-top: 15px;">
-                                    <p>
-                                        <strong>Trimestre :</strong>
-                                        <span id="v2-nombreSemaines">0</span> semaines •
-                                        <span id="v2-nombreJoursCours">0</span> jours de cours •
-                                        <span id="v2-totalConges">0</span> congés
-                                    </p>
-                                </div>
                             </div>
                         </div>
 
-                        <!-- Bouton de sauvegarde -->
-                        <div class="btn-groupe" style="justify-content: flex-end; margin-top: 15px;">
-                            <button class="btn btn-confirmer" onclick="sauvegarderCadreCalendrierV2()">
-                                Sauvegarder le cadre
-                            </button>
+                        <!-- Statistiques calculées -->
+                        <div class="info-box" style="margin-top: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <p style="margin: 0;">
+                                    <strong>Trimestre :</strong>
+                                    <span id="v2-nombreSemaines">0</span> semaines •
+                                    <span id="v2-nombreJoursCours">0</span> jours de cours •
+                                    <span id="v2-totalConges">0</span> congés
+                                </p>
+                                <button class="btn btn-confirmer btn-tres-compact" onclick="sauvegarderCadreCalendrierV2()">Sauvegarder le cadre</button>
+                            </div>
                         </div>
                     </div><!-- FIN carte Cadre régulier -->
 
@@ -7580,30 +7578,106 @@ Exemple :
 
                             <!-- COLONNE GAUCHE: Congés prévus -->
                             <div>
-                                <h5 class="sous-titre-section">Congés fériés et activités institutionnelles</h5>
-                                <p class="text-muted texte-desc">
-                                    Congés fériés, journées pédagogiques, journée Carrière, etc.
-                                </p>
+                                <h5 class="sous-titre-section">Congés fériés et activités institutionnelles (journées pédagogiques, journée Carrière, etc.)</h5>
                                 <div id="v2-congesPrevusContainer" class="mb-20">
-                                    <p class="text-muted text-italic">Aucun événement prévu déclaré.</p>
+                                    <!-- Liste des événements prévus générée dynamiquement -->
                                 </div>
-                                <button class="btn btn-confirmer" onclick="afficherFormEvenementV2('prevu')">
-                                    + Ajouter un événement prévu
-                                </button>
+
+                                <!-- Formulaire ajout événement prévu (caché par défaut) -->
+                                <div id="v2-formEvenementPrevu" style="display: none; background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; margin-bottom: 15px; position: relative;">
+                                    <button onclick="annulerFormEvenementPrevuV2()" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--rouge-danger); padding: 0; line-height: 1;" title="Annuler">✕</button>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                        <div class="groupe-form">
+                                            <label style="font-size: 0.8rem; font-weight: 500;">Date <span class="text-danger">*</span></label>
+                                            <input type="date" id="v2-dateEvenementPrevu" class="controle-form controle-form-compact">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label style="font-size: 0.8rem; font-weight: 500;">Horaire de reprise</label>
+                                            <select id="v2-horaireReprisePrevu" class="controle-form controle-form-compact">
+                                                <option value="">— Aucune —</option>
+                                                <option value="Lundi">Lundi</option>
+                                                <option value="Mardi">Mardi</option>
+                                                <option value="Mercredi">Mercredi</option>
+                                                <option value="Jeudi">Jeudi</option>
+                                                <option value="Vendredi">Vendredi</option>
+                                            </select>
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label style="font-size: 0.8rem; font-weight: 500;">Date de reprise</label>
+                                            <input type="date" id="v2-dateReprisePrevu" class="controle-form controle-form-compact">
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 10px; align-items: flex-end;">
+                                        <div class="groupe-form" style="flex: 1;">
+                                            <label style="font-size: 0.8rem; font-weight: 500;">Description <span class="text-danger">*</span></label>
+                                            <input type="text" id="v2-descriptionPrevu" class="controle-form controle-form-compact" placeholder="Ex: Journée pédagogique">
+                                        </div>
+                                        <button id="v2-btnConfirmerPrevu" class="btn btn-confirmer btn-tres-compact" onclick="confirmerEvenementPrevuV2()">Ajouter</button>
+                                    </div>
+                                </div>
+
+                                <!-- Encadré statistiques événements prévus -->
+                                <div class="info-box" style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <p style="margin: 0;">
+                                            <strong>Événements prévus :</strong>
+                                            <span id="v2-nombreEvenementsPrevus">0</span> déclarés
+                                        </p>
+                                        <button class="btn btn-confirmer btn-tres-compact" onclick="afficherFormEvenementV2('prevu')">+ Ajouter</button>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- COLONNE DROITE: Événements imprévus -->
                             <div>
-                                <h5 class="sous-titre-section">Événements imprévus</h5>
-                                <p class="text-muted texte-desc">
-                                    Maladie, conditions météo, urgences, etc.
-                                </p>
+                                <h5 class="sous-titre-section">Événements imprévus (maladie, conditions météo, urgences, etc.)</h5>
                                 <div id="v2-congesImprevusContainer" class="mb-20">
-                                    <p class="text-muted text-italic">Aucun événement imprévu déclaré.</p>
+                                    <!-- Liste des événements imprévus générée dynamiquement -->
                                 </div>
-                                <button class="btn btn-confirmer" onclick="afficherFormEvenementV2('imprevu')">
-                                    + Ajouter un événement imprévu
-                                </button>
+
+                                <!-- Formulaire ajout événement imprévu (caché par défaut) -->
+                                <div id="v2-formEvenementImprevu" style="display: none; background: var(--bleu-tres-pale); padding: 12px; border-radius: 8px; margin-bottom: 15px; position: relative;">
+                                    <button onclick="annulerFormEvenementImprevuV2()" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--rouge-danger); padding: 0; line-height: 1;" title="Annuler">✕</button>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                        <div class="groupe-form">
+                                            <label style="font-size: 0.8rem; font-weight: 500;">Date <span class="text-danger">*</span></label>
+                                            <input type="date" id="v2-dateEvenementImprevu" class="controle-form controle-form-compact">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label style="font-size: 0.8rem; font-weight: 500;">Horaire de reprise</label>
+                                            <select id="v2-horaireRepriseImprevu" class="controle-form controle-form-compact">
+                                                <option value="">— Aucune —</option>
+                                                <option value="Lundi">Lundi</option>
+                                                <option value="Mardi">Mardi</option>
+                                                <option value="Mercredi">Mercredi</option>
+                                                <option value="Jeudi">Jeudi</option>
+                                                <option value="Vendredi">Vendredi</option>
+                                            </select>
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label style="font-size: 0.8rem; font-weight: 500;">Date de reprise</label>
+                                            <input type="date" id="v2-dateRepriseImprevu" class="controle-form controle-form-compact">
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 10px; align-items: flex-end;">
+                                        <div class="groupe-form" style="flex: 1;">
+                                            <label style="font-size: 0.8rem; font-weight: 500;">Description <span class="text-danger">*</span></label>
+                                            <input type="text" id="v2-descriptionImprevu" class="controle-form controle-form-compact" placeholder="Ex: Maladie">
+                                        </div>
+                                        <button id="v2-btnConfirmerImprevu" class="btn btn-confirmer btn-tres-compact" onclick="confirmerEvenementImprevuV2()">Ajouter</button>
+                                    </div>
+                                </div>
+
+                                <!-- Encadré statistiques événements imprévus -->
+                                <div class="info-box" style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <p style="margin: 0;">
+                                            <strong>Événements imprévus :</strong>
+                                            <span id="v2-nombreEvenementsImprevus">0</span> déclarés
+                                        </p>
+                                        <button class="btn btn-confirmer btn-tres-compact" onclick="afficherFormEvenementV2('imprevu')">+ Ajouter</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -7630,20 +7704,144 @@ Exemple :
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▼</span> Cours
                             </h3>
-                            <button class="btn btn-secondaire btn-sm" onclick="event.stopPropagation(); ouvrirModalNouveauCours()">
-                                + Ajouter
+                            <button class="btn btn-confirmer btn-sm" onclick="event.stopPropagation(); afficherFormCoursV2()">
+                                + Nouveau cours
                             </button>
                         </div>
                         <div class="accordeon-contenu">
+                            <!-- Sélection du cours actif -->
                             <div class="d-flex-gap-10-center" style="margin-bottom: 15px;">
                                 <label style="font-weight: 500;">Cours sélectionné :</label>
                                 <select id="v2-selectCours" class="controle-form" style="max-width: 400px;" onchange="changerCoursSelectionneV2(this.value)">
                                     <option value="">Aucun cours</option>
                                 </select>
+                                <button class="btn btn-modifier btn-sm" onclick="modifierCoursSelectionneV2()" id="v2-btnModifierCours" style="display: none;">
+                                    Modifier
+                                </button>
                             </div>
-                            <div id="v2-detailsCours" class="carte-bleu-pale-p15">
+
+                            <!-- Aperçu du cours sélectionné (visible par défaut) -->
+                            <div id="v2-apercuCours" class="carte-bleu-pale-p15">
                                 <p class="text-muted">Sélectionnez un cours pour voir ses détails.</p>
                             </div>
+
+                            <!-- FORMULAIRE DE COURS (caché par défaut) -->
+                            <div id="v2-formulaireCours" style="display: none; padding: 20px; background: var(--bleu-pale); border: 1px solid var(--bleu-leger); border-radius: 8px; margin-top: 15px;">
+
+                                <h4 id="v2-titreFormCours" class="titre-bleu-mb-20">
+                                    Nouvelle configuration de cours
+                                </h4>
+
+                                <!-- Informations générales -->
+                                <h5 class="sous-titre-section">Informations générales</h5>
+                                <div class="grille-4col-form" style="margin-bottom: 20px;">
+                                    <div class="groupe-form">
+                                        <label>Code du cours</label>
+                                        <input type="text" id="v2-codeCours" class="controle-form controle-form-compact" placeholder="Ex: 601-101-MQ">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Nom du cours</label>
+                                        <input type="text" id="v2-nomCours" class="controle-form controle-form-compact" placeholder="Ex: Écriture et littérature">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>N° de la compétence</label>
+                                        <input type="text" id="v2-numeroCompetence" class="controle-form controle-form-compact" placeholder="Ex: 4EF0">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Compétence</label>
+                                        <input type="text" id="v2-competence" class="controle-form controle-form-compact" placeholder="Ex: Analyser des textes littéraires">
+                                    </div>
+                                </div>
+
+                                <div class="groupe-form" style="margin-bottom: 20px;">
+                                    <label>Éléments de compétence</label>
+                                    <textarea id="v2-elementsCompetence" class="controle-form controle-form-compact" rows="3"
+                                        placeholder="• Reconnaître le propos du texte&#10;• Repérer et classer des thèmes et procédés stylistiques"></textarea>
+                                </div>
+
+                                <!-- Enseignant·e -->
+                                <h5 class="sous-titre-section" style="margin-top: 25px;">Enseignant·e</h5>
+                                <div class="grille-3col-form" style="margin-bottom: 15px;">
+                                    <div class="groupe-form">
+                                        <label>Prénom</label>
+                                        <input type="text" id="v2-prenomEnseignant" class="controle-form controle-form-compact" placeholder="Ex: Grégoire">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Nom</label>
+                                        <input type="text" id="v2-nomEnseignant" class="controle-form controle-form-compact" placeholder="Ex: Bédard">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Courriel <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
+                                        <input type="email" id="v2-courrielEnseignant" class="controle-form controle-form-compact" placeholder="Ex: prenom.nom@cegep.qc.ca">
+                                    </div>
+                                </div>
+                                <div class="grille-3col-form" style="margin-bottom: 20px;">
+                                    <div class="groupe-form">
+                                        <label>Discipline <span style="color: var(--rouge-erreur); font-weight: normal;">*</span></label>
+                                        <input type="text" id="v2-disciplineEnseignant" class="controle-form controle-form-compact" required placeholder="Ex: Littérature">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Département</label>
+                                        <input type="text" id="v2-departement" class="controle-form controle-form-compact" placeholder="Ex: Littérature et communication">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Institution <span style="color: var(--gris-leger); font-weight: normal;">(optionnel)</span></label>
+                                        <input type="text" id="v2-institutionEnseignant" class="controle-form controle-form-compact" placeholder="Ex: Cégep de Drummondville">
+                                    </div>
+                                </div>
+
+                                <!-- Session et horaire -->
+                                <h5 class="sous-titre-section" style="margin-top: 25px;">Session et horaire</h5>
+                                <div class="grille-4col-form" style="margin-bottom: 20px;">
+                                    <div class="groupe-form">
+                                        <label>Session</label>
+                                        <select id="v2-session" class="controle-form controle-form-compact">
+                                            <option value="H">Hiver</option>
+                                            <option value="A">Automne</option>
+                                        </select>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Année</label>
+                                        <input type="number" id="v2-annee" class="controle-form controle-form-compact" value="2025" min="2020" max="2030">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Heures/semaine</label>
+                                        <input type="number" id="v2-heuresParSemaine" class="controle-form controle-form-compact" value="4" min="1" max="10">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Format horaire</label>
+                                        <select id="v2-formatHoraire" class="controle-form controle-form-compact">
+                                            <option value="1x4">1 période de 4h</option>
+                                            <option value="2x2" selected>2 périodes de 2h</option>
+                                            <option value="4x1">4 périodes de 1h</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Numéro de groupe -->
+                                <h5 class="sous-titre-section" style="margin-top: 25px;">Groupe</h5>
+                                <div class="grille-2col-form" style="margin-bottom: 20px;">
+                                    <div class="groupe-form">
+                                        <label>Numéro de groupe</label>
+                                        <input type="text" id="v2-numeroGroupe" class="controle-form controle-form-compact" placeholder="Ex: 01" value="01">
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Local</label>
+                                        <input type="text" id="v2-localCours" class="controle-form controle-form-compact" placeholder="Ex: 2314">
+                                    </div>
+                                </div>
+
+                                <!-- Boutons d'action -->
+                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--bleu-leger);">
+                                    <button class="btn btn-annuler" onclick="annulerFormCoursV2()">
+                                        Annuler
+                                    </button>
+                                    <button class="btn btn-confirmer" onclick="sauvegarderCoursV2()">
+                                        <span id="v2-btnTexteCours">Ajouter</span>
+                                    </button>
+                                </div>
+                            </div><!-- FIN formulaire cours v2 -->
+
                         </div>
                     </div><!-- FIN accordéon Cours -->
 
@@ -7651,16 +7849,104 @@ Exemple :
                     <div class="carte accordeon" style="margin-top: 20px;">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu" style="margin: 0;">
-                                <span class="accordeon-chevron">▼</span> Groupes
+                                <span class="accordeon-chevron">▼</span> Groupe d'étudiants
                             </h3>
-                            <button class="btn btn-secondaire btn-sm" onclick="event.stopPropagation(); ouvrirModalNouveauGroupe()">
-                                + Ajouter
-                            </button>
                         </div>
                         <div class="accordeon-contenu">
-                            <div id="v2-listeGroupes">
-                                <p class="text-muted">Sélectionnez un cours pour voir ses groupes.</p>
+
+                            <!-- VUE D'ENSEMBLE -->
+                            <div class="grille-cartes-metriques mb-20">
+                                <div class="carte-metrique-bleue">
+                                    <div class="carte-metrique-contenu">
+                                        <span class="carte-metrique-label">Étudiant·es</span>
+                                        <strong id="v2-nbEtudiantsTotal" class="carte-metrique-valeur">0</strong>
+                                    </div>
+                                </div>
+                                <div class="carte-metrique-bleue">
+                                    <div class="carte-metrique-contenu">
+                                        <span class="carte-metrique-label">Groupe actif</span>
+                                        <strong id="v2-groupeActif" class="carte-metrique-valeur">—</strong>
+                                    </div>
+                                </div>
                             </div>
+
+                            <!-- FORMULAIRE D'AJOUT MANUEL (collapsible) -->
+                            <details class="mb-20">
+                                <summary style="cursor: pointer; font-weight: 600; color: var(--bleu-principal); padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px; user-select: none;">
+                                    + Ajouter un·e étudiant·e manuellement
+                                </summary>
+                                <div style="padding: 15px; background: var(--bleu-tres-pale); border-radius: 0 0 6px 6px; margin-top: -5px;">
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
+                                        <div class="groupe-form">
+                                            <label style="font-size: 0.85rem;">DA</label>
+                                            <input type="text" id="v2-etudiantDA" class="controle-form controle-form-compact" placeholder="1234567">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label style="font-size: 0.85rem;">Nom <span class="text-danger">*</span></label>
+                                            <input type="text" id="v2-etudiantNom" class="controle-form controle-form-compact" required placeholder="Nom">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label style="font-size: 0.85rem;">Prénom <span class="text-danger">*</span></label>
+                                            <input type="text" id="v2-etudiantPrenom" class="controle-form controle-form-compact" required placeholder="Prénom">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label style="font-size: 0.85rem;">Programme</label>
+                                            <input type="text" id="v2-etudiantProgramme" class="controle-form controle-form-compact" placeholder="200.B1">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label style="font-size: 0.85rem;">SA</label>
+                                            <select id="v2-etudiantSA" class="controle-form controle-form-compact">
+                                                <option value="">—</option>
+                                                <option value="Oui">Oui</option>
+                                            </select>
+                                        </div>
+                                        <div class="groupe-form" style="display: flex; align-items: flex-end;">
+                                            <button onclick="ajouterEtudiantV2()" class="btn btn-confirmer btn-sm" style="width: 100%;">Ajouter</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+
+                            <!-- ZONE D'IMPORT (collapsible) -->
+                            <details class="mb-20">
+                                <summary style="cursor: pointer; font-weight: 600; color: var(--bleu-principal); padding: 12px; background: var(--gris-tres-pale); border-radius: 6px; user-select: none;">
+                                    Importer des étudiants (CSV/TSV ou copier-coller)
+                                </summary>
+                                <div style="padding: 15px; background: var(--gris-tres-pale); border-radius: 0 0 6px 6px; margin-top: -5px;">
+                                    <div style="margin-bottom: 15px;">
+                                        <label style="font-weight: 500; display: block; margin-bottom: 8px;">Option 1 : Fichier CSV/TSV</label>
+                                        <input type="file" id="v2-fichierCsvEntree" accept=".csv,.tsv,.txt" onchange="importerFichierEtudiantsV2(event)" class="controle-form">
+                                        <small style="color: var(--gris-moyen); display: block; margin-top: 5px;">Format : DA, Groupe, Nom, Prénom, Programme, Nom du programme, SA</small>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: 500; display: block; margin-bottom: 8px;">Option 2 : Copier-coller</label>
+                                        <textarea id="v2-donneesCollees" class="controle-form" placeholder="Collez vos données ici (colonnes séparées par des tabulations)" rows="4" style="font-family: monospace;"></textarea>
+                                        <button onclick="previsualiserDonneesV2()" class="btn btn-principal btn-sm" style="margin-top: 10px;">Prévisualiser</button>
+                                    </div>
+                                </div>
+                            </details>
+
+                            <!-- ZONE DE PRÉVISUALISATION (cachée par défaut) -->
+                            <div id="v2-previewZone" style="display: none; margin-bottom: 20px; background: var(--alerte-fond-attention); padding: 15px; border-radius: 8px; border: 2px solid #ffc107;">
+                                <h4 style="margin: 0 0 10px 0; color: #856404;">Prévisualisation de l'import</h4>
+                                <div id="v2-previewTable" style="overflow-x: auto; max-height: 200px; border: 1px solid var(--bordure-claire); border-radius: 4px; background: white;"></div>
+                                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                                    <button onclick="confirmerImportV2()" class="btn btn-confirmer btn-sm">Confirmer l'import</button>
+                                    <button onclick="annulerImportV2()" class="btn btn-annuler btn-sm">Annuler</button>
+                                </div>
+                            </div>
+
+                            <!-- LISTE DES ÉTUDIANTS -->
+                            <div id="v2-listeEtudiants">
+                                <p class="text-muted text-italic">Aucun étudiant dans ce groupe.</p>
+                            </div>
+
+                            <!-- Boutons d'action -->
+                            <div id="v2-actionsEtudiants" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                                <button onclick="exporterEtudiantsV2()" class="btn btn-principal btn-sm">Exporter (CSV)</button>
+                                <button onclick="reinitialiserEtudiantsV2()" class="btn btn-annuler btn-sm" style="margin-left: 10px;">Réinitialiser</button>
+                            </div>
+
                         </div>
                     </div><!-- FIN accordéon Groupes -->
 
@@ -7670,11 +7956,84 @@ Exemple :
                             <h3 class="carte-titre-bleu" style="margin: 0;">
                                 <span class="accordeon-chevron">▼</span> Horaire
                             </h3>
+                            <button class="btn btn-confirmer btn-sm" onclick="event.stopPropagation(); afficherFormSeanceV2()">
+                                + Ajouter une séance
+                            </button>
                         </div>
                         <div class="accordeon-contenu">
-                            <div id="v2-horaireGroupeActif">
-                                <p class="text-muted">Activez un groupe pour voir et modifier son horaire.</p>
+                            <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
+                                Configurez les séances de cours de la semaine. Chaque séance peut avoir une durée différente.
+                            </p>
+
+                            <!-- Liste des séances existantes -->
+                            <div id="v2-seancesContainer" class="mb-20">
+                                <p class="text-muted text-italic">Aucune séance configurée.</p>
                             </div>
+
+                            <!-- FORMULAIRE D'AJOUT SÉANCE (caché par défaut) -->
+                            <div id="v2-formAjoutSeance" class="item-carte" style="display: none; padding: 15px; background: var(--vert-pale); border: 1px solid var(--vert-confirmer); border-radius: 8px; margin-top: 15px;">
+                                <div class="item-carte-header" style="margin-bottom: 15px;">
+                                    <strong id="v2-titreFormSeance" class="item-carte-titre titre-vert">
+                                        Nouvelle séance
+                                    </strong>
+                                </div>
+                                <div class="grille-4col-form">
+                                    <div class="groupe-form">
+                                        <label>Jour</label>
+                                        <select class="controle-form controle-form-compact" id="v2-jourSeance">
+                                            <option value="">Choisir...</option>
+                                            <option value="Lundi">Lundi</option>
+                                            <option value="Mardi">Mardi</option>
+                                            <option value="Mercredi">Mercredi</option>
+                                            <option value="Jeudi">Jeudi</option>
+                                            <option value="Vendredi">Vendredi</option>
+                                        </select>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Heure début</label>
+                                        <select class="controle-form controle-form-compact" id="v2-debutSeance">
+                                            <option value="">Choisir...</option>
+                                            <option value="08:00">8h00</option>
+                                            <option value="09:00">9h00</option>
+                                            <option value="10:00">10h00</option>
+                                            <option value="11:00">11h00</option>
+                                            <option value="12:00">12h00</option>
+                                            <option value="13:00">13h00</option>
+                                            <option value="14:00">14h00</option>
+                                            <option value="15:00">15h00</option>
+                                            <option value="16:00">16h00</option>
+                                            <option value="17:00">17h00</option>
+                                            <option value="18:00">18h00</option>
+                                            <option value="19:00">19h00</option>
+                                            <option value="20:00">20h00</option>
+                                        </select>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Durée</label>
+                                        <select class="controle-form controle-form-compact" id="v2-dureeSeance">
+                                            <option value="">Choisir...</option>
+                                            <option value="1.0">1h</option>
+                                            <option value="1.5">1h30</option>
+                                            <option value="2.0" selected>2h</option>
+                                            <option value="2.5">2h30</option>
+                                            <option value="3.0">3h</option>
+                                            <option value="3.5">3h30</option>
+                                            <option value="4.0">4h</option>
+                                            <option value="4.5">4h30</option>
+                                            <option value="5.0">5h</option>
+                                        </select>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label>Local</label>
+                                        <input type="text" class="controle-form controle-form-compact" id="v2-localSeance" placeholder="Ex: 1709">
+                                    </div>
+                                </div>
+                                <div class="btn-groupe btn-groupe-droite" style="margin-top: 15px;">
+                                    <button class="btn btn-annuler btn-sm" onclick="annulerFormSeanceV2()">Annuler</button>
+                                    <button id="v2-btnConfirmerSeance" class="btn btn-confirmer btn-sm" onclick="confirmerSeanceV2()">Ajouter</button>
+                                </div>
+                            </div><!-- FIN formulaire ajout séance -->
+
                         </div>
                     </div><!-- FIN accordéon Horaire -->
 
@@ -7759,6 +8118,19 @@ Exemple :
                                     <strong>Portfolio</strong> : Les artefacts n'ont pas de pondération individuelle.
                                     La note finale est basée sur les N meilleurs ou N derniers artefacts.
                                 </p>
+                            </div>
+
+                            <!-- Option avancée : Découpler P et R -->
+                            <div style="margin-bottom: 15px; padding: 12px; background: var(--alerte-fond-attention); border-left: 3px solid #ffc107; border-radius: 4px;">
+                                <label style="cursor: pointer; display: flex; align-items: center;">
+                                    <input type="checkbox" id="v2-decoupler-pr" onchange="sauvegarderStructureV2()">
+                                    <strong style="margin-left: 8px;">Découpler Performance (P) et Risque (R)</strong>
+                                </label>
+                                <small style="display: block; color: var(--gris-moyen); margin-top: 8px; margin-left: 28px; font-size: 0.85rem; line-height: 1.5;">
+                                    <strong>P (notation)</strong> : Utilise la méthode ci-dessous pour calculer la note finale.<br>
+                                    <strong>R (dépistage)</strong> : Toujours basé sur les N dernières productions pour détecter les tendances.<br>
+                                    <em>Recommandé avec «N meilleurs» pour valoriser le progrès tout en détectant les décrochages.</em>
+                                </small>
                             </div>
                             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                                 <div class="groupe-form">
@@ -8176,6 +8548,69 @@ Exemple :
                                 </div>
                                 <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
                                     Valeur basse = détection précoce | Valeur élevée = détection plus fiable
+                                </small>
+                            </div>
+
+                            <!-- Seuils avancés pour la détection -->
+                            <h4 style="margin: 20px 0 15px 0; color: var(--bleu-principal); font-size: 0.95rem;">Seuils de détection avancés</h4>
+
+                            <!-- Seuil progression -->
+                            <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
+                                <label for="v2-seuil-progression" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                    Progression des artefacts
+                                    <span id="v2-valeur-progression" style="margin-left: 10px; color: var(--bleu-principal);">10 points (%)</span>
+                                </label>
+                                <input type="range" id="v2-seuil-progression" class="controle-form"
+                                       min="0.05" max="0.20" step="0.01" value="0.10"
+                                       style="width: 100%; cursor: pointer;"
+                                       oninput="mettreAJourAffichageSeuilV2('progression', this.value)"
+                                       onchange="sauvegarderSeuilsV2()">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen); margin-top: 5px;">
+                                    <span>5 points (sensible)</span>
+                                    <span>20 points (moins sensible)</span>
+                                </div>
+                                <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
+                                    Différence minimale pour considérer une progression (↗) ou régression (↘).
+                                </small>
+                            </div>
+
+                            <!-- Direction du risque -->
+                            <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
+                                <label for="v2-seuil-risque" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                    Direction du risque
+                                    <span id="v2-valeur-risque" style="margin-left: 10px; color: var(--bleu-principal);">5 points (%)</span>
+                                </label>
+                                <input type="range" id="v2-seuil-risque" class="controle-form"
+                                       min="0.03" max="0.15" step="0.01" value="0.05"
+                                       style="width: 100%; cursor: pointer;"
+                                       oninput="mettreAJourAffichageSeuilV2('risque', this.value)"
+                                       onchange="sauvegarderSeuilsV2()">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen); margin-top: 5px;">
+                                    <span>3 points (sensible)</span>
+                                    <span>15 points (moins sensible)</span>
+                                </div>
+                                <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
+                                    Variation minimale pour afficher une tendance du risque (→ ou ←).
+                                </small>
+                            </div>
+
+                            <!-- Défi spécifique -->
+                            <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
+                                <label for="v2-seuil-defi" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                    Seuil de défi spécifique
+                                    <span id="v2-valeur-defi" style="margin-left: 10px; color: var(--bleu-principal);">70%</span>
+                                </label>
+                                <input type="range" id="v2-seuil-defi" class="controle-form"
+                                       min="0.60" max="0.80" step="0.01" value="0.70"
+                                       style="width: 100%; cursor: pointer;"
+                                       oninput="mettreAJourAffichageSeuilV2('defi', this.value)"
+                                       onchange="sauvegarderSeuilsV2()">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen); margin-top: 5px;">
+                                    <span>60% (plus exigeant)</span>
+                                    <span>80% (moins exigeant)</span>
+                                </div>
+                                <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
+                                    Score sous lequel un critère est identifié comme défi nécessitant attention.
                                 </small>
                             </div>
 

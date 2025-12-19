@@ -158,6 +158,12 @@
             portfolioSelection.value = portfolio.methodeSelection || 'meilleurs';
         }
 
+        // Découpler P et R
+        const decouplerPR = document.getElementById('v2-decoupler-pr');
+        if (decouplerPR) {
+            decouplerPR.checked = portfolio.decouplerPR || false;
+        }
+
         const portfolioNombre = document.getElementById('v2-portfolio-nombre');
         if (portfolioNombre) {
             portfolioNombre.value = portfolio.nombreARetenir || 5;
@@ -323,6 +329,7 @@
             modalites.portfolio.nombreARetenir = parseInt(document.getElementById('v2-portfolio-nombre')?.value) || 5;
             modalites.portfolio.minimumCompletion = parseInt(document.getElementById('v2-portfolio-minimum')?.value) || 7;
             modalites.portfolio.nombreTotal = parseInt(document.getElementById('v2-portfolio-total')?.value) || 10;
+            modalites.portfolio.decouplerPR = document.getElementById('v2-decoupler-pr')?.checked || false;
         }
 
         // Standards
