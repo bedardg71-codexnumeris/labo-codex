@@ -352,8 +352,9 @@ async function sauvegarderProduction() {
         return;
     }
 
-    if (!dateEcheance) {
-        alert('La date d\'échéance est obligatoire pour toutes les productions');
+    // Les portfolios conteneurs n'ont pas d'échéance - seuls les artefacts individuels en ont
+    if (!dateEcheance && type !== 'portfolio') {
+        alert('La date d\'échéance est obligatoire pour les productions (sauf portfolios conteneurs)');
         return;
     }
 
@@ -693,6 +694,8 @@ function gererChangementTypeProduction() {
     const champGrilleSeparee = document.getElementById('champGrilleSeparee');
     const champGrilleInline = document.getElementById('champGrilleInline');
     const msgPonderation = document.getElementById('msgPonderationArtefact');
+    const champDateEcheance = document.getElementById('champDateEcheance');
+    const msgPortfolioSansEcheance = document.getElementById('msgPortfolioSansEcheance');
 
     // Réinitialiser tout d'abord
     if (champsPortfolio) champsPortfolio.style.display = 'none';
@@ -700,12 +703,17 @@ function gererChangementTypeProduction() {
     if (champGrilleSeparee) champGrilleSeparee.style.display = 'block';
     if (champGrilleInline) champGrilleInline.style.display = 'none';
     if (msgPonderation) msgPonderation.style.display = 'none';
+    if (champDateEcheance) champDateEcheance.style.display = 'grid';
+    if (msgPortfolioSansEcheance) msgPortfolioSansEcheance.style.display = 'none';
 
     // Appliquer selon le type
     if (type === 'portfolio') {
-        // Portfolio conteneur : afficher config, masquer grille
+        // Portfolio conteneur : afficher config, masquer grille et échéance
         if (champsPortfolio) champsPortfolio.style.display = 'block';
         if (champGrilleSeparee) champGrilleSeparee.style.display = 'none';
+        // Les portfolios conteneurs n'ont pas d'échéance - seuls les artefacts en ont
+        if (champDateEcheance) champDateEcheance.style.display = 'none';
+        if (msgPortfolioSansEcheance) msgPortfolioSansEcheance.style.display = 'block';
     } else if (type === 'artefact-portfolio') {
         // Artefact individuel : masquer pondération, afficher grille inline, afficher message
         if (champPonderation) champPonderation.style.display = 'none';
