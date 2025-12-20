@@ -718,6 +718,147 @@ function populerDropdownTrimestreV2() {
     });
 
     console.log('[Trimestre V2] Dropdown peuplé avec', trimestres.length, 'trimestre(s)');
+
+    // Mettre à jour aussi la liste de gestion des trimestres
+    afficherListeTrimestreGestion();
+}
+
+/**
+ * Affiche la liste des trimestres avec boutons de gestion (archiver, exporter, etc.)
+ */
+function afficherListeTrimestreGestion() {
+    const container = document.getElementById('listeTrimestreGestion');
+    if (!container) return;
+
+    const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
+    const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
+
+    if (trimestres.length === 0) {
+        container.innerHTML = '<p class="text-muted">Aucun trimestre configuré.</p>';
+        return;
+    }
+
+    container.innerHTML = trimestres.map(t => {
+        const estActif = trimestreActif && t.id === trimestreActif.id;
+        const estArchive = t.archive === true;
+
+        // Badge d'état
+        let badge = '';
+        if (estActif) {
+            badge = '<span style="background: var(--vert-positif); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 10px;">Actif</span>';
+        } else if (estArchive) {
+            badge = '<span style="background: var(--gris-moyen); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 10px;">Archivé</span>';
+        }
+
+        // Statistiques si archivé
+        let statsInfo = '';
+        if (estArchive && t.statistiquesFinales) {
+            const stats = t.statistiquesFinales;
+            statsInfo = `<div style="font-size: 0.8rem; color: var(--gris-moyen); margin-top: 5px;">
+                ${stats.nbEtudiants || 0} étudiant(s) • Engagement moyen: ${stats.moyenneEngagement || 0}%
+                ${t.dateFin ? ` • Archivé le ${t.dateFin}` : ''}
+            </div>`;
+        }
+
+        // Boutons d'action
+        let boutons = '';
+        if (estActif) {
+            // Le trimestre actif ne peut pas être archivé
+            boutons = `<button class="btn btn-secondaire btn-sm" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
+                Exporter
+            </button>`;
+        } else if (estArchive) {
+            // Trimestre archivé : exporter ou désarchiver
+            boutons = `
+                <button class="btn btn-secondaire btn-sm" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
+                    Exporter
+                </button>
+                <button class="btn btn-secondaire btn-sm" onclick="confirmerDesarchivage('${t.id}')" title="Désarchiver pour permettre les modifications">
+                    Désarchiver
+                </button>`;
+        } else {
+            // Trimestre inactif : peut être archivé ou activé
+            boutons = `
+                <button class="btn btn-principal btn-sm" onclick="changerTrimestreActifV2('${t.id}')" title="Activer ce trimestre">
+                    Activer
+                </button>
+                <button class="btn btn-secondaire btn-sm" onclick="confirmerArchivage('${t.id}')" title="Archiver ce trimestre (lecture seule)">
+                    Archiver
+                </button>
+                <button class="btn btn-secondaire btn-sm" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
+                    Exporter
+                </button>`;
+        }
+
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${estArchive ? 'var(--gris-pale)' : 'var(--bleu-tres-pale)'}; border-radius: 8px; border-left: 4px solid ${estActif ? 'var(--vert-positif)' : (estArchive ? 'var(--gris-moyen)' : 'var(--bleu-principal)')};">
+                <div>
+                    <strong>${t.nom}</strong>${badge}
+                    ${statsInfo}
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    ${boutons}
+                </div>
+            </div>`;
+    }).join('');
+}
+
+/**
+ * Confirme et archive un trimestre
+ */
+function confirmerArchivage(id) {
+    const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
+    const trimestre = trimestres.find(t => t.id === id);
+
+    if (!trimestre) {
+        alert('Trimestre non trouvé');
+        return;
+    }
+
+    const confirme = confirm(
+        `Archiver le trimestre "${trimestre.nom}" ?\n\n` +
+        `Un trimestre archivé passe en lecture seule et ne peut plus être modifié.\n` +
+        `Un export automatique sera généré.\n\n` +
+        `Cette action est réversible via le bouton "Désarchiver".`
+    );
+
+    if (confirme) {
+        const result = archiverTrimestre(id);
+        if (result.success) {
+            alert(`Trimestre "${trimestre.nom}" archivé avec succès.\n\nUn fichier d'export a été téléchargé.`);
+            afficherListeTrimestreGestion();
+        } else {
+            alert(`Erreur: ${result.error}`);
+        }
+    }
+}
+
+/**
+ * Confirme et désarchive un trimestre
+ */
+function confirmerDesarchivage(id) {
+    const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
+    const trimestre = trimestres.find(t => t.id === id);
+
+    if (!trimestre) {
+        alert('Trimestre non trouvé');
+        return;
+    }
+
+    const confirme = confirm(
+        `Désarchiver le trimestre "${trimestre.nom}" ?\n\n` +
+        `Cela permettra de modifier à nouveau les données de ce trimestre.`
+    );
+
+    if (confirme) {
+        const result = desarchiverTrimestre(id);
+        if (result.success) {
+            alert(`Trimestre "${trimestre.nom}" désarchivé.`);
+            afficherListeTrimestreGestion();
+        } else {
+            alert(`Erreur: ${result.error}`);
+        }
+    }
 }
 
 /**
@@ -1717,6 +1858,9 @@ window.retournerVueV2 = retournerVueV2;
 window.populerDropdownTrimestreV2 = populerDropdownTrimestreV2;
 window.changerTrimestreActifV2 = changerTrimestreActifV2;
 window.ouvrirModalNouveauTrimestre = ouvrirModalNouveauTrimestre;
+window.afficherListeTrimestreGestion = afficherListeTrimestreGestion;
+window.confirmerArchivage = confirmerArchivage;
+window.confirmerDesarchivage = confirmerDesarchivage;
 window.chargerDropdownCoursV2 = chargerDropdownCoursV2;
 window.changerCoursSelectionneV2 = changerCoursSelectionneV2;
 window.afficherDetailsCoursV2 = afficherDetailsCoursV2;

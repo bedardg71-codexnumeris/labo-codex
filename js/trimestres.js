@@ -178,6 +178,235 @@
     }
 
     /* ===============================
+       ARCHIVAGE DES TRIMESTRES
+       =============================== */
+
+    /**
+     * Archive un trimestre (fin de session)
+     *
+     * Un trimestre archivé est en lecture seule et ne peut plus être modifié
+     * sans désarchivage explicite.
+     *
+     * @param {string} id - ID du trimestre à archiver (ex: 'a2025')
+     * @returns {Object} Résultat de l'archivage
+     */
+    function archiverTrimestre(id) {
+        const trimestres = obtenirTrimestres();
+        const trimestre = trimestres.find(t => t.id === id);
+
+        if (!trimestre) {
+            console.error(`[Trimestres] Trimestre non trouvé: ${id}`);
+            return { success: false, error: 'Trimestre non trouvé' };
+        }
+
+        if (trimestre.archive) {
+            console.warn(`[Trimestres] Trimestre déjà archivé: ${id}`);
+            return { success: false, error: 'Trimestre déjà archivé' };
+        }
+
+        if (trimestre.actif) {
+            console.error(`[Trimestres] Impossible d'archiver le trimestre actif`);
+            return { success: false, error: 'Impossible d\'archiver le trimestre actif. Changez de trimestre d\'abord.' };
+        }
+
+        // Calculer les statistiques finales
+        const stats = calculerStatistiquesFinales(id);
+
+        // Marquer comme archivé
+        trimestre.archive = true;
+        trimestre.dateFin = new Date().toISOString().split('T')[0];
+        trimestre.statistiquesFinales = stats;
+
+        db.setSync('trimestres', trimestres);
+
+        console.log(`[Trimestres] Trimestre archivé: ${trimestre.nom}`);
+
+        // Générer export automatique
+        const exportResult = exporterTrimestreArchive(id);
+
+        return {
+            success: true,
+            trimestre: trimestre,
+            statistiques: stats,
+            exportGenere: exportResult.success
+        };
+    }
+
+    /**
+     * Désarchive un trimestre (permet modifications à nouveau)
+     *
+     * @param {string} id - ID du trimestre à désarchiver
+     * @returns {Object} Résultat du désarchivage
+     */
+    function desarchiverTrimestre(id) {
+        const trimestres = obtenirTrimestres();
+        const trimestre = trimestres.find(t => t.id === id);
+
+        if (!trimestre) {
+            console.error(`[Trimestres] Trimestre non trouvé: ${id}`);
+            return { success: false, error: 'Trimestre non trouvé' };
+        }
+
+        if (!trimestre.archive) {
+            console.warn(`[Trimestres] Trimestre pas archivé: ${id}`);
+            return { success: false, error: 'Trimestre non archivé' };
+        }
+
+        // Retirer le flag archivé
+        trimestre.archive = false;
+        delete trimestre.dateFin;
+        // Conserver statistiquesFinales comme référence historique
+
+        db.setSync('trimestres', trimestres);
+
+        console.log(`[Trimestres] Trimestre désarchivé: ${trimestre.nom}`);
+
+        return { success: true, trimestre: trimestre };
+    }
+
+    /**
+     * Vérifie si le trimestre actif est archivé (mode lecture seule)
+     * @returns {boolean} true si le trimestre actif est archivé
+     */
+    function estTrimestreArchive() {
+        const actif = obtenirTrimestreActif();
+        return actif ? actif.archive === true : false;
+    }
+
+    /**
+     * Calcule les statistiques finales d'un trimestre pour l'archivage
+     *
+     * @param {string} trimestreId - ID du trimestre
+     * @returns {Object} Statistiques calculées
+     */
+    function calculerStatistiquesFinales(trimestreId) {
+        try {
+            // Obtenir les cours liés à ce trimestre
+            const listeCours = db.getSync('listeCours', []);
+            const coursTrimestr = listeCours.filter(c => c.trimestreId === trimestreId);
+
+            if (coursTrimestr.length === 0) {
+                return { nbEtudiants: 0, nbCours: 0, message: 'Aucun cours trouvé' };
+            }
+
+            // Statistiques globales
+            const etudiants = db.getSync('groupeEtudiants', []);
+            const etudiantsActifs = etudiants.filter(e =>
+                e.statut !== 'abandon' && e.statut !== 'décrochage'
+            );
+
+            // Indices d'engagement
+            const indicesCP = db.getSync('indicesCP', {});
+            let totalEngagement = 0;
+            let nbAvecIndices = 0;
+
+            etudiantsActifs.forEach(e => {
+                const indices = indicesCP[e.da];
+                if (indices && indices.actuel) {
+                    const pan = indices.actuel.PAN || indices.actuel.SOM || {};
+                    const a = pan.A || 0;
+                    const c = pan.C || 0;
+                    const p = pan.P || 0;
+                    const engagement = (a * c * p) / 10000; // Normaliser
+                    totalEngagement += engagement;
+                    nbAvecIndices++;
+                }
+            });
+
+            const moyenneEngagement = nbAvecIndices > 0
+                ? Math.round((totalEngagement / nbAvecIndices) * 100)
+                : 0;
+
+            return {
+                nbEtudiants: etudiantsActifs.length,
+                nbCours: coursTrimestr.length,
+                moyenneEngagement: moyenneEngagement,
+                dateCalcul: new Date().toISOString().split('T')[0]
+            };
+        } catch (error) {
+            console.error('[Trimestres] Erreur calcul statistiques:', error);
+            return { error: error.message };
+        }
+    }
+
+    /**
+     * Exporte les données complètes d'un trimestre archivé
+     *
+     * @param {string} id - ID du trimestre à exporter
+     * @returns {Object} Résultat de l'export
+     */
+    function exporterTrimestreArchive(id) {
+        const trimestres = obtenirTrimestres();
+        const trimestre = trimestres.find(t => t.id === id);
+
+        if (!trimestre) {
+            return { success: false, error: 'Trimestre non trouvé' };
+        }
+
+        try {
+            // Collecter toutes les données du trimestre
+            const exportData = {
+                meta: {
+                    type: 'archive-trimestre',
+                    trimestreId: id,
+                    trimestreNom: trimestre.nom,
+                    dateExport: new Date().toISOString(),
+                    version: 'Beta 95'
+                },
+                trimestre: trimestre,
+                donnees: {}
+            };
+
+            // Données namespacées du trimestre
+            CLES_NAMESPACEES.forEach(nomCle => {
+                const cleComplete = `${id}_${nomCle}`;
+                const valeur = db.getSync(cleComplete, null);
+                if (valeur !== null) {
+                    exportData.donnees[nomCle] = valeur;
+                }
+            });
+
+            // Cours liés au trimestre
+            const listeCours = db.getSync('listeCours', []);
+            exportData.donnees.cours = listeCours.filter(c => c.trimestreId === id);
+
+            // Étudiants, évaluations, présences liés aux cours du trimestre
+            const coursIds = exportData.donnees.cours.map(c => c.id);
+
+            const etudiants = db.getSync('groupeEtudiants', []);
+            exportData.donnees.etudiants = etudiants.filter(e => coursIds.includes(e.coursId));
+
+            const evaluations = db.getSync('evaluationsSauvegardees', []);
+            exportData.donnees.evaluations = evaluations.filter(e => coursIds.includes(e.coursId));
+
+            const presences = db.getSync('presences', []);
+            exportData.donnees.presences = presences.filter(p => coursIds.includes(p.coursId));
+
+            const snapshots = db.getSync('snapshots', { hebdomadaires: [], interventions: [] });
+            exportData.donnees.snapshots = snapshots;
+
+            // Déclencher le téléchargement
+            const nomFichier = `trimestre-${id}-archive-${new Date().toISOString().split('T')[0]}.json`;
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nomFichier;
+            a.click();
+
+            URL.revokeObjectURL(url);
+
+            console.log(`[Trimestres] Export généré: ${nomFichier}`);
+            return { success: true, nomFichier: nomFichier };
+
+        } catch (error) {
+            console.error('[Trimestres] Erreur export:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /* ===============================
        MIGRATION DES DONNÉES EXISTANTES
        =============================== */
 
@@ -341,6 +570,13 @@
     window.forcerMigration = forcerMigration;
     window.migrerVersMultiTrimestres = migrerVersMultiTrimestres;
     window.initialiserModuleTrimestres = initialiserModuleTrimestres;
+
+    // Fonctions d'archivage
+    window.archiverTrimestre = archiverTrimestre;
+    window.desarchiverTrimestre = desarchiverTrimestre;
+    window.estTrimestreArchive = estTrimestreArchive;
+    window.exporterTrimestreArchive = exporterTrimestreArchive;
+    window.calculerStatistiquesFinales = calculerStatistiquesFinales;
 
     // Constantes exportées pour debug
     window.CLES_NAMESPACEES = CLES_NAMESPACEES;
