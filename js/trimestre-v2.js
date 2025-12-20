@@ -40,6 +40,11 @@ function initialiserTrimestreV2() {
     // Populer le dropdown trimestre (pour l'instant, un seul trimestre)
     populerDropdownTrimestreV2();
 
+    // Restaurer l'état des accordéons (ouvert/fermé) depuis localStorage
+    if (typeof restaurerEtatAccordeons === 'function') {
+        restaurerEtatAccordeons();
+    }
+
     console.log('[Trimestre V2] Initialisation terminée');
 }
 
@@ -51,7 +56,7 @@ function initialiserTrimestreV2() {
  * Charge les données du cadre calendrier dans les champs v2-
  */
 function chargerCadreCalendrierV2() {
-    const cadre = db.getSync('cadreCalendrier', null);
+    const cadre = db.getSync(cle('cadreCalendrier'), null);
     if (!cadre) return;
 
     // Mapping des IDs v2 vers les clés du cadre
@@ -74,7 +79,7 @@ function chargerCadreCalendrierV2() {
     }
 
     // Vérifier si le calendrier existe, sinon le générer
-    const calendrier = db.getSync('calendrierComplet', null);
+    const calendrier = db.getSync(cle('calendrierComplet'), null);
     if (!calendrier && cadre.dateDebut && cadre.finCours && cadre.finTrimestre) {
         if (typeof genererCalendrierComplet === 'function') {
             genererCalendrierComplet();
@@ -109,7 +114,7 @@ function sauvegarderCadreCalendrierV2() {
         return;
     }
 
-    db.setSync('cadreCalendrier', cadre);
+    db.setSync(cle('cadreCalendrier'), cadre);
 
     // Régénérer le calendrier complet
     if (typeof genererCalendrierComplet === 'function') {
@@ -152,12 +157,12 @@ function reinitialiserBornesTrimestreV2() {
     });
 
     // Mettre à jour le storage
-    let cadre = db.getSync('cadreCalendrier') || {};
+    let cadre = db.getSync(cle('cadreCalendrier')) || {};
     cadre.dateDebut = '';
     cadre.finCours = '';
     cadre.finTrimestre = '';
     cadre.remiseNotes = '';
-    db.setSync('cadreCalendrier', cadre);
+    db.setSync(cle('cadreCalendrier'), cadre);
 
     // Réinitialiser les statistiques
     const elemSemaines = document.getElementById('v2-nombreSemaines');
@@ -196,12 +201,12 @@ function reinitialiserSemainesSpecialesV2() {
     });
 
     // Mettre à jour le storage
-    let cadre = db.getSync('cadreCalendrier') || {};
+    let cadre = db.getSync(cle('cadreCalendrier')) || {};
     cadre.semainePlanificationDebut = '';
     cadre.semainePlanificationFin = '';
     cadre.semaineExamensDebut = '';
     cadre.semaineExamensFin = '';
-    db.setSync('cadreCalendrier', cadre);
+    db.setSync(cle('cadreCalendrier'), cadre);
 
     // Notification
     if (typeof afficherNotification === 'function') {
@@ -213,20 +218,17 @@ function reinitialiserSemainesSpecialesV2() {
  * Affiche les statistiques du trimestre dans les spans v2-
  */
 function afficherStatistiquesTrimestreV2() {
-    // Lire directement depuis localStorage pour éviter les problèmes de cache
+    // Lire depuis db avec clé namespacée
     let calendrier = null;
     try {
-        const raw = localStorage.getItem('calendrierComplet');
-        if (raw) {
-            calendrier = JSON.parse(raw);
-        }
+        calendrier = db.getSync(cle('calendrierComplet'), null);
     } catch (e) {
         console.error('[Trimestre V2] Erreur lecture calendrier:', e);
     }
 
     const elemSemaines = document.getElementById('v2-nombreSemaines');
     const elemJours = document.getElementById('v2-nombreJoursCours');
-    const elemConges = document.getElementById('v2-totalConges');
+    const elemCongesReprises = document.getElementById('v2-statsCongesReprises');
 
     console.log('[Trimestre V2] Calendrier lu:', calendrier ? Object.keys(calendrier).length + ' jours' : 'null');
 
@@ -235,27 +237,52 @@ function afficherStatistiquesTrimestreV2() {
         console.log('[Trimestre V2] Calendrier non disponible ou vide');
         if (elemSemaines) elemSemaines.textContent = '0';
         if (elemJours) elemJours.textContent = '0';
-        if (elemConges) elemConges.textContent = '0';
+        if (elemCongesReprises) elemCongesReprises.textContent = '';
         return;
     }
 
-    // Compter les jours de cours et congés (la propriété est 'statut', pas 'type')
+    // Compter les jours de cours, congés et reprises
     let joursCours = 0;
     let conges = 0;
+    let reprises = 0;
 
     Object.values(calendrier).forEach(jour => {
-        if (jour.statut === 'cours' || jour.statut === 'reprise') joursCours++;
+        if (jour.statut === 'cours') joursCours++;
+        if (jour.statut === 'reprise') {
+            joursCours++;  // Les reprises comptent comme jours de cours
+            reprises++;
+        }
         if (jour.statut === 'conge') conges++;
     });
+
+    // Total jours de cours = cours normaux + reprises
+    // Les congés sont déjà exclus (statut différent de 'cours')
 
     // Calculer les semaines (approximation : 5 jours = 1 semaine)
     const semaines = Math.ceil(joursCours / 5);
 
-    console.log(`[Trimestre V2] Stats: ${semaines} semaines, ${joursCours} jours, ${conges} congés`);
+    console.log(`[Trimestre V2] Stats: ${semaines} semaines, ${joursCours} jours, ${conges} congés, ${reprises} reprises`);
 
     if (elemSemaines) elemSemaines.textContent = semaines;
     if (elemJours) elemJours.textContent = joursCours;
-    if (elemConges) elemConges.textContent = conges;
+
+    // Générer le texte contextuel pour congés/reprises
+    if (elemCongesReprises) {
+        let texte = '';
+        if (conges === 0 && reprises === 0) {
+            texte = '(aucun congé)';
+        } else if (reprises > 0 && conges > 0) {
+            // Ex: "(incluant 2 reprises pour 2 congés)"
+            const congeText = conges === 1 ? 'congé' : 'congés';
+            const repriseText = reprises === 1 ? 'reprise' : 'reprises';
+            texte = `(incluant ${reprises} ${repriseText} pour ${conges} ${congeText})`;
+        } else if (conges > 0 && reprises === 0) {
+            texte = `(${conges} congé${conges > 1 ? 's' : ''} non repris)`;
+        } else if (reprises > 0 && conges === 0) {
+            texte = `(${reprises} reprise${reprises > 1 ? 's' : ''})`;
+        }
+        elemCongesReprises.textContent = texte;
+    }
 }
 
 /* ===============================
@@ -266,7 +293,7 @@ function afficherStatistiquesTrimestreV2() {
  * Charge et affiche les événements prévus
  */
 function chargerEvenementsPrevusV2() {
-    const evenements = db.getSync('evenementsPrevus', []);
+    const evenements = db.getSync(cle('evenementsPrevus'), []);
     const conteneur = document.getElementById('v2-congesPrevusContainer');
     const compteur = document.getElementById('v2-nombreEvenementsPrevus');
 
@@ -292,7 +319,7 @@ function chargerEvenementsPrevusV2() {
  * Charge et affiche les événements imprévus
  */
 function chargerEvenementsImprevusV2() {
-    const evenements = db.getSync('evenementsImprevus', []);
+    const evenements = db.getSync(cle('evenementsImprevus'), []);
     const conteneur = document.getElementById('v2-congesImprevusContainer');
     const compteur = document.getElementById('v2-nombreEvenementsImprevus');
 
@@ -457,7 +484,7 @@ function modifierEvenementV2(id, type) {
             if (btn) btn.textContent = 'Sauvegarder';
 
             form.style.display = 'block';
-            form.scrollIntoView({ behavior: 'smooth' });
+            // Ne pas faire défiler la page
         }
     } else {
         evenementImprevuEnEditionV2 = id;
@@ -475,7 +502,7 @@ function modifierEvenementV2(id, type) {
             if (btn) btn.textContent = 'Sauvegarder';
 
             form.style.display = 'block';
-            form.scrollIntoView({ behavior: 'smooth' });
+            // Ne pas faire défiler la page
         }
     }
 }
@@ -499,7 +526,7 @@ function confirmerEvenementPrevuV2() {
         return;
     }
 
-    const evenements = db.getSync('evenementsPrevus', []);
+    const evenements = db.getSync(cle('evenementsPrevus'), []);
 
     if (evenementPrevuEnEditionV2) {
         // Mode édition
@@ -524,7 +551,7 @@ function confirmerEvenementPrevuV2() {
         });
     }
 
-    db.setSync('evenementsPrevus', evenements);
+    db.setSync(cle('evenementsPrevus'), evenements);
 
     // Régénérer le calendrier
     if (typeof genererCalendrierComplet === 'function') {
@@ -572,7 +599,7 @@ function confirmerEvenementImprevuV2() {
         return;
     }
 
-    const evenements = db.getSync('evenementsImprevus', []);
+    const evenements = db.getSync(cle('evenementsImprevus'), []);
 
     if (evenementImprevuEnEditionV2) {
         // Mode édition
@@ -597,7 +624,7 @@ function confirmerEvenementImprevuV2() {
         });
     }
 
-    db.setSync('evenementsImprevus', evenements);
+    db.setSync(cle('evenementsImprevus'), evenements);
 
     // Régénérer le calendrier
     if (typeof genererCalendrierComplet === 'function') {
@@ -650,6 +677,9 @@ function supprimerEvenementV2(id, type) {
         chargerEvenementsImprevusV2();
     }
 
+    // Mettre à jour les statistiques du trimestre
+    afficherStatistiquesTrimestreV2();
+
     if (typeof afficherNotification === 'function') {
         afficherNotification('Événement supprimé');
     }
@@ -660,31 +690,56 @@ function supprimerEvenementV2(id, type) {
    =============================== */
 
 /**
- * Popule le dropdown de sélection du trimestre
+ * Popule le dropdown de sélection du trimestre depuis le registre
  */
 function populerDropdownTrimestreV2() {
     const select = document.getElementById('selectTrimestreActif');
     if (!select) return;
 
-    // Récupérer les infos du cours actif pour déterminer le trimestre
-    const coursActif = db.getSync('infoCours', null);
+    // Lire le registre des trimestres (de trimestres.js)
+    const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
+    const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
 
-    let nomTrimestre = 'Trimestre actuel';
-    if (coursActif && coursActif.session && coursActif.annee) {
-        const sessions = { 'A': 'Automne', 'H': 'Hiver', 'E': 'Été' };
-        nomTrimestre = `${sessions[coursActif.session] || coursActif.session} ${coursActif.annee}`;
+    select.innerHTML = '';
+
+    if (trimestres.length === 0) {
+        // Aucun trimestre dans le registre - afficher un placeholder
+        select.innerHTML = '<option value="">Aucun trimestre configuré</option>';
+        return;
     }
 
-    select.innerHTML = `<option value="actuel" selected>${nomTrimestre}</option>`;
+    // Ajouter chaque trimestre du registre
+    trimestres.forEach(t => {
+        const option = document.createElement('option');
+        option.value = t.id;
+        option.textContent = t.nom;
+        option.selected = (trimestreActif && t.id === trimestreActif.id);
+        select.appendChild(option);
+    });
+
+    console.log('[Trimestre V2] Dropdown peuplé avec', trimestres.length, 'trimestre(s)');
 }
 
 /**
- * Change le trimestre actif
+ * Change le trimestre actif et recharge l'interface
+ * Délègue à la fonction de trimestres.js
  */
-function changerTrimestreActif(valeur) {
+function changerTrimestreActifV2(valeur) {
     console.log('[Trimestre V2] Changement trimestre:', valeur);
-    // Pour l'instant, un seul trimestre supporté
-    // Cette fonction sera étendue quand le multi-trimestre sera implémenté
+
+    // Appeler la fonction de trimestres.js
+    if (typeof window.changerTrimestreActif === 'function') {
+        const success = window.changerTrimestreActif(valeur);
+        if (success) {
+            // Recharger l'interface
+            chargerCadreCalendrierV2();
+            chargerEvenementsPrevusV2();
+            chargerEvenementsImprevusV2();
+            afficherStatistiquesTrimestreV2();
+        }
+    } else {
+        console.error('[Trimestre V2] Fonction changerTrimestreActif non disponible');
+    }
 }
 
 /**
@@ -1388,7 +1443,7 @@ function chargerSeancesV2() {
     const conteneur = document.getElementById('v2-seancesContainer');
     if (!conteneur) return;
 
-    const horaire = db.getSync('horaireHebdo', []);
+    const horaire = db.getSync(cle('horaireHebdo'), []);
 
     if (horaire.length === 0) {
         conteneur.innerHTML = '<p class="text-muted text-italic">Aucune séance configurée. Cliquez sur « + Ajouter une séance » pour commencer.</p>';
@@ -1467,7 +1522,7 @@ function afficherFormSeanceV2() {
  * Modifie une séance existante
  */
 function modifierSeanceV2(index) {
-    const horaire = db.getSync('horaireHebdo', []);
+    const horaire = db.getSync(cle('horaireHebdo'), []);
     const seance = horaire[index];
 
     if (!seance) {
@@ -1543,7 +1598,7 @@ function confirmerSeanceV2() {
         local: local
     };
 
-    let horaire = db.getSync('horaireHebdo', []);
+    let horaire = db.getSync(cle('horaireHebdo'), []);
 
     if (seanceEnEditionV2 !== null) {
         // Modification
@@ -1562,7 +1617,7 @@ function confirmerSeanceV2() {
         return (a.heureDebut || '').localeCompare(b.heureDebut || '');
     });
 
-    db.setSync('horaireHebdo', horaire);
+    db.setSync(cle('horaireHebdo'), horaire);
 
     // Notifier
     if (typeof afficherNotificationSucces === 'function') {
@@ -1585,9 +1640,9 @@ function confirmerSeanceV2() {
 function supprimerSeanceV2(index) {
     if (!confirm('Supprimer cette séance ?')) return;
 
-    let horaire = db.getSync('horaireHebdo', []);
+    let horaire = db.getSync(cle('horaireHebdo'), []);
     horaire.splice(index, 1);
-    db.setSync('horaireHebdo', horaire);
+    db.setSync(cle('horaireHebdo'), horaire);
 
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Séance supprimée');
@@ -1660,7 +1715,7 @@ window.confirmerEvenementImprevuV2 = confirmerEvenementImprevuV2;
 window.annulerFormEvenementImprevuV2 = annulerFormEvenementImprevuV2;
 window.retournerVueV2 = retournerVueV2;
 window.populerDropdownTrimestreV2 = populerDropdownTrimestreV2;
-window.changerTrimestreActif = changerTrimestreActif;
+window.changerTrimestreActifV2 = changerTrimestreActifV2;
 window.ouvrirModalNouveauTrimestre = ouvrirModalNouveauTrimestre;
 window.chargerDropdownCoursV2 = chargerDropdownCoursV2;
 window.changerCoursSelectionneV2 = changerCoursSelectionneV2;

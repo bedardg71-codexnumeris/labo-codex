@@ -91,7 +91,7 @@ function migrerEvenementsAvecIDs() {
     console.log('🔄 Migration des événements : ajout des IDs manquants...');
 
     // Migrer les événements prévus
-    let evenementsPrevus = db.getSync('evenementsPrevus', []);
+    let evenementsPrevus = db.getSync(cle('evenementsPrevus'), []);
     let nbMigres = 0;
 
     evenementsPrevus = evenementsPrevus.map((evt, index) => {
@@ -106,12 +106,12 @@ function migrerEvenementsAvecIDs() {
     });
 
     if (nbMigres > 0) {
-        db.setSync('evenementsPrevus', evenementsPrevus);
+        db.setSync(cle('evenementsPrevus'), evenementsPrevus);
         console.log(`✅ ${nbMigres} événement(s) prévu(s) migré(s)`);
     }
 
     // Migrer les événements imprévus
-    let evenementsImprevus = db.getSync('evenementsImprevus', []);
+    let evenementsImprevus = db.getSync(cle('evenementsImprevus'), []);
     nbMigres = 0;
 
     evenementsImprevus = evenementsImprevus.map((evt, index) => {
@@ -126,7 +126,7 @@ function migrerEvenementsAvecIDs() {
     });
 
     if (nbMigres > 0) {
-        db.setSync('evenementsImprevus', evenementsImprevus);
+        db.setSync(cle('evenementsImprevus'), evenementsImprevus);
         console.log(`✅ ${nbMigres} événement(s) imprévu(s) migré(s)`);
     }
 
@@ -190,7 +190,7 @@ function chargerEtatCheckboxDemo() {
    =============================== */
 
 function chargerCadreCalendrier() {
-    const cadre = db.getSync('cadreCalendrier', null);
+    const cadre = db.getSync(cle('cadreCalendrier'), null);
     if (!cadre) return;
 
     // Remplir les champs du formulaire
@@ -231,7 +231,7 @@ function sauvegarderCadreCalendrier() {
         return;
     }
 
-    db.setSync('cadreCalendrier', cadre);
+    db.setSync(cle('cadreCalendrier'), cadre);
 
     // CRITIQUE: Régénérer le calendrier complet après modification
     genererCalendrierComplet();
@@ -245,7 +245,7 @@ function sauvegarderCadreCalendrier() {
    =============================== */
 
 function chargerEvenementsPrevus() {
-    const evenements = db.getSync('evenementsPrevus', []);
+    const evenements = db.getSync(cle('evenementsPrevus'), []);
     const conteneur = document.getElementById('congesPrevusContainer');
 
     if (!conteneur) return;
@@ -369,7 +369,7 @@ function confirmerAjoutEvenement() {
         return;
     }
 
-    const evenements = db.getSync('evenementsPrevus', []);
+    const evenements = db.getSync(cle('evenementsPrevus'), []);
 
     if (editId) {
         // MODE ÉDITION : Remplacer l'événement existant
@@ -395,7 +395,7 @@ function confirmerAjoutEvenement() {
         });
     }
 
-    db.setSync('evenementsPrevus', evenements);
+    db.setSync(cle('evenementsPrevus'), evenements);
 
     // Régénérer tout
     genererCalendrierComplet();
@@ -519,7 +519,7 @@ function sauvegarderEditionEnPlace(id, type) {
    =============================== */
 
 function chargerEvenementsImprevus() {
-    const evenements = db.getSync('evenementsImprevus', []);
+    const evenements = db.getSync(cle('evenementsImprevus'), []);
     const conteneur = document.getElementById('congesImprevusContainer');
 
     if (!conteneur) return;
@@ -643,7 +643,7 @@ function confirmerAjoutEvenementImprevu() {
     const form = document.getElementById('formEvenementImprevu');
     const editId = form.getAttribute('data-edit-id');
 
-    const evenements = db.getSync('evenementsImprevus', []);
+    const evenements = db.getSync(cle('evenementsImprevus'), []);
 
     if (editId) {
         // MODE ÉDITION : Remplacer l'événement existant
@@ -669,7 +669,7 @@ function confirmerAjoutEvenementImprevu() {
         });
     }
 
-    db.setSync('evenementsImprevus', evenements);
+    db.setSync(cle('evenementsImprevus'), evenements);
 
     // CRITIQUE: Régénérer le calendrier complet
     genererCalendrierComplet();
@@ -697,9 +697,9 @@ function confirmerAjoutEvenementImprevu() {
 function genererCalendrierComplet() {
     console.log('🏭 Génération du calendrier complet (source unique)...');
 
-    const cadre = db.getSync('cadreCalendrier', {});
-    const evenementsPrevus = db.getSync('evenementsPrevus', []);
-    const evenementsImprevus = db.getSync('evenementsImprevus', []);
+    const cadre = db.getSync(cle('cadreCalendrier'), {});
+    const evenementsPrevus = db.getSync(cle('evenementsPrevus'), []);
+    const evenementsImprevus = db.getSync(cle('evenementsImprevus'), []);
 
     // Valeurs par défaut si rien n'est configuré
     const dateDebut = cadre.dateDebut || cadre.debutTrimestre || '2025-08-21';
@@ -818,7 +818,7 @@ function genererCalendrierComplet() {
     }
 
     // STOCKER dans localStorage - LA SOURCE UNIQUE
-    db.setSync('calendrierComplet', calendrier);
+    db.setSync(cle('calendrierComplet'), calendrier);
 
     console.log(`✅ Calendrier complet généré: ${Object.keys(calendrier).length} jours`);
     console.log(`   - ${compteurJoursCours} jours de cours`);
@@ -832,7 +832,7 @@ function genererCalendrierComplet() {
    =============================== */
 
 function afficherStatistiquesTrimestre() {
-    const calendrier = db.getSync('calendrierComplet', {});
+    const calendrier = db.getSync(cle('calendrierComplet'), {});
 
     if (Object.keys(calendrier).length === 0) {
         console.warn('⚠️ Calendrier complet non généré');
@@ -1044,7 +1044,7 @@ function modifierEvenement(id, type) {
  * @returns {Object} Le calendrier complet (dictionnaire date -> infos)
  */
 function obtenirCalendrierComplet() {
-    return db.getSync('calendrierComplet', {});
+    return db.getSync(cle('calendrierComplet'), {});
 }
 
 /**
@@ -1072,7 +1072,7 @@ function obtenirInfosJour(date) {
  */
 function genererPresencesDemo(etudiants) {
     const presences = [];
-    const calendrier = db.getSync('calendrierComplet', {});
+    const calendrier = db.getSync(cle('calendrierComplet'), {});
 
     // Récupérer le nombre d'heures par séance depuis le cours
     const cours = db.getSync('listeCours', []).find(c => c.id === '601-101-h2026-9999');

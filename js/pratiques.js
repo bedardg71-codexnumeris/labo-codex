@@ -4928,6 +4928,7 @@ window.toggleAccordeon = toggleAccordeon;
 
 /**
  * ✅ BETA 95 : Toggle accordéon v2 (structure avec header cliquable)
+ * Sauvegarde l'état dans localStorage pour persistance
  * @param {HTMLElement} headerElement - L'élément .accordeon-header cliqué
  */
 function toggleAccordeonV2(headerElement) {
@@ -4937,10 +4938,75 @@ function toggleAccordeonV2(headerElement) {
         return;
     }
 
-    carte.classList.toggle('ferme');
+    const contenu = carte.querySelector('.accordeon-contenu');
+    const chevron = carte.querySelector('.accordeon-chevron');
+
+    if (!contenu) return;
+
+    const estOuvert = contenu.style.display !== 'none';
+
+    // Toggle l'affichage
+    contenu.style.display = estOuvert ? 'none' : 'block';
+
+    // Toggle le chevron
+    if (chevron) {
+        chevron.textContent = estOuvert ? '▶' : '▼';
+    }
+
+    // Sauvegarder l'état si l'accordéon a un ID
+    if (carte.id) {
+        sauvegarderEtatAccordeons();
+    }
+}
+
+/**
+ * Sauvegarde l'état de tous les accordéons dans localStorage
+ */
+function sauvegarderEtatAccordeons() {
+    const accordeons = document.querySelectorAll('.carte.accordeon[id]');
+    const etats = {};
+
+    accordeons.forEach(accordeon => {
+        const contenu = accordeon.querySelector('.accordeon-contenu');
+        if (contenu && accordeon.id) {
+            etats[accordeon.id] = contenu.style.display !== 'none';
+        }
+    });
+
+    localStorage.setItem('etatsAccordeonsV2', JSON.stringify(etats));
+}
+
+/**
+ * Restaure l'état des accordéons depuis localStorage
+ */
+function restaurerEtatAccordeons() {
+    let etats = {};
+    try {
+        etats = JSON.parse(localStorage.getItem('etatsAccordeonsV2')) || {};
+    } catch (e) {
+        etats = {};
+    }
+
+    const accordeons = document.querySelectorAll('.carte.accordeon[id]');
+
+    accordeons.forEach(accordeon => {
+        const contenu = accordeon.querySelector('.accordeon-contenu');
+        const chevron = accordeon.querySelector('.accordeon-chevron');
+
+        if (!contenu) return;
+
+        // Si on a un état sauvegardé, l'utiliser, sinon fermer par défaut
+        const estOuvert = etats[accordeon.id] === true;
+
+        contenu.style.display = estOuvert ? 'block' : 'none';
+        if (chevron) {
+            chevron.textContent = estOuvert ? '▼' : '▶';
+        }
+    });
 }
 
 window.toggleAccordeonV2 = toggleAccordeonV2;
+window.restaurerEtatAccordeons = restaurerEtatAccordeons;
 
 /* ===============================
    RÈGLES DE CONFORMITÉ

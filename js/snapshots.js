@@ -1033,7 +1033,7 @@ function confirmerNettoyageSnapshots() {
  * Fonction utilitaire pour obtenir le numéro de semaine actuelle
  */
 function obtenirNumeroSemaineActuelle() {
-    const calendrier = db.getSync('calendrierComplet', {});
+    const calendrier = db.getSync(cle('calendrierComplet'), {});
     if (!calendrier || Object.keys(calendrier).length === 0) {
         return null;
     }

@@ -351,10 +351,10 @@ function desilluminerSemaines() {
 function afficherCalendrierScolaire() {
     console.log('🔵 Génération du calendrier scolaire...');
 
-    // Récupérer les paramètres depuis db.getSync
-    const cadreCalendrier = db.getSync('cadreCalendrier', {});
-    const evenementsPrevus = db.getSync('evenementsPrevus', []);
-    const evenementsImprevus = db.getSync('evenementsImprevus', []);
+    // Récupérer les paramètres depuis db.getSync (namespacés par trimestre)
+    const cadreCalendrier = db.getSync(cle('cadreCalendrier'), {});
+    const evenementsPrevus = db.getSync(cle('evenementsPrevus'), []);
+    const evenementsImprevus = db.getSync(cle('evenementsImprevus'), []);
 
     // Configuration du calendrier
     const config = {
@@ -400,8 +400,11 @@ function afficherCalendrierScolaire() {
     const calendrierComplet = obtenirCalendrierComplet();
 
     // Déterminer les mois à afficher selon la session
-    const session = cadreCalendrier.session || 'A';
-    const annee = parseInt((cadreCalendrier.dateDebut || '2025-08-21').split('-')[0], 10);
+    // Déduire la session à partir du mois de début (janvier-mai = Hiver, août-décembre = Automne)
+    const dateDebut = cadreCalendrier.dateDebut || '2025-08-21';
+    const moisDebut = parseInt(dateDebut.split('-')[1], 10);
+    const session = (moisDebut >= 1 && moisDebut <= 6) ? 'H' : 'A';
+    const annee = parseInt(dateDebut.split('-')[0], 10);
     const moisAAfficher = (session === 'A') ? [8, 9, 10, 11, 12] : [1, 2, 3, 4, 5];
 
     // Générer le HTML du calendrier complet
