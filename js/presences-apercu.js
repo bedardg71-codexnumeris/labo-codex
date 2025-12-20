@@ -115,7 +115,7 @@ function calculerStatistiquesPresences(etudiants, indicesAssiduite, presences) {
  */
 function calculerHeuresOffertes() {
     try {
-        const calendrier = db.getSync('calendrierComplet', {});
+        const calendrier = db.getSync(cle('calendrierComplet'), {});
         let heuresOffertes = 0;
 
         Object.values(calendrier).forEach(jour => {
@@ -157,7 +157,7 @@ function calculerHeuresManquees(presences, etudiants) {
 function calculerSeancesCompletees(presences) {
     const datesUniques = new Set();
     const aujourdhui = new Date().toISOString().split('T')[0];
-    const calendrier = db.getSync('calendrierComplet', {});
+    const calendrier = db.getSync(cle('calendrierComplet'), {});
 
     presences.forEach(p => {
         if (p.date) {
@@ -185,7 +185,7 @@ function calculerSeancesCompletees(presences) {
  */
 function calculerTotalSeances() {
     try {
-        const calendrier = db.getSync('calendrierComplet', {});
+        const calendrier = db.getSync(cle('calendrierComplet'), {});
         const seancesHoraire = db.getSync('seancesHoraire', []);
         const aujourdhui = new Date().toISOString().split('T')[0];
 
@@ -259,7 +259,7 @@ function calculerAbsencesMotivees(presences) {
  */
 function calculerProchaineSeance() {
     try {
-        const calendrier = db.getSync('calendrierComplet', {});
+        const calendrier = db.getSync(cle('calendrierComplet'), {});
         const seancesHoraire = db.getSync('seancesHoraire', []);
 
         // Obtenir la liste des jours de la semaine où il y a cours (ex: ["Lundi", "Mercredi"])

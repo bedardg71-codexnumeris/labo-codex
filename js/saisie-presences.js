@@ -546,7 +546,7 @@ function obtenirInfosJourCalendrier(dateStr) {
 
     // Fallback : lire directement depuis localStorage
     console.warn('⚠️ Fonctions trimestre.js non disponibles, lecture directe');
-    const calendrier = db.getSync('calendrierComplet', {});
+    const calendrier = db.getSync(cle('calendrierComplet'), {});
     return calendrier[dateStr] || null;
 }
 
@@ -566,7 +566,7 @@ function estJourDeCoursReel(dateStr) {
 
     // Fallback : lire directement
     console.warn('⚠️ obtenirCalendrierComplet non disponible, lecture directe');
-    const calendrier = db.getSync('calendrierComplet', {});
+    const calendrier = db.getSync(cle('calendrierComplet'), {});
 
     if (!calendrier[dateStr]) {
         return false;
@@ -588,7 +588,7 @@ function obtenirToutesDatesCours() {
         seancesCompletes = obtenirSeancesCompletes();
     } else {
         console.warn('⚠️ obtenirSeancesCompletes non disponible, lecture directe');
-        seancesCompletes = db.getSync('seancesCompletes', {});
+        seancesCompletes = db.getSync(cle('seancesCompletes'), {});
     }
 
     // Si on a des séances, utiliser ces dates
@@ -614,7 +614,7 @@ function obtenirToutesDatesCours() {
     if (typeof obtenirCalendrierComplet === 'function') {
         calendrier = obtenirCalendrierComplet();
     } else {
-        calendrier = db.getSync('calendrierComplet', {});
+        calendrier = db.getSync(cle('calendrierComplet'), {});
     }
 
     if (!calendrier || Object.keys(calendrier).length === 0) {
@@ -670,7 +670,7 @@ function obtenirHeuresSeance(dateStr) {
         seances = obtenirSeancesJour(dateStr);
     } else {
         // Fallback : lecture directe
-        const seancesCompletes = db.getSync('seancesCompletes', {});
+        const seancesCompletes = db.getSync(cle('seancesCompletes'), {});
         seances = seancesCompletes[dateStr] || [];
     }
 
@@ -751,7 +751,7 @@ function calculerNombreSeances(dateJusqua) {
     } else {
         // Fallback : lecture directe
         console.warn('⚠️ obtenirSeancesCompletes non disponible, lecture directe');
-        seances = db.getSync('seancesCompletes', {});
+        seances = db.getSync(cle('seancesCompletes'), {});
     }
 
     if (!seances || Object.keys(seances).length === 0) {
@@ -968,7 +968,7 @@ function mettreAJourEnteteDateSeance(dateStr) {
     const rangSeance = obtenirRangSeanceDansSemaine(dateStr);
 
     // Récupérer le groupe depuis seancesCompletes
-    const seancesCompletes = db.getSync('seancesCompletes', {});
+    const seancesCompletes = db.getSync(cle('seancesCompletes'), {});
     const seancesDuJour = seancesCompletes[dateStr];
     let groupePrefix = '';
     if (seancesDuJour && seancesDuJour.length > 0 && seancesDuJour[0].groupe) {

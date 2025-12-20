@@ -219,10 +219,20 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('✅ Application initialisée');
 
     // ===============================
+    // PRIORITÉ 0 : MULTI-TRIMESTRES (Beta 95)
+    // Doit s'exécuter EN PREMIER pour la migration et le namespacing
+    // ===============================
+
+    if (typeof initialiserModuleTrimestres === 'function') {
+        console.log('   → Module Multi-Trimestres détecté');
+        initialiserModuleTrimestres();
+    }
+
+    // ===============================
     // PRIORITÉ 1 : MODULES GÉNÉRATEURS DE DONNÉES
     // Ces modules créent les sources uniques de vérité
     // ===============================
-    
+
     // MODULE TRIMESTRE: Génère calendrierComplet (source unique)
     if (typeof initialiserModuleTrimestre === 'function') {
         console.log('   → Module Trimestre détecté');

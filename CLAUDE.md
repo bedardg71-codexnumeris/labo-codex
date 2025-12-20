@@ -154,6 +154,389 @@ portfolio.js convertit 0-100 et stocke dans indicesCP
 
 **Version** : v0.91.1-indexeddb (tag Git créé 26 novembre 2025)
 
+### Architecture Multi-Trimestres (Beta 95 - Planifié)
+
+**⏳ PLANIFIÉ (19 décembre 2025)** : Gestion de plusieurs trimestres distincts avec données isolées.
+
+#### Problème actuel
+
+Actuellement, toutes les données calendrier sont stockées dans des clés partagées :
+- `calendrierComplet`, `cadreCalendrier`, `evenementsPrevus`, etc.
+- Changer de trimestre écrase les données du trimestre précédent
+- Impossible d'archiver ou comparer les trimestres (A2025 vs H2026)
+
+#### Solution : Namespacing par trimestreId
+
+**Principe** : Préfixer les clés localStorage/IndexedDB avec l'identifiant du trimestre.
+
+```
+AVANT (données partagées)          APRÈS (données isolées)
+├─ calendrierComplet               ├─ h2026_calendrierComplet
+├─ cadreCalendrier                 ├─ h2026_cadreCalendrier
+├─ evenementsPrevus                ├─ h2026_evenementsPrevus
+├─ seancesCompletes                ├─ h2026_seancesCompletes
+└─ horaireHebdo                    └─ h2026_horaireHebdo
+                                   │
+                                   ├─ a2025_calendrierComplet
+                                   ├─ a2025_cadreCalendrier
+                                   └─ ... (autre trimestre)
+```
+
+#### Structure du registre des trimestres
+
+**Clé** : `trimestres` (globale, non namespacée)
+
+```javascript
+[
+  {
+    id: "h2026",              // Identifiant unique (session + année en minuscules)
+    nom: "Hiver 2026",        // Nom affiché
+    session: "H",             // H (Hiver) ou A (Automne)
+    annee: "2026",
+    dateCreation: "2025-12-19",
+    actif: true               // Un seul trimestre actif à la fois
+  },
+  {
+    id: "a2025",
+    nom: "Automne 2025",
+    session: "A",
+    annee: "2025",
+    dateCreation: "2025-08-15",
+    actif: false
+  }
+]
+```
+
+#### Clés namespacées vs globales
+
+**Clés NAMESPACÉES par trimestre** (préfixe `{trimestreId}_`) :
+
+| Clé originale | Exemple namespacé | Module source |
+|---------------|-------------------|---------------|
+| `calendrierComplet` | `h2026_calendrierComplet` | trimestre.js |
+| `cadreCalendrier` | `h2026_cadreCalendrier` | trimestre.js |
+| `evenementsPrevus` | `h2026_evenementsPrevus` | trimestre.js |
+| `evenementsImprevus` | `h2026_evenementsImprevus` | trimestre.js |
+| `seancesCompletes` | `h2026_seancesCompletes` | horaire.js |
+| `horaireHebdo` | `h2026_horaireHebdo` | horaire.js |
+
+**Clés GLOBALES** (partagées entre trimestres) :
+
+| Clé | Raison |
+|-----|--------|
+| `trimestres` | Registre des trimestres |
+| `grillesTemplates` | Matériel pédagogique réutilisable |
+| `echellesTemplates` | Matériel pédagogique réutilisable |
+| `cartouches_*` | Matériel pédagogique réutilisable |
+| `pratiquesConfigurables` | Configuration globale |
+| `modalitesEvaluation` | Configuration globale |
+| `modeApplication` | État application |
+| `etatsAccordeonsV2` | État UI |
+
+**Clés liées aux COURS** (déjà avec `coursId`) :
+
+| Clé | Lien |
+|-----|------|
+| `listeCours` | Filtrer par `trimestreId` |
+| `groupeEtudiants` | Via `coursId` |
+| `productions` | Via `coursId` |
+| `presences` | Via `coursId` |
+| `evaluationsSauvegardees` | Via `coursId` |
+| `snapshots` | Via `coursId` |
+
+#### Nouveau module : js/trimestres.js
+
+**Fonctions principales** :
+
+```javascript
+// Lecture du trimestre actif
+obtenirTrimestreActif()     // Retourne l'objet trimestre actif
+obtenirTrimestreId()        // Retourne l'ID (ex: "h2026")
+
+// Namespacing des clés
+cle(nomCle)                 // Helper : cle('calendrierComplet') → 'h2026_calendrierComplet'
+
+// Gestion des trimestres
+creerTrimestre(session, annee)     // Crée un nouveau trimestre
+changerTrimestreActif(id)          // Change le trimestre et recharge les données
+supprimerTrimestre(id)             // Supprime un trimestre et ses données namespacées
+
+// Migration
+migrerVersMultiTrimestres()        // Migration automatique au premier chargement
+```
+
+**Exemple d'utilisation** :
+
+```javascript
+// AVANT (clé fixe)
+const calendrier = db.getSync('calendrierComplet', {});
+
+// APRÈS (clé namespacée)
+const calendrier = db.getSync(cle('calendrierComplet'), {});
+// Si trimestre actif = h2026, lit 'h2026_calendrierComplet'
+```
+
+#### Migration des données existantes
+
+**Fonction** : `migrerVersMultiTrimestres()`
+
+**Étapes** :
+1. Détecter si l'ancien format existe (`calendrierComplet` sans préfixe)
+2. Lire `cadreCalendrier` pour déterminer session + année
+3. Générer le `trimestreId` (ex: "h2026")
+4. Créer l'entrée dans `trimestres` avec `actif: true`
+5. Renommer toutes les clés concernées avec le préfixe
+6. Supprimer les anciennes clés non préfixées
+
+**Exemple** :
+```javascript
+// Avant migration
+localStorage: {
+  calendrierComplet: {...},
+  cadreCalendrier: {session: "H", annee: "2026", ...}
+}
+
+// Après migration
+localStorage: {
+  trimestres: [{id: "h2026", nom: "Hiver 2026", actif: true}],
+  h2026_calendrierComplet: {...},
+  h2026_cadreCalendrier: {...}
+}
+```
+
+#### Interface utilisateur
+
+**Dropdown dans l'en-tête** :
+```html
+<select id="selectTrimestreActif" onchange="changerTrimestreActif(this.value)">
+  <option value="h2026" selected>Hiver 2026</option>
+  <option value="a2025">Automne 2025</option>
+</select>
+<button onclick="ouvrirModalNouveauTrimestre()">+ Nouveau</button>
+```
+
+**Modal création trimestre** :
+- Session : A (Automne) ou H (Hiver)
+- Année : 2025, 2026, 2027...
+- Bouton "Créer"
+
+#### Fichiers à modifier
+
+| Fichier | Modifications |
+|---------|---------------|
+| `js/trimestres.js` | **NOUVEAU** - Module gestion multi-trimestres |
+| `js/trimestre.js` | Utiliser `cle()` pour toutes les clés calendrier |
+| `js/trimestre-v2.js` | Dropdown sélection + utiliser `cle()` |
+| `js/calendrier-vue.js` | Utiliser `cle()` pour lecture calendrier |
+| `js/horaire.js` | Utiliser `cle()` pour séances |
+| `js/cours.js` | Filtrer `listeCours` par `trimestreId` |
+| `js/main.js` | Initialiser le système trimestres au démarrage |
+| `index.html` | Ajouter dropdown dans l'en-tête |
+
+#### Plan d'implémentation
+
+**Phase 0 : Backup et préparation** ⚠️ OBLIGATOIRE
+- [ ] Exporter backup complet via Réglages → Import/Export
+- [ ] Sauvegarder le fichier JSON en lieu sûr
+- [ ] Documenter l'état actuel (nb étudiants, cours, évaluations)
+
+**Phase 1 : Infrastructure** (js/trimestres.js)
+- [ ] Créer le module avec fonctions de base
+- [ ] `obtenirTrimestreActif()`, `obtenirTrimestreId()`
+- [ ] `cle(nomCle)` pour namespacing
+- [ ] `creerTrimestre()`, `supprimerTrimestre()`
+- [ ] `changerTrimestreActif()`
+
+**Phase 2 : Migration A2025**
+- [ ] `migrerVersMultiTrimestres()` - détection et renommage clés
+- [ ] Créer entrée `trimestres` avec A2025 actif
+- [ ] Renommer toutes les clés calendrier avec préfixe `a2025_`
+- [ ] Mettre à jour `trimestreId` dans les cours existants
+- [ ] Intégrer dans main.js au démarrage
+- [ ] **VALIDER** : Application fonctionne avec données A2025 migrées
+
+**Phase 3 : Adaptation modules**
+- [ ] Adapter trimestre.js (utiliser `cle()`)
+- [ ] Adapter trimestre-v2.js (utiliser `cle()`)
+- [ ] Adapter calendrier-vue.js (utiliser `cle()`)
+- [ ] Adapter horaire.js (utiliser `cle()`)
+- [ ] Adapter cours.js (filtrer par `trimestreId`)
+- [ ] Adapter saisie-presences.js si nécessaire
+- [ ] Adapter snapshots.js si nécessaire
+
+**Phase 4 : Interface sélection**
+- [ ] Dropdown sélection trimestre dans index.html (en-tête)
+- [ ] Modal création nouveau trimestre
+- [ ] Confirmation suppression trimestre
+- [ ] Affichage du trimestre actif visible
+
+**Phase 5 : Système d'archivage**
+- [ ] `archiverTrimestre(id)` - calcul stats finales + export auto
+- [ ] `consulterTrimestreArchive(id)` - mode lecture seule
+- [ ] `exporterTrimestreArchive(id)` - export JSON complet
+- [ ] `desarchiverTrimestre(id)` - avec confirmation
+- [ ] Interface liste des trimestres avec états visuels
+- [ ] Bandeau "ARCHIVÉ" en mode consultation
+
+**Phase 6 : Tests complets**
+- [ ] Migration A2025 réussie (données intactes)
+- [ ] Création nouveau trimestre H2026
+- [ ] Changement de trimestre (A2025 ↔ H2026)
+- [ ] Isolation des données vérifiée
+- [ ] Archivage d'un trimestre
+- [ ] Consultation d'un trimestre archivé
+- [ ] Export d'un trimestre archivé
+- [ ] Désarchivage (avec confirmation)
+
+#### Transfert sécurisé des données A2025
+
+**⚠️ CRITIQUE** : Les données actuelles A2025 doivent être transférées AVANT toute création de nouveau trimestre.
+
+**Contexte actuel** (19 décembre 2025) :
+- Données A2025 stockées dans clés non préfixées (`calendrierComplet`, etc.)
+- Ces données représentent un trimestre complet avec étudiants, évaluations, présences
+- Risque de pollution si on crée H2026 sans migrer d'abord
+
+**Séquence de transfert obligatoire** :
+
+```
+ÉTAPE 0 : BACKUP COMPLET
+    ↓ Exporter via Réglages → Import/Export
+    ↓ Conserver fichier backup-YYYY-MM-DD.json
+
+ÉTAPE 1 : MIGRATION A2025
+    ↓ Détecter cadreCalendrier.session = "A", annee = "2025"
+    ↓ Créer entrée trimestres: [{id: "a2025", actif: true}]
+    ↓ Renommer TOUTES les clés : calendrierComplet → a2025_calendrierComplet
+    ↓ Renommer cours avec trimestreId: "a2025"
+
+ÉTAPE 2 : VALIDATION
+    ↓ Vérifier que l'application fonctionne avec a2025_*
+    ↓ Confirmer accès aux étudiants, évaluations, présences
+
+ÉTAPE 3 : NOUVEAU TRIMESTRE (optionnel)
+    ↓ Créer H2026 via interface
+    ↓ Données H2026 dans h2026_* (vide au départ)
+    ↓ A2025 intact dans a2025_*
+```
+
+**Clés à transférer pour A2025** :
+
+| Clé actuelle | Nouvelle clé | Données |
+|--------------|--------------|---------|
+| `calendrierComplet` | `a2025_calendrierComplet` | 124 jours |
+| `cadreCalendrier` | `a2025_cadreCalendrier` | Config trimestre |
+| `evenementsPrevus` | `a2025_evenementsPrevus` | Congés planifiés |
+| `evenementsImprevus` | `a2025_evenementsImprevus` | Congés ajoutés |
+| `seancesCompletes` | `a2025_seancesCompletes` | Séances générées |
+| `horaireHebdo` | `a2025_horaireHebdo` | Horaire configuré |
+| `presences` | Filtrer par coursId A2025 | Toutes présences |
+| `snapshots` | Filtrer par coursId A2025 | Captures progression |
+
+#### Système d'archivage des trimestres
+
+**Objectif** : Permettre de "fermer" un trimestre terminé pour le préserver en lecture seule.
+
+**Structure enrichie du registre** :
+
+```javascript
+{
+  id: "a2025",
+  nom: "Automne 2025",
+  session: "A",
+  annee: "2025",
+  dateCreation: "2025-08-15",
+  dateFin: "2025-12-20",           // 🆕 Date de clôture
+  actif: false,
+  archive: true,                    // 🆕 Trimestre archivé (lecture seule)
+  statistiquesFinales: {            // 🆕 Snapshot des stats à la clôture
+    nbEtudiants: 30,
+    moyenneEngagement: 78.5,
+    tauxReussite: 85.2
+  }
+}
+```
+
+**États d'un trimestre** :
+
+| État | actif | archive | Description |
+|------|-------|---------|-------------|
+| **Actif** | `true` | `false` | Trimestre en cours, modifications permises |
+| **Inactif** | `false` | `false` | Trimestre passé, encore modifiable |
+| **Archivé** | `false` | `true` | Trimestre fermé, lecture seule |
+
+**Fonctions d'archivage** :
+
+```javascript
+// Archiver un trimestre (fin de session)
+archiverTrimestre(id)
+    → Calcule statistiques finales
+    → Définit dateFin = aujourd'hui
+    → Définit archive = true
+    → Génère export JSON automatique (backup)
+
+// Consulter un trimestre archivé
+consulterTrimestreArchive(id)
+    → Charge les données en lecture seule
+    → Interface en mode consultation (pas de boutons modifier/supprimer)
+    → Bandeau visuel "ARCHIVÉ - Lecture seule"
+
+// Exporter un trimestre archivé
+exporterTrimestreArchive(id)
+    → Génère fichier JSON complet du trimestre
+    → Inclut toutes les données : cours, étudiants, évaluations, présences, snapshots
+    → Format : trimestre-a2025-archive-YYYY-MM-DD.json
+
+// Restaurer un trimestre (désarchiver)
+desarchiverTrimestre(id)
+    → Nécessite confirmation explicite
+    → Retire le flag archive = false
+    → Permet modifications à nouveau
+```
+
+**Interface d'archivage** :
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  TRIMESTRES                                                  │
+├─────────────────────────────────────────────────────────────┤
+│  ● Hiver 2026 (actif)                    [Sélectionner]     │
+│  ○ Automne 2025                          [Archiver] [→]     │
+│  📁 Hiver 2025 (archivé)                 [Consulter] [📤]   │
+│  📁 Automne 2024 (archivé)               [Consulter] [📤]   │
+├─────────────────────────────────────────────────────────────┤
+│  [+ Nouveau trimestre]                                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Workflow typique fin de trimestre** :
+
+```
+1. Terminer les évaluations et présences
+2. Vérifier les indices A-C-P finaux
+3. Générer les rapports si nécessaire
+4. Cliquer "Archiver" sur le trimestre
+5. Confirmer l'archivage (irréversible sans désarchivage)
+6. Export automatique généré
+7. Créer le nouveau trimestre
+```
+
+#### Précautions
+
+**Backup obligatoire** : Exporter toutes les données AVANT migration (Réglages → Import/Export)
+
+**Ordre de migration critique** :
+1. Backup complet
+2. Migrer A2025 vers format namespacé
+3. Valider le fonctionnement
+4. Seulement ensuite créer H2026
+
+**Rétrocompatibilité** : Le code doit fonctionner même sans migration (fallback sur clés sans préfixe)
+
+**Performance** : Ne pas charger les données des trimestres inactifs/archivés (lazy loading)
+
+**Intégrité des archives** : Un trimestre archivé ne peut JAMAIS être modifié sans désarchivage explicite
+
 ---
 
 ## Structure des fichiers
@@ -170,6 +553,7 @@ projet/
 │   ├── navigation.js                     # ⚠️ PROTÉGÉ - Gestion navigation
 │   ├── main.js                           # Initialisation
 │   ├── db.js                             # ✅ NOUVEAU (Beta 91.1) - Gestionnaire de stockage hybride
+│   ├── trimestres.js                     # ⏳ PLANIFIÉ (Beta 95) - Gestion multi-trimestres
 │   │
 │   ├── primo-accueil.js                  # 🆕 NOUVEAU (Beta 92) - Modal d'accueil Primo
 │   ├── primo-modal.js                    # 🆕 NOUVEAU (Beta 92) - Configuration conversationnelle

@@ -156,7 +156,7 @@ function peupleSelecteurTrimestre() {
 
     // Si aucun trimestre, ajouter un par défaut depuis le calendrier
     if (trimestres.size === 0) {
-        const calendrier = db.getSync('calendrierComplet', {});
+        const calendrier = db.getSync(cle('calendrierComplet'), {});
         if (calendrier.dateDebut) {
             // Extraire année depuis dateDebut (format: YYYY-MM-DD)
             const annee = calendrier.dateDebut.substring(0, 4);

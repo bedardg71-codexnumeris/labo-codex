@@ -80,7 +80,7 @@ function mettreAJourContexteEntete() {
         const dateStr = `${aujourdhui.getFullYear()}-${String(aujourdhui.getMonth() + 1).padStart(2, '0')}-${String(aujourdhui.getDate()).padStart(2, '0')}`;
 
         // Obtenir les informations du calendrier
-        const calendrier = db.getSync('calendrierComplet', {});
+        const calendrier = db.getSync(cle('calendrierComplet'), {});
         const infoJour = calendrier[dateStr];
 
         // Construire le contexte sur deux lignes

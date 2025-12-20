@@ -267,16 +267,16 @@ function genererSeancesCompletes() {
 
     if (seancesHoraire.length === 0) {
         console.log('   ⚠️  Aucune séance hebdomadaire configurée');
-        db.setSync('seancesCompletes', {});
+        db.setSync(cle('seancesCompletes'), {});
         return {};
     }
 
     // Lire le calendrier complet (source unique)
-    const calendrierComplet = db.getSync('calendrierComplet', {});
+    const calendrierComplet = db.getSync(cle('calendrierComplet'), {});
 
     if (Object.keys(calendrierComplet).length === 0) {
         console.warn('   ⚠️  Calendrier complet non disponible');
-        db.setSync('seancesCompletes', {});
+        db.setSync(cle('seancesCompletes'), {});
         return {};
     }
 
@@ -362,7 +362,7 @@ function genererSeancesCompletes() {
     });
 
     // Stocker dans localStorage - LA SOURCE UNIQUE
-    db.setSync('seancesCompletes', seancesCompletes);
+    db.setSync(cle('seancesCompletes'), seancesCompletes);
 
     console.log(`✅ Séances complètes générées: ${compteurSeances} séances`);
     console.log(`   - Réparties sur ${Object.keys(seancesCompletes).length} jours de cours`);
@@ -376,7 +376,7 @@ function genererSeancesCompletes() {
  */
 function obtenirSeancesCompletes() {
     // db.getSync retourne déjà l'objet parsé, pas besoin de JSON.parse
-    const seancesCompletes = db.getSync('seancesCompletes', null);
+    const seancesCompletes = db.getSync(cle('seancesCompletes'), null);
 
     if (!seancesCompletes) {
         console.log('⚠️  seancesCompletes non trouvé, génération...');
@@ -409,8 +409,8 @@ function obtenirSeancesJour(dateStr) {
  */
 function obtenirRangSeanceDansSemaine(dateStr) {
     try {
-        const calendrier = db.getSync('calendrierComplet', {});
-        const seancesCompletes = db.getSync('seancesCompletes', {});
+        const calendrier = db.getSync(cle('calendrierComplet'), {});
+        const seancesCompletes = db.getSync(cle('seancesCompletes'), {});
 
         const infoJour = calendrier[dateStr];
         if (!infoJour || !infoJour.numeroSemaine) return null;
