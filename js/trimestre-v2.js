@@ -887,7 +887,73 @@ function changerTrimestreActifV2(valeur) {
  * Ouvre la modal pour créer un nouveau trimestre
  */
 function ouvrirModalNouveauTrimestre() {
-    alert('Fonctionnalité "Nouveau trimestre" en cours de développement.\n\nPour l\'instant, configurez le trimestre via les champs ci-dessous.');
+    // Demander la session
+    const sessionChoix = prompt(
+        'Créer un nouveau trimestre\n\n' +
+        'Quelle session ?\n' +
+        '  A = Automne\n' +
+        '  H = Hiver\n\n' +
+        'Entrez A ou H :'
+    );
+
+    if (!sessionChoix) return; // Annulé
+
+    const session = sessionChoix.trim().toUpperCase();
+    if (session !== 'A' && session !== 'H') {
+        alert('Session invalide. Veuillez entrer A (Automne) ou H (Hiver).');
+        return;
+    }
+
+    // Demander l'année
+    const anneeActuelle = new Date().getFullYear();
+    const anneeChoix = prompt(
+        `Quelle année ?\n\n` +
+        `Exemples : ${anneeActuelle}, ${anneeActuelle + 1}\n\n` +
+        `Entrez l'année (4 chiffres) :`
+    );
+
+    if (!anneeChoix) return; // Annulé
+
+    const annee = anneeChoix.trim();
+    if (!/^\d{4}$/.test(annee)) {
+        alert('Année invalide. Veuillez entrer 4 chiffres (ex: 2026).');
+        return;
+    }
+
+    // Vérifier si ce trimestre existe déjà
+    const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
+    const id = `${session.toLowerCase()}${annee}`;
+    if (trimestres.find(t => t.id === id)) {
+        alert(`Le trimestre ${session === 'H' ? 'Hiver' : 'Automne'} ${annee} existe déjà.`);
+        return;
+    }
+
+    // Demander si on veut l'activer
+    const activer = confirm(
+        `Créer le trimestre ${session === 'H' ? 'Hiver' : 'Automne'} ${annee} ?\n\n` +
+        `Voulez-vous l'activer immédiatement ?\n` +
+        `(Le trimestre actuel sera désactivé)`
+    );
+
+    // Créer le trimestre
+    const result = creerTrimestre(session, annee, activer);
+
+    if (result) {
+        alert(`Trimestre "${result.nom}" créé avec succès !`);
+
+        // Rafraîchir l'interface
+        populerDropdownTrimestreV2();
+
+        if (activer) {
+            // Recharger les données du nouveau trimestre
+            chargerCadreCalendrierV2();
+            chargerEvenementsPrevusV2();
+            chargerEvenementsImprevusV2();
+            afficherStatistiquesTrimestreV2();
+        }
+    } else {
+        alert('Erreur lors de la création du trimestre.');
+    }
 }
 
 /* ===============================
