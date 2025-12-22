@@ -174,6 +174,10 @@
         db.setSync('trimestres', trimestres);
 
         console.log(`[Trimestres] Trimestre actif changé: ${trimestre.nom}`);
+
+        // Mettre à jour le bandeau d'archivage après changement
+        mettreAJourBandeauArchive();
+
         return true;
     }
 
@@ -554,6 +558,511 @@
         }
 
         console.log('[Trimestres] Module initialisé');
+
+        // Mettre à jour l'affichage du bandeau d'archivage
+        mettreAJourBandeauArchive();
+    }
+
+    /* ===============================
+       BANDEAU VISUEL ARCHIVAGE
+       =============================== */
+
+    /**
+     * Met à jour l'affichage du bandeau et le mode lecture seule
+     * Appelée au chargement et lors du changement de trimestre
+     */
+    function mettreAJourBandeauArchive() {
+        const bandeau = document.getElementById('bandeau-archive');
+        const isArchive = estTrimestreArchive();
+
+        if (bandeau) {
+            bandeau.style.display = isArchive ? 'block' : 'none';
+        }
+
+        // Ajouter/retirer la classe mode-archive sur le body
+        if (isArchive) {
+            document.body.classList.add('mode-archive');
+            console.log('[Trimestres] Mode archivé activé - Lecture seule');
+        } else {
+            document.body.classList.remove('mode-archive');
+        }
+
+        // Mettre à jour le texte du bandeau avec le nom du trimestre
+        if (isArchive && bandeau) {
+            const actif = obtenirTrimestreActif();
+            const texteElement = bandeau.querySelector('.bandeau-archive-texte');
+            if (texteElement && actif) {
+                texteElement.innerHTML = `<strong>TRIMESTRE ARCHIVÉ</strong> — ${actif.nom} (lecture seule)`;
+            }
+        }
+    }
+
+    /* ===============================
+       EXPORT FORMAT RECHERCHE
+       =============================== */
+
+    /**
+     * Génère une clé d'anonymisation aléatoire
+     * @returns {string} Clé de 32 caractères
+     */
+    function genererCleAnonymisation() {
+        const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let cle = '';
+        for (let i = 0; i < 32; i++) {
+            cle += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+        }
+        return cle;
+    }
+
+    /**
+     * Anonymise un DA avec une clé secrète (hash SHA-256 tronqué)
+     * @param {string} da - Le DA à anonymiser
+     * @param {string} cleSecrete - La clé secrète
+     * @returns {Promise<string>} ID anonyme (8 caractères hex)
+     */
+    async function anonymiserDA(da, cleSecrete) {
+        const donnee = da + ':' + cleSecrete;
+        const encoder = new TextEncoder();
+        const data = encoder.encode(donnee);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.slice(0, 4).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    /**
+     * Exporte les données au format recherche (anonymisé)
+     * Produit deux fichiers : données anonymisées + table de correspondance
+     *
+     * @param {Object} options - Options d'export
+     * @returns {Promise<Object>} Résultat de l'export
+     */
+    async function exporterFormatRecherche(options = {}) {
+        console.log('[Export Recherche] Démarrage export format recherche...');
+
+        try {
+            // 1. Obtenir ou générer la clé d'anonymisation
+            let cleSecrete = options.cleSecrete;
+            if (!cleSecrete) {
+                cleSecrete = genererCleAnonymisation();
+                console.log('[Export Recherche] Nouvelle clé générée');
+            }
+
+            // 2. Obtenir le trimestre actif
+            const trimestre = obtenirTrimestreActif();
+            if (!trimestre) {
+                return { success: false, error: 'Aucun trimestre actif' };
+            }
+
+            // 3. Collecter les données sources
+            const etudiants = db.getSync('groupeEtudiants', []);
+            const etudiantsActifs = etudiants.filter(e =>
+                e.statut !== 'abandon' && e.statut !== 'décrochage'
+            );
+            const productions = db.getSync('productions', []);
+            const evaluations = db.getSync('evaluationsSauvegardees', []);
+            const presences = db.getSync('presences', []);
+            const snapshots = db.getSync('snapshots', []);
+            const grilles = db.getSync('grillesTemplates', []);
+            const echelles = db.getSync('echellesTemplates', []);
+            const modalites = db.getSync('modalitesEvaluation', {});
+            const cadreCalendrier = db.getSync(cle('cadreCalendrier'), {});
+            const indicesCP = db.getSync('indicesCP', {});
+            const cours = db.getSync('listeCours', []);
+            const coursActif = cours.find(c => c.actif);
+
+            // 4. Créer la table de correspondance et anonymiser
+            const tableCorrespondance = {};
+            const daVersAnonyme = {};
+
+            for (const etudiant of etudiantsActifs) {
+                const idAnonyme = await anonymiserDA(etudiant.da, cleSecrete);
+                tableCorrespondance[idAnonyme] = etudiant.da;
+                daVersAnonyme[etudiant.da] = idAnonyme;
+            }
+
+            // 5. Obtenir la grille de référence pour SOLO
+            const grilleRefId = modalites.grilleReferenceDepistage;
+            const grilleRef = grilles.find(g => g.id === grilleRefId) || grilles[0];
+
+            // 6. Construire le JSON selon les spécifications
+            const exportData = {
+                meta: {
+                    version_monitorage: '6.0.0-beta95',
+                    version_format: '1.0',
+                    date_export: new Date().toISOString(),
+                    trimestre: {
+                        id: trimestre.id,
+                        nom: trimestre.nom,
+                        session: trimestre.session,
+                        annee: trimestre.annee
+                    },
+                    anonymisation: {
+                        methode: 'SHA-256 tronqué (8 caractères)',
+                        cle_hash: cleSecrete.substring(0, 4) + '****'
+                    }
+                },
+
+                contexte: {
+                    cours: coursActif ? {
+                        code: coursActif.sigle || coursActif.id,
+                        titre: coursActif.titre || coursActif.nom,
+                        groupe: coursActif.groupe
+                    } : {},
+                    grille_evaluation: grilleRef ? {
+                        id: grilleRef.id,
+                        nom: grilleRef.nom,
+                        echelle: ['I', 'D', 'M', 'E'],
+                        seuil_reussite: 'M',
+                        criteres: (grilleRef.criteres || []).map(c => ({
+                            code: c.id,
+                            nom: c.nom,
+                            ponderation: c.ponderation,
+                            niveau_solo: obtenirNiveauSOLO(c.nom),
+                            type: obtenirTypeCritere(c.nom)
+                        }))
+                    } : {},
+                    calendrier: {
+                        date_debut: cadreCalendrier.dateDebut || '',
+                        date_fin: cadreCalendrier.dateFin || '',
+                        session: cadreCalendrier.session || trimestre.session,
+                        annee: cadreCalendrier.annee || trimestre.annee
+                    },
+                    artefacts: productions.filter(p => p.type === 'artefact-portfolio').map(p => ({
+                        id: p.id,
+                        titre: p.titre || p.nom,
+                        type: p.type,
+                        date_echeance: p.dateEcheance,
+                        semaine: calculerSemaine(p.dateEcheance, cadreCalendrier.dateDebut)
+                    }))
+                },
+
+                observations: {
+                    etudiants: etudiantsActifs.map(e => ({
+                        id_anonyme: daVersAnonyme[e.da],
+                        statut: e.statut || 'actif',
+                        profil: {
+                            programme: e.programme || '',
+                            services_adaptes: e.servicesAdaptes || false
+                        }
+                    })),
+
+                    presences: presences.map(p => ({
+                        id_etudiant: daVersAnonyme[p.da] || p.da,
+                        date: p.date,
+                        statut: p.statut,
+                        duree_cours: p.heures || p.duree || 3,
+                        justifie: p.justifie || false,
+                        facultatif: p.facultatif || false
+                    })).filter(p => p.id_etudiant),
+
+                    evaluations: evaluations.map(e => ({
+                        id_etudiant: daVersAnonyme[e.etudiantDA] || e.etudiantDA,
+                        id_artefact: e.productionId,
+                        date_echeance: obtenirDateEcheance(e.productionId, productions),
+                        statut_remise: e.statutRemise,
+                        criteres: (e.criteres || []).reduce((acc, c) => {
+                            acc[normaliserNomCritere(c.critereNom)] = c.niveauSelectionne;
+                            return acc;
+                        }, {}),
+                        commentaires: (e.criteres || []).reduce((acc, c) => {
+                            if (c.retroaction) {
+                                acc[normaliserNomCritere(c.critereNom)] = c.retroaction;
+                            }
+                            return acc;
+                        }, {}),
+                        note_finale: e.noteFinale,
+                        niveau_final: e.niveauFinal,
+                        reprise_de: e.repriseDeId || null,
+                        jeton_delai: e.jetonDelaiApplique || false,
+                        jeton_reprise: e.jetonRepriseCibleeApplique || false
+                    })).filter(e => e.id_etudiant)
+                },
+
+                calculs: {
+                    description: 'Indices calculés selon formules Monitorage v6',
+                    formules: {
+                        indice_A: 'Heures présentes / Heures offertes (cumulatif)',
+                        indice_C: '% artefacts évalués >= Maîtrisé (M)',
+                        indice_P: 'Moyenne pondérée des N meilleurs artefacts (IDME → %)',
+                        engagement: 'A × C × P / 10000'
+                    },
+
+                    snapshots_hebdomadaires: snapshots.map(s => ({
+                        semaine: s.numSemaine,
+                        date: s.dateSeance,
+                        indices_par_etudiant: (s.etudiants || []).map(e => ({
+                            id_etudiant: daVersAnonyme[e.da] || e.da,
+                            A: e.A_cumulatif || e.A,
+                            C: e.C,
+                            P: e.P,
+                            pattern: e.pattern,
+                            rai: e.rai
+                        })).filter(e => e.id_etudiant)
+                    })),
+
+                    indices_finaux: etudiantsActifs.map(e => {
+                        const indices = indicesCP[e.da];
+                        const actuel = indices?.actuel?.PAN || indices?.actuel?.SOM || {};
+                        return {
+                            id_etudiant: daVersAnonyme[e.da],
+                            A_final: actuel.A || 0,
+                            C_final: actuel.C || 0,
+                            P_final: actuel.P || 0,
+                            engagement: Math.round((actuel.A || 0) * (actuel.C || 0) * (actuel.P || 0) / 10000)
+                        };
+                    }),
+
+                    performance_par_critere: calculerPerformanceParCritere(etudiantsActifs, evaluations, daVersAnonyme, grilleRef)
+                }
+            };
+
+            // 7. Générer et télécharger le fichier anonymisé
+            const jsonAnonyme = JSON.stringify(exportData, null, 2);
+            const blobAnonyme = new Blob([jsonAnonyme], { type: 'application/json' });
+            const urlAnonyme = URL.createObjectURL(blobAnonyme);
+
+            const dateStr = new Date().toISOString().split('T')[0];
+            const lienAnonyme = document.createElement('a');
+            lienAnonyme.href = urlAnonyme;
+            lienAnonyme.download = `monitorage_${trimestre.id}_anonyme_${dateStr}.json`;
+            lienAnonyme.click();
+            URL.revokeObjectURL(urlAnonyme);
+
+            // 8. Sauvegarder la table de correspondance localement (PRIVÉ)
+            const tablePrivee = {
+                cle_secrete: cleSecrete,
+                date_generation: new Date().toISOString(),
+                trimestre: trimestre.id,
+                correspondances: tableCorrespondance
+            };
+            db.setSync(`tableCorrespondance_${trimestre.id}`, tablePrivee);
+
+            // 9. Télécharger aussi la table de correspondance (fichier séparé)
+            const jsonTable = JSON.stringify(tablePrivee, null, 2);
+            const blobTable = new Blob([jsonTable], { type: 'application/json' });
+            const urlTable = URL.createObjectURL(blobTable);
+
+            const lienTable = document.createElement('a');
+            lienTable.href = urlTable;
+            lienTable.download = `table_correspondance_${trimestre.id}_PRIVE_${dateStr}.json`;
+
+            // Délai pour que le premier téléchargement se lance
+            setTimeout(() => {
+                lienTable.click();
+                URL.revokeObjectURL(urlTable);
+            }, 500);
+
+            console.log('[Export Recherche] Export terminé avec succès');
+            console.log(`[Export Recherche] ${etudiantsActifs.length} étudiants anonymisés`);
+            console.log(`[Export Recherche] ${evaluations.length} évaluations exportées`);
+            console.log(`[Export Recherche] ${presences.length} présences exportées`);
+            console.log(`[Export Recherche] ${snapshots.length} snapshots exportés`);
+
+            return {
+                success: true,
+                nbEtudiants: etudiantsActifs.length,
+                nbEvaluations: evaluations.length,
+                nbPresences: presences.length,
+                nbSnapshots: snapshots.length
+            };
+
+        } catch (error) {
+            console.error('[Export Recherche] Erreur:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Obtient le niveau SOLO associé à un critère
+     * @param {string} nomCritere - Nom du critère
+     * @returns {string} Niveau SOLO
+     */
+    function obtenirNiveauSOLO(nomCritere) {
+        const nom = nomCritere.toLowerCase();
+        // Critères fondamentaux (multistructurel)
+        if (nom.includes('structure') || nom.includes('rigueur') || nom.includes('français')) {
+            return 'multistructural';
+        }
+        // Critère transitionnel (relationnel)
+        if (nom.includes('plausibilité') || nom.includes('plausibilite')) {
+            return 'relational';
+        }
+        // Critère complexe (abstrait étendu)
+        if (nom.includes('nuance')) {
+            return 'extended_abstract';
+        }
+        return 'multistructural'; // Par défaut
+    }
+
+    /**
+     * Obtient le type d'un critère (fondamental, transitionnel, complexe)
+     * @param {string} nomCritere - Nom du critère
+     * @returns {string} Type du critère
+     */
+    function obtenirTypeCritere(nomCritere) {
+        const nom = nomCritere.toLowerCase();
+        if (nom.includes('structure') || nom.includes('rigueur') || nom.includes('français')) {
+            return 'fondamental';
+        }
+        if (nom.includes('plausibilité') || nom.includes('plausibilite')) {
+            return 'transitionnel';
+        }
+        if (nom.includes('nuance')) {
+            return 'complexe';
+        }
+        return 'fondamental';
+    }
+
+    /**
+     * Calcule le numéro de semaine à partir d'une date
+     * @param {string} dateStr - Date au format YYYY-MM-DD
+     * @param {string} dateDebut - Date de début du trimestre
+     * @returns {number} Numéro de semaine
+     */
+    function calculerSemaine(dateStr, dateDebut) {
+        if (!dateStr || !dateDebut) return 0;
+        const date = new Date(dateStr);
+        const debut = new Date(dateDebut);
+        const diff = date - debut;
+        return Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
+    }
+
+    /**
+     * Obtient la date d'échéance d'une production
+     * @param {string} productionId - ID de la production
+     * @param {Array} productions - Liste des productions
+     * @returns {string} Date d'échéance
+     */
+    function obtenirDateEcheance(productionId, productions) {
+        const prod = productions.find(p => p.id === productionId);
+        return prod ? prod.dateEcheance : null;
+    }
+
+    /**
+     * Normalise le nom d'un critère (minuscules, sans accents)
+     * @param {string} nom - Nom du critère
+     * @returns {string} Nom normalisé
+     */
+    function normaliserNomCritere(nom) {
+        if (!nom) return '';
+        return nom.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, '_');
+    }
+
+    /**
+     * Calcule la performance agrégée par critère pour chaque étudiant
+     * @param {Array} etudiants - Liste des étudiants
+     * @param {Array} evaluations - Liste des évaluations
+     * @param {Object} daVersAnonyme - Table de correspondance DA → ID anonyme
+     * @param {Object} grilleRef - Grille de référence
+     * @returns {Array} Performance par critère par étudiant
+     */
+    function calculerPerformanceParCritere(etudiants, evaluations, daVersAnonyme, grilleRef) {
+        const niveauVersScore = { 'I': 0, 'D': 1, 'M': 2, 'E': 3 };
+
+        return etudiants.map(etudiant => {
+            const evalEtudiant = evaluations.filter(e => e.etudiantDA === etudiant.da);
+            const perfCriteres = {};
+
+            if (grilleRef && grilleRef.criteres) {
+                grilleRef.criteres.forEach(critere => {
+                    const nomNorm = normaliserNomCritere(critere.nom);
+                    const evaluationsCritere = [];
+
+                    evalEtudiant.forEach(ev => {
+                        const c = (ev.criteres || []).find(c =>
+                            normaliserNomCritere(c.critereNom) === nomNorm
+                        );
+                        if (c && c.niveauSelectionne) {
+                            evaluationsCritere.push(c.niveauSelectionne);
+                        }
+                    });
+
+                    if (evaluationsCritere.length > 0) {
+                        const nbI = evaluationsCritere.filter(n => n === 'I').length;
+                        const nbD = evaluationsCritere.filter(n => n === 'D').length;
+                        const nbM = evaluationsCritere.filter(n => n === 'M').length;
+                        const nbE = evaluationsCritere.filter(n => n === 'E').length;
+                        const total = evaluationsCritere.length;
+
+                        perfCriteres[nomNorm] = {
+                            nb_evaluations: total,
+                            nb_I: nbI,
+                            nb_D: nbD,
+                            nb_M: nbM,
+                            nb_E: nbE,
+                            taux_maitrise: Math.round((nbM + nbE) / total * 100) / 100
+                        };
+                    }
+                });
+            }
+
+            return {
+                id_etudiant: daVersAnonyme[etudiant.da],
+                ...perfCriteres
+            };
+        }).filter(p => p.id_etudiant);
+    }
+
+    /**
+     * Lance l'export recherche depuis l'interface utilisateur
+     * Affiche le résultat dans la zone dédiée
+     */
+    async function lancerExportRecherche() {
+        const resultatDiv = document.getElementById('resultat-export-recherche');
+        if (resultatDiv) {
+            resultatDiv.style.display = 'block';
+            resultatDiv.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
+                    <p>Génération de l'export en cours...</p>
+                </div>
+            `;
+        }
+
+        try {
+            const result = await exporterFormatRecherche();
+
+            if (result.success) {
+                if (resultatDiv) {
+                    resultatDiv.innerHTML = `
+                        <div class="alerte-succes" style="text-align: left;">
+                            <strong>Export généré avec succès</strong>
+                            <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                                <li>${result.nbEtudiants} étudiants anonymisés</li>
+                                <li>${result.nbEvaluations} évaluations exportées</li>
+                                <li>${result.nbPresences} présences exportées</li>
+                                <li>${result.nbSnapshots} snapshots exportés</li>
+                            </ul>
+                            <p style="margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
+                                Deux fichiers ont été téléchargés. Conservez la table de correspondance en lieu sûr.
+                            </p>
+                        </div>
+                    `;
+                }
+            } else {
+                if (resultatDiv) {
+                    resultatDiv.innerHTML = `
+                        <div class="alerte-erreur">
+                            <strong>Erreur lors de l'export</strong><br>
+                            ${result.error || 'Une erreur inattendue s\'est produite.'}
+                        </div>
+                    `;
+                }
+            }
+        } catch (error) {
+            console.error('[Export Recherche] Erreur:', error);
+            if (resultatDiv) {
+                resultatDiv.innerHTML = `
+                    <div class="alerte-erreur">
+                        <strong>Erreur lors de l'export</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
     }
 
     /* ===============================
@@ -577,6 +1086,12 @@
     window.estTrimestreArchive = estTrimestreArchive;
     window.exporterTrimestreArchive = exporterTrimestreArchive;
     window.calculerStatistiquesFinales = calculerStatistiquesFinales;
+    window.mettreAJourBandeauArchive = mettreAJourBandeauArchive;
+
+    // Fonctions d'export recherche
+    window.exporterFormatRecherche = exporterFormatRecherche;
+    window.genererCleAnonymisation = genererCleAnonymisation;
+    window.lancerExportRecherche = lancerExportRecherche;
 
     // Constantes exportées pour debug
     window.CLES_NAMESPACEES = CLES_NAMESPACEES;

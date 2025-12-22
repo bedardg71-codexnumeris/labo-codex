@@ -537,6 +537,76 @@ desarchiverTrimestre(id)
 
 **Intégrité des archives** : Un trimestre archivé ne peut JAMAIS être modifié sans désarchivage explicite
 
+#### Export pour la recherche (Beta 95)
+
+**Objectif** : Exporter les données dans un format anonymisé pour analyse pédagogique ou publication.
+
+**Fonctions principales** :
+
+```javascript
+// Générer une clé d'anonymisation (32 caractères aléatoires)
+genererCleAnonymisation()
+
+// Exporter au format recherche (anonymisé)
+exporterFormatRecherche(options)
+    → Génère clé d'anonymisation SHA-256
+    → Anonymise tous les DA (hash tronqué 8 caractères)
+    → Structure selon spécifications (meta, contexte, observations, calculs)
+    → Télécharge 2 fichiers :
+      1. monitorage_[trimestre]_anonyme_[date].json (partageable)
+      2. table_correspondance_[trimestre]_PRIVE_[date].json (NE PAS PARTAGER)
+
+// Lancer depuis l'interface
+lancerExportRecherche()
+    → Bouton dans Réglages → Trimestre → Export pour la recherche
+    → Affiche résultat avec statistiques
+```
+
+**Structure du JSON exporté** :
+
+```javascript
+{
+  meta: {
+    version_monitorage: "6.0.0-beta95",
+    version_format: "1.0",
+    date_export: "2024-12-22T...",
+    trimestre: { id, nom, session, annee },
+    anonymisation: { methode, cle_hash }
+  },
+  contexte: {
+    cours: { code, titre, groupe },
+    grille_evaluation: {
+      criteres: [{ code, nom, ponderation, niveau_solo, type }]
+    },
+    calendrier: { date_debut, date_fin },
+    artefacts: [{ id, titre, date_echeance, semaine }]
+  },
+  observations: {
+    etudiants: [{ id_anonyme, statut, profil }],
+    presences: [{ id_etudiant, date, statut, duree_cours }],
+    evaluations: [{
+      id_etudiant, id_artefact, date_echeance,
+      criteres: { structure: "M", rigueur: "D", ... },
+      commentaires: { structure: "...", ... },
+      note_finale, niveau_final
+    }]
+  },
+  calculs: {
+    formules: { indice_A, indice_C, indice_P, engagement },
+    snapshots_hebdomadaires: [{ semaine, indices_par_etudiant }],
+    indices_finaux: [{ id_etudiant, A_final, C_final, P_final }],
+    performance_par_critere: [{ id_etudiant, structure: {nb_I, nb_D, nb_M, nb_E} }]
+  }
+}
+```
+
+**Classification SOLO automatique** :
+- Structure, Rigueur, Français → `multistructural` (fondamental)
+- Plausibilité → `relational` (transitionnel)
+- Nuance → `extended_abstract` (complexe)
+
+**Documentation détaillée** : Voir `ARCHITECTURE_EXPORT_RECHERCHE.md` et `SPECIFICATIONS_EXPORT_JSON_A2025.md`
+
 ---
 
 ## Structure des fichiers
