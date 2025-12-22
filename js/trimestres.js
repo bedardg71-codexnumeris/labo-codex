@@ -655,6 +655,8 @@
 
             // 3. Collecter les données sources
             const etudiants = db.getSync('groupeEtudiants', []);
+            // IMPORTANT: Inclure TOUS les étudiants pour l'anonymisation
+            const tousLesEtudiants = etudiants;
             const etudiantsActifs = etudiants.filter(e =>
                 e.statut !== 'abandon' && e.statut !== 'décrochage'
             );
@@ -670,14 +672,29 @@
             const cours = db.getSync('listeCours', []);
             const coursActif = cours.find(c => c.actif);
 
-            // 4. Créer la table de correspondance et anonymiser
+            // 4. Créer la table de correspondance et anonymiser TOUS les étudiants
             const tableCorrespondance = {};
             const daVersAnonyme = {};
 
-            for (const etudiant of etudiantsActifs) {
+            // Anonymiser tous les étudiants (actifs ET inactifs)
+            for (const etudiant of tousLesEtudiants) {
                 const idAnonyme = await anonymiserDA(etudiant.da, cleSecrete);
                 tableCorrespondance[idAnonyme] = etudiant.da;
                 daVersAnonyme[etudiant.da] = idAnonyme;
+            }
+
+            // Aussi anonymiser les DA présents dans les données mais pas dans la liste
+            const dasPresences = [...new Set(presences.map(p => p.da).filter(Boolean))];
+            const dasEvaluations = [...new Set(evaluations.map(e => e.etudiantDA).filter(Boolean))];
+            const dasSnapshots = [...new Set(snapshots.flatMap(s => (s.etudiants || []).map(e => e.da)).filter(Boolean))];
+            const tousLesDAs = [...new Set([...dasPresences, ...dasEvaluations, ...dasSnapshots])];
+
+            for (const da of tousLesDAs) {
+                if (!daVersAnonyme[da]) {
+                    const idAnonyme = await anonymiserDA(da, cleSecrete);
+                    tableCorrespondance[idAnonyme] = da;
+                    daVersAnonyme[da] = idAnonyme;
+                }
             }
 
             // 5. Obtenir la grille de référence pour SOLO
@@ -746,36 +763,34 @@
                         }
                     })),
 
-                    presences: presences.map(p => ({
-                        id_etudiant: daVersAnonyme[p.da] || p.da,
-                        date: p.date,
-                        statut: p.statut,
-                        duree_cours: p.heures || p.duree || 3,
-                        justifie: p.justifie || false,
-                        facultatif: p.facultatif || false
-                    })).filter(p => p.id_etudiant),
+                    presences: presences
+                        .filter(p => daVersAnonyme[p.da]) // Exclure si DA non anonymisable
+                        .map(p => ({
+                            id_etudiant: daVersAnonyme[p.da],
+                            date: p.date,
+                            statut: p.statut,
+                            duree_cours: p.heures || p.duree || 3,
+                            justifie: p.justifie || false,
+                            facultatif: p.facultatif || false
+                        })),
 
-                    evaluations: evaluations.map(e => ({
-                        id_etudiant: daVersAnonyme[e.etudiantDA] || e.etudiantDA,
-                        id_artefact: e.productionId,
-                        date_echeance: obtenirDateEcheance(e.productionId, productions),
-                        statut_remise: e.statutRemise,
-                        criteres: (e.criteres || []).reduce((acc, c) => {
-                            acc[normaliserNomCritere(c.critereNom)] = c.niveauSelectionne;
-                            return acc;
-                        }, {}),
-                        commentaires: (e.criteres || []).reduce((acc, c) => {
-                            if (c.retroaction) {
-                                acc[normaliserNomCritere(c.critereNom)] = c.retroaction;
-                            }
-                            return acc;
-                        }, {}),
-                        note_finale: e.noteFinale,
-                        niveau_final: e.niveauFinal,
-                        reprise_de: e.repriseDeId || null,
-                        jeton_delai: e.jetonDelaiApplique || false,
-                        jeton_reprise: e.jetonRepriseCibleeApplique || false
-                    })).filter(e => e.id_etudiant)
+                    evaluations: evaluations
+                        .filter(e => daVersAnonyme[e.etudiantDA]) // Exclure si DA non anonymisable
+                        .map(e => ({
+                            id_etudiant: daVersAnonyme[e.etudiantDA],
+                            id_artefact: e.productionId,
+                            date_echeance: obtenirDateEcheance(e.productionId, productions),
+                            statut_remise: e.statutRemise,
+                            criteres: (e.criteres || []).reduce((acc, c) => {
+                                acc[normaliserNomCritere(c.critereNom)] = c.niveauSelectionne;
+                                return acc;
+                            }, {}),
+                            note_finale: e.noteFinale,
+                            niveau_final: e.niveauFinal,
+                            reprise_de: e.repriseDeId || null,
+                            jeton_delai: e.jetonDelaiApplique || false,
+                            jeton_reprise: e.jetonRepriseCibleeApplique || false
+                        }))
                 },
 
                 calculs: {
@@ -790,14 +805,16 @@
                     snapshots_hebdomadaires: snapshots.map(s => ({
                         semaine: s.numSemaine,
                         date: s.dateSeance,
-                        indices_par_etudiant: (s.etudiants || []).map(e => ({
-                            id_etudiant: daVersAnonyme[e.da] || e.da,
-                            A: e.A_cumulatif || e.A,
-                            C: e.C,
-                            P: e.P,
-                            pattern: e.pattern,
-                            rai: e.rai
-                        })).filter(e => e.id_etudiant)
+                        indices_par_etudiant: (s.etudiants || [])
+                            .filter(e => daVersAnonyme[e.da]) // Exclure si DA non anonymisable
+                            .map(e => ({
+                                id_etudiant: daVersAnonyme[e.da],
+                                A: e.A_cumulatif || e.A,
+                                C: e.C,
+                                P: e.P,
+                                pattern: e.pattern,
+                                rai: e.rai
+                            }))
                     })),
 
                     indices_finaux: etudiantsActifs.map(e => {
