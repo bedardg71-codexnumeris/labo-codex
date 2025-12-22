@@ -647,13 +647,7 @@
                 console.log('[Export Recherche] Nouvelle clé générée');
             }
 
-            // 2. Obtenir le trimestre actif
-            const trimestre = obtenirTrimestreActif();
-            if (!trimestre) {
-                return { success: false, error: 'Aucun trimestre actif' };
-            }
-
-            // 3. Collecter les données sources
+            // 2. Collecter les données sources
             const etudiants = db.getSync('groupeEtudiants', []);
             // IMPORTANT: Inclure TOUS les étudiants pour l'anonymisation
             const tousLesEtudiants = etudiants;
@@ -669,10 +663,39 @@
             const grilles = db.getSync('grillesTemplates', []);
             const echelles = db.getSync('echellesTemplates', []);
             const modalites = db.getSync('modalitesEvaluation', {});
-            const cadreCalendrier = db.getSync(cle('cadreCalendrier'), {});
             const indicesCP = db.getSync('indicesCP', {});
             const cours = db.getSync('listeCours', []);
             const coursActif = cours.find(c => c.actif);
+
+            // 3. Déterminer le trimestre à partir du cours actif (où sont les données)
+            // Plutôt que d'utiliser le trimestre marqué "actif", on utilise celui du cours
+            const trimestres = db.getSync('trimestres', []);
+            let trimestre = null;
+
+            if (coursActif && coursActif.trimestreId) {
+                // Utiliser le trimestre du cours actif
+                trimestre = trimestres.find(t => t.id === coursActif.trimestreId);
+            }
+
+            if (!trimestre) {
+                // Fallback : utiliser le trimestre marqué actif
+                trimestre = trimestres.find(t => t.actif);
+            }
+
+            if (!trimestre && trimestres.length > 0) {
+                // Dernier fallback : premier trimestre disponible
+                trimestre = trimestres[0];
+            }
+
+            if (!trimestre) {
+                return { success: false, error: 'Aucun trimestre trouvé' };
+            }
+
+            console.log('[Export Recherche] Trimestre identifié:', trimestre.id, trimestre.nom);
+
+            // Obtenir le cadreCalendrier du bon trimestre
+            const cadreCalendrier = db.getSync(trimestre.id + '_cadreCalendrier', {})
+                                 || db.getSync('cadreCalendrier', {});
 
             // 4. Créer la table de correspondance et anonymiser TOUS les étudiants
             const tableCorrespondance = {};
