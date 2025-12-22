@@ -1101,6 +1101,13 @@ function chargerDropdownCoursV2() {
         if (!coursSelectionne && coursAfficher.length > 0) {
             select.options[1].selected = true;
             afficherDetailsCoursV2(coursAfficher[0]);
+            coursSelectionne = true; // Un cours est maintenant sélectionné
+        }
+
+        // Afficher le bouton Modifier si un cours est sélectionné
+        const btnModifier = document.getElementById('v2-btnModifierCours');
+        if (btnModifier) {
+            btnModifier.style.display = coursSelectionne ? '' : 'none';
         }
     }
 }
@@ -1183,7 +1190,7 @@ function afficherDetailsCoursV2(cours) {
     conteneur.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Sigle</label>
+                <label class="text-muted" style="font-size: 0.85rem;">Code</label>
                 <div style="font-weight: 600;">${sigle}</div>
             </div>
             <div>
@@ -1284,26 +1291,33 @@ function modifierCoursSelectionneV2() {
 
 /**
  * Remplit le formulaire avec les données d'un cours
+ * Gère différents formats de données (Beta 95)
  */
 function remplirFormCoursV2(cours) {
-    const enseignant = cours.enseignant || {};
+    console.log('[Trimestre V2] Remplissage formulaire avec:', cours);
 
+    // Informations générales du cours
     setValue('v2-codeCours', cours.sigle || cours.codeCours || '');
     setValue('v2-nomCours', cours.titre || cours.nomCours || '');
     setValue('v2-numeroCompetence', cours.numeroCompetence || '');
     setValue('v2-competence', cours.competence || '');
     setValue('v2-elementsCompetence', cours.elementsCompetence || '');
 
-    setValue('v2-prenomEnseignant', enseignant.prenom || '');
-    setValue('v2-nomEnseignant', enseignant.nom || '');
-    setValue('v2-courrielEnseignant', enseignant.courriel || '');
-    setValue('v2-disciplineEnseignant', enseignant.discipline || '');
-    setValue('v2-departement', enseignant.departement || '');
-    setValue('v2-institutionEnseignant', enseignant.institution || '');
+    // Enseignant - gère deux formats:
+    // 1. Champs directs: prenomEnseignant, nomEnseignant, courriel, etc.
+    // 2. Objet enseignant: enseignant.prenom, enseignant.nom, etc.
+    const enseignant = cours.enseignant || {};
+    setValue('v2-prenomEnseignant', cours.prenomEnseignant || enseignant.prenom || '');
+    setValue('v2-nomEnseignant', cours.nomEnseignant || enseignant.nom || '');
+    setValue('v2-courrielEnseignant', cours.courriel || enseignant.courriel || '');
+    setValue('v2-disciplineEnseignant', cours.discipline || enseignant.discipline || '');
+    setValue('v2-departement', cours.departement || enseignant.departement || '');
+    setValue('v2-institutionEnseignant', cours.institution || enseignant.institution || '');
 
+    // Session et horaire
     setValue('v2-session', cours.session || 'H');
     setValue('v2-annee', cours.annee || new Date().getFullYear());
-    setValue('v2-heuresParSemaine', cours.heuresParSemaine || 4);
+    setValue('v2-heuresParSemaine', cours.heuresParSemaine || cours.heuresHebdo || 4);
     setValue('v2-formatHoraire', cours.formatHoraire || '2x2');
     setValue('v2-numeroGroupe', cours.groupe || '01');
     setValue('v2-localCours', cours.local || '');
