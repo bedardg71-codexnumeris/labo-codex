@@ -1320,7 +1320,7 @@ function remplirFormCoursV2(cours) {
     setValue('v2-heuresParSemaine', cours.heuresParSemaine || cours.heuresHebdo || 4);
     setValue('v2-formatHoraire', cours.formatHoraire || '2x2');
     setValue('v2-numeroGroupe', cours.groupe || '01');
-    setValue('v2-localCours', cours.local || '');
+    // Local retiré de l'interface (Beta 95)
 }
 
 /**
@@ -1330,7 +1330,7 @@ function reinitialiserFormCoursV2() {
     const champs = [
         'v2-codeCours', 'v2-nomCours', 'v2-numeroCompetence', 'v2-competence', 'v2-elementsCompetence',
         'v2-prenomEnseignant', 'v2-nomEnseignant', 'v2-courrielEnseignant', 'v2-disciplineEnseignant',
-        'v2-departement', 'v2-institutionEnseignant', 'v2-localCours'
+        'v2-departement', 'v2-institutionEnseignant'
     ];
     champs.forEach(id => setValue(id, ''));
 
@@ -1408,7 +1408,6 @@ function sauvegarderCoursV2() {
         heuresParSemaine: parseInt(document.getElementById('v2-heuresParSemaine')?.value) || 4,
         formatHoraire: document.getElementById('v2-formatHoraire')?.value || '2x2',
         groupe: groupe,
-        local: document.getElementById('v2-localCours')?.value?.trim() || '',
         actif: true
     };
 
