@@ -217,6 +217,82 @@
         /* Dégradé bleu avec adaptation aux modes */
 
         /* ===============================
+           BANDEAU ARCHIVAGE
+           =============================== */
+        .bandeau-archive {
+            background: linear-gradient(135deg, #6b4c8c 0%, #8e6aad 50%, #a78bc2 100%);
+            color: white;
+            padding: 10px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 2px 8px rgba(107, 76, 140, 0.4);
+            border-bottom: 3px solid #4a3066;
+        }
+
+        .bandeau-archive-contenu {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+        }
+
+        .bandeau-archive-icone {
+            font-size: 1.5rem;
+        }
+
+        .bandeau-archive-texte {
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .bandeau-archive-texte strong {
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .bandeau-archive-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .bandeau-archive-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            border-color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Mode archivé : désactivation visuelle des éléments interactifs */
+        body.mode-archive .btn-supprimer,
+        body.mode-archive .btn-modifier,
+        body.mode-archive .btn-ajouter,
+        body.mode-archive button[onclick*="supprimer"],
+        body.mode-archive button[onclick*="modifier"],
+        body.mode-archive button[onclick*="ajouter"],
+        body.mode-archive button[onclick*="sauvegarder"] {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        body.mode-archive input:not([type="search"]),
+        body.mode-archive textarea,
+        body.mode-archive select:not(#selectTrimestreActif) {
+            pointer-events: none;
+            opacity: 0.7;
+            background-color: #f5f5f5;
+        }
+
+        /* ===============================
            NAVIGATION PRINCIPALE
            =============================== */
         /* Navigation principale et sous-navigation : styles définis dans styles.css */
@@ -2744,7 +2820,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de gestion de la notation</h1>
                         <p class="meta">
-                            Beta 95 - 18 décembre 2025
+                            Beta 95 - 22 décembre 2025
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés"></span>
                         </p>
                     </div>
@@ -2790,6 +2866,19 @@
                 </div>
             </div>
         </header>
+
+        <!-- BANDEAU ARCHIVAGE (affiché quand un trimestre archivé est actif) -->
+        <div id="bandeau-archive" class="bandeau-archive" style="display: none;">
+            <div class="bandeau-archive-contenu">
+                <span class="bandeau-archive-icone">📁</span>
+                <span class="bandeau-archive-texte">
+                    <strong>TRIMESTRE ARCHIVÉ</strong> — Mode consultation (lecture seule)
+                </span>
+                <button onclick="window.location.href='#reglages-trimestre'; afficherSousSectionActuelle('sous-section-trimestre');" class="bandeau-archive-btn">
+                    Gérer les trimestres
+                </button>
+            </div>
+        </div>
 
         <!-- MODAL NOUVEAUTÉS BETA -->
         <div id="modalNouveautes" class="modal-overlay">
@@ -7497,6 +7586,53 @@ Exemple :
                             </p>
                             <div id="listeTrimestreGestion" style="display: flex; flex-direction: column; gap: 10px;">
                                 <!-- Généré dynamiquement par JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========== ACCORDÉON: EXPORT RECHERCHE ========== -->
+                    <div class="carte accordeon" id="accordeon-export-recherche">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">
+                                <span class="accordeon-chevron">▶</span> Export pour la recherche
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: none;">
+                            <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--gris-moyen);">
+                                Exportez les données du trimestre dans un format anonymisé pour analyse pédagogique ou publication.
+                            </p>
+
+                            <div class="alerte-info" style="margin-bottom: 20px;">
+                                <strong>Anonymisation réversible</strong><br>
+                                Les DA sont transformés en identifiants anonymes via un hash cryptographique.
+                                Vous seul pouvez retrouver les correspondances grâce à la clé secrète.
+                            </div>
+
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                                <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Contenu de l'export</h4>
+                                <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
+                                    <li><strong>Observations</strong> : Présences, évaluations critère par critère (SRPNF), remises</li>
+                                    <li><strong>Contexte</strong> : Grille avec classification SOLO, calendrier, artefacts</li>
+                                    <li><strong>Calculs</strong> : Snapshots hebdomadaires A-C-P, indices finaux, performance par critère</li>
+                                </ul>
+                            </div>
+
+                            <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ff9800;">
+                                <h4 style="margin: 0 0 10px 0; color: #e65100;">Deux fichiers générés</h4>
+                                <ol style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
+                                    <li><code>monitorage_[trimestre]_anonyme_[date].json</code> — Données anonymisées (partageable)</li>
+                                    <li><code>table_correspondance_[trimestre]_PRIVE_[date].json</code> — Clé secrète (NE PAS PARTAGER)</li>
+                                </ol>
+                            </div>
+
+                            <div style="text-align: center;">
+                                <button onclick="lancerExportRecherche()" class="btn btn-principal" style="padding: 12px 30px;">
+                                    Générer l'export anonymisé
+                                </button>
+                            </div>
+
+                            <div id="resultat-export-recherche" style="margin-top: 20px; display: none;">
+                                <!-- Résultat affiché après export -->
                             </div>
                         </div>
                     </div>
