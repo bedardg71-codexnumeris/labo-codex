@@ -466,6 +466,56 @@
             margin-bottom: 15px;
         }
 
+        /* Bloc d'aide dépliable */
+        .details-aide {
+            margin-top: 20px;
+            border: 1px solid var(--gris-clair);
+            border-radius: 8px;
+            background: var(--blanc);
+        }
+
+        .details-aide summary {
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--bleu-principal);
+            list-style: none;
+        }
+
+        .details-aide summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .details-aide summary::before {
+            content: "▶ ";
+            font-size: 0.8rem;
+            margin-right: 8px;
+        }
+
+        .details-aide[open] summary::before {
+            content: "▼ ";
+        }
+
+        .details-aide .details-contenu {
+            padding: 0 15px 15px 15px;
+            font-size: 0.9rem;
+            color: var(--gris-fonce);
+            line-height: 1.6;
+        }
+
+        .details-aide .details-contenu p {
+            margin-bottom: 10px;
+        }
+
+        .details-aide .details-contenu ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .details-aide .details-contenu li {
+            margin-bottom: 8px;
+        }
+
         .texte-centre {
             text-align: center;
         }
@@ -7773,6 +7823,26 @@ Exemple :
                             <div id="listeTrimestreGestion">
                                 <!-- Généré dynamiquement par afficherListeTrimestreGestion() -->
                             </div>
+
+                            <!-- Explication de l'archivage -->
+                            <details class="details-aide">
+                                <summary>Qu'est-ce que l'archivage ?</summary>
+                                <div class="details-contenu">
+                                    <p>
+                                        <strong>L'archivage protège vos données</strong> en passant le trimestre en mode lecture seule.
+                                        Aucune modification n'est possible tant qu'il n'est pas désarchivé.
+                                    </p>
+                                    <ul>
+                                        <li><strong>Format</strong> : Les données restent dans votre navigateur (localStorage/IndexedDB), au même format qu'avant.</li>
+                                        <li><strong>Sécurité</strong> : Rien n'est envoyé sur Internet. Vos données restent 100% locales sur votre appareil.</li>
+                                        <li><strong>Réversible</strong> : Vous pouvez désarchiver à tout moment pour reprendre les modifications.</li>
+                                    </ul>
+                                    <p>
+                                        <strong>Faut-il archiver ?</strong> C'est recommandé à la fin d'une session pour éviter toute modification accidentelle.
+                                        Pensez aussi à <em>exporter</em> vos données régulièrement comme sauvegarde externe.
+                                    </p>
+                                </div>
+                            </details>
 
                             <!-- Section Export pour la recherche -->
                             <div class="section-export-recherche">

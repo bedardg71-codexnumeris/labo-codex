@@ -882,11 +882,22 @@ function changerTrimestreActifV2(valeur) {
     if (typeof window.changerTrimestreActif === 'function') {
         const success = window.changerTrimestreActif(valeur);
         if (success) {
-            // Recharger l'interface
+            // Recharger l'interface complète
             chargerCadreCalendrierV2();
             chargerEvenementsPrevusV2();
             chargerEvenementsImprevusV2();
             afficherStatistiquesTrimestreV2();
+
+            // Rafraîchir le dropdown et la liste de gestion
+            populerDropdownTrimestreV2();
+            afficherListeTrimestreGestion();
+
+            // Mettre à jour le bandeau d'archivage si applicable
+            if (typeof mettreAJourBandeauArchive === 'function') {
+                mettreAJourBandeauArchive();
+            }
+
+            console.log('[Trimestre V2] Interface rafraîchie après changement');
         }
     } else {
         console.error('[Trimestre V2] Fonction changerTrimestreActif non disponible');

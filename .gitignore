@@ -3,6 +3,7 @@
 
 # Fichiers temporaires
 *.backup.json
+*backups-donnees*/
 *obsolètes*/
 
 # Calendriers institutionnels (fichiers locaux)
