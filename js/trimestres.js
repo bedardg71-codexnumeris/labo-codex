@@ -663,7 +663,9 @@
             const productions = db.getSync('productions', []);
             const evaluations = db.getSync('evaluationsSauvegardees', []);
             const presences = db.getSync('presences', []);
-            const snapshots = db.getSync('snapshots', []);
+            const snapshotsRaw = db.getSync('snapshots', []);
+            // S'assurer que snapshots est un tableau
+            const snapshots = Array.isArray(snapshotsRaw) ? snapshotsRaw : Object.values(snapshotsRaw || {});
             const grilles = db.getSync('grillesTemplates', []);
             const echelles = db.getSync('echellesTemplates', []);
             const modalites = db.getSync('modalitesEvaluation', {});
