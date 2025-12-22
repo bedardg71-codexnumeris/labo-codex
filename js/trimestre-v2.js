@@ -996,16 +996,35 @@ function chargerDropdownCoursV2() {
     const tousCours = db.getSync('listeCours', []);
     const coursActif = db.getSync('infoCours', null);
 
+    console.log('[Trimestre V2] Chargement dropdown cours...');
+    console.log('[Trimestre V2] listeCours:', tousCours.length, 'cours');
+    console.log('[Trimestre V2] infoCours:', coursActif);
+
     // Obtenir le trimestre actif
     const trimestreActifId = typeof obtenirTrimestreId === 'function' ? obtenirTrimestreId() : '';
 
     // Helper: dériver trimestreId depuis session+annee
     const deriverTrimestreId = (cours) => {
+        if (!cours) return null;
         if (cours.trimestreId) return cours.trimestreId;
         if (cours.session && cours.annee) {
-            return cours.session.toLowerCase() + cours.annee;
+            // Gère les cas où session est "H" ou "A" (1 lettre)
+            const s = cours.session.length === 1 ? cours.session.toLowerCase() : cours.session.charAt(0).toLowerCase();
+            return s + cours.annee;
+        }
+        // Essayer de parser session combinée (ex: "H2026", "A2025")
+        if (cours.session && /^[AH]\d{4}$/i.test(cours.session)) {
+            return cours.session.toLowerCase();
         }
         return null;
+    };
+
+    // Helper: obtenir le texte d'affichage d'un cours
+    const obtenirTexteCours = (c) => {
+        const sigle = c.sigle || c.codeCours || c.numero || '';
+        const titre = c.titre || c.nomCours || '';
+        const texte = `${sigle} ${titre}`.trim();
+        return texte || `Cours ${c.id || 'sans identifiant'}`;
     };
 
     // Filtrer les cours par trimestre actif
@@ -1016,7 +1035,11 @@ function chargerDropdownCoursV2() {
     const coursFiltres = trimestreActifId
         ? tousCours.filter(c => {
             const trimestreDerive = deriverTrimestreId(c);
-            return trimestreDerive === trimestreActifId || trimestreDerive === null;
+            const inclus = trimestreDerive === trimestreActifId || trimestreDerive === null;
+            if (!inclus) {
+                console.log(`[Trimestre V2] Cours exclu: ${obtenirTexteCours(c)} (trimestre: ${trimestreDerive})`);
+            }
+            return inclus;
         })
         : tousCours;
 
@@ -1030,7 +1053,7 @@ function chargerDropdownCoursV2() {
         // Le cours actif n'est pas dans listeCours ou a été filtré
         // L'ajouter pour le rendre accessible
         coursAfficher.unshift(coursActif);
-        console.log('[Trimestre V2] Cours actif ajouté au dropdown (non trouvé dans liste)');
+        console.log('[Trimestre V2] Cours actif ajouté au dropdown:', obtenirTexteCours(coursActif));
     }
 
     if (coursAfficher.length === 0) {
@@ -1043,10 +1066,10 @@ function chargerDropdownCoursV2() {
     } else {
         let coursSelectionne = false;
 
-        coursAfficher.forEach(c => {
+        coursAfficher.forEach((c, index) => {
             const option = document.createElement('option');
-            option.value = c.id || 'actuel';
-            option.textContent = `${c.sigle || ''} ${c.titre || ''}`.trim() || 'Cours sans titre';
+            option.value = c.id || `cours-${index}`;
+            option.textContent = obtenirTexteCours(c);
 
             // Sélectionner le cours actif s'il correspond
             if (coursActif && (c.id === coursActif.id || (!c.id && !coursActif.id))) {
@@ -1098,19 +1121,48 @@ function changerCoursSelectionneV2(coursId) {
 
 /**
  * Affiche les détails d'un cours (aperçu)
+ * Gère différents formats de données (Beta 95)
  */
 function afficherDetailsCoursV2(cours) {
     const conteneur = document.getElementById('v2-apercuCours');
     if (!conteneur) return;
 
-    const enseignant = cours.enseignant || {};
-    const nomEnseignant = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim() || '—';
+    console.log('[Trimestre V2] Affichage détails cours:', cours);
+
+    // Normaliser l'enseignant (peut être string ou objet)
+    let nomEnseignant = '—';
+    if (typeof cours.enseignant === 'string') {
+        nomEnseignant = cours.enseignant || '—';
+    } else if (cours.enseignant && typeof cours.enseignant === 'object') {
+        nomEnseignant = `${cours.enseignant.prenom || ''} ${cours.enseignant.nom || ''}`.trim() || '—';
+    }
+
+    // Normaliser la session (peut être "H2026" ou séparé "H" + "2026")
+    let sessionAffichage = '—';
+    if (cours.session) {
+        // Si session contient déjà l'année (ex: "H2026", "A2025")
+        if (/^[AH]\d{4}$/i.test(cours.session)) {
+            const s = cours.session.charAt(0).toUpperCase();
+            const a = cours.session.substring(1);
+            sessionAffichage = (s === 'H' ? 'Hiver' : 'Automne') + ' ' + a;
+        } else {
+            // Session et année séparées
+            const sessionNom = cours.session === 'H' ? 'Hiver' : (cours.session === 'A' ? 'Automne' : cours.session);
+            sessionAffichage = `${sessionNom} ${cours.annee || ''}`.trim();
+        }
+    }
+
+    // Normaliser les heures (heuresParSemaine ou heuresHebdo)
+    const heures = cours.heuresParSemaine || cours.heuresHebdo || '—';
+
+    // Normaliser le sigle (sigle, codeCours ou numero)
+    const sigle = cours.sigle || cours.codeCours || cours.numero || '—';
 
     conteneur.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             <div>
                 <label class="text-muted" style="font-size: 0.85rem;">Sigle</label>
-                <div style="font-weight: 600;">${cours.sigle || cours.codeCours || '—'}</div>
+                <div style="font-weight: 600;">${sigle}</div>
             </div>
             <div>
                 <label class="text-muted" style="font-size: 0.85rem;">Titre</label>
@@ -1118,7 +1170,7 @@ function afficherDetailsCoursV2(cours) {
             </div>
             <div>
                 <label class="text-muted" style="font-size: 0.85rem;">Session</label>
-                <div>${cours.session || '—'} ${cours.annee || ''}</div>
+                <div>${sessionAffichage}</div>
             </div>
             <div>
                 <label class="text-muted" style="font-size: 0.85rem;">Enseignant·e</label>
@@ -1126,7 +1178,7 @@ function afficherDetailsCoursV2(cours) {
             </div>
             <div>
                 <label class="text-muted" style="font-size: 0.85rem;">Format horaire</label>
-                <div>${cours.formatHoraire || '—'} (${cours.heuresParSemaine || '—'}h/sem)</div>
+                <div>${cours.formatHoraire || '—'} (${heures}h/sem)</div>
             </div>
             <div>
                 <label class="text-muted" style="font-size: 0.85rem;">Groupe</label>
