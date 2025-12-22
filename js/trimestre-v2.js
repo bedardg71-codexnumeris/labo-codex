@@ -806,6 +806,11 @@ function afficherListeTrimestreGestion() {
                 </div>
             </div>`;
     }).join('');
+
+    // Mettre à jour l'info du trimestre ciblé pour l'export
+    if (typeof afficherTrimestreCibleExport === 'function') {
+        afficherTrimestreCibleExport();
+    }
 }
 
 /**

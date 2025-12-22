@@ -383,35 +383,39 @@
             }
         }
 
-        .export-info-card {
-            padding: 12px 15px;
-            border-radius: 8px;
+        /* Override alerte pour grid d'export */
+        .export-info-grid .alerte {
+            margin-bottom: 0;
+        }
+
+        .export-info-grid .alerte strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .export-info-grid .alerte ul {
+            margin: 0;
+            padding-left: 18px;
             font-size: 0.9rem;
         }
 
-        .export-info-card.info {
-            background: var(--alerte-fond-information);
-            border-left: 3px solid var(--alerte-bordure-information);
-        }
-
-        .export-info-card.warning {
-            background: var(--alerte-fond-attention);
-            border-left: 3px solid var(--alerte-bordure-attention);
-        }
-
-        .export-info-card h5 {
-            margin: 0 0 8px 0;
-            font-size: 0.85rem;
-            color: inherit;
-        }
-
-        .export-info-card ul {
-            margin: 0;
-            padding-left: 18px;
-        }
-
-        .export-info-card li {
+        .export-info-grid .alerte li {
             margin-bottom: 4px;
+        }
+
+        /* Trimestre sélectionné pour export */
+        .export-trimestre-cible {
+            background: var(--bleu-tres-pale);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .export-trimestre-cible strong {
+            color: var(--bleu-principal);
         }
 
         .export-actions {
@@ -7778,17 +7782,22 @@ Exemple :
                                     la publication scientifique ou le partage avec des collègues.
                                 </p>
 
+                                <!-- Trimestre ciblé par l'export (généré dynamiquement) -->
+                                <div id="export-trimestre-info" class="export-trimestre-cible">
+                                    <!-- Généré par JS: afficherTrimestreCibleExport() -->
+                                </div>
+
                                 <div class="export-info-grid">
-                                    <div class="export-info-card info">
-                                        <h5>Contenu de l'export</h5>
+                                    <div class="alerte alerte-information">
+                                        <strong>Contenu de l'export</strong>
                                         <ul>
                                             <li><strong>Observations</strong> : Présences, évaluations par critère, remises</li>
                                             <li><strong>Contexte</strong> : Grille SOLO, calendrier, artefacts</li>
                                             <li><strong>Calculs</strong> : Snapshots A-C-P, indices finaux</li>
                                         </ul>
                                     </div>
-                                    <div class="export-info-card warning">
-                                        <h5>Anonymisation réversible</h5>
+                                    <div class="alerte alerte-attention">
+                                        <strong>Anonymisation réversible</strong>
                                         <ul>
                                             <li>Les DA sont transformés via hash cryptographique</li>
                                             <li>Vous seul pouvez retrouver les correspondances</li>

@@ -1170,6 +1170,56 @@
         if (modal) modal.remove();
     }
 
+    /**
+     * Affiche le trimestre qui sera ciblé par l'export anonymisé
+     * Basé sur le cours actif (qui contient les données)
+     */
+    function afficherTrimestreCibleExport() {
+        const container = document.getElementById('export-trimestre-info');
+        if (!container) return;
+
+        // Déterminer le trimestre du cours actif (comme dans exporterFormatRecherche)
+        const cours = db.getSync('listeCours', []);
+        const coursActif = cours.find(c => c.actif);
+        const trimestres = db.getSync('trimestres', []);
+
+        let trimestre = null;
+        let source = '';
+
+        if (coursActif && coursActif.trimestreId) {
+            trimestre = trimestres.find(t => t.id === coursActif.trimestreId);
+            source = 'cours actif';
+        }
+
+        if (!trimestre) {
+            trimestre = trimestres.find(t => t.actif);
+            source = 'trimestre actif';
+        }
+
+        if (!trimestre && trimestres.length > 0) {
+            trimestre = trimestres[0];
+            source = 'premier trimestre';
+        }
+
+        if (trimestre) {
+            // Compter les données disponibles
+            const etudiants = db.getSync('groupeEtudiants', []);
+            const evaluations = db.getSync('evaluationsSauvegardees', []);
+            const nbEtudiants = etudiants.filter(e => e.statut !== 'abandon').length;
+            const nbEvaluations = evaluations.length;
+
+            container.innerHTML = `
+                <span>Trimestre ciblé :</span>
+                <strong>${trimestre.nom}</strong>
+                <span class="texte-muted">(${nbEtudiants} étudiants, ${nbEvaluations} évaluations)</span>
+            `;
+        } else {
+            container.innerHTML = `
+                <span class="texte-muted">Aucun trimestre avec données disponible pour l'export.</span>
+            `;
+        }
+    }
+
     /* ===============================
        EXPORTS GLOBAUX
        =============================== */
@@ -1198,6 +1248,7 @@
     window.genererCleAnonymisation = genererCleAnonymisation;
     window.lancerExportRecherche = lancerExportRecherche;
     window.fermerModalExportRecherche = fermerModalExportRecherche;
+    window.afficherTrimestreCibleExport = afficherTrimestreCibleExport;
 
     // Constantes exportées pour debug
     window.CLES_NAMESPACEES = CLES_NAMESPACEES;
