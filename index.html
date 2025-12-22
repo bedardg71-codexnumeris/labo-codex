@@ -293,6 +293,185 @@
         }
 
         /* ===============================
+           GESTION DES TRIMESTRES
+           =============================== */
+
+        /* Item de trimestre dans la liste */
+        .item-trimestre {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: var(--bleu-tres-pale);
+            border-radius: 8px;
+            border-left: 4px solid var(--bleu-principal);
+            margin-bottom: 10px;
+        }
+
+        .item-trimestre.actif {
+            border-left-color: var(--vert-positif);
+        }
+
+        .item-trimestre.archive {
+            background: var(--gris-pale);
+            border-left-color: var(--gris-moyen);
+        }
+
+        .item-trimestre-info {
+            flex: 1;
+        }
+
+        .item-trimestre-nom {
+            font-weight: 600;
+            color: var(--bleu-fonce);
+        }
+
+        .item-trimestre-stats {
+            font-size: 0.8rem;
+            color: var(--gris-moyen);
+            margin-top: 4px;
+        }
+
+        .item-trimestre-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        /* Badge d'état */
+        .badge-trimestre {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-left: 10px;
+            color: white;
+        }
+
+        .badge-trimestre.actif {
+            background: var(--vert-positif);
+        }
+
+        .badge-trimestre.archive {
+            background: var(--gris-moyen);
+        }
+
+        /* Section Export Recherche */
+        .section-export-recherche {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--bleu-leger);
+        }
+
+        .section-export-recherche h4 {
+            margin: 0 0 10px 0;
+            color: var(--bleu-principal);
+            font-size: 1rem;
+        }
+
+        .export-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 768px) {
+            .export-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .export-info-card {
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .export-info-card.info {
+            background: var(--alerte-fond-information);
+            border-left: 3px solid var(--alerte-bordure-information);
+        }
+
+        .export-info-card.warning {
+            background: var(--alerte-fond-attention);
+            border-left: 3px solid var(--alerte-bordure-attention);
+        }
+
+        .export-info-card h5 {
+            margin: 0 0 8px 0;
+            font-size: 0.85rem;
+            color: inherit;
+        }
+
+        .export-info-card ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .export-info-card li {
+            margin-bottom: 4px;
+        }
+
+        .export-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* Statistiques dans modal */
+        .liste-statistiques {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 600px) {
+            .liste-statistiques {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .statistique-item {
+            text-align: center;
+            padding: 15px 10px;
+            background: var(--bleu-tres-pale);
+            border-radius: 8px;
+        }
+
+        .statistique-valeur {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--bleu-principal);
+        }
+
+        .statistique-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--gris-moyen);
+            margin-top: 5px;
+        }
+
+        /* Utilitaires texte */
+        .texte-intro {
+            font-size: 0.9rem;
+            color: var(--gris-moyen);
+            margin-bottom: 15px;
+        }
+
+        .texte-centre {
+            text-align: center;
+        }
+
+        .texte-muted {
+            color: var(--gris-moyen);
+            font-size: 0.9rem;
+        }
+
+        /* ===============================
            NAVIGATION PRINCIPALE
            =============================== */
         /* Navigation principale et sous-navigation : styles définis dans styles.css */
@@ -7573,66 +7752,56 @@ Exemple :
                         </div>
                     </div>
 
-                    <!-- ========== GESTION DES TRIMESTRES (ARCHIVAGE) ========== -->
+                    <!-- ========== GESTION DES TRIMESTRES ========== -->
                     <div class="carte accordeon" id="accordeon-gestion-trimestres">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
-                            <h3 class="carte-titre-bleu" style="margin: 0;">
+                            <h3 class="carte-titre-bleu">
                                 <span class="accordeon-chevron">▶</span> Gestion des trimestres
                             </h3>
                         </div>
-                        <div class="accordeon-contenu" style="display: none;">
-                            <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--gris-moyen);">
-                                Archivez les trimestres terminés pour les conserver en lecture seule et libérer de l'espace.
-                            </p>
-                            <div id="listeTrimestreGestion" style="display: flex; flex-direction: column; gap: 10px;">
-                                <!-- Généré dynamiquement par JS -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ========== ACCORDÉON: EXPORT RECHERCHE ========== -->
-                    <div class="carte accordeon" id="accordeon-export-recherche">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
-                            <h3 class="carte-titre-bleu" style="margin: 0;">
-                                <span class="accordeon-chevron">▶</span> Export pour la recherche
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu" style="display: none;">
-                            <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--gris-moyen);">
-                                Exportez les données du trimestre dans un format anonymisé pour analyse pédagogique ou publication.
+                        <div class="accordeon-contenu">
+                            <p class="texte-intro">
+                                Gérez vos trimestres : archivez les sessions terminées pour les conserver en lecture seule,
+                                ou exportez les données pour analyse pédagogique.
                             </p>
 
-                            <div class="alerte-info" style="margin-bottom: 20px;">
-                                <strong>Anonymisation réversible</strong><br>
-                                Les DA sont transformés en identifiants anonymes via un hash cryptographique.
-                                Vous seul pouvez retrouver les correspondances grâce à la clé secrète.
+                            <!-- Liste des trimestres (générée par JS) -->
+                            <div id="listeTrimestreGestion">
+                                <!-- Généré dynamiquement par afficherListeTrimestreGestion() -->
                             </div>
 
-                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                                <h4 style="margin: 0 0 10px 0; color: var(--bleu-principal);">Contenu de l'export</h4>
-                                <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
-                                    <li><strong>Observations</strong> : Présences, évaluations critère par critère (SRPNF), remises</li>
-                                    <li><strong>Contexte</strong> : Grille avec classification SOLO, calendrier, artefacts</li>
-                                    <li><strong>Calculs</strong> : Snapshots hebdomadaires A-C-P, indices finaux, performance par critère</li>
-                                </ul>
-                            </div>
+                            <!-- Section Export pour la recherche -->
+                            <div class="section-export-recherche">
+                                <h4>Export anonymisé pour la recherche</h4>
+                                <p class="texte-intro">
+                                    Exportez vos données dans un format anonymisé, idéal pour l'analyse pédagogique,
+                                    la publication scientifique ou le partage avec des collègues.
+                                </p>
 
-                            <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ff9800;">
-                                <h4 style="margin: 0 0 10px 0; color: #e65100;">Deux fichiers générés</h4>
-                                <ol style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
-                                    <li><code>monitorage_[trimestre]_anonyme_[date].json</code> — Données anonymisées (partageable)</li>
-                                    <li><code>table_correspondance_[trimestre]_PRIVE_[date].json</code> — Clé secrète (NE PAS PARTAGER)</li>
-                                </ol>
-                            </div>
+                                <div class="export-info-grid">
+                                    <div class="export-info-card info">
+                                        <h5>Contenu de l'export</h5>
+                                        <ul>
+                                            <li><strong>Observations</strong> : Présences, évaluations par critère, remises</li>
+                                            <li><strong>Contexte</strong> : Grille SOLO, calendrier, artefacts</li>
+                                            <li><strong>Calculs</strong> : Snapshots A-C-P, indices finaux</li>
+                                        </ul>
+                                    </div>
+                                    <div class="export-info-card warning">
+                                        <h5>Anonymisation réversible</h5>
+                                        <ul>
+                                            <li>Les DA sont transformés via hash cryptographique</li>
+                                            <li>Vous seul pouvez retrouver les correspondances</li>
+                                            <li>Conservez la clé secrète en lieu sûr</li>
+                                        </ul>
+                                    </div>
+                                </div>
 
-                            <div style="text-align: center;">
-                                <button onclick="lancerExportRecherche()" class="btn btn-principal" style="padding: 12px 30px;">
-                                    Générer l'export anonymisé
-                                </button>
-                            </div>
-
-                            <div id="resultat-export-recherche" style="margin-top: 20px; display: none;">
-                                <!-- Résultat affiché après export -->
+                                <div class="export-actions">
+                                    <button onclick="lancerExportRecherche()" class="btn btn-principal">
+                                        Générer l'export anonymisé
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

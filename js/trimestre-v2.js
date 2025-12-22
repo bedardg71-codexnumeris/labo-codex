@@ -734,7 +734,7 @@ function afficherListeTrimestreGestion() {
     const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
 
     if (trimestres.length === 0) {
-        container.innerHTML = '<p class="text-muted">Aucun trimestre configuré.</p>';
+        container.innerHTML = '<p class="texte-muted">Aucun trimestre configuré.</p>';
         return;
     }
 
@@ -742,19 +742,24 @@ function afficherListeTrimestreGestion() {
         const estActif = trimestreActif && t.id === trimestreActif.id;
         const estArchive = t.archive === true;
 
+        // Classes CSS pour l'item
+        const itemClasses = ['item-trimestre'];
+        if (estActif) itemClasses.push('actif');
+        if (estArchive) itemClasses.push('archive');
+
         // Badge d'état
         let badge = '';
         if (estActif) {
-            badge = '<span style="background: var(--vert-positif); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 10px;">Actif</span>';
+            badge = '<span class="badge-trimestre actif">Actif</span>';
         } else if (estArchive) {
-            badge = '<span style="background: var(--gris-moyen); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 10px;">Archivé</span>';
+            badge = '<span class="badge-trimestre archive">Archivé</span>';
         }
 
         // Statistiques si archivé
         let statsInfo = '';
         if (estArchive && t.statistiquesFinales) {
             const stats = t.statistiquesFinales;
-            statsInfo = `<div style="font-size: 0.8rem; color: var(--gris-moyen); margin-top: 5px;">
+            statsInfo = `<div class="item-trimestre-stats">
                 ${stats.nbEtudiants || 0} étudiant(s) • Engagement moyen: ${stats.moyenneEngagement || 0}%
                 ${t.dateFin ? ` • Archivé le ${t.dateFin}` : ''}
             </div>`;
@@ -764,39 +769,39 @@ function afficherListeTrimestreGestion() {
         let boutons = '';
         if (estActif) {
             // Le trimestre actif ne peut pas être archivé
-            boutons = `<button class="btn btn-secondaire btn-sm" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
+            boutons = `<button class="btn btn-secondaire btn-compact" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
                 Exporter
             </button>`;
         } else if (estArchive) {
             // Trimestre archivé : exporter ou désarchiver
             boutons = `
-                <button class="btn btn-secondaire btn-sm" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
+                <button class="btn btn-secondaire btn-compact" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
                     Exporter
                 </button>
-                <button class="btn btn-secondaire btn-sm" onclick="confirmerDesarchivage('${t.id}')" title="Désarchiver pour permettre les modifications">
+                <button class="btn btn-secondaire btn-compact" onclick="confirmerDesarchivage('${t.id}')" title="Désarchiver pour permettre les modifications">
                     Désarchiver
                 </button>`;
         } else {
             // Trimestre inactif : peut être archivé ou activé
             boutons = `
-                <button class="btn btn-principal btn-sm" onclick="changerTrimestreActifV2('${t.id}')" title="Activer ce trimestre">
+                <button class="btn btn-principal btn-compact" onclick="changerTrimestreActifV2('${t.id}')" title="Activer ce trimestre">
                     Activer
                 </button>
-                <button class="btn btn-secondaire btn-sm" onclick="confirmerArchivage('${t.id}')" title="Archiver ce trimestre (lecture seule)">
+                <button class="btn btn-secondaire btn-compact" onclick="confirmerArchivage('${t.id}')" title="Archiver ce trimestre (lecture seule)">
                     Archiver
                 </button>
-                <button class="btn btn-secondaire btn-sm" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
+                <button class="btn btn-secondaire btn-compact" onclick="exporterTrimestreArchive('${t.id}')" title="Exporter les données">
                     Exporter
                 </button>`;
         }
 
         return `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${estArchive ? 'var(--gris-pale)' : 'var(--bleu-tres-pale)'}; border-radius: 8px; border-left: 4px solid ${estActif ? 'var(--vert-positif)' : (estArchive ? 'var(--gris-moyen)' : 'var(--bleu-principal)')};">
-                <div>
-                    <strong>${t.nom}</strong>${badge}
+            <div class="${itemClasses.join(' ')}">
+                <div class="item-trimestre-info">
+                    <span class="item-trimestre-nom">${t.nom}</span>${badge}
                     ${statsInfo}
                 </div>
-                <div style="display: flex; gap: 8px;">
+                <div class="item-trimestre-actions">
                     ${boutons}
                 </div>
             </div>`;
