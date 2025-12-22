@@ -657,9 +657,10 @@
             const productions = db.getSync('productions', []);
             const evaluations = db.getSync('evaluationsSauvegardees', []);
             const presences = db.getSync('presences', []);
-            const snapshotsRaw = db.getSync('snapshots', []);
-            // S'assurer que snapshots est un tableau
-            const snapshots = Array.isArray(snapshotsRaw) ? snapshotsRaw : Object.values(snapshotsRaw || {});
+            const snapshotsRaw = db.getSync('snapshots', { hebdomadaires: [], interventions: [] });
+            // Les snapshots sont stockés comme { hebdomadaires: [...], interventions: [...], metadata: {...} }
+            // On exporte les snapshots hebdomadaires
+            const snapshots = snapshotsRaw.hebdomadaires || [];
             const grilles = db.getSync('grillesTemplates', []);
             const echelles = db.getSync('echellesTemplates', []);
             const modalites = db.getSync('modalitesEvaluation', {});
