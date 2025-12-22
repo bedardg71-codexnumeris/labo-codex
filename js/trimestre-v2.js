@@ -888,9 +888,12 @@ function changerTrimestreActifV2(valeur) {
             chargerEvenementsImprevusV2();
             afficherStatistiquesTrimestreV2();
 
-            // Rafraîchir le dropdown et la liste de gestion
+            // Rafraîchir le dropdown trimestre et la liste de gestion
             populerDropdownTrimestreV2();
             afficherListeTrimestreGestion();
+
+            // Rafraîchir le dropdown des cours (filtré par trimestre)
+            chargerDropdownCoursV2();
 
             // Mettre à jour le bandeau d'archivage si applicable
             if (typeof mettreAJourBandeauArchive === 'function') {
@@ -983,38 +986,82 @@ function ouvrirModalNouveauTrimestre() {
 
 /**
  * Charge la liste des cours dans le dropdown
+ * Filtre par trimestre actif (Beta 95)
  */
 function chargerDropdownCoursV2() {
     const select = document.getElementById('v2-selectCours');
     if (!select) return;
 
     // Récupérer les cours depuis le stockage
-    const cours = db.getSync('listeCours', []);
+    const tousCours = db.getSync('listeCours', []);
     const coursActif = db.getSync('infoCours', null);
+
+    // Obtenir le trimestre actif
+    const trimestreActifId = typeof obtenirTrimestreId === 'function' ? obtenirTrimestreId() : '';
+
+    // Helper: dériver trimestreId depuis session+annee
+    const deriverTrimestreId = (cours) => {
+        if (cours.trimestreId) return cours.trimestreId;
+        if (cours.session && cours.annee) {
+            return cours.session.toLowerCase() + cours.annee;
+        }
+        return null;
+    };
+
+    // Filtrer les cours par trimestre actif
+    // Critères d'inclusion:
+    // 1. trimestreId correspond exactement
+    // 2. trimestreId dérivé (session+annee) correspond
+    // 3. Pas de trimestreId ni session/annee (rétrocompatibilité)
+    const coursFiltres = trimestreActifId
+        ? tousCours.filter(c => {
+            const trimestreDerive = deriverTrimestreId(c);
+            return trimestreDerive === trimestreActifId || trimestreDerive === null;
+        })
+        : tousCours;
+
+    console.log(`[Trimestre V2] Dropdown cours: ${coursFiltres.length}/${tousCours.length} cours pour trimestre ${trimestreActifId || '(aucun)'}`);
 
     select.innerHTML = '<option value="">Sélectionner un cours...</option>';
 
-    if (cours.length === 0 && coursActif) {
-        // Si pas de liste mais un cours actif, l'ajouter
-        const option = document.createElement('option');
-        option.value = coursActif.id || 'actuel';
-        option.textContent = `${coursActif.sigle || ''} ${coursActif.titre || 'Cours actuel'}`.trim();
-        option.selected = true;
-        select.appendChild(option);
+    // Si le cours actif n'est pas dans la liste mais existe, l'ajouter
+    let coursAfficher = [...coursFiltres];
+    if (coursActif && !coursAfficher.find(c => c.id === coursActif.id)) {
+        // Le cours actif n'est pas dans listeCours ou a été filtré
+        // L'ajouter pour le rendre accessible
+        coursAfficher.unshift(coursActif);
+        console.log('[Trimestre V2] Cours actif ajouté au dropdown (non trouvé dans liste)');
+    }
 
-        // Afficher les détails
-        afficherDetailsCoursV2(coursActif);
+    if (coursAfficher.length === 0) {
+        // Aucun cours disponible
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Aucun cours pour ce trimestre';
+        option.disabled = true;
+        select.appendChild(option);
     } else {
-        cours.forEach(c => {
+        let coursSelectionne = false;
+
+        coursAfficher.forEach(c => {
             const option = document.createElement('option');
-            option.value = c.id;
-            option.textContent = `${c.sigle || ''} ${c.titre || ''}`.trim();
-            if (coursActif && c.id === coursActif.id) {
+            option.value = c.id || 'actuel';
+            option.textContent = `${c.sigle || ''} ${c.titre || ''}`.trim() || 'Cours sans titre';
+
+            // Sélectionner le cours actif s'il correspond
+            if (coursActif && (c.id === coursActif.id || (!c.id && !coursActif.id))) {
                 option.selected = true;
+                coursSelectionne = true;
                 afficherDetailsCoursV2(c);
             }
             select.appendChild(option);
         });
+
+        // Si aucun cours sélectionné mais qu'il y en a, sélectionner le premier
+        if (!coursSelectionne && coursAfficher.length > 0) {
+            select.options[1].selected = true;
+            afficherDetailsCoursV2(coursAfficher[0]);
+        }
     }
 }
 
