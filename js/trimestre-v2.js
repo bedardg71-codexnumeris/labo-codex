@@ -1047,13 +1047,30 @@ function chargerDropdownCoursV2() {
 
     select.innerHTML = '<option value="">Sélectionner un cours...</option>';
 
-    // Si le cours actif n'est pas dans la liste mais existe, l'ajouter
+    // Déterminer le cours à sélectionner
     let coursAfficher = [...coursFiltres];
-    if (coursActif && !coursAfficher.find(c => c.id === coursActif.id)) {
-        // Le cours actif n'est pas dans listeCours ou a été filtré
-        // L'ajouter pour le rendre accessible
-        coursAfficher.unshift(coursActif);
-        console.log('[Trimestre V2] Cours actif ajouté au dropdown:', obtenirTexteCours(coursActif));
+    let coursASelectionner = null;
+
+    // Vérifier si infoCours correspond au trimestre actif
+    const trimestreInfoCours = coursActif ? deriverTrimestreId(coursActif) : null;
+    const infoCoursDansTrimestre = !trimestreActifId || trimestreInfoCours === trimestreActifId || trimestreInfoCours === null;
+
+    if (coursActif && infoCoursDansTrimestre) {
+        // infoCours est dans le bon trimestre
+        if (!coursAfficher.find(c => c.id === coursActif.id)) {
+            // Pas dans listeCours, l'ajouter
+            coursAfficher.unshift(coursActif);
+            console.log('[Trimestre V2] Cours actif (infoCours) ajouté:', obtenirTexteCours(coursActif));
+        }
+        coursASelectionner = coursActif;
+    } else if (coursFiltres.length > 0) {
+        // infoCours n'est pas dans le bon trimestre, utiliser le premier cours filtré
+        coursASelectionner = coursFiltres[0];
+        console.log('[Trimestre V2] infoCours hors trimestre, sélection:', obtenirTexteCours(coursASelectionner));
+
+        // Mettre à jour infoCours avec le bon cours
+        db.setSync('infoCours', coursASelectionner);
+        console.log('[Trimestre V2] infoCours mis à jour avec le cours du trimestre actif');
     }
 
     if (coursAfficher.length === 0) {
@@ -1071,8 +1088,8 @@ function chargerDropdownCoursV2() {
             option.value = c.id || `cours-${index}`;
             option.textContent = obtenirTexteCours(c);
 
-            // Sélectionner le cours actif s'il correspond
-            if (coursActif && (c.id === coursActif.id || (!c.id && !coursActif.id))) {
+            // Sélectionner le cours déterminé (coursASelectionner)
+            if (coursASelectionner && c.id === coursASelectionner.id) {
                 option.selected = true;
                 coursSelectionne = true;
                 afficherDetailsCoursV2(c);
@@ -1129,11 +1146,16 @@ function afficherDetailsCoursV2(cours) {
 
     console.log('[Trimestre V2] Affichage détails cours:', cours);
 
-    // Normaliser l'enseignant (peut être string ou objet)
+    // Normaliser l'enseignant (plusieurs formats possibles)
     let nomEnseignant = '—';
-    if (typeof cours.enseignant === 'string') {
+    if (cours.prenomEnseignant || cours.nomEnseignant) {
+        // Format: champs séparés prenomEnseignant/nomEnseignant
+        nomEnseignant = `${cours.prenomEnseignant || ''} ${cours.nomEnseignant || ''}`.trim() || '—';
+    } else if (typeof cours.enseignant === 'string') {
+        // Format: string simple
         nomEnseignant = cours.enseignant || '—';
     } else if (cours.enseignant && typeof cours.enseignant === 'object') {
+        // Format: objet {prenom, nom}
         nomEnseignant = `${cours.enseignant.prenom || ''} ${cours.enseignant.nom || ''}`.trim() || '—';
     }
 
