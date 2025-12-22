@@ -1051,61 +1051,123 @@
 
     /**
      * Lance l'export recherche depuis l'interface utilisateur
-     * Affiche le résultat dans la zone dédiée
+     * Affiche le résultat dans un modal
      */
     async function lancerExportRecherche() {
-        const resultatDiv = document.getElementById('resultat-export-recherche');
-        if (resultatDiv) {
-            resultatDiv.style.display = 'block';
-            resultatDiv.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <div style="font-size: 2rem; margin-bottom: 10px;">⏳</div>
-                    <p>Génération de l'export en cours...</p>
-                </div>
-            `;
-        }
+        // Afficher modal de chargement
+        afficherModalExportRecherche('loading');
 
         try {
             const result = await exporterFormatRecherche();
 
             if (result.success) {
-                if (resultatDiv) {
-                    resultatDiv.innerHTML = `
-                        <div class="alerte-succes" style="text-align: left;">
-                            <strong>Export généré avec succès</strong>
-                            <ul style="margin: 10px 0 0 0; padding-left: 20px;">
-                                <li>${result.nbEtudiants} étudiants anonymisés</li>
-                                <li>${result.nbEvaluations} évaluations exportées</li>
-                                <li>${result.nbPresences} présences exportées</li>
-                                <li>${result.nbSnapshots} snapshots exportés</li>
-                            </ul>
-                            <p style="margin-top: 15px; font-size: 0.85rem; color: var(--gris-moyen);">
-                                Deux fichiers ont été téléchargés. Conservez la table de correspondance en lieu sûr.
-                            </p>
-                        </div>
-                    `;
-                }
+                afficherModalExportRecherche('success', result);
             } else {
-                if (resultatDiv) {
-                    resultatDiv.innerHTML = `
-                        <div class="alerte-erreur">
-                            <strong>Erreur lors de l'export</strong><br>
-                            ${result.error || 'Une erreur inattendue s\'est produite.'}
-                        </div>
-                    `;
-                }
+                afficherModalExportRecherche('error', { message: result.error || 'Une erreur inattendue s\'est produite.' });
             }
         } catch (error) {
             console.error('[Export Recherche] Erreur:', error);
-            if (resultatDiv) {
-                resultatDiv.innerHTML = `
-                    <div class="alerte-erreur">
-                        <strong>Erreur lors de l'export</strong><br>
-                        ${error.message}
-                    </div>
-                `;
-            }
+            afficherModalExportRecherche('error', { message: error.message });
         }
+    }
+
+    /**
+     * Affiche le modal de résultat d'export recherche
+     * @param {string} etat - 'loading', 'success', 'error'
+     * @param {Object} data - Données à afficher
+     */
+    function afficherModalExportRecherche(etat, data = {}) {
+        // Supprimer modal existant si présent
+        const existant = document.getElementById('modal-export-recherche');
+        if (existant) existant.remove();
+
+        let contenu = '';
+
+        if (etat === 'loading') {
+            contenu = `
+                <div class="modal-contenu modal-compact">
+                    <h2 class="modal-titre">Export en cours...</h2>
+                    <div class="texte-centre">
+                        <p>Génération de l'export anonymisé.</p>
+                        <p class="texte-muted">Veuillez patienter quelques instants.</p>
+                    </div>
+                </div>
+            `;
+        } else if (etat === 'success') {
+            contenu = `
+                <div class="modal-contenu modal-compact">
+                    <button class="modal-fermer" onclick="fermerModalExportRecherche()">&times;</button>
+                    <h2 class="modal-titre">Export généré avec succès</h2>
+
+                    <div class="alerte alerte-succes">
+                        <strong>Deux fichiers ont été téléchargés</strong>
+                    </div>
+
+                    <div class="liste-statistiques">
+                        <div class="statistique-item">
+                            <span class="statistique-valeur">${data.nbEtudiants || 0}</span>
+                            <span class="statistique-label">étudiants anonymisés</span>
+                        </div>
+                        <div class="statistique-item">
+                            <span class="statistique-valeur">${data.nbEvaluations || 0}</span>
+                            <span class="statistique-label">évaluations</span>
+                        </div>
+                        <div class="statistique-item">
+                            <span class="statistique-valeur">${data.nbPresences || 0}</span>
+                            <span class="statistique-label">présences</span>
+                        </div>
+                        <div class="statistique-item">
+                            <span class="statistique-valeur">${data.nbSnapshots || 0}</span>
+                            <span class="statistique-label">snapshots</span>
+                        </div>
+                    </div>
+
+                    <div class="alerte alerte-attention">
+                        <strong>Important</strong><br>
+                        Conservez la table de correspondance (<code>*_PRIVE_*.json</code>) en lieu sûr.
+                        Elle vous permettra de retrouver les correspondances DA si nécessaire.
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="btn btn-principal" onclick="fermerModalExportRecherche()">Fermer</button>
+                    </div>
+                </div>
+            `;
+        } else if (etat === 'error') {
+            contenu = `
+                <div class="modal-contenu modal-compact">
+                    <button class="modal-fermer" onclick="fermerModalExportRecherche()">&times;</button>
+                    <h2 class="modal-titre">Erreur lors de l'export</h2>
+
+                    <div class="alerte alerte-erreur">
+                        <strong>L'export a échoué</strong><br>
+                        ${data.message || 'Une erreur inattendue s\'est produite.'}
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="btn btn-principal" onclick="fermerModalExportRecherche()">Fermer</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'modal-export-recherche';
+        modal.className = 'modal-overlay actif';
+        modal.innerHTML = contenu;
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) fermerModalExportRecherche();
+        });
+
+        document.body.appendChild(modal);
+    }
+
+    /**
+     * Ferme le modal d'export recherche
+     */
+    function fermerModalExportRecherche() {
+        const modal = document.getElementById('modal-export-recherche');
+        if (modal) modal.remove();
     }
 
     /* ===============================
@@ -1135,6 +1197,7 @@
     window.exporterFormatRecherche = exporterFormatRecherche;
     window.genererCleAnonymisation = genererCleAnonymisation;
     window.lancerExportRecherche = lancerExportRecherche;
+    window.fermerModalExportRecherche = fermerModalExportRecherche;
 
     // Constantes exportées pour debug
     window.CLES_NAMESPACEES = CLES_NAMESPACEES;
