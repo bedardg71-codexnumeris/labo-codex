@@ -228,10 +228,17 @@ function addStudent() {
         if (modeModification) {
             sessionStorage.removeItem('etudiantEnModification');
 
-            // Réinitialiser le bouton
-            const btnAjouter = document.querySelector('button[onclick*="addStudent"]');
+            // Réinitialiser le bouton - chercher d'abord dans l'accordéon V2
+            const accordeonGroupe = document.getElementById('accordeon-groupe');
+            let btnAjouter = null;
+            if (accordeonGroupe) {
+                btnAjouter = accordeonGroupe.querySelector('button[onclick*="addStudent"]');
+            }
+            if (!btnAjouter) {
+                btnAjouter = document.querySelector('button[onclick*="addStudent"]');
+            }
             if (btnAjouter) {
-                btnAjouter.textContent = '➕ Ajouter';
+                btnAjouter.textContent = 'Ajouter';
                 btnAjouter.style.background = '';
             }
         }
@@ -793,14 +800,38 @@ function modifierEtudiant(da) {
         document.getElementById('etudiantCAF').value = student.caf || '';
 
         // Ouvrir le formulaire et scroller
-        const formulaire = document.querySelector('details');
+        // D'abord chercher dans l'accordéon V2 Groupe, sinon dans le legacy
+        const accordeonGroupe = document.getElementById('accordeon-groupe');
+        let formulaire = null;
+        if (accordeonGroupe) {
+            formulaire = accordeonGroupe.querySelector('details');
+        }
+        if (!formulaire) {
+            // Fallback legacy
+            formulaire = document.querySelector('#reglages-groupe-legacy details');
+        }
+        if (!formulaire) {
+            // Dernier recours - premier details de la page
+            formulaire = document.querySelector('details');
+        }
+
         if (formulaire) {
             formulaire.open = true;
             formulaire.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // Changer le texte du bouton
-        const btnAjouter = document.querySelector('button[onclick*="ajouterEtudiant"]');
+        // Changer le texte du bouton (chercher addStudent ou ajouterEtudiant)
+        let btnAjouter = null;
+        if (accordeonGroupe) {
+            btnAjouter = accordeonGroupe.querySelector('button[onclick*="addStudent"]');
+        }
+        if (!btnAjouter) {
+            btnAjouter = document.querySelector('button[onclick*="ajouterEtudiant"]');
+        }
+        if (!btnAjouter) {
+            btnAjouter = document.querySelector('button[onclick*="addStudent"]');
+        }
+
         if (btnAjouter) {
             btnAjouter.textContent = '✓ Mettre à jour';
             btnAjouter.style.background = 'var(--orange-accent)';
@@ -1005,12 +1036,19 @@ function deleteStudent(id) {
 window.initialiserModuleGroupe = initialiserModuleGroupe;
 window.supprimerEtudiant = supprimerEtudiant;
 window.modifierEtudiant = modifierEtudiant;
-// window.ajouterEtudiant = ajouterEtudiant; // FIXME: fonction n'existe pas - utiliser addStudent() à la place
 window.afficherListeEtudiants = afficherListeEtudiants;
-// window.basculerVerrouillageGroupe = basculerVerrouillageGroupe; // FIXME: fonction n'existe pas
 window.resetStudentsData = resetStudentsData;
 window.exportStudentsData = exportStudentsData;
 window.deleteStudent = deleteStudent;
+
+// Fonctions d'import (utilisées par l'accordéon Groupe dans Trimestre V2)
+window.handleFileImport = handleFileImport;
+window.previewPastedData = previewPastedData;
+window.confirmImport = confirmImport;
+window.cancelImport = cancelImport;
+window.addStudent = addStudent;
+window.filtrerParGroupe = filtrerParGroupe;
+window.resetFiltreGroupe = resetFiltreGroupe;
 
 
 
