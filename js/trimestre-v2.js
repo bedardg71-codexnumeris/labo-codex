@@ -57,7 +57,6 @@ function initialiserTrimestreV2() {
  */
 function chargerCadreCalendrierV2() {
     const cadre = db.getSync(cle('cadreCalendrier'), null);
-    if (!cadre) return;
 
     // Mapping des IDs v2 vers les clés du cadre
     const champs = {
@@ -71,11 +70,23 @@ function chargerCadreCalendrierV2() {
         'v2-semaineExamensFin': 'semaineExamensFin'
     };
 
+    // Remplir ou vider les champs selon que le cadre existe ou non
     for (const [idElement, cleCadre] of Object.entries(champs)) {
         const element = document.getElementById(idElement);
-        if (element && cadre[cleCadre]) {
-            element.value = cadre[cleCadre];
+        if (element) {
+            element.value = (cadre && cadre[cleCadre]) ? cadre[cleCadre] : '';
         }
+    }
+
+    // Si pas de cadre, réinitialiser les statistiques et sortir
+    if (!cadre) {
+        const elemSemaines = document.getElementById('v2-nombreSemaines');
+        const elemJours = document.getElementById('v2-nombreJoursCours');
+        const elemStats = document.getElementById('v2-statsCongesReprises');
+        if (elemSemaines) elemSemaines.textContent = '0';
+        if (elemJours) elemJours.textContent = '0';
+        if (elemStats) elemStats.textContent = '';
+        return;
     }
 
     // Vérifier si le calendrier existe, sinon le générer
@@ -345,19 +356,25 @@ function chargerEvenementsImprevusV2() {
  * Génère le HTML d'une carte événement (mode compact)
  */
 function genererCarteEvenementV2(evt, type) {
-    const couleurBadge = type === 'prevu' ? 'var(--vert-confirmer)' : 'var(--orange-accent)';
     const repriseInfo = evt.dateReprise ?
-        ` → Reprise ${evt.horaireReprise || ''} le ${evt.dateReprise}` : '';
+        `<div style="font-size: 0.85rem; color: var(--gris-moyen); margin-top: 4px;">
+            → Reprise <strong>${evt.horaireReprise || ''}</strong> le <strong>${evt.dateReprise}</strong>
+        </div>` : '';
 
     return `
-    <div class="item-carte-compact" style="margin-bottom: 8px; padding: 10px; background: var(--bleu-tres-pale); border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <strong style="color: ${couleurBadge};">${evt.description}</strong>
-            <span class="text-muted" style="margin-left: 10px;">${evt.dateEvenement}${repriseInfo}</span>
-        </div>
-        <div>
-            <button onclick="modifierEvenementV2('${evt.id}', '${type}')" class="btn btn-secondaire btn-sm" style="padding: 4px 8px; font-size: 0.8rem;">Modifier</button>
-            <button onclick="supprimerEvenementV2('${evt.id}', '${type}')" class="btn btn-supprimer btn-sm" style="padding: 4px 8px; font-size: 0.8rem;">Suppr.</button>
+    <div class="item-carte-compact" style="margin-bottom: 12px; padding: 12px 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--bleu-principal);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;">
+            <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <strong style="font-size: 1rem;">${evt.description}</strong>
+                    <span style="color: var(--bleu-principal); font-weight: 500;">${evt.dateEvenement}</span>
+                </div>
+                ${repriseInfo}
+            </div>
+            <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                <button onclick="modifierEvenementV2('${evt.id}', '${type}')" class="btn btn-secondaire btn-sm" style="padding: 6px 12px; font-size: 0.85rem;">Modifier</button>
+                <button onclick="supprimerEvenementV2('${evt.id}', '${type}')" class="btn btn-supprimer btn-sm" style="padding: 6px 12px; font-size: 0.85rem;">Suppr.</button>
+            </div>
         </div>
     </div>`;
 }
@@ -460,7 +477,7 @@ function retournerVueV2() {
  */
 function modifierEvenementV2(id, type) {
     const typeStorage = type === 'prevu' ? 'evenementsPrevus' : 'evenementsImprevus';
-    const evenements = db.getSync(typeStorage, []);
+    const evenements = db.getSync(cle(typeStorage), []);
     const evt = evenements.find(e => e.id === id);
 
     if (!evt) {
@@ -660,10 +677,10 @@ function supprimerEvenementV2(id, type) {
     if (!confirm('Voulez-vous vraiment supprimer cet événement ?')) return;
 
     const typeStorage = type === 'prevu' ? 'evenementsPrevus' : 'evenementsImprevus';
-    let evenements = db.getSync(typeStorage, []);
+    let evenements = db.getSync(cle(typeStorage), []);
 
     evenements = evenements.filter(e => e.id !== id);
-    db.setSync(typeStorage, evenements);
+    db.setSync(cle(typeStorage), evenements);
 
     // Régénérer le calendrier
     if (typeof genererCalendrierComplet === 'function') {
@@ -1074,12 +1091,25 @@ function chargerDropdownCoursV2() {
     }
 
     if (coursAfficher.length === 0) {
-        // Aucun cours disponible
+        // Aucun cours disponible pour ce trimestre
         const option = document.createElement('option');
         option.value = '';
         option.textContent = 'Aucun cours pour ce trimestre';
         option.disabled = true;
         select.appendChild(option);
+
+        // IMPORTANT: Réinitialiser infoCours pour éviter d'afficher des données d'un autre trimestre
+        db.setSync('infoCours', null);
+        console.log('[Trimestre V2] infoCours réinitialisé (aucun cours pour ce trimestre)');
+
+        // Vider l'affichage des détails du cours
+        viderAffichageCoursV2();
+
+        // Cacher les boutons Modifier et Dupliquer
+        const btnModifier = document.getElementById('v2-btnModifierCours');
+        const btnDupliquer = document.getElementById('v2-btnDupliquerCours');
+        if (btnModifier) btnModifier.style.display = 'none';
+        if (btnDupliquer) btnDupliquer.style.display = 'none';
     } else {
         let coursSelectionne = false;
 
@@ -1104,10 +1134,14 @@ function chargerDropdownCoursV2() {
             coursSelectionne = true; // Un cours est maintenant sélectionné
         }
 
-        // Afficher le bouton Modifier si un cours est sélectionné
+        // Afficher les boutons Modifier et Dupliquer si un cours est sélectionné
         const btnModifier = document.getElementById('v2-btnModifierCours');
+        const btnDupliquer = document.getElementById('v2-btnDupliquerCours');
         if (btnModifier) {
             btnModifier.style.display = coursSelectionne ? '' : 'none';
+        }
+        if (btnDupliquer) {
+            btnDupliquer.style.display = coursSelectionne ? '' : 'none';
         }
     }
 }
@@ -1118,6 +1152,7 @@ function chargerDropdownCoursV2() {
 function changerCoursSelectionneV2(coursId) {
     const apercuCours = document.getElementById('v2-apercuCours');
     const btnModifier = document.getElementById('v2-btnModifierCours');
+    const btnDupliquer = document.getElementById('v2-btnDupliquerCours');
     const formulaire = document.getElementById('v2-formulaireCours');
     const listeGroupes = document.getElementById('v2-listeGroupes');
 
@@ -1129,6 +1164,7 @@ function changerCoursSelectionneV2(coursId) {
         if (apercuCours) apercuCours.innerHTML = '<p class="text-muted">Sélectionnez un cours pour voir ses détails.</p>';
         if (listeGroupes) listeGroupes.innerHTML = '<p class="text-muted">Sélectionnez un cours pour voir ses groupes.</p>';
         if (btnModifier) btnModifier.style.display = 'none';
+        if (btnDupliquer) btnDupliquer.style.display = 'none';
         return;
     }
 
@@ -1140,6 +1176,46 @@ function changerCoursSelectionneV2(coursId) {
         afficherDetailsCoursV2(coursSelectionne);
         chargerGroupesCoursV2(coursId);
         if (btnModifier) btnModifier.style.display = '';
+        if (btnDupliquer) btnDupliquer.style.display = '';
+    }
+}
+
+/**
+ * Vide l'affichage du cours et du groupe d'étudiants
+ * Appelé quand il n'y a aucun cours pour le trimestre actif
+ */
+function viderAffichageCoursV2() {
+    console.log('[Trimestre V2] Vidage de l\'affichage cours et étudiants');
+
+    // Vider l'aperçu du cours
+    const apercuCours = document.getElementById('v2-apercuCours');
+    if (apercuCours) {
+        apercuCours.innerHTML = '<p class="text-muted">Sélectionnez un cours pour voir ses détails.</p>';
+    }
+
+    // Vider les statistiques du groupe
+    const nbEtudiants = document.getElementById('v2-nbEtudiantsTotal');
+    if (nbEtudiants) nbEtudiants.textContent = '0';
+
+    const groupeCoursElem = document.getElementById('v2-groupeCours');
+    if (groupeCoursElem) groupeCoursElem.textContent = '—';
+
+    // Vider la liste des étudiants
+    const listeEtudiants = document.getElementById('v2-listeEtudiants');
+    if (listeEtudiants) {
+        listeEtudiants.innerHTML = '<p class="text-muted text-italic">Aucun cours sélectionné pour ce trimestre.</p>';
+    }
+
+    // Vider la liste des groupes
+    const listeGroupes = document.getElementById('v2-listeGroupes');
+    if (listeGroupes) {
+        listeGroupes.innerHTML = '<p class="text-muted">Aucun cours sélectionné.</p>';
+    }
+
+    // Vider l'horaire
+    const listeSeances = document.getElementById('v2-listeSeances');
+    if (listeSeances) {
+        listeSeances.innerHTML = '<p class="text-muted">Aucun cours sélectionné.</p>';
     }
 }
 
@@ -1187,11 +1263,23 @@ function afficherDetailsCoursV2(cours) {
     // Normaliser le sigle (sigle, codeCours ou numero)
     const sigle = cours.sigle || cours.codeCours || cours.numero || '—';
 
+    // Construire l'identifiant trimestre (ex: A2025, H2026)
+    let trimestreId = '';
+    if (cours.session && cours.annee) {
+        trimestreId = `${cours.session.charAt(0).toUpperCase()}${cours.annee}`;
+    } else if (cours.trimestreId) {
+        trimestreId = cours.trimestreId.toUpperCase();
+    }
+
+    // Construire l'identifiant groupe-cours complet (ex: A2025-601-101-MQ-00001)
+    const groupeFormate = cours.groupe ? String(cours.groupe).padStart(5, '0') : '00001';
+    const groupeCours = (trimestreId && sigle !== '—') ? `${trimestreId}-${sigle}-${groupeFormate}` : '—';
+
     conteneur.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Code</label>
-                <div style="font-weight: 600;">${sigle}</div>
+                <label class="text-muted" style="font-size: 0.85rem;">Groupe-cours</label>
+                <div style="font-weight: 600; font-size: 1.1rem; color: var(--bleu-principal);">${groupeCours}</div>
             </div>
             <div>
                 <label class="text-muted" style="font-size: 0.85rem;">Titre</label>
@@ -1208,10 +1296,6 @@ function afficherDetailsCoursV2(cours) {
             <div>
                 <label class="text-muted" style="font-size: 0.85rem;">Format horaire</label>
                 <div>${cours.formatHoraire || '—'} (${heures}h/sem)</div>
-            </div>
-            <div>
-                <label class="text-muted" style="font-size: 0.85rem;">Groupe</label>
-                <div>${cours.groupe || '—'}</div>
             </div>
         </div>
     `;
@@ -1290,6 +1374,57 @@ function modifierCoursSelectionneV2() {
 }
 
 /**
+ * Duplique le cours actuellement sélectionné
+ * Crée une copie avec un nouvel ID et ouvre le formulaire en mode création
+ */
+function dupliquerCoursSelectionneV2() {
+    const selectCours = document.getElementById('v2-selectCours');
+    const coursId = selectCours?.value;
+
+    if (!coursId) {
+        alert('Veuillez sélectionner un cours à dupliquer.');
+        return;
+    }
+
+    // Trouver le cours
+    const cours = db.getSync('listeCours', []);
+    const coursSelectionne = cours.find(c => c.id === coursId) || db.getSync('infoCours', null);
+
+    if (!coursSelectionne) {
+        alert('Cours non trouvé.');
+        return;
+    }
+
+    // Ouvrir le formulaire en mode création (pas d'édition)
+    coursEnEditionV2 = null;
+
+    const formulaire = document.getElementById('v2-formulaireCours');
+    const apercu = document.getElementById('v2-apercuCours');
+    const titre = document.getElementById('v2-titreFormCours');
+    const btnTexte = document.getElementById('v2-btnTexteCours');
+
+    if (formulaire) {
+        formulaire.style.display = 'block';
+        if (apercu) apercu.style.display = 'none';
+        if (titre) titre.textContent = 'Dupliquer le cours';
+        if (btnTexte) btnTexte.textContent = 'Créer la copie';
+
+        // Remplir les champs avec les données du cours existant
+        remplirFormCoursV2(coursSelectionne);
+
+        // Modifier le nom pour indiquer que c'est une copie
+        const nomCours = document.getElementById('v2-nomCours');
+        if (nomCours && nomCours.value) {
+            nomCours.value = nomCours.value + ' (copie)';
+        }
+
+        formulaire.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    console.log('[Trimestre V2] Duplication du cours:', coursSelectionne.sigle || coursSelectionne.codeCours);
+}
+
+/**
  * Remplit le formulaire avec les données d'un cours
  * Gère différents formats de données (Beta 95)
  */
@@ -1319,8 +1454,7 @@ function remplirFormCoursV2(cours) {
     setValue('v2-annee', cours.annee || new Date().getFullYear());
     setValue('v2-heuresParSemaine', cours.heuresParSemaine || cours.heuresHebdo || 4);
     setValue('v2-formatHoraire', cours.formatHoraire || '2x2');
-    setValue('v2-numeroGroupe', cours.groupe || '01');
-    // Local retiré de l'interface (Beta 95)
+    // Groupe géré via le groupe-cours (Beta 95)
 }
 
 /**
@@ -1337,7 +1471,6 @@ function reinitialiserFormCoursV2() {
     setValue('v2-session', 'H');
     setValue('v2-heuresParSemaine', 4);
     setValue('v2-formatHoraire', '2x2');
-    setValue('v2-numeroGroupe', '01');
 }
 
 /**
@@ -1384,10 +1517,22 @@ function sauvegarderCoursV2() {
 
     const session = document.getElementById('v2-session')?.value || 'H';
     const annee = document.getElementById('v2-annee')?.value || new Date().getFullYear();
-    const groupe = document.getElementById('v2-numeroGroupe')?.value || '01';
+
+    // Récupérer le groupe depuis le cours existant ou utiliser la valeur par défaut
+    let groupe = '00001';
+    if (coursEnEditionV2) {
+        const listeCours = db.getSync('listeCours', []);
+        const coursExistant = listeCours.find(c => c.id === coursEnEditionV2);
+        if (coursExistant?.groupe) {
+            groupe = String(coursExistant.groupe).padStart(5, '0');
+        }
+    }
+
+    // Construire l'identifiant groupe-cours (ex: a2025-601-101-MQ-00001)
+    const trimestreId = `${session.toLowerCase()}${annee}`;
 
     const cours = {
-        id: coursEnEditionV2 || `${codeCours}-${session.toLowerCase()}${annee}-${groupe}`,
+        id: coursEnEditionV2 || `${trimestreId}-${codeCours}-${groupe}`,
         sigle: codeCours,
         codeCours: codeCours,
         titre: nomCours,
@@ -1471,18 +1616,30 @@ let donneesImportEnAttenteV2 = [];
 function chargerListeEtudiantsV2() {
     const conteneur = document.getElementById('v2-listeEtudiants');
     const nbTotal = document.getElementById('v2-nbEtudiantsTotal');
-    const groupeActifElem = document.getElementById('v2-groupeActif');
+    const groupeCoursElem = document.getElementById('v2-groupeCours');
     const actionsEtudiants = document.getElementById('v2-actionsEtudiants');
 
     if (!conteneur) return;
 
     const etudiants = db.getSync('groupeEtudiants', []);
     const coursActif = db.getSync('infoCours', null);
-    const groupeActif = coursActif?.groupe || '01';
+
+    // Construire l'identifiant trimestre (ex: A2025, H2026)
+    let trimestreId = '';
+    if (coursActif?.session && coursActif?.annee) {
+        trimestreId = `${coursActif.session.charAt(0).toUpperCase()}${coursActif.annee}`;
+    } else if (coursActif?.trimestreId) {
+        trimestreId = coursActif.trimestreId.toUpperCase();
+    }
+
+    // Construire l'identifiant groupe-cours complet (ex: A2025-601-101-MQ-00001)
+    const codeCours = coursActif?.sigle || coursActif?.codeCours || '';
+    const numeroGroupe = coursActif?.groupe ? String(coursActif.groupe).padStart(5, '0') : '00001';
+    const groupeCours = (trimestreId && codeCours) ? `${trimestreId}-${codeCours}-${numeroGroupe}` : '—';
 
     // Mettre à jour les compteurs
     if (nbTotal) nbTotal.textContent = etudiants.length;
-    if (groupeActifElem) groupeActifElem.textContent = groupeActif;
+    if (groupeCoursElem) groupeCoursElem.textContent = groupeCours;
 
     if (etudiants.length === 0) {
         conteneur.innerHTML = '<p class="text-muted text-italic">Aucun étudiant dans ce groupe. Utilisez le formulaire ou l\'import ci-dessus.</p>';
@@ -1504,6 +1661,7 @@ function chargerListeEtudiantsV2() {
             <thead class="thead-bleu-moyen">
                 <tr>
                     <th style="text-align: left; padding: 8px;">DA</th>
+                    <th style="text-align: center; padding: 8px;">Groupe</th>
                     <th style="text-align: left; padding: 8px;">Nom</th>
                     <th style="text-align: left; padding: 8px;">Prénom</th>
                     <th style="text-align: left; padding: 8px;">Programme</th>
@@ -1516,9 +1674,12 @@ function chargerListeEtudiantsV2() {
 
     etudiants.forEach((e, index) => {
         const sa = e.sa === 'Oui' || e.sa === true ? '✓' : '';
+        // Formater le groupe sur 5 chiffres (ex: 00001)
+        const groupe = e.groupe ? String(e.groupe).padStart(5, '0') : '—';
         html += `
             <tr>
                 <td style="padding: 6px 8px;">${e.da || '—'}</td>
+                <td style="padding: 6px 8px; text-align: center;">${groupe}</td>
                 <td style="padding: 6px 8px;">${e.nom || '—'}</td>
                 <td style="padding: 6px 8px;">${e.prenom || '—'}</td>
                 <td style="padding: 6px 8px;">${e.programme || '—'}</td>
@@ -1550,6 +1711,7 @@ function ajouterEtudiantV2() {
     const prenom = document.getElementById('v2-etudiantPrenom')?.value?.trim();
     const programme = document.getElementById('v2-etudiantProgramme')?.value?.trim();
     const sa = document.getElementById('v2-etudiantSA')?.value;
+    const groupeInput = document.getElementById('v2-etudiantGroupe')?.value?.trim();
 
     if (!nom || !prenom) {
         alert('Le nom et le prénom sont obligatoires.');
@@ -1557,7 +1719,8 @@ function ajouterEtudiantV2() {
     }
 
     const coursActif = db.getSync('infoCours', null);
-    const groupe = coursActif?.groupe || '01';
+    // Priorité au champ groupe saisi, sinon groupe du cours actif
+    const groupe = groupeInput || coursActif?.groupe || '00001';
 
     const nouvelEtudiant = {
         da: da || `DA${Date.now()}`,
@@ -1577,6 +1740,7 @@ function ajouterEtudiantV2() {
     setValue('v2-etudiantDA', '');
     setValue('v2-etudiantNom', '');
     setValue('v2-etudiantPrenom', '');
+    setValue('v2-etudiantGroupe', '');
     setValue('v2-etudiantProgramme', '');
     setValue('v2-etudiantSA', '');
 
@@ -1649,7 +1813,7 @@ function traiterDonneesImportV2(contenu) {
         if (colonnes.length >= 4) {
             donneesImportEnAttenteV2.push({
                 da: colonnes[0] || '',
-                groupe: colonnes[1] || '01',
+                groupe: colonnes[1] || '00001',
                 nom: colonnes[2] || '',
                 prenom: colonnes[3] || '',
                 programme: colonnes[4] || '',
@@ -1672,16 +1836,17 @@ function traiterDonneesImportV2(contenu) {
             <table class="tableau-blanc" style="width: 100%; font-size: 0.85rem;">
                 <thead>
                     <tr>
-                        <th>DA</th><th>Nom</th><th>Prénom</th><th>Programme</th><th>SA</th>
+                        <th>DA</th><th>Groupe</th><th>Nom</th><th>Prénom</th><th>Programme</th><th>SA</th>
                     </tr>
                 </thead>
                 <tbody>
         `;
 
         donneesImportEnAttenteV2.forEach(e => {
+            const groupe = e.groupe ? String(e.groupe).padStart(5, '0') : '—';
             html += `
                 <tr>
-                    <td>${e.da}</td><td>${e.nom}</td><td>${e.prenom}</td><td>${e.programme}</td><td>${e.sa}</td>
+                    <td>${e.da}</td><td>${groupe}</td><td>${e.nom}</td><td>${e.prenom}</td><td>${e.programme}</td><td>${e.sa}</td>
                 </tr>
             `;
         });
@@ -1805,7 +1970,17 @@ function chargerSeancesV2() {
     const conteneur = document.getElementById('v2-seancesContainer');
     if (!conteneur) return;
 
-    const horaire = db.getSync(cle('horaireHebdo'), []);
+    let horaire = db.getSync(cle('horaireHebdo'), []);
+
+    // Fallback: chercher dans seancesHoraire (ancien format) et migrer si trouvé
+    if (horaire.length === 0) {
+        const seancesHoraire = db.getSync('seancesHoraire', []);
+        if (seancesHoraire.length > 0) {
+            console.log('[Horaire V2] Migration automatique de seancesHoraire vers', cle('horaireHebdo'));
+            horaire = seancesHoraire;
+            db.setSync(cle('horaireHebdo'), horaire);
+        }
+    }
 
     if (horaire.length === 0) {
         conteneur.innerHTML = '<p class="text-muted text-italic">Aucune séance configurée. Cliquez sur « + Ajouter une séance » pour commencer.</p>';
@@ -2084,9 +2259,11 @@ window.confirmerArchivage = confirmerArchivage;
 window.confirmerDesarchivage = confirmerDesarchivage;
 window.chargerDropdownCoursV2 = chargerDropdownCoursV2;
 window.changerCoursSelectionneV2 = changerCoursSelectionneV2;
+window.viderAffichageCoursV2 = viderAffichageCoursV2;
 window.afficherDetailsCoursV2 = afficherDetailsCoursV2;
 window.afficherFormCoursV2 = afficherFormCoursV2;
 window.modifierCoursSelectionneV2 = modifierCoursSelectionneV2;
+window.dupliquerCoursSelectionneV2 = dupliquerCoursSelectionneV2;
 window.annulerFormCoursV2 = annulerFormCoursV2;
 window.sauvegarderCoursV2 = sauvegarderCoursV2;
 window.ouvrirModalNouveauCours = ouvrirModalNouveauCours;

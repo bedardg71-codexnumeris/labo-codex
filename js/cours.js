@@ -830,6 +830,80 @@ function dupliquerCours(id) {
     }
 }
 
+/**
+ * Duplique un cours pour le trimestre actuellement actif
+ * Utilisé depuis le modal Bibliothèque pour créer une copie dans un nouveau trimestre
+ *
+ * FONCTIONNEMENT:
+ * 1. Récupère le cours original
+ * 2. Obtient le trimestre actif (session + année)
+ * 3. Crée une copie avec session/année du trimestre actif
+ * 4. Génère un nouvel ID et trimestreId
+ * 5. Sauvegarde et rafraîchit
+ *
+ * @param {string} id - ID du cours à dupliquer
+ */
+function dupliquerCoursPourTrimestreActif(id) {
+    const cours = db.getSync('listeCours', []);
+    const coursOriginal = cours.find(c => c.id === id);
+
+    if (!coursOriginal) {
+        alert('Cours introuvable');
+        return;
+    }
+
+    // Obtenir le trimestre actif
+    const trimestres = db.getSync('trimestres', []);
+    const trimestreActif = trimestres.find(t => t.actif) || trimestres[0];
+
+    if (!trimestreActif) {
+        alert('Aucun trimestre actif. Veuillez d\'abord créer un trimestre.');
+        return;
+    }
+
+    // Créer la copie avec les infos du nouveau trimestre
+    const nouveauCours = {
+        ...coursOriginal,
+        id: 'COURS' + Date.now(),
+        session: trimestreActif.session,
+        annee: trimestreActif.annee,
+        trimestreId: trimestreActif.id,
+        dateEnregistrement: new Date().toISOString(),
+        dansBibliotheque: true,
+        actif: false,
+        verrouille: false
+    };
+
+    // Ne pas copier le suffixe "(copie)" si déjà présent
+    if (!nouveauCours.codeCours.includes('(copie)')) {
+        // Garder le code original, pas de suffixe
+    }
+
+    cours.push(nouveauCours);
+    db.setSync('listeCours', cours);
+
+    // Fermer le modal et rafraîchir
+    fermerModalBibliothequeCours();
+
+    // Rafraîchir le dropdown V2 si disponible
+    if (typeof chargerDropdownCoursV2 === 'function') {
+        chargerDropdownCoursV2();
+    }
+
+    // Rafraîchir le tableau legacy si visible
+    if (typeof afficherTableauCours === 'function') {
+        afficherTableauCours();
+    }
+
+    // Rafraîchir la sidebar
+    if (typeof afficherListeCoursSidebar === 'function') {
+        afficherListeCoursSidebar();
+    }
+
+    afficherNotificationSucces(`Cours dupliqué pour ${trimestreActif.nom} !`);
+    console.log('[Cours] Cours dupliqué pour trimestre actif:', trimestreActif.id, nouveauCours);
+}
+
 /* ===============================
    ⭐ ACTIVATION DU COURS
    =============================== */
@@ -1204,11 +1278,16 @@ async function ouvrirModalBibliothequeCours() {
                                 ${echapperHtml(cours.prenomEnseignant)} ${echapperHtml(cours.nomEnseignant)} • ${echapperHtml(cours.session)}${echapperHtml(cours.annee)}
                             </div>
                         </div>
-                        <div style="display: flex; gap: 8px;">
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="dupliquerCoursPourTrimestreActif('${cours.id}')"
+                                    class="btn btn-confirmer btn-tres-compact"
+                                    title="Créer une copie de ce cours pour le trimestre actif">
+                                Dupliquer
+                            </button>
                             <button onclick="partagerCours('${cours.id}')"
                                     class="btn btn-secondaire btn-tres-compact"
-                                    title="Partager ce cours">
-                                Partager
+                                    title="Exporter ce cours en JSON pour le partager">
+                                Exporter
                             </button>
                             <button onclick="retirerCoursDeBibliotheque('${cours.id}')"
                                     class="btn btn-supprimer btn-tres-compact"
@@ -1224,9 +1303,9 @@ async function ouvrirModalBibliothequeCours() {
 
     modalHTML += `
                 </div>
-                <div style="text-align: center;">
-                    <button onclick="partagerTousLesCours()" class="btn btn-secondaire">
-                        Partager tous mes cours
+                <div style="text-align: center; margin-top: 15px;">
+                    <button onclick="partagerTousLesCours()" class="btn btn-secondaire" title="Exporter tous vos cours en un seul fichier JSON">
+                        Exporter tous mes cours
                     </button>
                 </div>
     `;
@@ -1277,8 +1356,8 @@ async function ouvrirModalBibliothequeCours() {
     modalHTML += `
                 <div style="text-align: center; margin-top: 15px;">
                     <button onclick="document.getElementById('fichier-import-cours-modal').click()"
-                            class="btn btn-secondaire">
-                        Ajouter des cours
+                            class="btn btn-confirmer" title="Importer des cours depuis un fichier JSON">
+                        Importer des cours
                     </button>
                     <input type="file" id="fichier-import-cours-modal" accept=".json"
                            style="display: none;" onchange="importerCoursSimple(event)">
@@ -1579,6 +1658,7 @@ window.sauvegarderCours = sauvegarderCours;
 window.annulerFormCours = annulerFormCours;
 window.modifierCours = modifierCours;
 window.dupliquerCours = dupliquerCours;
+window.dupliquerCoursPourTrimestreActif = dupliquerCoursPourTrimestreActif;
 window.supprimerCours = supprimerCours;
 window.activerCours = activerCours;
 window.afficherTableauCours = afficherTableauCours;

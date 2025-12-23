@@ -164,6 +164,13 @@ function initialiserModuleTrimestre() {
     // ✅ Beta 93.5 : Charger l'état de la checkbox données démo
     chargerEtatCheckboxDemo();
 
+    // ✅ Beta 95 : Synchroniser avec l'interface V2 (trimestre-v2.js)
+    if (typeof chargerCadreCalendrierV2 === 'function') {
+        chargerCadreCalendrierV2();
+        chargerEvenementsPrevusV2();
+        chargerEvenementsImprevusV2();
+    }
+
     console.log('   ✅ Module Trimestre initialisé avec calendrier complet');
 }
 
@@ -870,6 +877,11 @@ function afficherStatistiquesTrimestre() {
     if (elemConges) elemConges.textContent = nbConges;
 
     console.log(`Statistiques: ${nbSemaines} sem. | ${nbJoursCours} jours | ${nbConges} congés`);
+
+    // Synchroniser avec trimestre-v2.js (interface V2)
+    if (typeof afficherStatistiquesTrimestreV2 === 'function') {
+        afficherStatistiquesTrimestreV2();
+    }
 }
 
 /* ===============================
