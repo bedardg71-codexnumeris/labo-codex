@@ -272,8 +272,12 @@
     };
 
     /**
-     * Descriptions des variantes PAN-Standards
+     * Descriptions des variantes PAN-Standards (4 options - traces sélectives)
      * Basé sur les cartographies analysées et le formulaire de cartographie
+     *
+     * Note : Les approches "moyenne de toutes" et "médiane/mode" ont été retirées
+     * car elles s'apparentent davantage à des pratiques sommatives (toutes les
+     * traces comptent, pénalisant les erreurs initiales).
      */
     const VARIANTES_PAN_STANDARDS = {
         'n-meilleurs': {
@@ -281,20 +285,10 @@
             description: 'La note finale est basée sur les N meilleures productions de l\'étudiant. Permet de valoriser la progression et d\'éliminer les « mauvais jours ». Exemple : Grégoire Bédard (Littérature).',
             exemple: 'Portfolio avec les 7 meilleurs artefacts sur 12'
         },
-        'moyenne': {
-            nom: 'Moyenne de toutes les productions',
-            description: 'La note finale est la moyenne de toutes les productions évaluées par niveaux de maîtrise. Chaque production peut avoir une pondération différente. Exemple : Michel B. (Mathématiques).',
-            exemple: 'Moyenne pondérée des niveaux par objectif'
-        },
         'n-recents': {
             nom: 'N productions les plus récentes',
             description: 'La note finale est basée sur les N productions les plus récentes. Valorise la progression et l\'état actuel des apprentissages plutôt que les difficultés initiales.',
             exemple: 'Les 5 dernières évaluations déterminent la note'
-        },
-        'mediane-mode': {
-            nom: 'Médiane ou mode des niveaux',
-            description: 'La note finale est déterminée par la tendance centrale (médiane ou mode) des niveaux atteints, avec jugement professionnel de l\'enseignant. Exemple : Isabelle M. (Biologie).',
-            exemple: 'Mode statistique comme suggestion + jugement global'
         },
         'grille-profils': {
             nom: 'Grille de profils de niveaux',
