@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 95 - Refonte UX Réglages</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2025121601">
+    <link rel="stylesheet" href="styles.css?v=2025122401">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -8514,11 +8514,10 @@ Exemple :
                                 </label>
                                 <select id="v2-pratique-type" class="controle-form" onchange="changerTypePratiqueV2()">
                                     <option value="">-- Choisir un type --</option>
-                                    <option value="sommative">Sommative traditionnelle</option>
-                                    <option value="pan-maitrise">PAN-Maîtrise (portfolio)</option>
-                                    <option value="pan-objectifs">PAN-Objectifs (compétences)</option>
-                                    <option value="specifications">Notation par spécifications</option>
-                                    <option value="standards">Notation par maîtrise (SBG)</option>
+                                    <option value="sommative">Sommative</option>
+                                    <option value="pan-standards">PAN-Standards</option>
+                                    <option value="pan-specifications">PAN-Spécifications</option>
+                                    <option value="pan-denotation" disabled>PAN-Dénotation (bientôt)</option>
                                 </select>
                             </div>
                         </div>
@@ -8563,12 +8562,12 @@ Exemple :
                     <div class="carte" id="v2-carte-structure">
                         <h3 class="carte-titre-bleu">Structure des évaluations</h3>
 
-                        <!-- Configuration Portfolio (PAN-Maîtrise) -->
-                        <div id="v2-config-portfolio" style="display: none;">
+                        <!-- Configuration PAN-Standards -->
+                        <div id="v2-config-pan-standards" style="display: none;">
                             <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
                                 <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
-                                    <strong>Portfolio</strong> : Les artefacts n'ont pas de pondération individuelle.
-                                    La note finale est basée sur les N meilleurs ou N derniers artefacts.
+                                    <strong>PAN-Standards</strong> : Évaluation par niveaux de maîtrise (ex: IDME).
+                                    Le meilleur résultat est retenu pour chaque standard ou objectif.
                                 </p>
                             </div>
 
@@ -8631,36 +8630,12 @@ Exemple :
                             </p>
                         </div>
 
-                        <!-- Configuration Standards (SBG) -->
-                        <div id="v2-config-standards" style="display: none;">
+                        <!-- Configuration PAN-Spécifications -->
+                        <div id="v2-config-pan-specifications" style="display: none;">
                             <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
                                 <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
-                                    <strong>Notation par maîtrise (SBG)</strong> : Les étudiants progressent à travers des standards numérotés.
-                                    Les standards terminaux doivent être maîtrisés pour réussir.
-                                </p>
-                            </div>
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                                <div class="groupe-form">
-                                    <label for="v2-standards-nombre" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                        Nombre de standards
-                                    </label>
-                                    <input type="number" id="v2-standards-nombre" class="controle-form" min="1" max="20" value="10" onchange="sauvegarderStructureV2()">
-                                </div>
-                                <div class="groupe-form">
-                                    <label for="v2-standards-terminaux" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                        Standards terminaux (séparés par virgules)
-                                    </label>
-                                    <input type="text" id="v2-standards-terminaux" class="controle-form" placeholder="Ex: 7, 8, 9, 10" onchange="sauvegarderStructureV2()">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Configuration Spécifications -->
-                        <div id="v2-config-specifications" style="display: none;">
-                            <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
-                                    <strong>Notation par spécifications</strong> : Les étudiants atteignent des paliers de notes fixes
-                                    selon le nombre de travaux acceptables remis.
+                                    <strong>PAN-Spécifications</strong> : Productions évaluées de façon dichotomique (réussi/échoué).
+                                    La note finale dépend du « bundle » de travaux complétés.
                                 </p>
                             </div>
                             <div class="groupe-form">
@@ -8672,19 +8647,6 @@ Exemple :
                                     <option value="niveaux">Niveaux de performance (1-2-3-4)</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <!-- Configuration PAN-Objectifs -->
-                        <div id="v2-config-objectifs" style="display: none;">
-                            <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
-                                    <strong>PAN-Objectifs</strong> : Évaluation par compétences avec seuils critiques.
-                                    Chaque objectif doit atteindre un niveau minimum.
-                                </p>
-                            </div>
-                            <p class="text-muted" style="font-size: 0.9rem;">
-                                Les objectifs sont configurés dans <strong>Matériel → Ensembles d'objectifs</strong>.
-                            </p>
                         </div>
 
                         <!-- Message par défaut -->
@@ -12328,7 +12290,7 @@ Exemple :
     <script src="js/cartouches-bibliotheque.js?v=2025120827"></script>
     <script src="js/cartouches.js?v=2025120827"></script>
     <script src="js/cours.js?v=2025121601"></script>
-    <script src="js/contexte.js?v=2025120907"></script>
+    <script src="js/contexte.js?v=2025122401"></script>
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
     <script src="js/interpretation-config.js?v=2025111501"></script>
@@ -12339,7 +12301,7 @@ Exemple :
     <script src="js/pratiques/pratique-registre.js?v=2025120705"></script>
     <script src="js/pratiques/migration-pratiques.js?v=2025120705"></script>
     <script src="js/pratiques/pratique-test.js?v=2025120705"></script>
-    <script src="js/pratiques/pratique-pan-maitrise.js?v=2025121701"></script>
+    <script src="js/pratiques/pratique-pan-standards.js?v=2025122500"></script>
     <script src="js/pratiques/pratique-sommative.js?v=2025121003"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=2025112600"></script>
     <script src="js/pratiques/pratique-pan-objectifs.js?v=2025120901"></script>

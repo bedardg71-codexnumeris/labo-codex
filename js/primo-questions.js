@@ -142,20 +142,27 @@ const QUESTIONS_PRIMO = [
         options: [
             {
                 value: 'sommative',
-                label: 'Sommative traditionnelle',
+                label: 'Sommative',
                 description: 'Moyenne pondérée de toutes les évaluations'
             },
             {
-                value: 'pan-maitrise',
-                label: 'PAN-Maîtrise (IDME)',
-                description: 'Portfolio avec niveaux de maîtrise (Insuffisant, Développement, Maîtrisé, Étendu)',
+                value: 'pan-standards',
+                label: 'PAN-Standards',
+                description: 'Niveaux de maîtrise par standard/objectif, meilleur résultat retenu',
                 disabled: true,
                 disabledMessage: 'Configurable après dans Réglages'
             },
             {
                 value: 'pan-specifications',
                 label: 'PAN-Spécifications',
-                description: 'Portfolio avec critères Pass/Fail sur objectifs d\'apprentissage',
+                description: 'Pass/Fail sur productions, note selon « bundles » complétés',
+                disabled: true,
+                disabledMessage: 'Configurable après dans Réglages'
+            },
+            {
+                value: 'pan-denotation',
+                label: 'PAN-Dénotation',
+                description: 'Sans notes pendant le cours, rétroaction qualitative uniquement',
                 disabled: true,
                 disabledMessage: 'Configurable après dans Réglages'
             }
@@ -186,7 +193,7 @@ const QUESTIONS_PRIMO = [
         aide: 'Le portfolio permet aux étudiants de soumettre plusieurs versions améliorées de leurs travaux.',
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
-            return pratique !== 'pan-maitrise' && pratique !== 'pan-specifications';
+            return pratique !== 'pan-standards' && pratique !== 'pan-specifications';
         }
     },
 
@@ -207,7 +214,7 @@ const QUESTIONS_PRIMO = [
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];
-            return (pratique !== 'pan-maitrise' && pratique !== 'pan-specifications') || portfolio !== 'oui';
+            return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
         }
     },
 
@@ -242,7 +249,7 @@ const QUESTIONS_PRIMO = [
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];
-            return (pratique !== 'pan-maitrise' && pratique !== 'pan-specifications') || portfolio !== 'oui';
+            return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
         }
     },
 

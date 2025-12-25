@@ -612,12 +612,12 @@ function calculerEtStockerIndicesCP() {
 
     // 🎯 OBTENIR LES PRATIQUES DEPUIS LE REGISTRE (seulement si nécessaire)
     const pratiqueSommative = calculerSOM ? obtenirPratiqueParId('sommative') : null;
-    const pratiquePAN = calculerPAN ? obtenirPratiqueParId('pan-maitrise') : null;
+    const pratiquePAN = calculerPAN ? obtenirPratiqueParId('pan-standards') : null;
 
     if ((calculerSOM && !pratiqueSommative) || (calculerPAN && !pratiquePAN)) {
         console.error('❌ Pratiques requises non disponibles dans le registre');
         console.error('   Sommative:', calculerSOM ? !!pratiqueSommative : 'non requise');
-        console.error('   PAN-Maîtrise:', calculerPAN ? !!pratiquePAN : 'non requise');
+        console.error('   PAN-Standards:', calculerPAN ? !!pratiquePAN : 'non requise');
         return indicesCP;
     }
 

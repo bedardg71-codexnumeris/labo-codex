@@ -250,11 +250,12 @@
 
     /**
      * Affiche la configuration correspondant au type de pratique
+     * Taxonomie Beta 96 : Sommative, PAN-Standards, PAN-Spécifications, PAN-Dénotation
      */
     function afficherConfigurationType(type) {
         // Masquer toutes les configurations
-        const configs = ['v2-config-portfolio', 'v2-config-sommative', 'v2-config-standards',
-                        'v2-config-specifications', 'v2-config-objectifs', 'v2-config-defaut'];
+        const configs = ['v2-config-pan-standards', 'v2-config-sommative',
+                        'v2-config-pan-specifications', 'v2-config-defaut'];
 
         configs.forEach(id => {
             const el = document.getElementById(id);
@@ -264,20 +265,20 @@
         // Afficher la configuration correspondante
         let configId = 'v2-config-defaut';
         switch (type) {
-            case 'pan-maitrise':
-                configId = 'v2-config-portfolio';
+            case 'pan-standards':
+            case 'pan-maitrise':  // Rétrocompatibilité
+                configId = 'v2-config-pan-standards';
                 break;
             case 'sommative':
                 configId = 'v2-config-sommative';
                 break;
-            case 'standards':
-                configId = 'v2-config-standards';
+            case 'pan-specifications':
+            case 'specifications':  // Rétrocompatibilité
+                configId = 'v2-config-pan-specifications';
                 break;
-            case 'specifications':
-                configId = 'v2-config-specifications';
-                break;
-            case 'pan-objectifs':
-                configId = 'v2-config-objectifs';
+            case 'pan-denotation':
+                // PAN-Dénotation : pas encore de configuration spécifique
+                configId = 'v2-config-defaut';
                 break;
         }
 

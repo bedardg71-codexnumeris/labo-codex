@@ -6912,12 +6912,12 @@ function genererSectionPerformance(da) {
                         moyennesSOM = calculerMoyennesCriteres(da);
                         directionsSOM = calculerDirectionsCriteres(da, 'SOM');
 
-                        // PAN : Utiliser la méthode de la pratique PAN (N derniers artefacts)
-                        const pratiquePAN = obtenirPratiqueParId('pan-maitrise');
+                        // PAN : Utiliser la méthode de la pratique PAN-Standards (N derniers artefacts)
+                        const pratiquePAN = obtenirPratiqueParId('pan-standards');
                         if (pratiquePAN && typeof pratiquePAN._calculerMoyennesCriteresRecents === 'function') {
                             moyennesPAN = pratiquePAN._calculerMoyennesCriteresRecents(da);
                         } else {
-                            console.warn('  ⚠️ Pratique PAN non disponible ou méthode _calculerMoyennesCriteresRecents absente');
+                            console.warn('  ⚠️ Pratique PAN-Standards non disponible ou méthode _calculerMoyennesCriteresRecents absente');
                             moyennesPAN = null;
                         }
                         directionsPAN = calculerDirectionsCriteres(da, 'PAN');

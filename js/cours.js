@@ -63,7 +63,7 @@ function migrerCoursVersPratiques() {
 
     cours.forEach(c => {
         if (!c.pratiqueId) {
-            c.pratiqueId = 'pan-maitrise'; // Pratique par défaut
+            c.pratiqueId = 'pan-standards'; // Pratique par défaut
             nbMigres++;
         }
     });
@@ -435,11 +435,14 @@ function obtenirTousLesCoursBibliotheque() {
  */
 function obtenirNomPratiqueFallback(pratiqueId) {
     const noms = {
-        'sommative': 'Sommative traditionnelle',
-        'pan-maitrise': 'PAN-Maîtrise',
-        'specifications': 'PAN-Spécifications'
+        'sommative': 'Sommative',
+        'pan-standards': 'PAN-Standards',
+        'pan-maitrise': 'PAN-Standards', // Rétrocompatibilité
+        'pan-specifications': 'PAN-Spécifications',
+        'specifications': 'PAN-Spécifications',
+        'pan-denotation': 'PAN-Dénotation'
     };
-    return noms[pratiqueId] || pratiqueId || 'PAN-Maîtrise';
+    return noms[pratiqueId] || pratiqueId || 'PAN-Standards';
 }
 
 /**
@@ -465,7 +468,7 @@ async function afficherPratiqueEnLectureSeule() {
 
     // ✅ CORRECTION BUG (16 décembre 2025) : Lire depuis pratiqueParDefaut, pas modalitesEvaluation
     // Le modal "Bibliothèque de pratiques" sauvegarde dans pratiqueParDefaut
-    const pratiqueId = db.getSync('pratiqueParDefaut', 'pan-maitrise');
+    const pratiqueId = db.getSync('pratiqueParDefaut', 'pan-standards');
 
     // Obtenir toutes les pratiques disponibles (codées + configurables)
     let nomPratique = 'Chargement...';
@@ -702,7 +705,7 @@ function sauvegarderCours() {
 
     // ✅ CORRECTION BUG (16 décembre 2025) : Lire depuis pratiqueParDefaut
     // Le modal "Bibliothèque de pratiques" sauvegarde dans pratiqueParDefaut, pas modalitesEvaluation
-    const pratiqueId = db.getSync('pratiqueParDefaut', 'pan-maitrise');
+    const pratiqueId = db.getSync('pratiqueParDefaut', 'pan-standards');
 
     const nouveauCours = {
         id: coursEnEdition || 'COURS' + Date.now(),
