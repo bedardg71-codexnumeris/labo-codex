@@ -168,8 +168,10 @@ function obtenirStatutJour(dateStr, calendrierComplet) {
     
     const type = mapStatuts[infosJour.statut] || 'cours';
 
-    // Vérifier si c'est un jour de cours avec horaire (cours-reel)
-    const seances = db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95 : Vérifier si c'est un jour de cours avec horaire du cours actif
+    const seances = typeof obtenirSeancesHoraire === 'function'
+        ? obtenirSeancesHoraire()
+        : db.getSync('seancesHoraire', []);
     const estCoursReel = seances.some(function(seance) {
         return seance.jour === infosJour.jourSemaine;
     });

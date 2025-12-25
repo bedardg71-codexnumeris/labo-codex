@@ -154,9 +154,9 @@ portfolio.js convertit 0-100 et stocke dans indicesCP
 
 **Version** : v0.91.1-indexeddb (tag Git créé 26 novembre 2025)
 
-### Architecture Multi-Trimestres (Beta 95 - Planifié)
+### Architecture Multi-Trimestres (Beta 95 - IMPLÉMENTÉ)
 
-**⏳ PLANIFIÉ (19 décembre 2025)** : Gestion de plusieurs trimestres distincts avec données isolées.
+**✅ IMPLÉMENTÉ (24 décembre 2025)** : Gestion de plusieurs trimestres distincts avec données isolées.
 
 #### Problème actuel
 
@@ -607,6 +607,43 @@ lancerExportRecherche()
 
 **Documentation détaillée** : Voir `ARCHITECTURE_EXPORT_RECHERCHE.md` et `SPECIFICATIONS_EXPORT_JSON_A2025.md`
 
+### Vision stratégique Multi-Trimestres
+
+**Objectif à long terme** : Mesurer non seulement les résultats d'apprentissage (A-C-P), mais aussi l'efficacité de l'enseignement via comparaisons et analyses longitudinales.
+
+#### Documents de référence
+
+| Document | Contenu |
+|----------|---------|
+| `ARCHITECTURE_EXPORT_RECHERCHE.md` | Format export anonymisé, séparation observations/calculs |
+| `SPECIFICATIONS_EXPORT_JSON_A2025.md` | Structure données pour analyse, critères SRPNF, SOLO |
+| `Documentation/Plans/PLAN_UX_BETA_95.md` | Architecture UI, modèle Trimestre → Cours → Groupe-cours |
+
+#### Architecture des données
+
+- **Namespacing** : Clés préfixées par trimestreId (`a2025_*`, `h2026_*`)
+- **Cours** : Liés par `trimestreId` dans `listeCours`
+- **Étudiants/évaluations/présences** : Liés par `coursId`
+- **Indices A-C-P** : Calculés et historisés dans `snapshots`
+
+#### Workflow fin de trimestre
+
+```
+1. Exporter backup complet (Réglages → Import/Export)
+2. Créer nouveau trimestre (creerTrimestre('H', '2026', false))
+3. Archiver trimestre terminé (archiverTrimestre('a2025'))
+4. Activer nouveau trimestre (changerTrimestreActif('h2026'))
+5. (Optionnel) Export anonymisé (lancerExportRecherche())
+```
+
+#### Analyses futures possibles
+
+- **Comparaison inter-trimestres** : A2025 vs H2026 (même cours, élèves différents)
+- **Comparaison inter-groupes** : Groupe 01 PAN vs Groupe 02 Sommative
+- **Patterns de blocage** : Critères systématiquement < M (taxonomie SOLO)
+- **Prédicteurs de décrochage** : Affiner les seuils A-C-P
+- **Efficacité des jetons** : Impact sur progression
+
 ---
 
 ## Structure des fichiers
@@ -623,7 +660,7 @@ projet/
 │   ├── navigation.js                     # ⚠️ PROTÉGÉ - Gestion navigation
 │   ├── main.js                           # Initialisation
 │   ├── db.js                             # ✅ NOUVEAU (Beta 91.1) - Gestionnaire de stockage hybride
-│   ├── trimestres.js                     # ⏳ PLANIFIÉ (Beta 95) - Gestion multi-trimestres
+│   ├── trimestres.js                     # ✅ IMPLÉMENTÉ (Beta 95) - Gestion multi-trimestres
 │   │
 │   ├── primo-accueil.js                  # 🆕 NOUVEAU (Beta 92) - Modal d'accueil Primo
 │   ├── primo-modal.js                    # 🆕 NOUVEAU (Beta 92) - Configuration conversationnelle

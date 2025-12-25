@@ -1650,9 +1650,32 @@ async function partagerTousLesCours() {
 }
 
 /* ===============================
+   HELPER: Obtenir l'ID du cours actif (Beta 95)
+   =============================== */
+
+/**
+ * Retourne l'ID du cours actuellement actif
+ * Utilisé par horaire.js pour le namespacing des séances
+ *
+ * @returns {string|null} - ID du cours actif ou null si aucun
+ */
+function obtenirCoursActifId() {
+    const infoCours = db.getSync('infoCours', null);
+    if (infoCours && infoCours.id) {
+        return infoCours.id;
+    }
+
+    // Fallback: chercher dans listeCours
+    const listeCours = db.getSync('listeCours', []);
+    const coursActif = listeCours.find(c => c.actif);
+    return coursActif ? coursActif.id : null;
+}
+
+/* ===============================
    EXPORTS - Rendre les fonctions accessibles globalement
    =============================== */
 
+window.obtenirCoursActifId = obtenirCoursActifId;
 window.afficherFormCours = afficherFormCours;
 window.sauvegarderCours = sauvegarderCours;
 window.annulerFormCours = annulerFormCours;

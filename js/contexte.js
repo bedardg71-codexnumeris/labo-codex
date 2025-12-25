@@ -1,7 +1,8 @@
 /* ===============================
    MODULE: INFORMATIONS CONTEXTUELLES
    Gère l'affichage des informations contextuelles dans l'en-tête principal
-   - Nom du cours
+   - Dropdown de sélection de cours (Beta 95)
+   - Pratique de notation
    - Date actuelle et numéro de semaine
    - Rang de la séance dans la semaine
    =============================== */
@@ -20,60 +21,46 @@ function echapperHtml(texte) {
 
 /**
  * Met à jour l'affichage des informations contextuelles dans l'en-tête principal
+ * ✅ BETA 95 : Dropdown de sélection de cours pour multi-cours
  */
 function mettreAJourContexteEntete() {
     const conteneur = document.getElementById('info-contextuelles-centre');
     if (!conteneur) return;
 
     try {
-        // Obtenir les informations du cours actif
+        // Obtenir les trimestres pour filtrer les cours
+        const trimestres = db.getSync('trimestres', []);
+        const trimestreActif = trimestres.find(t => t.actif);
+        const trimestreActifId = trimestreActif ? trimestreActif.id : null;
+
+        // Obtenir les cours du trimestre actif
         const listeCours = db.getSync('listeCours', []);
-        const coursActif = listeCours.find(c => c.actif === true) || listeCours[0] || null;
-        const nomCours = coursActif ? (coursActif.nomCours || coursActif.codeCours || '') : '';
+        const coursTrimestreActif = trimestreActifId
+            ? listeCours.filter(c => c.trimestreId === trimestreActifId)
+            : listeCours;
 
-        console.log('[Contexte] Liste cours:', listeCours);
-        console.log('[Contexte] Cours actif:', coursActif);
-        console.log('[Contexte] Nom cours:', nomCours);
+        // Obtenir le cours actif (depuis infoCours ou le premier cours actif)
+        const infoCours = db.getSync('infoCours', null);
+        let coursActif = infoCours || coursTrimestreActif.find(c => c.actif) || coursTrimestreActif[0] || null;
 
-        // Obtenir la pratique active
-        const modalites = db.getSync('modalitesEvaluation', {});
-        const pratiqueId = modalites.pratique || 'pan-maitrise';
-
-        console.log('[Contexte] modalitesEvaluation:', modalites);
-
-        // ✅ AMÉLIORATION (9 décembre 2025) : Obtenir le nom de la pratique depuis le registre
-        let pratiqueName = 'Chargement...';
-
-        // Essayer d'obtenir le nom depuis le registre de pratiques
-        try {
-            console.log('[Contexte] Pratique ID:', pratiqueId);
-
-            // Lire directement depuis pratiquesConfigurables et pratiques codées
-            const pratiquesConfig = db.getSync('pratiquesConfigurables', []);
-            console.log('[Contexte] Pratiques configurables:', pratiquesConfig);
-
-            let pratiqueTrouvee = pratiquesConfig.find(p => p.id === pratiqueId);
-
-            // Si pas trouvée dans configurables, chercher dans les pratiques codées
-            if (!pratiqueTrouvee) {
-                // Noms des pratiques codées en dur
-                const pratiquesCodées = {
-                    'pan-maitrise': 'PAN-Maîtrise (IDME + SRPNF)',
-                    'pan-maitrise-json': 'PAN-Maîtrise (IDME + SRPNF)',
-                    'sommative': 'Sommative (moyenne pondérée)'
-                };
-                pratiqueName = pratiquesCodées[pratiqueId] || pratiqueId;
-                console.log('[Contexte] Pratique codée trouvée:', pratiqueName);
-            } else {
-                pratiqueName = pratiqueTrouvee.nom || pratiqueId;
-                console.log('[Contexte] Pratique configurable trouvée:', pratiqueName);
-            }
-        } catch (err) {
-            console.warn('Erreur lors de la lecture du nom de pratique:', err);
-            pratiqueName = pratiqueId;
+        // Vérifier que le cours actif est bien dans le trimestre actif
+        if (coursActif && trimestreActifId && coursActif.trimestreId !== trimestreActifId) {
+            coursActif = coursTrimestreActif[0] || null;
         }
 
-        console.log('[Contexte] Nom final de la pratique:', pratiqueName);
+        console.log('[Contexte] Cours trimestre actif:', coursTrimestreActif.length);
+        console.log('[Contexte] Cours actif:', coursActif);
+
+        // Obtenir la pratique du cours actif
+        let pratiqueName = '';
+        if (coursActif && coursActif.pratiqueId) {
+            const pratiquesCodées = {
+                'pan-maitrise': 'PAN-Maîtrise',
+                'pan-specifications': 'PAN-Spécifications',
+                'sommative': 'Sommative'
+            };
+            pratiqueName = pratiquesCodées[coursActif.pratiqueId] || coursActif.pratiqueId;
+        }
 
         // Obtenir la date actuelle
         const aujourdhui = new Date();
@@ -83,19 +70,56 @@ function mettreAJourContexteEntete() {
         const calendrier = db.getSync(cle('calendrierComplet'), {});
         const infoJour = calendrier[dateStr];
 
-        // Construire le contexte sur deux lignes
-        let ligne1 = []; // Cours + Pratique
-        let ligne2 = []; // Date
+        // ========================================
+        // LIGNE 1 : Dropdown cours + Pratique
+        // ========================================
+        let htmlLigne1 = '';
 
-        // 1. Nom du cours
-        if (nomCours) {
-            ligne1.push(echapperHtml(nomCours));
+        // Générer le dropdown de cours si plusieurs cours disponibles
+        if (coursTrimestreActif.length > 1) {
+            // Trier par sigle de cours, puis par groupe
+            const coursTries = coursTrimestreActif.slice().sort(function(a, b) {
+                const sigleA = (a.sigle || a.codeCours || '').toLowerCase();
+                const sigleB = (b.sigle || b.codeCours || '').toLowerCase();
+                if (sigleA !== sigleB) {
+                    return sigleA.localeCompare(sigleB);
+                }
+                // Même sigle : trier par groupe
+                const groupeA = a.groupe || '';
+                const groupeB = b.groupe || '';
+                return groupeA.localeCompare(groupeB);
+            });
+
+            htmlLigne1 += '<select id="dropdown-cours-entete" onchange="changerCoursDepuisEntete(this.value)" class="dropdown-cours-entete">';
+            coursTries.forEach(c => {
+                const selected = coursActif && c.id === coursActif.id ? ' selected' : '';
+                const sigle = c.sigle || c.codeCours || 'Sans code';
+                const titre = c.titre || c.nomCours || '';
+                const groupe = c.groupe || '';
+                const label = groupe ? `${sigle} (${groupe})` : sigle;
+                htmlLigne1 += `<option value="${c.id}"${selected}>${echapperHtml(label)}</option>`;
+            });
+            htmlLigne1 += '</select>';
+        } else if (coursActif) {
+            // Un seul cours : afficher en texte simple
+            const sigle = coursActif.sigle || coursActif.codeCours || '';
+            const titre = coursActif.titre || coursActif.nomCours || '';
+            htmlLigne1 += `<span class="info-contexte-item">${echapperHtml(titre || sigle)}</span>`;
         }
 
-        // 2. Pratique
-        ligne1.push(`Pratique : ${echapperHtml(pratiqueName)}`);
+        // Ajouter la pratique
+        if (pratiqueName) {
+            if (htmlLigne1) {
+                htmlLigne1 += '<span class="separateur-contexte">•</span>';
+            }
+            htmlLigne1 += `<span class="info-contexte-item">Pratique : ${echapperHtml(pratiqueName)}</span>`;
+        }
 
-        // 3. Date et semaine
+        // ========================================
+        // LIGNE 2 : Date et semaine
+        // ========================================
+        let htmlLigne2 = '';
+
         if (infoJour && (infoJour.statut === 'cours' || infoJour.statut === 'reprise')) {
             const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
                          'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -107,69 +131,133 @@ function mettreAJourContexteEntete() {
             const annee = aujourdhui.getFullYear();
             const jourSemainenom = joursComplets[jourSemaineNum];
 
-            // ✅ AMÉLIORATION (9 décembre 2025) : N'afficher le numéro de semaine que pendant le trimestre actif (semaines 1-15)
             let dateComplete = '';
-
-            // Vérifier si on est dans le trimestre actif (semaines 1 à 15)
             const numeroSemaine = infoJour.numeroSemaine;
             const dansTrimestre = numeroSemaine >= 1 && numeroSemaine <= 15;
 
             if (dansTrimestre) {
-                // Pendant le trimestre : afficher "Semaine X · Date"
                 dateComplete = `Semaine ${numeroSemaine} · ${jourSemainenom} ${jour} ${moisNom} ${annee}`;
             } else {
-                // Avant/après trimestre ou pendant congés : afficher seulement la date
                 dateComplete = `${jourSemainenom} ${jour} ${moisNom} ${annee}`;
             }
 
-            // ✅ AMÉLIORATION (9 décembre 2025) : N'afficher le rang de séance que les jours de cours effectifs
-            // Calculer le rang de la séance (source unique: horaire.js)
-            const rangSeance = obtenirRangSeanceDansSemaine(dateStr);
-
-            // Ajouter le rang de la séance seulement si :
-            // 1. rangSeance existe
-            // 2. Le numéro de séance est > 0 (évite "0ème séance")
-            // 3. C'est un jour de cours effectif (cours ou reprise)
-            if (rangSeance && rangSeance.numero > 0 && (infoJour.statut === 'cours' || infoJour.statut === 'reprise')) {
-                dateComplete += ` · ${rangSeance.ordinal} séance`;
+            // Rang de la séance
+            if (typeof obtenirRangSeanceDansSemaine === 'function') {
+                const rangSeance = obtenirRangSeanceDansSemaine(dateStr);
+                if (rangSeance && rangSeance.numero > 0) {
+                    dateComplete += ` · ${rangSeance.ordinal} séance`;
+                }
             }
 
-            ligne2.push(dateComplete);
-        }
-        // Sinon, afficher juste la date
-        else {
+            htmlLigne2 = `<span class="info-contexte-item">${dateComplete}</span>`;
+        } else {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateFr = aujourdhui.toLocaleDateString('fr-CA', options);
-            ligne2.push(dateFr);
+            htmlLigne2 = `<span class="info-contexte-item">${dateFr}</span>`;
         }
 
-        // Assembler les deux lignes avec des séparateurs
-        // Ligne 1 : Cours + Pratique (horizontale avec séparateurs)
-        const htmlLigne1 = ligne1.map((partie, index) => {
-            const separateur = index < ligne1.length - 1 ? '<span class="separateur-contexte">•</span>' : '';
-            return `<span class="info-contexte-item">${partie}</span>${separateur}`;
-        }).join('');
-
-        // Ligne 2 : Date (simple, sans séparateur)
-        const htmlLigne2 = ligne2.map(partie => {
-            return `<span class="info-contexte-item">${partie}</span>`;
-        }).join('');
-
-        // Combiner les deux lignes avec un div pour chaque ligne
+        // ========================================
+        // Assembler le HTML final
+        // ========================================
         const htmlFinal = `
             <div class="info-contexte-ligne">${htmlLigne1}</div>
             <div class="info-contexte-ligne">${htmlLigne2}</div>
         `;
-
-        console.log('[Contexte] Ligne 1:', ligne1);
-        console.log('[Contexte] Ligne 2:', ligne2);
-        console.log('[Contexte] HTML généré:', htmlFinal);
 
         conteneur.innerHTML = htmlFinal;
 
     } catch (error) {
         console.warn('⚠️ Erreur mise à jour contexte en-tête:', error);
         conteneur.innerHTML = '';
+    }
+}
+
+/**
+ * Change le cours actif depuis le dropdown de l'en-tête
+ * ✅ BETA 95 : Nouveau pour supporter multi-cours
+ *
+ * @param {string} coursId - ID du cours à activer
+ */
+function changerCoursDepuisEntete(coursId) {
+    if (!coursId) return;
+
+    console.log('[Contexte] Changement de cours vers:', coursId);
+
+    // Récupérer le cours sélectionné
+    const listeCours = db.getSync('listeCours', []);
+    const coursSelectionne = listeCours.find(c => c.id === coursId);
+
+    if (!coursSelectionne) {
+        console.warn('[Contexte] Cours non trouvé:', coursId);
+        return;
+    }
+
+    // Mettre à jour infoCours
+    db.setSync('infoCours', coursSelectionne);
+
+    // Mettre à jour le flag actif dans listeCours
+    listeCours.forEach(c => c.actif = (c.id === coursId));
+    db.setSync('listeCours', listeCours);
+
+    console.log('[Contexte] Cours activé:', coursSelectionne.sigle || coursSelectionne.codeCours);
+
+    // Mettre à jour l'en-tête (pratique peut changer)
+    mettreAJourContexteEntete();
+
+    // Rafraîchir les vues qui dépendent du cours actif
+    rafraichirVuesApresCours();
+}
+
+/**
+ * Rafraîchit les vues après changement de cours
+ * ✅ BETA 95 : Nouveau
+ */
+function rafraichirVuesApresCours() {
+    console.log('[Contexte] Rafraîchissement des vues après changement de cours...');
+
+    // Rafraîchir le tableau de bord aperçu
+    if (typeof afficherTableauBordApercu === 'function') {
+        try {
+            afficherTableauBordApercu();
+            console.log('   ✅ Tableau de bord rafraîchi');
+        } catch (e) {
+            console.warn('   ⚠️ Erreur rafraîchissement tableau de bord:', e);
+        }
+    }
+
+    // Rafraîchir la liste des étudiants (nom correct de la fonction)
+    if (typeof rechargerListeEtudiants === 'function') {
+        try {
+            rechargerListeEtudiants();
+            console.log('   ✅ Liste étudiants rafraîchie');
+        } catch (e) {
+            console.warn('   ⚠️ Erreur rafraîchissement liste étudiants:', e);
+        }
+    }
+
+    // Rafraîchir les statistiques du groupe
+    if (typeof mettreAJourStatistiquesGroupes === 'function') {
+        try {
+            mettreAJourStatistiquesGroupes();
+            console.log('   ✅ Statistiques groupe rafraîchies');
+        } catch (e) {
+            console.warn('   ⚠️ Erreur rafraîchissement statistiques:', e);
+        }
+    }
+
+    // Rafraîchir le dropdown V2 si présent (section Réglages)
+    if (typeof chargerDropdownCoursV2 === 'function') {
+        try {
+            chargerDropdownCoursV2();
+            console.log('   ✅ Dropdown V2 rafraîchi');
+        } catch (e) {
+            console.warn('   ⚠️ Erreur rafraîchissement dropdown V2:', e);
+        }
+    }
+
+    // Notification de succès
+    if (typeof afficherNotificationSucces === 'function') {
+        afficherNotificationSucces('Cours changé');
     }
 }
 
@@ -189,3 +277,5 @@ function initialiserModuleContexte() {
 // Exporter les fonctions
 window.mettreAJourContexteEntete = mettreAJourContexteEntete;
 window.initialiserModuleContexte = initialiserModuleContexte;
+window.changerCoursDepuisEntete = changerCoursDepuisEntete;
+window.rafraichirVuesApresCours = rafraichirVuesApresCours;
