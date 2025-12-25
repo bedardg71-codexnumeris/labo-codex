@@ -135,9 +135,17 @@
         const typePratique = document.getElementById('v2-pratique-type');
         if (typePratique) {
             typePratique.value = modalites.pratique || '';
-            // Afficher la description taxonomique et la configuration correspondante
+            // Afficher la description taxonomique, variante et configuration correspondante
             afficherDescriptionTaxonomique(modalites.pratique || '');
+            afficherVariantePANStandards(modalites.pratique || '');
             afficherConfigurationType(modalites.pratique || '');
+        }
+
+        // Variante PAN-Standards (si applicable)
+        const varianteSelect = document.getElementById('v2-variante-calcul');
+        if (varianteSelect && modalites.varianteCalcul) {
+            varianteSelect.value = modalites.varianteCalcul;
+            changerVariantePANStandards(); // Afficher la description de la variante
         }
 
         const description = document.getElementById('v2-pratique-description');
@@ -264,12 +272,99 @@
     };
 
     /**
+     * Descriptions des variantes PAN-Standards
+     * Basé sur les cartographies analysées et le formulaire de cartographie
+     */
+    const VARIANTES_PAN_STANDARDS = {
+        'n-meilleurs': {
+            nom: 'N meilleures productions',
+            description: 'La note finale est basée sur les N meilleures productions de l\'étudiant. Permet de valoriser la progression et d\'éliminer les « mauvais jours ». Exemple : Grégoire Bédard (Littérature).',
+            exemple: 'Portfolio avec les 7 meilleurs artefacts sur 12'
+        },
+        'moyenne': {
+            nom: 'Moyenne de toutes les productions',
+            description: 'La note finale est la moyenne de toutes les productions évaluées par niveaux de maîtrise. Chaque production peut avoir une pondération différente. Exemple : Michel B. (Mathématiques).',
+            exemple: 'Moyenne pondérée des niveaux par objectif'
+        },
+        'n-recents': {
+            nom: 'N productions les plus récentes',
+            description: 'La note finale est basée sur les N productions les plus récentes. Valorise la progression et l\'état actuel des apprentissages plutôt que les difficultés initiales.',
+            exemple: 'Les 5 dernières évaluations déterminent la note'
+        },
+        'mediane-mode': {
+            nom: 'Médiane ou mode des niveaux',
+            description: 'La note finale est déterminée par la tendance centrale (médiane ou mode) des niveaux atteints, avec jugement professionnel de l\'enseignant. Exemple : Isabelle M. (Biologie).',
+            exemple: 'Mode statistique comme suggestion + jugement global'
+        },
+        'grille-conversion': {
+            nom: 'Grille de conversion personnalisée',
+            description: 'Une grille de conversion traduit les niveaux de maîtrise atteints en pourcentage final selon des règles personnalisées. Exemple : Bruno V. (Chimie).',
+            exemple: 'Standards terminaux requis pour chaque palier de note'
+        },
+        'autre': {
+            nom: 'Autre méthode',
+            description: 'Décrivez votre méthode de calcul dans le champ « Description » ci-dessous. Nous pourrons discuter de son implémentation.',
+            exemple: ''
+        }
+    };
+
+    /**
      * Appelé quand l'utilisateur change le type de pratique
      */
     function changerTypePratiqueV2() {
         const typePratique = document.getElementById('v2-pratique-type')?.value || '';
         afficherDescriptionTaxonomique(typePratique);
+        afficherVariantePANStandards(typePratique);
         afficherConfigurationType(typePratique);
+        sauvegarderPratiqueBaseV2();
+    }
+
+    /**
+     * Affiche/masque le sélecteur de variante PAN-Standards
+     */
+    function afficherVariantePANStandards(type) {
+        const conteneur = document.getElementById('v2-variante-pan-standards');
+        if (!conteneur) return;
+
+        // Normaliser le type
+        let typeNormalise = type;
+        if (type === 'pan-maitrise') typeNormalise = 'pan-standards';
+
+        if (typeNormalise === 'pan-standards') {
+            conteneur.style.display = 'block';
+        } else {
+            conteneur.style.display = 'none';
+            // Réinitialiser la sélection si on change de type
+            const select = document.getElementById('v2-variante-calcul');
+            if (select) select.value = '';
+            const desc = document.getElementById('v2-variante-description');
+            if (desc) desc.style.display = 'none';
+        }
+    }
+
+    /**
+     * Appelé quand l'utilisateur change la variante PAN-Standards
+     */
+    function changerVariantePANStandards() {
+        const variante = document.getElementById('v2-variante-calcul')?.value || '';
+        const descEl = document.getElementById('v2-variante-description');
+
+        if (!descEl) return;
+
+        const varianteInfo = VARIANTES_PAN_STANDARDS[variante];
+
+        if (varianteInfo) {
+            let html = `<strong>${varianteInfo.nom}</strong><br>${varianteInfo.description}`;
+            if (varianteInfo.exemple) {
+                html += `<br><em style="color: var(--gris-moyen);">Ex: ${varianteInfo.exemple}</em>`;
+            }
+            descEl.innerHTML = html;
+            descEl.style.display = 'block';
+        } else {
+            descEl.style.display = 'none';
+        }
+
+        // Sauvegarder
         sauvegarderPratiqueBaseV2();
     }
 
@@ -356,6 +451,12 @@
         modalites.pratique = document.getElementById('v2-pratique-type')?.value || 'sommative';
         modalites.description = document.getElementById('v2-pratique-description')?.value || '';
         modalites.echelleId = document.getElementById('v2-echelle-id')?.value || '';
+
+        // Variante PAN-Standards (si applicable)
+        const varianteSelect = document.getElementById('v2-variante-calcul');
+        if (varianteSelect && modalites.pratique === 'pan-standards') {
+            modalites.varianteCalcul = varianteSelect.value || '';
+        }
 
         db.setSync('modalitesEvaluation', modalites);
         console.log('[pratique-notation-v2] Informations de base sauvegardées');
@@ -464,6 +565,7 @@
 
     window.initialiserPratiqueNotationV2 = initialiserPratiqueNotationV2;
     window.changerTypePratiqueV2 = changerTypePratiqueV2;
+    window.changerVariantePANStandards = changerVariantePANStandards;
     window.afficherPreviewEchelleV2 = afficherPreviewEchelleV2;
     window.sauvegarderPratiqueBaseV2 = sauvegarderPratiqueBaseV2;
     window.sauvegarderStructureV2 = sauvegarderStructureV2;
