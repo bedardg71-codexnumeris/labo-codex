@@ -246,8 +246,8 @@
      */
     const TAXONOMIE_PRATIQUES = {
         'sommative': {
-            titre: 'SOMMATIVE',
-            definition: 'Pratique traditionnelle où la note finale est calculée par moyenne pondérée de toutes les évaluations.'
+            titre: 'SOMMATIVE (pratique traditionnelle)',
+            definition: 'Pratique traditionnelle où la note finale est calculée par moyenne pondérée de toutes les évaluations. Cette famille n\'est pas une PAN, mais elle est incluse comme point de comparaison avec les pratiques alternatives.'
         },
         'pan-standards': {
             titre: 'PAN-STANDARDS (Standards-Based Grading)',
