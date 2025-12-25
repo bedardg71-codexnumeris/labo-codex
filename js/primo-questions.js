@@ -154,7 +154,7 @@ const QUESTIONS_PRIMO = [
             {
                 value: 'pan-specifications',
                 label: 'PAN-Spécifications',
-                description: 'Productions évaluées réussi/échoué, note selon « bundles » complétés.',
+                description: 'Productions évaluées conforme/non-conforme, note selon forfait (ensemble de travaux) complété.',
                 disabled: true,
                 disabledMessage: 'Bientôt disponible'
             },
@@ -273,9 +273,9 @@ const QUESTIONS_PRIMO = [
                 description: 'Tendance centrale avec jugement professionnel. Ex: Isabelle M. (Biologie).'
             },
             {
-                value: 'grille-conversion',
-                label: 'Grille de conversion personnalisée',
-                description: 'Règles personnalisées de conversion niveaux → %. Ex: Bruno V. (Chimie).'
+                value: 'grille-profils',
+                label: 'Grille de profils de niveaux',
+                description: 'Conversion du profil global (combinaison de niveaux) → %. Ex: Bruno V. (Chimie).'
             },
             {
                 value: 'autre',
