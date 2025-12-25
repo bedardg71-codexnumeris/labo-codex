@@ -263,7 +263,7 @@
         },
         'pan-specifications': {
             titre: 'PAN-SPÉCIFICATIONS (Specifications Grading)',
-            definition: 'Pratique où les productions sont évaluées de façon dichotomique (réussi/échoué selon des spécifications préétablies), et la note finale est déterminée par le « bundle » de travaux complétés.'
+            definition: 'Pratique où les productions sont évaluées de façon dichotomique (conforme/non-conforme selon des spécifications préétablies), et la note finale est déterminée par le forfait (ensemble de travaux conformes) complété.'
         },
         'pan-denotation': {
             titre: 'PAN-DÉNOTATION (Ungrading)',
@@ -296,10 +296,10 @@
             description: 'La note finale est déterminée par la tendance centrale (médiane ou mode) des niveaux atteints, avec jugement professionnel de l\'enseignant. Exemple : Isabelle M. (Biologie).',
             exemple: 'Mode statistique comme suggestion + jugement global'
         },
-        'grille-conversion': {
-            nom: 'Grille de conversion personnalisée',
-            description: 'Une grille de conversion traduit les niveaux de maîtrise atteints en pourcentage final selon des règles personnalisées. Exemple : Bruno V. (Chimie).',
-            exemple: 'Standards terminaux requis pour chaque palier de note'
+        'grille-profils': {
+            nom: 'Grille de profils de niveaux',
+            description: 'Une grille de profils traduit la combinaison de niveaux atteints (profil global) en pourcentage final selon des règles personnalisées. Exemple : Bruno V. (Chimie).',
+            exemple: 'Profil « 3M + 2É sur 5 standards » → 85%'
         },
         'autre': {
             nom: 'Autre méthode',
