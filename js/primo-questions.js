@@ -254,12 +254,12 @@ const QUESTIONS_PRIMO = [
         options: [
             {
                 value: 'n-meilleurs',
-                label: 'N meilleures productions',
-                description: 'La note est basée sur les N meilleures productions. Ex: Grégoire Bédard (Littérature).'
+                label: 'N meilleures évaluations',
+                description: 'La note est basée sur les N meilleures évaluations (travaux, entrevues, etc.).'
             },
             {
                 value: 'n-recents',
-                label: 'N productions les plus récentes',
+                label: 'N évaluations les plus récentes',
                 description: 'Valorise l\'état actuel des apprentissages plutôt que les difficultés initiales.'
             },
             {
