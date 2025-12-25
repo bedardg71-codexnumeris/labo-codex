@@ -135,7 +135,8 @@
         const typePratique = document.getElementById('v2-pratique-type');
         if (typePratique) {
             typePratique.value = modalites.pratique || '';
-            // Afficher la configuration correspondante
+            // Afficher la description taxonomique et la configuration correspondante
+            afficherDescriptionTaxonomique(modalites.pratique || '');
             afficherConfigurationType(modalites.pratique || '');
         }
 
@@ -240,12 +241,62 @@
     // =========================================================================
 
     /**
+     * Définitions taxonomiques des 4 familles de pratiques de notation
+     * Référence : DESC-Taxonomie des quatre familles de pratiques de notation.txt
+     */
+    const TAXONOMIE_PRATIQUES = {
+        'sommative': {
+            titre: 'SOMMATIVE',
+            definition: 'Pratique traditionnelle où la note finale est calculée par moyenne pondérée de toutes les évaluations.'
+        },
+        'pan-standards': {
+            titre: 'PAN-STANDARDS (Standards-Based Grading)',
+            definition: 'Pratique où chaque standard ou objectif d\'apprentissage est évalué par niveaux de maîtrise, et le meilleur résultat est retenu pour refléter l\'apprentissage atteint.'
+        },
+        'pan-specifications': {
+            titre: 'PAN-SPÉCIFICATIONS (Specifications Grading)',
+            definition: 'Pratique où les productions sont évaluées de façon dichotomique (réussi/échoué selon des spécifications préétablies), et la note finale est déterminée par le « bundle » de travaux complétés.'
+        },
+        'pan-denotation': {
+            titre: 'PAN-DÉNOTATION (Ungrading)',
+            definition: 'Pratique où aucune note chiffrée n\'est attribuée pendant le cours; seule la rétroaction qualitative guide l\'apprentissage jusqu\'à une évaluation globale finale.'
+        }
+    };
+
+    /**
      * Appelé quand l'utilisateur change le type de pratique
      */
     function changerTypePratiqueV2() {
         const typePratique = document.getElementById('v2-pratique-type')?.value || '';
+        afficherDescriptionTaxonomique(typePratique);
         afficherConfigurationType(typePratique);
         sauvegarderPratiqueBaseV2();
+    }
+
+    /**
+     * Affiche la description taxonomique correspondant au type sélectionné
+     */
+    function afficherDescriptionTaxonomique(type) {
+        const conteneur = document.getElementById('v2-description-taxonomique');
+        const titreEl = document.getElementById('v2-taxonomie-titre');
+        const definitionEl = document.getElementById('v2-taxonomie-definition');
+
+        if (!conteneur || !titreEl || !definitionEl) return;
+
+        // Normaliser le type (rétrocompatibilité)
+        let typeNormalise = type;
+        if (type === 'pan-maitrise') typeNormalise = 'pan-standards';
+        if (type === 'specifications') typeNormalise = 'pan-specifications';
+
+        const taxonomie = TAXONOMIE_PRATIQUES[typeNormalise];
+
+        if (taxonomie) {
+            titreEl.textContent = taxonomie.titre;
+            definitionEl.textContent = taxonomie.definition;
+            conteneur.style.display = 'block';
+        } else {
+            conteneur.style.display = 'none';
+        }
     }
 
     /**
