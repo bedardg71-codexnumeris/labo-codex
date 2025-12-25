@@ -193,6 +193,128 @@ function executerMigrationsBeta935() {
     return resultats;
 }
 
+/* ===============================
+   MIGRATIONS BETA 95 : HORAIRES PAR COURS
+   Date: 24 décembre 2025
+
+   Objectif:
+   Migrer l'horaire global existant vers des horaires par cours-groupe
+   =============================== */
+
+/**
+ * Migration 5: Copier l'horaire global vers chaque cours du trimestre actif
+ *
+ * Contexte:
+ * Avant Beta 95, un seul horaire était partagé par tous les cours.
+ * Après Beta 95, chaque cours-groupe a son propre horaire.
+ *
+ * Cette migration copie l'horaire global existant vers chaque cours
+ * du trimestre actif, permettant ensuite de les personnaliser.
+ *
+ * @returns {Object} { nbCoursMigres, nbSeancesGenerees }
+ */
+function migrerHoraireVersMultiCours() {
+    console.log('🔄 [Migration Beta 95] Migration horaires multi-cours...');
+
+    // Obtenir le trimestre actif
+    const trimestres = db.getSync('trimestres', []);
+    const trimestreActif = trimestres.find(t => t.actif);
+    if (!trimestreActif) {
+        console.log('   ⚠️ Aucun trimestre actif, migration reportée');
+        return { nbCoursMigres: 0, nbSeancesGenerees: 0 };
+    }
+
+    // Obtenir les cours du trimestre actif
+    const listeCours = db.getSync('listeCours', []);
+    const coursTrimestreActif = listeCours.filter(c => c.trimestreId === trimestreActif.id);
+    if (coursTrimestreActif.length === 0) {
+        console.log('   ⚠️ Aucun cours dans le trimestre actif');
+        return { nbCoursMigres: 0, nbSeancesGenerees: 0 };
+    }
+
+    // Chercher l'horaire global existant (plusieurs sources possibles)
+    let horaireGlobal = [];
+
+    // Source 1: horaireHebdo namespacé par trimestre
+    if (typeof cle === 'function') {
+        horaireGlobal = db.getSync(cle('horaireHebdo'), []);
+    }
+
+    // Source 2: seancesHoraire namespacé par trimestre
+    if (horaireGlobal.length === 0 && typeof cle === 'function') {
+        horaireGlobal = db.getSync(cle('seancesHoraire'), []);
+    }
+
+    // Source 3: seancesHoraire non namespacé (legacy)
+    if (horaireGlobal.length === 0) {
+        horaireGlobal = db.getSync('seancesHoraire', []);
+    }
+
+    if (horaireGlobal.length === 0) {
+        console.log('   ⚠️ Aucun horaire global existant, pas de migration nécessaire');
+        return { nbCoursMigres: 0, nbSeancesGenerees: 0 };
+    }
+
+    console.log(`   📋 Horaire global trouvé: ${horaireGlobal.length} séance(s)`);
+    console.log(`   📚 Cours à migrer: ${coursTrimestreActif.length}`);
+
+    // Copier l'horaire vers chaque cours qui n'en a pas encore
+    let nbCoursMigres = 0;
+    coursTrimestreActif.forEach(cours => {
+        const cleHoraireCours = `seancesHoraire_${cours.id}`;
+        const horaireExistant = db.getSync(cleHoraireCours, null);
+
+        if (!horaireExistant || horaireExistant.length === 0) {
+            // Copier l'horaire global vers ce cours
+            db.setSync(cleHoraireCours, horaireGlobal);
+            nbCoursMigres++;
+            console.log(`   ✅ Horaire copié vers: ${cours.sigle || cours.id} (${cours.groupe || 'sans groupe'})`);
+        }
+    });
+
+    // Générer les séances complètes pour chaque cours migré
+    let nbSeancesGenerees = 0;
+    if (nbCoursMigres > 0 && typeof genererSeancesCompletes === 'function') {
+        coursTrimestreActif.forEach(cours => {
+            try {
+                genererSeancesCompletes(cours.id);
+                nbSeancesGenerees++;
+            } catch (e) {
+                console.warn(`   ⚠️ Erreur génération séances pour ${cours.id}:`, e);
+            }
+        });
+    }
+
+    console.log(`✅ [Migration Beta 95] Terminée: ${nbCoursMigres} cours migré(s), ${nbSeancesGenerees} séances générées`);
+
+    return { nbCoursMigres, nbSeancesGenerees };
+}
+
+/**
+ * Exécuter toutes les migrations Beta 95
+ *
+ * Appelé au chargement de l'application dans js/main.js
+ *
+ * @returns {Object} Résultats des migrations
+ */
+function executerMigrationsBeta95() {
+    console.log('🔄 [Migration] Démarrage migrations Beta 95...');
+
+    const resultats = {
+        horaires: migrerHoraireVersMultiCours()
+    };
+
+    const total = resultats.horaires.nbCoursMigres || 0;
+
+    if (total > 0) {
+        console.log(`✅ [Migration] Beta 95 terminée (${total} cours migré(s))`);
+    } else {
+        console.log('✅ [Migration] Aucune migration Beta 95 nécessaire (déjà à jour)');
+    }
+
+    return resultats;
+}
+
 // Export des fonctions
 if (typeof window !== 'undefined') {
     window.executerMigrationsBeta935 = executerMigrationsBeta935;
@@ -200,4 +322,7 @@ if (typeof window !== 'undefined') {
     window.migrerProductionsVersCoursId = migrerProductionsVersCoursId;
     window.migrerPresencesVersCoursId = migrerPresencesVersCoursId;
     window.migrerCoursVersTrimestreId = migrerCoursVersTrimestreId;
+    // 🆕 Beta 95
+    window.executerMigrationsBeta95 = executerMigrationsBeta95;
+    window.migrerHoraireVersMultiCours = migrerHoraireVersMultiCours;
 }

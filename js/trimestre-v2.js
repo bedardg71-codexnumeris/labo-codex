@@ -1965,25 +1965,39 @@ function ouvrirModalNouveauGroupe() {
 
 /**
  * Charge et affiche les séances dans l'accordéon Horaire v2
+ * 🆕 BETA 95 : Affiche le cours actif et utilise obtenirSeancesHoraire()
  */
 function chargerSeancesV2() {
     const conteneur = document.getElementById('v2-seancesContainer');
     if (!conteneur) return;
 
-    let horaire = db.getSync(cle('horaireHebdo'), []);
+    // 🆕 BETA 95 : Utiliser obtenirSeancesHoraire() qui gère tous les fallbacks
+    let horaire = typeof obtenirSeancesHoraire === 'function'
+        ? obtenirSeancesHoraire()
+        : db.getSync(cle('horaireHebdo'), []);
 
-    // Fallback: chercher dans seancesHoraire (ancien format) et migrer si trouvé
-    if (horaire.length === 0) {
-        const seancesHoraire = db.getSync('seancesHoraire', []);
-        if (seancesHoraire.length > 0) {
-            console.log('[Horaire V2] Migration automatique de seancesHoraire vers', cle('horaireHebdo'));
-            horaire = seancesHoraire;
-            db.setSync(cle('horaireHebdo'), horaire);
+    // 🆕 BETA 95 : Obtenir les infos du cours actif pour affichage
+    let coursActifInfo = '';
+    if (typeof obtenirCoursActifId === 'function') {
+        const coursId = obtenirCoursActifId();
+        if (coursId) {
+            const infoCours = db.getSync('infoCours', null);
+            if (infoCours) {
+                const sigle = infoCours.sigle || infoCours.codeCours || '';
+                const groupe = infoCours.groupe || '';
+                coursActifInfo = groupe ? `${sigle} (${groupe})` : sigle;
+            }
         }
     }
 
     if (horaire.length === 0) {
-        conteneur.innerHTML = '<p class="text-muted text-italic">Aucune séance configurée. Cliquez sur « + Ajouter une séance » pour commencer.</p>';
+        let messageVide = '<p class="text-muted text-italic">Aucune séance configurée. Cliquez sur « + Ajouter une séance » pour commencer.</p>';
+        if (coursActifInfo) {
+            messageVide = `<div class="alerte alerte-info" style="margin-bottom: 10px;">
+                <strong>Cours actif :</strong> ${coursActifInfo}
+            </div>` + messageVide;
+        }
+        conteneur.innerHTML = messageVide;
         return;
     }
 
@@ -1997,7 +2011,15 @@ function chargerSeancesV2() {
     const joursNoms = { 'Lundi': 1, 'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5 };
     const joursInverse = ['', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
 
-    let html = `
+    // 🆕 BETA 95 : Afficher le cours actif en haut
+    let html = '';
+    if (coursActifInfo) {
+        html += `<div class="alerte alerte-info" style="margin-bottom: 10px;">
+            <strong>Horaire pour :</strong> ${coursActifInfo}
+        </div>`;
+    }
+
+    html += `
         <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
             <span class="text-muted"><strong>${horaire.length}</strong> séance(s) • <strong>${totalHeures}h</strong>/semaine</span>
         </div>
@@ -2135,7 +2157,10 @@ function confirmerSeanceV2() {
         local: local
     };
 
-    let horaire = db.getSync(cle('horaireHebdo'), []);
+    // 🆕 BETA 95 : Lire l'horaire actuel avec obtenirSeancesHoraire()
+    let horaire = typeof obtenirSeancesHoraire === 'function'
+        ? obtenirSeancesHoraire().slice() // Copie pour modification
+        : db.getSync(cle('horaireHebdo'), []);
 
     if (seanceEnEditionV2 !== null) {
         // Modification
@@ -2154,7 +2179,9 @@ function confirmerSeanceV2() {
         return (a.heureDebut || '').localeCompare(b.heureDebut || '');
     });
 
-    db.setSync(cle('horaireHebdo'), horaire);
+    // 🆕 BETA 95 : Sauvegarder dans la clé spécifique au cours
+    const cleSauvegarde = typeof cleHoraire === 'function' ? cleHoraire() : cle('horaireHebdo');
+    db.setSync(cleSauvegarde, horaire);
 
     // Notifier
     if (typeof afficherNotificationSucces === 'function') {
@@ -2177,9 +2204,13 @@ function confirmerSeanceV2() {
 function supprimerSeanceV2(index) {
     if (!confirm('Supprimer cette séance ?')) return;
 
-    let horaire = db.getSync(cle('horaireHebdo'), []);
+    // 🆕 BETA 95 : Utiliser les fonctions multi-cours
+    let horaire = typeof obtenirSeancesHoraire === 'function'
+        ? obtenirSeancesHoraire().slice() // Copie pour modification
+        : db.getSync(cle('horaireHebdo'), []);
     horaire.splice(index, 1);
-    db.setSync(cle('horaireHebdo'), horaire);
+    const cleSauvegarde = typeof cleHoraire === 'function' ? cleHoraire() : cle('horaireHebdo');
+    db.setSync(cleSauvegarde, horaire);
 
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Séance supprimée');

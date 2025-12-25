@@ -587,8 +587,10 @@ function obtenirToutesDatesCours() {
     if (typeof obtenirSeancesCompletes === 'function') {
         seancesCompletes = obtenirSeancesCompletes();
     } else {
+        // 🆕 BETA 95 : Utiliser clé multi-cours si disponible
         console.warn('⚠️ obtenirSeancesCompletes non disponible, lecture directe');
-        seancesCompletes = db.getSync(cle('seancesCompletes'), {});
+        const cleCours = typeof cleSeancesCompletes === 'function' ? cleSeancesCompletes() : cle('seancesCompletes');
+        seancesCompletes = db.getSync(cleCours, {});
     }
 
     // Si on a des séances, utiliser ces dates
@@ -622,8 +624,10 @@ function obtenirToutesDatesCours() {
         return [];
     }
 
-    // Obtenir les jours de séances depuis l'horaire
-    const seancesHoraire = db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95 : Obtenir les jours de séances depuis l'horaire du cours actif
+    const seancesHoraire = typeof obtenirSeancesHoraire === 'function'
+        ? obtenirSeancesHoraire()
+        : db.getSync('seancesHoraire', []);
     const joursAvecSeances = new Set();
     seancesHoraire.forEach(seance => {
         if (seance.jour) {
@@ -669,8 +673,9 @@ function obtenirHeuresSeance(dateStr) {
     if (typeof obtenirSeancesJour === 'function') {
         seances = obtenirSeancesJour(dateStr);
     } else {
-        // Fallback : lecture directe
-        const seancesCompletes = db.getSync(cle('seancesCompletes'), {});
+        // 🆕 BETA 95 : Fallback avec clé multi-cours
+        const cleCours = typeof cleSeancesCompletes === 'function' ? cleSeancesCompletes() : cle('seancesCompletes');
+        const seancesCompletes = db.getSync(cleCours, {});
         seances = seancesCompletes[dateStr] || [];
     }
 
@@ -749,9 +754,10 @@ function calculerNombreSeances(dateJusqua) {
     if (typeof obtenirSeancesCompletes === 'function') {
         seances = obtenirSeancesCompletes();
     } else {
-        // Fallback : lecture directe
+        // 🆕 BETA 95 : Fallback avec clé multi-cours
         console.warn('⚠️ obtenirSeancesCompletes non disponible, lecture directe');
-        seances = db.getSync(cle('seancesCompletes'), {});
+        const cleCours = typeof cleSeancesCompletes === 'function' ? cleSeancesCompletes() : cle('seancesCompletes');
+        seances = db.getSync(cleCours, {});
     }
 
     if (!seances || Object.keys(seances).length === 0) {
@@ -860,7 +866,10 @@ function verifierConfigurationFormatHoraire() {
     if (!alerteDiv) return;
 
     const formatHoraire = db.getSync('formatHoraire', null);
-    const seancesHoraire = db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95 : Utiliser l'horaire du cours actif
+    const seancesHoraire = typeof obtenirSeancesHoraire === 'function'
+        ? obtenirSeancesHoraire()
+        : db.getSync('seancesHoraire', []);
 
     if (!formatHoraire || seancesHoraire.length === 0) {
         alerteDiv.style.display = 'block';
@@ -967,8 +976,14 @@ function mettreAJourEnteteDateSeance(dateStr) {
     const estVerrouille = estDateVerrouillee(dateStr);
     const rangSeance = obtenirRangSeanceDansSemaine(dateStr);
 
-    // Récupérer le groupe depuis seancesCompletes
-    const seancesCompletes = db.getSync(cle('seancesCompletes'), {});
+    // 🆕 BETA 95 : Récupérer le groupe depuis seancesCompletes du cours actif
+    let seancesCompletes;
+    if (typeof obtenirSeancesCompletes === 'function') {
+        seancesCompletes = obtenirSeancesCompletes();
+    } else {
+        const cleCours = typeof cleSeancesCompletes === 'function' ? cleSeancesCompletes() : cle('seancesCompletes');
+        seancesCompletes = db.getSync(cleCours, {});
+    }
     const seancesDuJour = seancesCompletes[dateStr];
     let groupePrefix = '';
     if (seancesDuJour && seancesDuJour.length > 0 && seancesDuJour[0].groupe) {

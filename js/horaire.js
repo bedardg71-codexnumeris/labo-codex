@@ -37,6 +37,80 @@
    =============================== */
 
 /* ===============================
+   🆕 BETA 95 : HORAIRES PAR COURS-GROUPE
+   =============================== */
+
+/**
+ * Génère la clé de stockage pour l'horaire d'un cours
+ * @param {string|null} coursId - ID du cours (null = cours actif)
+ * @returns {string} - Clé de stockage (ex: "seancesHoraire_601-101-h2026-94")
+ */
+function cleHoraire(coursId) {
+    const id = coursId || (typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null);
+    if (id) {
+        return `seancesHoraire_${id}`;
+    }
+    // Fallback sur clé globale namespacée par trimestre
+    return typeof cle === 'function' ? cle('seancesHoraire') : 'seancesHoraire';
+}
+
+/**
+ * Génère la clé de stockage pour les séances complètes d'un cours
+ * @param {string|null} coursId - ID du cours (null = cours actif)
+ * @returns {string} - Clé de stockage (ex: "seancesCompletes_601-101-h2026-94")
+ */
+function cleSeancesCompletes(coursId) {
+    const id = coursId || (typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null);
+    if (id) {
+        return `seancesCompletes_${id}`;
+    }
+    // Fallback sur clé globale namespacée par trimestre
+    return typeof cle === 'function' ? cle('seancesCompletes') : 'seancesCompletes';
+}
+
+/**
+ * Obtient les séances horaire d'un cours spécifique
+ * 🆕 BETA 95 : Support multi-cours avec cascade de fallbacks
+ *
+ * Ordre de recherche :
+ * 1. seancesHoraire_{coursId} (nouvelle clé par cours)
+ * 2. {trimestre}_horaireHebdo (clé V2 namespacée)
+ * 3. {trimestre}_seancesHoraire (clé legacy namespacée)
+ * 4. seancesHoraire (clé legacy non namespacée)
+ *
+ * @param {string|null} coursId - ID du cours (null = cours actif)
+ * @returns {Array} - Séances horaire du cours
+ */
+function obtenirSeancesHoraire(coursId) {
+    // 1. Essayer la clé spécifique au cours
+    const cleCours = cleHoraire(coursId);
+    let seances = db.getSync(cleCours, null);
+    if (seances && seances.length > 0) {
+        return seances;
+    }
+
+    // 2. Fallback sur horaireHebdo (format V2)
+    if (typeof cle === 'function') {
+        seances = db.getSync(cle('horaireHebdo'), null);
+        if (seances && seances.length > 0) {
+            return seances;
+        }
+    }
+
+    // 3. Fallback sur seancesHoraire namespacé par trimestre
+    if (typeof cle === 'function') {
+        seances = db.getSync(cle('seancesHoraire'), null);
+        if (seances && seances.length > 0) {
+            return seances;
+        }
+    }
+
+    // 4. Fallback sur clé legacy non namespacée
+    seances = db.getSync('seancesHoraire', []);
+    return seances || [];
+}
+
+/* ===============================
    🚀 INITIALISATION DU MODULE
    =============================== */
 
@@ -228,13 +302,15 @@ function migrerDonneesSeances() {
 /**
  * Génère toutes les séances du trimestre avec leurs dates
  * SOURCE UNIQUE pour calendrier-saisie.js et calcul d'assiduité
- * 
+ *
+ * 🆕 BETA 95 : Support multi-cours avec coursId optionnel
+ *
  * FONCTIONNEMENT:
- * 1. Lit seancesHoraire (séances hebdomadaires configurées)
+ * 1. Lit seancesHoraire (séances hebdomadaires configurées) du cours
  * 2. Lit calendrierComplet (tous les jours du trimestre)
  * 3. Pour chaque jour de cours, crée les séances correspondantes
- * 4. Stocke dans db.setSync('seancesCompletes')
- * 
+ * 4. Stocke dans clé spécifique au cours
+ *
  * FORMAT DE SORTIE:
  * {
  *   "2025-08-25": [
@@ -252,22 +328,26 @@ function migrerDonneesSeances() {
  *   ],
  *   ...
  * }
- * 
- * RETOUR:
- * - Object avec toutes les séances datées
+ *
+ * @param {string|null} coursId - ID du cours (null = cours actif)
+ * @returns {Object} - Séances complètes du cours
  */
-function genererSeancesCompletes() {
-    console.log('📚 Génération des séances complètes du trimestre...');
+function genererSeancesCompletes(coursId = null) {
+    const idCours = coursId || (typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null);
+    console.log('📚 Génération des séances complètes...', idCours ? `(cours: ${idCours})` : '(global)');
 
     // Migrer les anciennes données si nécessaire
     migrerDonneesSeances();
 
-    // Lire les séances hebdomadaires configurées
-    const seancesHoraire = db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95 : Lire les séances horaire du cours spécifique
+    const seancesHoraire = obtenirSeancesHoraire(idCours);
+
+    // Clé de sortie spécifique au cours
+    const cleOutput = cleSeancesCompletes(idCours);
 
     if (seancesHoraire.length === 0) {
         console.log('   ⚠️  Aucune séance hebdomadaire configurée');
-        db.setSync(cle('seancesCompletes'), {});
+        db.setSync(cleOutput, {});
         return {};
     }
 
@@ -361,26 +441,35 @@ function genererSeancesCompletes() {
         }
     });
 
-    // Stocker dans localStorage - LA SOURCE UNIQUE
-    db.setSync(cle('seancesCompletes'), seancesCompletes);
+    // 🆕 BETA 95 : Stocker dans clé spécifique au cours
+    db.setSync(cleOutput, seancesCompletes);
 
     console.log(`✅ Séances complètes générées: ${compteurSeances} séances`);
     console.log(`   - Réparties sur ${Object.keys(seancesCompletes).length} jours de cours`);
+    if (idCours) {
+        console.log(`   - Clé de stockage: ${cleOutput}`);
+    }
 
     return seancesCompletes;
 }
 
 /**
  * API publique pour obtenir les séances complètes
- * @returns {Object} - Séances complètes du trimestre
+ *
+ * 🆕 BETA 95 : Support multi-cours avec coursId optionnel
+ *
+ * @param {string|null} coursId - ID du cours (null = cours actif)
+ * @returns {Object} - Séances complètes du cours
  */
-function obtenirSeancesCompletes() {
+function obtenirSeancesCompletes(coursId = null) {
+    const cleCours = cleSeancesCompletes(coursId);
+
     // db.getSync retourne déjà l'objet parsé, pas besoin de JSON.parse
-    const seancesCompletes = db.getSync(cle('seancesCompletes'), null);
+    const seancesCompletes = db.getSync(cleCours, null);
 
     if (!seancesCompletes) {
         console.log('⚠️  seancesCompletes non trouvé, génération...');
-        return genererSeancesCompletes();
+        return genererSeancesCompletes(coursId);
     }
 
     return seancesCompletes;
@@ -388,11 +477,15 @@ function obtenirSeancesCompletes() {
 
 /**
  * API publique pour obtenir les séances d'une date spécifique
+ *
+ * 🆕 BETA 95 : Support multi-cours avec coursId optionnel
+ *
  * @param {string} dateStr - Date au format YYYY-MM-DD
+ * @param {string|null} coursId - ID du cours (null = cours actif)
  * @returns {Array} - Séances de cette date (ou tableau vide)
  */
-function obtenirSeancesJour(dateStr) {
-    const seancesCompletes = obtenirSeancesCompletes();
+function obtenirSeancesJour(dateStr, coursId = null) {
+    const seancesCompletes = obtenirSeancesCompletes(coursId);
     return seancesCompletes[dateStr] || [];
 }
 
@@ -400,17 +493,20 @@ function obtenirSeancesJour(dateStr) {
  * API publique : Détermine le rang de la séance dans sa semaine (1ère, 2ème, etc.)
  * 🎯 SOURCE UNIQUE DE VÉRITÉ pour le calcul du rang
  *
+ * 🆕 BETA 95 : Support multi-cours avec coursId optionnel
+ *
  * @param {string} dateStr - Date au format YYYY-MM-DD
+ * @param {string|null} coursId - ID du cours (null = cours actif)
  * @returns {Object|null} - {rang: number, total: number, ordinal: string} ou null
  *
  * @example
  * const rang = obtenirRangSeanceDansSemaine('2025-11-12');
  * // => { rang: 1, total: 2, ordinal: '1ère' }
  */
-function obtenirRangSeanceDansSemaine(dateStr) {
+function obtenirRangSeanceDansSemaine(dateStr, coursId = null) {
     try {
         const calendrier = db.getSync(cle('calendrierComplet'), {});
-        const seancesCompletes = db.getSync(cle('seancesCompletes'), {});
+        const seancesCompletes = obtenirSeancesCompletes(coursId);
 
         const infoJour = calendrier[dateStr];
         if (!infoJour || !infoJour.numeroSemaine) return null;
@@ -481,8 +577,8 @@ let seancesEnCours = [];
  * 4. Active le bouton "+ Ajouter une séance" si < 6 séances
  */
 function afficherFormulaireSeancesDynamique() {
-    // Charger les séances existantes ou initialiser avec une séance vide
-    const seancesHoraire = db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95 : Charger les séances du cours actif
+    const seancesHoraire = obtenirSeancesHoraire(null);
 
     if (seancesHoraire.length > 0) {
         // Mode édition : charger les séances existantes
@@ -772,14 +868,16 @@ function confirmerSeances() {
         return;
     }
 
-    // Sauvegarder dans localStorage
-    db.setSync('seancesHoraire', seancesAEnregistrer);
+    // 🆕 BETA 95 : Sauvegarder dans la clé spécifique au cours actif
+    const cleCours = cleHoraire(null);
+    db.setSync(cleCours, seancesAEnregistrer);
+    console.log(`[Horaire] Séances sauvegardées dans: ${cleCours}`);
 
     // Rafraîchir l'affichage des séances existantes
     afficherSeancesExistantes();
 
-    // Régénérer les séances complètes du trimestre
-    genererSeancesCompletes();
+    // Régénérer les séances complètes du cours
+    genererSeancesCompletes(null);
 
     // Masquer le formulaire
     annulerAjoutSeance();
@@ -916,7 +1014,8 @@ function genererCarteSeanceEdition(seance, index) {
  * @param {number} index - Index de la séance dans seancesHoraire
  */
 function modifierSeanceEnPlace(index) {
-    const seances = db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95 : Lire depuis la clé du cours actif
+    const seances = obtenirSeancesHoraire(null);
     const seance = seances[index];
 
     if (!seance) {
@@ -971,7 +1070,9 @@ function sauvegarderEditionSeanceEnPlace(index) {
         return;
     }
 
-    const seances = db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95 : Lire et sauvegarder dans la clé du cours actif
+    const cleCours = cleHoraire(null);
+    const seances = obtenirSeancesHoraire(null);
 
     if (index < 0 || index >= seances.length) {
         alert('Index de séance invalide');
@@ -988,10 +1089,11 @@ function sauvegarderEditionSeanceEnPlace(index) {
         local: local || ''
     };
 
-    db.setSync('seancesHoraire', seances);
+    // 🆕 BETA 95 : Sauvegarder dans la clé du cours actif
+    db.setSync(cleCours, seances);
 
-    // Régénérer les séances complètes du trimestre
-    genererSeancesCompletes();
+    // Régénérer les séances complètes du cours
+    genererSeancesCompletes(null);
 
     // Recharger l'affichage
     afficherSeancesExistantes();
@@ -1009,7 +1111,9 @@ function supprimerSeance(index) {
         return;
     }
 
-    const seances = db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95 : Lire et sauvegarder dans la clé du cours actif
+    const cleCours = cleHoraire(null);
+    const seances = obtenirSeancesHoraire(null);
 
     // Supprimer la séance
     seances.splice(index, 1);
@@ -1020,10 +1124,10 @@ function supprimerSeance(index) {
         seance.lettre = lettres[i] || `S${i + 1}`;
     });
 
-    db.setSync('seancesHoraire', seances);
+    db.setSync(cleCours, seances);
 
-    // Régénérer les séances complètes du trimestre
-    genererSeancesCompletes();
+    // Régénérer les séances complètes du cours
+    genererSeancesCompletes(null);
 
     // Recharger l'affichage
     afficherSeancesExistantes();
@@ -1032,10 +1136,12 @@ function supprimerSeance(index) {
 }
 
 /**
- * Affiche les séances existantes
+ * Affiche les séances existantes du cours actif
+ *
+ * 🆕 BETA 95 : Affiche les séances spécifiques au cours actif
  *
  * FONCTIONNEMENT:
- * 1. Récupère les séances depuis localStorage
+ * 1. Récupère les séances depuis la clé spécifique au cours
  * 2. Si vide: affiche message
  * 3. Sinon: génère le HTML des séances
  * 4. Affiche les informations (jour, heures, local)
@@ -1046,7 +1152,8 @@ function afficherSeancesExistantes() {
     const container = document.getElementById('seancesContainer');
     if (!container) return;
 
-    const seances = db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95 : Utiliser la clé spécifique au cours actif
+    const seances = obtenirSeancesHoraire(null);
 
     if (seances.length === 0) {
         container.innerHTML = '<p class="text-muted text-italic">Aucune séance configurée.</p>';
@@ -1119,8 +1226,9 @@ function confirmerAjoutSeance() {
         return;
     }
 
-    // Récupérer les séances existantes
-    const seances = db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95 : Récupérer les séances du cours actif
+    const cleCours = cleHoraire(null);
+    const seances = obtenirSeancesHoraire(null);
 
     // Vérifier le nombre maximum de séances
     if (seances.length >= 6) {
@@ -1156,10 +1264,12 @@ function confirmerAjoutSeance() {
 
     // Ajouter la séance
     seances.push(nouvelleSeance);
-    db.setSync('seancesHoraire', seances);
 
-    // Régénérer les séances complètes du trimestre
-    genererSeancesCompletes();
+    // 🆕 BETA 95 : Sauvegarder dans la clé du cours actif
+    db.setSync(cleCours, seances);
+
+    // Régénérer les séances complètes du cours
+    genererSeancesCompletes(null);
 
     // Réinitialiser et cacher le formulaire
     annulerFormAjoutSeance();
@@ -1176,7 +1286,9 @@ function confirmerAjoutSeance() {
  * et supprime les duplicatas
  */
 function nettoyerDoublons() {
-    const seances = db.getSync('seancesHoraire', []);
+    // 🆕 BETA 95 : Lire depuis la clé du cours actif
+    const cleCours = cleHoraire(null);
+    const seances = obtenirSeancesHoraire(null);
 
     if (seances.length === 0) {
         alert('Aucune séance à nettoyer');
@@ -1222,11 +1334,11 @@ function nettoyerDoublons() {
         seance.lettre = lettres[i] || `S${i + 1}`;
     });
 
-    // Sauvegarder
-    db.setSync('seancesHoraire', seancesUniques);
+    // 🆕 BETA 95 : Sauvegarder dans la clé du cours actif
+    db.setSync(cleCours, seancesUniques);
 
-    // Régénérer
-    genererSeancesCompletes();
+    // Régénérer les séances complètes du cours
+    genererSeancesCompletes(null);
 
     // Recharger
     afficherSeancesExistantes();
@@ -1304,6 +1416,11 @@ window.genererSeancesCompletes = genererSeancesCompletes;
 window.obtenirSeancesCompletes = obtenirSeancesCompletes;
 window.obtenirSeancesJour = obtenirSeancesJour;
 window.obtenirRangSeanceDansSemaine = obtenirRangSeanceDansSemaine;
+
+// 🆕 BETA 95 : Helpers pour clés multi-cours
+window.cleSeancesCompletes = cleSeancesCompletes;
+window.cleHoraire = cleHoraire;
+window.obtenirSeancesHoraire = obtenirSeancesHoraire;
 
 // Fonctions utilitaires
 window.calculerHeureFin = calculerHeureFin;

@@ -460,7 +460,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ===============================
-    // 3.6 GROUPE DÉMO (Beta 93.5)
+    // 3.6 EXÉCUTION DES MIGRATIONS (Beta 95)
+    // ===============================
+    // Migrer horaires globaux vers horaires par cours
+    if (typeof executerMigrationsBeta95 === 'function') {
+        executerMigrationsBeta95();
+    }
+
+    // ===============================
+    // 3.7 GROUPE DÉMO (Beta 93.5)
     // ===============================
     // ✅ Préchargement automatique supprimé
     // Le groupe démo est maintenant géré via checkbox dans Réglages → Trimestre
