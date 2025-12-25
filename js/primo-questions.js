@@ -264,8 +264,8 @@ const QUESTIONS_PRIMO = [
             },
             {
                 value: 'grille-profils',
-                label: 'Grille de profils de niveaux',
-                description: 'Conversion du profil global (combinaison de niveaux) → %. Ex: Bruno V. (Chimie).'
+                label: 'Grille de profils (ex: « 3M + 2M+ → 85% »)',
+                description: 'La note finale dépend de la combinaison de niveaux atteints sur tous les standards. Ex: 3 Maîtrisé + 2 Au-delà des attentes → 85%.'
             },
             {
                 value: 'autre',

@@ -291,9 +291,9 @@
             exemple: 'Les 5 dernières évaluations déterminent la note'
         },
         'grille-profils': {
-            nom: 'Grille de profils de niveaux',
-            description: 'Une grille de profils traduit la combinaison de niveaux atteints (profil global) en pourcentage final selon des règles personnalisées. Exemple : Bruno V. (Chimie).',
-            exemple: 'Profil « 3M + 2É sur 5 standards » → 85%'
+            nom: 'Grille de profils (ex: « 3M + 2M+ → 85% »)',
+            description: 'Une grille de profils convertit la combinaison de niveaux atteints sur tous les standards en note finale. Par exemple : un étudiant avec 3 standards « Maîtrisé » (M) et 2 « Au-delà des attentes » (M+) obtient 85%.',
+            exemple: '5M → 75% | 4M + 1M+ → 80% | 3M + 2M+ → 85%'
         },
         'autre': {
             nom: 'Autre méthode',
