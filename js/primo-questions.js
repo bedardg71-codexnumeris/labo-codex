@@ -248,7 +248,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'n-artefacts-retenus',
-        texte: 'Combien d\'artefacts seront retenus pour calculer la note finale ?',
+        texte: 'Combien d\'artefacts seront retenus pour calculer la **note finale** ?',
         type: 'number',
         placeholder: 'Ex: 7',
         champsCibles: [
@@ -259,7 +259,7 @@ const QUESTIONS_PRIMO = [
             min: 1,
             max: 50
         },
-        aide: 'Seuls les N meilleurs artefacts compteront pour la note. Exemple : 7 meilleurs sur 12 soumis.',
+        aide: 'À la fin du trimestre, seuls les N meilleurs artefacts détermineront la note finale. Exemple : 7 meilleurs sur 12 soumis.',
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];
@@ -304,7 +304,7 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'minimum-avant-calcul',
-        texte: 'Combien d\'artefacts doivent être soumis avant de calculer une note ?',
+        texte: 'Combien d\'artefacts doivent être soumis avant d\'afficher une **note formative** ?',
         type: 'number',
         placeholder: 'Ex: 3',
         champsCibles: [
@@ -315,7 +315,7 @@ const QUESTIONS_PRIMO = [
             min: 1,
             max: 20
         },
-        aide: 'Évite de calculer une note sur trop peu d\'artefacts. La note apparaît seulement après ce seuil.',
+        aide: 'Une note formative (provisoire) apparaît après ce seuil. Elle donne un aperçu de la progression avant la note finale.',
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];

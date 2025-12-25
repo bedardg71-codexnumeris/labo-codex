@@ -517,11 +517,10 @@ function afficherListeEtudiants() {
  */
 function mettreAJourStatistiquesGroupes() {
     try {
-        const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        // Vérifier que la fonction de filtrage existe
-        const students = typeof filtrerEtudiantsParMode === 'function'
-            ? filtrerEtudiantsParMode(tousEtudiants)
-            : tousEtudiants.filter(e => e.groupe !== '9999');
+        // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
+        const students = typeof obtenirEtudiantsCoursActif === 'function'
+            ? obtenirEtudiantsCoursActif()
+            : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
 
         // Compteur total
         const compteurTotal = document.getElementById('nbEtudiantsTotal');
@@ -581,10 +580,10 @@ function mettreAJourStatistiquesGroupes() {
  */
 function remplirSelectFiltreGroupe() {
     try {
-        const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        const students = typeof filtrerEtudiantsParMode === 'function'
-            ? filtrerEtudiantsParMode(tousEtudiants)
-            : tousEtudiants.filter(e => e.groupe !== '9999');
+        // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
+        const students = typeof obtenirEtudiantsCoursActif === 'function'
+            ? obtenirEtudiantsCoursActif()
+            : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
         const selectFiltre = document.getElementById('filtreGroupe');
 
         if (!selectFiltre) return;
@@ -629,13 +628,11 @@ function filtrerParGroupe() {
         const selectFiltre = document.getElementById('filtreGroupe');
         const groupeSelectionné = selectFiltre ? selectFiltre.value : '';
 
-        const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        console.log(`🔍 filtrerParGroupe - Tous étudiants: ${tousEtudiants.length}`);
-
-        const students = typeof filtrerEtudiantsParMode === 'function'
-            ? filtrerEtudiantsParMode(tousEtudiants)
-            : tousEtudiants.filter(e => e.groupe !== '9999');
-        console.log(`🔍 filtrerParGroupe - Après filtrage: ${students.length}`);
+        // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
+        const students = typeof obtenirEtudiantsCoursActif === 'function'
+            ? obtenirEtudiantsCoursActif()
+            : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
+        console.log(`🔍 filtrerParGroupe - Étudiants cours actif: ${students.length}`);
 
         const tbody = document.getElementById('students-tbody');
         const container = document.getElementById('students-list-container');

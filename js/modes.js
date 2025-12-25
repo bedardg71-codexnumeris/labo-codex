@@ -735,6 +735,77 @@ function filtrerEtudiantsParMode(etudiants) {
 window.filtrerEtudiantsParMode = filtrerEtudiantsParMode;
 
 // ============================================
+// FILTRAGE DES ÉTUDIANTS PAR COURS/TRIMESTRE ACTIF
+// ============================================
+
+/**
+ * Obtient les étudiants du cours actif uniquement
+ * Filtre par coursId pour éviter la contamination entre trimestres
+ *
+ * @returns {Array} - Liste des étudiants du cours actif (vide si aucun cours)
+ */
+function obtenirEtudiantsCoursActif() {
+    // Obtenir le cours actif
+    const coursActif = typeof db !== 'undefined' && db.getSync
+        ? db.getSync('infoCours', null)
+        : JSON.parse(localStorage.getItem('infoCours') || 'null');
+
+    // Si aucun cours actif, retourner tableau vide
+    if (!coursActif || !coursActif.id) {
+        console.log('[Modes] Aucun cours actif - liste étudiants vide');
+        return [];
+    }
+
+    // Obtenir tous les étudiants
+    const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
+
+    // Filtrer par coursId
+    const etudiantsFiltres = tousEtudiants.filter(e => {
+        // Compatibilité : si l'étudiant n'a pas de coursId, vérifier le groupe
+        if (!e.coursId) {
+            // Ancien format : vérifier si le groupe correspond au cours actif
+            const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
+            return e.groupe === groupeCours;
+        }
+        return e.coursId === coursActif.id;
+    });
+
+    console.log(`[Modes] Étudiants cours actif (${coursActif.id}): ${etudiantsFiltres.length}/${tousEtudiants.length}`);
+
+    // Appliquer le filtrage par mode (exclure groupe 9999 en mode normal)
+    return filtrerEtudiantsParMode(etudiantsFiltres);
+}
+
+/**
+ * Vérifie si un étudiant appartient au cours/trimestre actif
+ *
+ * @param {Object} etudiant - L'étudiant à vérifier
+ * @returns {boolean} - true si l'étudiant est dans le cours actif
+ */
+function etudiantDansCoursActif(etudiant) {
+    if (!etudiant) return false;
+
+    const coursActif = typeof db !== 'undefined' && db.getSync
+        ? db.getSync('infoCours', null)
+        : JSON.parse(localStorage.getItem('infoCours') || 'null');
+
+    if (!coursActif || !coursActif.id) return false;
+
+    // Vérifier coursId
+    if (etudiant.coursId) {
+        return etudiant.coursId === coursActif.id;
+    }
+
+    // Compatibilité ancien format : vérifier groupe
+    const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
+    return etudiant.groupe === groupeCours;
+}
+
+// Exporter les nouvelles fonctions
+window.obtenirEtudiantsCoursActif = obtenirEtudiantsCoursActif;
+window.etudiantDansCoursActif = etudiantDansCoursActif;
+
+// ============================================
 // INITIALISATION AUTOMATIQUE
 // ============================================
 

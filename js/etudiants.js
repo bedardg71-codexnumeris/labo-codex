@@ -141,11 +141,10 @@ function chargerListeEtudiants() {
  * Charge les options des filtres (groupes et programmes)
  */
 function chargerOptionsFiltres() {
-    const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    // ✅ NOUVEAU (9 décembre 2025) : Filtrer le groupe demo (99) selon le mode
-    const etudiants = typeof filtrerEtudiantsDemo === 'function'
-        ? filtrerEtudiantsDemo(tousEtudiants)
-        : tousEtudiants;
+    // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
+    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
 
     // Charger les groupes
     const filtreGroupe = document.getElementById('filtre-groupe-liste');
@@ -864,12 +863,10 @@ function afficherListeEtudiantsConsultation() {
         return;
     }
 
-    // Charger les étudiants
-    const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    // ✅ NOUVEAU (9 décembre 2025) : Filtrer le groupe demo (99) selon le mode
-    const etudiants = typeof filtrerEtudiantsDemo === 'function'
-        ? filtrerEtudiantsDemo(tousEtudiants)
-        : tousEtudiants;
+    // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
+    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
 
     console.log('Nombre total d\'étudiants:', etudiants.length);
 
