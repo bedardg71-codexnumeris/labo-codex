@@ -272,12 +272,18 @@
     };
 
     /**
-     * Descriptions des variantes PAN-Standards (4 options - traces sélectives)
+     * Descriptions des variantes PAN-Standards (5 options - traces sélectives)
      * Basé sur les cartographies analysées et le formulaire de cartographie
      *
      * Note : Les approches "moyenne de toutes" et "médiane/mode" ont été retirées
      * car elles s'apparentent davantage à des pratiques sommatives (toutes les
      * traces comptent, pénalisant les erreurs initiales).
+     *
+     * ✅ NOUVEAU (Beta 95) : Ajout de la variante "par-objectifs" avec 4 modes de calcul :
+     * - Comptage (Bruno V., Chimie, André-Laurendeau)
+     * - Moyenne pondérée (Michel B., Mathématiques)
+     * - Seuils critiques (Xavier C.-T., Informatique)
+     * - Holistique (Isabelle M., Biologie)
      */
     const VARIANTES_PAN_STANDARDS = {
         'n-meilleurs': {
@@ -294,6 +300,11 @@
             nom: 'Grille de profils (ex: « 3M + 2M+ → 85% »)',
             description: 'Une grille de profils convertit la combinaison de niveaux atteints sur tous les standards en note finale. Par exemple : un étudiant avec 3 standards « Maîtrisé » (M) et 2 « Au-delà des attentes » (M+) obtient 85%.',
             exemple: '5M → 75% | 4M + 1M+ → 80% | 3M + 2M+ → 85%'
+        },
+        'par-objectifs': {
+            nom: 'Par objectifs (4 modes de calcul)',
+            description: 'Évaluation par objectifs d\'apprentissage avec choix du mode de calcul : <strong>Comptage</strong> (Bruno V.), <strong>Moyenne pondérée</strong> (Michel B.), <strong>Seuils critiques</strong> (Xavier C.-T.), ou <strong>Holistique</strong> (Isabelle M.).',
+            exemple: 'Objectifs essentiels/complémentaires | Pondérations variables | Seuils non-linéaires'
         },
         'autre': {
             nom: 'Autre méthode',
@@ -356,6 +367,18 @@
             descEl.style.display = 'block';
         } else {
             descEl.style.display = 'none';
+        }
+
+        // ✅ NOUVEAU (Beta 95) : Afficher/masquer la configuration par-objectifs
+        const configObjectifs = document.getElementById('v2-config-par-objectifs');
+        if (configObjectifs) {
+            if (variante === 'par-objectifs') {
+                configObjectifs.style.display = 'block';
+                // Charger les données de configuration
+                chargerConfigParObjectifs();
+            } else {
+                configObjectifs.style.display = 'none';
+            }
         }
 
         // Sauvegarder
@@ -537,6 +560,522 @@
     }
 
     // =========================================================================
+    // GESTION PAR-OBJECTIFS (4 modes : Bruno, Michel, Xavier, Isabelle)
+    // =========================================================================
+
+    /**
+     * Les 4 modes de calcul disponibles
+     */
+    const MODES_CALCUL_OBJECTIFS = {
+        'comptage': {
+            nom: 'Comptage (Bruno V.)',
+            description: 'Note = nombre d\'objectifs maîtrisés. Plafond si essentiels non maîtrisés.'
+        },
+        'moyenne-ponderee': {
+            nom: 'Moyenne pondérée (Michel B.)',
+            description: 'Note = moyenne des niveaux × pondération de chaque objectif.'
+        },
+        'seuils-critiques': {
+            nom: 'Seuils critiques (Xavier C.-T.)',
+            description: 'Tous les objectifs doivent atteindre niveau 3+. Bonus pour niveau 4.'
+        },
+        'holistique': {
+            nom: 'Holistique (Isabelle M.)',
+            description: 'Suggestion statistique + validation par l\'enseignant.'
+        }
+    };
+
+    /**
+     * Structure par défaut pour le système par objectifs
+     */
+    const CONFIG_PAR_OBJECTIFS_DEFAUT = {
+        modeCalcul: 'comptage',
+        objectifs: [],
+        // Paramètres mode Comptage (Bruno)
+        comptage: {
+            seuilMaitrise: 75,
+            plafondSiEssentielNonMaitrise: 55,
+            grilleConversion: {}
+        },
+        // Paramètres mode Moyenne pondérée (Michel)
+        moyennePonderee: {
+            // Les pondérations sont dans les objectifs
+        },
+        // Paramètres mode Seuils critiques (Xavier)
+        seuilsCritiques: {
+            seuilReussite: 3,
+            noteBaseReussite: 80,
+            bonusNiveau4: 3.33
+        },
+        // Paramètres mode Holistique (Isabelle)
+        holistique: {
+            methodeSuggestion: 'mode'
+        }
+    };
+
+    /**
+     * Charge la configuration par-objectifs depuis le storage
+     */
+    function chargerConfigParObjectifs() {
+        let modalites = {};
+        try {
+            modalites = db.getSync('modalitesEvaluation') || {};
+        } catch (e) {
+            modalites = {};
+        }
+
+        // Migration : si ancienne config comptageObjectifs existe, migrer
+        if (modalites.comptageObjectifs && !modalites.parObjectifs) {
+            modalites.parObjectifs = {
+                ...CONFIG_PAR_OBJECTIFS_DEFAUT,
+                modeCalcul: 'comptage',
+                objectifs: modalites.comptageObjectifs.objectifs || [],
+                comptage: {
+                    seuilMaitrise: modalites.comptageObjectifs.seuilMaitrise || 75,
+                    plafondSiEssentielNonMaitrise: modalites.comptageObjectifs.plafondSiEssentielNonMaitrise || 55,
+                    grilleConversion: modalites.comptageObjectifs.grilleConversion || {}
+                }
+            };
+            db.setSync('modalitesEvaluation', modalites);
+        }
+
+        const config = modalites.parObjectifs || CONFIG_PAR_OBJECTIFS_DEFAUT;
+
+        // Remplir le mode de calcul
+        const modeEl = document.getElementById('v2-objectifs-mode-calcul');
+        if (modeEl) {
+            modeEl.value = config.modeCalcul || 'comptage';
+            changerModeCalculObjectifs();
+        }
+
+        // Afficher la liste des objectifs
+        afficherListeObjectifs(config.objectifs || [], config.modeCalcul);
+
+        return config;
+    }
+
+    /**
+     * Appelé quand le mode de calcul change
+     */
+    function changerModeCalculObjectifs() {
+        const modeEl = document.getElementById('v2-objectifs-mode-calcul');
+        const mode = modeEl?.value || 'comptage';
+
+        // Afficher/masquer les sections spécifiques à chaque mode
+        const sections = ['comptage', 'moyenne-ponderee', 'seuils-critiques', 'holistique'];
+        sections.forEach(s => {
+            const section = document.getElementById(`v2-config-mode-${s}`);
+            if (section) {
+                section.style.display = (s === mode) ? 'block' : 'none';
+            }
+        });
+
+        // Afficher la description du mode
+        const descEl = document.getElementById('v2-objectifs-mode-description');
+        if (descEl && MODES_CALCUL_OBJECTIFS[mode]) {
+            descEl.textContent = MODES_CALCUL_OBJECTIFS[mode].description;
+            descEl.style.display = 'block';
+        }
+
+        // Charger les paramètres spécifiques au mode
+        chargerParametresMode(mode);
+
+        // Sauvegarder
+        sauvegarderModeCalculObjectifs();
+    }
+
+    /**
+     * Charge les paramètres spécifiques au mode sélectionné
+     */
+    function chargerParametresMode(mode) {
+        const modalites = db.getSync('modalitesEvaluation') || {};
+        const config = modalites.parObjectifs || CONFIG_PAR_OBJECTIFS_DEFAUT;
+
+        switch (mode) {
+            case 'comptage':
+                const comptage = config.comptage || {};
+                const seuilEl = document.getElementById('v2-comptage-seuil-maitrise');
+                if (seuilEl) seuilEl.value = comptage.seuilMaitrise || 75;
+                const plafondEl = document.getElementById('v2-comptage-plafond-essentiel');
+                if (plafondEl) plafondEl.value = comptage.plafondSiEssentielNonMaitrise || 55;
+                afficherGrilleConversion(comptage.grilleConversion || {});
+                break;
+
+            case 'seuils-critiques':
+                const seuils = config.seuilsCritiques || {};
+                const seuilReussiteEl = document.getElementById('v2-seuils-niveau-reussite');
+                if (seuilReussiteEl) seuilReussiteEl.value = seuils.seuilReussite || 3;
+                const noteBaseEl = document.getElementById('v2-seuils-note-base');
+                if (noteBaseEl) noteBaseEl.value = seuils.noteBaseReussite || 80;
+                const bonusEl = document.getElementById('v2-seuils-bonus-niveau4');
+                if (bonusEl) bonusEl.value = seuils.bonusNiveau4 || 3.33;
+                break;
+
+            case 'holistique':
+                const hol = config.holistique || {};
+                const methodeEl = document.getElementById('v2-holistique-methode');
+                if (methodeEl) methodeEl.value = hol.methodeSuggestion || 'mode';
+                break;
+        }
+    }
+
+    /**
+     * Sauvegarde le mode de calcul sélectionné
+     */
+    function sauvegarderModeCalculObjectifs() {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.parObjectifs) {
+            modalites.parObjectifs = { ...CONFIG_PAR_OBJECTIFS_DEFAUT };
+        }
+
+        const modeEl = document.getElementById('v2-objectifs-mode-calcul');
+        if (modeEl) {
+            modalites.parObjectifs.modeCalcul = modeEl.value;
+        }
+
+        db.setSync('modalitesEvaluation', modalites);
+    }
+
+    /**
+     * Affiche la liste des objectifs dans l'interface
+     * Adapte les colonnes selon le mode de calcul
+     */
+    function afficherListeObjectifs(objectifs, mode) {
+        const conteneur = document.getElementById('v2-objectifs-liste');
+        if (!conteneur) return;
+
+        if (!objectifs || objectifs.length === 0) {
+            conteneur.innerHTML = `
+                <div class="alerte-info" style="padding: 10px; margin: 10px 0;">
+                    Aucun objectif configuré. Utilisez le bouton « + Ajouter un objectif » pour commencer.
+                </div>
+            `;
+            return;
+        }
+
+        // Compter essentiels et complémentaires
+        const nbEssentiels = objectifs.filter(o => o.essentiel).length;
+        const nbComplementaires = objectifs.filter(o => !o.essentiel).length;
+        const totalPonderation = objectifs.reduce((sum, o) => sum + (o.ponderation || 0), 0);
+
+        // En-tête selon le mode
+        let statsHtml = `<strong>${objectifs.length} objectifs</strong>`;
+        if (mode === 'comptage') {
+            statsHtml += ` : ${nbEssentiels} essentiels + ${nbComplementaires} complémentaires`;
+        } else if (mode === 'moyenne-ponderee') {
+            statsHtml += ` | Pondération totale : ${totalPonderation}%`;
+        }
+
+        // Colonnes selon le mode
+        const showType = (mode === 'comptage');
+        const showPonderation = (mode === 'moyenne-ponderee');
+
+        let html = `
+            <div style="margin-bottom: 10px; padding: 8px; background: var(--bleu-tres-pale); border-radius: 4px;">
+                ${statsHtml}
+            </div>
+            <table class="tableau tableau-compact" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Nom de l'objectif</th>
+                        ${showType ? '<th style="width: 130px;">Type</th>' : ''}
+                        ${showPonderation ? '<th style="width: 100px;">Pondération</th>' : ''}
+                        <th style="width: 70px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        objectifs.forEach((obj, index) => {
+            html += `
+                <tr data-index="${index}">
+                    <td>${index + 1}</td>
+                    <td>
+                        <input type="text" class="form-control" value="${obj.nom || ''}"
+                               onchange="modifierObjectif(${index}, 'nom', this.value)"
+                               style="width: 100%; padding: 4px 8px;">
+                    </td>
+            `;
+
+            if (showType) {
+                html += `
+                    <td>
+                        <select class="form-control" onchange="modifierObjectif(${index}, 'essentiel', this.value === 'essentiel')"
+                                style="padding: 4px 8px;">
+                            <option value="essentiel" ${obj.essentiel ? 'selected' : ''}>Essentiel</option>
+                            <option value="complementaire" ${!obj.essentiel ? 'selected' : ''}>Complémentaire</option>
+                        </select>
+                    </td>
+                `;
+            }
+
+            if (showPonderation) {
+                html += `
+                    <td>
+                        <input type="number" class="form-control" value="${obj.ponderation || 0}"
+                               onchange="modifierObjectif(${index}, 'ponderation', parseFloat(this.value))"
+                               style="width: 70px; padding: 4px 8px;" min="0" max="100" step="0.5">%
+                    </td>
+                `;
+            }
+
+            html += `
+                    <td style="text-align: center;">
+                        <button type="button" class="btn btn-danger btn-tres-compact"
+                                onclick="supprimerObjectif(${index})"
+                                title="Supprimer cet objectif">
+                            ✕
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        conteneur.innerHTML = html;
+    }
+
+    /**
+     * Ajoute un nouvel objectif
+     */
+    function ajouterObjectif() {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.parObjectifs) {
+            modalites.parObjectifs = { ...CONFIG_PAR_OBJECTIFS_DEFAUT };
+        }
+
+        const objectifs = modalites.parObjectifs.objectifs || [];
+        const nouvelIndex = objectifs.length + 1;
+        const mode = modalites.parObjectifs.modeCalcul || 'comptage';
+
+        objectifs.push({
+            id: Date.now(),
+            nom: `Objectif ${nouvelIndex}`,
+            essentiel: true,
+            ponderation: mode === 'moyenne-ponderee' ? 10 : 0,
+            description: ''
+        });
+
+        modalites.parObjectifs.objectifs = objectifs;
+        db.setSync('modalitesEvaluation', modalites);
+
+        afficherListeObjectifs(objectifs, mode);
+        if (mode === 'comptage') {
+            regenererGrilleConversion();
+        }
+    }
+
+    /**
+     * Modifie une propriété d'un objectif
+     */
+    function modifierObjectif(index, propriete, valeur) {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.parObjectifs || !modalites.parObjectifs.objectifs) return;
+
+        modalites.parObjectifs.objectifs[index][propriete] = valeur;
+        db.setSync('modalitesEvaluation', modalites);
+
+        // Rafraîchir l'affichage si nécessaire
+        const mode = modalites.parObjectifs.modeCalcul || 'comptage';
+        if (propriete === 'essentiel' || propriete === 'ponderation') {
+            afficherListeObjectifs(modalites.parObjectifs.objectifs, mode);
+        }
+    }
+
+    /**
+     * Supprime un objectif
+     */
+    function supprimerObjectif(index) {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.parObjectifs || !modalites.parObjectifs.objectifs) return;
+
+        modalites.parObjectifs.objectifs.splice(index, 1);
+        db.setSync('modalitesEvaluation', modalites);
+
+        const mode = modalites.parObjectifs.modeCalcul || 'comptage';
+        afficherListeObjectifs(modalites.parObjectifs.objectifs, mode);
+        if (mode === 'comptage') {
+            regenererGrilleConversion();
+        }
+    }
+
+    /**
+     * Sauvegarde les paramètres du mode actuel
+     */
+    function sauvegarderParametresMode() {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.parObjectifs) {
+            modalites.parObjectifs = { ...CONFIG_PAR_OBJECTIFS_DEFAUT };
+        }
+
+        const mode = modalites.parObjectifs.modeCalcul || 'comptage';
+
+        switch (mode) {
+            case 'comptage':
+                if (!modalites.parObjectifs.comptage) modalites.parObjectifs.comptage = {};
+                const seuilEl = document.getElementById('v2-comptage-seuil-maitrise');
+                if (seuilEl) modalites.parObjectifs.comptage.seuilMaitrise = parseInt(seuilEl.value) || 75;
+                const plafondEl = document.getElementById('v2-comptage-plafond-essentiel');
+                if (plafondEl) modalites.parObjectifs.comptage.plafondSiEssentielNonMaitrise = parseInt(plafondEl.value) || 55;
+                break;
+
+            case 'seuils-critiques':
+                if (!modalites.parObjectifs.seuilsCritiques) modalites.parObjectifs.seuilsCritiques = {};
+                const seuilReussiteEl = document.getElementById('v2-seuils-niveau-reussite');
+                if (seuilReussiteEl) modalites.parObjectifs.seuilsCritiques.seuilReussite = parseInt(seuilReussiteEl.value) || 3;
+                const noteBaseEl = document.getElementById('v2-seuils-note-base');
+                if (noteBaseEl) modalites.parObjectifs.seuilsCritiques.noteBaseReussite = parseInt(noteBaseEl.value) || 80;
+                const bonusEl = document.getElementById('v2-seuils-bonus-niveau4');
+                if (bonusEl) modalites.parObjectifs.seuilsCritiques.bonusNiveau4 = parseFloat(bonusEl.value) || 3.33;
+                break;
+
+            case 'holistique':
+                if (!modalites.parObjectifs.holistique) modalites.parObjectifs.holistique = {};
+                const methodeEl = document.getElementById('v2-holistique-methode');
+                if (methodeEl) modalites.parObjectifs.holistique.methodeSuggestion = methodeEl.value || 'mode';
+                break;
+        }
+
+        db.setSync('modalitesEvaluation', modalites);
+        afficherNotificationSuccesV2('Configuration sauvegardée');
+    }
+
+    /**
+     * Régénère la grille de conversion automatiquement selon le nombre d'objectifs
+     */
+    function regenererGrilleConversion() {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.parObjectifs) return;
+
+        const objectifs = modalites.parObjectifs.objectifs || [];
+        const nbObjectifs = objectifs.length;
+
+        if (!modalites.parObjectifs.comptage) {
+            modalites.parObjectifs.comptage = {};
+        }
+
+        if (nbObjectifs === 0) {
+            modalites.parObjectifs.comptage.grilleConversion = {};
+            db.setSync('modalitesEvaluation', modalites);
+            afficherGrilleConversion({});
+            return;
+        }
+
+        // Générer une grille linéaire par défaut
+        // Note = (nb objectifs maîtrisés / total) × 100
+        const grille = {};
+        for (let i = 0; i <= nbObjectifs; i++) {
+            grille[i] = Math.round((i / nbObjectifs) * 100);
+        }
+
+        modalites.parObjectifs.comptage.grilleConversion = grille;
+        db.setSync('modalitesEvaluation', modalites);
+
+        afficherGrilleConversion(grille);
+    }
+
+    /**
+     * Affiche la grille de conversion
+     */
+    function afficherGrilleConversion(grille) {
+        const conteneur = document.getElementById('v2-comptage-grille-conversion');
+        if (!conteneur) return;
+
+        if (!grille || Object.keys(grille).length === 0) {
+            conteneur.innerHTML = '<div class="alerte-info">Ajoutez des objectifs pour voir la grille de conversion.</div>';
+            return;
+        }
+
+        let html = `
+            <table class="tableau tableau-compact" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Objectifs maîtrisés</th>
+                        <th>Note (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        Object.keys(grille).sort((a, b) => parseInt(a) - parseInt(b)).forEach(nb => {
+            html += `
+                <tr>
+                    <td>${nb}</td>
+                    <td>
+                        <input type="number" class="form-control" value="${grille[nb]}"
+                               onchange="modifierGrilleConversion(${nb}, this.value)"
+                               style="width: 80px; padding: 4px 8px;" min="0" max="100">%
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        conteneur.innerHTML = html;
+    }
+
+    /**
+     * Modifie une valeur dans la grille de conversion
+     */
+    function modifierGrilleConversion(nbObjectifs, note) {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.parObjectifs || !modalites.parObjectifs.comptage) return;
+
+        if (!modalites.parObjectifs.comptage.grilleConversion) {
+            modalites.parObjectifs.comptage.grilleConversion = {};
+        }
+
+        modalites.parObjectifs.comptage.grilleConversion[nbObjectifs] = parseInt(note) || 0;
+        db.setSync('modalitesEvaluation', modalites);
+    }
+
+    /**
+     * Initialise la section par-objectifs si la variante est sélectionnée
+     */
+    function initialiserParObjectifsV2() {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+
+        // Vérifier si la variante est "par-objectifs"
+        if (modalites.varianteCalcul === 'par-objectifs') {
+            chargerConfigParObjectifs();
+        }
+    }
+
+    // =========================================================================
+    // ALIASES POUR RÉTROCOMPATIBILITÉ (exports anciens noms)
+    // =========================================================================
+
+    // Ces fonctions renvoient vers les nouvelles pour rétrocompatibilité
+    function chargerConfigComptageObjectifs() {
+        return chargerConfigParObjectifs();
+    }
+
+    function ajouterObjectifComptage() {
+        return ajouterObjectif();
+    }
+
+    function modifierNomObjectifComptage(index, nom) {
+        return modifierObjectif(index, 'nom', nom);
+    }
+
+    function modifierTypeObjectifComptage(index, type) {
+        return modifierObjectif(index, 'essentiel', type === 'essentiel');
+    }
+
+    function supprimerObjectifComptage(index) {
+        return supprimerObjectif(index);
+    }
+
+    function sauvegarderComptageObjectifsV2() {
+        return sauvegarderParametresMode();
+    }
+
+    function initialiserComptageObjectifsV2() {
+        return initialiserParObjectifsV2();
+    }
+
+    // =========================================================================
     // NOTIFICATIONS
     // =========================================================================
 
@@ -565,6 +1104,28 @@
     window.sauvegarderStructureV2 = sauvegarderStructureV2;
     window.sauvegarderJetonsV2 = sauvegarderJetonsV2;
     window.sauvegarderToutePratiqueV2 = sauvegarderToutePratiqueV2;
+
+    // Exports par-objectifs (Beta 95 - variante unifiée avec 4 modes)
+    window.chargerConfigParObjectifs = chargerConfigParObjectifs;
+    window.changerModeCalculObjectifs = changerModeCalculObjectifs;
+    window.afficherListeObjectifs = afficherListeObjectifs;
+    window.ajouterObjectif = ajouterObjectif;
+    window.modifierObjectif = modifierObjectif;
+    window.supprimerObjectif = supprimerObjectif;
+    window.sauvegarderParametresMode = sauvegarderParametresMode;
+    window.regenererGrilleConversion = regenererGrilleConversion;
+    window.afficherGrilleConversion = afficherGrilleConversion;
+    window.modifierGrilleConversion = modifierGrilleConversion;
+    window.initialiserParObjectifsV2 = initialiserParObjectifsV2;
+
+    // Aliases rétrocompatibilité (anciens noms Beta 95)
+    window.chargerConfigComptageObjectifs = chargerConfigComptageObjectifs;
+    window.ajouterObjectifComptage = ajouterObjectifComptage;
+    window.modifierNomObjectifComptage = modifierNomObjectifComptage;
+    window.modifierTypeObjectifComptage = modifierTypeObjectifComptage;
+    window.supprimerObjectifComptage = supprimerObjectifComptage;
+    window.sauvegarderComptageObjectifsV2 = sauvegarderComptageObjectifsV2;
+    window.initialiserComptageObjectifsV2 = initialiserComptageObjectifsV2;
 
     // =========================================================================
     // INITIALISATION AU CHARGEMENT

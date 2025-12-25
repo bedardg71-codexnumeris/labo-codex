@@ -63,6 +63,12 @@ class PratiquePANStandards {
             return null;
         }
 
+        // ✅ NOUVEAU (Beta 95) : Vérifier si la variante est "par-objectifs"
+        const modalites = db.getSync('modalitesEvaluation', {});
+        if (modalites.varianteCalcul === 'par-objectifs') {
+            return this._calculerPerformanceParObjectifs(da);
+        }
+
         // Lire configuration
         const config = this._lireConfiguration();
         const portfolioActif = config.portfolioActif;
@@ -1315,6 +1321,257 @@ class PratiquePANStandards {
         };
 
         return seuilsDefaut[nomSeuil] || 0.75;
+    }
+
+    // =========================================================================
+    // SYSTÈME DE COMPTAGE D'OBJECTIFS (Bruno V.) - Beta 95
+    // =========================================================================
+
+    /**
+     * Calcule la performance selon le système de comptage d'objectifs
+     *
+     * Logique :
+     * 1. Pour chaque objectif configuré, trouver la meilleure note de l'étudiant
+     * 2. Un objectif est "maîtrisé" si note >= seuil de maîtrise
+     * 3. Note finale = grille de conversion[nb objectifs maîtrisés]
+     * 4. Si un objectif essentiel n'est pas maîtrisé → plafond à 55%
+     *
+     * @param {string} da - Numéro de dossier d'admission
+     * @returns {number} Indice P entre 0 et 1, ou null si pas de données
+     * @private
+     */
+    _calculerPerformanceParObjectifs(da) {
+        const modalites = db.getSync('modalitesEvaluation', {});
+        const config = modalites.parObjectifs || {};
+        const mode = config.modeCalcul || 'comptage';
+
+        const objectifs = config.objectifs || [];
+
+        if (objectifs.length === 0) {
+            console.warn('[PAN-Standards] Aucun objectif configuré');
+            return null;
+        }
+
+        // Dispatch vers le mode de calcul approprié
+        switch (mode) {
+            case 'comptage':
+                return this._calculerModeComptage(da, objectifs, config.comptage || {});
+            case 'moyenne-ponderee':
+                return this._calculerModeMoyennePonderee(da, objectifs, config.moyennePonderee || {});
+            case 'seuils-critiques':
+                return this._calculerModeSeuilsCritiques(da, objectifs, config.seuilsCritiques || {});
+            case 'holistique':
+                return this._calculerModeHolistique(da, objectifs, config.holistique || {});
+            default:
+                console.warn(`[PAN-Standards] Mode inconnu: ${mode}, utilisation du mode comptage`);
+                return this._calculerModeComptage(da, objectifs, config.comptage || {});
+        }
+    }
+
+    /**
+     * Mode Comptage (Bruno V.)
+     * Note = grille de conversion selon nombre d'objectifs maîtrisés
+     * Plafond si objectifs essentiels non maîtrisés
+     */
+    _calculerModeComptage(da, objectifs, configComptage) {
+        const seuilMaitrise = (configComptage.seuilMaitrise || 75) / 100;
+        const plafond = (configComptage.plafondSiEssentielNonMaitrise || 55) / 100;
+        const grilleConversion = configComptage.grilleConversion || {};
+
+        const niveauxParObjectif = this._calculerNiveauxParObjectif(da, objectifs);
+        if (!niveauxParObjectif) return null;
+
+        let nbObjectifsMaitrises = 0;
+        let essentielsNonMaitrises = [];
+
+        objectifs.forEach((obj, index) => {
+            const niveau = niveauxParObjectif[index];
+            if (niveau && niveau.note >= seuilMaitrise) {
+                nbObjectifsMaitrises++;
+            } else if (obj.essentiel) {
+                essentielsNonMaitrises.push(obj.nom);
+            }
+        });
+
+        // Note selon grille de conversion
+        let noteFinale = (grilleConversion[nbObjectifsMaitrises] || 0) / 100;
+
+        // Plafond si essentiels non maîtrisés
+        if (essentielsNonMaitrises.length > 0) {
+            noteFinale = Math.min(noteFinale, plafond);
+        }
+
+        return noteFinale;
+    }
+
+    /**
+     * Mode Moyenne pondérée (Michel B.)
+     * Note = moyenne des niveaux × pondération de chaque objectif
+     */
+    _calculerModeMoyennePonderee(da, objectifs, configMoyenne) {
+        const niveauxParObjectif = this._calculerNiveauxParObjectif(da, objectifs);
+        if (!niveauxParObjectif) return null;
+
+        let sommeNotesPonderees = 0;
+        let sommePonderations = 0;
+
+        objectifs.forEach((obj, index) => {
+            const niveau = niveauxParObjectif[index];
+            const ponderation = obj.ponderation || 0;
+
+            if (niveau && ponderation > 0) {
+                sommeNotesPonderees += niveau.note * ponderation;
+                sommePonderations += ponderation;
+            }
+        });
+
+        if (sommePonderations === 0) return null;
+
+        return sommeNotesPonderees / sommePonderations;
+    }
+
+    /**
+     * Mode Seuils critiques (Xavier C.-T.)
+     * Tous les objectifs doivent atteindre niveau 3+, bonus pour niveau 4
+     */
+    _calculerModeSeuilsCritiques(da, objectifs, configSeuils) {
+        const seuilReussite = configSeuils.seuilReussite || 3;
+        const noteBaseReussite = (configSeuils.noteBaseReussite || 80) / 100;
+        const bonusNiveau4 = (configSeuils.bonusNiveau4 || 3.33) / 100;
+
+        const niveauxParObjectif = this._calculerNiveauxParObjectif(da, objectifs);
+        if (!niveauxParObjectif) return null;
+
+        let objectifsNonAtteints = 0;
+        let objectifsNiveau4 = 0;
+        let objectifsNiveau2 = 0;
+        let objectifsNiveau1 = 0;
+
+        objectifs.forEach((obj, index) => {
+            const niveau = niveauxParObjectif[index];
+            if (!niveau) {
+                objectifsNonAtteints++;
+                return;
+            }
+
+            // Convertir la note (0-1) en niveau (1-4)
+            const niveauNum = this._convertirNoteEnNiveau(niveau.note);
+
+            if (niveauNum >= 4) {
+                objectifsNiveau4++;
+            } else if (niveauNum >= seuilReussite) {
+                // OK, niveau atteint
+            } else if (niveauNum === 2) {
+                objectifsNiveau2++;
+            } else {
+                objectifsNiveau1++;
+            }
+        });
+
+        // Règles Xavier : tous niveau 3+ → 80% | Bonus niveau 4 → +3.33%
+        // Un objectif niveau 2 → 55% | Deux niveau 2 OU un niveau 1 → 50%
+        if (objectifsNiveau1 > 0 || objectifsNiveau2 >= 2) {
+            return 0.50;
+        }
+        if (objectifsNiveau2 === 1) {
+            return 0.55;
+        }
+
+        // Tous les objectifs au niveau requis ou plus
+        return Math.min(1.0, noteBaseReussite + (objectifsNiveau4 * bonusNiveau4));
+    }
+
+    /**
+     * Mode Holistique (Isabelle M.)
+     * Suggestion statistique (mode, médiane, moyenne) + validation enseignant
+     */
+    _calculerModeHolistique(da, objectifs, configHolistique) {
+        const methode = configHolistique.methodeSuggestion || 'mode';
+        const niveauxParObjectif = this._calculerNiveauxParObjectif(da, objectifs);
+        if (!niveauxParObjectif) return null;
+
+        const notes = objectifs
+            .map((obj, index) => niveauxParObjectif[index]?.note)
+            .filter(n => n !== undefined && n !== null);
+
+        if (notes.length === 0) return null;
+
+        switch (methode) {
+            case 'mode': {
+                // Mode : note la plus fréquente
+                const frequences = {};
+                notes.forEach(n => {
+                    const key = Math.round(n * 100);
+                    frequences[key] = (frequences[key] || 0) + 1;
+                });
+                const modeKey = Object.entries(frequences).reduce((a, b) => b[1] > a[1] ? b : a)[0];
+                return parseInt(modeKey) / 100;
+            }
+            case 'mediane': {
+                const sorted = [...notes].sort((a, b) => a - b);
+                const mid = Math.floor(sorted.length / 2);
+                return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+            }
+            case 'moyenne':
+            default: {
+                return notes.reduce((a, b) => a + b, 0) / notes.length;
+            }
+        }
+    }
+
+    /**
+     * Calcule les niveaux atteints par objectif pour un étudiant
+     * @returns {Array} Tableau de {note, meilleureNote} par objectif
+     */
+    _calculerNiveauxParObjectif(da, objectifs) {
+        const evaluations = this._lireEvaluations();
+        const productions = db.getSync('productions', []);
+
+        const evaluationsEleve = evaluations.filter(e =>
+            e.etudiantDA === da &&
+            !e.remplaceeParId &&
+            e.noteFinale !== null &&
+            e.noteFinale !== undefined
+        );
+
+        if (evaluationsEleve.length === 0) {
+            return null;
+        }
+
+        return objectifs.map(obj => {
+            // Trouver les productions liées à cet objectif
+            const productionsObj = productions.filter(p =>
+                p.objectifId === obj.id || p.objectif === obj.nom
+            );
+
+            if (productionsObj.length === 0) {
+                return null;
+            }
+
+            // Trouver la meilleure note de l'étudiant pour cet objectif
+            const productionsIds = productionsObj.map(p => p.id);
+            const evalsObj = evaluationsEleve.filter(e => productionsIds.includes(e.productionId));
+
+            if (evalsObj.length === 0) {
+                return null;
+            }
+
+            const meilleureNote = Math.max(...evalsObj.map(e => e.noteFinale));
+            return {
+                note: meilleureNote / 100,
+                meilleureNote: meilleureNote
+            };
+        });
+    }
+
+    /**
+     * Convertit une note (0-1) en niveau IDME (1-4)
+     */
+    _convertirNoteEnNiveau(note) {
+        if (note >= 0.85) return 4; // Étendu
+        if (note >= 0.75) return 3; // Maîtrisé
+        if (note >= 0.65) return 2; // Développement
+        return 1; // Insuffisant
     }
 }
 
