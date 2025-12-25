@@ -289,26 +289,26 @@ const QUESTIONS_PRIMO = [
         }
     },
 
-    // MODE EXPLORATION : 3 grandes orientations simplifiées
+    // MODE EXPLORATION : 3 orientations alignées avec les options Expert
     {
         id: 'construction-note-exploration',
         texte: 'Quelle orientation préfères-tu pour le calcul de la note ?',
         type: 'radio',
         options: [
             {
-                value: 'valoriser-progres',
-                label: '📈 Valoriser le progrès',
-                description: 'Seuls les meilleurs travaux comptent. Les erreurs du début ne pénalisent pas.'
+                value: 'meilleure-demonstration',
+                label: '🎯 Ce qui compte, c\'est ta meilleure démonstration',
+                description: 'Les meilleures évaluations déterminent la note. Les erreurs du début ne pénalisent pas.'
             },
             {
-                value: 'considerer-ensemble',
-                label: '📊 Considérer l\'ensemble',
-                description: 'Tous les travaux contribuent à la note. Vision globale de la progression.'
+                value: 'etat-actuel',
+                label: '📈 Ce qui compte, c\'est où tu en es maintenant',
+                description: 'Les évaluations récentes déterminent la note. Valorise la progression.'
             },
             {
-                value: 'indecis',
-                label: '🤔 Je ne sais pas encore',
-                description: 'On utilise un défaut et tu pourras ajuster plus tard dans les Réglages.'
+                value: 'explorer',
+                label: '🔍 Je veux explorer les options',
+                description: 'On utilise un défaut et tu pourras ajuster dans les Réglages.'
             }
         ],
         champsCibles: [
