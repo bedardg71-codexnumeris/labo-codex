@@ -1435,8 +1435,9 @@ class PratiquePANStandards {
      * Tous les objectifs doivent atteindre niveau 3+, bonus pour niveau 4
      */
     _calculerModeSeuilsCritiques(da, objectifs, configSeuils) {
-        const seuilReussite = configSeuils.seuilReussite || 3;
-        const noteBaseReussite = (configSeuils.noteBaseReussite || 80) / 100;
+        // Paramètres configurés via wizard Primo (Beta 95)
+        const niveauMinimum = configSeuils.niveauMinimum || configSeuils.seuilReussite || 3;
+        const noteBase = (configSeuils.noteBase || configSeuils.noteBaseReussite || 80) / 100;
         const bonusNiveau4 = (configSeuils.bonusNiveau4 || 3.33) / 100;
 
         const niveauxParObjectif = this._calculerNiveauxParObjectif(da, objectifs);
@@ -1459,7 +1460,7 @@ class PratiquePANStandards {
 
             if (niveauNum >= 4) {
                 objectifsNiveau4++;
-            } else if (niveauNum >= seuilReussite) {
+            } else if (niveauNum >= niveauMinimum) {
                 // OK, niveau atteint
             } else if (niveauNum === 2) {
                 objectifsNiveau2++;
@@ -1478,7 +1479,7 @@ class PratiquePANStandards {
         }
 
         // Tous les objectifs au niveau requis ou plus
-        return Math.min(1.0, noteBaseReussite + (objectifsNiveau4 * bonusNiveau4));
+        return Math.min(1.0, noteBase + (objectifsNiveau4 * bonusNiveau4));
     }
 
     /**

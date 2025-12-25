@@ -320,9 +320,155 @@ const QUESTIONS_PRIMO = [
         }
     },
 
+    // ========================================================================
+    // MODE MOYENNE PONDÉRÉE (Michel B.)
+    // ========================================================================
+    {
+        id: 'objectifs-info-moyenne-ponderee',
+        texte: 'Avec la **moyenne pondérée**, chaque objectif aura un poids configurable. La note finale sera calculée selon la formule :\n\n**Note = Σ (niveau × pondération) / Σ pondérations**\n\nTu pourras définir les pondérations de chaque objectif dans Réglages → Pratique de notation.',
+        type: 'info',
+        champsCibles: [],
+        sautSi: function(reponses) {
+            const approche = reponses['approche-evaluation'];
+            const mode = reponses['mode-calcul-objectifs'];
+            return approche !== 'par-objectifs' || mode !== 'moyenne-ponderee';
+        }
+    },
+
+    // ========================================================================
+    // MODE SEUILS CRITIQUES (Xavier C.-T.)
+    // ========================================================================
+    {
+        id: 'objectifs-niveau-minimum',
+        texte: 'Quel est le niveau minimum que **tous** les objectifs doivent atteindre ?',
+        type: 'number',
+        placeholder: '3',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'parObjectifs.seuilsCritiques.niveauMinimum' }
+        ],
+        validation: {
+            requis: true,
+            min: 1,
+            max: 4
+        },
+        aide: 'Typiquement niveau 3 (Maîtrisé). Si un objectif est sous ce niveau, des règles non-linéaires s\'appliquent.',
+        sautSi: function(reponses) {
+            const approche = reponses['approche-evaluation'];
+            const mode = reponses['mode-calcul-objectifs'];
+            return approche !== 'par-objectifs' || mode !== 'seuils-critiques';
+        }
+    },
+
+    {
+        id: 'objectifs-note-base',
+        texte: 'Quelle est la note de base (%) quand **tous** les objectifs atteignent le niveau minimum ?',
+        type: 'number',
+        placeholder: '80',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'parObjectifs.seuilsCritiques.noteBase' }
+        ],
+        validation: {
+            requis: true,
+            min: 60,
+            max: 100
+        },
+        aide: 'Typiquement 80%. C\'est la note obtenue si tous les objectifs sont au niveau requis.',
+        sautSi: function(reponses) {
+            const approche = reponses['approche-evaluation'];
+            const mode = reponses['mode-calcul-objectifs'];
+            return approche !== 'par-objectifs' || mode !== 'seuils-critiques';
+        }
+    },
+
+    {
+        id: 'objectifs-bonus-niveau4',
+        texte: 'Quel bonus (%) accorder pour chaque objectif au niveau 4 (Étendu) ?',
+        type: 'number',
+        placeholder: '3.33',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'parObjectifs.seuilsCritiques.bonusNiveau4' }
+        ],
+        validation: {
+            requis: true,
+            min: 0,
+            max: 10
+        },
+        aide: 'Typiquement 3.33% par objectif niveau 4. Avec 6 objectifs, cela permet d\'atteindre 100% (80% + 6×3.33%).',
+        sautSi: function(reponses) {
+            const approche = reponses['approche-evaluation'];
+            const mode = reponses['mode-calcul-objectifs'];
+            return approche !== 'par-objectifs' || mode !== 'seuils-critiques';
+        }
+    },
+
+    {
+        id: 'objectifs-info-seuils-critiques',
+        texte: 'Avec les **seuils critiques**, des règles non-linéaires s\'appliquent si certains objectifs n\'atteignent pas le niveau requis :\n\n• **1 objectif niveau 2** → Note plafonnée à 55%\n• **2+ objectifs niveau 2 OU 1+ niveau 1** → Note plafonnée à 50%\n\nCes règles sont strictes pour garantir la maîtrise minimale.',
+        type: 'info',
+        champsCibles: [],
+        sautSi: function(reponses) {
+            const approche = reponses['approche-evaluation'];
+            const mode = reponses['mode-calcul-objectifs'];
+            return approche !== 'par-objectifs' || mode !== 'seuils-critiques';
+        }
+    },
+
+    // ========================================================================
+    // MODE HOLISTIQUE (Isabelle M.)
+    // ========================================================================
+    {
+        id: 'objectifs-methode-suggestion',
+        texte: 'Quelle méthode statistique veux-tu utiliser comme **suggestion** de note ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'mode',
+                label: 'Mode (niveau le plus fréquent)',
+                description: 'Le niveau qui apparaît le plus souvent parmi les objectifs.'
+            },
+            {
+                value: 'mediane',
+                label: 'Médiane (niveau central)',
+                description: 'Le niveau au milieu quand les objectifs sont triés.'
+            },
+            {
+                value: 'moyenne',
+                label: 'Moyenne (niveau moyen)',
+                description: 'La moyenne arithmétique des niveaux atteints.'
+            }
+        ],
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'parObjectifs.holistique.methodeSuggestion' }
+        ],
+        validation: {
+            requis: true
+        },
+        aide: 'Cette méthode génère une suggestion que tu pourras ajuster selon ton jugement professionnel.',
+        sautSi: function(reponses) {
+            const approche = reponses['approche-evaluation'];
+            const mode = reponses['mode-calcul-objectifs'];
+            return approche !== 'par-objectifs' || mode !== 'holistique';
+        }
+    },
+
+    {
+        id: 'objectifs-info-holistique',
+        texte: 'Avec le mode **holistique**, le système te propose une note basée sur la méthode statistique choisie, mais **tu gardes le dernier mot**.\n\nTon jugement professionnel peut prendre en compte :\n• Le contexte de l\'étudiant\n• La progression observée\n• Des facteurs qualitatifs non mesurés',
+        type: 'info',
+        champsCibles: [],
+        sautSi: function(reponses) {
+            const approche = reponses['approche-evaluation'];
+            const mode = reponses['mode-calcul-objectifs'];
+            return approche !== 'par-objectifs' || mode !== 'holistique';
+        }
+    },
+
+    // ========================================================================
+    // MESSAGE FINAL POUR TOUS LES MODES PAR-OBJECTIFS
+    // ========================================================================
     {
         id: 'objectifs-info-configuration',
-        texte: 'Parfait ! Tu pourras configurer tes objectifs dans **Réglages → Pratique de notation** après avoir terminé cette configuration initiale.',
+        texte: 'Parfait ! Tu pourras configurer tes objectifs d\'apprentissage dans **Réglages → Pratique de notation** après avoir terminé cette configuration initiale.',
         type: 'info',
         champsCibles: [],
         sautSi: function(reponses) {
