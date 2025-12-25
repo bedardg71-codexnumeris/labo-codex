@@ -585,6 +585,25 @@ function genererInputQuestion(question) {
             // Le bouton "Suivant" permettra de continuer
             break;
 
+        case 'info':
+            // Type informatif - affiche un message avec style distinct (Beta 95)
+            // Utilisé pour les messages de confirmation ou d'information
+            html += `
+                <div style="
+                    padding: 20px;
+                    background: var(--bleu-tres-pale);
+                    border-left: 4px solid var(--bleu-principal);
+                    border-radius: 8px;
+                    margin-top: 10px;
+                ">
+                    <div style="font-size: 1.2rem; margin-bottom: 8px;">ℹ️</div>
+                    <div style="font-size: 0.95rem; color: var(--gris-fonce); line-height: 1.5;">
+                        Ce message est informatif. Clique sur "Suivant" pour continuer.
+                    </div>
+                </div>
+            `;
+            break;
+
         case 'action':
             // Type spécial pour déclencher une action (import données demo, etc.)
             html += `
@@ -755,9 +774,9 @@ function primoQuestionSuivante() {
         return;
     }
 
-    // Pour les types 'instruction' et 'message', pas de validation nécessaire
-    if (question.type === 'instruction' || question.type === 'message') {
-        console.log('[Primo] Type instruction/message - passage direct');
+    // Pour les types 'instruction', 'message' et 'info', pas de validation nécessaire
+    if (question.type === 'instruction' || question.type === 'message' || question.type === 'info') {
+        console.log('[Primo] Type instruction/message/info - passage direct');
         indexQuestionActuelle++;
         afficherQuestionActuelle();
         return;
@@ -1360,6 +1379,7 @@ function transformerReponse(questionId, valeur) {
 
 /**
  * Sauvegarde un champ dans localStorage
+ * Supporte les chemins imbriqués (ex: 'parObjectifs.comptage.seuilMaitrise')
  */
 function sauvegarderChamp(cible, valeur) {
     const { cle, champ } = cible;
@@ -1367,6 +1387,23 @@ function sauvegarderChamp(cible, valeur) {
     if (champ === null) {
         // Sauvegarde directe (ex: groupeEtudiants)
         db.setSync(cle, valeur);
+    } else if (champ.includes('.')) {
+        // Chemin imbriqué (ex: 'parObjectifs.comptage.seuilMaitrise')
+        let objet = db.getSync(cle, {});
+        const parties = champ.split('.');
+        let ref = objet;
+
+        // Naviguer jusqu'à l'avant-dernier niveau, créer si nécessaire
+        for (let i = 0; i < parties.length - 1; i++) {
+            if (!ref[parties[i]]) {
+                ref[parties[i]] = {};
+            }
+            ref = ref[parties[i]];
+        }
+
+        // Assigner la valeur au dernier niveau
+        ref[parties[parties.length - 1]] = valeur;
+        db.setSync(cle, objet);
     } else {
         // Sauvegarde dans un objet (ex: infoCours.enseignant)
         let objet = db.getSync(cle, {});

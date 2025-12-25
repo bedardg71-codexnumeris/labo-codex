@@ -78,6 +78,39 @@ MODULE SOURCE (génère/stocke)     MODULE LECTEUR (lit/affiche)
   * Patterns et diagnostics universels
   * Interventions RàI configurables avec fallback générique intelligent
 
+**✅ VARIANTE PAR-OBJECTIFS UNIFIÉE (Beta 95 - 25 décembre 2025)** :
+
+La variante "par-objectifs" de PAN-Standards offre maintenant 4 modes de calcul configurables via le wizard Primo :
+
+| Mode | Auteur | Description |
+|------|--------|-------------|
+| **Comptage** | Bruno V. | Note = grille selon nb objectifs maîtrisés. Objectifs "essentiels" vs "complémentaires". Plafond 55% si essentiel non maîtrisé. |
+| **Moyenne pondérée** | Michel B. | Note = moyenne des niveaux × pondération par objectif |
+| **Seuils critiques** | Xavier C.-T. | Tous objectifs niveau 3+ requis. Bonus +3.33% par niveau 4. Règles non-linéaires. |
+| **Holistique** | Isabelle M. | Suggestion statistique (mode/médiane/moyenne) + jugement professionnel |
+
+**Structure de données** :
+```javascript
+modalitesEvaluation: {
+    pratique: 'pan-standards',
+    approcheEvaluation: 'par-objectifs',  // ou 'par-artefacts'
+    varianteCalcul: 'par-objectifs',
+    parObjectifs: {
+        modeCalcul: 'comptage',  // ou 'moyenne-ponderee', 'seuils-critiques', 'holistique'
+        comptage: {
+            seuilMaitrise: 75,
+            plafondSiEssentielNonMaitrise: 55
+        }
+    }
+}
+```
+
+**Fichiers clés** :
+- `js/primo-questions.js` : Questions wizard avec bifurcation artefacts/objectifs
+- `js/primo-modal.js` : Support chemins imbriqués dans champsCibles
+- `js/pratique-notation-v2.js` : Interface configuration avec 4 modes
+- `js/pratiques/pratique-pan-standards.js` : Calculs pour les 4 modes
+
 **Pratiques futures** :
 - PAN-Spécifications : Pass/fail sur objectifs
 - Dénotation (Ungrading) : Sans notes chiffrées

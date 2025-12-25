@@ -8543,6 +8543,7 @@ Exemple :
                                     <option value="n-meilleurs">Je retiens les N meilleures évaluations</option>
                                     <option value="n-recents">Je retiens les N évaluations les plus récentes</option>
                                     <option value="grille-profils">J'utilise une grille de profils (ex: « 3M + 2M+ → 85% »)</option>
+                                    <option value="par-objectifs">Par objectifs (4 modes de calcul)</option>
                                     <option value="autre">Autre (je vais le décrire après)</option>
                                 </select>
                             </div>
@@ -8647,6 +8648,148 @@ Exemple :
                                     <input type="number" id="v2-portfolio-total" class="controle-form" min="1" max="50" value="10" onchange="sauvegarderStructureV2()">
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Configuration Par-Objectifs (4 modes) - Beta 95 -->
+                        <div id="v2-config-par-objectifs" style="display: none;">
+
+                            <!-- Sélecteur de mode de calcul -->
+                            <div style="margin-bottom: 20px;">
+                                <div class="groupe-form">
+                                    <label for="v2-objectifs-mode-calcul" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                        Mode de calcul de la note finale
+                                    </label>
+                                    <select id="v2-objectifs-mode-calcul" class="controle-form" onchange="changerModeCalculObjectifs()">
+                                        <option value="comptage">Comptage d'objectifs (Bruno V.)</option>
+                                        <option value="moyenne-ponderee">Moyenne pondérée (Michel B.)</option>
+                                        <option value="seuils-critiques">Seuils critiques (Xavier C.-T.)</option>
+                                        <option value="holistique">Holistique (Isabelle M.)</option>
+                                    </select>
+                                </div>
+                                <div id="v2-objectifs-mode-description" style="display: none; margin-top: 10px; padding: 10px 12px; background: #f8f9fa; border-radius: 4px; font-size: 0.85rem; color: var(--gris-fonce);">
+                                </div>
+                            </div>
+
+                            <!-- Liste des objectifs (partagée entre tous les modes) -->
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h4 style="margin: 0; font-size: 1rem;">Liste des objectifs</h4>
+                                    <button type="button" class="btn btn-primary btn-compact" onclick="ajouterObjectif()">
+                                        + Ajouter un objectif
+                                    </button>
+                                </div>
+                                <div id="v2-objectifs-liste">
+                                    <!-- Liste générée dynamiquement selon le mode -->
+                                </div>
+                            </div>
+
+                            <!-- Section Mode Comptage (Bruno) -->
+                            <div id="v2-config-mode-comptage" style="display: none;">
+                                <div style="margin-bottom: 15px; padding: 12px; background: #e8f5e9; border-left: 3px solid #4caf50; border-radius: 6px;">
+                                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                        <strong>Comptage (Bruno V.)</strong> : La note finale dépend du nombre d'objectifs maîtrisés.
+                                        Les objectifs « essentiels » doivent TOUS être maîtrisés, sinon la note est plafonnée.
+                                    </p>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+                                    <div class="groupe-form">
+                                        <label for="v2-comptage-seuil-maitrise" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                            Seuil de maîtrise (%)
+                                        </label>
+                                        <input type="number" id="v2-comptage-seuil-maitrise" class="controle-form" min="50" max="100" value="75" onchange="sauvegarderParametresMode()">
+                                        <small class="text-muted" style="display: block; margin-top: 4px;">Note minimale pour considérer un objectif « Maîtrisé »</small>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label for="v2-comptage-plafond-essentiel" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                            Plafond si essentiels non maîtrisés (%)
+                                        </label>
+                                        <input type="number" id="v2-comptage-plafond-essentiel" class="controle-form" min="0" max="60" value="55" onchange="sauvegarderParametresMode()">
+                                        <small class="text-muted" style="display: block; margin-top: 4px;">Note maximale si un objectif essentiel n'est pas maîtrisé</small>
+                                    </div>
+                                </div>
+                                <!-- Grille de conversion -->
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <h4 style="margin: 0; font-size: 1rem;">Grille de conversion</h4>
+                                        <small class="text-muted">Cliquez sur une note pour la modifier</small>
+                                    </div>
+                                    <div id="v2-comptage-grille-conversion" style="max-height: 300px; overflow-y: auto;">
+                                        <!-- Grille générée dynamiquement -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section Mode Moyenne pondérée (Michel) -->
+                            <div id="v2-config-mode-moyenne-ponderee" style="display: none;">
+                                <div style="margin-bottom: 15px; padding: 12px; background: #e3f2fd; border-left: 3px solid #2196f3; border-radius: 6px;">
+                                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                        <strong>Moyenne pondérée (Michel B.)</strong> : La note finale est la moyenne des niveaux atteints,
+                                        pondérée par l'importance de chaque objectif. Configurez les pondérations dans la liste ci-dessus.
+                                    </p>
+                                </div>
+                                <div class="alerte-info" style="padding: 10px; margin: 10px 0;">
+                                    <strong>Configuration :</strong> Ajustez les pondérations (%) de chaque objectif dans le tableau ci-dessus.
+                                    Le total devrait être 100%.
+                                </div>
+                            </div>
+
+                            <!-- Section Mode Seuils critiques (Xavier) -->
+                            <div id="v2-config-mode-seuils-critiques" style="display: none;">
+                                <div style="margin-bottom: 15px; padding: 12px; background: #fff3e0; border-left: 3px solid #ff9800; border-radius: 6px;">
+                                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                        <strong>Seuils critiques (Xavier C.-T.)</strong> : Tous les objectifs doivent atteindre un niveau minimum.
+                                        Bonus pour les objectifs au niveau supérieur.
+                                    </p>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                                    <div class="groupe-form">
+                                        <label for="v2-seuils-niveau-reussite" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                            Niveau requis pour réussite
+                                        </label>
+                                        <input type="number" id="v2-seuils-niveau-reussite" class="controle-form" min="1" max="4" value="3" onchange="sauvegarderParametresMode()">
+                                        <small class="text-muted" style="display: block; margin-top: 4px;">Tous les objectifs doivent atteindre ce niveau</small>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label for="v2-seuils-note-base" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                            Note si tous réussis (%)
+                                        </label>
+                                        <input type="number" id="v2-seuils-note-base" class="controle-form" min="60" max="100" value="80" onchange="sauvegarderParametresMode()">
+                                        <small class="text-muted" style="display: block; margin-top: 4px;">Note obtenue si tous au niveau requis</small>
+                                    </div>
+                                    <div class="groupe-form">
+                                        <label for="v2-seuils-bonus-niveau4" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                            Bonus par objectif niveau 4 (%)
+                                        </label>
+                                        <input type="number" id="v2-seuils-bonus-niveau4" class="controle-form" min="0" max="10" step="0.5" value="3.33" onchange="sauvegarderParametresMode()">
+                                        <small class="text-muted" style="display: block; margin-top: 4px;">Points bonus par objectif au niveau 4</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section Mode Holistique (Isabelle) -->
+                            <div id="v2-config-mode-holistique" style="display: none;">
+                                <div style="margin-bottom: 15px; padding: 12px; background: #f3e5f5; border-left: 3px solid #9c27b0; border-radius: 6px;">
+                                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                        <strong>Holistique (Isabelle M.)</strong> : Le système suggère une note basée sur une analyse statistique,
+                                        mais l'enseignant·e valide avec son jugement professionnel.
+                                    </p>
+                                </div>
+                                <div class="groupe-form">
+                                    <label for="v2-holistique-methode" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                        Méthode de suggestion
+                                    </label>
+                                    <select id="v2-holistique-methode" class="controle-form" onchange="sauvegarderParametresMode()">
+                                        <option value="mode">Mode (niveau le plus fréquent)</option>
+                                        <option value="mediane">Médiane</option>
+                                        <option value="moyenne">Moyenne</option>
+                                    </select>
+                                    <small class="text-muted" style="display: block; margin-top: 4px;">La suggestion peut être modifiée par l'enseignant·e lors de l'évaluation finale</small>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-primary" onclick="sauvegarderParametresMode()" style="margin-top: 15px;">
+                                Sauvegarder la configuration
+                            </button>
                         </div>
 
                         <!-- Configuration Sommative -->

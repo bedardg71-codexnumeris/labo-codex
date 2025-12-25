@@ -203,7 +203,139 @@ const QUESTIONS_PRIMO = [
         }
     },
 
-    // Question commune PAN (Maîtrise et Spécifications)
+    // ========================================================================
+    // NOUVELLE BIFURCATION : Artefacts vs Objectifs (Beta 95)
+    // ========================================================================
+    {
+        id: 'approche-evaluation',
+        texte: 'Comment veux-tu structurer l\'évaluation de tes étudiants ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'par-artefacts',
+                label: '📁 Par artefacts (portfolio)',
+                description: 'Les étudiants soumettent des productions (artefacts) évaluées avec une grille de critères. Note basée sur les N meilleures.'
+            },
+            {
+                value: 'par-objectifs',
+                label: '🎯 Par objectifs d\'apprentissage',
+                description: 'Tu définis des objectifs spécifiques. La note finale dépend du niveau de maîtrise atteint sur chaque objectif.'
+            }
+        ],
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'approcheEvaluation' },
+            { cle: 'modalitesEvaluation', champ: 'varianteCalcul' }
+        ],
+        validation: {
+            requis: true
+        },
+        aide: 'L\'approche par artefacts est idéale pour les cours avec dossiers d\'apprentissage. L\'approche par objectifs convient aux cours structurés par compétences spécifiques.',
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            return pratique !== 'pan-standards';
+        }
+    },
+
+    // ========================================================================
+    // BRANCHE PAR-OBJECTIFS : Configuration des 4 modes (Beta 95)
+    // ========================================================================
+    {
+        id: 'mode-calcul-objectifs',
+        texte: 'Quel mode de calcul veux-tu utiliser pour la note finale ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'comptage',
+                label: '🔢 Comptage d\'objectifs (Bruno V.)',
+                description: 'Note = nombre d\'objectifs maîtrisés. Objectifs « essentiels » vs « complémentaires ». Plafond si essentiels non maîtrisés.'
+            },
+            {
+                value: 'moyenne-ponderee',
+                label: '⚖️ Moyenne pondérée (Michel B.)',
+                description: 'Note = moyenne des niveaux × pondération de chaque objectif. Chaque objectif a un poids différent.'
+            },
+            {
+                value: 'seuils-critiques',
+                label: '📊 Seuils critiques (Xavier C.-T.)',
+                description: 'Tous les objectifs doivent atteindre niveau 3+. Bonus pour niveau 4. Règles non-linéaires.'
+            },
+            {
+                value: 'holistique',
+                label: '🎨 Holistique (Isabelle M.)',
+                description: 'Suggestion statistique (mode, médiane, moyenne) + validation par ton jugement professionnel.'
+            }
+        ],
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'parObjectifs.modeCalcul' }
+        ],
+        validation: {
+            requis: true
+        },
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            const approche = reponses['approche-evaluation'];
+            return pratique !== 'pan-standards' || approche !== 'par-objectifs';
+        }
+    },
+
+    {
+        id: 'objectifs-seuil-maitrise',
+        texte: 'Quel est le seuil de maîtrise (%) pour considérer un objectif comme « Maîtrisé » ?',
+        type: 'number',
+        placeholder: '75',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'parObjectifs.comptage.seuilMaitrise' }
+        ],
+        validation: {
+            requis: true,
+            min: 50,
+            max: 100
+        },
+        aide: 'Typiquement 75%. Un objectif est considéré maîtrisé si la note est ≥ ce seuil.',
+        sautSi: function(reponses) {
+            const approche = reponses['approche-evaluation'];
+            const mode = reponses['mode-calcul-objectifs'];
+            return approche !== 'par-objectifs' || mode !== 'comptage';
+        }
+    },
+
+    {
+        id: 'objectifs-plafond-essentiel',
+        texte: 'Si un objectif essentiel n\'est pas maîtrisé, quelle est la note maximale possible ?',
+        type: 'number',
+        placeholder: '55',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'parObjectifs.comptage.plafondSiEssentielNonMaitrise' }
+        ],
+        validation: {
+            requis: true,
+            min: 0,
+            max: 60
+        },
+        aide: 'Typiquement 55%. C\'est le plafond automatique si un objectif « essentiel » n\'est pas maîtrisé.',
+        sautSi: function(reponses) {
+            const approche = reponses['approche-evaluation'];
+            const mode = reponses['mode-calcul-objectifs'];
+            return approche !== 'par-objectifs' || mode !== 'comptage';
+        }
+    },
+
+    {
+        id: 'objectifs-info-configuration',
+        texte: 'Parfait ! Tu pourras configurer tes objectifs dans **Réglages → Pratique de notation** après avoir terminé cette configuration initiale.',
+        type: 'info',
+        champsCibles: [],
+        sautSi: function(reponses) {
+            const approche = reponses['approche-evaluation'];
+            return approche !== 'par-objectifs';
+        }
+    },
+
+    // ========================================================================
+    // BRANCHE PAR-ARTEFACTS : Questions portfolio existantes
+    // ========================================================================
+
+    // Question commune PAN (Maîtrise et Spécifications) - Seulement pour approche par-artefacts
     {
         id: 'utiliser-portfolio',
         texte: 'Veux-tu utiliser un dossier d\'apprentissage (portfolio) ?',
@@ -221,6 +353,9 @@ const QUESTIONS_PRIMO = [
         aide: 'Le portfolio permet aux étudiants de soumettre plusieurs versions améliorées de leurs travaux.',
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
+            const approche = reponses['approche-evaluation'];
+            // Sauter si pas PAN, ou si approche par-objectifs (Beta 95)
+            if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
             return pratique !== 'pan-standards' && pratique !== 'pan-specifications';
         }
     },
@@ -242,6 +377,9 @@ const QUESTIONS_PRIMO = [
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];
+            const approche = reponses['approche-evaluation'];
+            // Sauter si par-objectifs (Beta 95)
+            if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
             return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
         }
     },
@@ -263,6 +401,9 @@ const QUESTIONS_PRIMO = [
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];
+            const approche = reponses['approche-evaluation'];
+            // Sauter si par-objectifs (Beta 95)
+            if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
             return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
         }
     },
@@ -298,6 +439,9 @@ const QUESTIONS_PRIMO = [
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];
+            const approche = reponses['approche-evaluation'];
+            // Sauter si par-objectifs (Beta 95)
+            if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
             return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
         }
     },
@@ -319,11 +463,14 @@ const QUESTIONS_PRIMO = [
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];
+            const approche = reponses['approche-evaluation'];
+            // Sauter si par-objectifs (Beta 95)
+            if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
             return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
         }
     },
 
-    // MODE EXPERT : 4 variantes PAN-Standards (traces sélectives)
+    // MODE EXPERT : 4 variantes PAN-Standards (traces sélectives) - Seulement pour approche par-artefacts
     {
         id: 'construction-note-expert',
         texte: 'Comment veux-tu construire la note finale ?',
@@ -361,12 +508,15 @@ const QUESTIONS_PRIMO = [
             const pratique = reponses['pratique-notation'];
             const mode = reponses['mode-configuration'];
             const portfolio = reponses['utiliser-portfolio'];
+            const approche = reponses['approche-evaluation'];
+            // Sauter si par-objectifs (Beta 95) - le mode est déjà configuré
+            if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
             // Afficher seulement si PAN-Standards + mode expert + portfolio oui
             return pratique !== 'pan-standards' || mode !== 'expert' || portfolio !== 'oui';
         }
     },
 
-    // MODE EXPLORATION : 3 orientations alignées avec les options Expert
+    // MODE EXPLORATION : 3 orientations alignées avec les options Expert - Seulement pour approche par-artefacts
     {
         id: 'construction-note-exploration',
         texte: 'Quelle orientation préfères-tu pour le calcul de la note ?',
@@ -399,6 +549,9 @@ const QUESTIONS_PRIMO = [
             const pratique = reponses['pratique-notation'];
             const mode = reponses['mode-configuration'];
             const portfolio = reponses['utiliser-portfolio'];
+            const approche = reponses['approche-evaluation'];
+            // Sauter si par-objectifs (Beta 95) - le mode est déjà configuré
+            if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
             // Afficher seulement si PAN-Standards + mode exploration + portfolio oui
             return pratique !== 'pan-standards' || mode !== 'exploration' || portfolio !== 'oui';
         }
