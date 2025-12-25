@@ -246,6 +246,83 @@ const QUESTIONS_PRIMO = [
         }
     },
 
+    {
+        id: 'n-artefacts-retenus',
+        texte: 'Combien d\'artefacts seront retenus pour calculer la note finale ?',
+        type: 'number',
+        placeholder: 'Ex: 7',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'nArtefactsRetenus' }
+        ],
+        validation: {
+            requis: true,
+            min: 1,
+            max: 50
+        },
+        aide: 'Seuls les N meilleurs artefacts compteront pour la note. Exemple : 7 meilleurs sur 12 soumis.',
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            const portfolio = reponses['utiliser-portfolio'];
+            return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
+        }
+    },
+
+    {
+        id: 'reprises-permises',
+        texte: 'Les étudiants peuvent-ils resoumettre un artefact amélioré ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'oui-illimite',
+                label: 'Oui, sans limite',
+                description: 'L\'étudiant peut resoumettre autant de fois qu\'il le souhaite jusqu\'à la fin du trimestre.'
+            },
+            {
+                value: 'oui-limite',
+                label: 'Oui, mais limité',
+                description: 'L\'étudiant peut resoumettre un nombre limité de fois (ex: 2 reprises par artefact).'
+            },
+            {
+                value: 'non',
+                label: 'Non',
+                description: 'Chaque artefact est évalué une seule fois, sans possibilité de reprise.'
+            }
+        ],
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'reprisesPermises' }
+        ],
+        validation: {
+            requis: true
+        },
+        aide: 'Les reprises permettent aux étudiants de démontrer leur progression.',
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            const portfolio = reponses['utiliser-portfolio'];
+            return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
+        }
+    },
+
+    {
+        id: 'minimum-avant-calcul',
+        texte: 'Combien d\'artefacts doivent être soumis avant de calculer une note ?',
+        type: 'number',
+        placeholder: 'Ex: 3',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'minimumAvantCalcul' }
+        ],
+        validation: {
+            requis: true,
+            min: 1,
+            max: 20
+        },
+        aide: 'Évite de calculer une note sur trop peu d\'artefacts. La note apparaît seulement après ce seuil.',
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            const portfolio = reponses['utiliser-portfolio'];
+            return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
+        }
+    },
+
     // MODE EXPERT : 4 variantes PAN-Standards (traces sélectives)
     {
         id: 'construction-note-expert',
