@@ -8521,11 +8521,22 @@ Exemple :
                                 </select>
                             </div>
                         </div>
+
+                        <!-- Description taxonomique (dynamique selon le type sélectionné) -->
+                        <div id="v2-description-taxonomique" style="display: none; margin-top: 15px; padding: 12px 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                            <p style="margin: 0; font-weight: 600; font-size: 0.9rem; color: var(--bleu-principal);" id="v2-taxonomie-titre">
+                                <!-- Titre dynamique -->
+                            </p>
+                            <p style="margin: 8px 0 0 0; font-size: 0.85rem; line-height: 1.5; color: var(--gris-fonce);" id="v2-taxonomie-definition">
+                                <!-- Définition dynamique -->
+                            </p>
+                        </div>
+
                         <div class="groupe-form" style="margin-top: 15px;">
                             <label for="v2-pratique-description" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                Description
+                                Description <span style="font-weight: normal; color: var(--gris-moyen);">(spécificités de votre pratique)</span>
                             </label>
-                            <textarea id="v2-pratique-description" class="controle-form" rows="2" placeholder="Brève description de cette pratique d'évaluation" onchange="sauvegarderPratiqueBaseV2()"></textarea>
+                            <textarea id="v2-pratique-description" class="controle-form" rows="2" placeholder="Décrivez les particularités de votre implémentation..." onchange="sauvegarderPratiqueBaseV2()"></textarea>
                         </div>
                     </div>
 
