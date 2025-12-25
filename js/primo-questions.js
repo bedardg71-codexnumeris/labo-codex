@@ -246,7 +246,7 @@ const QUESTIONS_PRIMO = [
         }
     },
 
-    // MODE EXPERT : 6 variantes précises pour construire la note finale
+    // MODE EXPERT : 4 variantes PAN-Standards (traces sélectives)
     {
         id: 'construction-note-expert',
         texte: 'Comment veux-tu construire la note finale ?',
@@ -258,19 +258,9 @@ const QUESTIONS_PRIMO = [
                 description: 'La note est basée sur les N meilleures productions. Ex: Grégoire Bédard (Littérature).'
             },
             {
-                value: 'moyenne',
-                label: 'Moyenne de toutes les productions',
-                description: 'Moyenne des niveaux avec pondérations possibles. Ex: Michel B. (Mathématiques).'
-            },
-            {
                 value: 'n-recents',
                 label: 'N productions les plus récentes',
                 description: 'Valorise l\'état actuel des apprentissages plutôt que les difficultés initiales.'
-            },
-            {
-                value: 'mediane-mode',
-                label: 'Médiane ou mode + jugement',
-                description: 'Tendance centrale avec jugement professionnel. Ex: Isabelle M. (Biologie).'
             },
             {
                 value: 'grille-profils',
