@@ -281,13 +281,13 @@
      */
     const VARIANTES_PAN_STANDARDS = {
         'n-meilleurs': {
-            nom: 'N meilleures productions',
-            description: 'La note finale est basée sur les N meilleures productions de l\'étudiant. Permet de valoriser la progression et d\'éliminer les « mauvais jours ». Exemple : Grégoire Bédard (Littérature).',
-            exemple: 'Portfolio avec les 7 meilleurs artefacts sur 12'
+            nom: 'N meilleures évaluations',
+            description: 'La note finale est basée sur les N meilleures évaluations (travaux écrits, entrevues, démonstrations, etc.). Permet de valoriser la progression et d\'éliminer les « mauvais jours ».',
+            exemple: 'Les 7 meilleures évaluations sur 12'
         },
         'n-recents': {
-            nom: 'N productions les plus récentes',
-            description: 'La note finale est basée sur les N productions les plus récentes. Valorise la progression et l\'état actuel des apprentissages plutôt que les difficultés initiales.',
+            nom: 'N évaluations les plus récentes',
+            description: 'La note finale est basée sur les N évaluations les plus récentes. Valorise la progression et l\'état actuel des apprentissages plutôt que les difficultés initiales.',
             exemple: 'Les 5 dernières évaluations déterminent la note'
         },
         'grille-profils': {
