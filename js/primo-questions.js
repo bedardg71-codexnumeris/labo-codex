@@ -133,38 +133,37 @@ const QUESTIONS_PRIMO = [
     },
 
     // ========================================================================
-    // ÉTAPE 2 : PRATIQUE DE NOTATION (Simplifié - Sommative par défaut)
+    // ÉTAPE 2 : PRATIQUE DE NOTATION
+    // Taxonomie : Sommative + 3 PAN (Standards, Spécifications, Dénotation)
     // ========================================================================
     {
         id: 'pratique-notation',
-        texte: 'Quelle pratique de notation veux-tu mettre en place ?\n\n💡 Pour ce tutoriel, seule la **sommative traditionnelle** est disponible. Tu pourras configurer les pratiques alternatives après dans **Réglages → Pratique de notation**.',
+        texte: 'Quelle pratique de notation veux-tu mettre en place ?',
         type: 'radio',
         options: [
             {
                 value: 'sommative',
-                label: 'Sommative',
-                description: 'Moyenne pondérée de toutes les évaluations'
+                label: 'Sommative (pratique traditionnelle)',
+                description: 'Moyenne pondérée de toutes les évaluations. Point de comparaison avec les PAN.'
             },
             {
                 value: 'pan-standards',
                 label: 'PAN-Standards',
-                description: 'Niveaux de maîtrise par standard/objectif, meilleur résultat retenu',
-                disabled: true,
-                disabledMessage: 'Configurable après dans Réglages'
+                description: 'Niveaux de maîtrise par standard/objectif, meilleur résultat retenu.'
             },
             {
                 value: 'pan-specifications',
                 label: 'PAN-Spécifications',
-                description: 'Pass/Fail sur productions, note selon « bundles » complétés',
+                description: 'Productions évaluées réussi/échoué, note selon « bundles » complétés.',
                 disabled: true,
-                disabledMessage: 'Configurable après dans Réglages'
+                disabledMessage: 'Bientôt disponible'
             },
             {
                 value: 'pan-denotation',
                 label: 'PAN-Dénotation',
-                description: 'Sans notes pendant le cours, rétroaction qualitative uniquement',
+                description: 'Sans notes pendant le cours, rétroaction qualitative uniquement.',
                 disabled: true,
-                disabledMessage: 'Configurable après dans Réglages'
+                disabledMessage: 'Bientôt disponible'
             }
         ],
         champsCibles: [
@@ -175,14 +174,43 @@ const QUESTIONS_PRIMO = [
         }
     },
 
+    // Question de bifurcation : Expert vs Exploration (seulement pour PAN-Standards)
+    {
+        id: 'mode-configuration',
+        texte: 'Comment te sens-tu par rapport à cette pratique ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'expert',
+                label: '🎯 J\'ai une idée claire',
+                description: 'Ma pratique est définie, documentée ou déjà expérimentée. Je veux configurer précisément.'
+            },
+            {
+                value: 'exploration',
+                label: '🔍 Je veux explorer',
+                description: 'Je découvre cette pratique ou je veux expérimenter. Guidez-moi avec les grandes orientations.'
+            }
+        ],
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'modeConfiguration' }
+        ],
+        validation: {
+            requis: true
+        },
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            return pratique === 'sommative';
+        }
+    },
+
     // Question commune PAN (Maîtrise et Spécifications)
     {
         id: 'utiliser-portfolio',
         texte: 'Veux-tu utiliser un dossier d\'apprentissage (portfolio) ?',
         type: 'radio',
         options: [
-            { value: 'oui', label: 'Oui' },
-            { value: 'non', label: 'Non' }
+            { value: 'oui', label: 'Oui', description: 'Les étudiants soumettent plusieurs artefacts au fil du trimestre.' },
+            { value: 'non', label: 'Non', description: 'Évaluations ponctuelles sans dossier cumulatif.' }
         ],
         champsCibles: [
             { cle: 'modalitesEvaluation', champ: 'utiliserPortfolio' }
@@ -218,38 +246,94 @@ const QUESTIONS_PRIMO = [
         }
     },
 
+    // MODE EXPERT : 6 variantes précises pour construire la note finale
     {
-        id: 'construction-note',
+        id: 'construction-note-expert',
         texte: 'Comment veux-tu construire la note finale ?',
         type: 'radio',
         options: [
             {
-                value: 'meilleurs',
-                label: 'Moyenne des meilleurs artefacts',
-                description: 'Les N meilleurs artefacts déterminent la note'
+                value: 'n-meilleurs',
+                label: 'N meilleures productions',
+                description: 'La note est basée sur les N meilleures productions. Ex: Grégoire Bédard (Littérature).'
             },
             {
-                value: 'tous',
-                label: 'Moyenne de tous les artefacts',
-                description: 'Tous les artefacts comptent également'
+                value: 'moyenne',
+                label: 'Moyenne de toutes les productions',
+                description: 'Moyenne des niveaux avec pondérations possibles. Ex: Michel B. (Mathématiques).'
             },
             {
-                value: 'dernier',
-                label: 'Dernière version soumise',
-                description: 'Seul le dernier artefact compte (dernière chance)'
+                value: 'n-recents',
+                label: 'N productions les plus récentes',
+                description: 'Valorise l\'état actuel des apprentissages plutôt que les difficultés initiales.'
+            },
+            {
+                value: 'mediane-mode',
+                label: 'Médiane ou mode + jugement',
+                description: 'Tendance centrale avec jugement professionnel. Ex: Isabelle M. (Biologie).'
+            },
+            {
+                value: 'grille-conversion',
+                label: 'Grille de conversion personnalisée',
+                description: 'Règles personnalisées de conversion niveaux → %. Ex: Bruno V. (Chimie).'
+            },
+            {
+                value: 'autre',
+                label: 'Autre méthode',
+                description: 'Tu pourras décrire ta méthode dans les Réglages.'
             }
         ],
         champsCibles: [
-            { cle: 'modalitesEvaluation', champ: 'modeCalculPAN' }
+            { cle: 'modalitesEvaluation', champ: 'varianteCalcul' }
         ],
         validation: {
             requis: true
         },
-        aide: 'Définit comment calculer la performance à partir des artefacts du portfolio.',
+        aide: 'Chaque méthode a ses avantages. Tu pourras affiner dans Réglages → Pratique de notation.',
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
+            const mode = reponses['mode-configuration'];
             const portfolio = reponses['utiliser-portfolio'];
-            return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
+            // Afficher seulement si PAN-Standards + mode expert + portfolio oui
+            return pratique !== 'pan-standards' || mode !== 'expert' || portfolio !== 'oui';
+        }
+    },
+
+    // MODE EXPLORATION : 3 grandes orientations simplifiées
+    {
+        id: 'construction-note-exploration',
+        texte: 'Quelle orientation préfères-tu pour le calcul de la note ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'valoriser-progres',
+                label: '📈 Valoriser le progrès',
+                description: 'Seuls les meilleurs travaux comptent. Les erreurs du début ne pénalisent pas.'
+            },
+            {
+                value: 'considerer-ensemble',
+                label: '📊 Considérer l\'ensemble',
+                description: 'Tous les travaux contribuent à la note. Vision globale de la progression.'
+            },
+            {
+                value: 'indecis',
+                label: '🤔 Je ne sais pas encore',
+                description: 'On utilise un défaut et tu pourras ajuster plus tard dans les Réglages.'
+            }
+        ],
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'orientationCalcul' }
+        ],
+        validation: {
+            requis: true
+        },
+        aide: 'Pas de mauvais choix ! Tu pourras toujours affiner dans Réglages → Pratique de notation.',
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            const mode = reponses['mode-configuration'];
+            const portfolio = reponses['utiliser-portfolio'];
+            // Afficher seulement si PAN-Standards + mode exploration + portfolio oui
+            return pratique !== 'pan-standards' || mode !== 'exploration' || portfolio !== 'oui';
         }
     },
 
