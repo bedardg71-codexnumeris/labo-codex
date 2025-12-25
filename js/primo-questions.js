@@ -4,9 +4,16 @@
  * Définit toutes les questions que Primo pose pour configurer l'application.
  * Chaque question est liée à un champ spécifique dans les formulaires de Réglages.
  *
- * VERSION : 1.0
- * DATE : 27 novembre 2025
+ * VERSION : 1.1
+ * DATE : 25 décembre 2025
  * AUTEUR : Grégoire Bédard (Labo Codex) avec Claude
+ *
+ * CHANGELOG :
+ * - 1.1 (25 déc 2025) : Ajout questions PAN-Spécifications (Beta 95)
+ *   - Activation option pan-specifications (plus disabled)
+ *   - 7 nouvelles questions : seuil acceptabilité, jetons délai/reprise, info bundles
+ *   - Exclusion des questions portfolio pour pan-specifications (utilise bundles)
+ * - 1.0 (27 nov 2025) : Version initiale avec PAN-Standards + variantes par-objectifs
  */
 
 // ============================================================================
@@ -154,9 +161,7 @@ const QUESTIONS_PRIMO = [
             {
                 value: 'pan-specifications',
                 label: 'PAN-Spécifications',
-                description: 'Productions évaluées conforme/non-conforme, note selon forfait (ensemble de travaux) complété.',
-                disabled: true,
-                disabledMessage: 'Bientôt disponible'
+                description: 'Productions évaluées acceptable/non-acceptable selon spécifications claires. Note selon forfait (bundle) de travaux complété.'
             },
             {
                 value: 'pan-denotation',
@@ -200,6 +205,140 @@ const QUESTIONS_PRIMO = [
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
             return pratique === 'sommative';
+        }
+    },
+
+    // ========================================================================
+    // BRANCHE PAN-SPÉCIFICATIONS (Beta 95)
+    // Basée sur François A.-H. et Linda B. Nilson
+    // ========================================================================
+    {
+        id: 'specifications-intro',
+        texte: '**Bienvenue dans PAN-Spécifications !** 📋\n\nCette pratique repose sur des principes clairs :\n\n• **Évaluation binaire** : Chaque travail est acceptable ou non-acceptable\n• **Spécifications** : Des critères observables définissent ce qui est acceptable\n• **Forfaits (bundles)** : La note finale dépend de l\'ensemble de travaux complétés\n• **Révisions** : Les travaux peuvent être améliorés jusqu\'à devenir acceptables\n\nOn va configurer les paramètres essentiels ensemble.',
+        type: 'info',
+        champsCibles: [],
+        sautSi: function(reponses) {
+            return reponses['pratique-notation'] !== 'pan-specifications';
+        }
+    },
+
+    {
+        id: 'specifications-seuil',
+        texte: 'Quel est le seuil d\'acceptabilité (%) pour qu\'un travail soit considéré **acceptable** ?',
+        type: 'number',
+        placeholder: '75',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'specifications.seuilAcceptable' }
+        ],
+        validation: {
+            requis: true,
+            min: 50,
+            max: 100
+        },
+        aide: 'Typiquement 75%. Un travail qui respecte toutes les spécifications atteint ce seuil. Sinon, il doit être révisé.',
+        sautSi: function(reponses) {
+            return reponses['pratique-notation'] !== 'pan-specifications';
+        }
+    },
+
+    {
+        id: 'specifications-jetons',
+        texte: 'Veux-tu utiliser un système de **jetons** ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'oui',
+                label: 'Oui, utiliser des jetons',
+                description: 'Les étudiants reçoivent des jetons pour obtenir des délais ou reprises supplémentaires.'
+            },
+            {
+                value: 'non',
+                label: 'Non, pas de jetons',
+                description: 'Les délais et reprises sont gérés différemment (politique du cours).'
+            }
+        ],
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'specifications.jetonsActifs' }
+        ],
+        validation: {
+            requis: true
+        },
+        aide: 'Les jetons responsabilisent les étudiants en leur donnant un contrôle sur les extensions et reprises.',
+        sautSi: function(reponses) {
+            return reponses['pratique-notation'] !== 'pan-specifications';
+        }
+    },
+
+    {
+        id: 'specifications-jetons-delai-nombre',
+        texte: 'Combien de **jetons délai** chaque étudiant reçoit-il ?',
+        type: 'number',
+        placeholder: '2',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'specifications.jetons.delai.nombre' }
+        ],
+        validation: {
+            requis: true,
+            min: 0,
+            max: 10
+        },
+        aide: 'François utilise 2 jetons. Un jeton = une extension de délai sans justification requise.',
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            const jetons = reponses['specifications-jetons'];
+            return pratique !== 'pan-specifications' || jetons !== 'oui';
+        }
+    },
+
+    {
+        id: 'specifications-jetons-delai-duree',
+        texte: 'Combien de **jours** d\'extension donne chaque jeton délai ?',
+        type: 'number',
+        placeholder: '7',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'specifications.jetons.delai.dureeJours' }
+        ],
+        validation: {
+            requis: true,
+            min: 1,
+            max: 30
+        },
+        aide: 'Typiquement 7 jours. C\'est le nombre de jours ajoutés à la date de remise originale.',
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            const jetons = reponses['specifications-jetons'];
+            return pratique !== 'pan-specifications' || jetons !== 'oui';
+        }
+    },
+
+    {
+        id: 'specifications-jetons-reprise-nombre',
+        texte: 'Combien de **jetons reprise** chaque étudiant reçoit-il ?',
+        type: 'number',
+        placeholder: '2',
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'specifications.jetons.reprise.nombre' }
+        ],
+        validation: {
+            requis: true,
+            min: 0,
+            max: 10
+        },
+        aide: 'Un jeton reprise permet de resoumettre un travail non-acceptable après révision.',
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            const jetons = reponses['specifications-jetons'];
+            return pratique !== 'pan-specifications' || jetons !== 'oui';
+        }
+    },
+
+    {
+        id: 'specifications-info-bundles',
+        texte: 'Parfait ! Tu devras ensuite configurer tes **forfaits (bundles)** dans Réglages → Pratique de notation.\n\nChaque forfait définit :\n• Les travaux requis pour l\'atteindre\n• La note associée (ex: Forfait A → 100%)\n\n**Exemple de François** :\n• **A (100%)** : 2 prises de position + 2 tests + portfolio\n• **B (80%)** : 2 prises de position + 1 test + portfolio\n• **C (60%)** : 1 prise de position + 1 test\n• **F (50%)** : Forfait C non atteint',
+        type: 'info',
+        champsCibles: [],
+        sautSi: function(reponses) {
+            return reponses['pratique-notation'] !== 'pan-specifications';
         }
     },
 
@@ -481,7 +620,7 @@ const QUESTIONS_PRIMO = [
     // BRANCHE PAR-ARTEFACTS : Questions portfolio existantes
     // ========================================================================
 
-    // Question commune PAN (Maîtrise et Spécifications) - Seulement pour approche par-artefacts
+    // Question portfolio - Seulement pour PAN-Standards par-artefacts
     {
         id: 'utiliser-portfolio',
         texte: 'Veux-tu utiliser un dossier d\'apprentissage (portfolio) ?',
@@ -500,9 +639,10 @@ const QUESTIONS_PRIMO = [
         sautSi: function(reponses) {
             const pratique = reponses['pratique-notation'];
             const approche = reponses['approche-evaluation'];
-            // Sauter si pas PAN, ou si approche par-objectifs (Beta 95)
+            // Sauter si PAN-Spécifications (utilise bundles, pas portfolio) ou par-objectifs (Beta 95)
+            if (pratique === 'pan-specifications') return true;
             if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
-            return pratique !== 'pan-standards' && pratique !== 'pan-specifications';
+            return pratique !== 'pan-standards';
         }
     },
 
@@ -524,9 +664,10 @@ const QUESTIONS_PRIMO = [
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];
             const approche = reponses['approche-evaluation'];
-            // Sauter si par-objectifs (Beta 95)
+            // Sauter si PAN-Spécifications ou par-objectifs (Beta 95)
+            if (pratique === 'pan-specifications') return true;
             if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
-            return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
+            return pratique !== 'pan-standards' || portfolio !== 'oui';
         }
     },
 
@@ -548,9 +689,10 @@ const QUESTIONS_PRIMO = [
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];
             const approche = reponses['approche-evaluation'];
-            // Sauter si par-objectifs (Beta 95)
+            // Sauter si PAN-Spécifications (bundles déterminent la note) ou par-objectifs (Beta 95)
+            if (pratique === 'pan-specifications') return true;
             if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
-            return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
+            return pratique !== 'pan-standards' || portfolio !== 'oui';
         }
     },
 
@@ -586,9 +728,10 @@ const QUESTIONS_PRIMO = [
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];
             const approche = reponses['approche-evaluation'];
-            // Sauter si par-objectifs (Beta 95)
+            // Sauter si PAN-Spécifications (utilise jetons) ou par-objectifs (Beta 95)
+            if (pratique === 'pan-specifications') return true;
             if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
-            return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
+            return pratique !== 'pan-standards' || portfolio !== 'oui';
         }
     },
 
@@ -610,9 +753,10 @@ const QUESTIONS_PRIMO = [
             const pratique = reponses['pratique-notation'];
             const portfolio = reponses['utiliser-portfolio'];
             const approche = reponses['approche-evaluation'];
-            // Sauter si par-objectifs (Beta 95)
+            // Sauter si PAN-Spécifications (bundles, pas note formative) ou par-objectifs (Beta 95)
+            if (pratique === 'pan-specifications') return true;
             if (pratique === 'pan-standards' && approche === 'par-objectifs') return true;
-            return (pratique !== 'pan-standards' && pratique !== 'pan-specifications') || portfolio !== 'oui';
+            return pratique !== 'pan-standards' || portfolio !== 'oui';
         }
     },
 
