@@ -536,6 +536,43 @@ body {
     font-weight: normal;
 }
 
+/* ✅ BETA 95 : Dropdown de sélection de cours dans l'en-tête */
+.dropdown-cours-entete {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    color: white;
+    font-size: 0.95rem;
+    padding: 4px 28px 4px 10px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    min-width: 150px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.dropdown-cours-entete:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.dropdown-cours-entete:focus {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.dropdown-cours-entete option {
+    background: var(--bleu-principal);
+    color: white;
+    padding: 8px;
+}
+
 /* Sélecteur de mode dans la navigation (à droite) */
 .selecteur-mode-nav {
     margin-left: auto;
@@ -7603,6 +7640,19 @@ label:has(+ textarea:disabled) {
     font-size: 0.7rem;
     margin-top: 2px;
     opacity: 0.9;
+    /* 🆕 BETA 95 : Support noms d'événements longs */
+    line-height: 1.2;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* 🆕 BETA 95 : Label événement dans cellule de congé */
+.calendrier-jour-conge .cal-texte-mini-fade,
+.calendrier-jour-reprise .cal-texte-mini-fade {
+    font-size: 0.65rem;
+    font-weight: 600;
+    line-height: 1.1;
 }
 
 .cal-grid-auto-200 {

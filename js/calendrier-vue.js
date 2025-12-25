@@ -137,18 +137,26 @@ function obtenirNomJour(date) {
 function obtenirStatutJour(dateStr, calendrierComplet) {
     // Lire les infos depuis le calendrier complet (source unique)
     const infosJour = calendrierComplet[dateStr];
-    
+
     // Si la date n'existe pas dans le calendrier, retourner vide
     if (!infosJour) {
         return { type: 'vide', classe: '', label: '', numeroSemaine: null };
     }
-    
+
     // Déterminer le label selon le type de jour
     let label = '';
-    if (infosJour.numeroSemaine) {
+
+    // 🆕 BETA 95 : Afficher le nom de l'événement pour les congés/reprises
+    if (infosJour.statut === 'conge' && infosJour.motif) {
+        // Afficher le nom du congé (ex: "Vendredi saint", "EUF")
+        label = infosJour.motif;
+    } else if (infosJour.statut === 'reprise' && infosJour.jourRemplace) {
+        // Afficher "Reprise" ou le jour remplacé
+        label = 'Reprise ' + infosJour.jourRemplace;
+    } else if (infosJour.numeroSemaine) {
         label = 'Sem. ' + infosJour.numeroSemaine;
     }
-    
+
     if (infosJour.statut === 'semaine-examens') {
         label = 'Examen';
     } else if (infosJour.statut === 'semaine-planification') {
