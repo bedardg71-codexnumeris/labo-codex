@@ -55,8 +55,10 @@ function mettreAJourContexteEntete() {
         let pratiqueName = '';
         if (coursActif && coursActif.pratiqueId) {
             const pratiquesCodées = {
-                'pan-maitrise': 'PAN-Maîtrise',
+                'pan-standards': 'PAN-Standards',
+                'pan-maitrise': 'PAN-Standards', // Rétrocompatibilité
                 'pan-specifications': 'PAN-Spécifications',
+                'pan-denotation': 'PAN-Dénotation',
                 'sommative': 'Sommative'
             };
             pratiqueName = pratiquesCodées[coursActif.pratiqueId] || coursActif.pratiqueId;

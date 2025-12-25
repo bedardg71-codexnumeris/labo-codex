@@ -41,13 +41,13 @@ let pratiqueCacheId = null;
 /**
  * Enregistre une nouvelle pratique dans le registre
  *
- * @param {string} id - Identifiant unique de la pratique (ex: 'pan-maitrise')
+ * @param {string} id - Identifiant unique de la pratique (ex: 'pan-standards')
  * @param {Object} instance - Instance de la classe implémentant IPratique
  * @throws {Error} Si l'ID est vide ou si la pratique est invalide
  *
  * @example
- * const pratiquePAN = new PratiquePANMaitrise();
- * enregistrerPratique('pan-maitrise', pratiquePAN);
+ * const pratiquePAN = new PratiquePANStandards();
+ * enregistrerPratique('pan-standards', pratiquePAN);
  */
 function enregistrerPratique(id, instance) {
     // Validation de l'ID
@@ -109,7 +109,7 @@ function enregistrerPratique(id, instance) {
  * @returns {string|null} ID de la pratique active, ou null si non configuré
  *
  * @example
- * obtenirIdPratiqueActive() => "pan-maitrise"
+ * obtenirIdPratiqueActive() => "pan-standards"
  */
 function obtenirIdPratiqueActive() {
     try {
@@ -127,12 +127,14 @@ function obtenirIdPratiqueActive() {
             return null;
         }
 
-        // Fallback automatique pour migration Beta 89 → Beta 90
-        if (idPratique === 'alternative') {
-            console.warn('⚠️ Pratique "alternative" détectée, migration automatique vers "pan-maitrise"');
-            idPratique = 'pan-maitrise';
+        // Fallback automatique pour migrations
+        // Beta 89 → Beta 90 : 'alternative' → 'pan-standards'
+        // Beta 95 → Beta 96 : 'pan-maitrise' → 'pan-standards'
+        if (idPratique === 'alternative' || idPratique === 'pan-maitrise') {
+            console.warn(`⚠️ Pratique "${idPratique}" détectée, migration automatique vers "pan-standards"`);
+            idPratique = 'pan-standards';
             // Sauvegarder la migration
-            config.pratique = 'pan-maitrise';
+            config.pratique = 'pan-standards';
             db.setSync('modalitesEvaluation', config);
         }
 
@@ -225,14 +227,14 @@ function obtenirPratiqueActive() {
  * @example
  * listerPratiquesDisponibles() => [
  *   {
- *     id: 'pan-maitrise',
- *     nom: 'PAN-Maîtrise',
- *     description: 'Pratique PAN-Maîtrise...',
- *     instance: PratiquePANMaitrise {...}
+ *     id: 'pan-standards',
+ *     nom: 'PAN-Standards',
+ *     description: 'Pratique PAN-Standards...',
+ *     instance: PratiquePANStandards {...}
  *   },
  *   {
  *     id: 'sommative',
- *     nom: 'Sommative traditionnelle',
+ *     nom: 'Sommative',
  *     description: 'Pratique sommative...',
  *     instance: PratiqueSommative {...}
  *   }
@@ -260,7 +262,7 @@ function listerPratiquesDisponibles() {
  * @returns {boolean} true si la pratique est enregistrée
  *
  * @example
- * pratiqueEstDisponible('pan-maitrise') => true
+ * pratiqueEstDisponible('pan-standards') => true
  * pratiqueEstDisponible('inexistante') => false
  */
 function pratiqueEstDisponible(id) {
@@ -274,7 +276,7 @@ function pratiqueEstDisponible(id) {
  * @returns {Object|null} Instance de la pratique, ou null si non trouvée
  *
  * @example
- * const pratiquePAN = obtenirPratiqueParId('pan-maitrise');
+ * const pratiquePAN = obtenirPratiqueParId('pan-standards');
  */
 function obtenirPratiqueParId(id) {
     return pratiquesEnregistrees.get(id) || null;
@@ -346,7 +348,7 @@ function viderRegistre() {
  *
  * @example
  * // Dans main.js
- * import './pratiques/pratique-pan-maitrise.js';
+ * import './pratiques/pratique-pan-standards.js';
  * import './pratiques/pratique-sommative.js';
  * import { initialiserRegistrePratiques } from './pratiques/pratique-registre.js';
  *

@@ -1842,15 +1842,6 @@ function genererSelecteurPratiqueParDefaut() {
                     <input
                         type="radio"
                         name="pratiqueDefaut"
-                        value="pan-maitrise"
-                        ${pratiqueDefaut === 'pan-maitrise' ? 'checked' : ''}
-                        onchange="changerPratiqueParDefaut('pan-maitrise')">
-                    <span style="margin-left: 8px;">PAN-Maîtrise</span>
-                </label>
-                <label style="cursor: pointer; display: flex; align-items: center;">
-                    <input
-                        type="radio"
-                        name="pratiqueDefaut"
                         value="sommative"
                         ${pratiqueDefaut === 'sommative' ? 'checked' : ''}
                         onchange="changerPratiqueParDefaut('sommative')">
@@ -1860,10 +1851,27 @@ function genererSelecteurPratiqueParDefaut() {
                     <input
                         type="radio"
                         name="pratiqueDefaut"
-                        value="specifications"
-                        ${pratiqueDefaut === 'specifications' ? 'checked' : ''}
-                        onchange="changerPratiqueParDefaut('specifications')">
+                        value="pan-standards"
+                        ${pratiqueDefaut === 'pan-standards' || pratiqueDefaut === 'pan-maitrise' ? 'checked' : ''}
+                        onchange="changerPratiqueParDefaut('pan-standards')">
+                    <span style="margin-left: 8px;">PAN-Standards</span>
+                </label>
+                <label style="cursor: pointer; display: flex; align-items: center;">
+                    <input
+                        type="radio"
+                        name="pratiqueDefaut"
+                        value="pan-specifications"
+                        ${pratiqueDefaut === 'pan-specifications' || pratiqueDefaut === 'specifications' ? 'checked' : ''}
+                        onchange="changerPratiqueParDefaut('pan-specifications')">
                     <span style="margin-left: 8px;">PAN-Spécifications</span>
+                </label>
+                <label style="cursor: pointer; display: flex; align-items: center; opacity: 0.5;" title="Bientôt disponible">
+                    <input
+                        type="radio"
+                        name="pratiqueDefaut"
+                        value="pan-denotation"
+                        disabled>
+                    <span style="margin-left: 8px;">PAN-Dénotation (bientôt)</span>
                 </label>
             </div>
         </div>
@@ -2279,7 +2287,7 @@ async function editerPratiqueActive() {
     }
 
     // Vérifier si c'est une pratique codée (canevas de base)
-    const pratiquesCodees = ['pan-maitrise', 'sommative', 'specifications'];
+    const pratiquesCodees = ['pan-standards', 'sommative', 'pan-specifications', 'pan-maitrise', 'specifications'];
     if (pratiquesCodees.includes(pratiqueActiveId)) {
         alert('❌ Impossible de modifier un canevas de base\n\nLes canevas de base (PAN-Maîtrise, Sommative, PAN-Spécifications) ne peuvent pas être modifiés.\n\nVous pouvez créer une nouvelle pratique basée sur ces canevas.');
         return;

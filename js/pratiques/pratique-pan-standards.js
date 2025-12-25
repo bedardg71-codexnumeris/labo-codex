@@ -1,26 +1,31 @@
 /**
- * PRATIQUE PAN-MAÎTRISE - Implémentation complète
+ * PRATIQUE PAN-STANDARDS - Implémentation complète
  *
- * Pratique PAN (Plan d'apprentissage numérique) selon l'approche de Grégoire Bédard.
+ * Pratique PAN Standards-Based Grading (SBG) selon l'approche de Grégoire Bédard.
  * Évaluation formative basée sur les N meilleurs artefacts de portfolio.
  *
  * CARACTÉRISTIQUES :
- * - Échelle IDME (Insuffisant, Développement, Maîtrisé, Étendu)
+ * - Échelle de niveaux (ex: IDME - Insuffisant, Développement, Maîtrisé, Étendu)
  * - ✅ Critères d'évaluation configurables (grille de référence)
- * - Performance calculée sur N meilleurs artefacts (configurable: 3, 7 ou 12 cours)
+ * - Performance calculée sur N meilleurs artefacts (configurable: 3, 7 ou 12)
+ * - Meilleur résultat retenu (non-rétrogradable)
  * - Détection défis spécifiques par critère
  * - Cibles RàI personnalisées selon pattern et défi principal
  *
- * VERSION : 1.1 (Universelle)
- * DATE : 3 décembre 2025
+ * TAXONOMIE : PAN-Standards (Standards-Based Grading)
+ * - Distinction avec PAN-Spécifications (Pass/Fail, bundles)
+ * - Distinction avec PAN-Dénotation (sans notes pendant le cours)
+ *
+ * VERSION : 2.0 (Taxonomie 4 familles)
+ * DATE : 25 décembre 2025
  * AUTEUR : Grégoire Bédard (Labo Codex)
  */
 
-class PratiquePANMaitrise {
+class PratiquePANStandards {
 
     constructor() {
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log('🎯 Initialisation de la pratique PAN-Maîtrise');
+        // console.log('🎯 Initialisation de la pratique PAN-Standards');
     }
 
     // ========================================================================
@@ -28,16 +33,16 @@ class PratiquePANMaitrise {
     // ========================================================================
 
     obtenirNom() {
-        return "PAN-Maîtrise";
+        return "PAN-Standards";
     }
 
     obtenirId() {
-        return "pan-maitrise";
+        return "pan-standards";
     }
 
     obtenirDescription() {
-        return "Pratique PAN-Maîtrise basée sur les N meilleurs artefacts de portfolio " +
-               "avec évaluation formative selon l'échelle IDME et la grille de critères configurée.";
+        return "Pratique PAN-Standards (SBG) basée sur les N meilleurs artefacts de portfolio " +
+               "avec évaluation par niveaux de maîtrise et critères configurables.";
     }
 
     // ========================================================================
@@ -1321,26 +1326,26 @@ class PratiquePANMaitrise {
     // Vérifier que le registre est chargé
     if (typeof window.enregistrerPratique !== 'function') {
         console.error(
-            '[PAN] Le registre n\'est pas chargé ! ' +
-            'Assurez-vous de charger pratique-registre.js avant pratique-pan-maitrise.js'
+            '[PAN-Standards] Le registre n\'est pas chargé ! ' +
+            'Assurez-vous de charger pratique-registre.js avant pratique-pan-standards.js'
         );
         return;
     }
 
     // Créer et enregistrer l'instance
-    const instance = new PratiquePANMaitrise();
+    const instance = new PratiquePANStandards();
 
     try {
-        window.enregistrerPratique('pan-maitrise', instance);
+        window.enregistrerPratique('pan-standards', instance);
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log('✅ [PAN] Pratique PAN-Maîtrise enregistrée avec succès');
+        // console.log('✅ [PAN-Standards] Pratique PAN-Standards enregistrée avec succès');
     } catch (error) {
-        console.error('[PAN] Erreur lors de l\'enregistrement:', error);
+        console.error('[PAN-Standards] Erreur lors de l\'enregistrement:', error);
     }
 })();
 
 // Export pour utilisation directe
-window.PratiquePANMaitrise = PratiquePANMaitrise;
+window.PratiquePANStandards = PratiquePANStandards;
 
 // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-// console.log('✅ Module pratique-pan-maitrise.js chargé');
+// console.log('✅ Module pratique-pan-standards.js chargé');

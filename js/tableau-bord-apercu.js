@@ -409,10 +409,10 @@ function chargerTableauBordApercu() {
     }
 
     try {
-        const tousEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
-        const etudiants = typeof filtrerEtudiantsParMode === 'function'
-            ? filtrerEtudiantsParMode(tousEtudiants)
-            : tousEtudiants.filter(e => e.groupe !== '9999');
+        // BETA 95 : Filtrer par cours actif pour éviter contamination entre trimestres
+        const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+            ? obtenirEtudiantsCoursActif()
+            : filtrerEtudiantsParMode(obtenirDonneesSelonMode('groupeEtudiants') || []);
 
         const etudiantsActifs = etudiants.filter(e =>
             e.statut !== 'décrochage' && e.statut !== 'abandon'
@@ -1913,7 +1913,7 @@ function afficherNiveauxRaI(etudiants) {
 
     // NOUVEAU Beta 90 : Récupérer les pratiques spécifiques
     const pratiqueSOM = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('sommative') : null;
-    const pratiquePAN = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('pan-maitrise') : null;
+    const pratiquePAN = typeof obtenirPratiqueParId === 'function' ? obtenirPratiqueParId('pan-standards') : null;
 
     // 🆕 NOUVEAU Beta 90+ : Utiliser determinerNiveauRaiPedagogique() pour cohérence
     // Cette fonction calcule le niveau RàI basé UNIQUEMENT sur P + SRPNF (sans A-C)
