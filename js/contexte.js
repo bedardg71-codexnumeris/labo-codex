@@ -257,6 +257,26 @@ function rafraichirVuesApresCours() {
         }
     }
 
+    // 🆕 BETA 95 : Rafraîchir l'affichage des séances horaire du nouveau cours
+    if (typeof afficherSeancesExistantes === 'function') {
+        try {
+            afficherSeancesExistantes();
+            console.log('   ✅ Séances horaire rafraîchies');
+        } catch (e) {
+            console.warn('   ⚠️ Erreur rafraîchissement séances horaire:', e);
+        }
+    }
+
+    // 🆕 BETA 95 : Régénérer les séances complètes pour le nouveau cours
+    if (typeof genererSeancesCompletes === 'function') {
+        try {
+            genererSeancesCompletes(null);
+            console.log('   ✅ Séances complètes régénérées');
+        } catch (e) {
+            console.warn('   ⚠️ Erreur régénération séances complètes:', e);
+        }
+    }
+
     // Notification de succès
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Cours changé');
