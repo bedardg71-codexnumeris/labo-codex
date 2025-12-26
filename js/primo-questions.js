@@ -4,11 +4,17 @@
  * Définit toutes les questions que Primo pose pour configurer l'application.
  * Chaque question est liée à un champ spécifique dans les formulaires de Réglages.
  *
- * VERSION : 1.2
+ * VERSION : 1.3
  * DATE : 26 décembre 2025
  * AUTEUR : Grégoire Bédard (Labo Codex) avec Claude
  *
  * CHANGELOG :
+ * - 1.3 (26 déc 2025) : Refonte Module 1 et Module 2 (Beta 95)
+ *   - Ajout question code du cours (code-cours)
+ *   - Ajout question numéro de groupe (numero-groupe)
+ *   - Format liste étudiants : DA, Groupe, Nom, Prénom, Programme
+ *   - Étudiants créés avec coursId
+ *   - Correction références fichiers Module 2 (echelle-idme.json, grille-srpnf.json)
  * - 1.2 (26 déc 2025) : Mode exploratoire PAN-Spécifications (Beta 95)
  *   - Question choix de modèle (3 prédéfinis + personnalisé)
  *   - Question confirmation avec résumé dynamique du modèle choisi
@@ -106,6 +112,22 @@ const QUESTIONS_PRIMO = [
     },
 
     {
+        id: 'code-cours',
+        texte: 'Quel est le code du cours ?',
+        type: 'text',
+        placeholder: 'Ex: 601-101-MQ',
+        champsCibles: [
+            { cle: 'infoCours', champ: 'code' }
+        ],
+        validation: {
+            requis: true,
+            pattern: /^\d{3}-\d{3}(-[A-Z]{2})?$/,
+            messageErreur: 'Format attendu : 601-101 ou 601-101-MQ'
+        },
+        aide: 'Le code officiel du cours tel qu\'il apparaît dans ton horaire (ex: 601-101-MQ).'
+    },
+
+    {
         id: 'trimestre',
         texte: 'C\'est pour quel trimestre ?',
         type: 'select',
@@ -141,6 +163,26 @@ const QUESTIONS_PRIMO = [
         ],
         validation: {
             requis: true
+        }
+    },
+
+    {
+        id: 'numero-groupe',
+        texte: 'Quel est le numéro de ton groupe ?',
+        type: 'text',
+        placeholder: 'Ex: 00094 ou 94',
+        champsCibles: [
+            { cle: 'infoCours', champ: 'groupe' }
+        ],
+        validation: {
+            requis: true,
+            pattern: /^\d{1,5}$/,
+            messageErreur: 'Entrer un numéro de groupe (1 à 5 chiffres)'
+        },
+        aide: 'Le numéro de groupe tel qu\'il apparaît dans Clara ou ton système de gestion.',
+        transformation: function(valeur) {
+            // Normaliser en format 5 chiffres avec zéros
+            return valeur.padStart(5, '0');
         }
     },
 
@@ -1229,7 +1271,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'etudiants-methode',
-        texte: '**Ajout des étudiants**\n\nConsulte le système de gestion des apprentissages de ton établissement pour récupérer la liste de tes élèves. Nous allons la copier-coller à la prochaine étape.\n\nSi tu préfères utiliser une liste fictive, tu trouveras un fichier **etudiants-demo.csv** dans le dossier **materiel-demo/** que tu peux ouvrir et copier-coller.',
+        texte: '**Ajout des étudiants**\n\nConsulte le système de gestion des apprentissages de ton établissement pour récupérer la liste de tes élèves.\n\nLe format attendu est : **DA, Groupe, Nom, Prénom, Programme** (séparés par virgules ou tabulations).\n\nSi tu préfères utiliser une liste fictive, tu trouveras un fichier **etudiants-demo.csv** dans le dossier **materiel-demo/**.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -1237,9 +1279,9 @@ const QUESTIONS_PRIMO = [
 
     {
         id: 'etudiants-liste',
-        texte: 'Parfait ! Colle ta liste ici (DA, Nom, Prénom, Programme par ligne, séparés par virgules ou tabulations).',
+        texte: 'Parfait ! Colle ta liste ici (DA, Groupe, Nom, Prénom, Programme par ligne).',
         type: 'textarea',
-        placeholder: 'Ex:\n1234567,Tremblay,Sophie,506.A0\n2345678,Gagnon,Marc,200.B1',
+        placeholder: 'Ex:\n1234567,00094,Tremblay,Sophie,506.A0\n2345678,00094,Gagnon,Marc,200.B1',
         champsCibles: [
             { cle: 'groupeEtudiants', champ: null }
         ],
@@ -1252,6 +1294,11 @@ const QUESTIONS_PRIMO = [
             const lignes = valeur.split('\n');
             const etudiants = [];
 
+            // Récupérer le coursId depuis infoCours (créé à l'étape précédente)
+            const infoCours = typeof db !== 'undefined' ? db.getSync('infoCours', {}) : {};
+            const coursId = infoCours.id || null;
+            const groupeDefaut = infoCours.groupe || '';
+
             lignes.forEach(ligne => {
                 ligne = ligne.trim();
                 if (ligne === '') return;
@@ -1260,13 +1307,17 @@ const QUESTIONS_PRIMO = [
                 const separateur = ligne.includes('\t') ? '\t' : ',';
                 const parts = ligne.split(separateur).map(p => p.trim());
 
-                if (parts.length >= 3) {
+                if (parts.length >= 4) {
+                    // Format: DA, Groupe, Nom, Prénom, Programme, Courriel
+                    const groupe = parts[1] ? parts[1].padStart(5, '0') : groupeDefaut;
                     etudiants.push({
                         da: parts[0],
-                        nom: parts[1],
-                        prenom: parts[2],
-                        programme: parts[3] || '',
-                        courriel: parts[4] || ''
+                        groupe: groupe,
+                        nom: parts[2],
+                        prenom: parts[3],
+                        programme: parts[4] || '',
+                        courriel: parts[5] || '',
+                        coursId: coursId
                     });
                 }
             });
@@ -1351,7 +1402,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'importer-echelle-idme',
-        texte: '**Étape 1 : Importer l\'échelle de performance**\n\n1️⃣ Va dans **Matériel → Échelles de performance**\n2️⃣ Clique sur **Nouvelle échelle**\n3️⃣ Clique sur **Options d\'import/export**\n4️⃣ Clique sur **Importer une échelle**\n5️⃣ Sélectionne le fichier **test-echelle-idme.json** dans le dossier **materiel-demo**\n6️⃣ Confirme l\'importation\n\nTu devrais voir apparaître **Échelle IDME Test** avec 2 niveaux (I et M).\n\nClique **"Suivant →"** quand c\'est fait.',
+        texte: '**Étape 1 : Importer l\'échelle de performance**\n\n1️⃣ Va dans **Matériel → Échelles de performance**\n2️⃣ Clique sur **Nouvelle échelle**\n3️⃣ Clique sur **Options d\'import/export**\n4️⃣ Clique sur **Importer une échelle**\n5️⃣ Sélectionne le fichier **echelle-idme.json** (dans le dossier de données de démonstration)\n6️⃣ Confirme l\'importation\n\nTu devrais voir apparaître **Échelle IDME** avec 4 niveaux (I, D, M, E).\n\nClique **"Suivant →"** quand c\'est fait.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }
@@ -1362,7 +1413,7 @@ const QUESTIONS_PRIMO = [
     // ========================================================================
     {
         id: 'importer-grille-srpnf',
-        texte: '**Étape 2 : Importer la grille d\'évaluation**\n\n1️⃣ Va dans **Matériel → Grilles de critères**\n2️⃣ Clique sur **Nouvelle grille**\n3️⃣ Clique sur **Options d\'import/export**\n4️⃣ Clique sur **Importer des grilles**\n5️⃣ Sélectionne le fichier **test-grille-srpnf.json** dans le dossier **materiel-demo**\n6️⃣ Confirme l\'importation\n\nTu devrais voir apparaître **Grille Test** avec 2 critères (Critère A et B).\n\nClique **"Suivant →"** quand c\'est fait.',
+        texte: '**Étape 2 : Importer la grille d\'évaluation**\n\n1️⃣ Va dans **Matériel → Grilles de critères**\n2️⃣ Clique sur **Nouvelle grille**\n3️⃣ Clique sur **Options d\'import/export**\n4️⃣ Clique sur **Importer des grilles**\n5️⃣ Sélectionne le fichier **grille-srpnf.json** (dans le dossier de données de démonstration)\n6️⃣ Confirme l\'importation\n\nTu devrais voir apparaître **Grille SRPNF** avec 5 critères.\n\nClique **"Suivant →"** quand c\'est fait.',
         type: 'instruction',
         champsCibles: [],
         validation: { requis: false }

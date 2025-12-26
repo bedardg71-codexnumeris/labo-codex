@@ -1552,37 +1552,87 @@ async function importerMaterielDemarrage() {
 
 /**
  * Crée le cours initial à partir des réponses de Primo
+ * Beta 95 : Génère coursId et trimestreId selon architecture multi-cours
  */
 function creerCoursInitial(reponses) {
     const cours = db.getSync('listeCours', []);
 
+    // Extraire les données des réponses
+    const session = reponses['trimestre'] || 'Hiver';  // "Hiver", "Été", "Automne"
+    const annee = reponses['annee'] || new Date().getFullYear().toString();
+    const code = reponses['code-cours'] || '';  // "601-101-MQ"
+    const groupe = reponses['numero-groupe'] || '00001';  // "00094"
+
+    // Générer trimestreId : h2026, e2026, a2026
+    const sessionCode = session === 'Hiver' ? 'h' : session === 'Été' ? 'e' : 'a';
+    const trimestreId = sessionCode + annee;
+
+    // Générer coursId : 601-101-h2026-94
+    // Retirer le suffixe -MQ/-ML du code si présent
+    const codeBase = code.replace(/-[A-Z]{2}$/, '');
+    const groupeNumerique = groupe.replace(/^0+/, '') || '1';  // "00094" -> "94"
+    const coursId = codeBase ? `${codeBase}-${trimestreId}-${groupeNumerique}` : 'COURS' + Date.now();
+
     // Créer le nouveau cours
     const nouveauCours = {
-        id: 'COURS' + Date.now(),
-        codeCours: '',  // Pas demandé par Primo (optionnel)
-        nomCours: reponses['titre-cours'] || '',
-        numeroCompetence: '',  // Pas demandé par Primo (optionnel)
-        competence: '',  // Pas demandé par Primo (optionnel)
-        elementsCompetence: '',  // Pas demandé par Primo (optionnel)
-        prenomEnseignant: reponses['nom-utilisateur'] || '',
-        nomEnseignant: '',  // Pas demandé par Primo (optionnel)
-        departement: '',  // Pas demandé par Primo (optionnel)
-        local: '',  // Pas demandé par Primo (optionnel)
-        session: reponses['trimestre'] || '',
-        annee: reponses['annee'] || '',
-        heuresParSemaine: '',  // Calculé à partir de l'horaire (optionnel)
-        formatHoraire: '',  // Calculé à partir de l'horaire (optionnel)
+        id: coursId,
+        code: code,  // Code complet (ex: 601-101-MQ)
+        titre: reponses['titre-cours'] || '',
+        groupe: groupe,  // Groupe normalisé 5 chiffres
+        session: session.charAt(0).toUpperCase(),  // "H", "E", "A"
+        annee: annee,
+        trimestreId: trimestreId,
+        enseignant: reponses['nom-utilisateur'] || '',
+        courriel: reponses['courriel-utilisateur'] || '',
+        siteWeb: reponses['site-utilisateur'] || '',
         pratiqueId: reponses['pratique-notation'] || 'pan-maitrise',
         verrouille: false,
         actif: true,  // Premier cours = actif par défaut
-        dateEnregistrement: new Date().toISOString()
+        dateCreation: new Date().toISOString().split('T')[0]
     };
 
-    // Ajouter le cours
-    cours.push(nouveauCours);
+    // Vérifier si le cours existe déjà (mise à jour vs création)
+    const indexExistant = cours.findIndex(c => c.id === coursId);
+    if (indexExistant >= 0) {
+        cours[indexExistant] = nouveauCours;
+        console.log('[Primo] Cours mis à jour:', nouveauCours);
+    } else {
+        cours.push(nouveauCours);
+        console.log('[Primo] Nouveau cours créé:', nouveauCours);
+    }
+
     db.setSync('listeCours', cours);
 
-    console.log('[Primo] Cours initial créé:', nouveauCours);
+    // Mettre à jour infoCours avec le coursId
+    const infoCours = db.getSync('infoCours', {});
+    infoCours.id = coursId;
+    infoCours.trimestreId = trimestreId;
+    db.setSync('infoCours', infoCours);
+
+    // Créer le trimestre si inexistant
+    creerTrimestreSiAbsent(trimestreId, session, annee);
+
+    console.log('[Primo] coursId:', coursId, 'trimestreId:', trimestreId);
+}
+
+/**
+ * Crée le trimestre s'il n'existe pas déjà
+ */
+function creerTrimestreSiAbsent(trimestreId, session, annee) {
+    const trimestres = db.getSync('trimestres', []);
+
+    if (!trimestres.find(t => t.id === trimestreId)) {
+        trimestres.push({
+            id: trimestreId,
+            nom: `${session} ${annee}`,
+            session: session.charAt(0).toUpperCase(),
+            annee: annee,
+            dateCreation: new Date().toISOString().split('T')[0],
+            actif: true
+        });
+        db.setSync('trimestres', trimestres);
+        console.log('[Primo] Trimestre créé:', trimestreId);
+    }
 }
 
 // ============================================================================
