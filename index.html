@@ -8805,22 +8805,65 @@ Exemple :
                             </p>
                         </div>
 
-                        <!-- Configuration PAN-Spécifications -->
+                        <!-- Configuration PAN-Spécifications (Beta 95) -->
                         <div id="v2-config-pan-specifications" style="display: none;">
-                            <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <!-- Description taxonomique -->
+                            <div style="margin-bottom: 20px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-principal);">
                                 <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
-                                    <strong>PAN-Spécifications</strong> : Productions évaluées de façon dichotomique (réussi/échoué).
-                                    La note finale dépend du « bundle » de travaux complétés.
+                                    <strong>PAN-Spécifications</strong> : Chaque travail est évalué de façon binaire
+                                    (acceptable / non-acceptable) selon des spécifications claires. La note finale
+                                    dépend du « forfait » (bundle) de travaux complétés.
+                                    <br><em style="color: var(--gris-moyen);">Référence : Linda B. Nilson (2015), François A.-H.</em>
                                 </p>
                             </div>
-                            <div class="groupe-form">
-                                <label for="v2-spec-type" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                    Type d'évaluation
+
+                            <!-- Seuil d'acceptabilité -->
+                            <div class="groupe-form" style="margin-bottom: 20px;">
+                                <label for="v2-spec-seuil" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                    Seuil d'acceptabilité (%)
                                 </label>
-                                <select id="v2-spec-type" class="controle-form" onchange="sauvegarderStructureV2()">
-                                    <option value="binaire">Binaire (acceptable / non-acceptable)</option>
-                                    <option value="niveaux">Niveaux de performance (1-2-3-4)</option>
-                                </select>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="number" id="v2-spec-seuil" class="controle-form"
+                                           value="75" min="50" max="100" style="width: 80px;"
+                                           onchange="sauvegarderConfigSpecifications()">
+                                    <span class="text-muted" style="font-size: 0.85rem;">
+                                        Un travail est acceptable s'il atteint ce seuil ou plus.
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Section : Types de travaux -->
+                            <div style="margin-bottom: 25px; padding: 15px; background: white; border: 1px solid var(--gris-bordure); border-radius: 6px;">
+                                <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--bleu-principal);">
+                                    Types de travaux
+                                </h4>
+                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
+                                    Définissez les types de travaux que les étudiants devront compléter.
+                                    Chaque type peut apparaître plusieurs fois dans les forfaits.
+                                </p>
+                                <div id="v2-spec-types-travaux-liste" style="margin-bottom: 15px;">
+                                    <!-- Liste générée dynamiquement -->
+                                </div>
+                                <button type="button" class="btn btn-secondaire" onclick="ajouterTypeTravailSpec()">
+                                    + Ajouter un type de travail
+                                </button>
+                            </div>
+
+                            <!-- Section : Table des forfaits -->
+                            <div style="padding: 15px; background: white; border: 1px solid var(--gris-bordure); border-radius: 6px;">
+                                <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--bleu-principal);">
+                                    Table des forfaits (bundles)
+                                </h4>
+                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
+                                    Chaque forfait définit un ensemble de travaux requis et la note associée.
+                                    L'étudiant obtient la note du forfait le plus élevé qu'il a complété.
+                                </p>
+                                <div id="v2-spec-forfaits-liste" style="margin-bottom: 15px;">
+                                    <!-- Table générée dynamiquement -->
+                                </div>
+                                <button type="button" class="btn btn-secondaire" onclick="ajouterForfaitSpec()">
+                                    + Ajouter un forfait
+                                </button>
                             </div>
                         </div>
 
