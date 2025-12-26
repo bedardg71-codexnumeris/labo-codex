@@ -1152,6 +1152,19 @@ function afficherSeancesExistantes() {
     const container = document.getElementById('seancesContainer');
     if (!container) return;
 
+    // 🆕 BETA 95 : Afficher le cours actif dans le titre
+    const titreCoursElement = document.getElementById('titreHoraireCours');
+    if (titreCoursElement) {
+        const infoCours = db.getSync('infoCours', null);
+        if (infoCours) {
+            const sigle = infoCours.sigle || infoCours.codeCours || '';
+            const groupe = infoCours.groupe || '';
+            titreCoursElement.textContent = sigle && groupe ? `— ${sigle} (${groupe})` : sigle ? `— ${sigle}` : '';
+        } else {
+            titreCoursElement.textContent = '';
+        }
+    }
+
     // 🆕 BETA 95 : Utiliser la clé spécifique au cours actif
     const seances = obtenirSeancesHoraire(null);
 
