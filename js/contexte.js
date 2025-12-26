@@ -287,6 +287,26 @@ function rafraichirVuesApresCours() {
         }
     }
 
+    // 🆕 BETA 95 : Rafraîchir la vue calendrier
+    if (typeof afficherCalendrierScolaire === 'function') {
+        try {
+            afficherCalendrierScolaire();
+            console.log('   ✅ Vue calendrier rafraîchie');
+        } catch (e) {
+            console.warn('   ⚠️ Erreur rafraîchissement calendrier:', e);
+        }
+    }
+
+    // 🆕 BETA 95 : Rafraîchir le cadre calendrier V2
+    if (typeof chargerCadreCalendrierV2 === 'function') {
+        try {
+            chargerCadreCalendrierV2();
+            console.log('   ✅ Cadre calendrier V2 rafraîchi');
+        } catch (e) {
+            console.warn('   ⚠️ Erreur rafraîchissement cadre calendrier V2:', e);
+        }
+    }
+
     // Notification de succès
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Cours changé');
