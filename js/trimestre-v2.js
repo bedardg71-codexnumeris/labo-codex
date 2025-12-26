@@ -2079,9 +2079,12 @@ function afficherFormSeanceV2() {
 
 /**
  * Modifie une séance existante
+ * 🆕 BETA 95 : Utilise obtenirSeancesHoraire() pour support multi-cours
  */
 function modifierSeanceV2(index) {
-    const horaire = db.getSync(cle('horaireHebdo'), []);
+    const horaire = typeof obtenirSeancesHoraire === 'function'
+        ? obtenirSeancesHoraire()
+        : db.getSync(cle('horaireHebdo'), []);
     const seance = horaire[index];
 
     if (!seance) {

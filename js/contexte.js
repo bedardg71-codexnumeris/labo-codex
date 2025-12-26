@@ -258,6 +258,16 @@ function rafraichirVuesApresCours() {
     }
 
     // 🆕 BETA 95 : Rafraîchir l'affichage des séances horaire du nouveau cours
+    // Interface V2 (trimestre-v2.js) - prioritaire
+    if (typeof chargerSeancesV2 === 'function') {
+        try {
+            chargerSeancesV2();
+            console.log('   ✅ Séances horaire V2 rafraîchies');
+        } catch (e) {
+            console.warn('   ⚠️ Erreur rafraîchissement séances V2:', e);
+        }
+    }
+    // Interface legacy (horaire.js) - fallback
     if (typeof afficherSeancesExistantes === 'function') {
         try {
             afficherSeancesExistantes();
