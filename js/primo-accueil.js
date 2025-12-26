@@ -294,45 +294,22 @@ function naviguerVersImportDemo() {
 /**
  * Option 2: Démarrer le wizard de création de pratique
  *
- * Note Beta 95 : Le modal wizard est dans la section legacy (masquée avec legacy-hidden).
- * On le déplace temporairement dans le body pour qu'il soit visible.
+ * Beta 95 : Utilise le nouveau Wizard V2 aligné sur l'architecture primo-questions.js
  */
 function demarrerWizard() {
     fermerModalAccueil();
 
     // Délai pour permettre la fermeture du modal d'accueil
     setTimeout(() => {
-        console.log('[Primo] Tentative d\'ouverture du wizard pratique...');
+        console.log('[Primo] Ouverture du Wizard V2...');
 
-        // Vérifier que le modal existe dans le DOM
-        const modal = document.getElementById('modalWizardPratique');
-        if (!modal) {
-            console.error('[Primo] Modal #modalWizardPratique introuvable dans le DOM');
-            alert('Erreur : Le modal de configuration n\'a pas pu être trouvé.');
-            return;
-        }
-
-        // Le modal est dans une section masquée (legacy-hidden).
-        // On le déplace dans le body pour qu'il soit visible.
-        // Utiliser closest() pour vérifier si un ancêtre a la classe legacy-hidden
-        if (!modal.dataset.movedToBody) {
-            const legacyParent = modal.closest('.legacy-hidden');
-            if (legacyParent) {
-                modal.dataset.originalParentId = legacyParent.id || '';
-                document.body.appendChild(modal);
-                modal.dataset.movedToBody = 'true';
-                console.log('[Primo] Modal déplacé vers body (depuis section legacy)');
-            }
-        }
-
-        if (typeof ouvrirWizardPratique === 'function') {
-            console.log('[Primo] Ouverture du wizard...');
-            ouvrirWizardPratique();
+        if (typeof ouvrirWizardV2 === 'function') {
+            ouvrirWizardV2();
         } else {
-            console.error('[Primo] Fonction ouvrirWizardPratique non disponible');
-            alert('Erreur : Le module de configuration des pratiques n\'est pas chargé.');
+            console.error('[Primo] Fonction ouvrirWizardV2 non disponible');
+            alert('Erreur : Le module Wizard V2 n\'est pas chargé.');
         }
-    }, 500);
+    }, 300);
 }
 
 /**
@@ -355,8 +332,29 @@ function demarrerConfigComplete() {
 /**
  * Option 3: Démarrer le parcours "Évaluer"
  * Commence directement à l'étape d'import de matériel
+ * Beta 95 : Vérifie les prérequis (cours et étudiants)
  */
 function demarrerEvaluation() {
+    // Vérifier les prérequis avant de démarrer
+    const infoCours = typeof db !== 'undefined' ? db.getSync('infoCours', {}) : {};
+    const listeCours = typeof db !== 'undefined' ? db.getSync('listeCours', []) : [];
+    const etudiants = typeof db !== 'undefined' ? db.getSync('groupeEtudiants', []) : [];
+
+    const aCours = infoCours.id || listeCours.length > 0;
+    const aEtudiants = etudiants.length > 0;
+
+    if (!aCours || !aEtudiants) {
+        // Afficher message d'erreur
+        let message = 'Tu dois d\'abord configurer :\n\n';
+        if (!aCours) message += '• Un cours (MODULE 1 : Créer un groupe-cours)\n';
+        if (!aEtudiants) message += '• Des étudiants (MODULE 1 : Créer un groupe-cours)\n';
+        message += '\nComplète le Module 1 avant de pouvoir évaluer une production.';
+
+        alert(message);
+        console.warn('[Primo] Module 2 bloqué - prérequis manquants:', { aCours, aEtudiants });
+        return;
+    }
+
     fermerModalAccueil();
 
     // Calculer les questions actives (avec réponses vides car on démarre)
