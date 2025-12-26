@@ -278,9 +278,10 @@ function fermerModalAccueil() {
 // ============================================================================
 
 /**
- * Option 1: Charger les données de démonstration
+ * Option 1: Naviguer vers la section d'import des données
+ * NOTE: Renommé de chargerDonneesDemo pour éviter conflit avec donnees-demo.js
  */
-function chargerDonneesDemo() {
+function naviguerVersImportDemo() {
     fermerModalAccueil();
 
     // Naviguer vers Import/Export et déclencher import
@@ -457,7 +458,7 @@ function reafficherAccueilPrimo() {
 window.initialiserPrimoAccueil = initialiserPrimoAccueil;
 window.reafficherAccueilPrimo = reafficherAccueilPrimo;
 window.fermerModalAccueil = fermerModalAccueil;
-window.chargerDonneesDemo = chargerDonneesDemo;
+window.naviguerVersImportDemo = naviguerVersImportDemo;
 window.demarrerConfigComplete = demarrerConfigComplete;
 window.demarrerWizard = demarrerWizard;
 window.explorerLibrement = explorerLibrement;
