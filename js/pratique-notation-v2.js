@@ -14,6 +14,8 @@
  * directement ici pour les utilisateurs experts.
  *
  * CHANGELOG :
+ * - 26 déc 2025 : Modèles prédéfinis PAN-Spécifications (François, Simple, Littérature)
+ *                 Fonction appliquerModeleSpecifications() exportée
  * - 25 déc 2025 : Ajout configuration PAN-Spécifications (types travaux + forfaits)
  * - 24 déc 2025 : Variante par-objectifs unifiée avec 4 modes de calcul
  */
@@ -1479,6 +1481,96 @@
         );
     }
 
+    // -------------------------------------------------------------------------
+    // MODÈLES PRÉDÉFINIS (Mode exploratoire)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Définitions des modèles prédéfinis pour PAN-Spécifications
+     */
+    const MODELES_SPECIFICATIONS = {
+        'modele-francois': {
+            nom: 'Modèle François',
+            description: 'Basé sur la pratique de François A.-H. (Chimie)',
+            typesTravaux: [
+                { id: 1, nom: 'Prise de position', description: 'Travail écrit argumentatif' },
+                { id: 2, nom: 'Test', description: 'Évaluation des connaissances' },
+                { id: 3, nom: 'Portfolio', description: 'Dossier d\'apprentissage' }
+            ],
+            forfaits: [
+                { id: 1, lettre: 'A', note: 100, travaux: { 1: 2, 2: 2, 3: 1 } },
+                { id: 2, lettre: 'B', note: 80, travaux: { 1: 2, 2: 1, 3: 1 } },
+                { id: 3, lettre: 'C', note: 60, travaux: { 1: 1, 2: 1, 3: 0 } }
+            ]
+        },
+        'modele-simple': {
+            nom: 'Modèle simple',
+            description: 'Pour commencer avec PAN-Spécifications',
+            typesTravaux: [
+                { id: 1, nom: 'Projet', description: 'Travail pratique ou créatif' },
+                { id: 2, nom: 'Examen', description: 'Évaluation sommative' }
+            ],
+            forfaits: [
+                { id: 1, lettre: 'Excellence', note: 90, travaux: { 1: 2, 2: 1 } },
+                { id: 2, lettre: 'Réussite', note: 70, travaux: { 1: 1, 2: 1 } }
+            ]
+        },
+        'modele-litterature': {
+            nom: 'Modèle littérature',
+            description: 'Adapté aux cours de français et littérature',
+            typesTravaux: [
+                { id: 1, nom: 'Analyse littéraire', description: 'Analyse d\'un texte ou d\'une œuvre' },
+                { id: 2, nom: 'Dissertation', description: 'Texte argumentatif structuré' },
+                { id: 3, nom: 'Portfolio de lecture', description: 'Traces de lecture et réflexions' }
+            ],
+            forfaits: [
+                { id: 1, lettre: 'A', note: 100, travaux: { 1: 2, 2: 1, 3: 1 } },
+                { id: 2, lettre: 'B', note: 80, travaux: { 1: 2, 2: 1, 3: 0 } },
+                { id: 3, lettre: 'C', note: 60, travaux: { 1: 1, 2: 1, 3: 0 } }
+            ]
+        }
+    };
+
+    /**
+     * Applique un modèle prédéfini pour PAN-Spécifications
+     * Appelé depuis le wizard Primo (mode exploratoire)
+     */
+    function appliquerModeleSpecifications(modeleId) {
+        const modele = MODELES_SPECIFICATIONS[modeleId];
+        if (!modele) {
+            console.warn('[pratique-notation-v2] Modèle inconnu:', modeleId);
+            return false;
+        }
+
+        let modalites = {};
+        try {
+            modalites = db.getSync('modalitesEvaluation') || {};
+        } catch (e) {
+            modalites = {};
+        }
+
+        // Initialiser specifications si nécessaire
+        if (!modalites.specifications) {
+            modalites.specifications = {};
+        }
+
+        // Appliquer le modèle
+        modalites.specifications.typesTravaux = JSON.parse(JSON.stringify(modele.typesTravaux));
+        modalites.specifications.forfaits = JSON.parse(JSON.stringify(modele.forfaits));
+        modalites.specifications.modeleChoisi = modeleId;
+        modalites.specifications.modeleNom = modele.nom;
+
+        // Conserver le seuil d'acceptabilité s'il existe déjà
+        if (!modalites.specifications.seuilAcceptable) {
+            modalites.specifications.seuilAcceptable = 75;
+        }
+
+        db.setSync('modalitesEvaluation', modalites);
+        console.log('[pratique-notation-v2] Modèle appliqué:', modele.nom);
+
+        return true;
+    }
+
     // =========================================================================
     // ALIASES POUR RÉTROCOMPATIBILITÉ (exports anciens noms)
     // =========================================================================
@@ -1576,6 +1668,7 @@
     window.modifierForfaitSpec = modifierForfaitSpec;
     window.modifierTravailForfaitSpec = modifierTravailForfaitSpec;
     window.supprimerForfaitSpec = supprimerForfaitSpec;
+    window.appliquerModeleSpecifications = appliquerModeleSpecifications;
 
     // =========================================================================
     // INITIALISATION AU CHARGEMENT

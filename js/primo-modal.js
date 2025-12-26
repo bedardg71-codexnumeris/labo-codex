@@ -4,9 +4,15 @@
  * Gère l'affichage du modal conversationnel de Primo qui pose les questions
  * une par une et remplit automatiquement les formulaires de Réglages.
  *
- * VERSION : 1.0
- * DATE : 27 novembre 2025
+ * VERSION : 1.1
+ * DATE : 26 décembre 2025
  * AUTEUR : Grégoire Bédard (Labo Codex) avec Claude
+ *
+ * CHANGELOG :
+ * - 1.1 (26 déc 2025) : Support texte dynamique et actionApres (Beta 95)
+ *   - Question.texte peut être une fonction(reponses) pour texte dynamique
+ *   - Question.actionApres exécuté après sauvegarde (ex: appliquer modèle)
+ * - 1.0 (27 nov 2025) : Version initiale
  */
 
 // ============================================================================
@@ -358,8 +364,12 @@ function genererHTMLQuestion(question) {
         </div>
     `;
 
-    // Question (avec parsing markdown)
-    const texteFormate = parserMarkdownSimple(question.texte);
+    // Question (avec parsing markdown) - Support texte dynamique (Beta 95)
+    let texteQuestion = question.texte;
+    if (typeof texteQuestion === 'function') {
+        texteQuestion = texteQuestion(reponsesPrimo);
+    }
+    const texteFormate = parserMarkdownSimple(texteQuestion);
 
     html += `
         <div style="margin-bottom: var(--primo-spacing-lg, 30px);">
@@ -801,6 +811,16 @@ function primoQuestionSuivante() {
 
     // Sauvegarder la réponse
     reponsesPrimo[question.id] = reponse;
+
+    // Exécuter actionApres si définie (Beta 95 - pour appliquer modèles)
+    if (question.actionApres && typeof question.actionApres === 'function') {
+        try {
+            question.actionApres(reponse, reponsesPrimo);
+            console.log('[Primo] actionApres exécutée pour', question.id);
+        } catch (e) {
+            console.error('[Primo] Erreur dans actionApres:', e);
+        }
+    }
 
     // Passer à la suivante
     indexQuestionActuelle++;
