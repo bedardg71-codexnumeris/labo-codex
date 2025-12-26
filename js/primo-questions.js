@@ -4,11 +4,16 @@
  * Définit toutes les questions que Primo pose pour configurer l'application.
  * Chaque question est liée à un champ spécifique dans les formulaires de Réglages.
  *
- * VERSION : 1.1
- * DATE : 25 décembre 2025
+ * VERSION : 1.2
+ * DATE : 26 décembre 2025
  * AUTEUR : Grégoire Bédard (Labo Codex) avec Claude
  *
  * CHANGELOG :
+ * - 1.2 (26 déc 2025) : Mode exploratoire PAN-Spécifications (Beta 95)
+ *   - Question choix de modèle (3 prédéfinis + personnalisé)
+ *   - Question confirmation avec résumé dynamique du modèle choisi
+ *   - Support texte dynamique (fonction) dans question confirmation
+ *   - Support actionApres pour appliquer modèle automatiquement
  * - 1.1 (25 déc 2025) : Ajout questions PAN-Spécifications (Beta 95)
  *   - Activation option pan-specifications (plus disabled)
  *   - 7 nouvelles questions : seuil acceptabilité, jetons délai/reprise, info bundles
@@ -332,13 +337,89 @@ const QUESTIONS_PRIMO = [
         }
     },
 
+    // MODE EXPERT : Rediriger vers Réglages
     {
-        id: 'specifications-info-bundles',
-        texte: 'Parfait ! Tu devras ensuite configurer tes **forfaits (bundles)** dans Réglages → Pratique de notation.\n\nChaque forfait définit :\n• Les travaux requis pour l\'atteindre\n• La note associée (ex: Forfait A → 100%)\n\n**Exemple de François** :\n• **A (100%)** : 2 prises de position + 2 tests + portfolio\n• **B (80%)** : 2 prises de position + 1 test + portfolio\n• **C (60%)** : 1 prise de position + 1 test\n• **F (50%)** : Forfait C non atteint',
+        id: 'specifications-info-bundles-expert',
+        texte: 'Parfait ! Tu pourras configurer tes **forfaits (bundles)** dans Réglages → Pratique de notation.\n\nChaque forfait définit :\n• Les travaux requis pour l\'atteindre\n• La note associée (ex: Forfait A → 100%)\n\nL\'interface te permettra de créer tes propres types de travaux et forfaits.',
         type: 'info',
         champsCibles: [],
         sautSi: function(reponses) {
-            return reponses['pratique-notation'] !== 'pan-specifications';
+            const pratique = reponses['pratique-notation'];
+            const mode = reponses['mode-configuration'];
+            return pratique !== 'pan-specifications' || mode !== 'expert';
+        }
+    },
+
+    // MODE EXPLORATOIRE : Choix de modèle prédéfini
+    {
+        id: 'specifications-modele',
+        texte: 'Quel modèle de forfaits veux-tu utiliser ?',
+        type: 'radio',
+        options: [
+            {
+                value: 'modele-francois',
+                label: 'Modèle François (recommandé)',
+                description: '3 types de travaux (Prise de position, Test, Portfolio) avec 3 forfaits (A-B-C). Idéal pour les sciences.'
+            },
+            {
+                value: 'modele-simple',
+                label: 'Modèle simple',
+                description: '2 types de travaux (Projet, Examen) avec 2 forfaits (Réussite, Excellence). Pour commencer simplement.'
+            },
+            {
+                value: 'modele-litterature',
+                label: 'Modèle littérature',
+                description: '3 types (Analyse, Dissertation, Portfolio) avec 3 forfaits gradués. Pour les cours de français/littérature.'
+            },
+            {
+                value: 'personnalise',
+                label: 'Personnalisé',
+                description: 'Tu créeras tes propres types et forfaits dans Réglages → Pratique de notation.'
+            }
+        ],
+        champsCibles: [
+            { cle: 'modalitesEvaluation', champ: 'specifications.modeleChoisi' }
+        ],
+        validation: {
+            requis: true
+        },
+        aide: 'Les modèles prédéfinis configurent automatiquement les types de travaux et forfaits. Tu peux toujours les modifier ensuite dans Réglages.',
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            const mode = reponses['mode-configuration'];
+            return pratique !== 'pan-specifications' || mode !== 'exploration';
+        },
+        // Action spéciale : appliquer le modèle après la réponse
+        actionApres: function(reponse) {
+            if (reponse && reponse !== 'personnalise') {
+                if (typeof window.appliquerModeleSpecifications === 'function') {
+                    window.appliquerModeleSpecifications(reponse);
+                }
+            }
+        }
+    },
+
+    // Confirmation du modèle appliqué
+    {
+        id: 'specifications-confirmation-modele',
+        texte: function(reponses) {
+            const modele = reponses['specifications-modele'];
+            if (modele === 'modele-francois') {
+                return '✅ **Modèle François appliqué !**\n\n**Types de travaux** :\n• Prise de position (argumentatif)\n• Test (connaissances)\n• Portfolio (dossier)\n\n**Forfaits** :\n• **A (100%)** : 2 prises de position + 2 tests + 1 portfolio\n• **B (80%)** : 2 prises de position + 1 test + 1 portfolio\n• **C (60%)** : 1 prise de position + 1 test\n\nTu peux modifier cette configuration dans Réglages → Pratique de notation.';
+            } else if (modele === 'modele-simple') {
+                return '✅ **Modèle simple appliqué !**\n\n**Types de travaux** :\n• Projet\n• Examen\n\n**Forfaits** :\n• **Réussite (70%)** : 1 projet + 1 examen réussi\n• **Excellence (90%)** : 2 projets + 1 examen réussi\n\nTu peux modifier cette configuration dans Réglages → Pratique de notation.';
+            } else if (modele === 'modele-litterature') {
+                return '✅ **Modèle littérature appliqué !**\n\n**Types de travaux** :\n• Analyse littéraire\n• Dissertation\n• Portfolio de lecture\n\n**Forfaits** :\n• **A (100%)** : 2 analyses + 1 dissertation + 1 portfolio\n• **B (80%)** : 2 analyses + 1 dissertation\n• **C (60%)** : 1 analyse + 1 dissertation\n\nTu peux modifier cette configuration dans Réglages → Pratique de notation.';
+            } else {
+                return 'Tu pourras configurer tes propres types de travaux et forfaits dans **Réglages → Pratique de notation**.';
+            }
+        },
+        type: 'info',
+        champsCibles: [],
+        sautSi: function(reponses) {
+            const pratique = reponses['pratique-notation'];
+            const mode = reponses['mode-configuration'];
+            return pratique !== 'pan-specifications' || mode !== 'exploration';
         }
     },
 
