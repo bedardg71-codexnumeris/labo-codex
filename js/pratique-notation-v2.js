@@ -7,9 +7,15 @@
  * - Échelle de performance
  * - Structure des évaluations (portfolio, sommative, standards, etc.)
  * - Système de jetons
+ * - PAN-Standards par-objectifs (4 modes de calcul)
+ * - PAN-Spécifications (types de travaux + forfaits/bundles)
  *
  * Les mêmes données que le wizard remplit progressivement sont accessibles
  * directement ici pour les utilisateurs experts.
+ *
+ * CHANGELOG :
+ * - 25 déc 2025 : Ajout configuration PAN-Spécifications (types travaux + forfaits)
+ * - 24 déc 2025 : Variante par-objectifs unifiée avec 4 modes de calcul
  */
 
 (function() {
@@ -447,6 +453,11 @@
 
         const config = document.getElementById(configId);
         if (config) config.style.display = 'block';
+
+        // Charger les données spécifiques au type de pratique
+        if (type === 'pan-specifications' || type === 'specifications') {
+            chargerConfigSpecifications();
+        }
     }
 
     // =========================================================================
@@ -1043,6 +1054,432 @@
     }
 
     // =========================================================================
+    // GESTION PAN-SPÉCIFICATIONS (Types de travaux + Forfaits)
+    // Basé sur François A.-H. et Linda B. Nilson (2015)
+    // =========================================================================
+
+    /**
+     * Configuration par défaut pour PAN-Spécifications
+     */
+    const CONFIG_SPECIFICATIONS_DEFAUT = {
+        seuilAcceptable: 75,
+        typesTravaux: [
+            { id: 1, nom: 'Prise de position', description: 'Travail écrit argumentatif' },
+            { id: 2, nom: 'Test', description: 'Évaluation des connaissances' },
+            { id: 3, nom: 'Portfolio', description: 'Dossier d\'apprentissage' }
+        ],
+        forfaits: [
+            { id: 1, lettre: 'A', note: 100, travaux: { 1: 2, 2: 2, 3: 1 } },
+            { id: 2, lettre: 'B', note: 80, travaux: { 1: 2, 2: 1, 3: 1 } },
+            { id: 3, lettre: 'C', note: 60, travaux: { 1: 1, 2: 1, 3: 0 } }
+        ]
+    };
+
+    /**
+     * Charge la configuration PAN-Spécifications depuis le storage
+     */
+    function chargerConfigSpecifications() {
+        let modalites = {};
+        try {
+            modalites = db.getSync('modalitesEvaluation') || {};
+        } catch (e) {
+            modalites = {};
+        }
+
+        const config = modalites.specifications || CONFIG_SPECIFICATIONS_DEFAUT;
+
+        // Seuil d'acceptabilité
+        const seuilEl = document.getElementById('v2-spec-seuil');
+        if (seuilEl) {
+            seuilEl.value = config.seuilAcceptable || 75;
+        }
+
+        // Afficher les types de travaux
+        afficherTypesTravauxSpec(config.typesTravaux || []);
+
+        // Afficher les forfaits
+        afficherForfaitsSpec(config.forfaits || [], config.typesTravaux || []);
+
+        return config;
+    }
+
+    /**
+     * Sauvegarde la configuration PAN-Spécifications
+     */
+    function sauvegarderConfigSpecifications() {
+        let modalites = {};
+        try {
+            modalites = db.getSync('modalitesEvaluation') || {};
+        } catch (e) {
+            modalites = {};
+        }
+
+        if (!modalites.specifications) {
+            modalites.specifications = { ...CONFIG_SPECIFICATIONS_DEFAUT };
+        }
+
+        // Seuil d'acceptabilité
+        const seuilEl = document.getElementById('v2-spec-seuil');
+        if (seuilEl) {
+            modalites.specifications.seuilAcceptable = parseInt(seuilEl.value) || 75;
+        }
+
+        db.setSync('modalitesEvaluation', modalites);
+        console.log('[pratique-notation-v2] Configuration PAN-Spécifications sauvegardée');
+    }
+
+    // -------------------------------------------------------------------------
+    // TYPES DE TRAVAUX
+    // -------------------------------------------------------------------------
+
+    /**
+     * Affiche la liste des types de travaux
+     */
+    function afficherTypesTravauxSpec(typesTravaux) {
+        const conteneur = document.getElementById('v2-spec-types-travaux-liste');
+        if (!conteneur) return;
+
+        if (!typesTravaux || typesTravaux.length === 0) {
+            conteneur.innerHTML = `
+                <div class="alerte-info" style="padding: 10px; margin: 10px 0;">
+                    Aucun type de travail configuré. Utilisez le bouton ci-dessous pour commencer.
+                </div>
+            `;
+            return;
+        }
+
+        let html = `
+            <table class="tableau tableau-compact" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">#</th>
+                        <th>Nom du type</th>
+                        <th>Description (optionnelle)</th>
+                        <th style="width: 70px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        typesTravaux.forEach((type, index) => {
+            html += `
+                <tr data-id="${type.id}">
+                    <td>${index + 1}</td>
+                    <td>
+                        <input type="text" class="form-control" value="${type.nom || ''}"
+                               onchange="modifierTypeTravailSpec(${type.id}, 'nom', this.value)"
+                               style="width: 100%; padding: 4px 8px;">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" value="${type.description || ''}"
+                               onchange="modifierTypeTravailSpec(${type.id}, 'description', this.value)"
+                               placeholder="Ex: Travail écrit argumentatif"
+                               style="width: 100%; padding: 4px 8px;">
+                    </td>
+                    <td style="text-align: center;">
+                        <button type="button" class="btn btn-danger btn-tres-compact"
+                                onclick="supprimerTypeTravailSpec(${type.id})"
+                                title="Supprimer ce type">
+                            ✕
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table>';
+        conteneur.innerHTML = html;
+    }
+
+    /**
+     * Ajoute un nouveau type de travail
+     */
+    function ajouterTypeTravailSpec() {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.specifications) {
+            modalites.specifications = { ...CONFIG_SPECIFICATIONS_DEFAUT };
+        }
+
+        const typesTravaux = modalites.specifications.typesTravaux || [];
+        const nouvelId = typesTravaux.length > 0
+            ? Math.max(...typesTravaux.map(t => t.id)) + 1
+            : 1;
+
+        typesTravaux.push({
+            id: nouvelId,
+            nom: `Type ${nouvelId}`,
+            description: ''
+        });
+
+        modalites.specifications.typesTravaux = typesTravaux;
+        db.setSync('modalitesEvaluation', modalites);
+
+        afficherTypesTravauxSpec(typesTravaux);
+        // Rafraîchir aussi les forfaits pour inclure le nouveau type
+        afficherForfaitsSpec(modalites.specifications.forfaits || [], typesTravaux);
+    }
+
+    /**
+     * Modifie une propriété d'un type de travail
+     */
+    function modifierTypeTravailSpec(id, propriete, valeur) {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.specifications || !modalites.specifications.typesTravaux) return;
+
+        const type = modalites.specifications.typesTravaux.find(t => t.id === id);
+        if (type) {
+            type[propriete] = valeur;
+            db.setSync('modalitesEvaluation', modalites);
+
+            // Rafraîchir les forfaits si le nom a changé
+            if (propriete === 'nom') {
+                afficherForfaitsSpec(
+                    modalites.specifications.forfaits || [],
+                    modalites.specifications.typesTravaux
+                );
+            }
+        }
+    }
+
+    /**
+     * Supprime un type de travail
+     */
+    function supprimerTypeTravailSpec(id) {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.specifications || !modalites.specifications.typesTravaux) return;
+
+        // Vérifier si le type est utilisé dans des forfaits
+        const forfaits = modalites.specifications.forfaits || [];
+        const estUtilise = forfaits.some(f => f.travaux && f.travaux[id] > 0);
+
+        if (estUtilise) {
+            if (!confirm('Ce type est utilisé dans des forfaits. Le supprimer retirera aussi les références dans les forfaits. Continuer ?')) {
+                return;
+            }
+            // Supprimer les références dans les forfaits
+            forfaits.forEach(f => {
+                if (f.travaux && f.travaux[id]) {
+                    delete f.travaux[id];
+                }
+            });
+        }
+
+        modalites.specifications.typesTravaux = modalites.specifications.typesTravaux.filter(t => t.id !== id);
+        db.setSync('modalitesEvaluation', modalites);
+
+        afficherTypesTravauxSpec(modalites.specifications.typesTravaux);
+        afficherForfaitsSpec(modalites.specifications.forfaits || [], modalites.specifications.typesTravaux);
+    }
+
+    // -------------------------------------------------------------------------
+    // FORFAITS (BUNDLES)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Affiche la table des forfaits
+     */
+    function afficherForfaitsSpec(forfaits, typesTravaux) {
+        const conteneur = document.getElementById('v2-spec-forfaits-liste');
+        if (!conteneur) return;
+
+        if (!typesTravaux || typesTravaux.length === 0) {
+            conteneur.innerHTML = `
+                <div class="alerte-info" style="padding: 10px; margin: 10px 0;">
+                    Définissez d'abord les types de travaux ci-dessus avant de créer des forfaits.
+                </div>
+            `;
+            return;
+        }
+
+        if (!forfaits || forfaits.length === 0) {
+            conteneur.innerHTML = `
+                <div class="alerte-info" style="padding: 10px; margin: 10px 0;">
+                    Aucun forfait configuré. Utilisez le bouton ci-dessous pour créer vos forfaits.
+                </div>
+            `;
+            return;
+        }
+
+        // Construire l'en-tête avec les types de travaux
+        let html = `
+            <div style="overflow-x: auto;">
+            <table class="tableau tableau-compact" style="width: 100%; min-width: 500px;">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Forfait</th>
+                        <th style="width: 80px;">Note (%)</th>
+        `;
+
+        typesTravaux.forEach(type => {
+            html += `<th style="min-width: 80px; text-align: center;" title="${type.description || ''}">${type.nom}</th>`;
+        });
+
+        html += `
+                        <th style="width: 70px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        // Trier les forfaits par note décroissante
+        const forfaitsTries = [...forfaits].sort((a, b) => b.note - a.note);
+
+        forfaitsTries.forEach(forfait => {
+            html += `
+                <tr data-id="${forfait.id}">
+                    <td>
+                        <input type="text" class="form-control" value="${forfait.lettre || ''}"
+                               onchange="modifierForfaitSpec(${forfait.id}, 'lettre', this.value)"
+                               style="width: 50px; padding: 4px 8px; text-align: center; font-weight: bold;">
+                    </td>
+                    <td>
+                        <input type="number" class="form-control" value="${forfait.note || 0}"
+                               onchange="modifierForfaitSpec(${forfait.id}, 'note', parseInt(this.value))"
+                               style="width: 70px; padding: 4px 8px;" min="0" max="100">
+                    </td>
+            `;
+
+            typesTravaux.forEach(type => {
+                const quantite = (forfait.travaux && forfait.travaux[type.id]) || 0;
+                html += `
+                    <td style="text-align: center;">
+                        <input type="number" class="form-control" value="${quantite}"
+                               onchange="modifierTravailForfaitSpec(${forfait.id}, ${type.id}, parseInt(this.value))"
+                               style="width: 50px; padding: 4px 8px; text-align: center;" min="0" max="20">
+                    </td>
+                `;
+            });
+
+            html += `
+                    <td style="text-align: center;">
+                        <button type="button" class="btn btn-danger btn-tres-compact"
+                                onclick="supprimerForfaitSpec(${forfait.id})"
+                                title="Supprimer ce forfait">
+                            ✕
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += '</tbody></table></div>';
+
+        // Légende
+        html += `
+            <p class="text-muted" style="font-size: 0.8rem; margin-top: 10px;">
+                <strong>Lecture</strong> : Pour obtenir le forfait A (100%), l'étudiant doit avoir complété
+                le nombre requis de chaque type de travail indiqué dans la ligne.
+            </p>
+        `;
+
+        conteneur.innerHTML = html;
+    }
+
+    /**
+     * Ajoute un nouveau forfait
+     */
+    function ajouterForfaitSpec() {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.specifications) {
+            modalites.specifications = { ...CONFIG_SPECIFICATIONS_DEFAUT };
+        }
+
+        const forfaits = modalites.specifications.forfaits || [];
+        const typesTravaux = modalites.specifications.typesTravaux || [];
+
+        if (typesTravaux.length === 0) {
+            alert('Veuillez d\'abord ajouter des types de travaux.');
+            return;
+        }
+
+        const nouvelId = forfaits.length > 0
+            ? Math.max(...forfaits.map(f => f.id)) + 1
+            : 1;
+
+        // Générer une lettre (D, E, F... après A, B, C)
+        const lettresUtilisees = forfaits.map(f => f.lettre);
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let nouvelleLlettre = 'D';
+        for (let i = 0; i < alphabet.length; i++) {
+            if (!lettresUtilisees.includes(alphabet[i])) {
+                nouvelleLlettre = alphabet[i];
+                break;
+            }
+        }
+
+        // Initialiser les travaux à 0 pour chaque type
+        const travaux = {};
+        typesTravaux.forEach(t => {
+            travaux[t.id] = 0;
+        });
+
+        forfaits.push({
+            id: nouvelId,
+            lettre: nouvelleLlettre,
+            note: 70,
+            travaux: travaux
+        });
+
+        modalites.specifications.forfaits = forfaits;
+        db.setSync('modalitesEvaluation', modalites);
+
+        afficherForfaitsSpec(forfaits, typesTravaux);
+    }
+
+    /**
+     * Modifie une propriété d'un forfait
+     */
+    function modifierForfaitSpec(id, propriete, valeur) {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.specifications || !modalites.specifications.forfaits) return;
+
+        const forfait = modalites.specifications.forfaits.find(f => f.id === id);
+        if (forfait) {
+            forfait[propriete] = valeur;
+            db.setSync('modalitesEvaluation', modalites);
+
+            // Rafraîchir l'affichage si la note a changé (pour re-trier)
+            if (propriete === 'note') {
+                afficherForfaitsSpec(
+                    modalites.specifications.forfaits,
+                    modalites.specifications.typesTravaux || []
+                );
+            }
+        }
+    }
+
+    /**
+     * Modifie la quantité d'un type de travail dans un forfait
+     */
+    function modifierTravailForfaitSpec(forfaitId, typeId, quantite) {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.specifications || !modalites.specifications.forfaits) return;
+
+        const forfait = modalites.specifications.forfaits.find(f => f.id === forfaitId);
+        if (forfait) {
+            if (!forfait.travaux) forfait.travaux = {};
+            forfait.travaux[typeId] = quantite || 0;
+            db.setSync('modalitesEvaluation', modalites);
+        }
+    }
+
+    /**
+     * Supprime un forfait
+     */
+    function supprimerForfaitSpec(id) {
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.specifications || !modalites.specifications.forfaits) return;
+
+        modalites.specifications.forfaits = modalites.specifications.forfaits.filter(f => f.id !== id);
+        db.setSync('modalitesEvaluation', modalites);
+
+        afficherForfaitsSpec(
+            modalites.specifications.forfaits,
+            modalites.specifications.typesTravaux || []
+        );
+    }
+
+    // =========================================================================
     // ALIASES POUR RÉTROCOMPATIBILITÉ (exports anciens noms)
     // =========================================================================
 
@@ -1126,6 +1563,19 @@
     window.supprimerObjectifComptage = supprimerObjectifComptage;
     window.sauvegarderComptageObjectifsV2 = sauvegarderComptageObjectifsV2;
     window.initialiserComptageObjectifsV2 = initialiserComptageObjectifsV2;
+
+    // Exports PAN-Spécifications (Beta 95)
+    window.chargerConfigSpecifications = chargerConfigSpecifications;
+    window.sauvegarderConfigSpecifications = sauvegarderConfigSpecifications;
+    window.afficherTypesTravauxSpec = afficherTypesTravauxSpec;
+    window.ajouterTypeTravailSpec = ajouterTypeTravailSpec;
+    window.modifierTypeTravailSpec = modifierTypeTravailSpec;
+    window.supprimerTypeTravailSpec = supprimerTypeTravailSpec;
+    window.afficherForfaitsSpec = afficherForfaitsSpec;
+    window.ajouterForfaitSpec = ajouterForfaitSpec;
+    window.modifierForfaitSpec = modifierForfaitSpec;
+    window.modifierTravailForfaitSpec = modifierTravailForfaitSpec;
+    window.supprimerForfaitSpec = supprimerForfaitSpec;
 
     // =========================================================================
     // INITIALISATION AU CHARGEMENT
