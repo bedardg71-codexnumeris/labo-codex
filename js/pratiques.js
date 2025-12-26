@@ -2349,10 +2349,25 @@ async function editerPratique(id) {
  * Ouvre le wizard en mode création ou édition
  * @param {boolean} modeEdition - true si mode édition, false si création
  * @param {string} idPratique - ID de la pratique à éditer (si mode édition)
+ *
+ * Note Beta 95 : Le modal est dans une section legacy masquée.
+ * On le déplace dans le body pour qu'il soit visible depuis n'importe où.
  */
 function ouvrirWizardPratique(modeEdition = false, idPratique = null) {
     const modal = document.getElementById('modalWizardPratique');
     if (!modal) return;
+
+    // Beta 95 : Déplacer le modal dans le body s'il est dans une section masquée
+    // Utiliser closest() pour vérifier si un ancêtre a la classe legacy-hidden
+    if (!modal.dataset.movedToBody) {
+        const legacyParent = modal.closest('.legacy-hidden');
+        if (legacyParent) {
+            modal.dataset.originalParentId = legacyParent.id || '';
+            document.body.appendChild(modal);
+            modal.dataset.movedToBody = 'true';
+            console.log('[Pratiques] Modal wizard déplacé vers body (depuis section legacy)');
+        }
+    }
 
     // Stocker le mode et l'ID pour utilisation ultérieure
     modal.dataset.modeEdition = modeEdition;

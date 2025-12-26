@@ -293,40 +293,46 @@ function naviguerVersImportDemo() {
 
 /**
  * Option 2: Démarrer le wizard de création de pratique
+ *
+ * Note Beta 95 : Le modal wizard est dans la section legacy (masquée avec legacy-hidden).
+ * On le déplace temporairement dans le body pour qu'il soit visible.
  */
 function demarrerWizard() {
     fermerModalAccueil();
 
-    // Naviguer vers Pratiques et ouvrir Wizard
+    // Délai pour permettre la fermeture du modal d'accueil
     setTimeout(() => {
-        afficherSection('reglages');
+        console.log('[Primo] Tentative d\'ouverture du wizard pratique...');
 
-        // Attendre que la section soit affichée avant d'afficher la sous-section
-        setTimeout(() => {
-            afficherSousSection('reglages-pratique-notation');
+        // Vérifier que le modal existe dans le DOM
+        const modal = document.getElementById('modalWizardPratique');
+        if (!modal) {
+            console.error('[Primo] Modal #modalWizardPratique introuvable dans le DOM');
+            alert('Erreur : Le modal de configuration n\'a pas pu être trouvé.');
+            return;
+        }
 
-            // Attendre que la page soit chargée, puis ouvrir le wizard
-            setTimeout(() => {
-                console.log('[Primo] Tentative d\'ouverture du wizard pratique...');
+        // Le modal est dans une section masquée (legacy-hidden).
+        // On le déplace dans le body pour qu'il soit visible.
+        // Utiliser closest() pour vérifier si un ancêtre a la classe legacy-hidden
+        if (!modal.dataset.movedToBody) {
+            const legacyParent = modal.closest('.legacy-hidden');
+            if (legacyParent) {
+                modal.dataset.originalParentId = legacyParent.id || '';
+                document.body.appendChild(modal);
+                modal.dataset.movedToBody = 'true';
+                console.log('[Primo] Modal déplacé vers body (depuis section legacy)');
+            }
+        }
 
-                // Vérifier que le modal existe dans le DOM
-                const modal = document.getElementById('modalWizardPratique');
-                if (!modal) {
-                    console.error('[Primo] Modal #modalWizardPratique introuvable dans le DOM');
-                    alert('Erreur : Le modal de configuration n\'a pas pu être trouvé.');
-                    return;
-                }
-
-                if (typeof ouvrirWizardPratique === 'function') {
-                    console.log('[Primo] Ouverture du wizard...');
-                    ouvrirWizardPratique();
-                } else {
-                    console.error('[Primo] Fonction ouvrirWizardPratique non disponible');
-                    alert('Erreur : Le module de configuration des pratiques n\'est pas chargé.');
-                }
-            }, 1200);
-        }, 400);
-    }, 300);
+        if (typeof ouvrirWizardPratique === 'function') {
+            console.log('[Primo] Ouverture du wizard...');
+            ouvrirWizardPratique();
+        } else {
+            console.error('[Primo] Fonction ouvrirWizardPratique non disponible');
+            alert('Erreur : Le module de configuration des pratiques n\'est pas chargé.');
+        }
+    }, 500);
 }
 
 /**
