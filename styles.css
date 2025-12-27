@@ -8537,3 +8537,382 @@ body[data-mode="simulation"] table tr:hover {
     font-size: 0.9em;
     margin-right: 8px;
 }
+
+/* ============================================================================
+   WIZARD PRATIQUE V2 (Beta 95 - 26 décembre 2025)
+   Styles pour le nouveau wizard de création de pratique de notation
+   ============================================================================ */
+
+/* Modal container */
+.modal-contenu.wizard-v2 {
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 25px 30px;
+}
+
+/* En-tête du wizard */
+.wizard-v2-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.wizard-v2-primo-avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #1a5266, #2d7a8c);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: 0 4px 15px rgba(26, 82, 102, 0.3);
+    flex-shrink: 0;
+}
+
+.wizard-v2-header-texte {
+    flex: 1;
+}
+
+.wizard-v2-header-texte h2 {
+    margin: 0 0 5px 0;
+    font-size: 1.3rem;
+    color: var(--bleu-principal);
+}
+
+.wizard-v2-header-texte p {
+    margin: 0 0 8px 0;
+    color: var(--gris-moyen);
+    font-size: 0.9rem;
+}
+
+.wizard-v2-progression {
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+}
+
+.wizard-v2-progression strong {
+    color: var(--bleu-principal);
+}
+
+.wizard-v2-etape-separateur {
+    margin: 0 6px;
+    color: var(--gris-clair);
+}
+
+/* Indicateurs visuels (dots) */
+.wizard-v2-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 25px;
+    padding: 10px 0;
+}
+
+.wizard-v2-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gris-clair);
+    transition: all 0.3s ease;
+}
+
+.wizard-v2-dot-active {
+    background: var(--bleu-principal);
+    transform: scale(1.2);
+}
+
+.wizard-v2-dot-complete {
+    background: var(--vert-succes);
+}
+
+/* Contenu de l'étape */
+.wizard-v2-contenu {
+    min-height: 200px;
+    margin-bottom: 25px;
+}
+
+/* Champs du formulaire */
+.wizard-v2-champs {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.wizard-v2-champ {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.wizard-v2-champ label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--gris-fonce);
+}
+
+.wizard-v2-champ input[type="text"],
+.wizard-v2-champ input[type="number"],
+.wizard-v2-champ textarea,
+.wizard-v2-champ select {
+    padding: 10px 12px;
+    border: 1px solid var(--gris-clair);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease;
+}
+
+.wizard-v2-champ input:focus,
+.wizard-v2-champ textarea:focus,
+.wizard-v2-champ select:focus {
+    outline: none;
+    border-color: var(--bleu-principal);
+    box-shadow: 0 0 0 3px rgba(26, 82, 102, 0.1);
+}
+
+.wizard-v2-champ textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.wizard-v2-help {
+    font-size: 0.8rem;
+    color: var(--gris-moyen);
+    margin-top: 2px;
+}
+
+/* Champ avec erreur */
+.wizard-v2-champ-erreur input,
+.wizard-v2-champ-erreur select,
+.wizard-v2-champ-erreur textarea {
+    border-color: var(--rouge-erreur) !important;
+}
+
+/* Toggle switch */
+.wizard-v2-toggle {
+    flex-direction: row !important;
+    align-items: center;
+}
+
+.wizard-v2-toggle .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.wizard-v2-toggle input[type="checkbox"] {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    appearance: none;
+    background: var(--gris-clair);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.wizard-v2-toggle input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.wizard-v2-toggle input[type="checkbox"]:checked {
+    background: var(--bleu-principal);
+}
+
+.wizard-v2-toggle input[type="checkbox"]:checked::before {
+    transform: translateX(20px);
+}
+
+.wizard-v2-toggle .toggle-text {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+/* Radio cards */
+.wizard-v2-radio-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.wizard-v2-radio-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px;
+    border: 2px solid var(--gris-clair);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.wizard-v2-radio-card:hover:not(.wizard-v2-card-disabled) {
+    border-color: var(--bleu-clair);
+    background: var(--bleu-tres-pale);
+}
+
+.wizard-v2-radio-card:has(input:checked) {
+    border-color: var(--bleu-principal);
+    background: var(--bleu-tres-pale);
+}
+
+.wizard-v2-radio-card input[type="radio"] {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--bleu-principal);
+    flex-shrink: 0;
+}
+
+.wizard-v2-card-content {
+    flex: 1;
+}
+
+.wizard-v2-card-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--gris-fonce);
+    margin-bottom: 4px;
+}
+
+.wizard-v2-card-description {
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+    line-height: 1.4;
+}
+
+/* Carte désactivée */
+.wizard-v2-card-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.wizard-v2-card-disabled:hover {
+    border-color: var(--gris-clair);
+    background: white;
+}
+
+/* Bloc d'information */
+.wizard-v2-info-block {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    border-left: 4px solid var(--bleu-clair);
+}
+
+.wizard-v2-info-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.wizard-v2-info-block span {
+    font-size: 0.9rem;
+    color: var(--gris-fonce);
+    line-height: 1.5;
+}
+
+/* Alerte */
+.wizard-v2-alerte {
+    padding: 12px 15px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #856404;
+}
+
+.wizard-v2-info {
+    padding: 12px 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--gris-moyen);
+}
+
+/* Récapitulatif */
+.wizard-v2-recapitulatif {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.wizard-v2-recap-section {
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 8px;
+}
+
+.wizard-v2-recap-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 0.95rem;
+    color: var(--bleu-principal);
+    border-bottom: 1px solid var(--bleu-clair);
+    padding-bottom: 8px;
+}
+
+.wizard-v2-recap-section p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+    color: var(--gris-fonce);
+}
+
+.wizard-v2-recap-section p strong {
+    color: var(--gris-moyen);
+    font-weight: 500;
+}
+
+/* Boutons d'actions */
+.wizard-v2-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid var(--gris-clair);
+}
+
+.wizard-v2-actions-droite {
+    display: flex;
+    gap: 10px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .modal-contenu.wizard-v2 {
+        max-width: 100%;
+        margin: 10px;
+        padding: 20px;
+    }
+
+    .wizard-v2-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .wizard-v2-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .wizard-v2-actions-droite {
+        width: 100%;
+        justify-content: space-between;
+    }
+}

@@ -2741,10 +2741,16 @@ const wizardTitresEtapes = {
 
 /**
  * Ouvre le modal wizard de création de pratique
+ * Beta 95 : Utilise le nouveau Wizard V2
  */
 function creerNouvellePratique() {
-    // Ouvrir le wizard en mode création
-    ouvrirWizardPratique(false, null);
+    // Ouvrir le wizard V2 en mode création
+    if (typeof ouvrirWizardV2 === 'function') {
+        ouvrirWizardV2(false, null);
+    } else {
+        // Fallback sur l'ancien wizard
+        ouvrirWizardPratique(false, null);
+    }
 }
 
 /**
