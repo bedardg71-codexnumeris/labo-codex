@@ -4,6 +4,24 @@
 **Date cible** : 5 janvier 2026
 **Durée** : 9 jours (27 décembre 2025 - 5 janvier 2026)
 
+## État d'avancement
+
+| Phase | Description | Date | Statut |
+|-------|-------------|------|--------|
+| **Phase 1** | Audit Technique | 27 déc 2025 | ✅ Complétée |
+| **Phase 2** | Corrections Critiques | 27 déc 2025 | ✅ Complétée |
+| **Phase 3** | Documentation | 27 déc 2025 | ✅ Complétée |
+| **Phase 4** | Tests Systématiques | 27 déc 2025 | ✅ Complétée |
+| **Phase 5** | Finalisation | 4-5 jan 2026 | ⏳ Planifiée |
+
+**Commits du 27 décembre 2025** :
+- `937371d` - Phase 1.3 modes complétée
+- `a4e76d9` - Phase 1.4 audit visuel complété
+- `e640228` - Phase 2 corrections complétée
+- `4117d55` - Phase 3 documentation complétée
+- `991ee38` - Phase 4 vérification code complétée
+- `9094133` - Mise à jour date et cache busters
+
 ---
 
 ## Mission et philosophie
@@ -314,15 +332,15 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 | Consultation | Sections TB, Profil à jour ? | [x] OK |
 | Référence | Glossaire, FAQ actualisés ? | [x] Glossaire présent |
 
-#### 3.3.3 Améliorations post-Beta 95
+#### 3.3.3 Améliorations identifiées
 
-| Zone | Action | Priorité |
-|------|--------|----------|
-| **Primo** | Documenter l'assistant 😎 et ses modules | Moyenne |
-| **coursId** | Expliquer le concept multi-cours | Basse |
-| **Captures d'écran** | Mettre à jour si nécessaire | Basse |
+| Zone | Action | Priorité | Statut |
+|------|--------|----------|--------|
+| **Primo** | Documenter l'assistant 😎 et ses modules | Moyenne | ✅ Ajouté 27 déc |
+| **coursId** | Expliquer le concept multi-cours | Basse | ⏳ Post-Beta 95 |
+| **Captures d'écran** | Mettre à jour si nécessaire | Basse | ⏳ Post-Beta 95 |
 
-**Décision Beta 95** : La section Aide est fonctionnelle. Les améliorations sont reportées post-Beta 95.
+**Décision Beta 95** : La section Aide est fonctionnelle. Documentation Primo ajoutée le 27 décembre 2025.
 
 ### 3.4 Primo - Orientation autonomie
 
@@ -466,11 +484,26 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 
 ## Prochaine action immédiate
 
-1. **Aujourd'hui** : Commencer l'audit de l'architecture des données
-2. Identifier tous les endroits où `coursId` devrait être utilisé
-3. Vérifier la cohérence du filtrage dans `modes.js`
+~~1. **Aujourd'hui** : Commencer l'audit de l'architecture des données~~
+~~2. Identifier tous les endroits où `coursId` devrait être utilisé~~
+~~3. Vérifier la cohérence du filtrage dans `modes.js`~~
+
+**Phases 1-4 complétées le 27 décembre 2025** ✅
+
+### Prochaines étapes (Phase 5 - 4-5 janvier 2026)
+
+1. **Tests manuels en navigateur** : Valider les workflows critiques
+2. **Documentation Primo** : Ajouter dans section AIDE ✅ (27 déc)
+3. **Packaging final** : Version Beta 95.0, cache busters, release notes
+
+### Recommandations post-Beta 95
+
+1. **Dette technique Design System** : Migrer les 616 couleurs hexadécimales vers `var(--xxx)`
+2. **Primo autonomie** : Implémenter suggestions contextuelles
+3. **Classes CSS manquantes** : Créer `.modal-primo-*` et `.btn-primo-*`
 
 ---
 
 *Plan créé le 27 décembre 2025*
+*Phases 1-4 complétées le 27 décembre 2025*
 *Objectif : Beta 95 stable pour H2026*
