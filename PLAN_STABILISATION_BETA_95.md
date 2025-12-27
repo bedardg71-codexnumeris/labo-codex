@@ -354,28 +354,32 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 
 ### 4.1 Scénarios de test prioritaires
 
-| Scénario | Description | Statut |
-|----------|-------------|--------|
-| **Nouveau utilisateur** | Primo → Module 1 → Module 2 complet | [ ] |
-| **Import étudiants** | CSV/TSV avec différents formats | [ ] |
-| **Multi-cours** | 2+ cours, changement contexte | [ ] |
-| **Évaluation complète** | Création → saisie → indices | [ ] |
-| **Présences** | Saisie → calcul assiduité | [ ] |
-| **Snapshots** | Capture → reconstruction | [ ] |
-| **Export/Import** | Backup complet → restauration | [ ] |
-| **Changement mode** | Normal ↔ Assisté ↔ Anonymisé | [ ] |
+**Vérification du code (27 déc 2025)** : ✅ Tous les flux ont coursId
 
-### 4.2 Tests de régression
+| Scénario | Description | Code vérifié |
+|----------|-------------|--------------|
+| **Nouveau utilisateur** | Primo → Module 1 → Module 2 | [x] coursId + infoCours OK |
+| **Import étudiants** | CSV/TSV avec différents formats | [x] coursId dans addStudent/parseAndPreview |
+| **Multi-cours** | 2+ cours, changement contexte | [x] changerCoursDepuisEntete() OK |
+| **Évaluation complète** | Création → saisie → indices | [x] coursId (ligne 1601-1608) |
+| **Présences** | Saisie → calcul assiduité | [x] coursId (ligne 1336-1353) |
+| **Snapshots** | Capture → reconstruction | [x] capturerSnapshotSeance() OK |
+| **Export/Import** | Backup complet → restauration | [x] Fonctions export/import OK |
+| **Changement mode** | Normal ↔ Assisté ↔ Anonymisé | [x] Audit Phase 1.3 OK |
 
-| Zone | Vérification |
-|------|-------------|
-| Tableau de bord | Indices A-C-P affichés correctement |
-| Liste étudiants | Filtres, recherche, navigation |
-| Profil étudiant | Toutes sections, graphiques |
-| Productions | CRUD, liaison grilles |
-| Grilles/Échelles | Import/export, édition |
-| Présences | Calendrier, saisie, motifs |
-| Interventions RàI | Création, complétion |
+### 4.2 Tests de régression (à faire en utilisation réelle)
+
+| Zone | Vérification | Test manuel |
+|------|-------------|-------------|
+| Tableau de bord | Indices A-C-P affichés correctement | [ ] |
+| Liste étudiants | Filtres, recherche, navigation | [ ] |
+| Profil étudiant | Toutes sections, graphiques | [ ] |
+| Productions | CRUD, liaison grilles | [ ] |
+| Grilles/Échelles | Import/export, édition | [ ] |
+| Présences | Calendrier, saisie, motifs | [ ] |
+| Interventions RàI | Création, complétion | [ ] |
+
+**Note** : Les tests de régression manuels seront effectués lors de l'utilisation réelle de l'application.
 
 ---
 
