@@ -6,7 +6,46 @@
 
 ---
 
-## Contexte
+## Mission et philosophie
+
+> L'application doit **soutenir** l'utilisateur, pas le surcharger.
+
+### Objectifs fondamentaux
+
+| Objectif | Description |
+|----------|-------------|
+| **Suivi des apprentissages** | Soutenir l'enseignant·e dans le monitorage de la progression des étudiant·es |
+| **Gestion de la notation** | Faciliter l'évaluation selon différentes pratiques (Sommative, PAN) |
+| **Capacités augmentées** | Permettre ce qui serait impossible autrement (indices A-C-P, dépistage, patterns) |
+| **Indépendance** | L'utilisateur reste maître de ses données et de ses décisions |
+| **Sobriété** | Empreinte carbone minimale (application locale, pas de cloud obligatoire) |
+| **Intelligence collective** | Encourager le partage de ressources entre collègues |
+
+### Ce que l'application NE DOIT PAS être
+
+- ❌ Une tâche lourde supplémentaire
+- ❌ Une obsession bureaucratique
+- ❌ Un outil qui crée de la dépendance
+- ❌ Un système qui impose des pratiques
+
+### Ce que l'application DOIT être
+
+- ✅ Un amplificateur des pratiques existantes
+- ✅ Un outil de décision basé sur données probantes
+- ✅ Un accompagnateur du développement professionnel
+- ✅ Un facilitateur d'efficacité pédagogique
+
+### Principe directeur pour Beta 95
+
+Chaque fonctionnalité, chaque écran, chaque message doit répondre à la question :
+
+> **« Est-ce que ça aide l'enseignant·e à mieux accompagner ses étudiant·es, sans alourdir sa charge ? »**
+
+Si la réponse est non, la fonctionnalité doit être simplifiée ou retirée.
+
+---
+
+## Contexte technique
 
 La Beta 95 doit être suffisamment robuste pour supporter :
 - Plusieurs utilisateurs dans différentes disciplines
