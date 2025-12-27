@@ -231,7 +231,61 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 | Layouts | Grilles, accordéons |
 | États | Hover, disabled, active |
 
-### 3.3 Autres documents
+### 3.3 Section AIDE - Refonte complète
+
+**Objectif** : Documentation utilisateur fiable, précise et pédagogiquement pertinente.
+
+#### 3.3.1 Problèmes identifiés
+
+| Problème | Impact |
+|----------|--------|
+| Structure ne correspond plus à l'application | Utilisateurs perdus |
+| Fonctionnalités décrites obsolètes | Confusion, frustration |
+| Généralisations IA parfois erronées | Perte de crédibilité |
+| Exemples non réalistes (technique/pédagogique) | Incompréhension |
+| Primo pas assez orienté autonomie | Dépendance excessive |
+
+#### 3.3.2 Audit de la section Aide
+
+| Sous-section | Vérifications | Statut |
+|--------------|--------------|--------|
+| Introduction | Correspond à Beta 95 ? | [ ] |
+| Configuration | Reflète Primo + Réglages actuels ? | [ ] |
+| Utilisation | Flux réels documentés ? | [ ] |
+| Consultation | Sections TB, Profil à jour ? | [ ] |
+| Référence | Glossaire, FAQ actualisés ? | [ ] |
+
+#### 3.3.3 Corrections à apporter
+
+| Zone | Action |
+|------|--------|
+| **Structure navigation** | Aligner avec sections réelles (Tableau de bord, Présences, Évaluations, Matériel, Réglages) |
+| **Primo et autonomie** | Expliquer comment Primo aide à devenir autonome, pas dépendant |
+| **Exemples** | Remplacer exemples génériques par cas réels (ex: grille SRPNF, échelle IDME) |
+| **Captures d'écran** | Mettre à jour ou supprimer les obsolètes |
+| **Terminologie** | Uniformiser (code du cours, groupe-cours, coursId, etc.) |
+| **Indices A-C-P** | Vérifier formules et explications |
+| **RàI** | Documenter les 3 niveaux correctement |
+| **Pratiques de notation** | Expliquer PAN-Standards, Sommative, PAN-Spécifications |
+
+#### 3.3.4 Réécriture avec rigueur
+
+- [ ] Relire CHAQUE paragraphe pour exactitude
+- [ ] Supprimer généralisations non vérifiées
+- [ ] Ajouter notes "Beta 95" où pertinent
+- [ ] Vérifier cohérence avec CLAUDE.md
+- [ ] Tester chaque procédure décrite
+
+### 3.4 Primo - Orientation autonomie
+
+| Aspect | Objectif |
+|--------|----------|
+| Messages Primo | Expliquer le "pourquoi", pas juste le "comment" |
+| Fin de parcours | Inviter à explorer seul, pas à revenir vers Primo |
+| Aide contextuelle | Pointer vers section Aide, pas réexpliquer |
+| Tutoriel | Montrer où trouver l'info ensuite |
+
+### 3.5 Autres documents
 
 | Document | Action |
 |----------|--------|
