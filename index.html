@@ -12670,7 +12670,13 @@ Exemple :
             if (modal) {
                 modal.classList.add('actif');
                 // Marquer comme vu dans localStorage
-                localStorage.setItem('nouveautes-beta-93-vue', 'true');
+                localStorage.setItem('nouveautes-beta-95-vue', 'true');
+                // Changer la pastille en jaune immédiatement
+                const pastille = document.querySelector('.pastille-nouveautes');
+                if (pastille) {
+                    pastille.style.background = '#f5a623';
+                    pastille.style.animation = 'none';
+                }
             }
         }
 
@@ -12695,11 +12701,11 @@ Exemple :
                 });
             }
 
-            // Rendre la pastille grise pâle si les nouveautés ont déjà été vues
-            const nouveautesVues = localStorage.getItem('nouveautes-beta-93-vue');
+            // Rendre la pastille jaune si les nouveautés ont déjà été vues
+            const nouveautesVues = localStorage.getItem('nouveautes-beta-95-vue');
             const pastille = document.querySelector('.pastille-nouveautes');
             if (nouveautesVues === 'true' && pastille) {
-                pastille.style.background = 'rgba(200, 200, 200, 0.5)';
+                pastille.style.background = '#f5a623'; // Jaune-orangé visible
                 pastille.style.animation = 'none';
             }
         });
