@@ -449,6 +449,33 @@ function obtenirDonneesSelonMode(cle) {
     const valeurParDefaut = clesSontObjets.includes(cle) ? {} : [];
     let donnees = db.getSync(cle, valeurParDefaut);
 
+    // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025)
+    // Filtrer par coursId pour les données liées au cours actif uniquement
+    // Ceci corrige le bug de contamination entre cours/trimestres
+    const clesAvecCoursId = ['groupeEtudiants', 'productions', 'presences', 'evaluationsSauvegardees'];
+    if (clesAvecCoursId.includes(cle) && Array.isArray(donnees)) {
+        const coursActif = db.getSync('infoCours', null);
+        if (coursActif && coursActif.id) {
+            const totalAvant = donnees.length;
+            donnees = donnees.filter(item => {
+                // Compatibilité : ancien format sans coursId
+                if (!item.coursId) {
+                    // Pour étudiants : vérifier groupe
+                    if (cle === 'groupeEtudiants') {
+                        const groupeCours = coursActif.groupe || coursActif.groupes?.[0];
+                        return item.groupe === groupeCours;
+                    }
+                    // Pour autres données sans coursId : les inclure (migration progressive)
+                    return true;
+                }
+                return item.coursId === coursActif.id;
+            });
+            if (donnees.length !== totalAvant) {
+                console.log(`📋 [coursId] Filtré ${cle}: ${donnees.length}/${totalAvant} pour cours ${coursActif.id}`);
+            }
+        }
+    }
+
     // Si mode anonymisation, anonymiser selon le type de données
     if (mode === MODES.ANONYMISATION) {
         console.log(`🎭 [ANONYMISATION] Mode actif, anonymisation de "${cle}"...`);
