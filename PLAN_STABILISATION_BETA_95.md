@@ -73,14 +73,14 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 
 | Flux | Description | Statut |
 |------|-------------|--------|
-| Création cours (Primo Module 1) | Code, groupe, trimestreId, coursId | [ ] |
-| Import étudiants (manuel) | Format, coursId, validation | [ ] |
-| Import étudiants (Primo) | Format, coursId, validation | [ ] |
-| Création production | Liaison grille, coursId | [ ] |
-| Saisie évaluation | Liaison production, étudiant | [ ] |
-| Saisie présences | Liaison séances, coursId | [ ] |
-| Calcul indices A-C-P | Sources, stockage, rafraîchissement | [ ] |
-| Snapshots | Capture, reconstruction, intégrité | [ ] |
+| Création cours (Primo Module 1) | Code, groupe, trimestreId, coursId | [x] |
+| Import étudiants (manuel) | Format, coursId, validation | [x] |
+| Import étudiants (Primo) | Format, coursId, validation | [x] |
+| Création production | Liaison grille, coursId | [x] |
+| Saisie évaluation | Liaison production, étudiant | [x] |
+| Saisie présences | Liaison séances, coursId | [x] |
+| Calcul indices A-C-P | Sources, stockage, rafraîchissement | [x] |
+| Snapshots | Capture, reconstruction, intégrité | [x] |
 
 ### 1.3 Audit des modes d'application
 
