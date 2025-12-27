@@ -6155,7 +6155,7 @@
 
                             <!-- Bouton création en haut à droite -->
                             <div style="margin-bottom: 20px; text-align: right;">
-                                <button onclick="ouvrirWizardPratique()" class="btn btn-principal">
+                                <button onclick="ouvrirWizardV2()" class="btn btn-principal">
                                     + Nouvelle pratique
                                 </button>
                             </div>
@@ -12486,10 +12486,10 @@ Exemple :
     <script src="js/config.js?v=2025121004"></script>
     <script src="js/navigation.js?v=2025121700"></script>
     <script src="js/modes.js?v=2025121500"></script>
-    <script src="js/donnees-demo.js?v=2025121009"></script>
 
-    <!-- ✅ NOUVEAU Beta 93.5 : Pack de démarrage (groupe 9999) -->
-    <script src="js/pack-demarrage.js"></script>
+    <!-- ✅ Pack de démarrage AVANT donnees-demo (expose PACK_DEMARRAGE) -->
+    <script src="js/pack-demarrage.js?v=2025122701"></script>
+    <script src="js/donnees-demo.js?v=2025122701"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2025121902"></script> <!-- Beta 95 : Gestion multi-trimestres -->
@@ -12534,6 +12534,7 @@ Exemple :
 
     <!-- Interface de gestion des pratiques configurables -->
     <script src="js/pratiques.js?v=2025121602"></script>
+    <script src="js/wizard-pratique-v2.js?v=2025122603"></script>
     <script src="js/objectifs.js?v=2025120124"></script>
 
     <script src="js/portfolio.js?v=2025120908"></script>
@@ -13167,6 +13168,57 @@ Exemple :
 
     <!-- Script pour afficher les informations contextuelles dans la navigation -->
     <!-- ✅ SUPPRIMÉ (9 décembre 2025) : Remplacé par contexte.js qui gère l'affichage horizontal centré -->
+
+    <!-- ========================================= -->
+    <!-- MODAL WIZARD PRATIQUE V2 (Beta 95) -->
+    <!-- ========================================= -->
+    <div id="modalWizardPratiqueV2" class="modal-overlay" style="display: none;">
+        <div class="modal-contenu wizard-v2">
+            <button onclick="fermerWizardV2()" class="modal-fermer">✕</button>
+
+            <!-- En-tête avec Primo -->
+            <div class="wizard-v2-header">
+                <div class="wizard-v2-primo-avatar">😎</div>
+                <div class="wizard-v2-header-texte">
+                    <h2 id="wizard-v2-titre">Informations de base</h2>
+                    <p id="wizard-v2-description">Donnez un nom à votre pratique de notation</p>
+                    <div class="wizard-v2-progression">
+                        <span>Étape <strong id="wizard-v2-etape-num">1</strong>/<span id="wizard-v2-etape-total">8</span></span>
+                        <span class="wizard-v2-etape-separateur">•</span>
+                        <span id="wizard-v2-etape-nom">Informations de base</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Indicateur visuel (dots) -->
+            <div class="wizard-v2-dots" id="wizard-v2-dots">
+                <!-- Généré dynamiquement -->
+            </div>
+
+            <!-- Contenu de l'étape -->
+            <div class="wizard-v2-contenu" id="wizard-v2-contenu">
+                <!-- Généré dynamiquement -->
+            </div>
+
+            <!-- Boutons navigation -->
+            <div class="wizard-v2-actions">
+                <button id="wizard-v2-btn-annuler" class="btn btn-danger" onclick="fermerWizardV2()">
+                    Annuler
+                </button>
+                <div class="wizard-v2-actions-droite">
+                    <button id="wizard-v2-btn-precedent" class="btn btn-secondaire" onclick="etapePrecedenteV2()" style="display: none;">
+                        ← Précédent
+                    </button>
+                    <button id="wizard-v2-btn-suivant" class="btn btn-principal" onclick="etapeSuivanteV2()">
+                        Suivant →
+                    </button>
+                    <button id="wizard-v2-btn-creer" class="btn btn-succes" onclick="creerPratiqueV2()" style="display: none;">
+                        ✓ Créer la pratique
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

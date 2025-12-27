@@ -7,7 +7,8 @@
    =============================== */
 
 /**
- * Charge les données de démonstration depuis pack-demarrage-complet.json
+ * Charge les données de démonstration
+ * Utilise PACK_DEMARRAGE (variable globale) ou fetch() comme fallback
  * @returns {Promise<boolean>} True si succès, false sinon
  */
 async function chargerDonneesDemo() {
@@ -21,15 +22,34 @@ async function chargerDonneesDemo() {
             return true;
         }
 
-        // Charger le fichier JSON
-        console.log('   → Tentative de chargement pack-demarrage-complet.json...');
-        const response = await fetch('pack-demarrage-complet.json');
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP: ${response.status}`);
+        let packDemo = null;
+
+        // PRIORITÉ 1 : Utiliser la variable globale PACK_DEMARRAGE (fonctionne en mode file://)
+        if (typeof PACK_DEMARRAGE !== 'undefined' && PACK_DEMARRAGE) {
+            console.log('   → Utilisation de PACK_DEMARRAGE (variable globale)');
+            packDemo = PACK_DEMARRAGE;
+        } else {
+            // PRIORITÉ 2 : Charger via fetch (nécessite un serveur HTTP)
+            try {
+                console.log('   → Tentative de chargement pack-demarrage-complet.json...');
+                const response = await fetch('pack-demarrage-complet.json');
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                packDemo = await response.json();
+                console.log('   ✅ Fichier pack-demarrage-complet.json chargé via fetch');
+            } catch (fetchError) {
+                console.warn('   ⚠️ fetch() a échoué (mode file:// ?):', fetchError.message);
+                console.error('   ❌ Impossible de charger les données demo - PACK_DEMARRAGE non disponible');
+                return false;
+            }
         }
 
-        const packDemo = await response.json();
-        console.log('   ✅ Fichier pack-demarrage-complet.json chargé');
+        if (!packDemo) {
+            console.error('   ❌ Aucune source de données demo disponible');
+            return false;
+        }
+
         console.log(`   → Contient: ${packDemo.listeCours?.length || 0} cours, ${packDemo.groupeEtudiants?.length || 0} étudiants`);
 
         // Fusionner avec les données existantes
