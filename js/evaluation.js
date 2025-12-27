@@ -1597,12 +1597,15 @@ function sauvegarderEvaluation() {
     }
 
     // Créer l'objet évaluation avec horodatage
+    // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
+    const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
     const maintenant = new Date();
     const evaluation = {
         id: 'EVAL_' + Date.now(),
         etudiantDA: etudiantDA,
         etudiantNom: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : '',
         groupe: etudiant ? etudiant.groupe : '',
+        coursId: coursId,  // ✅ Lier l'évaluation au cours actif
         productionId: productionId,
         productionNom: production ? (production.titre || production.nom) : '',
         grilleId: grilleId,
