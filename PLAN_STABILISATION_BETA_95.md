@@ -86,10 +86,10 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 
 | Mode | Comportement attendu | Statut |
 |------|---------------------|--------|
-| Normal | Exclut groupe 9999, données réelles | [ ] |
-| Assisté (simulation) | Affiche SEULEMENT groupe 9999 | [ ] |
-| Anonymisé | Exclut 9999, noms masqués | [ ] |
-| Changement de mode | Rechargement correct des données | [ ] |
+| Normal | Exclut groupe 9999, données réelles | [x] |
+| Assisté (simulation) | Affiche SEULEMENT groupe 9999 | [x] |
+| Anonymisé | Exclut 9999, noms masqués | [x] |
+| Changement de mode | Rechargement correct des données | [x] |
 
 ### 1.4 Audit visuel et Design System
 
