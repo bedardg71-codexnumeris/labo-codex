@@ -52,6 +52,88 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 | Anonymisé | Exclut 9999, noms masqués | [ ] |
 | Changement de mode | Rechargement correct des données | [ ] |
 
+### 1.4 Audit visuel et Design System
+
+**Objectif** : Application uniforme et systématique du design dans TOUTE l'application.
+
+#### 1.4.1 Inventaire des styles inline à éliminer
+
+| Fichier | Type | Priorité | Statut |
+|---------|------|----------|--------|
+| index.html | Styles inline dans balises | Haute | [ ] |
+| Modals dynamiques (JS) | cssText dans createElement | Haute | [ ] |
+| primo-modal.js | Styles inline modals Primo | Haute | [ ] |
+| primo-accueil.js | Styles inline modal accueil | Haute | [ ] |
+| evaluation.js | Styles inline formulaires | Moyenne | [ ] |
+| profil-etudiant.js | Styles inline sections | Moyenne | [ ] |
+| tableau-bord-apercu.js | Styles inline cartes | Moyenne | [ ] |
+
+#### 1.4.2 Audit par section de navigation
+
+| Section | Sous-sections | Statut |
+|---------|--------------|--------|
+| **Tableau de bord** | Aperçu, Liste individus, Profil, Interventions RàI | [ ] |
+| **Présences** | Aperçu, Saisie, Calendrier | [ ] |
+| **Évaluations** | Aperçu, Liste, Formulaire évaluation | [ ] |
+| **Matériel** | Productions, Grilles, Échelles, Cartouches, Objectifs | [ ] |
+| **Réglages** | Trimestre, Cours, Groupe, Pratique, Préférences, Import/Export | [ ] |
+| **Aide** | Toutes sous-sections | [ ] |
+
+#### 1.4.3 Éléments visuels à harmoniser
+
+| Élément | Variables CSS attendues | Vérification |
+|---------|------------------------|--------------|
+| **Typographie** | | |
+| Titres H1 | `--titre-principal` | [ ] |
+| Titres H2 | `--titre-section` | [ ] |
+| Titres H3 | `--titre-sous-section` | [ ] |
+| Corps de texte | `font-size: 1rem` | [ ] |
+| Texte secondaire | `color: var(--gris-moyen)` | [ ] |
+| **Couleurs** | | |
+| Fond page | `var(--fond-page)` | [ ] |
+| Fond cartes | `var(--fond-carte)` ou `white` | [ ] |
+| Bordures | `var(--bordure-claire)` | [ ] |
+| Accent bleu | `var(--bleu-principal)` | [ ] |
+| Accent orange | `var(--orange-accent)` | [ ] |
+| **Espacements** | | |
+| Padding cartes | `20px` ou `25px` uniforme | [ ] |
+| Margin sections | Cohérent entre sections | [ ] |
+| Gap grilles | `15px` ou `20px` uniforme | [ ] |
+| **Composants** | | |
+| Boutons primaires | `.btn` + variantes | [ ] |
+| Boutons secondaires | `.btn-outline` | [ ] |
+| Cartes | `.carte` ou `.item-carte` | [ ] |
+| Accordéons | `.accordeon` | [ ] |
+| Badges | `.badge`, `.statut-badge` | [ ] |
+| Formulaires | `input`, `select`, `textarea` | [ ] |
+| Tableaux | `.tableau` | [ ] |
+| Alertes | `.alerte-info`, `.alerte-warning` | [ ] |
+
+#### 1.4.4 Audit des modals
+
+| Modal | Fichier source | Cohérence design | Statut |
+|-------|---------------|------------------|--------|
+| Modal Primo Accueil | primo-accueil.js | [ ] | [ ] |
+| Modal Primo Conversation | primo-modal.js | [ ] | [ ] |
+| Modal Wizard Pratique V2 | wizard-pratique-v2.js | [ ] | [ ] |
+| Modal Confirmation | Divers | [ ] | [ ] |
+| Modal Import/Export | import-export.js | [ ] | [ ] |
+| Modal Nouveau cours | cours.js | [ ] | [ ] |
+| Modal Évaluation | evaluation.js | [ ] | [ ] |
+
+#### 1.4.5 Checklist Design System
+
+- [ ] Toutes les couleurs utilisent des variables CSS
+- [ ] Aucun `color: #XXXXXX` en dur (sauf dans :root)
+- [ ] Aucun `font-size` en pixels (utiliser rem)
+- [ ] Aucun `margin`/`padding` incohérent
+- [ ] Tous les boutons utilisent les classes `.btn`
+- [ ] Tous les formulaires ont un style uniforme
+- [ ] Les cartes ont des ombres cohérentes
+- [ ] Les bordures radius sont uniformes (8px ou 12px)
+- [ ] Les transitions sont cohérentes (0.2s ou 0.3s)
+- [ ] Les états hover/focus sont définis partout
+
 ---
 
 ## Phase 2 : Corrections Critiques (29-31 décembre)
@@ -76,6 +158,54 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 | Migration données existantes | Ajouter coursId aux anciens étudiants | Haute |
 | Backup automatique | Avant opérations destructives | Moyenne |
 | Logs de diagnostic | Console structurée pour debug | Moyenne |
+
+### 2.3 Corrections visuelles et Design System
+
+#### 2.3.1 Extraction des styles inline vers CSS
+
+| Tâche | Fichier cible | Priorité |
+|-------|--------------|----------|
+| Créer classes pour modals Primo | styles.css | Haute |
+| Migrer styles primo-accueil.js | styles.css | Haute |
+| Migrer styles primo-modal.js | styles.css | Haute |
+| Migrer styles wizard-pratique-v2.js | styles.css | Haute |
+| Nettoyer styles inline index.html | styles.css | Moyenne |
+| Harmoniser cartes statistiques | styles.css | Moyenne |
+
+#### 2.3.2 Nouvelles classes CSS à créer
+
+```css
+/* Classes pour modals Primo */
+.modal-primo { }
+.modal-primo-overlay { }
+.modal-primo-content { }
+.modal-primo-header { }
+.modal-primo-body { }
+.modal-primo-footer { }
+.modal-primo-avatar { }
+
+/* Classes pour boutons Primo */
+.btn-primo-primary { }
+.btn-primo-secondary { }
+.btn-primo-module { }
+
+/* Classes pour notifications */
+.notification-primo { }
+.notification-success { }
+.notification-warning { }
+```
+
+#### 2.3.3 Harmonisation par zone
+
+| Zone | Actions requises |
+|------|-----------------|
+| En-tête application | Vérifier cohérence dropdown, boutons |
+| Navigation principale | Uniformiser styles onglets |
+| Sous-navigation | Cohérence boutons secondaires |
+| Cartes métriques | Même structure, mêmes espacements |
+| Formulaires | Labels, inputs, selects uniformes |
+| Tableaux | En-têtes, lignes, pagination |
+| Messages vides | Style "Aucun·e étudiant·e trouvé·e" |
 
 ---
 
@@ -166,15 +296,15 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 
 | Date | Journée | Activités |
 |------|---------|-----------|
-| **27 déc** | Vendredi | Audit architecture données |
-| **28 déc** | Samedi | Audit flux + modes |
-| **29 déc** | Dimanche | Début corrections critiques |
-| **30 déc** | Lundi | Corrections + migrations |
-| **31 déc** | Mardi | Finalisation corrections |
-| **1 jan** | Mercredi | Documentation CLAUDE.md |
-| **2 jan** | Jeudi | Documentation + début tests |
-| **3 jan** | Vendredi | Tests systématiques |
-| **4 jan** | Samedi | Tests + corrections finales |
+| **27 déc** | Vendredi | Audit architecture données + Audit visuel (styles inline) |
+| **28 déc** | Samedi | Audit flux + modes + Audit design par section |
+| **29 déc** | Dimanche | Corrections critiques (bugs fonctionnels) |
+| **30 déc** | Lundi | Corrections visuelles (extraction styles, classes CSS) |
+| **31 déc** | Mardi | Harmonisation design + migrations données |
+| **1 jan** | Mercredi | Documentation CLAUDE.md + DESIGN_SYSTEM |
+| **2 jan** | Jeudi | Documentation + début tests fonctionnels |
+| **3 jan** | Vendredi | Tests systématiques + tests visuels |
+| **4 jan** | Samedi | Corrections finales + polish visuel |
 | **5 jan** | Dimanche | Packaging + déploiement |
 
 ---
@@ -182,6 +312,8 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 ## Critères de succès
 
 ### Obligatoires (bloquants)
+
+**Fonctionnels :**
 - [ ] Création groupe-cours fonctionnelle (Primo Module 1)
 - [ ] Import étudiants fonctionnel (manuel + Primo)
 - [ ] Évaluations créées et sauvegardées correctement
@@ -191,11 +323,20 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 - [ ] Changement de cours fonctionne
 - [ ] Mode Normal affiche données réelles
 
+**Visuels :**
+- [ ] Aucun style inline critique dans les modals
+- [ ] Typographie cohérente (variables CSS)
+- [ ] Couleurs uniformes (variables CSS)
+- [ ] Boutons avec classes .btn partout
+- [ ] Cartes avec structure uniforme
+
 ### Souhaitables (non bloquants)
 - [ ] Mode Assisté fonctionne avec données démo
 - [ ] Snapshots et graphiques fonctionnels
 - [ ] Documentation à jour
 - [ ] Wizard Pratique (Module 4) fonctionnel
+- [ ] 100% des styles inline éliminés
+- [ ] DESIGN_SYSTEM.html complet et à jour
 
 ---
 
