@@ -60,13 +60,13 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 
 | Vérification | Priorité | Statut |
 |-------------|----------|--------|
-| Structure `listeCours` vs `infoCours` | Critique | [ ] |
-| Liaison `coursId` dans `groupeEtudiants` | Critique | [ ] |
-| Liaison `coursId` dans `productions` | Critique | [ ] |
-| Liaison `coursId` dans `presences` | Critique | [ ] |
-| Liaison `coursId` dans `evaluationsSauvegardees` | Critique | [ ] |
-| Génération `trimestreId` cohérente | Haute | [ ] |
-| Namespacing des clés par trimestre | Haute | [ ] |
+| Structure `listeCours` vs `infoCours` | Critique | [x] |
+| Liaison `coursId` dans `groupeEtudiants` | Critique | [x] |
+| Liaison `coursId` dans `productions` | Critique | [x] |
+| Liaison `coursId` dans `presences` | Critique | [x] |
+| Liaison `coursId` dans `evaluationsSauvegardees` | Critique | [x] |
+| Génération `trimestreId` cohérente | Haute | [x] |
+| Namespacing des clés par trimestre | Haute | [x] |
 | Intégrité IndexedDB ↔ localStorage cache | Haute | [ ] |
 
 ### 1.2 Audit des flux de données
