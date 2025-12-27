@@ -207,60 +207,61 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 
 ### 2.2 Améliorations de robustesse
 
-| Amélioration | Description | Priorité |
-|-------------|-------------|----------|
-| Validation import étudiants | Vérifier format, doublons DA | Haute |
-| Migration données existantes | Ajouter coursId aux anciens étudiants | Haute |
-| Backup automatique | Avant opérations destructives | Moyenne |
-| Logs de diagnostic | Console structurée pour debug | Moyenne |
+**Résultats audit (27 déc 2025)** : Fonctionnalités déjà implémentées
+
+| Amélioration | Description | Statut |
+|-------------|-------------|--------|
+| Validation import étudiants | Doublons DA détectés (groupe.js:203-207, 460-466) | [x] |
+| Migration données existantes | migrations.js exécuté au démarrage (main.js:458-467) | [x] |
+| Backup automatique | Avant opérations destructives | [ ] À évaluer |
+| Logs de diagnostic | Console structurée pour debug | [ ] À évaluer |
 
 ### 2.3 Corrections visuelles et Design System
 
+**Résultats audit (27 déc 2025)** : Compromis acceptable pour Beta 95
+
 #### 2.3.1 Extraction des styles inline vers CSS
 
-| Tâche | Fichier cible | Priorité |
-|-------|--------------|----------|
-| Créer classes pour modals Primo | styles.css | Haute |
-| Migrer styles primo-accueil.js | styles.css | Haute |
-| Migrer styles primo-modal.js | styles.css | Haute |
-| Migrer styles wizard-pratique-v2.js | styles.css | Haute |
-| Nettoyer styles inline index.html | styles.css | Moyenne |
-| Harmoniser cartes statistiques | styles.css | Moyenne |
+| Tâche | Fichier cible | Statut |
+|-------|--------------|--------|
+| Créer classes `.wizard-v2-*` | styles.css | [x] 50+ règles CSS |
+| Migrer styles primo-accueil.js | - | ⚠️ Inline mais utilise var() |
+| Migrer styles primo-modal.js | - | ⚠️ Inline mais utilise var() |
+| Migrer styles wizard-pratique-v2.js | styles.css | [x] Classes CSS |
+| Nettoyer styles inline index.html | - | [ ] Post-Beta 95 |
+| Harmoniser cartes statistiques | - | [ ] Post-Beta 95 |
 
-#### 2.3.2 Nouvelles classes CSS à créer
+**Note** : Les fichiers primo-*.js utilisent des styles inline mais avec des variables CSS (`var(--bleu-principal)`, etc.). C'est un compromis acceptable pour Beta 95.
+
+#### 2.3.2 Classes CSS existantes
 
 ```css
-/* Classes pour modals Primo */
-.modal-primo { }
-.modal-primo-overlay { }
-.modal-primo-content { }
-.modal-primo-header { }
-.modal-primo-body { }
-.modal-primo-footer { }
-.modal-primo-avatar { }
+/* ✅ Déjà implémenté dans styles.css */
+.wizard-v2-* { /* 50+ règles */ }
+.modal-contenu.wizard-v2 { }
+.wizard-v2-header { }
+.wizard-v2-progression { }
+.wizard-v2-champs { }
+.wizard-v2-radio-cards { }
+/* etc. */
 
-/* Classes pour boutons Primo */
-.btn-primo-primary { }
-.btn-primo-secondary { }
-.btn-primo-module { }
-
-/* Classes pour notifications */
-.notification-primo { }
-.notification-success { }
-.notification-warning { }
+/* ⏳ À créer post-Beta 95 */
+.modal-primo-* { }
+.btn-primo-* { }
 ```
 
 #### 2.3.3 Harmonisation par zone
 
-| Zone | Actions requises |
-|------|-----------------|
-| En-tête application | Vérifier cohérence dropdown, boutons |
-| Navigation principale | Uniformiser styles onglets |
-| Sous-navigation | Cohérence boutons secondaires |
-| Cartes métriques | Même structure, mêmes espacements |
-| Formulaires | Labels, inputs, selects uniformes |
-| Tableaux | En-têtes, lignes, pagination |
-| Messages vides | Style "Aucun·e étudiant·e trouvé·e" |
+**Décision Beta 95** : Les classes standard (.carte, .btn, .tableau) sont bien utilisées (voir audit 1.4.2). L'harmonisation complète est reportée post-Beta 95.
+
+| Zone | État actuel | Action |
+|------|------------|--------|
+| En-tête | ✅ OK | - |
+| Navigation | ✅ OK | - |
+| Cartes | ✅ Classes .carte | - |
+| Boutons | ✅ Classes .btn | - |
+| Formulaires | ⚠️ Mixte | Post-Beta 95 |
+| Tableaux | ✅ Classes .tableau | - |
 
 ---
 
