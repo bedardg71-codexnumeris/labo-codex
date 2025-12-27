@@ -97,81 +97,97 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 
 #### 1.4.1 Inventaire des styles inline à éliminer
 
-| Fichier | Type | Priorité | Statut |
-|---------|------|----------|--------|
-| index.html | Styles inline dans balises | Haute | [ ] |
-| Modals dynamiques (JS) | cssText dans createElement | Haute | [ ] |
-| primo-modal.js | Styles inline modals Primo | Haute | [ ] |
-| primo-accueil.js | Styles inline modal accueil | Haute | [ ] |
-| evaluation.js | Styles inline formulaires | Moyenne | [ ] |
-| profil-etudiant.js | Styles inline sections | Moyenne | [ ] |
-| tableau-bord-apercu.js | Styles inline cartes | Moyenne | [ ] |
+**Résultats audit (27 déc 2025)** : ~2000 styles inline identifiés
+
+| Fichier | `style="..."` | `.style.` | Total | Priorité | Statut |
+|---------|--------------|-----------|-------|----------|--------|
+| index.html | 962 | - | **962** | Haute | [x] Inventorié |
+| profil-etudiant.js | 290 | 20 | **310** | Haute | [x] Inventorié |
+| evaluation.js | 73 | 76 | **149** | Haute | [x] Inventorié |
+| pratiques.js | - | 115 | **115** | Haute | [x] Inventorié |
+| primo-modal.js | 41 | 67 | **108** | Haute | [x] Inventorié |
+| tableau-bord-apercu.js | 42 | 8 | **50** | Moyenne | [x] Inventorié |
+| grilles.js | - | 49 | **49** | Moyenne | [x] Inventorié |
+| cartouches.js | - | 47 | **47** | Moyenne | [x] Inventorié |
+| productions.js | - | 40 | **40** | Moyenne | [x] Inventorié |
+| primo-accueil.js | 19 | 7 | **26** | Moyenne | [x] Inventorié |
+
+**616 couleurs hexadécimales en dur** dans les fichiers JS (à migrer vers variables CSS)
 
 #### 1.4.2 Audit par section de navigation
 
+**Résultats audit (27 déc 2025)** : Classes CSS standard bien utilisées
+
+| Élément | Occurrences | Commentaire |
+|---------|-------------|-------------|
+| `.carte` | 186 | ✅ Bien utilisé |
+| `.btn` | 291 | ✅ Bien utilisé |
+| `.tableau` | 24 | ✅ Bien utilisé |
+| `.alerte` | 16 | ✅ Bien utilisé |
+
 | Section | Sous-sections | Statut |
 |---------|--------------|--------|
-| **Tableau de bord** | Aperçu, Liste individus, Profil, Interventions RàI | [ ] |
-| **Présences** | Aperçu, Saisie, Calendrier | [ ] |
-| **Évaluations** | Aperçu, Liste, Formulaire évaluation | [ ] |
-| **Matériel** | Productions, Grilles, Échelles, Cartouches, Objectifs | [ ] |
-| **Réglages** | Trimestre, Cours, Groupe, Pratique, Préférences, Import/Export | [ ] |
-| **Aide** | Toutes sous-sections | [ ] |
+| **Tableau de bord** | Aperçu, Liste individus, Profil, Interventions RàI | [x] |
+| **Présences** | Aperçu, Saisie, Calendrier | [x] |
+| **Évaluations** | Aperçu, Liste, Formulaire évaluation | [x] |
+| **Matériel** | Productions, Grilles, Échelles, Cartouches, Objectifs | [x] |
+| **Réglages** | Trimestre, Cours, Groupe, Pratique, Préférences, Import/Export | [x] |
+| **Aide** | Toutes sous-sections | [x] |
 
 #### 1.4.3 Éléments visuels à harmoniser
 
-| Élément | Variables CSS attendues | Vérification |
-|---------|------------------------|--------------|
-| **Typographie** | | |
-| Titres H1 | `--titre-principal` | [ ] |
-| Titres H2 | `--titre-section` | [ ] |
-| Titres H3 | `--titre-sous-section` | [ ] |
-| Corps de texte | `font-size: 1rem` | [ ] |
-| Texte secondaire | `color: var(--gris-moyen)` | [ ] |
-| **Couleurs** | | |
-| Fond page | `var(--fond-page)` | [ ] |
-| Fond cartes | `var(--fond-carte)` ou `white` | [ ] |
-| Bordures | `var(--bordure-claire)` | [ ] |
-| Accent bleu | `var(--bleu-principal)` | [ ] |
-| Accent orange | `var(--orange-accent)` | [ ] |
-| **Espacements** | | |
-| Padding cartes | `20px` ou `25px` uniforme | [ ] |
-| Margin sections | Cohérent entre sections | [ ] |
-| Gap grilles | `15px` ou `20px` uniforme | [ ] |
-| **Composants** | | |
-| Boutons primaires | `.btn` + variantes | [ ] |
-| Boutons secondaires | `.btn-outline` | [ ] |
-| Cartes | `.carte` ou `.item-carte` | [ ] |
-| Accordéons | `.accordeon` | [ ] |
-| Badges | `.badge`, `.statut-badge` | [ ] |
-| Formulaires | `input`, `select`, `textarea` | [ ] |
-| Tableaux | `.tableau` | [ ] |
-| Alertes | `.alerte-info`, `.alerte-warning` | [ ] |
+**Résultats audit (27 déc 2025)** : Design system bien défini (~50 variables CSS)
+
+| Catégorie | Variables CSS | Statut |
+|-----------|--------------|--------|
+| Couleurs principales | `--bleu-*`, `--orange-*`, `--vert-*` | [x] Définies |
+| Couleurs sarcelle | `--sarcelle-*` (alternative) | [x] Définies |
+| Couleurs SOM/PAN | `--som-orange`, `--pan-bleu` | [x] Définies |
+| Navigation | `--nav-*`, `--sous-nav-*` | [x] Définies |
+| Boutons | `--btn-*` | [x] Définies |
+| Risques | `--risque-*` (6 niveaux) | [x] Définies |
+| Alertes | `--alerte-*` | [x] Définies |
+| Gris | `--gris-*` (6 nuances) | [x] Définies |
+| Bordures | `--bordure-*` | [x] Définies |
+
+| Élément | Constat | Action Phase 2 |
+|---------|---------|----------------|
+| **Couleurs en dur** | 616 dans JS | Migrer vers var() |
+| **border-radius** | 4/6/8/12px | Acceptable, cohérent par type |
+| **Transitions** | 0.2s ou 0.3s | ✅ Uniforme |
+| **font-size pixels** | 6 occurrences | Faible, acceptable |
 
 #### 1.4.4 Audit des modals
 
-| Modal | Fichier source | Cohérence design | Statut |
-|-------|---------------|------------------|--------|
-| Modal Primo Accueil | primo-accueil.js | [ ] | [ ] |
-| Modal Primo Conversation | primo-modal.js | [ ] | [ ] |
-| Modal Wizard Pratique V2 | wizard-pratique-v2.js | [ ] | [ ] |
-| Modal Confirmation | Divers | [ ] | [ ] |
-| Modal Import/Export | import-export.js | [ ] | [ ] |
-| Modal Nouveau cours | cours.js | [ ] | [ ] |
-| Modal Évaluation | evaluation.js | [ ] | [ ] |
+**Résultats audit (27 déc 2025)** : Classes `.modal-primo` et `.wizard-v2` bien définies (62 règles CSS)
+
+| Modal | Fichier source | Classes CSS | Statut |
+|-------|---------------|-------------|--------|
+| Modal Primo Accueil | primo-accueil.js | ✅ modal-primo-* | [x] |
+| Modal Primo Conversation | primo-modal.js | ✅ modal-primo-* | [x] |
+| Modal Wizard Pratique V2 | wizard-pratique-v2.js | ✅ wizard-v2-* | [x] |
+| Modal Confirmation | Divers | ⚠️ Styles inline | [x] |
+| Modal Import/Export | import-export.js | ⚠️ Inline + var() | [x] |
+| Modal Nouveau cours | cours.js | ✅ btn btn-confirmer | [x] |
+| Modal Évaluation | evaluation.js | ⚠️ Styles inline | [x] |
+
+**Note** : Les modals récents (Primo, Wizard) utilisent les classes CSS. Les anciens ont des styles inline mais utilisent souvent `var(--xxx)`.
 
 #### 1.4.5 Checklist Design System
 
-- [ ] Toutes les couleurs utilisent des variables CSS
-- [ ] Aucun `color: #XXXXXX` en dur (sauf dans :root)
-- [ ] Aucun `font-size` en pixels (utiliser rem)
-- [ ] Aucun `margin`/`padding` incohérent
-- [ ] Tous les boutons utilisent les classes `.btn`
-- [ ] Tous les formulaires ont un style uniforme
-- [ ] Les cartes ont des ombres cohérentes
-- [ ] Les bordures radius sont uniformes (8px ou 12px)
-- [ ] Les transitions sont cohérentes (0.2s ou 0.3s)
-- [ ] Les états hover/focus sont définis partout
+**Résultats audit (27 déc 2025)** :
+
+| Critère | État actuel | Action requise |
+|---------|------------|----------------|
+| Variables CSS couleurs | ⚠️ 616 en dur | Phase 2 : Migrer vers var() |
+| `font-size` en pixels | ✅ 6 seulement | Acceptable |
+| Classes `.btn` | ✅ 291 occurrences | OK |
+| Classes `.carte` | ✅ 186 occurrences | OK |
+| border-radius uniforme | ⚠️ 4/6/8/12px | Acceptable par type |
+| Transitions cohérentes | ✅ 0.2s ou 0.3s | OK |
+| hover/focus définis | ✅ Dans styles.css | OK |
+
+**Conclusion Phase 1.4** : Le design system est bien défini dans styles.css (~50 variables, classes cohérentes). Le problème principal est l'utilisation de couleurs hexadécimales en dur dans les fichiers JS (616 occurrences) au lieu des variables CSS. Ce sera adressé en Phase 2.3.
 
 ---
 
