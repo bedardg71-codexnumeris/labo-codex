@@ -1603,11 +1603,9 @@ function creerCoursInitial(reponses) {
 
     db.setSync('listeCours', cours);
 
-    // Mettre à jour infoCours avec le coursId
-    const infoCours = db.getSync('infoCours', {});
-    infoCours.id = coursId;
-    infoCours.trimestreId = trimestreId;
-    db.setSync('infoCours', infoCours);
+    // ✅ CORRECTION (Beta 95 - 27 déc 2025) : Sauvegarder le cours complet dans infoCours
+    // (pas seulement id et trimestreId, pour cohérence avec trimestre-v2.js et contexte.js)
+    db.setSync('infoCours', nouveauCours);
 
     // Créer le trimestre si inexistant
     creerTrimestreSiAbsent(trimestreId, session, annee);
