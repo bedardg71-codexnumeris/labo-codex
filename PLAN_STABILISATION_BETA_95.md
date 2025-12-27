@@ -181,7 +181,7 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 
 | Bug | Fichier | Priorité | Statut |
 |-----|---------|----------|--------|
-| Filtrage étudiants par coursId incohérent | modes.js | Critique | [ ] |
+| Filtrage étudiants par coursId incohérent | modes.js | Critique | [x] |
 | Données démo non chargées (fetch file://) | donnees-demo.js | Critique | [x] |
 | Ordre chargement scripts (PACK_DEMARRAGE) | index.html | Critique | [x] |
 | Format liste étudiants (colonne Groupe) | primo-questions.js | Haute | [x] |
