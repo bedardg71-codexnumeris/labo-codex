@@ -870,7 +870,11 @@ localStorage.seancesCompletes             // horaire.js (futur)
 
 ---
 
-## État actuel du projet (octobre-novembre 2025)
+## État actuel du projet (octobre 2025 - janvier 2026)
+
+> **Version actuelle** : Beta 95 (Stabilisation H2026)
+> **Objectif** : Version stable pour le trimestre Hiver 2026 (5 janvier 2026)
+> **Plan détaillé** : `PLAN_STABILISATION_BETA_95.md`
 
 ### ✅ Fonctionnalités complétées
 
@@ -2034,12 +2038,78 @@ Application revient à l'état sans demo
 
 ---
 
-**Fichier actuel: Beta 94 (Snapshots et suivi longitudinal)**
+**Fichier actuel: Beta 95 (Stabilisation H2026)**
+
+**Nom**: `index.html`
+**Date de création**: 27 décembre 2025
+**Version actuelle**: Beta 95
+**Statut**: 🔄 En stabilisation (objectif : 5 janvier 2026)
+
+**Créée à partir de**: Beta 94 (Snapshots et suivi longitudinal)
+**Objectif**: Version stable pour le trimestre H2026
+**Plan détaillé**: `PLAN_STABILISATION_BETA_95.md`
+
+### Corrections critiques Beta 95 (27 décembre 2025)
+
+**1. Filtrage automatique par coursId** (commit `101dbe4`)
+
+Problème : ~120 endroits utilisaient `obtenirDonneesSelonMode()` sans filtrer par coursId, causant une contamination des données entre cours.
+
+Solution dans `js/modes.js` :
+```javascript
+// Filtrage automatique pour groupeEtudiants, productions, presences, evaluationsSauvegardees
+const clesAvecCoursId = ['groupeEtudiants', 'productions', 'presences', 'evaluationsSauvegardees'];
+if (clesAvecCoursId.includes(cle) && Array.isArray(donnees)) {
+    const coursActif = db.getSync('infoCours', null);
+    if (coursActif && coursActif.id) {
+        donnees = donnees.filter(item => item.coursId === coursActif.id);
+    }
+}
+```
+
+**2. coursId dans création de données** (commit `fc2d550`)
+
+Ajout de `coursId` lors de la création :
+- `groupe.js` : `addStudent()`, `parseAndPreview()`
+- `saisie-presences.js` : Enregistrement présences
+- `evaluation.js` : Sauvegarde évaluations
+- `productions.js` : Nouvelles productions
+
+**3. Correction infoCours dans Primo** (commit `400a627`)
+
+Primo sauvegardait seulement `{id, trimestreId}` au lieu du cours complet.
+Fix : `db.setSync('infoCours', nouveauCours)` avec l'objet cours complet.
+
+### Audit technique complété
+
+| Phase | Statut |
+|-------|--------|
+| 1.1 Architecture données | ✅ coursId dans toutes les entités |
+| 1.2 Flux de données | ✅ Création/lecture cohérentes |
+| 1.3 Modes d'application | ✅ Normal/Assisté/Anonymisé OK |
+| 1.4 Audit visuel | ✅ Design system solide (50+ variables CSS) |
+| 2.1 Bugs critiques | ✅ Tous corrigés |
+| 2.2 Robustesse | ✅ Validation doublons, migrations auto |
+| 2.3 Visuelles | ✅ Compromis acceptable |
+
+### Statistiques Beta 95
+
+| Métrique | Valeur |
+|----------|--------|
+| **Date début** | 27 décembre 2025 |
+| **Objectif** | 5 janvier 2026 |
+| **Commits** | ~10 commits |
+| **Fichiers modifiés** | 8+ fichiers JS |
+| **Bugs corrigés** | 3 critiques (coursId) |
+
+---
+
+**Fichier précédent: Beta 94 (Snapshots et suivi longitudinal)**
 
 **Nom**: `index.html`
 **Date de création**: 10 décembre 2025
-**Version actuelle**: Beta 94
-**Statut**: ✅ Fonctionnel
+**Version**: Beta 94
+**Statut**: ✅ Archivé
 
 **Créée à partir de**: Beta 93.5 (architecture multi-cours intégrée)
 **Provenance**: Beta 93 avec système universel 100% complet

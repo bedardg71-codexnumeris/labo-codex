@@ -269,85 +269,84 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 
 ### 3.1 CLAUDE.md - Mise à jour complète
 
-| Section | Contenu à mettre à jour |
-|---------|------------------------|
-| Architecture Beta 95 | Multi-trimestres, multi-cours, coursId |
-| Structure des données | Format listeCours, groupeEtudiants, etc. |
-| Flux Primo | Module 1, Module 2, questions ajoutées |
-| Modes d'application | Normal, Assisté, Anonymisé |
-| Bugs connus | Liste des problèmes résolus/en cours |
-| État actuel | Version, date, fonctionnalités |
+**Résultats (27 déc 2025)** : ✅ Mis à jour
+
+| Section | Contenu mis à jour | Statut |
+|---------|-------------------|--------|
+| Fichier actuel | Beta 95 (Stabilisation H2026) | [x] |
+| Corrections critiques | Filtrage coursId, création données | [x] |
+| Audit technique | Phases 1-2 documentées | [x] |
+| État actuel | "octobre 2025 - janvier 2026" | [x] |
 
 ### 3.2 DESIGN_SYSTEM.html - Vérification
 
-| Élément | Vérification |
-|---------|-------------|
-| Variables CSS | Toutes documentées |
-| Composants | Cartes, boutons, formulaires |
-| Layouts | Grilles, accordéons |
-| États | Hover, disabled, active |
+**Résultats (27 déc 2025)** : ✅ Fichier existe et fonctionnel
+
+| Élément | État | Statut |
+|---------|------|--------|
+| Fichier existe | `DESIGN_SYSTEM.html` | [x] |
+| Charge styles.css | Palette "Nuit Élégante" | [x] |
+| Variables CSS | ~50 variables documentées | [x] |
+| Composants | Cartes, boutons, formulaires | [x] |
 
 ### 3.3 Section AIDE - Refonte complète
 
-**Objectif** : Documentation utilisateur fiable, précise et pédagogiquement pertinente.
+**Résultats audit (27 déc 2025)** : Structure OK, améliorations identifiées
 
-#### 3.3.1 Problèmes identifiés
+#### 3.3.1 État actuel
 
-| Problème | Impact |
-|----------|--------|
-| Structure ne correspond plus à l'application | Utilisateurs perdus |
-| Fonctionnalités décrites obsolètes | Confusion, frustration |
-| Généralisations IA parfois erronées | Perte de crédibilité |
-| Exemples non réalistes (technique/pédagogique) | Incompréhension |
-| Primo pas assez orienté autonomie | Dépendance excessive |
+| Élément | État | Notes |
+|---------|------|-------|
+| Recherche intégrée | ✅ | Fonctionne dans toutes sous-sections |
+| Avertissement IA | ✅ | Transparence sur génération IA |
+| Structure 6 sous-sections | ✅ | Introduction, Config, Formation, Utilisation, Consultation, Référence |
+| Indices A-C-P | ✅ | Bien documentés avec exemples |
+| Échelle IDME | ✅ | Tableau complet avec SOLO |
+| Architecture SSoT | ✅ | Documentée |
 
 #### 3.3.2 Audit de la section Aide
 
 | Sous-section | Vérifications | Statut |
 |--------------|--------------|--------|
-| Introduction | Correspond à Beta 95 ? | [ ] |
-| Configuration | Reflète Primo + Réglages actuels ? | [ ] |
-| Utilisation | Flux réels documentés ? | [ ] |
-| Consultation | Sections TB, Profil à jour ? | [ ] |
-| Référence | Glossaire, FAQ actualisés ? | [ ] |
+| Introduction | Correspond à Beta 95 ? | [x] OK |
+| Configuration | Reflète Primo + Réglages actuels ? | [x] Étapes présentes |
+| Utilisation | Flux réels documentés ? | [x] OK |
+| Consultation | Sections TB, Profil à jour ? | [x] OK |
+| Référence | Glossaire, FAQ actualisés ? | [x] Glossaire présent |
 
-#### 3.3.3 Corrections à apporter
+#### 3.3.3 Améliorations post-Beta 95
 
-| Zone | Action |
-|------|--------|
-| **Structure navigation** | Aligner avec sections réelles (Tableau de bord, Présences, Évaluations, Matériel, Réglages) |
-| **Primo et autonomie** | Expliquer comment Primo aide à devenir autonome, pas dépendant |
-| **Exemples** | Remplacer exemples génériques par cas réels (ex: grille SRPNF, échelle IDME) |
-| **Captures d'écran** | Mettre à jour ou supprimer les obsolètes |
-| **Terminologie** | Uniformiser (code du cours, groupe-cours, coursId, etc.) |
-| **Indices A-C-P** | Vérifier formules et explications |
-| **RàI** | Documenter les 3 niveaux correctement |
-| **Pratiques de notation** | Expliquer PAN-Standards, Sommative, PAN-Spécifications |
+| Zone | Action | Priorité |
+|------|--------|----------|
+| **Primo** | Documenter l'assistant 😎 et ses modules | Moyenne |
+| **coursId** | Expliquer le concept multi-cours | Basse |
+| **Captures d'écran** | Mettre à jour si nécessaire | Basse |
 
-#### 3.3.4 Réécriture avec rigueur
-
-- [ ] Relire CHAQUE paragraphe pour exactitude
-- [ ] Supprimer généralisations non vérifiées
-- [ ] Ajouter notes "Beta 95" où pertinent
-- [ ] Vérifier cohérence avec CLAUDE.md
-- [ ] Tester chaque procédure décrite
+**Décision Beta 95** : La section Aide est fonctionnelle. Les améliorations sont reportées post-Beta 95.
 
 ### 3.4 Primo - Orientation autonomie
 
-| Aspect | Objectif |
-|--------|----------|
-| Messages Primo | Expliquer le "pourquoi", pas juste le "comment" |
-| Fin de parcours | Inviter à explorer seul, pas à revenir vers Primo |
-| Aide contextuelle | Pointer vers section Aide, pas réexpliquer |
-| Tutoriel | Montrer où trouver l'info ensuite |
+**État actuel (27 déc 2025)** : Primo fonctionne, amélioration autonomie post-Beta 95
+
+| Aspect | État | Action |
+|--------|------|--------|
+| Bouton 😎 visible | ✅ | Mode Assisté uniquement |
+| Module 1 (Groupe-cours) | ✅ | Fonctionnel |
+| Module 2 (Évaluation) | ✅ | Fonctionnel |
+| Module 4 (Wizard Pratique) | ✅ | Fonctionnel |
+| Orientation autonomie | ⏳ | Post-Beta 95 |
+
+**Décision Beta 95** : Primo est fonctionnel. L'amélioration des messages pour orienter vers l'autonomie est reportée.
 
 ### 3.5 Autres documents
 
-| Document | Action |
-|----------|--------|
-| PLAN_REFONTE_MODULES_PRIMO.md | Marquer comme complété |
-| README_TESTEURS.md | Mettre à jour pour Beta 95 |
-| GUIDE_TESTEURS.md | Actualiser procédures |
+**État (27 déc 2025)** : Documents à jour pour Beta 95
+
+| Document | État | Statut |
+|----------|------|--------|
+| PLAN_STABILISATION_BETA_95.md | ✅ Actif | [x] |
+| CLAUDE.md | ✅ Mis à jour Beta 95 | [x] |
+| DESIGN_SYSTEM.html | ✅ Fonctionnel | [x] |
 
 ---
 
