@@ -360,6 +360,12 @@ async function sauvegarderProduction() {
 
     let evaluations = await db.get('productions') || [];
 
+    // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
+    const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+    if (!coursId) {
+        console.warn('[Productions] ⚠️ Aucun cours actif - production créée sans coursId');
+    }
+
     // Préparer l'objet de base
     let productionData = {
         titre,
@@ -371,7 +377,8 @@ async function sauvegarderProduction() {
         grilleId,
         dateEcheance,     // ✨ NOUVEAU (Beta 94 - 10 déc 2025)
         verrouille: false,
-        dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Nouvelle production dans bibliothèque par défaut
+        dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) - Nouvelle production dans bibliothèque par défaut
+        coursId  // ✅ CRITIQUE (Beta 95) : Lier la production au cours actif
     };
 
     // Si c'est un Portfolio, ajouter les données spécifiques
