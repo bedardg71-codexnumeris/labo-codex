@@ -175,6 +175,9 @@ function addStudent() {
     }
 
     try {
+        // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
+        const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+
         const student = {
             id: Date.now(),
             da: document.getElementById('etudiantDA').value.trim() || `AUTO-${Date.now()}`,
@@ -183,7 +186,8 @@ function addStudent() {
             prenom: prenom,
             programme: document.getElementById('etudiantProgramme').value.trim() || '---',
             sa: document.getElementById('etudiantSA').value || '',
-            caf: document.getElementById('etudiantCAF').value || ''
+            caf: document.getElementById('etudiantCAF').value || '',
+            coursId: coursId  // ✅ Lier l'étudiant au cours actif
         };
 
         let students = obtenirDonneesSelonMode('groupeEtudiants');
@@ -346,6 +350,9 @@ function parseAndPreview(content) {
 
             // TOLÉRANCE : Accepter même avec seulement Nom et Prénom
             if (parts.length >= 2) {
+                // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
+                const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+
                 const student = {
                     id: Date.now() + index + Math.random(),
                     da: parts[0] || `AUTO-${Date.now() + index}`,
@@ -354,7 +361,8 @@ function parseAndPreview(content) {
                     prenom: parts[3] || parts[1] || '', // Si pas de groupe, deuxième champ = prénom
                     programme: parts[4] || '---',
                     sa: parts[5] || '',
-                    caf: parts[6] || ''
+                    caf: parts[6] || '',
+                    coursId: coursId  // ✅ Lier l'étudiant au cours actif
                 };
 
                 // Nettoyer le DA (retirer espaces, lettres parasites)

@@ -1333,6 +1333,9 @@ function enregistrerPresences() {
     });
 
     // Ajouter les nouvelles présences
+    // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025) : Ajouter coursId
+    const coursId = typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : null;
+
     etudiantsATraiter.forEach(etudiant => {
         const inputHeures = document.getElementById(`heures_${etudiant.da}`);
         const inputNotes = document.getElementById(`notes_${etudiant.da}`);
@@ -1346,7 +1349,8 @@ function enregistrerPresences() {
                 date: dateStr,
                 da: etudiant.da,
                 heures: heures,
-                notes: notes
+                notes: notes,
+                coursId: coursId  // ✅ Lier la présence au cours actif
             };
 
             // IMPORTANT : Préserver le flag facultatif s'il existait
