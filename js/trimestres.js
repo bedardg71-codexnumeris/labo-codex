@@ -579,6 +579,13 @@
             bandeau.style.display = isArchive ? 'block' : 'none';
         }
 
+        // Réinitialiser le mode écriture temporaire
+        document.body.classList.remove('mode-ecriture-temp');
+        const checkbox = document.getElementById('checkbox-ecriture-temp');
+        if (checkbox) {
+            checkbox.checked = false;
+        }
+
         // Ajouter/retirer la classe mode-archive sur le body
         if (isArchive) {
             document.body.classList.add('mode-archive');
@@ -592,7 +599,7 @@
             const actif = obtenirTrimestreActif();
             const texteElement = bandeau.querySelector('.bandeau-archive-texte');
             if (texteElement && actif) {
-                texteElement.innerHTML = `<strong>TRIMESTRE ARCHIVÉ</strong> — ${actif.nom} (lecture seule)`;
+                texteElement.innerHTML = `<strong>LECTURE SEULE</strong> — ${actif.nom}`;
             }
         }
     }
@@ -1221,6 +1228,25 @@
     }
 
     /* ===============================
+       MODE ÉCRITURE TEMPORAIRE
+       =============================== */
+
+    /**
+     * Bascule le mode écriture temporaire pour les trimestres archivés
+     * Permet de faire des corrections ponctuelles (absences, jetons, etc.)
+     * @param {boolean} activer - true pour activer le mode correction
+     */
+    function basculerModeEcritureTemp(activer) {
+        if (activer) {
+            document.body.classList.add('mode-ecriture-temp');
+            console.log('Mode correction activé - modifications autorisées temporairement');
+        } else {
+            document.body.classList.remove('mode-ecriture-temp');
+            console.log('Mode correction désactivé - retour en lecture seule');
+        }
+    }
+
+    /* ===============================
        EXPORTS GLOBAUX
        =============================== */
 
@@ -1242,6 +1268,7 @@
     window.exporterTrimestreArchive = exporterTrimestreArchive;
     window.calculerStatistiquesFinales = calculerStatistiquesFinales;
     window.mettreAJourBandeauArchive = mettreAJourBandeauArchive;
+    window.basculerModeEcritureTemp = basculerModeEcritureTemp;
 
     // Fonctions d'export recherche
     window.exporterFormatRecherche = exporterFormatRecherche;
