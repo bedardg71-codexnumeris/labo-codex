@@ -912,6 +912,13 @@ function changerTrimestreActifV2(valeur) {
             // Rafraîchir le dropdown des cours (filtré par trimestre)
             chargerDropdownCoursV2();
 
+            // 🆕 BETA 95 FIX : Rafraîchir toutes les vues après changement de cours
+            // (la liste d'étudiants, le tableau de bord, etc.)
+            if (typeof rafraichirVuesApresCours === 'function') {
+                rafraichirVuesApresCours();
+                console.log('[Trimestre V2] Vues rafraîchies après changement de cours');
+            }
+
             // Mettre à jour le bandeau d'archivage si applicable
             if (typeof mettreAJourBandeauArchive === 'function') {
                 mettreAJourBandeauArchive();
