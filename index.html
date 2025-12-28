@@ -217,17 +217,21 @@
         /* Dégradé bleu avec adaptation aux modes */
 
         /* ===============================
-           BANDEAU ARCHIVAGE
+           BANDEAU ARCHIVAGE (style bandeau bas)
            =============================== */
         .bandeau-archive {
-            background: linear-gradient(135deg, #6b4c8c 0%, #8e6aad 50%, #a78bc2 100%);
+            background: var(--bleu-clair, #065dbb);
             color: white;
-            padding: 10px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 999;
-            box-shadow: 0 2px 8px rgba(107, 76, 140, 0.4);
-            border-bottom: 3px solid #4a3066;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .bandeau-archive-contenu {
@@ -235,32 +239,28 @@
             align-items: center;
             justify-content: center;
             gap: 15px;
-            max-width: 1200px;
-            margin: 0 auto;
-            flex-wrap: wrap;
         }
 
         .bandeau-archive-icone {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
         }
 
         .bandeau-archive-texte {
-            font-size: 0.95rem;
-            letter-spacing: 0.5px;
+            font-size: 0.9rem;
         }
 
         .bandeau-archive-texte strong {
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .bandeau-archive-btn {
             background: rgba(255, 255, 255, 0.2);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -268,7 +268,6 @@
         .bandeau-archive-btn:hover {
             background: rgba(255, 255, 255, 0.35);
             border-color: white;
-            transform: translateY(-1px);
         }
 
         /* Mode archivé : désactivation visuelle des éléments interactifs */
@@ -3105,10 +3104,10 @@
             <div class="bandeau-archive-contenu">
                 <span class="bandeau-archive-icone">📁</span>
                 <span class="bandeau-archive-texte">
-                    <strong>TRIMESTRE ARCHIVÉ</strong> — Mode consultation (lecture seule)
+                    <strong>LECTURE SEULE</strong> — Trimestre archivé
                 </span>
                 <button onclick="window.location.href='#reglages-trimestre'; afficherSousSectionActuelle('sous-section-trimestre');" class="bandeau-archive-btn">
-                    Gérer les trimestres
+                    Trimestres
                 </button>
             </div>
         </div>
