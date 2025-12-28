@@ -28,6 +28,32 @@
 
 **Commits du 28 décembre 2025** :
 - `ac58537` - Scripts migration données A2025
+- `13bbb14` - Documentation migration A2025
+- `979a6a8` - Bandeau lecture seule en bas de l'écran
+- `b8dfc2c` - Checkbox Mode correction pour trimestres archivés
+- `e731b11` - Checkbox Anonymiser dans bandeau lecture seule
+
+### Bandeau Lecture Seule (28 décembre 2025)
+
+**Refonte complète du bandeau pour les trimestres archivés** :
+
+| Avant | Après |
+|-------|-------|
+| Position en-tête (sticky top) | Position bas d'écran (fixed bottom) |
+| Couleur violet gradient | Couleur bleu clair `#065dbb` |
+| Texte "TRIMESTRE ARCHIVÉ" | Texte "LECTURE SEULE — [Nom trimestre]" |
+
+**Nouvelles fonctionnalités** :
+
+| Checkbox | Fonction | Couleur bandeau |
+|----------|----------|-----------------|
+| **Correction** | Réactive les contrôles pour modifications ponctuelles (absences, jetons) | Bleu clair |
+| **Anonymiser** | Masque les identités réelles pour captures d'écran | Bleu foncé `#0f1e3a` |
+
+**Comportement** :
+- Les deux options sont indépendantes et combinables
+- Réinitialisation automatique lors du changement de trimestre
+- Le bandeau-mode standard est masqué quand Anonymiser est actif (évite chevauchement)
 
 ### Migration données A2025 (28 décembre 2025)
 
