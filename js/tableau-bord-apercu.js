@@ -649,11 +649,8 @@ function genererIndicateurPratiqueOuCheckboxes() {
         `;
     }
 
-    // MODE NORMAL: Afficher un simple badge identifiant la pratique
-    const pratique = afficherSom ? 'SOM' : 'PAN';
-
-    // Utiliser la fonction globale unique (compact = true)
-    return genererBadgePratique(pratique, true);
+    // MODE NORMAL: Pas de badge (info déjà dans l'en-tête)
+    return '';
 }
 
 
