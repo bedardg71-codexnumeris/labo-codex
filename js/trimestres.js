@@ -577,13 +577,21 @@
 
         if (bandeau) {
             bandeau.style.display = isArchive ? 'block' : 'none';
+            // Restaurer la couleur par défaut
+            bandeau.style.background = 'var(--bleu-clair, #065dbb)';
         }
 
         // Réinitialiser le mode écriture temporaire
         document.body.classList.remove('mode-ecriture-temp');
-        const checkbox = document.getElementById('checkbox-ecriture-temp');
-        if (checkbox) {
-            checkbox.checked = false;
+        const checkboxEcriture = document.getElementById('checkbox-ecriture-temp');
+        if (checkboxEcriture) {
+            checkboxEcriture.checked = false;
+        }
+
+        // Réinitialiser le mode anonymisation
+        const checkboxAnonyme = document.getElementById('checkbox-anonymiser-archive');
+        if (checkboxAnonyme) {
+            checkboxAnonyme.checked = false;
         }
 
         // Ajouter/retirer la classe mode-archive sur le body
@@ -1246,6 +1254,38 @@
         }
     }
 
+    /**
+     * Bascule le mode anonymisation depuis le bandeau lecture seule
+     * Permet de faire des captures d'écran sans afficher les identités réelles
+     * @param {boolean} activer - true pour anonymiser
+     */
+    async function basculerAnonymisationArchive(activer) {
+        if (activer) {
+            // Activer le mode anonymisation
+            await changerMode('anonymisation');
+            // Masquer le bandeau-mode car on a déjà le bandeau archive
+            const bandeauMode = document.getElementById('bandeau-mode');
+            if (bandeauMode) {
+                bandeauMode.style.display = 'none';
+            }
+            // Changer la couleur du bandeau archive pour indiquer l'anonymisation
+            const bandeauArchive = document.getElementById('bandeau-archive');
+            if (bandeauArchive) {
+                bandeauArchive.style.background = '#0f1e3a'; // Bleu très foncé (anonymisation)
+            }
+            console.log('Mode anonymisation activé - identités masquées');
+        } else {
+            // Retour au mode normal
+            await changerMode('normal');
+            // Restaurer la couleur du bandeau archive
+            const bandeauArchive = document.getElementById('bandeau-archive');
+            if (bandeauArchive) {
+                bandeauArchive.style.background = 'var(--bleu-clair, #065dbb)';
+            }
+            console.log('Mode anonymisation désactivé - identités visibles');
+        }
+    }
+
     /* ===============================
        EXPORTS GLOBAUX
        =============================== */
@@ -1269,6 +1309,7 @@
     window.calculerStatistiquesFinales = calculerStatistiquesFinales;
     window.mettreAJourBandeauArchive = mettreAJourBandeauArchive;
     window.basculerModeEcritureTemp = basculerModeEcritureTemp;
+    window.basculerAnonymisationArchive = basculerAnonymisationArchive;
 
     // Fonctions d'export recherche
     window.exporterFormatRecherche = exporterFormatRecherche;
