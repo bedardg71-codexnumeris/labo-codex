@@ -597,15 +597,16 @@
         // Si trimestre archivé, forcer le mode normal (réinitialise après rechargement)
         if (isArchive) {
             const modeActuel = db.getSync('modeApplication', 'normal');
-            if (modeActuel === 'anonymisation') {
-                // Remettre en mode normal sans déclencher changerMode()
-                db.setSync('modeApplication', 'normal');
-                // Masquer le bandeau-mode standard s'il existe
-                const bandeauMode = document.getElementById('bandeau-mode');
-                if (bandeauMode) {
-                    bandeauMode.remove();
-                }
-                console.log('[Trimestres] Mode anonymisation réinitialisé pour trimestre archivé');
+            if (modeActuel === 'anonymisation' && typeof window.changerMode === 'function') {
+                // Appeler changerMode pour mettre à jour la variable modeActuel dans modes.js
+                window.changerMode('normal').then(() => {
+                    // Masquer le bandeau-mode standard s'il existe
+                    const bandeauMode = document.getElementById('bandeau-mode');
+                    if (bandeauMode) {
+                        bandeauMode.remove();
+                    }
+                    console.log('[Trimestres] Mode anonymisation réinitialisé pour trimestre archivé');
+                });
             }
         }
 
