@@ -556,6 +556,132 @@ La Beta 95 doit être suffisamment robuste pour supporter :
 
 ---
 
+## Session du 28 décembre 2025 (suite)
+
+### Nouvelles fonctionnalités implémentées
+
+#### 1. Formulaire de demande d'accès (Phase Test)
+
+**Fichier** : `formulaire-demande-acces.html`
+
+Formulaire HTML autonome pour intégration Ghost, permettant aux enseignant·es de demander l'accès à la phase de test.
+
+| Champ | Description |
+|-------|-------------|
+| Nom complet | Prénom et nom |
+| Établissement | Ex: Cégep de Jonquière |
+| Département | Ex: Français |
+| Discipline | Ex: Littérature |
+| Courriel institutionnel | prenom.nom@cegep.qc.ca |
+| Pratique de notation actuelle | Comment ils gèrent actuellement |
+| Motivation et besoins | Pourquoi tester l'application |
+| Engagement | Checkbox obligatoire (feedback) |
+
+**Informations incluses** :
+- Gratuité de l'application
+- Données stockées localement (confidentialité)
+- Avertissement sur les risques de perte de données
+- Processus d'accès (courriel avec URL + code Cloudflare)
+
+#### 2. Modal de rappel backup
+
+**Fichier** : `js/modal-backup-reminder.js` (230 lignes)
+
+Modal d'avertissement sur les risques de perte de données avec rappel périodique.
+
+| Déclencheur | Comportement |
+|-------------|--------------|
+| Premier lancement | Modal affiché après 1.5s |
+| "J'ai compris" + rappel X jours | Modal réapparaît dans X jours |
+| "Exporter maintenant" | Navigation vers Réglages → Données + rappel 7j |
+| "Ne plus rappeler" | Modal désactivé définitivement |
+
+**Risques listés** :
+- Effacement historique navigation (avec « données de sites »)
+- Navigation privée
+- Changement de navigateur
+- Réinstallation ou changement d'ordinateur
+
+**Accès** : Bouton ⚠️ cliquable dans l'en-tête (à côté de "Beta 95")
+
+#### 3. Retrait badges pratique redondants
+
+Les badges "PAN-Maîtrise" / "Sommative" ont été retirés des titres de pages car l'information est déjà visible dans l'en-tête.
+
+| Page | Badge retiré |
+|------|--------------|
+| Liste des étudiant·es | ✅ |
+| Profil étudiant | ✅ |
+| Tableau de bord (Vue d'ensemble) | ✅ |
+
+**Exception** : Les badges restent affichés en **mode comparatif** pour distinguer les deux pratiques.
+
+#### 4. Namespacing des interventions par trimestre
+
+**Problème** : Les interventions de A2025 apparaissaient dans tous les trimestres.
+
+**Solution** :
+- Ajout `'interventions'` à `CLES_NAMESPACEES` dans `trimestres.js`
+- `interventions.js` utilise maintenant `cle('interventions')`
+- Migration automatique : `interventions` → `a2025_interventions`
+
+### Commits du 28 décembre 2025 (suite)
+
+- `51eac9f` - feat: formulaire de demande d'accès pour phase test
+- `7d916cd` - docs(form): ajout info gratuité et avertissement perte données
+- `173300f` - feat: modal de rappel pour backup des données
+- `7eb2dcd` - fix: correction boutons modal backup reminder
+- `13ff1e6` - fix: navigation vers reglages-donnees + emoji ⚠️ dans en-tête
+- `af909e3` - fix: emoji ⚠️ en bouton cliquable et plus petit
+- `89b4c2c` - fix: cursor pointer sur emoji ⚠️ avec classe CSS dédiée
+- `7ffc5fb` - fix: pointer-events auto sur btn-backup-warning
+- `e061605` - fix: retrait badge pratique du tableau de bord (mode normal)
+- `864d815` - feat: namespacing des interventions par trimestre
+
+---
+
+## Tests à effectuer (prochaine session)
+
+### Tests prioritaires
+
+#### 1. Modal backup reminder
+- [ ] Premier lancement : modal apparaît après 1.5s
+- [ ] Bouton "Exporter maintenant" → navigue vers Réglages → Données
+- [ ] Bouton "J'ai compris" → ferme le modal et définit rappel selon dropdown
+- [ ] Option "Ne plus rappeler" → modal ne réapparaît plus
+- [ ] Option "Dans 7/14/30 jours" → modal réapparaît après le délai
+- [ ] Bouton ⚠️ dans l'en-tête → affiche le modal à la demande
+
+#### 2. Namespacing interventions
+- [ ] Trimestre A2025 : interventions visibles
+- [ ] Autre trimestre (H2026) : page interventions vide
+- [ ] Nouvelle intervention créée dans H2026 → stockée dans `h2026_interventions`
+- [ ] Changement de trimestre → interventions correctes affichées
+
+#### 3. Badges pratique
+- [ ] Liste étudiants : pas de badge en mode normal
+- [ ] Profil étudiant : pas de badge en mode normal
+- [ ] Tableau de bord : pas de badge en mode normal
+- [ ] Mode comparatif : badges SOM et PAN visibles
+
+#### 4. Formulaire demande d'accès
+- [ ] Validation des champs obligatoires
+- [ ] Envoi via mailto: fonctionne
+- [ ] Affichage correct UTF-8 (accents)
+
+### Tests de régression
+
+- [ ] Création nouveau trimestre fonctionne
+- [ ] Changement de trimestre fonctionne
+- [ ] Mode lecture seule (trimestre archivé) fonctionne
+- [ ] Checkbox Correction réactive les contrôles
+- [ ] Checkbox Anonymiser masque les identités
+- [ ] Export/Import backup complet fonctionne
+- [ ] Calcul indices A-C-P correct
+
+---
+
 *Plan créé le 27 décembre 2025*
 *Phases 1-4 complétées le 27 décembre 2025*
+*Session 28 décembre 2025 : Formulaire accès, modal backup, namespacing interventions*
 *Objectif : Beta 95 stable pour H2026*
