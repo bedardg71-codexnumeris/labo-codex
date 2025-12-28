@@ -24,7 +24,8 @@
         'evenementsPrevus',
         'evenementsImprevus',
         'seancesCompletes',
-        'horaireHebdo'
+        'horaireHebdo',
+        'interventions'
     ];
 
     // Clés globales (partagées entre trimestres)
@@ -540,6 +541,37 @@
         };
     }
 
+    /**
+     * Migration ponctuelle : interventions vers A2025
+     * Les anciennes interventions non namespacées datent de A2025
+     */
+    function migrerInterventionsVersA2025() {
+        const interventionsAnciennes = db.getSync('interventions', null);
+
+        // Si des interventions existent dans l'ancienne clé
+        if (interventionsAnciennes && Array.isArray(interventionsAnciennes) && interventionsAnciennes.length > 0) {
+            console.log(`[Trimestres] Migration interventions: ${interventionsAnciennes.length} interventions trouvées`);
+
+            // Migrer vers a2025_interventions
+            const cleA2025 = 'a2025_interventions';
+            const existantes = db.getSync(cleA2025, []);
+
+            // Fusionner si nécessaire (éviter doublons par ID)
+            const idsExistants = new Set(existantes.map(i => i.id));
+            const nouvellesInterventions = interventionsAnciennes.filter(i => !idsExistants.has(i.id));
+
+            if (nouvellesInterventions.length > 0) {
+                const fusionnees = [...existantes, ...nouvellesInterventions];
+                db.setSync(cleA2025, fusionnees);
+                console.log(`[Trimestres] → ${nouvellesInterventions.length} interventions migrées vers ${cleA2025}`);
+            }
+
+            // Supprimer l'ancienne clé
+            db.removeSync('interventions');
+            console.log('[Trimestres] → Ancienne clé "interventions" supprimée');
+        }
+    }
+
     /* ===============================
        INITIALISATION
        =============================== */
@@ -549,6 +581,9 @@
 
         // Exécuter la migration si nécessaire
         const resultatMigration = migrerVersMultiTrimestres();
+
+        // Migration ponctuelle des interventions vers A2025
+        migrerInterventionsVersA2025();
 
         if (resultatMigration.success) {
             const actif = obtenirTrimestreActif();
