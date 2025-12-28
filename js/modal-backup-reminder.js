@@ -74,8 +74,13 @@
         definirProchainRappel(7);
 
         // Navigation vers Réglages → Import/Export
-        if (typeof window.naviguerVers === 'function') {
-            window.naviguerVers('reglages', 'import-export');
+        if (typeof afficherSection === 'function') {
+            afficherSection('reglages');
+            setTimeout(() => {
+                if (typeof afficherSousSection === 'function') {
+                    afficherSousSection('import-export');
+                }
+            }, 100);
         } else {
             // Fallback : clic sur les éléments de navigation
             const ongletReglages = document.querySelector('[data-section="reglages"]');
@@ -200,7 +205,7 @@
                     </div>
 
                     <div style="display: flex; gap: 0.5rem;">
-                        <button id="btn-backup-exporter" style="
+                        <button onclick="window.backupReminder.allerVersExport()" style="
                             padding: 0.6rem 1rem;
                             background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
                             color: white;
@@ -213,7 +218,7 @@
                         ">
                             Exporter maintenant
                         </button>
-                        <button id="btn-backup-compris" style="
+                        <button onclick="window.backupReminder.gererChoixRappel()" style="
                             padding: 0.6rem 1rem;
                             background: #f5f5f5;
                             color: #333;
@@ -233,19 +238,6 @@
         // Ajouter au DOM
         document.body.appendChild(overlay);
         document.body.appendChild(modal);
-
-        // Event listeners
-        document.getElementById('btn-backup-exporter').addEventListener('click', allerVersExport);
-        document.getElementById('btn-backup-compris').addEventListener('click', gererChoixRappel);
-
-        // Hover effects
-        const btnExporter = document.getElementById('btn-backup-exporter');
-        btnExporter.addEventListener('mouseenter', () => btnExporter.style.transform = 'translateY(-2px)');
-        btnExporter.addEventListener('mouseleave', () => btnExporter.style.transform = 'translateY(0)');
-
-        const btnCompris = document.getElementById('btn-backup-compris');
-        btnCompris.addEventListener('mouseenter', () => btnCompris.style.background = '#e0e0e0');
-        btnCompris.addEventListener('mouseleave', () => btnCompris.style.background = '#f5f5f5');
     }
 
     /**
@@ -278,7 +270,10 @@
         afficherModal: afficherModal,
         verifierEtAfficher: verifierEtAfficher,
         definirProchainRappel: definirProchainRappel,
-        desactiverRappels: desactiverRappels
+        desactiverRappels: desactiverRappels,
+        allerVersExport: allerVersExport,
+        gererChoixRappel: gererChoixRappel,
+        fermerModal: fermerModal
     };
 
     // Initialiser automatiquement
