@@ -73,12 +73,12 @@
         // Définir un rappel dans 7 jours par défaut après export
         definirProchainRappel(7);
 
-        // Navigation vers Réglages → Import/Export
+        // Navigation vers Réglages → Gestion des données
         if (typeof afficherSection === 'function') {
             afficherSection('reglages');
             setTimeout(() => {
                 if (typeof afficherSousSection === 'function') {
-                    afficherSousSection('import-export');
+                    afficherSousSection('reglages-donnees');
                 }
             }, 100);
         } else {
@@ -188,7 +188,7 @@
                 <div style="background: #e3f2fd; border-left: 4px solid #1976d2; padding: 1rem; border-radius: 0 8px 8px 0; margin-bottom: 1.5rem;">
                     <p style="margin: 0; color: #1565c0; font-size: 0.95rem;">
                         <strong>💡 Solution :</strong> Exportez régulièrement vos données via
-                        <strong>Réglages → Import/Export</strong>. Le fichier JSON peut être réimporté
+                        <strong>Réglages → Données</strong>. Le fichier JSON peut être réimporté
                         à tout moment pour restaurer vos données.
                     </p>
                 </div>
