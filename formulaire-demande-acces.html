@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demande d'accès - Phase Test</title>
+</head>
+<body>
+
+<!--
+  FORMULAIRE DE DEMANDE D'ACCÈS - Phase Test
+  À intégrer dans une page Ghost via un bloc HTML
+
+  Usage : Copier le contenu ENTRE les balises de commentaire dans un bloc HTML de Ghost
+  (du <style> jusqu'à la fin du </script>)
+-->
+
+<style>
+.formulaire-acces {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.formulaire-acces h2 {
+    color: #032e5c;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    border-bottom: 3px solid #065dbb;
+    padding-bottom: 0.5rem;
+}
+
+.formulaire-acces .intro-box {
+    background: linear-gradient(to right, #c9880b 4px, #fef9e7 4px);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0 8px 8px 0;
+}
+
+.formulaire-acces .intro-box h3 {
+    color: #c9880b;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.formulaire-acces .intro-box p {
+    color: #5a5a5a;
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.formulaire-acces .champ {
+    margin-bottom: 1.25rem;
+}
+
+.formulaire-acces label {
+    display: block;
+    font-weight: 600;
+    color: #032e5c;
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+}
+
+.formulaire-acces input[type="text"],
+.formulaire-acces input[type="email"],
+.formulaire-acces textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.formulaire-acces input[type="text"]:focus,
+.formulaire-acces input[type="email"]:focus,
+.formulaire-acces textarea:focus {
+    outline: none;
+    border-color: #065dbb;
+    box-shadow: 0 0 0 3px rgba(6, 93, 187, 0.15);
+}
+
+.formulaire-acces textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.formulaire-acces .deux-colonnes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 500px) {
+    .formulaire-acces .deux-colonnes {
+        grid-template-columns: 1fr;
+    }
+}
+
+.formulaire-acces .engagement-box {
+    background: #f0f7ff;
+    border: 2px solid #065dbb;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+}
+
+.formulaire-acces .engagement-box h4 {
+    color: #032e5c;
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+}
+
+.formulaire-acces .engagement-box p {
+    color: #444;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 1rem 0;
+}
+
+.formulaire-acces .checkbox-engagement {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: pointer;
+}
+
+.formulaire-acces .checkbox-engagement input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: #065dbb;
+}
+
+.formulaire-acces .checkbox-engagement span {
+    color: #032e5c;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.formulaire-acces .btn-envoyer {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #065dbb 0%, #032e5c 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.formulaire-acces .btn-envoyer:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 93, 187, 0.4);
+}
+
+.formulaire-acces .btn-envoyer:disabled {
+    background: #999;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.formulaire-acces .note-obligatoire {
+    text-align: center;
+    color: #888;
+    font-size: 0.85rem;
+    margin-top: 1rem;
+}
+
+.formulaire-acces .processus-box {
+    background: #f5f5f5;
+    border-left: 4px solid #065dbb;
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.formulaire-acces .processus-box h4 {
+    color: #032e5c;
+    margin: 0 0 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+.formulaire-acces .processus-box p {
+    color: #555;
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.formulaire-acces .erreur {
+    color: #d32f2f;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+.formulaire-acces .champ.invalide input,
+.formulaire-acces .champ.invalide textarea {
+    border-color: #d32f2f;
+}
+
+.formulaire-acces .champ.invalide .erreur {
+    display: block;
+}
+</style>
+
+<div class="formulaire-acces">
+    <h2>Demande d'accès - Phase Test</h2>
+
+    <div class="intro-box">
+        <h3>Projet collectif - Places limitées</h3>
+        <p>
+            L'application est en développement actif et <strong>le nombre de testeur·euses est limité</strong>.
+            Nous recherchons des enseignant·es de <strong>différentes disciplines et pratiques</strong>,
+            qui ont à coeur le bien commun et souhaitent contribuer à un outil pensé par et pour la communauté enseignante.
+        </p>
+        <p style="margin-top: 0.75rem;">
+            L'accès anticipé implique un engagement à partager vos retours d'expérience.
+            Votre feedback est essentiel pour répondre aux besoins réels du terrain.
+        </p>
+    </div>
+
+    <form id="formDemandeAcces" onsubmit="return envoyerDemandeAcces(event)">
+
+        <div class="champ">
+            <label for="nomComplet">Nom complet *</label>
+            <input type="text" id="nomComplet" name="nomComplet" required
+                   placeholder="Prénom et nom">
+            <div class="erreur">Ce champ est obligatoire</div>
+        </div>
+
+        <div class="deux-colonnes">
+            <div class="champ">
+                <label for="etablissement">Établissement *</label>
+                <input type="text" id="etablissement" name="etablissement" required
+                       placeholder="Ex: Cégep de Jonquière">
+                <div class="erreur">Ce champ est obligatoire</div>
+            </div>
+
+            <div class="champ">
+                <label for="departement">Département *</label>
+                <input type="text" id="departement" name="departement" required
+                       placeholder="Ex: Français">
+                <div class="erreur">Ce champ est obligatoire</div>
+            </div>
+        </div>
+
+        <div class="deux-colonnes">
+            <div class="champ">
+                <label for="discipline">Discipline *</label>
+                <input type="text" id="discipline" name="discipline" required
+                       placeholder="Ex: Littérature">
+                <div class="erreur">Ce champ est obligatoire</div>
+            </div>
+
+            <div class="champ">
+                <label for="courriel">Courriel institutionnel *</label>
+                <input type="email" id="courriel" name="courriel" required
+                       placeholder="prenom.nom@cegep.qc.ca">
+                <div class="erreur">Adresse courriel invalide</div>
+            </div>
+        </div>
+
+        <div class="champ">
+            <label for="pratiqueNotation">Pratique de notation actuelle *</label>
+            <textarea id="pratiqueNotation" name="pratiqueNotation" required
+                      placeholder="Comment gérez-vous actuellement la notation dans vos cours ? (Ex: moyenne pondérée, portfolio, évaluation par compétences, etc.)"></textarea>
+            <div class="erreur">Ce champ est obligatoire</div>
+        </div>
+
+        <div class="champ">
+            <label for="motivation">Motivation et besoins *</label>
+            <textarea id="motivation" name="motivation" required
+                      placeholder="Pourquoi souhaitez-vous tester cette application ? Quels sont vos besoins en matière de suivi des apprentissages ?"></textarea>
+            <div class="erreur">Ce champ est obligatoire</div>
+        </div>
+
+        <div class="engagement-box">
+            <h4>Engagement de contribution</h4>
+            <p>
+                En tant que testeur·euse, je comprends que l'application est en développement
+                et que mon feedback est une contribution essentielle au projet collectif.
+                Je m'engage à partager mes observations, suggestions et difficultés rencontrées
+                pour aider à améliorer l'outil au bénéfice de la communauté enseignante.
+            </p>
+            <label class="checkbox-engagement">
+                <input type="checkbox" id="engagement" name="engagement" required>
+                <span>Je m'engage à fournir du feedback constructif durant la phase de test</span>
+            </label>
+        </div>
+
+        <button type="submit" class="btn-envoyer" id="btnEnvoyer">
+            Envoyer ma demande d'accès
+        </button>
+
+        <p class="note-obligatoire">* Tous les champs sont obligatoires</p>
+
+        <div class="processus-box">
+            <h4>Prochaines étapes</h4>
+            <p>
+                Si votre demande est acceptée, vous recevrez un courriel à votre adresse institutionnelle
+                contenant le lien vers l'application ainsi qu'un <strong>code d'accès personnel</strong>.
+                Ce code vous permettra de vous connecter à l'application durant la phase de test.
+            </p>
+        </div>
+    </form>
+</div>
+
+<script>
+function envoyerDemandeAcces(event) {
+    event.preventDefault();
+
+    // Récupérer les valeurs
+    const nom = document.getElementById('nomComplet').value.trim();
+    const etablissement = document.getElementById('etablissement').value.trim();
+    const departement = document.getElementById('departement').value.trim();
+    const discipline = document.getElementById('discipline').value.trim();
+    const courriel = document.getElementById('courriel').value.trim();
+    const pratiqueNotation = document.getElementById('pratiqueNotation').value.trim();
+    const motivation = document.getElementById('motivation').value.trim();
+    const engagement = document.getElementById('engagement').checked;
+
+    // Validation
+    let valide = true;
+
+    document.querySelectorAll('.champ').forEach(champ => {
+        champ.classList.remove('invalide');
+    });
+
+    if (!nom) {
+        document.getElementById('nomComplet').parentElement.classList.add('invalide');
+        valide = false;
+    }
+    if (!etablissement) {
+        document.getElementById('etablissement').parentElement.classList.add('invalide');
+        valide = false;
+    }
+    if (!departement) {
+        document.getElementById('departement').parentElement.classList.add('invalide');
+        valide = false;
+    }
+    if (!discipline) {
+        document.getElementById('discipline').parentElement.classList.add('invalide');
+        valide = false;
+    }
+    if (!courriel || !courriel.includes('@')) {
+        document.getElementById('courriel').parentElement.classList.add('invalide');
+        valide = false;
+    }
+    if (!pratiqueNotation) {
+        document.getElementById('pratiqueNotation').parentElement.classList.add('invalide');
+        valide = false;
+    }
+    if (!motivation) {
+        document.getElementById('motivation').parentElement.classList.add('invalide');
+        valide = false;
+    }
+    if (!engagement) {
+        alert('Vous devez accepter l\'engagement de contribution pour soumettre votre demande.');
+        valide = false;
+    }
+
+    if (!valide) return false;
+
+    // Construire le corps du courriel
+    const sujet = encodeURIComponent(`Demande d'accès - Phase Test - ${nom}`);
+    const corps = encodeURIComponent(
+`=== DEMANDE D'ACCÈS - PHASE TEST ===
+Date: ${new Date().toLocaleDateString('fr-CA')} ${new Date().toLocaleTimeString('fr-CA')}
+
+--- INFORMATIONS ---
+Nom complet: ${nom}
+Établissement: ${etablissement}
+Département: ${departement}
+Discipline: ${discipline}
+Courriel: ${courriel}
+
+--- PRATIQUE DE NOTATION ACTUELLE ---
+${pratiqueNotation}
+
+--- MOTIVATION ET BESOINS ---
+${motivation}
+
+--- ENGAGEMENT ---
+Je m'engage à fournir du feedback constructif durant la phase de test.
+
+---
+Demande envoyée via le formulaire d'accès codexnumeris.org`
+    );
+
+    // Ouvrir le client mail
+    window.location.href = `mailto:labo@codexnumeris.org?subject=${sujet}&body=${corps}`;
+
+    // Message de confirmation
+    setTimeout(() => {
+        alert('Votre client de messagerie devrait s\'ouvrir avec votre demande pré-remplie. Si ce n\'est pas le cas, envoyez un courriel à labo@codexnumeris.org');
+    }, 500);
+
+    return false;
+}
+</script>
+
+</body>
+</html>
