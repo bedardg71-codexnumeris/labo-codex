@@ -62,7 +62,8 @@
  */
 function obtenirInterventions() {
     // db.getSync retourne déjà l'objet parsé, pas besoin de JSON.parse
-    return db.getSync('interventions', []);
+    // Utiliser cle() pour namespacing par trimestre
+    return db.getSync(cle('interventions'), []);
 }
 
 /**
@@ -102,10 +103,10 @@ function sauvegarderInterventions(interventions) {
         });
     });
 
-    db.setSync('interventions', interventions);
+    db.setSync(cle('interventions'), interventions);
 
     // Vérifier immédiatement la lecture
-    const verification = db.getSync('interventions', null);
+    const verification = db.getSync(cle('interventions'), null);
     console.log('   ✅ Vérification lecture immédiate:');
     console.log('   Nombre d\'interventions relues:', verification ? verification.length : 0);
     console.log('💾 sauvegarderInterventions() - FIN');
@@ -1526,9 +1527,9 @@ function afficherNotificationSucces(message) {
  * Initialiser le module Interventions
  */
 function initialiserModuleInterventions() {
-    // Vérifier que db.interventions existe
-    if (!db.getSync('interventions', null)) {
-        db.setSync('interventions', []);
+    // Vérifier que les interventions existent pour ce trimestre
+    if (!db.getSync(cle('interventions'), null)) {
+        db.setSync(cle('interventions'), []);
     }
 
     // Observer les changements de visibilité de la sous-section
