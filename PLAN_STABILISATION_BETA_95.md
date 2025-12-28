@@ -21,6 +21,32 @@
 - `4117d55` - Phase 3 documentation complétée
 - `991ee38` - Phase 4 vérification code complétée
 - `9094133` - Mise à jour date et cache busters
+- `91b4846` - Documentation Primo dans section Aide
+- `767519b` - Mise à jour section À propos Beta 95
+- `7eafea6` - Pastille nouveautés jaune au lieu de grise
+- `36ab877` - Fix rafraîchissement vues changement trimestre
+
+**Commits du 28 décembre 2025** :
+- `ac58537` - Scripts migration données A2025
+
+### Migration données A2025 (28 décembre 2025)
+
+**Problème identifié** : Les 30 étudiants du trimestre A2025 n'apparaissaient pas après changement de trimestre.
+
+**Cause** : Les données existaient avant l'implémentation du système `coursId` et n'avaient pas été migrées.
+
+**Solution** : Scripts de migration créés dans `scripts/beta95/` :
+- `08-migrer-a2025-auto.js` : Version auto-exécutable (bloquée par CORS)
+- `09-migrer-a2025-fichier.js` : Version avec FileReader (bloquée par Safari)
+- `10-migrer-a2025-bouton.js` : Version avec bouton UI (fonctionnelle)
+
+**Données migrées** :
+- 30 étudiants avec `coursId: COURS1759148752954`
+- 911 présences
+- 31 portfoliosEleves (évaluations)
+- Indices CP et Assiduité
+
+**Résultat** : Tableau de bord affiche correctement A=98%, C=92%, P=76%, E=86%
 
 ---
 
