@@ -270,6 +270,11 @@
             border-color: white;
         }
 
+        /* Espace en bas pour ne pas cacher le contenu sous le bandeau */
+        body.mode-archive {
+            padding-bottom: 50px;
+        }
+
         /* Mode archivé : désactivation visuelle des éléments interactifs */
         /* Exception : .mode-ecriture-temp réactive les contrôles */
         body.mode-archive:not(.mode-ecriture-temp) .btn-supprimer,
