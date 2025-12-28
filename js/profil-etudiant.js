@@ -2929,9 +2929,8 @@ function changerSectionProfil(section) {
             contenu = '<p>Section non trouvée</p>';
     }
 
-    // Récupérer la pratique pour le badge (toutes les sections)
+    // Récupérer les indices (pour autres usages, badge retiré - info déjà dans l'en-tête)
     const indices = calculerTousLesIndices(da);
-    const badgePratique = genererBadgePratiqueProfil(indices.pratique);
 
     // Générer l'aide Primo selon la section (popup au clic)
     let toggleInfo = '';
@@ -2948,7 +2947,7 @@ function changerSectionProfil(section) {
     contenuContainer.innerHTML = `
         <div class="profil-contenu-header">
             <h2 class="u-flex-between-mb20">
-                <span>${titre}${badgePratique}</span>
+                <span>${titre}</span>
                 ${toggleInfo}
             </h2>
         </div>
@@ -3490,7 +3489,7 @@ function afficherProfilComplet(da) {
                 <!-- Contenu dynamique chargé par changerSectionProfil() -->
                 <div class="profil-contenu-header">
                     <h2 class="u-flex-between-mb20">
-                        <span>${titreSection}${genererBadgePratiqueProfil(indices.pratique, modeComparatif)}</span>
+                        <span>${titreSection}</span>
                         <span class="primo-aide" data-target="details-calculs-risque-${da}">😎</span>
                     </h2>
                 </div>

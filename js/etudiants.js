@@ -563,12 +563,11 @@ function mettreAJourTitreListeEtudiants() {
     const conteneurTitre = document.createElement('div');
     conteneurTitre.style.cssText = 'display: flex; justify-content: space-between; align-items: center;';
 
-    // Partie gauche : titre + badge pratique
+    // Partie gauche : titre (badge pratique retiré - info déjà dans l'en-tête)
     const partieGauche = document.createElement('div');
     partieGauche.style.cssText = 'display: flex; align-items: center; gap: 12px;';
     partieGauche.innerHTML = `
         <span>Liste des étudiant·es</span>
-        ${genererBadgePratiqueListeEtudiants()}
     `;
 
     // Partie droite : aide Primo 😎
