@@ -115,11 +115,14 @@ function chargerListeEtudiantsEval() {
 
     if (!select) return;
 
-    // ✅ CORRIGÉ (29 déc 2025): Détecter mode anonymisation de plusieurs façons
-    // obtenirDonneesSelonMode peut ne PAS anonymiser les données (conflit db.js/modes.js)
-    // On vérifie donc directement le mode via estModeeLectureSeule() ou modeActuel
-    const modeAnonymisation = (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule()) ||
-                              (typeof modeActuel !== 'undefined' && typeof MODES !== 'undefined' && modeActuel === MODES.ANONYMISATION);
+    // ✅ CORRIGÉ (29 déc 2025): Détecter mode anonymisation via db directement
+    // modeActuel n'est PAS accessible depuis evaluation.js (variable locale à modes.js)
+    // On utilise db.getSync comme source de vérité
+    const modeDepuisDb = db.getSync('modeApplication', 'normal');
+    const modeAnonymisation = modeDepuisDb === 'anonymisation' ||
+                              (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule());
+
+    console.log('🔍 [chargerListeEtudiantsEval] Mode:', modeDepuisDb, 'Anonymisation:', modeAnonymisation);
 
     // NOUVEAU (Beta 84): Trier par nom de famille (ordre alphabétique)
     etudiants.sort((a, b) => {
@@ -185,11 +188,21 @@ function filtrerEtudiantsParGroupe() {
     const groupeId = document.getElementById('selectGroupeEval').value;
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
-    // ✅ CORRIGÉ (29 déc 2025): Détecter mode anonymisation de plusieurs façons
-    // obtenirDonneesSelonMode peut ne PAS anonymiser les données (conflit db.js/modes.js)
-    // On vérifie donc directement le mode via estModeeLectureSeule() ou modeActuel
-    const modeAnonymisation = (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule()) ||
-                              (typeof modeActuel !== 'undefined' && typeof MODES !== 'undefined' && modeActuel === MODES.ANONYMISATION);
+    // ✅ CORRIGÉ (29 déc 2025): Détecter mode anonymisation via db directement
+    // modeActuel n'est PAS accessible depuis evaluation.js (variable locale à modes.js)
+    // On utilise db.getSync comme source de vérité
+    const modeDepuisDb = db.getSync('modeApplication', 'normal');
+    const estFonctionDisponible = typeof estModeeLectureSeule === 'function';
+    const estModeDepuisFonction = estFonctionDisponible ? estModeeLectureSeule() : false;
+    const modeAnonymisation = modeDepuisDb === 'anonymisation' || estModeDepuisFonction;
+
+    console.log('🔍 [filtrerEtudiantsParGroupe] Debug mode:', {
+        modeDepuisDb,
+        estFonctionDisponible,
+        estModeDepuisFonction,
+        modeAnonymisation,
+        nbEtudiants: etudiants.length
+    });
 
     const etudiantsFiltres = groupeId
         ? etudiants.filter(e => e.groupe === groupeId)

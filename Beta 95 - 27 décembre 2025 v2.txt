@@ -1,0 +1,48 @@
+Beta 95 - 27 décembre 2025 v2.
+
+
+Codex Numeris Beta 95 : Une application de monitorage pédagogique pour le réseau collégial
+Version de test disponible de janvier à mai 2025
+
+Depuis l'hiver 2024, un outil de monitorage de l'apprentissage prend forme au Cégep de Drummondville. Conçu initialement comme un simple tableur Numbers pour suivre la progression d'étudiants en littérature, Codex Numeris est devenu une application web autonome qui permet de gérer différentes approches pédagogiques, notamment les pratiques alternatives de notation (PAN). La Beta 95, actuellement en phase de test, sera disponible pour le réseau collégial de janvier à mai 2025.
+
+Une application conçue pour le monitorage de l'apprentissage
+L'application structure le suivi pédagogique autour de trois indices complémentaires : l'Assiduité (A), la Complétion (C) et la Performance (P). Ces indices permettent de détecter rapidement les patterns d'apprentissage et d'identifier les situations nécessitant une intervention.
+Le système capture automatiquement l'évolution de ces indices à chaque saisie de présences, créant des «snapshots» hebdomadaires qui documentent la progression dans le temps. Les enseignants peuvent ainsi visualiser graphiquement l'évolution individuelle de chaque étudiant ou les tendances du groupe, identifier les chutes de motivation, les paliers ou les rebonds, et valider l'impact de leurs interventions.
+L'application intègre également le cadre de la Réponse à l'intervention (RàI), une approche en trois niveaux qui guide les décisions pédagogiques : suivi régulier en classe (niveau universel), interventions préventives (niveau préventif), et interventions intensives individuelles hors classe (niveau intensif). Les seuils qui déterminent ces niveaux sont configurables selon les besoins de chaque enseignant.
+
+Des rétroactions personnalisées sans intelligence artificielle
+Un système de «cartouches de rétroactions» permet de générer des commentaires personnalisés de manière automatisée, sans recourir à l'intelligence artificielle. L'enseignant constitue une banque de commentaires organisés par critère d'évaluation et par niveau de performance. Lors de l'évaluation d'un travail, l'application assemble automatiquement les commentaires pertinents selon les forces et les défis identifiés chez l'étudiant.
+Cette approche préserve la cohérence pédagogique : les rétroactions reflètent le vocabulaire et les priorités de l'enseignant plutôt que ceux d'un modèle de langage générique. Le système facilite également la différenciation pédagogique en permettant d'adapter rapidement les commentaires selon les besoins spécifiques de chaque étudiant, tout en assurant que tous reçoivent une rétroaction détaillée et constructive.
+
+Une plateforme pour diverses pratiques de notation
+Codex Numeris ne se limite pas à une seule approche pédagogique. L'application permet de configurer différentes pratiques de notation : PAN-Standards (basé sur des niveaux qualitatifs), PAN-Spécification (selon un «contrat»), ou encore l'évaluation sommative traditionnelle.
+Les enseignants peuvent définir leurs propres grilles d'évaluation selon la grille de compétences de leur programme (par exemple l’approche ELLAC en littérature au Québec), créer des échelles de performance personnalisées, et configurer les productions attendues dans leur cours. Le système s'adapte ainsi aux exigences particulières de chaque discipline et de chaque plan-cadre ministériel.
+Cette souplesse permet également d'expérimenter progressivement avec les PAN. Un enseignant peut commencer par transformer une évaluation sommative à faible pondération en véritable évaluation formative, tester le système de jetons pour permettre les reprises d'évaluation, ou construire graduellement une grille d'évaluation selon les cibles d'apprentissage plutôt que selon les types d'évaluations.
+
+Trois modes d'utilisation
+L'application fonctionne selon trois modes distincts. Le mode Normal offre toutes les fonctionnalités de gestion de cours et d'évaluation. Le mode Assisté active «Primo», un assistant de configuration qui guide les nouveaux utilisateurs à travers les étapes de mise en place : définition du trimestre, création du cours, importation du groupe d'étudiants, configuration des pratiques de notation. Ce mode facilite l'appropriation de l'outil sans submerger les enseignants par la complexité des options disponibles.
+Le mode Anonymisé, quant à lui, masque toutes les informations nominatives pour permettre des démonstrations publiques ou la préparation de données pour la recherche pédagogique. Les noms d'étudiants deviennent des codes aléatoires, préservant ainsi la confidentialité lors de présentations ou de partages d'expérience avec des collègues.
+
+Autonomie, sécurité et empreinte écologique minimale
+Codex Numeris fonctionne entièrement en local, dans le navigateur de l'utilisateur. Les données sont stockées sur l'appareil via localStorage et IndexedDB (capacité de plusieurs gigaoctets), sans aucun transfert infonuagique. Cette architecture garantit une confidentialité totale : les informations sur les étudiants ne quittent jamais l'ordinateur de l'enseignant.
+L'application ne nécessite aucune connexion internet une fois téléchargée, ce qui la rend utilisable partout, y compris dans les zones avec connectivité limitée. Cette indépendance technologique élimine également les frais d'abonnement, les risques de fuites de données, et les dépendances envers des plateformes commerciales.
+L'absence de serveurs distants et de traitements par intelligence artificielle réduit considérablement l'empreinte carbone de l'outil. Les seules ressources consommées sont celles de l'appareil de l'enseignant, une fraction de ce qu'exigent les plateformes infonuagiques avec leurs centres de données énergivores.
+
+Partage de matériel pédagogique et communs éducatifs
+La Beta 95 introduit un système d'import/export qui permet de partager du matériel pédagogique entre collègues : grilles d'évaluation, échelles de performance, cartouches de rétroactions, configurations de pratiques de notation. Chaque export génère un fichier JSON accompagné d'un fichier LISEZMOI expliquant le contenu et les conditions d'utilisation.
+Tout matériel exporté est protégé par la licence Creative Commons BY-NC-SA 4.0, qui permet le partage et l'adaptation tout en préservant l'attribution à l'auteur original. Cette approche favorise l'émergence de communs éducatifs : plutôt que de recommencer à zéro, les enseignants peuvent s'inspirer du travail de leurs pairs, l'adapter à leur contexte, et le redistribuer à leur tour.
+Le système détecte automatiquement les conflits lorsqu'un enseignant importe du matériel qui existe déjà sous une autre forme dans son application, et propose des résolutions intelligentes. Cette fonctionnalité facilite la collaboration sans créer de duplication ou d'incohérence dans les données.
+
+Gestion multi-cours et multi-trimestres
+La Beta 95 permet désormais de gérer plusieurs cours simultanément et de naviguer entre différents trimestres. Les enseignants peuvent archiver leurs trimestres terminés, générer des exports de recherche anonymisés, puis créer de nouveaux trimestres sans perdre l'historique de leurs interventions passées.
+Cette architecture ouvre la porte à des analyses longitudinales : comparer la progression de différents groupes ayant suivi le même cours, évaluer l'impact de modifications pédagogiques d'un trimestre à l'autre, ou documenter l'évolution de sa pratique enseignante sur plusieurs années.
+
+Phase de test et participation
+La Beta 95 sera accessible en test de janvier à mai 2025. Les enseignants intéressés peuvent s'enregistrer en écrivant à labo@codexnumeris.org. L'engagement demandé est de communiquer régulièrement ses besoins, d'identifier les bogues rencontrés, et de partager ses observations sur l'utilisation de l'outil dans sa pratique.
+Tous les rapports d'utilisation serviront à raffiner l'application et à la rendre de plus en plus conforme aux pratiques réelles des enseignants du réseau collégial. Cette phase de test collaborative vise à développer un outil véritablement adapté aux besoins du terrain, construit avec et pour les enseignants.
+L'application est entièrement gratuite et son code source est déjà disponible en open source sur GitHub. Codex Numeris représente une démarche de développement pédagogique qui mise sur l'autonomie professionnelle, le partage de pratiques efficaces, et la construction collective d'outils adaptés aux réalités de l'enseignement collégial québécois. Cette approche est documentée depuis plus d’un an sur le blog Codex Numeris.
+
+Pour en savoir plus : codexnumeris.org/labocodex
+
+1155 mots
