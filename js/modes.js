@@ -533,7 +533,9 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
  */
 function obtenirOptionAffichageDA() {
     const option = db.getSync('anonymisation_afficher_da_reel', null);
-    return option === null ? true : option === 'true' || option === true; // Par défaut: true (DA réel)
+    // ✅ CORRECTION (29 déc 2025) : Par défaut false (masquer DA) au lieu de true
+    // En mode anonymisation, les DA doivent être masqués par défaut
+    return option === null ? false : option === 'true' || option === true;
 }
 
 /**
