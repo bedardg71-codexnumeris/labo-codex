@@ -903,8 +903,10 @@ function genererLigneHTML(ligne) {
         boutons = genererBoutonsActionsNonEvalue(ligne);
     }
 
-    // ✅ NOUVEAU (29 déc 2025): Utiliser daAffichage pour anonymisation
-    const daAffiche = ligne.daAffichage || ligne.da;
+    // ✅ CORRIGÉ (29 déc 2025): Ne PAS afficher les DA en mode anonymisation
+    // Les élèves sont déjà identifiés par leur numéro
+    const modeAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+    const daAffiche = modeAnonymisation ? '---' : ligne.da;
 
     return `
         <tr data-evaluation-id="${ligne.evaluationId || ''}" data-da="${ligne.da}" data-production-id="${ligne.productionId}"${classeRemplacee}>

@@ -1090,10 +1090,10 @@ function afficherListeEtudiantsConsultation() {
         // Effet de survol géré par CSS (plus fiable pour adaptation par mode)
 
         // Échapper les valeurs pour sécurité
-        // IMPORTANT: Utiliser daAffichage pour l'affichage, mais garder da pour les calculs
-        // En mode anonymisé, etudiant.nom et etudiant.prenom sont déjà anonymisés par modes.js
-        const daAfficher = etudiant.daAffichage || etudiant.da; // Utiliser daAffichage si disponible
-        const da = echapperHtml(daAfficher || '');
+        // IMPORTANT: En mode anonymisation, ne PAS afficher les DA du tout
+        // Les élèves sont déjà identifiés par leur numéro (Élève 1, Élève 2, etc.)
+        const modeAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+        const da = modeAnonymisation ? '---' : echapperHtml(etudiant.da || '');
         const groupe = echapperHtml(etudiant.groupe || '');
         const nom = echapperHtml(etudiant.nom || '');  // Déjà anonymisé si mode anonymisation
         const prenom = echapperHtml(etudiant.prenom || '');  // Déjà anonymisé si mode anonymisation
