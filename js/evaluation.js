@@ -115,11 +115,11 @@ function chargerListeEtudiantsEval() {
 
     if (!select) return;
 
-    // ✅ CORRIGÉ (29 déc 2025): Détecter mode anonymisation via:
-    // 1. La présence de daAffichage (données déjà anonymisées par obtenirDonneesSelonMode)
-    // 2. Ou via estModeeLectureSeule() comme fallback
-    const donneesAnonymisees = etudiants.length > 0 && etudiants[0].hasOwnProperty('daAffichage');
-    const modeAnonymisation = donneesAnonymisees || (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule());
+    // ✅ CORRIGÉ (29 déc 2025): Détecter mode anonymisation de plusieurs façons
+    // obtenirDonneesSelonMode peut ne PAS anonymiser les données (conflit db.js/modes.js)
+    // On vérifie donc directement le mode via estModeeLectureSeule() ou modeActuel
+    const modeAnonymisation = (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule()) ||
+                              (typeof modeActuel !== 'undefined' && typeof MODES !== 'undefined' && modeActuel === MODES.ANONYMISATION);
 
     // NOUVEAU (Beta 84): Trier par nom de famille (ordre alphabétique)
     etudiants.sort((a, b) => {
@@ -129,14 +129,15 @@ function chargerListeEtudiantsEval() {
     });
 
     select.innerHTML = '<option value="">-- Choisir un·e étudiant·e --</option>';
-    etudiants.forEach(etudiant => {
+    etudiants.forEach((etudiant, index) => {
         const option = document.createElement('option');
-        // Toujours utiliser le DA réel (daReel ou da) pour la valeur (nécessaire pour les calculs)
+        // Toujours utiliser le DA réel pour la valeur (nécessaire pour les calculs)
         option.value = etudiant.daReel || etudiant.da;
-        // En mode anonymisation, utiliser les données anonymisées et ne pas afficher le DA
+
+        // En mode anonymisation, afficher "Élève X" sans DA
         if (modeAnonymisation) {
-            // Utiliser prenom/nom qui sont déjà anonymisés par obtenirDonneesSelonMode()
-            option.textContent = `${etudiant.prenom} ${etudiant.nom}`.trim();
+            // Générer nom anonyme "Élève 1", "Élève 2", etc.
+            option.textContent = `Élève ${index + 1}`;
         } else {
             option.textContent = `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`;
         }
@@ -184,11 +185,11 @@ function filtrerEtudiantsParGroupe() {
     const groupeId = document.getElementById('selectGroupeEval').value;
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
-    // ✅ CORRIGÉ (29 déc 2025): Détecter mode anonymisation via:
-    // 1. La présence de daAffichage (données déjà anonymisées par obtenirDonneesSelonMode)
-    // 2. Ou via estModeeLectureSeule() comme fallback
-    const donneesAnonymisees = etudiants.length > 0 && etudiants[0].hasOwnProperty('daAffichage');
-    const modeAnonymisation = donneesAnonymisees || (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule());
+    // ✅ CORRIGÉ (29 déc 2025): Détecter mode anonymisation de plusieurs façons
+    // obtenirDonneesSelonMode peut ne PAS anonymiser les données (conflit db.js/modes.js)
+    // On vérifie donc directement le mode via estModeeLectureSeule() ou modeActuel
+    const modeAnonymisation = (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule()) ||
+                              (typeof modeActuel !== 'undefined' && typeof MODES !== 'undefined' && modeActuel === MODES.ANONYMISATION);
 
     const etudiantsFiltres = groupeId
         ? etudiants.filter(e => e.groupe === groupeId)
@@ -205,14 +206,15 @@ function filtrerEtudiantsParGroupe() {
     if (!select) return;
 
     select.innerHTML = '<option value="">-- Choisir un·e étudiant·e --</option>';
-    etudiantsFiltres.forEach(etudiant => {
+    etudiantsFiltres.forEach((etudiant, index) => {
         const option = document.createElement('option');
-        // Toujours utiliser le DA réel (daReel ou da) pour la valeur (nécessaire pour les calculs)
+        // Toujours utiliser le DA réel pour la valeur (nécessaire pour les calculs)
         option.value = etudiant.daReel || etudiant.da;
-        // En mode anonymisation, utiliser les données anonymisées et ne pas afficher le DA
+
+        // En mode anonymisation, afficher "Élève X" sans DA
         if (modeAnonymisation) {
-            // Utiliser prenom/nom qui sont déjà anonymisés par obtenirDonneesSelonMode()
-            option.textContent = `${etudiant.prenom} ${etudiant.nom}`.trim();
+            // Générer nom anonyme "Élève 1", "Élève 2", etc.
+            option.textContent = `Élève ${index + 1}`;
         } else {
             option.textContent = `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`;
         }
