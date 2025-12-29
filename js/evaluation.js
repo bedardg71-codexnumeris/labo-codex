@@ -2517,9 +2517,9 @@ function chargerListeEvaluationsRefonte() {
     const etudiants = db.getSync('groupeEtudiants', []);
     const evaluations = db.getSync('evaluationsSauvegardees', []);
     // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : saisie-presences.js génère indicesAssiduiteDetailles
-    const indicesAssiduiteDetailles = db.getSync('indicesAssiduiteDetailles', {});
+    const indicesAssiduiteDetailles = db.getSync((typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite', {});
     // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : portfolio.js génère indicesCP
-    const indicesCP = db.getSync('indicesCP', {});
+    const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
 
     // Détecter la pratique active
     const config = db.getSync('modalitesEvaluation', {});
@@ -2612,7 +2612,7 @@ function genererBadgeCompletion(etudiant) {
 
     // PRIORITÉ 2 : Fallback - Lire directement depuis localStorage
     if (completion === 0) {
-        const indicesCP = db.getSync('indicesCP', {});
+        const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
         const actuel = indicesCP[etudiant.da]?.actuel;
         if (actuel && actuel[pratique] && typeof actuel[pratique].C === 'number') {
             completion = actuel[pratique].C / 100;
@@ -2846,7 +2846,7 @@ function genererDetailsEtudiant(etudiant) {
     const nbRemis = productionsDistinctes.size;
 
     // Lire les indices depuis la source unique (portfolio.js)
-    const indicesCP = db.getSync('indicesCP', {});
+    const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
     const indicesCPEtudiant = indicesCP[etudiant.da]?.actuel || null;
 
     // 🔍 DÉTERMINER LA PRATIQUE ACTIVE (SOM ou PAN)

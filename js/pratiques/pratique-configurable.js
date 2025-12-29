@@ -109,7 +109,7 @@ class PratiqueConfigurable {
         // Vérifier que la configuration contient les objectifs
         if (!this.config.objectifs || !Array.isArray(this.config.objectifs)) {
             console.warn('Configuration multi-objectifs manquante, fallback sur PAN standard');
-            const indicesCP = db.getSync('indicesCP', {});
+            const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
             return indicesCP[da]?.actuel?.PAN?.P || 0;
         }
 
@@ -174,7 +174,7 @@ class PratiqueConfigurable {
      * @returns {number} Indice P (0-1, décimal)
      */
     calculerPerformance(da) {
-        const indicesCP = db.getSync('indicesCP', {});
+        const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
         const donneesEtudiant = indicesCP[da];
 
         if (!donneesEtudiant || !donneesEtudiant.actuel) {
@@ -230,7 +230,7 @@ class PratiqueConfigurable {
      * @returns {number} Indice C (0-1, décimal)
      */
     calculerCompletion(da) {
-        const indicesCP = db.getSync('indicesCP', {});
+        const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
         const donneesEtudiant = indicesCP[da];
 
         if (!donneesEtudiant || !donneesEtudiant.actuel) {
@@ -256,7 +256,7 @@ class PratiqueConfigurable {
     detecterDefis(da) {
         const defis = [];
 
-        const indicesCP = db.getSync('indicesCP', {});
+        const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
         const donneesEtudiant = indicesCP[da];
 
         if (!donneesEtudiant || !donneesEtudiant.actuel) {

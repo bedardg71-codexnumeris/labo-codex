@@ -1207,11 +1207,11 @@ function obtenirIndicesEtudiant(da) {
     const pratique = pratiqueNotation.pratique === 'alternative' ? 'PAN' : 'SOM';
 
     // Indice A (Assiduité)
-    const indicesAssiduiteDetailles = db.getSync('indicesAssiduiteDetailles', {});
+    const indicesAssiduiteDetailles = db.getSync((typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite', {});
     const A = indicesAssiduiteDetailles[da]?.actuel?.indice ?? 0;
 
     // Indices C et P (Complétion et Performance)
-    const indicesCP = db.getSync('indicesCP', {});
+    const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
     const donneesCP = indicesCP[da]?.actuel?.[pratique] || {};
     const C = donneesCP.C ?? 0;
     const P = donneesCP.P ?? 0;

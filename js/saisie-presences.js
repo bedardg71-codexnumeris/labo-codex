@@ -1430,7 +1430,9 @@ function calculerTotalHeuresPresence(da, dateActuelle) {
  */
 function calculerTauxAssiduite(da, dateActuelle, heuresSeanceActuelle) {
     // Utiliser les indices sauvegardés qui tiennent compte des séances facultatives
-    const indices = db.getSync('indicesAssiduite', {});
+    // Utiliser cle() pour namespacing par trimestre
+    const cleIndices = (typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite';
+    const indices = db.getSync(cleIndices, {});
 
     if (indices.sommatif && indices.sommatif[da] !== undefined) {
         // Retourner l'indice sommatif sauvegardé (déjà calculé avec logique facultative)

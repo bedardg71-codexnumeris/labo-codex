@@ -25,7 +25,10 @@
         'evenementsImprevus',
         'seancesCompletes',
         'horaireHebdo',
-        'interventions'
+        'interventions',
+        'indicesAssiduite',
+        'indicesCP',
+        'snapshots'
     ];
 
     // Clés globales (partagées entre trimestres)
@@ -301,7 +304,7 @@
             );
 
             // Indices d'engagement
-            const indicesCP = db.getSync('indicesCP', {});
+            const indicesCP = db.getSync(cle('indicesCP'), {});
             let totalEngagement = 0;
             let nbAvecIndices = 0;
 
@@ -387,7 +390,7 @@
             const presences = db.getSync('presences', []);
             exportData.donnees.presences = presences.filter(p => coursIds.includes(p.coursId));
 
-            const snapshots = db.getSync('snapshots', { hebdomadaires: [], interventions: [] });
+            const snapshots = db.getSync(cle('snapshots'), { hebdomadaires: [], interventions: [] });
             exportData.donnees.snapshots = snapshots;
 
             // Déclencher le téléchargement
@@ -542,33 +545,44 @@
     }
 
     /**
-     * Migration ponctuelle : interventions vers A2025
-     * Les anciennes interventions non namespacées datent de A2025
+     * Migration ponctuelle : clés non namespacées vers A2025
+     * Les anciennes données non namespacées datent de A2025
      */
-    function migrerInterventionsVersA2025() {
-        const interventionsAnciennes = db.getSync('interventions', null);
+    function migrerClesVersA2025() {
+        // Liste des clés à migrer vers a2025_*
+        const clesAMigrer = ['interventions', 'indicesAssiduite', 'indicesCP', 'snapshots'];
+        let clesMigrees = 0;
 
-        // Si des interventions existent dans l'ancienne clé
-        if (interventionsAnciennes && Array.isArray(interventionsAnciennes) && interventionsAnciennes.length > 0) {
-            console.log(`[Trimestres] Migration interventions: ${interventionsAnciennes.length} interventions trouvées`);
+        clesAMigrer.forEach(nomCle => {
+            const donneesAnciennes = db.getSync(nomCle, null);
 
-            // Migrer vers a2025_interventions
-            const cleA2025 = 'a2025_interventions';
-            const existantes = db.getSync(cleA2025, []);
+            // Si des données existent dans l'ancienne clé
+            if (donneesAnciennes !== null) {
+                // Vérifier que ce n'est pas vide
+                const estVide = Array.isArray(donneesAnciennes)
+                    ? donneesAnciennes.length === 0
+                    : (typeof donneesAnciennes === 'object' && Object.keys(donneesAnciennes).length === 0);
 
-            // Fusionner si nécessaire (éviter doublons par ID)
-            const idsExistants = new Set(existantes.map(i => i.id));
-            const nouvellesInterventions = interventionsAnciennes.filter(i => !idsExistants.has(i.id));
+                if (!estVide) {
+                    const cleA2025 = `a2025_${nomCle}`;
+                    const existantes = db.getSync(cleA2025, null);
 
-            if (nouvellesInterventions.length > 0) {
-                const fusionnees = [...existantes, ...nouvellesInterventions];
-                db.setSync(cleA2025, fusionnees);
-                console.log(`[Trimestres] → ${nouvellesInterventions.length} interventions migrées vers ${cleA2025}`);
+                    // Ne migrer que si la clé a2025_* n'existe pas déjà
+                    if (existantes === null) {
+                        db.setSync(cleA2025, donneesAnciennes);
+                        console.log(`[Trimestres] → ${nomCle} migré vers ${cleA2025}`);
+                        clesMigrees++;
+                    }
+
+                    // Supprimer l'ancienne clé
+                    db.removeSync(nomCle);
+                    console.log(`[Trimestres] → Ancienne clé "${nomCle}" supprimée`);
+                }
             }
+        });
 
-            // Supprimer l'ancienne clé
-            db.removeSync('interventions');
-            console.log('[Trimestres] → Ancienne clé "interventions" supprimée');
+        if (clesMigrees > 0) {
+            console.log(`[Trimestres] Migration terminée: ${clesMigrees} clés migrées vers a2025_*`);
         }
     }
 
@@ -582,8 +596,8 @@
         // Exécuter la migration si nécessaire
         const resultatMigration = migrerVersMultiTrimestres();
 
-        // Migration ponctuelle des interventions vers A2025
-        migrerInterventionsVersA2025();
+        // Migration ponctuelle des clés vers A2025
+        migrerClesVersA2025();
 
         if (resultatMigration.success) {
             const actif = obtenirTrimestreActif();
@@ -723,14 +737,14 @@
             const productions = db.getSync('productions', []);
             const evaluations = db.getSync('evaluationsSauvegardees', []);
             const presences = db.getSync('presences', []);
-            const snapshotsRaw = db.getSync('snapshots', { hebdomadaires: [], interventions: [] });
+            const snapshotsRaw = db.getSync(cle('snapshots'), { hebdomadaires: [], interventions: [] });
             // Les snapshots sont stockés comme { hebdomadaires: [...], interventions: [...], metadata: {...} }
             // On exporte les snapshots hebdomadaires
             const snapshots = snapshotsRaw.hebdomadaires || [];
             const grilles = db.getSync('grillesTemplates', []);
             const echelles = db.getSync('echellesTemplates', []);
             const modalites = db.getSync('modalitesEvaluation', {});
-            const indicesCP = db.getSync('indicesCP', {});
+            const indicesCP = db.getSync(cle('indicesCP'), {});
             const cours = db.getSync('listeCours', []);
             const coursActif = cours.find(c => c.actif);
 

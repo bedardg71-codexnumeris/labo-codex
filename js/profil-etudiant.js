@@ -395,7 +395,7 @@ function calculerTousLesIndices(da, pratique = null) {
     // INDICE A : SINGLE SOURCE OF TRUTH
     // Lire depuis db.getSync('indicesAssiduite') (calculé par saisie-presences.js)
     // ========================================
-    const indicesAssiduite = db.getSync('indicesAssiduite', {});
+    const indicesAssiduite = db.getSync((typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite', {});
     const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
 
     // Extraire l'indice (gérer ancien format nombre et nouveau format objet)
@@ -2562,7 +2562,7 @@ function obtenirDetailsAssiduite(da) {
     // SINGLE SOURCE OF TRUTH
     // Lire depuis db.getSync('indicesAssiduite') calculé par saisie-presences.js
     // ========================================
-    const indices = db.getSync('indicesAssiduite', {});
+    const indices = db.getSync((typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite', {});
     const detailsSommatif = indices.sommatif && indices.sommatif[da];
 
     // Si les données n'existent pas, retourner des valeurs par défaut

@@ -712,7 +712,7 @@ function calculerEtStockerIndicesCP() {
         // E est maintenant stocké dans indicesCP au lieu d'être recalculé partout
 
         // Lire A depuis indicesAssiduite (calculé par saisie-presences.js)
-        const indicesAssiduite = db.getSync('indicesAssiduite', {});
+        const indicesAssiduite = db.getSync((typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite', {});
         const assiduiteSommatif = indicesAssiduite.sommatif?.[da];
 
         // Extraire l'indice A (gérer ancien format nombre et nouveau format objet)
