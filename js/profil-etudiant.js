@@ -3311,6 +3311,9 @@ function afficherProfilComplet(da) {
         return;
     }
 
+    // ✅ NOUVEAU (29 déc 2025): Détecter le mode anonymisation pour masquer les DA
+    const modeAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+
     if (typeof afficherSousSection === 'function') {
         afficherSousSection('tableau-bord-profil');
     }
@@ -3408,11 +3411,15 @@ function afficherProfilComplet(da) {
                 <div class="sidebar-filtre">
                     <label style="font-size: 0.85rem; color: #666; margin-bottom: 5px; display: block;">Étudiant·e :</label>
                     <select id="selecteurEtudiantProfil" class="controle-form" onchange="afficherProfilComplet(this.value)">
-                        ${etudiants.map(e => `
+                        ${etudiants.map(e => {
+                            // ✅ CORRIGÉ (29 déc 2025): Ne pas afficher DA en mode anonymisation
+                            const daTexte = modeAnonymisation ? '' : ` (${echapperHtml(e.da)})`;
+                            return `
                             <option value="${e.da}" ${e.da === da ? 'selected' : ''}>
-                                ${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)} (${echapperHtml(e.daAffichage || e.da)})
+                                ${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}${daTexte}
                             </option>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </select>
                 </div>
 
@@ -3438,7 +3445,7 @@ function afficherProfilComplet(da) {
                         ${echapperHtml(eleve.prenom)} ${echapperHtml(eleve.nom)}
                     </div>
                     <div class="sidebar-info-card-details">
-                        <div><strong>DA:</strong> ${echapperHtml(eleve.daAffichage || eleve.da)}</div>
+                        ${modeAnonymisation ? '' : `<div><strong>DA:</strong> ${echapperHtml(eleve.da)}</div>`}
                         ${eleve.groupe ? `<div><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</div>` : ''}
                         ${eleve.programme ? `<div><strong>Programme:</strong> ${typeof obtenirNomProgramme === 'function' ? echapperHtml(obtenirNomProgramme(eleve.programme)) : echapperHtml(eleve.programme)}</div>` : ''}
                         ${eleve.sa === 'Oui' ? '<div class="u-texte-bleu">✓ Services adaptés</div>' : ''}
@@ -7449,9 +7456,14 @@ function genererRapportAPI(da, options = {}) {
 
     let rapport = '';
 
+    // ✅ NOUVEAU (29 déc 2025): Détecter le mode anonymisation
+    const modeAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+
     // 1. IDENTIFICATION
     if (opts.identification) {
-        rapport += `${etudiant.prenom} ${etudiant.nom} (DA: ${etudiant.da})\n\n`;
+        // Ne pas afficher le DA en mode anonymisation
+        const daTexte = modeAnonymisation ? '' : ` (DA: ${etudiant.da})`;
+        rapport += `${etudiant.prenom} ${etudiant.nom}${daTexte}\n\n`;
     }
 
     // 2. ASSIDUITÉ
