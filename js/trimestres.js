@@ -637,33 +637,20 @@
             checkboxEcriture.checked = false;
         }
 
-        // ✅ CORRIGÉ (29 déc 2025): Synchroniser checkbox avec le mode stocké
-        // Au lieu de réinitialiser, on lit le mode actuel et on synchronise l'UI
+        // ✅ CORRIGÉ (29 déc 2025): Par défaut = mode normal (vrais noms visibles)
+        // L'utilisateur peut activer l'anonymisation au besoin via la checkbox
         const checkboxAnonyme = document.getElementById('checkbox-anonymiser-archive');
         const modeActuel = db.getSync('modeApplication', 'normal');
 
-        if (isArchive) {
-            // Trimestre archivé : synchroniser checkbox avec mode stocké
-            if (checkboxAnonyme) {
-                checkboxAnonyme.checked = (modeActuel === 'anonymisation');
-            }
+        // Toujours décocher la checkbox par défaut
+        if (checkboxAnonyme) {
+            checkboxAnonyme.checked = false;
+        }
 
-            // Mettre à jour la couleur du bandeau selon le mode
-            if (modeActuel === 'anonymisation' && bandeau) {
-                bandeau.style.background = '#0f1e3a'; // Bleu très foncé (anonymisation)
-            }
-
-            console.log(`[Trimestres] Synchronisation checkbox anonymisation: ${modeActuel}`);
-        } else {
-            // Trimestre NON archivé : forcer le mode normal si on était en anonymisation
-            if (checkboxAnonyme) {
-                checkboxAnonyme.checked = false;
-            }
-
-            if (modeActuel === 'anonymisation' && typeof window.changerMode === 'function') {
-                console.log('[Trimestres] Retour mode normal (trimestre non archivé)');
-                window.changerMode('normal');
-            }
+        // Si on était en mode anonymisation, revenir en mode normal
+        if (modeActuel === 'anonymisation' && typeof window.changerMode === 'function') {
+            console.log('[Trimestres] Retour mode normal (défaut)');
+            window.changerMode('normal');
         }
 
         // Ajouter/retirer la classe mode-archive sur le body
