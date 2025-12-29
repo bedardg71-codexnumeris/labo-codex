@@ -445,9 +445,12 @@ function obtenirDonneesSelonMode(cle) {
 
     // Déterminer la valeur par défaut selon le type de clé
     // IMPORTANT: 'presences' est un TABLEAU, pas un objet (utilisé avec .forEach dans profil-etudiant.js)
-    const clesSontObjets = ['indicesAssiduiteDetailles', 'indicesCP', 'calendrierComplet'];
+    const clesSontObjets = ['indicesAssiduiteDetailles', 'indicesCP', 'indicesAssiduite', 'calendrierComplet', 'snapshots'];
     const valeurParDefaut = clesSontObjets.includes(cle) ? {} : [];
-    let donnees = db.getSync(cle, valeurParDefaut);
+
+    // Utiliser cle() pour le namespacing par trimestre (si disponible)
+    const cleEffective = (typeof window.cle === 'function') ? window.cle(cle) : cle;
+    let donnees = db.getSync(cleEffective, valeurParDefaut);
 
     // ✅ CORRECTION CRITIQUE (Beta 95 - 27 déc 2025)
     // Filtrer par coursId pour les données liées au cours actif uniquement
@@ -506,8 +509,10 @@ function sauvegarderDonneesSelonMode(cle, donnees) {
     // MODE ASSISTÉ et NORMAL : Sauvegarder dans les mêmes clés réelles
     // Depuis Beta 92, le mode Assisté partage les données avec Normal
     try {
-        db.setSync(cle, donnees);
-        console.log(`[${mode === MODES.SIMULATION ? 'Assisté' : 'Normal'}] Sauvegarde dans ${cle}`);
+        // Utiliser cle() pour le namespacing par trimestre (si disponible)
+        const cleEffective = (typeof window.cle === 'function') ? window.cle(cle) : cle;
+        db.setSync(cleEffective, donnees);
+        console.log(`[${mode === MODES.SIMULATION ? 'Assisté' : 'Normal'}] Sauvegarde dans ${cleEffective}`);
         return true;
     } catch (error) {
         // Détecter erreur de quota dépassé

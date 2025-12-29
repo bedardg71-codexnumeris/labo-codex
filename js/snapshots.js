@@ -66,11 +66,18 @@
 /**
  * Initialise le module snapshots au chargement
  */
+/**
+ * Helper pour obtenir la clé snapshots avec namespacing par trimestre
+ */
+function cleSnapshots() {
+    return (typeof cle === 'function') ? cle('snapshots') : 'snapshots';
+}
+
 function initialiserModuleSnapshots() {
     console.log('🔄 Initialisation module snapshots...');
 
     // Créer structure si première utilisation
-    const snapshots = db.getSync('snapshots', null);
+    const snapshots = db.getSync(cleSnapshots(), null);
     if (!snapshots) {
         const structure = {
             hebdomadaires: [],
@@ -82,7 +89,7 @@ function initialiserModuleSnapshots() {
                 dernierSnapshotIntervention: null
             }
         };
-        db.setSync('snapshots', structure);
+        db.setSync(cleSnapshots(), structure);
         console.log('✅ Structure snapshots créée');
     }
 
@@ -322,7 +329,7 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
  * Appelé automatiquement au chargement de l'application
  */
 async function verifierEtCapturerSnapshotHebdomadaire() {
-    const snapshots = db.getSync('snapshots', null);
+    const snapshots = db.getSync(cleSnapshots(), null);
     if (!snapshots) return;
 
     const calendrier = obtenirCalendrierComplet();
@@ -522,7 +529,7 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
 
         // ⚡ SAUVEGARDE DANS INDEXEDDB (pas localStorage - trop grand!)
         // Lire depuis IndexedDB (async)
-        let snapshots = await db.get('snapshots');
+        let snapshots = await db.get(cleSnapshots());
 
         // Initialiser structure si première utilisation
         if (!snapshots) {
@@ -552,7 +559,7 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null) 
         snapshots.metadata.dernierSnapshotHebdo = snapshot.timestamp;
 
         // ⚡ Sauvegarder dans IndexedDB (plusieurs GB disponibles)
-        await db.set('snapshots', snapshots);
+        await db.set(cleSnapshots(), snapshots);
 
         console.log(`✅ Snapshot séance ${dateSeance} capturé (${nbEtudiants} étudiants)`);
         return snapshot;
@@ -642,10 +649,10 @@ function capturerSnapshotIntervention(interventionId, etudiantsDA, type, titre) 
         };
 
         // Sauvegarder
-        const snapshots = db.getSync('snapshots');
+        const snapshots = db.getSync(cleSnapshots());
         snapshots.interventions.push(snapshotIntervention);
         snapshots.metadata.dernierSnapshotIntervention = snapshotIntervention.date;
-        db.setSync('snapshots', snapshots);
+        db.setSync(cleSnapshots(), snapshots);
 
         console.log(`✅ Snapshot intervention "${titre}" capturé (avant) - ${etudiantsDA.length} étudiants`);
         return snapshotIntervention;
@@ -667,7 +674,7 @@ function capturerSnapshotIntervention(interventionId, etudiantsDA, type, titre) 
  */
 function mettreAJourSnapshotIntervention(interventionId) {
     try {
-        const snapshots = db.getSync('snapshots');
+        const snapshots = db.getSync(cleSnapshots());
         const snapshotIntervention = snapshots.interventions.find(s => s.id === interventionId);
 
         if (!snapshotIntervention) {
@@ -694,7 +701,7 @@ function mettreAJourSnapshotIntervention(interventionId) {
         snapshotIntervention.apres = apres;
         snapshotIntervention.dateApres = new Date().toISOString().split('T')[0];
 
-        db.setSync('snapshots', snapshots);
+        db.setSync(cleSnapshots(), snapshots);
 
         console.log(`✅ Snapshot intervention "${snapshotIntervention.titre}" mis à jour (après)`);
         return true;
@@ -765,7 +772,7 @@ async function reconstruireSnapshotsHistoriques() {
 
         // Effacer snapshots existants (reconstruction complète)
         // ⚡ Utiliser IndexedDB (pas localStorage - trop grand!)
-        await db.set('snapshots', {
+        await db.set(cleSnapshots(), {
             hebdomadaires: [],
             interventions: [],
             metadata: {
@@ -831,7 +838,7 @@ async function reconstruireSnapshotsHistoriques() {
  * @returns {string} - JSON des snapshots
  */
 function exporterSnapshots() {
-    const snapshots = db.getSync('snapshots');
+    const snapshots = db.getSync(cleSnapshots());
     return JSON.stringify(snapshots, null, 2);
 }
 
@@ -843,7 +850,7 @@ function exporterSnapshots() {
 function importerSnapshots(json) {
     try {
         const snapshots = JSON.parse(json);
-        db.setSync('snapshots', snapshots);
+        db.setSync(cleSnapshots(), snapshots);
         console.log('✅ Snapshots importés avec succès');
         return true;
     } catch (error) {
@@ -861,7 +868,7 @@ function importerSnapshots(json) {
  * @returns {Array} - Liste des snapshots
  */
 function obtenirSnapshotsHebdomadaires() {
-    const snapshots = db.getSync('snapshots', { hebdomadaires: [] });
+    const snapshots = db.getSync(cleSnapshots(), { hebdomadaires: [] });
     return snapshots.hebdomadaires || [];
 }
 
@@ -893,7 +900,7 @@ function obtenirSnapshotsEtudiant(da) {
  * @returns {Array} - Liste des snapshots interventions
  */
 function obtenirSnapshotsInterventions() {
-    const snapshots = db.getSync('snapshots', { interventions: [] });
+    const snapshots = db.getSync(cleSnapshots(), { interventions: [] });
     return snapshots.interventions || [];
 }
 
@@ -905,7 +912,7 @@ function obtenirSnapshotsInterventions() {
  * Affiche les statistiques des captures dans l'interface Réglages
  */
 function afficherStatutSnapshots() {
-    const snapshots = db.getSync('snapshots', { hebdomadaires: [], interventions: [] });
+    const snapshots = db.getSync(cleSnapshots(), { hebdomadaires: [], interventions: [] });
 
     const nbHebdo = snapshots.hebdomadaires?.length || 0;
     const nbInterventions = snapshots.interventions?.length || 0;
@@ -1019,7 +1026,7 @@ function confirmerNettoyageSnapshots() {
 
     try {
         // Supprimer toutes les données
-        db.setSync('snapshots', { hebdomadaires: [], interventions: [] });
+        db.setSync(cleSnapshots(), { hebdomadaires: [], interventions: [] });
 
         alert('✅ Toutes les captures ont été supprimées.');
         afficherStatutSnapshots();

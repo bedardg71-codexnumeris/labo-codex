@@ -686,7 +686,7 @@ function calculerNiveauRaI(da) {
     // ========================================
     // DÉCOUPLAGE P/R : Lire P_recent si disponible
     // ========================================
-    const indicesCP = db.getSync('indicesCP', {});
+    const indicesCP = db.getSync((typeof cle === 'function') ? cle('indicesCP') : 'indicesCP', {});
     const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique === 'sommative' ? 'SOM' : 'PAN';
     const donneesCP = indicesCP[da]?.actuel?.[pratique];
