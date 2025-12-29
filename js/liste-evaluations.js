@@ -626,8 +626,10 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     }
 
                     // Évaluation existante
+                    // ✅ NOUVEAU (29 déc 2025): Ajouter daAffichage pour anonymisation
                     lignes.push({
                         da: etudiant.da,
+                        daAffichage: etudiant.daAffichage || etudiant.da,
                         nom: etudiant.nom || '',
                         prenom: etudiant.prenom || '',
                         groupe: etudiant.groupe,
@@ -656,8 +658,10 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                 }
 
                 // Évaluation manquante
+                // ✅ NOUVEAU (29 déc 2025): Ajouter daAffichage pour anonymisation
                 lignes.push({
                     da: etudiant.da,
+                    daAffichage: etudiant.daAffichage || etudiant.da,
                     nom: etudiant.nom || '',
                     prenom: etudiant.prenom || '',
                     groupe: etudiant.groupe,
@@ -798,7 +802,8 @@ function appliquerRechercheTexte(lignes) {
 
     return lignes.filter(ligne => {
         // Rechercher dans tous les champs pertinents
-        const da = ligne.da.toString().toLowerCase();
+        // ✅ NOUVEAU (29 déc 2025): Utiliser daAffichage pour anonymisation
+        const da = (ligne.daAffichage || ligne.da).toString().toLowerCase();
         const nom = ligne.nom.toLowerCase();
         const prenom = ligne.prenom.toLowerCase();
         const production = ligne.productionNom.toLowerCase();
@@ -898,9 +903,12 @@ function genererLigneHTML(ligne) {
         boutons = genererBoutonsActionsNonEvalue(ligne);
     }
 
+    // ✅ NOUVEAU (29 déc 2025): Utiliser daAffichage pour anonymisation
+    const daAffiche = ligne.daAffichage || ligne.da;
+
     return `
         <tr data-evaluation-id="${ligne.evaluationId || ''}" data-da="${ligne.da}" data-production-id="${ligne.productionId}"${classeRemplacee}>
-            <td class="td-left">${ligne.da}</td>
+            <td class="td-left">${daAffiche}</td>
             <td class="td-left">${echapperHtml(ligne.nom)}</td>
             <td class="td-left">${echapperHtml(ligne.prenom)}</td>
             <td class="td-left">${echapperHtml(ligne.productionNom)}</td>
@@ -1395,8 +1403,9 @@ function trierLignesParColonne(lignes) {
 
         switch (triEvaluationsActuel.colonne) {
             case 'da':
-                valeurA = (a.da || '').toString();
-                valeurB = (b.da || '').toString();
+                // ✅ NOUVEAU (29 déc 2025): Utiliser daAffichage pour anonymisation
+                valeurA = (a.daAffichage || a.da || '').toString();
+                valeurB = (b.daAffichage || b.da || '').toString();
                 return asc
                     ? valeurA.localeCompare(valeurB)
                     : valeurB.localeCompare(valeurA);
