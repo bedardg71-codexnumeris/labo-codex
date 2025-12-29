@@ -115,8 +115,11 @@ function chargerListeEtudiantsEval() {
 
     if (!select) return;
 
-    // ✅ NOUVEAU (29 déc 2025): Détecter mode anonymisation pour masquer les DA
-    const modeAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+    // ✅ CORRIGÉ (29 déc 2025): Détecter mode anonymisation via:
+    // 1. La présence de daAffichage (données déjà anonymisées par obtenirDonneesSelonMode)
+    // 2. Ou via estModeeLectureSeule() comme fallback
+    const donneesAnonymisees = etudiants.length > 0 && etudiants[0].hasOwnProperty('daAffichage');
+    const modeAnonymisation = donneesAnonymisees || (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule());
 
     // NOUVEAU (Beta 84): Trier par nom de famille (ordre alphabétique)
     etudiants.sort((a, b) => {
@@ -128,11 +131,15 @@ function chargerListeEtudiantsEval() {
     select.innerHTML = '<option value="">-- Choisir un·e étudiant·e --</option>';
     etudiants.forEach(etudiant => {
         const option = document.createElement('option');
-        option.value = etudiant.da;
-        // En mode anonymisation, ne pas afficher le DA
-        option.textContent = modeAnonymisation
-            ? `${etudiant.prenom} ${etudiant.nom}`
-            : `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`;
+        // Toujours utiliser le DA réel (daReel ou da) pour la valeur (nécessaire pour les calculs)
+        option.value = etudiant.daReel || etudiant.da;
+        // En mode anonymisation, utiliser les données anonymisées et ne pas afficher le DA
+        if (modeAnonymisation) {
+            // Utiliser prenom/nom qui sont déjà anonymisés par obtenirDonneesSelonMode()
+            option.textContent = `${etudiant.prenom} ${etudiant.nom}`.trim();
+        } else {
+            option.textContent = `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`;
+        }
         select.appendChild(option);
     });
 }
@@ -177,8 +184,11 @@ function filtrerEtudiantsParGroupe() {
     const groupeId = document.getElementById('selectGroupeEval').value;
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
-    // ✅ NOUVEAU (29 déc 2025): Détecter mode anonymisation pour masquer les DA
-    const modeAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+    // ✅ CORRIGÉ (29 déc 2025): Détecter mode anonymisation via:
+    // 1. La présence de daAffichage (données déjà anonymisées par obtenirDonneesSelonMode)
+    // 2. Ou via estModeeLectureSeule() comme fallback
+    const donneesAnonymisees = etudiants.length > 0 && etudiants[0].hasOwnProperty('daAffichage');
+    const modeAnonymisation = donneesAnonymisees || (typeof estModeeLectureSeule === 'function' && estModeeLectureSeule());
 
     const etudiantsFiltres = groupeId
         ? etudiants.filter(e => e.groupe === groupeId)
@@ -197,11 +207,15 @@ function filtrerEtudiantsParGroupe() {
     select.innerHTML = '<option value="">-- Choisir un·e étudiant·e --</option>';
     etudiantsFiltres.forEach(etudiant => {
         const option = document.createElement('option');
-        option.value = etudiant.da;
-        // En mode anonymisation, ne pas afficher le DA
-        option.textContent = modeAnonymisation
-            ? `${etudiant.prenom} ${etudiant.nom}`
-            : `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`;
+        // Toujours utiliser le DA réel (daReel ou da) pour la valeur (nécessaire pour les calculs)
+        option.value = etudiant.daReel || etudiant.da;
+        // En mode anonymisation, utiliser les données anonymisées et ne pas afficher le DA
+        if (modeAnonymisation) {
+            // Utiliser prenom/nom qui sont déjà anonymisés par obtenirDonneesSelonMode()
+            option.textContent = `${etudiant.prenom} ${etudiant.nom}`.trim();
+        } else {
+            option.textContent = `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`;
+        }
         select.appendChild(option);
     });
 }
