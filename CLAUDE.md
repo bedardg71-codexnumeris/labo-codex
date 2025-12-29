@@ -2496,6 +2496,14 @@ FORMAT : [Patch minimal / diff / code complet si nouveau module]
 **Cause** : localStorage effacé (navigation privée, nettoyage navigateur)
 **Solution** : Utiliser Import/Export régulièrement pour backup JSON
 
+### Anonymisation ne fonctionne pas dans le formulaire d'évaluation (CORRIGÉ Beta 95 - 29 déc 2025)
+**Symptômes** : La checkbox "Anonymiser" est cochée mais les vrais noms/DA s'affichent
+**Cause** : `mettreAJourBandeauArchive()` réinitialisait le mode à 'normal' à chaque navigation
+**Solution appliquée** :
+1. `trimestres.js` : Synchroniser l'état de la checkbox avec le mode stocké au lieu de réinitialiser
+2. `evaluation.js` : Lire le mode directement depuis `db.getSync('modeApplication')` car `modeActuel` est une variable locale à `modes.js`
+**Commits** : `8794971`, `210ed93`, `08ada03`
+
 ---
 
 ## Debug général
