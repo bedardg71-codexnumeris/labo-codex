@@ -640,9 +640,13 @@
         // ✅ CORRIGÉ (29 déc 2025): Synchroniser checkbox avec le mode stocké
         // Au lieu de réinitialiser, on lit le mode actuel et on synchronise l'UI
         const checkboxAnonyme = document.getElementById('checkbox-anonymiser-archive');
-        if (checkboxAnonyme && isArchive) {
-            const modeActuel = db.getSync('modeApplication', 'normal');
-            checkboxAnonyme.checked = (modeActuel === 'anonymisation');
+        const modeActuel = db.getSync('modeApplication', 'normal');
+
+        if (isArchive) {
+            // Trimestre archivé : synchroniser checkbox avec mode stocké
+            if (checkboxAnonyme) {
+                checkboxAnonyme.checked = (modeActuel === 'anonymisation');
+            }
 
             // Mettre à jour la couleur du bandeau selon le mode
             if (modeActuel === 'anonymisation' && bandeau) {
@@ -650,9 +654,16 @@
             }
 
             console.log(`[Trimestres] Synchronisation checkbox anonymisation: ${modeActuel}`);
-        } else if (checkboxAnonyme) {
-            // Si pas archivé, décocher la checkbox
-            checkboxAnonyme.checked = false;
+        } else {
+            // Trimestre NON archivé : forcer le mode normal si on était en anonymisation
+            if (checkboxAnonyme) {
+                checkboxAnonyme.checked = false;
+            }
+
+            if (modeActuel === 'anonymisation' && typeof window.changerMode === 'function') {
+                console.log('[Trimestres] Retour mode normal (trimestre non archivé)');
+                window.changerMode('normal');
+            }
         }
 
         // Ajouter/retirer la classe mode-archive sur le body
