@@ -78,6 +78,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof afficherTableauProductions === 'function') {
             await afficherTableauProductions();
         }
+        // ✅ NOUVEAU (29 déc 2025): Recharger le tableau de bord après synchronisation IndexedDB
+        if (typeof chargerTableauBordApercu === 'function') {
+            chargerTableauBordApercu();
+        }
     });
 
     // ===============================
