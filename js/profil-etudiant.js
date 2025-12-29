@@ -2490,7 +2490,7 @@ function calculerPerformancePAN(da) {
 
     // 🆕 PRIORITÉ 1 : Utiliser les artefacts SÉLECTIONNÉS dans le portfolio
     const selectionsPortfolios = obtenirDonneesSelonMode('portfoliosEleves') || {};
-    const productions = db.getSync('productions', []);
+    const productions = obtenirDonneesSelonMode('productions') || [];
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     if (portfolio && selectionsPortfolios[da]?.[portfolio.id]) {
@@ -2985,7 +2985,7 @@ function changerSectionProfil(section) {
  */
 function calculerDirectionRisque(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = db.getSync('productions', []);
+    const productions = obtenirDonneesSelonMode('productions') || [];
 
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
@@ -3061,7 +3061,7 @@ function calculerDirectionRisque(da) {
  */
 function calculerDirectionsCriteres(da, pratique = 'PAN') {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = db.getSync('productions', []);
+    const productions = obtenirDonneesSelonMode('productions') || [];
 
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
@@ -4505,7 +4505,7 @@ function fermerDetailIndice() {
  * @returns {string} - HTML de la section
  */
 function genererSectionCompletion(da) {
-    const productions = db.getSync('productions', []);
+    const productions = obtenirDonneesSelonMode('productions') || [];
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
 
@@ -4884,7 +4884,7 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
     }
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = db.getSync('productions', []);
+    const productions = obtenirDonneesSelonMode('productions') || [];
 
     // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
     const artefactsPortfolio = productions
@@ -5216,7 +5216,9 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     }
 
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = db.getSync('productions', []);
+    // ✅ CORRECTION (29 déc 2025): Utiliser obtenirDonneesSelonMode() au lieu de db.getSync()
+    // pour respecter le namespace du trimestre archivé et le filtrage par coursId
+    const productions = obtenirDonneesSelonMode('productions') || [];
 
     // Filtrer uniquement les artefacts de portfolio évalués pour cet étudiant
     const artefactsPortfolio = productions
@@ -5405,7 +5407,7 @@ function calculerProgressionEleve(da) {
  */
 function identifierDefiSpecifique(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const productions = db.getSync('productions', []);
+    const productions = obtenirDonneesSelonMode('productions') || [];
 
     // Obtenir le nombre de productions configuré pour l'analyse des patterns
     const N = obtenirNombreProductionsPourPatterns() || 3;
@@ -6562,7 +6564,7 @@ function genererSectionPerformance(da) {
         console.error(`[DEBUG Graphique Critères] Fonction creerGraphiqueCriteres non disponible`);
     }
 
-    const productions = db.getSync('productions', []);
+    const productions = obtenirDonneesSelonMode('productions') || [];
     const portfolio = productions.find(p => p.type === 'portfolio');
 
     if (!portfolio) {

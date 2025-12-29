@@ -92,7 +92,8 @@ function calculerEtSauvegarderIndiceCompletion() {
  */
 function calculerCompletionSommative(da) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
-    const productions = db.getSync('productions', []);
+    // ✅ CORRECTION (29 déc 2025): Utiliser obtenirDonneesSelonMode() pour namespace
+    const productions = obtenirDonneesSelonMode('productions') || [];
     
     // Productions à évaluer (exclure portfolio)
     const productionsAEvaluer = productions.filter(p => p.type !== 'portfolio');
@@ -207,7 +208,8 @@ function chargerDonneesEvaluations() {
     // Charger les données selon le mode actif (géré automatiquement par le module 17)
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
-    const productions = db.getSync('productions', []);
+    // ✅ CORRECTION (29 déc 2025): Utiliser obtenirDonneesSelonMode() pour namespace
+    const productions = obtenirDonneesSelonMode('productions') || [];
 
     // Extraire les groupes uniques depuis les étudiants
     const groupes = etudiants.length > 0
@@ -299,7 +301,8 @@ function genererOptionsFiltres(groupes, productions) {
  * Appelée après création/modification/suppression d'une production
  */
 function rechargerFiltreProduction() {
-    const productions = db.getSync('productions', []);
+    // ✅ CORRECTION (29 déc 2025): Utiliser obtenirDonneesSelonMode() pour namespace
+    const productions = obtenirDonneesSelonMode('productions') || [];
     const selectProduction = document.getElementById('filtre-production-eval');
 
     if (!selectProduction) return;
