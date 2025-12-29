@@ -115,6 +115,9 @@ function chargerListeEtudiantsEval() {
 
     if (!select) return;
 
+    // ✅ NOUVEAU (29 déc 2025): Détecter mode anonymisation pour masquer les DA
+    const modeAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+
     // NOUVEAU (Beta 84): Trier par nom de famille (ordre alphabétique)
     etudiants.sort((a, b) => {
         const nomA = (a.nom + ' ' + a.prenom).toLowerCase();
@@ -126,7 +129,10 @@ function chargerListeEtudiantsEval() {
     etudiants.forEach(etudiant => {
         const option = document.createElement('option');
         option.value = etudiant.da;
-        option.textContent = `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`;
+        // En mode anonymisation, ne pas afficher le DA
+        option.textContent = modeAnonymisation
+            ? `${etudiant.prenom} ${etudiant.nom}`
+            : `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`;
         select.appendChild(option);
     });
 }
@@ -171,6 +177,9 @@ function filtrerEtudiantsParGroupe() {
     const groupeId = document.getElementById('selectGroupeEval').value;
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
+    // ✅ NOUVEAU (29 déc 2025): Détecter mode anonymisation pour masquer les DA
+    const modeAnonymisation = typeof estModeeLectureSeule === 'function' && estModeeLectureSeule();
+
     const etudiantsFiltres = groupeId
         ? etudiants.filter(e => e.groupe === groupeId)
         : etudiants;
@@ -189,7 +198,10 @@ function filtrerEtudiantsParGroupe() {
     etudiantsFiltres.forEach(etudiant => {
         const option = document.createElement('option');
         option.value = etudiant.da;
-        option.textContent = `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`;
+        // En mode anonymisation, ne pas afficher le DA
+        option.textContent = modeAnonymisation
+            ? `${etudiant.prenom} ${etudiant.nom}`
+            : `${etudiant.prenom} ${etudiant.nom} (${etudiant.da})`;
         select.appendChild(option);
     });
 }
