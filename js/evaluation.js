@@ -1,7 +1,8 @@
 /* ===============================
    MODULE EVALUATION: ÉVALUATIONS ET RÉTROACTIONS
    Index: 50 10-10-2025a → Modularisation
-   
+   Version: 2025122905 (29 déc 2025 - Fix anonymisation)
+
    ⚠️ AVERTISSEMENT ⚠️
    Ce module gère l'évaluation des productions étudiantes
    et la génération automatique de rétroactions.
@@ -92,7 +93,7 @@ function initialiserModuleEvaluation() {
     // 🔄 Initialiser le mode évaluation en série
     initialiserModeEvaluationSerie();
 
-    console.log('   ✅ Module Évaluation initialisé');
+    console.log('   ✅ Module Évaluation initialisé (v2025122905 - Fix anonymisation)');
 }
 
 /* ===============================
