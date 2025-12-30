@@ -1291,8 +1291,14 @@ async function basculerDonneesDemo(activer) {
                 console.log('   ✅ Cours démo activé comme cours actif');
             }
 
+            // ✅ CORRECTION CRITIQUE (30 déc 2025): Basculer vers Mode Assisté
+            // Le groupe 9999 n'est visible qu'en Mode Assisté (filtrerEtudiantsParMode dans modes.js)
+            // Sans ce basculement, les étudiants démo sont filtrés et invisibles!
+            db.setSync('modeApplication', 'simulation');
+            console.log('   ✅ Mode Assisté activé automatiquement');
+
             // Notification succès
-            alert('✅ Données de démonstration chargées avec succès !\n\nGroupe 9999 : 10 étudiants, 4 artefacts, 40 évaluations');
+            alert('✅ Données de démonstration chargées avec succès !\n\nGroupe 9999 : 10 étudiants, 4 artefacts, 40 évaluations\n\nMode Assisté activé automatiquement.');
 
             // Recharger la page pour afficher les nouvelles données
             window.location.reload();
@@ -1355,8 +1361,24 @@ async function basculerDonneesDemo(activer) {
         await db.set('donneesDemo', false);
         localStorage.removeItem('demo-chargees'); // ✅ Retirer flag de validation
 
+        // ✅ CORRECTION (30 déc 2025): Revenir au Mode Normal et réactiver un vrai cours
+        db.setSync('modeApplication', 'normal');
+        console.log('   ✅ Mode Normal réactivé');
+
+        // Réactiver le premier cours réel s'il existe
+        const coursRestants = await db.get('listeCours') || [];
+        const premierCoursReel = coursRestants.find(c => c.groupe !== '9999');
+        if (premierCoursReel) {
+            await db.set('infoCours', premierCoursReel);
+            console.log(`   ✅ Cours ${premierCoursReel.sigle} groupe ${premierCoursReel.groupe} réactivé`);
+        } else {
+            // Aucun autre cours: effacer infoCours
+            await db.set('infoCours', null);
+            console.log('   ⚠️ Aucun autre cours disponible');
+        }
+
         // Notification succès
-        alert('✅ Données de démonstration supprimées avec succès !');
+        alert('✅ Données de démonstration supprimées avec succès !\n\nMode Normal réactivé.');
 
         // Recharger la page pour refléter les changements
         window.location.reload();
