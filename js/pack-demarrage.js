@@ -1794,7 +1794,7 @@ const PACK_DEMARRAGE =
   "groupeEtudiants": [
     {
       "id": "ETU_DEMO_1",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "groupe": "demo",
       "nom": "Tremblay",
       "prenom": "Émilie",
@@ -1805,7 +1805,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "ETU_DEMO_2",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "groupe": "demo",
       "nom": "Gagnon",
       "prenom": "Antoine",
@@ -1816,7 +1816,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "ETU_DEMO_3",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "groupe": "demo",
       "nom": "Roy",
       "prenom": "Léa",
@@ -1827,7 +1827,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "ETU_DEMO_4",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "groupe": "demo",
       "nom": "Côté",
       "prenom": "Thomas",
@@ -1838,7 +1838,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "ETU_DEMO_5",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "groupe": "demo",
       "nom": "Bouchard",
       "prenom": "Camille",
@@ -1916,7 +1916,7 @@ const PACK_DEMARRAGE =
   "evaluationsSauvegardees": [
     {
       "id": "EVAL_DEMO_1",
-      "etudiantDA": "DEMO3",
+      "etudiantDA": "DEMO003",
       "etudiantNom": "Léa Roy",
       "groupe": "demo",
       "productionId": "EV2",
@@ -1979,7 +1979,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_2",
-      "etudiantDA": "DEMO1",
+      "etudiantDA": "DEMO001",
       "etudiantNom": "Émilie Tremblay",
       "groupe": "demo",
       "productionId": "EV2",
@@ -2042,7 +2042,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_3",
-      "etudiantDA": "DEMO2",
+      "etudiantDA": "DEMO002",
       "etudiantNom": "Antoine Gagnon",
       "groupe": "demo",
       "productionId": "EV2",
@@ -2105,7 +2105,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_4",
-      "etudiantDA": "DEMO4",
+      "etudiantDA": "DEMO004",
       "etudiantNom": "Thomas Côté",
       "groupe": "demo",
       "productionId": "EV2",
@@ -2168,7 +2168,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_5",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "EV2",
@@ -2224,7 +2224,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_6",
-      "etudiantDA": "DEMO1",
+      "etudiantDA": "DEMO001",
       "etudiantNom": "Émilie Tremblay",
       "groupe": "demo",
       "productionId": "PROD1759719880034",
@@ -2280,7 +2280,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_7",
-      "etudiantDA": "DEMO2",
+      "etudiantDA": "DEMO002",
       "etudiantNom": "Antoine Gagnon",
       "groupe": "demo",
       "productionId": "PROD1759719880034",
@@ -2336,7 +2336,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_8",
-      "etudiantDA": "DEMO3",
+      "etudiantDA": "DEMO003",
       "etudiantNom": "Léa Roy",
       "groupe": "demo",
       "productionId": "PROD1759719880034",
@@ -2392,7 +2392,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_9",
-      "etudiantDA": "DEMO4",
+      "etudiantDA": "DEMO004",
       "etudiantNom": "Thomas Côté",
       "groupe": "demo",
       "productionId": "PROD1759719880034",
@@ -2448,7 +2448,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_10",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "PROD1759719880034",
@@ -2504,7 +2504,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_11",
-      "etudiantDA": "DEMO2",
+      "etudiantDA": "DEMO002",
       "etudiantNom": "Antoine Gagnon",
       "groupe": "demo",
       "productionId": "EV3",
@@ -2560,7 +2560,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_12",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "EV3",
@@ -2616,7 +2616,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_13",
-      "etudiantDA": "DEMO4",
+      "etudiantDA": "DEMO004",
       "etudiantNom": "Thomas Côté",
       "groupe": "demo",
       "productionId": "EV3",
@@ -2672,7 +2672,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_14",
-      "etudiantDA": "DEMO1",
+      "etudiantDA": "DEMO001",
       "etudiantNom": "Émilie Tremblay",
       "groupe": "demo",
       "productionId": "EV3",
@@ -2728,7 +2728,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_15",
-      "etudiantDA": "DEMO1",
+      "etudiantDA": "DEMO001",
       "etudiantNom": "Émilie Tremblay",
       "groupe": "demo",
       "productionId": "PROD1759762907652",
@@ -2793,7 +2793,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_16",
-      "etudiantDA": "DEMO3",
+      "etudiantDA": "DEMO003",
       "etudiantNom": "Léa Roy",
       "groupe": "demo",
       "productionId": "PROD1759762907652",
@@ -2856,7 +2856,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_17",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "PROD1759762907652",
@@ -2919,7 +2919,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_18",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "PROD1759762907652",
@@ -2982,7 +2982,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_19",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "PROD1759762907652",
@@ -3047,7 +3047,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_20",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "PROD1759762907652",
@@ -3110,7 +3110,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_21",
-      "etudiantDA": "DEMO4",
+      "etudiantDA": "DEMO004",
       "etudiantNom": "Thomas Côté",
       "groupe": "demo",
       "productionId": "PROD1759762907652",
@@ -3177,7 +3177,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_22",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "PROD1759762907652",
@@ -3243,7 +3243,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_23",
-      "etudiantDA": "DEMO4",
+      "etudiantDA": "DEMO004",
       "etudiantNom": "Thomas Côté",
       "groupe": "demo",
       "productionId": "PROD1759762907652",
@@ -3314,7 +3314,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_24",
-      "etudiantDA": "DEMO1",
+      "etudiantDA": "DEMO001",
       "etudiantNom": "Émilie Tremblay",
       "groupe": "demo",
       "productionId": "PROD1761667427153",
@@ -3378,7 +3378,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_25",
-      "etudiantDA": "DEMO2",
+      "etudiantDA": "DEMO002",
       "etudiantNom": "Antoine Gagnon",
       "groupe": "demo",
       "productionId": "PROD1761667427153",
@@ -3442,7 +3442,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_26",
-      "etudiantDA": "DEMO3",
+      "etudiantDA": "DEMO003",
       "etudiantNom": "Léa Roy",
       "groupe": "demo",
       "productionId": "PROD1761667427153",
@@ -3510,7 +3510,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_27",
-      "etudiantDA": "DEMO4",
+      "etudiantDA": "DEMO004",
       "etudiantNom": "Thomas Côté",
       "groupe": "demo",
       "productionId": "PROD1761667427153",
@@ -3574,7 +3574,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_28",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "PROD1761667427153",
@@ -3638,7 +3638,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_29",
-      "etudiantDA": "DEMO3",
+      "etudiantDA": "DEMO003",
       "etudiantNom": "Léa Roy",
       "groupe": "demo",
       "productionId": "PROD1761667427153",
@@ -3707,7 +3707,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_30",
-      "etudiantDA": "DEMO3",
+      "etudiantDA": "DEMO003",
       "etudiantNom": "Léa Roy",
       "groupe": "demo",
       "productionId": "EV3",
@@ -3764,7 +3764,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_31",
-      "etudiantDA": "DEMO1",
+      "etudiantDA": "DEMO001",
       "etudiantNom": "Émilie Tremblay",
       "groupe": "demo",
       "productionId": "PROD1763652231596",
@@ -3857,7 +3857,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_32",
-      "etudiantDA": "DEMO2",
+      "etudiantDA": "DEMO002",
       "etudiantNom": "Antoine Gagnon",
       "groupe": "demo",
       "productionId": "PROD1763652231596",
@@ -3947,7 +3947,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_33",
-      "etudiantDA": "DEMO3",
+      "etudiantDA": "DEMO003",
       "etudiantNom": "Léa Roy",
       "groupe": "demo",
       "productionId": "PROD1763652231596",
@@ -4032,7 +4032,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_34",
-      "etudiantDA": "DEMO4",
+      "etudiantDA": "DEMO004",
       "etudiantNom": "Thomas Côté",
       "groupe": "demo",
       "productionId": "PROD1763652231596",
@@ -4126,7 +4126,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_35",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "PROD1763652231596",
@@ -4208,7 +4208,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_36",
-      "etudiantDA": "DEMO1",
+      "etudiantDA": "DEMO001",
       "etudiantNom": "Émilie Tremblay",
       "groupe": "demo",
       "productionId": "1764678245382",
@@ -4275,7 +4275,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_37",
-      "etudiantDA": "DEMO2",
+      "etudiantDA": "DEMO002",
       "etudiantNom": "Antoine Gagnon",
       "groupe": "demo",
       "productionId": "1764678245382",
@@ -4342,7 +4342,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_38",
-      "etudiantDA": "DEMO3",
+      "etudiantDA": "DEMO003",
       "etudiantNom": "Léa Roy",
       "groupe": "demo",
       "productionId": "1764678245382",
@@ -4411,7 +4411,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_39",
-      "etudiantDA": "DEMO4",
+      "etudiantDA": "DEMO004",
       "etudiantNom": "Thomas Côté",
       "groupe": "demo",
       "productionId": "1764678245382",
@@ -4480,7 +4480,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_40",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "1764678245382",
@@ -4549,7 +4549,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_41",
-      "etudiantDA": "DEMO1",
+      "etudiantDA": "DEMO001",
       "etudiantNom": "Émilie Tremblay",
       "groupe": "demo",
       "productionId": "1765107743248",
@@ -4609,7 +4609,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_42",
-      "etudiantDA": "DEMO2",
+      "etudiantDA": "DEMO002",
       "etudiantNom": "Antoine Gagnon",
       "groupe": "demo",
       "productionId": "1765107743248",
@@ -4669,7 +4669,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_43",
-      "etudiantDA": "DEMO3",
+      "etudiantDA": "DEMO003",
       "etudiantNom": "Léa Roy",
       "groupe": "demo",
       "productionId": "1765107743248",
@@ -4729,7 +4729,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_44",
-      "etudiantDA": "DEMO4",
+      "etudiantDA": "DEMO004",
       "etudiantNom": "Thomas Côté",
       "groupe": "demo",
       "productionId": "1765107743248",
@@ -4789,7 +4789,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_45",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "1765107743248",
@@ -4849,7 +4849,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_46",
-      "etudiantDA": "DEMO2",
+      "etudiantDA": "DEMO002",
       "etudiantNom": "Antoine Gagnon",
       "groupe": "demo",
       "productionId": "PROD1765112349610",
@@ -4909,7 +4909,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_47",
-      "etudiantDA": "DEMO4",
+      "etudiantDA": "DEMO004",
       "etudiantNom": "Thomas Côté",
       "groupe": "demo",
       "productionId": "PROD1765112349610",
@@ -4969,7 +4969,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_48",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "PROD1765112349610",
@@ -5029,7 +5029,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_49",
-      "etudiantDA": "DEMO3",
+      "etudiantDA": "DEMO003",
       "etudiantNom": "Léa Roy",
       "groupe": "demo",
       "productionId": "PROD1765112349610",
@@ -5089,7 +5089,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_50",
-      "etudiantDA": "DEMO1",
+      "etudiantDA": "DEMO001",
       "etudiantNom": "Émilie Tremblay",
       "groupe": "demo",
       "productionId": "PROD1765112349610",
@@ -5120,7 +5120,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_51",
-      "etudiantDA": "DEMO1",
+      "etudiantDA": "DEMO001",
       "etudiantNom": "Émilie Tremblay",
       "groupe": "demo",
       "productionId": "PROD1765415976749",
@@ -5231,7 +5231,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_52",
-      "etudiantDA": "DEMO2",
+      "etudiantDA": "DEMO002",
       "etudiantNom": "Antoine Gagnon",
       "groupe": "demo",
       "productionId": "PROD1765415976749",
@@ -5315,7 +5315,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_53",
-      "etudiantDA": "DEMO3",
+      "etudiantDA": "DEMO003",
       "etudiantNom": "Léa Roy",
       "groupe": "demo",
       "productionId": "PROD1765415976749",
@@ -5412,7 +5412,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_54",
-      "etudiantDA": "DEMO4",
+      "etudiantDA": "DEMO004",
       "etudiantNom": "Thomas Côté",
       "groupe": "demo",
       "productionId": "PROD1765415976749",
@@ -5503,7 +5503,7 @@ const PACK_DEMARRAGE =
     },
     {
       "id": "EVAL_DEMO_55",
-      "etudiantDA": "DEMO5",
+      "etudiantDA": "DEMO005",
       "etudiantNom": "Camille Bouchard",
       "groupe": "demo",
       "productionId": "PROD1765415976749",
@@ -5613,637 +5613,637 @@ const PACK_DEMARRAGE =
   "presences": [
     {
       "date": "2025-08-25",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-08-25",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-08-25",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-08-25",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-08-25",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-08-27",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-08-27",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-08-27",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-08-27",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-08-27",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-04",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-04",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-04",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-04",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-04",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-03",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-03",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-03",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-03",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-03",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-08",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-08",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-08",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-08",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-08",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-10",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-10",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-10",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-10",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-10",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-15",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-15",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-15",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-15",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-15",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-17",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-17",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-17",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-17",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-17",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-22",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-22",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-22",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-22",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-22",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-24",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-24",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-24",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-24",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 0,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-24",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-06",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-06",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-06",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-06",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-06",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-08",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-08",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-08",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-08",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 0,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-08",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-29",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-29",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-29",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-29",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-29",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-20",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-20",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-20",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-20",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-20",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-22",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-22",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-22",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-22",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-22",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-01",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-01",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-01",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-01",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-01",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-27",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-27",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-27",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-27",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-27",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-29",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-29",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-29",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-29",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-29",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-10-28",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 0,
       "notes": "Absence motivée RàI",
       "facultatif": true,
@@ -6251,7 +6251,7 @@ const PACK_DEMARRAGE =
     },
     {
       "date": "2025-10-28",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 0,
       "notes": "Absence motivée RàI",
       "facultatif": true,
@@ -6259,7 +6259,7 @@ const PACK_DEMARRAGE =
     },
     {
       "date": "2025-10-28",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 0,
       "notes": "Absence motivée RàI",
       "facultatif": true,
@@ -6267,7 +6267,7 @@ const PACK_DEMARRAGE =
     },
     {
       "date": "2025-10-28",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 0,
       "notes": "Absence motivée RàI",
       "facultatif": true,
@@ -6275,7 +6275,7 @@ const PACK_DEMARRAGE =
     },
     {
       "date": "2025-10-28",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 0,
       "notes": "Absence motivée RàI",
       "facultatif": true,
@@ -6283,217 +6283,217 @@ const PACK_DEMARRAGE =
     },
     {
       "date": "2025-11-05",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-05",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-05",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-05",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-05",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-12",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-12",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-12",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-12",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-12",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-17",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-17",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-17",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-17",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-17",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-19",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-19",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-19",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-19",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-19",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-24",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-24",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-24",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-24",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-24",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-26",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-26",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-26",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-26",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-26",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-01",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 0,
       "notes": "Absence motivée RàI",
       "facultatif": true,
@@ -6501,7 +6501,7 @@ const PACK_DEMARRAGE =
     },
     {
       "date": "2025-12-01",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "Intervention RàI : Intervention niveau 2 (1er déc.)",
       "facultatif": true,
@@ -6509,7 +6509,7 @@ const PACK_DEMARRAGE =
     },
     {
       "date": "2025-12-01",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 0,
       "notes": "Absence motivée RàI",
       "facultatif": true,
@@ -6517,7 +6517,7 @@ const PACK_DEMARRAGE =
     },
     {
       "date": "2025-12-01",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 0,
       "notes": "Absence motivée RàI",
       "facultatif": true,
@@ -6525,7 +6525,7 @@ const PACK_DEMARRAGE =
     },
     {
       "date": "2025-12-01",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 0,
       "notes": "Absence motivée RàI",
       "facultatif": true,
@@ -6533,7 +6533,7 @@ const PACK_DEMARRAGE =
     },
     {
       "date": "2025-11-03",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "Intervention RàI : Interventions niveau 2 (3 nov.)",
       "facultatif": true,
@@ -6541,175 +6541,175 @@ const PACK_DEMARRAGE =
     },
     {
       "date": "2025-12-03",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-03",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-03",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-03",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-03",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-08",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-08",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-08",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-08",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-08",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-10",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-10",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-10",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-10",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-12-10",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-30",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 0,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-30",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 0,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-30",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 0,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-30",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 0,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-09-30",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 0,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-14",
-      "da": "DEMO1",
+      "da": "DEMO001",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-14",
-      "da": "DEMO2",
+      "da": "DEMO002",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-14",
-      "da": "DEMO3",
+      "da": "DEMO003",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-14",
-      "da": "DEMO4",
+      "da": "DEMO004",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
     },
     {
       "date": "2025-11-14",
-      "da": "DEMO5",
+      "da": "DEMO005",
       "heures": 2,
       "notes": "",
       "coursId": "demo-cours-h2026"
