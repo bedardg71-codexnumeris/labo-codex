@@ -7523,26 +7523,37 @@ function genererRapportAPI(da, options = {}) {
     }
 
     // 5. GESTION DES JETONS
-    if (opts.jetons) {
-        // Obtenir les jetons depuis le profil étudiant
-        const jetons = etudiant.jetons || {};
-        const configJetons = obtenirDonneesSelonMode('modalitesEvaluation')?.jetons || {};
+    if (opts.jetons && typeof obtenirStatutJetonsEtudiant === 'function') {
+        // Utiliser la fonction officielle pour obtenir le statut des jetons
+        const statutJetons = obtenirStatutJetonsEtudiant(da);
 
-        // Compter les jetons utilisés par type
-        let nbUtilises = 0;
-        let nbDisponibles = 0;
+        // Vérifier si des jetons sont configurés
+        const typesJetons = Object.keys(statutJetons);
+        if (typesJetons.length > 0) {
+            // Calculer les totaux
+            let nbUtilises = 0;
+            let nbDisponibles = 0;
+            const details = [];
 
-        Object.keys(configJetons).forEach(type => {
-            const config = configJetons[type];
-            if (config && config.actif) {
-                const utilises = jetons[type]?.utilises || 0;
-                const max = config.quantite || 0;
-                nbUtilises += utilises;
-                nbDisponibles += max;
+            typesJetons.forEach(typeId => {
+                const info = statutJetons[typeId];
+                if (info && info.total > 0) {
+                    nbUtilises += info.utilises;
+                    nbDisponibles += info.total;
+                    if (info.utilises > 0) {
+                        details.push(`${info.nom}: ${info.utilises}/${info.total}`);
+                    }
+                }
+            });
+
+            if (nbDisponibles > 0) {
+                rapport += `Jetons : ${nbUtilises} / ${nbDisponibles} utilisés`;
+                if (details.length > 0) {
+                    rapport += ` (${details.join(', ')})`;
+                }
+                rapport += `\n`;
             }
-        });
-
-        rapport += `Gestion des jetons : ${nbUtilises} / ${nbDisponibles} utilisés\n`;
+        }
     }
 
     return rapport.trim();
@@ -7598,6 +7609,10 @@ function genererSectionRapport(da) {
                                 Performance
                             </label>
                             <label class="text-sm-pointer">
+                                <input type="checkbox" id="inclure-jetons-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                Jetons
+                            </label>
+                            <label class="text-sm-pointer">
                                 <input type="checkbox" id="inclure-date-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
                                 Date
                             </label>
@@ -7644,6 +7659,7 @@ function genererEtAfficherRapport(da) {
         assiduite: document.getElementById(`inclure-assiduite-${da}`)?.checked ?? true,
         completion: document.getElementById(`inclure-completion-${da}`)?.checked ?? true,
         performance: document.getElementById(`inclure-performance-${da}`)?.checked ?? true,
+        jetons: document.getElementById(`inclure-jetons-${da}`)?.checked ?? true,
         date: document.getElementById(`inclure-date-${da}`)?.checked ?? true
     };
 
@@ -7759,6 +7775,7 @@ function sauvegarderPreferencesRapport(da) {
         assiduite: document.getElementById(`inclure-assiduite-${da}`)?.checked ?? true,
         completion: document.getElementById(`inclure-completion-${da}`)?.checked ?? true,
         performance: document.getElementById(`inclure-performance-${da}`)?.checked ?? true,
+        jetons: document.getElementById(`inclure-jetons-${da}`)?.checked ?? true,
         date: document.getElementById(`inclure-date-${da}`)?.checked ?? true
     };
 
@@ -7774,7 +7791,7 @@ function restaurerPreferencesRapport(da) {
     const preferences = db.getSync('preferencesRapport', null);
 
     // Restaurer les checkboxes de sections
-    const sections = ['identification', 'assiduite', 'completion', 'performance', 'date'];
+    const sections = ['identification', 'assiduite', 'completion', 'performance', 'jetons', 'date'];
     sections.forEach(section => {
         const checkbox = document.getElementById(`inclure-${section}-${da}`);
         if (checkbox && preferences && preferences[section] !== undefined) {
