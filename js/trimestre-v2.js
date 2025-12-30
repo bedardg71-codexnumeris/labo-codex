@@ -1044,10 +1044,12 @@ function chargerDropdownCoursV2() {
     };
 
     // Helper: obtenir le texte d'affichage d'un cours
+    // ✅ CORRECTION (30 déc 2025): Inclure le groupe pour distinguer les cours démo
     const obtenirTexteCours = (c) => {
         const sigle = c.sigle || c.codeCours || c.numero || '';
         const titre = c.titre || c.nomCours || '';
-        const texte = `${sigle} ${titre}`.trim();
+        const groupe = c.groupe ? ` (gr. ${c.groupe})` : '';
+        const texte = `${sigle} ${titre}${groupe}`.trim();
         return texte || `Cours ${c.id || 'sans identifiant'}`;
     };
 
