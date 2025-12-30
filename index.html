@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 95 - Refonte UX Réglages</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2025122701">
+    <link rel="stylesheet" href="styles.css?v=2025123002">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -291,7 +291,7 @@
 
         body.mode-archive:not(.mode-ecriture-temp) input:not([type="search"]):not([id^="recherche-"]):not([id^="inclure-"]):not([id^="checkbox-"]):not([id^="v2-"]),
         body.mode-archive:not(.mode-ecriture-temp) textarea:not([id^="textarea-rapport-"]),
-        body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not(#select-mode):not([id^="filtre-"]):not([id^="v2-"]) {
+        body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not(#select-mode):not([id^="filtre-"]):not([id^="v2-"]):not(#selecteurEtudiantProfil) {
             pointer-events: none;
             opacity: 0.7;
             background-color: #f5f5f5;
@@ -8630,36 +8630,32 @@ Exemple :
                                     <em>Recommandé avec «N meilleurs» pour valoriser le progrès tout en détectant les décrochages.</em>
                                 </small>
                             </div>
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
                                 <div class="groupe-form">
                                     <label for="v2-portfolio-selection" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                         Mode de sélection
                                     </label>
                                     <select id="v2-portfolio-selection" class="controle-form" onchange="sauvegarderStructureV2()">
-                                        <option value="meilleurs">N meilleurs artefacts</option>
-                                        <option value="derniers">N derniers artefacts</option>
-                                        <option value="tous">Tous les artefacts</option>
+                                        <option value="meilleurs">N meilleurs</option>
+                                        <option value="derniers">N derniers</option>
+                                        <option value="tous">Tous</option>
                                     </select>
                                 </div>
                                 <div class="groupe-form">
                                     <label for="v2-portfolio-nombre" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                        Artefacts pour la note finale
+                                        Pour la note finale
                                     </label>
                                     <input type="number" id="v2-portfolio-nombre" class="controle-form" min="1" max="20" value="5" onchange="sauvegarderStructureV2()">
-                                    <small class="text-muted" style="display: block; margin-top: 4px;">Les N meilleurs artefacts pour calculer la note finale</small>
                                 </div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
                                 <div class="groupe-form">
                                     <label for="v2-portfolio-minimum" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                        Seuil pour note formative
+                                        Seuil note formative
                                     </label>
                                     <input type="number" id="v2-portfolio-minimum" class="controle-form" min="1" max="20" value="7" onchange="sauvegarderStructureV2()">
-                                    <small class="text-muted" style="display: block; margin-top: 4px;">Affiche une note provisoire après ce nombre d'artefacts</small>
                                 </div>
                                 <div class="groupe-form">
                                     <label for="v2-portfolio-total" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                        Total d'artefacts prévus
+                                        Total prévus
                                     </label>
                                     <input type="number" id="v2-portfolio-total" class="controle-form" min="1" max="50" value="10" onchange="sauvegarderStructureV2()">
                                 </div>
@@ -12649,12 +12645,12 @@ Exemple :
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
     <script src="js/import-export.js?v=2025120608"></script>
     <script src="js/statistiques.js?v=2025121001"></script>
-    <script src="js/liste-evaluations.js?v=2025122904"></script>
+    <script src="js/liste-evaluations.js?v=2025123001"></script>
     <script src="js/snapshots.js?v=2025122901"></script>
     <script src="js/graphiques-progression.js?v=2025121704"></script>
 
     <!-- PRIORITÉ 7: Utilitaires -->
-    <script src="js/evaluation-jetons.js?v=2025113013"></script>
+    <script src="js/evaluation-jetons.js?v=2025123001"></script>
     <script src="js/evaluation.js?v=2025122905"></script>
 
     <!-- PRIMO - Système conversationnel de configuration (Beta 92) -->
