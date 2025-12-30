@@ -62,6 +62,26 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('📦 Modules chargés : 01-config, 02-navigation');
 
     // ===============================
+    // FONCTION UTILITAIRE : Recalcul indices C-P
+    // ===============================
+    function recalculerIndicesSiDemande() {
+        if (localStorage.getItem('recalculerIndicesCP') === 'true') {
+            console.log('🔄 [Main] Recalcul des indices C et P demandé...');
+            localStorage.removeItem('recalculerIndicesCP'); // Effacer le flag immédiatement
+            if (typeof calculerEtStockerIndicesCP === 'function') {
+                try {
+                    calculerEtStockerIndicesCP();
+                    console.log('✅ [Main] Indices C et P recalculés');
+                } catch (e) {
+                    console.error('❌ [Main] Erreur lors du recalcul:', e);
+                }
+            } else {
+                console.warn('⚠️ [Main] Fonction calculerEtStockerIndicesCP non disponible');
+            }
+        }
+    }
+
+    // ===============================
     // 0. ÉCOUTER LA SYNCHRONISATION IndexedDB
     // ===============================
     // Recharger les données quand la synchronisation IndexedDB → localStorage est terminée
@@ -69,16 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('🔄 [Main] Données synchronisées, rechargement...');
 
         // ✅ NOUVEAU (30 déc 2025): Recalculer les indices C et P si demandé (après chargement démo)
-        if (localStorage.getItem('recalculerIndicesCP') === 'true') {
-            console.log('🔄 [Main] Recalcul des indices C et P demandé...');
-            localStorage.removeItem('recalculerIndicesCP'); // Effacer le flag immédiatement
-            if (typeof calculerEtStockerIndicesCP === 'function') {
-                calculerEtStockerIndicesCP();
-                console.log('✅ [Main] Indices C et P recalculés');
-            } else {
-                console.warn('⚠️ [Main] Fonction calculerEtStockerIndicesCP non disponible');
-            }
-        }
+        recalculerIndicesSiDemande();
 
         // Recharger les données de toutes les sections affichées
         if (typeof chargerInfosCours === 'function') {
@@ -489,6 +500,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // ✅ Préchargement automatique supprimé
     // Le groupe démo est maintenant géré via checkbox dans Réglages → Trimestre
     // Voir fonction basculerDonneesDemo() dans trimestre.js
+
+    // ===============================
+    // 3.8 RECALCUL INDICES C-P (FALLBACK)
+    // ===============================
+    // Si db-ready n'a pas été capturé, recalculer après un délai
+    setTimeout(() => {
+        recalculerIndicesSiDemande();
+    }, 1500); // Attendre 1.5s pour s'assurer que tout est chargé
 
     // ===============================
     // 4. FIN D'INITIALISATION
