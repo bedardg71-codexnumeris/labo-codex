@@ -291,6 +291,7 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
     console.log('Archivage:', archiverOriginale ? 'OUI' : 'NON (suppression)');
 
     // Créer la nouvelle évaluation (duplicata)
+    // ✅ CORRECTIF (30 déc 2025): Effacer les notes pour obliger une nouvelle évaluation
     const nouvelleEvaluation = {
         ...evaluationOriginale,
         id: 'EVAL_' + Date.now(), // ID NORMAL, pas EVAL_REPRISE_
@@ -301,7 +302,13 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
         dateApplicationJetonReprise: new Date().toISOString(),
         verrouillee: false, // Déverrouiller pour permettre modification
         dateModification: undefined,
-        heureModification: undefined
+        heureModification: undefined,
+        // ✅ Effacer les notes - l'enseignant·e doit saisir de nouvelles notes
+        noteFinale: null,
+        niveauFinal: null,
+        criteres: {}, // Critères vides
+        statut: 'en-cours', // Réinitialiser le statut
+        commentaireGlobal: '' // Effacer le commentaire global
     };
 
     if (archiverOriginale) {
@@ -335,7 +342,16 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
         setTimeout(() => initialiserListeEvaluations(), 150);
     }
 
-    afficherNotificationSucces(`Jeton de reprise appliqué (${archiverOriginale ? 'originale archivée' : 'originale supprimée'})`);
+    afficherNotificationSucces(`Jeton de reprise appliqué - Veuillez évaluer la reprise`);
+
+    // ✅ AMÉLIORATION (30 déc 2025): Ouvrir automatiquement le formulaire d'évaluation pour la reprise
+    setTimeout(() => {
+        if (typeof modifierEvaluation === 'function') {
+            console.log('📝 Ouverture automatique du formulaire pour la reprise:', nouvelleEvaluation.id);
+            modifierEvaluation(nouvelleEvaluation.id);
+        }
+    }, 300);
+
     return nouvelleEvaluation;
 }
 
@@ -673,6 +689,13 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
     console.log('Archivage:', archiverOriginale ? 'OUI' : 'NON (suppression)');
 
     // Créer la nouvelle évaluation (duplicata)
+    // ✅ CORRECTIF (30 déc 2025): Copier les critères puis effacer le critère ciblé
+    const criteresModifies = evaluationOriginale.criteres ? { ...evaluationOriginale.criteres } : {};
+    if (critereId && criteresModifies[critereId]) {
+        // Effacer le critère ciblé pour permettre une nouvelle évaluation
+        delete criteresModifies[critereId];
+    }
+
     const nouvelleEvaluation = {
         ...evaluationOriginale,
         id: 'EVAL_' + Date.now(),
@@ -686,6 +709,12 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
         verrouillee: false, // Déverrouiller pour permettre modification
         dateModification: undefined,
         heureModification: undefined,
+        // ✅ Utiliser les critères modifiés (sans le critère ciblé)
+        criteres: criteresModifies,
+        // Remettre la note à recalculer
+        noteFinale: null,
+        niveauFinal: null,
+        statut: 'en-cours',
         // IMPORTANT: Nettoyer les propriétés qui ne doivent PAS être copiées
         remplaceeParId: undefined,
         dateRemplacement: undefined,
@@ -724,7 +753,16 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
         setTimeout(() => initialiserListeEvaluations(), 150);
     }
 
-    afficherNotificationSucces(`Jeton de reprise ciblée appliqué (${archiverOriginale ? 'originale archivée' : 'originale supprimée'})`);
+    afficherNotificationSucces(`Jeton de reprise ciblée appliqué - Veuillez évaluer le critère ${critereId || 'ciblé'}`);
+
+    // ✅ AMÉLIORATION (30 déc 2025): Ouvrir automatiquement le formulaire d'évaluation pour la reprise ciblée
+    setTimeout(() => {
+        if (typeof modifierEvaluation === 'function') {
+            console.log('📝 Ouverture automatique du formulaire pour la reprise ciblée:', nouvelleEvaluation.id);
+            modifierEvaluation(nouvelleEvaluation.id);
+        }
+    }, 300);
+
     return nouvelleEvaluation;
 }
 
