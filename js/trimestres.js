@@ -656,6 +656,11 @@
         // Ajouter/retirer la classe mode-archive sur le body
         if (isArchive) {
             document.body.classList.add('mode-archive');
+            // Masquer le bandeau-mode car on a déjà le bandeau archive
+            const bandeauMode = document.getElementById('bandeau-mode');
+            if (bandeauMode) {
+                bandeauMode.style.display = 'none';
+            }
             console.log('[Trimestres] Mode archivé activé - Lecture seule');
         } else {
             document.body.classList.remove('mode-archive');
@@ -1336,6 +1341,11 @@
         } else {
             // Retour au mode normal
             await changerMode('normal');
+            // Masquer le bandeau-mode car on a déjà le bandeau archive
+            const bandeauMode = document.getElementById('bandeau-mode');
+            if (bandeauMode) {
+                bandeauMode.style.display = 'none';
+            }
             // Restaurer la couleur du bandeau archive
             const bandeauArchive = document.getElementById('bandeau-archive');
             if (bandeauArchive) {
