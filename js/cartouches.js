@@ -48,6 +48,32 @@
    =============================== */
 
 /* ===============================
+   🔧 FONCTION HELPER ROBUSTE
+   =============================== */
+
+/**
+ * Récupère les cartouches d'une grille de manière robuste
+ * Gère le cas où les cartouches sont stockées comme objet unique au lieu de tableau
+ * (Corrige un bug avec pack-demarrage-complet.json)
+ *
+ * @param {string} grilleId - L'ID de la grille
+ * @returns {Promise<Array>} - Tableau des cartouches (toujours un tableau)
+ */
+async function obtenirCartouchesGrille(grilleId) {
+    let cartouches = await db.get(`cartouches_${grilleId}`) || [];
+
+    // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
+    // Le pack-demarrage peut stocker un objet au lieu d'un tableau
+    if (cartouches && !Array.isArray(cartouches)) {
+        cartouches = [cartouches];
+        // Optionnel: Corriger le stockage pour les prochaines fois
+        await db.set(`cartouches_${grilleId}`, cartouches);
+    }
+
+    return cartouches;
+}
+
+/* ===============================
    🚀 INITIALISATION DU MODULE
    =============================== */
 
@@ -109,7 +135,12 @@ async function migrerCartouchesVersBibliotheque() {
 
     for (const grille of grilles) {
         const cle = `cartouches_${grille.id}`;
-        const cartouches = await db.get(cle) || [];
+        let cartouches = await db.get(cle) || [];
+
+        // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
+        if (cartouches && !Array.isArray(cartouches)) {
+            cartouches = [cartouches];
+        }
 
         cartouches.forEach(cartouche => {
             if (cartouche.dansBibliotheque === undefined) {
@@ -187,8 +218,13 @@ async function chargerCartouchesRetroaction() {
     }
     
     // Charger les cartouches existantes pour cette grille
-    const cartouches = await db.get(`cartouches_${grilleId}`) || [];
-    
+    let cartouches = await db.get(`cartouches_${grilleId}`) || [];
+
+    // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
+    if (cartouches && !Array.isArray(cartouches)) {
+        cartouches = [cartouches];
+    }
+
     selectCartouche.innerHTML = '<option value="">-- Nouvelle cartouche --</option>';
     cartouches.forEach(cartouche => {
         const nomEchappe = echapperHtml(cartouche.nom);
@@ -2447,7 +2483,14 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
     // Récupérer toutes les cartouches de toutes les grilles
     // ✅ CORRECTION: Utiliser for...of au lieu de forEach pour supporter await
     for (const grille of grilles) {
-        const cartouches = await db.get(`cartouches_${grille.id}`) || [];
+        let cartouches = await db.get(`cartouches_${grille.id}`) || [];
+
+        // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
+        // Le pack-demarrage peut stocker un objet au lieu d'un tableau
+        if (cartouches && !Array.isArray(cartouches)) {
+            cartouches = [cartouches];
+        }
+
         console.log(`   Grille "${grille.nom}": ${cartouches.length} cartouche(s)`);
         cartouches.forEach(cart => {
             toutesLesCartouches.push({
@@ -2819,7 +2862,13 @@ async function afficherBibliothequeCartouches() {
     // Récupérer toutes les cartouches (locales + bibliothèque)
     let toutesLesCartouches = [];
     for (const grille of grilles) {
-        const cartouches = await db.get(`cartouches_${grille.id}`) || [];
+        let cartouches = await db.get(`cartouches_${grille.id}`) || [];
+
+        // ✅ CORRECTION (30 déc 2025): Gérer le cas où cartouches est un objet unique
+        if (cartouches && !Array.isArray(cartouches)) {
+            cartouches = [cartouches];
+        }
+
         cartouches.forEach(cart => {
             toutesLesCartouches.push({
                 ...cart,
