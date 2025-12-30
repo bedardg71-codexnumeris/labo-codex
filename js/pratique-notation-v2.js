@@ -131,6 +131,7 @@
         try {
             modalites = db.getSync('modalitesEvaluation') || {};
         } catch (e) {
+            console.error('[pratique-notation-v2] Erreur chargement:', e);
             modalites = {};
         }
 
@@ -474,6 +475,7 @@
         try {
             modalites = db.getSync('modalitesEvaluation') || {};
         } catch (e) {
+            console.error('[pratique-notation-v2] Erreur lecture modalitesEvaluation:', e);
             modalites = {};
         }
 
@@ -488,8 +490,11 @@
             modalites.varianteCalcul = varianteSelect.value || '';
         }
 
-        db.setSync('modalitesEvaluation', modalites);
-        console.log('[pratique-notation-v2] Informations de base sauvegardées');
+        try {
+            db.setSync('modalitesEvaluation', modalites);
+        } catch (e) {
+            console.error('[pratique-notation-v2] ❌ Erreur sauvegarde:', e);
+        }
     }
 
     /**
@@ -505,8 +510,9 @@
 
         const type = modalites.pratique || '';
 
-        // Portfolio
-        if (type === 'pan-maitrise') {
+        // Portfolio (PAN-Maîtrise et PAN-Standards utilisent le portfolio)
+        // ✅ CORRECTIF (30 déc 2025): Inclure 'pan-standards' en plus de 'pan-maitrise'
+        if (type === 'pan-maitrise' || type === 'pan-standards') {
             modalites.portfolio = modalites.portfolio || {};
             modalites.portfolio.methodeSelection = document.getElementById('v2-portfolio-selection')?.value || 'meilleurs';
             modalites.portfolio.nombreARetenir = parseInt(document.getElementById('v2-portfolio-nombre')?.value) || 5;
@@ -515,7 +521,7 @@
             modalites.portfolio.decouplerPR = document.getElementById('v2-decoupler-pr')?.checked || false;
         }
 
-        // Standards
+        // Standards (ancien format, conservé pour rétrocompatibilité)
         if (type === 'standards') {
             modalites.standards = modalites.standards || {};
             modalites.standards.nombre = parseInt(document.getElementById('v2-standards-nombre')?.value) || 10;
@@ -524,7 +530,7 @@
         }
 
         // Spécifications
-        if (type === 'specifications') {
+        if (type === 'specifications' || type === 'pan-specifications') {
             modalites.specifications = modalites.specifications || {};
             modalites.specifications.type = document.getElementById('v2-spec-type')?.value || 'binaire';
         }
@@ -537,6 +543,12 @@
      * Sauvegarde la configuration des jetons
      */
     function sauvegarderJetonsV2() {
+        // DEBUG: Vérifier les valeurs des inputs
+        const inputNombre = document.getElementById('v2-jetons-nombre');
+        const inputDelaiDuree = document.getElementById('v2-delai-duree');
+        console.log('[DEBUG sauvegarderJetonsV2] Input nombre trouvé:', !!inputNombre, 'valeur:', inputNombre?.value);
+        console.log('[DEBUG sauvegarderJetonsV2] Input durée trouvé:', !!inputDelaiDuree, 'valeur:', inputDelaiDuree?.value);
+
         let modalites = {};
         try {
             modalites = db.getSync('modalitesEvaluation') || {};
@@ -544,10 +556,15 @@
             modalites = {};
         }
 
+        const nombreParEleve = parseInt(inputNombre?.value) || 4;
+        const dureeDelaiJours = parseInt(inputDelaiDuree?.value) || 7;
+
+        console.log('[DEBUG sauvegarderJetonsV2] Valeurs à sauvegarder - nombreParEleve:', nombreParEleve, 'dureeDelaiJours:', dureeDelaiJours);
+
         modalites.configurationJetons = modalites.configurationJetons || {};
-        modalites.configurationJetons.nombreParEleve = parseInt(document.getElementById('v2-jetons-nombre')?.value) || 4;
+        modalites.configurationJetons.nombreParEleve = nombreParEleve;
         modalites.configurationJetons.delaiActif = document.getElementById('v2-jeton-delai-actif')?.checked !== false;
-        modalites.configurationJetons.dureeDelaiJours = parseInt(document.getElementById('v2-delai-duree')?.value) || 7;
+        modalites.configurationJetons.dureeDelaiJours = dureeDelaiJours;
         modalites.configurationJetons.repriseActif = document.getElementById('v2-jeton-reprise-actif')?.checked !== false;
 
         const repriseOriginale = document.querySelector('input[name="v2-reprise-originale"]:checked');
@@ -557,7 +574,7 @@
         modalites.configurationJetons.plafondCiblee = document.getElementById('v2-ciblee-plafond')?.value || 'D (Développement)';
 
         db.setSync('modalitesEvaluation', modalites);
-        console.log('[pratique-notation-v2] Jetons sauvegardés');
+        console.log('[DEBUG sauvegarderJetonsV2] Sauvegarde effectuée:', modalites.configurationJetons);
     }
 
     /**

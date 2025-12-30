@@ -379,6 +379,10 @@ function afficherSousSection(idSousSection) {
             if (typeof initialiserModulePratiques === 'function') {
                 setTimeout(initialiserModulePratiques, 100);
             }
+            // ✅ CORRECTIF (30 déc 2025): Initialiser aussi pratique-notation-v2 pour remplir les champs
+            if (typeof initialiserPratiqueNotationV2 === 'function') {
+                setTimeout(initialiserPratiqueNotationV2, 150);
+            }
             break;
 
         case 'evaluations-apercu':
