@@ -1280,6 +1280,13 @@ async function basculerDonneesDemo(activer) {
             await db.set('donneesDemo', true);
             localStorage.setItem('demo-chargees', 'true'); // ✅ Flag pour test de validation
 
+            // ✅ CORRECTION (30 déc 2025): Activer le cours démo comme cours actif
+            // Sinon après rechargement, l'app ne sait pas quel cours afficher
+            if (coursDemo) {
+                await db.set('infoCours', coursDemo);
+                console.log('   ✅ Cours démo activé comme cours actif');
+            }
+
             // Notification succès
             alert('✅ Données de démonstration chargées avec succès !\n\nGroupe 9999 : 10 étudiants, 4 artefacts, 40 évaluations');
 
