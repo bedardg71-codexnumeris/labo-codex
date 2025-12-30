@@ -7424,7 +7424,6 @@ function genererRapportAPI(da, options = {}) {
     // Options par défaut
     const opts = {
         identification: true,
-        date: true,
         assiduite: true,
         completion: true,
         performance: true,
@@ -7466,23 +7465,7 @@ function genererRapportAPI(da, options = {}) {
     if (opts.identification) {
         // Ne pas afficher le DA en mode anonymisation
         const daTexte = modeAnonymisation ? '' : ` (DA: ${etudiant.da})`;
-        rapport += `${etudiant.prenom} ${etudiant.nom}${daTexte}\n`;
-    }
-
-    // 1b. DATE
-    if (opts.date) {
-        const aujourdhui = new Date();
-        const dateFormatee = aujourdhui.toLocaleDateString('fr-CA', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        rapport += `${dateFormatee}\n`;
-    }
-
-    // Saut de ligne après identification/date
-    if (opts.identification || opts.date) {
-        rapport += '\n';
+        rapport += `${etudiant.prenom} ${etudiant.nom}${daTexte}\n\n`;
     }
 
     // 2. ASSIDUITÉ
@@ -7547,29 +7530,26 @@ function genererRapportAPI(da, options = {}) {
         const nbDisponibles = configJetons.nombreParEleve || 0;
 
         if (nbDisponibles > 0) {
-            // Parcourir les évaluations pour trouver les jetons utilisés avec leur production
-            const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId);
-            const jetonsUtilises = [];
+            // Compter les jetons utilisés via la fonction officielle si disponible
+            let nbUtilises = 0;
+            const details = [];
 
-            evaluationsEleve.forEach(evaluation => {
-                const production = productions.find(p => p.id === evaluation.productionId);
-                const nomProduction = production?.description || production?.nom || 'Production inconnue';
+            if (typeof obtenirStatutJetonsEtudiant === 'function') {
+                const statutJetons = obtenirStatutJetonsEtudiant(da);
+                Object.keys(statutJetons).forEach(typeId => {
+                    const info = statutJetons[typeId];
+                    if (info && info.utilises > 0) {
+                        nbUtilises += info.utilises;
+                        // Simplifier le nom du type
+                        const nomCourt = info.nom.replace('Jeton de ', '').replace('Jeton ', '');
+                        details.push(`${nomCourt}: ${info.utilises}`);
+                    }
+                });
+            }
 
-                if (evaluation.jetonDelaiApplique === true) {
-                    jetonsUtilises.push(`délai: ${nomProduction}`);
-                }
-                if (evaluation.jetonRepriseApplique === true || evaluation.repriseDeId) {
-                    jetonsUtilises.push(`reprise: ${nomProduction}`);
-                }
-                if (evaluation.jetonRepriseCibleeApplique === true) {
-                    jetonsUtilises.push(`reprise ciblée: ${nomProduction}`);
-                }
-            });
-
-            const nbUtilises = jetonsUtilises.length;
             rapport += `Jetons : ${nbUtilises} / ${nbDisponibles} utilisés`;
-            if (jetonsUtilises.length > 0) {
-                rapport += ` (${jetonsUtilises.join(', ')})`;
+            if (details.length > 0) {
+                rapport += ` (${details.join(', ')})`;
             }
             rapport += `\n`;
         }
@@ -7616,10 +7596,6 @@ function genererSectionRapport(da) {
                                 Identification
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-date-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
-                                Date
-                            </label>
-                            <label class="text-sm-pointer">
                                 <input type="checkbox" id="inclure-assiduite-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
                                 Assiduité
                             </label>
@@ -7634,6 +7610,10 @@ function genererSectionRapport(da) {
                             <label class="text-sm-pointer">
                                 <input type="checkbox" id="inclure-jetons-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
                                 Jetons
+                            </label>
+                            <label class="text-sm-pointer">
+                                <input type="checkbox" id="inclure-date-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
+                                Date
                             </label>
                         </div>
                     </div>

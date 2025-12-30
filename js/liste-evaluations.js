@@ -874,9 +874,6 @@ function genererLigneHTML(ligne) {
     } else if (ligne.statut === 'non-recevable') {
         // Non recevable : afficher 0 ou --
         affichageNiveau = '<strong style="color: #999;">0</strong>';
-    } else if (ligne.statut === 'en-cours' || (!ligne.niveauFinal && !ligne.noteChiffree)) {
-        // ✅ CORRECTIF (30 déc 2025): Reprise en attente d'évaluation
-        affichageNiveau = '<span class="badge-en-attente-wrapper"><span class="badge-jeton-titre">À évaluer</span></span>';
     } else if ((ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.niveauFinal !== '-') {
         affichageNiveau = `<strong>${ligne.niveauFinal}</strong>`;
     } else {
@@ -891,9 +888,6 @@ function genererLigneHTML(ligne) {
     } else if (ligne.statut === 'non-recevable') {
         // Non recevable : afficher -- au lieu d'une note
         affichageNoteChiffree = '<strong style="color: #999;">--</strong>';
-    } else if (ligne.statut === 'en-cours' || (!ligne.niveauFinal && !ligne.noteChiffree)) {
-        // ✅ CORRECTIF (30 déc 2025): Reprise en attente d'évaluation
-        affichageNoteChiffree = '<strong style="color: #2196F3;">--</strong>';
     } else if ((ligne.statut === 'evalue' || ligne.statut === 'remplacee') && ligne.noteChiffree !== null) {
         affichageNoteChiffree = `<strong>${ligne.noteChiffree}%</strong>`;
     } else {
