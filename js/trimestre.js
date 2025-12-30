@@ -1281,6 +1281,17 @@ async function basculerDonneesDemo(activer) {
                 }
             }
 
+            // 7. Charger modalitesEvaluation (CRITIQUE pour calcul indices C et P)
+            if (pack.modalitesEvaluation) {
+                await db.set('modalitesEvaluation', pack.modalitesEvaluation);
+                console.log('   ✅ modalitesEvaluation chargé (afficherAlternatif:',
+                    pack.modalitesEvaluation.affichageTableauBord?.afficherAlternatif, ')');
+            }
+
+            // 8. Marquer pour recalcul des indices au prochain chargement
+            localStorage.setItem('recalculerIndicesCP', 'true');
+            console.log('   ✅ Flag recalculerIndicesCP positionné');
+
             // Marquer comme activé
             await db.set('donneesDemo', true);
             localStorage.setItem('demo-chargees', 'true'); // ✅ Flag pour test de validation
