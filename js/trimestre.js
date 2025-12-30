@@ -183,17 +183,28 @@ function chargerEtatCheckboxDemo() {
     if (!checkbox) return;
 
     // ✅ CORRECTION (30 déc 2025): Vérifier TOUS les formats démo (legacy + nouveau)
-    const cours = db.getSync('listeCours', []);
     const GROUPES_DEMO = ['9999', 'demo'];
-    const groupeDemo = cours.find(c =>
+    const estCoursDemo = (c) => c && (
         GROUPES_DEMO.includes(c.groupe) ||
         (c.id && (c.id.includes('9999') || c.id.includes('demo')))
     );
 
-    // Cocher la checkbox si le groupe existe
-    checkbox.checked = !!groupeDemo;
+    // Vérifier dans listeCours
+    const cours = db.getSync('listeCours', []);
+    const coursDemo = cours.find(estCoursDemo);
 
-    console.log(`   → Checkbox données démo: ${checkbox.checked ? 'cochée' : 'décochée'}`);
+    // Vérifier aussi infoCours (le cours actuellement actif)
+    const infoCours = db.getSync('infoCours', null);
+    const infoCourEstDemo = estCoursDemo(infoCours);
+
+    // Vérifier aussi le flag donneesDemo
+    const flagDonneesDemo = db.getSync('donneesDemo', false);
+
+    // Cocher si AU MOINS UNE des conditions est vraie
+    const demoActif = !!coursDemo || infoCourEstDemo || flagDonneesDemo;
+    checkbox.checked = demoActif;
+
+    console.log(`   → Checkbox données démo: ${checkbox.checked ? 'cochée' : 'décochée'} (cours: ${!!coursDemo}, infoCours: ${infoCourEstDemo}, flag: ${flagDonneesDemo})`);
 }
 
 /* ===============================
