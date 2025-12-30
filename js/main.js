@@ -68,6 +68,18 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('db-ready', async function(event) {
         console.log('🔄 [Main] Données synchronisées, rechargement...');
 
+        // ✅ NOUVEAU (30 déc 2025): Recalculer les indices C et P si demandé (après chargement démo)
+        if (localStorage.getItem('recalculerIndicesCP') === 'true') {
+            console.log('🔄 [Main] Recalcul des indices C et P demandé...');
+            localStorage.removeItem('recalculerIndicesCP'); // Effacer le flag immédiatement
+            if (typeof calculerEtStockerIndicesCP === 'function') {
+                calculerEtStockerIndicesCP();
+                console.log('✅ [Main] Indices C et P recalculés');
+            } else {
+                console.warn('⚠️ [Main] Fonction calculerEtStockerIndicesCP non disponible');
+            }
+        }
+
         // Recharger les données de toutes les sections affichées
         if (typeof chargerInfosCours === 'function') {
             chargerInfosCours();
