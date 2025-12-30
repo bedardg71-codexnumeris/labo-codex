@@ -182,9 +182,13 @@ function chargerEtatCheckboxDemo() {
     const checkbox = document.getElementById('checkboxDonneesDemo');
     if (!checkbox) return;
 
-    // Vérifier si le groupe 9999 existe
+    // ✅ CORRECTION (30 déc 2025): Vérifier TOUS les formats démo (legacy + nouveau)
     const cours = db.getSync('listeCours', []);
-    const groupeDemo = cours.find(c => c.id === '601-101-h2026-9999' || c.groupe === '9999');
+    const GROUPES_DEMO = ['9999', 'demo'];
+    const groupeDemo = cours.find(c =>
+        GROUPES_DEMO.includes(c.groupe) ||
+        (c.id && (c.id.includes('9999') || c.id.includes('demo')))
+    );
 
     // Cocher la checkbox si le groupe existe
     checkbox.checked = !!groupeDemo;
@@ -1336,6 +1340,8 @@ async function basculerDonneesDemo(activer) {
         const GROUPES_DEMO = ['9999', 'demo'];
         const estGroupeDemo = (g) => GROUPES_DEMO.includes(g);
         const estCoursDemo = (id) => id && (id.includes('9999') || id.includes('demo'));
+        // ✅ CORRECTION (30 déc 2025): Détecter aussi les DA démo (DEMO1-DEMO5 ou DEMO001-DEMO005)
+        const estDADemo = (da) => da && da.startsWith('DEMO');
 
         // ✅ CORRECTION (30 déc 2025): Utiliser namespacing pour les clés
         const cleNamespace = (typeof window.cle === 'function') ? window.cle : (k) => k;
@@ -1347,10 +1353,14 @@ async function basculerDonneesDemo(activer) {
         await db.set('listeCours', cours);
         console.log(`   ✅ ${nbCours} cours démo supprimé(s)`);
 
-        // 2. Supprimer les étudiants du groupe démo
+        // 2. Supprimer les étudiants du groupe démo (par groupe, coursId, OU DA commençant par DEMO)
         let etudiants = await db.get(cleNamespace('groupeEtudiants')) || [];
-        const nbEtudiants = etudiants.filter(e => estGroupeDemo(e.groupe) || estCoursDemo(e.coursId)).length;
-        etudiants = etudiants.filter(e => !estGroupeDemo(e.groupe) && !estCoursDemo(e.coursId));
+        const nbEtudiants = etudiants.filter(e =>
+            estGroupeDemo(e.groupe) || estCoursDemo(e.coursId) || estDADemo(e.da)
+        ).length;
+        etudiants = etudiants.filter(e =>
+            !estGroupeDemo(e.groupe) && !estCoursDemo(e.coursId) && !estDADemo(e.da)
+        );
         await db.set(cleNamespace('groupeEtudiants'), etudiants);
         console.log(`   ✅ ${nbEtudiants} étudiants démo supprimés`);
 
@@ -1361,17 +1371,25 @@ async function basculerDonneesDemo(activer) {
         await db.set(cleNamespace('productions'), productions);
         console.log(`   ✅ ${nbProductions} productions démo supprimées`);
 
-        // 4. Supprimer les évaluations du groupe démo
+        // 4. Supprimer les évaluations du groupe démo (par coursId, groupe, OU etudiantDA commençant par DEMO)
         let evaluations = await db.get(cleNamespace('evaluationsSauvegardees')) || [];
-        const nbEvals = evaluations.filter(e => estCoursDemo(e.coursId) || estGroupeDemo(e.groupe)).length;
-        evaluations = evaluations.filter(e => !estCoursDemo(e.coursId) && !estGroupeDemo(e.groupe));
+        const nbEvals = evaluations.filter(e =>
+            estCoursDemo(e.coursId) || estGroupeDemo(e.groupe) || estDADemo(e.etudiantDA)
+        ).length;
+        evaluations = evaluations.filter(e =>
+            !estCoursDemo(e.coursId) && !estGroupeDemo(e.groupe) && !estDADemo(e.etudiantDA)
+        );
         await db.set(cleNamespace('evaluationsSauvegardees'), evaluations);
         console.log(`   ✅ ${nbEvals} évaluations démo supprimées`);
 
-        // 5. Supprimer les présences du groupe démo
+        // 5. Supprimer les présences du groupe démo (par coursId OU da commençant par DEMO)
         let presences = await db.get(cleNamespace('presences')) || [];
-        const nbPresences = presences.filter(p => estCoursDemo(p.coursId)).length;
-        presences = presences.filter(p => !estCoursDemo(p.coursId));
+        const nbPresences = presences.filter(p =>
+            estCoursDemo(p.coursId) || estDADemo(p.da)
+        ).length;
+        presences = presences.filter(p =>
+            !estCoursDemo(p.coursId) && !estDADemo(p.da)
+        );
         await db.set(cleNamespace('presences'), presences);
         console.log(`   ✅ ${nbPresences} présences démo supprimées`);
 
