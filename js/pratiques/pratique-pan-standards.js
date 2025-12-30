@@ -741,7 +741,9 @@ class PratiquePANStandards {
      * @private
      */
     _lireArtefactsPortfolio() {
-        const productions = db.getSync('productions', []);
+        // ✅ CORRECTION (30 déc 2025): Utiliser obtenirDonneesSelonMode pour respecter coursId
+        // Avant: db.getSync('productions', []) ne filtrait pas par cours actif
+        const productions = this._lireProductions();
         return productions
             .filter(p => p.type === 'artefact-portfolio')
             .map(p => p.id);
