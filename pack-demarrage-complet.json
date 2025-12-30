@@ -439,7 +439,7 @@
       "actif": false
     }
   },
-  "cartouches_GRILLE1759243306842": {
+  "cartouches_GRILLE1759243306842": [{
     "id": "CART_DEMO_2025",
     "grilleId": "GRILLE1759243306842",
     "nom": "Rétroactions Global-5",
@@ -507,7 +507,7 @@
       "CR1759243428715_E": "Français impeccable ! Expression soignée et précise."
     },
     "verrouille": false
-  },
+  }],
   "presences": [
     {
       "date": "2026-01-19",
