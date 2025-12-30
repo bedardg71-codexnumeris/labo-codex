@@ -1191,22 +1191,26 @@ async function basculerDonneesDemo(activer) {
             // ✅ CORRECTION (30 déc 2025): Utiliser db.set() (async) au lieu de db.setSync()
             // pour écrire dans IndexedDB ET localStorage (architecture hybride)
 
+            // ✅ CORRECTION (30 déc 2025): Groupes démo supportés (legacy 9999 + nouveau demo)
+            const GROUPES_DEMO = ['9999', 'demo'];
+            const estGroupeDemo = (g) => GROUPES_DEMO.includes(g);
+
             // 1. Ajouter le cours démo s'il n'existe pas
             const coursExistants = await db.get('listeCours') || [];
-            const coursDemo = pack.listeCours?.find(c => c.id === '601-101-h2026-9999');
+            const coursDemo = pack.listeCours?.[0]; // Premier cours du pack = cours démo
             if (coursDemo && !coursExistants.find(c => c.id === coursDemo.id)) {
                 coursExistants.push(coursDemo);
                 await db.set('listeCours', coursExistants);
-                console.log(`   ✅ Cours démo ajouté`);
+                console.log(`   ✅ Cours démo ajouté: ${coursDemo.id}`);
             }
+            const coursIdDemo = coursDemo?.id;
 
             // ✅ CORRECTION (30 déc 2025): Utiliser window.cle() pour namespacing par trimestre
-            // Sinon les données sont écrites dans 'groupeEtudiants' mais lues depuis 'h2026_groupeEtudiants'
             const cleNamespace = (typeof window.cle === 'function') ? window.cle : (k) => k;
 
-            // 2. Ajouter les étudiants du groupe 9999
+            // 2. Ajouter les étudiants du groupe démo
             const etudiantsExistants = await db.get(cleNamespace('groupeEtudiants')) || [];
-            const etudiantsDemo = pack.groupeEtudiants?.filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999') || [];
+            const etudiantsDemo = pack.groupeEtudiants || [];
             etudiantsDemo.forEach(e => {
                 if (!etudiantsExistants.find(ex => ex.da === e.da)) {
                     etudiantsExistants.push(e);
@@ -1217,7 +1221,7 @@ async function basculerDonneesDemo(activer) {
 
             // 3. Ajouter les productions du cours démo
             const productionsExistantes = await db.get(cleNamespace('productions')) || [];
-            const productionsDemo = pack.productions?.filter(p => p.coursId === '601-101-h2026-9999') || [];
+            const productionsDemo = pack.productions || [];
             productionsDemo.forEach(p => {
                 if (!productionsExistantes.find(ex => ex.id === p.id)) {
                     productionsExistantes.push(p);
@@ -1228,28 +1232,25 @@ async function basculerDonneesDemo(activer) {
 
             // 4. Ajouter les évaluations du groupe démo
             const evalsExistantes = await db.get(cleNamespace('evaluationsSauvegardees')) || [];
-            const evalsDemo = pack.evaluationsSauvegardees?.filter(e => e.coursId === '601-101-h2026-9999') || [];
+            const evalsDemo = pack.evaluationsSauvegardees || [];
             evalsDemo.forEach(e => {
-                if (!evalsExistantes.find(ex => ex.da === e.da && ex.productionId === e.productionId)) {
+                if (!evalsExistantes.find(ex => ex.id === e.id)) {
                     evalsExistantes.push(e);
                 }
             });
             await db.set(cleNamespace('evaluationsSauvegardees'), evalsExistantes);
             console.log(`   ✅ ${evalsDemo.length} évaluations démo ajoutées`);
 
-            // 5. GÉNÉRER dynamiquement les présences (92% d'assiduité)
-            console.log('📊 [Démo] Génération dynamique des présences...');
-            const presencesGenerees = genererPresencesDemo(etudiantsDemo);
-
-            // Ajouter les présences générées (sans écraser les existantes)
+            // 5. Ajouter les présences du pack (déjà anonymisées)
             const presencesExistantes = await db.get(cleNamespace('presences')) || [];
-            presencesGenerees.forEach(p => {
+            const presencesDemo = pack.presences || [];
+            presencesDemo.forEach(p => {
                 if (!presencesExistantes.find(ex => ex.da === p.da && ex.date === p.date)) {
                     presencesExistantes.push(p);
                 }
             });
             await db.set(cleNamespace('presences'), presencesExistantes);
-            console.log(`   ✅ ${presencesGenerees.length} présences générées (pattern 92%)`);
+            console.log(`   ✅ ${presencesDemo.length} présences démo ajoutées`);
 
             // 6. Ajouter grilles/échelles/cartouches si absentes
             const sectionsPartagees = [
@@ -1311,8 +1312,8 @@ async function basculerDonneesDemo(activer) {
         }
 
     } else {
-        // DÉSACTIVER : Supprimer toutes les données du groupe 9999
-        if (!confirm('Supprimer toutes les données de démonstration (groupe 9999) ?\n\nCette action supprimera :\n• Le cours 601-101-h2026-9999\n• Les 10 étudiants du groupe 9999\n• Toutes les évaluations associées\n• Toutes les présences associées\n\nCette action est irréversible.')) {
+        // DÉSACTIVER : Supprimer toutes les données de démonstration
+        if (!confirm('Supprimer toutes les données de démonstration ?\n\nCette action supprimera :\n• Le cours de démonstration\n• Les étudiants du groupe démo\n• Toutes les évaluations associées\n• Toutes les présences associées\n\nCette action est irréversible.')) {
             // Recocher la checkbox si l'utilisateur annule
             document.getElementById('checkboxDonneesDemo').checked = true;
             return;
@@ -1320,46 +1321,52 @@ async function basculerDonneesDemo(activer) {
 
         console.log('🗑️ [Démo] Suppression des données de démonstration...');
 
+        // ✅ CORRECTION (30 déc 2025): Groupes démo supportés (legacy 9999 + nouveau demo)
+        const GROUPES_DEMO = ['9999', 'demo'];
+        const estGroupeDemo = (g) => GROUPES_DEMO.includes(g);
+        const estCoursDemo = (id) => id && (id.includes('9999') || id.includes('demo'));
+
         // ✅ CORRECTION (30 déc 2025): Utiliser namespacing pour les clés
         const cleNamespace = (typeof window.cle === 'function') ? window.cle : (k) => k;
 
         // 1. Supprimer le cours démo
         let cours = await db.get('listeCours') || [];
-        cours = cours.filter(c => c.id !== '601-101-h2026-9999' && c.groupe !== '9999');
+        const nbCours = cours.filter(c => estGroupeDemo(c.groupe) || estCoursDemo(c.id)).length;
+        cours = cours.filter(c => !estGroupeDemo(c.groupe) && !estCoursDemo(c.id));
         await db.set('listeCours', cours);
-        console.log('   ✅ Cours démo supprimé');
+        console.log(`   ✅ ${nbCours} cours démo supprimé(s)`);
 
-        // 2. Supprimer les étudiants du groupe 9999
+        // 2. Supprimer les étudiants du groupe démo
         let etudiants = await db.get(cleNamespace('groupeEtudiants')) || [];
-        const nbEtudiants = etudiants.filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999').length;
-        etudiants = etudiants.filter(e => e.groupe !== '9999' && e.coursId !== '601-101-h2026-9999');
+        const nbEtudiants = etudiants.filter(e => estGroupeDemo(e.groupe) || estCoursDemo(e.coursId)).length;
+        etudiants = etudiants.filter(e => !estGroupeDemo(e.groupe) && !estCoursDemo(e.coursId));
         await db.set(cleNamespace('groupeEtudiants'), etudiants);
         console.log(`   ✅ ${nbEtudiants} étudiants démo supprimés`);
 
         // 3. Supprimer les productions du cours démo
         let productions = await db.get(cleNamespace('productions')) || [];
-        const nbProductions = productions.filter(p => p.coursId === '601-101-h2026-9999').length;
-        productions = productions.filter(p => p.coursId !== '601-101-h2026-9999');
+        const nbProductions = productions.filter(p => estCoursDemo(p.coursId)).length;
+        productions = productions.filter(p => !estCoursDemo(p.coursId));
         await db.set(cleNamespace('productions'), productions);
         console.log(`   ✅ ${nbProductions} productions démo supprimées`);
 
         // 4. Supprimer les évaluations du groupe démo
         let evaluations = await db.get(cleNamespace('evaluationsSauvegardees')) || [];
-        const nbEvals = evaluations.filter(e => e.coursId === '601-101-h2026-9999').length;
-        evaluations = evaluations.filter(e => e.coursId !== '601-101-h2026-9999');
+        const nbEvals = evaluations.filter(e => estCoursDemo(e.coursId) || estGroupeDemo(e.groupe)).length;
+        evaluations = evaluations.filter(e => !estCoursDemo(e.coursId) && !estGroupeDemo(e.groupe));
         await db.set(cleNamespace('evaluationsSauvegardees'), evaluations);
         console.log(`   ✅ ${nbEvals} évaluations démo supprimées`);
 
         // 5. Supprimer les présences du groupe démo
         let presences = await db.get(cleNamespace('presences')) || [];
-        const nbPresences = presences.filter(p => p.coursId === '601-101-h2026-9999').length;
-        presences = presences.filter(p => p.coursId !== '601-101-h2026-9999');
+        const nbPresences = presences.filter(p => estCoursDemo(p.coursId)).length;
+        presences = presences.filter(p => !estCoursDemo(p.coursId));
         await db.set(cleNamespace('presences'), presences);
         console.log(`   ✅ ${nbPresences} présences démo supprimées`);
 
         // Marquer comme désactivé
         await db.set('donneesDemo', false);
-        localStorage.removeItem('demo-chargees'); // ✅ Retirer flag de validation
+        localStorage.removeItem('demo-chargees');
 
         // ✅ CORRECTION (30 déc 2025): Revenir au Mode Normal et réactiver un vrai cours
         db.setSync('modeApplication', 'normal');
@@ -1367,7 +1374,7 @@ async function basculerDonneesDemo(activer) {
 
         // Réactiver le premier cours réel s'il existe
         const coursRestants = await db.get('listeCours') || [];
-        const premierCoursReel = coursRestants.find(c => c.groupe !== '9999');
+        const premierCoursReel = coursRestants.find(c => !estGroupeDemo(c.groupe));
         if (premierCoursReel) {
             await db.set('infoCours', premierCoursReel);
             console.log(`   ✅ Cours ${premierCoursReel.sigle} groupe ${premierCoursReel.groupe} réactivé`);
