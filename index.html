@@ -289,9 +289,9 @@
             cursor: not-allowed;
         }
 
-        body.mode-archive:not(.mode-ecriture-temp) input:not([type="search"]):not([id^="recherche-"]):not([id^="inclure-"]):not([id^="checkbox-"]),
+        body.mode-archive:not(.mode-ecriture-temp) input:not([type="search"]):not([id^="recherche-"]):not([id^="inclure-"]):not([id^="checkbox-"]):not([id^="v2-"]),
         body.mode-archive:not(.mode-ecriture-temp) textarea:not([id^="textarea-rapport-"]),
-        body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not(#select-mode):not([id^="filtre-"]) {
+        body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not(#select-mode):not([id^="filtre-"]):not([id^="v2-"]) {
             pointer-events: none;
             opacity: 0.7;
             background-color: #f5f5f5;
@@ -8587,7 +8587,7 @@ Exemple :
                                 <label for="v2-echelle-id" style="font-weight: 600; display: block; margin-bottom: 6px;">
                                     Échelle à utiliser
                                 </label>
-                                <select id="v2-echelle-id" class="controle-form" onchange="afficherPreviewEchelleV2()">
+                                <select id="v2-echelle-id" class="controle-form" onchange="afficherPreviewEchelleV2(); sauvegarderPratiqueBaseV2()">
                                     <option value="">-- Sélectionner une échelle --</option>
                                     <!-- Options chargées dynamiquement -->
                                 </select>
@@ -12589,7 +12589,7 @@ Exemple :
     <script src="js/trimestres.js?v=2025123001"></script> <!-- Beta 95 : Gestion multi-trimestres -->
     <script src="js/trimestre.js?v=2025121201"></script>
     <script src="js/trimestre-v2.js?v=2025122801"></script> <!-- Beta 95 : Onglet Trimestre restructuré -->
-    <script src="js/pratique-notation-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Pratique de notation restructuré -->
+    <script src="js/pratique-notation-v2.js?v=2025123002"></script> <!-- Beta 95 : Onglet Pratique de notation restructuré -->
     <script src="js/preferences-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Préférences restructuré -->
     <script src="js/donnees-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Données restructuré -->
     <script src="js/etudiants.js?v=2025122902"></script>
