@@ -179,8 +179,11 @@ function initialiserModuleTrimestre() {
  * Vérifie si le groupe 9999 existe pour déterminer l'état
  */
 function chargerEtatCheckboxDemo() {
+    // ✅ CORRECTION (30 déc 2025): Mettre à jour LES DEUX checkboxes (V1 et V2)
     const checkbox = document.getElementById('checkboxDonneesDemo');
-    if (!checkbox) return;
+    const checkboxV2 = document.getElementById('v2-checkboxDonneesDemo');
+
+    if (!checkbox && !checkboxV2) return;
 
     // ✅ CORRECTION (30 déc 2025): Vérifier TOUS les formats démo (legacy + nouveau)
     const GROUPES_DEMO = ['9999', 'demo'];
@@ -202,10 +205,16 @@ function chargerEtatCheckboxDemo() {
 
     // Cocher si AU MOINS UNE des conditions est vraie
     const demoActif = !!coursDemo || infoCourEstDemo || flagDonneesDemo;
-    checkbox.checked = demoActif;
 
-    console.log(`   → Checkbox données démo: ${checkbox.checked ? 'cochée' : 'décochée'} (cours: ${!!coursDemo}, infoCours: ${infoCourEstDemo}, flag: ${flagDonneesDemo})`);
+    // Mettre à jour les deux checkboxes
+    if (checkbox) checkbox.checked = demoActif;
+    if (checkboxV2) checkboxV2.checked = demoActif;
+
+    console.log(`   → Checkbox données démo: ${demoActif ? 'cochée' : 'décochée'} (cours: ${!!coursDemo}, infoCours: ${infoCourEstDemo}, flag: ${flagDonneesDemo})`);
 }
+
+// Exporter pour utilisation globale (db-ready, etc.)
+window.chargerEtatCheckboxDemo = chargerEtatCheckboxDemo;
 
 /* ===============================
    GESTION DU CADRE CALENDRIER

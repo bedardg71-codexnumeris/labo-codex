@@ -105,6 +105,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof chargerTableauBordApercu === 'function') {
             chargerTableauBordApercu();
         }
+
+        // ✅ NOUVEAU (30 déc 2025): Mettre à jour l'état des checkboxes démo après sync
+        if (typeof chargerEtatCheckboxDemo === 'function') {
+            chargerEtatCheckboxDemo();
+        }
     });
 
     // ===============================
