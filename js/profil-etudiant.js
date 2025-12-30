@@ -7549,144 +7549,6 @@ function genererRapportAPI(da, options = {}) {
 }
 
 /**
- * Génère un rapport de bilan pour l'étudiant (version bienveillante et encadrante)
- * @param {string} da - Numéro DA de l'étudiant
- * @param {Object} options - Options de sections à inclure
- * @returns {string} - Rapport en texte brut
- */
-function genererRapportEtudiant(da, options = {}) {
-    // Options par défaut
-    const opts = {
-        identification: true,
-        synthese: true,
-        indicateurs: true,
-        progression: true,
-        interventions: true,
-        recommandations: true,
-        ...options
-    };
-
-    const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
-    if (!etudiant) return 'Erreur : Étudiant non trouvé';
-
-    const indices = calculerTousLesIndices(da);
-    const detailsA = obtenirDetailsAssiduite(da);
-    const moyennes = calculerMoyennesCriteres(da);
-    const diagnostic = diagnostiquerForcesChallenges(moyennes);
-    const risque = indices.R;
-
-    const productions = obtenirDonneesSelonMode('productions') || [];
-    const artefacts = productions.filter(p => p.type === 'artefact-portfolio');
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const nbRemis = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId).length;
-    const nbManquants = artefacts.length - nbRemis;
-
-    const maintenant = new Date();
-    const dateRapport = maintenant.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
-
-    const config = db.getSync('informationsCours', {});
-    const nomCours = config.titre || 'ce cours';
-
-    let rapport = '';
-
-    // IDENTIFICATION
-    if (opts.identification) {
-        rapport += `Bonjour ${etudiant.prenom},\n`;
-        rapport += `${dateRapport}\n\n`;
-    }
-
-    // SYNTHÈSE
-    if (opts.synthese) {
-        if (risque < 20) {
-            rapport += `Ton parcours dans ${nomCours} se déroule très bien !\n\n`;
-        } else if (risque < 40) {
-            rapport += `Ce bilan te permet de faire le point sur ton parcours dans ${nomCours}.\n\n`;
-        } else {
-            rapport += `Faisons le point ensemble sur ton parcours dans ${nomCours}.\n\n`;
-        }
-    }
-
-    // INDICATEURS
-    if (opts.indicateurs) {
-        rapport += `Présence: ${indices.A}% (${detailsA.heuresPresentes}h/${detailsA.heuresOffertes}h)`;
-        if (detailsA.absences.length > 0) rapport += `, ${detailsA.absences.length} absence(s)`;
-        rapport += `\n\n`;
-
-        rapport += `Remise des travaux: ${indices.C}% (${nbRemis}/${artefacts.length} remis)`;
-        if (nbManquants > 0) rapport += `, ${nbManquants} à compléter`;
-        rapport += `\n\n`;
-
-        rapport += `Performance: ${indices.P}%`;
-        if (indices.P >= 85) rapport += ` - Excellente maîtrise !`;
-        else if (indices.P >= 75) rapport += ` - Très bien !`;
-        else if (indices.P >= 65) rapport += ` - En développement`;
-        else rapport += ` - À approfondir`;
-        rapport += `\n\n`;
-
-        if (diagnostic.forces.length > 0) {
-            rapport += `Points forts: `;
-            rapport += diagnostic.forces.map(f => f.nom).join(', ');
-            rapport += `\n\n`;
-        }
-
-        if (diagnostic.principalDefi) {
-            rapport += `Principal défi: ${diagnostic.principalDefi.nom}\n\n`;
-        }
-    }
-
-    // PROGRESSION
-    if (opts.progression) {
-        const progression = calculerProgressionEleve(da);
-        if (progression) {
-            const evolution = progression.AM - progression.AL;
-            if (progression.direction === '↗') {
-                rapport += `Ta performance s'améliore (+${evolution.toFixed(1)} points). Continue tes efforts !\n\n`;
-            } else if (progression.direction === '↘') {
-                rapport += `Ta performance a baissé (${evolution.toFixed(1)} points). Viens me voir pour qu'on en discute.\n\n`;
-            }
-        }
-    }
-
-    // INTERVENTIONS
-    if (opts.interventions) {
-        const interventions = typeof obtenirInterventionsEtudiant === 'function'
-            ? obtenirInterventionsEtudiant(da).filter(i => i.statut === 'completee')
-            : [];
-
-        if (interventions.length > 0) {
-            rapport += `Rencontres de soutien: ${interventions.length}\n`;
-            interventions.slice(-2).forEach(inter => {
-                const date = new Date(inter.date + 'T12:00:00');
-                const dateStr = date.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' });
-                rapport += `- ${dateStr}: ${inter.titre || 'Soutien pédagogique'}\n`;
-            });
-            rapport += `\n`;
-        }
-    }
-
-    // RECOMMANDATIONS
-    if (opts.recommandations) {
-        if (risque >= 70) {
-            rapport += `Ta situation nécessite un suivi rapproché. Rencontre obligatoire avec ton API dans les prochains jours.\n`;
-            if (nbManquants > 0) rapport += `Priorité: compléter les ${nbManquants} travaux manquants.\n`;
-            rapport += `Demander de l'aide est un signe de maturité. Je suis là pour t'accompagner.\n`;
-        } else if (risque >= 40) {
-            rapport += `Pour assurer ta réussite, viens me voir en disponibilité.\n`;
-            if (nbManquants > 0) rapport += `Assure-toi de bien gérer ton temps pour compléter les ${nbManquants} travaux manquants.\n`;
-            if (detailsA.absences.length >= 3) rapport += `Améliore ta présence en classe.\n`;
-            rapport += `Tu as les capacités de réussir !\n`;
-        } else if (risque >= 20) {
-            rapport += `Tu es sur la bonne voie ! Continue tes efforts.\n`;
-            if (diagnostic.principalDefi) rapport += `Concentre-toi sur: ${diagnostic.principalDefi.nom}.\n`;
-        } else {
-            rapport += `Excellent travail ! Continue ainsi.\n`;
-        }
-    }
-
-    return rapport.trim();
-}
-
-/**
  * Génère l'interface de la section Rapport avec toggle et bouton copier
  * @param {string} da - Numéro DA de l'étudiant
  * @returns {string} - HTML de la section
@@ -7751,11 +7613,11 @@ function genererSectionRapport(da) {
                 </div>
             </div>
 
-            <!-- Zone de texte du rapport (séparée et éditable) -->
+            <!-- Zone de texte du rapport (éditable pour ajouter commentaires personnels) -->
             <div class="profil-position-relative-mt15">
                 <textarea id="textarea-rapport-${da}"
-                          placeholder="Le rapport apparaîtra ici. Vous pourrez ensuite le modifier avant de le copier."
-                          style="width: 100%; height: 300px; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.9rem; border: 2px solid var(--bleu-pale); border-radius: 6px; resize: none; line-height: 1.6; background: white; overflow-y: auto;"></textarea>
+                          placeholder="Le rapport apparaîtra ici. Vous pouvez le modifier et ajouter vos commentaires avant de le copier."
+                          style="width: 100%; height: 300px; padding: 15px; font-family: 'Courier New', monospace; font-size: 0.9rem; border: 2px solid var(--bleu-pale); border-radius: 6px; resize: vertical; line-height: 1.6; background: white; overflow-y: auto;"></textarea>
             </div>
         </div>
     `;
