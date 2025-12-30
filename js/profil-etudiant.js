@@ -7736,30 +7736,15 @@ function genererSectionRapport(da) {
                                 Performance
                             </label>
                             <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-apprentissage-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
-                                Apprentissage
-                            </label>
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="inclure-interventions-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
-                                Interventions
-                            </label>
-                            <label class="text-sm-pointer">
                                 <input type="checkbox" id="inclure-date-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
                                 Date
-                            </label>
-                            <label class="text-sm-pointer">
-                                <input type="checkbox" id="afficher-details-${da}" onchange="genererEtAfficherRapport('${da}')" checked>
-                                Précisions
                             </label>
                         </div>
                     </div>
 
                     <!-- Colonne droite : Actions -->
-                    <div style="display: flex; flex-direction: column; gap: 10px; min-width: 180px;">
-                        <button class="btn btn-principal u-w-100" onclick="genererEtAfficherRapport('${da}')">
-                            Rafraîchir
-                        </button>
-                        <button class="btn btn-secondaire u-w-100" onclick="copierRapport('${da}')">
+                    <div style="display: flex; flex-direction: column; gap: 10px; min-width: 120px;">
+                        <button class="btn btn-principal u-w-100" onclick="copierRapport('${da}')">
                             Copier
                         </button>
                     </div>
@@ -7797,10 +7782,7 @@ function genererEtAfficherRapport(da) {
         assiduite: document.getElementById(`inclure-assiduite-${da}`)?.checked ?? true,
         completion: document.getElementById(`inclure-completion-${da}`)?.checked ?? true,
         performance: document.getElementById(`inclure-performance-${da}`)?.checked ?? true,
-        apprentissage: document.getElementById(`inclure-apprentissage-${da}`)?.checked ?? true,
-        interventions: document.getElementById(`inclure-interventions-${da}`)?.checked ?? true,
-        date: document.getElementById(`inclure-date-${da}`)?.checked ?? true,
-        afficherDetails: document.getElementById(`afficher-details-${da}`)?.checked ?? true
+        date: document.getElementById(`inclure-date-${da}`)?.checked ?? true
     };
 
     // Générer le rapport (toujours version API)
@@ -7915,10 +7897,7 @@ function sauvegarderPreferencesRapport(da) {
         assiduite: document.getElementById(`inclure-assiduite-${da}`)?.checked ?? true,
         completion: document.getElementById(`inclure-completion-${da}`)?.checked ?? true,
         performance: document.getElementById(`inclure-performance-${da}`)?.checked ?? true,
-        apprentissage: document.getElementById(`inclure-apprentissage-${da}`)?.checked ?? true,
-        interventions: document.getElementById(`inclure-interventions-${da}`)?.checked ?? true,
-        date: document.getElementById(`inclure-date-${da}`)?.checked ?? true,
-        afficherDetails: document.getElementById(`afficher-details-${da}`)?.checked ?? true
+        date: document.getElementById(`inclure-date-${da}`)?.checked ?? true
     };
 
     db.setSync('preferencesRapport', preferences);
@@ -7933,19 +7912,13 @@ function restaurerPreferencesRapport(da) {
     const preferences = db.getSync('preferencesRapport', null);
 
     // Restaurer les checkboxes de sections
-    const sections = ['identification', 'assiduite', 'completion', 'performance', 'apprentissage', 'interventions', 'date'];
+    const sections = ['identification', 'assiduite', 'completion', 'performance', 'date'];
     sections.forEach(section => {
         const checkbox = document.getElementById(`inclure-${section}-${da}`);
         if (checkbox && preferences && preferences[section] !== undefined) {
             checkbox.checked = preferences[section];
         }
     });
-
-    // Restaurer la checkbox de détails
-    const checkboxDetails = document.getElementById(`afficher-details-${da}`);
-    if (checkboxDetails && preferences && preferences.afficherDetails !== undefined) {
-        checkboxDetails.checked = preferences.afficherDetails;
-    }
 
     // Générer automatiquement le rapport après restauration des préférences
     genererEtAfficherRapport(da);
