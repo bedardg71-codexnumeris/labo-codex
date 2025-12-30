@@ -290,10 +290,16 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
 
     console.log('Archivage:', archiverOriginale ? 'OUI' : 'NON (suppression)');
 
-    // Créer la nouvelle évaluation (duplicata)
+    // ✅ CORRECTIF (30 déc 2025): Deep copy pour éviter la modification de l'original
+    // Le spread operator fait une copie superficielle - les objets imbriqués (criteres)
+    // restent des références partagées. JSON.parse(JSON.stringify()) crée une vraie copie.
+    const copieOriginale = JSON.parse(JSON.stringify(evaluationOriginale));
+
+    // Créer la nouvelle évaluation (duplicata) avec un nouvel ID unique
+    const nouvelId = 'EVAL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
     const nouvelleEvaluation = {
-        ...evaluationOriginale,
-        id: 'EVAL_' + Date.now(), // ID NORMAL, pas EVAL_REPRISE_
+        ...copieOriginale,
+        id: nouvelId,
         dateEvaluation: new Date().toISOString(),
         dateCreation: new Date().toISOString(),
         repriseDeId: evaluationOriginaleId, // Lien vers l'originale
@@ -303,6 +309,9 @@ function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale = null) 
         dateModification: undefined,
         heureModification: undefined
     };
+
+    console.log('📋 Nouvelle évaluation créée avec ID:', nouvelId);
+    console.log('📋 Lien vers originale:', evaluationOriginaleId);
 
     if (archiverOriginale) {
         // Option 1: Archiver l'originale
@@ -672,10 +681,14 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
 
     console.log('Archivage:', archiverOriginale ? 'OUI' : 'NON (suppression)');
 
-    // Créer la nouvelle évaluation (duplicata)
+    // ✅ CORRECTIF (30 déc 2025): Deep copy pour éviter la modification de l'original
+    const copieOriginale = JSON.parse(JSON.stringify(evaluationOriginale));
+
+    // Créer la nouvelle évaluation (duplicata) avec un nouvel ID unique
+    const nouvelId = 'EVAL_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
     const nouvelleEvaluation = {
-        ...evaluationOriginale,
-        id: 'EVAL_' + Date.now(),
+        ...copieOriginale,
+        id: nouvelId,
         dateEvaluation: new Date().toISOString(),
         dateCreation: new Date().toISOString(),
         repriseDeIdCiblee: evaluationOriginaleId, // Lien vers l'originale (ciblée)
@@ -692,6 +705,9 @@ function appliquerJetonRepriseCiblee(evaluationOriginaleId, critereId = null, ar
         archivee: undefined,
         dateArchivage: undefined
     };
+
+    console.log('📋 Nouvelle évaluation ciblée créée avec ID:', nouvelId);
+    console.log('📋 Lien vers originale:', evaluationOriginaleId);
 
     if (archiverOriginale) {
         // Option 1: Archiver l'originale
