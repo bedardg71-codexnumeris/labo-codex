@@ -1200,37 +1200,41 @@ async function basculerDonneesDemo(activer) {
                 console.log(`   ✅ Cours démo ajouté`);
             }
 
+            // ✅ CORRECTION (30 déc 2025): Utiliser window.cle() pour namespacing par trimestre
+            // Sinon les données sont écrites dans 'groupeEtudiants' mais lues depuis 'h2026_groupeEtudiants'
+            const cleNamespace = (typeof window.cle === 'function') ? window.cle : (k) => k;
+
             // 2. Ajouter les étudiants du groupe 9999
-            const etudiantsExistants = await db.get('groupeEtudiants') || [];
+            const etudiantsExistants = await db.get(cleNamespace('groupeEtudiants')) || [];
             const etudiantsDemo = pack.groupeEtudiants?.filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999') || [];
             etudiantsDemo.forEach(e => {
                 if (!etudiantsExistants.find(ex => ex.da === e.da)) {
                     etudiantsExistants.push(e);
                 }
             });
-            await db.set('groupeEtudiants', etudiantsExistants);
-            console.log(`   ✅ ${etudiantsDemo.length} étudiants démo ajoutés`);
+            await db.set(cleNamespace('groupeEtudiants'), etudiantsExistants);
+            console.log(`   ✅ ${etudiantsDemo.length} étudiants démo ajoutés (clé: ${cleNamespace('groupeEtudiants')})`);
 
             // 3. Ajouter les productions du cours démo
-            const productionsExistantes = await db.get('productions') || [];
+            const productionsExistantes = await db.get(cleNamespace('productions')) || [];
             const productionsDemo = pack.productions?.filter(p => p.coursId === '601-101-h2026-9999') || [];
             productionsDemo.forEach(p => {
                 if (!productionsExistantes.find(ex => ex.id === p.id)) {
                     productionsExistantes.push(p);
                 }
             });
-            await db.set('productions', productionsExistantes);
+            await db.set(cleNamespace('productions'), productionsExistantes);
             console.log(`   ✅ ${productionsDemo.length} productions démo ajoutées`);
 
             // 4. Ajouter les évaluations du groupe démo
-            const evalsExistantes = await db.get('evaluationsSauvegardees') || [];
+            const evalsExistantes = await db.get(cleNamespace('evaluationsSauvegardees')) || [];
             const evalsDemo = pack.evaluationsSauvegardees?.filter(e => e.coursId === '601-101-h2026-9999') || [];
             evalsDemo.forEach(e => {
                 if (!evalsExistantes.find(ex => ex.da === e.da && ex.productionId === e.productionId)) {
                     evalsExistantes.push(e);
                 }
             });
-            await db.set('evaluationsSauvegardees', evalsExistantes);
+            await db.set(cleNamespace('evaluationsSauvegardees'), evalsExistantes);
             console.log(`   ✅ ${evalsDemo.length} évaluations démo ajoutées`);
 
             // 5. GÉNÉRER dynamiquement les présences (92% d'assiduité)
@@ -1238,13 +1242,13 @@ async function basculerDonneesDemo(activer) {
             const presencesGenerees = genererPresencesDemo(etudiantsDemo);
 
             // Ajouter les présences générées (sans écraser les existantes)
-            const presencesExistantes = await db.get('presences') || [];
+            const presencesExistantes = await db.get(cleNamespace('presences')) || [];
             presencesGenerees.forEach(p => {
                 if (!presencesExistantes.find(ex => ex.da === p.da && ex.date === p.date)) {
                     presencesExistantes.push(p);
                 }
             });
-            await db.set('presences', presencesExistantes);
+            await db.set(cleNamespace('presences'), presencesExistantes);
             console.log(`   ✅ ${presencesGenerees.length} présences générées (pattern 92%)`);
 
             // 6. Ajouter grilles/échelles/cartouches si absentes
@@ -1310,7 +1314,8 @@ async function basculerDonneesDemo(activer) {
 
         console.log('🗑️ [Démo] Suppression des données de démonstration...');
 
-        // ✅ CORRECTION (30 déc 2025): Utiliser db.set() (async) pour IndexedDB
+        // ✅ CORRECTION (30 déc 2025): Utiliser namespacing pour les clés
+        const cleNamespace = (typeof window.cle === 'function') ? window.cle : (k) => k;
 
         // 1. Supprimer le cours démo
         let cours = await db.get('listeCours') || [];
@@ -1319,35 +1324,31 @@ async function basculerDonneesDemo(activer) {
         console.log('   ✅ Cours démo supprimé');
 
         // 2. Supprimer les étudiants du groupe 9999
-        let etudiants = await db.get('groupeEtudiants') || [];
+        let etudiants = await db.get(cleNamespace('groupeEtudiants')) || [];
         const nbEtudiants = etudiants.filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999').length;
         etudiants = etudiants.filter(e => e.groupe !== '9999' && e.coursId !== '601-101-h2026-9999');
-        await db.set('groupeEtudiants', etudiants);
+        await db.set(cleNamespace('groupeEtudiants'), etudiants);
         console.log(`   ✅ ${nbEtudiants} étudiants démo supprimés`);
 
         // 3. Supprimer les productions du cours démo
-        let productions = await db.get('productions') || [];
+        let productions = await db.get(cleNamespace('productions')) || [];
         const nbProductions = productions.filter(p => p.coursId === '601-101-h2026-9999').length;
         productions = productions.filter(p => p.coursId !== '601-101-h2026-9999');
-        await db.set('productions', productions);
+        await db.set(cleNamespace('productions'), productions);
         console.log(`   ✅ ${nbProductions} productions démo supprimées`);
 
         // 4. Supprimer les évaluations du groupe démo
-        let evaluations = await db.get('evaluationsSauvegardees') || [];
+        let evaluations = await db.get(cleNamespace('evaluationsSauvegardees')) || [];
         const nbEvals = evaluations.filter(e => e.coursId === '601-101-h2026-9999').length;
         evaluations = evaluations.filter(e => e.coursId !== '601-101-h2026-9999');
-        await db.set('evaluationsSauvegardees', evaluations);
+        await db.set(cleNamespace('evaluationsSauvegardees'), evaluations);
         console.log(`   ✅ ${nbEvals} évaluations démo supprimées`);
 
-        // 5. Supprimer les présences du groupe démo (avant de filtrer les étudiants)
-        const etudiantsAvantSuppression = await db.get('groupeEtudiants') || [];
-        const dasDemoSuppression = etudiantsAvantSuppression
-            .filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999')
-            .map(e => e.da);
-        let presences = await db.get('presences') || [];
-        const nbPresences = presences.filter(p => dasDemoSuppression.includes(p.da)).length;
-        presences = presences.filter(p => !dasDemoSuppression.includes(p.da));
-        await db.set('presences', presences);
+        // 5. Supprimer les présences du groupe démo
+        let presences = await db.get(cleNamespace('presences')) || [];
+        const nbPresences = presences.filter(p => p.coursId === '601-101-h2026-9999').length;
+        presences = presences.filter(p => p.coursId !== '601-101-h2026-9999');
+        await db.set(cleNamespace('presences'), presences);
         console.log(`   ✅ ${nbPresences} présences démo supprimées`);
 
         // Marquer comme désactivé
