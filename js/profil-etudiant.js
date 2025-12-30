@@ -7523,36 +7523,35 @@ function genererRapportAPI(da, options = {}) {
     }
 
     // 5. GESTION DES JETONS
-    if (opts.jetons && typeof obtenirStatutJetonsEtudiant === 'function') {
-        // Utiliser la fonction officielle pour obtenir le statut des jetons
-        const statutJetons = obtenirStatutJetonsEtudiant(da);
+    if (opts.jetons) {
+        // Lire la configuration globale des jetons (nombreParEleve = quota total)
+        const modalites = obtenirDonneesSelonMode('modalitesEvaluation') || {};
+        const configJetons = modalites.configurationJetons || {};
+        const nbDisponibles = configJetons.nombreParEleve || 0;
 
-        // Vérifier si des jetons sont configurés
-        const typesJetons = Object.keys(statutJetons);
-        if (typesJetons.length > 0) {
-            // Calculer les totaux
+        if (nbDisponibles > 0) {
+            // Compter les jetons utilisés via la fonction officielle si disponible
             let nbUtilises = 0;
-            let nbDisponibles = 0;
             const details = [];
 
-            typesJetons.forEach(typeId => {
-                const info = statutJetons[typeId];
-                if (info && info.total > 0) {
-                    nbUtilises += info.utilises;
-                    nbDisponibles += info.total;
-                    if (info.utilises > 0) {
-                        details.push(`${info.nom}: ${info.utilises}/${info.total}`);
+            if (typeof obtenirStatutJetonsEtudiant === 'function') {
+                const statutJetons = obtenirStatutJetonsEtudiant(da);
+                Object.keys(statutJetons).forEach(typeId => {
+                    const info = statutJetons[typeId];
+                    if (info && info.utilises > 0) {
+                        nbUtilises += info.utilises;
+                        // Simplifier le nom du type
+                        const nomCourt = info.nom.replace('Jeton de ', '').replace('Jeton ', '');
+                        details.push(`${nomCourt}: ${info.utilises}`);
                     }
-                }
-            });
-
-            if (nbDisponibles > 0) {
-                rapport += `Jetons : ${nbUtilises} / ${nbDisponibles} utilisés`;
-                if (details.length > 0) {
-                    rapport += ` (${details.join(', ')})`;
-                }
-                rapport += `\n`;
+                });
             }
+
+            rapport += `Jetons : ${nbUtilises} / ${nbDisponibles} utilisés`;
+            if (details.length > 0) {
+                rapport += ` (${details.join(', ')})`;
+            }
+            rapport += `\n`;
         }
     }
 
