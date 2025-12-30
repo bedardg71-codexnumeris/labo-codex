@@ -749,19 +749,23 @@ function filtrerEtudiantsParMode(etudiants) {
     // Lire directement la variable modeActuel (pas un appel de fonction)
     const mode = modeActuel;
 
+    // Groupes de démonstration (9999 legacy + demo nouveau)
+    const GROUPES_DEMO = ['9999', 'demo'];
+    const estGroupeDemo = (groupe) => GROUPES_DEMO.includes(groupe);
+
     switch(mode) {
         case 'simulation':
-            // Mode Assisté : afficher SEULEMENT le Groupe 9999 (données de démo)
-            return etudiants.filter(e => e.groupe === '9999');
+            // Mode Assisté : afficher SEULEMENT les groupes démo
+            return etudiants.filter(e => estGroupeDemo(e.groupe));
 
         case 'normal':
         case 'anonymisation':
-            // Mode Normal et Anonymisé : exclure le Groupe 9999
-            return etudiants.filter(e => e.groupe !== '9999');
+            // Mode Normal et Anonymisé : exclure les groupes démo
+            return etudiants.filter(e => !estGroupeDemo(e.groupe));
 
         default:
-            // Par défaut, exclure le Groupe 9999
-            return etudiants.filter(e => e.groupe !== '9999');
+            // Par défaut, exclure les groupes démo
+            return etudiants.filter(e => !estGroupeDemo(e.groupe));
     }
 }
 
