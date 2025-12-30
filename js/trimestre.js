@@ -1188,46 +1188,49 @@ async function basculerDonneesDemo(activer) {
 
             // FUSIONNER les données (ne pas écraser les données existantes)
 
+            // ✅ CORRECTION (30 déc 2025): Utiliser db.set() (async) au lieu de db.setSync()
+            // pour écrire dans IndexedDB ET localStorage (architecture hybride)
+
             // 1. Ajouter le cours démo s'il n'existe pas
-            const coursExistants = db.getSync('listeCours', []);
+            const coursExistants = await db.get('listeCours') || [];
             const coursDemo = pack.listeCours?.find(c => c.id === '601-101-h2026-9999');
             if (coursDemo && !coursExistants.find(c => c.id === coursDemo.id)) {
                 coursExistants.push(coursDemo);
-                db.setSync('listeCours', coursExistants);
+                await db.set('listeCours', coursExistants);
                 console.log(`   ✅ Cours démo ajouté`);
             }
 
             // 2. Ajouter les étudiants du groupe 9999
-            const etudiantsExistants = db.getSync('groupeEtudiants', []);
+            const etudiantsExistants = await db.get('groupeEtudiants') || [];
             const etudiantsDemo = pack.groupeEtudiants?.filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999') || [];
             etudiantsDemo.forEach(e => {
                 if (!etudiantsExistants.find(ex => ex.da === e.da)) {
                     etudiantsExistants.push(e);
                 }
             });
-            db.setSync('groupeEtudiants', etudiantsExistants);
+            await db.set('groupeEtudiants', etudiantsExistants);
             console.log(`   ✅ ${etudiantsDemo.length} étudiants démo ajoutés`);
 
             // 3. Ajouter les productions du cours démo
-            const productionsExistantes = db.getSync('productions', []);
+            const productionsExistantes = await db.get('productions') || [];
             const productionsDemo = pack.productions?.filter(p => p.coursId === '601-101-h2026-9999') || [];
             productionsDemo.forEach(p => {
                 if (!productionsExistantes.find(ex => ex.id === p.id)) {
                     productionsExistantes.push(p);
                 }
             });
-            db.setSync('productions', productionsExistantes);
+            await db.set('productions', productionsExistantes);
             console.log(`   ✅ ${productionsDemo.length} productions démo ajoutées`);
 
             // 4. Ajouter les évaluations du groupe démo
-            const evalsExistantes = db.getSync('evaluationsSauvegardees', []);
+            const evalsExistantes = await db.get('evaluationsSauvegardees') || [];
             const evalsDemo = pack.evaluationsSauvegardees?.filter(e => e.coursId === '601-101-h2026-9999') || [];
             evalsDemo.forEach(e => {
                 if (!evalsExistantes.find(ex => ex.da === e.da && ex.productionId === e.productionId)) {
                     evalsExistantes.push(e);
                 }
             });
-            db.setSync('evaluationsSauvegardees', evalsExistantes);
+            await db.set('evaluationsSauvegardees', evalsExistantes);
             console.log(`   ✅ ${evalsDemo.length} évaluations démo ajoutées`);
 
             // 5. GÉNÉRER dynamiquement les présences (92% d'assiduité)
@@ -1235,13 +1238,13 @@ async function basculerDonneesDemo(activer) {
             const presencesGenerees = genererPresencesDemo(etudiantsDemo);
 
             // Ajouter les présences générées (sans écraser les existantes)
-            const presencesExistantes = db.getSync('presences', []);
+            const presencesExistantes = await db.get('presences') || [];
             presencesGenerees.forEach(p => {
                 if (!presencesExistantes.find(ex => ex.da === p.da && ex.date === p.date)) {
                     presencesExistantes.push(p);
                 }
             });
-            db.setSync('presences', presencesExistantes);
+            await db.set('presences', presencesExistantes);
             console.log(`   ✅ ${presencesGenerees.length} présences générées (pattern 92%)`);
 
             // 6. Ajouter grilles/échelles/cartouches si absentes
@@ -1250,28 +1253,31 @@ async function basculerDonneesDemo(activer) {
                 { cle: 'echellesTemplates', label: 'échelles' }
             ];
 
-            sectionsPartagees.forEach(({ cle, label }) => {
-                const existantes = db.getSync(cle, []);
+            for (const { cle, label } of sectionsPartagees) {
+                const existantes = await db.get(cle) || [];
                 const nouvelles = pack[cle] || [];
                 nouvelles.forEach(item => {
                     if (!existantes.find(ex => ex.id === item.id)) {
                         existantes.push(item);
                     }
                 });
-                db.setSync(cle, existantes);
+                await db.set(cle, existantes);
                 console.log(`   ✅ ${label} fusionnées`);
-            });
+            }
 
             // Cartouches (format spécial)
-            Object.keys(pack).forEach(cle => {
-                if (cle.startsWith('cartouches_') && !db.getSync(cle)) {
-                    db.setSync(cle, pack[cle]);
-                    console.log(`   ✅ ${cle}`);
+            for (const cle of Object.keys(pack)) {
+                if (cle.startsWith('cartouches_')) {
+                    const existant = await db.get(cle);
+                    if (!existant) {
+                        await db.set(cle, pack[cle]);
+                        console.log(`   ✅ ${cle}`);
+                    }
                 }
-            });
+            }
 
             // Marquer comme activé
-            db.setSync('donneesDemo', true);
+            await db.set('donneesDemo', true);
             localStorage.setItem('demo-chargees', 'true'); // ✅ Flag pour test de validation
 
             // Notification succès
@@ -1297,45 +1303,48 @@ async function basculerDonneesDemo(activer) {
 
         console.log('🗑️ [Démo] Suppression des données de démonstration...');
 
+        // ✅ CORRECTION (30 déc 2025): Utiliser db.set() (async) pour IndexedDB
+
         // 1. Supprimer le cours démo
-        let cours = db.getSync('listeCours', []);
+        let cours = await db.get('listeCours') || [];
         cours = cours.filter(c => c.id !== '601-101-h2026-9999' && c.groupe !== '9999');
-        db.setSync('listeCours', cours);
+        await db.set('listeCours', cours);
         console.log('   ✅ Cours démo supprimé');
 
         // 2. Supprimer les étudiants du groupe 9999
-        let etudiants = db.getSync('groupeEtudiants', []);
+        let etudiants = await db.get('groupeEtudiants') || [];
         const nbEtudiants = etudiants.filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999').length;
         etudiants = etudiants.filter(e => e.groupe !== '9999' && e.coursId !== '601-101-h2026-9999');
-        db.setSync('groupeEtudiants', etudiants);
+        await db.set('groupeEtudiants', etudiants);
         console.log(`   ✅ ${nbEtudiants} étudiants démo supprimés`);
 
         // 3. Supprimer les productions du cours démo
-        let productions = db.getSync('productions', []);
+        let productions = await db.get('productions') || [];
         const nbProductions = productions.filter(p => p.coursId === '601-101-h2026-9999').length;
         productions = productions.filter(p => p.coursId !== '601-101-h2026-9999');
-        db.setSync('productions', productions);
+        await db.set('productions', productions);
         console.log(`   ✅ ${nbProductions} productions démo supprimées`);
 
         // 4. Supprimer les évaluations du groupe démo
-        let evaluations = db.getSync('evaluationsSauvegardees', []);
+        let evaluations = await db.get('evaluationsSauvegardees') || [];
         const nbEvals = evaluations.filter(e => e.coursId === '601-101-h2026-9999').length;
         evaluations = evaluations.filter(e => e.coursId !== '601-101-h2026-9999');
-        db.setSync('evaluationsSauvegardees', evaluations);
+        await db.set('evaluationsSauvegardees', evaluations);
         console.log(`   ✅ ${nbEvals} évaluations démo supprimées`);
 
-        // 5. Supprimer les présences du groupe démo
-        let presences = db.getSync('presences', []);
-        const dasDemoSuppression = db.getSync('groupeEtudiants', [])
+        // 5. Supprimer les présences du groupe démo (avant de filtrer les étudiants)
+        const etudiantsAvantSuppression = await db.get('groupeEtudiants') || [];
+        const dasDemoSuppression = etudiantsAvantSuppression
             .filter(e => e.groupe === '9999' || e.coursId === '601-101-h2026-9999')
             .map(e => e.da);
+        let presences = await db.get('presences') || [];
         const nbPresences = presences.filter(p => dasDemoSuppression.includes(p.da)).length;
         presences = presences.filter(p => !dasDemoSuppression.includes(p.da));
-        db.setSync('presences', presences);
+        await db.set('presences', presences);
         console.log(`   ✅ ${nbPresences} présences démo supprimées`);
 
         // Marquer comme désactivé
-        db.setSync('donneesDemo', false);
+        await db.set('donneesDemo', false);
         localStorage.removeItem('demo-chargees'); // ✅ Retirer flag de validation
 
         // Notification succès
