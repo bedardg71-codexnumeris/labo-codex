@@ -835,7 +835,8 @@ function genererCalendrierComplet() {
         }
         // 6. Jour de cours normal (avant fin des cours seulement)
         // ✅ CORRECTION (31 déc 2025): Vérifier que ce jour a des cours selon horaireHebdo
-        else if (dateStr <= finCours && (joursAvecCours === null || joursAvecCours.has(jourSemaine))) {
+        // ✅ FIX: Comparer en minuscules (joursAvecCours contient "lundi", jourSemaine = "Lundi")
+        else if (dateStr <= finCours && (joursAvecCours === null || joursAvecCours.has(jourSemaine.toLowerCase()))) {
             infosJour.statut = 'cours';
             compteurJoursCours++;
             joursDeCoursMemeSemaine++;
