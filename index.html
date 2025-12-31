@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 95 - Refonte UX Réglages</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2025122701">
+    <link rel="stylesheet" href="styles.css?v=2025123102">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -9363,8 +9363,8 @@ Exemple :
                     <!-- ========================================
                          CARTE : CAPTURES DE PROGRESSION
                          ======================================== -->
-                    <div class="carte accordeon ferme">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this.parentElement)">
+                    <div class="carte accordeon ferme" id="accordeon-snapshots">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu" style="margin: 0;">Captures de progression (Snapshots)</h3>
                             <span class="accordeon-chevron">▼</span>
                         </div>
@@ -9428,8 +9428,8 @@ Exemple :
                     <!-- ========================================
                          CARTE : RÉINITIALISATION
                          ======================================== -->
-                    <div class="carte accordeon ferme">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this.parentElement)" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);">
+                    <div class="carte accordeon ferme" id="accordeon-reinitialisation">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);">
                             <h3 style="margin: 0; color: #c62828;">Réinitialisation</h3>
                             <span class="accordeon-chevron" style="color: #c62828;">▼</span>
                         </div>
@@ -9453,8 +9453,8 @@ Exemple :
                     <!-- ========================================
                          CARTE : INFORMATIONS TECHNIQUES
                          ======================================== -->
-                    <div class="carte accordeon ferme">
-                        <div class="accordeon-header" onclick="toggleAccordeonV2(this.parentElement)">
+                    <div class="carte accordeon ferme" id="accordeon-infos-techniques">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
                             <h3 class="carte-titre-bleu" style="margin: 0;">Informations techniques</h3>
                             <span class="accordeon-chevron">▼</span>
                         </div>
@@ -12582,12 +12582,12 @@ Exemple :
     <script src="js/modes.js?v=2025123004"></script>
 
     <!-- ✅ Pack de démarrage AVANT donnees-demo (expose PACK_DEMARRAGE) -->
-    <script src="js/pack-demarrage.js?v=2025123106"></script>
+    <script src="js/pack-demarrage.js?v=2025123108"></script>
     <script src="js/donnees-demo.js?v=2025122701"></script>
 
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2025123001"></script> <!-- Beta 95 : Gestion multi-trimestres -->
-    <script src="js/trimestre.js?v=2025123103"></script>
+    <script src="js/trimestre.js?v=2025123105"></script>
     <script src="js/trimestre-v2.js?v=2025123101"></script> <!-- Beta 95 : Onglet Trimestre restructuré -->
     <script src="js/pratique-notation-v2.js?v=2025123002"></script> <!-- Beta 95 : Onglet Pratique de notation restructuré -->
     <script src="js/preferences-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Préférences restructuré -->
@@ -12627,7 +12627,7 @@ Exemple :
     <script src="js/cc-license.js?v=2025120118"></script>
 
     <!-- Interface de gestion des pratiques configurables -->
-    <script src="js/pratiques.js?v=2025121602"></script>
+    <script src="js/pratiques.js?v=2025123104"></script>
     <script src="js/wizard-pratique-v2.js?v=2025122603"></script>
     <script src="js/objectifs.js?v=2025120124"></script>
 
