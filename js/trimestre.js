@@ -728,6 +728,17 @@ function confirmerAjoutEvenementImprevu() {
 function genererCalendrierComplet() {
     console.log('🏭 Génération du calendrier complet (source unique)...');
 
+    // ✅ CORRECTION (31 déc 2025): En mode démo, utiliser le calendrier pré-généré du pack
+    // Ne PAS régénérer car les données démo sont calculées manuellement (15 mardis spécifiques)
+    const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
+    if (trimestreActif && trimestreActif.id === 'demo') {
+        const calendrierDemo = db.getSync('demo_calendrierComplet', null);
+        if (calendrierDemo && Object.keys(calendrierDemo).length > 0) {
+            console.log('   ✅ Mode démo détecté - calendrier pré-généré utilisé (' + Object.keys(calendrierDemo).length + ' jours)');
+            return calendrierDemo;
+        }
+    }
+
     const cadre = db.getSync(cle('cadreCalendrier'), {});
     const evenementsPrevus = db.getSync(cle('evenementsPrevus'), []);
     const evenementsImprevus = db.getSync(cle('evenementsImprevus'), []);
