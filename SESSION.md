@@ -51,28 +51,47 @@ Decouverte probleme majeur : namespacing incomplet (4/14 cles migrees).
 - ✅ Bug calendrier case-sensitivity corrige
 - ✅ Donnees A2025 nettoyees (30 etudiants)
 - ✅ Plan de migration documente
-- ✅ Phase 1 namespacing COMPLETE
-  - evaluation.js : 4 occurrences corrigees (obtenirDonneesSelonMode)
-  - profil-etudiant.js : 1 occurrence corrigee
-- ⏳ Phase 2 namespacing (5 fichiers)
-- ❌ Phase 3 namespacing (5 fichiers)
-- ❌ Test pack demo end-to-end
+- ✅ Phase 1 namespacing COMPLETE (5 occurrences)
+  - evaluation.js : 4 occurrences
+  - profil-etudiant.js : 1 occurrence
+- ✅ Phase 2 namespacing COMPLETE (9 occurrences)
+  - trimestres.js : 4 occurrences
+  - modes.js : 2 occurrences (avec cle() pour eviter recursion)
+  - cours.js : 1 occurrence
+  - main.js : 1 occurrence
+  - statistiques.js : 1 occurrence
+- ✅ Phase 3 namespacing COMPLETE (6 occurrences)
+  - horaire.js : 1 occurrence
+  - primo-accueil.js : 2 occurrences
+  - primo-validation-champs.js : 1 occurrence
+  - migrations.js : 1 occurrence
+  - rapport-bug.js : 1 occurrence
+- ⏳ Test pack demo end-to-end
 
 **Action immediate au retour** :
-Continuer Phase 2 du namespacing (PLAN_MIGRATION_NAMESPACING.md) :
-- trimestres.js : 4 occurrences (lignes 308, 391, 737, 1292)
-- modes.js : 2 occurrences (lignes 373, 442)
-- cours.js : 1 occurrence (ligne 999)
-- main.js : 1 occurrence (ligne 186)
-- statistiques.js : 1 occurrence (ligne 102)
+Tester le pack demo :
+1. Activer checkbox "Donnees demo"
+2. Verifier 5 etudiants demo visibles
+3. Verifier calendrier avec jours de cours
+4. Desactiver et verifier retour aux 30 etudiants A2025
 
 **Fichiers modifies cette session** :
 - js/trimestre.js (fix case-sensitivity)
-- js/evaluation.js (namespacing Phase 1 - 4 occurrences)
-- js/profil-etudiant.js (namespacing Phase 1 - 1 occurrence)
+- js/evaluation.js (namespacing - 4 occurrences)
+- js/profil-etudiant.js (namespacing - 1 occurrence)
+- js/trimestres.js (namespacing - 4 occurrences)
+- js/modes.js (namespacing - 2 occurrences)
+- js/cours.js (namespacing - 1 occurrence)
+- js/main.js (namespacing - 1 occurrence)
+- js/statistiques.js (namespacing - 1 occurrence)
+- js/horaire.js (namespacing - 1 occurrence)
+- js/primo-accueil.js (namespacing - 2 occurrences)
+- js/primo-validation-champs.js (namespacing - 1 occurrence)
+- js/migrations.js (namespacing - 1 occurrence)
+- js/rapport-bug.js (namespacing - 1 occurrence)
 - PLAN_MIGRATION_NAMESPACING.md (cree)
 - diagnostic_donnees.js (cree)
-- SESSION.md (cree)
+- SESSION.md (cree et mis a jour)
 
 ---
 

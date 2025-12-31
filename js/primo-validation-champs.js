@@ -167,7 +167,10 @@ function appliquerStyleRempli(element) {
  * Validation spéciale pour le groupe d'étudiants
  */
 function validerGroupeEtudiants() {
-    const etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ NAMESPACING (Beta 95.5)
+    const etudiants = (typeof obtenirDonneesSelonMode === 'function')
+        ? obtenirDonneesSelonMode('groupeEtudiants')
+        : db.getSync('groupeEtudiants', []);
     const tableau = document.getElementById('tableau-etudiants');
 
     if (!tableau) return;

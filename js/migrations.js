@@ -22,7 +22,9 @@
  * @returns {number} Nombre d'étudiants migrés
  */
 function migrerEtudiantsVersCoursId() {
-    const etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ NAMESPACING (Beta 95.5) : Lire depuis cle namespacee si disponible
+    const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtudiants, []);
     const cours = db.getSync('listeCours', []);
     const coursActif = cours.find(c => c.actif) || cours[0];
 

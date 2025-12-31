@@ -995,11 +995,12 @@ function supprimerCours(id) {
 
     // ===============================
     // COMPTER LES DONNÉES LIÉES (Beta 93.5)
+    // ✅ NAMESPACING (Beta 95.5)
     // ===============================
-    const etudiants = db.getSync('groupeEtudiants', []);
-    const productions = db.getSync('productions', []);
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const productions = obtenirDonneesSelonMode('productions');
     const evaluations = db.getSync('evaluationsDetaillees', []);
-    const presences = db.getSync('presences', {});
+    const presences = obtenirDonneesSelonMode('presences');
 
     const nbEtudiants = etudiants.filter(e => e.coursId === id).length;
     const nbProductions = productions.filter(p => p.coursId === id).length;

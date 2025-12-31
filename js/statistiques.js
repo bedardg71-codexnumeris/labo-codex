@@ -99,7 +99,8 @@ function chargerInfosCours() {
     setStatText('stat-nb-groupes', listeCours.length > 0 ? '1' : '—');
     
     // Nombre d'élèves
-    const etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ NAMESPACING (Beta 95.5)
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     setStatText('stat-nb-eleves', etudiants.length || '0');
 }
 

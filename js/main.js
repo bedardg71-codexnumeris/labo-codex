@@ -183,7 +183,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!container) return;
 
         // Récupérer le nombre d'étudiants (groupeEtudiants est la clé correcte)
-        const listeEtudiants = db.getSync('groupeEtudiants', []);
+        // ✅ NAMESPACING (Beta 95.5)
+        const listeEtudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const nbEtudiants = listeEtudiants.length || 10; // Par défaut 10 si pas d'étudiants
 
         console.log(`   → Création de ${nbEtudiants} bulles (1 par étudiant)`);

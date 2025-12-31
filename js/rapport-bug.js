@@ -115,8 +115,11 @@ function obtenirEtatApplication() {
     }
 
     // Nombre d'étudiants
+    // ✅ NAMESPACING (Beta 95.5)
     try {
-        const etudiants = db.getSync('groupeEtudiants', []);
+        const etudiants = (typeof obtenirDonneesSelonMode === 'function')
+            ? obtenirDonneesSelonMode('groupeEtudiants')
+            : db.getSync('groupeEtudiants', []);
         etat.nbEtudiants = etudiants.length;
     } catch (e) {
         etat.nbEtudiants = 'erreur';

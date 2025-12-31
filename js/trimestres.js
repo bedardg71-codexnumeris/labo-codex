@@ -305,7 +305,8 @@
             }
 
             // Statistiques globales
-            const etudiants = db.getSync('groupeEtudiants', []);
+            // ✅ NAMESPACING (Beta 95.5)
+            const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
             const etudiantsActifs = etudiants.filter(e =>
                 e.statut !== 'abandon' && e.statut !== 'décrochage'
             );
@@ -388,13 +389,14 @@
             // Étudiants, évaluations, présences liés aux cours du trimestre
             const coursIds = exportData.donnees.cours.map(c => c.id);
 
-            const etudiants = db.getSync('groupeEtudiants', []);
+            // ✅ NAMESPACING (Beta 95.5) - obtenirDonneesSelonMode filtre deja par coursId
+            const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
             exportData.donnees.etudiants = etudiants.filter(e => coursIds.includes(e.coursId));
 
-            const evaluations = db.getSync('evaluationsSauvegardees', []);
+            const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
             exportData.donnees.evaluations = evaluations.filter(e => coursIds.includes(e.coursId));
 
-            const presences = db.getSync('presences', []);
+            const presences = obtenirDonneesSelonMode('presences');
             exportData.donnees.presences = presences.filter(p => coursIds.includes(p.coursId));
 
             const snapshots = db.getSync(cle('snapshots'), { hebdomadaires: [], interventions: [] });
@@ -754,15 +756,16 @@
             }
 
             // 2. Collecter les données sources
-            const etudiants = db.getSync('groupeEtudiants', []);
-            // IMPORTANT: Inclure TOUS les étudiants pour l'anonymisation
+            // ✅ NAMESPACING (Beta 95.5)
+            const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+            // IMPORTANT: Inclure TOUS les étudiants pour l'anonymisation (du trimestre actif)
             const tousLesEtudiants = etudiants;
             const etudiantsActifs = etudiants.filter(e =>
                 e.statut !== 'abandon' && e.statut !== 'décrochage'
             );
-            const productions = db.getSync('productions', []);
-            const evaluations = db.getSync('evaluationsSauvegardees', []);
-            const presences = db.getSync('presences', []);
+            const productions = obtenirDonneesSelonMode('productions');
+            const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+            const presences = obtenirDonneesSelonMode('presences');
             const snapshotsRaw = db.getSync(cle('snapshots'), { hebdomadaires: [], interventions: [] });
             // Les snapshots sont stockés comme { hebdomadaires: [...], interventions: [...], metadata: {...} }
             // On exporte les snapshots hebdomadaires
@@ -1309,8 +1312,9 @@
 
         if (trimestre) {
             // Compter les données disponibles
-            const etudiants = db.getSync('groupeEtudiants', []);
-            const evaluations = db.getSync('evaluationsSauvegardees', []);
+            // ✅ NAMESPACING (Beta 95.5)
+            const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+            const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
             const nbEtudiants = etudiants.filter(e => e.statut !== 'abandon').length;
             const nbEvaluations = evaluations.length;
 
