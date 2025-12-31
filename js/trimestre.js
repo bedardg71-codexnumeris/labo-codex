@@ -1396,6 +1396,12 @@ async function basculerDonneesDemo(activer) {
             }
             if (pack.horaireHebdo) {
                 await db.set(cleNamespace('horaireHebdo'), pack.horaireHebdo);
+                // ✅ CORRECTION (31 déc 2025): Aussi sauvegarder dans la clé spécifique au cours
+                // horaire.js cherche d'abord seancesHoraire_{coursId} avant cle('horaireHebdo')
+                if (coursIdDemo) {
+                    await db.set(`seancesHoraire_${coursIdDemo}`, pack.horaireHebdo);
+                    console.log(`   ✅ horaireHebdo chargé dans seancesHoraire_${coursIdDemo}`);
+                }
                 console.log('   ✅ horaireHebdo chargé:', JSON.stringify(pack.horaireHebdo));
             }
             // calendrierComplet et seancesCompletes seront générés au rechargement
@@ -1514,6 +1520,8 @@ async function basculerDonneesDemo(activer) {
         await db.remove(cleNamespace('horaireHebdo'));
         await db.remove(cleNamespace('calendrierComplet'));
         await db.remove(cleNamespace('seancesCompletes'));
+        // ✅ CORRECTION (31 déc 2025): Aussi supprimer la clé horaire spécifique au cours
+        await db.remove('seancesHoraire_demo-cours');
         console.log('   ✅ Données calendrier démo supprimées');
 
         // 7. Désactiver le trimestre démo et réactiver le précédent

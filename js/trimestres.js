@@ -557,7 +557,26 @@
      */
     function migrerClesVersA2025() {
         // Liste des clés à migrer vers a2025_*
-        const clesAMigrer = ['interventions', 'indicesAssiduite', 'indicesCP', 'snapshots'];
+        // ✅ CORRECTION (31 déc 2025): Ajouter TOUTES les clés namespacées manquantes
+        const clesAMigrer = [
+            // Données étudiants et évaluations (critiques!)
+            'groupeEtudiants',
+            'productions',
+            'presences',
+            'evaluationsSauvegardees',
+            // Calendrier et horaire
+            'calendrierComplet',
+            'cadreCalendrier',
+            'horaireHebdo',
+            'seancesCompletes',
+            'evenementsPrevus',
+            'evenementsImprevus',
+            // Indices et snapshots (existants)
+            'interventions',
+            'indicesAssiduite',
+            'indicesCP',
+            'snapshots'
+        ];
         let clesMigrees = 0;
 
         clesAMigrer.forEach(nomCle => {
@@ -577,13 +596,14 @@
                     // Ne migrer que si la clé a2025_* n'existe pas déjà
                     if (existantes === null) {
                         db.setSync(cleA2025, donneesAnciennes);
-                        console.log(`[Trimestres] → ${nomCle} migré vers ${cleA2025}`);
+                        console.log(`[Trimestres] → ${nomCle} COPIÉ vers ${cleA2025}`);
                         clesMigrees++;
                     }
 
-                    // Supprimer l'ancienne clé
-                    db.removeSync(nomCle);
-                    console.log(`[Trimestres] → Ancienne clé "${nomCle}" supprimée`);
+                    // ⚠️ NE PAS supprimer l'ancienne clé pour l'instant
+                    // Les modules qui lisent directement sans cle() en ont besoin
+                    // db.removeSync(nomCle);
+                    // console.log(`[Trimestres] → Ancienne clé "${nomCle}" supprimée`);
                 }
             }
         });
