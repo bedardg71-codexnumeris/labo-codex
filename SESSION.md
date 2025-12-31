@@ -39,9 +39,26 @@ Decouverte probleme majeur : namespacing incomplet (4/14 cles migrees).
 ### Bug #3 : Namespacing incomplet (decouvert ~09:00)
 - **Symptome** : 20+ modules lisent `db.getSync('groupeEtudiants')` sans passer par `cle()`
 - **Cause** : Migration initiale incomplete (seulement 4 cles sur 14+)
-- **Fix** : Plan de migration documente dans PLAN_MIGRATION_NAMESPACING.md
-- **Fichiers touches** : A corriger - voir plan
-- **Statut** : ⏳ En cours
+- **Fix** : Migration en 3 phases (20 occurrences)
+- **Fichiers touches** : 12 fichiers JS
+- **Statut** : ✅ Resolu
+- **Commits** : Plusieurs
+
+### Bug #4 : Timeout generation selects criteres (~11:00)
+- **Symptome** : Erreur "Timeout génération selects critères" au chargement evaluation
+- **Cause** : donnees-demo.js ne chargeait pas evaluations, echelles, cartouches correctement
+- **Fix** : Correction des cles (evaluationsSauvegardees, echellesTemplates, cartouches_*)
+- **Fichiers touches** : js/donnees-demo.js
+- **Statut** : ✅ Resolu
+- **Commit** : `1398448`
+
+### Bug #5 : CritereId mismatch (~12:00)
+- **Symptome** : Selects generes mais timeout persiste, cartouche vide
+- **Cause** : Pack demo utilisait `structure` mais grille existante utilise `CR_STRUCTURE`
+- **Fix** : Alignement IDs criteres dans pack-demarrage.js (72 occurrences)
+- **Fichiers touches** : js/pack-demarrage.js
+- **Statut** : ✅ Resolu
+- **Commit** : `6876d7b`
 
 ---
 
@@ -50,23 +67,10 @@ Decouverte probleme majeur : namespacing incomplet (4/14 cles migrees).
 **Etat actuel** :
 - ✅ Bug calendrier case-sensitivity corrige
 - ✅ Donnees A2025 nettoyees (30 etudiants)
-- ✅ Plan de migration documente
-- ✅ Phase 1 namespacing COMPLETE (5 occurrences)
-  - evaluation.js : 4 occurrences
-  - profil-etudiant.js : 1 occurrence
-- ✅ Phase 2 namespacing COMPLETE (9 occurrences)
-  - trimestres.js : 4 occurrences
-  - modes.js : 2 occurrences (avec cle() pour eviter recursion)
-  - cours.js : 1 occurrence
-  - main.js : 1 occurrence
-  - statistiques.js : 1 occurrence
-- ✅ Phase 3 namespacing COMPLETE (6 occurrences)
-  - horaire.js : 1 occurrence
-  - primo-accueil.js : 2 occurrences
-  - primo-validation-champs.js : 1 occurrence
-  - migrations.js : 1 occurrence
-  - rapport-bug.js : 1 occurrence
-- ⏳ Test pack demo end-to-end
+- ✅ Phase 1-3 namespacing COMPLETE (20 occurrences, 12 fichiers)
+- ✅ donnees-demo.js corrige (cles, cartouches, infoCours)
+- ✅ pack-demarrage.js aligne (critereId → CR_STRUCTURE, etc.)
+- ⏳ Test pack demo end-to-end (PRET A TESTER)
 
 **Action immediate au retour** :
 Tester le pack demo :
@@ -89,6 +93,8 @@ Tester le pack demo :
 - js/primo-validation-champs.js (namespacing - 1 occurrence)
 - js/migrations.js (namespacing - 1 occurrence)
 - js/rapport-bug.js (namespacing - 1 occurrence)
+- js/donnees-demo.js (correction cles evaluations, echelles, cartouches)
+- js/pack-demarrage.js (alignement critereId CR_STRUCTURE, etc.)
 - PLAN_MIGRATION_NAMESPACING.md (cree)
 - diagnostic_donnees.js (cree)
 - SESSION.md (cree et mis a jour)
@@ -98,25 +104,27 @@ Tester le pack demo :
 ## NOTES POUR CLAUDE CODE
 
 **Contexte actuel** :
-On corrige le namespacing incomplet. 20+ modules lisent directement les cles
-globales au lieu d'utiliser `cle()` ou `obtenirDonneesSelonMode()`.
+Pack demo corrige et pret a tester. Tous les critereId alignes avec la
+structure existante de l'utilisateur (CR_STRUCTURE, CR_RIGUEUR, etc.)
 
 **Rappels critiques** :
 - `cle('groupeEtudiants')` retourne `a2025_groupeEtudiants` si trimestre actif = a2025
 - `obtenirDonneesSelonMode()` est prefere car il gere aussi le filtrage
-- Ne PAS supprimer les cles globales pour l'instant (compatibilite)
+- Les evaluations demo utilisent grilleId=GRILLE_DEMO et critereId=CR_STRUCTURE, etc.
+- Les cartouches utilisent cles comme CR_STRUCTURE_M, CR_RIGUEUR_D, etc.
 
-**Pattern de correction** :
+**Structure critereId** :
 ```javascript
-// AVANT (problematique)
-const etudiants = db.getSync('groupeEtudiants', []);
+// Dans grille (criteres[].id)
+{ "id": "CR_STRUCTURE", "code": "structure", "nom": "Structure", ... }
 
-// APRES (correct)
-const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-// OU
-const etudiants = db.getSync(cle('groupeEtudiants'), []);
+// Dans evaluation (criteres[].critereId)
+{ "critereId": "CR_STRUCTURE", "niveauSelectionne": "M" }
+
+// Dans cartouche (commentaires keys)
+{ "CR_STRUCTURE_M": "Bonne organisation !", ... }
 ```
 
 ---
 
-**Derniere mise a jour** : 31 dec 2025, ~10:00
+**Derniere mise a jour** : 31 dec 2025, ~13:00
