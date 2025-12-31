@@ -1261,8 +1261,13 @@ async function basculerDonneesDemo(activer) {
             const estCoursDemo = (id) => id && (id.includes('9999') || id.includes('demo'));
             const estDADemo = (da) => da && da.startsWith('DEMO');
 
-            // ✅ CORRECTION (30 déc 2025): Utiliser window.cle() pour namespacing par trimestre
-            const cleNamespace = (typeof window.cle === 'function') ? window.cle : (k) => k;
+            // ✅ CORRECTION (31 déc 2025): Utiliser préfixe 'demo_' explicite
+            // On NE PEUT PAS utiliser window.cle() car obtenirTrimestreId() peut encore retourner l'ancien trimestre
+            // Utiliser un préfixe fixe garantit que les données vont dans le bon namespace
+            const DEMO_PREFIX = 'demo_';
+            const CLES_NAMESPACEES = ['groupeEtudiants', 'productions', 'presences', 'evaluationsSauvegardees',
+                                      'cadreCalendrier', 'horaireHebdo', 'calendrierComplet', 'seancesCompletes'];
+            const cleNamespace = (k) => CLES_NAMESPACEES.includes(k) ? DEMO_PREFIX + k : k;
 
             // ÉTAPE 0: Supprimer les anciennes données démo AVANT d'ajouter les nouvelles
             console.log('   🗑️ Suppression des anciennes données démo...');
@@ -1432,8 +1437,11 @@ async function basculerDonneesDemo(activer) {
         // ✅ CORRECTION (30 déc 2025): Détecter aussi les DA démo (DEMO1-DEMO5 ou DEMO001-DEMO005)
         const estDADemo = (da) => da && da.startsWith('DEMO');
 
-        // ✅ CORRECTION (30 déc 2025): Utiliser namespacing pour les clés
-        const cleNamespace = (typeof window.cle === 'function') ? window.cle : (k) => k;
+        // ✅ CORRECTION (31 déc 2025): Utiliser préfixe 'demo_' explicite (même logique que chargement)
+        const DEMO_PREFIX = 'demo_';
+        const CLES_NAMESPACEES = ['groupeEtudiants', 'productions', 'presences', 'evaluationsSauvegardees',
+                                  'cadreCalendrier', 'horaireHebdo', 'calendrierComplet', 'seancesCompletes'];
+        const cleNamespace = (k) => CLES_NAMESPACEES.includes(k) ? DEMO_PREFIX + k : k;
 
         // 1. Supprimer le cours démo
         let cours = await db.get('listeCours') || [];
@@ -1482,14 +1490,25 @@ async function basculerDonneesDemo(activer) {
         await db.set(cleNamespace('presences'), presences);
         console.log(`   ✅ ${nbPresences} présences démo supprimées`);
 
-        // 6. Supprimer les données calendrier démo (seulement si trimestre demo actif)
-        const trimestreActuel = obtenirTrimestreActif();
-        if (trimestreActuel && trimestreActuel.id === TRIMESTRE_DEMO_ID) {
-            await db.remove(cleNamespace('cadreCalendrier'));
-            await db.remove(cleNamespace('horaireHebdo'));
-            await db.remove(cleNamespace('calendrierComplet'));
-            await db.remove(cleNamespace('seancesCompletes'));
-            console.log('   ✅ Données calendrier démo supprimées');
+        // 6. Supprimer les données calendrier démo (TOUJOURS, car préfixe demo_ explicite)
+        await db.remove(cleNamespace('cadreCalendrier'));
+        await db.remove(cleNamespace('horaireHebdo'));
+        await db.remove(cleNamespace('calendrierComplet'));
+        await db.remove(cleNamespace('seancesCompletes'));
+        console.log('   ✅ Données calendrier démo supprimées');
+
+        // 7. Désactiver le trimestre démo et réactiver le précédent
+        const trimestres = db.getSync('trimestres', []);
+        const indexDemo = trimestres.findIndex(t => t.id === 'demo');
+        if (indexDemo !== -1) {
+            trimestres.splice(indexDemo, 1); // Supprimer le trimestre démo
+            // Activer le premier trimestre non-démo
+            const autreTrimstre = trimestres.find(t => t.id !== 'demo');
+            if (autreTrimstre) {
+                trimestres.forEach(t => t.actif = (t.id === autreTrimstre.id));
+            }
+            db.setSync('trimestres', trimestres);
+            console.log('   ✅ Trimestre démo supprimé, trimestre précédent réactivé');
         }
 
         // Marquer comme désactivé
