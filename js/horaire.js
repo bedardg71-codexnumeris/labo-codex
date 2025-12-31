@@ -547,7 +547,8 @@ function obtenirRangSeanceDansSemaine(dateStr, coursId = null) {
  * @returns {string} HTML des options
  */
 function genererOptionsGroupes() {
-    const etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ NAMESPACING (Beta 95.5)
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
 
     // Extraire les groupes uniques et les trier
     const groupes = [...new Set(etudiants.map(e => e.groupe))].filter(g => g).sort();

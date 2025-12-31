@@ -369,8 +369,10 @@ function genererMappingAnonyme() {
     }
 
     // Créer un nouveau mapping avec format "Élève X"
-    // IMPORTANT : Lire DIRECTEMENT depuis storage pour éviter la récursion
-    const etudiants = db.getSync('groupeEtudiants', []);
+    // IMPORTANT : Lire DIRECTEMENT depuis storage pour éviter la récursion avec obtenirDonneesSelonMode
+    // ✅ NAMESPACING (Beta 95.5) : Utiliser cle() pour le namespacing par trimestre
+    const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtudiants, []);
 
     // Filtrer pour exclure le groupe 9999 (simulation)
     const etudiantsReels = etudiants.filter(e => e.groupe !== '9999');
@@ -439,7 +441,9 @@ function anonymiserTexteRetroaction(texte, daEtudiant) {
     if (!texte) return texte;
 
     // Lire les étudiants DIRECTEMENT (pas via obtenirDonneesSelonMode pour éviter récursion)
-    const etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ NAMESPACING (Beta 95.5) : Utiliser cle() pour le namespacing par trimestre
+    const cleEtudiants = (typeof cle === 'function') ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtudiants, []);
     const mapping = genererMappingAnonyme();
 
     let texteAnonyme = texte;

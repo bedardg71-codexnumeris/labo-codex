@@ -23,8 +23,11 @@ function estPremiereUtilisation() {
     if (dejaVu) return false;
 
     // Vérifier s'il y a des données importantes
+    // ✅ NAMESPACING (Beta 95.5)
     const cours = db.getSync('listeCours', []);
-    const etudiants = db.getSync('groupeEtudiants', []);
+    const etudiants = (typeof obtenirDonneesSelonMode === 'function')
+        ? obtenirDonneesSelonMode('groupeEtudiants')
+        : db.getSync('groupeEtudiants', []);
     const trimestre = db.getSync('informationsTrimestre', {});
     const modalites = db.getSync('modalitesEvaluation', {});
 
@@ -338,7 +341,10 @@ function demarrerEvaluation() {
     // Vérifier les prérequis avant de démarrer
     const infoCours = typeof db !== 'undefined' ? db.getSync('infoCours', {}) : {};
     const listeCours = typeof db !== 'undefined' ? db.getSync('listeCours', []) : [];
-    const etudiants = typeof db !== 'undefined' ? db.getSync('groupeEtudiants', []) : [];
+    // ✅ NAMESPACING (Beta 95.5)
+    const etudiants = (typeof obtenirDonneesSelonMode === 'function')
+        ? obtenirDonneesSelonMode('groupeEtudiants')
+        : (typeof db !== 'undefined' ? db.getSync('groupeEtudiants', []) : []);
 
     const aCours = infoCours.id || listeCours.length > 0;
     const aEtudiants = etudiants.length > 0;
