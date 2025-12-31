@@ -422,6 +422,60 @@ function anonymiserNom(da) {
     return mapping[da]?.nomComplet || 'Étudiant Inconnu';
 }
 
+/**
+ * Anonymise le texte d'une rétroaction en remplaçant les prénoms réels par les prénoms anonymisés
+ * ✅ NOUVEAU (30 déc 2025) - Corrige le bug d'affichage des vrais prénoms en mode Anonymisé
+ *
+ * @param {string} texte - Le texte de la rétroaction
+ * @param {string} daEtudiant - Le DA de l'étudiant concerné (pour obtenir le prénom anonymisé)
+ * @returns {string} - Le texte anonymisé (ou original si pas en mode anonymisation)
+ */
+function anonymiserTexteRetroaction(texte, daEtudiant) {
+    // Si pas en mode anonymisation, retourner le texte tel quel
+    if (modeActuel !== MODES.ANONYMISATION) {
+        return texte;
+    }
+
+    if (!texte) return texte;
+
+    // Lire les étudiants DIRECTEMENT (pas via obtenirDonneesSelonMode pour éviter récursion)
+    const etudiants = db.getSync('groupeEtudiants', []);
+    const mapping = genererMappingAnonyme();
+
+    let texteAnonyme = texte;
+
+    // Remplacer tous les prénoms réels par "Élève X"
+    etudiants.forEach(etudiant => {
+        if (etudiant.prenom && mapping[etudiant.da]) {
+            const prenomReel = etudiant.prenom;
+            const prenomAnonyme = mapping[etudiant.da].prenom || 'Élève';
+
+            // Remplacer "Bonjour Prénom" par "Bonjour Élève X"
+            const regexBonjour = new RegExp(`Bonjour ${prenomReel}`, 'gi');
+            texteAnonyme = texteAnonyme.replace(regexBonjour, `Bonjour ${prenomAnonyme}`);
+
+            // Remplacer le prénom seul suivi d'espace ou ponctuation (pour éviter les faux positifs)
+            // Par exemple "Marie, tu as bien travaillé" → "Élève 5, tu as bien travaillé"
+            const regexPrenom = new RegExp(`\\b${prenomReel}\\b`, 'g');
+            texteAnonyme = texteAnonyme.replace(regexPrenom, prenomAnonyme);
+        }
+    });
+
+    // Si un DA spécifique est fourni et qu'on veut s'assurer que ce prénom est anonymisé
+    if (daEtudiant && mapping[daEtudiant]) {
+        const etudiant = etudiants.find(e => e.da === daEtudiant);
+        if (etudiant && etudiant.prenom) {
+            const regexPrenom = new RegExp(`\\b${etudiant.prenom}\\b`, 'g');
+            texteAnonyme = texteAnonyme.replace(regexPrenom, mapping[daEtudiant].prenom || 'Élève');
+        }
+    }
+
+    return texteAnonyme;
+}
+
+// Exposer la fonction globalement
+window.anonymiserTexteRetroaction = anonymiserTexteRetroaction;
+
 // ============================================
 // UTILITAIRES
 // ============================================

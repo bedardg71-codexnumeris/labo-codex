@@ -784,6 +784,128 @@ function cartoucheSelectionnee() {
     document.getElementById('listeCriteresGrille1').innerHTML = html;
 }
 
+/**
+ * Génère les critères directement depuis la grille (FALLBACK sans cartouche)
+ *
+ * UTILISÉ PAR:
+ * - consulterEvaluation() quand cartoucheId est vide
+ *
+ * @param {string} grilleId - ID de la grille
+ * @param {string} echelleId - ID de l'échelle
+ */
+function afficherCriteresDepuisGrille(grilleId, echelleId) {
+    console.log(`🔧 [Fallback] Génération critères depuis grille ${grilleId} avec échelle ${echelleId}`);
+
+    const grilles = db.getSync('grillesTemplates', []);
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!grille || !grille.criteres) {
+        console.error('❌ Grille introuvable ou sans critères');
+        document.getElementById('listeCriteresGrille1').innerHTML =
+            '<p class="eval-texte-italic-gris">Grille introuvable</p>';
+        return;
+    }
+
+    // Récupérer les niveaux de l'échelle
+    let niveauxDisponibles = [];
+
+    if (echelleId && echelleId.startsWith('pratique-')) {
+        const pratiqueId = echelleId.replace('pratique-', '');
+        const pratiquesConfigurables = db.getSync('pratiquesConfigurables', []);
+        const pratiqueData = pratiquesConfigurables.find(p => p.id === pratiqueId);
+        if (pratiqueData?.config?.echelle?.niveaux) {
+            niveauxDisponibles = pratiqueData.config.echelle.niveaux;
+        }
+    } else {
+        const echelles = db.getSync('echellesTemplates', []);
+        const echelle = echelles.find(e => e.id === echelleId);
+        if (echelle?.niveaux) {
+            niveauxDisponibles = echelle.niveaux;
+        }
+    }
+
+    // Fallback: niveaux IDME par défaut
+    if (niveauxDisponibles.length === 0) {
+        niveauxDisponibles = [
+            { code: 'I', nom: 'Insuffisant' },
+            { code: 'D', nom: 'En développement' },
+            { code: 'M', nom: 'Maîtrisé' },
+            { code: 'E', nom: 'Étendu' }
+        ];
+    }
+
+    // Générer le HTML pour chaque critère
+    const html = grille.criteres.map(critere => {
+        const ponderation = critere.ponderation || '?';
+        const estAlgorithmique = critere.type === 'algorithmique';
+        const facteur = critere.facteurNormalisation || 500;
+
+        return `
+    <div style="margin-bottom: 15px; padding: 12px; background: white; border-left: 3px solid ${estAlgorithmique ? 'var(--orange-accent)' : 'var(--bleu-moyen)'};">
+        <div class="eval-grid-critere">
+            <div>
+                <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;">
+                    <strong class="u-texte-09">${echapperHtml(critere.nom)}</strong>
+                    <small style="color: #666;">(${ponderation}%)</small>
+                    ${estAlgorithmique ? '<span style="font-size: 0.7rem; color: var(--orange-accent); font-weight: bold; margin-left: 6px;">ALGORITHMIQUE</span>' : ''}
+                </div>
+                ${critere.description ? `<small style="display: block; color: #888; font-style: italic; margin-bottom: 10px; line-height: 1.3;">${echapperHtml(critere.description)}</small>` : ''}
+
+                ${estAlgorithmique ? `
+                    <!-- Interface algorithmique SIMPLE (mode consultation) -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div class="groupe-form">
+                            <label style="font-size: 0.75rem; color: #666;">Nombre d'erreurs</label>
+                            <input type="number"
+                                   id="eval_erreurs_${critere.id}"
+                                   class="controle-form"
+                                   min="0"
+                                   placeholder="0"
+                                   oninput="calculerNoteAlgorithmiqueSimple('${critere.id}', ${ponderation}, ${facteur})"
+                                   style="font-size: 0.85rem;">
+                        </div>
+                        <div class="groupe-form">
+                            <label style="font-size: 0.75rem; color: #666;">Nombre de mots</label>
+                            <input type="number"
+                                   id="eval_mots_${critere.id}"
+                                   class="controle-form"
+                                   min="1"
+                                   placeholder="500"
+                                   oninput="calculerNoteAlgorithmiqueSimple('${critere.id}', ${ponderation}, ${facteur})"
+                                   style="font-size: 0.85rem;">
+                        </div>
+                    </div>
+                    <div id="resultat_algo_${critere.id}" style="padding: 8px; background: #f0f8ff; border-radius: 4px; font-size: 0.85rem; color: #666; margin-bottom: 8px;">
+                        -- erreurs sur -- mots
+                    </div>
+                    <select id="eval_${critere.id}" class="controle-form"
+                            onchange="niveauSelectionne('${critere.id}')"
+                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
+                        <option value="">--</option>
+                        ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+                    </select>
+                ` : `
+                    <!-- Interface standard -->
+                    <select id="eval_${critere.id}" class="controle-form"
+                            onchange="niveauSelectionne('${critere.id}')"
+                            style="font-size: 0.85rem; transition: background-color 0.3s ease; border: 2px solid #ddd; width: 100%;">
+                        <option value="">--</option>
+                        ${niveauxDisponibles.map(n => `<option value="${n.code}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+                    </select>
+                `}
+            </div>
+            <div id="comm_${critere.id}" style="font-size: 0.85rem; line-height: 1.5; color: #555; font-style: italic; padding: 8px; background: #f8f9fa; border-radius: 4px; min-height: 60px;">
+                ${estAlgorithmique ? 'Saisissez les erreurs et le nombre de mots' : 'Sélectionnez un niveau'}
+            </div>
+        </div>
+    </div>
+`;
+    }).join('');
+
+    document.getElementById('listeCriteresGrille1').innerHTML = html;
+    console.log(`✅ ${grille.criteres.length} critères générés depuis la grille (sans cartouche)`);
+}
+
 /* ===============================
    📝 ÉVALUATION DES CRITÈRES
    =============================== */
@@ -3534,9 +3656,14 @@ function verifierEtChargerEvaluationExistante() {
         console.log(`✅ ${criteresCharges}/${evaluationExistante.criteres.length} niveaux de maîtrise chargés`);
 
         // Charger la rétroaction finale
+        // ✅ CORRECTION (30 déc 2025): Anonymiser le texte si en mode Anonymisé
         const retroaction = document.getElementById('retroactionFinale1');
         if (retroaction && evaluationExistante.retroactionFinale) {
-            retroaction.value = evaluationExistante.retroactionFinale;
+            // Utiliser anonymiserTexteRetroaction() pour remplacer les prénoms réels
+            const texteRetroaction = typeof anonymiserTexteRetroaction === 'function'
+                ? anonymiserTexteRetroaction(evaluationExistante.retroactionFinale, evaluationExistante.etudiantDA)
+                : evaluationExistante.retroactionFinale;
+            retroaction.value = texteRetroaction;
         }
 
         // Mettre à jour evaluationEnCours pour indiquer qu'on modifie cette évaluation
@@ -4262,12 +4389,30 @@ function modifierEvaluation(evaluationId) {
                 selectEchelle.dispatchEvent(new Event('change', { bubbles: true }));
             }
 
-            // ÉTAPE 7: Charger cartouche
+            // ÉTAPE 7: Charger cartouche OU générer critères depuis grille (fallback)
             console.log('7️⃣ Chargement cartouche');
             const selectCartouche = document.getElementById('selectCartoucheEval');
-            if (selectCartouche) {
-                selectCartouche.value = evaluation.cartoucheId;
-                selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
+            let cartoucheChargee = false;
+
+            if (selectCartouche && evaluation.cartoucheId) {
+                // Vérifier que la cartouche existe vraiment
+                const cartouches = db.getSync(`cartouches_${evaluation.grilleId}`, []);
+                const cartoucheExiste = cartouches.some(c => c.id === evaluation.cartoucheId);
+
+                if (cartoucheExiste) {
+                    selectCartouche.value = evaluation.cartoucheId;
+                    selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
+                    cartoucheChargee = true;
+                    console.log('   ✅ Cartouche chargée:', evaluation.cartoucheId);
+                } else {
+                    console.warn(`   ⚠️ Cartouche ${evaluation.cartoucheId} non trouvée`);
+                }
+            }
+
+            // FALLBACK: Si pas de cartouche, générer les critères directement depuis la grille
+            if (!cartoucheChargee) {
+                console.log('   🔧 Fallback: génération critères depuis grille');
+                afficherCriteresDepuisGrille(evaluation.grilleId, evaluation.echelleId);
             }
 
             // ÉTAPE 8: Charger statut de remise
@@ -4389,10 +4534,14 @@ function modifierEvaluation(evaluationId) {
             }
 
             // ÉTAPE 12: Charger la rétroaction finale
+            // ✅ CORRECTION (30 déc 2025): Anonymiser le texte si en mode Anonymisé
             console.log('1️⃣2️⃣ Chargement rétroaction finale');
             const retroaction = document.getElementById('retroactionFinale1');
             if (retroaction) {
-                retroaction.value = evaluation.retroactionFinale || '';
+                const texteRetroaction = typeof anonymiserTexteRetroaction === 'function'
+                    ? anonymiserTexteRetroaction(evaluation.retroactionFinale || '', evaluation.etudiantDA)
+                    : (evaluation.retroactionFinale || '');
+                retroaction.value = texteRetroaction;
             }
 
             // ÉTAPE 13: Afficher indicateur de mode modification

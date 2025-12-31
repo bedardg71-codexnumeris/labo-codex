@@ -1630,7 +1630,9 @@ function chargerListeEtudiantsV2() {
 
     if (!conteneur) return;
 
-    const etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ CORRECTION (31 déc 2025): Utiliser namespace cle() pour lire les données du trimestre actif
+    const cleEtudiants = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtudiants, []);
     const coursActif = db.getSync('infoCours', null);
 
     // Construire l'identifiant trimestre (ex: A2025, H2026)
@@ -1741,9 +1743,11 @@ function ajouterEtudiantV2() {
         coursId: coursActif?.id || ''
     };
 
-    let etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ CORRECTION (31 déc 2025): Utiliser namespace
+    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    let etudiants = db.getSync(cleEtud, []);
     etudiants.push(nouvelEtudiant);
-    db.setSync('groupeEtudiants', etudiants);
+    db.setSync(cleEtud, etudiants);
 
     // Vider les champs
     setValue('v2-etudiantDA', '');
@@ -1765,13 +1769,15 @@ function ajouterEtudiantV2() {
  * Supprime un étudiant
  */
 function supprimerEtudiantV2(index) {
-    let etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ CORRECTION (31 déc 2025): Utiliser namespace
+    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    let etudiants = db.getSync(cleEtud, []);
     const etudiant = etudiants[index];
 
     if (!confirm(`Supprimer ${etudiant?.prenom || ''} ${etudiant?.nom || ''} ?`)) return;
 
     etudiants.splice(index, 1);
-    db.setSync('groupeEtudiants', etudiants);
+    db.setSync(cleEtud, etudiants);
 
     chargerListeEtudiantsV2();
 
@@ -1873,7 +1879,9 @@ function confirmerImportV2() {
     if (donneesImportEnAttenteV2.length === 0) return;
 
     const coursActif = db.getSync('infoCours', null);
-    let etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ CORRECTION (31 déc 2025): Utiliser namespace
+    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    let etudiants = db.getSync(cleEtud, []);
 
     donneesImportEnAttenteV2.forEach(e => {
         etudiants.push({
@@ -1882,7 +1890,7 @@ function confirmerImportV2() {
         });
     });
 
-    db.setSync('groupeEtudiants', etudiants);
+    db.setSync(cleEtud, etudiants);
 
     // Nettoyer
     donneesImportEnAttenteV2 = [];
@@ -1909,7 +1917,9 @@ function annulerImportV2() {
  * Exporte les étudiants en CSV
  */
 function exporterEtudiantsV2() {
-    const etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ CORRECTION (31 déc 2025): Utiliser namespace
+    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtud, []);
     if (etudiants.length === 0) {
         alert('Aucun étudiant à exporter.');
         return;
@@ -1932,10 +1942,12 @@ function exporterEtudiantsV2() {
  * Réinitialise la liste des étudiants
  */
 function reinitialiserEtudiantsV2() {
-    const etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ CORRECTION (31 déc 2025): Utiliser namespace
+    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtud, []);
     if (!confirm(`Supprimer les ${etudiants.length} étudiant(s) ? Cette action est irréversible.`)) return;
 
-    db.setSync('groupeEtudiants', []);
+    db.setSync(cleEtud, []);
     chargerListeEtudiantsV2();
 
     if (typeof afficherNotificationSucces === 'function') {
@@ -2255,8 +2267,10 @@ function chargerEtatDonneesDemoV2() {
     if (!checkbox) return;
 
     // Vérifier si le groupe 9999 existe
-    const etudiants = db.getSync('groupeEtudiants', []);
-    const groupeDemoExiste = etudiants.some(e => e.groupe === '9999');
+    // ✅ CORRECTION (31 déc 2025): Utiliser namespace + vérifier aussi groupe "demo"
+    const cleEtud = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtud, []);
+    const groupeDemoExiste = etudiants.some(e => e.groupe === '9999' || e.groupe === 'demo');
 
     checkbox.checked = groupeDemoExiste;
 }
