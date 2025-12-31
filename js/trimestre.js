@@ -1363,6 +1363,24 @@ async function basculerDonneesDemo(activer) {
                     pack.modalitesEvaluation.affichageTableauBord?.afficherAlternatif, ')');
             }
 
+            // 7b. Charger les données calendrier (CRITIQUE pour snapshots)
+            if (pack.cadreCalendrier) {
+                await db.set(cleNamespace('cadreCalendrier'), pack.cadreCalendrier);
+                console.log('   ✅ cadreCalendrier chargé');
+            }
+            if (pack.horaireHebdo) {
+                await db.set(cleNamespace('horaireHebdo'), pack.horaireHebdo);
+                console.log('   ✅ horaireHebdo chargé (4h/mardi)');
+            }
+            if (pack.calendrierComplet) {
+                await db.set(cleNamespace('calendrierComplet'), pack.calendrierComplet);
+                console.log(`   ✅ calendrierComplet chargé (${Object.keys(pack.calendrierComplet).length} jours)`);
+            }
+            if (pack.seancesCompletes) {
+                await db.set(cleNamespace('seancesCompletes'), pack.seancesCompletes);
+                console.log(`   ✅ seancesCompletes chargé (${pack.seancesCompletes.length} séances)`);
+            }
+
             // 8. Marquer pour recalcul des indices au prochain chargement
             localStorage.setItem('recalculerIndicesCP', 'true');
             console.log('   ✅ Flag recalculerIndicesCP positionné');
@@ -1463,6 +1481,16 @@ async function basculerDonneesDemo(activer) {
         );
         await db.set(cleNamespace('presences'), presences);
         console.log(`   ✅ ${nbPresences} présences démo supprimées`);
+
+        // 6. Supprimer les données calendrier démo (seulement si trimestre demo actif)
+        const trimestreActuel = obtenirTrimestreActif();
+        if (trimestreActuel && trimestreActuel.id === TRIMESTRE_DEMO_ID) {
+            await db.remove(cleNamespace('cadreCalendrier'));
+            await db.remove(cleNamespace('horaireHebdo'));
+            await db.remove(cleNamespace('calendrierComplet'));
+            await db.remove(cleNamespace('seancesCompletes'));
+            console.log('   ✅ Données calendrier démo supprimées');
+        }
 
         // Marquer comme désactivé
         await db.set('donneesDemo', false);

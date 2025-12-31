@@ -1,25 +1,17 @@
 /**
- * Pack de démarrage - Données de démonstration SIMPLIFIÉES
- * Version : 5 étudiants × 4 productions évaluables = 20 évaluations
+ * Pack de démarrage - Données de démonstration
+ * Version : 5 étudiants × 4 productions = 20 évaluations
+ * Trimestre : A2025 (15 semaines, cours le mardi 8h-12h)
  * Date : 31 décembre 2025
- *
- * Contenu :
- * - 5 étudiants fictifs (groupe demo)
- * - 1 Portfolio + 3 Artefacts + 1 Rédaction terminale (examen)
- * - 20 évaluations complètes
- * - 1 grille de critères
- * - 1 échelle IDME
- * - 1 cartouche de rétroaction
- * - 8 semaines de présences
  */
 
 const PACK_DEMARRAGE = {
   // ===== MÉTADONNÉES =====
   "_metadata": {
-    "nom": "Pack démo simplifié",
-    "version": "5.2",
+    "nom": "Pack démo A2025",
+    "version": "6.0",
     "date": "2025-12-31",
-    "description": "5 étudiants • 5 productions • 20 évaluations",
+    "description": "5 étudiants • 5 productions • 20 évaluations • 15 séances (mardi 4h)",
     "auteur": "Système de monitorage"
   },
 
@@ -29,8 +21,8 @@ const PACK_DEMARRAGE = {
       "id": "demo-cours",
       "sigle": "601-101",
       "titre": "Écriture et littérature (Démo)",
-      "session": "Demo",
-      "annee": "----",
+      "session": "A",
+      "annee": "2025",
       "trimestreId": "demo",
       "groupe": "demo",
       "enseignant": "Primo Primavera",
@@ -38,578 +30,294 @@ const PACK_DEMARRAGE = {
     }
   ],
 
+  // ===== CADRE CALENDRIER (vraies dates A2025) =====
+  "cadreCalendrier": {
+    "session": "A",
+    "annee": "2025",
+    "dateDebut": "2025-08-21",
+    "finCoursReguliers": "2025-12-12",
+    "finTrimestre": "2025-12-22",
+    "remiseNotes": "2025-12-31",
+    "semainePlanificationDebut": "2025-10-13",
+    "semainePlanificationFin": "2025-10-17",
+    "semaineExamensDebut": "2025-12-15",
+    "semaineExamensFin": "2025-12-22",
+    "joursFeries": [],
+    "evenementsPrevus": [],
+    "evenementsImprevus": []
+  },
+
+  // ===== HORAIRE HEBDOMADAIRE (mardi 8h-12h) =====
+  "horaireHebdo": {
+    "lundi": [],
+    "mardi": [{ "debut": "08:00", "fin": "12:00", "duree": 4 }],
+    "mercredi": [],
+    "jeudi": [],
+    "vendredi": []
+  },
+
+  // ===== CALENDRIER COMPLET (15 mardis de cours) =====
+  "calendrierComplet": {
+    "2025-08-26": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 1, "numSeance": 1, "heuresCours": 4 },
+    "2025-09-02": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 2, "numSeance": 2, "heuresCours": 4 },
+    "2025-09-09": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 3, "numSeance": 3, "heuresCours": 4 },
+    "2025-09-16": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 4, "numSeance": 4, "heuresCours": 4 },
+    "2025-09-23": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 5, "numSeance": 5, "heuresCours": 4 },
+    "2025-09-30": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 6, "numSeance": 6, "heuresCours": 4 },
+    "2025-10-07": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 7, "numSeance": 7, "heuresCours": 4 },
+    "2025-10-21": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 8, "numSeance": 8, "heuresCours": 4 },
+    "2025-10-28": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 9, "numSeance": 9, "heuresCours": 4 },
+    "2025-11-04": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 10, "numSeance": 10, "heuresCours": 4 },
+    "2025-11-11": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 11, "numSeance": 11, "heuresCours": 4 },
+    "2025-11-18": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 12, "numSeance": 12, "heuresCours": 4 },
+    "2025-11-25": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 13, "numSeance": 13, "heuresCours": 4 },
+    "2025-12-02": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 14, "numSeance": 14, "heuresCours": 4 },
+    "2025-12-09": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 15, "numSeance": 15, "heuresCours": 4 }
+  },
+
+  // ===== SÉANCES COMPLÈTES (15 séances) =====
+  "seancesCompletes": [
+    { "date": "2025-08-26", "jour": "mardi", "numSemaine": 1, "numSeance": 1, "heures": 4 },
+    { "date": "2025-09-02", "jour": "mardi", "numSemaine": 2, "numSeance": 2, "heures": 4 },
+    { "date": "2025-09-09", "jour": "mardi", "numSemaine": 3, "numSeance": 3, "heures": 4 },
+    { "date": "2025-09-16", "jour": "mardi", "numSemaine": 4, "numSeance": 4, "heures": 4 },
+    { "date": "2025-09-23", "jour": "mardi", "numSemaine": 5, "numSeance": 5, "heures": 4 },
+    { "date": "2025-09-30", "jour": "mardi", "numSemaine": 6, "numSeance": 6, "heures": 4 },
+    { "date": "2025-10-07", "jour": "mardi", "numSemaine": 7, "numSeance": 7, "heures": 4 },
+    { "date": "2025-10-21", "jour": "mardi", "numSemaine": 8, "numSeance": 8, "heures": 4 },
+    { "date": "2025-10-28", "jour": "mardi", "numSemaine": 9, "numSeance": 9, "heures": 4 },
+    { "date": "2025-11-04", "jour": "mardi", "numSemaine": 10, "numSeance": 10, "heures": 4 },
+    { "date": "2025-11-11", "jour": "mardi", "numSemaine": 11, "numSeance": 11, "heures": 4 },
+    { "date": "2025-11-18", "jour": "mardi", "numSemaine": 12, "numSeance": 12, "heures": 4 },
+    { "date": "2025-11-25", "jour": "mardi", "numSemaine": 13, "numSeance": 13, "heures": 4 },
+    { "date": "2025-12-02", "jour": "mardi", "numSemaine": 14, "numSeance": 14, "heures": 4 },
+    { "date": "2025-12-09", "jour": "mardi", "numSemaine": 15, "numSeance": 15, "heures": 4 }
+  ],
+
   // ===== ÉTUDIANTS (5) =====
   "groupeEtudiants": [
-    {
-      "da": "DEMO001",
-      "prenom": "Émilie",
-      "nom": "Tremblay",
-      "groupe": "demo",
-      "courriel": "emilie.tremblay@demo.qc.ca",
-      "programme": "500.AE",
-      "servicesAdaptes": false,
-      "coursId": "demo-cours"
-    },
-    {
-      "da": "DEMO002",
-      "prenom": "Antoine",
-      "nom": "Gagnon",
-      "groupe": "demo",
-      "courriel": "antoine.gagnon@demo.qc.ca",
-      "programme": "300.A0",
-      "servicesAdaptes": false,
-      "coursId": "demo-cours"
-    },
-    {
-      "da": "DEMO003",
-      "prenom": "Léa",
-      "nom": "Roy",
-      "groupe": "demo",
-      "courriel": "lea.roy@demo.qc.ca",
-      "programme": "200.B1",
-      "servicesAdaptes": true,
-      "coursId": "demo-cours"
-    },
-    {
-      "da": "DEMO004",
-      "prenom": "Thomas",
-      "nom": "Côté",
-      "groupe": "demo",
-      "courriel": "thomas.cote@demo.qc.ca",
-      "programme": "500.AE",
-      "servicesAdaptes": false,
-      "coursId": "demo-cours"
-    },
-    {
-      "da": "DEMO005",
-      "prenom": "Camille",
-      "nom": "Bouchard",
-      "groupe": "demo",
-      "courriel": "camille.bouchard@demo.qc.ca",
-      "programme": "300.A0",
-      "servicesAdaptes": false,
-      "coursId": "demo-cours"
-    }
+    { "da": "DEMO001", "prenom": "Émilie", "nom": "Tremblay", "groupe": "demo", "courriel": "emilie.tremblay@demo.qc.ca", "programme": "500.AE", "servicesAdaptes": false, "coursId": "demo-cours" },
+    { "da": "DEMO002", "prenom": "Antoine", "nom": "Gagnon", "groupe": "demo", "courriel": "antoine.gagnon@demo.qc.ca", "programme": "300.A0", "servicesAdaptes": false, "coursId": "demo-cours" },
+    { "da": "DEMO003", "prenom": "Léa", "nom": "Roy", "groupe": "demo", "courriel": "lea.roy@demo.qc.ca", "programme": "200.B1", "servicesAdaptes": true, "coursId": "demo-cours" },
+    { "da": "DEMO004", "prenom": "Thomas", "nom": "Côté", "groupe": "demo", "courriel": "thomas.cote@demo.qc.ca", "programme": "500.AE", "servicesAdaptes": false, "coursId": "demo-cours" },
+    { "da": "DEMO005", "prenom": "Camille", "nom": "Bouchard", "groupe": "demo", "courriel": "camille.bouchard@demo.qc.ca", "programme": "300.A0", "servicesAdaptes": false, "coursId": "demo-cours" }
   ],
 
   // ===== PRODUCTIONS (5) =====
   "productions": [
     {
-      "id": "PROD_PORTFOLIO",
-      "titre": "Portfolio",
-      "description": "Conteneur des artefacts du trimestre",
-      "type": "portfolio",
-      "ponderation": 0,
-      "grilleId": "",
-      "dateEcheance": "",
-      "coursId": "demo-cours"
+      "id": "PROD_PORTFOLIO", "titre": "Portfolio", "description": "Conteneur des artefacts",
+      "type": "portfolio", "dateEcheance": "2025-12-09", "ponderation": 0, "grilleId": null,
+      "artefacts": ["PROD_ART1", "PROD_ART2", "PROD_ART3"], "coursId": "demo-cours"
     },
     {
-      "id": "PROD_ART1",
-      "code": "A1",
-      "titre": "Artefact 1",
-      "description": "Stratégies de lecture",
-      "type": "artefact-portfolio",
-      "ponderation": 10,
-      "grilleId": "GRILLE_DEMO",
-      "dateEcheance": "2025-09-15",
-      "parentId": "PROD_PORTFOLIO",
-      "coursId": "demo-cours"
+      "id": "PROD_ART1", "titre": "Artefact 1 - Carte mentale", "description": "Carte mentale thème littéraire",
+      "type": "artefact-portfolio", "dateEcheance": "2025-09-23", "semaine": 5, "ponderation": 20,
+      "grilleId": "GRILLE_DEMO", "portfolioParent": "PROD_PORTFOLIO", "coursId": "demo-cours"
     },
     {
-      "id": "PROD_ART2",
-      "code": "A2",
-      "titre": "Artefact 2",
-      "description": "Description d'un personnage",
-      "type": "artefact-portfolio",
-      "ponderation": 10,
-      "grilleId": "GRILLE_DEMO",
-      "dateEcheance": "2025-10-01",
-      "parentId": "PROD_PORTFOLIO",
-      "coursId": "demo-cours"
+      "id": "PROD_ART2", "titre": "Artefact 2 - Analyse de texte", "description": "Analyse extrait littéraire",
+      "type": "artefact-portfolio", "dateEcheance": "2025-10-21", "semaine": 8, "ponderation": 25,
+      "grilleId": "GRILLE_DEMO", "portfolioParent": "PROD_PORTFOLIO", "coursId": "demo-cours"
     },
     {
-      "id": "PROD_ART3",
-      "code": "A3",
-      "titre": "Artefact 3",
-      "description": "Carte mentale",
-      "type": "artefact-portfolio",
-      "ponderation": 10,
-      "grilleId": "GRILLE_DEMO",
-      "dateEcheance": "2025-10-15",
-      "parentId": "PROD_PORTFOLIO",
-      "coursId": "demo-cours"
+      "id": "PROD_ART3", "titre": "Artefact 3 - Dissertation", "description": "Dissertation sujet imposé",
+      "type": "artefact-portfolio", "dateEcheance": "2025-11-18", "semaine": 12, "ponderation": 25,
+      "grilleId": "GRILLE_DEMO", "portfolioParent": "PROD_PORTFOLIO", "coursId": "demo-cours"
     },
     {
-      "id": "PROD_REDAC",
-      "code": "RT",
-      "titre": "Rédaction terminale",
-      "description": "Évaluation sommative de fin de trimestre",
-      "type": "examen",
-      "ponderation": 30,
-      "grilleId": "GRILLE_DEMO",
-      "dateEcheance": "2025-11-15",
-      "coursId": "demo-cours"
+      "id": "PROD_EXAM", "titre": "Rédaction terminale", "description": "Examen fin de trimestre",
+      "type": "examen", "dateEcheance": "2025-12-09", "semaine": 15, "ponderation": 30,
+      "grilleId": "GRILLE_DEMO", "coursId": "demo-cours"
     }
   ],
 
-  // ===== ÉVALUATIONS (20 = 5 étudiants × 4 productions évaluables) =====
+  // ===== ÉVALUATIONS (20) =====
   "evaluationsSauvegardees": [
-    // ----- Artefact 1 : Stratégies de lecture (5 évaluations) -----
-    {
-      "id": "EVAL_A1_01", "etudiantDA": "DEMO001", "etudiantNom": "Émilie Tremblay", "groupe": "demo",
-      "productionId": "PROD_ART1", "productionNom": "Artefact 1",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-09-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "M", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "M", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "E", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "M", "ponderation": 35 }
-      ],
-      "noteFinale": 82.5, "niveauFinal": "M",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A1_02", "etudiantDA": "DEMO002", "etudiantNom": "Antoine Gagnon", "groupe": "demo",
-      "productionId": "PROD_ART1", "productionNom": "Artefact 1",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-09-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "D", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "D", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "M", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "D", "ponderation": 35 }
-      ],
-      "noteFinale": 67.5, "niveauFinal": "D",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A1_03", "etudiantDA": "DEMO003", "etudiantNom": "Léa Roy", "groupe": "demo",
-      "productionId": "PROD_ART1", "productionNom": "Artefact 1",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-09-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "E", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "E", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "E", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "M", "ponderation": 35 }
-      ],
-      "noteFinale": 91.25, "niveauFinal": "E",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A1_04", "etudiantDA": "DEMO004", "etudiantNom": "Thomas Côté", "groupe": "demo",
-      "productionId": "PROD_ART1", "productionNom": "Artefact 1",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-09-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "M", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "D", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "M", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "M", "ponderation": 35 }
-      ],
-      "noteFinale": 75.0, "niveauFinal": "M",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A1_05", "etudiantDA": "DEMO005", "etudiantNom": "Camille Bouchard", "groupe": "demo",
-      "productionId": "PROD_ART1", "productionNom": "Artefact 1",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-09-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "I", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "D", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "D", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "I", "ponderation": 35 }
-      ],
-      "noteFinale": 52.5, "niveauFinal": "I",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
+    // Artefact 1 (sem 5)
+    { "da": "DEMO001", "productionId": "PROD_ART1", "dateEvaluation": "2025-09-24", "criteres": { "structure": "M", "rigueur": "M", "plausibilite": "D", "nuance": "M" }, "niveauFinal": "M", "noteFinale": 78, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO002", "productionId": "PROD_ART1", "dateEvaluation": "2025-09-24", "criteres": { "structure": "D", "rigueur": "D", "plausibilite": "D", "nuance": "I" }, "niveauFinal": "D", "noteFinale": 62, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO003", "productionId": "PROD_ART1", "dateEvaluation": "2025-09-24", "criteres": { "structure": "E", "rigueur": "M", "plausibilite": "M", "nuance": "M" }, "niveauFinal": "M", "noteFinale": 82, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO004", "productionId": "PROD_ART1", "dateEvaluation": "2025-09-24", "criteres": { "structure": "I", "rigueur": "D", "plausibilite": "I", "nuance": "I" }, "niveauFinal": "I", "noteFinale": 45, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO005", "productionId": "PROD_ART1", "dateEvaluation": "2025-09-24", "criteres": { "structure": "M", "rigueur": "E", "plausibilite": "M", "nuance": "E" }, "niveauFinal": "E", "noteFinale": 88, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    // Artefact 2 (sem 8)
+    { "da": "DEMO001", "productionId": "PROD_ART2", "dateEvaluation": "2025-10-22", "criteres": { "structure": "M", "rigueur": "M", "plausibilite": "M", "nuance": "D" }, "niveauFinal": "M", "noteFinale": 76, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO002", "productionId": "PROD_ART2", "dateEvaluation": "2025-10-22", "criteres": { "structure": "D", "rigueur": "M", "plausibilite": "D", "nuance": "D" }, "niveauFinal": "D", "noteFinale": 68, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO003", "productionId": "PROD_ART2", "dateEvaluation": "2025-10-22", "criteres": { "structure": "M", "rigueur": "M", "plausibilite": "E", "nuance": "M" }, "niveauFinal": "M", "noteFinale": 81, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO004", "productionId": "PROD_ART2", "dateEvaluation": "2025-10-22", "criteres": { "structure": "D", "rigueur": "I", "plausibilite": "D", "nuance": "I" }, "niveauFinal": "D", "noteFinale": 55, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO005", "productionId": "PROD_ART2", "dateEvaluation": "2025-10-22", "criteres": { "structure": "E", "rigueur": "M", "plausibilite": "M", "nuance": "M" }, "niveauFinal": "M", "noteFinale": 84, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    // Artefact 3 (sem 12)
+    { "da": "DEMO001", "productionId": "PROD_ART3", "dateEvaluation": "2025-11-19", "criteres": { "structure": "E", "rigueur": "M", "plausibilite": "M", "nuance": "M" }, "niveauFinal": "M", "noteFinale": 80, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO002", "productionId": "PROD_ART3", "dateEvaluation": "2025-11-19", "criteres": { "structure": "M", "rigueur": "D", "plausibilite": "M", "nuance": "D" }, "niveauFinal": "D", "noteFinale": 71, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO003", "productionId": "PROD_ART3", "dateEvaluation": "2025-11-19", "criteres": { "structure": "M", "rigueur": "E", "plausibilite": "M", "nuance": "E" }, "niveauFinal": "E", "noteFinale": 87, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO004", "productionId": "PROD_ART3", "dateEvaluation": "2025-11-19", "criteres": { "structure": "D", "rigueur": "D", "plausibilite": "I", "nuance": "D" }, "niveauFinal": "D", "noteFinale": 58, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO005", "productionId": "PROD_ART3", "dateEvaluation": "2025-11-19", "criteres": { "structure": "M", "rigueur": "M", "plausibilite": "E", "nuance": "M" }, "niveauFinal": "M", "noteFinale": 82, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    // Examen (sem 15)
+    { "da": "DEMO001", "productionId": "PROD_EXAM", "dateEvaluation": "2025-12-10", "criteres": { "structure": "M", "rigueur": "E", "plausibilite": "M", "nuance": "M" }, "niveauFinal": "M", "noteFinale": 81, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO002", "productionId": "PROD_EXAM", "dateEvaluation": "2025-12-10", "criteres": { "structure": "M", "rigueur": "M", "plausibilite": "D", "nuance": "D" }, "niveauFinal": "D", "noteFinale": 72, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO003", "productionId": "PROD_EXAM", "dateEvaluation": "2025-12-10", "criteres": { "structure": "E", "rigueur": "E", "plausibilite": "M", "nuance": "M" }, "niveauFinal": "E", "noteFinale": 89, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO004", "productionId": "PROD_EXAM", "dateEvaluation": "2025-12-10", "criteres": { "structure": "D", "rigueur": "D", "plausibilite": "D", "nuance": "I" }, "niveauFinal": "D", "noteFinale": 60, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" },
+    { "da": "DEMO005", "productionId": "PROD_EXAM", "dateEvaluation": "2025-12-10", "criteres": { "structure": "M", "rigueur": "M", "plausibilite": "M", "nuance": "E" }, "niveauFinal": "M", "noteFinale": 83, "statut": "evalue", "statutRemise": "remis", "coursId": "demo-cours" }
+  ],
 
-    // ----- Artefact 2 : Description d'un personnage (5 évaluations) -----
+  // ===== ÉCHELLE IDME =====
+  "echellesTemplates": [
     {
-      "id": "EVAL_A2_01", "etudiantDA": "DEMO001", "etudiantNom": "Émilie Tremblay", "groupe": "demo",
-      "productionId": "PROD_ART2", "productionNom": "Artefact 2",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-10-02", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "E", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "M", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "E", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "E", "ponderation": 35 }
+      "id": "ECHELLE_IDME", "nom": "Échelle IDME", "description": "Échelle 4 niveaux (taxonomie SOLO)",
+      "niveaux": [
+        { "code": "I", "nom": "Insuffisant", "min": 0, "max": 64, "valeur": 50 },
+        { "code": "D", "nom": "Développement", "min": 65, "max": 74, "valeur": 70 },
+        { "code": "M", "nom": "Maîtrisé", "min": 75, "max": 84, "valeur": 80 },
+        { "code": "E", "nom": "Étendu", "min": 85, "max": 100, "valeur": 92 }
       ],
-      "noteFinale": 91.25, "niveauFinal": "E",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A2_02", "etudiantDA": "DEMO002", "etudiantNom": "Antoine Gagnon", "groupe": "demo",
-      "productionId": "PROD_ART2", "productionNom": "Artefact 2",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-10-02", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "M", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "M", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "M", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "D", "ponderation": 35 }
-      ],
-      "noteFinale": 75.0, "niveauFinal": "M",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A2_03", "etudiantDA": "DEMO003", "etudiantNom": "Léa Roy", "groupe": "demo",
-      "productionId": "PROD_ART2", "productionNom": "Artefact 2",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-10-02", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "E", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "E", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "M", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "E", "ponderation": 35 }
-      ],
-      "noteFinale": 91.25, "niveauFinal": "E",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A2_04", "etudiantDA": "DEMO004", "etudiantNom": "Thomas Côté", "groupe": "demo",
-      "productionId": "PROD_ART2", "productionNom": "Artefact 2",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-10-02", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "M", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "M", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "M", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "M", "ponderation": 35 }
-      ],
-      "noteFinale": 80.0, "niveauFinal": "M",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A2_05", "etudiantDA": "DEMO005", "etudiantNom": "Camille Bouchard", "groupe": "demo",
-      "productionId": "PROD_ART2", "productionNom": "Artefact 2",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-10-02", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "D", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "D", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "M", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "D", "ponderation": 35 }
-      ],
-      "noteFinale": 67.5, "niveauFinal": "D",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-
-    // ----- Artefact 3 : Carte mentale (5 évaluations) -----
-    {
-      "id": "EVAL_A3_01", "etudiantDA": "DEMO001", "etudiantNom": "Émilie Tremblay", "groupe": "demo",
-      "productionId": "PROD_ART3", "productionNom": "Artefact 3",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-10-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "E", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "E", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "M", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "E", "ponderation": 35 }
-      ],
-      "noteFinale": 91.25, "niveauFinal": "E",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A3_02", "etudiantDA": "DEMO002", "etudiantNom": "Antoine Gagnon", "groupe": "demo",
-      "productionId": "PROD_ART3", "productionNom": "Artefact 3",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-10-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "M", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "M", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "E", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "M", "ponderation": 35 }
-      ],
-      "noteFinale": 82.5, "niveauFinal": "M",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A3_03", "etudiantDA": "DEMO003", "etudiantNom": "Léa Roy", "groupe": "demo",
-      "productionId": "PROD_ART3", "productionNom": "Artefact 3",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-10-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "M", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "E", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "E", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "E", "ponderation": 35 }
-      ],
-      "noteFinale": 91.25, "niveauFinal": "E",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A3_04", "etudiantDA": "DEMO004", "etudiantNom": "Thomas Côté", "groupe": "demo",
-      "productionId": "PROD_ART3", "productionNom": "Artefact 3",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-10-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "E", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "M", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "M", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "E", "ponderation": 35 }
-      ],
-      "noteFinale": 88.75, "niveauFinal": "E",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_A3_05", "etudiantDA": "DEMO005", "etudiantNom": "Camille Bouchard", "groupe": "demo",
-      "productionId": "PROD_ART3", "productionNom": "Artefact 3",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-10-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "M", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "M", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "D", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "M", "ponderation": 35 }
-      ],
-      "noteFinale": 78.75, "niveauFinal": "M",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-
-    // ----- Rédaction terminale : Examen de fin de trimestre (5 évaluations) -----
-    {
-      "id": "EVAL_RT_01", "etudiantDA": "DEMO001", "etudiantNom": "Émilie Tremblay", "groupe": "demo",
-      "productionId": "PROD_REDAC", "productionNom": "Rédaction terminale",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-11-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "E", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "E", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "E", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "E", "ponderation": 35 }
-      ],
-      "noteFinale": 100.0, "niveauFinal": "E",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_RT_02", "etudiantDA": "DEMO002", "etudiantNom": "Antoine Gagnon", "groupe": "demo",
-      "productionId": "PROD_REDAC", "productionNom": "Rédaction terminale",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-11-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "E", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "M", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "E", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "M", "ponderation": 35 }
-      ],
-      "noteFinale": 86.25, "niveauFinal": "E",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_RT_03", "etudiantDA": "DEMO003", "etudiantNom": "Léa Roy", "groupe": "demo",
-      "productionId": "PROD_REDAC", "productionNom": "Rédaction terminale",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-11-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "E", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "E", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "E", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "M", "ponderation": 35 }
-      ],
-      "noteFinale": 93.75, "niveauFinal": "E",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_RT_04", "etudiantDA": "DEMO004", "etudiantNom": "Thomas Côté", "groupe": "demo",
-      "productionId": "PROD_REDAC", "productionNom": "Rédaction terminale",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-11-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "E", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "E", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "M", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "E", "ponderation": 35 }
-      ],
-      "noteFinale": 93.75, "niveauFinal": "E",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
-    },
-    {
-      "id": "EVAL_RT_05", "etudiantDA": "DEMO005", "etudiantNom": "Camille Bouchard", "groupe": "demo",
-      "productionId": "PROD_REDAC", "productionNom": "Rédaction terminale",
-      "grilleId": "GRILLE_DEMO", "grilleNom": "Grille démo", "echelleId": "ECHELLE_DEMO", "cartoucheId": "CART_DEMO",
-      "dateEvaluation": "2025-11-16", "statutRemise": "remis",
-      "criteres": [
-        { "critereId": "CR_STRUCTURE", "critereNom": "Structure", "niveauSelectionne": "M", "ponderation": 20 },
-        { "critereId": "CR_RIGUEUR", "critereNom": "Rigueur", "niveauSelectionne": "E", "ponderation": 30 },
-        { "critereId": "CR_PLAUSIBILITE", "critereNom": "Plausibilité", "niveauSelectionne": "M", "ponderation": 15 },
-        { "critereId": "CR_NUANCE", "critereNom": "Nuance", "niveauSelectionne": "M", "ponderation": 35 }
-      ],
-      "noteFinale": 85.0, "niveauFinal": "M",
-      "retroactionFinale": "",
-      "coursId": "demo-cours"
+      "verrouille": false, "dansBibliotheque": true
     }
   ],
 
   // ===== GRILLE DE CRITÈRES =====
   "grillesTemplates": [
     {
-      "id": "GRILLE_DEMO",
-      "nom": "Grille démo",
+      "id": "GRILLE_DEMO", "nom": "Grille SRPN (Démo)", "description": "Grille 4 critères",
+      "echelleId": "ECHELLE_IDME",
       "criteres": [
-        { "id": "CR_STRUCTURE", "nom": "Structure", "description": "Capacité à organiser sa pensée de manière logique et cohérente", "ponderation": 20, "type": "holistique" },
-        { "id": "CR_RIGUEUR", "nom": "Rigueur", "description": "Qualité et exhaustivité du travail d'analyse", "ponderation": 30, "type": "holistique" },
-        { "id": "CR_PLAUSIBILITE", "nom": "Plausibilité", "description": "Crédibilité et pertinence des interprétations proposées", "ponderation": 15, "type": "holistique" },
-        { "id": "CR_NUANCE", "nom": "Nuance", "description": "Capacité à percevoir et exprimer les subtilités", "ponderation": 35, "type": "holistique" }
+        { "code": "structure", "nom": "Structure", "ponderation": 25, "description": "Organisation logique" },
+        { "code": "rigueur", "nom": "Rigueur", "ponderation": 25, "description": "Précision et exhaustivité" },
+        { "code": "plausibilite", "nom": "Plausibilité", "ponderation": 25, "description": "Crédibilité des interprétations" },
+        { "code": "nuance", "nom": "Nuance", "ponderation": 25, "description": "Finesse de l'analyse" }
       ],
-      "dateCreation": "2025-01-01",
-      "dansBibliotheque": true
+      "verrouille": false, "dansBibliotheque": true
     }
   ],
 
-  // ===== ÉCHELLE DE PERFORMANCE =====
-  "echellesTemplates": [
+  // ===== CARTOUCHES DE RÉTROACTION =====
+  "cartouchesTemplates": [
     {
-      "id": "ECHELLE_DEMO",
-      "nom": "IDME (4 niveaux)",
-      "description": "Échelle basée sur la taxonomie SOLO",
-      "niveaux": [
-        { "code": "I", "nom": "Insuffisant", "min": 0, "max": 64, "valeurCalcul": 50 },
-        { "code": "D", "nom": "En Développement", "min": 65, "max": 74, "valeurCalcul": 70 },
-        { "code": "M", "nom": "Maîtrisé", "min": 75, "max": 84, "valeurCalcul": 80 },
-        { "code": "E", "nom": "Étendu", "min": 85, "max": 100, "valeurCalcul": 100 }
-      ],
-      "dateCreation": "2025-01-01",
-      "dansBibliotheque": true
-    }
-  ],
-
-  // ===== CARTOUCHE DE RÉTROACTION =====
-  "cartouches_GRILLE_DEMO": [
-    {
-      "id": "CART_DEMO",
-      "grilleId": "GRILLE_DEMO",
-      "nom": "Cartouche générique",
-      "criteres": [
-        { "id": "CR_STRUCTURE", "nom": "Structure" },
-        { "id": "CR_RIGUEUR", "nom": "Rigueur" },
-        { "id": "CR_PLAUSIBILITE", "nom": "Plausibilité" },
-        { "id": "CR_NUANCE", "nom": "Nuance" }
-      ],
-      "niveaux": [
-        { "code": "I", "nom": "Insuffisant" },
-        { "code": "D", "nom": "En Développement" },
-        { "code": "M", "nom": "Maîtrisé" },
-        { "code": "E", "nom": "Étendu" }
-      ],
+      "id": "CARTOUCHE_DEMO", "nom": "Cartouche Démo", "grilleId": "GRILLE_DEMO",
       "commentaires": {
-        "CR_STRUCTURE_I": "L'organisation de ton travail présente des difficultés. Les idées sont présentées de manière désordonnée. Pour t'améliorer, structure ton texte en paragraphes distincts avec des transitions claires.",
-        "CR_STRUCTURE_D": "Ton travail montre une organisation de base. Les idées commencent à se regrouper, mais les liens entre elles restent parfois flous. Continue à travailler sur les transitions.",
-        "CR_STRUCTURE_M": "Bonne organisation ! Ton travail présente une structure claire et logique. Les idées s'enchaînent bien et les transitions sont efficaces.",
-        "CR_STRUCTURE_E": "Excellente structure ! Ton organisation est exemplaire : introduction engageante, développement logique et conclusion pertinente. Les transitions sont fluides et naturelles.",
-        "CR_RIGUEUR_I": "Ton analyse manque de profondeur et d'exhaustivité. Plusieurs éléments importants sont absents ou traités superficiellement. Prends le temps d'approfondir chaque aspect.",
-        "CR_RIGUEUR_D": "Tu as identifié plusieurs éléments pertinents, mais l'analyse reste parfois incomplète. Continue à développer tes observations avec plus de détails.",
-        "CR_RIGUEUR_M": "Bon niveau de rigueur ! Ton analyse est complète et bien détaillée. Tu as couvert les aspects essentiels avec précision.",
-        "CR_RIGUEUR_E": "Rigueur exemplaire ! Ton analyse est exhaustive, précise et approfondie. Tu démontres une maîtrise remarquable de la méthode analytique.",
-        "CR_PLAUSIBILITE_I": "Tes interprétations manquent de fondement. Les affirmations ne sont pas suffisamment appuyées par des preuves du texte. Cite davantage le texte.",
-        "CR_PLAUSIBILITE_D": "Tu commences à appuyer tes interprétations avec des éléments du texte. Continue à renforcer ce lien entre tes affirmations et les preuves textuelles.",
-        "CR_PLAUSIBILITE_M": "Bonne plausibilité ! Tes interprétations sont bien fondées et soutenues par des preuves pertinentes du texte.",
-        "CR_PLAUSIBILITE_E": "Excellent travail ! Tes interprétations sont particulièrement bien fondées, avec des preuves textuelles judicieusement choisies et intégrées.",
-        "CR_NUANCE_I": "Ton analyse reste en surface, sans percevoir les subtilités du texte. Essaie d'aller au-delà de la première impression et d'explorer les nuances.",
-        "CR_NUANCE_D": "Tu commences à percevoir certaines nuances, mais ton analyse pourrait être plus approfondie. Explore davantage les complexités et les ambiguïtés.",
-        "CR_NUANCE_M": "Bonne perception des nuances ! Tu identifies les subtilités du texte et proposes des interprétations qui vont au-delà de la surface.",
-        "CR_NUANCE_E": "Excellente finesse d'analyse ! Tu perçois avec acuité les nuances, les contradictions et les multiples niveaux de sens."
+        "CR_STRUCTURE_I": "La structure manque de clarté. Organise tes idées avec intro, développement et conclusion.",
+        "CR_STRUCTURE_D": "Ta structure est présente mais pourrait être plus solide.",
+        "CR_STRUCTURE_M": "Bonne organisation ! Les idées s'enchaînent logiquement.",
+        "CR_STRUCTURE_E": "Excellente structure avec transitions fluides.",
+        "CR_RIGUEUR_I": "Analyse manque de précision. Appuie-toi sur des éléments concrets.",
+        "CR_RIGUEUR_D": "Observations pertinentes mais incomplètes.",
+        "CR_RIGUEUR_M": "Analyse rigoureuse avec observations bien documentées.",
+        "CR_RIGUEUR_E": "Analyse exemplaire, observations exhaustives.",
+        "CR_PLAUSIBILITE_I": "Interprétations peu fondées. Appuie-les sur le texte.",
+        "CR_PLAUSIBILITE_D": "Certaines interprétations nécessitent meilleur ancrage.",
+        "CR_PLAUSIBILITE_M": "Interprétations généralement bien fondées.",
+        "CR_PLAUSIBILITE_E": "Interprétations particulièrement bien fondées.",
+        "CR_NUANCE_I": "Analyse en surface. Explore les nuances.",
+        "CR_NUANCE_D": "Tu perçois certaines nuances, approfondis.",
+        "CR_NUANCE_M": "Bonne perception des nuances et subtilités.",
+        "CR_NUANCE_E": "Excellente finesse d'analyse."
       },
-      "contexte": "Cette évaluation porte sur ta capacité à analyser un texte de manière structurée, rigoureuse et nuancée.",
-      "verrouille": false,
-      "dansBibliotheque": true
+      "contexte": "Évaluation de ta capacité à analyser un texte.", "verrouille": false, "dansBibliotheque": true
     }
   ],
 
-  // ===== PRÉSENCES (8 semaines × 5 étudiants = 40 entrées) =====
+  // ===== PRÉSENCES (15 séances × 5 étudiants = 75 entrées) =====
   "presences": [
-    // Semaine 1
-    { "date": "2025-09-03", "da": "DEMO001", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-03", "da": "DEMO002", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-03", "da": "DEMO003", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-03", "da": "DEMO004", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-03", "da": "DEMO005", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
-    // Semaine 2
-    { "date": "2025-09-10", "da": "DEMO001", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-10", "da": "DEMO002", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-10", "da": "DEMO003", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-10", "da": "DEMO004", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
-    { "date": "2025-09-10", "da": "DEMO005", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    // Semaine 3
-    { "date": "2025-09-17", "da": "DEMO001", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-17", "da": "DEMO002", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-17", "da": "DEMO003", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-17", "da": "DEMO004", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-17", "da": "DEMO005", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
-    // Semaine 4
-    { "date": "2025-09-24", "da": "DEMO001", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-24", "da": "DEMO002", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
-    { "date": "2025-09-24", "da": "DEMO003", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-24", "da": "DEMO004", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-09-24", "da": "DEMO005", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    // Semaine 5
-    { "date": "2025-10-01", "da": "DEMO001", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-01", "da": "DEMO002", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-01", "da": "DEMO003", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-01", "da": "DEMO004", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-01", "da": "DEMO005", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    // Semaine 6
-    { "date": "2025-10-08", "da": "DEMO001", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-08", "da": "DEMO002", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-08", "da": "DEMO003", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
-    { "date": "2025-10-08", "da": "DEMO004", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-08", "da": "DEMO005", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
-    // Semaine 7
-    { "date": "2025-10-15", "da": "DEMO001", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-15", "da": "DEMO002", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-15", "da": "DEMO003", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-15", "da": "DEMO004", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-15", "da": "DEMO005", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    // Semaine 8
-    { "date": "2025-10-22", "da": "DEMO001", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-22", "da": "DEMO002", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-22", "da": "DEMO003", "statut": "present", "heures": 2, "coursId": "demo-cours" },
-    { "date": "2025-10-22", "da": "DEMO004", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
-    { "date": "2025-10-22", "da": "DEMO005", "statut": "absent", "heures": 0, "coursId": "demo-cours" }
+    // Sem 1 - 26 août
+    { "date": "2025-08-26", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-08-26", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-08-26", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-08-26", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-08-26", "da": "DEMO005", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
+    // Sem 2 - 2 sept
+    { "date": "2025-09-02", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-02", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-02", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-02", "da": "DEMO004", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
+    { "date": "2025-09-02", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    // Sem 3 - 9 sept
+    { "date": "2025-09-09", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-09", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-09", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-09", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-09", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    // Sem 4 - 16 sept
+    { "date": "2025-09-16", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-16", "da": "DEMO002", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
+    { "date": "2025-09-16", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-16", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-16", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    // Sem 5 - 23 sept
+    { "date": "2025-09-23", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-23", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-23", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-23", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-23", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    // Sem 6 - 30 sept
+    { "date": "2025-09-30", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-30", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-30", "da": "DEMO003", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
+    { "date": "2025-09-30", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-09-30", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    // Sem 7 - 7 oct
+    { "date": "2025-10-07", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-10-07", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-10-07", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-10-07", "da": "DEMO004", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
+    { "date": "2025-10-07", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    // Sem 8 - 21 oct (après semaine planif)
+    { "date": "2025-10-21", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-10-21", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-10-21", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-10-21", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-10-21", "da": "DEMO005", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
+    // Sem 9 - 28 oct
+    { "date": "2025-10-28", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-10-28", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-10-28", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-10-28", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-10-28", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    // Sem 10 - 4 nov
+    { "date": "2025-11-04", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-04", "da": "DEMO002", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
+    { "date": "2025-11-04", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-04", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-04", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    // Sem 11 - 11 nov
+    { "date": "2025-11-11", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-11", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-11", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-11", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-11", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    // Sem 12 - 18 nov
+    { "date": "2025-11-18", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-18", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-18", "da": "DEMO003", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
+    { "date": "2025-11-18", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-18", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    // Sem 13 - 25 nov
+    { "date": "2025-11-25", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-25", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-25", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-11-25", "da": "DEMO004", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
+    { "date": "2025-11-25", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    // Sem 14 - 2 déc
+    { "date": "2025-12-02", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-12-02", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-12-02", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-12-02", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-12-02", "da": "DEMO005", "statut": "absent", "heures": 0, "coursId": "demo-cours" },
+    // Sem 15 - 9 déc
+    { "date": "2025-12-09", "da": "DEMO001", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-12-09", "da": "DEMO002", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-12-09", "da": "DEMO003", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-12-09", "da": "DEMO004", "statut": "present", "heures": 4, "coursId": "demo-cours" },
+    { "date": "2025-12-09", "da": "DEMO005", "statut": "present", "heures": 4, "coursId": "demo-cours" }
   ],
 
-  // ===== CONFIGURATION PRATIQUE DE NOTATION =====
+  // ===== CONFIGURATION =====
   "modalitesEvaluation": {
     "pratique": "pan-maitrise",
     "grilleReferenceDepistage": "GRILLE_DEMO",
     "nombreArtefacts": 3,
     "fenetrePatterns": 3,
-    "seuilsInterpretation": {
-      "fragile": 70,
-      "acceptable": 80,
-      "bon": 85
-    },
-    "affichageTableauBord": {
-      "afficherSommatif": false,
-      "afficherAlternatif": true,
-      "activerRai": true,
-      "modeComparatif": false
-    }
+    "seuilsInterpretation": { "fragile": 70, "acceptable": 80, "bon": 85 },
+    "affichageTableauBord": { "afficherSommatif": false, "afficherAlternatif": true, "activerRai": true, "modeComparatif": false }
   }
 };
 
-// Exporter vers window
 window.PACK_DEMARRAGE = PACK_DEMARRAGE;

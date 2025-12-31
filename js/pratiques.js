@@ -4972,14 +4972,23 @@ function toggleAccordeonV2(headerElement) {
 
     if (!contenu) return;
 
-    const estOuvert = contenu.style.display !== 'none';
+    // Toggle la classe "ferme" - le CSS gère max-height et opacity via :not(.ferme)
+    const estFerme = carte.classList.contains('ferme');
 
-    // Toggle l'affichage
-    contenu.style.display = estOuvert ? 'none' : 'block';
+    if (estFerme) {
+        // Ouvrir - retirer la classe, le CSS fait le reste
+        carte.classList.remove('ferme');
+        // Nettoyer les styles inline qui pourraient interférer
+        contenu.style.maxHeight = '';
+        contenu.style.opacity = '';
+    } else {
+        // Fermer
+        carte.classList.add('ferme');
+    }
 
     // Toggle le chevron
     if (chevron) {
-        chevron.textContent = estOuvert ? '▶' : '▼';
+        chevron.textContent = estFerme ? '▼' : '▶';
     }
 
     // Sauvegarder l'état si l'accordéon a un ID
@@ -4996,9 +5005,9 @@ function sauvegarderEtatAccordeons() {
     const etats = {};
 
     accordeons.forEach(accordeon => {
-        const contenu = accordeon.querySelector('.accordeon-contenu');
-        if (contenu && accordeon.id) {
-            etats[accordeon.id] = contenu.style.display !== 'none';
+        if (accordeon.id) {
+            // Détecter l'état basé sur la classe .ferme (pas display)
+            etats[accordeon.id] = !accordeon.classList.contains('ferme');
         }
     });
 
@@ -5024,10 +5033,20 @@ function restaurerEtatAccordeons() {
 
         if (!contenu) return;
 
-        // Si on a un état sauvegardé, l'utiliser, sinon fermer par défaut
+        // Si on a un état sauvegardé, l'utiliser, sinon garder l'état HTML initial
         const estOuvert = etats[accordeon.id] === true;
 
-        contenu.style.display = estOuvert ? 'block' : 'none';
+        // Utiliser la classe .ferme au lieu de display (cohérent avec toggleAccordeonV2)
+        if (estOuvert) {
+            accordeon.classList.remove('ferme');
+            contenu.style.maxHeight = '';
+            contenu.style.opacity = '';
+            contenu.style.display = ''; // Nettoyer les anciens styles inline
+        } else {
+            accordeon.classList.add('ferme');
+            contenu.style.display = ''; // Nettoyer les anciens styles inline
+        }
+
         if (chevron) {
             chevron.textContent = estOuvert ? '▼' : '▶';
         }

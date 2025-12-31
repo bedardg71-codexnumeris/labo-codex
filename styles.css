@@ -1097,6 +1097,12 @@ body {
     padding: 0;
 }
 
+/* État ouvert (sans classe .ferme) */
+.carte.accordeon:not(.ferme) .accordeon-contenu {
+    max-height: 2000px;
+    opacity: 1;
+}
+
 /* Titre avec fond bleu dégradé (comme l'en-tête) */
 .carte h3.carte-titre-bleu {
     background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%) !important;
