@@ -53,43 +53,8 @@ const PACK_DEMARRAGE = {
     { "jour": "mardi", "debut": "08:00", "fin": "12:00", "duree": 4 }
   ],
 
-  // ===== CALENDRIER COMPLET (15 mardis de cours) =====
-  "calendrierComplet": {
-    "2025-08-26": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 1, "numSeance": 1, "heuresCours": 4 },
-    "2025-09-02": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 2, "numSeance": 2, "heuresCours": 4 },
-    "2025-09-09": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 3, "numSeance": 3, "heuresCours": 4 },
-    "2025-09-16": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 4, "numSeance": 4, "heuresCours": 4 },
-    "2025-09-23": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 5, "numSeance": 5, "heuresCours": 4 },
-    "2025-09-30": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 6, "numSeance": 6, "heuresCours": 4 },
-    "2025-10-07": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 7, "numSeance": 7, "heuresCours": 4 },
-    "2025-10-21": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 8, "numSeance": 8, "heuresCours": 4 },
-    "2025-10-28": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 9, "numSeance": 9, "heuresCours": 4 },
-    "2025-11-04": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 10, "numSeance": 10, "heuresCours": 4 },
-    "2025-11-11": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 11, "numSeance": 11, "heuresCours": 4 },
-    "2025-11-18": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 12, "numSeance": 12, "heuresCours": 4 },
-    "2025-11-25": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 13, "numSeance": 13, "heuresCours": 4 },
-    "2025-12-02": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 14, "numSeance": 14, "heuresCours": 4 },
-    "2025-12-09": { "type": "cours", "jourSemaine": "mardi", "numSemaine": 15, "numSeance": 15, "heuresCours": 4 }
-  },
-
-  // ===== SÉANCES COMPLÈTES (15 séances) =====
-  "seancesCompletes": [
-    { "date": "2025-08-26", "jour": "mardi", "numSemaine": 1, "numSeance": 1, "heures": 4 },
-    { "date": "2025-09-02", "jour": "mardi", "numSemaine": 2, "numSeance": 2, "heures": 4 },
-    { "date": "2025-09-09", "jour": "mardi", "numSemaine": 3, "numSeance": 3, "heures": 4 },
-    { "date": "2025-09-16", "jour": "mardi", "numSemaine": 4, "numSeance": 4, "heures": 4 },
-    { "date": "2025-09-23", "jour": "mardi", "numSemaine": 5, "numSeance": 5, "heures": 4 },
-    { "date": "2025-09-30", "jour": "mardi", "numSemaine": 6, "numSeance": 6, "heures": 4 },
-    { "date": "2025-10-07", "jour": "mardi", "numSemaine": 7, "numSeance": 7, "heures": 4 },
-    { "date": "2025-10-21", "jour": "mardi", "numSemaine": 8, "numSeance": 8, "heures": 4 },
-    { "date": "2025-10-28", "jour": "mardi", "numSemaine": 9, "numSeance": 9, "heures": 4 },
-    { "date": "2025-11-04", "jour": "mardi", "numSemaine": 10, "numSeance": 10, "heures": 4 },
-    { "date": "2025-11-11", "jour": "mardi", "numSemaine": 11, "numSeance": 11, "heures": 4 },
-    { "date": "2025-11-18", "jour": "mardi", "numSemaine": 12, "numSeance": 12, "heures": 4 },
-    { "date": "2025-11-25", "jour": "mardi", "numSemaine": 13, "numSeance": 13, "heures": 4 },
-    { "date": "2025-12-02", "jour": "mardi", "numSemaine": 14, "numSeance": 14, "heures": 4 },
-    { "date": "2025-12-09", "jour": "mardi", "numSemaine": 15, "numSeance": 15, "heures": 4 }
-  ],
+  // ===== NOTE: calendrierComplet et seancesCompletes sont GÉNÉRÉS par l'app =====
+  // L'app utilise cadreCalendrier + horaireHebdo pour les générer automatiquement
 
   // ===== ÉTUDIANTS (5) =====
   "groupeEtudiants": [
