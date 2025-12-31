@@ -2484,9 +2484,10 @@ let donneesEvaluationsFiltrees = [];
 function calculerEtSauvegarderIndicesEvaluation() {
     console.log('Calcul des indices C et P...');
 
-    const etudiants = db.getSync('groupeEtudiants', []);
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
-    const productions = db.getSync('productions', []);
+    // ✅ NAMESPACING (Beta 95.5) : Utiliser obtenirDonneesSelonMode pour le filtrage par trimestre/cours
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    const productions = obtenirDonneesSelonMode('productions');
 
     const indicesEvaluation = {};
 
@@ -2678,8 +2679,9 @@ function chargerListeEvaluationsRefonte() {
     // L'ancien calcul est désactivé pour éviter les conflits de structure
 
     // Récupérer toutes les données
-    const etudiants = db.getSync('groupeEtudiants', []);
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
+    // ✅ NAMESPACING (Beta 95.5)
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
     // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : saisie-presences.js génère indicesAssiduiteDetailles
     const indicesAssiduiteDetailles = db.getSync((typeof cle === 'function') ? cle('indicesAssiduite') : 'indicesAssiduite', {});
     // 🎯 LECTURE DEPUIS LA SOURCE UNIQUE : portfolio.js génère indicesCP
@@ -4614,10 +4616,11 @@ function sauvegarderEvaluationModifiee() {
     const productionId = document.getElementById('selectProduction1').value;
     const grilleId = document.getElementById('selectGrille1').value;
 
-    const etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ NAMESPACING (Beta 95.5)
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const etudiant = etudiants.find(e => e.da === etudiantDA);
 
-    const productions = db.getSync('productions', []);
+    const productions = obtenirDonneesSelonMode('productions');
     const production = productions.find(p => p.id === productionId);
 
     const grilles = db.getSync('grillesTemplates', []);
@@ -4916,9 +4919,10 @@ function fermerBanqueEvaluations() {
  * Charge les options de filtres
  */
 function chargerFiltresBanqueEvaluations() {
-    const evaluations = db.getSync('evaluationsSauvegardees', []);
-    const etudiants = db.getSync('groupeEtudiants', []);
-    const productions = db.getSync('productions', []);
+    // ✅ NAMESPACING (Beta 95.5)
+    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees');
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const productions = obtenirDonneesSelonMode('productions');
 
     // Filtre étudiants
     const selectEtudiant = document.getElementById('filtreBanqueEtudiant');

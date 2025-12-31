@@ -51,18 +51,25 @@ Decouverte probleme majeur : namespacing incomplet (4/14 cles migrees).
 - ✅ Bug calendrier case-sensitivity corrige
 - ✅ Donnees A2025 nettoyees (30 etudiants)
 - ✅ Plan de migration documente
-- ⏳ Phase 1 namespacing (evaluation.js, profil-etudiant.js)
-- ❌ Phase 2 namespacing (5 fichiers)
+- ✅ Phase 1 namespacing COMPLETE
+  - evaluation.js : 4 occurrences corrigees (obtenirDonneesSelonMode)
+  - profil-etudiant.js : 1 occurrence corrigee
+- ⏳ Phase 2 namespacing (5 fichiers)
 - ❌ Phase 3 namespacing (5 fichiers)
 - ❌ Test pack demo end-to-end
 
 **Action immediate au retour** :
-Ouvrir PLAN_MIGRATION_NAMESPACING.md et commencer Phase 1 :
-- evaluation.js : 4 occurrences lignes 2487, 2681, 4617, 4920
-- profil-etudiant.js : 1 occurrence ligne 8199
+Continuer Phase 2 du namespacing (PLAN_MIGRATION_NAMESPACING.md) :
+- trimestres.js : 4 occurrences (lignes 308, 391, 737, 1292)
+- modes.js : 2 occurrences (lignes 373, 442)
+- cours.js : 1 occurrence (ligne 999)
+- main.js : 1 occurrence (ligne 186)
+- statistiques.js : 1 occurrence (ligne 102)
 
 **Fichiers modifies cette session** :
 - js/trimestre.js (fix case-sensitivity)
+- js/evaluation.js (namespacing Phase 1 - 4 occurrences)
+- js/profil-etudiant.js (namespacing Phase 1 - 1 occurrence)
 - PLAN_MIGRATION_NAMESPACING.md (cree)
 - diagnostic_donnees.js (cree)
 - SESSION.md (cree)

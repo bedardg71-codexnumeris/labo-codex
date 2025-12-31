@@ -8196,7 +8196,8 @@ window.determinerAlerteContextuelle = determinerAlerteContextuelle;
  * @returns {Object} - Patterns et RàI de tous les étudiants
  */
 function calculerEtStockerPatternsGroupe() {
-    const etudiants = db.getSync('groupeEtudiants', []);
+    // ✅ NAMESPACING (Beta 95.5)
+    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const patternsGroupe = {};
 
     console.log('📊 Calcul des patterns pour', etudiants.length, 'étudiants...');
