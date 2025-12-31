@@ -1191,6 +1191,45 @@ async function basculerDonneesDemo(activer) {
         console.log('📚 [Démo] Chargement des données de démonstration...');
 
         try {
+            // ✅ CORRECTION CRITIQUE (31 déc 2025): Activer le trimestre DEMO AVANT de charger les données
+            // Les données démo sont dans un trimestre fictif permanent "demo"
+            // Cela garantit que la démo fonctionne peu importe le trimestre réel (A2025, H2026, A2026, etc.)
+            const TRIMESTRE_DEMO_ID = 'demo';
+            const trimestreActuelId = typeof obtenirTrimestreId === 'function' ? obtenirTrimestreId() : '';
+
+            if (trimestreActuelId !== TRIMESTRE_DEMO_ID) {
+                console.log('📅 [Démo] Changement vers trimestre de démonstration...');
+
+                // Vérifier si le trimestre demo existe, sinon le créer
+                const trimestres = db.getSync('trimestres', []);
+                let trimestreDemo = trimestres.find(t => t.id === TRIMESTRE_DEMO_ID);
+
+                if (!trimestreDemo) {
+                    // Créer le trimestre de démonstration (fictif, permanent)
+                    console.log('   📅 Création du trimestre de démonstration...');
+                    trimestreDemo = {
+                        id: TRIMESTRE_DEMO_ID,
+                        nom: '📚 Démonstration',
+                        session: 'Demo',
+                        annee: '----',
+                        dateCreation: new Date().toISOString().split('T')[0],
+                        actif: true,
+                        archive: false,
+                        estDemo: true  // Flag pour identifier ce trimestre spécial
+                    };
+                    // Désactiver les autres trimestres
+                    trimestres.forEach(t => t.actif = false);
+                    trimestres.push(trimestreDemo);
+                    db.setSync('trimestres', trimestres);
+                    console.log('   ✅ Trimestre de démonstration créé');
+                } else {
+                    // Activer le trimestre demo
+                    trimestres.forEach(t => t.actif = (t.id === TRIMESTRE_DEMO_ID));
+                    db.setSync('trimestres', trimestres);
+                    console.log('   ✅ Trimestre de démonstration activé');
+                }
+            }
+
             // Attendre que le module soit chargé (max 3 secondes)
             let pack = window.PACK_DEMARRAGE;
             let tentatives = 0;
@@ -1210,7 +1249,8 @@ async function basculerDonneesDemo(activer) {
             console.log(`   → ${pack.productions?.length || 0} productions`);
             console.log(`   → ${pack.evaluationsSauvegardees?.length || 0} évaluations`);
 
-            // FUSIONNER les données (ne pas écraser les données existantes)
+            // ✅ CORRECTION (30 déc 2025 - v2): REMPLACER les données démo au lieu de fusionner
+            // Cela garantit que les nouvelles données du pack sont toujours utilisées
 
             // ✅ CORRECTION (30 déc 2025): Utiliser db.set() (async) au lieu de db.setSync()
             // pour écrire dans IndexedDB ET localStorage (architecture hybride)
@@ -1218,61 +1258,72 @@ async function basculerDonneesDemo(activer) {
             // ✅ CORRECTION (30 déc 2025): Groupes démo supportés (legacy 9999 + nouveau demo)
             const GROUPES_DEMO = ['9999', 'demo'];
             const estGroupeDemo = (g) => GROUPES_DEMO.includes(g);
-
-            // 1. Ajouter le cours démo s'il n'existe pas
-            const coursExistants = await db.get('listeCours') || [];
-            const coursDemo = pack.listeCours?.[0]; // Premier cours du pack = cours démo
-            if (coursDemo && !coursExistants.find(c => c.id === coursDemo.id)) {
-                coursExistants.push(coursDemo);
-                await db.set('listeCours', coursExistants);
-                console.log(`   ✅ Cours démo ajouté: ${coursDemo.id}`);
-            }
-            const coursIdDemo = coursDemo?.id;
+            const estCoursDemo = (id) => id && (id.includes('9999') || id.includes('demo'));
+            const estDADemo = (da) => da && da.startsWith('DEMO');
 
             // ✅ CORRECTION (30 déc 2025): Utiliser window.cle() pour namespacing par trimestre
             const cleNamespace = (typeof window.cle === 'function') ? window.cle : (k) => k;
 
+            // ÉTAPE 0: Supprimer les anciennes données démo AVANT d'ajouter les nouvelles
+            console.log('   🗑️ Suppression des anciennes données démo...');
+
+            // 0a. Supprimer étudiants démo existants
+            let etudiantsExistants = await db.get(cleNamespace('groupeEtudiants')) || [];
+            etudiantsExistants = etudiantsExistants.filter(e =>
+                !estGroupeDemo(e.groupe) && !estCoursDemo(e.coursId) && !estDADemo(e.da)
+            );
+
+            // 0b. Supprimer productions démo existantes
+            let productionsExistantes = await db.get(cleNamespace('productions')) || [];
+            productionsExistantes = productionsExistantes.filter(p => !estCoursDemo(p.coursId));
+
+            // 0c. Supprimer évaluations démo existantes
+            let evalsExistantes = await db.get(cleNamespace('evaluationsSauvegardees')) || [];
+            evalsExistantes = evalsExistantes.filter(e =>
+                !estCoursDemo(e.coursId) && !estGroupeDemo(e.groupe) && !estDADemo(e.etudiantDA)
+            );
+
+            // 0d. Supprimer présences démo existantes
+            let presencesExistantes = await db.get(cleNamespace('presences')) || [];
+            presencesExistantes = presencesExistantes.filter(p =>
+                !estCoursDemo(p.coursId) && !estDADemo(p.da)
+            );
+
+            console.log('   ✅ Anciennes données démo supprimées');
+
+            // 1. Ajouter le cours démo
+            const coursExistants = await db.get('listeCours') || [];
+            const coursDemo = pack.listeCours?.[0]; // Premier cours du pack = cours démo
+            // Supprimer l'ancien cours démo s'il existe
+            const coursFiltrés = coursExistants.filter(c => !estGroupeDemo(c.groupe) && !estCoursDemo(c.id));
+            if (coursDemo) {
+                coursFiltrés.push(coursDemo);
+                await db.set('listeCours', coursFiltrés);
+                console.log(`   ✅ Cours démo ajouté: ${coursDemo.id}`);
+            }
+            const coursIdDemo = coursDemo?.id;
+
             // 2. Ajouter les étudiants du groupe démo
-            const etudiantsExistants = await db.get(cleNamespace('groupeEtudiants')) || [];
             const etudiantsDemo = pack.groupeEtudiants || [];
-            etudiantsDemo.forEach(e => {
-                if (!etudiantsExistants.find(ex => ex.da === e.da)) {
-                    etudiantsExistants.push(e);
-                }
-            });
+            etudiantsDemo.forEach(e => etudiantsExistants.push(e));
             await db.set(cleNamespace('groupeEtudiants'), etudiantsExistants);
             console.log(`   ✅ ${etudiantsDemo.length} étudiants démo ajoutés (clé: ${cleNamespace('groupeEtudiants')})`);
 
             // 3. Ajouter les productions du cours démo
-            const productionsExistantes = await db.get(cleNamespace('productions')) || [];
             const productionsDemo = pack.productions || [];
-            productionsDemo.forEach(p => {
-                if (!productionsExistantes.find(ex => ex.id === p.id)) {
-                    productionsExistantes.push(p);
-                }
-            });
+            productionsDemo.forEach(p => productionsExistantes.push(p));
             await db.set(cleNamespace('productions'), productionsExistantes);
             console.log(`   ✅ ${productionsDemo.length} productions démo ajoutées`);
 
             // 4. Ajouter les évaluations du groupe démo
-            const evalsExistantes = await db.get(cleNamespace('evaluationsSauvegardees')) || [];
             const evalsDemo = pack.evaluationsSauvegardees || [];
-            evalsDemo.forEach(e => {
-                if (!evalsExistantes.find(ex => ex.id === e.id)) {
-                    evalsExistantes.push(e);
-                }
-            });
+            evalsDemo.forEach(e => evalsExistantes.push(e));
             await db.set(cleNamespace('evaluationsSauvegardees'), evalsExistantes);
             console.log(`   ✅ ${evalsDemo.length} évaluations démo ajoutées`);
 
             // 5. Ajouter les présences du pack (déjà anonymisées)
-            const presencesExistantes = await db.get(cleNamespace('presences')) || [];
             const presencesDemo = pack.presences || [];
-            presencesDemo.forEach(p => {
-                if (!presencesExistantes.find(ex => ex.da === p.da && ex.date === p.date)) {
-                    presencesExistantes.push(p);
-                }
-            });
+            presencesDemo.forEach(p => presencesExistantes.push(p));
             await db.set(cleNamespace('presences'), presencesExistantes);
             console.log(`   ✅ ${presencesDemo.length} présences démo ajoutées`);
 
@@ -1334,7 +1385,7 @@ async function basculerDonneesDemo(activer) {
             console.log('   ✅ Mode Assisté activé automatiquement');
 
             // Notification succès
-            alert('✅ Données de démonstration chargées avec succès !\n\nGroupe 9999 : 10 étudiants, 4 artefacts, 40 évaluations\n\nMode Assisté activé automatiquement.');
+            alert('✅ Données de démonstration chargées avec succès !\n\nGroupe demo : 5 étudiants, 5 productions, 20 évaluations\n\nMode Assisté activé automatiquement.');
 
             // Recharger la page pour afficher les nouvelles données
             window.location.reload();
