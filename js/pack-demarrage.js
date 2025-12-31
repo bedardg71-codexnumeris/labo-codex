@@ -48,13 +48,10 @@ const PACK_DEMARRAGE = {
   },
 
   // ===== HORAIRE HEBDOMADAIRE (mardi 8h-12h) =====
-  "horaireHebdo": {
-    "lundi": [],
-    "mardi": [{ "debut": "08:00", "fin": "12:00", "duree": 4 }],
-    "mercredi": [],
-    "jeudi": [],
-    "vendredi": []
-  },
+  // Format tableau de séances (attendu par horaire.js)
+  "horaireHebdo": [
+    { "jour": "mardi", "debut": "08:00", "fin": "12:00", "duree": 4 }
+  ],
 
   // ===== CALENDRIER COMPLET (15 mardis de cours) =====
   "calendrierComplet": {
