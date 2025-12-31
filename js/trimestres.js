@@ -18,6 +18,8 @@
        =============================== */
 
     // Clés qui doivent être namespacées par trimestre
+    // ✅ CORRECTION (31 déc 2025): Ajouter groupeEtudiants, productions, presences, evaluationsSauvegardees
+    // pour que le mode démo fonctionne correctement (données isolées par trimestre)
     const CLES_NAMESPACEES = [
         'calendrierComplet',
         'cadreCalendrier',
@@ -28,7 +30,12 @@
         'interventions',
         'indicesAssiduite',
         'indicesCP',
-        'snapshots'
+        'snapshots',
+        // ✅ Clés liées aux données étudiants (critiques pour le mode démo)
+        'groupeEtudiants',
+        'productions',
+        'presences',
+        'evaluationsSauvegardees'
     ];
 
     // Clés globales (partagées entre trimestres)
