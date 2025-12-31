@@ -728,20 +728,22 @@ function confirmerAjoutEvenementImprevu() {
 function genererCalendrierComplet() {
     console.log('🏭 Génération du calendrier complet (source unique)...');
 
-    // ✅ CORRECTION (31 déc 2025): En mode démo, utiliser le calendrier pré-généré du pack
-    // Ne PAS régénérer car les données démo sont calculées manuellement (15 mardis spécifiques)
-    const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
-    if (trimestreActif && trimestreActif.id === 'demo') {
-        const calendrierDemo = db.getSync('demo_calendrierComplet', null);
-        if (calendrierDemo && Object.keys(calendrierDemo).length > 0) {
-            console.log('   ✅ Mode démo détecté - calendrier pré-généré utilisé (' + Object.keys(calendrierDemo).length + ' jours)');
-            return calendrierDemo;
-        }
-    }
-
     const cadre = db.getSync(cle('cadreCalendrier'), {});
     const evenementsPrevus = db.getSync(cle('evenementsPrevus'), []);
     const evenementsImprevus = db.getSync(cle('evenementsImprevus'), []);
+
+    // ✅ CORRECTION (31 déc 2025): Utiliser horaireHebdo pour déterminer les jours de cours
+    // Si horaireHebdo est défini, seuls les jours avec des séances sont des jours de cours
+    // Sinon, tous les jours ouvrables sont considérés comme jours de cours (comportement legacy)
+    const horaireHebdo = db.getSync(cle('horaireHebdo'), null);
+    let joursAvecCours = null; // null = tous les jours ouvrables
+    if (horaireHebdo && Array.isArray(horaireHebdo) && horaireHebdo.length > 0) {
+        // Extraire les jours qui ont des séances
+        joursAvecCours = new Set(horaireHebdo.map(s => s.jour.toLowerCase()));
+        console.log('   📅 Jours avec cours selon horaireHebdo:', [...joursAvecCours].join(', '));
+    } else {
+        console.log('   📅 Pas d\'horaireHebdo défini - tous les jours ouvrables sont des jours de cours');
+    }
 
     // Valeurs par défaut si rien n'est configuré
     const dateDebut = cadre.dateDebut || cadre.debutTrimestre || '2025-08-21';
@@ -832,12 +834,14 @@ function genererCalendrierComplet() {
             }
         }
         // 6. Jour de cours normal (avant fin des cours seulement)
-        else if (dateStr <= finCours) {
+        // ✅ CORRECTION (31 déc 2025): Vérifier que ce jour a des cours selon horaireHebdo
+        else if (dateStr <= finCours && (joursAvecCours === null || joursAvecCours.has(jourSemaine))) {
             infosJour.statut = 'cours';
             compteurJoursCours++;
             joursDeCoursMemeSemaine++;
 
-            // Nouvelle semaine tous les 5 jours de cours
+            // Nouvelle semaine tous les N jours de cours (N = nb jours avec cours par semaine)
+            const joursParSemaine = joursAvecCours ? joursAvecCours.size : 5;
             if (joursDeCoursMemeSemaine === 1) {
                 numeroSemaine++;
             }
@@ -845,10 +849,14 @@ function genererCalendrierComplet() {
             infosJour.numeroJour = compteurJoursCours;
             infosJour.numeroSemaine = numeroSemaine;
 
-            // Réinitialiser après 5 jours de cours
-            if (joursDeCoursMemeSemaine >= 5) {
+            // Réinitialiser après N jours de cours
+            if (joursDeCoursMemeSemaine >= joursParSemaine) {
                 joursDeCoursMemeSemaine = 0;
             }
+        }
+        // 6b. Jour ouvrable sans cours (pas dans l'horaire hebdo)
+        else if (dateStr <= finCours) {
+            infosJour.statut = 'jour-ouvrable';
         }
         // 7. Après fin des cours (avant fin trimestre)
         else {
@@ -1379,23 +1387,23 @@ async function basculerDonneesDemo(activer) {
                     pack.modalitesEvaluation.affichageTableauBord?.afficherAlternatif, ')');
             }
 
-            // 7b. Charger les données calendrier (CRITIQUE pour snapshots)
+            // 7b. Charger les RÉGLAGES calendrier (cadreCalendrier + horaireHebdo)
+            // NOTE: calendrierComplet et seancesCompletes sont GÉNÉRÉS par l'app
+            // à partir de ces réglages lors du rechargement de la page
             if (pack.cadreCalendrier) {
                 await db.set(cleNamespace('cadreCalendrier'), pack.cadreCalendrier);
                 console.log('   ✅ cadreCalendrier chargé');
             }
             if (pack.horaireHebdo) {
                 await db.set(cleNamespace('horaireHebdo'), pack.horaireHebdo);
-                console.log('   ✅ horaireHebdo chargé (4h/mardi)');
+                console.log('   ✅ horaireHebdo chargé:', JSON.stringify(pack.horaireHebdo));
             }
+            // calendrierComplet et seancesCompletes seront générés au rechargement
             if (pack.calendrierComplet) {
-                await db.set(cleNamespace('calendrierComplet'), pack.calendrierComplet);
-                console.log(`   ✅ calendrierComplet chargé (${Object.keys(pack.calendrierComplet).length} jours)`);
+                // Obsolète - ne plus charger, laisser l'app générer
+                console.log('   ⏭️ calendrierComplet ignoré (sera généré par l\'app)');
             }
-            if (pack.seancesCompletes) {
-                await db.set(cleNamespace('seancesCompletes'), pack.seancesCompletes);
-                console.log(`   ✅ seancesCompletes chargé (${pack.seancesCompletes.length} séances)`);
-            }
+            // Note: seancesCompletes n'est plus dans le pack (généré par l'app)
 
             // 8. Marquer pour recalcul des indices au prochain chargement
             localStorage.setItem('recalculerIndicesCP', 'true');
