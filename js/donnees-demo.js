@@ -56,10 +56,18 @@ async function chargerDonneesDemo() {
         console.log('   → Fusion avec données existantes...');
         await fusionnerDonneesDemo(packDemo);
 
+        // ✅ AJOUTÉ (31 déc 2025) : Activer le cours demo comme cours actif
+        // Pour que obtenirDonneesSelonMode() filtre correctement les données
+        const coursDemo = packDemo.listeCours?.[0];
+        if (coursDemo) {
+            await db.set('infoCours', coursDemo);
+            console.log(`   → Cours actif défini: ${coursDemo.sigle} (${coursDemo.id})`);
+        }
+
         // Marquer comme chargées
         localStorage.setItem('demo-chargees', 'true');
 
-        console.log('   ✅ Données demo chargées avec succès (groupe 9999)');
+        console.log('   ✅ Données demo chargées avec succès');
         return true;
 
     } catch (error) {
@@ -120,26 +128,20 @@ async function fusionnerDonneesDemo(packDemo) {
         console.log('   ➜ productions fusionnées');
     }
 
-    // 4. Fusionner evaluations
-    if (packDemo.evaluations) {
-        const evaluations = await db.get('evaluations') || {};
-        const evaluationsDemo = packDemo.evaluations || {};
+    // 4. Fusionner evaluations (evaluationsSauvegardees)
+    // ✅ CORRIGÉ (31 déc 2025) : Le pack utilise evaluationsSauvegardees, pas evaluations
+    const evaluationsDemo = packDemo.evaluationsSauvegardees || packDemo.evaluations || [];
+    if (evaluationsDemo.length > 0) {
+        const evaluations = await db.get('evaluationsSauvegardees') || [];
 
-        // Fusionner les évaluations par DA
-        for (const [da, evals] of Object.entries(evaluationsDemo)) {
-            if (!evaluations[da]) {
-                evaluations[da] = [];
-            }
-
-            for (const eval of evals) {
-                const existe = evaluations[da].some(e => e.id === eval.id);
-                if (!existe) {
-                    evaluations[da].push(eval);
-                }
+        for (const evalDemo of evaluationsDemo) {
+            const existe = evaluations.some(e => e.id === evalDemo.id);
+            if (!existe) {
+                evaluations.push(evalDemo);
             }
         }
-        await db.set('evaluations', evaluations);
-        console.log('   ➜ evaluations fusionnées');
+        await db.set('evaluationsSauvegardees', evaluations);
+        console.log(`   ➜ evaluationsSauvegardees fusionnées (${evaluationsDemo.length} ajoutées)`);
     }
 
     // 5. Fusionner grilles (si présentes)
@@ -158,9 +160,10 @@ async function fusionnerDonneesDemo(packDemo) {
     }
 
     // 6. Fusionner échelles (si présentes)
-    if (packDemo.echellesPerformance) {
-        const echelles = await db.get('echellesPerformance') || [];
-        const echellesDemo = packDemo.echellesPerformance || [];
+    // ✅ CORRIGÉ (31 déc 2025) : Le pack utilise echellesTemplates, pas echellesPerformance
+    const echellesDemo = packDemo.echellesTemplates || packDemo.echellesPerformance || [];
+    if (echellesDemo.length > 0) {
+        const echelles = await db.get('echellesTemplates') || [];
 
         for (const echelle of echellesDemo) {
             const existe = echelles.some(e => e.id === echelle.id);
@@ -168,8 +171,8 @@ async function fusionnerDonneesDemo(packDemo) {
                 echelles.push(echelle);
             }
         }
-        await db.set('echellesPerformance', echelles);
-        console.log('   ➜ echellesPerformance fusionnées');
+        await db.set('echellesTemplates', echelles);
+        console.log(`   ➜ echellesTemplates fusionnées (${echellesDemo.length} ajoutées)`);
     }
 
     // 7. Fusionner présences (si présentes)
@@ -191,6 +194,25 @@ async function fusionnerDonneesDemo(packDemo) {
         }
         await db.set('presences', presences);
         console.log('   ➜ presences fusionnées');
+    }
+
+    // 8. Fusionner cartouches (clés cartouches_*)
+    // ✅ AJOUTÉ (31 déc 2025) : Les cartouches sont stockées par grille
+    const clesCartouches = Object.keys(packDemo).filter(k => k.startsWith('cartouches_'));
+    for (const cleCartouche of clesCartouches) {
+        const cartouchesDemo = packDemo[cleCartouche] || [];
+        if (cartouchesDemo.length > 0) {
+            const cartouches = await db.get(cleCartouche) || [];
+
+            for (const cartouche of cartouchesDemo) {
+                const existe = cartouches.some(c => c.id === cartouche.id);
+                if (!existe) {
+                    cartouches.push(cartouche);
+                }
+            }
+            await db.set(cleCartouche, cartouches);
+            console.log(`   ➜ ${cleCartouche} fusionnées (${cartouchesDemo.length} ajoutées)`);
+        }
     }
 
     // Synchroniser vers localStorage cache
@@ -228,42 +250,52 @@ async function dechargerDonneesDemo() {
 }
 
 /**
- * Supprime toutes les données du groupe 9999
+ * Supprime toutes les données demo
+ * ✅ CORRIGÉ (31 déc 2025) : Utilise 'demo' comme groupe et coursId: 'demo-cours'
  */
 async function supprimerGroupe9999() {
-    // 1. Supprimer étudiants groupe 9999
+    // 1. Supprimer étudiants groupe demo
     const groupeEtudiants = await db.get('groupeEtudiants') || [];
-    const etudiantsFiltres = groupeEtudiants.filter(e => e.groupe !== '9999');
-    await db.set('groupeEtudiants', etudiantsFiltres);
-    console.log('   ➜ Étudiants groupe 9999 supprimés');
-
-    // 2. Supprimer cours avec groupe 9999
-    const listeCours = await db.get('listeCours') || [];
-    const coursFiltres = listeCours.filter(c => c.groupe !== '9999');
-    await db.set('listeCours', coursFiltres);
-    console.log('   ➜ Cours groupe 9999 supprimés');
-
-    // 3. Supprimer évaluations des étudiants groupe 9999
-    const evaluations = await db.get('evaluations') || {};
-    const dasGroupe9999 = groupeEtudiants
-        .filter(e => e.groupe === '9999')
+    const dasDemo = groupeEtudiants
+        .filter(e => e.groupe === 'demo' || e.coursId === 'demo-cours' || e.da?.startsWith('DEMO'))
         .map(e => e.da);
+    const etudiantsFiltres = groupeEtudiants.filter(e =>
+        e.groupe !== 'demo' && e.coursId !== 'demo-cours' && !e.da?.startsWith('DEMO')
+    );
+    await db.set('groupeEtudiants', etudiantsFiltres);
+    console.log(`   ➜ ${dasDemo.length} étudiants demo supprimés`);
 
-    for (const da of dasGroupe9999) {
-        delete evaluations[da];
-    }
-    await db.set('evaluations', evaluations);
-    console.log('   ➜ Évaluations groupe 9999 supprimées');
+    // 2. Supprimer cours demo
+    const listeCours = await db.get('listeCours') || [];
+    const coursFiltres = listeCours.filter(c => c.id !== 'demo-cours' && c.groupe !== 'demo');
+    await db.set('listeCours', coursFiltres);
+    console.log('   ➜ Cours demo supprimés');
 
-    // 4. Supprimer présences des étudiants groupe 9999
+    // 3. Supprimer évaluations demo (evaluationsSauvegardees)
+    const evaluations = await db.get('evaluationsSauvegardees') || [];
+    const evalsFiltrees = evaluations.filter(e =>
+        e.coursId !== 'demo-cours' && !e.id?.startsWith('EVAL_DEMO')
+    );
+    await db.set('evaluationsSauvegardees', evalsFiltrees);
+    console.log('   ➜ Évaluations demo supprimées');
+
+    // 4. Supprimer présences des étudiants demo
     const presences = await db.get('presences') || {};
     for (const date in presences) {
-        for (const da of dasGroupe9999) {
-            delete presences[date][da];
+        for (const da of dasDemo) {
+            delete presences[date]?.[da];
         }
     }
     await db.set('presences', presences);
-    console.log('   ➜ Présences groupe 9999 supprimées');
+    console.log('   ➜ Présences demo supprimées');
+
+    // 5. Supprimer productions demo
+    const productions = await db.get('productions') || [];
+    const prodsFiltrees = productions.filter(p =>
+        p.coursId !== 'demo-cours' && !p.id?.startsWith('PROD_')
+    );
+    await db.set('productions', prodsFiltrees);
+    console.log('   ➜ Productions demo supprimées');
 
     // Synchroniser vers localStorage cache
     await db.syncToLocalStorageCache();
