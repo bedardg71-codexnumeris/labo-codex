@@ -60,6 +60,31 @@ Decouverte probleme majeur : namespacing incomplet (4/14 cles migrees).
 - **Statut** : ✅ Resolu
 - **Commit** : `6876d7b`
 
+### Bug #6 : Cartouche non selectionnee (~19:00)
+- **Symptome** : Evaluation chargee mais cartouche dropdown vide, pas de retroactions
+- **Cause** : cartoucheId manquant dans evaluations + mauvais ID (CARTOUCHE_DEMO vs CART_DEMO)
+- **Fix** : Ajout cartoucheId aux 18 evaluations + correction ID vers CART_DEMO
+- **Fichiers touches** : js/pack-demarrage.js, js/evaluation.js
+- **Statut** : ✅ Resolu
+
+### Bug #7 : Donnees demo non trouvees dans profil etudiant (~20:00)
+- **Symptome** : Profil etudiant affiche "Non remis" pour toutes les productions
+- **Cause** : donnees-demo.js sauvegardait dans cles non-namespacees (evaluationsSauvegardees)
+  mais obtenirDonneesSelonMode() lisait depuis cles namespacees (demo_evaluationsSauvegardees)
+- **Fix** :
+  1. Deplacer activation trimestre AVANT fusion des donnees
+  2. Utiliser cle() dans fusionnerDonneesDemo() pour toutes les cles namespacees
+  3. Utiliser cle() dans supprimerGroupe9999() pour le nettoyage
+- **Fichiers touches** : js/donnees-demo.js
+- **Statut** : ✅ Resolu
+
+### Bug #8 : Productions introuvables dans dropdown evaluation (~20:30)
+- **Symptome** : "Timeout: option PROD_ART1 introuvable dans #selectProduction1"
+- **Cause** : chargerProductionsDansSelect() utilisait db.getSync('productions') sans namespacing
+- **Fix** : Utiliser obtenirDonneesSelonMode('productions') dans chargerProductionsDansSelect()
+- **Fichiers touches** : js/evaluation.js
+- **Statut** : ✅ Resolu
+
 ---
 
 ## OU REPRENDRE (si session s'arrete maintenant)
@@ -68,20 +93,14 @@ Decouverte probleme majeur : namespacing incomplet (4/14 cles migrees).
 - ✅ Bug calendrier case-sensitivity corrige
 - ✅ Donnees A2025 nettoyees (30 etudiants)
 - ✅ Phase 1-3 namespacing COMPLETE (20 occurrences, 12 fichiers)
-- ✅ donnees-demo.js corrige (cles, cartouches, infoCours)
-- ✅ pack-demarrage.js aligne (critereId → CR_STRUCTURE, etc.)
-- ⏳ Test pack demo end-to-end (PRET A TESTER)
-
-**Action immediate au retour** :
-Tester le pack demo :
-1. Activer checkbox "Donnees demo"
-2. Verifier 5 etudiants demo visibles
-3. Verifier calendrier avec jours de cours
-4. Desactiver et verifier retour aux 30 etudiants A2025
+- ✅ donnees-demo.js corrige (cles namespacees, cartouches, infoCours, trimestre)
+- ✅ pack-demarrage.js aligne (critereId, cartoucheId)
+- ✅ evaluation.js corrige (chargerProductionsDansSelect avec namespacing)
+- ✅ **PACK DEMO FONCTIONNEL** - Test end-to-end reussi !
 
 **Fichiers modifies cette session** :
 - js/trimestre.js (fix case-sensitivity)
-- js/evaluation.js (namespacing - 4 occurrences)
+- js/evaluation.js (namespacing chargerProductionsDansSelect + cartouche dropdown)
 - js/profil-etudiant.js (namespacing - 1 occurrence)
 - js/trimestres.js (namespacing - 4 occurrences)
 - js/modes.js (namespacing - 2 occurrences)
@@ -93,38 +112,38 @@ Tester le pack demo :
 - js/primo-validation-champs.js (namespacing - 1 occurrence)
 - js/migrations.js (namespacing - 1 occurrence)
 - js/rapport-bug.js (namespacing - 1 occurrence)
-- js/donnees-demo.js (correction cles evaluations, echelles, cartouches)
-- js/pack-demarrage.js (alignement critereId CR_STRUCTURE, etc.)
-- PLAN_MIGRATION_NAMESPACING.md (cree)
-- diagnostic_donnees.js (cree)
-- SESSION.md (cree et mis a jour)
+- js/donnees-demo.js (namespacing complet : fusion + nettoyage)
+- js/pack-demarrage.js (alignement critereId + cartoucheId)
+- index.html (cache busters)
+- SESSION.md (documentation)
 
 ---
 
 ## NOTES POUR CLAUDE CODE
 
 **Contexte actuel** :
-Pack demo corrige et pret a tester. Tous les critereId alignes avec la
-structure existante de l'utilisateur (CR_STRUCTURE, CR_RIGUEUR, etc.)
+Pack demo 100% fonctionnel. Le namespacing est maintenant coherent :
+- Trimestre demo active AVANT fusion des donnees
+- Toutes les cles namespacees utilisent cle() : demo_groupeEtudiants, demo_productions, etc.
+- obtenirDonneesSelonMode() utilise dans evaluation.js pour les productions
 
 **Rappels critiques** :
-- `cle('groupeEtudiants')` retourne `a2025_groupeEtudiants` si trimestre actif = a2025
-- `obtenirDonneesSelonMode()` est prefere car il gere aussi le filtrage
-- Les evaluations demo utilisent grilleId=GRILLE_DEMO et critereId=CR_STRUCTURE, etc.
+- `cle('groupeEtudiants')` retourne `demo_groupeEtudiants` si trimestre actif = demo
+- `obtenirDonneesSelonMode()` est prefere car il gere namespacing + filtrage coursId
+- Les evaluations demo utilisent grilleId=GRILLE_DEMO, cartoucheId=CART_DEMO
 - Les cartouches utilisent cles comme CR_STRUCTURE_M, CR_RIGUEUR_D, etc.
 
-**Structure critereId** :
-```javascript
-// Dans grille (criteres[].id)
-{ "id": "CR_STRUCTURE", "code": "structure", "nom": "Structure", ... }
+**Cles namespacees** (prefixe trimestre) :
+- groupeEtudiants → demo_groupeEtudiants
+- productions → demo_productions
+- evaluationsSauvegardees → demo_evaluationsSauvegardees
+- presences → demo_presences
 
-// Dans evaluation (criteres[].critereId)
-{ "critereId": "CR_STRUCTURE", "niveauSelectionne": "M" }
-
-// Dans cartouche (commentaires keys)
-{ "CR_STRUCTURE_M": "Bonne organisation !", ... }
-```
+**Cles globales** (pas de prefixe) :
+- listeCours, trimestres
+- grillesTemplates, echellesTemplates
+- cartouches_*, modalitesEvaluation
 
 ---
 
-**Derniere mise a jour** : 31 dec 2025, ~13:00
+**Derniere mise a jour** : 31 dec 2025, ~20:45
