@@ -80,7 +80,8 @@ const configurationsOnglets = {
       { id: 'formation', label: 'Formation et démonstration' },
       { id: 'utilisation', label: 'Utilisation hebdomadaire' },
       { id: 'consultation', label: 'Consultation' },
-      { id: 'reference', label: 'Référence rapide' }
+      { id: 'reference', label: 'Référence rapide' },
+      { id: 'versions', label: 'Notes de version' }
   ]
 };
 

@@ -137,66 +137,46 @@
         // Overlay
         const overlay = document.createElement('div');
         overlay.id = 'overlay-backup-reminder';
-        overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 10000;
-        `;
+        overlay.className = 'modal-backup-overlay';
 
         // Modal
         const modal = document.createElement('div');
         modal.id = 'modal-backup-reminder';
-        modal.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            max-width: 520px;
-            width: 90%;
-            z-index: 10001;
-            overflow: hidden;
-        `;
+        modal.className = 'modal-backup-contenu';
 
         modal.innerHTML = `
-            <div style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white; padding: 1.25rem 1.5rem;">
-                <h2 style="margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="font-size: 1.5rem;">⚠️</span>
+            <div class="modal-header-warning">
+                <h2>
+                    <span>⚠️</span>
                     Protégez vos données
                 </h2>
             </div>
 
-            <div style="padding: 1.5rem;">
-                <p style="margin: 0 0 1rem 0; color: #333; line-height: 1.6;">
+            <div class="modal-backup-body">
+                <p>
                     Vos données sont stockées <strong>localement dans votre navigateur</strong>.
                     Personne d'autre n'y a accès, mais elles peuvent être <strong>perdues</strong> si :
                 </p>
 
-                <ul style="margin: 0 0 1.25rem 0; padding-left: 1.5rem; color: #555; line-height: 1.8;">
+                <ul>
                     <li>Vous effacez l'historique de navigation <em>(avec « données de sites »)</em></li>
                     <li>Vous utilisez la <strong>navigation privée</strong></li>
                     <li>Vous changez de navigateur <em>(Chrome ≠ Safari ≠ Firefox)</em></li>
                     <li>Vous réinstallez votre navigateur ou changez d'ordinateur</li>
                 </ul>
 
-                <div style="background: #e3f2fd; border-left: 4px solid #1976d2; padding: 1rem; border-radius: 0 8px 8px 0; margin-bottom: 1.5rem;">
-                    <p style="margin: 0; color: #1565c0; font-size: 0.95rem;">
+                <div class="modal-backup-solution">
+                    <p>
                         <strong>💡 Solution :</strong> Exportez régulièrement vos données via
                         <strong>Réglages → Données</strong>. Le fichier JSON peut être réimporté
                         à tout moment pour restaurer vos données.
                     </p>
                 </div>
 
-                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <label for="select-rappel-backup" style="color: #666; font-size: 0.9rem;">Rappel :</label>
-                        <select id="select-rappel-backup" style="padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem;">
+                <div class="modal-backup-controles">
+                    <div class="modal-backup-rappel">
+                        <label for="select-rappel-backup">Rappel :</label>
+                        <select id="select-rappel-backup">
                             <option value="7">Dans 7 jours</option>
                             <option value="14" selected>Dans 14 jours</option>
                             <option value="30">Dans 30 jours</option>
@@ -204,30 +184,11 @@
                         </select>
                     </div>
 
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button onclick="window.backupReminder.allerVersExport()" style="
-                            padding: 0.6rem 1rem;
-                            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
-                            color: white;
-                            border: none;
-                            border-radius: 6px;
-                            font-size: 0.95rem;
-                            font-weight: 600;
-                            cursor: pointer;
-                            transition: transform 0.2s;
-                        ">
+                    <div class="modal-backup-actions">
+                        <button class="btn btn-principal" onclick="window.backupReminder.allerVersExport()">
                             Exporter maintenant
                         </button>
-                        <button onclick="window.backupReminder.gererChoixRappel()" style="
-                            padding: 0.6rem 1rem;
-                            background: #f5f5f5;
-                            color: #333;
-                            border: 1px solid #ccc;
-                            border-radius: 6px;
-                            font-size: 0.95rem;
-                            cursor: pointer;
-                            transition: background 0.2s;
-                        ">
+                        <button class="btn btn-neutre" onclick="window.backupReminder.gererChoixRappel()">
                             J'ai compris
                         </button>
                     </div>

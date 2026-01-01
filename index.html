@@ -291,7 +291,7 @@
 
         body.mode-archive:not(.mode-ecriture-temp) input:not([type="search"]):not([id^="recherche-"]):not([id^="inclure-"]):not([id^="checkbox-"]):not([id^="v2-"]),
         body.mode-archive:not(.mode-ecriture-temp) textarea:not([id^="textarea-rapport-"]),
-        body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not(#select-mode):not([id^="filtre-"]):not([id^="v2-"]) {
+        body.mode-archive:not(.mode-ecriture-temp) select:not(#selectTrimestreActif):not(#select-mode):not([id^="filtre-"]):not([id^="v2-"]):not(#select-rappel-backup) {
             pointer-events: none;
             opacity: 0.7;
             background-color: #f5f5f5;
@@ -3059,7 +3059,7 @@
                         <h1>Système de suivi des apprentissages et de gestion de la notation</h1>
                         <p class="meta">
                             Beta 95 - 27 décembre 2025
-                            <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés"></span>
+                            <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés">✉️🔴</span>
                             <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Protégez vos données">⚠️</button>
                         </p>
                     </div>
@@ -3133,57 +3133,81 @@
 
         <!-- MODAL NOUVEAUTÉS BETA -->
         <div id="modalNouveautes" class="modal-overlay">
-            <div class="modal-contenu" style="max-width: 600px;">
+            <div class="modal-contenu modal-compact">
 
                 <!-- Bouton fermer -->
-                <button onclick="fermerModalNouveautes()" style="
-                    position: absolute;
-                    top: 15px;
-                    right: 15px;
-                    background: none;
-                    border: none;
-                    font-size: 1.5rem;
-                    color: var(--gris-moyen);
-                    cursor: pointer;
-                    width: 30px;
-                    height: 30px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 4px;
-                    transition: all 0.2s;">✕</button>
+                <button onclick="fermerModalNouveautes()" class="modal-fermer">✕</button>
 
                 <!-- Titre principal -->
-                <h2>Nouveautés - Beta 95</h2>
+                <h2 class="modal-titre">Nouveautés - Beta 95</h2>
 
                 <!-- Message de Grégoire -->
-                <div style="margin-bottom: 25px;">
+                <div class="modal-section">
                     <h3>Message de Grégoire</h3>
-                    <p style="line-height: 1.6;">
-                        Bonjour ! La Beta 95 simplifie la section Réglages avec une nouvelle organisation en 4 onglets clairs : Trimestre, Pratique de notation, Préférences et Données. L'interface est plus intuitive et les configurations structurantes sont maintenant accessibles directement, sans passer par le wizard. Merci de votre patience et de votre confiance !
+                    <p>
+                        Bonjour ! La Beta 95 est une version de stabilisation majeure. Elle introduit la gestion multi-trimestres, améliore considérablement le mode Assisté avec des données de démonstration enrichies, et permet de gérer plusieurs cours dans un même trimestre. Bonne session H2026 !
                     </p>
                 </div>
 
-                <!-- Principales nouveautés -->
-                <div style="margin-bottom: 25px;">
-                    <h3>Nouveautés pour vous</h3>
-                    <ul style="line-height: 1.8; padding-left: 20px; margin-top: 10px;">
-                        <li><strong>Navigation simplifiée</strong> : Les 9 sous-sections de Réglages sont maintenant regroupées en 4 onglets logiques pour une navigation plus fluide.</li>
-                        <li><strong>Onglet Trimestre</strong> : Configuration temporelle complète (cadre, aménagements, cours, groupes, horaire) dans une seule vue.</li>
-                        <li><strong>Onglet Pratique de notation</strong> : Accès direct aux configurations structurantes du wizard (type, échelle, structure, jetons).</li>
-                        <li><strong>Onglet Préférences</strong> : Options d'affichage regroupées (mode comparatif, SOLO, RàI, seuils d'interprétation).</li>
+                <!-- Gestion multi-trimestres -->
+                <div class="modal-section">
+                    <h3>Gestion multi-trimestres</h3>
+                    <ul class="modal-liste">
+                        <li><strong>Plusieurs trimestres</strong> : Gérez A2025, H2026, etc. séparément avec leurs propres données.</li>
+                        <li><strong>Archivage automatique</strong> : Les trimestres terminés passent en lecture seule pour protéger vos données.</li>
+                        <li><strong>Mode Correction</strong> : Réactivez temporairement les contrôles pour modifications ponctuelles (absences, jetons).</li>
+                        <li><strong>Mode Anonymisé</strong> : Masquez les identités pour captures d'écran ou présentations.</li>
+                    </ul>
+                </div>
+
+                <!-- Suivi longitudinal -->
+                <div class="modal-section">
+                    <h3>Suivi longitudinal</h3>
+                    <ul class="modal-liste">
+                        <li><strong>Captures automatiques</strong> : Snapshots hebdomadaires de la progression de chaque étudiant.</li>
+                        <li><strong>Graphiques d'évolution</strong> : Visualisez l'évolution des indices A-C-P dans le temps.</li>
+                        <li><strong>Reconstruction rétroactive</strong> : Recalculez l'historique après corrections de données.</li>
+                    </ul>
+                </div>
+
+                <!-- Mode Assisté -->
+                <div class="modal-section">
+                    <h3>Mode Assisté amélioré</h3>
+                    <ul class="modal-liste">
+                        <li><strong>Données de démonstration</strong> : 5 étudiants • 4 productions • 20 évaluations • 8 semaines de présences.</li>
+                        <li><strong>Exploration sans risque</strong> : L'application bascule en mode Assisté où vous pouvez tout expérimenter. Les données demo sont complètement isolées de vos vraies données.</li>
+                        <li><strong>Primo 😎</strong> : Assistant de configuration pas-à-pas pour nouveaux utilisateurs.</li>
+                    </ul>
+                </div>
+
+                <!-- Multi-cours -->
+                <div class="modal-section">
+                    <h3>Gestion multi-cours</h3>
+                    <ul class="modal-liste">
+                        <li><strong>Plusieurs cours</strong> : Gérez 601-101, 601-102, etc. dans le même trimestre.</li>
+                        <li><strong>Changement rapide</strong> : Menu déroulant dans l'en-tête pour basculer entre vos cours.</li>
+                        <li><strong>Données isolées</strong> : Chaque cours a ses propres étudiants, évaluations et présences.</li>
+                    </ul>
+                </div>
+
+                <!-- Sauvegarde -->
+                <div class="modal-section">
+                    <h3>Sauvegarde et protection</h3>
+                    <ul class="modal-liste">
+                        <li><strong>Rappel de backup</strong> : Modal périodique rappelant l'importance de l'export régulier.</li>
+                        <li><strong>Export/Import amélioré</strong> : Configuration complète avec métadonnées Creative Commons.</li>
                     </ul>
                 </div>
 
                 <!-- En savoir plus -->
-                <div style="margin-bottom: 10px; padding: 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--bleu-principal);">
-                    <p style="margin: 0; line-height: 1.6;">
-                        <strong>Pour en savoir plus</strong> : Consultez le fichier <code>BETA_94_CHANGELOG.md</code> pour tous les détails techniques de cette version.
+                <div class="modal-info">
+                    <p>
+                        <strong>Pour en savoir plus</strong> : Consultez <strong>Aide → Notes de version</strong> pour l'historique complet des changements.
                     </p>
                 </div>
 
                 <!-- Bouton fermer en bas -->
-                <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--gris-pale); margin-top: 30px;">
+                <div class="modal-actions-centre">
                     <button onclick="fermerModalNouveautes()" class="btn btn-principal">
                         Fermer
                     </button>
@@ -9537,179 +9561,208 @@ Exemple :
                     <p class="text-muted">« L'objectif est de faire mentir les prédictions de risque par nos interventions proactives ! »</p>
 
                     <!-- Carte: Qu'est-ce que le monitorage -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Qu'est-ce que le monitorage pédagogique ?</h3>
-                        <p><strong>Le système transforme votre intuition pédagogique en intelligence prédictive.</strong></p>
+                    <div class="carte accordeon" id="accordeon-aide-monitorage">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Qu'est-ce que le monitorage pédagogique ?
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Le système transforme votre intuition pédagogique en intelligence prédictive.</strong></p>
 
-                        <p>Ce système formalise et systématise ce que tout enseignant fait intuitivement : observer ses étudiants, détecter les difficultés émergentes et ajuster ses interventions. Cette formalisation apporte :</p>
+                            <p>Ce système formalise et systématise ce que tout enseignant fait intuitivement : observer ses étudiants, détecter les difficultés émergentes et ajuster ses interventions. Cette formalisation apporte :</p>
 
-                        <ul>
-                            <li><strong>Objectivité</strong> : Données factuelles plutôt qu'impressions</li>
-                            <li><strong>Systématicité</strong> : Suivi régulier et exhaustif</li>
-                            <li><strong>Prédictivité</strong> : Détection précoce des signaux faibles</li>
-                        </ul>
-
-                        <p><strong>Architecture modulaire et flexible :</strong></p>
-                        <p>Le système s'adapte à <strong>votre pratique de notation</strong> existante. Vous pouvez configurer :</p>
-                        <ul>
-                            <li><strong>Vos grilles d'évaluation</strong> : Créez vos propres critères selon votre discipline</li>
-                            <li><strong>Votre échelle de notation</strong> : Échelle qualitative (IDME) ou notes chiffrées (0-100%)</li>
-                            <li><strong>Votre pratique pédagogique</strong> : Évaluation par compétences (PAN) ou sommative traditionnelle</li>
-                        </ul>
-
-                        <div class="alerte alerte-information">
-                            <p><strong>📝 Exemple : Pratique PAN-Maîtrise</strong></p>
-                            <p>La pratique PAN-Maîtrise développée par Grégoire utilise :</p>
-                            <ul class="mt-5">
-                                <li><strong>Critères SRPNF</strong> : Structure, Rigueur, Plausibilité, Nuance, Français</li>
-                                <li><strong>Échelle IDME</strong> : Basée sur la taxonomie SOLO (Insuffisant, Développement, Maîtrisé, Étendu)</li>
-                                <li><strong>RàI (Réponse à l'Intervention)</strong> : Détection patterns et niveaux d'intervention</li>
+                            <ul>
+                                <li><strong>Objectivité</strong> : Données factuelles plutôt qu'impressions</li>
+                                <li><strong>Systématicité</strong> : Suivi régulier et exhaustif</li>
+                                <li><strong>Prédictivité</strong> : Détection précoce des signaux faibles</li>
                             </ul>
-                            <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem"><em>Cette pratique est un exemple parmi d'autres possibilités.</em></p>
+
+                            <p><strong>Architecture modulaire et flexible :</strong></p>
+                            <p>Le système s'adapte à <strong>votre pratique de notation</strong> existante. Vous pouvez configurer :</p>
+                            <ul>
+                                <li><strong>Vos grilles d'évaluation</strong> : Créez vos propres critères selon votre discipline</li>
+                                <li><strong>Votre échelle de notation</strong> : Échelle qualitative (IDME) ou notes chiffrées (0-100%)</li>
+                                <li><strong>Votre pratique pédagogique</strong> : Évaluation par compétences (PAN) ou sommative traditionnelle</li>
+                            </ul>
+
+                            <div class="alerte alerte-information">
+                                <p><strong>📝 Exemple : Pratique PAN-Maîtrise</strong></p>
+                                <p>La pratique PAN-Maîtrise développée par Grégoire utilise :</p>
+                                <ul class="mt-5">
+                                    <li><strong>Critères SRPNF</strong> : Structure, Rigueur, Plausibilité, Nuance, Français</li>
+                                    <li><strong>Échelle IDME</strong> : Basée sur la taxonomie SOLO (Insuffisant, Développement, Maîtrisé, Étendu)</li>
+                                    <li><strong>RàI (Réponse à l'Intervention)</strong> : Détection patterns et niveaux d'intervention</li>
+                                </ul>
+                                <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem"><em>Cette pratique est un exemple parmi d'autres possibilités.</em></p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Concepts clés A-C-P -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Les trois indices primaires (A-C-P)</h3>
-
-                        <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">A - Assiduité</h4>
-                            <p><strong>Présence en classe</strong> - Mesure l'engagement cognitif</p>
-                            <p class="text-muted" style="font-size: 0.9rem"><em>Module source : saisie-presences.js</em></p>
-                            <p>Les étudiants assidus sont davantage exposés au contenu, aux explications et aux pratiques guidées.</p>
+                    <div class="carte accordeon" id="accordeon-aide-acp">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Les trois indices primaires (A-C-P)
+                            </h3>
                         </div>
+                        <div class="accordeon-contenu">
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">A - Assiduité</h4>
+                                <p><strong>Présence en classe</strong> - Mesure l'engagement cognitif</p>
+                                <p class="text-muted" style="font-size: 0.9rem"><em>Module source : saisie-presences.js</em></p>
+                                <p>Les étudiants assidus sont davantage exposés au contenu, aux explications et aux pratiques guidées.</p>
+                            </div>
 
-                        <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">C - Complétion</h4>
-                            <p><strong>Remise des travaux</strong> - Mesure la mobilisation</p>
-                            <p class="text-muted" style="font-size: 0.9rem"><em>Module source : portfolio.js</em></p>
-                            <p>Reflète la constance et la persévérance dans les efforts, la régularité d'exécution et le respect des délais.</p>
-                        </div>
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">C - Complétion</h4>
+                                <p><strong>Remise des travaux</strong> - Mesure la mobilisation</p>
+                                <p class="text-muted" style="font-size: 0.9rem"><em>Module source : portfolio.js</em></p>
+                                <p>Reflète la constance et la persévérance dans les efforts, la régularité d'exécution et le respect des délais.</p>
+                            </div>
 
-                        <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">P - Performance</h4>
-                            <p><strong>Qualité des productions</strong> - Mesure la maîtrise</p>
-                            <p class="text-muted" style="font-size: 0.9rem"><em>Module source : portfolio.js</em></p>
-                            <p>Évalue la qualité des travaux selon vos critères et votre échelle de notation.</p>
-                            <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem"><em>Le calcul dépend de votre pratique : en PAN-Maîtrise, P = moyenne des N meilleurs artefacts (IDME). En Sommative, P = moyenne pondérée de toutes les évaluations (0-100%).</em></p>
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">P - Performance</h4>
+                                <p><strong>Qualité des productions</strong> - Mesure la maîtrise</p>
+                                <p class="text-muted" style="font-size: 0.9rem"><em>Module source : portfolio.js</em></p>
+                                <p>Évalue la qualité des travaux selon vos critères et votre échelle de notation.</p>
+                                <p class="text-muted" style="margin-top: 10px; font-size: 0.9rem"><em>Le calcul dépend de votre pratique : en PAN-Maîtrise, P = moyenne des N meilleurs artefacts (IDME). En Sommative, P = moyenne pondérée de toutes les évaluations (0-100%).</em></p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Critères SRPNF -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Exemple de grille : SRPNF (pratique PAN-Maîtrise)</h3>
-                        <p>Inspirés de l'approche ELLAC (Enseignement de la Lecture Littéraire Au Collégial)</p>
+                    <div class="carte accordeon" id="accordeon-aide-srpnf">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Exemple de grille : SRPNF (pratique PAN-Maîtrise)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>Inspirés de l'approche ELLAC (Enseignement de la Lecture Littéraire Au Collégial)</p>
 
-                        <table class="tableau">
-                            <thead>
-                                <tr>
-                                    <th>Critère</th>
-                                    <th class="text-center">Pondération</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>Structure</strong></td>
-                                    <td class="text-center">15%</td>
-                                    <td>Organisation logique des idées</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Rigueur</strong></td>
-                                    <td class="text-center">20%</td>
-                                    <td>Exhaustivité des observations</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Plausibilité</strong></td>
-                                    <td class="text-center">10%</td>
-                                    <td>Crédibilité de l'interprétation</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Nuance</strong></td>
-                                    <td class="text-center">25%</td>
-                                    <td>Qualité du raisonnement</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Français</strong></td>
-                                    <td class="text-center">30%</td>
-                                    <td>Maîtrise linguistique</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table class="tableau">
+                                <thead>
+                                    <tr>
+                                        <th>Critère</th>
+                                        <th class="text-center">Pondération</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Structure</strong></td>
+                                        <td class="text-center">15%</td>
+                                        <td>Organisation logique des idées</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Rigueur</strong></td>
+                                        <td class="text-center">20%</td>
+                                        <td>Exhaustivité des observations</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Plausibilité</strong></td>
+                                        <td class="text-center">10%</td>
+                                        <td>Crédibilité de l'interprétation</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Nuance</strong></td>
+                                        <td class="text-center">25%</td>
+                                        <td>Qualité du raisonnement</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Français</strong></td>
+                                        <td class="text-center">30%</td>
+                                        <td>Maîtrise linguistique</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <div class="alerte alerte-info">
-                            <p><strong>💡 Créez vos propres grilles</strong></p>
-                            <p>Ces critères sont un exemple spécifique à l'enseignement de la littérature. Vous pouvez créer vos propres grilles adaptées à votre discipline dans <strong>Matériel → Critères d'évaluation</strong>.</p>
+                            <div class="alerte alerte-info">
+                                <p><strong>💡 Créez vos propres grilles</strong></p>
+                                <p>Ces critères sont un exemple spécifique à l'enseignement de la littérature. Vous pouvez créer vos propres grilles adaptées à votre discipline dans <strong>Matériel → Critères d'évaluation</strong>.</p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Échelle IDME -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Exemple d'échelle : IDME (pratique PAN-Maîtrise)</h3>
-                        <p>L'échelle IDME traduit la profondeur de compréhension selon la taxonomie SOLO de Biggs & Collis :</p>
+                    <div class="carte accordeon" id="accordeon-aide-idme">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Exemple d'échelle : IDME (pratique PAN-Maîtrise)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>L'échelle IDME traduit la profondeur de compréhension selon la taxonomie SOLO de Biggs & Collis :</p>
 
-                        <table class="tableau">
-                            <thead>
-                                <tr>
-                                    <th>IDME</th>
-                                    <th>SOLO</th>
-                                    <th class="text-center">Score</th>
-                                    <th>Compréhension</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>I</strong> - Insuffisant</td>
-                                    <td>Préstructurel / Unistructurel</td>
-                                    <td class="text-center">&lt; 64%</td>
-                                    <td>Incompréhension ou superficielle</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>D</strong> - Développement</td>
-                                    <td>Multistructurel</td>
-                                    <td class="text-center">65-74%</td>
-                                    <td>Points pertinents sans liens</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>M</strong> - Maîtrisé</td>
-                                    <td>Relationnel</td>
-                                    <td class="text-center">75-84%</td>
-                                    <td>Compréhension globale avec liens</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>E</strong> - Étendu</td>
-                                    <td>Abstrait étendu</td>
-                                    <td class="text-center">≥ 85%</td>
-                                    <td>Transfert à autres contextes</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table class="tableau">
+                                <thead>
+                                    <tr>
+                                        <th>IDME</th>
+                                        <th>SOLO</th>
+                                        <th class="text-center">Score</th>
+                                        <th>Compréhension</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>I</strong> - Insuffisant</td>
+                                        <td>Préstructurel / Unistructurel</td>
+                                        <td class="text-center">&lt; 64%</td>
+                                        <td>Incompréhension ou superficielle</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>D</strong> - Développement</td>
+                                        <td>Multistructurel</td>
+                                        <td class="text-center">65-74%</td>
+                                        <td>Points pertinents sans liens</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>M</strong> - Maîtrisé</td>
+                                        <td>Relationnel</td>
+                                        <td class="text-center">75-84%</td>
+                                        <td>Compréhension globale avec liens</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>E</strong> - Étendu</td>
+                                        <td>Abstrait étendu</td>
+                                        <td class="text-center">≥ 85%</td>
+                                        <td>Transfert à autres contextes</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <div class="alerte alerte-info">
-                            <p><strong>📌 Autres échelles possibles</strong></p>
-                            <p>L'échelle IDME est utilisée en pratique PAN-Maîtrise pour évaluer la profondeur de compréhension. D'autres pratiques utilisent des <strong>moyennes pondérées traditionnelles (0-100%)</strong> ou des échelles personnalisées. Configurez votre échelle dans <strong>Matériel → Niveaux de performance</strong>.</p>
+                            <div class="alerte alerte-info">
+                                <p><strong>📌 Autres échelles possibles</strong></p>
+                                <p>L'échelle IDME est utilisée en pratique PAN-Maîtrise pour évaluer la profondeur de compréhension. D'autres pratiques utilisent des <strong>moyennes pondérées traditionnelles (0-100%)</strong> ou des échelles personnalisées. Configurez votre échelle dans <strong>Matériel → Niveaux de performance</strong>.</p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Architecture Single Source of Truth -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Architecture : Single Source of Truth</h3>
-                        <p><strong>Principe fondamental :</strong> Chaque donnée a UNE source unique qui la génère et la stocke. Les autres modules la lisent via localStorage.</p>
-
-                        <div class="carte-code-light">
-                            <p class="m-0-success"><strong>MODULE SOURCE</strong> (génère/stocke)</p>
-                            <p class="my-5-mx-20">trimestre.js → calendrierComplet</p>
-                            <p class="my-5-mx-20">saisie-presences.js → indicesAssiduiteDetailles</p>
-                            <p class="my-5-mx-20">portfolio.js → indicesCP</p>
-
-                            <p class="m-15-0-0-0-primary"><strong>MODULE LECTEUR</strong> (lit/affiche)</p>
-                            <p class="my-5-mx-20">calendrier-vue.js → lit calendrierComplet</p>
-                            <p class="my-5-mx-20">tableau-bord-apercu.js → lit indices A, C, P</p>
-                            <p class="my-5-mx-20">profil-etudiant.js → lit indices A, C, P</p>
+                    <div class="carte accordeon" id="accordeon-aide-ssot">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Architecture : Single Source of Truth
+                            </h3>
                         </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Principe fondamental :</strong> Chaque donnée a UNE source unique qui la génère et la stocke. Les autres modules la lisent via localStorage.</p>
 
-                        <p class="mt-15"><strong>Règle d'or :</strong> Les modules ne se parlent JAMAIS directement. Communication via localStorage uniquement.</p>
+                            <div class="carte-code-light">
+                                <p class="m-0-success"><strong>MODULE SOURCE</strong> (génère/stocke)</p>
+                                <p class="my-5-mx-20">trimestre.js → calendrierComplet</p>
+                                <p class="my-5-mx-20">saisie-presences.js → indicesAssiduiteDetailles</p>
+                                <p class="my-5-mx-20">portfolio.js → indicesCP</p>
+
+                                <p class="m-15-0-0-0-primary"><strong>MODULE LECTEUR</strong> (lit/affiche)</p>
+                                <p class="my-5-mx-20">calendrier-vue.js → lit calendrierComplet</p>
+                                <p class="my-5-mx-20">tableau-bord-apercu.js → lit indices A, C, P</p>
+                                <p class="my-5-mx-20">profil-etudiant.js → lit indices A, C, P</p>
+                            </div>
+
+                            <p class="mt-15"><strong>Règle d'or :</strong> Les modules ne se parlent JAMAIS directement. Communication via localStorage uniquement.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -9721,455 +9774,521 @@ Exemple :
                     <p class="text-muted">Guide pas-à-pas pour configurer votre système de monitorage</p>
 
                     <!-- Carte: Vue d'ensemble -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Étapes de configuration</h3>
-                        <p>Suivez ces étapes dans l'ordre pour configurer correctement le système :</p>
-                        <ol class="lh-relaxed">
-                            <li><strong>Cours</strong> : Informations de base (code, titre, pondération)</li>
-                            <li><strong>Trimestre</strong> : Dates et calendrier complet (SOURCE)</li>
-                            <li><strong>Groupe</strong> : Liste des étudiants</li>
-                            <li><strong>Horaire</strong> : Séances hebdomadaires ✅</li>
-                            <li><strong>Pratique de notation</strong> : Choisir votre approche (PAN-Maîtrise, Sommative, etc.)</li>
-                        </ol>
+                    <div class="carte accordeon" id="accordeon-aide-etapes-config">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Étapes de configuration
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>Suivez ces étapes dans l'ordre pour configurer correctement le système :</p>
+                            <ol class="lh-relaxed">
+                                <li><strong>Cours</strong> : Informations de base (code, titre, pondération)</li>
+                                <li><strong>Trimestre</strong> : Dates et calendrier complet (SOURCE)</li>
+                                <li><strong>Groupe</strong> : Liste des étudiants</li>
+                                <li><strong>Horaire</strong> : Séances hebdomadaires ✅</li>
+                                <li><strong>Pratique de notation</strong> : Choisir votre approche (PAN-Maîtrise, Sommative, etc.)</li>
+                            </ol>
 
-                        <div class="alerte alerte-succes">
-                            <strong>💡 Astuce :</strong> L'assistant Primo peut vous guider dans ces étapes de manière conversationnelle. Voir la carte suivante.
+                            <div class="alerte alerte-succes">
+                                <strong>💡 Astuce :</strong> L'assistant Primo peut vous guider dans ces étapes de manière conversationnelle. Voir la carte suivante.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Assistant Primo -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Configuration avec l'assistant Primo 😎</h3>
-                        <p><strong>Primo</strong> est un assistant conversationnel qui vous guide pas-à-pas dans la configuration de votre système de monitorage.</p>
+                    <div class="carte accordeon" id="accordeon-aide-primo">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Configuration avec l'assistant Primo 😎
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Primo</strong> est un assistant conversationnel qui vous guide pas-à-pas dans la configuration de votre système de monitorage.</p>
 
-                        <div class="carte-gradient-bleu">
-                            <p class="titre-11-bold-bleu-mb15">Quand utiliser Primo ?</p>
-                            <ul class="lh-2">
-                                <li><strong>Première utilisation</strong> : Primo apparaît automatiquement au premier chargement</li>
-                                <li><strong>Nouveau cours</strong> : Pour créer rapidement un groupe-cours complet</li>
-                                <li><strong>Découverte</strong> : Pour explorer les fonctionnalités de manière guidée</li>
+                            <div class="carte-gradient-bleu">
+                                <p class="titre-11-bold-bleu-mb15">Quand utiliser Primo ?</p>
+                                <ul class="lh-2">
+                                    <li><strong>Première utilisation</strong> : Primo apparaît automatiquement au premier chargement</li>
+                                    <li><strong>Nouveau cours</strong> : Pour créer rapidement un groupe-cours complet</li>
+                                    <li><strong>Découverte</strong> : Pour explorer les fonctionnalités de manière guidée</li>
+                                </ul>
+                            </div>
+
+                            <p><strong>Les 4 modules de Primo :</strong></p>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 1 : Créer un groupe-cours</h4>
+                                <p><strong>Durée :</strong> ~3 minutes</p>
+                                <p>Questions conversationnelles pour configurer :</p>
+                                <ul class="mt-5">
+                                    <li>Informations du cours (code, titre, groupe)</li>
+                                    <li>Dates du trimestre</li>
+                                    <li>Horaire hebdomadaire</li>
+                                    <li>Import de la liste d'étudiants</li>
+                                </ul>
+                                <p class="text-muted mt-10" style="font-size: 0.9rem"><em>À la fin, votre cours est prêt avec calendrier, séances et étudiants.</em></p>
+                            </div>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 2 : Évaluer une production</h4>
+                                <p><strong>Prérequis :</strong> Avoir au moins un cours-groupe créé</p>
+                                <p>Guide direct vers le formulaire d'évaluation avec explications contextuelles.</p>
+                            </div>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 3 : Explorer les diagnostics</h4>
+                                <p><strong>Prérequis :</strong> Avoir des données (évaluations, présences)</p>
+                                <p>Visite guidée du tableau de bord et des profils étudiants.</p>
+                                <p class="text-muted mt-5" style="font-size: 0.9rem"><em>En développement</em></p>
+                            </div>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 4 : Créer une pratique de notation</h4>
+                                <p><strong>Durée :</strong> ~8 minutes</p>
+                                <p>Wizard interactif pour configurer votre pratique personnalisée :</p>
+                                <ul class="mt-5">
+                                    <li>Choix du type (PAN-Standards, Sommative, etc.)</li>
+                                    <li>Configuration des paramètres (artefacts, seuils, jetons)</li>
+                                    <li>Sélection des grilles et échelles</li>
+                                </ul>
+                            </div>
+
+                            <p><strong>Comment accéder à Primo :</strong></p>
+                            <ul>
+                                <li><strong>Automatiquement</strong> : Au premier chargement de l'application</li>
+                                <li><strong>Mode Assisté</strong> : Cliquez sur le bouton 😎 dans l'en-tête (visible uniquement en mode Assisté)</li>
+                                <li><strong>Réglages → Préférences</strong> : Activez le «Mode Assisté» pour afficher le bouton Primo</li>
                             </ul>
-                        </div>
 
-                        <p><strong>Les 4 modules de Primo :</strong></p>
+                            <div class="alerte alerte-attention">
+                                <strong>Navigation libre :</strong> Vous pouvez quitter Primo à tout moment pour naviguer librement dans l'application. Les données saisies via Primo sont sauvegardées normalement et accessibles depuis les sections Réglages.
+                            </div>
 
-                        <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 1 : Créer un groupe-cours</h4>
-                            <p><strong>Durée :</strong> ~3 minutes</p>
-                            <p>Questions conversationnelles pour configurer :</p>
-                            <ul class="mt-5">
-                                <li>Informations du cours (code, titre, groupe)</li>
-                                <li>Dates du trimestre</li>
-                                <li>Horaire hebdomadaire</li>
-                                <li>Import de la liste d'étudiants</li>
-                            </ul>
-                            <p class="text-muted mt-10" style="font-size: 0.9rem"><em>À la fin, votre cours est prêt avec calendrier, séances et étudiants.</em></p>
-                        </div>
-
-                        <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 2 : Évaluer une production</h4>
-                            <p><strong>Prérequis :</strong> Avoir au moins un cours-groupe créé</p>
-                            <p>Guide direct vers le formulaire d'évaluation avec explications contextuelles.</p>
-                        </div>
-
-                        <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 3 : Explorer les diagnostics</h4>
-                            <p><strong>Prérequis :</strong> Avoir des données (évaluations, présences)</p>
-                            <p>Visite guidée du tableau de bord et des profils étudiants.</p>
-                            <p class="text-muted mt-5" style="font-size: 0.9rem"><em>En développement</em></p>
-                        </div>
-
-                        <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Module 4 : Créer une pratique de notation</h4>
-                            <p><strong>Durée :</strong> ~8 minutes</p>
-                            <p>Wizard interactif pour configurer votre pratique personnalisée :</p>
-                            <ul class="mt-5">
-                                <li>Choix du type (PAN-Standards, Sommative, etc.)</li>
-                                <li>Configuration des paramètres (artefacts, seuils, jetons)</li>
-                                <li>Sélection des grilles et échelles</li>
-                            </ul>
-                        </div>
-
-                        <p><strong>Comment accéder à Primo :</strong></p>
-                        <ul>
-                            <li><strong>Automatiquement</strong> : Au premier chargement de l'application</li>
-                            <li><strong>Mode Assisté</strong> : Cliquez sur le bouton 😎 dans l'en-tête (visible uniquement en mode Assisté)</li>
-                            <li><strong>Réglages → Préférences</strong> : Activez le «Mode Assisté» pour afficher le bouton Primo</li>
-                        </ul>
-
-                        <div class="alerte alerte-attention">
-                            <strong>Navigation libre :</strong> Vous pouvez quitter Primo à tout moment pour naviguer librement dans l'application. Les données saisies via Primo sont sauvegardées normalement et accessibles depuis les sections Réglages.
-                        </div>
-
-                        <div class="alerte alerte-succes">
-                            <strong>💡 Philosophie :</strong> Primo vous accompagne au début, mais l'objectif est de vous rendre autonome. Une fois familiarisé avec l'application, vous n'aurez plus besoin de l'assistant.
+                            <div class="alerte alerte-succes">
+                                <strong>💡 Philosophie :</strong> Primo vous accompagne au début, mais l'objectif est de vous rendre autonome. Une fois familiarisé avec l'application, vous n'aurez plus besoin de l'assistant.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: 1. Cours -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">1. Configurer le cours</h3>
-                        <p><strong>Navigation :</strong> Réglages → Cours</p>
+                    <div class="carte accordeon" id="accordeon-aide-cours">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 1. Configurer le cours
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Cours</p>
 
-                        <p><strong>Informations à saisir :</strong></p>
-                        <ul>
-                            <li><strong>Code du cours</strong> : Ex. 601-101-MQ</li>
-                            <li><strong>Titre</strong> : Ex. Écriture et littérature</li>
-                            <li><strong>Pondération</strong> : Ex. 2-2-3</li>
-                            <li><strong>Heures/semaine</strong> : Ex. 4 heures</li>
-                            <li><strong>Format horaire</strong> : 2×2h, 3h ou 4h continu</li>
-                        </ul>
+                            <p><strong>Informations à saisir :</strong></p>
+                            <ul>
+                                <li><strong>Code du cours</strong> : Ex. 601-101-MQ</li>
+                                <li><strong>Titre</strong> : Ex. Écriture et littérature</li>
+                                <li><strong>Pondération</strong> : Ex. 2-2-3</li>
+                                <li><strong>Heures/semaine</strong> : Ex. 4 heures</li>
+                                <li><strong>Format horaire</strong> : 2×2h, 3h ou 4h continu</li>
+                            </ul>
 
-                        <div class="alerte alerte-attention">
-                            <strong>Astuce :</strong> Le format horaire est important pour le calcul correct de l'assiduité.
+                            <div class="alerte alerte-attention">
+                                <strong>Astuce :</strong> Le format horaire est important pour le calcul correct de l'assiduité.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: 2. Trimestre -->
-                    <div class="carte" class="border-left-succes">
-                        <h3 class="carte-titre-bleu">2. Définir le trimestre - MODULE SOURCE</h3>
-                        <p><strong>Navigation :</strong> Réglages → Trimestre</p>
-                        <p class="text-succes-bold">Ce module GÉNÈRE le calendrierComplet (source unique)</p>
+                    <div class="carte accordeon" id="accordeon-aide-trimestre">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 2. Définir le trimestre - MODULE SOURCE
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Trimestre</p>
+                            <p class="text-succes-bold">Ce module GÉNÈRE le calendrierComplet (source unique)</p>
 
-                        <p><strong>Informations à saisir :</strong></p>
-                        <ul>
-                            <li><strong>Date de début</strong> : Premier jour de cours</li>
-                            <li><strong>Date de fin</strong> : Dernier jour de cours</li>
-                            <li><strong>Jours fériés</strong> : Congés prévus</li>
-                            <li><strong>Congés imprévus</strong> : À ajouter en cours de trimestre</li>
-                            <li><strong>Reprises</strong> : Si nécessaire</li>
-                        </ul>
+                            <p><strong>Informations à saisir :</strong></p>
+                            <ul>
+                                <li><strong>Date de début</strong> : Premier jour de cours</li>
+                                <li><strong>Date de fin</strong> : Dernier jour de cours</li>
+                                <li><strong>Jours fériés</strong> : Congés prévus</li>
+                                <li><strong>Congés imprévus</strong> : À ajouter en cours de trimestre</li>
+                                <li><strong>Reprises</strong> : Si nécessaire</li>
+                            </ul>
 
-                        <p><strong>Génération automatique :</strong></p>
-                        <ul>
-                            <li>Calendrier complet sur 124 jours</li>
-                            <li>Calcul automatique des semaines (5 jours cours = 1 semaine)</li>
-                            <li>Gestion des congés et reprises</li>
-                        </ul>
+                            <p><strong>Génération automatique :</strong></p>
+                            <ul>
+                                <li>Calendrier complet sur 124 jours</li>
+                                <li>Calcul automatique des semaines (5 jours cours = 1 semaine)</li>
+                                <li>Gestion des congés et reprises</li>
+                            </ul>
 
-                        <div class="alerte alerte-succes">
-                            <strong>API disponibles :</strong><br>
-                            <code>obtenirCalendrierComplet()</code> - Récupère le calendrier<br>
-                            <code>obtenirInfosJour(date)</code> - Détails d'une journée
+                            <div class="alerte alerte-succes">
+                                <strong>API disponibles :</strong><br>
+                                <code>obtenirCalendrierComplet()</code> - Récupère le calendrier<br>
+                                <code>obtenirInfosJour(date)</code> - Détails d'une journée
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: 2b. Données de démonstration -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">2b. Utiliser les données de démonstration (optionnel)</h3>
-                        <p><strong>Navigation :</strong> Réglages → Trimestre → Section «Données de démonstration»</p>
-
-                        <p>Pour explorer l'application avec des données réalistes <strong>avant de configurer vos propres données</strong>, activez le groupe de démonstration.</p>
-
-                        <div class="carte-gradient-bleu">
-                            <p class="titre-11-bold-bleu-mb15">Activation :</p>
-                            <ol class="lh-2">
-                                <li>Allez dans <strong>Réglages → Trimestre</strong></li>
-                                <li>Descendez à la section «Données de démonstration»</li>
-                                <li>Cochez la case «Utiliser les données de démonstration (groupe 9999)»</li>
-                                <li>Le groupe demo est immédiatement chargé dans l'application</li>
-                            </ol>
+                    <div class="carte accordeon" id="accordeon-aide-demo">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 2b. Utiliser les données de démonstration (optionnel)
+                            </h3>
                         </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Trimestre → Section «Données de démonstration»</p>
 
-                        <p><strong>Contenu du groupe demo (groupe 9999) :</strong></p>
-                        <ul>
-                            <li><strong>Cours</strong> : 601-101 Écriture et littérature (H2026)</li>
-                            <li><strong>Enseignant</strong> : Primo Primavera (fictif)</li>
-                            <li><strong>10 étudiants</strong> : Noms fictifs avec programmes variés (500.A1, 200.B0, 300.A0, etc.)</li>
-                            <li><strong>4 productions</strong> : Artefacts portfolio avec échéances échelonnées</li>
-                            <li><strong>40 évaluations</strong> : Notes réalistes selon l'échelle IDME (réparties sur les 4 artefacts)</li>
-                            <li><strong>8 semaines de présences</strong> : Générées dynamiquement avec pattern réaliste (92% assiduité moyenne)</li>
-                            <li><strong>Grilles et échelles</strong> : Grille SRPNF + Échelle IDME + cartouches de rétroaction</li>
-                        </ul>
+                            <p>Pour explorer l'application avec des données réalistes <strong>avant de configurer vos propres données</strong>, activez le groupe de démonstration.</p>
 
-                        <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Expérience complète du système</h4>
-                            <p>Avec le groupe demo, vous pouvez :</p>
-                            <ul class="m-10-0-0-0">
-                                <li><strong>Tableau de bord</strong> : Visualiser les indices A-C-P de 10 étudiants</li>
-                                <li><strong>Profils individuels</strong> : Explorer les diagnostics, patterns, niveaux RàI</li>
-                                <li><strong>Graphiques de progression</strong> : Voir l'évolution sur 8 semaines</li>
-                                <li><strong>Liste des étudiants</strong> : Trier, filtrer, identifier les patterns</li>
-                                <li><strong>Système de dépistage</strong> : Comprendre la détection des risques</li>
+                            <div class="carte-gradient-bleu">
+                                <p class="titre-11-bold-bleu-mb15">Activation :</p>
+                                <ol class="lh-2">
+                                    <li>Allez dans <strong>Réglages → Trimestre</strong></li>
+                                    <li>Descendez à la section «Données de démonstration»</li>
+                                    <li>Cochez la case «Utiliser les données de démonstration (groupe 9999)»</li>
+                                    <li>Le groupe demo est immédiatement chargé dans l'application</li>
+                                </ol>
+                            </div>
+
+                            <p><strong>Contenu du groupe demo (groupe 9999) :</strong></p>
+                            <ul>
+                                <li><strong>Cours</strong> : 601-101 Écriture et littérature (H2026)</li>
+                                <li><strong>Enseignant</strong> : Primo Primavera (fictif)</li>
+                                <li><strong>10 étudiants</strong> : Noms fictifs avec programmes variés (500.A1, 200.B0, 300.A0, etc.)</li>
+                                <li><strong>4 productions</strong> : Artefacts portfolio avec échéances échelonnées</li>
+                                <li><strong>40 évaluations</strong> : Notes réalistes selon l'échelle IDME (réparties sur les 4 artefacts)</li>
+                                <li><strong>8 semaines de présences</strong> : Générées dynamiquement avec pattern réaliste (92% assiduité moyenne)</li>
+                                <li><strong>Grilles et échelles</strong> : Grille SRPNF + Échelle IDME + cartouches de rétroaction</li>
                             </ul>
-                        </div>
 
-                        <p><strong>Désactivation :</strong></p>
-                        <ul>
-                            <li>Décochez la case dans Réglages → Trimestre</li>
-                            <li>Toutes les données du groupe 9999 sont supprimées automatiquement</li>
-                            <li>Vos données personnelles (si présentes) restent intactes</li>
-                        </ul>
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Expérience complète du système</h4>
+                                <p>Avec le groupe demo, vous pouvez :</p>
+                                <ul class="m-10-0-0-0">
+                                    <li><strong>Tableau de bord</strong> : Visualiser les indices A-C-P de 10 étudiants</li>
+                                    <li><strong>Profils individuels</strong> : Explorer les diagnostics, patterns, niveaux RàI</li>
+                                    <li><strong>Graphiques de progression</strong> : Voir l'évolution sur 8 semaines</li>
+                                    <li><strong>Liste des étudiants</strong> : Trier, filtrer, identifier les patterns</li>
+                                    <li><strong>Système de dépistage</strong> : Comprendre la détection des risques</li>
+                                </ul>
+                            </div>
 
-                        <div class="alerte alerte-attention">
-                            <strong>Important :</strong> Le groupe demo (9999) et vos données réelles coexistent. Vous pouvez avoir le groupe demo activé en même temps que votre propre cours-groupe. Utilisez les filtres de groupe pour basculer entre les deux.
-                        </div>
+                            <p><strong>Désactivation :</strong></p>
+                            <ul>
+                                <li>Décochez la case dans Réglages → Trimestre</li>
+                                <li>Toutes les données du groupe 9999 sont supprimées automatiquement</li>
+                                <li>Vos données personnelles (si présentes) restent intactes</li>
+                            </ul>
 
-                        <div class="alerte alerte-succes">
-                            <strong>💡 Astuce pédagogique :</strong> Utilisez le groupe demo pour vous familiariser avec les fonctionnalités avant de saisir vos vraies données. C'est aussi utile pour expérimenter des configurations (seuils, pratiques de notation) sans risquer d'affecter vos données réelles.
+                            <div class="alerte alerte-attention">
+                                <strong>Important :</strong> Le groupe demo (9999) et vos données réelles coexistent. Vous pouvez avoir le groupe demo activé en même temps que votre propre cours-groupe. Utilisez les filtres de groupe pour basculer entre les deux.
+                            </div>
+
+                            <div class="alerte alerte-succes">
+                                <strong>💡 Astuce pédagogique :</strong> Utilisez le groupe demo pour vous familiariser avec les fonctionnalités avant de saisir vos vraies données. C'est aussi utile pour expérimenter des configurations (seuils, pratiques de notation) sans risquer d'affecter vos données réelles.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: 3. Groupe -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">3. Créer le groupe</h3>
-                        <p><strong>Navigation :</strong> Réglages → Groupe</p>
+                    <div class="carte accordeon" id="accordeon-aide-groupe">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 3. Créer le groupe
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Groupe</p>
 
-                        <p><strong>Informations à saisir pour chaque étudiant :</strong></p>
-                        <ul>
-                            <li><strong>Numéro DA</strong> : Dossier administratif</li>
-                            <li><strong>Nom</strong> : Nom de famille</li>
-                            <li><strong>Prénom</strong> : Prénom</li>
-                            <li><strong>Services adaptés (SA)</strong> : Si applicable</li>
-                            <li><strong>CAF</strong> : Centre d'Aide en Français (si inscrit)</li>
-                        </ul>
+                            <p><strong>Informations à saisir pour chaque étudiant :</strong></p>
+                            <ul>
+                                <li><strong>Numéro DA</strong> : Dossier administratif</li>
+                                <li><strong>Nom</strong> : Nom de famille</li>
+                                <li><strong>Prénom</strong> : Prénom</li>
+                                <li><strong>Services adaptés (SA)</strong> : Si applicable</li>
+                                <li><strong>CAF</strong> : Centre d'Aide en Français (si inscrit)</li>
+                            </ul>
 
-                        <p><strong>Options d'import :</strong></p>
-                        <ul>
-                            <li>Saisie manuelle</li>
-                            <li>Import depuis fichier CSV (à venir)</li>
-                        </ul>
+                            <p><strong>Options d'import :</strong></p>
+                            <ul>
+                                <li>Saisie manuelle</li>
+                                <li>Import depuis fichier CSV (à venir)</li>
+                            </ul>
+                        </div>
                     </div>
 
                     <!-- Carte: 4. Horaire -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">4. Établir l'horaire - MODULE SOURCE</h3>
-                        <p><strong>Navigation :</strong> Réglages → Horaire</p>
-                        <p class="text-succes-bold">Ce module GÉNÈRE les seancesCompletes (source unique)</p>
-
-                        <div class="alerte alerte-succes">
-                            <strong>✅ Module complété (octobre 2025)</strong> : Génération automatique des séances avec synchronisation au calendrier. Les séances s'adaptent automatiquement aux congés et reprises.
+                    <div class="carte accordeon" id="accordeon-aide-horaire">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 4. Établir l'horaire - MODULE SOURCE
+                            </h3>
                         </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Horaire</p>
+                            <p class="text-succes-bold">Ce module GÉNÈRE les seancesCompletes (source unique)</p>
 
-                        <p><strong>Fonctionnalités :</strong></p>
-                        <ul>
-                            <li><strong>Définition des séances hebdomadaires</strong> : Jours et heures de cours</li>
-                            <li><strong>Gestion automatique des reprises</strong> : Ex: "Horaire du lundi" se déplace au jeudi si lundi est congé</li>
-                            <li><strong>API</strong> : <code>genererSeancesCompletes()</code> et <code>obtenirSeancesCompletes()</code></li>
-                        </ul>
+                            <div class="alerte alerte-succes">
+                                <strong>✅ Module complété (octobre 2025)</strong> : Génération automatique des séances avec synchronisation au calendrier. Les séances s'adaptent automatiquement aux congés et reprises.
+                            </div>
+
+                            <p><strong>Fonctionnalités :</strong></p>
+                            <ul>
+                                <li><strong>Définition des séances hebdomadaires</strong> : Jours et heures de cours</li>
+                                <li><strong>Gestion automatique des reprises</strong> : Ex: "Horaire du lundi" se déplace au jeudi si lundi est congé</li>
+                                <li><strong>API</strong> : <code>genererSeancesCompletes()</code> et <code>obtenirSeancesCompletes()</code></li>
+                            </ul>
+                        </div>
                     </div>
 
                     <!-- Carte: 5. Pratique de notation -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">5. Choisir votre pratique de notation</h3>
-                        <p><strong>Navigation :</strong> Réglages → Pratique de notation</p>
-
-                        <p>Le système supporte différentes pratiques pédagogiques. Choisissez celle qui correspond à votre approche :</p>
-
-                        <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">📝 PAN-Maîtrise (Évaluation par compétences)</h4>
-                            <p><strong>Principes :</strong> Sélection des N meilleurs artefacts, échelle IDME, système de jetons</p>
-                            <p><strong>Paramètres à définir :</strong></p>
-                            <ul class="mt-5">
-                                <li><strong>Nombre d'artefacts</strong> : 8-14 recommandé (configuration standard : 12)</li>
-                                <li><strong>Système de jetons</strong> : 3-4 jetons maximum
-                                    <ul class="mt-5">
-                                        <li>Jeton de délai : Report d'échéance sans pénalité</li>
-                                        <li>Jeton de reprise : Possibilité de refaire un artefact</li>
-                                    </ul>
-                                </li>
-                                <li><strong>Méthode de sélection</strong> : N meilleurs artefacts (permet progression sans pénaliser erreurs initiales)</li>
-                            </ul>
+                    <div class="carte accordeon" id="accordeon-aide-pratique">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 5. Choisir votre pratique de notation
+                            </h3>
                         </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Pratique de notation</p>
 
-                        <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal); margin-bottom: 10px">📊 Sommative (Évaluation traditionnelle)</h4>
-                            <p><strong>Principes :</strong> Moyenne pondérée de toutes les évaluations, notation 0-100%</p>
-                            <p><strong>Fonctionnement :</strong> Toutes les évaluations comptent selon leur pondération. Approche traditionnelle utilisée dans la plupart des disciplines.</p>
-                        </div>
+                            <p>Le système supporte différentes pratiques pédagogiques. Choisissez celle qui correspond à votre approche :</p>
 
-                        <div class="alerte alerte-info">
-                            <p><strong>💡 À venir :</strong> PAN-Spécifications (Pass/Fail par objectifs) et Dénotation (Ungrading sans notes chiffrées)</p>
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">📝 PAN-Maîtrise (Évaluation par compétences)</h4>
+                                <p><strong>Principes :</strong> Sélection des N meilleurs artefacts, échelle IDME, système de jetons</p>
+                                <p><strong>Paramètres à définir :</strong></p>
+                                <ul class="mt-5">
+                                    <li><strong>Nombre d'artefacts</strong> : 8-14 recommandé (configuration standard : 12)</li>
+                                    <li><strong>Système de jetons</strong> : 3-4 jetons maximum
+                                        <ul class="mt-5">
+                                            <li>Jeton de délai : Report d'échéance sans pénalité</li>
+                                            <li>Jeton de reprise : Possibilité de refaire un artefact</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Méthode de sélection</strong> : N meilleurs artefacts (permet progression sans pénaliser erreurs initiales)</li>
+                                </ul>
+                            </div>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">📊 Sommative (Évaluation traditionnelle)</h4>
+                                <p><strong>Principes :</strong> Moyenne pondérée de toutes les évaluations, notation 0-100%</p>
+                                <p><strong>Fonctionnement :</strong> Toutes les évaluations comptent selon leur pondération. Approche traditionnelle utilisée dans la plupart des disciplines.</p>
+                            </div>
+
+                            <div class="alerte alerte-info">
+                                <p><strong>💡 À venir :</strong> PAN-Spécifications (Pass/Fail par objectifs) et Dénotation (Ungrading sans notes chiffrées)</p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: 5b. Grille de référence pour dépistage -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">5b. Configurer la grille de critères pour le dépistage</h3>
-                        <p><strong>Navigation :</strong> Réglages → Pratique de notation (section «Grille de critères pour le dépistage»)</p>
-
-                        <p><strong>Pourquoi configurer une grille de référence ?</strong></p>
-                        <p>Le système de dépistage identifie automatiquement les <strong>forces et défis</strong> de chaque étudiant en analysant leurs performances sur vos critères d'évaluation. Pour fonctionner, il doit savoir quels critères vous utilisez dans votre discipline.</p>
-
-                        <p><strong>Étape 1 : Créer votre grille de critères</strong></p>
-                        <ol>
-                            <li>Aller dans <strong>Matériel → Critères d'évaluation</strong></li>
-                            <li>Cliquer sur «➕ Créer une nouvelle grille»</li>
-                            <li>Nommer votre grille (ex: «Grille SRPNF Littérature», «Rapport de labo - Chimie»)</li>
-                            <li>Ajouter vos critères d'évaluation :
-                                <ul class="mt-5">
-                                    <li><strong>Nom</strong> : Nom du critère (ex: Structure, Hypothèse, Analyse)</li>
-                                    <li><strong>Pondération</strong> : Importance relative (ex: 20%, 30%)</li>
-                                    <li><strong>Description</strong> : Définition du critère (optionnel)</li>
-                                </ul>
-                            </li>
-                            <li>Vérifier que la pondération totale = 100%</li>
-                            <li>Sauvegarder la grille</li>
-                        </ol>
-
-                        <p><strong>Étape 2 : Définir la grille comme référence</strong></p>
-                        <ol>
-                            <li>Retourner dans <strong>Réglages → Pratique de notation</strong></li>
-                            <li>Section «Grille de critères pour le dépistage»</li>
-                            <li>Sélectionner votre grille dans le menu déroulant</li>
-                            <li>Cliquer sur «Sauvegarder les réglages»</li>
-                        </ol>
-
-                        <div class="alerte alerte-attention">
-                            <strong>Important :</strong> Tu dois utiliser cette même grille pour toutes tes évaluations. Le dépistage fonctionne en analysant tes rétroactions écrites (ex: «STRUCTURE (M) RIGUEUR (D)»).
+                    <div class="carte accordeon" id="accordeon-aide-grille-depistage">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 5b. Configurer la grille de critères pour le dépistage
+                            </h3>
                         </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Pratique de notation (section «Grille de critères pour le dépistage»)</p>
 
-                        <p><strong>Exemples de grilles par discipline :</strong></p>
-                        <ul>
-                            <li><strong>Littérature</strong> : Structure, Rigueur, Plausibilité, Nuance, Français</li>
-                            <li><strong>Chimie</strong> : Hypothèse, Protocole, Analyse, Conclusion</li>
-                            <li><strong>Anthropologie</strong> : Contextualisation, Méthodologie, Analyse comparative, Réflexivité</li>
-                            <li><strong>Mathématiques</strong> : Compréhension, Démarche, Calculs, Communication</li>
-                            <li><strong>Histoire</strong> : Contextualisation, Analyse de sources, Argumentation, Synthèse</li>
-                        </ul>
+                            <p><strong>Pourquoi configurer une grille de référence ?</strong></p>
+                            <p>Le système de dépistage identifie automatiquement les <strong>forces et défis</strong> de chaque étudiant en analysant leurs performances sur vos critères d'évaluation. Pour fonctionner, il doit savoir quels critères vous utilisez dans votre discipline.</p>
 
-                        <p><strong>Comment le système utilise la grille :</strong></p>
-                        <ul>
-                            <li><strong>Diagnostic forces/défis</strong> : Identifie automatiquement les critères maîtrisés (≥70%) et les défis (&lt;70%)</li>
-                            <li><strong>Patterns d'apprentissage</strong> : Détecte progression, blocages émergents, blocages critiques</li>
-                            <li><strong>Priorisation</strong> : Les critères avec pondération élevée sont priorisés dans les recommandations</li>
-                            <li><strong>Suivi longitudinal</strong> : Calcule l'évolution de chaque critère au fil du temps</li>
-                        </ul>
+                            <p><strong>Étape 1 : Créer votre grille de critères</strong></p>
+                            <ol>
+                                <li>Aller dans <strong>Matériel → Critères d'évaluation</strong></li>
+                                <li>Cliquer sur «➕ Créer une nouvelle grille»</li>
+                                <li>Nommer votre grille (ex: «Grille SRPNF Littérature», «Rapport de labo - Chimie»)</li>
+                                <li>Ajouter vos critères d'évaluation :
+                                    <ul class="mt-5">
+                                        <li><strong>Nom</strong> : Nom du critère (ex: Structure, Hypothèse, Analyse)</li>
+                                        <li><strong>Pondération</strong> : Importance relative (ex: 20%, 30%)</li>
+                                        <li><strong>Description</strong> : Définition du critère (optionnel)</li>
+                                    </ul>
+                                </li>
+                                <li>Vérifier que la pondération totale = 100%</li>
+                                <li>Sauvegarder la grille</li>
+                            </ol>
 
-                        <div class="alerte alerte-succes">
-                            <strong>Validation rapide :</strong> Après configuration, ouvrez le profil d'un étudiant évalué et vérifiez que la section «Développement des habiletés et compétences» affiche les forces/défis basés sur vos critères.
+                            <p><strong>Étape 2 : Définir la grille comme référence</strong></p>
+                            <ol>
+                                <li>Retourner dans <strong>Réglages → Pratique de notation</strong></li>
+                                <li>Section «Grille de critères pour le dépistage»</li>
+                                <li>Sélectionner votre grille dans le menu déroulant</li>
+                                <li>Cliquer sur «Sauvegarder les réglages»</li>
+                            </ol>
+
+                            <div class="alerte alerte-attention">
+                                <strong>Important :</strong> Tu dois utiliser cette même grille pour toutes tes évaluations. Le dépistage fonctionne en analysant tes rétroactions écrites (ex: «STRUCTURE (M) RIGUEUR (D)»).
+                            </div>
+
+                            <p><strong>Exemples de grilles par discipline :</strong></p>
+                            <ul>
+                                <li><strong>Littérature</strong> : Structure, Rigueur, Plausibilité, Nuance, Français</li>
+                                <li><strong>Chimie</strong> : Hypothèse, Protocole, Analyse, Conclusion</li>
+                                <li><strong>Anthropologie</strong> : Contextualisation, Méthodologie, Analyse comparative, Réflexivité</li>
+                                <li><strong>Mathématiques</strong> : Compréhension, Démarche, Calculs, Communication</li>
+                                <li><strong>Histoire</strong> : Contextualisation, Analyse de sources, Argumentation, Synthèse</li>
+                            </ul>
+
+                            <p><strong>Comment le système utilise la grille :</strong></p>
+                            <ul>
+                                <li><strong>Diagnostic forces/défis</strong> : Identifie automatiquement les critères maîtrisés (≥70%) et les défis (&lt;70%)</li>
+                                <li><strong>Patterns d'apprentissage</strong> : Détecte progression, blocages émergents, blocages critiques</li>
+                                <li><strong>Priorisation</strong> : Les critères avec pondération élevée sont priorisés dans les recommandations</li>
+                                <li><strong>Suivi longitudinal</strong> : Calcule l'évolution de chaque critère au fil du temps</li>
+                            </ul>
+
+                            <div class="alerte alerte-succes">
+                                <strong>Validation rapide :</strong> Après configuration, ouvrez le profil d'un étudiant évalué et vérifiez que la section «Développement des habiletés et compétences» affiche les forces/défis basés sur vos critères.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: 5c. Sous-critères avec pondération différenciée -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">5c. Sous-critères avec pondération différenciée (Critères algorithmiques)</h3>
-                        <p><strong>Navigation :</strong> Matériel → Critères d'évaluation</p>
-
-                        <p><strong>Qu'est-ce qu'un critère algorithmique ?</strong></p>
-                        <p>Un critère <strong>algorithmique</strong> est un type spécial de critère qui calcule automatiquement une note basée sur une formule mathématique. Le cas d'usage principal est l'<strong>évaluation du français écrit</strong> selon la formule :</p>
-
-                        <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin: 15px 0;">
-                            <code style="font-size: 0.95rem;">Note = Pondération − (Erreurs pondérées ÷ Mots × Facteur de normalisation)</code>
+                    <div class="carte accordeon" id="accordeon-aide-sous-criteres">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 5c. Sous-critères avec pondération différenciée (Critères algorithmiques)
+                            </h3>
                         </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Matériel → Critères d'évaluation</p>
 
-                        <p><strong>Pourquoi des sous-critères ?</strong></p>
-                        <p>Les sous-critères permettent de <strong>catégoriser les erreurs</strong> avec des <strong>pondérations différentes</strong>. Par exemple, dans certains cégeps, les erreurs de ponctuation comptent pour un demi-point (0.5) au lieu d'un point complet (1.0).</p>
+                            <p><strong>Qu'est-ce qu'un critère algorithmique ?</strong></p>
+                            <p>Un critère <strong>algorithmique</strong> est un type spécial de critère qui calcule automatiquement une note basée sur une formule mathématique. Le cas d'usage principal est l'<strong>évaluation du français écrit</strong> selon la formule :</p>
 
-                        <div class="alerte alerte-information">
-                            <strong>Exemple concret :</strong><br>
-                            Un étudiant commet 4 erreurs : 2× ponctuation (0.5 pt chacune) + 1× syntaxe (1.0 pt) + 1× orthographe (1.0 pt)<br>
-                            = 0.5 + 0.5 + 1.0 + 1.0 = <strong>3.0 points d'erreur</strong> (au lieu de 4.0)<br>
-                            Pour 500 mots et facteur 500 : Note = 30 − (3.0 ÷ 500 × 500) = 30 − 3.0 = <strong>27/30</strong>
-                        </div>
+                            <div style="background: var(--bleu-tres-pale); padding: 15px; border-radius: 6px; margin: 15px 0;">
+                                <code style="font-size: 0.95rem;">Note = Pondération − (Erreurs pondérées ÷ Mots × Facteur de normalisation)</code>
+                            </div>
 
-                        <p><strong>Étape 1 : Créer un critère algorithmique</strong></p>
-                        <ol>
-                            <li>Dans votre grille de critères, ajouter un nouveau critère</li>
-                            <li>Sélectionner le type <strong>«Algorithmique»</strong></li>
-                            <li>Définir la pondération (ex: 30%)</li>
-                            <li>Définir le facteur de normalisation (défaut: 500 mots)</li>
-                        </ol>
+                            <p><strong>Pourquoi des sous-critères ?</strong></p>
+                            <p>Les sous-critères permettent de <strong>catégoriser les erreurs</strong> avec des <strong>pondérations différentes</strong>. Par exemple, dans certains cégeps, les erreurs de ponctuation comptent pour un demi-point (0.5) au lieu d'un point complet (1.0).</p>
 
-                        <p><strong>Étape 2 : Ajouter des sous-critères</strong></p>
-                        <p>Vous avez deux options :</p>
+                            <div class="alerte alerte-information">
+                                <strong>Exemple concret :</strong><br>
+                                Un étudiant commet 4 erreurs : 2× ponctuation (0.5 pt chacune) + 1× syntaxe (1.0 pt) + 1× orthographe (1.0 pt)<br>
+                                = 0.5 + 0.5 + 1.0 + 1.0 = <strong>3.0 points d'erreur</strong> (au lieu de 4.0)<br>
+                                Pour 500 mots et facteur 500 : Note = 30 − (3.0 ÷ 500 × 500) = 30 − 3.0 = <strong>27/30</strong>
+                            </div>
 
-                        <p><strong>Option A : Utiliser les 11 sous-critères par défaut</strong></p>
-                        <ul>
-                            <li>Cliquer sur le bouton <strong>«📋 Utiliser sous-critères par défaut (0-10)»</strong></li>
-                            <li>Le système crée automatiquement 11 sous-critères avec rétroactions complètes :
-                                <ul class="mt-5" style="font-size: 0.85rem;">
-                                    <li><strong>Code 0</strong> : Aucune erreur</li>
-                                    <li><strong>Code 1</strong> : Syntaxe (construction de phrases, accord du verbe)</li>
-                                    <li><strong>Code 2</strong> : Subordination (subordonnées mal construites)</li>
-                                    <li><strong>Code 3</strong> : Ponctuation (virgules, points)</li>
-                                    <li><strong>Code 4</strong> : Orthographe d'usage</li>
-                                    <li><strong>Code 5</strong> : Homophones (ce/se, a/à, son/sont)</li>
-                                    <li><strong>Code 6</strong> : Accords dans le GN (groupe nominal)</li>
-                                    <li><strong>Code 7</strong> : Participes passés</li>
-                                    <li><strong>Code 8</strong> : Mots inappropriés (anglicismes, registre)</li>
-                                    <li><strong>Code 9</strong> : Répétitions et pléonasmes</li>
-                                    <li><strong>Code 10</strong> : Autres erreurs variées</li>
-                                </ul>
-                            </li>
-                            <li>Tous les sous-critères ont une pondération initiale de <strong>1.0</strong></li>
-                        </ul>
+                            <p><strong>Étape 1 : Créer un critère algorithmique</strong></p>
+                            <ol>
+                                <li>Dans votre grille de critères, ajouter un nouveau critère</li>
+                                <li>Sélectionner le type <strong>«Algorithmique»</strong></li>
+                                <li>Définir la pondération (ex: 30%)</li>
+                                <li>Définir le facteur de normalisation (défaut: 500 mots)</li>
+                            </ol>
 
-                        <p><strong>Option B : Créer vos propres sous-critères</strong></p>
-                        <ul>
-                            <li>Cliquer sur <strong>«+ Ajouter un sous-critère»</strong></li>
-                            <li>Remplir les champs :
-                                <ul class="mt-5">
-                                    <li><strong>Code</strong> : Identifiant court (ex: "1", "A", "syn", "pct")</li>
-                                    <li><strong>Nom</strong> : Nom descriptif (ex: "Syntaxe", "Ponctuation")</li>
-                                    <li><strong>Pondération</strong> : Poids de l'erreur (défaut: 1.0, ajustable par paliers de 0.1)</li>
-                                    <li><strong>Description/Rétroaction</strong> : Texte à afficher quand c'est le type d'erreur dominant</li>
-                                </ul>
-                            </li>
-                            <li>Répéter pour chaque catégorie d'erreurs</li>
-                            <li>Nombre de sous-critères : <strong>illimité</strong></li>
-                        </ul>
+                            <p><strong>Étape 2 : Ajouter des sous-critères</strong></p>
+                            <p>Vous avez deux options :</p>
 
-                        <p><strong>Étape 3 : Personnaliser les pondérations (optionnel)</strong></p>
-                        <p>Pour adapter à la politique de votre département :</p>
-                        <ul>
-                            <li>Ponctuation = 0.5 point (demi-point)</li>
-                            <li>Erreurs graves de syntaxe = 2.0 points (doublement pénalisé)</li>
-                            <li>Erreurs mineures = 0.5 point</li>
-                            <li>Ou toute autre combinaison selon vos besoins</li>
-                        </ul>
+                            <p><strong>Option A : Utiliser les 11 sous-critères par défaut</strong></p>
+                            <ul>
+                                <li>Cliquer sur le bouton <strong>«📋 Utiliser sous-critères par défaut (0-10)»</strong></li>
+                                <li>Le système crée automatiquement 11 sous-critères avec rétroactions complètes :
+                                    <ul class="mt-5" style="font-size: 0.85rem;">
+                                        <li><strong>Code 0</strong> : Aucune erreur</li>
+                                        <li><strong>Code 1</strong> : Syntaxe (construction de phrases, accord du verbe)</li>
+                                        <li><strong>Code 2</strong> : Subordination (subordonnées mal construites)</li>
+                                        <li><strong>Code 3</strong> : Ponctuation (virgules, points)</li>
+                                        <li><strong>Code 4</strong> : Orthographe d'usage</li>
+                                        <li><strong>Code 5</strong> : Homophones (ce/se, a/à, son/sont)</li>
+                                        <li><strong>Code 6</strong> : Accords dans le GN (groupe nominal)</li>
+                                        <li><strong>Code 7</strong> : Participes passés</li>
+                                        <li><strong>Code 8</strong> : Mots inappropriés (anglicismes, registre)</li>
+                                        <li><strong>Code 9</strong> : Répétitions et pléonasmes</li>
+                                        <li><strong>Code 10</strong> : Autres erreurs variées</li>
+                                    </ul>
+                                </li>
+                                <li>Tous les sous-critères ont une pondération initiale de <strong>1.0</strong></li>
+                            </ul>
 
-                        <p><strong>Comment utiliser lors de l'évaluation</strong></p>
-                        <ol>
-                            <li>Lors de la correction, noter le code de chaque erreur rencontrée</li>
-                            <li>Dans le formulaire d'évaluation, saisir les codes séparés par des points-virgules :
-                                <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace;">
-                                    3;3;1;4;4;6;1
-                                </div>
-                            </li>
-                            <li>Saisir le nombre de mots de la rédaction</li>
-                            <li>Le système calcule automatiquement :
-                                <ul class="mt-5">
-                                    <li>Le nombre total d'erreurs (7)</li>
-                                    <li>La somme pondérée (ex: 6.0 si ponctuation=0.5)</li>
-                                    <li>La note finale selon la formule</li>
-                                    <li>Le sous-critère dominant (MODE statistique)</li>
-                                    <li>La rétroaction personnalisée selon le type d'erreur dominant</li>
-                                </ul>
-                            </li>
-                        </ol>
+                            <p><strong>Option B : Créer vos propres sous-critères</strong></p>
+                            <ul>
+                                <li>Cliquer sur <strong>«+ Ajouter un sous-critère»</strong></li>
+                                <li>Remplir les champs :
+                                    <ul class="mt-5">
+                                        <li><strong>Code</strong> : Identifiant court (ex: "1", "A", "syn", "pct")</li>
+                                        <li><strong>Nom</strong> : Nom descriptif (ex: "Syntaxe", "Ponctuation")</li>
+                                        <li><strong>Pondération</strong> : Poids de l'erreur (défaut: 1.0, ajustable par paliers de 0.1)</li>
+                                        <li><strong>Description/Rétroaction</strong> : Texte à afficher quand c'est le type d'erreur dominant</li>
+                                    </ul>
+                                </li>
+                                <li>Répéter pour chaque catégorie d'erreurs</li>
+                                <li>Nombre de sous-critères : <strong>illimité</strong></li>
+                            </ul>
 
-                        <div class="alerte alerte-attention">
-                            <strong>Mode simple disponible :</strong> Si vous ne souhaitez pas catégoriser les erreurs, désactivez l'option «Activer la catégorisation des erreurs de français» dans <strong>Réglages → Pratique de notation</strong>. Vous pourrez alors simplement saisir le nombre total d'erreurs sans codes.
-                        </div>
+                            <p><strong>Étape 3 : Personnaliser les pondérations (optionnel)</strong></p>
+                            <p>Pour adapter à la politique de votre département :</p>
+                            <ul>
+                                <li>Ponctuation = 0.5 point (demi-point)</li>
+                                <li>Erreurs graves de syntaxe = 2.0 points (doublement pénalisé)</li>
+                                <li>Erreurs mineures = 0.5 point</li>
+                                <li>Ou toute autre combinaison selon vos besoins</li>
+                            </ul>
 
-                        <p><strong>Avantages pédagogiques</strong></p>
-                        <ul>
-                            <li><strong>Rétroaction ciblée</strong> : L'étudiant sait exactement quel type d'erreur dominer</li>
-                            <li><strong>Justice évaluative</strong> : Erreurs mineures pénalisent moins que graves</li>
-                            <li><strong>Gain de temps</strong> : Codes rapides à noter pendant la correction</li>
-                            <li><strong>Suivi longitudinal</strong> : Analyse des types d'erreurs au fil du temps</li>
-                            <li><strong>Flexibilité disciplinaire</strong> : Adaptation aux normes de chaque département</li>
-                        </ul>
+                            <p><strong>Comment utiliser lors de l'évaluation</strong></p>
+                            <ol>
+                                <li>Lors de la correction, noter le code de chaque erreur rencontrée</li>
+                                <li>Dans le formulaire d'évaluation, saisir les codes séparés par des points-virgules :
+                                    <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace;">
+                                        3;3;1;4;4;6;1
+                                    </div>
+                                </li>
+                                <li>Saisir le nombre de mots de la rédaction</li>
+                                <li>Le système calcule automatiquement :
+                                    <ul class="mt-5">
+                                        <li>Le nombre total d'erreurs (7)</li>
+                                        <li>La somme pondérée (ex: 6.0 si ponctuation=0.5)</li>
+                                        <li>La note finale selon la formule</li>
+                                        <li>Le sous-critère dominant (MODE statistique)</li>
+                                        <li>La rétroaction personnalisée selon le type d'erreur dominant</li>
+                                    </ul>
+                                </li>
+                            </ol>
 
-                        <div class="alerte alerte-succes">
-                            <strong>Astuce professionnelle :</strong> Imprimez une feuille de codes plastifiée pour référence rapide pendant la correction. Exemple : «1=Syntaxe, 2=Subord., 3=Ponct., 4=Ortho., 5=Hom., 6=GN, 7=PP, 8=Mots, 9=Rép., 10=Autre»
+                            <div class="alerte alerte-attention">
+                                <strong>Mode simple disponible :</strong> Si vous ne souhaitez pas catégoriser les erreurs, désactivez l'option «Activer la catégorisation des erreurs de français» dans <strong>Réglages → Pratique de notation</strong>. Vous pourrez alors simplement saisir le nombre total d'erreurs sans codes.
+                            </div>
+
+                            <p><strong>Avantages pédagogiques</strong></p>
+                            <ul>
+                                <li><strong>Rétroaction ciblée</strong> : L'étudiant sait exactement quel type d'erreur dominer</li>
+                                <li><strong>Justice évaluative</strong> : Erreurs mineures pénalisent moins que graves</li>
+                                <li><strong>Gain de temps</strong> : Codes rapides à noter pendant la correction</li>
+                                <li><strong>Suivi longitudinal</strong> : Analyse des types d'erreurs au fil du temps</li>
+                                <li><strong>Flexibilité disciplinaire</strong> : Adaptation aux normes de chaque département</li>
+                            </ul>
+
+                            <div class="alerte alerte-succes">
+                                <strong>Astuce professionnelle :</strong> Imprimez une feuille de codes plastifiée pour référence rapide pendant la correction. Exemple : «1=Syntaxe, 2=Subord., 3=Ponct., 4=Ortho., 5=Hom., 6=GN, 7=PP, 8=Mots, 9=Rép., 10=Autre»
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Checklist -->
-                    <div class="carte" class="bg-bleu-tres-pale">
-                        <h3 class="carte-titre-bleu">Checklist de configuration</h3>
-                        <p>Avant de commencer à utiliser le système, assurez-vous d'avoir complété :</p>
-                        <ul class="list-unstyled">
-                            <li class="py-8">[ ] Informations du cours saisies</li>
-                            <li class="py-8">[ ] Calendrier du trimestre généré</li>
-                            <li class="py-8">[ ] Liste des étudiants importée/saisie</li>
-                            <li class="py-8">[ ] Horaire défini (si disponible)</li>
-                            <li class="py-8">[ ] Pratiques PAN paramétrées</li>
-                            <li class="py-8">[ ] Grille de critères créée et définie comme référence</li>
-                        </ul>
-                        <p class="titre-mt15-fw-bold-bleu">→ Vous êtes prêt à commencer le suivi hebdomadaire !</p>
+                    <div class="carte accordeon" id="accordeon-aide-checklist">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Checklist de configuration
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>Avant de commencer à utiliser le système, assurez-vous d'avoir complété :</p>
+                            <ul class="list-unstyled">
+                                <li class="py-8">[ ] Informations du cours saisies</li>
+                                <li class="py-8">[ ] Calendrier du trimestre généré</li>
+                                <li class="py-8">[ ] Liste des étudiants importée/saisie</li>
+                                <li class="py-8">[ ] Horaire défini (si disponible)</li>
+                                <li class="py-8">[ ] Pratiques PAN paramétrées</li>
+                                <li class="py-8">[ ] Grille de critères créée et définie comme référence</li>
+                            </ul>
+                            <p class="titre-mt15-fw-bold-bleu">→ Vous êtes prêt à commencer le suivi hebdomadaire !</p>
+                        </div>
                     </div>
                 </div>
 
@@ -10181,51 +10300,62 @@ Exemple :
                     <p class="text-muted">Modes de fonctionnement pour explorer l'application sans risque</p>
 
                     <!-- Carte: Modes de fonctionnement -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Les trois modes de l'application</h3>
-                        <p>L'application offre trois modes de fonctionnement pour différents contextes d'utilisation :</p>
-
-                        <div class="alerte-success-bleu-pale">
-                            <h4 class="text-success-mb10">Mode Normal</h4>
-                            <p><strong>Utilisation en contexte réel</strong> - Données authentiques des étudiants</p>
-                            <ul class="mt-8">
-                                <li>Toutes les modifications sont sauvegardées dans localStorage</li>
-                                <li>Données réelles du cours</li>
-                                <li>Mode par défaut de l'application</li>
-                            </ul>
+                    <div class="carte accordeon" id="accordeon-aide-modes">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Les trois modes de l'application
+                            </h3>
                         </div>
+                        <div class="accordeon-contenu">
+                            <p>L'application offre trois modes de fonctionnement pour différents contextes d'utilisation :</p>
 
-                        <div class="alerte-warning-jaune">
-                            <h4 class="text-warning-856-mb10">Mode Simulé</h4>
-                            <p><strong>Exploration et formation</strong> - Données fictives pour expérimenter</p>
-                            <ul class="mt-8">
-                                <li>Données sauvegardées avec préfixe <code>simulation_*</code></li>
-                                <li>Totalement isolé des données réelles</li>
-                                <li>Parfait pour apprendre sans risque</li>
-                                <li>Permet de tester scénarios pédagogiques</li>
-                            </ul>
-                        </div>
+                            <div class="alerte-success-bleu-pale">
+                                <h4 class="text-success-mb10">Mode Normal</h4>
+                                <p><strong>Utilisation en contexte réel</strong> - Données authentiques des étudiants</p>
+                                <ul class="mt-8">
+                                    <li>Toutes les modifications sont sauvegardées dans localStorage</li>
+                                    <li>Données réelles du cours</li>
+                                    <li>Mode par défaut de l'application</li>
+                                </ul>
+                            </div>
 
-                        <div class="alerte-info-cyan">
-                            <h4 style="color: #0c5460; margin-bottom: 10px;">Mode Anonymisé</h4>
-                            <p><strong>Démonstration publique</strong> - Données réelles avec noms fictifs</p>
-                            <ul class="mt-8">
-                                <li>Noms et prénoms remplacés par des noms fictifs</li>
-                                <li>Préfixe "AN." devant les numéros de groupe</li>
-                                <li>Lecture seule (aucune modification possible)</li>
-                                <li>Idéal pour présentations et captures d'écran</li>
-                            </ul>
-                        </div>
+                            <div class="alerte-warning-jaune">
+                                <h4 class="text-warning-856-mb10">Mode Simulé</h4>
+                                <p><strong>Exploration et formation</strong> - Données fictives pour expérimenter</p>
+                                <ul class="mt-8">
+                                    <li>Données sauvegardées avec préfixe <code>simulation_*</code></li>
+                                    <li>Totalement isolé des données réelles</li>
+                                    <li>Parfait pour apprendre sans risque</li>
+                                    <li>Permet de tester scénarios pédagogiques</li>
+                                </ul>
+                            </div>
 
-                        <div class="alerte alerte-information">
-                            <strong>Basculer entre les modes :</strong> Utilisez le sélecteur de mode en haut à droite de l'interface (⚙️ Mode: Normal/Simulé/Anonymisé)
+                            <div class="alerte-info-cyan">
+                                <h4 style="color: #0c5460; margin-bottom: 10px;">Mode Anonymisé</h4>
+                                <p><strong>Démonstration publique</strong> - Données réelles avec noms fictifs</p>
+                                <ul class="mt-8">
+                                    <li>Noms et prénoms remplacés par des noms fictifs</li>
+                                    <li>Préfixe "AN." devant les numéros de groupe</li>
+                                    <li>Lecture seule (aucune modification possible)</li>
+                                    <li>Idéal pour présentations et captures d'écran</li>
+                                </ul>
+                            </div>
+
+                            <div class="alerte alerte-information">
+                                <strong>Basculer entre les modes :</strong> Utilisez le sélecteur de mode en haut à droite de l'interface (⚙️ Mode: Normal/Simulé/Anonymisé)
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Groupe fictif 9999 -->
-                    <div class="carte" class="border-left-purple">
-                        <h3 class="carte-titre-bleu">Le Groupe 9999 : Votre laboratoire pédagogique</h3>
-                        <p><strong>Navigation :</strong> Réglages → Groupe → Section "Clonage de groupe"</p>
+                    <div class="carte accordeon" id="accordeon-aide-groupe-9999">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Le Groupe 9999 : Votre laboratoire pédagogique
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Groupe → Section "Clonage de groupe"</p>
 
                         <p class="text-105-mt15"><strong>Qu'est-ce que le Groupe 9999 ?</strong></p>
                         <p>C'est un groupe fictif réservé pour :</p>
@@ -10305,15 +10435,21 @@ Exemple :
                             </ul>
                         </div>
 
-                        <div class="alerte alerte-attention" class="mt-15">
-                            <strong>⚠️ Important :</strong> Générer un nouveau groupe efface l'ancien Groupe 9999. Utilisez l'export/import si vous voulez conserver plusieurs scénarios.
+                            <div class="alerte alerte-attention" class="mt-15">
+                                <strong>⚠️ Important :</strong> Générer un nouveau groupe efface l'ancien Groupe 9999. Utilisez l'export/import si vous voulez conserver plusieurs scénarios.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Export/Import de groupes fictifs -->
-                    <div class="carte" style="border-left: 4px solid #673ab7;">
-                        <h3 class="carte-titre-bleu">📦 Partager des scénarios pédagogiques</h3>
-                        <p><strong>Navigation :</strong> Réglages → Groupe → Section "Import / Export"</p>
+                    <div class="carte accordeon" id="accordeon-aide-export-import-9999" style="border-left: 4px solid #673ab7;">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Partager des scénarios pédagogiques
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Groupe → Section "Import / Export"</p>
 
                         <p class="text-105-mt15"><strong>Pourquoi exporter/importer ?</strong></p>
                         <ul>
@@ -10359,14 +10495,20 @@ Exemple :
                             </ol>
                         </div>
 
-                        <div class="alerte alerte-information" class="mt-15">
-                            <strong>Format du fichier :</strong> JSON standard, lisible et modifiable. Inclut métadonnées (version, date d'export, statistiques).
+                            <div class="alerte alerte-information" class="mt-15">
+                                <strong>Format du fichier :</strong> JSON standard, lisible et modifiable. Inclut métadonnées (version, date d'export, statistiques).
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Cas d'usage pédagogiques -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">🎓 Cas d'usage pédagogiques</h3>
+                    <div class="carte accordeon" id="accordeon-aide-cas-usage">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Cas d'usage pédagogiques
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
 
                         <div class="alerte-success-green">
                             <h4 class="text-success-dark-mb10">1. Formation des enseignants</h4>
@@ -10416,15 +10558,21 @@ Exemple :
                             </ul>
                         </div>
 
-                        <div class="alerte alerte-succes" class="mt-15">
-                            <strong>Principe directeur :</strong> Le Groupe 9999 est votre terrain de jeu pédagogique. Explorez, expérimentez, apprenez sans risque !
+                            <div class="alerte alerte-succes" class="mt-15">
+                                <strong>Principe directeur :</strong> Le Groupe 9999 est votre terrain de jeu pédagogique. Explorez, expérimentez, apprenez sans risque !
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Validation configuration grille de référence -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">✅ Valider votre configuration : Tests de la grille de référence</h3>
-                        <p><strong>Objectif :</strong> S'assurer que votre grille de critères fonctionne correctement avec le système de dépistage</p>
+                    <div class="carte accordeon" id="accordeon-aide-validation-grille">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Valider votre configuration : Tests de la grille de référence
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Objectif :</strong> S'assurer que votre grille de critères fonctionne correctement avec le système de dépistage</p>
 
                         <p class="text-105-mt15"><strong>Pourquoi tester ?</strong></p>
                         <p>Le système de dépistage analyse vos rétroactions pour identifier automatiquement les forces et défis de chaque étudiant. Il est important de valider que :</p>
@@ -10540,8 +10688,9 @@ Exemple :
                             <p style="margin-top: 8px;"><strong>→ Si vous voyez ces erreurs</strong> : Vérifier que la grille existe bien et qu'elle est correctement sélectionnée dans les réglages.</p>
                         </div>
 
-                        <div class="alerte alerte-succes" class="mt-15">
-                            <strong>💡 Conseil :</strong> Gardez la console ouverte lors des premiers tests. Elle affiche des informations précieuses sur le fonctionnement du système et aide à diagnostiquer rapidement tout problème de configuration.
+                            <div class="alerte alerte-succes" class="mt-15">
+                                <strong>💡 Conseil :</strong> Gardez la console ouverte lors des premiers tests. Elle affiche des informations précieuses sur le fonctionnement du système et aide à diagnostiquer rapidement tout problème de configuration.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -10554,9 +10703,14 @@ Exemple :
                     <p class="text-muted">Routine de saisie et flux de travail (5-15 min/semaine)</p>
 
                     <!-- Carte: Vue d'ensemble -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Flux de travail hebdomadaire</h3>
-                        <p><strong>Temps estimé :</strong> 5-15 minutes par semaine</p>
+                    <div class="carte accordeon" id="accordeon-aide-flux-travail">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Flux de travail hebdomadaire
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Temps estimé :</strong> 5-15 minutes par semaine</p>
 
                         <div class="carte-gradient-bleu">
                             <p class="titre-11-bold-bleu-mb15">Étapes recommandées :</p>
@@ -10567,13 +10721,19 @@ Exemple :
                                 <li><strong>Action si nécessaire</strong> : Intervenir si seuils critiques atteints</li>
                             </ol>
                         </div>
+                        </div>
                     </div>
 
                     <!-- Carte: Saisir les présences -->
-                    <div class="carte" class="border-left-succes">
-                        <h3 class="carte-titre-bleu">1. Saisir les présences - MODULE SOURCE</h3>
-                        <p><strong>Navigation :</strong> Présences → Saisie</p>
-                        <p class="text-succes-bold">Ce module GÉNÈRE les indicesAssiduiteDetailles (source unique)</p>
+                    <div class="carte accordeon" id="accordeon-aide-saisie-presences" class="border-left-succes">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 1. Saisir les présences - MODULE SOURCE
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Présences → Saisie</p>
+                            <p class="text-succes-bold">Ce module GÉNÈRE les indicesAssiduiteDetailles (source unique)</p>
 
                         <p><strong>Interface de saisie rapide :</strong></p>
                         <ul>
@@ -10602,13 +10762,19 @@ Exemple :
                             <li>Assiduité sommative : sur tout le trimestre</li>
                             <li>Assiduité alternative : sur les 3, 7 ou 12 derniers artefacts</li>
                         </ul>
+                        </div>
                     </div>
 
                     <!-- Carte: Évaluer les productions -->
-                    <div class="carte" class="border-left-succes">
-                        <h3 class="carte-titre-bleu">2. Évaluer les productions - MODULE SOURCE</h3>
-                        <p><strong>Navigation :</strong> Portfolio → Évaluation</p>
-                        <p class="text-succes-bold">Ce module GÉNÈRE les indicesCP (Complétion & Performance)</p>
+                    <div class="carte accordeon" id="accordeon-aide-evaluer-productions" class="border-left-succes">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 2. Évaluer les productions - MODULE SOURCE
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Portfolio → Évaluation</p>
+                            <p class="text-succes-bold">Ce module GÉNÈRE les indicesCP (Complétion & Performance)</p>
 
                         <p><strong>Processus d'évaluation :</strong></p>
                         <ol class="lh-relaxed">
@@ -10630,12 +10796,18 @@ Exemple :
                                 <li>Historique longitudinal : Évolution dans le temps</li>
                             </ul>
                         </div>
+                        </div>
                     </div>
 
                     <!-- Carte: Gérer les jetons -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">3. Gérer les jetons</h3>
-                        <p><strong>Navigation :</strong> Portfolio → Gestion</p>
+                    <div class="carte accordeon" id="accordeon-aide-gerer-jetons">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 3. Gérer les jetons
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Portfolio → Gestion</p>
 
                         <p><strong>Types de jetons :</strong></p>
                         <ul>
@@ -10655,15 +10827,21 @@ Exemple :
 
                         <p><strong>Suivi automatique :</strong> Le système compte automatiquement les jetons utilisés (maximum 3-4 selon configuration).</p>
 
-                        <div class="alerte alerte-attention">
-                            <strong>Bonnes pratiques :</strong> Expliquer clairement le système de jetons aux étudiants dès le début du trimestre.
+                            <div class="alerte alerte-attention">
+                                <strong>Bonnes pratiques :</strong> Expliquer clairement le système de jetons aux étudiants dès le début du trimestre.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Gestion des travaux irrecevables et non-remis -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">4. Gestion des travaux irrecevables et non-remis</h3>
-                        <p><strong>Navigation :</strong> Portfolio → Évaluation</p>
+                    <div class="carte accordeon" id="accordeon-aide-irrecevables">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 4. Gestion des travaux irrecevables et non-remis
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Portfolio → Évaluation</p>
 
                         <p>Le système distingue clairement deux situations différentes qui affectent les calculs de manière distincte :</p>
 
@@ -10791,15 +10969,21 @@ Exemple :
                             <li><strong>Indice P :</strong> 73.3%</li>
                         </ul>
 
-                        <div class="alerte alerte-info">
-                            <strong>Principe clé :</strong> Un travail non recevable n'est pas une note de 0%, c'est une absence d'évaluation. Le système fait comme si cette production n'avait jamais existé dans les attentes du cours.
+                            <div class="alerte alerte-info">
+                                <strong>Principe clé :</strong> Un travail non recevable n'est pas une note de 0%, c'est une absence d'évaluation. Le système fait comme si cette production n'avait jamais existé dans les attentes du cours.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Vérification hebdomadaire -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">5. Vérification hebdomadaire</h3>
-                        <p><strong>Navigation :</strong> Tableau de bord → Aperçu</p>
+                    <div class="carte accordeon" id="accordeon-aide-verification-hebdo">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 5. Vérification hebdomadaire
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Tableau de bord → Aperçu</p>
 
                         <p><strong>Indices à surveiller :</strong></p>
                         <ul>
@@ -10842,15 +11026,21 @@ Exemple :
                             </tbody>
                         </table>
 
-                        <div class="alerte alerte-erreur">
-                            <strong>Détérioration récente :</strong> Comparer les indices sommatifs et alternatifs pour détecter les changements récents, même chez des étudiants au bilan global acceptable.
+                            <div class="alerte alerte-erreur">
+                                <strong>Détérioration récente :</strong> Comparer les indices sommatifs et alternatifs pour détecter les changements récents, même chez des étudiants au bilan global acceptable.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Captures de progression (Snapshots) -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">6. Captures de progression (Snapshots hebdomadaires)</h3>
-                        <p><strong>Navigation :</strong> Réglages → Captures de progression</p>
+                    <div class="carte accordeon" id="accordeon-aide-snapshots">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 6. Captures de progression (Snapshots hebdomadaires)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Captures de progression</p>
 
                         <p>Le système capture automatiquement l'état des indices A-C-P de chaque étudiant à chaque séance, créant un historique longitudinal complet pour l'analyse de la progression.</p>
 
@@ -10913,12 +11103,18 @@ Exemple :
                                 <li><strong>Reconstruction rétroactive</strong> : Correction d'erreurs sans perte de données</li>
                             </ul>
                         </div>
+                        </div>
                     </div>
 
                     <!-- Carte: Collaboration entre collègues -->
-                    <div class="carte" class="border-left-purple">
-                        <h3 class="carte-titre-bleu">7. Collaboration entre collègues</h3>
-                        <p><strong>Partage de matériel pédagogique via Import/Export</strong></p>
+                    <div class="carte accordeon" id="accordeon-aide-collaboration" class="border-left-purple">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 7. Collaboration entre collègues
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Partage de matériel pédagogique via Import/Export</strong></p>
 
                         <p>Le système permet de partager facilement du matériel pédagogique entre enseignant·es, favorisant la collaboration départementale et l'harmonisation des pratiques.</p>
 
@@ -11084,12 +11280,18 @@ Exemple :
                                 et de reconnaître le travail de chacun·e dans la communauté pédagogique.
                             </p>
                         </div>
+                        </div>
                     </div>
 
                     <!-- Carte: Interventions RàI avec présences facultatives -->
-                    <div class="carte" class="border-left-primary">
-                        <h3 class="carte-titre-bleu">6. Interventions RàI avec absences motivées</h3>
-                        <p><strong>Navigation :</strong> Tableau de bord → Interventions</p>
+                    <div class="carte accordeon" id="accordeon-aide-rai-absences" class="border-left-primary">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> 8. Interventions RàI avec absences motivées
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Tableau de bord → Interventions</p>
 
                         <p>Le système permet de documenter des interventions de Réponse à l'Intervention (RàI) de niveau 2 ou 3 tout en justifiant les absences des étudiants non participants, sans pénaliser leur assiduité.</p>
 
@@ -11258,13 +11460,19 @@ Exemple :
                             </ul>
                         </div>
 
-                        <p class="titre-mt15-fw-bold-bleu">Temps estimé : 5-10 minutes par intervention (planification + saisie présences)</p>
+                            <p class="titre-mt15-fw-bold-bleu">Temps estimé : 5-10 minutes par intervention (planification + saisie présences)</p>
+                        </div>
                     </div>
 
                     <!-- Carte: Temps estimés -->
-                    <div class="carte" class="bg-bleu-tres-pale">
-                        <h3 class="carte-titre-bleu">Temps estimés par activité</h3>
-                        <table class="table-collapse">
+                    <div class="carte accordeon" id="accordeon-aide-temps-estimes" class="bg-bleu-tres-pale">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Temps estimés par activité
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <table class="table-collapse">
                             <tr class="bg-white">
                                 <td class="td-bleu-separee"><strong>Saisie présences</strong></td>
                                 <td class="td-right-bleu">2-5 min</td>
@@ -11278,11 +11486,13 @@ Exemple :
                                 <td class="td-right-bleu">1-2 min</td>
                             </tr>
                             <tr class="bg-white">
-                                <td class="p-10"><strong>Vérification hebdomadaire</strong></td>
-                                <td class="td-right">3-5 min</td>
-                            </tr>
-                        </table>
-                        <p class="titre-mt15-fw-bold-bleu">Total hebdomadaire (hors évaluations) : 5-15 minutes</p>
+                                <tr class="bg-white">
+                                    <td class="p-10"><strong>Vérification hebdomadaire</strong></td>
+                                    <td class="td-right">3-5 min</td>
+                                </tr>
+                            </table>
+                            <p class="titre-mt15-fw-bold-bleu">Total hebdomadaire (hors évaluations) : 5-15 minutes</p>
+                        </div>
                     </div>
                 </div>
 
@@ -11294,10 +11504,15 @@ Exemple :
                     <p class="text-muted">Prendre des décisions basées sur les données</p>
 
                     <!-- Carte: Tableau de bord Aperçu -->
-                    <div class="carte" class="border-left-primary">
-                        <h3 class="carte-titre-bleu">Tableau de bord → Aperçu - LECTEUR</h3>
-                        <p><strong>Navigation :</strong> Tableau de bord → Aperçu</p>
-                        <p class="text-primary-bold">Ce module LIT indicesAssiduiteDetailles et indicesCP</p>
+                    <div class="carte accordeon" id="accordeon-aide-tableau-bord" class="border-left-primary">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Tableau de bord → Aperçu - LECTEUR
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Tableau de bord → Aperçu</p>
+                            <p class="text-primary-bold">Ce module LIT indicesAssiduiteDetailles et indicesCP</p>
 
                         <p><strong>Vue d'ensemble :</strong></p>
                         <ul>
@@ -11309,16 +11524,22 @@ Exemple :
 
                         <p><strong>Action :</strong> Identifier rapidement qui nécessite une intervention.</p>
 
-                        <div class="alerte alerte-information">
-                            <strong>Rechargement automatique :</strong> Les données se mettent à jour automatiquement après chaque saisie.
+                            <div class="alerte alerte-information">
+                                <strong>Rechargement automatique :</strong> Les données se mettent à jour automatiquement après chaque saisie.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Profil étudiant -->
-                    <div class="carte" class="border-left-primary">
-                        <h3 class="carte-titre-bleu">Profil étudiant (détaillé) - LECTEUR</h3>
-                        <p><strong>Navigation :</strong> Tableau de bord → Profil</p>
-                        <p class="text-primary-bold">Ce module LIT toutes les sources de données</p>
+                    <div class="carte accordeon" id="accordeon-aide-profil-etudiant" class="border-left-primary">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Profil étudiant (détaillé) - LECTEUR
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Tableau de bord → Profil</p>
+                            <p class="text-primary-bold">Ce module LIT toutes les sources de données</p>
 
                         <p><strong>Layout 2 colonnes :</strong></p>
                         <ul>
@@ -11356,13 +11577,19 @@ Exemple :
                             </ul>
                         </div>
 
-                        <p class="mt-15"><strong>Navigation intuitive :</strong> Boutons centrés Précédent/Suivant pour parcourir rapidement tous les profils.</p>
+                            <p class="mt-15"><strong>Navigation intuitive :</strong> Boutons centrés Précédent/Suivant pour parcourir rapidement tous les profils.</p>
+                        </div>
                     </div>
 
                     <!-- Carte: Interpréter les seuils -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Interpréter les diagnostics</h3>
-                        <p><strong>Seuils harmonisés A/C/M :</strong> 70%, 80%, 85%</p>
+                    <div class="carte accordeon" id="accordeon-aide-diagnostics">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Interpréter les diagnostics
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Seuils harmonisés A/C/M :</strong> 70%, 80%, 85%</p>
 
                         <table class="tableau">
                             <thead>
@@ -11400,11 +11627,17 @@ Exemple :
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                     </div>
 
                     <!-- Carte: Options configurables RàI et SOLO -->
-                    <div class="carte" style="background: #fff3e0; border-left: 4px solid var(--orange-accent);">
-                        <h3 class="carte-titre-bleu">⚙️ Options configurables : RàI et SOLO</h3>
+                    <div class="carte accordeon" id="accordeon-aide-rai-solo" style="background: #fff3e0; border-left: 4px solid var(--orange-accent);">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Options configurables : RàI et SOLO
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
 
                         <p><strong>Le système offre deux fonctionnalités optionnelles</strong> que vous pouvez activer/désactiver selon votre pratique de notation :</p>
 
@@ -11443,13 +11676,19 @@ Exemple :
                             </ul>
                         </div>
 
-                        <p class="text-muted" style="margin-top: 15px; font-size: 0.9rem;"><em><strong>Note :</strong> Ces options ont été développées dans le cadre de la pratique PAN-Maîtrise de Grégoire Bédard mais peuvent être adaptées à d'autres pratiques pédagogiques. Elles ne sont pas obligatoires pour utiliser le système de monitorage A-C-P.</em></p>
+                            <p class="text-muted" style="margin-top: 15px; font-size: 0.9rem;"><em><strong>Note :</strong> Ces options ont été développées dans le cadre de la pratique PAN-Maîtrise de Grégoire Bédard mais peuvent être adaptées à d'autres pratiques pédagogiques. Elles ne sont pas obligatoires pour utiliser le système de monitorage A-C-P.</em></p>
+                        </div>
                     </div>
 
                     <!-- Carte: Patterns d'apprentissage (optionnel) -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Patterns d'apprentissage (optionnel - si activé)</h3>
-                        <p>Lorsque l'option RàI est activée, le système identifie automatiquement 4 patterns selon la performance moyenne et les défis identifiés :</p>
+                    <div class="carte accordeon" id="accordeon-aide-patterns">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Patterns d'apprentissage (optionnel - si activé)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>Lorsque l'option RàI est activée, le système identifie automatiquement 4 patterns selon la performance moyenne et les défis identifiés :</p>
 
                         <div class="alerte-success-dark">
                             <h4 class="text-success-mb10">Progression stable</h4>
@@ -11478,11 +11717,17 @@ Exemple :
                             <p><strong>Intervention :</strong> RàI Niveau 3 - Intervention très intensive ou spécialisée</p>
                             <p><strong>Action :</strong> Rencontre individuelle + CAF + Dépistage + Services adaptés si nécessaire</p>
                         </div>
+                        </div>
                     </div>
 
                     <!-- Carte: Guide détaillé du profil étudiant (Phase 2) -->
-                    <div class="carte" class="bg-f0f8ff">
-                        <h3 class="carte-titre-bleu">Guide détaillé : Profil étudiant</h3>
+                    <div class="carte accordeon" id="accordeon-aide-guide-profil" class="bg-f0f8ff">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Guide détaillé : Profil étudiant
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
 
                         <p class="mb-20">Le profil étudiant est l'outil central de diagnostic et d'intervention. Il est organisé en 3 grandes sections, chacune fournissant des informations complémentaires pour une vision complète de la progression de l'étudiant.</p>
 
@@ -11829,11 +12074,17 @@ Exemple :
                                 </tbody>
                             </table>
                         </div>
+                        </div>
                     </div>
 
                     <!-- Carte: Planifier interventions -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Planifier les interventions RàI</h3>
+                    <div class="carte accordeon" id="accordeon-aide-planifier-rai">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Planifier les interventions RàI
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
 
                         <div class="alerte alerte-information">
                             <h4 style="color: var(--bleu-principal)">Niveau 1 : Enseignement universel avec suivi</h4>
@@ -11889,6 +12140,7 @@ Exemple :
                                 <li>"Blocage critique | Intervention intensive | Services adaptés"</li>
                             </ul>
                         </div>
+                        </div>
                     </div>
                 </div>
 
@@ -11900,8 +12152,13 @@ Exemple :
                     <p class="text-muted">Aide-mémoire et seuils critiques</p>
 
                     <!-- Carte: Seuils critiques -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Seuils critiques d'alerte</h3>
+                    <div class="carte accordeon" id="accordeon-aide-seuils-critiques">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Seuils critiques d'alerte
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
 
                         <div class="carte-gradient-success-danger">
                             <h4 class="mb-15">ASSIDUITÉ (A)</h4>
@@ -11993,15 +12250,21 @@ Exemple :
                             </table>
                         </div>
 
-                        <div class="alerte alerte-erreur">
-                            <strong>Règle d'or :</strong> Un étudiant avec un indice &lt; 70% nécessite UNE action. Un étudiant avec un risque &gt; 50% nécessite un PLAN D'INTERVENTION.
+                            <div class="alerte alerte-erreur">
+                                <strong>Règle d'or :</strong> Un étudiant avec un indice &lt; 70% nécessite UNE action. Un étudiant avec un risque &gt; 50% nécessite un PLAN D'INTERVENTION.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Architecture Single Source of Truth -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Architecture Single Source of Truth (rappel)</h3>
-                        <p><strong>Les modules sources ne doivent JAMAIS être contournés.</strong></p>
+                    <div class="carte accordeon" id="accordeon-aide-architecture">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Architecture Single Source of Truth (rappel)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Les modules sources ne doivent JAMAIS être contournés.</strong></p>
 
                         <table class="tableau">
                             <thead>
@@ -12030,14 +12293,20 @@ Exemple :
                             </tbody>
                         </table>
 
-                        <div class="alerte alerte-information">
-                            <strong>Règle d'or :</strong> Les modules ne se parlent JAMAIS directement. Toute communication passe exclusivement par localStorage.
+                            <div class="alerte alerte-information">
+                                <strong>Règle d'or :</strong> Les modules ne se parlent JAMAIS directement. Toute communication passe exclusivement par localStorage.
+                            </div>
                         </div>
                     </div>
 
                     <!-- Carte: Résolution de problèmes -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Résolution de problèmes courants</h3>
+                    <div class="carte accordeon" id="accordeon-aide-problemes">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Résolution de problèmes courants
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
 
                         <div class="alerte-info-grise">
                             <h4 style="color: var(--bleu-principal)">Calendrier vide après rechargement</h4>
@@ -12069,12 +12338,18 @@ Exemple :
                             <p><strong>Solution :</strong> Utiliser Import/Export régulièrement pour backup JSON</p>
                             <p><strong>Prévention :</strong> Activer Export automatique hebdomadaire (à venir)</p>
                         </div>
+                        </div>
                     </div>
 
                     <!-- Carte: Debug localStorage -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Debug - Console navigateur</h3>
-                        <p>Commandes à exécuter dans la console du navigateur (F12) :</p>
+                    <div class="carte accordeon" id="accordeon-aide-debug">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Debug - Console navigateur
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>Commandes à exécuter dans la console du navigateur (F12) :</p>
 
                         <div class="carte-code-dark">
                             <p class="text-secondary">// Vérifier calendrierComplet</p>
@@ -12089,11 +12364,17 @@ Exemple :
                             <p class="text-secondary">// Vérifier APIs disponibles</p>
                             <p><span style="color: #66d9ef;">console</span><span style="color: #f8f8f2;">.log(</span><span style="color: #e6db74;">'API calendrier:'</span><span style="color: #f8f8f2;">, </span><span style="color: #f92672;">typeof</span><span style="color: #f8f8f2;"> obtenirCalendrierComplet);</span></p>
                         </div>
+                        </div>
                     </div>
 
                     <!-- Carte: FAQ (Phase 2) -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">Questions fréquentes (FAQ)</h3>
+                    <div class="carte accordeon" id="accordeon-aide-faq">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Questions fréquentes (FAQ)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
 
                         <div class="my-20">
                             <h4 class="titre-bleu-mb8">Questions sur le monitorage</h4>
@@ -12293,11 +12574,17 @@ Exemple :
                                 </div>
                             </details>
                         </div>
+                        </div>
                     </div>
 
                     <!-- Carte: Glossaire (Phase 2) -->
-                    <div class="carte" class="bg-fff9e6">
-                        <h3 class="carte-titre-bleu">Glossaire des termes</h3>
+                    <div class="carte accordeon" id="accordeon-aide-glossaire" class="bg-fff9e6">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Glossaire des termes
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
 
                         <div class="my-15">
                             <h4 style="color: var(--bleu-principal); border-bottom: 2px solid var(--bleu-pale); padding-bottom: 5px; margin-bottom: 15px;">A</h4>
@@ -12455,11 +12742,17 @@ Exemple :
                         <div class="alerte alerte-info" class="mt-20">
                             <strong>😎 Note :</strong> Ce glossaire est une référence rapide. Pour des explications détaillées avec exemples et formules, consultez le Guide complet (PDF) disponible dans les ressources ci-dessous.
                         </div>
+                        </div><!-- fin accordeon-contenu glossaire -->
                     </div>
 
                     <!-- Carte: Ressources -->
-                    <div class="carte" class="bg-bleu-tres-pale">
-                        <h3 class="carte-titre-bleu">Ressources et documentation</h3>
+                    <div class="carte accordeon" id="accordeon-aide-ressources">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Ressources et documentation
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
 
                         <p><strong>Références bibliographiques :</strong></p>
                         <div class="text-09-lh16-pl20-indent">
@@ -12519,11 +12812,17 @@ Exemple :
                             </ul>
                             <p class="m-15-0-0-0-sm-bleu"><strong>😎 Détails complets :</strong> Voir LICENSE.md dans le dépôt du projet</p>
                         </div>
+                        </div><!-- fin accordeon-contenu ressources -->
                     </div>
 
                     <!-- Carte: À propos -->
-                    <div class="carte">
-                        <h3 class="carte-titre-bleu">À propos de l'application</h3>
+                    <div class="carte accordeon" id="accordeon-aide-apropos">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> À propos de l'application
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
                         <table class="table-collapse">
                             <tr>
                                 <td class="td-bold-30-bleu">Version</td>
@@ -12560,6 +12859,152 @@ Exemple :
                         <p class="carte-bleu-mt20-center-italic">
                             <strong>« L'objectif pédagogique : Faire mentir les prédictions de risque par des interventions proactives ! »</strong>
                         </p>
+                        </div><!-- fin accordeon-contenu apropos -->
+                    </div>
+                </div>
+
+                <!-- ===================================
+                     SOUS-SECTION 7: NOTES DE VERSION
+                     =================================== -->
+                <div id="aide-versions" class="sous-section">
+                    <h2>Notes de version</h2>
+                    <p class="text-muted">Historique des changements majeurs</p>
+
+                    <!-- Beta 95 -->
+                    <div class="carte accordeon" id="accordeon-aide-beta95">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 95 — Stabilisation H2026
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">27 décembre 2025</p>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Gestion multi-trimestres</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Plusieurs trimestres</strong> : Gérez A2025, H2026, etc. séparément avec leurs propres données.</li>
+                            <li><strong>Archivage automatique</strong> : Les trimestres terminés passent en lecture seule pour protéger vos données.</li>
+                            <li><strong>Mode Correction</strong> : Réactivez temporairement les contrôles pour modifications ponctuelles (absences, jetons).</li>
+                            <li><strong>Mode Anonymisé</strong> : Masquez les identités pour captures d'écran ou présentations.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Mode Assisté amélioré</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Données de démonstration</strong> : 5 étudiants • 4 productions • 20 évaluations • 8 semaines de présences.</li>
+                            <li><strong>Exploration sans risque</strong> : L'application bascule en mode Assisté où vous pouvez tout expérimenter. Les données demo sont complètement isolées de vos vraies données. En cas de pépin, décochez la case pour tout réinitialiser.</li>
+                            <li><strong>Primo 😎</strong> : Assistant de configuration pas-à-pas pour nouveaux utilisateurs.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Gestion multi-cours</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Plusieurs cours</strong> : Gérez 601-101, 601-102, etc. dans le même trimestre.</li>
+                            <li><strong>Changement rapide</strong> : Menu déroulant dans l'en-tête pour basculer entre vos cours.</li>
+                            <li><strong>Données isolées</strong> : Chaque cours a ses propres étudiants, évaluations et présences.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Sauvegarde et protection</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Rappel de backup</strong> : Modal périodique rappelant l'importance de l'export régulier.</li>
+                            <li><strong>Export/Import amélioré</strong> : Configuration complète avec métadonnées Creative Commons.</li>
+                        </ul>
+                        </div><!-- fin accordeon-contenu beta95 -->
+                    </div>
+
+                    <!-- Beta 94 -->
+                    <div class="carte accordeon" id="accordeon-aide-beta94">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 94 — Snapshots et suivi longitudinal
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">10-12 décembre 2025</p>
+
+                        <ul class="modal-liste">
+                            <li><strong>Captures automatiques</strong> : Snapshots hebdomadaires de la progression de chaque étudiant.</li>
+                            <li><strong>Graphiques d'évolution</strong> : Visualisez l'évolution des indices A-C-P dans le temps avec Chart.js.</li>
+                            <li><strong>Reconstruction rétroactive</strong> : Recalculez l'historique après corrections de données.</li>
+                            <li><strong>Architecture multi-cours</strong> : Préparation du support pour plusieurs cours simultanés.</li>
+                        </ul>
+                        </div><!-- fin accordeon-contenu beta94 -->
+                    </div>
+
+                    <!-- Beta 93 -->
+                    <div class="carte accordeon" id="accordeon-aide-beta93">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 93 — Système universel de critères
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">3 décembre 2025</p>
+
+                        <ul class="modal-liste">
+                            <li><strong>Critères configurables</strong> : Utilisez n'importe quelle grille de critères, pas seulement SRPNF.</li>
+                            <li><strong>Détection dynamique</strong> : Forces et défis calculés automatiquement pour vos critères.</li>
+                            <li><strong>Recommandations génériques</strong> : Interventions RàI adaptées à n'importe quelle grille.</li>
+                        </ul>
+                        </div><!-- fin accordeon-contenu beta93 -->
+                    </div>
+
+                    <!-- Beta 92 -->
+                    <div class="carte accordeon" id="accordeon-aide-beta92">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 92 — Primo Assistant
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">27-30 novembre 2025</p>
+
+                        <ul class="modal-liste">
+                            <li><strong>Primo 😎</strong> : Modal d'accueil conversationnel pour nouveaux utilisateurs.</li>
+                            <li><strong>4 parcours guidés</strong> : Créer un groupe-cours, évaluer une production, explorer les diagnostics, configurer une pratique.</li>
+                            <li><strong>Tutoriel interactif</strong> : 7 étapes pour découvrir l'application.</li>
+                            <li><strong>Import/Export CC</strong> : Métadonnées Creative Commons pour le partage pédagogique.</li>
+                        </ul>
+                        </div><!-- fin accordeon-contenu beta92 -->
+                    </div>
+
+                    <!-- Beta 91 -->
+                    <div class="carte accordeon" id="accordeon-aide-beta91">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 91 — IndexedDB et capacité étendue
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">18-26 novembre 2025</p>
+
+                        <ul class="modal-liste">
+                            <li><strong>Stockage hybride</strong> : IndexedDB (stockage principal) + localStorage (cache rapide).</li>
+                            <li><strong>Capacité augmentée</strong> : Passage de 5-10 MB à plusieurs GB de stockage.</li>
+                            <li><strong>Compatibilité totale</strong> : API inchangée, tous les modules fonctionnent sans modification.</li>
+                        </ul>
+                        </div><!-- fin accordeon-contenu beta91 -->
+                    </div>
+
+                    <!-- Beta 90 -->
+                    <div class="carte accordeon" id="accordeon-aide-beta90">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Beta 90 — Présentation AQPC
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                        <p class="text-muted">5-16 novembre 2025</p>
+
+                        <ul class="modal-liste">
+                            <li><strong>Système de pratiques modulaire</strong> : Support de plusieurs pratiques de notation (Sommative, PAN-Maîtrise).</li>
+                            <li><strong>Engagement (E)</strong> : Remplacement du concept de « Risque d'échec » par une perspective positive.</li>
+                            <li><strong>Jetons personnalisés</strong> : Délai, reprise, aide, bonus avec compteurs visuels.</li>
+                            <li><strong>Barres de distribution</strong> : Visualisation par nuages de points avec gradients.</li>
+                        </ul>
+                        </div><!-- fin accordeon-contenu beta90 -->
+                    </div>
+
+                    <div class="alerte alerte-information">
+                        <strong>Versions antérieures :</strong> Pour l'historique complet des versions Beta 75 à 89, consultez les fichiers de documentation du projet (CLAUDE.md, changelogs).
                     </div>
                 </div>
                 <!-- LLM:OK_TO_EDIT -->
@@ -12701,11 +13146,10 @@ Exemple :
                 modal.classList.add('actif');
                 // Marquer comme vu dans localStorage
                 localStorage.setItem('nouveautes-beta-95-vue', 'true');
-                // Changer la pastille en jaune immédiatement
+                // Changer l'emoji en version "lu"
                 const pastille = document.querySelector('.pastille-nouveautes');
                 if (pastille) {
-                    pastille.style.background = '#f5a623';
-                    pastille.style.animation = 'none';
+                    pastille.textContent = '✉️';
                 }
             }
         }
@@ -12731,12 +13175,11 @@ Exemple :
                 });
             }
 
-            // Rendre la pastille jaune si les nouveautés ont déjà été vues
+            // Afficher l'emoji "lu" si les nouveautés ont déjà été vues
             const nouveautesVues = localStorage.getItem('nouveautes-beta-95-vue');
             const pastille = document.querySelector('.pastille-nouveautes');
             if (nouveautesVues === 'true' && pastille) {
-                pastille.style.background = '#f5a623'; // Jaune-orangé visible
-                pastille.style.animation = 'none';
+                pastille.textContent = '✉️';
             }
         });
 

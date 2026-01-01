@@ -450,22 +450,18 @@ body {
     gap: 8px;
 }
 
-/* Pastille de notification rouge (nouveautés) */
+/* Pastille de notification nouveautés (emoji) */
 .pastille-nouveautes {
     display: inline-block;
-    width: 8px;
-    height: 8px;
-    background: #ff3b30;
-    border-radius: 50%;
     cursor: pointer;
-    transition: all 0.2s;
-    animation: pulse-notification 2s ease-in-out infinite;
+    transition: transform 0.2s;
     pointer-events: auto;
+    font-size: 0.85rem;
+    line-height: 1;
 }
 
 .pastille-nouveautes:hover {
-    transform: scale(1.3);
-    box-shadow: 0 0 8px rgba(255, 59, 48, 0.6);
+    transform: scale(1.2);
 }
 
 /* Bouton warning backup (rappel sauvegarde) */
@@ -2303,6 +2299,17 @@ textarea {
     background: var(--btn-annuler-hover);
 }
 
+.btn-neutre {
+    background: var(--gris-leger);
+    color: var(--gris-fonce);
+    border: 1px solid var(--gris-moyen);
+}
+
+.btn-neutre:hover:not(:disabled) {
+    background: var(--gris-moyen);
+    color: white;
+}
+
 .btn-supprimer {
     background: var(--btn-supprimer);
     color: white;
@@ -2453,6 +2460,168 @@ textarea {
     gap: 10px;
     justify-content: flex-end;
     margin-top: 20px;
+}
+
+.modal-actions-centre {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding-top: 20px;
+    border-top: 1px solid var(--gris-pale);
+    margin-top: 25px;
+}
+
+.modal-section {
+    margin-bottom: 20px;
+}
+
+.modal-section h3 {
+    color: var(--bleu-principal);
+    font-size: 1.1rem;
+    margin: 0 0 10px 0;
+}
+
+.modal-section p {
+    line-height: 1.6;
+    margin: 0;
+}
+
+.modal-liste {
+    line-height: 1.8;
+    padding-left: 20px;
+    margin: 10px 0 0 0;
+}
+
+.modal-info {
+    padding: 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: 8px;
+    border-left: 4px solid var(--bleu-principal);
+    margin-bottom: 10px;
+}
+
+.modal-info p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Modal Backup Reminder */
+.modal-backup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+}
+
+.modal-backup-contenu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 520px;
+    width: 90%;
+    z-index: 10001;
+}
+
+.modal-header-warning {
+    background: linear-gradient(135deg, var(--orange-accent) 0%, #f57c00 100%);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header-warning h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-header-warning h2 span {
+    font-size: 1.5rem;
+}
+
+.modal-backup-body {
+    padding: 1.5rem;
+}
+
+.modal-backup-body > p {
+    margin: 0 0 1rem 0;
+    color: var(--gris-fonce);
+    line-height: 1.6;
+}
+
+.modal-backup-body ul {
+    margin: 0 0 1.25rem 0;
+    padding-left: 1.5rem;
+    color: var(--gris-moyen);
+    line-height: 1.8;
+}
+
+.modal-backup-solution {
+    background: var(--alerte-fond-information);
+    border-left: 4px solid var(--alerte-bordure-information);
+    padding: 1rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 1.5rem;
+}
+
+.modal-backup-solution p {
+    margin: 0;
+    color: var(--alerte-texte-information);
+    font-size: 0.95rem;
+}
+
+.modal-backup-controles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-backup-rappel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-backup-rappel label {
+    color: var(--gris-moyen);
+    font-size: 0.9rem;
+}
+
+.modal-backup-rappel select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--gris-moyen);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: white;
+    color: var(--gris-fonce);
+    cursor: pointer;
+    min-width: 140px;
+    position: relative;
+    z-index: 10;
+    -webkit-appearance: menulist;
+    appearance: menulist;
+}
+
+.modal-backup-rappel select:focus {
+    outline: none;
+    border-color: var(--bleu-principal);
+    box-shadow: 0 0 0 2px rgba(66, 139, 202, 0.2);
+}
+
+.modal-backup-actions {
+    display: flex;
+    gap: 0.5rem;
 }
 
 /* ===============================
@@ -4102,6 +4271,11 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     gap: 8px;
     flex-wrap: wrap;
     font-size: 0.85rem;
+    align-items: center;
+}
+
+.intervention-badges > span {
+    line-height: 1.2;
 }
 
 /* Groupe de boutons d'action */
@@ -4217,19 +4391,16 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--bleu-principal);
 }
 
-/* Layout 2 colonnes pour interventions (Aperçu 40% + Notes 60%) */
-.intervention-layout-2col {
+/* Ligne de cartes pour interventions (Patterns + Niveaux + Notes) */
+.intervention-cartes-row {
     display: grid;
-    grid-template-columns: 40fr 60fr;
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    align-items: stretch;
 }
 
-.intervention-col-gauche {
-    /* Colonne gauche: cartes d'analyse empilées (Patterns + Niveaux RàI) */
-}
-
-.intervention-col-droite {
-    /* Colonne droite: notes individuelles */
+.intervention-cartes-row > .profil-carte {
+    margin: 0;
 }
 
 /* 🆕 BETA 91: Module portfolio (sélection artefacts) */

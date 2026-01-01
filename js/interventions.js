@@ -31,8 +31,8 @@
  *     patternsCommuns: { 'Blocage émergent': 5 },
  *     progressions: { 'En progression': 3, 'Plateau': 2, 'Régression': 2 },
  *     niveauxRai: { '1': 0, '2': 5, '3': 2 },
- *     risqueMoyen: 0.45,
- *     risqueDistribution: { 'Minimal': 0, 'Faible': 2, 'Modéré': 3, 'Élevé': 2, 'Critique': 0 }
+ *     engagementMoyen: 0.55,
+ *     engagementDistribution: { 'Excellent': 0, 'Bon': 2, 'En développement': 3, 'Insuffisant': 2, 'Critique': 0 }
  *   },
  *   observations: 'Notes prises durant la rencontre...',
  *   notesIndividuelles: { '1234567': 'Excellente participation...', '7654321': 'A besoin de...' },
@@ -207,8 +207,8 @@ function analyserSousGroupe(dasEtudiants) {
     const patternsCommuns = {};
     const progressions = {};
     const niveauxRai = { '1': 0, '2': 0, '3': 0 };
-    const risqueDistribution = { 'Minimal': 0, 'Faible': 0, 'Modéré': 0, 'Élevé': 0, 'Critique': 0 };
-    let sommeRisque = 0;
+    const engagementDistribution = { 'Excellent': 0, 'Bon': 0, 'En développement': 0, 'Insuffisant': 0, 'Critique': 0 };
+    let sommeEngagement = 0;
     let nbEtudiants = dasEtudiants.length;
 
     dasEtudiants.forEach(da => {
@@ -219,12 +219,12 @@ function analyserSousGroupe(dasEtudiants) {
         // Compter les niveaux RàI
         niveauxRai[cible.niveau] = (niveauxRai[cible.niveau] || 0) + 1;
 
-        // Accumuler les risques
-        sommeRisque += indices.R;
+        // Accumuler l'engagement (E = A × C × P)
+        sommeEngagement += (indices.E || 0);
 
-        // Distribution du risque
-        const interpR = interpreterRisque(indices.R);
-        risqueDistribution[interpR.niveau] = (risqueDistribution[interpR.niveau] || 0) + 1;
+        // Distribution de l'engagement
+        const niveauE = interpreterNiveauEngagement(indices.E);
+        engagementDistribution[niveauE] = (engagementDistribution[niveauE] || 0) + 1;
 
         // Compter les patterns
         const pattern = cible.pattern;
@@ -259,9 +259,22 @@ function analyserSousGroupe(dasEtudiants) {
         patternsCommuns: patternsCommuns,
         progressions: progressions,
         niveauxRai: niveauxRai,
-        risqueMoyen: nbEtudiants > 0 ? (sommeRisque / nbEtudiants) : 0,
-        risqueDistribution: risqueDistribution
+        engagementMoyen: nbEtudiants > 0 ? (sommeEngagement / nbEtudiants) : 0,
+        engagementDistribution: engagementDistribution
     };
+}
+
+/**
+ * Interprète le niveau d'engagement
+ * @param {number} valeur - Valeur E entre 0 et 1
+ * @returns {string} Niveau d'engagement
+ */
+function interpreterNiveauEngagement(valeur) {
+    if (valeur >= 0.85) return 'Excellent';
+    if (valeur >= 0.75) return 'Bon';
+    if (valeur >= 0.65) return 'En développement';
+    if (valeur >= 0.40) return 'Insuffisant';
+    return 'Critique';
 }
 
 /**
@@ -416,14 +429,12 @@ function afficherListeInterventions() {
                             <span>${badgeStatut}</span>
                             <span class="badge-type-intervention">${badgeType}</span>
                             <span class="badge-rai-${intervention.niveauRai}">${badgeNiveau}</span>
-                            <span class="text-muted">${formaterDateLisible(intervention.date)}</span>
-                            ${intervention.heure ? `<span class="text-muted">${intervention.heure}</span>` : ''}
                         </div>
                     </div>
                     <div class="intervention-actions">
                         ${intervention.statut !== 'completee' ? `
                             <button onclick="ouvrirIntervention('${intervention.id}')" class="btn btn-principal">
-                                Ouvrir
+                                Modifier
                             </button>
                         ` : `
                             <button onclick="ouvrirIntervention('${intervention.id}')" class="btn btn-secondaire">
@@ -434,19 +445,13 @@ function afficherListeInterventions() {
                     </div>
                 </div>
 
-                ${intervention.description ? `
-                    <p class="intervention-description">${intervention.description}</p>
-                ` : ''}
+                <p class="intervention-description">${intervention.description || ''} <span class="text-muted">${formaterDateLisible(intervention.date)}${intervention.heure ? ` à ${intervention.heure}` : ''}</span></p>
 
                 ${(intervention.analyse || (intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0)) ? `
                     <h4 class="intervention-titre u-mb-10 u-mt-10">Aperçu du sous-groupe (${intervention.analyse ? intervention.analyse.nbEtudiants : 0} étudiant·e·s)</h4>
-                    <div class="intervention-layout-2col">
-                        <div class="intervention-col-gauche">
-                            ${intervention.analyse ? genererAffichageAnalyseCartes(intervention.analyse) : ''}
-                        </div>
-                        <div class="intervention-col-droite">
-                            ${intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0 ? genererAffichageNotesIndividuelles(intervention.notesIndividuelles) : ''}
-                        </div>
+                    <div class="intervention-cartes-row">
+                        ${intervention.analyse ? genererAffichageAnalyseCartes(intervention.analyse) : ''}
+                        ${intervention.notesIndividuelles && Object.keys(intervention.notesIndividuelles).length > 0 ? genererAffichageNotesIndividuelles(intervention.notesIndividuelles) : ''}
                     </div>
                 ` : ''}
 
@@ -524,7 +529,7 @@ function genererAffichageAnalyseCartes(analyse) {
     let html = '';
 
     // CARTE 1: Patterns d'apprentissage
-    html += '<div class="profil-carte u-mb-15">';
+    html += '<div class="profil-carte">';
 
     // Calculer le nombre de patterns distincts
     const nbPatterns = analyse.patternsCommuns ? Object.keys(analyse.patternsCommuns).length : 0;
@@ -599,16 +604,21 @@ function genererAffichageNotesIndividuelles(notesIndividuelles) {
     if (!notesIndividuelles || Object.keys(notesIndividuelles).length === 0) return '';
 
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
+    const nbNotes = Object.keys(notesIndividuelles).length;
+
     let html = `
-        <div class="carte intervention-notes-individuelles">
-            <h5>Notes individuelles</h5>
+        <div class="profil-carte">
+            <div class="carte-metrique-header">
+                <h4>Notes individuelles</h4>
+                <strong>${nbNotes}</strong>
+            </div>
     `;
 
     Object.entries(notesIndividuelles).forEach(([da, note]) => {
         const etudiant = etudiants.find(e => e.da === da);
         if (etudiant && note) {
             html += `
-                <div style="margin-bottom: 8px;">
+                <div style="margin-bottom: 8px; font-size: 0.9rem;">
                     <strong>${etudiant.prenom} ${etudiant.nom}:</strong> ${note}
                 </div>
             `;
