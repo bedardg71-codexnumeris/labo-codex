@@ -1448,7 +1448,7 @@ async function basculerDonneesDemo(activer) {
 
     } else {
         // DÉSACTIVER : Supprimer toutes les données de démonstration
-        if (!confirm('Supprimer toutes les données de démonstration ?\n\nCette action supprimera :\n• Le cours de démonstration\n• Les étudiants du groupe démo\n• Toutes les évaluations associées\n• Toutes les présences associées\n\nCette action est irréversible.')) {
+        if (!confirm('Supprimer toutes les données de démonstration ?\n\nCette action supprimera :\n• Le cours de démonstration\n• Les étudiants du groupe démo\n• Toutes les évaluations associées\n• Toutes les présences associées\n\nVous pourrez recharger les données originales en recochant la case, mais vos expérimentations seront perdues.')) {
             // Recocher la checkbox si l'utilisateur annule
             document.getElementById('checkboxDonneesDemo').checked = true;
             return;
