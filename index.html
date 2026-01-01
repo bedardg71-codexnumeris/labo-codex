@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de suivi Beta 95 - Refonte UX Réglages</title>
+    <title>Système de suivi Beta 95 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2025123102">
+    <link rel="stylesheet" href="styles.css?v=2026010101">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -3058,7 +3058,7 @@
                     <div class="titre-section">
                         <h1>Système de suivi des apprentissages et de gestion de la notation</h1>
                         <p class="meta">
-                            Beta 95 - 27 décembre 2025
+                            Beta 95 - 1er janvier 2026
                             <span class="pastille-nouveautes" onclick="afficherModalNouveautes()" title="Voir les nouveautés">✉️🔴</span>
                             <button class="btn-backup-warning" onclick="window.backupReminder.afficherModal()" title="Protégez vos données">⚠️</button>
                         </p>
@@ -9560,6 +9560,40 @@ Exemple :
                     <h2>Introduction au système de monitorage</h2>
                     <p class="text-muted">« L'objectif est de faire mentir les prédictions de risque par nos interventions proactives ! »</p>
 
+                    <!-- Carte: Présentation de l'application -->
+                    <div class="carte accordeon ouvert" id="accordeon-aide-presentation">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Présentation de l'application
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu" style="display: block;">
+                            <p><strong>L'intelligence artificielle n'est peut-être pas l'instrument idéal pour soutenir un·e enseignant·e dans l'accompagnement de l'apprentissage. L'expert·e, c'est toujours l'enseignant·e, pas l'outil.</strong></p>
+
+                            <p>Cette application de suivi des apprentissages permet de capturer les <em>micro data</em> générées dans la classe, de les trier et de les interpréter afin de mieux organiser l'apprentissage et l'accompagnement des élèves.</p>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Qu'est-ce que les micro data ?</h4>
+                                <p>Les <strong>micro données</strong> sont des informations créées, collectées et traitées localement par un·e enseignant·e tout au long du trimestre : présences, notes, observations, interventions. Ces données sont généralement perdues en fin de session.</p>
+                                <p class="mt-10">L'application permet de <strong>mettre en relation</strong> ces informations pour créer des portraits dynamiques de l'apprentissage, tant individuels que collectifs.</p>
+                            </div>
+
+                            <p><strong>Fonctionnalités principales :</strong></p>
+                            <ul>
+                                <li><strong>Tableau de bord</strong> : Indicateurs globaux A-C-P-E, détection précoce des difficultés</li>
+                                <li><strong>Portraits individuels</strong> : Profil détaillé de chaque étudiant avec forces, défis et recommandations</li>
+                                <li><strong>Captures hebdomadaires</strong> : Vue longitudinale de la progression (snapshots)</li>
+                                <li><strong>Rétroactions personnalisées</strong> : Assemblage automatique de commentaires selon vos cartouches</li>
+                                <li><strong>Pratiques de notation</strong> : Support PAN-Maîtrise, Sommative et autres pratiques</li>
+                            </ul>
+
+                            <div class="alerte alerte-succes">
+                                <p><strong>Autonomie et sobriété</strong></p>
+                                <p>L'application fonctionne <strong>entièrement en local</strong>, directement dans votre navigateur. Les données sont stockées sur votre appareil (localStorage/IndexedDB), sans aucun transfert cloud. Aucune IA générative n'est utilisée pour l'analyse.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Carte: Qu'est-ce que le monitorage -->
                     <div class="carte accordeon" id="accordeon-aide-monitorage">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
@@ -9762,6 +9796,74 @@ Exemple :
                             </div>
 
                             <p class="mt-15"><strong>Règle d'or :</strong> Les modules ne se parlent JAMAIS directement. Communication via localStorage uniquement.</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Trois modes d'utilisation -->
+                    <div class="carte accordeon" id="accordeon-aide-modes">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Trois modes d'utilisation
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>L'application fonctionne selon trois modes distincts :</p>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Mode Normal</h4>
+                                <p>Toutes les fonctionnalités de gestion de cours et d'évaluation sont disponibles. C'est le mode par défaut pour l'utilisation quotidienne.</p>
+                            </div>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Mode Assisté</h4>
+                                <p>Active l'assistant de configuration <strong>Primo</strong> qui guide l'enseignant·e à travers les étapes de mise en place : définition du trimestre, création du cours, importation du groupe, configuration des pratiques de notation. Ce mode facilite l'appropriation de l'outil sans être surchargé par la complexité des options disponibles.</p>
+                            </div>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Mode Anonymisé</h4>
+                                <p>Masque toutes les informations nominatives (noms, DA) pour permettre :</p>
+                                <ul class="mt-5">
+                                    <li>Des <strong>démonstrations publiques</strong> sans compromettre la vie privée</li>
+                                    <li>La <strong>capture d'écran</strong> pour documentation ou formation</li>
+                                    <li>La <strong>discussion de résultats</strong> entre collègues</li>
+                                    <li>Le respect des <strong>exigences éthiques de la recherche</strong></li>
+                                </ul>
+                            </div>
+
+                            <div class="alerte alerte-succes">
+                                <p><strong>Accès aux modes</strong></p>
+                                <p>Le sélecteur de mode se trouve dans <strong>Réglages → Préférences</strong>. Le mode peut être changé à tout moment.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Partage et communs éducatifs -->
+                    <div class="carte accordeon" id="accordeon-aide-partage">
+                        <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Partage et communs éducatifs
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>L'application comprend un système d'import/export qui permet de <strong>partager du matériel pédagogique</strong> entre collègues :</p>
+
+                            <ul>
+                                <li><strong>Grilles d'évaluation</strong> : Critères et pondérations</li>
+                                <li><strong>Échelles de performance</strong> : Niveaux et descriptions</li>
+                                <li><strong>Cartouches de rétroaction</strong> : Commentaires prédéfinis par critère</li>
+                                <li><strong>Configurations de pratiques</strong> : Paramètres complets</li>
+                            </ul>
+
+                            <div class="alerte alerte-information">
+                                <h4 style="color: var(--bleu-principal); margin-bottom: 10px">Licence Creative Commons</h4>
+                                <p>Tout matériel exporté est protégé par la licence <strong>CC BY-NC-SA 4.0</strong>, qui permet le partage et l'adaptation tout en préservant l'attribution à la personne autrice originale.</p>
+                                <p class="mt-10">Cette approche favorise l'émergence de <strong>communs éducatifs</strong> : plutôt que de recommencer à zéro, on peut s'inspirer du travail de ses pairs, l'adapter à son contexte et le redistribuer à son tour.</p>
+                            </div>
+
+                            <div class="alerte alerte-succes">
+                                <p><strong>Protection des données</strong></p>
+                                <p>Les exports de matériel pédagogique ne contiennent <strong>jamais</strong> de données confidentielles (noms d'étudiants, notes, présences). Seul le matériel réutilisable est partagé.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -12826,7 +12928,7 @@ Exemple :
                         <table class="table-collapse">
                             <tr>
                                 <td class="td-bold-30-bleu">Version</td>
-                                <td class="ligne-separee-bleu">Beta 95 (27 décembre 2025)<br>
+                                <td class="ligne-separee-bleu">Beta 95 (1er janvier 2026)<br>
                                     <span class="text-muted" style="font-size: 0.9rem">Stabilisation H2026</span>
                                 </td>
                             </tr>
