@@ -64,6 +64,34 @@ async function chargerDonneesDemo() {
             console.log(`   → Cours actif défini: ${coursDemo.sigle} (${coursDemo.id})`);
         }
 
+        // ✅ AJOUTÉ (31 déc 2025) : Activer le trimestre demo
+        // Pour que cle() retourne le préfixe 'demo_' et trouve les données namespacées
+        // obtenirTrimestreActif() cherche dans le tableau trimestres celui avec actif: true
+        const trimestres = await db.get('trimestres') || [];
+
+        // Désactiver tous les trimestres existants
+        trimestres.forEach(t => t.actif = false);
+
+        // Ajouter ou mettre à jour le trimestre demo
+        const indexDemo = trimestres.findIndex(t => t.id === 'demo');
+        const trimestreDemo = {
+            id: 'demo',
+            nom: 'Démonstration',
+            session: 'D',
+            annee: '2025',
+            actif: true,
+            isDemo: true
+        };
+
+        if (indexDemo >= 0) {
+            trimestres[indexDemo] = trimestreDemo;
+        } else {
+            trimestres.push(trimestreDemo);
+        }
+
+        await db.set('trimestres', trimestres);
+        console.log('   → Trimestre demo activé dans le tableau trimestres');
+
         // Marquer comme chargées
         localStorage.setItem('demo-chargees', 'true');
 
@@ -236,6 +264,28 @@ async function dechargerDonneesDemo() {
 
         // Supprimer le groupe 9999 de toutes les structures
         await supprimerGroupe9999();
+
+        // ✅ AJOUTÉ (31 déc 2025) : Désactiver le trimestre demo et réactiver un autre
+        const trimestres = await db.get('trimestres') || [];
+        const indexDemo = trimestres.findIndex(t => t.id === 'demo');
+
+        if (indexDemo >= 0) {
+            // Désactiver le trimestre demo
+            trimestres[indexDemo].actif = false;
+
+            // Réactiver le premier trimestre non-demo (ex: a2025)
+            const autresTrimestres = trimestres.filter(t => t.id !== 'demo');
+            if (autresTrimestres.length > 0) {
+                const trimestreAReactiver = autresTrimestres[0];
+                const indexAReactiver = trimestres.findIndex(t => t.id === trimestreAReactiver.id);
+                if (indexAReactiver >= 0) {
+                    trimestres[indexAReactiver].actif = true;
+                    console.log(`   → Trimestre ${trimestreAReactiver.id} réactivé`);
+                }
+            }
+
+            await db.set('trimestres', trimestres);
+        }
 
         // Marquer comme non chargées
         localStorage.removeItem('demo-chargees');
