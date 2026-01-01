@@ -247,7 +247,10 @@ function filtrerEtudiantsParGroupe() {
  * - 'productions' : Array des productions (nom historique)
  */
 function chargerProductionsDansSelect() {
-    const productions = db.getSync('productions', []);
+    // ✅ CORRIGÉ (31 déc 2025) : Utiliser obtenirDonneesSelonMode pour le namespacing
+    const productions = (typeof obtenirDonneesSelonMode === 'function')
+        ? obtenirDonneesSelonMode('productions')
+        : db.getSync('productions', []);
     const select = document.getElementById('selectProduction1');
 
     if (!select) return;

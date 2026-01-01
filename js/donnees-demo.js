@@ -52,20 +52,8 @@ async function chargerDonneesDemo() {
 
         console.log(`   → Contient: ${packDemo.listeCours?.length || 0} cours, ${packDemo.groupeEtudiants?.length || 0} étudiants`);
 
-        // Fusionner avec les données existantes
-        console.log('   → Fusion avec données existantes...');
-        await fusionnerDonneesDemo(packDemo);
-
-        // ✅ AJOUTÉ (31 déc 2025) : Activer le cours demo comme cours actif
-        // Pour que obtenirDonneesSelonMode() filtre correctement les données
-        const coursDemo = packDemo.listeCours?.[0];
-        if (coursDemo) {
-            await db.set('infoCours', coursDemo);
-            console.log(`   → Cours actif défini: ${coursDemo.sigle} (${coursDemo.id})`);
-        }
-
-        // ✅ AJOUTÉ (31 déc 2025) : Activer le trimestre demo
-        // Pour que cle() retourne le préfixe 'demo_' et trouve les données namespacées
+        // ✅ DÉPLACÉ AVANT FUSION (31 déc 2025) : Activer le trimestre demo d'abord
+        // Pour que cle() retourne le préfixe 'demo_' lors de la fusion des données
         // obtenirTrimestreActif() cherche dans le tableau trimestres celui avec actif: true
         const trimestres = await db.get('trimestres') || [];
 
@@ -90,7 +78,19 @@ async function chargerDonneesDemo() {
         }
 
         await db.set('trimestres', trimestres);
-        console.log('   → Trimestre demo activé dans le tableau trimestres');
+        console.log('   → Trimestre demo activé AVANT fusion');
+
+        // ✅ Activer le cours demo comme cours actif
+        // Pour que obtenirDonneesSelonMode() filtre correctement les données
+        const coursDemo = packDemo.listeCours?.[0];
+        if (coursDemo) {
+            await db.set('infoCours', coursDemo);
+            console.log(`   → Cours actif défini: ${coursDemo.sigle} (${coursDemo.id})`);
+        }
+
+        // Fusionner avec les données existantes (APRÈS activation trimestre)
+        console.log('   → Fusion avec données existantes...');
+        await fusionnerDonneesDemo(packDemo);
 
         // Marquer comme chargées
         localStorage.setItem('demo-chargees', 'true');
@@ -127,7 +127,10 @@ async function fusionnerDonneesDemo(packDemo) {
     console.log('   ➜ listeCours fusionnée');
 
     // 2. Fusionner groupeEtudiants
-    const groupeEtudiants = await db.get('groupeEtudiants') || [];
+    // ✅ CORRIGÉ (31 déc 2025) : Utiliser cle() pour le namespacing par trimestre
+    const cleEtudiants = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
+    console.log(`   📦 Clé étudiants: ${cleEtudiants}`);
+    const groupeEtudiants = await db.get(cleEtudiants) || [];
     const etudiantsDemo = packDemo.groupeEtudiants || [];
 
     for (const etudiant of etudiantsDemo) {
@@ -138,12 +141,15 @@ async function fusionnerDonneesDemo(packDemo) {
             groupeEtudiants.push(etudiant);
         }
     }
-    await db.set('groupeEtudiants', groupeEtudiants);
-    console.log('   ➜ groupeEtudiants fusionné');
+    await db.set(cleEtudiants, groupeEtudiants);
+    console.log(`   ➜ ${cleEtudiants} fusionné (${etudiantsDemo.length} étudiants demo)`);
 
     // 3. Fusionner productions
+    // ✅ CORRIGÉ (31 déc 2025) : Utiliser cle() pour le namespacing par trimestre
     if (packDemo.productions) {
-        const productions = await db.get('productions') || [];
+        const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+        console.log(`   📦 Clé productions: ${cleProductions}`);
+        const productions = await db.get(cleProductions) || [];
         const productionsDemo = packDemo.productions || [];
 
         for (const prod of productionsDemo) {
@@ -152,15 +158,17 @@ async function fusionnerDonneesDemo(packDemo) {
                 productions.push(prod);
             }
         }
-        await db.set('productions', productions);
-        console.log('   ➜ productions fusionnées');
+        await db.set(cleProductions, productions);
+        console.log(`   ➜ ${cleProductions} fusionnées (${productionsDemo.length} productions demo)`);
     }
 
     // 4. Fusionner evaluations (evaluationsSauvegardees)
-    // ✅ CORRIGÉ (31 déc 2025) : Le pack utilise evaluationsSauvegardees, pas evaluations
+    // ✅ CORRIGÉ (31 déc 2025) : Utiliser cle() pour le namespacing par trimestre
     const evaluationsDemo = packDemo.evaluationsSauvegardees || packDemo.evaluations || [];
     if (evaluationsDemo.length > 0) {
-        const evaluations = await db.get('evaluationsSauvegardees') || [];
+        const cleEvaluations = (typeof window.cle === 'function') ? window.cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
+        console.log(`   📦 Clé évaluations: ${cleEvaluations}`);
+        const evaluations = await db.get(cleEvaluations) || [];
 
         for (const evalDemo of evaluationsDemo) {
             const existe = evaluations.some(e => e.id === evalDemo.id);
@@ -168,8 +176,8 @@ async function fusionnerDonneesDemo(packDemo) {
                 evaluations.push(evalDemo);
             }
         }
-        await db.set('evaluationsSauvegardees', evaluations);
-        console.log(`   ➜ evaluationsSauvegardees fusionnées (${evaluationsDemo.length} ajoutées)`);
+        await db.set(cleEvaluations, evaluations);
+        console.log(`   ➜ ${cleEvaluations} fusionnées (${evaluationsDemo.length} évaluations demo)`);
     }
 
     // 5. Fusionner grilles (si présentes)
@@ -204,8 +212,11 @@ async function fusionnerDonneesDemo(packDemo) {
     }
 
     // 7. Fusionner présences (si présentes)
+    // ✅ CORRIGÉ (31 déc 2025) : Utiliser cle() pour le namespacing par trimestre
     if (packDemo.presences) {
-        const presences = await db.get('presences') || {};
+        const clePresences = (typeof window.cle === 'function') ? window.cle('presences') : 'presences';
+        console.log(`   📦 Clé présences: ${clePresences}`);
+        const presences = await db.get(clePresences) || {};
         const presencesDemo = packDemo.presences || {};
 
         // Fusionner les présences par date
@@ -220,8 +231,8 @@ async function fusionnerDonneesDemo(packDemo) {
                 }
             }
         }
-        await db.set('presences', presences);
-        console.log('   ➜ presences fusionnées');
+        await db.set(clePresences, presences);
+        console.log(`   ➜ ${clePresences} fusionnées`);
     }
 
     // 8. Fusionner cartouches (clés cartouches_*)
@@ -301,51 +312,59 @@ async function dechargerDonneesDemo() {
 
 /**
  * Supprime toutes les données demo
- * ✅ CORRIGÉ (31 déc 2025) : Utilise 'demo' comme groupe et coursId: 'demo-cours'
+ * ✅ CORRIGÉ (31 déc 2025) : Utilise cle() pour les clés namespacées
  */
 async function supprimerGroupe9999() {
+    // ✅ Utiliser cle() pour les clés namespacées (le trimestre demo est encore actif)
+    const cleEtudiants = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+    const cleEvaluations = (typeof window.cle === 'function') ? window.cle('evaluationsSauvegardees') : 'evaluationsSauvegardees';
+    const clePresences = (typeof window.cle === 'function') ? window.cle('presences') : 'presences';
+
+    console.log(`   📦 Clés à nettoyer: ${cleEtudiants}, ${cleProductions}, ${cleEvaluations}, ${clePresences}`);
+
     // 1. Supprimer étudiants groupe demo
-    const groupeEtudiants = await db.get('groupeEtudiants') || [];
+    const groupeEtudiants = await db.get(cleEtudiants) || [];
     const dasDemo = groupeEtudiants
         .filter(e => e.groupe === 'demo' || e.coursId === 'demo-cours' || e.da?.startsWith('DEMO'))
         .map(e => e.da);
     const etudiantsFiltres = groupeEtudiants.filter(e =>
         e.groupe !== 'demo' && e.coursId !== 'demo-cours' && !e.da?.startsWith('DEMO')
     );
-    await db.set('groupeEtudiants', etudiantsFiltres);
-    console.log(`   ➜ ${dasDemo.length} étudiants demo supprimés`);
+    await db.set(cleEtudiants, etudiantsFiltres);
+    console.log(`   ➜ ${dasDemo.length} étudiants demo supprimés de ${cleEtudiants}`);
 
-    // 2. Supprimer cours demo
+    // 2. Supprimer cours demo (listeCours n'est pas namespacé)
     const listeCours = await db.get('listeCours') || [];
     const coursFiltres = listeCours.filter(c => c.id !== 'demo-cours' && c.groupe !== 'demo');
     await db.set('listeCours', coursFiltres);
     console.log('   ➜ Cours demo supprimés');
 
-    // 3. Supprimer évaluations demo (evaluationsSauvegardees)
-    const evaluations = await db.get('evaluationsSauvegardees') || [];
+    // 3. Supprimer évaluations demo
+    const evaluations = await db.get(cleEvaluations) || [];
     const evalsFiltrees = evaluations.filter(e =>
         e.coursId !== 'demo-cours' && !e.id?.startsWith('EVAL_DEMO')
     );
-    await db.set('evaluationsSauvegardees', evalsFiltrees);
-    console.log('   ➜ Évaluations demo supprimées');
+    await db.set(cleEvaluations, evalsFiltrees);
+    console.log(`   ➜ Évaluations demo supprimées de ${cleEvaluations}`);
 
     // 4. Supprimer présences des étudiants demo
-    const presences = await db.get('presences') || {};
+    const presences = await db.get(clePresences) || {};
     for (const date in presences) {
         for (const da of dasDemo) {
             delete presences[date]?.[da];
         }
     }
-    await db.set('presences', presences);
-    console.log('   ➜ Présences demo supprimées');
+    await db.set(clePresences, presences);
+    console.log(`   ➜ Présences demo supprimées de ${clePresences}`);
 
     // 5. Supprimer productions demo
-    const productions = await db.get('productions') || [];
+    const productions = await db.get(cleProductions) || [];
     const prodsFiltrees = productions.filter(p =>
         p.coursId !== 'demo-cours' && !p.id?.startsWith('PROD_')
     );
-    await db.set('productions', prodsFiltrees);
-    console.log('   ➜ Productions demo supprimées');
+    await db.set(cleProductions, prodsFiltrees);
+    console.log(`   ➜ Productions demo supprimées de ${cleProductions}`);
 
     // Synchroniser vers localStorage cache
     await db.syncToLocalStorageCache();
