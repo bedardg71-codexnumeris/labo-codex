@@ -73,17 +73,23 @@ const PACK_DEMARRAGE = {
       "artefacts": ["PROD_ART1", "PROD_ART2", "PROD_ART3"], "coursId": "demo-cours"
     },
     {
-      "id": "PROD_ART1", "titre": "Artefact 1 - Carte mentale", "description": "Carte mentale thème littéraire",
+      "id": "PROD_ART1", "titre": "Artefact 1 - Stratégies de lecture", "description": "Stratégies de lecture",
+      "objectif": "Développer sa capacité à utiliser efficacement différentes stratégies de lecture et à documenter de manière claire et méthodique son processus d'analyse.",
+      "tache": "Appliquer au moins trois stratégies de lecture différentes sur un texte littéraire et laisser des traces visibles et organisées de cette analyse.",
       "type": "artefact-portfolio", "dateEcheance": "2025-09-23", "semaine": 5, "ponderation": 20,
       "grilleId": "GRILLE_DEMO", "portfolioParent": "PROD_PORTFOLIO", "coursId": "demo-cours"
     },
     {
-      "id": "PROD_ART2", "titre": "Artefact 2 - Analyse de texte", "description": "Analyse extrait littéraire",
+      "id": "PROD_ART2", "titre": "Artefact 2 - Carte mentale", "description": "Carte mentale",
+      "objectif": "Développer sa capacité à analyser collaborativement un texte et à représenter les relations entre objectif, mécanismes et procédés.",
+      "tache": "En binôme, construire une carte mentale qui organise visuellement l'analyse du texte, en délibérant sur chaque élément pour arriver à une interprétation commune.",
       "type": "artefact-portfolio", "dateEcheance": "2025-10-21", "semaine": 8, "ponderation": 25,
       "grilleId": "GRILLE_DEMO", "portfolioParent": "PROD_PORTFOLIO", "coursId": "demo-cours"
     },
     {
-      "id": "PROD_ART3", "titre": "Artefact 3 - Dissertation", "description": "Dissertation sujet imposé",
+      "id": "PROD_ART3", "titre": "Artefact 3 - Plan de rédaction", "description": "Plan de rédaction",
+      "objectif": "Développer ta capacité à structurer une analyse littéraire cohérente en établissant des liens logiques clairs entre tous les éléments.",
+      "tache": "Transformer ta carte mentale en plan d'analyse détaillé en organisant logiquement les idées principales, secondaires, les preuves, les mini-conclusions et la transition.",
       "type": "artefact-portfolio", "dateEcheance": "2025-11-18", "semaine": 12, "ponderation": 25,
       "grilleId": "GRILLE_DEMO", "portfolioParent": "PROD_PORTFOLIO", "coursId": "demo-cours"
     },
