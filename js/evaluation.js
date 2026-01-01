@@ -4396,18 +4396,32 @@ function modifierEvaluation(evaluationId) {
             const selectCartouche = document.getElementById('selectCartoucheEval');
             let cartoucheChargee = false;
 
-            if (selectCartouche && evaluation.cartoucheId) {
-                // Vérifier que la cartouche existe vraiment
+            if (selectCartouche && evaluation.grilleId) {
+                // ✅ CORRIGÉ (31 déc 2025) : Peupler explicitement le dropdown avant de sélectionner
+                // Le dropdown peut être vide si chargerGrilleSelectionnee() n'a pas été appelée
                 const cartouches = db.getSync(`cartouches_${evaluation.grilleId}`, []);
-                const cartoucheExiste = cartouches.some(c => c.id === evaluation.cartoucheId);
+                console.log(`   📋 ${cartouches.length} cartouche(s) trouvée(s) pour ${evaluation.grilleId}`);
 
-                if (cartoucheExiste) {
-                    selectCartouche.value = evaluation.cartoucheId;
-                    selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
-                    cartoucheChargee = true;
-                    console.log('   ✅ Cartouche chargée:', evaluation.cartoucheId);
-                } else {
-                    console.warn(`   ⚠️ Cartouche ${evaluation.cartoucheId} non trouvée`);
+                // Peupler le dropdown
+                selectCartouche.innerHTML = '<option value="">-- Choisir une cartouche --</option>';
+                cartouches.forEach(cartouche => {
+                    const option = document.createElement('option');
+                    option.value = cartouche.id;
+                    option.textContent = cartouche.nom || cartouche.id;
+                    selectCartouche.appendChild(option);
+                });
+
+                // Sélectionner la cartouche si elle existe dans l'évaluation
+                if (evaluation.cartoucheId) {
+                    const cartoucheExiste = cartouches.some(c => c.id === evaluation.cartoucheId);
+                    if (cartoucheExiste) {
+                        selectCartouche.value = evaluation.cartoucheId;
+                        selectCartouche.dispatchEvent(new Event('change', { bubbles: true }));
+                        cartoucheChargee = true;
+                        console.log('   ✅ Cartouche chargée:', evaluation.cartoucheId);
+                    } else {
+                        console.warn(`   ⚠️ Cartouche ${evaluation.cartoucheId} non trouvée dans les ${cartouches.length} cartouches`);
+                    }
                 }
             }
 
