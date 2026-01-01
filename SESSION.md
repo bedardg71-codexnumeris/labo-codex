@@ -48,7 +48,7 @@ Nouvelle structure docs/ creee et peuplee.
 
 ### Phase 5 : Validation et finalisation
 - [x] Valider nouvelle structure
-- [ ] Commit final avec tag v0.95.5
+- [x] Commit final avec tag v0.95.5-reorganisation-docs
 
 ---
 
