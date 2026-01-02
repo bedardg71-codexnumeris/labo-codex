@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3d : Modals - Design System v7</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+body{margin:0;padding:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.6}
+.guide-header{background:linear-gradient(135deg,#032e5c 0%,#0f1e3a 100%);color:white;padding:30px 40px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.guide-header h1{margin:0 0 8px 0;font-size:2.2rem}
+.guide-header p{margin:0;font-size:1rem;color:#9fc5e8}
+.guide-header-nav{margin-top:20px}
+.guide-header-nav a{color:#9fc5e8;text-decoration:none;font-size:0.9rem;transition:color 0.2s ease;margin:0 15px}
+.guide-header-nav a:hover{color:white}
+.guide-container{max-width:1400px;margin:0 auto;padding:40px}
+.guide-section{margin-bottom:60px;padding-top:20px}
+.guide-section-title{color:#032e5c;font-size:2rem;margin-bottom:10px;padding-bottom:10px;border-bottom:3px solid #d97706}
+.guide-section-intro{color:#666;font-size:1.1rem;margin-bottom:30px;line-height:1.6}
+.guide-component{background:white;border:1px solid #e8f2fd;border-radius:8px;padding:30px;margin-bottom:30px;box-shadow:0 2px 8px rgba(3,46,92,0.05)}
+.guide-component-title{color:#032e5c;font-size:1.4rem;margin-bottom:15px}
+.guide-component-description{color:#666;font-size:0.95rem;margin-bottom:20px;line-height:1.6}
+.guide-example{background:#fafbfc;border:2px dashed #e8f2fd;border-radius:6px;padding:30px;margin:20px 0}
+.guide-example-title{font-size:0.9rem;font-weight:600;color:#032e5c;margin-bottom:15px;text-transform:uppercase;letter-spacing:0.5px}
+.guide-code{background:#2a3d5a;color:#e8f2fd;border-radius:6px;padding:20px;margin:20px 0;overflow-x:auto;font-family:'Monaco','Menlo','Courier New',monospace;font-size:0.85rem;line-height:1.6}
+.guide-code-title{font-size:0.85rem;font-weight:600;color:#666;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px}
+.guide-specs{background:#fff9f0;border-left:4px solid #d97706;padding:15px 20px;margin:20px 0;border-radius:0 6px 6px 0}
+.guide-specs-title{font-weight:600;color:#d97706;margin-bottom:10px}
+.guide-specs ul{margin:0;padding-left:20px}
+.guide-specs li{margin-bottom:5px;color:#666}
+.guide-do-dont{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0}
+.guide-do,.guide-dont{border-radius:6px;padding:20px}
+.guide-do{background:#f0fdf4;border:2px solid #22c55e}
+.guide-dont{background:#fef2f2;border:2px solid #ef4444}
+.guide-do-title,.guide-dont-title{font-weight:600;margin-bottom:10px;font-size:1.1rem}
+.guide-do-title{color:#16a34a}
+.guide-dont-title{color:#dc2626}
+
+/* Styles des boutons */
+.btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.btn-principal {
+    background: linear-gradient(135deg, #032e5c 0%, #064a8a 100%);
+    color: white;
+}
+
+.btn-principal:hover {
+    background: linear-gradient(135deg, #064a8a 0%, #032e5c 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
+}
+
+.btn-ajouter {
+    background: linear-gradient(135deg, #1e5a4a 0%, #2a7a65 100%);
+    color: white;
+}
+
+.btn-ajouter:hover {
+    background: linear-gradient(135deg, #2a7a65 0%, #1e5a4a 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 90, 74, 0.3);
+}
+
+.btn-modifier {
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+    color: white;
+}
+
+.btn-modifier:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+}
+
+.btn-annuler {
+    background: #f0f8ff;
+    color: #032e5c;
+    border: 1px solid #d4e6f5;
+}
+
+.btn-annuler:hover {
+    background: #e8f2fd;
+    border-color: #032e5c;
+}
+
+.btn-supprimer {
+    background: linear-gradient(135deg, #8a2a2a 0%, #b93a3a 100%);
+    color: white;
+}
+
+.btn-supprimer:hover {
+    background: linear-gradient(135deg, #b93a3a 0%, #8a2a2a 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(138, 42, 42, 0.3);
+}
+
+/* Styles des modals */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(3, 46, 92, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-contenu {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+}
+
+.modal-petit {
+    max-width: 400px;
+}
+
+.modal-grand {
+    max-width: 800px;
+}
+
+.modal-tres-grand {
+    max-width: 1000px;
+}
+
+.modal-entete {
+    padding: 24px 30px;
+    border-bottom: 2px solid #e8f2fd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-entete h2 {
+    margin: 0;
+    color: #032e5c;
+    font-size: 1.5rem;
+}
+
+.modal-corps {
+    padding: 30px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-pied {
+    padding: 20px 30px;
+    border-top: 1px solid #e8f2fd;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-fermer {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-fermer:hover {
+    background: #f0f8ff;
+    color: #032e5c;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+</style>
+</head>
+<body>
+<div class="guide-header">
+<h1>Module 3d : Modals</h1>
+<p>Structure • Styles • Animations • Accessibilité • Patterns</p>
+<div class="guide-header-nav">
+<a href="03c-barres-gradient.html">← Module 3c : Barres de gradient</a>
+<a href="index.html">Retour à l'index</a>
+<a href="04a-navigation.html">Module 4a : Navigation →</a>
+</div>
+</div>
+<div class="guide-container">
+
+    <!-- ===================== -->
+    <!-- MODALS -->
+    <!-- ===================== -->
+    <section id="modals" class="guide-section">
+        <h2 class="guide-section-title">Modals</h2>
+        <p class="guide-section-intro">
+            Les modals (fenêtres modales) sont des composants overlay qui apparaissent au-dessus du contenu principal 
+            pour afficher des informations importantes, des formulaires ou demander une confirmation à l'utilisateur. 
+            Ils bloquent l'interaction avec le reste de l'interface jusqu'à ce qu'ils soient fermés.
+        </p>
+
+        <!-- Structure de base -->
+        <div class="guide-component">
+            <h3 class="guide-component-title">Structure HTML de base</h3>
+            <p class="guide-component-description">
+                Tous les modals suivent une structure en deux couches : l'overlay (fond semi-transparent) 
+                et le contenu du modal (carte blanche au centre).
+            </p>
+
+            <div class="guide-code-title">HTML Pattern</div>
+            <div class="guide-code">&lt;!-- Modal avec overlay --&gt;
+&lt;div id="monModal" class="modal-overlay"&gt;
+    &lt;div class="modal-contenu"&gt;
+        &lt;!-- En-tête avec titre et bouton fermer --&gt;
+        &lt;div class="modal-entete"&gt;
+            &lt;h2&gt;Titre du modal&lt;/h2&gt;
+            &lt;button class="btn-fermer" onclick="fermerModal()"&gt;×&lt;/button&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Corps du modal --&gt;
+        &lt;div class="modal-corps"&gt;
+            &lt;!-- Contenu ici --&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Pied avec actions --&gt;
+        &lt;div class="modal-pied"&gt;
+            &lt;button class="btn btn-annuler" onclick="fermerModal()"&gt;Annuler&lt;/button&gt;
+            &lt;button class="btn btn-principal" onclick="sauvegarder()"&gt;Sauvegarder&lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">&#x1F4CB; Structure hiérarchique</div>
+                <ul>
+                    <li><strong>.modal-overlay</strong> : Conteneur principal avec fond semi-transparent (position: fixed)</li>
+                    <li><strong>.modal-contenu</strong> : Carte blanche centrée contenant le modal</li>
+                    <li><strong>.modal-entete</strong> : Titre + bouton de fermeture</li>
+                    <li><strong>.modal-corps</strong> : Contenu principal (scrollable si nécessaire)</li>
+                    <li><strong>.modal-pied</strong> : Actions (boutons Annuler/Confirmer)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Exemples interactifs -->
+        <div class="guide-component">
+            <h3 class="guide-component-title">Exemples interactifs</h3>
+            <p class="guide-component-description">
+                Clique sur les boutons ci-dessous pour voir les modals en action.
+            </p>
+
+            <div class="guide-example">
+                <div class="guide-example-title">Variantes de taille</div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px;">
+                    <button class="btn btn-principal" onclick="afficherModalPetit()">Modal Petit</button>
+                    <button class="btn btn-principal" onclick="afficherModalMoyen()">Modal Moyen (défaut)</button>
+                    <button class="btn btn-principal" onclick="afficherModalGrand()">Modal Grand</button>
+                    <button class="btn btn-principal" onclick="afficherModalTresGrand()">Modal Très Grand</button>
+                </div>
+            </div>
+
+            <div class="guide-example">
+                <div class="guide-example-title">Exemples de contenu</div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px;">
+                    <button class="btn btn-modifier" onclick="afficherModalConfirmation()">Confirmation</button>
+                    <button class="btn btn-ajouter" onclick="afficherModalFormulaire()">Formulaire</button>
+                    <button class="btn btn-principal" onclick="afficherModalBibliotheque()">Bibliothèque</button>
+                    <button class="btn btn-supprimer" onclick="afficherModalAlerte()">Alerte ⚠️</button>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">💡 Interactions à tester</div>
+                <ul>
+                    <li><strong>Touche Escape</strong> : Ferme le modal</li>
+                    <li><strong>Clic sur l'overlay</strong> : Ferme le modal</li>
+                    <li><strong>Bouton × (fermer)</strong> : Ferme le modal</li>
+                    <li><strong>Bouton Annuler</strong> : Ferme le modal</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Classes CSS -->
+        <div class="guide-component">
+            <h3 class="guide-component-title">Classes CSS et styles</h3>
+            <p class="guide-component-description">
+                Styles standardisés pour tous les modals de l'application.
+            </p>
+
+            <div class="guide-code-title">CSS - Styles de base</div>
+            <div class="guide-code">/* Overlay - Fond semi-transparent */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(3, 46, 92, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+/* Contenu du modal - Carte blanche centrée */
+.modal-contenu {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* En-tête */
+.modal-entete {
+    padding: 24px 30px;
+    border-bottom: 2px solid #e8f2fd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-entete h2 {
+    margin: 0;
+    color: #032e5c;
+    font-size: 1.5rem;
+}
+
+/* Corps - scrollable */
+.modal-corps {
+    padding: 30px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Pied avec actions */
+.modal-pied {
+    padding: 20px 30px;
+    border-top: 1px solid #e8f2fd;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Bouton fermer (×) */
+.btn-fermer {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-fermer:hover {
+    background: #f0f8ff;
+    color: #032e5c;
+}</div>
+        </div>
+
+        <!-- Variantes de taille -->
+        <div class="guide-component">
+            <h3 class="guide-component-title">Variantes de taille</h3>
+            <p class="guide-component-description">
+                Trois tailles standard pour s'adapter au contenu : petit, moyen (défaut), grand.
+            </p>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">&#x1F4CF; Dimensions</div>
+                <ul>
+                    <li><strong>Petit (.modal-petit)</strong> : max-width: 400px - Confirmations simples</li>
+                    <li><strong>Moyen (défaut)</strong> : max-width: 600px - Formulaires standards</li>
+                    <li><strong>Grand (.modal-grand)</strong> : max-width: 800px - Bibliothèques, contenu riche</li>
+                    <li><strong>Très grand (.modal-tres-grand)</strong> : max-width: 1000px - Tableaux, aperçus</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">CSS - Variantes</div>
+            <div class="guide-code">/* Petit modal */
+.modal-contenu.modal-petit {
+    max-width: 400px;
+}
+
+/* Grand modal */
+.modal-contenu.modal-grand {
+    max-width: 800px;
+}
+
+/* Très grand modal */
+.modal-contenu.modal-tres-grand {
+    max-width: 1000px;
+}</div>
+
+            <div class="guide-code-title">Exemple d'utilisation</div>
+            <div class="guide-code">&lt;!-- Modal de bibliothèque (grand) --&gt;
+&lt;div id="modalBibliotheque" class="modal-overlay"&gt;
+    &lt;div class="modal-contenu modal-grand"&gt;
+        &lt;!-- Contenu --&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</div>
+        </div>
+
+        <!-- Animations -->
+        <div class="guide-component">
+            <h3 class="guide-component-title">Animations et transitions</h3>
+            <p class="guide-component-description">
+                Animations fluides pour l'apparition et la disparition des modals.
+            </p>
+
+            <div class="guide-code-title">CSS - Animations</div>
+            <div class="guide-code">/* Animation d'apparition */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Application des animations */
+.modal-overlay {
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-contenu {
+    animation: slideIn 0.3s ease;
+}</div>
+        </div>
+
+        <!-- Patterns JavaScript -->
+        <div class="guide-component">
+            <h3 class="guide-component-title">Gestion JavaScript</h3>
+            <p class="guide-component-description">
+                Fonctions standard pour ouvrir, fermer et gérer les modals.
+            </p>
+
+            <div class="guide-code-title">JavaScript - Pattern de base</div>
+            <div class="guide-code">// Créer et afficher un modal
+function afficherModal(id, contenu) {
+    // Créer le HTML du modal
+    const modalHTML = `
+        &lt;div id="${id}" class="modal-overlay"&gt;
+            &lt;div class="modal-contenu"&gt;
+                &lt;div class="modal-entete"&gt;
+                    &lt;h2&gt;Titre&lt;/h2&gt;
+                    &lt;button class="btn-fermer" onclick="fermerModal('${id}')"&gt;×&lt;/button&gt;
+                &lt;/div&gt;
+                &lt;div class="modal-corps"&gt;
+                    ${contenu}
+                &lt;/div&gt;
+                &lt;div class="modal-pied"&gt;
+                    &lt;button class="btn btn-annuler" onclick="fermerModal('${id}')"&gt;Fermer&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    `;
+    
+    // Injecter dans le DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Fermer au clic sur l'overlay
+    document.getElementById(id).addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+            fermerModal(id);
+        }
+    });
+}
+
+// Fermer et supprimer un modal
+function fermerModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Fermer à la touche Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const modals = document.querySelectorAll('.modal-overlay');
+        if (modals.length > 0) {
+            modals[modals.length - 1].remove();
+        }
+    }
+});</div>
+        </div>
+
+        <!-- Pattern Bibliothèque -->
+        <div class="guide-component">
+            <h3 class="guide-component-title">Pattern spécifique : Bibliothèques</h3>
+            <p class="guide-component-description">
+                Les modals de bibliothèque (Productions, Grilles, Échelles, etc.) suivent un pattern standardisé 
+                avec deux sections : «&nbsp;Ma bibliothèque&nbsp;» et «&nbsp;Bibliothèque partagée&nbsp;».
+            </p>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">&#x1F4CB; Anatomie d'une bibliothèque</div>
+                <ul>
+                    <li><strong>Modal grand</strong> : max-width: 800px pour afficher les cartes confortablement</li>
+                    <li><strong>Deux sections</strong> : Ma bibliothèque (éditable) + Bibliothèque partagée (lecture seule)</li>
+                    <li><strong>Cartes cliquables</strong> : Sélection visuelle avec bordure bleue épaissie</li>
+                    <li><strong>Actions contextuelles</strong> : Modifier/Supprimer (ma biblio), Dupliquer (partagée)</li>
+                    <li><strong>Bouton «&nbsp;Partager&nbsp;»</strong> : Ouvre sous-modal pour métadonnées CC BY-NC-SA 4.0</li>
+                </ul>
+            </div>
+
+            <div class="guide-example-title">Flux d'interaction</div>
+            <div class="guide-example">
+                <ol style="margin: 0; padding-left: 20px;">
+                    <li>Clic sur «&nbsp;Consulter la bibliothèque&nbsp;» dans la sidebar → Ouvre modal</li>
+                    <li>Sélection d'une carte → Bordure bleue + boutons d'action visibles</li>
+                    <li>Clic «&nbsp;Modifier&nbsp;» → Ouvre formulaire d'édition</li>
+                    <li>Sauvegarde → Rafraîchit le modal ET la sidebar</li>
+                    <li>Clic «&nbsp;Partager&nbsp;» → Ouvre sous-modal pour métadonnées</li>
+                </ol>
+            </div>
+
+            <div class="guide-code-title">JavaScript - Rafraîchissement</div>
+            <div class="guide-code">// Après toute modification, rafraîchir MODAL + SIDEBAR
+function apresModification() {
+    // 1. Rafraîchir le modal
+    rafraichirModalBibliotheque();
+    
+    // 2. Rafraîchir la sidebar
+    rafraichirSidebar();
+}</div>
+        </div>
+
+        <!-- Accessibilité -->
+        <div class="guide-component">
+            <h3 class="guide-component-title">⚠️ Accessibilité et focus</h3>
+            <p class="guide-component-description">
+                Bonnes pratiques pour garantir l'accessibilité des modals.
+            </p>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">&#x1F4CB; Checklist accessibilité</div>
+                <ul>
+                    <li><strong>Focus piège</strong> : Le focus doit rester dans le modal (tab ne sort pas)</li>
+                    <li><strong>Fermeture Escape</strong> : La touche Escape ferme toujours le modal</li>
+                    <li><strong>Clic overlay</strong> : Cliquer en dehors du modal le ferme</li>
+                    <li><strong>ARIA labels</strong> : role="dialog", aria-labelledby, aria-modal="true"</li>
+                    <li><strong>Focus initial</strong> : Placer le focus sur le premier élément interactif</li>
+                    <li><strong>Retour du focus</strong> : À la fermeture, redonner le focus à l'élément déclencheur</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">HTML - ARIA complet</div>
+            <div class="guide-code">&lt;div id="monModal" 
+     class="modal-overlay" 
+     role="dialog" 
+     aria-modal="true" 
+     aria-labelledby="titre-modal"&gt;
+    &lt;div class="modal-contenu"&gt;
+        &lt;div class="modal-entete"&gt;
+            &lt;h2 id="titre-modal"&gt;Titre du modal&lt;/h2&gt;
+            &lt;button class="btn-fermer" 
+                    onclick="fermerModal()" 
+                    aria-label="Fermer le modal"&gt;×&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;!-- Reste du modal --&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</div>
+        </div>
+
+        <!-- Usage emoji ⚠️ -->
+        <div class="guide-component">
+            <h3 class="guide-component-title">Usage des emojis dans les modals</h3>
+            <p class="guide-component-description">
+                Règle critique : L'emoji ⚠️ (triangle avertissement) est autorisé UNIQUEMENT dans les modals 
+                pour les messages d'alerte critiques. Il ne doit JAMAIS apparaître dans les messages inline.
+            </p>
+
+            <div class="guide-do-dont">
+                <div class="guide-do">
+                    <div class="guide-do-title">&#x2705; CORRECT</div>
+                    <div class="guide-code" style="margin-top: 10px;">&lt;!-- Modal de confirmation --&gt;
+&lt;div class="modal-corps"&gt;
+    &lt;p style="text-align: center;"&gt;
+        ⚠️ &lt;strong&gt;Attention&lt;/strong&gt;
+    &lt;/p&gt;
+    &lt;p&gt;Cette action est irréversible.&lt;/p&gt;
+&lt;/div&gt;</div>
+                </div>
+                <div class="guide-dont">
+                    <div class="guide-dont-title">❌ INCORRECT</div>
+                    <div class="guide-code" style="margin-top: 10px;">&lt;!-- Message inline (INTERDIT) --&gt;
+&lt;div class="alerte alerte-attention"&gt;
+    ⚠️ Certaines évaluations...
+&lt;/div&gt;</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bonnes pratiques -->
+        <div class="guide-component">
+            <h3 class="guide-component-title">Bonnes pratiques</h3>
+
+            <div class="guide-do-dont">
+                <div class="guide-do">
+                    <div class="guide-do-title">&#x2705; À FAIRE</div>
+                    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                        <li>Supprimer le modal du DOM avec .remove() à la fermeture</li>
+                        <li>Rafraîchir le modal ET la sidebar après modification</li>
+                        <li>Utiliser max-width adapté au contenu</li>
+                        <li>Ajouter backdrop-filter: blur(2px) sur l'overlay</li>
+                        <li>Fermer à l'Escape et au clic sur overlay</li>
+                        <li>Placer le focus sur le premier champ au chargement</li>
+                        <li>Limiter la hauteur (max-height: 85vh) et rendre scrollable</li>
+                    </ul>
+                </div>
+                <div class="guide-dont">
+                    <div class="guide-dont-title">❌ À ÉVITER</div>
+                    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                        <li>Oublier de rafraîchir le modal après une action</li>
+                        <li>Laisser le modal en display: none (toujours supprimer du DOM)</li>
+                        <li>Empiler plusieurs modals (fermer le précédent)</li>
+                        <li>Utiliser ⚠️ en dehors des modals</li>
+                        <li>Bloquer le scroll du body sans le réactiver</li>
+                        <li>Oublier les attributs ARIA pour l'accessibilité</li>
+                        <li>Modal trop haut (doit rester visible sans scroll vertical du viewport)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+<script>
+// Fonctions pour afficher les différents modals
+
+function afficherModalPetit() {
+    const modalHTML = `
+        <div id="modalPetit" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titre-modal-petit">
+            <div class="modal-contenu modal-petit">
+                <div class="modal-entete">
+                    <h2 id="titre-modal-petit">Modal Petit</h2>
+                    <button class="btn-fermer" onclick="fermerModal('modalPetit')" aria-label="Fermer le modal">×</button>
+                </div>
+                <div class="modal-corps">
+                    <p style="text-align: center; margin: 0;">
+                        Ceci est un modal petit (max-width: 400px).
+                    </p>
+                    <p style="text-align: center; margin: 15px 0 0 0; color: #666; font-size: 0.9rem;">
+                        Idéal pour les confirmations simples.
+                    </p>
+                </div>
+                <div class="modal-pied">
+                    <button class="btn btn-annuler" onclick="fermerModal('modalPetit')">Fermer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    ajouterEcouteurs('modalPetit');
+}
+
+function afficherModalMoyen() {
+    const modalHTML = `
+        <div id="modalMoyen" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titre-modal-moyen">
+            <div class="modal-contenu">
+                <div class="modal-entete">
+                    <h2 id="titre-modal-moyen">Modal Moyen (défaut)</h2>
+                    <button class="btn-fermer" onclick="fermerModal('modalMoyen')" aria-label="Fermer le modal">×</button>
+                </div>
+                <div class="modal-corps">
+                    <p>Ceci est un modal de taille moyenne (max-width: 600px).</p>
+                    <p style="color: #666;">
+                        C'est la taille par défaut, utilisée pour les formulaires standards 
+                        et la plupart des interactions courantes.
+                    </p>
+                </div>
+                <div class="modal-pied">
+                    <button class="btn btn-annuler" onclick="fermerModal('modalMoyen')">Annuler</button>
+                    <button class="btn btn-principal" onclick="fermerModal('modalMoyen')">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    ajouterEcouteurs('modalMoyen');
+}
+
+function afficherModalGrand() {
+    const modalHTML = `
+        <div id="modalGrand" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titre-modal-grand">
+            <div class="modal-contenu modal-grand">
+                <div class="modal-entete">
+                    <h2 id="titre-modal-grand">Modal Grand</h2>
+                    <button class="btn-fermer" onclick="fermerModal('modalGrand')" aria-label="Fermer le modal">×</button>
+                </div>
+                <div class="modal-corps">
+                    <h3 style="margin-top: 0;">Bibliothèque - Productions</h3>
+                    <p>Ceci est un modal grand (max-width: 800px).</p>
+                    <p style="color: #666;">
+                        Utilisé pour les bibliothèques (Productions, Grilles, Échelles) qui affichent 
+                        plusieurs cartes côte à côte et nécessitent plus d'espace.
+                    </p>
+                    <div style="background: #e8f2fd; padding: 20px; border-radius: 6px; margin-top: 20px;">
+                        <h4 style="margin-top: 0;">Ma bibliothèque</h4>
+                        <p style="margin: 0; color: #666;">Les cartes seraient affichées ici...</p>
+                    </div>
+                </div>
+                <div class="modal-pied">
+                    <button class="btn btn-annuler" onclick="fermerModal('modalGrand')">Fermer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    ajouterEcouteurs('modalGrand');
+}
+
+function afficherModalTresGrand() {
+    const modalHTML = `
+        <div id="modalTresGrand" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titre-modal-tres-grand">
+            <div class="modal-contenu modal-tres-grand">
+                <div class="modal-entete">
+                    <h2 id="titre-modal-tres-grand">Modal Très Grand</h2>
+                    <button class="btn-fermer" onclick="fermerModal('modalTresGrand')" aria-label="Fermer le modal">×</button>
+                </div>
+                <div class="modal-corps">
+                    <p>Ceci est un modal très grand (max-width: 1000px).</p>
+                    <p style="color: #666;">
+                        Utilisé pour afficher des tableaux larges, des aperçus de données complexes 
+                        ou du contenu nécessitant beaucoup d'espace horizontal.
+                    </p>
+                    <div style="background: #fafbfc; border: 2px dashed #e8f2fd; padding: 40px; border-radius: 6px; margin-top: 20px; text-align: center;">
+                        <p style="margin: 0; color: #999;">Zone de contenu large - Tableaux, graphiques, etc.</p>
+                    </div>
+                </div>
+                <div class="modal-pied">
+                    <button class="btn btn-annuler" onclick="fermerModal('modalTresGrand')">Fermer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    ajouterEcouteurs('modalTresGrand');
+}
+
+function afficherModalConfirmation() {
+    const modalHTML = `
+        <div id="modalConfirmation" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titre-modal-confirmation">
+            <div class="modal-contenu modal-petit">
+                <div class="modal-entete">
+                    <h2 id="titre-modal-confirmation">Confirmer la suppression</h2>
+                    <button class="btn-fermer" onclick="fermerModal('modalConfirmation')" aria-label="Fermer le modal">×</button>
+                </div>
+                <div class="modal-corps">
+                    <p style="text-align: center; margin: 0;">
+                        Êtes-vous sûr de vouloir supprimer cet élément ?
+                    </p>
+                    <p style="text-align: center; margin: 10px 0 0 0; color: #8a2a2a; font-weight: 600;">
+                        Cette action est irréversible.
+                    </p>
+                </div>
+                <div class="modal-pied">
+                    <button class="btn btn-annuler" onclick="fermerModal('modalConfirmation')">Annuler</button>
+                    <button class="btn btn-supprimer" onclick="fermerModal('modalConfirmation')">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    ajouterEcouteurs('modalConfirmation');
+}
+
+function afficherModalFormulaire() {
+    const modalHTML = `
+        <div id="modalFormulaire" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titre-modal-formulaire">
+            <div class="modal-contenu">
+                <div class="modal-entete">
+                    <h2 id="titre-modal-formulaire">Nouvelle production</h2>
+                    <button class="btn-fermer" onclick="fermerModal('modalFormulaire')" aria-label="Fermer le modal">×</button>
+                </div>
+                <div class="modal-corps">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #032e5c;">Titre</label>
+                        <input type="text" placeholder="Titre de la production" style="width: 100%; padding: 10px; border: 1px solid #e8f2fd; border-radius: 6px; font-size: 1rem;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #032e5c;">Description</label>
+                        <textarea placeholder="Description..." style="width: 100%; padding: 10px; border: 1px solid #e8f2fd; border-radius: 6px; font-size: 1rem; min-height: 100px;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-pied">
+                    <button class="btn btn-annuler" onclick="fermerModal('modalFormulaire')">Annuler</button>
+                    <button class="btn btn-ajouter" onclick="fermerModal('modalFormulaire')">Créer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    ajouterEcouteurs('modalFormulaire');
+}
+
+function afficherModalBibliotheque() {
+    const modalHTML = `
+        <div id="modalBibliotheque" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titre-modal-bibliotheque">
+            <div class="modal-contenu modal-grand">
+                <div class="modal-entete">
+                    <h2 id="titre-modal-bibliotheque">Bibliothèque - Productions</h2>
+                    <button class="btn-fermer" onclick="fermerModal('modalBibliotheque')" aria-label="Fermer le modal">×</button>
+                </div>
+                <div class="modal-corps">
+                    <h3 style="margin-top: 0; color: #032e5c;">Ma bibliothèque</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                        <div style="background: white; border: 2px solid #e8f2fd; border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.2s ease;">
+                            <h4 style="margin: 0 0 8px 0; color: #032e5c;">Production 1</h4>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Description courte...</p>
+                        </div>
+                        <div style="background: white; border: 2px solid #e8f2fd; border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.2s ease;">
+                            <h4 style="margin: 0 0 8px 0; color: #032e5c;">Production 2</h4>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Description courte...</p>
+                        </div>
+                    </div>
+                    
+                    <h3 style="color: #032e5c;">Bibliothèque partagée</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                        <div style="background: white; border: 2px solid #e8f2fd; border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.2s ease;">
+                            <h4 style="margin: 0 0 8px 0; color: #032e5c;">Production partagée</h4>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">Disponible en lecture seule</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-pied">
+                    <button class="btn btn-annuler" onclick="fermerModal('modalBibliotheque')">Fermer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    ajouterEcouteurs('modalBibliotheque');
+}
+
+function afficherModalAlerte() {
+    const modalHTML = `
+        <div id="modalAlerte" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="titre-modal-alerte">
+            <div class="modal-contenu modal-petit">
+                <div class="modal-entete">
+                    <h2 id="titre-modal-alerte">Alerte critique</h2>
+                    <button class="btn-fermer" onclick="fermerModal('modalAlerte')" aria-label="Fermer le modal">×</button>
+                </div>
+                <div class="modal-corps">
+                    <p style="text-align: center; margin: 0; font-size: 3rem;">⚠️</p>
+                    <p style="text-align: center; margin: 15px 0 0 0; font-weight: 600; color: #8a2a2a;">
+                        Attention : Action critique
+                    </p>
+                    <p style="text-align: center; margin: 10px 0 0 0; color: #666;">
+                        L'emoji ⚠️ est autorisé UNIQUEMENT dans les modals pour les alertes critiques.
+                    </p>
+                </div>
+                <div class="modal-pied">
+                    <button class="btn btn-annuler" onclick="fermerModal('modalAlerte')">Annuler</button>
+                    <button class="btn btn-supprimer" onclick="fermerModal('modalAlerte')">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    ajouterEcouteurs('modalAlerte');
+}
+
+// Fonction pour fermer un modal
+function fermerModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Ajouter les écouteurs pour fermeture Escape et clic overlay
+function ajouterEcouteurs(id) {
+    const modal = document.getElementById(id);
+    
+    // Fermer au clic sur l'overlay
+    modal.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+            fermerModal(id);
+        }
+    });
+}
+
+// Fermer à la touche Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const modals = document.querySelectorAll('.modal-overlay');
+        if (modals.length > 0) {
+            modals[modals.length - 1].remove();
+        }
+    }
+});
+</script>
+
+</div>
+</body>
+</html>

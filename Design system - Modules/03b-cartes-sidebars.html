@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 3b : Cartes et sidebars - Design System v7</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        body { margin: 0; padding: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 16px; line-height: 1.6; }
+        .guide-header { background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%); color: white; padding: 30px 40px; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+        .guide-header h1 { margin: 0 0 8px 0; font-size: 2.2rem; }
+        .guide-header p { margin: 0; font-size: 1rem; color: #9fc5e8; }
+        .guide-header-nav { margin-top: 20px; }
+        .guide-header-nav a { color: #9fc5e8; text-decoration: none; font-size: 0.9rem; transition: color 0.2s ease; margin: 0 15px; }
+        .guide-header-nav a:hover { color: white; }
+        .guide-container { max-width: 1400px; margin: 0 auto; padding: 40px; }
+        .guide-section { margin-bottom: 60px; padding-top: 20px; }
+        .guide-section-title { color: #032e5c; font-size: 2rem; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 3px solid #d97706; }
+        .guide-section-intro { color: #666; font-size: 1.1rem; margin-bottom: 30px; line-height: 1.6; }
+        .guide-component { background: white; border: 1px solid #e8f2fd; border-radius: 8px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(3, 46, 92, 0.05); }
+        .guide-component-title { color: #032e5c; font-size: 1.4rem; margin-bottom: 15px; }
+        .guide-component-description { color: #666; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6; }
+        .guide-example { background: #fafbfc; border: 2px dashed #e8f2fd; border-radius: 6px; padding: 30px; margin: 20px 0; }
+        .guide-example-title { font-size: 0.9rem; font-weight: 600; color: #032e5c; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .guide-code { background: #2a3d5a; color: #e8f2fd; border-radius: 6px; padding: 20px; margin: 20px 0; overflow-x: auto; font-family: 'Monaco', 'Menlo', 'Courier New', monospace; font-size: 0.85rem; line-height: 1.6; }
+        .guide-code-title { font-size: 0.85rem; font-weight: 600; color: #666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .guide-specs { background: #fff9f0; border-left: 4px solid #d97706; padding: 15px 20px; margin: 20px 0; border-radius: 0 6px 6px 0; }
+        .guide-specs-title { font-weight: 600; color: #d97706; margin-bottom: 10px; }
+        .guide-specs ul { margin: 0; padding-left: 20px; }
+        .guide-specs li { margin-bottom: 5px; color: #666; }
+        .guide-do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .guide-do, .guide-dont { border-radius: 6px; padding: 20px; }
+        .guide-do { background: #f0fdf4; border: 2px solid #22c55e; }
+        .guide-dont { background: #fef2f2; border: 2px solid #ef4444; }
+        .guide-do-title, .guide-dont-title { font-weight: 600; margin-bottom: 10px; font-size: 1.1rem; }
+        .guide-do-title { color: #16a34a; }
+        .guide-dont-title { color: #dc2626; }
+    </style>
+</head>
+<body>
+<div class="guide-header">
+    <h1>Module 3b : Cartes et sidebars</h1>
+    <p>Layouts • Navigation latérale</p>
+    <div class="guide-header-nav">
+        <a href="03a-tableaux.html">← Module 3a : Tableaux</a>
+        <a href="index.html">Retour à l'index</a>
+        <a href="03c-barres-gradient.html">Module 3c : Barres de gradient →</a>
+    </div>
+</div>
+<div class="guide-container">
+        <h2 class="guide-section-title">5. Cartes et sidebars</h2>
+        <p class="guide-section-intro">
+            Les cartes regroupent des informations connexes dans des conteneurs visuellement distincts.
+            Les sidebars offrent une navigation contextuelle fixe avec adaptation automatique aux modes.
+        </p>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Carte standard (.carte)</h3>
+
+            <div class="guide-example">
+                <div class="carte">
+                    <h3>Titre de la carte</h3>
+                    <p>Contenu de la carte avec des informations regroupées de manière cohérente.</p>
+                    <button class="btn btn-principal">Action</button>
+                </div>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;div class="carte"&gt;
+    &lt;h3&gt;Titre de la carte&lt;/h3&gt;
+    &lt;p&gt;Contenu...&lt;/p&gt;
+    &lt;button class="btn btn-principal"&gt;Action&lt;/button&gt;
+&lt;/div&gt;</div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Carte avec en-tête inversée (.carte-titre-bleu)</h3>
+            <p class="guide-component-description">
+                Carte avec un titre sur fond bleu foncé et texte blanc. Idéale pour mettre en évidence les sections importantes.
+            </p>
+
+            <div class="guide-example">
+                <div class="carte">
+                    <h3 class="carte-titre-bleu">Qu'est-ce que le monitorage pédagogique ?</h3>
+                    <p><strong>Le système transforme votre intuition pédagogique en intelligence prédictive.</strong></p>
+                    <p>Ce système formalise et systématise ce que tout enseignant fait intuitivement : observer ses étudiants, détecter les difficultés émergentes et ajuster ses interventions. Cette formalisation apporte :</p>
+                    <ul>
+                        <li><strong>Objectivité</strong> : Données factuelles plutôt qu'impressions</li>
+                        <li><strong>Systématicité</strong> : Suivi régulier et exhaustif</li>
+                        <li><strong>Prédictivité</strong> : Détection précoce des signaux faibles</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">ðŸ“ Spécifications</div>
+                <ul>
+                    <li><strong>En-tête:</strong> Fond dégradé bleu (--bleu-principal â†’ --bleu-fonce)</li>
+                    <li><strong>Texte en-tête:</strong> Blanc, gras</li>
+                    <li><strong>Coins:</strong> Arrondis en haut (8px), l'en-tête s'étend jusqu'aux bords</li>
+                    <li><strong>Corps:</strong> Fond blanc avec padding standard</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;div class="carte"&gt;
+    &lt;h3 class="carte-titre-bleu"&gt;Titre de la carte&lt;/h3&gt;
+    &lt;p&gt;Contenu de la carte...&lt;/p&gt;
+    &lt;ul&gt;
+        &lt;li&gt;Point 1&lt;/li&gt;
+        &lt;li&gt;Point 2&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;</div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Carte métrique (.carte-metrique)</h3>
+            <p class="guide-component-description">
+                Pour afficher des statistiques ou des indicateurs numériques.
+            </p>
+
+            <div class="guide-example">
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div class="carte-metrique">
+                        <span class="label">Étudiants</span>
+                        <strong class="valeur">30</strong>
+                    </div>
+                    <div class="carte-metrique">
+                        <span class="label">Assiduité moyenne</span>
+                        <strong class="valeur">85%</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-component">
+            <h3 class="guide-component-title">Sidebar de navigation (.sidebar-navigation)</h3>
+            <p class="guide-component-description">
+                Barre latérale de navigation utilisée dans le profil étudiant et la page d'évaluation des travaux.
+                Elle reste fixe lors du défilement (sticky) et s'adapte automatiquement aux trois modes d'affichage.
+            </p>
+
+            <div class="guide-example">
+                <div style="display: grid; grid-template-columns: 280px 1fr; gap: 20px;">
+                    <!-- Sidebar -->
+                    <div class="sidebar-navigation" style="position: static; max-height: 500px;">
+                        <!-- Filtre étudiant -->
+                        <div class="sidebar-filtre">
+                            <label style="font-size: 0.85rem; color: #666; margin-bottom: 5px; display: block;">ÉtudiantÂ·e :</label>
+                            <select class="controle-form">
+                                <option>Tremblay, Sophie (2987654)</option>
+                                <option>Gagnon, Marc (2876543)</option>
+                            </select>
+                        </div>
+
+                        <!-- Navigation Précédent/Suivant -->
+                        <div class="sidebar-nav-buttons">
+                            <button class="btn btn-principal">â† Préc.</button>
+                            <button class="btn btn-principal">Suiv. â†’</button>
+                        </div>
+
+                        <!-- Informations étudiant -->
+                        <div class="sidebar-info-card">
+                            <div class="sidebar-info-card-nom">Sophie Tremblay</div>
+                            <div class="sidebar-info-card-details">
+                                <div><strong>DA:</strong> 2987654</div>
+                                <div><strong>Groupe:</strong> 01</div>
+                                <div><strong>Programme:</strong> Sciences de la nature</div>
+                            </div>
+                        </div>
+
+                        <!-- Navigation sections -->
+                        <div class="sidebar-liste">
+                            <div class="sidebar-section-titre">OBSERVATIONS</div>
+                            <div class="sidebar-item active">
+                                <div class="sidebar-item-titre">Suivi de l'apprentissage</div>
+                            </div>
+                            <div class="sidebar-item">
+                                <div class="sidebar-item-titre">Développement des habiletés</div>
+                            </div>
+                            <div class="sidebar-item">
+                                <div class="sidebar-item-titre">Mobilisation</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zone principale -->
+                    <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e8f2fd;">
+                        <h4 style="margin: 0 0 10px 0; color: #032e5c;">Contenu principal</h4>
+                        <p style="margin: 0; color: #666;">Le contenu de la section sélectionnée s'affiche ici.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-specs">
+                <div class="guide-specs-title">ðŸ“ Spécifications</div>
+                <ul>
+                    <li><strong>Largeur:</strong> 280px fixe</li>
+                    <li><strong>Position:</strong> sticky (top: 20px)</li>
+                    <li><strong>Hauteur max:</strong> calc(100vh - 100px) avec défilement automatique</li>
+                    <li><strong>Background Mode Normal:</strong> var(--bleu-pale) â†’ #e8f2fd</li>
+                    <li><strong>Background Mode Assisté:</strong> var(--sous-nav-bg-simulation) â†’ #dce8f5</li>
+                    <li><strong>Background Mode Anonymisation:</strong> var(--sous-nav-bg-anonymisation) â†’ #e0f0f0</li>
+                    <li><strong>Padding:</strong> 15px</li>
+                    <li><strong>Border-radius:</strong> 8px</li>
+                    <li><strong>Ombre:</strong> 0 1px 3px rgba(0,0,0,0.08)</li>
+                </ul>
+            </div>
+
+            <div class="guide-specs" style="margin-top: 20px;">
+                <div class="guide-specs-title">&#x1F3A8; Comportement adaptatif aux modes</div>
+                <ul>
+                    <li><strong>Mode Normal:</strong> Fond bleu pâle (#e8f2fd) harmonisé avec la palette bleue principale</li>
+                    <li><strong>Mode Assisté:</strong> Fond bleu légèrement plus foncé (#dce8f5) pour distinguer l'environnement de test</li>
+                    <li><strong>Mode Anonymisation:</strong> Fond cyan pâle (#e0f0f0) pour signaler la protection des données</li>
+                    <li><strong>Cohérence:</strong> Utilise les mêmes variables CSS que les sous-navigations pour une harmonie visuelle</li>
+                    <li><strong>Items actifs:</strong> Les items .sidebar-item restent en #e8f2fd avec bordure bleue quel que soit le mode</li>
+                </ul>
+            </div>
+
+            <div class="guide-specs" style="margin-top: 20px;">
+                <div class="guide-specs-title">&#x1F4CB; Composants internes</div>
+                <ul>
+                    <li><strong>.sidebar-filtre:</strong> Zone de sélection (dropdown, recherche)</li>
+                    <li><strong>.sidebar-nav-buttons:</strong> Boutons Précédent/Suivant en flexbox</li>
+                    <li><strong>.sidebar-info-card:</strong> Carte d'information sur fond bleu très pâle</li>
+                    <li><strong>.sidebar-section-titre:</strong> Titre de section en majuscules (OBSERVATIONS, ACTIONS, etc.)</li>
+                    <li><strong>.sidebar-liste:</strong> Conteneur des items de navigation</li>
+                    <li><strong>.sidebar-item:</strong> Item cliquable avec fond #e8f2fd et bordure</li>
+                    <li><strong>.sidebar-item.active:</strong> Item actif avec bordure 2px et dégradé</li>
+                </ul>
+            </div>
+
+            <div class="guide-code-title">Code HTML</div>
+            <div class="guide-code">&lt;div class="layout-sidebar-2col"&gt;
+    &lt;!-- Sidebar --&gt;
+    &lt;div class="sidebar-navigation"&gt;
+        &lt;!-- Filtre --&gt;
+        &lt;div class="sidebar-filtre"&gt;
+            &lt;select class="controle-form"&gt;...&lt;/select&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Navigation --&gt;
+        &lt;div class="sidebar-nav-buttons"&gt;
+            &lt;button class="btn btn-principal"&gt;â† Précédent&lt;/button&gt;
+            &lt;button class="btn btn-principal"&gt;Suivant â†’&lt;/button&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Info card --&gt;
+        &lt;div class="sidebar-info-card"&gt;
+            &lt;div class="sidebar-info-card-nom"&gt;Nom étudiant&lt;/div&gt;
+            &lt;div class="sidebar-info-card-details"&gt;...&lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Liste navigation --&gt;
+        &lt;div class="sidebar-liste"&gt;
+            &lt;div class="sidebar-section-titre"&gt;OBSERVATIONS&lt;/div&gt;
+            &lt;div class="sidebar-item active"&gt;
+                &lt;div class="sidebar-item-titre"&gt;Section 1&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="sidebar-item"&gt;
+                &lt;div class="sidebar-item-titre"&gt;Section 2&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Zone principale --&gt;
+    &lt;div class="zone-principale"&gt;
+        &lt;!-- Contenu --&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</div>
+
+            <div class="guide-code-title">Code CSS (adaptation aux modes)</div>
+            <div class="guide-code">/* Sidebar base - Mode Normal */
+.sidebar-navigation {
+    background: var(--bleu-pale);
+}
+
+/* Mode Assisté */
+body[data-mode="assisté"] .sidebar-navigation {
+    background: var(--sous-nav-bg-simulation);
+}
+
+/* Mode Anonymisation */
+body[data-mode="anonymisation"] .sidebar-navigation {
+    background: var(--sous-nav-bg-anonymisation);
+}</div>
+
+            <div class="guide-do-dont">
+                <div class="guide-do">
+                    <div class="guide-do-title">âœ… À FAIRE</div>
+                    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                        <li>Utiliser .layout-sidebar-2col pour créer la grille 2 colonnes</li>
+                        <li>Laisser le système adapter automatiquement les couleurs selon le mode</li>
+                        <li>Utiliser les classes standardisées (.sidebar-item, .sidebar-info-card, etc.)</li>
+                        <li>Maintenir une largeur fixe de 280px pour la sidebar</li>
+                    </ul>
+                </div>
+                <div class="guide-dont">
+                    <div class="guide-dont-title">âŒ À ÉVITER</div>
+                    <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                        <li>Définir des couleurs de fond inline qui court-circuiteraient l'adaptation</li>
+                        <li>Modifier la largeur de la sidebar (cohérence visuelle)</li>
+                        <li>Créer des styles custom au lieu d'utiliser les classes existantes</li>
+                        <li>Oublier le sticky positioning (UX fluide lors du défilement)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================== -->
+    <!-- 5bis. PATTERN MATÉRIEL PÉDAGOGIQUE -->
+    <!-- ======================================== -->
+
+    <section class="guide-section" id="materiel-pedagogique"></div>
+</body>
+</html>

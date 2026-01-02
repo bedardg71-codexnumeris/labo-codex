@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design System - Monitorage v7 | Palette Nuit Élégante</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* Styles spécifiques pour le guide */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .guide-header {
+            background: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .guide-header h1 {
+            margin: 0 0 8px 0;
+            font-size: 2.2rem;
+        }
+
+        .guide-header p {
+            margin: 0;
+            font-size: 1rem;
+            color: #9fc5e8;
+        }
+
+        .guide-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .guide-nav-section {
+            margin-bottom: 40px;
+        }
+
+        .guide-nav-section h2 {
+            color: #032e5c;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #d97706;
+        }
+
+        .guide-nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .guide-nav-card {
+            background: white;
+            border: 2px solid #e8f2fd;
+            border-radius: 8px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            box-shadow: 0 2px 8px rgba(3, 46, 92, 0.05);
+        }
+
+        .guide-nav-card:hover {
+            border-color: #065dbb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(3, 46, 92, 0.15);
+        }
+
+        .guide-nav-card h3 {
+            color: #032e5c;
+            font-size: 1.2rem;
+            margin: 0 0 10px 0;
+        }
+
+        .guide-nav-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .guide-nav-card-new {
+            position: relative;
+        }
+
+        .guide-nav-card-new::before {
+            content: "NOUVEAU";
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #22c55e;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .guide-intro {
+            background: #f0f8ff;
+            border: 2px solid #065dbb;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .guide-intro h2 {
+            color: #032e5c;
+            margin-top: 0;
+            font-size: 1.3rem;
+        }
+
+        .guide-intro p {
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+
+        .guide-intro ul {
+            color: #666;
+            line-height: 1.7;
+        }
+
+        .guide-intro strong {
+            color: #032e5c;
+        }
+    </style>
+</head>
+<body>
+
+<!-- EN-TÊTE -->
+<div class="guide-header">
+    <h1>🎨 Design System Monitorage v7</h1>
+    <p>Palette Nuit Élégante • Guide de référence complet • 1er janvier 2026</p>
+</div>
+
+<div class="guide-container">
+
+    <!-- INTRODUCTION -->
+    <div class="guide-intro">
+        <h2>📖 À propos de ce guide</h2>
+        <p>
+            Ce Design System documente l'ensemble des composants, styles et patterns utilisés dans 
+            l'application de monitorage pédagogique. Il garantit la cohérence visuelle et facilite 
+            le développement en fournissant des exemples concrets et des spécifications précises.
+        </p>
+        <p><strong>Organisation modulaire :</strong></p>
+        <ul>
+            <li><strong>Fondations</strong> : Palette de couleurs (modes Normal/Assisté/Anonymisation), typographie</li>
+            <li><strong>Composants de base</strong> : Boutons, formulaires, badges</li>
+            <li><strong>Composants de données</strong> : Tableaux, cartes, barres de gradient</li>
+            <li><strong>Composants de layout</strong> : Navigation, sidebars, en-tête</li>
+            <li><strong>Patterns pédagogiques</strong> : Matériel pédagogique, bibliothèques</li>
+            <li><strong>Composants interactifs</strong> : Toggles d'information, messages et alertes</li>
+            <li><strong>Primo Assistant</strong> : Modal d'accueil, parcours guidés, mode assisté</li>
+        </ul>
+        <p><strong>Règles critiques :</strong></p>
+        <ul>
+            <li><strong>Emojis autorisés uniquement :</strong> 😎 (Primo), 💡📋🎓 (toggles), ⚠️ (alertes), ✉️ (contact)</li>
+            <li><strong>Modes d'affichage :</strong> Normal (bleu), Assisté (sarcelle), Anonymisation (gris-vert)</li>
+            <li><strong>Aucun émoji décoratif</strong> ailleurs dans l'application</li>
+        </ul>
+    </div>
+
+    <!-- MODULE 1: FONDATIONS -->
+    <div class="guide-nav-section">
+        <h2>Module 1 : Fondations</h2>
+        <div class="guide-nav-grid">
+            <a href="01a-palette-couleurs.html" class="guide-nav-card">
+                <h3>1a. Palette de couleurs</h3>
+                <p>
+                    Couleurs des trois modes d'affichage (Normal, Assisté, Anonymisation), 
+                    variables CSS, codes hexadécimaux, couleurs des boutons et principes de design uniformes.
+                </p>
+            </a>
+            <a href="01b-typographie.html" class="guide-nav-card">
+                <h3>1b. Typographie</h3>
+                <p>
+                    Hiérarchie des titres (H1-H4), tailles de police, spécifications 
+                    et conventions typographiques.
+                </p>
+            </a>
+        </div>
+    </div>
+
+    <!-- MODULE 2: COMPOSANTS DE BASE -->
+    <div class="guide-nav-section">
+        <h2>Module 2 : Composants de base</h2>
+        <div class="guide-nav-grid">
+            <a href="02a-boutons.html" class="guide-nav-card">
+                <h3>2a. Boutons</h3>
+                <p>
+                    Types de boutons par fonction (principal, ajouter, modifier, annuler, supprimer), 
+                    tailles (large, standard, compact) et règles automatiques de dimensionnement.
+                </p>
+            </a>
+            <a href="02b-formulaires.html" class="guide-nav-card">
+                <h3>2b. Formulaires</h3>
+                <p>
+                    Champs de texte, zones de texte, sélecteurs, cases à cocher, 
+                    boutons radio et composants de saisie avec états et validation.
+                </p>
+            </a>
+            <a href="02c-badges.html" class="guide-nav-card">
+                <h3>2c. Badges</h3>
+                <p>
+                    Badges de statut, indicateurs visuels, pastilles de notification 
+                    et étiquettes avec codes couleur sémantiques.
+                </p>
+            </a>
+        </div>
+    </div>
+
+    <!-- MODULE 3: COMPOSANTS DE DONNÉES -->
+    <div class="guide-nav-section">
+        <h2>Module 3 : Composants de données</h2>
+        <div class="guide-nav-grid">
+            <a href="03a-tableaux.html" class="guide-nav-card">
+                <h3>3a. Tableaux</h3>
+                <p>
+                    Tableaux de données avec styles, interactions et états de rangées 
+                    (hover, sélection, tri).
+                </p>
+            </a>
+            <a href="03b-cartes-sidebars.html" class="guide-nav-card">
+                <h3>3b. Cartes et sidebars</h3>
+                <p>
+                    Cartes d'information, sidebars de navigation latérale, layouts 
+                    et zones de contenu structuré.
+                </p>
+            </a>
+            <a href="03c-barres-gradient.html" class="guide-nav-card">
+                <h3>3c. Barres de gradient</h3>
+                <p>
+                    Barres visuelles pour indices A-C-P-E, patterns d'apprentissage 
+                    et RàI avec points de distribution.
+                </p>
+            </a>
+            <a href="03d-modals.html" class="guide-nav-card">
+                <h3>3d. Modals <span style="background: #22c55e; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">NOUVEAU</span></h3>
+                <p>
+                    Fenêtres modales : structure, variantes de taille, accessibilité, 
+                    exemples (bibliothèques, confirmations, Primo).
+                </p>
+            </a>
+        </div>
+    </div>
+
+    <!-- MODULE 4: COMPOSANTS DE LAYOUT -->
+    <div class="guide-nav-section">
+        <h2>Module 4 : Composants de layout</h2>
+        <div class="guide-nav-grid">
+            <a href="04-composants-layout.html" class="guide-nav-card">
+                <h3>Navigation</h3>
+                <p>
+                    Navigation principale et secondaire avec boutons glassmorphism 
+                    et adaptation aux modes.
+                </p>
+            </a>
+            <a href="04-composants-layout.html#entete" class="guide-nav-card">
+                <h3>En-tête de l'application</h3>
+                <p>
+                    Structure de l'en-tête avec logo, titre centré, gradient "Nuit Élégante" 
+                    et boutons d'action.
+                </p>
+            </a>
+        </div>
+    </div>
+
+    <!-- MODULE 5: PATTERNS PÉDAGOGIQUES -->
+    <div class="guide-nav-section">
+        <h2>Module 5 : Patterns pédagogiques</h2>
+        <div class="guide-nav-grid">
+            <a href="05-patterns-pedagogiques.html" class="guide-nav-card">
+                <h3>Matériel pédagogique</h3>
+                <p>
+                    Layout sidebar + zone principale pour productions, grilles, échelles, 
+                    cartouches et objectifs.
+                </p>
+            </a>
+            <a href="05-patterns-pedagogiques.html#bibliotheques" class="guide-nav-card">
+                <h3>Bibliothèques</h3>
+                <p>
+                    Modals de gestion avec sections "Ma sélection" et "Disponibles à ajouter", 
+                    import/export Creative Commons.
+                </p>
+            </a>
+        </div>
+    </div>
+
+    <!-- MODULE 6: COMPOSANTS INTERACTIFS -->
+    <div class="guide-nav-section">
+        <h2>Module 6 : Composants interactifs</h2>
+        <div class="guide-nav-grid">
+            <a href="06-composants-interactifs.html" class="guide-nav-card">
+                <h3>Règle critique : Usage des emojis</h3>
+                <p>
+                    Liste restrictive des emojis autorisés et contextes d'usage 
+                    (toggles, alertes uniquement).
+                </p>
+            </a>
+            <a href="06-composants-interactifs.html#toggles" class="guide-nav-card">
+                <h3>Toggles d'information</h3>
+                <p>
+                    Cartes pliables avec emojis 💡 (conseils pratiques), 📋 (spécifications), 
+                    🎓 (pédagogie).
+                </p>
+            </a>
+            <a href="06-composants-interactifs.html#alertes" class="guide-nav-card">
+                <h3>Messages et alertes</h3>
+                <p>
+                    Messages d'information, succès, avertissement, erreur avec emoji ⚠️ 
+                    pour alertes modales.
+                </p>
+            </a>
+        </div>
+    </div>
+
+    <!-- MODULE 7: PRIMO ASSISTANT (NOUVEAU) -->
+    <div class="guide-nav-section">
+        <h2>Module 7 : Primo Assistant 😎</h2>
+        <div class="guide-nav-grid">
+            <a href="07-primo-assistant.html" class="guide-nav-card guide-nav-card-new">
+                <h3>Modal d'accueil Primo</h3>
+                <p>
+                    Modal d'accueil conversationnel pour nouveaux utilisateurs avec emoji 😎 
+                    et 4 parcours guidés.
+                </p>
+            </a>
+            <a href="07-primo-assistant.html#parcours" class="guide-nav-card guide-nav-card-new">
+                <h3>Parcours guidés</h3>
+                <p>
+                    Module 1 (Créer un groupe), Module 2 (Évaluer), Module 3 (Diagnostics), 
+                    Module 4 (Wizard de pratique).
+                </p>
+            </a>
+            <a href="07-primo-assistant.html#mode-assiste" class="guide-nav-card guide-nav-card-new">
+                <h3>Mode Assisté</h3>
+                <p>
+                    Palette sarcelle/vert, données de démonstration, interface adaptée 
+                    pour l'apprentissage.
+                </p>
+            </a>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUDIT 01 : Modes d'affichage - Design System v7</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #e8f2fd 0%, #f0f8ff 100%);
+        }
+
+        .guide-header {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .guide-header h1 {
+            margin: 0 0 8px 0;
+            font-size: 2.2rem;
+        }
+
+        .guide-header p {
+            margin: 0 0 15px 0;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .audit-meta {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .guide-header-nav {
+            margin-top: 20px;
+        }
+
+        .guide-header-nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: opacity 0.2s ease;
+            opacity: 0.9;
+        }
+
+        .guide-header-nav a:hover {
+            opacity: 1;
+        }
+
+        .guide-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .guide-section {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(3, 46, 92, 0.05);
+        }
+
+        .guide-section-title {
+            color: #032e5c;
+            font-size: 1.5rem;
+            margin: 0 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #d97706;
+        }
+
+        .guide-specs {
+            background: #fff9f0;
+            border-left: 4px solid #d97706;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .guide-specs-title {
+            font-weight: 600;
+            color: #d97706;
+            margin-bottom: 10px;
+        }
+
+        .guide-specs ul, .guide-specs ol {
+            margin: 10px 0 0 0;
+            padding-left: 25px;
+        }
+
+        .guide-specs li {
+            margin-bottom: 8px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .guide-code {
+            background: #2a3d5a;
+            color: #e8f2fd;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .guide-code-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #032e5c;
+            margin-bottom: 10px;
+        }
+
+        .guide-example {
+            background: #fafbfc;
+            border: 2px dashed #e8f2fd;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .code-before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .code-block {
+            background: white;
+            border: 2px solid;
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        .code-block-before {
+            border-color: #ef4444;
+        }
+
+        .code-block-after {
+            border-color: #22c55e;
+        }
+
+        .code-block-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .code-block-before .code-block-title {
+            color: #dc2626;
+        }
+
+        .code-block-after .code-block-title {
+            color: #16a34a;
+        }
+
+        .checklist {
+            background: #f0f8ff;
+            border: 1px solid #065dbb;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .checklist-title {
+            font-weight: 600;
+            color: #032e5c;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .checklist-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #e8f2fd;
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #e8f2fd;
+        }
+
+        th {
+            background: #e8f2fd;
+            color: #032e5c;
+            font-weight: 600;
+        }
+
+        .alert-box {
+            background: #fef2f2;
+            border: 2px solid #dc2626;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            color: #dc2626;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="guide-header">
+    <h1>🔴 AUDIT 01 : Modes d'affichage</h1>
+    <p>Renommer «&nbsp;Simulation&nbsp;» → «&nbsp;Assisté&nbsp;»</p>
+    <div class="audit-meta">
+        <span><strong>Priorité :</strong> CRITIQUE</span>
+        <span><strong>Durée :</strong> 45 minutes</span>
+        <span><strong>Fichiers :</strong> ~10</span>
+    </div>
+    <div class="guide-header-nav">
+        <a href="index.html">← Retour aux fiches d'audit</a>
+    </div>
+</div>
+
+<div class="guide-container">
+
+    <!-- OBJECTIF -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">🎯 Objectif</h2>
+        <p>
+            Renommer <strong>toutes</strong> les références à «&nbsp;Simulation&nbsp;» par «&nbsp;Assisté&nbsp;» 
+            pour refléter la nouvelle terminologie du mode d'affichage avec données de démonstration.
+        </p>
+    </div>
+
+    <!-- CONTEXTE -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">📋 Contexte</h2>
+        <p>L'application possède 3 modes d'affichage :</p>
+        <div class="guide-specs">
+            <div class="guide-specs-title">Les 3 modes</div>
+            <ol>
+                <li><strong>Mode Normal :</strong> Données réelles (palette bleue)</li>
+                <li><strong>Mode Assisté :</strong> Données de démonstration (palette sarcelle) - <strong>ANCIENNEMENT «&nbsp;Simulation&nbsp;»</strong></li>
+                <li><strong>Mode Anonymisation :</strong> Protection des données (bleus désaturés)</li>
+            </ol>
+        </div>
+        <p>
+            Le mode «&nbsp;Simulation&nbsp;» a été renommé «&nbsp;Assisté&nbsp;» mais de nombreuses 
+            références obsolètes subsistent dans le code.
+        </p>
+    </div>
+
+    <!-- PATTERNS DE RECHERCHE -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">🔍 Patterns de recherche</h2>
+        
+        <div class="guide-code-title">Pattern 1 : Attributs HTML</div>
+        <div class="guide-code">Chercher: data-mode="simulation"
+Remplacer: data-mode="assisté"
+
+Chercher: \[data-mode="simulation"\]
+Remplacer: [data-mode="assisté"]</div>
+
+        <div class="guide-code-title">Pattern 2 : Texte visible</div>
+        <div class="guide-code">Chercher: Mode Simulation
+Remplacer: Mode Assisté
+
+Chercher: mode Simulation
+Remplacer: mode Assisté
+
+Chercher: mode simulation
+Remplacer: mode assisté</div>
+
+        <div class="guide-code-title">Pattern 3 : Variables JavaScript</div>
+        <div class="guide-code">Chercher: modeSimulation
+Remplacer: modeAssisté
+
+Chercher: 'simulation'
+Remplacer: 'assisté'
+
+Chercher: "simulation"
+Remplacer: "assisté"</div>
+    </div>
+
+    <!-- FICHIERS À AUDITER -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">📁 Fichiers à auditer</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Priorité</th>
+                    <th>Fichier</th>
+                    <th>Éléments à vérifier</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1</strong></td>
+                    <td>styles.css</td>
+                    <td>Lignes 166-191 (conversion variables mode), commentaires</td>
+                </tr>
+                <tr>
+                    <td><strong>2</strong></td>
+                    <td>config.js</td>
+                    <td>Variable modeApplication, fonctions de détection</td>
+                </tr>
+                <tr>
+                    <td><strong>2</strong></td>
+                    <td>primo-accueil.js</td>
+                    <td>Initialisation mode, textes modal Primo</td>
+                </tr>
+                <tr>
+                    <td><strong>2</strong></td>
+                    <td>primo-modal.js</td>
+                    <td>Références au mode dans questions</td>
+                </tr>
+                <tr>
+                    <td><strong>3</strong></td>
+                    <td>navigation.js</td>
+                    <td>Labels boutons de mode, switch entre modes</td>
+                </tr>
+                <tr>
+                    <td><strong>3</strong></td>
+                    <td>tableau-bord-apercu.js</td>
+                    <td>Détection mode actif, affichage conditionnel</td>
+                </tr>
+                <tr>
+                    <td><strong>3</strong></td>
+                    <td>liste-evaluations.js</td>
+                    <td>Comportement selon le mode</td>
+                </tr>
+                <tr>
+                    <td><strong>3</strong></td>
+                    <td>profil-etudiant.js</td>
+                    <td>Affichage adapté au mode</td>
+                </tr>
+                <tr>
+                    <td><strong>4</strong></td>
+                    <td>index.html (tous)</td>
+                    <td>Attributs data-mode, textes, commentaires</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- EXEMPLES DE CORRECTIONS -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">✅ Exemples de corrections</h2>
+        
+        <h3 style="color: #032e5c; margin: 30px 0 15px 0;">Exemple 1 : CSS</h3>
+        <div class="code-before-after">
+            <div class="code-block code-block-before">
+                <div class="code-block-title">❌ AVANT</div>
+                <div class="guide-code">[data-mode="simulation"] {
+    --bleu-principal: var(--sarcelle-principal);
+}
+
+/* Mode Simulation - Sarcelle/vert */
+body[data-mode="simulation"] .entete {
+    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
+}</div>
+            </div>
+            <div class="code-block code-block-after">
+                <div class="code-block-title">✅ APRÈS</div>
+                <div class="guide-code">[data-mode="assisté"] {
+    --bleu-principal: var(--sarcelle-principal);
+}
+
+/* Mode Assisté - Sarcelle/vert */
+body[data-mode="assisté"] .entete {
+    background: linear-gradient(135deg, #1a5266 0%, #0d3540 100%);
+}</div>
+            </div>
+        </div>
+
+        <h3 style="color: #032e5c; margin: 30px 0 15px 0;">Exemple 2 : JavaScript</h3>
+        <div class="code-before-after">
+            <div class="code-block code-block-before">
+                <div class="code-block-title">❌ AVANT</div>
+                <div class="guide-code">const modeApplication = localStorage.getItem('modeApplication') || 'simulation';
+
+if (modeApplication === 'simulation') {
+    chargerDonneesDemo();
+}
+
+const labelMode = 'Mode Simulation';</div>
+            </div>
+            <div class="code-block code-block-after">
+                <div class="code-block-title">✅ APRÈS</div>
+                <div class="guide-code">const modeApplication = localStorage.getItem('modeApplication') || 'assisté';
+
+if (modeApplication === 'assisté') {
+    chargerDonneesDemo();
+}
+
+const labelMode = 'Mode Assisté';</div>
+            </div>
+        </div>
+
+        <h3 style="color: #032e5c; margin: 30px 0 15px 0;">Exemple 3 : HTML</h3>
+        <div class="code-before-after">
+            <div class="code-block code-block-before">
+                <div class="code-block-title">❌ AVANT</div>
+                <div class="guide-code">&lt;body data-mode="simulation"&gt;
+    &lt;button onclick="activerModeSimulation()"&gt;
+        Mode Simulation
+    &lt;/button&gt;
+&lt;/body&gt;</div>
+            </div>
+            <div class="code-block code-block-after">
+                <div class="code-block-title">✅ APRÈS</div>
+                <div class="guide-code">&lt;body data-mode="assisté"&gt;
+    &lt;button onclick="activerModeAssisté()"&gt;
+        Mode Assisté
+    &lt;/button&gt;
+&lt;/body&gt;</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POINTS D'ATTENTION -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">⚠️ Points d'attention</h2>
+        
+        <div class="alert-box">
+            <div class="alert-title">Migration localStorage</div>
+            <p>Si des données sont stockées avec la clé <code>'simulation'</code>, prévoir une migration automatique :</p>
+            <div class="guide-code">// Migration automatique
+if (localStorage.getItem('modeApplication') === 'simulation') {
+    localStorage.setItem('modeApplication', 'assisté');
+}</div>
+        </div>
+
+        <div class="guide-specs">
+            <div class="guide-specs-title">Noms de fonctions</div>
+            <p>Renommer systématiquement :</p>
+            <ul>
+                <li><code>activerModeSimulation()</code> → <code>activerModeAssisté()</code></li>
+                <li><code>estModeSimulation()</code> → <code>estModeAssisté()</code></li>
+                <li><code>basculerVersSimulation()</code> → <code>basculerVersAssisté()</code></li>
+            </ul>
+        </div>
+
+        <div class="guide-specs">
+            <div class="guide-specs-title">Commentaires de code</div>
+            <p>Ne pas oublier les commentaires :</p>
+            <div class="guide-code">// ❌ AVANT : Initialisation mode simulation
+// ✅ APRÈS : Initialisation mode assisté</div>
+        </div>
+    </div>
+
+    <!-- TESTS DE VALIDATION -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">🧪 Tests de validation</h2>
+        
+        <div class="guide-specs">
+            <div class="guide-specs-title">Test 1 : Recherche exhaustive</div>
+            <div class="guide-code"># Dans le terminal, depuis la racine du projet
+grep -r "simulation" --include="*.js" --include="*.css" --include="*.html"</div>
+            <p><strong>Résultat attendu :</strong> Aucune occurrence (ou seulement dans fichiers de documentation)</p>
+        </div>
+
+        <div class="guide-specs">
+            <div class="guide-specs-title">Test 2 : Vérification visuelle</div>
+            <ol>
+                <li>Ouvrir l'application en mode Normal</li>
+                <li>Basculer vers le mode Assisté</li>
+                <li>Vérifier que tous les textes affichent «&nbsp;Assisté&nbsp;» (pas «&nbsp;Simulation&nbsp;»)</li>
+                <li>Inspecter l'élément <code>&lt;body&gt;</code> : doit avoir <code>data-mode="assisté"</code></li>
+            </ol>
+        </div>
+
+        <div class="guide-specs">
+            <div class="guide-specs-title">Test 3 : localStorage</div>
+            <div class="guide-code">// Console navigateur
+console.log(localStorage.getItem('modeApplication'));
+// Doit afficher : "assisté" (pas "simulation")</div>
+        </div>
+    </div>
+
+    <!-- CHECKLIST -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">📊 Checklist de progression</h2>
+        
+        <div class="checklist">
+            <div class="checklist-title">Phase 1 : Recherche</div>
+            <div class="checklist-item">☐ Recherche globale «&nbsp;simulation&nbsp;» effectuée</div>
+            <div class="checklist-item">☐ Liste complète des occurrences documentée</div>
+            <div class="checklist-item">☐ Fichiers prioritaires identifiés</div>
+        </div>
+
+        <div class="checklist">
+            <div class="checklist-title">Phase 2 : Corrections CSS</div>
+            <div class="checklist-item">☐ styles.css corrigé et testé</div>
+            <div class="checklist-item">☐ Aucune occurrence «&nbsp;simulation&nbsp;» dans les CSS</div>
+        </div>
+
+        <div class="checklist">
+            <div class="checklist-title">Phase 3 : Corrections JavaScript</div>
+            <div class="checklist-item">☐ Variables renommées</div>
+            <div class="checklist-item">☐ Fonctions renommées</div>
+            <div class="checklist-item">☐ Textes d'interface corrigés</div>
+            <div class="checklist-item">☐ Migration localStorage implémentée (si nécessaire)</div>
+        </div>
+
+        <div class="checklist">
+            <div class="checklist-title">Phase 4 : Corrections HTML</div>
+            <div class="checklist-item">☐ Attributs data-mode corrigés</div>
+            <div class="checklist-item">☐ Textes visibles mis à jour</div>
+            <div class="checklist-item">☐ Commentaires HTML nettoyés</div>
+        </div>
+
+        <div class="checklist">
+            <div class="checklist-title">Phase 5 : Validation</div>
+            <div class="checklist-item">☐ Tests de recherche passés (0 occurrence)</div>
+            <div class="checklist-item">☐ Tests visuels validés</div>
+            <div class="checklist-item">☐ Tests fonctionnels OK (basculement entre modes)</div>
+            <div class="checklist-item">☐ Aucune régression détectée</div>
+        </div>
+    </div>
+
+    <!-- COMMIT -->
+    <div class="guide-section">
+        <h2 class="guide-section-title">🚀 Commit recommandé</h2>
+        <div class="guide-code">git add .
+git commit -m "fix(design): [AUDIT_01] Renommer 'Simulation' → 'Assisté' dans toute l'application
+
+- Correction data-mode='simulation' → 'assisté'
+- Renommage variables et fonctions JavaScript
+- Mise à jour textes interface et commentaires
+- Migration localStorage automatique
+
+Fichiers modifiés : styles.css, config.js, primo-*.js, navigation.js, index.html
+Closes #XX"</div>
+    </div>
+
+</div>
+
+</body>
+</html>
