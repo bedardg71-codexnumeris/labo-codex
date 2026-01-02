@@ -347,15 +347,17 @@
 
     /**
      * Affiche/masque la bibliothèque de configurations selon le type de pratique
+     * Active pour: PAN-Standards (STD) et PAN-Spécifications (SPE)
+     * Les configurations appliquent TOUS les paramètres de la pratique sélectionnée
      */
     function afficherBibliothequeConfigurations(type) {
         const conteneur = document.getElementById('v2-bibliotheque-configurations');
         if (!conteneur) return;
 
-        // Afficher pour PAN-Spécifications et PAN-Standards
+        // Afficher pour PAN-Standards ET PAN-Spécifications
         if (type === 'pan-specifications' || type === 'pan-standards') {
             conteneur.style.display = 'block';
-            // Charger le dropdown des configurations
+            // Charger le dropdown des configurations filtrées par type
             if (typeof chargerDropdownModelesPratiques === 'function') {
                 chargerDropdownModelesPratiques();
             }
