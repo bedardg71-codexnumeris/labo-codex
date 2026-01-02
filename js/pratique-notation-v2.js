@@ -338,9 +338,29 @@
         const typePratique = document.getElementById('v2-pratique-type')?.value || '';
         afficherDescriptionTaxonomique(typePratique);
         afficherVariantePANStandards(typePratique);
+        afficherBibliothequeConfigurations(typePratique);
         afficherConfigurationType(typePratique);
         mettreAJourBadgePratiqueV2(typePratique);
         sauvegarderPratiqueBaseV2();
+    }
+
+    /**
+     * Affiche/masque la bibliothèque de configurations selon le type de pratique
+     */
+    function afficherBibliothequeConfigurations(type) {
+        const conteneur = document.getElementById('v2-bibliotheque-configurations');
+        if (!conteneur) return;
+
+        // Afficher pour PAN-Spécifications et PAN-Standards
+        if (type === 'pan-specifications' || type === 'pan-standards') {
+            conteneur.style.display = 'block';
+            // Charger le dropdown des configurations
+            if (typeof chargerDropdownModelesPratiques === 'function') {
+                chargerDropdownModelesPratiques();
+            }
+        } else {
+            conteneur.style.display = 'none';
+        }
     }
 
     /**
