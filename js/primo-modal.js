@@ -1108,10 +1108,12 @@ async function creerProduction() {
 
         console.log('[Primo] 💾 Objet production créé:', nouvelleProduction);
 
+        // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
         // Ajouter la production dans localStorage
-        const productions = db.getSync('productions', []);
+        const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+        const productions = db.getSync(cleProductions, []);
         productions.push(nouvelleProduction);
-        db.setSync('productions', productions);
+        db.setSync(cleProductions, productions);
 
         console.log('[Primo] ✅ Production créée avec succès:', titre);
 

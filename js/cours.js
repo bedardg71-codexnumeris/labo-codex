@@ -995,12 +995,17 @@ function supprimerCours(id) {
 
     // ===============================
     // COMPTER LES DONNÉES LIÉES (Beta 93.5)
-    // ✅ NAMESPACING (Beta 95.5)
+    // ✅ CORRECTION CRITIQUE (Beta 95 - 2 jan 2026)
+    // Lire TOUTES les données (pas filtrées) pour suppression correcte
     // ===============================
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
-    const productions = obtenirDonneesSelonMode('productions');
+    const cleEtudiants = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
+    const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+    const clePresences = (typeof window.cle === 'function') ? window.cle('presences') : 'presences';
+
+    const etudiants = db.getSync(cleEtudiants, []);
+    const productions = db.getSync(cleProductions, []);
     const evaluations = db.getSync('evaluationsDetaillees', []);
-    const presences = obtenirDonneesSelonMode('presences');
+    const presences = db.getSync(clePresences, {});
 
     const nbEtudiants = etudiants.filter(e => e.coursId === id).length;
     const nbProductions = productions.filter(p => p.coursId === id).length;
@@ -1023,17 +1028,18 @@ function supprimerCours(id) {
 
     // ===============================
     // SUPPRESSION EN CASCADE (Beta 93.5)
+    // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clés namespacées
     // ===============================
 
     // 1. Supprimer les étudiants du cours
     const nouveauxEtudiants = etudiants.filter(e => e.coursId !== id);
-    db.setSync('groupeEtudiants', nouveauxEtudiants);
-    console.log(`✅ [Suppression] ${nbEtudiants} étudiant(s) supprimé(s)`);
+    db.setSync(cleEtudiants, nouveauxEtudiants);
+    console.log(`✅ [Suppression] ${nbEtudiants} étudiant(s) supprimé(s) dans ${cleEtudiants}`);
 
     // 2. Supprimer les productions du cours
     const nouvellesProductions = productions.filter(p => p.coursId !== id);
-    db.setSync('productions', nouvellesProductions);
-    console.log(`✅ [Suppression] ${nbProductions} production(s) supprimée(s)`);
+    db.setSync(cleProductions, nouvellesProductions);
+    console.log(`✅ [Suppression] ${nbProductions} production(s) supprimée(s) dans ${cleProductions}`);
 
     // 3. Supprimer les évaluations liées aux productions supprimées
     const nouvellesEvaluations = evaluations.filter(e => !productionsIds.includes(e.productionId));
@@ -1047,8 +1053,8 @@ function supprimerCours(id) {
             nouvellesPresences[date] = presences[date];
         }
     });
-    db.setSync('presences', nouvellesPresences);
-    console.log(`✅ [Suppression] ${nbPresences} date(s) de présences supprimée(s)`);
+    db.setSync(clePresences, nouvellesPresences);
+    console.log(`✅ [Suppression] ${nbPresences} date(s) de présences supprimée(s) dans ${clePresences}`);
 
     // 5. Supprimer le cours lui-même
     const nouveauxCours = cours.filter(c => c.id !== id);

@@ -8181,6 +8181,13 @@ label:has(+ textarea:disabled) {
     text-align: center !important;
 }
 
+/* Colonne Actions (Modifier/Supprimer) */
+.td-center-200 {
+    text-align: center !important;
+    white-space: nowrap;
+    min-width: 180px;
+}
+
 /* Badge jeton personnalisé (neutre - bleu clair) */
 .badge-jeton-personnalise-wrapper {
     display: inline-flex;
