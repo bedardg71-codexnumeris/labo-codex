@@ -426,13 +426,14 @@ h1, h2, h3, h4 {
    =============================== */
 
 .entete {
-    background: var(--gradient-entete);
+    /* Variables directement pour s'adapter aux modes (pas via --gradient-entete) */
+    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
     color: white;
     padding: 15px 30px;
     position: relative;
     border-radius: 0 0 var(--radius-grand) var(--radius-grand);
     box-shadow: var(--shadow-prononce);
-    transition: box-shadow 0.3s ease;
+    transition: box-shadow 0.3s ease, background 0.3s ease;
 }
 
 .entete-conteneur {
