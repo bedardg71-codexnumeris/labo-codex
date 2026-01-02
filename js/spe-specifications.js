@@ -41,6 +41,7 @@
         id: ECHELLE_SPE_ID,
         nom: '[SPE] Acceptable / Non acceptable',
         type: 'spe-binaire',
+        pratiques: ['SPE'],
         description: 'Gabarit SPE : Échelle binaire pour PAN-Spécifications. Conforme aux spécifications = Acceptable.',
         niveaux: [
             {
@@ -74,6 +75,18 @@
     };
 
     /**
+     * Spécifications exemple pour une prise de position (François)
+     * DOIT être défini AVANT GRILLE_SPE_GABARIT
+     */
+    const EXEMPLE_SPECIFICATIONS_PRISE_POSITION = [
+        'La prise de position équivaut à environ 750 mots (hors bibliographie et annexes)',
+        'Au moins deux sources fiables sont convenablement citées',
+        'Des faits établis sont tirés des sources fiables et servent à étayer les arguments principaux',
+        'Le texte présente une structure claire (introduction, développement, conclusion)',
+        'L\'orthographe et la grammaire sont correctes'
+    ];
+
+    /**
      * Gabarit de grille de spécifications (basé sur François)
      */
     const GRILLE_SPE_GABARIT = {
@@ -83,6 +96,7 @@
         typeSPE: true,
         estGabarit: true,
         gabaritType: 'SPE',
+        pratiques: ['SPE'],
         description: 'Gabarit SPE : Grille de spécifications pour une prise de position écrite (basé sur le modèle de François A.-H.).',
         criteres: EXEMPLE_SPECIFICATIONS_PRISE_POSITION.map((spec, index) => ({
             id: 'crit_' + (index + 1),
@@ -105,12 +119,91 @@
         type: 'specifications',
         estGabarit: true,
         gabaritType: 'SPE',
+        pratiques: ['SPE'],
         description: 'Gabarit SPE : Production de type "Prise de position" pour notation par spécifications. L\'étudiant prend position sur un enjeu lié à son domaine.',
         consignes: 'Prenez position de façon éclairée par rapport à un enjeu scientifique ou technologique qui traverse un métier qui vous intéresse.',
         ponderation: 0,
         dateCreation: '2026-01-02T00:00:00.000Z',
         auteur: 'François A.-H. (adapté)',
         dansBibliotheque: true
+    };
+
+    /**
+     * Gabarits supplémentaires basés sur le cours de François
+     */
+    const GABARITS_GRILLES_SPE = [
+        // Grille pour Portfolio
+        {
+            id: 'GRILLE_SPE_GABARIT_PORTFOLIO',
+            nom: '[SPE] Gabarit - Portfolio',
+            type: 'specifications',
+            typeSPE: true,
+            estGabarit: true,
+            gabaritType: 'SPE',
+            pratiques: ['SPE'],
+            description: 'Gabarit SPE : Portfolio des activités d\'apprentissage avec entrevue finale.',
+            criteres: [
+                { id: 'crit_1', nom: 'Le portfolio contient au moins 5 entrées réflexives', obligatoire: true, type: 'checkbox' },
+                { id: 'crit_2', nom: 'Chaque entrée est datée et identifie l\'activité concernée', obligatoire: true, type: 'checkbox' },
+                { id: 'crit_3', nom: 'Les réflexions démontrent une progression dans l\'apprentissage', obligatoire: true, type: 'checkbox' },
+                { id: 'crit_4', nom: 'L\'étudiant peut expliquer ses choix lors de l\'entrevue', obligatoire: true, type: 'checkbox' }
+            ],
+            dateCreation: '2026-01-02T00:00:00.000Z',
+            auteur: 'François A.-H. (adapté)',
+            dansBibliotheque: true
+        },
+        // Grille pour Test/Quiz
+        {
+            id: 'GRILLE_SPE_GABARIT_TEST',
+            nom: '[SPE] Gabarit - Test',
+            type: 'specifications',
+            typeSPE: true,
+            estGabarit: true,
+            gabaritType: 'SPE',
+            pratiques: ['SPE'],
+            description: 'Gabarit SPE : Test avec seuil de réussite (ex: 70% des questions correctes).',
+            criteres: [
+                { id: 'crit_1', nom: 'Le seuil de réussite est atteint (ex: 70%)', obligatoire: true, type: 'checkbox' },
+                { id: 'crit_2', nom: 'Aucune question critique n\'est échouée', obligatoire: true, type: 'checkbox' }
+            ],
+            dateCreation: '2026-01-02T00:00:00.000Z',
+            auteur: 'Gabarit générique',
+            dansBibliotheque: true
+        },
+        // Grille pour Présentation orale
+        {
+            id: 'GRILLE_SPE_GABARIT_ORAL',
+            nom: '[SPE] Gabarit - Présentation orale',
+            type: 'specifications',
+            typeSPE: true,
+            estGabarit: true,
+            gabaritType: 'SPE',
+            pratiques: ['SPE'],
+            description: 'Gabarit SPE : Explication orale d\'une découverte ou d\'un concept.',
+            criteres: [
+                { id: 'crit_1', nom: 'La présentation respecte le temps alloué (±10%)', obligatoire: true, type: 'checkbox' },
+                { id: 'crit_2', nom: 'Le sujet est clairement expliqué et compréhensible', obligatoire: true, type: 'checkbox' },
+                { id: 'crit_3', nom: 'Au moins une source est citée pour appuyer les propos', obligatoire: true, type: 'checkbox' },
+                { id: 'crit_4', nom: 'L\'étudiant peut répondre aux questions de base', obligatoire: true, type: 'checkbox' }
+            ],
+            dateCreation: '2026-01-02T00:00:00.000Z',
+            auteur: 'François A.-H. (adapté)',
+            dansBibliotheque: true
+        }
+    ];
+
+    /**
+     * Table de correspondance forfaits par défaut (modèle François)
+     * Note finale basée sur le nombre de travaux acceptables
+     */
+    const TABLE_FORFAITS_DEFAUT = {
+        description: 'Table de correspondance travaux-note finale (modèle François)',
+        noteEchec: 50,
+        forfaits: [
+            { lettre: 'A', note: 90, travaux: { prisePosition: 3, portfolio: 1, test: 2, oral: 1 } },
+            { lettre: 'B', note: 80, travaux: { prisePosition: 2, portfolio: 1, test: 2, oral: 1 } },
+            { lettre: 'C', note: 60, travaux: { prisePosition: 1, portfolio: 0, test: 2, oral: 0 } }
+        ]
     };
 
     // =========================================================================
@@ -150,37 +243,45 @@
      * Crée l'échelle SPE binaire si elle n'existe pas déjà
      */
     async function creerEchelleSPESiInexistante() {
-        let echelles = await db.get('echellesTemplates') || [];
+        // Ajouter à la bibliothèque partagée (clé correcte)
+        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_ECHELLES) || [];
 
         // Vérifier si l'échelle SPE existe déjà
-        const echelleSPE = echelles.find(e => e.id === ECHELLE_SPE_ID);
+        const echelleSPE = bibliotheque.find(e => e.id === ECHELLE_SPE_ID);
 
         if (!echelleSPE) {
             console.log('[spe-specifications] Création du gabarit Échelle SPE...');
-            echelles.push({ ...ECHELLE_SPE_DEFAUT });
-            await db.set('echellesTemplates', echelles);
-
-            // Ajouter aussi à la bibliothèque partagée
-            if (typeof ajouterEchelleALaBibliotheque === 'function') {
-                await ajouterEchelleALaBibliotheque({ ...ECHELLE_SPE_DEFAUT });
-            }
+            bibliotheque.push({ ...ECHELLE_SPE_DEFAUT });
+            await db.set(CLE_BIBLIOTHEQUE_ECHELLES, bibliotheque);
             console.log('[spe-specifications] Gabarit Échelle SPE créé');
         }
     }
 
     /**
-     * Crée le gabarit de grille SPE si inexistant
+     * Crée tous les gabarits de grilles SPE si inexistants
      */
     async function creerGrilleSPESiInexistante() {
         // Ajouter à la bibliothèque partagée
-        const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
-        const existe = bibliotheque.find(g => g.id === GRILLE_SPE_GABARIT.id);
+        let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
+        let nbAjoutees = 0;
 
-        if (!existe) {
-            console.log('[spe-specifications] Création du gabarit Grille SPE...');
+        // Gabarit principal (Prise de position)
+        if (!bibliotheque.find(g => g.id === GRILLE_SPE_GABARIT.id)) {
             bibliotheque.push({ ...GRILLE_SPE_GABARIT });
+            nbAjoutees++;
+        }
+
+        // Gabarits supplémentaires (Portfolio, Test, Oral)
+        for (const gabarit of GABARITS_GRILLES_SPE) {
+            if (!bibliotheque.find(g => g.id === gabarit.id)) {
+                bibliotheque.push({ ...gabarit });
+                nbAjoutees++;
+            }
+        }
+
+        if (nbAjoutees > 0) {
             await db.set(CLE_BIBLIOTHEQUE_GRILLES, bibliotheque);
-            console.log('[spe-specifications] Gabarit Grille SPE créé');
+            console.log(`[spe-specifications] ${nbAjoutees} gabarit(s) Grille SPE créé(s)`);
         }
     }
 
@@ -222,17 +323,6 @@
             dateCreation: new Date().toISOString()
         };
     }
-
-    /**
-     * Exemple de spécifications pour une prise de position (François)
-     */
-    const EXEMPLE_SPECIFICATIONS_PRISE_POSITION = [
-        'La prise de position équivaut à environ 750 mots (hors bibliographie et annexes)',
-        'Au moins deux sources fiables sont convenablement citées',
-        'Des faits établis sont tirés des sources fiables et servent à étayer les arguments principaux',
-        'Le texte présente une structure claire (introduction, développement, conclusion)',
-        'L\'orthographe et la grammaire sont correctes'
-    ];
 
     // =========================================================================
     // ÉVALUATION SPE
@@ -287,9 +377,9 @@
         });
 
         // Pour chaque évaluation, déterminer si acceptable et quel type
-        for (const eval of evalsEtudiant) {
+        for (const evalItem of evalsEtudiant) {
             // Trouver le type de production
-            const production = await obtenirProductionParId(eval.productionId);
+            const production = await obtenirProductionParId(evalItem.productionId);
             if (!production) continue;
 
             // Trouver le type correspondant
@@ -300,7 +390,7 @@
             if (!typeProd) continue;
 
             // Vérifier si l'évaluation est acceptable
-            const estAcceptable = verifierEvaluationAcceptable(eval);
+            const estAcceptable = verifierEvaluationAcceptable(evalItem);
             if (estAcceptable) {
                 compteurParType[typeProd.id] = (compteurParType[typeProd.id] || 0) + 1;
             }
@@ -881,28 +971,49 @@ La structure est claire (intro, développement, conclusion)"></textarea>
 
     // Gabarits SPE
     window.GRILLE_SPE_GABARIT = GRILLE_SPE_GABARIT;
+    window.GABARITS_GRILLES_SPE = GABARITS_GRILLES_SPE;
     window.PRODUCTION_SPE_GABARIT = PRODUCTION_SPE_GABARIT;
+    window.TABLE_FORFAITS_DEFAUT = TABLE_FORFAITS_DEFAUT;
     window.creerGabaritsSPE = creerGabaritsSPE;
 
     // =========================================================================
     // INITIALISATION AU CHARGEMENT
     // =========================================================================
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof db !== 'undefined' && db.isReady) {
-                initialiserModuleSPE();
-            } else {
-                document.addEventListener('db-ready', initialiserModuleSPE);
-            }
-        });
-    } else {
-        if (typeof db !== 'undefined' && db.isReady) {
-            initialiserModuleSPE();
-        } else {
-            document.addEventListener('db-ready', initialiserModuleSPE);
+    let speInitialise = false;
+
+    async function tentativeInitSPE() {
+        if (speInitialise) return;
+
+        // Vérifier que db est disponible et prêt
+        if (typeof db === 'undefined') {
+            console.log('[spe-specifications] db non disponible, attente...');
+            return;
+        }
+
+        // Tester si db fonctionne
+        try {
+            await db.get('test_spe');
+            speInitialise = true;
+            await initialiserModuleSPE();
+        } catch (e) {
+            console.log('[spe-specifications] db pas encore prêt:', e.message);
         }
     }
+
+    // Essayer plusieurs stratégies d'initialisation
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tentativeInitSPE);
+    } else {
+        // DOM déjà chargé, essayer immédiatement
+        setTimeout(tentativeInitSPE, 100);
+    }
+
+    // Écouter aussi db-ready au cas où
+    document.addEventListener('db-ready', tentativeInitSPE);
+
+    // Et window.onload comme fallback
+    window.addEventListener('load', () => setTimeout(tentativeInitSPE, 500));
 
     console.log('[spe-specifications] Module chargé');
 
