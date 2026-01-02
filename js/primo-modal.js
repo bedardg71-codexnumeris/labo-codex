@@ -1217,6 +1217,9 @@ function afficherErreur(message) {
 /**
  * Convertit les données horaireHebdomadaire en tableau seancesHoraire
  * Format Primo → Format attendu par horaire.js
+ *
+ * ✅ CORRECTION (2 jan 2026) : Sauvegarde dans seancesHoraire_{coursId}
+ * au lieu de la clé globale legacy 'seancesHoraire'
  */
 function creerSeancesHoraire() {
     const horaire = db.getSync('horaireHebdomadaire', null);
@@ -1224,6 +1227,15 @@ function creerSeancesHoraire() {
         console.log('[Primo] Aucun horaire à convertir');
         return;
     }
+
+    // ✅ Récupérer le coursId depuis infoCours (créé juste avant)
+    const infoCours = db.getSync('infoCours', null);
+    if (!infoCours || !infoCours.id) {
+        console.warn('[Primo] Impossible de sauvegarder horaire: infoCours.id manquant');
+        // Fallback sur clé legacy pour ne pas perdre les données
+        console.log('[Primo] Fallback sur clé legacy seancesHoraire');
+    }
+    const coursId = infoCours?.id;
 
     const seances = [];
     const lettres = ['A', 'B', 'C'];
@@ -1255,8 +1267,10 @@ function creerSeancesHoraire() {
     }
 
     if (seances.length > 0) {
-        db.setSync('seancesHoraire', seances);
-        console.log(`[Primo] ${seances.length} séance(s) créée(s):`, seances);
+        // ✅ Sauvegarder dans la clé namespacée par cours
+        const cleSauvegarde = coursId ? `seancesHoraire_${coursId}` : 'seancesHoraire';
+        db.setSync(cleSauvegarde, seances);
+        console.log(`[Primo] ${seances.length} séance(s) créée(s) dans ${cleSauvegarde}:`, seances);
     }
 }
 
@@ -1277,11 +1291,13 @@ async function terminerConfiguration() {
     // Sauvegarder toutes les réponses dans localStorage
     sauvegarderReponses(reponsesPrimo);
 
-    // Créer le tableau de séances à partir de horaireHebdomadaire
-    creerSeancesHoraire();
-
-    // Créer le cours initial dans listeCours
+    // ✅ CORRECTION (2 jan 2026) : Créer le cours AVANT l'horaire
+    // pour que creerSeancesHoraire() puisse utiliser le coursId
     creerCoursInitial(reponsesPrimo);
+
+    // Créer le tableau de séances à partir de horaireHebdomadaire
+    // Utilise maintenant seancesHoraire_{coursId} (namespacé)
+    creerSeancesHoraire();
 
     // Générer le calendrier complet à partir des données du trimestre
     if (typeof genererCalendrierComplet === 'function') {
