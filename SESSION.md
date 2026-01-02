@@ -184,16 +184,33 @@ a la configuration des cours, puis au guide groupe-cours.
 
 ---
 
+## DETTE TECHNIQUE (a traiter plus tard)
+
+### 1. ~~Migration namespacing Primo~~ ✅ RESOLU
+**Identifie** : 2 jan 2026
+**Resolu** : 2 jan 2026 (commit 6de8927)
+
+**Correction appliquee** :
+- Ordre inverse : creerCoursInitial() AVANT creerSeancesHoraire()
+- creerSeancesHoraire() lit infoCours.id
+- Sauvegarde dans `seancesHoraire_{coursId}` (plus de cle globale)
+
+**Note** : `horaireHebdomadaire` reste utilise comme stockage temporaire
+pendant la configuration Primo (converti a la fin). C'est acceptable.
+
+---
+
 ## OU REPRENDRE (si session s'arrete maintenant)
 
 **Etat actuel** :
-- Guide groupe-cours : EN COURS (non commite)
-- Design System v7 : Partiellement applique (parties 1-9 confirmees, 10-16 a verifier)
-- Documentation : Nettoyage requis (doublons, obsoletes)
+- Guide groupe-cours : TERMINE et commite (3984e0c)
+- Nettoyage documentation : TERMINE (files/, artefacts supprimes)
+- Migration namespacing Primo : TERMINE et commite (6de8927)
+- Design System v7 : Parties 10-16 a verifier
 
 **Action immediate au retour** :
-1. Terminer et commiter le guide groupe-cours
-2. Suivre le PLAN DE MATCH ci-dessus
+1. Verifier application AUDIT_V5 parties 10-16 (Phase 3)
+2. Tester parcours complet Primo pour valider la migration
 
 ---
 
@@ -215,4 +232,4 @@ a la configuration des cours, puis au guide groupe-cours.
 
 ---
 
-**Derniere mise a jour** : 2 jan 2026, ~11:00
+**Derniere mise a jour** : 2 jan 2026, ~12:30
