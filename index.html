@@ -8677,6 +8677,27 @@ Exemple :
                             </p>
                         </div>
 
+                        <!-- Bibliothèque de configurations (visible pour PAN-Spécifications et PAN-Standards) -->
+                        <div id="v2-bibliotheque-configurations" style="display: none; margin-top: 15px; padding: 12px 15px; background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border: 1px solid #ff9800; border-radius: 6px;">
+                            <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 0.9rem; color: #e65100;">
+                                Configuration de pratique de notation
+                            </p>
+                            <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #666;">
+                                Appliquez une configuration prédéfinie ou sauvegardez la vôtre pour la partager.
+                            </p>
+                            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                <select id="v2-spec-dropdown-modeles" class="form-control" style="flex: 1; min-width: 200px;">
+                                    <option value="">-- Sélectionner une configuration --</option>
+                                </select>
+                                <button type="button" class="btn btn-principal" onclick="appliquerModeleSelectionne()">
+                                    Appliquer
+                                </button>
+                                <button type="button" class="btn btn-secondaire" onclick="ouvrirModaleSauvegardeConfig()" title="Sauvegarder ma configuration actuelle">
+                                    Sauvegarder
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Variante PAN-Standards (visible uniquement si PAN-Standards sélectionné) -->
                         <div id="v2-variante-pan-standards" style="display: none; margin-top: 15px;">
                             <div class="groupe-form">
@@ -8962,36 +8983,6 @@ Exemple :
                                 </p>
                             </div>
 
-                            <!-- Section : Bibliothèque de configurations -->
-                            <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border: 1px solid #ff9800; border-radius: 6px;">
-                                <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: #e65100;">
-                                    Bibliothèque de configurations
-                                </h4>
-                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
-                                    Appliquez un modèle prédéfini ou sauvegardez votre configuration pour la partager avec des collègues.
-                                </p>
-
-                                <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
-                                    <div style="flex: 1; min-width: 200px;">
-                                        <label style="font-weight: 500; margin-bottom: 5px; display: block;">
-                                            Appliquer un modèle :
-                                        </label>
-                                        <select id="v2-spec-dropdown-modeles" class="form-control">
-                                            <option value="">-- Sélectionner un modèle --</option>
-                                        </select>
-                                    </div>
-                                    <button type="button" class="btn btn-principal" onclick="appliquerModeleSelectionne()">
-                                        Appliquer
-                                    </button>
-                                    <button type="button" class="btn btn-secondaire" onclick="ouvrirModaleSauvegardeConfig()" title="Sauvegarder ma configuration actuelle">
-                                        Sauvegarder
-                                    </button>
-                                </div>
-                                <p class="text-muted" style="font-size: 0.75rem; margin-top: 10px; margin-bottom: 0;">
-                                    Conseil : Commencez par le <strong>Modèle François</strong> pour une configuration complète prête à l'emploi.
-                                </p>
-                            </div>
-
                             <!-- Seuil d'acceptabilité -->
                             <div class="groupe-form" style="margin-bottom: 20px;">
                                 <label for="v2-spec-seuil" style="font-weight: 600; display: block; margin-bottom: 6px;">
@@ -9057,30 +9048,6 @@ Exemple :
                                 </button>
                             </div>
 
-                            <!-- Section : Matériel pédagogique SPE -->
-                            <div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 1px solid #2196f3; border-radius: 6px;">
-                                <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: #1565c0;">
-                                    Matériel pédagogique requis
-                                </h4>
-                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
-                                    Pour évaluer en mode Spécifications, consultez les bibliothèques de matériel
-                                    et sélectionnez les gabarits SPE :
-                                </p>
-                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                    <button type="button" class="btn btn-secondaire" onclick="afficherBibliothequeEchelles()">
-                                        Échelles
-                                    </button>
-                                    <button type="button" class="btn btn-secondaire" onclick="afficherBibliothequeGrilles()">
-                                        Grilles
-                                    </button>
-                                    <button type="button" class="btn btn-secondaire" onclick="afficherBibliothequeCartouches()">
-                                        Cartouches
-                                    </button>
-                                </div>
-                                <p class="text-muted" style="font-size: 0.8rem; margin-top: 10px; margin-bottom: 0;">
-                                    Conseil : Recherchez les gabarits marqués <strong>[SPE]</strong> dans les bibliothèques.
-                                </p>
-                            </div>
                         </div>
 
                         <!-- Message par défaut -->
@@ -13396,10 +13363,10 @@ Exemple :
     <script src="js/trimestres.js?v=2025123102"></script> <!-- Beta 95 : Gestion multi-trimestres -->
     <script src="js/trimestre.js?v=2025123109"></script>
     <script src="js/trimestre-v2.js?v=2026010203"></script> <!-- Beta 95 : Onglet Trimestre + guide groupe-cours -->
-    <script src="js/pratique-notation-v2.js?v=2026010222"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
+    <script src="js/pratique-notation-v2.js?v=2026010224"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
     <script src="js/gabarits-utils.js?v=2026010202"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
     <script src="js/spe-specifications.js?v=2026010206"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
-    <script src="js/pratiques-bibliotheque.js?v=2026010202"></script> <!-- Beta 95 : Bibliothèque de configurations de pratiques -->
+    <script src="js/pratiques-bibliotheque.js?v=2026010203"></script> <!-- Beta 95 : Bibliothèque de configurations de pratiques -->
     <script src="js/preferences-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Préférences restructuré -->
     <script src="js/donnees-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Données restructuré -->
     <script src="js/etudiants.js?v=2025122902"></script>

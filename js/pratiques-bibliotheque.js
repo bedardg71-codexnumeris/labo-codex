@@ -471,14 +471,14 @@ function getNombrePratiquesBibliotheque() {
 }
 
 /**
- * Générer le HTML pour le sélecteur de modèles
+ * Générer le HTML pour le sélecteur de configurations
  * @param {string} typeFiltre - Filtrer par type (optionnel)
  * @returns {Promise<string>} HTML du sélecteur
  */
 async function genererSelecteurModelesPratiques(typeFiltre = null) {
     const configurations = await obtenirToutesLesPratiquesBibliotheque();
 
-    let html = '<option value="">-- Sélectionner un modèle --</option>';
+    let html = '<option value="">-- Sélectionner une configuration --</option>';
 
     // Grouper par type
     const gabarits = configurations.filter(c => c.estGabarit);
@@ -494,7 +494,7 @@ async function genererSelecteurModelesPratiques(typeFiltre = null) {
     const personnalisesFiltres = filtrerParType(personnalises);
 
     if (gabaritsFiltres.length > 0) {
-        html += '<optgroup label="Gabarits prédéfinis">';
+        html += '<optgroup label="Configurations prédéfinies">';
         gabaritsFiltres.forEach(config => {
             const badge = config.pratiques?.includes('SPE') ? '[SPE] ' : '';
             html += `<option value="${config.id}">${badge}${config.nom}</option>`;
@@ -524,12 +524,12 @@ async function chargerDropdownModelesPratiques() {
 }
 
 /**
- * Appliquer le modèle sélectionné depuis le dropdown
+ * Appliquer la configuration sélectionnée depuis le dropdown
  */
 async function appliquerModeleSelectionne() {
     const dropdown = document.getElementById('v2-spec-dropdown-modeles');
     if (!dropdown || !dropdown.value) {
-        alert('Veuillez sélectionner un modèle.');
+        alert('Veuillez sélectionner une configuration.');
         return;
     }
 
@@ -539,12 +539,12 @@ async function appliquerModeleSelectionne() {
     if (succes) {
         // Afficher confirmation
         if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces('Modèle appliqué avec succès');
+            afficherNotificationSucces('Configuration appliquée avec succès');
         } else {
-            alert('Modèle appliqué !');
+            alert('Configuration appliquée !');
         }
     } else {
-        alert('Erreur lors de l\'application du modèle.');
+        alert('Erreur lors de l\'application de la configuration.');
     }
 }
 
@@ -552,14 +552,14 @@ async function appliquerModeleSelectionne() {
  * Ouvrir la modale de sauvegarde de configuration
  */
 function ouvrirModaleSauvegardeConfig() {
-    const nom = prompt('Nom de la configuration :', 'Ma configuration');
+    const nom = prompt('Nom de la configuration de pratique :', 'Ma configuration');
     if (!nom) return;
 
     const description = prompt('Description (optionnel) :', '');
 
     sauvegarderConfigurationActuelle(nom, description).then(config => {
         if (typeof afficherNotificationSucces === 'function') {
-            afficherNotificationSucces(`Configuration "${config.nom}" sauvegardée dans la bibliothèque`);
+            afficherNotificationSucces(`Configuration "${config.nom}" sauvegardée`);
         } else {
             alert(`Configuration "${config.nom}" sauvegardée !`);
         }
