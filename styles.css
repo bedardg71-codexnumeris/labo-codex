@@ -29,6 +29,33 @@
     --fond-page-clair: #e8f2fd;       /* Fin du gradient - = --bleu-pale */
     --bleu-anonymisation: #0f1e3a;
 
+    /* === GRADIENTS (04b-box-shadow) === */
+    --gradient-entete: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    --gradient-fond-page: linear-gradient(135deg, #e8f2fd 0%, #f0f8ff 100%);
+
+    /* === OMBRES - 5 niveaux (04b-box-shadow) === */
+    --shadow-subtil: 0 1px 4px rgba(3, 46, 92, 0.1);       /* Sections, items */
+    --shadow-normal: 0 2px 8px rgba(3, 46, 92, 0.15);      /* Cartes, sidebars */
+    --shadow-prononce: 0 4px 12px rgba(3, 46, 92, 0.25);   /* En-tête, hover */
+    --shadow-fort: 0 8px 24px rgba(3, 46, 92, 0.3);        /* Modaux, flottants */
+    --shadow-inset: inset 0 1px 3px rgba(3, 46, 92, 0.08); /* Panneaux, toggles */
+
+    /* === BORDER-RADIUS - 4 niveaux (04b-box-shadow) === */
+    --radius-petit: 5px;      /* Badges Tétris */
+    --radius-moyen: 6px;      /* Boutons, inputs, alertes */
+    --radius-grand: 12px;     /* Conteneurs, cartes, modaux */
+    --radius-pill: 20px;      /* Pills uniformes */
+
+    /* === TAILLES TÉTRIS (SPECS_TETRIS) === */
+    --padding-compact: 3px 8px;
+    --font-compact: 0.75rem;
+    --padding-compact-pill: 3px 10px;
+    --padding-moyen: 10px 15px;
+    --font-moyen: 0.9rem;
+    --padding-moyen-pill: 6px 15px;
+    --font-moyen-pill: 0.85rem;
+    --padding-large: 15px;
+
     /* Couleurs d'accent */
     --orange-accent: #ff6b35;
     --vert-pale: #f8fef8;
