@@ -1239,9 +1239,9 @@ function initialiserModuleProductions() {
  * 2. Productions disponibles à ajouter (bibliothèque + productions retirées)
  */
 async function afficherBibliothequeProductions() {
-    // Vérifier que PRODUCTIONS_BIBLIOTHEQUE existe
-    if (!window.PRODUCTIONS_BIBLIOTHEQUE) {
-        alert('❌ Erreur : La bibliothèque de productions n\'est pas chargée.\n\nVérifiez que le fichier productions-bibliotheque.js est bien chargé.');
+    // Vérifier que le module bibliothèque est chargé
+    if (typeof obtenirToutesLesProductionsBibliotheque !== 'function') {
+        alert('❌ Erreur : Le module bibliothèque n\'est pas chargé.\n\nVérifiez que le fichier productions-bibliotheque.js est bien chargé.');
         return;
     }
 
@@ -1352,18 +1352,50 @@ async function afficherBibliothequeProductions() {
         modalHTML += `</div>`;
     }
 
-    // Bouton "Partager toutes mes productions" après la Section 1
+    // Boutons d'action après la Section 1
     modalHTML += `
-                <div style="margin-top: 15px; text-align: center;">
+                <div style="margin-top: 15px; text-align: center; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="ajouterMesProductionsALaBibliotheque()" class="btn btn-principal">
+                        Ajouter mes productions à la bibliothèque
+                    </button>
                     <button onclick="exporterProductions()" class="btn btn-secondaire">
                         Partager toutes mes productions
                     </button>
                 </div>
     `;
 
+    // SECTION 1.5 : Importer depuis un autre trimestre
+    const trimestresDisponibles = listerTrimestresAvecProductions();
+    if (trimestresDisponibles.length > 0) {
+        modalHTML += `
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e0e0e0;">
+                    <h4 style="color: var(--bleu-principal); font-size: 1rem; margin: 0 0 10px 0;">
+                        Importer depuis un autre trimestre
+                    </h4>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <select id="selectTrimestreImport" class="controle-form" style="flex: 1; min-width: 200px;">
+                            <option value="">-- Choisir un trimestre --</option>
+                            ${trimestresDisponibles.map(t =>
+                                `<option value="${t.cle}">${t.nom} (${t.nombre} production${t.nombre > 1 ? 's' : ''})</option>`
+                            ).join('')}
+                        </select>
+                        <button onclick="afficherProductionsTrimestreModal()" class="btn btn-secondaire btn-compact">
+                            Voir les productions
+                        </button>
+                        <button onclick="importerToutTrimestreModal()" class="btn btn-principal btn-compact">
+                            Tout importer
+                        </button>
+                    </div>
+                    <div id="previewProductionsTrimestre" style="margin-top: 10px; display: none;">
+                        <!-- Preview des productions du trimestre sélectionné -->
+                    </div>
+                </div>
+        `;
+    }
+
     // SECTION 2 : Productions disponibles
-    // Obtenir toutes les productions de la bibliothèque
-    const toutesProductionsBibliotheque = obtenirToutesLesProductionsBibliotheque();
+    // Obtenir toutes les productions de la bibliothèque (asynchrone)
+    const toutesProductionsBibliotheque = await obtenirToutesLesProductionsBibliotheque();
 
     // Combiner avec les productions retirées
     const toutesProductionsDisponibles = [...toutesProductionsBibliotheque, ...productionsRetirees];
@@ -1476,33 +1508,202 @@ async function afficherBibliothequeProductions() {
 }
 
 /**
- * Ajoute une production individuelle à la bibliothèque (ma sélection)
+ * Ajoute une production individuelle au cours actuel (depuis la bibliothèque ou productions retirées)
  */
 async function ajouterProductionIndividuelle(id) {
     try {
-        const productions = await db.get('productions') || [];
-        const prod = productions.find(p => p.id === id);
+        let productions = await db.get('productions') || [];
+        let prod = productions.find(p => p.id === id);
 
+        // Si pas trouvée dans le cours actuel, chercher dans la bibliothèque partagée
         if (!prod) {
-            alert('Production introuvable');
-            return;
+            const bibliotheque = await obtenirToutesLesProductionsBibliotheque();
+            const prodBiblio = bibliotheque.find(p => p.id === id);
+
+            if (!prodBiblio) {
+                alert('Production introuvable dans le cours actuel ni dans la bibliothèque.');
+                return;
+            }
+
+            // Copier la production de la bibliothèque vers le cours actuel
+            // Générer un nouvel ID pour éviter les conflits
+            const nouvelId = `prod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            prod = {
+                ...prodBiblio,
+                id: nouvelId,
+                idOriginal: prodBiblio.id, // Garder trace de l'original
+                dansBibliotheque: true,
+                dateImport: new Date().toISOString()
+            };
+
+            // Ajouter aux productions du cours
+            productions.push(prod);
+            await db.set('productions', productions);
+
+            console.log('[Productions] Importée depuis bibliothèque:', prod.titre);
+        } else {
+            // Production déjà dans le cours, juste la marquer comme visible
+            prod.dansBibliotheque = true;
+            await db.set('productions', productions);
         }
-
-        // Marquer comme dans la bibliothèque
-        prod.dansBibliotheque = true;
-
-        // Sauvegarder
-        await db.set('productions', productions);
 
         // Rafraîchir modal et sidebar
         fermerModalBibliothequeProductions();
         await afficherListeProductions();
         await afficherBibliothequeProductions();
 
-        alert('Production ajoutée à votre sélection avec succès !');
+        alert(`✅ "${prod.titre}" ajoutée à votre cours !`);
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de la production');
+    }
+}
+
+/**
+ * Ajoute toutes les productions du cours actuel à la bibliothèque partagée
+ * Permet de rendre ses productions disponibles pour tous les trimestres
+ */
+async function ajouterMesProductionsALaBibliotheque() {
+    try {
+        // Récupérer les productions du cours actuel
+        const productions = await db.get('productions') || [];
+
+        if (productions.length === 0) {
+            alert('Aucune production à ajouter.\n\nCréez d\'abord des productions dans votre cours actuel.');
+            return;
+        }
+
+        // Confirmer avec l'utilisateur
+        const confirmation = confirm(
+            `Voulez-vous ajouter vos ${productions.length} production(s) à la bibliothèque partagée ?\n\n` +
+            `Elles seront disponibles dans tous vos trimestres et pourront être partagées avec des collègues.`
+        );
+
+        if (!confirmation) {
+            return;
+        }
+
+        // Importer dans la bibliothèque partagée
+        const resultat = await importerDansBibliotheque(productions);
+
+        // Rafraîchir l'affichage
+        fermerModalBibliothequeProductions();
+        await afficherBibliothequeProductions();
+
+        // Message de confirmation
+        if (resultat.ajoutees > 0) {
+            alert(`✅ ${resultat.ajoutees} production(s) ajoutée(s) à la bibliothèque !\n\n` +
+                  (resultat.existantes > 0 ? `${resultat.existantes} étai(en)t déjà présente(s).` : ''));
+        } else {
+            alert(`Toutes vos productions étaient déjà dans la bibliothèque.`);
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
+        alert('Erreur lors de l\'ajout des productions à la bibliothèque.');
+    }
+}
+
+/**
+ * Affiche un aperçu des productions d'un trimestre dans la modal
+ */
+function afficherProductionsTrimestreModal() {
+    const select = document.getElementById('selectTrimestreImport');
+    const preview = document.getElementById('previewProductionsTrimestre');
+
+    if (!select || !preview) return;
+
+    const cleSelectionnee = select.value;
+    if (!cleSelectionnee) {
+        preview.style.display = 'none';
+        return;
+    }
+
+    const productions = obtenirProductionsTrimestre(cleSelectionnee);
+
+    if (productions.length === 0) {
+        preview.innerHTML = '<p style="color: #999; font-style: italic;">Aucune production trouvée.</p>';
+        preview.style.display = 'block';
+        return;
+    }
+
+    let html = '<div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px;">';
+    productions.forEach(prod => {
+        html += `
+            <div style="padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>${prod.titre || 'Sans titre'}</strong>
+                    ${prod.description ? ` - ${prod.description}` : ''}
+                    <br><small style="color: #666;">Type: ${prod.type || 'N/A'} • Pondération: ${prod.ponderation || 0}%</small>
+                </div>
+                <button onclick="importerUneProductionTrimestre('${cleSelectionnee}', '${prod.id}')" class="btn btn-confirmer btn-tres-compact">
+                    Importer
+                </button>
+            </div>
+        `;
+    });
+    html += '</div>';
+
+    preview.innerHTML = html;
+    preview.style.display = 'block';
+}
+
+/**
+ * Importe toutes les productions d'un trimestre dans la bibliothèque
+ */
+async function importerToutTrimestreModal() {
+    const select = document.getElementById('selectTrimestreImport');
+    if (!select || !select.value) {
+        alert('Veuillez d\'abord sélectionner un trimestre.');
+        return;
+    }
+
+    const cleSelectionnee = select.value;
+    const codeTrimestre = cleSelectionnee.replace('_productions', '');
+    const nomTrimestre = formaterNomTrimestre(codeTrimestre);
+
+    const productions = obtenirProductionsTrimestre(cleSelectionnee);
+
+    if (productions.length === 0) {
+        alert('Aucune production à importer dans ce trimestre.');
+        return;
+    }
+
+    const confirmation = confirm(
+        `Voulez-vous importer les ${productions.length} production(s) de ${nomTrimestre} dans la bibliothèque partagée ?`
+    );
+
+    if (!confirmation) return;
+
+    const resultat = await importerDansBibliotheque(productions);
+
+    // Rafraîchir l'affichage
+    fermerModalBibliothequeProductions();
+    await afficherBibliothequeProductions();
+
+    alert(`✅ Import terminé !\n\n${resultat.ajoutees} production(s) ajoutée(s).\n${resultat.existantes} déjà présente(s).`);
+}
+
+/**
+ * Importe une seule production d'un trimestre dans la bibliothèque
+ */
+async function importerUneProductionTrimestre(cleTrimestre, productionId) {
+    const productions = obtenirProductionsTrimestre(cleTrimestre);
+    const prod = productions.find(p => p.id === productionId);
+
+    if (!prod) {
+        alert('Production introuvable.');
+        return;
+    }
+
+    const resultat = await ajouterALaBibliotheque(prod);
+
+    if (resultat) {
+        // Rafraîchir l'affichage
+        fermerModalBibliothequeProductions();
+        await afficherBibliothequeProductions();
+        alert(`✅ "${prod.titre}" ajoutée à la bibliothèque !`);
+    } else {
+        alert('Cette production est déjà dans la bibliothèque.');
     }
 }
 
@@ -2164,12 +2365,18 @@ window.dupliquerProductionActive = dupliquerProductionActive;
 window.supprimerProductionActive = supprimerProductionActive;
 window.chargerGrillesDisponiblesPourProduction = chargerGrillesDisponiblesPourProduction;
 
-// Gestionnaire de bibliothèque (Beta 93)
+// Gestionnaire de bibliothèque (Beta 93 + Beta 95)
 window.afficherBibliothequeProductions = afficherBibliothequeProductions;
 window.retirerProductionDeBibliotheque = retirerProductionDeBibliotheque;
 window.ajouterProductionsABibliotheque = ajouterProductionsABibliotheque;
 window.filtrerProductionsParDiscipline = filtrerProductionsParDiscipline;
 window.fermerModalBibliothequeProductions = fermerModalBibliothequeProductions;
+window.ajouterProductionIndividuelle = ajouterProductionIndividuelle;
+window.partagerProduction = partagerProduction;
+window.ajouterMesProductionsALaBibliotheque = ajouterMesProductionsALaBibliotheque;
+window.afficherProductionsTrimestreModal = afficherProductionsTrimestreModal;
+window.importerToutTrimestreModal = importerToutTrimestreModal;
+window.importerUneProductionTrimestre = importerUneProductionTrimestre;
 
 /* ===============================
    📌 NOTES D'UTILISATION
