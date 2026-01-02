@@ -147,6 +147,7 @@
             // Afficher la description taxonomique, variante et configuration correspondante
             afficherDescriptionTaxonomique(modalites.pratique || '');
             afficherVariantePANStandards(modalites.pratique || '');
+            afficherBibliothequeConfigurations(modalites.pratique || '');
             afficherConfigurationType(modalites.pratique || '');
             mettreAJourBadgePratiqueV2(modalites.pratique || '');
         }
