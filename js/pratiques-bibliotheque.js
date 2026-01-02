@@ -21,6 +21,7 @@ const CLE_BIBLIOTHEQUE_PRATIQUES = 'bibliothequePratiques';
  * Ces modèles sont toujours disponibles même si la bibliothèque est vide
  */
 const MODELES_PRATIQUES_PREDEFINIS = {
+    // === PAN-SPÉCIFICATIONS ===
     'SPE-francois': {
         id: 'SPE-francois',
         nom: 'Modèle François',
@@ -87,6 +88,46 @@ const MODELES_PRATIQUES_PREDEFINIS = {
                 { id: 2, lettre: 'B', note: 80, travaux: { 1: 2, 2: 1, 3: 0 } },
                 { id: 3, lettre: 'C', note: 60, travaux: { 1: 1, 2: 1, 3: 0 } }
             ]
+        }
+    },
+    // === PAN-STANDARDS ===
+    'STD-n-meilleurs': {
+        id: 'STD-n-meilleurs',
+        nom: 'N meilleures évaluations',
+        description: 'Retient les N meilleures notes (favorise le progrès)',
+        type: 'pan-standards',
+        auteur: 'Codex Numeris',
+        discipline: 'Général',
+        estGabarit: true,
+        pratiques: ['STD'],
+        configuration: {
+            varianteCalcul: 'n-meilleurs'
+        }
+    },
+    'STD-n-recents': {
+        id: 'STD-n-recents',
+        nom: 'N plus récentes évaluations',
+        description: 'Retient les N évaluations les plus récentes',
+        type: 'pan-standards',
+        auteur: 'Codex Numeris',
+        discipline: 'Général',
+        estGabarit: true,
+        pratiques: ['STD'],
+        configuration: {
+            varianteCalcul: 'n-recents'
+        }
+    },
+    'STD-par-objectifs': {
+        id: 'STD-par-objectifs',
+        nom: 'Par objectifs d\'apprentissage',
+        description: 'Évaluation par objectifs avec 4 modes de calcul',
+        type: 'pan-standards',
+        auteur: 'Codex Numeris',
+        discipline: 'Général',
+        estGabarit: true,
+        pratiques: ['STD'],
+        configuration: {
+            varianteCalcul: 'par-objectifs'
         }
     }
 };
@@ -493,10 +534,17 @@ async function genererSelecteurModelesPratiques(typeFiltre = null) {
     const gabaritsFiltres = filtrerParType(gabarits);
     const personnalisesFiltres = filtrerParType(personnalises);
 
+    // Fonction pour générer le badge
+    const genererBadge = (config) => {
+        if (config.pratiques?.includes('SPE')) return '[SPE] ';
+        if (config.pratiques?.includes('STD')) return '[STD] ';
+        return '';
+    };
+
     if (gabaritsFiltres.length > 0) {
         html += '<optgroup label="Configurations prédéfinies">';
         gabaritsFiltres.forEach(config => {
-            const badge = config.pratiques?.includes('SPE') ? '[SPE] ' : '';
+            const badge = genererBadge(config);
             html += `<option value="${config.id}">${badge}${config.nom}</option>`;
         });
         html += '</optgroup>';
@@ -505,7 +553,8 @@ async function genererSelecteurModelesPratiques(typeFiltre = null) {
     if (personnalisesFiltres.length > 0) {
         html += '<optgroup label="Mes configurations">';
         personnalisesFiltres.forEach(config => {
-            html += `<option value="${config.id}">${config.nom}</option>`;
+            const badge = genererBadge(config);
+            html += `<option value="${config.id}">${badge}${config.nom}</option>`;
         });
         html += '</optgroup>';
     }
@@ -514,13 +563,19 @@ async function genererSelecteurModelesPratiques(typeFiltre = null) {
 }
 
 /**
- * Charger le dropdown des modèles dans l'interface
+ * Charger le dropdown des configurations dans l'interface
+ * Détecte automatiquement le type de pratique sélectionné
  */
 async function chargerDropdownModelesPratiques() {
     const dropdown = document.getElementById('v2-spec-dropdown-modeles');
     if (!dropdown) return;
 
-    dropdown.innerHTML = await genererSelecteurModelesPratiques('pan-specifications');
+    // Détecter le type de pratique actuel
+    const typeSelect = document.getElementById('v2-pratique-type');
+    const typePratique = typeSelect?.value || null;
+
+    // Ne pas filtrer si pas de type sélectionné - montrer toutes les configurations
+    dropdown.innerHTML = await genererSelecteurModelesPratiques(typePratique);
 }
 
 /**
@@ -551,25 +606,27 @@ async function appliquerModeleSelectionne() {
 /**
  * Ouvrir la modale de sauvegarde de configuration
  */
-function ouvrirModaleSauvegardeConfig() {
+async function ouvrirModaleSauvegardeConfig() {
     const nom = prompt('Nom de la configuration de pratique :', 'Ma configuration');
     if (!nom) return;
 
     const description = prompt('Description (optionnel) :', '');
 
-    sauvegarderConfigurationActuelle(nom, description).then(config => {
+    try {
+        const config = await sauvegarderConfigurationActuelle(nom, description);
+
+        // Rafraîchir le dropdown AVANT d'afficher la notification
+        await chargerDropdownModelesPratiques();
+
         if (typeof afficherNotificationSucces === 'function') {
             afficherNotificationSucces(`Configuration "${config.nom}" sauvegardée`);
         } else {
             alert(`Configuration "${config.nom}" sauvegardée !`);
         }
-
-        // Rafraîchir le dropdown
-        chargerDropdownModelesPratiques();
-    }).catch(err => {
+    } catch (err) {
         console.error('[Bibliothèque Pratiques] Erreur sauvegarde:', err);
         alert('Erreur lors de la sauvegarde.');
-    });
+    }
 }
 
 // ===========================
