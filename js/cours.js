@@ -554,19 +554,19 @@ function afficherFormCours(id = null) {
     // Peupler le sélecteur de trimestre (Beta 93.5)
     peupleSelecteurTrimestre();
 
-    // Afficher la pratique active en lecture seule (Single Source of Truth)
-    afficherPratiqueEnLectureSeule();
-    
+    // ✅ CORRECTION (2 jan 2026) : La pratique est maintenant sélectionnable par cours
+    // Ne plus appeler afficherPratiqueEnLectureSeule(), le dropdown est dans le HTML
+
     if (id) {
         // Mode édition
         const cours = db.getSync('listeCours', []);
         const c = cours.find(cours => cours.id === id);
-        
+
         if (c) {
             coursEnEdition = id;
             if (titre) titre.textContent = 'Modifier la configuration';
             if (btnTexte) btnTexte.textContent = 'Sauvegarder';
-            
+
             // Remplir les champs
             document.getElementById('codeCours').value = c.codeCours || '';
             document.getElementById('nomCours').value = c.nomCours || '';
@@ -591,7 +591,11 @@ function afficherFormCours(id = null) {
                 document.getElementById('trimestreId').value = c.trimestreId || '';
             }
 
-            // La pratique est affichée en lecture seule (pas modifiable ici)
+            // ✅ CORRECTION (2 jan 2026) : Pré-sélectionner la pratique du cours
+            const selectPratique = document.getElementById('pratiqueIdCours');
+            if (selectPratique && c.pratiqueId) {
+                selectPratique.value = c.pratiqueId;
+            }
         }
     } else {
         // Mode ajout - MAIS vérifier s'il y a déjà un cours (créé par Primo par ex)
@@ -615,7 +619,11 @@ function afficherFormCours(id = null) {
             document.getElementById('heuresParSemaine').value = premierCours.heuresParSemaine || '4';
             document.getElementById('formatHoraire').value = premierCours.formatHoraire || '2x2';
 
-            // La pratique est affichée en lecture seule (pas modifiable ici)
+            // ✅ CORRECTION (2 jan 2026) : Pré-sélectionner la pratique du cours existant
+            const selectPratique1 = document.getElementById('pratiqueIdCours');
+            if (selectPratique1 && premierCours.pratiqueId) {
+                selectPratique1.value = premierCours.pratiqueId;
+            }
 
             if (titre) titre.textContent = 'Configuration du cours';
             coursEnEdition = premierCours.id; // Permettre la modification
@@ -639,6 +647,13 @@ function afficherFormCours(id = null) {
             document.getElementById('annee').value = new Date().getFullYear().toString();
             document.getElementById('heuresParSemaine').value = '4';
             document.getElementById('formatHoraire').value = '2x2';
+
+            // ✅ CORRECTION (2 jan 2026) : Pratique par défaut pour nouveau cours
+            const selectPratique2 = document.getElementById('pratiqueIdCours');
+            if (selectPratique2) {
+                const pratiqueDefaut = db.getSync('pratiqueParDefaut', 'pan-standards');
+                selectPratique2.value = pratiqueDefaut;
+            }
         }
     }
 }
@@ -703,9 +718,10 @@ function annulerFormCours() {
 function sauvegarderCours() {
     let cours = db.getSync('listeCours', []);
 
-    // ✅ CORRECTION BUG (16 décembre 2025) : Lire depuis pratiqueParDefaut
-    // Le modal "Bibliothèque de pratiques" sauvegarde dans pratiqueParDefaut, pas modalitesEvaluation
-    const pratiqueId = db.getSync('pratiqueParDefaut', 'pan-standards');
+    // ✅ CORRECTION (2 jan 2026) : Lire depuis le sélecteur du formulaire
+    // Chaque cours peut avoir sa propre pratique de notation
+    const selectPratique = document.getElementById('pratiqueIdCours');
+    const pratiqueId = selectPratique ? selectPratique.value : db.getSync('pratiqueParDefaut', 'pan-standards');
 
     const nouveauCours = {
         id: coursEnEdition || 'COURS' + Date.now(),
@@ -727,7 +743,7 @@ function sauvegarderCours() {
         annee: document.getElementById('annee').value,
         heuresParSemaine: document.getElementById('heuresParSemaine').value,
         formatHoraire: document.getElementById('formatHoraire').value,
-        pratiqueId: pratiqueId, // ✅ NOUVEAU : Association à une pratique
+        pratiqueId: pratiqueId, // ✅ Association à une pratique (sélectionnable par cours)
         trimestreId: document.getElementById('trimestreId')?.value || '', // ✅ BETA 93.5 : Association à un trimestre
         dansBibliotheque: true, // ✅ NOUVEAU : Visible dans sidebar par défaut
         verrouille: false,

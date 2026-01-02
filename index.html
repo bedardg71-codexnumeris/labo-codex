@@ -6,7 +6,7 @@
     <title>Système de suivi Beta 95 - Hiver 2026</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=2026010204">
+    <link rel="stylesheet" href="styles.css?v=2026010205">
 
     <style>
         /* Les styles embarqués restent ici */
@@ -5703,31 +5703,26 @@
                                 </div>
                             </div>
 
-                            <!-- Pratique de notation (lecture seule - Single Source of Truth) -->
+                            <!-- Pratique de notation (sélectionnable par cours) -->
                             <h5 class="sous-titre-section" style="margin-top: 25px;">
                                 Pratique de notation
                             </h5>
                             <div class="groupe-form" style="margin-bottom: 20px;">
-                                <label>
-                                    Pratique de notation mise en place pour ce cours
+                                <label for="pratiqueIdCours">
+                                    Pratique de notation pour ce groupe-cours
                                     <small style="display: block; color: var(--gris-moyen); font-weight: normal; margin-top: 3px;">
-                                        Cette information est définie dans Réglages → Pratique de notation
+                                        Chaque groupe-cours peut avoir sa propre pratique de notation
                                     </small>
                                 </label>
-                                <div id="pratiqueCoursAffichage" style="
-                                    padding: 10px 15px;
-                                    background: var(--bleu-tres-pale);
-                                    border: 1px solid var(--bleu-leger);
-                                    border-radius: 6px;
-                                    color: var(--bleu-principal);
-                                    font-weight: 500;
-                                    font-size: 0.95rem;
-                                ">
-                                    <!-- Sera rempli dynamiquement par JavaScript -->
-                                </div>
+                                <select id="pratiqueIdCours" class="champ-texte">
+                                    <option value="sommative">Sommative (moyenne pondérée)</option>
+                                    <option value="pan-standards" selected>PAN-Standards (par niveaux de maîtrise)</option>
+                                    <option value="pan-maitrise">PAN-Maîtrise (N meilleurs artefacts)</option>
+                                    <option value="pan-objectifs">PAN-Objectifs (par objectifs)</option>
+                                </select>
                                 <div style="margin-top: 10px;">
-                                    <button type="button" class="btn btn-modifier" onclick="naviguerVersPratiqueNotation()" style="font-size: 0.85rem; padding: 6px 12px;">
-                                        Modifier la pratique de notation
+                                    <button type="button" class="btn btn-secondaire" onclick="naviguerVersPratiqueNotation()" style="font-size: 0.85rem; padding: 6px 12px;">
+                                        Configurer les détails de la pratique
                                     </button>
                                 </div>
                             </div>
