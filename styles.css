@@ -45,7 +45,7 @@
 
     /* Couleurs pratiques d'évaluation */
     --som-orange: #ff6f00;
-    --pan-bleu: #0277bd;
+    /* OBSOLÈTE - Utiliser --std-bleu à la place */
     --hybride-violet: #9c27b0;
 
     /* Couleurs de tableau */
@@ -363,10 +363,13 @@ body {
    =============================== */
 
 .entete {
-    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
+    background: var(--gradient-entete);
     color: white;
     padding: 15px 30px;
     position: relative;
+    border-radius: 0 0 var(--radius-grand) var(--radius-grand);
+    box-shadow: var(--shadow-prononce);
+    transition: box-shadow 0.3s ease;
 }
 
 .entete-conteneur {
@@ -981,10 +984,16 @@ body {
 .carte {
     background: white;
     border: 1px solid var(--bleu-pale);
-    border-radius: 8px;
+    border-radius: var(--radius-grand);
     padding: var(--espacement-moyen);
     margin-bottom: var(--espacement-moyen);
-    box-shadow: 0 2px 8px rgba(3, 46, 92, 0.05);
+    box-shadow: var(--shadow-normal);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.carte:hover {
+    box-shadow: var(--shadow-prononce);
+    transform: translateY(-2px);
 }
 
 .carte h3 {
@@ -1836,57 +1845,63 @@ input[type="number"].controle-form {
     background: #1bbd7e;
 }
 
-/* === BADGES DE NIVEAU RÀI === */
+/* === BADGES TÉTRIS : Niveau RàI === */
 /* Couleurs alignées sur le gradient de la barre RàI */
-/* Format uniformisé avec les autres badges d'intervention */
 .badge-rai-1 {
     display: inline-block;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 0.8rem;
+    padding: var(--padding-compact);
+    border-radius: var(--radius-petit);
+    font-size: var(--font-compact);
     font-weight: 600;
+    line-height: 1.2;
     background: #dbeafe;
     color: #2196f3;
+    transition: all 0.2s ease;
 }
 
 .badge-rai-2 {
     display: inline-block;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 0.8rem;
+    padding: var(--padding-compact);
+    border-radius: var(--radius-petit);
+    font-size: var(--font-compact);
     font-weight: 600;
+    line-height: 1.2;
     background: #e0e7ff;
     color: #6366f1;
+    transition: all 0.2s ease;
 }
 
 .badge-rai-3 {
     display: inline-block;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 0.8rem;
+    padding: var(--padding-compact);
+    border-radius: var(--radius-petit);
+    font-size: var(--font-compact);
     font-weight: 600;
+    line-height: 1.2;
     background: #ede9fe;
     color: #7c3aed;
+    transition: all 0.2s ease;
 }
 
-/* === BADGES D'ANALYSE (Aperçu du sous-groupe) === */
-/* Style de base pour tous les badges d'analyse - style uniformisé avec tableau */
+/* === BADGES TÉTRIS : Analyse (Aperçu du sous-groupe) === */
 .badge-analyse {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    border-radius: 4px;
-    padding: 4px 10px;
+    border-radius: var(--radius-petit);
+    padding: var(--padding-compact);
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: var(--font-compact);
+    line-height: 1.2;
+    transition: all 0.2s ease;
 }
 
 /* Badge compteur interne (petit badge avec nombre) */
 .badge-analyse-count {
-    padding: 2px 8px;
-    border-radius: 4px;
+    padding: 2px 6px;
+    border-radius: 3px;
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: white;
 }
 
@@ -2227,17 +2242,17 @@ textarea {
 }
 
 /* ===============================
-   BOUTONS
+   BOUTONS (padding unifié 10px 15px)
    =============================== */
 
 .btn {
-    padding: 10px 20px;
+    padding: var(--padding-moyen);
     border: none;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    font-weight: 500;
+    border-radius: var(--radius-moyen);
+    font-size: var(--font-moyen);
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
 .btn:disabled {
@@ -2418,10 +2433,10 @@ textarea {
     max-width: 800px;
     margin: 50px auto;
     background: white;
-    border-radius: 12px;
+    border-radius: var(--radius-grand);
     padding: 30px;
     position: relative;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-fort);
 }
 
 .modal-contenu.modal-large {
@@ -3239,14 +3254,15 @@ textarea {
 
 /* Colonne gauche (sidebar) */
 .profil-sidebar {
-    background: var(--bleu-pale);
-    border-radius: 8px;
+    background: white;
+    border-radius: var(--radius-grand);
     border: 1px solid var(--bleu-moyen);
     padding: 15px;
     position: sticky;
     top: 20px;
     max-height: calc(100vh - 40px);
     overflow-y: auto;
+    box-shadow: var(--shadow-normal);
 }
 
 /* En-tête sidebar */
@@ -3584,9 +3600,10 @@ textarea {
 .section-collapsible {
     background: white;
     border: 1px solid var(--bleu-pale);
-    border-radius: 6px;
+    border-radius: var(--radius-grand);
     margin-bottom: 12px;
     overflow: hidden;
+    box-shadow: var(--shadow-subtil);
 }
 
 .section-collapsible-header {
@@ -4951,9 +4968,9 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--som-orange);
 }
 
-.profil-valeur-grande-bleu-pan {
+.profil-valeur-grande-bleu-std {
     font-size: 1.8rem;
-    color: var(--pan-bleu);
+    color: var(--std-bleu);
 }
 
 .profil-valeur-moyenne {
@@ -5214,9 +5231,9 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--som-orange);
 }
 
-.tb-texte-mini-bleu-pan {
+.tb-texte-mini-bleu-std {
     font-size: 0.7rem;
-    color: var(--pan-bleu);
+    color: var(--std-bleu);
 }
 
 .tb-valeur-grande-orange {
@@ -5225,9 +5242,9 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-weight: 700;
 }
 
-.tb-valeur-grande-bleu-pan {
+.tb-valeur-grande-bleu-std {
     font-size: 1.5rem;
-    color: var(--pan-bleu);
+    color: var(--std-bleu);
     font-weight: 700;
 }
 
@@ -5293,9 +5310,9 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 
 
-.tb-valeur-tres-grande-bleu-pan {
+.tb-valeur-tres-grande-bleu-std {
     font-size: 1.8rem;
-    color: var(--pan-bleu);
+    color: var(--std-bleu);
     font-weight: 700;
 }
 
@@ -5306,10 +5323,10 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-left: 10px;
 }
 
-.tb-texte-moyen-bleu-pan {
+.tb-texte-moyen-bleu-std {
     font-size: 0.9rem;
     font-weight: 600;
-    color: var(--pan-bleu);
+    color: var(--std-bleu);
     margin-left: 10px;
 }
 
@@ -5734,27 +5751,28 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     align-items: start;
 }
 
+/* === SIDEBARS (fond blanc, radius 12px) === */
 .sidebar-cartouches,
 .sidebar-navigation {
     position: sticky;
     top: 20px;
     max-height: calc(100vh - 100px);
     overflow-y: auto;
-    background: var(--bleu-pale);
+    background: white;
     padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border-radius: var(--radius-grand);
+    box-shadow: var(--shadow-normal);
 }
 
 .item-cartouche-banque,
 .sidebar-item {
-    padding: 12px;
-    background: var(--bleu-pale);
-    border-radius: 6px;
+    padding: 10px 15px;
+    background: var(--bleu-tres-pale);
+    border-radius: var(--radius-moyen);
     border: 1px solid var(--bleu-leger);
     margin-bottom: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .item-cartouche-banque:hover,
@@ -5780,25 +5798,27 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 6px;
 }
 
+/* === BADGES MATÉRIEL PÉDAGOGIQUE (Moyen pill) === */
 .badge-grille,
 .sidebar-item-badge {
     display: inline-block;
     background: var(--bleu-principal);
     color: white;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
+    padding: var(--padding-moyen-pill);
+    border-radius: var(--radius-pill);
+    font-size: var(--font-moyen-pill);
+    font-weight: 600;
+    line-height: 1.2;
     margin-bottom: 8px;
-    box-shadow: 0 1px 3px rgba(3, 46, 92, 0.3);
-    transition: background 0.3s ease, transform 0.2s ease;
+    box-shadow: var(--shadow-subtil);
+    transition: all 0.2s ease;
 }
 
 .badge-grille:hover,
 .sidebar-item-badge:hover {
-    background: linear-gradient(135deg, var(--bleu-moyen) 0%, var(--bleu-principal) 100%);
+    background: #054a95;
     transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(3, 46, 92, 0.4);
+    box-shadow: var(--shadow-normal);
 }
 
 .actions-cartouche,
@@ -6683,8 +6703,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     background: var(--som-orange);
 }
 
-.profil-echelle-point-pan {
-    background: var(--pan-bleu);
+.profil-echelle-point-std {
+    background: var(--std-bleu);
 }
 
 .profil-echelle-point-unique {
@@ -6767,18 +6787,27 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-weight: bold;
 }
 
-/* Badges pratiques de notation (SOM, PAN-Maîtrise, etc.) */
+/* === BADGES PRATIQUE (4 FAMILLES : SOM/STD/SPE/DEN) === */
+
+/* Badge normal (Compact pill) */
 .badge-pratique {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: 20px;
     border: 1.5px solid;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 600;
+    line-height: 1.2;
     margin-left: 12px;
     vertical-align: middle;
+    transition: all 0.2s ease;
+}
+
+.badge-pratique:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 /* Badge pratique compact (pour profil) */
@@ -6790,12 +6819,13 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     border-radius: 12px;
     border: 1.5px solid;
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 600;
+    line-height: 1.2;
     margin-left: 8px;
     vertical-align: middle;
 }
 
-/* Variantes SOM */
+/* Variante SOM (orange) - Sommative */
 .badge-pratique.som,
 .badge-pratique-compact.som {
     background: color-mix(in srgb, var(--som-orange) 9%, transparent);
@@ -6803,12 +6833,36 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     color: var(--som-orange);
 }
 
-/* Variantes PAN */
+/* Variante STD (bleu) - Standards */
+.badge-pratique.std,
+.badge-pratique-compact.std {
+    background: color-mix(in srgb, var(--std-bleu) 9%, transparent);
+    border-color: var(--std-bleu);
+    color: var(--std-bleu);
+}
+
+/* Variante SPE (vert) - Spécifications */
+.badge-pratique.spe,
+.badge-pratique-compact.spe {
+    background: color-mix(in srgb, var(--spe-vert) 9%, transparent);
+    border-color: var(--spe-vert);
+    color: var(--spe-vert);
+}
+
+/* Variante DEN (violet) - Dénotation */
+.badge-pratique.den,
+.badge-pratique-compact.den {
+    background: color-mix(in srgb, var(--den-violet) 9%, transparent);
+    border-color: var(--den-violet);
+    color: var(--den-violet);
+}
+
+/* Rétrocompatibilité : .pan → .std */
 .badge-pratique.pan,
 .badge-pratique-compact.pan {
-    background: color-mix(in srgb, var(--pan-bleu) 9%, transparent);
-    border-color: var(--pan-bleu);
-    color: var(--pan-bleu);
+    background: color-mix(in srgb, var(--std-bleu) 9%, transparent);
+    border-color: var(--std-bleu);
+    color: var(--std-bleu);
 }
 
 /* Ancienne classe pour rétrocompatibilité */
@@ -6820,7 +6874,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     border-radius: 12px;
     border: 1.5px solid;
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 600;
+    line-height: 1.2;
     margin-left: 8px;
     vertical-align: middle;
 }
@@ -6835,13 +6890,15 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 15px;
 }
 
-/* Badges d'absence/retard */
+/* === BADGES TÉTRIS : Absence/Retard === */
 .badge-absence {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    border-radius: 8px;
-    padding: 4px 6px;
+    border-radius: var(--radius-petit);
+    padding: var(--padding-compact);
+    font-size: var(--font-compact);
+    line-height: 1.2;
     cursor: pointer;
     transition: all 0.2s ease;
     opacity: 0.9;
@@ -6851,8 +6908,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .badge-absence:hover {
     opacity: 1;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .badge-absence-complete {
@@ -6922,21 +6979,23 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     font-weight: 600;
 }
 
-/* Badge artefact (production remise/non remise) */
+/* === BADGES TÉTRIS : Artefacts === */
 .badge-artefact {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    border-radius: 8px;
-    padding: 4px 6px;
+    border-radius: var(--radius-petit);
+    padding: var(--padding-compact);
+    font-size: var(--font-compact);
+    line-height: 1.2;
     border-width: 2px;
     border-style: solid;
     transition: all 0.2s ease;
 }
 
 .badge-artefact:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .badge-artefact-checkbox {
@@ -6973,8 +7032,10 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     gap: 6px;
     background: #f5f5f5;
     border: 2px solid #ccc;
-    border-radius: 8px;
-    padding: 4px 6px;
+    border-radius: var(--radius-petit);
+    padding: var(--padding-compact);
+    font-size: var(--font-compact);
+    line-height: 1.2;
     opacity: 0.6;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -6982,46 +7043,50 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 
 .badge-artefact-non-remis:hover {
     opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Badge completion pour colonne C (format comme Assiduité) */
+/* === BADGES TÉTRIS : Completion === */
 .badge-completion-remis {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     background: #28a74522;
     border: 2px solid #28a745;
-    border-radius: 8px;
-    padding: 4px 6px;
+    border-radius: var(--radius-petit);
+    padding: var(--padding-compact);
+    font-size: var(--font-compact);
+    line-height: 1.2;
     cursor: pointer;
     transition: all 0.2s ease;
     opacity: 0.9;
 }
 
 .badge-completion-remis:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
     opacity: 1;
 }
 
 .badge-completion-non-remis {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     background: #99999922;
     border: 2px solid #999;
-    border-radius: 8px;
-    padding: 4px 6px;
+    border-radius: var(--radius-petit);
+    padding: var(--padding-compact);
+    font-size: var(--font-compact);
+    line-height: 1.2;
     cursor: pointer;
     transition: all 0.2s ease;
     opacity: 0.7;
 }
 
 .badge-completion-non-remis:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     opacity: 0.9;
 }
 
@@ -7056,19 +7121,21 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .badge-completion-non-recevable {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     background: #dc354522;
     border: 2px solid #dc3545;
-    border-radius: 8px;
-    padding: 4px 6px;
+    border-radius: var(--radius-petit);
+    padding: var(--padding-compact);
+    font-size: var(--font-compact);
+    line-height: 1.2;
     cursor: pointer;
     transition: all 0.2s ease;
     opacity: 0.85;
 }
 
 .badge-completion-non-recevable:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
     opacity: 1;
 }
 
@@ -7255,8 +7322,8 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     background: var(--som-orange);
 }
 
-.critere-point-pan {
-    background: var(--pan-bleu);
+.critere-point-std {
+    background: var(--std-bleu);
 }
 
 /* Légende IDME alignée avec zones */
@@ -7485,22 +7552,24 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     white-space: nowrap;
 }
 
-/* Badges de jetons */
+/* === BADGES TÉTRIS : Jetons === */
 .badge-jeton {
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 0.7rem;
+    padding: var(--padding-compact);
+    border-radius: var(--radius-petit);
+    font-size: var(--font-compact);
     font-weight: 600;
+    line-height: 1.2;
     color: white;
     margin-left: 8px;
+    transition: all 0.2s ease;
 }
 
 .badge-jeton-reprise {
-    background-color: #9c27b0;
+    background-color: var(--den-violet);
 }
 
 .badge-jeton-delai {
-    background-color: #ff6f00;
+    background-color: var(--som-orange);
 }
 
 /* ===============================
@@ -7706,8 +7775,8 @@ label:has(+ textarea:disabled) {
 }
 
 /* Point pour PAN (bleu) */
-.barre-etudiant-pan {
-    background: var(--pan-bleu);
+.barre-etudiant-std {
+    background: var(--std-bleu);
     opacity: 1; /* Opacité maximale pour meilleure visibilité */
 }
 

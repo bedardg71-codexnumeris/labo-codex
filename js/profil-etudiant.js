@@ -1489,10 +1489,10 @@ function genererSectionMobilisationEngagement(da) {
                             ${modeComparatif ? `
                                 <!-- Indicateurs duaux: symboles de direction -->
                                 ${directionSOM.symbole ? `<div style="position: absolute; left: ${Math.max(0, Math.min((E_SOM - 0.30) / 0.70 * 100, 100))}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${directionSOM.symbole}</div>` : ''}
-                                ${directionPAN.symbole ? `<div style="position: absolute; left: ${Math.max(0, Math.min((E_PAN - 0.30) / 0.70 * 100, 100))}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--pan-bleu);" title="PAN: ${directionPAN.interpretation}">${directionPAN.symbole}</div>` : ''}
+                                ${directionPAN.symbole ? `<div style="position: absolute; left: ${Math.max(0, Math.min((E_PAN - 0.30) / 0.70 * 100, 100))}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--std-bleu);" title="PAN: ${directionPAN.interpretation}">${directionPAN.symbole}</div>` : ''}
                                 <!-- Points colorés (valeurs affichées dans l'en-tête) -->
                                 <div class="profil-echelle-point profil-echelle-point-som" style="left: ${Math.max(0, Math.min((E_SOM - 0.30) / 0.70 * 100, 100))}%;"></div>
-                                <div class="profil-echelle-point profil-echelle-point-pan" style="left: ${Math.max(0, Math.min((E_PAN - 0.30) / 0.70 * 100, 100))}%;"></div>
+                                <div class="profil-echelle-point profil-echelle-point-std" style="left: ${Math.max(0, Math.min((E_PAN - 0.30) / 0.70 * 100, 100))}%;"></div>
                             ` : `
                                 <!-- Indicateur unique pratique courante -->
                                 <div class="profil-echelle-point profil-echelle-point-unique" style="left: ${Math.max(0, Math.min((E_reel - 0.30) / 0.70 * 100, 100))}%;"></div>
@@ -3277,7 +3277,7 @@ function genererValeursComparatives(valeurSOM, valeurPAN, modeComparatif) {
     return `
         <div class="profil-flex-gap15-baseline">
             <strong class="profil-valeur-grande-orange">${valeurSOM}%</strong>
-            <strong class="profil-valeur-grande-bleu-pan">${valeurPAN}%</strong>
+            <strong class="profil-valeur-grande-bleu-std">${valeurPAN}%</strong>
         </div>
     `;
 }
@@ -6807,7 +6807,7 @@ function genererSectionPerformance(da) {
                 ${modeComparatif ? `
                     <div class="profil-flex-gap15-baseline" style="margin-left: auto;">
                         <strong class="profil-valeur-grande-orange">${lettreIDME_SOM} ${indicesSOM.P}%</strong>
-                        <strong class="profil-valeur-grande-bleu-pan">${lettreIDME_PAN} ${indicesPAN.P}%</strong>
+                        <strong class="profil-valeur-grande-bleu-std">${lettreIDME_PAN} ${indicesPAN.P}%</strong>
                     </div>
                 ` : `
                     <strong class="profil-valeur-grande-bleu" style="margin-left: auto;">${lettreIDME} ${indices.P}%</strong>
@@ -6984,13 +6984,13 @@ function genererSectionPerformance(da) {
                             // Points colorés
                             pointsHTML = `
                                 ${pourcentageSOM !== null ? `<div class="critere-point critere-point-som" style="left: ${Math.min(pourcentageSOM, 100)}%;"></div>` : ''}
-                                ${pourcentagePAN !== null ? `<div class="critere-point critere-point-pan" style="left: ${Math.min(pourcentagePAN, 100)}%;"></div>` : ''}
+                                ${pourcentagePAN !== null ? `<div class="critere-point critere-point-std" style="left: ${Math.min(pourcentagePAN, 100)}%;"></div>` : ''}
                             `;
 
                             // Symboles de direction au-dessus des points
                             symbolesHTML = `
                                 ${symboleSOM && pourcentageSOM !== null ? `<div style="position: absolute; left: ${Math.min(pourcentageSOM, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--som-orange);" title="SOM: ${directionSOM.interpretation}">${symboleSOM}</div>` : ''}
-                                ${symbolePAN && pourcentagePAN !== null ? `<div style="position: absolute; left: ${Math.min(pourcentagePAN, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--pan-bleu);" title="PAN: ${directionPAN.interpretation}">${symbolePAN}</div>` : ''}
+                                ${symbolePAN && pourcentagePAN !== null ? `<div style="position: absolute; left: ${Math.min(pourcentagePAN, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--std-bleu);" title="PAN: ${directionPAN.interpretation}">${symbolePAN}</div>` : ''}
                             `;
 
                             // Affichage des valeurs duales
@@ -6998,7 +6998,7 @@ function genererSectionPerformance(da) {
                                 <span style="display: flex; gap: 8px; align-items: center;">
                                     ${pourcentageSOM !== null ? `<span style="color: var(--som-orange); font-weight: 600;">${pourcentageSOM}%</span>` : ''}
                                     ${pourcentageSOM !== null && pourcentagePAN !== null ? `<span style="color: #999;">|</span>` : ''}
-                                    ${pourcentagePAN !== null ? `<span style="color: var(--pan-bleu); font-weight: 600;">${pourcentagePAN}%</span>` : ''}
+                                    ${pourcentagePAN !== null ? `<span style="color: var(--std-bleu); font-weight: 600;">${pourcentagePAN}%</span>` : ''}
                                 </span>
                             `;
                         } else {
