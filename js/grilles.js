@@ -2003,7 +2003,7 @@ async function afficherBibliothequeGrilles() {
 
     // Séparer grilles dans la bibliothèque vs disponibles
     const grillesDansBibliotheque = grilles.filter(g => g.dansBibliotheque !== false);
-    const grillesDisponibles = obtenirToutesLesGrillesBibliotheque();
+    const grillesDisponibles = await obtenirToutesLesGrillesBibliotheque();
 
     // Obtenir les disciplines disponibles
     const disciplines = obtenirDisciplinesDisponiblesGrilles();
@@ -2236,7 +2236,7 @@ async function ajouterGrilleIndividuelle(id) {
 
         if (!grille) {
             // C'est une grille de la bibliothèque externe, il faut l'importer
-            const toutesGrilles = obtenirToutesLesGrillesBibliotheque();
+            const toutesGrilles = await obtenirToutesLesGrillesBibliotheque();
             const grilleSource = toutesGrilles.find(g => g.id === id);
 
             if (grilleSource) {
@@ -2344,7 +2344,7 @@ async function ajouterGrillesABibliotheque() {
     }
 
     const grilles = await db.get('grillesTemplates') || [];
-    const grillesBibliotheque = obtenirToutesLesGrillesBibliotheque();
+    const grillesBibliotheque = await obtenirToutesLesGrillesBibliotheque();
 
     let nbAjoutees = 0;
 

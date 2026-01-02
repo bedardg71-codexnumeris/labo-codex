@@ -211,6 +211,20 @@ Ni dans le formulaire de modification, ni dans la bibliotheque de cours.
 
 **Priorite** : Moyenne (contournable via console)
 
+### 3. Checkbox activer/desactiver systeme de jetons
+**Identifie** : 2 jan 2026
+**Probleme** : Dans Primo, on peut choisir de ne pas utiliser les jetons.
+Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox globale).
+
+**Incohérence** : Primo permet "sans jetons", Trimestre impose les jetons.
+
+**Solution proposee** :
+- Ajouter checkbox "Activer le systeme de jetons" en haut de la section
+- Si decoche : masquer/desactiver les 3 sous-sections (delai, reprise, ciblee)
+- Synchroniser avec le choix fait dans Primo
+
+**Priorite** : Haute (incoherence UX)
+
 ---
 
 ## OU REPRENDRE (si session s'arrete maintenant)

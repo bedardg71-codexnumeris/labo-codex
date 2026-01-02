@@ -1222,16 +1222,19 @@
     // -------------------------------------------------------------------------
 
     /**
-     * Affiche la liste des types de travaux
+     * Affiche la liste des types de productions
      */
     function afficherTypesTravauxSpec(typesTravaux) {
         const conteneur = document.getElementById('v2-spec-types-travaux-liste');
         if (!conteneur) return;
 
+        // Charger aussi le dropdown des productions
+        chargerDropdownProductionsSpec();
+
         if (!typesTravaux || typesTravaux.length === 0) {
             conteneur.innerHTML = `
                 <div class="alerte-info" style="padding: 10px; margin: 10px 0;">
-                    Aucun type de travail configuré. Utilisez le bouton ci-dessous pour commencer.
+                    Aucun type de production configuré. Sélectionnez depuis la bibliothèque ou ajoutez manuellement.
                 </div>
             `;
             return;
@@ -1242,8 +1245,8 @@
                 <thead>
                     <tr>
                         <th style="width: 40px;">#</th>
-                        <th>Nom du type</th>
-                        <th>Description (optionnelle)</th>
+                        <th>Type de production</th>
+                        <th>Description</th>
                         <th style="width: 70px;">Actions</th>
                     </tr>
                 </thead>
@@ -1262,7 +1265,7 @@
                     <td>
                         <input type="text" class="form-control" value="${type.description || ''}"
                                onchange="modifierTypeTravailSpecV2(${type.id}, 'description', this.value)"
-                               placeholder="Ex: Travail écrit argumentatif"
+                               placeholder="Ex: Analyse littéraire"
                                style="width: 100%; padding: 4px 8px;">
                     </td>
                     <td style="text-align: center;">
@@ -1278,6 +1281,131 @@
 
         html += '</tbody></table>';
         conteneur.innerHTML = html;
+    }
+
+    /**
+     * Charge le dropdown des productions depuis la bibliothèque et les productions du cours
+     */
+    async function chargerDropdownProductionsSpec() {
+        const dropdown = document.getElementById('v2-spec-dropdown-productions');
+        if (!dropdown) return;
+
+        dropdown.innerHTML = '<option value="">-- Sélectionner une production --</option>';
+
+        // 1. Productions du cours actuel
+        let productionsCours = [];
+        try {
+            productionsCours = await db.get('productions') || [];
+        } catch (e) {
+            productionsCours = [];
+        }
+
+        // 2. Productions de la bibliothèque
+        let productionsBiblio = [];
+        try {
+            if (typeof obtenirToutesLesProductionsBibliotheque === 'function') {
+                productionsBiblio = await obtenirToutesLesProductionsBibliotheque();
+            } else if (typeof window.obtenirToutesLesProductionsBibliothequeSync === 'function') {
+                productionsBiblio = window.obtenirToutesLesProductionsBibliothequeSync();
+            }
+        } catch (e) {
+            productionsBiblio = [];
+        }
+
+        // Groupe : Productions du cours
+        if (productionsCours.length > 0) {
+            const optgroup1 = document.createElement('optgroup');
+            optgroup1.label = 'Productions du cours';
+            productionsCours.forEach(p => {
+                if (!p || !p.id) return;
+                const option = document.createElement('option');
+                option.value = JSON.stringify({ id: p.id, titre: p.titre, description: p.description || '', source: 'cours' });
+                option.textContent = p.titre || p.id;
+                optgroup1.appendChild(option);
+            });
+            dropdown.appendChild(optgroup1);
+        }
+
+        // Groupe : Bibliothèque
+        if (productionsBiblio.length > 0) {
+            const optgroup2 = document.createElement('optgroup');
+            optgroup2.label = 'Bibliothèque partagée';
+            productionsBiblio.forEach(p => {
+                if (!p || !p.id) return;
+                const option = document.createElement('option');
+                option.value = JSON.stringify({ id: p.id, titre: p.titre, description: p.description || '', source: 'biblio' });
+                option.textContent = p.titre || p.id;
+                optgroup2.appendChild(option);
+            });
+            dropdown.appendChild(optgroup2);
+        }
+
+        // Message si aucune production
+        if (productionsCours.length === 0 && productionsBiblio.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '(Aucune production disponible)';
+            option.disabled = true;
+            dropdown.appendChild(option);
+        }
+    }
+
+    /**
+     * Importe une production depuis le dropdown vers les types de productions
+     */
+    function importerProductionDepuisBibliothequeSpec() {
+        const dropdown = document.getElementById('v2-spec-dropdown-productions');
+        if (!dropdown || !dropdown.value) {
+            alert('Veuillez sélectionner une production.');
+            return;
+        }
+
+        let prodData;
+        try {
+            prodData = JSON.parse(dropdown.value);
+        } catch (e) {
+            console.error('[pratique-notation-v2] Erreur parsing production:', e);
+            return;
+        }
+
+        // Ajouter comme type de production
+        let modalites = db.getSync('modalitesEvaluation') || {};
+        if (!modalites.specifications) {
+            modalites.specifications = { ...CONFIG_SPECIFICATIONS_DEFAUT };
+        }
+
+        const typesTravaux = modalites.specifications.typesTravaux || [];
+
+        // Vérifier si déjà présent
+        const dejaPresent = typesTravaux.some(t => t.nom === prodData.titre);
+        if (dejaPresent) {
+            alert('Cette production est déjà dans la liste.');
+            return;
+        }
+
+        const nouvelId = typesTravaux.length > 0
+            ? Math.max(...typesTravaux.map(t => t.id)) + 1
+            : 1;
+
+        typesTravaux.push({
+            id: nouvelId,
+            nom: prodData.titre,
+            description: prodData.description || '',
+            productionId: prodData.id,
+            source: prodData.source
+        });
+
+        modalites.specifications.typesTravaux = typesTravaux;
+        db.setSync('modalitesEvaluation', modalites);
+
+        // Rafraîchir l'affichage
+        afficherTypesTravauxSpec(typesTravaux);
+        afficherForfaitsSpec(modalites.specifications.forfaits || [], typesTravaux);
+
+        // Reset dropdown
+        dropdown.value = '';
+
+        console.log('[pratique-notation-v2] Production importée:', prodData.titre);
     }
 
     /**
@@ -1374,7 +1502,7 @@
         if (!typesTravaux || typesTravaux.length === 0) {
             conteneur.innerHTML = `
                 <div class="alerte-info" style="padding: 10px; margin: 10px 0;">
-                    Définissez d'abord les types de travaux ci-dessus avant de créer des forfaits.
+                    Définissez d'abord les types de productions ci-dessus avant de créer des forfaits.
                 </div>
             `;
             return;
@@ -1457,7 +1585,7 @@
         html += `
             <p class="text-muted" style="font-size: 0.8rem; margin-top: 10px;">
                 <strong>Lecture</strong> : Pour obtenir le forfait A (100%), l'étudiant doit avoir complété
-                le nombre requis de chaque type de travail indiqué dans la ligne.
+                le nombre requis de chaque type de production indiqué dans la ligne.
             </p>
         `;
 
@@ -1477,7 +1605,7 @@
         const typesTravaux = modalites.specifications.typesTravaux || [];
 
         if (typesTravaux.length === 0) {
-            alert('Veuillez d\'abord ajouter des types de travaux.');
+            alert('Veuillez d\'abord ajouter des types de productions.');
             return;
         }
 
@@ -1747,6 +1875,8 @@
     window.chargerConfigSpecifications = chargerConfigSpecifications;
     window.sauvegarderConfigSpecifications = sauvegarderConfigSpecifications;
     window.afficherTypesTravauxSpec = afficherTypesTravauxSpec;
+    window.chargerDropdownProductionsSpec = chargerDropdownProductionsSpec;
+    window.importerProductionDepuisBibliothequeSpec = importerProductionDepuisBibliothequeSpec;
     window.ajouterTypeTravailSpecV2 = ajouterTypeTravailSpec;
     window.modifierTypeTravailSpecV2 = modifierTypeTravailSpec;
     window.supprimerTypeTravailSpecV2 = supprimerTypeTravailSpec;
