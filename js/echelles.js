@@ -2140,7 +2140,8 @@ async function afficherBibliothequeEchelles() {
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
-                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                                ${typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(echelle) : ''}
                                 ${nomEchelle}
                             </div>
                             <div style="color: #7f8c8d; font-size: 0.9em;">
