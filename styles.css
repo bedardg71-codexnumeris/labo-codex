@@ -23,6 +23,10 @@
     --bleu-pale: #e8f2fd;
     --bleu-tres-pale: #f0f8ff;
     --bleu-simulation: #1a5266;
+
+    /* Fond de page - Couleurs saturées pour hiérarchie visuelle (01a-palette-couleurs) */
+    --fond-page-sature: #d4e6f5;      /* Début du gradient - plus saturé */
+    --fond-page-clair: #e8f2fd;       /* Fin du gradient - = --bleu-pale */
     --bleu-anonymisation: #0f1e3a;
 
     /* Couleurs d'accent */
@@ -191,6 +195,10 @@
     /* Boutons */
     --btn-principal: var(--sarcelle-principal);
     --btn-principal-hover: var(--sarcelle-moyen);
+
+    /* Fond de page saturé - Mode Assisté (01a-palette-couleurs) */
+    --fond-page-sature: #d4ebe5;
+    --fond-page-clair: #e8f5f2;
 }
 
 /* Sous-navigation plus foncée en mode Assisté */
@@ -229,6 +237,10 @@
     /* Boutons */
     --btn-principal: #0f2e4a;
     --btn-principal-hover: #2a4060;
+
+    /* Fond de page saturé - Mode Anonymisation (01a-palette-couleurs) */
+    --fond-page-sature: #e0e8e8;
+    --fond-page-clair: #edf2f2;
 }
 
 /* ===============================
@@ -339,7 +351,8 @@ body {
     font-size: 16px;
     line-height: 1.6;
     color: #333;
-    background: linear-gradient(135deg, var(--bleu-pale) 0%, var(--bleu-tres-pale) 100%);
+    /* Fond saturé pour hiérarchie visuelle (01a-palette-couleurs) */
+    background: linear-gradient(135deg, var(--fond-page-sature) 0%, var(--fond-page-clair) 100%);
     min-height: 100vh;
     padding: 20px;
 }
