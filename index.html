@@ -36,10 +36,39 @@
             --vert-leger: #2a8a6a;
             --vert-succes: #28a745;
 
-            /* Couleurs pratiques d'évaluation */
-            --som-orange: #ff6f00;
-            --pan-bleu: #0277bd;
-            --hybride-violet: #9c27b0;
+            /* === COULEURS PRATIQUES D'ÉVALUATION (codes 3 lettres) === */
+            --som-orange: #ff6f00;    /* Sommative */
+            --std-bleu: #0277bd;      /* Standards (ex-PAN) */
+            --spe-vert: #16a34a;      /* Spécifications */
+            --den-violet: #9c27b0;    /* Dénotation */
+
+            /* === GRADIENTS === */
+            --gradient-entete: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+            --gradient-fond-page: linear-gradient(135deg, #e8f2fd 0%, #f0f8ff 100%);
+
+            /* === BOX-SHADOW (5 niveaux) === */
+            --shadow-subtil: 0 1px 4px rgba(3, 46, 92, 0.1);
+            --shadow-normal: 0 2px 8px rgba(3, 46, 92, 0.15);
+            --shadow-prononce: 0 4px 12px rgba(3, 46, 92, 0.25);
+            --shadow-fort: 0 8px 24px rgba(3, 46, 92, 0.3);
+            --shadow-inset: inset 0 1px 3px rgba(3, 46, 92, 0.08);
+
+            /* === BORDER-RADIUS === */
+            --radius-petit: 5px;      /* Badges Tétris */
+            --radius-moyen: 6px;      /* Boutons, inputs */
+            --radius-grand: 12px;     /* Conteneurs (harmonisé toggles) */
+            --radius-pill: 20px;      /* Pills uniformes */
+
+            /* === SYSTÈME TÉTRIS (3 échelles) === */
+            --padding-compact: 3px 8px;
+            --font-compact: 0.75rem;
+            --padding-compact-pill: 3px 10px;
+            --padding-moyen: 10px 15px;
+            --font-moyen: 0.9rem;
+            --padding-moyen-pill: 6px 15px;
+            --font-moyen-pill: 0.85rem;
+            --padding-large: 15px;
+            --font-large: 1rem;
 
             /* Couleurs de tableau */
             --table-hover: var(--bleu-carte);    /* Couleur hover des rangées (plus foncé, texte reste lisible) */
@@ -1470,21 +1499,21 @@
             height: 16px;
         }
 
-        /* Couleurs des pratiques */
+        /* Couleurs des 4 pratiques (codes 3 lettres) */
         .bulle.som {
             background: var(--som-orange);
         }
 
-        .bulle.pan-maitrise {
-            background: var(--pan-bleu);
+        .bulle.std {
+            background: var(--std-bleu);
         }
 
-        .bulle.pan-spec {
-            background: var(--hybride-violet);
+        .bulle.spe {
+            background: var(--spe-vert);
         }
 
-        .bulle.pan-denotation {
-            background: var(--risque-modere);
+        .bulle.den {
+            background: var(--den-violet);
         }
 
         /* Animation organique comme du pollen - mouvement fluide continu avec courbes */
@@ -3139,70 +3168,87 @@
                 <button onclick="fermerModalNouveautes()" class="modal-fermer">✕</button>
 
                 <!-- Titre principal -->
-                <h2 class="modal-titre">Nouveautés - Beta 95</h2>
+                <h2 class="modal-titre">Bienvenue dans Codex Numeris Beta 95</h2>
 
-                <!-- Message de Grégoire -->
+                <!-- Nouveautés -->
                 <div class="modal-section">
-                    <h3>Message de Grégoire</h3>
+                    <h3>Nouveautés de cette version</h3>
                     <p>
-                        Bonjour ! La Beta 95 est une version de stabilisation majeure. Elle introduit la gestion multi-trimestres, améliore considérablement le mode Assisté avec des données de démonstration enrichies, et permet de gérer plusieurs cours dans un même trimestre. Bonne session H2026 !
+                        Cette version vous permet maintenant de gérer plusieurs trimestres et plusieurs cours simultanément. Vos trimestres terminés sont automatiquement archivés pour protéger vos données, et vous pouvez suivre l'évolution de vos étudiants dans le temps grâce à des graphiques et des captures hebdomadaires. Si vous devez corriger une donnée dans un trimestre archivé, le Mode Correction vous permet de réactiver temporairement les contrôles. Enfin, le Mode Anonymisé masque les identités pour vos captures d'écran et présentations.
                     </p>
                 </div>
 
-                <!-- Gestion multi-trimestres -->
+                <hr style="border: none; border-top: 1px solid var(--gris-clair); margin: 1.5rem 0;">
+
+                <!-- Par où commencer -->
                 <div class="modal-section">
-                    <h3>Gestion multi-trimestres</h3>
-                    <ul class="modal-liste">
-                        <li><strong>Plusieurs trimestres</strong> : Gérez A2025, H2026, etc. séparément avec leurs propres données.</li>
-                        <li><strong>Archivage automatique</strong> : Les trimestres terminés passent en lecture seule pour protéger vos données.</li>
-                        <li><strong>Mode Correction</strong> : Réactivez temporairement les contrôles pour modifications ponctuelles (absences, jetons).</li>
-                        <li><strong>Mode Anonymisé</strong> : Masquez les identités pour captures d'écran ou présentations.</li>
-                    </ul>
+                    <h3>Par où commencer ?</h3>
+
+                    <h4>Vous découvrez l'application pour la première fois ?</h4>
+                    <p>
+                        Ne vous inquiétez pas, vous n'avez pas besoin de tout comprendre d'un coup. L'application vous propose deux façons d'apprendre à votre rythme.
+                    </p>
+
+                    <p><strong>Primo, votre assistant de configuration</strong></p>
+                    <p>
+                        Primo vous pose des questions simples sur votre façon d'enseigner et configure l'application pour vous. Pas de jargon technique, juste des choix pédagogiques que vous comprenez déjà. Même si vous n'êtes pas à l'aise avec la technologie, Primo vous guide pas à pas.
+                    </p>
+
+                    <p><strong>Le Mode Assisté avec des données fictives</strong></p>
+                    <p>
+                        Avant de saisir vos vrais étudiants, explorez l'application avec un groupe de démonstration. Nous avons créé pour vous 5 étudiants fictifs avec déjà 4 productions, 20 évaluations et 8 semaines de présences. Vous pouvez cliquer partout, essayer toutes les fonctions sans aucun risque. Vos vraies données restent complètement protégées et séparées. Pour activer ce mode, utilisez simplement le menu en haut de l'écran.
+                    </p>
+
+                    <p><strong>La section AIDE est votre alliée</strong></p>
+                    <p>
+                        Vous y trouverez un guide d'utilisation hebdomadaire qui vous montre exactement quoi faire chaque semaine, des réponses aux questions les plus fréquentes, et des explications sur chaque fonction de l'application. N'hésitez pas à la consulter dès que vous avez un doute.
+                    </p>
+
+                    <h4>Vous utilisez déjà l'application ?</h4>
+                    <p><strong>Pensez à sauvegarder régulièrement</strong></p>
+                    <p>
+                        Vos données sont précieuses. Prenez l'habitude d'exporter un backup complet au moins une fois par semaine dans <strong>Réglages → Import/Export</strong>. Conservez ces fichiers en lieu sûr, par exemple dans votre OneDrive ou Google Drive.
+                    </p>
                 </div>
 
-                <!-- Suivi longitudinal -->
+                <hr style="border: none; border-top: 1px solid var(--gris-clair); margin: 1.5rem 0;">
+
+                <!-- Collaboration -->
                 <div class="modal-section">
-                    <h3>Suivi longitudinal</h3>
+                    <h3>Votre collaboration est essentielle</h3>
+
+                    <p><strong>Cette application est développée en solitaire</strong></p>
+                    <p>
+                        Depuis la présentation du 19 novembre, j'ai reçu quelques captures d'écran de bugs qui empêchaient l'utilisation, et je les ai corrigés rapidement. Mais j'ai très peu reçu de retours sur l'utilisation réelle : est-ce que les pratiques de notation fonctionnent pour vous ? Les fonctionnalités de suivi répondent-elles à vos besoins ? Qu'est-ce qui manque dans votre quotidien ?
+                    </p>
+
+                    <p><strong>Je développe un peu à l'aveugle</strong></p>
+                    <p>
+                        Je ne peux pas deviner votre façon d'enseigner, vos contraintes particulières, ou les petites frictions que vous rencontrez au jour le jour. Chaque enseignant a sa pratique, ses besoins spécifiques. Sans vos retours, je risque de développer des fonctionnalités qui ne vous servent pas, ou de passer à côté de ce qui vous aiderait vraiment.
+                    </p>
+
+                    <p><strong>À partir du 5 janvier, j'ai vraiment besoin de vous</strong></p>
+                    <p>
+                        Le déploiement de la Beta 95 marque une nouvelle étape. L'application est maintenant assez stable pour un usage quotidien. C'est le moment idéal pour me dire ce qui fonctionne, ce qui coince, ce qui manque. Utilisez le formulaire dans <strong>AIDE → Signaler un bug</strong>, mais n'hésitez pas à me partager aussi :
+                    </p>
                     <ul class="modal-liste">
-                        <li><strong>Captures automatiques</strong> : Snapshots hebdomadaires de la progression de chaque étudiant.</li>
-                        <li><strong>Graphiques d'évolution</strong> : Visualisez l'évolution des indices A-C-P dans le temps.</li>
-                        <li><strong>Reconstruction rétroactive</strong> : Recalculez l'historique après corrections de données.</li>
+                        <li>Comment se passe votre pratique de notation au quotidien avec l'application ?</li>
+                        <li>Quelles fonctionnalités vous font gagner du temps (ou vous en font perdre) ?</li>
+                        <li>Qu'est-ce qui vous manque dans votre suivi pédagogique ?</li>
+                        <li>Y a-t-il des messages d'erreur peu clairs ou des comportements étranges ?</li>
+                        <li>Des suggestions d'amélioration, même petites ?</li>
                     </ul>
+
+                    <p><strong>Chaque retour compte vraiment</strong></p>
+                    <p>
+                        Vous n'êtes pas juste des testeurs, vous êtes des co-développeurs. Vos retours orientent directement les prochaines versions. Ce que vous me partagez profite à toute la communauté d'enseignants qui utilisera cette application. Merci de prendre quelques minutes pour me faire part de votre expérience, même si tout vous semble bien fonctionner. Les bonnes nouvelles aussi, ça aide à savoir sur quoi continuer !
+                    </p>
                 </div>
 
-                <!-- Mode Assisté -->
-                <div class="modal-section">
-                    <h3>Mode Assisté amélioré</h3>
-                    <ul class="modal-liste">
-                        <li><strong>Données de démonstration</strong> : 5 étudiants • 4 productions • 20 évaluations • 8 semaines de présences.</li>
-                        <li><strong>Exploration sans risque</strong> : L'application bascule en mode Assisté où vous pouvez tout expérimenter. Les données demo sont complètement isolées de vos vraies données.</li>
-                        <li><strong>Primo 😎</strong> : Assistant de configuration pas-à-pas pour nouveaux utilisateurs.</li>
-                    </ul>
-                </div>
-
-                <!-- Multi-cours -->
-                <div class="modal-section">
-                    <h3>Gestion multi-cours</h3>
-                    <ul class="modal-liste">
-                        <li><strong>Plusieurs cours</strong> : Gérez 601-101, 601-102, etc. dans le même trimestre.</li>
-                        <li><strong>Changement rapide</strong> : Menu déroulant dans l'en-tête pour basculer entre vos cours.</li>
-                        <li><strong>Données isolées</strong> : Chaque cours a ses propres étudiants, évaluations et présences.</li>
-                    </ul>
-                </div>
-
-                <!-- Sauvegarde -->
-                <div class="modal-section">
-                    <h3>Sauvegarde et protection</h3>
-                    <ul class="modal-liste">
-                        <li><strong>Rappel de backup</strong> : Modal périodique rappelant l'importance de l'export régulier.</li>
-                        <li><strong>Export/Import amélioré</strong> : Configuration complète avec métadonnées Creative Commons.</li>
-                    </ul>
-                </div>
-
-                <!-- En savoir plus -->
+                <!-- Aide -->
                 <div class="modal-info">
                     <p>
-                        <strong>Pour en savoir plus</strong> : Consultez <strong>Aide → Notes de version</strong> pour l'historique complet des changements.
+                        <strong>Besoin d'aide ?</strong> Consultez la section <strong>AIDE → Questions fréquentes</strong>
                     </p>
                 </div>
 

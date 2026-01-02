@@ -910,7 +910,7 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
     }
 
     if (afficherPan) {
-        valeurs.push(`<strong class="tb-valeur-tres-grande-bleu-pan">${formatPourcentage(valeurPan)}</strong>`);
+        valeurs.push(`<strong class="tb-valeur-tres-grande-bleu-std">${formatPourcentage(valeurPan)}</strong>`);
     }
 
     // Intégrer la description dans le label si présente
@@ -1094,7 +1094,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             <span style="display: flex; gap: 8px; align-items: center; font-size: 0.9rem; font-weight: 600; margin-left: 10px;">
                 <span style="color: var(--som-orange);">${moyenneSOM}%</span>
                 <span style="color: #999;">|</span>
-                <span style="color: var(--pan-bleu);">${moyennePAN}%</span>
+                <span style="color: var(--std-bleu);">${moyennePAN}%</span>
             </span>
         `;
     } else if (moyenneSOM !== null) {
@@ -1102,7 +1102,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         valeursHTML = `<span class="tb-texte-moyen-orange">${moyenneSOM}%</span>`;
     } else if (moyennePAN !== null) {
         // Mode PAN uniquement
-        valeursHTML = `<span class="tb-texte-moyen-bleu-pan">${moyennePAN}%</span>`;
+        valeursHTML = `<span class="tb-texte-moyen-bleu-std">${moyennePAN}%</span>`;
     }
 
     // Générer les points pour SOM avec jitter aléatoire
@@ -1191,7 +1191,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 } else {
                     nomAffiche = `${e.nom}, ${e.prenom}`;
                 }
-                lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
+                lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
                     style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
@@ -1310,7 +1310,7 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
             } else {
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
-            lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
+            lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
                 style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
@@ -1351,20 +1351,20 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
     let labelCritique = 'Blocage<br>critique';
 
     if (afficherSom && afficherPan) {
-        labelStable += `<br><span class="tb-texte-mini-orange">${stableSOM} (${stablePctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${stablePAN} (${stablePctPAN}%)</span>`;
-        labelDefi += `<br><span class="tb-texte-mini-orange">${defiSOM} (${defiPctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${defiPAN} (${defiPctPAN}%)</span>`;
-        labelEmergent += `<br><span class="tb-texte-mini-orange">${emergentSOM} (${emergentPctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${emergentPAN} (${emergentPctPAN}%)</span>`;
-        labelCritique += `<br><span class="tb-texte-mini-orange">${critiqueSOM} (${critiquePctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${critiquePAN} (${critiquePctPAN}%)</span>`;
+        labelStable += `<br><span class="tb-texte-mini-orange">${stableSOM} (${stablePctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${stablePAN} (${stablePctPAN}%)</span>`;
+        labelDefi += `<br><span class="tb-texte-mini-orange">${defiSOM} (${defiPctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${defiPAN} (${defiPctPAN}%)</span>`;
+        labelEmergent += `<br><span class="tb-texte-mini-orange">${emergentSOM} (${emergentPctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${emergentPAN} (${emergentPctPAN}%)</span>`;
+        labelCritique += `<br><span class="tb-texte-mini-orange">${critiqueSOM} (${critiquePctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${critiquePAN} (${critiquePctPAN}%)</span>`;
     } else if (afficherSom) {
         labelStable += `<br><span class="tb-texte-mini-orange">${stableSOM} (${stablePctSOM}%)</span>`;
         labelDefi += `<br><span class="tb-texte-mini-orange">${defiSOM} (${defiPctSOM}%)</span>`;
         labelEmergent += `<br><span class="tb-texte-mini-orange">${emergentSOM} (${emergentPctSOM}%)</span>`;
         labelCritique += `<br><span class="tb-texte-mini-orange">${critiqueSOM} (${critiquePctSOM}%)</span>`;
     } else if (afficherPan) {
-        labelStable += `<br><span class="tb-texte-mini-bleu-pan">${stablePAN} (${stablePctPAN}%)</span>`;
-        labelDefi += `<br><span class="tb-texte-mini-bleu-pan">${defiPAN} (${defiPctPAN}%)</span>`;
-        labelEmergent += `<br><span class="tb-texte-mini-bleu-pan">${emergentPAN} (${emergentPctPAN}%)</span>`;
-        labelCritique += `<br><span class="tb-texte-mini-bleu-pan">${critiquePAN} (${critiquePctPAN}%)</span>`;
+        labelStable += `<br><span class="tb-texte-mini-bleu-std">${stablePAN} (${stablePctPAN}%)</span>`;
+        labelDefi += `<br><span class="tb-texte-mini-bleu-std">${defiPAN} (${defiPctPAN}%)</span>`;
+        labelEmergent += `<br><span class="tb-texte-mini-bleu-std">${emergentPAN} (${emergentPctPAN}%)</span>`;
+        labelCritique += `<br><span class="tb-texte-mini-bleu-std">${critiquePAN} (${critiquePctPAN}%)</span>`;
     }
 
     // 🆕 BETA 91: Générer l'interprétation des patterns
@@ -1517,7 +1517,7 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
             } else {
                 nomAffiche = `${e.nom}, ${e.prenom}`;
             }
-            lignesPAN += `<div class="barre-etudiant barre-etudiant-pan"
+            lignesPAN += `<div class="barre-etudiant barre-etudiant-std"
                 style="left: ${positionFinale}%; top: calc(50% + ${jitterV}px);"
                 data-da="${e.da}"
                 data-nom="${echapperHtml(nomAffiche)}"
@@ -1551,17 +1551,17 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan) {
     let labelNiveau3 = 'Niveau 3<br>Intensif';
 
     if (afficherSom && afficherPan) {
-        labelNiveau1 += `<br><span class="tb-texte-mini-orange">${niveau1SOM} (${niveau1PctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
-        labelNiveau2 += `<br><span class="tb-texte-mini-orange">${niveau2SOM} (${niveau2PctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
-        labelNiveau3 += `<br><span class="tb-texte-mini-orange">${niveau3SOM} (${niveau3PctSOM}%)</span> <span class="tb-texte-mini-bleu-pan">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
+        labelNiveau1 += `<br><span class="tb-texte-mini-orange">${niveau1SOM} (${niveau1PctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
+        labelNiveau2 += `<br><span class="tb-texte-mini-orange">${niveau2SOM} (${niveau2PctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
+        labelNiveau3 += `<br><span class="tb-texte-mini-orange">${niveau3SOM} (${niveau3PctSOM}%)</span> <span class="tb-texte-mini-bleu-std">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
     } else if (afficherSom) {
         labelNiveau1 += `<br><span class="tb-texte-mini-orange">${niveau1SOM} (${niveau1PctSOM}%)</span>`;
         labelNiveau2 += `<br><span class="tb-texte-mini-orange">${niveau2SOM} (${niveau2PctSOM}%)</span>`;
         labelNiveau3 += `<br><span class="tb-texte-mini-orange">${niveau3SOM} (${niveau3PctSOM}%)</span>`;
     } else if (afficherPan) {
-        labelNiveau1 += `<br><span class="tb-texte-mini-bleu-pan">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
-        labelNiveau2 += `<br><span class="tb-texte-mini-bleu-pan">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
-        labelNiveau3 += `<br><span class="tb-texte-mini-bleu-pan">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
+        labelNiveau1 += `<br><span class="tb-texte-mini-bleu-std">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
+        labelNiveau2 += `<br><span class="tb-texte-mini-bleu-std">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
+        labelNiveau3 += `<br><span class="tb-texte-mini-bleu-std">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
     }
 
     // 🆕 BETA 91: Générer l'interprétation RàI
@@ -1691,7 +1691,7 @@ function genererCarteEngagement(label, valeurSom, valeurPan, total, afficherSom,
     }
 
     if (afficherPan) {
-        valeurs.push(`<strong class="tb-valeur-grande-bleu-pan">${valeurPan}</strong>`);
+        valeurs.push(`<strong class="tb-valeur-grande-bleu-std">${valeurPan}</strong>`);
     }
 
     return `
@@ -1763,7 +1763,7 @@ function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, af
     }
 
     if (afficherPan) {
-        valeurs.push(`<strong class="tb-valeur-grande-bleu-pan">${valeurPan}</strong>`);
+        valeurs.push(`<strong class="tb-valeur-grande-bleu-std">${valeurPan}</strong>`);
     }
 
     return `
@@ -1868,7 +1868,7 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
     }
 
     if (afficherPan) {
-        valeurs.push(`<strong class="tb-valeur-grande-bleu-pan">${valeurPanPct}%</strong>`);
+        valeurs.push(`<strong class="tb-valeur-grande-bleu-std">${valeurPanPct}%</strong>`);
     }
 
     // Générer le texte du nombre d'étudiants

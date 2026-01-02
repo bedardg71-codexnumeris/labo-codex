@@ -519,15 +519,16 @@ function mettreAJourExplicationCalculIndices() {
 }
 
 /**
- * Génère le badge de pratique de notation (SOM ou PAN-Maîtrise)
+ * Génère le badge de pratique de notation (SOM, STD, SPE, DEN)
  * Affiche la pratique choisie par l'utilisateur (pas de mode "Hybride")
  * Le mode comparatif est juste un affichage dual des calculs, pas une pratique distincte
- * Utilise les classes CSS .badge-pratique-compact.som ou .badge-pratique-compact.pan
+ * Utilise les classes CSS .badge-pratique-compact.som, .std, .spe, .den
  * @returns {string} - HTML du badge
  */
 function genererBadgePratiqueListeEtudiants() {
     const config = db.getSync('modalitesEvaluation', {});
     const pratique = config.pratique || 'pan-maitrise';
+    const typePAN = config.typePAN || 'maitrise';
 
     let texte = '';
     let classePratique = '';
@@ -538,10 +539,21 @@ function genererBadgePratiqueListeEtudiants() {
         classePratique = 'som';
         description = 'Pratique sommative : moyenne pondérée provisoire';
     } else {
-        // PAN-Maîtrise (par défaut)
-        texte = 'PAN-Maîtrise';
-        classePratique = 'pan';
-        description = 'Pratique alternative : N meilleurs artefacts selon IDME';
+        // Pratiques PAN avec codes 3 lettres
+        if (typePAN === 'specifications') {
+            texte = 'SPE';
+            classePratique = 'spe';
+            description = 'PAN-Spécifications : pass/fail sur objectifs';
+        } else if (typePAN === 'denotation') {
+            texte = 'DEN';
+            classePratique = 'den';
+            description = 'Dénotation : sans notes chiffrées';
+        } else {
+            // Standards (maitrise) par défaut
+            texte = 'STD';
+            classePratique = 'std';
+            description = 'PAN-Standards : N meilleurs artefacts selon IDME';
+        }
     }
 
     return `<span class="badge-pratique-compact ${classePratique}" title="${description}">${texte}</span>`;

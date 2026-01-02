@@ -34,17 +34,20 @@ window.genererBadgePratique = function(type, compact = false) {
         texte = 'SOM';
         classe += ' som';
     } else {
-        // PAN : Identifier la pratique spécifique
-        if (typePAN === 'maitrise') {
-            texte = 'PAN-Maîtrise';
+        // PAN : Identifier la pratique spécifique avec classe correspondante
+        if (typePAN === 'maitrise' || typePAN === 'standards') {
+            texte = 'STD';
+            classe += ' std';
         } else if (typePAN === 'specifications') {
-            texte = 'PAN-Spécifications';
+            texte = 'SPE';
+            classe += ' spe';
         } else if (typePAN === 'denotation') {
-            texte = 'PAN-Dénotation';
+            texte = 'DEN';
+            classe += ' den';
         } else {
-            texte = 'PAN';
+            texte = 'STD';
+            classe += ' std';
         }
-        classe += ' pan';
     }
 
     return `<span class="${classe}">${texte}</span>`;
