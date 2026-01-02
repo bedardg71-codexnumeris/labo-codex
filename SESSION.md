@@ -198,6 +198,19 @@ a la configuration des cours, puis au guide groupe-cours.
 **Note** : `horaireHebdomadaire` reste utilise comme stockage temporaire
 pendant la configuration Primo (converti a la fin). C'est acceptable.
 
+### 2. Ajouter option suppression cours
+**Identifie** : 2 jan 2026
+**Probleme** : Impossible de supprimer un cours depuis l'interface.
+Ni dans le formulaire de modification, ni dans la bibliotheque de cours.
+
+**Solution proposee** :
+- Ajouter bouton "Supprimer" dans le formulaire de modification cours
+- Ajouter action "Supprimer" dans la bibliotheque de cours
+- Confirmer avant suppression (modal)
+- Gerer la suppression des donnees liees (horaire, etudiants?)
+
+**Priorite** : Moyenne (contournable via console)
+
 ---
 
 ## OU REPRENDRE (si session s'arrete maintenant)
@@ -205,12 +218,12 @@ pendant la configuration Primo (converti a la fin). C'est acceptable.
 **Etat actuel** :
 - Guide groupe-cours : TERMINE et commite (3984e0c)
 - Nettoyage documentation : TERMINE (files/, artefacts supprimes)
-- Migration namespacing Primo : TERMINE et commite (6de8927)
+- Migration namespacing Primo : TERMINE, TESTE et commite (6de8927, 4507313)
 - Design System v7 : Parties 10-16 a verifier
 
 **Action immediate au retour** :
-1. Verifier application AUDIT_V5 parties 10-16 (Phase 3)
-2. Tester parcours complet Primo pour valider la migration
+1. Ajouter option suppression cours (formulaire + bibliotheque)
+2. Verifier application AUDIT_V5 parties 10-16 (Phase 3)
 
 ---
 
@@ -232,4 +245,4 @@ pendant la configuration Primo (converti a la fin). C'est acceptable.
 
 ---
 
-**Derniere mise a jour** : 2 jan 2026, ~12:30
+**Derniere mise a jour** : 2 jan 2026, ~13:00
