@@ -9,14 +9,14 @@
 ## ETAT MENTAL
 
 **Ou j'en suis** :
-Design System v7 TERMINE avec AUDIT_V5 !
-- V4 applique (9 parties)
-- V5 cree et applique (7 parties supplementaires)
-- 16 parties au total, 100% couverture UI
+Nettoyage documentation + corrections bugs coursId
+- CLAUDE.md leger cree (60 lignes vs 2000+)
+- Pointe vers docs/00-START-HERE.md
+- Historique preserve dans archive/
 
 **Prochain pas prevu** :
-1. Tester visuellement l'application
-2. Identifier prochaines taches de stabilisation
+1. Tester le selecteur de pratique par cours
+2. Valider isolation donnees entre trimestres
 
 ---
 
@@ -48,6 +48,28 @@ Design System v7 TERMINE avec AUDIT_V5 !
 
 ---
 
+## TACHES CORRECTIONS (2 jan 2026 - apres-midi)
+
+### Bugs corriges
+- [x] Boutons Modifier/Supprimer empiles -> CSS .td-center-200 ajoute
+- [x] Namespacing: etudiants A2025 apparaissaient dans H2026
+  - groupe.js: obtenirTousLesEtudiants(), sauvegarderTousLesEtudiants()
+  - cours.js: suppression cascade avec cles namespacees
+  - migrations.js: 3 migrations corrigees pour namespace
+  - primo-modal.js, import-export.js: productions avec namespace
+
+### Nouvelles fonctionnalites
+- [x] Selecteur pratique par cours (formulaire V2)
+  - index.html: ajout select v2-pratiqueIdCours (lignes 8291-8306)
+  - trimestre-v2.js: lecture/ecriture pratiqueId dans sauvegarderCoursV2()
+  - trimestre-v2.js: pre-selection dans remplirFormCoursV2()
+
+### Documentation
+- [x] CLAUDE.md leger cree (60 lignes, pointe vers docs/)
+- [x] SESSION.md mis a jour
+
+---
+
 ## COMMITS DE LA SESSION
 
 1. `ef81e7d` - style(design-system): harmonisation complete selon AUDIT_COMPLET_V4
@@ -61,6 +83,43 @@ Design System v7 TERMINE avec AUDIT_V5 !
 4. `a4abc66` - style(design-system): application AUDIT_V5 - harmonisation UI complete
    - 1 fichier modifie (+54 / -51 lignes)
    - Modal overlay, alertes, 51x border-radius 8px -> 12px
+
+5. `7a702ba` - docs(design-system): ajout documentation complete Design System v7
+   - 31 fichiers (+14885 lignes)
+   - AUDIT_V5.md, AUDIT_BADGES.md, SPECS_TETRIS.md, 16 modules HTML demo
+
+6. `3e98e7c` - style(fond-page): appliquer couleurs saturees selon 01a-palette-couleurs
+   - Fond de page plus sature pour meilleur contraste
+   - Mode Normal: #d4e6f5 -> #e8f2fd
+   - Mode Assiste: #d4ebe5 -> #e8f5f2
+   - Mode Anonymisation: #e0e8e8 -> #edf2f2
+
+7. `4aff825` - style(variables): declarer toutes les variables CSS manquantes
+   - Gradients: --gradient-entete, --gradient-fond-page
+   - Ombres 5 niveaux: --shadow-subtil/normal/prononce/fort/inset
+   - Border-radius 4 niveaux: --radius-petit/moyen/grand/pill
+   - Tailles Tetris: --padding-compact/moyen/large, --font-compact/moyen
+
+8. `1fb86d6` - style(typographie+boutons): appliquer 01b et 02a
+   - Typographie H1-H4 globale (2rem/1.5rem/1.2rem/1rem)
+   - .btn-large (12px 24px)
+   - Regles auto-compact: .carte .btn, [id*="liste"] .btn, etc.
+
+9. `5f73635` - style(sidebar): fond bleu pale au lieu de blanc (03b)
+   - .sidebar-navigation et .sidebar-cartouches: var(--bleu-pale)
+
+10. `d96aef1` - fix(layout): corriger marges inegales et fond non visible
+   - Body padding: 20px → 30px pour cadre bleu plus visible
+   - scrollbar-gutter: stable sur html pour symetrie
+
+11. `e91b4ce` - fix(layout+modes): conteneur adaptatif et en-tete sensible au mode
+   - Conteneur: max-width 1400px → 95% (adaptatif)
+   - Gradient en-tete: hex fixes → var(--bleu-principal/fonce)
+
+12. `8c033d4` - fix(layout+modes): correction styles embarques et gradient en-tete
+   - Suppression width:100% et margin:0 embarques qui overridaient CSS externe
+   - .entete utilise directement les variables (pas via --gradient-entete)
+   - Cache buster mis a jour: v=2026010202
 
 ---
 
@@ -94,25 +153,25 @@ Design System v7 TERMINE avec AUDIT_V5 !
 ## OU REPRENDRE (si session s'arrete maintenant)
 
 **Etat actuel** :
-- Design System v7 applique a 100% (AUDIT_V5)
-- Documentation reorganisee
-- 4 commits pousses sur GitHub
+- Design System v7 applique a 100%
+- Namespacing corrige (isolation trimestres)
+- Selecteur pratique par cours ajoute (formulaire V2)
+- CLAUDE.md leger cree (pointe vers docs/)
 
 **Action immediate au retour** :
-1. Ouvrir l'application dans Safari
-2. Verifier visuellement : modals, alertes, cartes, badges
-3. Tester les 4 pratiques (SOM/STD/SPE/DEN)
-4. Verifier le backdrop-filter blur sur les modals
+1. Tester le selecteur pratique dans Reglages > Trimestre > Modifier cours
+2. Verifier que la pratique est bien sauvegardee avec le cours
+3. Valider isolation donnees A2025/H2026
 
 ---
 
 ## NOTES POUR CLAUDE CODE
 
 **Contexte actuel** :
-- Utiliser docs/00-START-HERE.md comme point d'entree
-- CLAUDE.md est archive (ne plus utiliser)
+- CLAUDE.md leger cree (60 lignes) -> pointe vers docs/
+- docs/00-START-HERE.md est le point d'entree principal
 - Design System v7 avec codes 3 lettres (SOM/STD/SPE/DEN)
-- AUDIT_V5.md est la reference pour le design (pas V4)
+- Namespacing: utiliser window.cle('nomCle') pour cles localStorage
 
 **Rappels critiques** :
 - Variable --pan-bleu supprimee (utiliser --std-bleu)
@@ -120,7 +179,8 @@ Design System v7 TERMINE avec AUDIT_V5 !
 - border-radius: 12px pour conteneurs (var(--radius-grand))
 - border-radius: 6px pour petits elements (var(--radius-moyen))
 - Ne jamais utiliser "complet" ou "final" dans les noms de fichiers
+- Toujours lire/ecrire avec namespace: cle('groupeEtudiants') -> h2026_groupeEtudiants
 
 ---
 
-**Derniere mise a jour** : 2 jan 2026, ~06:30
+**Derniere mise a jour** : 2 jan 2026, ~09:30
