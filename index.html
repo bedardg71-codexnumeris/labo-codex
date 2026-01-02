@@ -8288,6 +8288,23 @@
                                     </div>
                                 </div>
 
+                                <!-- Pratique de notation (sélectionnable par cours) -->
+                                <h5 class="sous-titre-section" style="margin-top: 25px;">Pratique de notation</h5>
+                                <div class="groupe-form" style="margin-bottom: 20px;">
+                                    <label for="v2-pratiqueIdCours">
+                                        Pratique de notation pour ce groupe-cours
+                                        <small style="display: block; color: var(--gris-moyen); font-weight: normal; margin-top: 3px;">
+                                            Chaque groupe-cours peut avoir sa propre pratique de notation
+                                        </small>
+                                    </label>
+                                    <select id="v2-pratiqueIdCours" class="controle-form controle-form-compact">
+                                        <option value="sommative">Sommative (moyenne pondérée)</option>
+                                        <option value="pan-standards" selected>PAN-Standards (par niveaux de maîtrise)</option>
+                                        <option value="pan-maitrise">PAN-Maîtrise (N meilleurs artefacts)</option>
+                                        <option value="pan-objectifs">PAN-Objectifs (par objectifs)</option>
+                                    </select>
+                                </div>
+
                                 <!-- Boutons d'action -->
                                 <div class="btn-groupe btn-groupe-droite" style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--bleu-leger);">
                                     <button class="btn btn-annuler" onclick="annulerFormCoursV2()">
@@ -13236,7 +13253,7 @@ Exemple :
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2025123102"></script> <!-- Beta 95 : Gestion multi-trimestres -->
     <script src="js/trimestre.js?v=2025123109"></script>
-    <script src="js/trimestre-v2.js?v=2025123101"></script> <!-- Beta 95 : Onglet Trimestre restructuré -->
+    <script src="js/trimestre-v2.js?v=2026010202"></script> <!-- Beta 95 : Onglet Trimestre restructuré + pratique par cours -->
     <script src="js/pratique-notation-v2.js?v=2025123002"></script> <!-- Beta 95 : Onglet Pratique de notation restructuré -->
     <script src="js/preferences-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Préférences restructuré -->
     <script src="js/donnees-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Données restructuré -->

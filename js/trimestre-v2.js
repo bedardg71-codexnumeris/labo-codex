@@ -1464,6 +1464,9 @@ function remplirFormCoursV2(cours) {
     setValue('v2-heuresParSemaine', cours.heuresParSemaine || cours.heuresHebdo || 4);
     setValue('v2-formatHoraire', cours.formatHoraire || '2x2');
     // Groupe géré via le groupe-cours (Beta 95)
+
+    // ✅ AJOUT (2 jan 2026) : Pratique de notation
+    setValue('v2-pratiqueIdCours', cours.pratiqueId || 'pan-standards');
 }
 
 /**
@@ -1480,6 +1483,8 @@ function reinitialiserFormCoursV2() {
     setValue('v2-session', 'H');
     setValue('v2-heuresParSemaine', 4);
     setValue('v2-formatHoraire', '2x2');
+    // ✅ AJOUT (2 jan 2026) : Pratique par défaut
+    setValue('v2-pratiqueIdCours', 'pan-standards');
 }
 
 /**
@@ -1562,7 +1567,9 @@ function sauvegarderCoursV2() {
         heuresParSemaine: parseInt(document.getElementById('v2-heuresParSemaine')?.value) || 4,
         formatHoraire: document.getElementById('v2-formatHoraire')?.value || '2x2',
         groupe: groupe,
-        actif: true
+        actif: true,
+        // ✅ AJOUT (2 jan 2026) : Pratique de notation associée au cours
+        pratiqueId: document.getElementById('v2-pratiqueIdCours')?.value || 'pan-standards'
     };
 
     // Sauvegarder dans la liste des cours
