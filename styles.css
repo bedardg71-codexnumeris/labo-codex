@@ -431,7 +431,7 @@ h1, h2, h3, h4 {
     color: white;
     padding: 15px 30px;
     position: relative;
-    border-radius: 0 0 var(--radius-grand) var(--radius-grand);
+    /* Pas de border-radius pour continuité visuelle avec la navigation */
     box-shadow: var(--shadow-prononce);
     transition: box-shadow 0.3s ease, background 0.3s ease;
 }
