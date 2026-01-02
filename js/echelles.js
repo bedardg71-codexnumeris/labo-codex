@@ -2340,7 +2340,7 @@ async function ajouterEchelleIndividuelle(id) {
         let echelle = echelles.find(e => e.id === id);
 
         if (!echelle) {
-            const toutesEchelles = obtenirToutesLesEchellesBibliotheque();
+            const toutesEchelles = await obtenirToutesLesEchellesBibliotheque();
             const echelleSource = toutesEchelles.find(e => e.id === id);
             if (echelleSource) {
                 echelle = { ...echelleSource };
