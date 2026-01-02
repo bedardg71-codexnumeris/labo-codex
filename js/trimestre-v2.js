@@ -45,6 +45,9 @@ function initialiserTrimestreV2() {
         restaurerEtatAccordeons();
     }
 
+    // Mettre à jour le guide groupe-cours (indicateurs d'état)
+    mettreAJourGuideGroupeCours();
+
     console.log('[Trimestre V2] Initialisation terminée');
 }
 
@@ -1610,6 +1613,9 @@ function sauvegarderCoursV2() {
         selectCours.value = cours.id;
         changerCoursSelectionneV2(cours.id);
     }
+
+    // Mettre à jour le guide groupe-cours
+    mettreAJourGuideGroupeCours();
 }
 
 /**
@@ -1910,6 +1916,9 @@ function confirmerImportV2() {
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces(`${etudiants.length} étudiant(s) importé(s)`);
     }
+
+    // Mettre à jour le guide groupe-cours
+    mettreAJourGuideGroupeCours();
 }
 
 /**
@@ -1960,6 +1969,9 @@ function reinitialiserEtudiantsV2() {
     if (typeof afficherNotificationSucces === 'function') {
         afficherNotificationSucces('Liste réinitialisée');
     }
+
+    // Mettre à jour le guide groupe-cours
+    mettreAJourGuideGroupeCours();
 }
 
 /**
@@ -2227,6 +2239,9 @@ function confirmerSeanceV2() {
     if (typeof genererSeancesCompletes === 'function') {
         genererSeancesCompletes();
     }
+
+    // Mettre à jour le guide groupe-cours
+    mettreAJourGuideGroupeCours();
 }
 
 /**
@@ -2253,6 +2268,9 @@ function supprimerSeanceV2(index) {
     if (typeof genererSeancesCompletes === 'function') {
         genererSeancesCompletes();
     }
+
+    // Mettre à jour le guide groupe-cours
+    mettreAJourGuideGroupeCours();
 }
 
 /**
@@ -2353,6 +2371,55 @@ window.confirmerSeanceV2 = confirmerSeanceV2;
 window.supprimerSeanceV2 = supprimerSeanceV2;
 window.chargerEtatDonneesDemoV2 = chargerEtatDonneesDemoV2;
 window.basculerDonneesDemoV2 = basculerDonneesDemoV2;
+window.mettreAJourGuideGroupeCours = mettreAJourGuideGroupeCours;
+
+/* ===============================
+   GUIDE GROUPE-COURS : INDICATEURS D'ÉTAT
+   =============================== */
+
+/**
+ * Met à jour les indicateurs d'état du guide groupe-cours
+ * Vérifie si chaque étape est complétée : ○ (à faire) → ● (fait)
+ */
+function mettreAJourGuideGroupeCours() {
+    const statusCours = document.getElementById('status-cours');
+    const statusGroupe = document.getElementById('status-groupe');
+    const statusHoraire = document.getElementById('status-horaire');
+    const statusEtudiants = document.getElementById('status-etudiants');
+
+    if (!statusCours) return; // Guide non présent sur la page
+
+    // 1. Cours configuré ?
+    const infoCours = db.getSync('infoCours', null);
+    const coursOk = infoCours && (infoCours.sigle || infoCours.codeCours);
+    statusCours.textContent = coursOk ? '●' : '○';
+    statusCours.style.color = coursOk ? 'var(--vert-succes)' : 'var(--gris-moyen)';
+
+    // 2. Groupe configuré ?
+    const groupeOk = infoCours && infoCours.groupe;
+    statusGroupe.textContent = groupeOk ? '●' : '○';
+    statusGroupe.style.color = groupeOk ? 'var(--vert-succes)' : 'var(--gris-moyen)';
+
+    // 3. Horaire configuré ?
+    const cleHoraire = infoCours ? `seancesHoraire_${infoCours.id}` : null;
+    let horaireOk = false;
+    if (cleHoraire) {
+        const seances = db.getSync(cleHoraire, []);
+        horaireOk = seances && seances.length > 0;
+    }
+    statusHoraire.textContent = horaireOk ? '●' : '○';
+    statusHoraire.style.color = horaireOk ? 'var(--vert-succes)' : 'var(--gris-moyen)';
+
+    // 4. Étudiants importés ?
+    const cleEtudiants = typeof cle === 'function' ? cle('groupeEtudiants') : 'groupeEtudiants';
+    const etudiants = db.getSync(cleEtudiants, []);
+    const etudiantsFiltres = infoCours ? etudiants.filter(e => e.coursId === infoCours.id) : etudiants;
+    const etudiantsOk = etudiantsFiltres.length > 0;
+    statusEtudiants.textContent = etudiantsOk ? '●' : '○';
+    statusEtudiants.style.color = etudiantsOk ? 'var(--vert-succes)' : 'var(--gris-moyen)';
+
+    console.log('[Guide] État:', { coursOk, groupeOk, horaireOk, etudiantsOk });
+}
 
 /* ===============================
    INITIALISATION AUTOMATIQUE
