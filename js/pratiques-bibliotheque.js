@@ -90,44 +90,107 @@ const MODELES_PRATIQUES_PREDEFINIS = {
             ]
         }
     },
+
     // === PAN-STANDARDS ===
     'STD-n-meilleurs': {
         id: 'STD-n-meilleurs',
         nom: 'N meilleures évaluations',
-        description: 'Retient les N meilleures notes (favorise le progrès)',
+        description: 'Garde les 7 meilleures évaluations sur 10, valorise la progression',
         type: 'pan-standards',
         auteur: 'Codex Numeris',
         discipline: 'Général',
         estGabarit: true,
         pratiques: ['STD'],
         configuration: {
-            varianteCalcul: 'n-meilleurs'
+            varianteCalcul: 'n-meilleurs',
+            portfolio: {
+                methodeSelection: 'meilleurs',
+                nombreARetenir: 7,
+                minimumCompletion: 7,
+                nombreTotal: 10,
+                decouplerPR: false
+            }
         }
     },
     'STD-n-recents': {
         id: 'STD-n-recents',
-        nom: 'N plus récentes évaluations',
-        description: 'Retient les N évaluations les plus récentes',
+        nom: 'N plus récentes',
+        description: 'Garde les 5 évaluations les plus récentes, valorise l\'état actuel',
         type: 'pan-standards',
         auteur: 'Codex Numeris',
         discipline: 'Général',
         estGabarit: true,
         pratiques: ['STD'],
         configuration: {
-            varianteCalcul: 'n-recents'
+            varianteCalcul: 'n-recents',
+            portfolio: {
+                methodeSelection: 'recents',
+                nombreARetenir: 5,
+                minimumCompletion: 5,
+                nombreTotal: 10,
+                decouplerPR: false
+            }
         }
     },
-    'STD-par-objectifs': {
-        id: 'STD-par-objectifs',
-        nom: 'Par objectifs d\'apprentissage',
-        description: 'Évaluation par objectifs avec 4 modes de calcul',
+    'STD-par-objectifs-comptage': {
+        id: 'STD-par-objectifs-comptage',
+        nom: 'Par objectifs (Comptage)',
+        description: 'Mode Bruno V. : comptage d\'objectifs essentiels et complémentaires',
         type: 'pan-standards',
-        auteur: 'Codex Numeris',
-        discipline: 'Général',
+        auteur: 'Bruno V.',
+        discipline: 'Chimie',
         estGabarit: true,
         pratiques: ['STD'],
         configuration: {
-            varianteCalcul: 'par-objectifs'
+            varianteCalcul: 'par-objectifs',
+            portfolio: {
+                methodeSelection: 'meilleurs',
+                nombreARetenir: 5,
+                minimumCompletion: 5,
+                nombreTotal: 10,
+                decouplerPR: true
+            },
+            parObjectifs: {
+                modeCalcul: 'comptage',
+                objectifs: [
+                    { id: 1, nom: 'Objectif 1', essentiel: true, ponderation: 0 },
+                    { id: 2, nom: 'Objectif 2', essentiel: true, ponderation: 0 },
+                    { id: 3, nom: 'Objectif 3', essentiel: false, ponderation: 0 }
+                ],
+                comptage: {
+                    seuilMaitrise: 75,
+                    plafondSiEssentielNonMaitrise: 55,
+                    grilleConversion: { 0: 0, 1: 33, 2: 67, 3: 100 }
+                }
+            }
+        }
+    },
+    'STD-par-objectifs-pondere': {
+        id: 'STD-par-objectifs-pondere',
+        nom: 'Par objectifs (Pondéré)',
+        description: 'Mode Michel B. : moyenne pondérée des objectifs',
+        type: 'pan-standards',
+        auteur: 'Michel B.',
+        discipline: 'Mathématiques',
+        estGabarit: true,
+        pratiques: ['STD'],
+        configuration: {
+            varianteCalcul: 'par-objectifs',
+            portfolio: {
+                methodeSelection: 'meilleurs',
+                nombreARetenir: 5,
+                minimumCompletion: 5,
+                nombreTotal: 10,
+                decouplerPR: false
+            },
+            parObjectifs: {
+                modeCalcul: 'moyenne-ponderee',
+                objectifs: [
+                    { id: 1, nom: 'Objectif principal', essentiel: true, ponderation: 50 },
+                    { id: 2, nom: 'Objectif secondaire', essentiel: false, ponderation: 30 },
+                    { id: 3, nom: 'Objectif complémentaire', essentiel: false, ponderation: 20 }
+                ]
+            }
         }
     }
 };
@@ -339,6 +402,7 @@ async function retirerPratiqueDeLaBibliotheque(configId) {
 
 /**
  * Sauvegarder la configuration actuelle comme nouvelle configuration
+ * Extrait TOUS les paramètres pertinents selon le type de pratique (STD, SPE, etc.)
  * @param {string} nom - Nom de la configuration
  * @param {string} description - Description optionnelle
  * @returns {Promise<Object>} La configuration sauvegardée
@@ -370,10 +434,23 @@ async function sauvegarderConfigurationActuelle(nom, description = '') {
             typesTravaux: JSON.parse(JSON.stringify(modalites.specifications?.typesTravaux || [])),
             forfaits: JSON.parse(JSON.stringify(modalites.specifications?.forfaits || []))
         };
+
     } else if (modalites.pratique === 'pan-standards') {
         nouvelleConfig.pratiques = ['STD'];
         nouvelleConfig.configuration = {
+            // Variante de calcul
             varianteCalcul: modalites.varianteCalcul || '',
+
+            // Portfolio complet (mode de sélection, N à retenir, etc.)
+            portfolio: modalites.portfolio ? {
+                methodeSelection: modalites.portfolio.methodeSelection || 'meilleurs',
+                nombreARetenir: modalites.portfolio.nombreARetenir || 5,
+                minimumCompletion: modalites.portfolio.minimumCompletion || 5,
+                nombreTotal: modalites.portfolio.nombreTotal || 10,
+                decouplerPR: modalites.portfolio.decouplerPR || false
+            } : null,
+
+            // Configuration par-objectifs (si applicable)
             parObjectifs: modalites.parObjectifs ? JSON.parse(JSON.stringify(modalites.parObjectifs)) : null
         };
     }
@@ -386,6 +463,7 @@ async function sauvegarderConfigurationActuelle(nom, description = '') {
 
 /**
  * Appliquer une configuration depuis la bibliothèque
+ * Remplit TOUS les paramètres pertinents selon le type de pratique (STD, SPE, etc.)
  * @param {string} configId - ID de la configuration à appliquer
  * @returns {Promise<boolean>} true si appliquée avec succès
  */
@@ -416,32 +494,97 @@ async function appliquerConfigurationPratique(configId) {
         modalites.specifications.forfaits = JSON.parse(JSON.stringify(config.configuration?.forfaits || []));
         modalites.specifications.modeleChoisi = config.id;
         modalites.specifications.modeleNom = config.nom;
+
     } else if (config.type === 'pan-standards') {
         modalites.pratique = 'pan-standards';
 
+        // Variante de calcul (n-meilleurs, n-recents, par-objectifs, etc.)
         if (config.configuration?.varianteCalcul) {
             modalites.varianteCalcul = config.configuration.varianteCalcul;
         }
+
+        // Portfolio (mode de sélection, N à retenir, etc.)
+        if (config.configuration?.portfolio) {
+            modalites.portfolio = {
+                ...(modalites.portfolio || {}),
+                ...JSON.parse(JSON.stringify(config.configuration.portfolio))
+            };
+        }
+
+        // Configuration par-objectifs (si variante = 'par-objectifs')
         if (config.configuration?.parObjectifs) {
             modalites.parObjectifs = JSON.parse(JSON.stringify(config.configuration.parObjectifs));
         }
+
+        // Marquer la configuration appliquée
+        modalites.configurationSTDAppliquee = {
+            id: config.id,
+            nom: config.nom,
+            dateApplication: new Date().toISOString()
+        };
     }
 
     db.setSync('modalitesEvaluation', modalites);
     console.log('[Bibliothèque Pratiques] Configuration appliquée:', config.nom);
 
-    // Rafraîchir l'interface si disponible
-    if (typeof chargerConfigSpecifications === 'function') {
-        chargerConfigSpecifications();
-    }
-    if (typeof afficherTypesTravauxSpec === 'function') {
-        afficherTypesTravauxSpec(modalites.specifications?.typesTravaux || []);
-    }
-    if (typeof afficherForfaitsSpec === 'function') {
-        afficherForfaitsSpec(
-            modalites.specifications?.forfaits || [],
-            modalites.specifications?.typesTravaux || []
-        );
+    // Rafraîchir l'interface selon le type
+    if (config.type === 'pan-specifications') {
+        // Rafraîchir interface SPE
+        if (typeof chargerConfigSpecifications === 'function') {
+            chargerConfigSpecifications();
+        }
+        if (typeof afficherTypesTravauxSpec === 'function') {
+            afficherTypesTravauxSpec(modalites.specifications?.typesTravaux || []);
+        }
+        if (typeof afficherForfaitsSpec === 'function') {
+            afficherForfaitsSpec(
+                modalites.specifications?.forfaits || [],
+                modalites.specifications?.typesTravaux || []
+            );
+        }
+    } else if (config.type === 'pan-standards') {
+        // Rafraîchir interface STD
+
+        // 1. Mettre à jour le dropdown de variante
+        const varianteSelect = document.getElementById('v2-variante-calcul');
+        if (varianteSelect && modalites.varianteCalcul) {
+            varianteSelect.value = modalites.varianteCalcul;
+            // Déclencher l'événement change pour afficher la description
+            if (typeof changerVariantePANStandards === 'function') {
+                changerVariantePANStandards();
+            }
+        }
+
+        // 2. Mettre à jour les champs portfolio
+        const portfolioSelection = document.getElementById('v2-portfolio-selection');
+        if (portfolioSelection && modalites.portfolio?.methodeSelection) {
+            portfolioSelection.value = modalites.portfolio.methodeSelection;
+        }
+
+        const portfolioNombre = document.getElementById('v2-portfolio-nombre');
+        if (portfolioNombre && modalites.portfolio?.nombreARetenir) {
+            portfolioNombre.value = modalites.portfolio.nombreARetenir;
+        }
+
+        const portfolioMinimum = document.getElementById('v2-portfolio-minimum');
+        if (portfolioMinimum && modalites.portfolio?.minimumCompletion) {
+            portfolioMinimum.value = modalites.portfolio.minimumCompletion;
+        }
+
+        const portfolioTotal = document.getElementById('v2-portfolio-total');
+        if (portfolioTotal && modalites.portfolio?.nombreTotal) {
+            portfolioTotal.value = modalites.portfolio.nombreTotal;
+        }
+
+        const decouplerPR = document.getElementById('v2-decoupler-pr');
+        if (decouplerPR && modalites.portfolio?.decouplerPR !== undefined) {
+            decouplerPR.checked = modalites.portfolio.decouplerPR;
+        }
+
+        // 3. Charger la configuration par-objectifs si applicable
+        if (modalites.varianteCalcul === 'par-objectifs' && typeof chargerConfigParObjectifs === 'function') {
+            chargerConfigParObjectifs();
+        }
     }
 
     return true;
