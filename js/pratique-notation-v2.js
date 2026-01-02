@@ -1189,6 +1189,11 @@
         // Afficher les forfaits
         afficherForfaitsSpec(config.forfaits || [], config.typesTravaux || []);
 
+        // Charger le dropdown des modèles de pratiques (Beta 95)
+        if (typeof chargerDropdownModelesPratiques === 'function') {
+            chargerDropdownModelesPratiques();
+        }
+
         return config;
     }
 
