@@ -1,281 +1,269 @@
 /* ===============================
    BIBLIOTHÈQUE DE GRILLES DE CRITÈRES
-   ✅ CRÉATION (8 décembre 2025)
+   ✅ REFACTORING (2 janvier 2026)
 
-   Grilles de critères d'évaluation organisées par discipline
-   Utilisées pour la bibliothèque partagée dans le gestionnaire de grilles
+   Bibliothèque partagée de grilles de critères.
+   - Indépendante du trimestre (clé non-namespacée)
+   - Stockage dans IndexedDB/localStorage
+   - Import/export avec collègues
+   - Plus de données hardcodées
 
-   Structure par discipline:
-   - Chimie
-   - Philosophie
-   - Mathématiques
-   - Littérature
-   - Biologie
-
-   Licence: Creative Commons BY-NC-SA 4.0
-   Auteur: Primo Primavera
+   Clé de stockage: 'bibliothequeGrilles' (sans namespace)
    =============================== */
 
-window.GRILLES_BIBLIOTHEQUE = {
-    // ===========================
-    // CHIMIE
-    // ===========================
-    chimie: [
-        {
-            id: 'chimie-grille-rapport-labo',
-            nom: 'Rapport de laboratoire',
-            discipline: 'Chimie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            description: 'Grille pour évaluer les rapports de laboratoire en chimie',
-            criteres: [
-                {
-                    id: 'crit-chimie-1',
-                    nom: 'Protocole expérimental',
-                    description: 'Clarté et rigueur du protocole',
-                    ponderation: 25,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-chimie-2',
-                    nom: 'Résultats et observations',
-                    description: 'Précision des mesures et qualité des observations',
-                    ponderation: 30,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-chimie-3',
-                    nom: 'Analyse et interprétation',
-                    description: 'Qualité de l\'analyse des résultats',
-                    ponderation: 30,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-chimie-4',
-                    nom: 'Présentation',
-                    description: 'Clarté de la présentation et respect des normes',
-                    ponderation: 15,
-                    verrouille: false
-                }
-            ],
-            dansBibliotheque: false
-        }
-    ],
-
-    // ===========================
-    // PHILOSOPHIE
-    // ===========================
-    philosophie: [
-        {
-            id: 'philo-grille-dissertation',
-            nom: 'Dissertation philosophique',
-            discipline: 'Philosophie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            description: 'Grille pour évaluer les dissertations philosophiques',
-            criteres: [
-                {
-                    id: 'crit-philo-1',
-                    nom: 'Problématisation',
-                    description: 'Qualité de la problématique et des enjeux soulevés',
-                    ponderation: 20,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-philo-2',
-                    nom: 'Argumentation',
-                    description: 'Rigueur et cohérence de l\'argumentation',
-                    ponderation: 35,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-philo-3',
-                    nom: 'Références philosophiques',
-                    description: 'Pertinence et utilisation des références',
-                    ponderation: 20,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-philo-4',
-                    nom: 'Langue et présentation',
-                    description: 'Qualité de la langue et de la présentation',
-                    ponderation: 25,
-                    verrouille: false
-                }
-            ],
-            dansBibliotheque: false
-        }
-    ],
-
-    // ===========================
-    // MATHÉMATIQUES
-    // ===========================
-    mathematiques: [
-        {
-            id: 'math-grille-resolution',
-            nom: 'Résolution de problèmes',
-            discipline: 'Mathématiques',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            description: 'Grille pour évaluer la résolution de problèmes mathématiques',
-            criteres: [
-                {
-                    id: 'crit-math-1',
-                    nom: 'Compréhension du problème',
-                    description: 'Identification correcte des données et de l\'objectif',
-                    ponderation: 20,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-math-2',
-                    nom: 'Démarche de résolution',
-                    description: 'Choix et application des méthodes appropriées',
-                    ponderation: 40,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-math-3',
-                    nom: 'Exactitude des calculs',
-                    description: 'Précision des calculs et des manipulations algébriques',
-                    ponderation: 25,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-math-4',
-                    nom: 'Communication mathématique',
-                    description: 'Clarté de la présentation et justification des étapes',
-                    ponderation: 15,
-                    verrouille: false
-                }
-            ],
-            dansBibliotheque: false
-        }
-    ],
-
-    // ===========================
-    // LITTÉRATURE
-    // ===========================
-    litterature: [
-        {
-            id: 'litt-grille-analyse',
-            nom: 'Analyse littéraire',
-            discipline: 'Littérature',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            description: 'Grille pour évaluer les analyses d\'œuvres littéraires',
-            criteres: [
-                {
-                    id: 'crit-litt-1',
-                    nom: 'Compréhension de l\'œuvre',
-                    description: 'Saisie du sens global et des nuances',
-                    ponderation: 25,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-litt-2',
-                    nom: 'Analyse des procédés',
-                    description: 'Identification et analyse des procédés littéraires',
-                    ponderation: 30,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-litt-3',
-                    nom: 'Interprétation',
-                    description: 'Qualité et pertinence de l\'interprétation',
-                    ponderation: 25,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-litt-4',
-                    nom: 'Qualité de la langue',
-                    description: 'Maîtrise de la langue et de l\'expression',
-                    ponderation: 20,
-                    verrouille: false
-                }
-            ],
-            dansBibliotheque: false
-        }
-    ],
-
-    // ===========================
-    // BIOLOGIE
-    // ===========================
-    biologie: [
-        {
-            id: 'bio-grille-rapport',
-            nom: 'Rapport d\'expérimentation',
-            discipline: 'Biologie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            description: 'Grille pour évaluer les rapports d\'expérimentation en biologie',
-            criteres: [
-                {
-                    id: 'crit-bio-1',
-                    nom: 'Démarche scientifique',
-                    description: 'Rigueur de la démarche et respect du protocole',
-                    ponderation: 30,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-bio-2',
-                    nom: 'Observations et données',
-                    description: 'Précision et complétude des observations',
-                    ponderation: 25,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-bio-3',
-                    nom: 'Analyse et conclusion',
-                    description: 'Qualité de l\'analyse et pertinence de la conclusion',
-                    ponderation: 30,
-                    verrouille: false
-                },
-                {
-                    id: 'crit-bio-4',
-                    nom: 'Communication scientifique',
-                    description: 'Clarté et respect des normes de présentation',
-                    ponderation: 15,
-                    verrouille: false
-                }
-            ],
-            dansBibliotheque: false
-        }
-    ]
-};
+/**
+ * Clé de stockage pour la bibliothèque (NON namespacée = partagée entre trimestres)
+ */
+const CLE_BIBLIOTHEQUE_GRILLES = 'bibliothequeGrilles';
 
 /**
- * Obtenir toutes les grilles de la bibliothèque (toutes disciplines)
+ * Obtenir toutes les grilles de la bibliothèque
+ * @returns {Promise<Array>} Tableau de toutes les grilles disponibles
+ */
+async function obtenirToutesLesGrillesBibliotheque() {
+    const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
+    return bibliotheque;
+}
+
+/**
+ * Version synchrone pour compatibilité
  * @returns {Array} Tableau de toutes les grilles disponibles
  */
-function obtenirToutesLesGrillesBibliotheque() {
-    const toutes = [];
-    Object.keys(window.GRILLES_BIBLIOTHEQUE).forEach(discipline => {
-        toutes.push(...window.GRILLES_BIBLIOTHEQUE[discipline]);
-    });
-    return toutes;
+function obtenirToutesLesGrillesBibliothequeSync() {
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_GRILLES) || [];
+    return bibliotheque;
 }
 
 /**
  * Obtenir les grilles d'une discipline spécifique
- * @param {string} discipline - Nom de la discipline (chimie, philosophie, etc.)
+ * @param {string} discipline - Nom de la discipline
  * @returns {Array} Tableau des grilles de cette discipline
  */
 function obtenirGrillesParDiscipline(discipline) {
-    return window.GRILLES_BIBLIOTHEQUE[discipline] || [];
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_GRILLES) || [];
+    if (!discipline || discipline === 'toutes') {
+        return bibliotheque;
+    }
+    return bibliotheque.filter(g =>
+        g.discipline && g.discipline.toLowerCase() === discipline.toLowerCase()
+    );
 }
 
 /**
- * Obtenir la liste des disciplines disponibles pour les grilles
- * @returns {Array} Tableau des noms de disciplines
+ * Obtenir la liste des disciplines disponibles dans la bibliothèque
+ * @returns {Array} Tableau des noms de disciplines uniques
  */
 function obtenirDisciplinesDisponiblesGrilles() {
-    return Object.keys(window.GRILLES_BIBLIOTHEQUE).map(key => {
-        // Capitaliser la première lettre
-        return key.charAt(0).toUpperCase() + key.slice(1);
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_GRILLES) || [];
+    const disciplines = new Set();
+
+    bibliotheque.forEach(grille => {
+        if (grille.discipline) {
+            disciplines.add(grille.discipline);
+        }
     });
+
+    return Array.from(disciplines).sort();
 }
 
-// Exporter les fonctions
+/**
+ * Ajouter une grille à la bibliothèque partagée
+ * @param {Object} grille - La grille à ajouter
+ * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
+ */
+async function ajouterGrilleALaBibliotheque(grille) {
+    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
+
+    const existe = bibliotheque.some(g => g.id === grille.id);
+    if (existe) {
+        console.log('[Bibliothèque Grilles] Grille déjà présente:', grille.id);
+        return false;
+    }
+
+    const grilleBiblio = {
+        ...grille,
+        dansBibliotheque: true,
+        dateAjoutBiblio: new Date().toISOString(),
+        auteur: grille.auteur || 'Inconnu'
+    };
+
+    bibliotheque.push(grilleBiblio);
+    await db.set(CLE_BIBLIOTHEQUE_GRILLES, bibliotheque);
+
+    console.log('[Bibliothèque Grilles] Grille ajoutée:', grille.nom);
+    return true;
+}
+
+/**
+ * Retirer une grille de la bibliothèque
+ * @param {string} grilleId - ID de la grille à retirer
+ * @returns {Promise<boolean>} true si retirée, false si non trouvée
+ */
+async function retirerGrilleDeLaBibliotheque(grilleId) {
+    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
+
+    const indexAvant = bibliotheque.length;
+    bibliotheque = bibliotheque.filter(g => g.id !== grilleId);
+
+    if (bibliotheque.length === indexAvant) {
+        return false;
+    }
+
+    await db.set(CLE_BIBLIOTHEQUE_GRILLES, bibliotheque);
+    console.log('[Bibliothèque Grilles] Grille retirée:', grilleId);
+    return true;
+}
+
+/**
+ * Importer des grilles dans la bibliothèque
+ * @param {Array} grilles - Tableau de grilles à importer
+ * @returns {Promise<{ajoutees: number, existantes: number}>}
+ */
+async function importerGrillesDansBibliotheque(grilles) {
+    let ajoutees = 0;
+    let existantes = 0;
+
+    for (const grille of grilles) {
+        const resultat = await ajouterGrilleALaBibliotheque(grille);
+        if (resultat) {
+            ajoutees++;
+        } else {
+            existantes++;
+        }
+    }
+
+    console.log(`[Bibliothèque Grilles] Import: ${ajoutees} ajoutées, ${existantes} déjà existantes`);
+    return { ajoutees, existantes };
+}
+
+/**
+ * Exporter toute la bibliothèque de grilles
+ * @returns {Promise<Object>} Objet JSON exportable
+ */
+async function exporterBibliothequeGrilles() {
+    const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_GRILLES) || [];
+
+    return {
+        version: '1.0',
+        type: 'grilles',
+        dateExport: new Date().toISOString(),
+        nombreGrilles: bibliotheque.length,
+        grilles: bibliotheque
+    };
+}
+
+/**
+ * Migrer les grilles d'un trimestre vers la bibliothèque partagée
+ * @param {string} cleSource - Clé source (ex: 'a2025_grilles')
+ * @returns {Promise<{ajoutees: number, existantes: number}>}
+ */
+async function migrerGrillesVersBibliotheque(cleSource) {
+    const dataRaw = localStorage.getItem(cleSource);
+    if (!dataRaw) {
+        console.log('[Bibliothèque Grilles] Aucune donnée trouvée pour:', cleSource);
+        return { ajoutees: 0, existantes: 0 };
+    }
+
+    const grilles = JSON.parse(dataRaw);
+    if (!Array.isArray(grilles)) {
+        return { ajoutees: 0, existantes: 0 };
+    }
+
+    console.log(`[Bibliothèque Grilles] Migration de ${grilles.length} grilles depuis ${cleSource}`);
+    return await importerGrillesDansBibliotheque(grilles);
+}
+
+/**
+ * Lister tous les trimestres qui ont des grilles
+ * @returns {Array<{cle: string, code: string, nom: string, nombre: number}>}
+ */
+function listerTrimestresAvecGrilles() {
+    const trimestres = [];
+    const trimestreActuel = window.trimestreActif || '';
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const cle = localStorage.key(i);
+        if (cle && cle.endsWith('_grilles')) {
+            try {
+                const data = JSON.parse(localStorage.getItem(cle));
+                if (Array.isArray(data) && data.length > 0) {
+                    const codeTrimestre = cle.replace('_grilles', '');
+
+                    if (codeTrimestre !== trimestreActuel) {
+                        const nomTrimestre = formaterNomTrimestreGrilles(codeTrimestre);
+                        trimestres.push({
+                            cle: cle,
+                            code: codeTrimestre,
+                            nom: nomTrimestre,
+                            nombre: data.length
+                        });
+                    }
+                }
+            } catch (e) {
+                // Ignorer
+            }
+        }
+    }
+
+    trimestres.sort((a, b) => b.code.localeCompare(a.code));
+    return trimestres;
+}
+
+/**
+ * Formater un code trimestre pour affichage
+ */
+function formaterNomTrimestreGrilles(code) {
+    if (!code) return 'Inconnu';
+    const saison = code.charAt(0).toLowerCase();
+    const annee = code.substring(1);
+    const saisons = { 'a': 'Automne', 'h': 'Hiver', 'e': 'Été' };
+    return `${saisons[saison] || saison.toUpperCase()} ${annee}`;
+}
+
+/**
+ * Obtenir les grilles d'un trimestre spécifique
+ * @param {string} cleOuCode - Clé complète ou code trimestre
+ * @returns {Array}
+ */
+function obtenirGrillesTrimestre(cleOuCode) {
+    const cle = cleOuCode.includes('_') ? cleOuCode : `${cleOuCode}_grilles`;
+    try {
+        const data = localStorage.getItem(cle);
+        if (data) {
+            return JSON.parse(data);
+        }
+    } catch (e) {
+        console.error('[Bibliothèque Grilles] Erreur lecture trimestre:', e);
+    }
+    return [];
+}
+
+/**
+ * Obtenir le nombre de grilles dans la bibliothèque
+ * @returns {number}
+ */
+function getNombreGrillesBibliotheque() {
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_GRILLES) || [];
+    return bibliotheque.length;
+}
+
+// ===========================
+// EXPORTS GLOBAUX
+// ===========================
 window.obtenirToutesLesGrillesBibliotheque = obtenirToutesLesGrillesBibliotheque;
+window.obtenirToutesLesGrillesBibliothequeSync = obtenirToutesLesGrillesBibliothequeSync;
 window.obtenirGrillesParDiscipline = obtenirGrillesParDiscipline;
 window.obtenirDisciplinesDisponiblesGrilles = obtenirDisciplinesDisponiblesGrilles;
+window.ajouterGrilleALaBibliotheque = ajouterGrilleALaBibliotheque;
+window.retirerGrilleDeLaBibliotheque = retirerGrilleDeLaBibliotheque;
+window.importerGrillesDansBibliotheque = importerGrillesDansBibliotheque;
+window.exporterBibliothequeGrilles = exporterBibliothequeGrilles;
+window.migrerGrillesVersBibliotheque = migrerGrillesVersBibliotheque;
+window.listerTrimestresAvecGrilles = listerTrimestresAvecGrilles;
+window.formaterNomTrimestreGrilles = formaterNomTrimestreGrilles;
+window.obtenirGrillesTrimestre = obtenirGrillesTrimestre;
+window.getNombreGrillesBibliotheque = getNombreGrillesBibliotheque;
+window.CLE_BIBLIOTHEQUE_GRILLES = CLE_BIBLIOTHEQUE_GRILLES;
+
+// Rétrocompatibilité: GRILLES_BIBLIOTHEQUE vide (plus de hardcodé)
+window.GRILLES_BIBLIOTHEQUE = {};

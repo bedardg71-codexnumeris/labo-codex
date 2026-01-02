@@ -2060,7 +2060,7 @@ async function afficherBibliothequeEchelles() {
 
     // Séparer échelles dans la bibliothèque vs disponibles
     const echellesDansBibliotheque = echelles.filter(e => e.dansBibliotheque !== false);
-    const echellesDisponibles = obtenirToutesLesEchellesBibliotheque();
+    const echellesDisponibles = await obtenirToutesLesEchellesBibliotheque();
 
     // Obtenir les disciplines disponibles
     const disciplines = obtenirDisciplinesDisponiblesEchelles();
@@ -2183,16 +2183,18 @@ async function afficherBibliothequeEchelles() {
                     Échelles disponibles à ajouter
                 </h3>
 
-                <!-- Filtre par discipline -->
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
-                        Filtrer par discipline :
-                    </label>
-                    <select id="filtreDisciplineEchelles"
-                            class="controle-form"
-                            onchange="filtrerEchellesParDiscipline()"
-                            style="max-width: 300px;">
-                        <option value="">Toutes les disciplines</option>
+                <!-- Filtres -->
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <!-- Filtre par discipline -->
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
+                            Filtrer par discipline :
+                        </label>
+                        <select id="filtreDisciplineEchelles"
+                                class="controle-form"
+                                onchange="filtrerEchellesBibliotheque()"
+                                style="max-width: 300px;">
+                            <option value="">Toutes les disciplines</option>
     `;
 
     disciplines.forEach(discipline => {
@@ -2202,6 +2204,25 @@ async function afficherBibliothequeEchelles() {
     html += `
                         </select>
                     </div>
+
+                    <!-- Filtre par pratique -->
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="display: block; margin-bottom: 5px; color: #555; font-weight: 500;">
+                            Filtrer par pratique :
+                        </label>
+                        <select id="filtrePratiqueEchelles"
+                                class="controle-form"
+                                onchange="filtrerEchellesBibliotheque()"
+                                style="max-width: 300px;">
+                            <option value="">Toutes les pratiques</option>
+                            <option value="SOM">Sommative</option>
+                            <option value="STD">PAN-Standards</option>
+                            <option value="SPE">PAN-Spécifications</option>
+                            <option value="DEN">PAN-Dénotation</option>
+                            <option value="all">Multi-pratiques</option>
+                        </select>
+                    </div>
+                </div>
 
                     <div id="listeEchellesDisponibles">
     `;
@@ -2226,11 +2247,32 @@ async function afficherBibliothequeEchelles() {
             const description = echelle.description || '';
             const auteur = echelle.auteur || '';
 
+            // Obtenir les pratiques de l'échelle
+            const pratiques = echelle.pratiques || (echelle.gabaritType ? [echelle.gabaritType] : ['all']);
+            const pratiquesStr = pratiques.join(',');
+
+            // Générer les badges de pratique
+            let badgesPratiques = '';
+            if (window.GabaritsUtils) {
+                badgesPratiques = window.GabaritsUtils.genererBadgesPratiques(echelle);
+            } else {
+                // Fallback sans le module
+                pratiques.forEach(p => {
+                    const label = p === 'all' ? 'Multi' : p;
+                    const classeCSS = p === 'all' ? '' : p.toLowerCase();
+                    badgesPratiques += `<span class="badge-pratique-compact ${classeCSS}">${label}</span>`;
+                });
+            }
+
             // Vérifier si déjà dans la bibliothèque
             const dejaPresent = echelles.some(e => e.id === echelle.id && e.dansBibliotheque !== false);
 
+            // Style spécial si c'est un gabarit
+            const estGabarit = echelle.estGabarit === true;
+            const styleGabarit = estGabarit ? 'border-left: 4px solid #6f42c1; background: linear-gradient(135deg, #f8f4ff 0%, #fff 100%);' : '';
+
             html += `
-                <div class="echelle-disponible-item" data-discipline="${discipline}" style="
+                <div class="echelle-disponible-item" data-discipline="${discipline}" data-pratiques="${pratiquesStr}" style="
                     padding: 12px;
                     background: white;
                     border: 1px solid #ddd;
@@ -2241,9 +2283,14 @@ async function afficherBibliothequeEchelles() {
                     align-items: start;
                     gap: 12px;
                     ${dejaPresent ? 'opacity: 0.5;' : ''}
+                    ${styleGabarit}
                 ">
                     <div style="flex: 1;">
-                        <div style="font-weight: 500; margin-bottom: 4px;">${nomEchelle}</div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            ${badgesPratiques}
+                            <span style="font-weight: 500;">${nomEchelle}</span>
+                            ${estGabarit ? '<span style="font-size: 0.7rem; color: #6f42c1; font-weight: 500;">(gabarit)</span>' : ''}
+                        </div>
                         <div style="font-size: 0.85rem; color: #666; margin-bottom: 4px;">
                             ${nbNiveaux} niveau(x)${auteur ? ' • ' + auteur : ''}
                         </div>
@@ -2425,28 +2472,63 @@ async function ajouterEchellesABibliotheque() {
  * ✅ AJOUT (8 décembre 2025) : Filtrer les échelles disponibles par discipline
  */
 function filtrerEchellesParDiscipline() {
-    const select = document.getElementById('filtreDisciplineEchelles');
-    const disciplineSelectionnee = select ? select.value : '';
+    // Rétrocompatibilité - appeler la nouvelle fonction
+    filtrerEchellesBibliotheque();
+}
+
+/**
+ * Filtre les échelles par discipline ET par pratique
+ * Utilise le module GabaritsUtils pour le filtrage par pratique
+ */
+function filtrerEchellesBibliotheque() {
+    const selectDiscipline = document.getElementById('filtreDisciplineEchelles');
+    const selectPratique = document.getElementById('filtrePratiqueEchelles');
+
+    const disciplineSelectionnee = selectDiscipline ? selectDiscipline.value : '';
+    const pratiqueSelectionnee = selectPratique ? selectPratique.value : '';
 
     const items = document.querySelectorAll('.echelle-disponible-item');
     const titresDisciplines = document.querySelectorAll('#listeEchellesDisponibles h4');
 
-    if (!disciplineSelectionnee) {
-        // Afficher tout
-        items.forEach(item => item.style.display = 'flex');
-        titresDisciplines.forEach(titre => titre.style.display = 'block');
-    } else {
-        // Filtrer par discipline
-        items.forEach(item => {
-            const discipline = item.dataset.discipline;
-            item.style.display = discipline === disciplineSelectionnee ? 'flex' : 'none';
-        });
+    // Filtrer chaque item
+    items.forEach(item => {
+        const discipline = item.dataset.discipline || '';
+        const pratiques = (item.dataset.pratiques || 'all').split(',');
 
-        titresDisciplines.forEach(titre => {
-            const disciplineTitre = titre.textContent.trim();
+        // Vérifier filtre discipline
+        const matchDiscipline = !disciplineSelectionnee || discipline === disciplineSelectionnee;
+
+        // Vérifier filtre pratique (utiliser GabaritsUtils si disponible)
+        let matchPratique = true;
+        if (pratiqueSelectionnee) {
+            if (pratiqueSelectionnee === 'all') {
+                // Chercher les multi-pratiques
+                matchPratique = pratiques.includes('all');
+            } else {
+                matchPratique = pratiques.includes('all') || pratiques.includes(pratiqueSelectionnee);
+            }
+        }
+
+        item.style.display = (matchDiscipline && matchPratique) ? 'flex' : 'none';
+    });
+
+    // Masquer les titres de discipline si aucun item visible
+    titresDisciplines.forEach(titre => {
+        const disciplineTitre = titre.textContent.trim();
+
+        if (!disciplineSelectionnee) {
+            // Vérifier si au moins un item de cette discipline est visible
+            let hasVisibleItem = false;
+            items.forEach(item => {
+                if (item.dataset.discipline === disciplineTitre && item.style.display !== 'none') {
+                    hasVisibleItem = true;
+                }
+            });
+            titre.style.display = hasVisibleItem ? 'block' : 'none';
+        } else {
             titre.style.display = disciplineTitre === disciplineSelectionnee ? 'block' : 'none';
-        });
-    }
+        }
+    });
 }
 
 /**
@@ -2475,7 +2557,17 @@ async function creerNouvelleEchelle() {
 
     // Réinitialiser le formulaire
     document.getElementById('nomEchelleTemplate').value = '';
-    document.getElementById('tableauNiveauxEchelle').innerHTML = '';
+
+    // Afficher un message et un bouton pour ajouter le premier niveau
+    const container = document.getElementById('tableauNiveauxEchelle');
+    container.innerHTML = `
+        <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 8px; text-align: center; margin-bottom: 15px;">
+            <p style="color: #666; margin-bottom: 15px;">Aucun niveau défini. Ajoutez des niveaux de performance pour cette échelle.</p>
+            <button class="btn btn-confirmer" onclick="ajouterPremierNiveau()">
+                + Ajouter un niveau
+            </button>
+        </div>
+    `;
 
     // Réinitialiser la référence à l'échelle actuelle
     echelleTemplateActuelle = null;
@@ -2484,9 +2576,149 @@ async function creerNouvelleEchelle() {
 }
 
 /**
+ * Ajoute le premier niveau lors de la création d'une nouvelle échelle
+ * Cette fonction est utilisée quand echelleTemplateActuelle est null
+ */
+function ajouterPremierNiveau() {
+    // Créer une structure temporaire pour la nouvelle échelle
+    const niveauxTemp = [
+        {
+            code: 'N1',
+            nom: 'Nouveau niveau',
+            min: 0,
+            max: 100,
+            valeurCalcul: 50,
+            couleur: '#3498db'
+        }
+    ];
+
+    // Stocker temporairement les niveaux
+    window._niveauxNouvelleEchelle = niveauxTemp;
+
+    // Afficher le tableau des niveaux avec le bouton pour en ajouter d'autres
+    afficherNiveauxNouvelleEchelle();
+}
+
+/**
+ * Affiche les niveaux pour une nouvelle échelle (pas encore sauvegardée)
+ */
+function afficherNiveauxNouvelleEchelle() {
+    const container = document.getElementById('tableauNiveauxEchelle');
+    const niveaux = window._niveauxNouvelleEchelle || [];
+
+    if (niveaux.length === 0) {
+        container.innerHTML = `
+            <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 8px; text-align: center; margin-bottom: 15px;">
+                <p style="color: #666; margin-bottom: 15px;">Aucun niveau défini.</p>
+                <button class="btn btn-confirmer" onclick="ajouterPremierNiveau()">
+                    + Ajouter un niveau
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    let html = niveaux.map((niveau, index) => `
+        <div class="niveau-echelle-item" style="
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: white;
+            border: 1px solid #ddd;
+            border-left: 4px solid ${niveau.couleur || '#ccc'};
+            border-radius: 6px;
+            margin-bottom: 8px;
+        ">
+            <input type="text" value="${niveau.code}"
+                   onchange="modifierNiveauTemp(${index}, 'code', this.value)"
+                   class="controle-form" style="width: 60px;" placeholder="Code">
+            <input type="text" value="${niveau.nom}"
+                   onchange="modifierNiveauTemp(${index}, 'nom', this.value)"
+                   class="controle-form" style="flex: 1;" placeholder="Nom du niveau">
+            <input type="number" value="${niveau.min}"
+                   onchange="modifierNiveauTemp(${index}, 'min', parseInt(this.value))"
+                   class="controle-form" style="width: 70px;" placeholder="Min %">
+            <input type="number" value="${niveau.max}"
+                   onchange="modifierNiveauTemp(${index}, 'max', parseInt(this.value))"
+                   class="controle-form" style="width: 70px;" placeholder="Max %">
+            <input type="color" value="${niveau.couleur || '#cccccc'}"
+                   onchange="modifierNiveauTemp(${index}, 'couleur', this.value)"
+                   style="width: 40px; height: 32px; border: none; cursor: pointer;">
+            <button class="btn btn-supprimer btn-tres-compact" onclick="supprimerNiveauTemp(${index})" title="Supprimer">
+                X
+            </button>
+        </div>
+    `).join('');
+
+    html += `
+        <button class="btn btn-confirmer" style="margin-top: 10px;" onclick="ajouterNiveauTemp()">
+            + Ajouter un niveau
+        </button>
+    `;
+
+    container.innerHTML = html;
+
+    // Mettre à jour l'aperçu
+    const apercuContainer = document.getElementById('apercuEchelleNiveaux');
+    if (apercuContainer) {
+        apercuContainer.innerHTML = niveaux.map(n => `
+            <span style="
+                display: inline-block;
+                padding: 6px 12px;
+                background: ${n.couleur || '#ccc'};
+                color: white;
+                border-radius: 4px;
+                font-weight: 500;
+                font-size: 0.9rem;
+            ">${n.code} - ${n.nom}</span>
+        `).join('');
+    }
+}
+
+/**
+ * Modifie un niveau temporaire
+ */
+function modifierNiveauTemp(index, champ, valeur) {
+    if (!window._niveauxNouvelleEchelle) return;
+    window._niveauxNouvelleEchelle[index][champ] = valeur;
+    afficherNiveauxNouvelleEchelle();
+}
+
+/**
+ * Ajoute un niveau temporaire
+ */
+function ajouterNiveauTemp() {
+    if (!window._niveauxNouvelleEchelle) {
+        window._niveauxNouvelleEchelle = [];
+    }
+    const nbNiveaux = window._niveauxNouvelleEchelle.length;
+    window._niveauxNouvelleEchelle.push({
+        code: 'N' + (nbNiveaux + 1),
+        nom: 'Nouveau niveau',
+        min: 0,
+        max: 100,
+        valeurCalcul: 50,
+        couleur: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')
+    });
+    afficherNiveauxNouvelleEchelle();
+}
+
+/**
+ * Supprime un niveau temporaire
+ */
+function supprimerNiveauTemp(index) {
+    if (!window._niveauxNouvelleEchelle) return;
+    window._niveauxNouvelleEchelle.splice(index, 1);
+    afficherNiveauxNouvelleEchelle();
+}
+
+/**
  * Annule l'édition d'une échelle et retourne à l'accueil
  */
 function annulerFormEchelle() {
+    // Nettoyer les niveaux temporaires
+    window._niveauxNouvelleEchelle = null;
     // Masquer l'éditeur et réafficher l'accueil
     document.getElementById('conteneurEditionEchelle').style.display = 'none';
     // Note: Section optionsImportExportEchelles supprimée (Beta 92)
@@ -2924,11 +3156,21 @@ async function dupliquerEchelleDepuisSidebar(id) {
  * @returns {Object} {utilisee: boolean, nbEvaluations: number, evaluations: Array}
  */
 async function verifierUtilisationEchelle(echelleId) {
-    // Récupérer toutes les évaluations
-    const evaluations = await db.get('evaluations') ||  [];
+    // Récupérer toutes les évaluations (essayer avec et sans namespace)
+    let evaluations = await db.get('evaluations');
+
+    // Si pas trouvé, essayer avec la clé namespacée
+    if (!evaluations && typeof window.cle === 'function') {
+        evaluations = await db.get(window.cle('evaluations'));
+    }
+
+    // S'assurer que c'est un tableau
+    if (!Array.isArray(evaluations)) {
+        evaluations = [];
+    }
 
     // Filtrer les évaluations qui utilisent cette échelle
-    const evaluationsUtilisant = evaluations.filter(eval => eval.echelleId === echelleId);
+    const evaluationsUtilisant = evaluations.filter(e => e.echelleId === echelleId);
 
     return {
         utilisee: evaluationsUtilisant.length > 0,
@@ -3063,14 +3305,57 @@ async function supprimerEchelleActive() {
  * Sauvegarde complète de l'échelle en cours d'édition
  */
 async function sauvegarderEchelleComplete() {
-    // Sauvegarder le nom si modifié
-    await sauvegarderNomEchelle();
+    const nom = document.getElementById('nomEchelleTemplate').value.trim();
 
-    // Message de confirmation
-    alert('Échelle sauvegardée avec succès');
+    // Vérifier le nom
+    if (!nom) {
+        alert('Veuillez entrer un nom pour l\'échelle');
+        return;
+    }
+
+    // Cas 1: Création d'une nouvelle échelle (echelleTemplateActuelle est null)
+    if (!echelleTemplateActuelle && window._niveauxNouvelleEchelle) {
+        const niveaux = window._niveauxNouvelleEchelle;
+
+        if (niveaux.length === 0) {
+            alert('Veuillez ajouter au moins un niveau de performance');
+            return;
+        }
+
+        // Créer la nouvelle échelle
+        const nouvelleEchelle = {
+            id: 'echelle_' + Date.now(),
+            nom: nom,
+            niveaux: niveaux,
+            dansBibliotheque: true,
+            dateCreation: new Date().toISOString()
+        };
+
+        // Sauvegarder dans la base
+        let echelles = await db.get('echellesTemplates') || [];
+        echelles.push(nouvelleEchelle);
+        await db.set('echellesTemplates', echelles);
+
+        // Nettoyer les niveaux temporaires
+        window._niveauxNouvelleEchelle = null;
+
+        // Définir comme échelle actuelle
+        echelleTemplateActuelle = nouvelleEchelle;
+
+        // Message de confirmation
+        alert('Nouvelle échelle créée avec succès !');
+    } else {
+        // Cas 2: Modification d'une échelle existante
+        await sauvegarderNomEchelle();
+        alert('Échelle sauvegardée avec succès');
+    }
 
     // Recharger la liste pour refléter les changements
     await afficherListeEchelles();
+
+    // Retourner à l'accueil
+    document.getElementById('conteneurEditionEchelle').style.display = 'none';
+    document.getElementById('accueilEchelles').style.display = 'block';
 }
 
 // Export global
@@ -3088,6 +3373,11 @@ window.deplacerNiveauBas = deplacerNiveauBas;
 window.deplacerNiveauEchelleHaut = deplacerNiveauEchelleHaut;
 window.deplacerNiveauEchelleBas = deplacerNiveauEchelleBas;
 window.ajouterNiveauEchelle = ajouterNiveauEchelle;
+window.ajouterPremierNiveau = ajouterPremierNiveau;
+window.afficherNiveauxNouvelleEchelle = afficherNiveauxNouvelleEchelle;
+window.modifierNiveauTemp = modifierNiveauTemp;
+window.ajouterNiveauTemp = ajouterNiveauTemp;
+window.supprimerNiveauTemp = supprimerNiveauTemp;
 window.supprimerNiveauEchelle = supprimerNiveauEchelle;
 window.modifierNiveauEchelle = modifierNiveauEchelle;
 window.verifierUtilisationEchelle = verifierUtilisationEchelle;
@@ -3098,4 +3388,5 @@ window.afficherBibliothequeEchelles = afficherBibliothequeEchelles;
 window.retirerEchelleDeBibliotheque = retirerEchelleDeBibliotheque;
 window.ajouterEchellesABibliotheque = ajouterEchellesABibliotheque;
 window.filtrerEchellesParDiscipline = filtrerEchellesParDiscipline;
+window.filtrerEchellesBibliotheque = filtrerEchellesBibliotheque;
 window.fermerModalBibliothequeEchelles = fermerModalBibliothequeEchelles;

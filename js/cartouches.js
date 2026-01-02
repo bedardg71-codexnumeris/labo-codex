@@ -2880,7 +2880,7 @@ async function afficherBibliothequeCartouches() {
 
     // Ajouter les cartouches de la bibliothèque partagée
     if (window.CARTOUCHES_BIBLIOTHEQUE) {
-        const cartouchesBibliotheque = obtenirToutesLesCartouchesBibliotheque();
+        const cartouchesBibliotheque = await obtenirToutesLesCartouchesBibliotheque();
         toutesLesCartouches.push(...cartouchesBibliotheque);
     }
 
@@ -3120,7 +3120,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
         let cartouche = cartouches.find(c => c.id === id);
 
         if (!cartouche) {
-            const toutesCartouches = obtenirToutesLesCartouchesBibliotheque();
+            const toutesCartouches = await obtenirToutesLesCartouchesBibliotheque();
             const cartoucheSource = toutesCartouches.find(c => c.id === id);
             if (cartoucheSource) {
                 cartouche = { ...cartoucheSource };
@@ -3215,7 +3215,7 @@ async function ajouterCartouchesABibliotheque() {
         }
         // Cas 2: Cartouche de la bibliothèque partagée - copier dans localStorage
         else {
-            const cartouchesBibliotheque = obtenirToutesLesCartouchesBibliotheque();
+            const cartouchesBibliotheque = await obtenirToutesLesCartouchesBibliotheque();
             const cartouche = cartouchesBibliotheque.find(c => c.id === id);
 
             if (cartouche) {

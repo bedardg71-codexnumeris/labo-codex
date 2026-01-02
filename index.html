@@ -4644,7 +4644,7 @@
                         <!-- SIDEBAR GAUCHE (280px, sticky) -->
                         <div class="sidebar-navigation">
 
-                            <!-- Liste des échelles -->
+                            <!-- Liste des échelles (incluant le bouton "Consulter la bibliothèque" généré par JS) -->
                             <div class="sidebar-liste" id="sidebarListeEchelles">
                                 <!-- Généré par afficherListeEchelles() -->
                             </div>
@@ -8977,20 +8977,36 @@ Exemple :
                                 </div>
                             </div>
 
-                            <!-- Section : Types de travaux -->
+                            <!-- Section : Types de productions -->
                             <div style="margin-bottom: 25px; padding: 15px; background: white; border: 1px solid var(--gris-bordure); border-radius: 6px;">
                                 <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--bleu-principal);">
-                                    Types de travaux
+                                    Types de productions
                                 </h4>
                                 <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
-                                    Définissez les types de travaux que les étudiants devront compléter.
+                                    Définissez les types de productions que les étudiants devront compléter.
                                     Chaque type peut apparaître plusieurs fois dans les forfaits.
                                 </p>
+
+                                <!-- Dropdown pour importer depuis la bibliothèque -->
+                                <div style="margin-bottom: 15px; padding: 10px; background: var(--bleu-tres-pale); border-radius: 4px;">
+                                    <label style="font-weight: 500; margin-bottom: 5px; display: block;">
+                                        Importer depuis la bibliothèque :
+                                    </label>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <select id="v2-spec-dropdown-productions" class="form-control" style="flex: 1;">
+                                            <option value="">-- Sélectionner une production --</option>
+                                        </select>
+                                        <button type="button" class="btn btn-principal" onclick="importerProductionDepuisBibliothequeSpec()">
+                                            Ajouter
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <div id="v2-spec-types-travaux-liste" style="margin-bottom: 15px;">
                                     <!-- Liste générée dynamiquement -->
                                 </div>
                                 <button type="button" class="btn btn-secondaire" onclick="ajouterTypeTravailSpecV2()">
-                                    + Ajouter un type de travail
+                                    + Ajouter manuellement
                                 </button>
                             </div>
 
@@ -9000,7 +9016,7 @@ Exemple :
                                     Table des forfaits (bundles)
                                 </h4>
                                 <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
-                                    Chaque forfait définit un ensemble de travaux requis et la note associée.
+                                    Chaque forfait définit un ensemble de productions requises et la note associée.
                                     L'étudiant obtient la note du forfait le plus élevé qu'il a complété.
                                 </p>
                                 <div id="v2-spec-forfaits-liste" style="margin-bottom: 15px;">
@@ -9009,6 +9025,31 @@ Exemple :
                                 <button type="button" class="btn btn-secondaire" onclick="ajouterForfaitSpec()">
                                     + Ajouter un forfait
                                 </button>
+                            </div>
+
+                            <!-- Section : Matériel pédagogique SPE -->
+                            <div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 1px solid #2196f3; border-radius: 6px;">
+                                <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: #1565c0;">
+                                    Matériel pédagogique requis
+                                </h4>
+                                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
+                                    Pour évaluer en mode Spécifications, consultez les bibliothèques de matériel
+                                    et sélectionnez les gabarits SPE :
+                                </p>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button type="button" class="btn btn-secondaire" onclick="afficherBibliothequeEchelles()">
+                                        Échelles
+                                    </button>
+                                    <button type="button" class="btn btn-secondaire" onclick="afficherBibliothequeGrilles()">
+                                        Grilles
+                                    </button>
+                                    <button type="button" class="btn btn-secondaire" onclick="afficherBibliothequeCartouches()">
+                                        Cartouches
+                                    </button>
+                                </div>
+                                <p class="text-muted" style="font-size: 0.8rem; margin-top: 10px; margin-bottom: 0;">
+                                    Conseil : Recherchez les gabarits marqués <strong>[SPE]</strong> dans les bibliothèques.
+                                </p>
                             </div>
                         </div>
 
@@ -13325,17 +13366,19 @@ Exemple :
     <script src="js/trimestres.js?v=2025123102"></script> <!-- Beta 95 : Gestion multi-trimestres -->
     <script src="js/trimestre.js?v=2025123109"></script>
     <script src="js/trimestre-v2.js?v=2026010203"></script> <!-- Beta 95 : Onglet Trimestre + guide groupe-cours -->
-    <script src="js/pratique-notation-v2.js?v=2026010215"></script> <!-- Beta 95 : Onglet Pratique de notation + badge + types travaux V2 -->
+    <script src="js/pratique-notation-v2.js?v=2026010221"></script> <!-- Beta 95 : dropdown productions + terminologie "production" -->
+    <script src="js/gabarits-utils.js?v=2026010202"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
+    <script src="js/spe-specifications.js?v=2026010202"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits biblio -->
     <script src="js/preferences-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Préférences restructuré -->
     <script src="js/donnees-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Données restructuré -->
     <script src="js/etudiants.js?v=2025122902"></script>
     <script src="js/productions-bibliotheque.js?v=2026010218"></script> <!-- + import depuis trimestres -->
     <script src="js/productions.js?v=2026010219"></script> <!-- + import depuis bibliothèque corrigé -->
-    <script src="js/grilles-bibliotheque.js?v=2025120826"></script>
+    <script src="js/grilles-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
     <script src="js/grilles.js?v=2025120827"></script>
-    <script src="js/echelles-bibliotheque.js?v=2025120826"></script>
+    <script src="js/echelles-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
     <script src="js/echelles.js?v=2025120827"></script>
-    <script src="js/cartouches-bibliotheque.js?v=2025120827"></script>
+    <script src="js/cartouches-bibliotheque.js?v=2026010220"></script> <!-- refactoring: plus de hardcodé -->
     <script src="js/cartouches.js?v=2025120827"></script>
     <script src="js/cours.js?v=2025121601"></script>
     <script src="js/contexte.js?v=2025122401"></script>
