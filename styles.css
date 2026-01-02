@@ -385,6 +385,23 @@ body {
 }
 
 /* ===============================
+   TYPOGRAPHIE GLOBALE (01b-typographie)
+   =============================== */
+
+h1 { font-size: 2rem; }      /* 32px - Titres de pages principales */
+h2 { font-size: 1.5rem; }    /* 24px - Titres de sections */
+h3 { font-size: 1.2rem; }    /* 19px - Titres de sous-sections */
+h4 { font-size: 1rem; }      /* 16px - Titres de composants */
+p  { font-size: 0.95rem; }   /* 15px - Texte de base */
+
+h1, h2, h3, h4 {
+    color: var(--bleu-principal);
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 0.5em;
+}
+
+/* ===============================
    CONTENEUR PRINCIPAL
    =============================== */
 
@@ -2386,7 +2403,12 @@ textarea {
    MODIFICATEURS DE BOUTONS
    =============================== */
 
-/* Tailles alternatives */
+/* Tailles alternatives (02a-boutons) */
+.btn-large {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+}
+
 .btn-compact {
     padding: 6px 12px;
     font-size: 0.85rem;
@@ -2445,10 +2467,28 @@ textarea {
     cursor: pointer;
 }
 
-/* TOUS les boutons dans un .item-liste sont automatiquement compacts */
-.item-liste .btn {
+/* ===============================
+   RÈGLE AUTO-COMPACT CONTEXTUELLE (02a-boutons)
+   Boutons dans ces contextes sont automatiquement compacts (6px 12px)
+   =============================== */
+
+.item-liste .btn,
+.carte .btn,
+#listeCriteres .btn,
+[id*="liste"] .btn,
+[id*="tableau"] .btn {
     padding: 6px 12px;
     font-size: 0.85rem;
+}
+
+/* Exception : Les boutons avec classe explicite gardent leur taille */
+.item-liste .btn.btn-large,
+.carte .btn.btn-large,
+#listeCriteres .btn.btn-large,
+[id*="liste"] .btn.btn-large,
+[id*="tableau"] .btn.btn-large {
+    padding: 12px 24px;
+    font-size: 0.95rem;
 }
 
 /* ===============================
