@@ -30,7 +30,8 @@
     --bleu-anonymisation: #0f1e3a;
 
     /* === GRADIENTS (04b-box-shadow) === */
-    --gradient-entete: linear-gradient(135deg, #032e5c 0%, #0f1e3a 100%);
+    /* Utilise des variables pour s'adapter automatiquement au mode (Normal/Assisté/Anonymisé) */
+    --gradient-entete: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
     --gradient-fond-page: linear-gradient(135deg, #e8f2fd 0%, #f0f8ff 100%);
 
     /* === OMBRES - 5 niveaux (04b-box-shadow) === */
@@ -411,7 +412,7 @@ h1, h2, h3, h4 {
    =============================== */
 
 .conteneur {
-    max-width: 1400px;
+    max-width: 95%;  /* Adaptatif au lieu de 1400px fixe */
     margin: 0 auto;
     background: white;
     border-radius: 12px;
