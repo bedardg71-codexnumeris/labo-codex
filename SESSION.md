@@ -144,24 +144,56 @@ Nettoyage documentation + corrections bugs coursId
 
 ---
 
-## DEVIATIONS (bugs rencontres)
+## DEVIATIONS
 
-*Aucun bug rencontre*
+### Deviation 1 : Guide groupe-cours (2 jan ~10:30)
+
+**Contexte** : Le travail sur les badges de pratique (SOM/STD/SPE/DEN) a conduit
+a la configuration des cours, puis au guide groupe-cours.
+
+**Travail non commite** :
+- `index.html` : Encadre "Guide groupe-cours" avec 4 indicateurs visuels
+- `js/trimestre-v2.js` : Fonction `mettreAJourGuideGroupeCours()`
+- `index.html` : Notes de version mises a jour
+
+**Etat** : En cours - a terminer avant retour a la tache principale
+
+---
+
+## PLAN DE MATCH (decision 2 jan ~11:00)
+
+### Phase 1 : Terminer guide groupe-cours (30 min)
+- [ ] Tester les 4 indicateurs (Cours/Groupe/Horaire/Etudiants)
+- [ ] Ajuster si necessaire
+- [ ] Commiter avec message clair
+
+### Phase 2 : Nettoyage documentation
+- [ ] Identifier documents non commites importants
+- [ ] Identifier documents obsoletes a supprimer/archiver
+- [ ] Commiter le nettoyage
+
+### Phase 3 : Retour a AUDIT_V5
+- [ ] Verifier quelles parties (1-16) sont reellement appliquees au code
+- [ ] Appliquer les parties manquantes
+- [ ] Executer CHECKLIST_AUDIT.md (9 audits specifiques)
+
+### Phase 4 : Modularisation styles.css (anticipee)
+**Probleme identifie** : styles.css est devenu trop gros pour etre gere convenablement
+(comme index.html et design_system.html avant leur modularisation).
+**A faire** : Planifier la separation en fichiers modulaires.
 
 ---
 
 ## OU REPRENDRE (si session s'arrete maintenant)
 
 **Etat actuel** :
-- Design System v7 applique a 100%
-- Namespacing corrige (isolation trimestres)
-- Selecteur pratique par cours ajoute (formulaire V2)
-- CLAUDE.md leger cree (pointe vers docs/)
+- Guide groupe-cours : EN COURS (non commite)
+- Design System v7 : Partiellement applique (parties 1-9 confirmees, 10-16 a verifier)
+- Documentation : Nettoyage requis (doublons, obsoletes)
 
 **Action immediate au retour** :
-1. Tester le selecteur pratique dans Reglages > Trimestre > Modifier cours
-2. Verifier que la pratique est bien sauvegardee avec le cours
-3. Valider isolation donnees A2025/H2026
+1. Terminer et commiter le guide groupe-cours
+2. Suivre le PLAN DE MATCH ci-dessus
 
 ---
 
@@ -183,4 +215,4 @@ Nettoyage documentation + corrections bugs coursId
 
 ---
 
-**Derniere mise a jour** : 2 jan 2026, ~09:30
+**Derniere mise a jour** : 2 jan 2026, ~11:00

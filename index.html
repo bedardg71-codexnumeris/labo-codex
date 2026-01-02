@@ -7883,6 +7883,43 @@
                         </div>
                     </div>
 
+                    <!-- ========== GUIDE : CONFIGURATION GROUPE-COURS ========== -->
+                    <div class="carte" id="guide-groupe-cours">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <h3 class="carte-titre-bleu" style="margin: 0;">Configuration d'un groupe-cours</h3>
+                            <button class="btn btn-secondaire btn-sm" onclick="demarrerConfigComplete()" title="Lancer l'assistant guidé">
+                                😎 Assistant Primo
+                            </button>
+                        </div>
+
+                        <div class="alerte alerte-information" style="margin-bottom: 15px;">
+                            Un <strong>groupe-cours</strong> associe : un cours + un numéro de groupe + un horaire + une pratique de notation.
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px;">
+                            <div class="carte-metrique" id="guide-etape-1">
+                                <span class="label">1. Cours</span>
+                                <span class="valeur" id="status-cours" style="font-size: 1.2rem;">○</span>
+                            </div>
+                            <div class="carte-metrique" id="guide-etape-2">
+                                <span class="label">2. Groupe</span>
+                                <span class="valeur" id="status-groupe" style="font-size: 1.2rem;">○</span>
+                            </div>
+                            <div class="carte-metrique" id="guide-etape-3">
+                                <span class="label">3. Horaire</span>
+                                <span class="valeur" id="status-horaire" style="font-size: 1.2rem;">○</span>
+                            </div>
+                            <div class="carte-metrique" id="guide-etape-4">
+                                <span class="label">4. Étudiants</span>
+                                <span class="valeur" id="status-etudiants" style="font-size: 1.2rem;">○</span>
+                            </div>
+                        </div>
+
+                        <p class="text-muted" style="margin: 0; font-size: 0.9rem;">
+                            <strong>Mode expert :</strong> Utilisez les sections ci-dessous et les bibliothèques pour configurer rapidement.
+                        </p>
+                    </div>
+
                     <!-- ========== GESTION DES TRIMESTRES ========== -->
                     <div class="carte accordeon" id="accordeon-gestion-trimestres">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
@@ -9603,7 +9640,7 @@ Exemple :
                             ⚠️ <strong>Avertissement :</strong> La section Aide a été générée par une intelligence artificielle et peut contenir des inexactitudes.
                         </div>
                         <div class="label-block-085-muted-center-mb8">
-                            Recherche dans : Introduction • Configuration • Formation • Utilisation • Consultation • Référence
+                            Recherche dans : Introduction • Configuration • Formation • Utilisation • Consultation • Référence • Notes de version
                         </div>
                         <div id="aide-recherche-resultats" class="text-09-muted-center-hidden"></div>
                     </div>
@@ -13037,7 +13074,7 @@ Exemple :
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                        <p class="text-muted">27 décembre 2025</p>
+                        <p class="text-muted">27 décembre 2025 — 2 janvier 2026</p>
 
                         <h4 class="titre-bleu-mb8 mt-15">Gestion multi-trimestres</h4>
                         <ul class="modal-liste">
@@ -13065,6 +13102,28 @@ Exemple :
                         <ul class="modal-liste">
                             <li><strong>Rappel de backup</strong> : Modal périodique rappelant l'importance de l'export régulier.</li>
                             <li><strong>Export/Import amélioré</strong> : Configuration complète avec métadonnées Creative Commons.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Corrections et stabilisation (27 déc — 2 jan)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Isolation des données par cours</strong> : Filtrage automatique par coursId pour éviter la contamination entre cours.</li>
+                            <li><strong>Anonymisation corrigée</strong> : Le mode anonymisé fonctionne maintenant dans le formulaire d'évaluation.</li>
+                            <li><strong>Namespacing complet</strong> : Toutes les clés localStorage utilisent le préfixe du trimestre actif.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Design System v7 (1-2 jan 2026)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Harmonisation visuelle</strong> : 51 occurrences de border-radius harmonisées selon les standards.</li>
+                            <li><strong>Variables CSS</strong> : Gradients, ombres et rayons déclarés comme variables réutilisables.</li>
+                            <li><strong>Modals améliorées</strong> : Overlay bleu semi-transparent avec effet de flou.</li>
+                            <li><strong>Typographie unifiée</strong> : Tailles H1-H4 standardisées dans toute l'application.</li>
+                        </ul>
+
+                        <h4 class="titre-bleu-mb8 mt-15">Guide groupe-cours (2 jan 2026)</h4>
+                        <ul class="modal-liste">
+                            <li><strong>Encadré permanent</strong> : Guide visuel en haut de la page Trimestre avec 4 indicateurs d'état.</li>
+                            <li><strong>Indicateurs dynamiques</strong> : Affichage en temps réel de la progression (Cours, Groupe, Horaire, Étudiants).</li>
+                            <li><strong>Accès rapide à Primo</strong> : Bouton « Assistant Primo » intégré pour les nouveaux utilisateurs.</li>
                         </ul>
                         </div><!-- fin accordeon-contenu beta95 -->
                     </div>
@@ -13242,7 +13301,7 @@ Exemple :
     <script src="libs/chartjs-plugin-annotation.min.js"></script>
 
     <!-- PRIORITÉ 1: Fondations -->
-    <script src="js/config.js?v=2025121004"></script>
+    <script src="js/config.js?v=2026010203"></script>
     <script src="js/navigation.js?v=2025121700"></script>
     <script src="js/modes.js?v=2025123004"></script>
 
@@ -13253,7 +13312,7 @@ Exemple :
     <!-- PRIORITÉ 2: Données de base -->
     <script src="js/trimestres.js?v=2025123102"></script> <!-- Beta 95 : Gestion multi-trimestres -->
     <script src="js/trimestre.js?v=2025123109"></script>
-    <script src="js/trimestre-v2.js?v=2026010202"></script> <!-- Beta 95 : Onglet Trimestre restructuré + pratique par cours -->
+    <script src="js/trimestre-v2.js?v=2026010203"></script> <!-- Beta 95 : Onglet Trimestre + guide groupe-cours -->
     <script src="js/pratique-notation-v2.js?v=2025123002"></script> <!-- Beta 95 : Onglet Pratique de notation restructuré -->
     <script src="js/preferences-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Préférences restructuré -->
     <script src="js/donnees-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Données restructuré -->
