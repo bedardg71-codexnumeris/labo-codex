@@ -2083,7 +2083,8 @@ async function afficherBibliothequeGrilles() {
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="flex: 1;">
-                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                                ${typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : ''}
                                 ${nomGrille}
                             </div>
                             <div style="color: #7f8c8d; font-size: 0.9em;">
@@ -2186,7 +2187,10 @@ async function afficherBibliothequeGrilles() {
                     ${dejaPresent ? 'opacity: 0.5;' : ''}
                 ">
                     <div style="flex: 1;">
-                        <div style="font-weight: 500; margin-bottom: 4px;">${nomGrille}</div>
+                        <div style="font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                            ${typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgesPratiques(grille) : ''}
+                            ${nomGrille}
+                        </div>
                         <div style="font-size: 0.85rem; color: #666; margin-bottom: 4px;">
                             ${nbCriteres} critère(s)${auteur ? ' • ' + auteur : ''}
                         </div>
