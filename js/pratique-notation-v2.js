@@ -148,6 +148,7 @@
             afficherDescriptionTaxonomique(modalites.pratique || '');
             afficherVariantePANStandards(modalites.pratique || '');
             afficherConfigurationType(modalites.pratique || '');
+            mettreAJourBadgePratiqueV2(modalites.pratique || '');
         }
 
         // Variante PAN-Standards (si applicable)
@@ -216,6 +217,14 @@
 
         // Jetons
         const configJetons = modalites.configurationJetons || {};
+
+        // Checkbox maître pour activer/désactiver le système de jetons
+        const jetonsActif = document.getElementById('v2-jetons-actif');
+        if (jetonsActif) {
+            jetonsActif.checked = configJetons.jetonsActif !== false;
+            // Appliquer l'état visuel
+            toggleSystemeJetonsV2(false); // false = ne pas sauvegarder
+        }
 
         const jetonsNombre = document.getElementById('v2-jetons-nombre');
         if (jetonsNombre) {
@@ -330,7 +339,38 @@
         afficherDescriptionTaxonomique(typePratique);
         afficherVariantePANStandards(typePratique);
         afficherConfigurationType(typePratique);
+        mettreAJourBadgePratiqueV2(typePratique);
         sauvegarderPratiqueBaseV2();
+    }
+
+    /**
+     * Met à jour le badge de pratique dans le titre "Informations de base"
+     */
+    function mettreAJourBadgePratiqueV2(typePratique) {
+        const badge = document.getElementById('v2-badge-pratique');
+        if (!badge) return;
+
+        // Mapping type → classe CSS et texte
+        const badgeConfig = {
+            'sommative': { classe: 'som', texte: 'SOM' },
+            'pan-standards': { classe: 'std', texte: 'STD' },
+            'pan-maitrise': { classe: 'std', texte: 'STD' },
+            'pan-specifications': { classe: 'spe', texte: 'SPE' },
+            'pan-denotation': { classe: 'den', texte: 'DEN' }
+        };
+
+        const config = badgeConfig[typePratique];
+
+        if (config) {
+            // Supprimer les anciennes classes de couleur
+            badge.classList.remove('som', 'std', 'spe', 'den');
+            // Ajouter la nouvelle classe
+            badge.classList.add(config.classe);
+            badge.textContent = config.texte;
+            badge.style.display = 'inline-flex';
+        } else {
+            badge.style.display = 'none';
+        }
     }
 
     /**
@@ -562,6 +602,7 @@
         console.log('[DEBUG sauvegarderJetonsV2] Valeurs à sauvegarder - nombreParEleve:', nombreParEleve, 'dureeDelaiJours:', dureeDelaiJours);
 
         modalites.configurationJetons = modalites.configurationJetons || {};
+        modalites.configurationJetons.jetonsActif = document.getElementById('v2-jetons-actif')?.checked !== false;
         modalites.configurationJetons.nombreParEleve = nombreParEleve;
         modalites.configurationJetons.delaiActif = document.getElementById('v2-jeton-delai-actif')?.checked !== false;
         modalites.configurationJetons.dureeDelaiJours = dureeDelaiJours;
@@ -576,6 +617,35 @@
         db.setSync('modalitesEvaluation', modalites);
         console.log('[DEBUG sauvegarderJetonsV2] Sauvegarde effectuée:', modalites.configurationJetons);
     }
+
+    /**
+     * Active/désactive visuellement le système de jetons
+     * @param {boolean} doitSauvegarder - true pour sauvegarder après toggle (défaut: true)
+     */
+    function toggleSystemeJetonsV2(doitSauvegarder = true) {
+        const checkbox = document.getElementById('v2-jetons-actif');
+        const contenu = document.getElementById('contenu-jetons-v2');
+
+        if (!checkbox || !contenu) {
+            console.warn('[toggleSystemeJetonsV2] Éléments non trouvés');
+            return;
+        }
+
+        const actif = checkbox.checked;
+        contenu.style.display = actif ? 'block' : 'none';
+
+        // Optionnel : ajouter une classe pour le style
+        contenu.classList.toggle('jetons-desactive', !actif);
+
+        console.log('[toggleSystemeJetonsV2] Système de jetons:', actif ? 'ACTIVÉ' : 'DÉSACTIVÉ');
+
+        if (doitSauvegarder) {
+            sauvegarderJetonsV2();
+        }
+    }
+
+    // Exposer la fonction globalement pour l'événement onchange
+    window.toggleSystemeJetonsV2 = toggleSystemeJetonsV2;
 
     /**
      * Sauvegarde toute la configuration
@@ -1186,18 +1256,18 @@
                     <td>${index + 1}</td>
                     <td>
                         <input type="text" class="form-control" value="${type.nom || ''}"
-                               onchange="modifierTypeTravailSpec(${type.id}, 'nom', this.value)"
+                               onchange="modifierTypeTravailSpecV2(${type.id}, 'nom', this.value)"
                                style="width: 100%; padding: 4px 8px;">
                     </td>
                     <td>
                         <input type="text" class="form-control" value="${type.description || ''}"
-                               onchange="modifierTypeTravailSpec(${type.id}, 'description', this.value)"
+                               onchange="modifierTypeTravailSpecV2(${type.id}, 'description', this.value)"
                                placeholder="Ex: Travail écrit argumentatif"
                                style="width: 100%; padding: 4px 8px;">
                     </td>
                     <td style="text-align: center;">
                         <button type="button" class="btn btn-danger btn-tres-compact"
-                                onclick="supprimerTypeTravailSpec(${type.id})"
+                                onclick="supprimerTypeTravailSpecV2(${type.id})"
                                 title="Supprimer ce type">
                             ✕
                         </button>
@@ -1677,9 +1747,9 @@
     window.chargerConfigSpecifications = chargerConfigSpecifications;
     window.sauvegarderConfigSpecifications = sauvegarderConfigSpecifications;
     window.afficherTypesTravauxSpec = afficherTypesTravauxSpec;
-    window.ajouterTypeTravailSpec = ajouterTypeTravailSpec;
-    window.modifierTypeTravailSpec = modifierTypeTravailSpec;
-    window.supprimerTypeTravailSpec = supprimerTypeTravailSpec;
+    window.ajouterTypeTravailSpecV2 = ajouterTypeTravailSpec;
+    window.modifierTypeTravailSpecV2 = modifierTypeTravailSpec;
+    window.supprimerTypeTravailSpecV2 = supprimerTypeTravailSpec;
     window.afficherForfaitsSpec = afficherForfaitsSpec;
     window.ajouterForfaitSpec = ajouterForfaitSpec;
     window.modifierForfaitSpec = modifierForfaitSpec;

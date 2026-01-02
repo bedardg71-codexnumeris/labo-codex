@@ -1,296 +1,292 @@
 /* ===============================
    BIBLIOTHÈQUE DE PRODUCTIONS ÉTUDIANTES
-   ✅ CRÉATION (8 décembre 2025)
+   ✅ REFACTORING (2 janvier 2026)
 
-   Productions exemples organisées par discipline
-   Utilisées pour la bibliothèque partagée dans le gestionnaire de productions
+   Bibliothèque partagée de productions étudiantes.
+   - Indépendante du trimestre (clé non-namespacée)
+   - Stockage dans IndexedDB/localStorage
+   - Import/export avec collègues
+   - Plus de données hardcodées
 
-   Structure par discipline:
-   - Chimie
-   - Philosophie
-   - Mathématiques
-   - Littérature
-   - Biologie
-
-   Licence: Creative Commons BY-NC-SA 4.0
-   Auteur: Primo Primavera
+   Clé de stockage: 'bibliothequeProductions' (sans namespace)
    =============================== */
 
-window.PRODUCTIONS_BIBLIOTHEQUE = {
-    // ===========================
-    // CHIMIE
-    // ===========================
-    chimie: [
-        {
-            id: 'chimie-lab-titrage',
-            titre: 'Laboratoire 1',
-            description: 'Titrage acide-base',
-            type: 'travail',
-            ponderation: 10,
-            objectif: 'Maîtriser les techniques de titrage et interpréter les résultats',
-            tache: 'Réaliser un titrage acide-base et produire un rapport d\'analyse',
-            grilleId: '',  // Sera associé à une grille lors de l'ajout
-            discipline: 'Chimie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        },
-        {
-            id: 'chimie-examen-mi-session',
-            titre: 'Examen de mi-session',
-            description: 'Nomenclature et réactions',
-            type: 'examen',
-            ponderation: 20,
-            objectif: 'Évaluer la maîtrise de la nomenclature et des types de réactions',
-            tache: 'Examen écrit de 2 heures',
-            grilleId: '',
-            discipline: 'Chimie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        },
-        {
-            id: 'chimie-lab-synthese',
-            titre: 'Laboratoire de synthèse',
-            description: 'Synthèse d\'un composé organique',
-            type: 'travail',
-            ponderation: 15,
-            objectif: 'Réaliser une synthèse organique et évaluer le rendement',
-            tache: 'Synthèse en laboratoire avec rapport complet',
-            grilleId: '',
-            discipline: 'Chimie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        }
-    ],
-
-    // ===========================
-    // PHILOSOPHIE
-    // ===========================
-    philosophie: [
-        {
-            id: 'philo-dissertation-1',
-            titre: 'Dissertation 1',
-            description: 'Analyse d\'un texte philosophique',
-            type: 'travail',
-            ponderation: 20,
-            objectif: 'Analyser rigoureusement un texte philosophique',
-            tache: 'Dissertation de 1000 mots sur un extrait de Platon',
-            grilleId: '',
-            discipline: 'Philosophie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        },
-        {
-            id: 'philo-expose-oral',
-            titre: 'Exposé oral',
-            description: 'Présentation d\'un courant philosophique',
-            type: 'presentation',
-            ponderation: 15,
-            objectif: 'Expliquer clairement un courant philosophique',
-            tache: 'Présentation de 15 minutes avec support visuel',
-            grilleId: '',
-            discipline: 'Philosophie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        },
-        {
-            id: 'philo-dissertation-finale',
-            titre: 'Dissertation finale',
-            description: 'Argumentation philosophique complète',
-            type: 'travail',
-            ponderation: 30,
-            objectif: 'Construire une argumentation philosophique rigoureuse',
-            tache: 'Dissertation de 1500 mots sur une question éthique',
-            grilleId: '',
-            discipline: 'Philosophie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        }
-    ],
-
-    // ===========================
-    // MATHÉMATIQUES
-    // ===========================
-    mathematiques: [
-        {
-            id: 'math-quiz-1',
-            titre: 'Quiz 1',
-            description: 'Dérivées et limites',
-            type: 'quiz',
-            ponderation: 10,
-            objectif: 'Vérifier la compréhension des dérivées et limites',
-            tache: 'Quiz de 30 minutes en classe',
-            grilleId: '',
-            discipline: 'Mathématiques',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        },
-        {
-            id: 'math-examen-mi-session',
-            titre: 'Examen de mi-session',
-            description: 'Calcul différentiel',
-            type: 'examen',
-            ponderation: 25,
-            objectif: 'Évaluer la maîtrise du calcul différentiel',
-            tache: 'Examen écrit de 2 heures',
-            grilleId: '',
-            discipline: 'Mathématiques',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        },
-        {
-            id: 'math-projet-modelisation',
-            titre: 'Projet de modélisation',
-            description: 'Modélisation mathématique d\'un phénomène réel',
-            type: 'travail',
-            ponderation: 20,
-            objectif: 'Appliquer les mathématiques à un contexte réel',
-            tache: 'Rapport de modélisation avec graphiques et analyse',
-            grilleId: '',
-            discipline: 'Mathématiques',
-            auteur: 'Primo Primavera',
-            etablissement: 'Cégeg de Rimouski',
-            dansBibliotheque: false
-        }
-    ],
-
-    // ===========================
-    // LITTÉRATURE
-    // ===========================
-    litterature: [
-        {
-            id: 'litt-commentaire-compose',
-            titre: 'Commentaire composé',
-            description: 'Analyse d\'un extrait littéraire',
-            type: 'travail',
-            ponderation: 20,
-            objectif: 'Analyser les procédés littéraires et leur effet',
-            tache: 'Commentaire de 800 mots sur un extrait de roman',
-            grilleId: '',
-            discipline: 'Littérature',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        },
-        {
-            id: 'litt-dissertation-comparative',
-            titre: 'Dissertation comparative',
-            description: 'Comparaison de deux œuvres',
-            type: 'travail',
-            ponderation: 25,
-            objectif: 'Comparer les thèmes et styles de deux œuvres',
-            tache: 'Dissertation de 1200 mots comparant deux romans',
-            grilleId: '',
-            discipline: 'Littérature',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        },
-        {
-            id: 'litt-creation-litteraire',
-            titre: 'Création littéraire',
-            description: 'Rédaction d\'une nouvelle',
-            type: 'travail',
-            ponderation: 15,
-            objectif: 'Créer un texte littéraire original',
-            tache: 'Nouvelle de 1000 mots avec analyse de votre démarche créative',
-            grilleId: '',
-            discipline: 'Littérature',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        }
-    ],
-
-    // ===========================
-    // BIOLOGIE
-    // ===========================
-    biologie: [
-        {
-            id: 'bio-lab-microscopie',
-            titre: 'Laboratoire de microscopie',
-            description: 'Observation de cellules',
-            type: 'travail',
-            ponderation: 10,
-            objectif: 'Maîtriser l\'utilisation du microscope et l\'observation cellulaire',
-            tache: 'Rapport de laboratoire avec dessins d\'observation',
-            grilleId: '',
-            discipline: 'Biologie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        },
-        {
-            id: 'bio-examen-genetique',
-            titre: 'Examen de génétique',
-            description: 'Lois de Mendel et hérédité',
-            type: 'examen',
-            ponderation: 20,
-            objectif: 'Évaluer la compréhension des mécanismes de l\'hérédité',
-            tache: 'Examen écrit de 2 heures',
-            grilleId: '',
-            discipline: 'Biologie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        },
-        {
-            id: 'bio-projet-ecosysteme',
-            titre: 'Projet sur un écosystème',
-            description: 'Étude d\'un écosystème local',
-            type: 'travail',
-            ponderation: 25,
-            objectif: 'Analyser les interactions dans un écosystème',
-            tache: 'Rapport d\'étude de terrain avec analyse des données',
-            grilleId: '',
-            discipline: 'Biologie',
-            auteur: 'Primo Primavera',
-            etablissement: '',
-            dansBibliotheque: false
-        }
-    ]
-};
+/**
+ * Clé de stockage pour la bibliothèque (NON namespacée = partagée entre trimestres)
+ */
+const CLE_BIBLIOTHEQUE_PRODUCTIONS = 'bibliothequeProductions';
 
 /**
- * Obtenir toutes les productions de la bibliothèque (toutes disciplines)
+ * Obtenir toutes les productions de la bibliothèque
+ * @returns {Promise<Array>} Tableau de toutes les productions disponibles
+ */
+async function obtenirToutesLesProductionsBibliotheque() {
+    // Lecture depuis IndexedDB (clé non-namespacée)
+    const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
+    return bibliotheque;
+}
+
+/**
+ * Version synchrone pour compatibilité
  * @returns {Array} Tableau de toutes les productions disponibles
  */
-function obtenirToutesLesProductionsBibliotheque() {
-    const toutes = [];
-    Object.keys(window.PRODUCTIONS_BIBLIOTHEQUE).forEach(discipline => {
-        toutes.push(...window.PRODUCTIONS_BIBLIOTHEQUE[discipline]);
-    });
-    return toutes;
+function obtenirToutesLesProductionsBibliothequeSync() {
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
+    return bibliotheque;
 }
 
 /**
  * Obtenir les productions d'une discipline spécifique
- * @param {string} discipline - Nom de la discipline (chimie, philosophie, etc.)
+ * @param {string} discipline - Nom de la discipline
  * @returns {Array} Tableau des productions de cette discipline
  */
 function obtenirProductionsParDiscipline(discipline) {
-    return window.PRODUCTIONS_BIBLIOTHEQUE[discipline] || [];
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
+    if (!discipline || discipline === 'toutes') {
+        return bibliotheque;
+    }
+    return bibliotheque.filter(p =>
+        p.discipline && p.discipline.toLowerCase() === discipline.toLowerCase()
+    );
 }
 
 /**
- * Obtenir la liste des disciplines disponibles
- * @returns {Array} Tableau des noms de disciplines
+ * Obtenir la liste des disciplines disponibles dans la bibliothèque
+ * @returns {Array} Tableau des noms de disciplines uniques
  */
 function obtenirDisciplinesDisponibles() {
-    return Object.keys(window.PRODUCTIONS_BIBLIOTHEQUE).map(key => {
-        // Capitaliser la première lettre
-        return key.charAt(0).toUpperCase() + key.slice(1);
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
+    const disciplines = new Set();
+
+    bibliotheque.forEach(prod => {
+        if (prod.discipline) {
+            disciplines.add(prod.discipline);
+        }
     });
+
+    return Array.from(disciplines).sort();
 }
 
-// Exporter les fonctions
+/**
+ * Ajouter une production à la bibliothèque partagée
+ * @param {Object} production - La production à ajouter
+ * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
+ */
+async function ajouterALaBibliotheque(production) {
+    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
+
+    // Vérifier si déjà présente (par ID)
+    const existe = bibliotheque.some(p => p.id === production.id);
+    if (existe) {
+        console.log('[Bibliothèque] Production déjà présente:', production.id);
+        return false;
+    }
+
+    // Marquer comme partagée et ajouter métadonnées
+    const productionBiblio = {
+        ...production,
+        dansBibliotheque: true,
+        dateAjoutBiblio: new Date().toISOString(),
+        // Conserver l'auteur original ou utiliser celui du cours
+        auteur: production.auteur || 'Inconnu'
+    };
+
+    bibliotheque.push(productionBiblio);
+    await db.set(CLE_BIBLIOTHEQUE_PRODUCTIONS, bibliotheque);
+
+    console.log('[Bibliothèque] Production ajoutée:', production.titre);
+    return true;
+}
+
+/**
+ * Retirer une production de la bibliothèque
+ * @param {string} productionId - ID de la production à retirer
+ * @returns {Promise<boolean>} true si retirée, false si non trouvée
+ */
+async function retirerDeLaBibliotheque(productionId) {
+    let bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
+
+    const indexAvant = bibliotheque.length;
+    bibliotheque = bibliotheque.filter(p => p.id !== productionId);
+
+    if (bibliotheque.length === indexAvant) {
+        console.log('[Bibliothèque] Production non trouvée:', productionId);
+        return false;
+    }
+
+    await db.set(CLE_BIBLIOTHEQUE_PRODUCTIONS, bibliotheque);
+    console.log('[Bibliothèque] Production retirée:', productionId);
+    return true;
+}
+
+/**
+ * Importer des productions dans la bibliothèque (depuis un fichier JSON par exemple)
+ * @param {Array} productions - Tableau de productions à importer
+ * @returns {Promise<{ajoutees: number, existantes: number}>}
+ */
+async function importerDansBibliotheque(productions) {
+    let ajoutees = 0;
+    let existantes = 0;
+
+    for (const prod of productions) {
+        const resultat = await ajouterALaBibliotheque(prod);
+        if (resultat) {
+            ajoutees++;
+        } else {
+            existantes++;
+        }
+    }
+
+    console.log(`[Bibliothèque] Import: ${ajoutees} ajoutées, ${existantes} déjà existantes`);
+    return { ajoutees, existantes };
+}
+
+/**
+ * Exporter toute la bibliothèque (pour partage avec collègues)
+ * @returns {Promise<Object>} Objet JSON exportable
+ */
+async function exporterBibliotheque() {
+    const bibliotheque = await db.get(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
+
+    return {
+        version: '1.0',
+        dateExport: new Date().toISOString(),
+        nombreProductions: bibliotheque.length,
+        productions: bibliotheque
+    };
+}
+
+/**
+ * Migrer les productions d'un trimestre vers la bibliothèque partagée
+ * @param {string} cleSource - Clé source (ex: 'a2025_productions')
+ * @returns {Promise<{ajoutees: number, existantes: number}>}
+ */
+async function migrerVersBibliotheque(cleSource) {
+    // Lire directement depuis localStorage (clé exacte fournie)
+    const dataRaw = localStorage.getItem(cleSource);
+    if (!dataRaw) {
+        console.log('[Bibliothèque] Aucune donnée trouvée pour:', cleSource);
+        return { ajoutees: 0, existantes: 0 };
+    }
+
+    const productions = JSON.parse(dataRaw);
+    if (!Array.isArray(productions)) {
+        console.log('[Bibliothèque] Format invalide pour:', cleSource);
+        return { ajoutees: 0, existantes: 0 };
+    }
+
+    console.log(`[Bibliothèque] Migration de ${productions.length} productions depuis ${cleSource}`);
+    return await importerDansBibliotheque(productions);
+}
+
+/**
+ * Obtenir le nombre de productions dans la bibliothèque
+ * @returns {number}
+ */
+function getNombreProductionsBibliotheque() {
+    const bibliotheque = db.getSync(CLE_BIBLIOTHEQUE_PRODUCTIONS) || [];
+    return bibliotheque.length;
+}
+
+/**
+ * Lister tous les trimestres qui ont des productions
+ * @returns {Array<{cle: string, trimestre: string, nombre: number}>}
+ */
+function listerTrimestresAvecProductions() {
+    const trimestres = [];
+    const trimestreActuel = window.trimestreActif || '';
+
+    // Scanner localStorage pour les clés *_productions
+    for (let i = 0; i < localStorage.length; i++) {
+        const cle = localStorage.key(i);
+        if (cle && cle.endsWith('_productions')) {
+            try {
+                const data = JSON.parse(localStorage.getItem(cle));
+                if (Array.isArray(data) && data.length > 0) {
+                    // Extraire le code trimestre (ex: "a2025" de "a2025_productions")
+                    const codeTrimestre = cle.replace('_productions', '');
+
+                    // Ne pas inclure le trimestre actuel (déjà accessible)
+                    if (codeTrimestre !== trimestreActuel) {
+                        // Formater le nom pour affichage
+                        const nomTrimestre = formaterNomTrimestre(codeTrimestre);
+                        trimestres.push({
+                            cle: cle,
+                            code: codeTrimestre,
+                            nom: nomTrimestre,
+                            nombre: data.length
+                        });
+                    }
+                }
+            } catch (e) {
+                // Ignorer les clés non-JSON
+            }
+        }
+    }
+
+    // Trier par code (plus récent d'abord)
+    trimestres.sort((a, b) => b.code.localeCompare(a.code));
+
+    return trimestres;
+}
+
+/**
+ * Formater un code trimestre pour affichage
+ * @param {string} code - Ex: "a2025", "h2026"
+ * @returns {string} - Ex: "Automne 2025", "Hiver 2026"
+ */
+function formaterNomTrimestre(code) {
+    if (!code) return 'Inconnu';
+
+    const saison = code.charAt(0).toLowerCase();
+    const annee = code.substring(1);
+
+    const saisons = {
+        'a': 'Automne',
+        'h': 'Hiver',
+        'e': 'Été'
+    };
+
+    return `${saisons[saison] || saison.toUpperCase()} ${annee}`;
+}
+
+/**
+ * Obtenir les productions d'un trimestre spécifique
+ * @param {string} cleOuCode - Clé complète (ex: "a2025_productions") ou code (ex: "a2025")
+ * @returns {Array}
+ */
+function obtenirProductionsTrimestre(cleOuCode) {
+    // Si c'est un code, construire la clé
+    const cle = cleOuCode.includes('_') ? cleOuCode : `${cleOuCode}_productions`;
+
+    try {
+        const data = localStorage.getItem(cle);
+        if (data) {
+            return JSON.parse(data);
+        }
+    } catch (e) {
+        console.error('[Bibliothèque] Erreur lecture trimestre:', e);
+    }
+    return [];
+}
+
+// ===========================
+// EXPORTS GLOBAUX
+// ===========================
 window.obtenirToutesLesProductionsBibliotheque = obtenirToutesLesProductionsBibliotheque;
+window.obtenirToutesLesProductionsBibliothequeSync = obtenirToutesLesProductionsBibliothequeSync;
 window.obtenirProductionsParDiscipline = obtenirProductionsParDiscipline;
 window.obtenirDisciplinesDisponibles = obtenirDisciplinesDisponibles;
+window.ajouterALaBibliotheque = ajouterALaBibliotheque;
+window.retirerDeLaBibliotheque = retirerDeLaBibliotheque;
+window.importerDansBibliotheque = importerDansBibliotheque;
+window.exporterBibliotheque = exporterBibliotheque;
+window.migrerVersBibliotheque = migrerVersBibliotheque;
+window.getNombreProductionsBibliotheque = getNombreProductionsBibliotheque;
+window.listerTrimestresAvecProductions = listerTrimestresAvecProductions;
+window.formaterNomTrimestre = formaterNomTrimestre;
+window.obtenirProductionsTrimestre = obtenirProductionsTrimestre;
+window.CLE_BIBLIOTHEQUE_PRODUCTIONS = CLE_BIBLIOTHEQUE_PRODUCTIONS;
+
+// Rétrocompatibilité: PRODUCTIONS_BIBLIOTHEQUE vide (plus de hardcodé)
+window.PRODUCTIONS_BIBLIOTHEQUE = {};

@@ -8645,7 +8645,7 @@ Exemple :
 
                     <!-- Carte : Informations de base -->
                     <div class="carte">
-                        <h3 class="carte-titre-bleu">Informations de base</h3>
+                        <h3 class="carte-titre-bleu">Informations de base <span id="v2-badge-pratique" class="badge-pratique" style="display: none;"></span></h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div class="groupe-form">
                                 <label for="v2-pratique-nom" style="font-weight: 600; display: block; margin-bottom: 6px;">
@@ -8989,7 +8989,7 @@ Exemple :
                                 <div id="v2-spec-types-travaux-liste" style="margin-bottom: 15px;">
                                     <!-- Liste générée dynamiquement -->
                                 </div>
-                                <button type="button" class="btn btn-secondaire" onclick="ajouterTypeTravailSpec()">
+                                <button type="button" class="btn btn-secondaire" onclick="ajouterTypeTravailSpecV2()">
                                     + Ajouter un type de travail
                                 </button>
                             </div>
@@ -9026,6 +9026,17 @@ Exemple :
                         <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
                             Les jetons sont des ressources limitées que l'apprenant·e peut utiliser pour adapter son parcours.
                         </p>
+
+                        <!-- Checkbox maître pour activer/désactiver le système -->
+                        <div class="groupe-form" style="margin-bottom: 20px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600;">
+                                <input type="checkbox" id="v2-jetons-actif" checked onchange="toggleSystemeJetonsV2()">
+                                Activer le système de jetons
+                            </label>
+                        </div>
+
+                        <!-- Contenu du système de jetons (masquable) -->
+                        <div id="contenu-jetons-v2">
 
                         <!-- Nombre de jetons -->
                         <div class="groupe-form" style="margin-bottom: 20px;">
@@ -9106,6 +9117,7 @@ Exemple :
                                 </div>
                             </div>
                         </div>
+                        </div><!-- Fin contenu-jetons-v2 -->
                     </div>
 
                     <!-- Bouton sauvegarder -->
@@ -13313,12 +13325,12 @@ Exemple :
     <script src="js/trimestres.js?v=2025123102"></script> <!-- Beta 95 : Gestion multi-trimestres -->
     <script src="js/trimestre.js?v=2025123109"></script>
     <script src="js/trimestre-v2.js?v=2026010203"></script> <!-- Beta 95 : Onglet Trimestre + guide groupe-cours -->
-    <script src="js/pratique-notation-v2.js?v=2025123002"></script> <!-- Beta 95 : Onglet Pratique de notation restructuré -->
+    <script src="js/pratique-notation-v2.js?v=2026010215"></script> <!-- Beta 95 : Onglet Pratique de notation + badge + types travaux V2 -->
     <script src="js/preferences-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Préférences restructuré -->
     <script src="js/donnees-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Données restructuré -->
     <script src="js/etudiants.js?v=2025122902"></script>
-    <script src="js/productions-bibliotheque.js?v=2025120826"></script>
-    <script src="js/productions.js?v=2025122701"></script>
+    <script src="js/productions-bibliotheque.js?v=2026010218"></script> <!-- + import depuis trimestres -->
+    <script src="js/productions.js?v=2026010219"></script> <!-- + import depuis bibliothèque corrigé -->
     <script src="js/grilles-bibliotheque.js?v=2025120826"></script>
     <script src="js/grilles.js?v=2025120827"></script>
     <script src="js/echelles-bibliotheque.js?v=2025120826"></script>
