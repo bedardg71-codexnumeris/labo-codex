@@ -106,6 +106,27 @@ function filtrerEtudiantsParMode(etudiants) {
 }
 
 /**
+ * ✅ CORRECTION CRITIQUE (Beta 95 - 2 jan 2026)
+ * Obtient TOUS les étudiants sans filtrage par coursId
+ * (pour sauvegarder correctement sans perdre les autres cours)
+ */
+function obtenirTousLesEtudiants() {
+    const cleEffective = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
+    return db.getSync(cleEffective, []);
+}
+
+/**
+ * ✅ CORRECTION CRITIQUE (Beta 95 - 2 jan 2026)
+ * Sauvegarde TOUS les étudiants vers la clé namespacée
+ * Préserve les étudiants des autres cours
+ */
+function sauvegarderTousLesEtudiants(etudiants) {
+    const cleEffective = (typeof window.cle === 'function') ? window.cle('groupeEtudiants') : 'groupeEtudiants';
+    db.setSync(cleEffective, etudiants);
+    console.log(`💾 Sauvegarde ${etudiants.length} étudiants dans ${cleEffective}`);
+}
+
+/**
  * Initialise le module
  */
 function initialiserModuleGroupe() {
@@ -190,28 +211,34 @@ function addStudent() {
             coursId: coursId  // ✅ Lier l'étudiant au cours actif
         };
 
-        let students = obtenirDonneesSelonMode('groupeEtudiants');
+        // ✅ CORRECTION CRITIQUE (Beta 95 - 2 jan 2026)
+        // Utiliser obtenirTousLesEtudiants() pour ne pas perdre les autres cours
+        let tousLesEtudiants = obtenirTousLesEtudiants();
+
+        // Pour les vérifications, utiliser la liste du cours actif
+        let studentsCours = tousLesEtudiants.filter(s => s.coursId === coursId);
 
         // ============================================
         // SI MODE MODIFICATION : SUPPRIMER L'ANCIEN
         // ============================================
         if (modeModification) {
             console.log('Suppression de l\'ancien étudiant avec DA:', daEnModification);
-            students = students.filter(s => s.da !== daEnModification);
+            // Supprimer de la liste complète (pas seulement du cours)
+            tousLesEtudiants = tousLesEtudiants.filter(s => s.da !== daEnModification);
         }
 
-        // Vérifier doublons DA (sauf si c'est le même DA en modification)
+        // Vérifier doublons DA dans le cours actif (sauf si c'est le même DA en modification)
         if (student.da !== '' && !student.da.startsWith('AUTO-')) {
-            const existe = students.find(s => s.da === student.da);
+            const existe = studentsCours.find(s => s.da === student.da);
             if (existe && (!modeModification || student.da !== daEnModification)) {
-                if (!confirm(`Un·e étudiant·e avec le DA ${student.da} existe déjà.\nContinuer quand même ?`)) {
+                if (!confirm(`Un·e étudiant·e avec le DA ${student.da} existe déjà dans ce cours.\nContinuer quand même ?`)) {
                     return;
                 }
             }
         }
 
-        students.push(student);
-        db.setSync('groupeEtudiants', students);
+        tousLesEtudiants.push(student);
+        sauvegarderTousLesEtudiants(tousLesEtudiants);
 
         // Prévisualisation
         const actionTexte = modeModification ? 'Étudiant·e modifié·e' : 'Étudiant·e ajouté·e';
@@ -863,11 +890,13 @@ function deleteStudent(id, silent = false) {
     }
 
     try {
-        const students = obtenirDonneesSelonMode('groupeEtudiants');
-        const student = students.find(s => s.id === id);
+        // ✅ CORRECTION CRITIQUE (Beta 95 - 2 jan 2026)
+        // Utiliser obtenirTousLesEtudiants() pour ne pas perdre les autres cours
+        let tousLesEtudiants = obtenirTousLesEtudiants();
+        const student = tousLesEtudiants.find(s => s.id === id);
 
-        students = students.filter(s => s.id !== id);
-        db.setSync('groupeEtudiants', students);
+        tousLesEtudiants = tousLesEtudiants.filter(s => s.id !== id);
+        sauvegarderTousLesEtudiants(tousLesEtudiants);
 
         if (!silent && student) {
             const details = `${student.nom}, ${student.prenom}`;

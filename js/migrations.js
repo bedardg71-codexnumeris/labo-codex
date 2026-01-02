@@ -42,8 +42,9 @@ function migrerEtudiantsVersCoursId() {
     });
 
     if (nbMigres > 0) {
-        db.setSync('groupeEtudiants', etudiants);
-        console.log(`✅ [Migration] ${nbMigres} étudiant(s) → coursId: ${coursActif.id}`);
+        // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Sauvegarder dans la clé namespacée
+        db.setSync(cleEtudiants, etudiants);
+        console.log(`✅ [Migration] ${nbMigres} étudiant(s) → coursId: ${coursActif.id} (clé: ${cleEtudiants})`);
     }
 
     return nbMigres;
@@ -59,7 +60,9 @@ function migrerEtudiantsVersCoursId() {
  * @returns {number} Nombre de productions migrées
  */
 function migrerProductionsVersCoursId() {
-    const productions = db.getSync('productions', []);
+    // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
+    const cleProductions = (typeof cle === 'function') ? cle('productions') : 'productions';
+    const productions = db.getSync(cleProductions, []);
     const cours = db.getSync('listeCours', []);
     const coursActif = cours.find(c => c.actif) || cours[0];
 
@@ -77,8 +80,8 @@ function migrerProductionsVersCoursId() {
     });
 
     if (nbMigres > 0) {
-        db.setSync('productions', productions);
-        console.log(`✅ [Migration] ${nbMigres} production(s) → coursId: ${coursActif.id}`);
+        db.setSync(cleProductions, productions);
+        console.log(`✅ [Migration] ${nbMigres} production(s) → coursId: ${coursActif.id} (clé: ${cleProductions})`);
     }
 
     return nbMigres;
@@ -108,7 +111,9 @@ function migrerProductionsVersCoursId() {
  * @returns {number} Nombre de dates migrées
  */
 function migrerPresencesVersCoursId() {
-    const presences = db.getSync('presences', {});
+    // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
+    const clePresences = (typeof cle === 'function') ? cle('presences') : 'presences';
+    const presences = db.getSync(clePresences, {});
     const cours = db.getSync('listeCours', []);
     const coursActif = cours.find(c => c.actif) || cours[0];
 
@@ -126,8 +131,8 @@ function migrerPresencesVersCoursId() {
     });
 
     if (nbMigres > 0) {
-        db.setSync('presences', presences);
-        console.log(`✅ [Migration] ${nbMigres} date(s) de présences → coursId: ${coursActif.id}`);
+        db.setSync(clePresences, presences);
+        console.log(`✅ [Migration] ${nbMigres} date(s) de présences → coursId: ${coursActif.id} (clé: ${clePresences})`);
     }
 
     return nbMigres;

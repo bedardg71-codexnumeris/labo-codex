@@ -545,8 +545,10 @@ function executerImportConfigComplete() {
         }
 
         // 3. Importer les productions avec mise à jour des références aux grilles
+        // ✅ CORRECTION (Beta 95 - 2 jan 2026) : Utiliser clé namespacée
         if (contenu.productions && contenu.productions.length > 0) {
-            const productionsExistantes = db.getSync('productions', []);
+            const cleProductions = (typeof window.cle === 'function') ? window.cle('productions') : 'productions';
+            const productionsExistantes = db.getSync(cleProductions, []);
 
             const productionsAImporter = contenu.productions.map(production => {
                 // Créer une copie de la production
@@ -566,8 +568,8 @@ function executerImportConfigComplete() {
 
             // Fusionner avec productions existantes
             const productionsFusionnees = [...productionsExistantes, ...productionsAImporter];
-            db.setSync('productions', productionsFusionnees);
-            console.log(`✅ ${productionsAImporter.length} production(s) importée(s)`);
+            db.setSync(cleProductions, productionsFusionnees);
+            console.log(`✅ ${productionsAImporter.length} production(s) importée(s) (clé: ${cleProductions})`);
         }
 
         // 4. Importer les cartouches avec mise à jour des clés (grilleId)
