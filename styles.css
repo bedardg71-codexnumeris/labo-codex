@@ -5834,14 +5834,14 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     align-items: start;
 }
 
-/* === SIDEBARS (fond blanc, radius 12px) === */
+/* === SIDEBARS (fond bleu pâle, radius 12px) - 03b-cartes-sidebars === */
 .sidebar-cartouches,
 .sidebar-navigation {
     position: sticky;
     top: 20px;
     max-height: calc(100vh - 100px);
     overflow-y: auto;
-    background: white;
+    background: var(--bleu-pale);  /* #e8f2fd - cohérent avec design system */
     padding: 15px;
     border-radius: var(--radius-grand);
     box-shadow: var(--shadow-normal);
