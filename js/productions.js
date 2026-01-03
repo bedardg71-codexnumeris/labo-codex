@@ -715,13 +715,15 @@ async function descendreEvaluation(id) {
 function gererChangementTypeProduction() {
     const type = document.getElementById('productionType').value;
 
-    // Éléments de formulaire
-    const champPonderation = document.getElementById('champPonderation');
-    const champGrilleSeparee = document.getElementById('champGrilleSeparee');
-    const champGrilleInline = document.getElementById('champGrilleInline');
-    const msgPonderation = document.getElementById('msgPonderationArtefact');
+    // Éléments Pondération (Ligne 3 gauche)
+    const inputPonderation = document.getElementById('productionPonderation');
+    const notePonderation = document.getElementById('notePonderation');
 
-    // Éléments de date d'échéance
+    // Éléments Grille (Ligne 3 droite)
+    const selectGrille = document.getElementById('productionGrille');
+    const noteGrille = document.getElementById('noteGrille');
+
+    // Éléments Date d'échéance (Section 5)
     const inputDateEcheance = document.getElementById('productionDateEcheance');
     const asterisqueDateEcheance = document.getElementById('asterisqueDateEcheance');
     const noteExplicativeDateEcheance = document.getElementById('noteExplicativeDateEcheance');
@@ -737,12 +739,30 @@ function gererChangementTypeProduction() {
     // ═══════════════════════════════════════════════════════════
     // RÉINITIALISER : affichage par défaut (production standard)
     // ═══════════════════════════════════════════════════════════
-    if (champPonderation) champPonderation.style.display = 'block';
-    if (champGrilleSeparee) champGrilleSeparee.style.display = 'block';
-    if (champGrilleInline) champGrilleInline.style.display = 'none';
-    if (msgPonderation) msgPonderation.style.display = 'none';
 
-    // Réinitialiser date d'échéance (actif par défaut)
+    // Pondération : actif par défaut
+    if (inputPonderation) {
+        inputPonderation.disabled = false;
+        inputPonderation.style.opacity = '1';
+        inputPonderation.style.cursor = 'text';
+    }
+    if (notePonderation) {
+        notePonderation.style.display = 'none';
+        notePonderation.innerHTML = '';
+    }
+
+    // Grille : actif par défaut
+    if (selectGrille) {
+        selectGrille.disabled = false;
+        selectGrille.style.opacity = '1';
+        selectGrille.style.cursor = 'pointer';
+    }
+    if (noteGrille) {
+        noteGrille.style.display = 'none';
+        noteGrille.innerHTML = '';
+    }
+
+    // Date d'échéance : actif par défaut
     if (inputDateEcheance) {
         inputDateEcheance.disabled = false;
         inputDateEcheance.style.opacity = '1';
@@ -764,18 +784,26 @@ function gererChangementTypeProduction() {
     // ═══════════════════════════════════════════════════════════
     if (type === 'portfolio') {
         // PORTFOLIO CONTENEUR
-        // - Afficher carte contexte portfolio
-        // - Masquer grille (pas de grille pour le conteneur)
-        // - Désactiver date d'échéance (grisé) avec note explicative
         if (carteContextePortfolio) carteContextePortfolio.style.display = 'block';
-        if (champGrilleSeparee) champGrilleSeparee.style.display = 'none';
 
-        // Griser le champ date d'échéance
+        // Griser la grille de critères + note
+        if (selectGrille) {
+            selectGrille.disabled = true;
+            selectGrille.style.opacity = '0.5';
+            selectGrille.style.cursor = 'not-allowed';
+            selectGrille.value = '';
+        }
+        if (noteGrille) {
+            noteGrille.style.display = 'block';
+            noteGrille.innerHTML = '<strong>Note :</strong> Ce n\'est pas le portfolio comme tel qui est évalué, mais les artefacts qui le composent.';
+        }
+
+        // Griser la date d'échéance + note
         if (inputDateEcheance) {
             inputDateEcheance.disabled = true;
             inputDateEcheance.style.opacity = '0.5';
             inputDateEcheance.style.cursor = 'not-allowed';
-            inputDateEcheance.value = ''; // Vider la valeur
+            inputDateEcheance.value = '';
         }
         if (asterisqueDateEcheance) asterisqueDateEcheance.style.display = 'none';
         if (noteExplicativeDateEcheance) {
@@ -784,19 +812,22 @@ function gererChangementTypeProduction() {
 
     } else if (type === 'artefact-portfolio') {
         // ARTEFACT DE PORTFOLIO
-        // - Afficher carte contexte artefact
-        // - Masquer pondération (définie par le portfolio)
-        // - Utiliser grille inline
         if (carteContexteArtefact) carteContexteArtefact.style.display = 'block';
-        if (champPonderation) champPonderation.style.display = 'none';
-        if (champGrilleSeparee) champGrilleSeparee.style.display = 'none';
-        if (champGrilleInline) champGrilleInline.style.display = 'block';
-        if (msgPonderation) msgPonderation.style.display = 'block';
-        synchroniserGrilles();
+
+        // Griser la pondération + note
+        if (inputPonderation) {
+            inputPonderation.disabled = true;
+            inputPonderation.style.opacity = '0.5';
+            inputPonderation.style.cursor = 'not-allowed';
+            inputPonderation.value = '';
+        }
+        if (notePonderation) {
+            notePonderation.style.display = 'block';
+            notePonderation.innerHTML = '<strong>Note :</strong> Les artefacts individuels n\'ont pas de pondération propre. C\'est le Portfolio conteneur qui définit la pondération globale.';
+        }
 
     } else if (type) {
         // PRODUCTION STANDARD (examen, travail, quiz, etc.)
-        // - Afficher carte contexte standard (champ facultatif)
         if (carteContexteStandard) carteContexteStandard.style.display = 'block';
     }
 }
@@ -2657,9 +2688,15 @@ function creerNouvelleProduction() {
     document.getElementById('productionObjectif').value = '';
     document.getElementById('productionTache').value = '';
 
-    // Réinitialiser les champs portfolio
-    document.getElementById('champsPortfolio').style.display = 'none';
-    document.getElementById('msgPonderationArtefact').style.display = 'none';
+    // Réinitialiser les champs portfolio et les notes explicatives
+    const champsPortfolio = document.getElementById('champsPortfolio');
+    if (champsPortfolio) champsPortfolio.style.display = 'none';
+
+    // Réinitialiser les notes et états des champs
+    const notePonderation = document.getElementById('notePonderation');
+    const noteGrille = document.getElementById('noteGrille');
+    if (notePonderation) notePonderation.style.display = 'none';
+    if (noteGrille) noteGrille.style.display = 'none';
 
     // Réinitialiser les checkboxes de pratiques compatibles
     const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
