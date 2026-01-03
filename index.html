@@ -4490,22 +4490,15 @@
                                      Date d'échéance + note explicative
                                      ═══════════════════════════════════════════════════════════ -->
                                 <div id="sectionPlanification" style="margin-bottom: 20px;">
-                                    <!-- Date d'échéance (pour tous sauf portfolio) -->
+                                    <!-- Date d'échéance -->
                                     <div id="champDateEcheance" style="display: grid; grid-template-columns: 250px 1fr; gap: 20px; align-items: start;">
                                         <div class="groupe-form" style="margin: 0;">
-                                            <label for="productionDateEcheance">Date d'échéance <span style="color: var(--rouge-principal);">*</span></label>
+                                            <label for="productionDateEcheance">Date d'échéance <span id="asterisqueDateEcheance" style="color: var(--rouge-principal);">*</span></label>
                                             <input type="date" id="productionDateEcheance" class="controle-form"
                                                 title="Date limite de remise du travail (obligatoire)">
                                         </div>
-                                        <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5;">
+                                        <p id="noteExplicativeDateEcheance" style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5;">
                                             Cette date fixe les indices <strong>C</strong> (Complétion) et <strong>P</strong> (Performance) pour les suivis longitudinaux.
-                                        </p>
-                                    </div>
-                                    <!-- Note pour portfolio (sans échéance) -->
-                                    <div id="msgPortfolioSansEcheance" style="display: none; padding: 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--bleu-principal);">
-                                        <p style="margin: 0; color: var(--bleu-principal); font-size: 0.9rem;">
-                                            <strong>Note :</strong> Le portfolio conteneur n'a pas de date d'échéance.
-                                            Seuls les <strong>artefacts individuels</strong> ont une date d'échéance.
                                         </p>
                                     </div>
                                 </div>
