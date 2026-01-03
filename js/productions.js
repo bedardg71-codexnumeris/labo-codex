@@ -719,15 +719,17 @@ function gererChangementTypeProduction() {
     // DÉFINITIONS DES TYPES DE PRODUCTION
     // ═══════════════════════════════════════════════════════════
     const definitions = {
-        'examen': '<strong>Examen :</strong> Évaluation écrite réalisée en temps limité, généralement en classe sous surveillance. Exemples : examen mi-session, examen final, examen de reprise.',
-        'travail': '<strong>Travail écrit :</strong> Production écrite réalisée sur une période étendue, souvent à la maison. Exemples : dissertation, analyse de texte, rédaction, rapport de recherche.',
-        'quiz': '<strong>Quiz/Test :</strong> Évaluation courte, souvent à correction objective (choix multiples, vrai/faux, réponses courtes). Exemples : test de lecture, quiz de révision.',
-        'laboratoire': '<strong>Laboratoire :</strong> Travail pratique réalisé en laboratoire, généralement accompagné d\'un rapport. Exemples : manipulation, rapport de laboratoire, expérimentation.',
-        'presentation': '<strong>Présentation :</strong> Production orale devant un auditoire, avec ou sans support visuel. Exemples : exposé oral, soutenance, présentation de projet.',
-        'projet': '<strong>Projet :</strong> Production complexe réalisée sur plusieurs étapes, souvent en équipe. Exemples : projet de session, étude de cas, création multimédia, poster scientifique.',
-        'autre': '<strong>Autre :</strong> Tout autre type de production ne correspondant pas aux catégories ci-dessus. Exemples : participation, activités en classe, portfolio de lecture.',
+        'examen': '<strong>Examen :</strong> Évaluation écrite en temps limité, en classe, sous supervision.',
+        'travail': '<strong>Travail écrit :</strong> Production écrite sur période étendue, à la maison ou en classe.',
+        'quiz': '<strong>Quiz/Test :</strong> Évaluation courte, sous forme de questionnaire à choix multiples ou de réponses à développement.',
+        'laboratoire': '<strong>Laboratoire :</strong> Travail pratique en laboratoire avec rapport.',
+        'presentation': '<strong>Présentation :</strong> Production orale devant un auditoire, généralement unidirectionnelle.',
+        'entrevue': '<strong>Entrevue :</strong> Production orale devant un individu, généralement bidirectionnelle.',
+        'projet': '<strong>Projet :</strong> Production complexe multi-étapes.',
+        'stage': '<strong>Stage :</strong> Expérience pratique dans une entreprise pour découvrir un métier, un secteur ou valider un projet professionnel. Le stage vise l\'apprentissage (découverte/exploration) plutôt que la production. Sa durée varie de quelques heures à quelques semaines et il est suivi par un tuteur.',
+        'autre': '<strong>Autre :</strong> Tout autre type de production (participation, activités, etc.).',
         'portfolio': '<strong>Portfolio (conteneur) :</strong> Regroupement d\'artefacts permettant d\'évaluer la progression. Le portfolio inclura automatiquement toutes les productions de type «Artefact». Il n\'est pas comptabilisé dans l\'indice de <strong>Complétion (C)</strong>.',
-        'artefact-portfolio': '<strong>Artefact :</strong> Production individuelle rattachée à un portfolio. L\'artefact contribue à construire la note du portfolio selon les règles définies dans la pratique de notation.'
+        'artefact-portfolio': '<strong>Artefact :</strong> Production ciblée sur une tâche de nature variée et rattachée au portfolio.'
     };
 
     // Éléments Définition (carte dynamique)
