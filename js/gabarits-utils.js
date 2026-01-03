@@ -493,8 +493,8 @@
         }).join('');
 
         return `
-            <div class="champ-pratiques-compatibles" style="margin: 10px 0; padding: 10px 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                <div style="font-weight: 500; color: var(--bleu-principal); font-size: 0.9rem; margin-bottom: 8px;">
+            <div class="champ-pratiques-compatibles">
+                <div style="font-weight: 500; font-size: 0.9rem; margin-bottom: 8px;">
                     Pratiques compatibles :
                 </div>
                 <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px;">
