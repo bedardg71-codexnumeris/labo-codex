@@ -2644,8 +2644,16 @@ function afficherNiveauxNouvelleEchelle() {
     const html = niveaux.map((niveau, index) => {
         const ph = placeholders[index] || { code: 'X', nom: 'Niveau' };
         return `
-        <div class="item-liste" style="padding: 15px; background: white; margin-bottom: 10px;">
-            <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px 100px; gap: 12px; align-items: end;">
+        <div class="item-liste" style="position: relative; padding: 15px; background: white; margin-bottom: 10px;">
+            ${niveaux.length > 1 ? `
+                <button onclick="supprimerNiveauTemp(${index})"
+                        class="btn btn-supprimer btn-tres-compact"
+                        title="Supprimer ce niveau"
+                        style="position: absolute; top: 8px; right: 8px;">
+                    ✕
+                </button>
+            ` : ''}
+            <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px; gap: 12px; align-items: end;">
                 <div class="groupe-form echelle-text-center">
                     <label class="echelle-texte-detail">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -2721,20 +2729,6 @@ function afficherNiveauxNouvelleEchelle() {
                            value="${niveau.couleur}"
                            onchange="modifierNiveauTemp(${index}, 'couleur', this.value)"
                            style="height: 38px; cursor: pointer;">
-                </div>
-                <div class="groupe-form">
-                    <label class="echelle-texte-detail">Actions</label>
-                    ${niveaux.length > 1 ? `
-                        <button onclick="supprimerNiveauTemp(${index})"
-                                class="btn btn-supprimer btn-compact"
-                                title="Supprimer ce niveau">
-                            Supprimer
-                        </button>
-                    ` : `
-                        <div style="font-size: 0.75rem; color: #999; text-align: center; font-style: italic;">
-                            (minimum 1)
-                        </div>
-                    `}
                 </div>
             </div>
         </div>
@@ -2909,8 +2903,16 @@ function afficherNiveauxEchelle(echelle) {
 
     // Afficher le tableau des niveaux en mode édition
     const html = echelle.niveaux.map((niveau, index) => `
-        <div class="item-liste" style="padding: 15px; background: white; margin-bottom: 10px;">
-            <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px 100px; gap: 12px; align-items: end;">
+        <div class="item-liste" style="position: relative; padding: 15px; background: white; margin-bottom: 10px;">
+            ${echelle.niveaux.length > 1 ? `
+                <button onclick="(async () => { await supprimerNiveauEchelle('${echelle.id}', ${index}); })()"
+                        class="btn btn-supprimer btn-tres-compact"
+                        title="Supprimer ce niveau"
+                        style="position: absolute; top: 8px; right: 8px;">
+                    ✕
+                </button>
+            ` : ''}
+            <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px; gap: 12px; align-items: end;">
                 <div class="groupe-form echelle-text-center">
                     <label class="echelle-texte-detail">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -2986,21 +2988,6 @@ function afficherNiveauxEchelle(echelle) {
                            value="${niveau.couleur}"
                            onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'couleur', this.value)"
                            style="height: 38px; cursor: pointer;">
-                </div>
-                <div class="groupe-form">
-                    <label class="echelle-texte-detail">Actions</label>
-                    ${echelle.niveaux.length > 1 ? `
-                        <button onclick="(async () => { await supprimerNiveauEchelle('${echelle.id}', ${index}); })()"
-                                class="btn btn-supprimer btn-compact"
-                                title="Supprimer ce niveau"
-                                class="u-w-100">
-                            Supprimer
-                        </button>
-                    ` : `
-                        <div style="font-size: 0.75rem; color: #999; text-align: center; font-style: italic;">
-                            (minimum 1)
-                        </div>
-                    `}
                 </div>
             </div>
         </div>
