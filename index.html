@@ -9401,25 +9401,14 @@ Exemple :
                             Activez ou désactivez les fonctionnalités selon vos besoins. Les outils désactivés seront masqués.
                         </p>
 
-                        <!-- Dépistage A-C-P -->
+                        <!-- Micro données ACP -->
                         <div class="form-group" style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
                             <label style="cursor: pointer; display: flex; align-items: center;">
                                 <input type="checkbox" id="v2-pref-depistage-acp" checked onchange="sauvegarderPreferencesV2()">
-                                <strong style="margin-left: 8px;">Dépistage A-C-P</strong>
+                                <strong style="margin-left: 8px;">Micro données ACP</strong>
                             </label>
                             <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
                                 Indices prédictifs : Assiduité, Complétion, Performance
-                            </small>
-                        </div>
-
-                        <!-- Détection des patterns -->
-                        <div class="form-group" style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
-                                <input type="checkbox" id="v2-pref-patterns" checked onchange="sauvegarderPreferencesV2()">
-                                <strong style="margin-left: 8px;">Détection des patterns</strong>
-                            </label>
-                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
-                                Identification des tendances récurrentes (progression, stagnation, régression)
                             </small>
                         </div>
 
@@ -9431,17 +9420,6 @@ Exemple :
                             </label>
                             <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
                                 Niveaux d'intervention et recommandations personnalisées
-                            </small>
-                        </div>
-
-                        <!-- Mode comparatif -->
-                        <div class="form-group" style="padding: 12px; background: var(--alerte-fond-attention); border-radius: 6px;">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
-                                <input type="checkbox" id="v2-pref-comparatif" onchange="sauvegarderPreferencesV2()">
-                                <strong style="margin-left: 8px;">Mode comparatif SOM/PAN (expérimental)</strong>
-                            </label>
-                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
-                                Afficher les deux pratiques côte à côte pour comparer les approches
                             </small>
                         </div>
                     </div>
@@ -9486,25 +9464,25 @@ Exemple :
                             </small>
                         </div>
 
-                        <!-- Seuils d'interprétation visuels -->
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label style="cursor: pointer; display: flex; align-items: center;">
-                                <input type="checkbox" id="v2-pref-seuils-visuels" checked onchange="sauvegarderPreferencesV2()">
-                                <strong style="margin-left: 8px;">Indicateurs visuels des seuils</strong>
-                            </label>
-                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
-                                Couleurs Fragile / Acceptable / Bon selon les seuils configurés
-                            </small>
-                        </div>
-
                         <!-- Détails techniques -->
-                        <div class="form-group">
+                        <div class="form-group" style="margin-bottom: 15px;">
                             <label style="cursor: pointer; display: flex; align-items: center;">
                                 <input type="checkbox" id="v2-pref-details-techniques" onchange="sauvegarderPreferencesV2()">
                                 <strong style="margin-left: 8px;">Détails techniques</strong>
                             </label>
                             <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
                                 Afficher les formules de calcul et données brutes
+                            </small>
+                        </div>
+
+                        <!-- Mode comparatif (expérimental) -->
+                        <div class="form-group" style="padding: 12px; background: var(--alerte-fond-attention); border-radius: 6px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-comparatif" onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Mode comparatif SOM/PAN (expérimental)</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Afficher les deux pratiques côte à côte pour comparer les approches
                             </small>
                         </div>
                     </div>
@@ -9516,6 +9494,17 @@ Exemple :
                             Paramètres utilisés pour la détection des patterns et l'identification des forces/défis.
                             La détection des patterns nécessite d'utiliser <strong>la même grille et la même échelle</strong> pour tous les artefacts évalués durant le trimestre.
                         </p>
+
+                        <!-- Détection des patterns -->
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-patterns" checked onchange="sauvegarderPreferencesV2()">
+                                <span style="margin-left: 8px; font-weight: 600;">Activer la détection des patterns</span>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                Identification des tendances récurrentes (progression, stagnation, régression)
+                            </small>
+                        </div>
 
                         <!-- Grille de référence -->
                         <div class="groupe-form" style="margin-bottom: 15px;">
@@ -9630,13 +9619,24 @@ Exemple :
                     <!-- Accordéon : Seuils d'interprétation -->
                     <div class="carte accordeon" id="v2-accordeon-seuils">
                         <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
-                            <h3 style="margin: 0; font-size: 1rem;">Seuils d'interprétation</h3>
+                            <h3 style="margin: 0; font-size: 1rem; text-decoration: none;">Seuils d'interprétation</h3>
                             <span class="accordeon-chevron">▼</span>
                         </div>
                         <div class="accordeon-contenu">
                             <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
                                 Personnalisez les seuils pour l'interprétation des indices A-C-P.
                             </p>
+
+                            <!-- Indicateurs visuels des seuils -->
+                            <div class="form-group" style="margin-bottom: 20px;">
+                                <label style="cursor: pointer; display: flex; align-items: center;">
+                                    <input type="checkbox" id="v2-pref-seuils-visuels" checked onchange="sauvegarderPreferencesV2()">
+                                    <span style="margin-left: 8px; font-weight: 600;">Indicateurs visuels des seuils</span>
+                                </label>
+                                <small style="display: block; color: var(--gris-moyen); margin-top: 5px; margin-left: 28px; font-size: 0.85rem;">
+                                    Couleurs Fragile / Acceptable / Bon selon les seuils configurés
+                                </small>
+                            </div>
 
                             <!-- Grille des seuils -->
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
