@@ -78,11 +78,11 @@ const ETAPES_TUTORIEL = [
     {
         id: 'pratiques',
         titre: '⚙️ Pratiques de notation',
-        description: 'Tu peux changer de pratique (Sommative, PAN-Maîtrise, etc.) ou créer la tienne avec le Wizard Primo en 8 étapes.',
-        cible: '[data-section="reglages"]',
+        description: 'Tu peux changer de pratique (Sommative, STD, etc.) ou créer la tienne dans Construction → Pratiques de notation.',
+        cible: '[data-section="construction"]',
         action: () => {
-            afficherSection('reglages');
-            afficherSousSection('reglages-pratiques');
+            afficherSection('construction');
+            afficherSousSection('construction-pratiques-notation');
         },
         position: 'bottom'
     },
