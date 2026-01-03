@@ -2230,7 +2230,7 @@ async function afficherBibliothequeEchelles() {
 
                 <!-- Section 2 : Échelles disponibles -->
                 <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Échelles disponibles à ajouter
+                    Échelles disponibles à ajouter à la barre latérale
                 </h3>
 
                 <!-- Filtres -->

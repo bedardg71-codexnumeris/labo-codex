@@ -1549,7 +1549,7 @@ async function afficherBibliothequeProductions() {
 
     modalHTML += `
                 <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Productions disponibles à ajouter
+                    Productions disponibles à ajouter à la barre latérale
                 </h3>
 
                 <!-- Filtre par discipline -->

@@ -339,7 +339,7 @@ async function afficherBibliothequePratiques() {
 
                 <!-- Section 2 : Pratiques disponibles -->
                 <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Pratiques disponibles à ajouter
+                    Pratiques disponibles à ajouter à la barre latérale
                 </h3>
 
                 <!-- Filtres -->
