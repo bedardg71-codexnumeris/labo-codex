@@ -4461,12 +4461,16 @@
                                      ═══════════════════════════════════════════════════════════ -->
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                                     <div class="groupe-form">
-                                        <label>Objectif d'apprentissage</label>
+                                        <label>Objectif d'apprentissage
+                                            <span class="tooltip-aide" title="Utilisez des verbes actifs et observables selon la taxonomie de Bloom (ex : nommer, décrire, analyser, créer, résoudre). Évitez les verbes vagues comme savoir, comprendre ou connaître.">📌</span>
+                                        </label>
+                                        <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0 0 6px 0;">À la fin de cette activité, l'apprenant sera capable de...</p>
                                         <textarea id="productionObjectif" class="controle-form" rows="3"
-                                            placeholder="Ex: Développer les compétences d'analyse..."></textarea>
+                                            placeholder="Ex: Reconnaître le propos du texte"></textarea>
                                     </div>
                                     <div class="groupe-form">
                                         <label>Description de la tâche</label>
+                                        <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0 0 6px 0;">La tâche permet de démontrer l'atteinte de l'objectif...</p>
                                         <textarea id="productionTache" class="controle-form" rows="3"
                                             placeholder="Ex: Rédiger un texte de 500 mots..."></textarea>
                                     </div>
@@ -4480,12 +4484,14 @@
                                     <!-- Date d'échéance -->
                                     <div id="champDateEcheance" style="display: grid; grid-template-columns: 250px 1fr; gap: 20px; align-items: start;">
                                         <div class="groupe-form" style="margin: 0;">
-                                            <label for="productionDateEcheance">Date d'échéance <span id="asterisqueDateEcheance" style="color: var(--rouge-principal);">*</span></label>
+                                            <label for="productionDateEcheance">Date d'échéance
+                                                <span class="tooltip-aide" title="Cette date fixe les indices C (Complétion) et P (Performance) pour les suivis longitudinaux.">📌</span>
+                                            </label>
                                             <input type="date" id="productionDateEcheance" class="controle-form"
                                                 title="Date limite de remise du travail (obligatoire)">
                                         </div>
-                                        <p id="noteExplicativeDateEcheance" style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5;">
-                                            Cette date fixe les indices <strong>C</strong> (Complétion) et <strong>P</strong> (Performance) pour les suivis longitudinaux.
+                                        <p id="noteExplicativeDateEcheance" style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5; display: none;">
+                                            <!-- Note dynamique pour portfolios -->
                                         </p>
                                     </div>
                                 </div>
