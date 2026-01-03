@@ -832,6 +832,12 @@ function gererChangementTypeProduction() {
             notePonderation.innerHTML = '<strong>Note :</strong> Les artefacts individuels n\'ont pas de pondération propre. C\'est le Portfolio conteneur qui définit la pondération globale.';
         }
 
+        // Note explicative pour la grille (champ reste actif)
+        if (noteGrille) {
+            noteGrille.style.display = 'block';
+            noteGrille.innerHTML = '<strong>Note :</strong> Ce n\'est pas le portfolio comme tel qui est évalué, mais les artefacts qui le composent.';
+        }
+
     } else if (type) {
         // PRODUCTION STANDARD (examen, travail, quiz, etc.)
         if (carteContexteStandard) carteContexteStandard.style.display = 'block';
