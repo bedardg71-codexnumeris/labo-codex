@@ -1319,7 +1319,7 @@ let coursEnEditionV2 = null;
 /**
  * Affiche le formulaire pour créer un nouveau cours
  */
-function afficherFormCoursV2() {
+async function afficherFormCoursV2() {
     coursEnEditionV2 = null;
 
     const formulaire = document.getElementById('v2-formulaireCours');
@@ -1336,6 +1336,9 @@ function afficherFormCoursV2() {
         // Réinitialiser tous les champs
         reinitialiserFormCoursV2();
 
+        // ✅ AJOUT (2 jan 2026) : Charger le dropdown des pratiques
+        await chargerDropdownPratiquesCours();
+
         // Mettre l'année courante par défaut
         const anneeInput = document.getElementById('v2-annee');
         if (anneeInput) anneeInput.value = new Date().getFullYear();
@@ -1347,7 +1350,7 @@ function afficherFormCoursV2() {
 /**
  * Modifie le cours actuellement sélectionné
  */
-function modifierCoursSelectionneV2() {
+async function modifierCoursSelectionneV2() {
     const selectCours = document.getElementById('v2-selectCours');
     const coursId = selectCours?.value;
 
@@ -1377,6 +1380,9 @@ function modifierCoursSelectionneV2() {
         if (apercu) apercu.style.display = 'none';
         if (titre) titre.textContent = 'Modifier le cours';
         if (btnTexte) btnTexte.textContent = 'Enregistrer';
+
+        // ✅ AJOUT (2 jan 2026) : Charger le dropdown des pratiques AVANT de remplir
+        await chargerDropdownPratiquesCours();
 
         // Remplir les champs avec les données du cours
         remplirFormCoursV2(coursSelectionne);
@@ -1488,6 +1494,80 @@ function reinitialiserFormCoursV2() {
     setValue('v2-formatHoraire', '2x2');
     // ✅ AJOUT (2 jan 2026) : Pratique par défaut
     setValue('v2-pratiqueIdCours', 'pan-standards');
+}
+
+/**
+ * ✅ AJOUT (2 jan 2026) : Charge le dropdown des pratiques depuis la bibliothèque
+ * Utilise les configurations de pratiques-materiel.js et pratiques-bibliotheque.js
+ */
+async function chargerDropdownPratiquesCours() {
+    const select = document.getElementById('v2-pratiqueIdCours');
+    if (!select) return;
+
+    // Valeur actuelle pour la restaurer après le rechargement
+    const valeurActuelle = select.value;
+
+    // Options de base (toujours disponibles)
+    let html = `
+        <optgroup label="Types de pratique de base">
+            <option value="sommative">Sommative (moyenne pondérée)</option>
+            <option value="pan-standards">PAN-Standards (par niveaux de maîtrise)</option>
+            <option value="pan-maitrise">PAN-Maîtrise (N meilleurs artefacts)</option>
+            <option value="pan-objectifs">PAN-Objectifs (par objectifs)</option>
+        </optgroup>
+    `;
+
+    // Charger les configurations personnalisées depuis pratiques-materiel.js
+    let configurationsPerso = [];
+    try {
+        if (typeof CLE_PRATIQUES_CONFIGURATIONS !== 'undefined') {
+            configurationsPerso = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+            configurationsPerso = configurationsPerso.filter(p => p.dansBibliotheque !== false);
+        }
+    } catch (e) {
+        console.warn('[trimestre-v2] Erreur chargement configurations:', e);
+    }
+
+    // Charger les gabarits depuis la bibliothèque
+    let gabarits = [];
+    try {
+        if (typeof obtenirToutesLesPratiquesBibliotheque === 'function') {
+            gabarits = await obtenirToutesLesPratiquesBibliotheque(true);
+            gabarits = gabarits.filter(p => p.estGabarit);
+        }
+    } catch (e) {
+        console.warn('[trimestre-v2] Erreur chargement gabarits:', e);
+    }
+
+    // Ajouter les gabarits prédéfinis
+    if (gabarits.length > 0) {
+        html += '<optgroup label="Gabarits prédéfinis">';
+        gabarits.forEach(g => {
+            const badge = g.pratiques?.[0] || '';
+            html += `<option value="${g.id}">[${badge}] ${g.nom}</option>`;
+        });
+        html += '</optgroup>';
+    }
+
+    // Ajouter les configurations personnalisées
+    if (configurationsPerso.length > 0) {
+        html += '<optgroup label="Mes configurations">';
+        configurationsPerso.forEach(c => {
+            const badge = c.pratiques?.[0] || '';
+            html += `<option value="${c.id}">[${badge}] ${c.nom}</option>`;
+        });
+        html += '</optgroup>';
+    }
+
+    select.innerHTML = html;
+
+    // Restaurer la valeur précédente si elle existe encore
+    if (valeurActuelle) {
+        const optionExiste = Array.from(select.options).some(o => o.value === valeurActuelle);
+        if (optionExiste) {
+            select.value = valeurActuelle;
+        }
+    }
 }
 
 /**
@@ -2348,6 +2428,7 @@ window.modifierCoursSelectionneV2 = modifierCoursSelectionneV2;
 window.dupliquerCoursSelectionneV2 = dupliquerCoursSelectionneV2;
 window.annulerFormCoursV2 = annulerFormCoursV2;
 window.sauvegarderCoursV2 = sauvegarderCoursV2;
+window.chargerDropdownPratiquesCours = chargerDropdownPratiquesCours; // ✅ AJOUT (2 jan 2026)
 window.ouvrirModalNouveauCours = ouvrirModalNouveauCours;
 window.chargerGroupesCoursV2 = chargerGroupesCoursV2;
 window.activerGroupeV2 = activerGroupeV2;

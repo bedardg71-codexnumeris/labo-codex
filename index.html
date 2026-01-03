@@ -3267,7 +3267,7 @@
                 <button data-onglet="tableau-bord">Tableau de bord</button>
                 <button data-onglet="presences">Présences</button>
                 <button data-onglet="evaluations">Évaluations</button>
-                <button data-onglet="materiel">Matériel</button>
+                <button data-onglet="construction">Construction de la note</button>
                 <button data-onglet="reglages">Réglages</button>
 
                 <!-- Bouton Aide (visible uniquement en mode Assisté) -->
@@ -4210,10 +4210,10 @@
             <!-- ===================================
                  SECTION: MATÉRIEL PÉDAGOGIQUE
                  =================================== -->
-            <section id="section-materiel" class="section">
+            <section id="section-construction" class="section">
 
                 <!-- Sous-section: Aperçu du matériel -->
-                <div id="materiel-apercu" class="sous-section">
+                <div id="construction-apercu" class="sous-section">
                     <h2 class="d-flex-between-center">
                         <span>Vue d'ensemble</span>
                         <span class="text-12">
@@ -4278,7 +4278,7 @@
                 </div>
 
                 <!-- Sous-section: Productions -->
-                <div id="materiel-productions" class="sous-section">
+                <div id="construction-productions" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Productions étudiantes</span>
                         <span class="titre-emoji-container">
@@ -4501,7 +4501,7 @@
                 </div><!--fin sous-section productions-->
 
                 <!-- Sous-section : Grilles de critères -->
-                <div id="materiel-grille-criteres" class="sous-section">
+                <div id="construction-grille-criteres" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Grilles de critères</span>
                         <span class="titre-emoji-container">
@@ -4620,7 +4620,7 @@
                 </div><!--fin sous-section grille-criteres-->
 
                 <!-- Sous-section : Échelle de performance -->
-                <div id="materiel-echelle-performance" class="sous-section">
+                <div id="construction-echelle-performance" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Échelles de performance</span>
                         <span class="titre-emoji-container">
@@ -4887,8 +4887,316 @@
                 </div><!--fin sous-section echelle-performance-->
 
 
+                <!-- Sous-section : Pratiques de notation (✨ AJOUTÉ 2 jan 2026) -->
+                <div id="construction-pratiques-notation" class="sous-section">
+                    <h2 class="titre-avec-emoji-toggles">
+                        <span>Pratiques de notation</span>
+                        <span class="titre-emoji-container">
+                            <span class="primo-aide" data-target="note-pratiques">😎</span>
+                        </span>
+                    </h2>
+                    <p class="text-muted">Configurez vos pratiques de notation (SOM, STD, SPE, DEN)</p>
+
+                    <!-- Carte Note -->
+                    <div id="note-pratiques" class="carte-info-toggle carte-info-note" style="display: none;">
+                        <strong>Note :</strong> Une pratique de notation définit comment les notes sont calculées et interprétées.
+                        <strong>SOM</strong> (Sommative) utilise une moyenne pondérée traditionnelle.
+                        <strong>STD</strong> (Standards) permet d'attribuer une cote finale selon des seuils de performance.
+                        <strong>SPE</strong> (Spécifications) calcule la note selon le nombre de critères réussis.
+                        <strong>DEN</strong> (Dénombrement) utilise le comptage des réussites/échecs.
+                        Créez vos propres configurations ou utilisez les gabarits de la bibliothèque.
+                    </div>
+
+                    <!-- LAYOUT SIDEBAR 2 COLONNES -->
+                    <div class="layout-sidebar-2col">
+
+                        <!-- SIDEBAR GAUCHE (280px, sticky) -->
+                        <div class="sidebar-navigation">
+                            <!-- Bouton bibliothèque (toujours visible) -->
+                            <div style="margin-bottom: 15px;">
+                                <button onclick="afficherBibliothequePratiques()" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
+                                    Consulter la bibliothèque
+                                </button>
+                            </div>
+                            <!-- Liste des pratiques (remplie par JS) -->
+                            <div class="sidebar-liste" id="sidebarListePratiques">
+                                <p class="sidebar-vide">Chargement...</p>
+                            </div>
+                        </div>
+
+                        <!-- ZONE PRINCIPALE (centrale, scroll) -->
+                        <div class="zone-principale">
+
+                            <!-- Bouton création en haut à droite -->
+                            <div style="margin-bottom: 20px; text-align: right;">
+                                <button onclick="creerNouvellePratique()" class="btn btn-principal">
+                                    + Nouvelle pratique
+                                </button>
+                            </div>
+
+                            <!-- Message d'accueil initial -->
+                            <div class="zone-principale-accueil" id="accueilPratiques">
+                                <p>Sélectionnez une pratique dans la barre latérale ou créez une nouvelle pratique</p>
+                            </div>
+
+                            <!-- Conteneur pour le formulaire d'édition -->
+                            <div id="conteneurEditionPratique" style="display: none;">
+
+                                <!-- En-tête avec nom et actions -->
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                                    <div>
+                                        <h3 style="margin: 0 0 5px 0; display: flex; align-items: center; gap: 8px;">
+                                            <span id="mat-badge-pratique" class="badge-pratique"></span>
+                                            <span id="mat-titre-pratique">Nouvelle pratique</span>
+                                        </h3>
+                                        <p style="color: #7f8c8d; margin: 0; font-size: 0.9rem;" id="mat-type-label">Configuration de pratique de notation</p>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button onclick="dupliquerPratiqueMateriel(pratiqueEnEditionMateriel)" class="btn btn-secondaire">
+                                            Dupliquer
+                                        </button>
+                                        <button onclick="supprimerPratiqueMateriel(pratiqueEnEditionMateriel)" class="btn btn-supprimer">
+                                            Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Carte : Informations de base -->
+                                <div class="carte">
+                                    <h3 class="carte-titre-bleu">Informations de base</h3>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                        <div class="groupe-form">
+                                            <label for="mat-pratique-nom" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                Nom de la pratique
+                                            </label>
+                                            <input type="text" id="mat-pratique-nom" class="controle-form" placeholder="Ex: PAN-Maîtrise Littérature" onchange="mettreAJourNomPratiqueMat()">
+                                        </div>
+                                        <div class="groupe-form">
+                                            <label for="mat-pratique-type" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                Type de pratique
+                                            </label>
+                                            <select id="mat-pratique-type" class="controle-form" onchange="changerTypePratiqueMat()">
+                                                <option value="">-- Choisir un type --</option>
+                                                <option value="sommative">Sommative</option>
+                                                <option value="pan-standards">PAN-Standards</option>
+                                                <option value="pan-specifications">PAN-Spécifications</option>
+                                                <option value="pan-denotation" disabled>PAN-Dénotation (bientôt)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Description taxonomique (dynamique selon le type sélectionné) -->
+                                    <div id="mat-description-taxonomique" style="display: none; margin-top: 15px; padding: 12px 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
+                                        <p style="margin: 0; font-weight: 600; font-size: 0.9rem; color: var(--bleu-principal);" id="mat-taxonomie-titre"></p>
+                                        <p style="margin: 8px 0 0 0; font-size: 0.85rem; line-height: 1.5; color: var(--gris-fonce);" id="mat-taxonomie-definition"></p>
+                                    </div>
+
+                                    <!-- Variante PAN-Standards -->
+                                    <div id="mat-variante-pan-standards" style="display: none; margin-top: 15px;">
+                                        <div class="groupe-form">
+                                            <label for="mat-variante-calcul" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                Comment construis-tu la note finale ?
+                                            </label>
+                                            <select id="mat-variante-calcul" class="controle-form" onchange="changerVariantePANStandardsMat()">
+                                                <option value="">-- Choisir une méthode --</option>
+                                                <option value="n-meilleurs">Je retiens les N meilleures évaluations</option>
+                                                <option value="n-recents">Je retiens les N évaluations les plus récentes</option>
+                                                <option value="grille-profils">J'utilise une grille de profils</option>
+                                                <option value="par-objectifs">Par objectifs (4 modes de calcul)</option>
+                                                <option value="autre">Autre (je vais le décrire après)</option>
+                                            </select>
+                                        </div>
+                                        <div id="mat-variante-description" style="display: none; margin-top: 10px; padding: 10px 12px; background: #f8f9fa; border-radius: 4px; font-size: 0.85rem; color: var(--gris-fonce);"></div>
+                                    </div>
+
+                                    <div class="groupe-form" style="margin-top: 15px;">
+                                        <label for="mat-pratique-description" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                            Description <span style="font-weight: normal; color: var(--gris-moyen);">(spécificités de cette pratique)</span>
+                                        </label>
+                                        <textarea id="mat-pratique-description" class="controle-form" rows="2" placeholder="Décrivez les particularités de cette configuration..." onchange="mettreAJourDescriptionPratiqueMat()"></textarea>
+                                    </div>
+
+                                    <div class="groupe-form" style="margin-top: 15px;">
+                                        <label for="mat-pratique-discipline" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                            Discipline
+                                        </label>
+                                        <input type="text" id="mat-pratique-discipline" class="controle-form" placeholder="Ex: Chimie, Français, Mathématiques..." onchange="mettreAJourDisciplinePratiqueMat()">
+                                    </div>
+                                </div>
+
+                                <!-- Carte : Échelle de performance -->
+                                <div class="carte">
+                                    <h3 class="carte-titre-bleu">Échelle de performance</h3>
+                                    <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
+                                        L'échelle définit les niveaux de performance utilisés pour évaluer les productions.
+                                    </p>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: start;">
+                                        <div class="groupe-form">
+                                            <label for="mat-echelle-id" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                Échelle à utiliser
+                                            </label>
+                                            <select id="mat-echelle-id" class="controle-form" onchange="afficherPreviewEchelleMat()">
+                                                <option value="">-- Sélectionner une échelle --</option>
+                                            </select>
+                                            <small style="display: block; color: var(--gris-moyen); margin-top: 6px; font-size: 0.85rem;">
+                                                Gérer les échelles dans <strong>Construction → Échelles de performance</strong>
+                                            </small>
+                                        </div>
+                                        <div id="mat-preview-echelle" style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px; display: none;">
+                                            <p style="margin: 0 0 8px 0; font-weight: 600; font-size: 0.9rem;">Aperçu</p>
+                                            <div id="mat-preview-echelle-contenu" class="text-muted" style="font-size: 0.85rem;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Carte : Structure des évaluations -->
+                                <div class="carte" id="mat-carte-structure">
+                                    <h3 class="carte-titre-bleu">Structure des évaluations</h3>
+
+                                    <!-- Configuration PAN-Standards -->
+                                    <div id="mat-config-pan-standards" style="display: none;">
+                                        <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                            <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                                <strong>PAN-Standards</strong> : Évaluation par niveaux de maîtrise (ex: IDME).
+                                                Le meilleur résultat est retenu pour chaque standard ou objectif.
+                                            </p>
+                                        </div>
+
+                                        <!-- Option avancée : Découpler P et R -->
+                                        <div style="margin-bottom: 15px; padding: 12px; background: var(--alerte-fond-attention); border-left: 3px solid #ffc107; border-radius: 4px;">
+                                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                                <input type="checkbox" id="mat-decoupler-pr" onchange="sauvegarderConfigPratiqueMat()">
+                                                <strong style="margin-left: 8px;">Découpler Performance (P) et Risque (R)</strong>
+                                            </label>
+                                            <small style="display: block; color: var(--gris-moyen); margin-top: 8px; margin-left: 28px; font-size: 0.85rem; line-height: 1.5;">
+                                                <strong>P (notation)</strong> : Utilise la méthode ci-dessous pour calculer la note finale.<br>
+                                                <strong>R (dépistage)</strong> : Toujours basé sur les N dernières productions pour détecter les tendances.
+                                            </small>
+                                        </div>
+
+                                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                            <div class="groupe-form">
+                                                <label for="mat-portfolio-selection" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                    Mode de sélection
+                                                </label>
+                                                <select id="mat-portfolio-selection" class="controle-form" onchange="sauvegarderConfigPratiqueMat()">
+                                                    <option value="meilleurs">N meilleurs artefacts</option>
+                                                    <option value="derniers">N derniers artefacts</option>
+                                                    <option value="tous">Tous les artefacts</option>
+                                                </select>
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label for="mat-portfolio-nombre" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                    Artefacts pour la note finale
+                                                </label>
+                                                <input type="number" id="mat-portfolio-nombre" class="controle-form" min="1" max="20" value="5" onchange="sauvegarderConfigPratiqueMat()">
+                                            </div>
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+                                            <div class="groupe-form">
+                                                <label for="mat-portfolio-minimum" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                    Seuil pour note formative
+                                                </label>
+                                                <input type="number" id="mat-portfolio-minimum" class="controle-form" min="1" max="20" value="7" onchange="sauvegarderConfigPratiqueMat()">
+                                            </div>
+                                            <div class="groupe-form">
+                                                <label for="mat-portfolio-total" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                    Total d'artefacts prévus
+                                                </label>
+                                                <input type="number" id="mat-portfolio-total" class="controle-form" min="1" max="50" value="10" onchange="sauvegarderConfigPratiqueMat()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Configuration Sommative -->
+                                    <div id="mat-config-sommative" style="display: none;">
+                                        <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                            <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                                <strong>Évaluations traditionnelles</strong> : Chaque évaluation a sa propre pondération.
+                                                La note finale est la moyenne pondérée (total = 100%).
+                                            </p>
+                                        </div>
+                                        <p class="text-muted" style="font-size: 0.9rem;">
+                                            Les évaluations et leurs pondérations sont configurées dans <strong>Construction → Productions étudiantes</strong>.
+                                        </p>
+                                    </div>
+
+                                    <!-- Configuration PAN-Spécifications -->
+                                    <div id="mat-config-pan-specifications" style="display: none;">
+                                        <div style="margin-bottom: 20px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px; border-left: 4px solid var(--bleu-principal);">
+                                            <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                                <strong>PAN-Spécifications</strong> : Chaque travail est évalué de façon binaire
+                                                (acceptable / non-acceptable). La note finale dépend du « forfait » de travaux complétés.
+                                            </p>
+                                        </div>
+
+                                        <!-- Seuil d'acceptabilité -->
+                                        <div class="groupe-form" style="margin-bottom: 20px;">
+                                            <label for="mat-spec-seuil" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                Seuil d'acceptabilité (%)
+                                            </label>
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <input type="number" id="mat-spec-seuil" class="controle-form" value="75" min="50" max="100" style="width: 80px;" onchange="sauvegarderConfigPratiqueMat()">
+                                                <span class="text-muted" style="font-size: 0.85rem;">
+                                                    Un travail est acceptable s'il atteint ce seuil ou plus.
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Types de productions -->
+                                        <div style="margin-bottom: 25px; padding: 15px; background: white; border: 1px solid var(--gris-bordure); border-radius: 6px;">
+                                            <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--bleu-principal);">Types de productions</h4>
+                                            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
+                                                Définissez les types de productions que les étudiants devront compléter.
+                                            </p>
+                                            <div id="mat-spec-types-travaux-liste" style="margin-bottom: 15px;"></div>
+                                            <button type="button" class="btn btn-secondaire" onclick="ajouterTypeTravailMat()">
+                                                + Ajouter un type
+                                            </button>
+                                        </div>
+
+                                        <!-- Table des forfaits -->
+                                        <div style="padding: 15px; background: white; border: 1px solid var(--gris-bordure); border-radius: 6px;">
+                                            <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--bleu-principal);">Table des forfaits (bundles)</h4>
+                                            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 15px;">
+                                                Chaque forfait définit un ensemble de productions requises et la note associée.
+                                            </p>
+                                            <div id="mat-spec-forfaits-liste" style="margin-bottom: 15px;"></div>
+                                            <button type="button" class="btn btn-secondaire" onclick="ajouterForfaitMat()">
+                                                + Ajouter un forfait
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Message par défaut -->
+                                    <div id="mat-config-defaut">
+                                        <p class="text-muted" style="font-size: 0.9rem;">
+                                            Sélectionnez un type de pratique pour configurer la structure des évaluations.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Actions finales -->
+                                <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                                    <button onclick="appliquerPratiqueAuCours(pratiqueEnEditionMateriel)" class="btn btn-principal">
+                                        Appliquer au cours actif
+                                    </button>
+                                    <button onclick="sauvegarderPratiqueMaterielComplet()" class="btn btn-confirmer">
+                                        Enregistrer la pratique
+                                    </button>
+                                </div>
+
+                            </div><!-- fin conteneurEditionPratique -->
+
+                        </div>
+
+                    </div><!-- fin layout-sidebar-2col -->
+
+                </div><!--fin sous-section pratiques-notation-->
+
+
                 <!-- Sous-section : Rétroactions -->
-                <div id="materiel-retroactions" class="sous-section">
+                <div id="construction-retroactions" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
                         <span>Cartouches de rétroaction</span>
                         <span class="titre-emoji-container">
@@ -5045,82 +5353,7 @@
 
                 </div><!--fin sous-section retroactions-->
 
-                <!-- Sous-section: Objectifs d'apprentissage -->
-                <div id="materiel-objectifs" class="sous-section">
-                    <h2 class="titre-avec-emoji-toggles">
-                        <span>Ensembles d'objectifs</span>
-                        <span class="titre-emoji-container">
-                            <span class="primo-aide" data-target="conseil-objectifs">😎</span>
-                        </span>
-                    </h2>
-                    <p class="text-muted">
-                        Définissez des ensembles d'objectifs réutilisables pour vos pratiques d'évaluation multi-objectifs.
-                        Chaque ensemble regroupe plusieurs objectifs avec leurs pondérations et types. Les ensembles peuvent
-                        être exportés et partagés avec vos collègues.
-                    </p>
-
-                    <div id="conseil-objectifs" class="carte-info-toggle carte-info-conseil">
-                        <strong>Conseil pratique :</strong> Les ensembles d'objectifs sont utilisés dans les pratiques de type
-                        «Multi-objectifs pondérés». Créez vos objectifs ici une fois, puis référencez-les dans le wizard
-                        de création de pratique. Les modifications apportées à un ensemble se répercutent automatiquement
-                        sur toutes les pratiques qui l'utilisent.
-                    </div>
-
-<!-- CARTE : OBJECTIFS D'APPRENTISSAGE -->
-                    <div class="carte">
-
-                        <!-- LAYOUT SIDEBAR 2 COLONNES -->
-                        <div class="layout-sidebar-2col">
-
-                            <!-- SIDEBAR GAUCHE (280px, sticky) -->
-                            <div class="sidebar-navigation">
-
-                                <!-- Liste des ensembles -->
-                                <div class="sidebar-liste" id="listeEnsemblesObjectifs">
-                                    <p class="banque-vide">Aucun ensemble d'objectifs</p>
-                                </div>
-                            </div>
-
-                            <!-- ZONE PRINCIPALE (centrale, scroll) -->
-                            <div class="zone-principale">
-
-                                <!-- Barre d'en-tête avec boutons (toujours visible) -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                    <!-- Boutons Import/Export à gauche -->
-                                    <div style="display: flex; gap: 10px;">
-                                        <button class="btn btn-confirmer" onclick="exporterTousObjectifs()">
-                                            Exporter tous les ensembles
-                                        </button>
-                                        <button class="btn btn-principal" onclick="document.getElementById('importObjectifsInput').click()">
-                                            Importer des ensembles
-                                        </button>
-                                        <input type="file" id="importObjectifsInput" accept=".json" style="display: none;" onchange="traiterImportObjectifs(event)">
-                                    </div>
-                                    <!-- Bouton Nouvel ensemble à droite -->
-                                    <button onclick="creerNouvelEnsembleObjectifs()" class="btn btn-principal">
-                                        + Nouvel ensemble
-                                    </button>
-                                </div>
-
-                                <!-- Message d'accueil initial -->
-                                <div class="zone-principale-accueil" id="messageAccueilObjectifs">
-                                    <p>Sélectionnez un ensemble dans la barre latérale ou créez un nouvel ensemble</p>
-                                </div>
-
-                                <!-- Zone d'édition d'un ensemble -->
-                                <div id="editionEnsembleObjectifs" class="hidden">
-                                    <!-- Le contenu sera généré dynamiquement -->
-                                </div>
-
-                            </div><!-- fin zone-principale -->
-
-                        </div><!-- fin layout-sidebar-2col -->
-
-                    </div><!-- fin carte -->
-
-                </div><!--fin sous-section objectifs-->
-
-            </section><!-- fin section-materiel -->
+            </section><!-- fin section-construction -->
 
             <!-- ===================================
                  SECTION: RÉGLAGES
@@ -13352,7 +13585,7 @@ Exemple :
 
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js?v=2026010203"></script>
-    <script src="js/navigation.js?v=2025121700"></script>
+    <script src="js/navigation.js?v=2026010205"></script>
     <script src="js/modes.js?v=2025123004"></script>
 
     <!-- ✅ Pack de démarrage AVANT donnees-demo (expose PACK_DEMARRAGE) -->
@@ -13367,6 +13600,7 @@ Exemple :
     <script src="js/gabarits-utils.js?v=2026010202"></script> <!-- Beta 95 : Module utilitaire gabarits + filtres pratique -->
     <script src="js/spe-specifications.js?v=2026010206"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
     <script src="js/pratiques-bibliotheque.js?v=2026010205"></script> <!-- Beta 95 : Bibliothèque universelle STD + SPE -->
+    <script src="js/pratiques-materiel.js?v=2026010210"></script> <!-- Beta 95 : retirerPratiqueDeBibliothequeMateriel -->
     <script src="js/preferences-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Préférences restructuré -->
     <script src="js/donnees-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Données restructuré -->
     <script src="js/etudiants.js?v=2025122902"></script>
