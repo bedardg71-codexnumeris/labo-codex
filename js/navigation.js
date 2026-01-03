@@ -385,16 +385,8 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'reglages-pratique-notation':
-            console.log('🔄 Initialisation du module Pratiques...');
-            if (typeof initialiserModulePratiques === 'function') {
-                setTimeout(initialiserModulePratiques, 100);
-            }
-            // ✅ CORRECTIF (30 déc 2025): Initialiser aussi pratique-notation-v2 pour remplir les champs
-            if (typeof initialiserPratiqueNotationV2 === 'function') {
-                setTimeout(initialiserPratiqueNotationV2, 150);
-            }
-            break;
+        // NOTE: reglages-pratique-notation supprimé (2 jan 2026)
+        // Fonctionnalité migrée vers Construction > Pratiques de notation
 
         case 'evaluations-apercu':
             console.log('🔄 Rafraîchissement de l\'aperçu des évaluations...');

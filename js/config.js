@@ -56,11 +56,10 @@ const configurationsOnglets = {
         { id: 'pratiques-notation', label: 'Pratiques de notation' },
         { id: 'retroactions', label: 'Cartouches de rétroaction' }
     ],
-    // ✨ REFONTE UX (18 déc 2025) : 4 onglets au lieu de 9
-    // Structure : Trimestre, Pratique de notation, Préférences, Données
+    // ✨ REFONTE UX (18 déc 2025) : 3 onglets (Pratique de notation migrée vers Construction)
+    // Structure : Trimestre, Préférences, Données
     'reglages': [
         { id: 'trimestre', label: 'Trimestre' },
-        { id: 'pratique-notation', label: 'Pratique de notation' },
         { id: 'preferences', label: 'Préférences' },
         { id: 'donnees', label: 'Données' }
     ],
