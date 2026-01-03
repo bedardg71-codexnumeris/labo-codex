@@ -2604,7 +2604,6 @@ function filtrerCartouchesBanque() {
  */
 async function populerDropdownGrilleCartouche(selectedId = '', disabled = false) {
     const select = document.getElementById('selectGrilleCartouche');
-    const infoSmall = document.getElementById('infoGrilleCartouche');
     if (!select) return;
 
     const grilles = await db.get('grillesTemplates') || [];
@@ -2619,11 +2618,6 @@ async function populerDropdownGrilleCartouche(selectedId = '', disabled = false)
 
     select.innerHTML = optionsHtml;
     select.disabled = disabled;
-
-    // Afficher/masquer le texte d'aide
-    if (infoSmall) {
-        infoSmall.style.display = disabled ? 'none' : 'block';
-    }
 }
 
 /**
