@@ -715,6 +715,25 @@ async function descendreEvaluation(id) {
 function gererChangementTypeProduction() {
     const type = document.getElementById('productionType').value;
 
+    // ═══════════════════════════════════════════════════════════
+    // DÉFINITIONS DES TYPES DE PRODUCTION
+    // ═══════════════════════════════════════════════════════════
+    const definitions = {
+        'examen': '<strong>Examen :</strong> Évaluation écrite réalisée en temps limité, généralement en classe sous surveillance. Exemples : examen mi-session, examen final, examen de reprise.',
+        'travail': '<strong>Travail écrit :</strong> Production écrite réalisée sur une période étendue, souvent à la maison. Exemples : dissertation, analyse de texte, rédaction, rapport de recherche.',
+        'quiz': '<strong>Quiz/Test :</strong> Évaluation courte, souvent à correction objective (choix multiples, vrai/faux, réponses courtes). Exemples : test de lecture, quiz de révision.',
+        'laboratoire': '<strong>Laboratoire :</strong> Travail pratique réalisé en laboratoire, généralement accompagné d\'un rapport. Exemples : manipulation, rapport de laboratoire, expérimentation.',
+        'presentation': '<strong>Présentation :</strong> Production orale devant un auditoire, avec ou sans support visuel. Exemples : exposé oral, soutenance, présentation de projet.',
+        'projet': '<strong>Projet :</strong> Production complexe réalisée sur plusieurs étapes, souvent en équipe. Exemples : projet de session, étude de cas, création multimédia, poster scientifique.',
+        'autre': '<strong>Autre :</strong> Tout autre type de production ne correspondant pas aux catégories ci-dessus. Exemples : participation, activités en classe, portfolio de lecture.',
+        'portfolio': '<strong>Portfolio (conteneur) :</strong> Regroupement d\'artefacts permettant d\'évaluer la progression. Le portfolio inclura automatiquement toutes les productions de type «Artefact». Il n\'est pas comptabilisé dans l\'indice de <strong>Complétion (C)</strong>.',
+        'artefact-portfolio': '<strong>Artefact :</strong> Production individuelle rattachée à un portfolio. L\'artefact contribue à construire la note du portfolio selon les règles définies dans la pratique de notation.'
+    };
+
+    // Éléments Définition (carte dynamique)
+    const carteDefinition = document.getElementById('carteDefinitionType');
+    const texteDefinition = document.getElementById('texteDefinitionType');
+
     // Éléments Pondération (Ligne 3 gauche)
     const inputPonderation = document.getElementById('productionPonderation');
     const notePonderation = document.getElementById('notePonderation');
@@ -728,17 +747,15 @@ function gererChangementTypeProduction() {
     const asterisqueDateEcheance = document.getElementById('asterisqueDateEcheance');
     const noteExplicativeDateEcheance = document.getElementById('noteExplicativeDateEcheance');
 
-    // Cartes contextuelles (Section 3)
-    const carteContextePortfolio = document.getElementById('carteContextePortfolio');
-    const carteContexteArtefact = document.getElementById('carteContexteArtefact');
-    const carteContexteStandard = document.getElementById('carteContexteStandard');
-
     // Ancien élément (compatibilité)
     const champsPortfolio = document.getElementById('champsPortfolio');
 
     // ═══════════════════════════════════════════════════════════
-    // RÉINITIALISER : affichage par défaut (production standard)
+    // RÉINITIALISER : affichage par défaut
     // ═══════════════════════════════════════════════════════════
+
+    // Masquer la carte définition par défaut
+    if (carteDefinition) carteDefinition.style.display = 'none';
 
     // Pondération : actif par défaut
     if (inputPonderation) {
@@ -773,23 +790,25 @@ function gererChangementTypeProduction() {
         noteExplicativeDateEcheance.innerHTML = 'Cette date fixe les indices <strong>C</strong> (Complétion) et <strong>P</strong> (Performance) pour les suivis longitudinaux.';
     }
 
-    // Masquer toutes les cartes contextuelles
-    if (carteContextePortfolio) carteContextePortfolio.style.display = 'none';
-    if (carteContexteArtefact) carteContexteArtefact.style.display = 'none';
-    if (carteContexteStandard) carteContexteStandard.style.display = 'none';
     if (champsPortfolio) champsPortfolio.style.display = 'none';
 
     // ═══════════════════════════════════════════════════════════
-    // APPLIQUER : configuration selon le type
+    // AFFICHER LA DÉFINITION si un type est sélectionné
+    // ═══════════════════════════════════════════════════════════
+    if (type && definitions[type]) {
+        if (carteDefinition) carteDefinition.style.display = 'block';
+        if (texteDefinition) texteDefinition.innerHTML = definitions[type];
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // APPLIQUER : configuration spécifique selon le type
     // ═══════════════════════════════════════════════════════════
     if (type === 'portfolio') {
         // PORTFOLIO CONTENEUR
-        if (carteContextePortfolio) carteContextePortfolio.style.display = 'block';
-
         // Note explicative pour la pondération (champ reste actif)
         if (notePonderation) {
             notePonderation.style.display = 'block';
-            notePonderation.innerHTML = 'Les règles de calcul du portfolio (artefacts retenus, minimum requis) se configurent dans <strong>Construction de la note → Pratique de notation</strong>.';
+            notePonderation.innerHTML = 'Les règles de calcul du portfolio se configurent dans <strong>Construction de la note → Pratique de notation</strong>.';
         }
 
         // Griser la grille de critères + note
@@ -801,7 +820,7 @@ function gererChangementTypeProduction() {
         }
         if (noteGrille) {
             noteGrille.style.display = 'block';
-            noteGrille.innerHTML = '<strong>Note :</strong> Ce n\'est pas le portfolio comme tel qui est évalué, mais les artefacts qui le composent.';
+            noteGrille.innerHTML = 'Ce n\'est pas le portfolio comme tel qui est évalué, mais les artefacts qui le composent.';
         }
 
         // Griser la date d'échéance + note
@@ -813,13 +832,11 @@ function gererChangementTypeProduction() {
         }
         if (asterisqueDateEcheance) asterisqueDateEcheance.style.display = 'none';
         if (noteExplicativeDateEcheance) {
-            noteExplicativeDateEcheance.innerHTML = '<strong>Note :</strong> Le portfolio conteneur n\'a pas de date d\'échéance. Seuls les <strong>artefacts individuels</strong> ont une date d\'échéance.';
+            noteExplicativeDateEcheance.innerHTML = 'Le portfolio conteneur n\'a pas de date d\'échéance. Seuls les <strong>artefacts individuels</strong> ont une date d\'échéance.';
         }
 
     } else if (type === 'artefact-portfolio') {
         // ARTEFACT DE PORTFOLIO
-        if (carteContexteArtefact) carteContexteArtefact.style.display = 'block';
-
         // Griser la pondération + note
         if (inputPonderation) {
             inputPonderation.disabled = true;
@@ -829,19 +846,17 @@ function gererChangementTypeProduction() {
         }
         if (notePonderation) {
             notePonderation.style.display = 'block';
-            notePonderation.innerHTML = '<strong>Note :</strong> Les artefacts individuels n\'ont pas de pondération propre. C\'est le Portfolio conteneur qui définit la pondération globale.';
+            notePonderation.innerHTML = 'Les artefacts n\'ont pas de pondération propre. C\'est le portfolio conteneur qui définit la pondération globale.';
         }
 
         // Note explicative pour la grille (champ reste actif)
         if (noteGrille) {
             noteGrille.style.display = 'block';
-            noteGrille.innerHTML = '<strong>Note :</strong> Ce n\'est pas le portfolio comme tel qui est évalué, mais les artefacts qui le composent.';
+            noteGrille.innerHTML = 'Chaque artefact peut avoir sa propre grille de critères.';
         }
 
     } else if (type) {
-        // PRODUCTION STANDARD (examen, travail, quiz, etc.)
-        if (carteContexteStandard) carteContexteStandard.style.display = 'block';
-
+        // PRODUCTION STANDARD (examen, travail, quiz, laboratoire, présentation, projet, autre)
         // Note explicative pour la pondération
         if (notePonderation) {
             notePonderation.style.display = 'block';
