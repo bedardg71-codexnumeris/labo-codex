@@ -306,8 +306,8 @@ async function afficherBibliothequePratiques() {
                             <button
                                 onclick="partagerPratiqueMateriel('${pratique.id}')"
                                 class="btn btn-secondaire btn-tres-compact"
-                                title="Partager avec la communauté">
-                                Partager
+                                title="Exporter en JSON">
+                                Exporter
                             </button>
                             <button
                                 onclick="retirerPratiqueDeBibliothequeMateriel('${pratique.id}')"
@@ -325,11 +325,15 @@ async function afficherBibliothequePratiques() {
     html += `
                     </div>
 
-                    <!-- Bouton "Partager toutes mes pratiques" après la Section 1 -->
-                    <div style="margin-top: 15px; text-align: center;">
+                    <!-- Boutons Import/Export après la Section 1 -->
+                    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
                         <button onclick="exporterPratiquesUtilisateur()" class="btn btn-secondaire">
-                            Partager toutes mes pratiques
+                            Exporter toutes mes pratiques
                         </button>
+                        <button onclick="document.getElementById('fichier-import-pratiques-modal').click()" class="btn btn-secondaire">
+                            Importer des pratiques
+                        </button>
+                        <input type="file" id="fichier-import-pratiques-modal" accept=".json" style="display: none;" onchange="importerPratiquesUtilisateur(event)">
                     </div>
                 </div>
 
@@ -1557,6 +1561,65 @@ async function exporterPratiquesUtilisateur() {
     }
 }
 
+/**
+ * Importer des pratiques depuis un fichier JSON
+ * @param {Event} event - Événement du changement de fichier
+ */
+async function importerPratiquesUtilisateur(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        const content = await file.text();
+        const data = JSON.parse(content);
+
+        // Vérifier le format
+        if (!data.configurations || !Array.isArray(data.configurations)) {
+            alert('Format de fichier invalide. Le fichier doit contenir un tableau de configurations.');
+            return;
+        }
+
+        const configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+        let nbImportees = 0;
+        let nbIgnorees = 0;
+
+        for (const config of data.configurations) {
+            // Vérifier si la pratique existe déjà (par ID)
+            const existe = configurations.some(c => c.id === config.id);
+            if (existe) {
+                nbIgnorees++;
+                continue;
+            }
+
+            // Ajouter avec un nouvel ID si nécessaire
+            if (!config.id) {
+                config.id = 'PRAT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+            config.dansBibliotheque = true;
+
+            configurations.push(config);
+            nbImportees++;
+        }
+
+        await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+
+        // Rafraîchir l'affichage
+        await afficherListePratiquesMateriel();
+        await afficherBibliothequePratiques();
+
+        if (typeof afficherNotificationSucces === 'function') {
+            afficherNotificationSucces(`Import réussi : ${nbImportees} pratique(s) importée(s)${nbIgnorees > 0 ? `, ${nbIgnorees} ignorée(s) (déjà existantes)` : ''}`);
+        }
+
+    } catch (error) {
+        console.error('Erreur import pratiques:', error);
+        alert('Erreur lors de l\'import : ' + error.message);
+    }
+
+    // Réinitialiser l'input
+    event.target.value = '';
+}
+
 /* ===============================
    SYSTÈME DE JETONS
    =============================== */
@@ -1960,6 +2023,7 @@ window.sauvegarderPratiqueMateriel = sauvegarderPratiqueMateriel;
 window.sauvegarderPratiqueMaterielComplet = sauvegarderPratiqueMaterielComplet;
 window.partagerPratiqueMateriel = partagerPratiqueMateriel;
 window.exporterPratiquesUtilisateur = exporterPratiquesUtilisateur;
+window.importerPratiquesUtilisateur = importerPratiquesUtilisateur;
 
 // Handlers formulaire (préfixe mat-)
 window.changerTypePratiqueMat = changerTypePratiqueMat;
