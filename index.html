@@ -4408,7 +4408,37 @@
                                     </div>
                                 </div>
 
-                                <!-- Ligne 3 : Pondération + Grille de critères -->
+                                <!-- ═══════════════════════════════════════════════════════════
+                                     CONTEXTE (variable selon le type)
+                                     Affiché juste après le Type pour expliquer les champs affectés
+                                     ═══════════════════════════════════════════════════════════ -->
+
+                                <!-- Carte contextuelle : PORTFOLIO -->
+                                <div id="carteContextePortfolio" class="carte-contexte" style="display: none; margin-bottom: 15px; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
+                                    <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--gris-fonce);">
+                                        <strong>Contexte :</strong> Le portfolio est un <em>conteneur</em> qui inclura automatiquement toutes les productions de type «Artefact». Il n'est pas comptabilisé dans l'indice de <strong>Complétion (C)</strong>.
+                                    </p>
+                                </div>
+
+                                <!-- Carte contextuelle : ARTEFACT -->
+                                <div id="carteContexteArtefact" class="carte-contexte" style="display: none; margin-bottom: 15px; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
+                                    <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--gris-fonce);">
+                                        <strong>Contexte :</strong> L'artefact sera automatiquement rattaché au portfolio dont il contribue à construire la note.
+                                    </p>
+                                </div>
+
+                                <!-- Carte contextuelle : STANDARD (facultatif) -->
+                                <div id="carteContexteStandard" class="carte-contexte" style="display: none; margin-bottom: 15px;">
+                                    <div class="groupe-form">
+                                        <label>Contexte (facultatif)</label>
+                                        <textarea id="productionContexte" class="controle-form" rows="2"
+                                            placeholder="Informations complémentaires sur cette production..."></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- ═══════════════════════════════════════════════════════════
+                                     SECTION 3 : PONDÉRATION ET GRILLE
+                                     ═══════════════════════════════════════════════════════════ -->
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                                     <!-- Pondération + Note explicative -->
                                     <div id="champPonderation" style="display: grid; grid-template-columns: 150px 1fr; gap: 15px; align-items: start;">
@@ -4428,36 +4458,6 @@
                                             </select>
                                         </div>
                                         <p id="noteGrille" style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5; display: none;"></p>
-                                    </div>
-                                </div>
-
-                                <!-- ═══════════════════════════════════════════════════════════
-                                     SECTION 3 : CONTEXTE (variable selon le type)
-                                     - Portfolio : configuration et comportement
-                                     - Artefact : lien avec portfolio
-                                     - Standard : contexte facultatif
-                                     ═══════════════════════════════════════════════════════════ -->
-
-                                <!-- Carte contextuelle : PORTFOLIO -->
-                                <div id="carteContextePortfolio" class="carte-contexte" style="display: none; margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
-                                    <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--gris-fonce);">
-                                        <strong>Contexte :</strong> Le portfolio est un <em>conteneur</em> qui inclura automatiquement toutes les productions de type «Artefact». Il n'est pas comptabilisé dans l'indice de <strong>Complétion (C)</strong>.
-                                    </p>
-                                </div>
-
-                                <!-- Carte contextuelle : ARTEFACT -->
-                                <div id="carteContexteArtefact" class="carte-contexte" style="display: none; margin-bottom: 20px; padding: 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal);">
-                                    <p style="margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--gris-fonce);">
-                                        <strong>Contexte :</strong> L'artefact sera automatiquement rattaché au portfolio dont il contribue à construire la note.
-                                    </p>
-                                </div>
-
-                                <!-- Carte contextuelle : STANDARD (facultatif) -->
-                                <div id="carteContexteStandard" class="carte-contexte" style="display: none; margin-bottom: 20px;">
-                                    <div class="groupe-form">
-                                        <label>Contexte (facultatif)</label>
-                                        <textarea id="productionContexte" class="controle-form" rows="2"
-                                            placeholder="Informations complémentaires sur cette production..."></textarea>
                                     </div>
                                 </div>
 
