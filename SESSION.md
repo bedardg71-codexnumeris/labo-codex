@@ -308,11 +308,17 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 - [ ] Tester navigation Primo → Construction (guidage.js)
 - [ ] Corriger bugs eventuels
 
-### Priorite 3 : Documentation
+### Priorite 3 : Audit CSS (AUDIT_V5 parties 10-16)
+- [ ] Partie 10 : Modals (overlay bleu + blur)
+- [ ] Partie 11 : Alertes (border-radius 6px + shadow)
+- [ ] Parties 12-16 : Navigation, Formulaires, Tableaux, Barres, Wizard
+- [ ] Executer CHECKLIST_AUDIT.md
+
+### Priorite 4 : Documentation
 - [ ] Mettre a jour docs/modules/ si necessaire
 - [ ] Creer pratique "Par-Objectifs (Michel)" dans la bibliotheque officielle
 
-### Priorite 4 : Dette technique
+### Priorite 5 : Dette technique
 - [ ] Ajouter option suppression cours (formulaire + bibliotheque)
 - [ ] Verifier checkbox jetons dans Reglages vs Primo
 
