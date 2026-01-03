@@ -2569,16 +2569,16 @@ async function creerNouvelleEchelle() {
     // Réinitialiser le formulaire
     document.getElementById('nomEchelleTemplate').value = '';
 
-    // Afficher un message et un bouton pour ajouter le premier niveau
-    const container = document.getElementById('tableauNiveauxEchelle');
-    container.innerHTML = `
-        <div style="padding: 20px; background: var(--bleu-tres-pale); border-radius: 8px; text-align: center; margin-bottom: 15px;">
-            <p style="color: #666; margin-bottom: 15px;">Aucun niveau défini. Ajoutez des niveaux de performance pour cette échelle.</p>
-            <button class="btn btn-confirmer" onclick="ajouterPremierNiveau()">
-                + Ajouter un niveau
-            </button>
-        </div>
-    `;
+    // Initialiser avec 4 niveaux vides par défaut (structure typique)
+    window._niveauxNouvelleEchelle = [
+        { code: '', nom: '', min: 90, max: 100, valeurCalcul: 95, couleur: '#27ae60' },
+        { code: '', nom: '', min: 75, max: 89, valeurCalcul: 82, couleur: '#3498db' },
+        { code: '', nom: '', min: 60, max: 74, valeurCalcul: 67, couleur: '#f39c12' },
+        { code: '', nom: '', min: 0, max: 59, valeurCalcul: 30, couleur: '#e74c3c' }
+    ];
+
+    // Afficher les niveaux avec placeholders
+    afficherNiveauxNouvelleEchelle();
 
     // Réinitialiser la référence à l'échelle actuelle
     echelleTemplateActuelle = null;
@@ -2612,9 +2612,11 @@ function ajouterPremierNiveau() {
 
 /**
  * Affiche les niveaux pour une nouvelle échelle (pas encore sauvegardée)
+ * Format identique aux échelles existantes avec placeholders
  */
 function afficherNiveauxNouvelleEchelle() {
     const container = document.getElementById('tableauNiveauxEchelle');
+    const apercuContainer = document.getElementById('apercuEchelleNiveaux');
     const niveaux = window._niveauxNouvelleEchelle || [];
 
     if (niveaux.length === 0) {
@@ -2626,64 +2628,132 @@ function afficherNiveauxNouvelleEchelle() {
                 </button>
             </div>
         `;
+        if (apercuContainer) apercuContainer.innerHTML = '';
         return;
     }
 
-    let html = niveaux.map((niveau, index) => `
-        <div class="niveau-echelle-item" style="
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px;
-            background: white;
-            border: 1px solid #ddd;
-            border-left: 4px solid ${niveau.couleur || '#ccc'};
-            border-radius: 6px;
-            margin-bottom: 8px;
-        ">
-            <input type="text" value="${niveau.code}"
-                   onchange="modifierNiveauTemp(${index}, 'code', this.value)"
-                   class="controle-form" style="width: 60px;" placeholder="Code">
-            <input type="text" value="${niveau.nom}"
-                   onchange="modifierNiveauTemp(${index}, 'nom', this.value)"
-                   class="controle-form" style="flex: 1;" placeholder="Nom du niveau">
-            <input type="number" value="${niveau.min}"
-                   onchange="modifierNiveauTemp(${index}, 'min', parseInt(this.value))"
-                   class="controle-form" style="width: 70px;" placeholder="Min %">
-            <input type="number" value="${niveau.max}"
-                   onchange="modifierNiveauTemp(${index}, 'max', parseInt(this.value))"
-                   class="controle-form" style="width: 70px;" placeholder="Max %">
-            <input type="color" value="${niveau.couleur || '#cccccc'}"
-                   onchange="modifierNiveauTemp(${index}, 'couleur', this.value)"
-                   style="width: 40px; height: 32px; border: none; cursor: pointer;">
-            <button class="btn btn-supprimer btn-tres-compact" onclick="supprimerNiveauTemp(${index})" title="Supprimer">
-                X
-            </button>
-        </div>
-    `).join('');
+    // Placeholders pour guider l'utilisateur
+    const placeholders = [
+        { code: 'A', nom: 'Excellent' },
+        { code: 'B', nom: 'Très bien' },
+        { code: 'C', nom: 'Satisfaisant' },
+        { code: 'D', nom: 'En développement' },
+        { code: 'E', nom: 'Insuffisant' }
+    ];
 
-    html += `
-        <button class="btn btn-confirmer" style="margin-top: 10px;" onclick="ajouterNiveauTemp()">
+    const html = niveaux.map((niveau, index) => {
+        const ph = placeholders[index] || { code: 'X', nom: 'Niveau' };
+        return `
+        <div class="item-liste" style="padding: 15px; background: white; margin-bottom: 10px;">
+            <div style="display: grid; grid-template-columns: 60px 60px 2fr 80px 80px 100px 80px 100px; gap: 12px; align-items: end;">
+                <div class="groupe-form echelle-text-center">
+                    <label class="echelle-texte-detail">Ordre</label>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <button onclick="deplacerNiveauTempHaut(${index})"
+                                class="btn btn-compact"
+                                ${index === 0 ? 'disabled' : ''}
+                                title="Déplacer vers le haut">
+                            ↑
+                        </button>
+                        <button onclick="deplacerNiveauTempBas(${index})"
+                                class="btn btn-compact"
+                                ${index === niveaux.length - 1 ? 'disabled' : ''}
+                                title="Déplacer vers le bas">
+                            ↓
+                        </button>
+                    </div>
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Code</label>
+                    <input type="text"
+                           class="controle-form"
+                           value="${niveau.code}"
+                           placeholder="Ex: ${ph.code}"
+                           maxlength="3"
+                           onchange="modifierNiveauTemp(${index}, 'code', this.value)"
+                           style="font-weight: 600; text-align: center;">
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Nom du niveau</label>
+                    <input type="text"
+                           class="controle-form"
+                           value="${niveau.nom}"
+                           placeholder="Ex: ${ph.nom}"
+                           onchange="modifierNiveauTemp(${index}, 'nom', this.value)"
+                           style="font-weight: 500;">
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Min (%)</label>
+                    <input type="number"
+                           class="controle-form"
+                           value="${niveau.min}"
+                           min="0"
+                           max="100"
+                           onchange="modifierNiveauTemp(${index}, 'min', parseFloat(this.value))">
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Max (%)</label>
+                    <input type="number"
+                           class="controle-form"
+                           value="${niveau.max}"
+                           min="0"
+                           max="100"
+                           onchange="modifierNiveauTemp(${index}, 'max', parseFloat(this.value))">
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Valeur calc (%)</label>
+                    <input type="number"
+                           class="controle-form"
+                           value="${niveau.valeurCalcul}"
+                           min="0"
+                           max="100"
+                           step="0.01"
+                           onchange="modifierNiveauTemp(${index}, 'valeurCalcul', parseFloat(this.value))">
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Couleur</label>
+                    <input type="color"
+                           class="controle-form"
+                           value="${niveau.couleur}"
+                           onchange="modifierNiveauTemp(${index}, 'couleur', this.value)"
+                           style="height: 38px; cursor: pointer;">
+                </div>
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Actions</label>
+                    ${niveaux.length > 1 ? `
+                        <button onclick="supprimerNiveauTemp(${index})"
+                                class="btn btn-supprimer btn-compact"
+                                title="Supprimer ce niveau">
+                            Supprimer
+                        </button>
+                    ` : `
+                        <div style="font-size: 0.75rem; color: #999; text-align: center; font-style: italic;">
+                            (minimum 1)
+                        </div>
+                    `}
+                </div>
+            </div>
+        </div>
+    `}).join('');
+
+    // Bouton ajouter niveau
+    const btnAjouterNiveau = `
+        <button class="sidebar-btn-ajouter" onclick="ajouterNiveauTemp()">
             + Ajouter un niveau
         </button>
     `;
 
-    container.innerHTML = html;
+    container.innerHTML = html + btnAjouterNiveau;
 
-    // Mettre à jour l'aperçu
-    const apercuContainer = document.getElementById('apercuEchelleNiveaux');
+    // Afficher l'aperçu visuel
     if (apercuContainer) {
-        apercuContainer.innerHTML = niveaux.map(n => `
-            <span style="
-                display: inline-block;
-                padding: 6px 12px;
-                background: ${n.couleur || '#ccc'};
-                color: white;
-                border-radius: 4px;
-                font-weight: 500;
-                font-size: 0.9rem;
-            ">${n.code} - ${n.nom}</span>
+        const apercuHtml = niveaux.map(niveau => `
+            <div style="text-align: center; flex: 1; padding: 10px; background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
+                <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${niveau.code || '?'}</strong>
+                <div class="echelle-texte-petit-mt5">${niveau.min}%-${niveau.max}%</div>
+            </div>
         `).join('');
+        apercuContainer.innerHTML = apercuHtml;
     }
 }
 
@@ -2697,20 +2767,24 @@ function modifierNiveauTemp(index, champ, valeur) {
 }
 
 /**
- * Ajoute un niveau temporaire
+ * Ajoute un niveau temporaire (vide avec couleur aléatoire)
  */
 function ajouterNiveauTemp() {
     if (!window._niveauxNouvelleEchelle) {
         window._niveauxNouvelleEchelle = [];
     }
+    // Couleurs prédéfinies pour les niveaux
+    const couleurs = ['#27ae60', '#3498db', '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c'];
     const nbNiveaux = window._niveauxNouvelleEchelle.length;
+    const couleur = couleurs[nbNiveaux % couleurs.length];
+
     window._niveauxNouvelleEchelle.push({
-        code: 'N' + (nbNiveaux + 1),
-        nom: 'Nouveau niveau',
+        code: '',
+        nom: '',
         min: 0,
         max: 100,
         valeurCalcul: 50,
-        couleur: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')
+        couleur: couleur
     });
     afficherNiveauxNouvelleEchelle();
 }
@@ -2721,6 +2795,27 @@ function ajouterNiveauTemp() {
 function supprimerNiveauTemp(index) {
     if (!window._niveauxNouvelleEchelle) return;
     window._niveauxNouvelleEchelle.splice(index, 1);
+    afficherNiveauxNouvelleEchelle();
+}
+
+/**
+ * Déplace un niveau temporaire vers le haut
+ */
+function deplacerNiveauTempHaut(index) {
+    if (!window._niveauxNouvelleEchelle || index <= 0) return;
+    const niveaux = window._niveauxNouvelleEchelle;
+    [niveaux[index - 1], niveaux[index]] = [niveaux[index], niveaux[index - 1]];
+    afficherNiveauxNouvelleEchelle();
+}
+
+/**
+ * Déplace un niveau temporaire vers le bas
+ */
+function deplacerNiveauTempBas(index) {
+    if (!window._niveauxNouvelleEchelle) return;
+    const niveaux = window._niveauxNouvelleEchelle;
+    if (index >= niveaux.length - 1) return;
+    [niveaux[index], niveaux[index + 1]] = [niveaux[index + 1], niveaux[index]];
     afficherNiveauxNouvelleEchelle();
 }
 
@@ -3402,6 +3497,8 @@ window.afficherNiveauxNouvelleEchelle = afficherNiveauxNouvelleEchelle;
 window.modifierNiveauTemp = modifierNiveauTemp;
 window.ajouterNiveauTemp = ajouterNiveauTemp;
 window.supprimerNiveauTemp = supprimerNiveauTemp;
+window.deplacerNiveauTempHaut = deplacerNiveauTempHaut;
+window.deplacerNiveauTempBas = deplacerNiveauTempBas;
 window.supprimerNiveauEchelle = supprimerNiveauEchelle;
 window.modifierNiveauEchelle = modifierNiveauEchelle;
 window.verifierUtilisationEchelle = verifierUtilisationEchelle;
