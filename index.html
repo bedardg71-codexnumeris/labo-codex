@@ -4470,6 +4470,14 @@
                                     </div>
                                 </div>
 
+                                <!-- Pratiques compatibles -->
+                                <div style="display: flex; gap: 15px; align-items: center; margin-top: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                                    <label style="font-weight: 600; margin: 0;">Pratiques :</label>
+                                    <div id="checkboxesPratiquesProduction" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                        <!-- Généré par genererCheckboxesPratiques() -->
+                                    </div>
+                                </div>
+
                                 <!-- Boutons du formulaire -->
                                 <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
                                     <!-- Boutons gauche (actions sur la production) -->
@@ -4568,15 +4576,15 @@
                             <!-- Formulaire d'édition de grille -->
                             <div id="conteneurEditionGrille" style="display: none;">
 
-                                <!-- Nom de la grille -->
-                                <div class="groupe-form" class="max-w-500-mb-20">
-                                    <label>Nom de la grille :</label>
-                                    <input type="text" id="nomGrilleTemplate" class="controle-form"
-                                        placeholder="Ex: Grille analyse littéraire" onchange="sauvegarderNomGrille()">
+                                <!-- Nom + Pratiques compatibles sur même ligne -->
+                                <div style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap;">
+                                    <div class="groupe-form" style="flex: 1; min-width: 300px; margin: 0;">
+                                        <label>Nom de la grille :</label>
+                                        <input type="text" id="nomGrilleTemplate" class="controle-form"
+                                            placeholder="Ex: Grille analyse littéraire" onchange="sauvegarderNomGrille()">
+                                    </div>
+                                    <div id="checkboxesPratiquesGrille" style="flex-shrink: 0;"></div>
                                 </div>
-
-                                <!-- Pratiques compatibles -->
-                                <div id="checkboxesPratiquesGrille"></div>
 
                                 <!-- Liste des critères -->
                                 <div id="listeCriteres" class="mb-20">
@@ -4679,15 +4687,15 @@
                             <!-- Formulaire d'édition -->
                             <div id="conteneurEditionEchelle" style="display: none;">
 
-                                <!-- Nom de l'échelle -->
-                                <div class="groupe-form" class="max-w-500-mb-20">
-                                    <label>Nom de l'échelle :</label>
-                                    <input type="text" id="nomEchelleTemplate" class="controle-form"
-                                        placeholder="Ex: Échelle standard A-F" onchange="sauvegarderNomEchelle()">
+                                <!-- Nom + Pratiques compatibles sur même ligne -->
+                                <div style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap;">
+                                    <div class="groupe-form" style="flex: 1; min-width: 300px; margin: 0;">
+                                        <label>Nom de l'échelle :</label>
+                                        <input type="text" id="nomEchelleTemplate" class="controle-form"
+                                            placeholder="Ex: Échelle standard A-F" onchange="sauvegarderNomEchelle()">
+                                    </div>
+                                    <div id="checkboxesPratiquesEchelle" style="flex-shrink: 0;"></div>
                                 </div>
-
-                                <!-- Pratiques compatibles -->
-                                <div id="checkboxesPratiquesEchelle"></div>
 
                                 <!-- Tableau des niveaux -->
                                 <div id="tableauNiveauxEchelle" class="mb-20">
@@ -4981,7 +4989,7 @@
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                         <div class="groupe-form">
                                             <label for="mat-pratique-nom" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                                Nom de la pratique
+                                                Nom de la configuration
                                             </label>
                                             <input type="text" id="mat-pratique-nom" class="controle-form" placeholder="Ex: PAN-Maîtrise Littérature" onchange="mettreAJourNomPratiqueMat()">
                                         </div>
@@ -5520,16 +5528,17 @@
                                         </div>
                                     </div>
 
-                            <div class="groupe-form" class="max-w-500">
-                                <label>Nom de la cartouche :</label>
-                                <input type="text" id="nomCartouche" class="controle-form"
-                                    placeholder="Ex: Dissertation argumentative - Session Automne 2025">
+                            <!-- Nom + Pratiques compatibles sur même ligne -->
+                            <div style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap;">
+                                <div class="groupe-form" style="flex: 1; min-width: 300px; margin: 0;">
+                                    <label>Nom de la cartouche :</label>
+                                    <input type="text" id="nomCartouche" class="controle-form"
+                                        placeholder="Ex: Dissertation argumentative - Session Automne 2025">
+                                </div>
+                                <div id="checkboxesPratiquesCartouche" style="flex-shrink: 0;"></div>
                             </div>
 
-                            <!-- Pratiques compatibles -->
-                            <div id="checkboxesPratiquesCartouche"></div>
-
-                            <div class="groupe-form" class="mt-15">
+                            <div class="groupe-form">
                                 <label>Contexte de la rétroaction (optionnel) :</label>
                                 <textarea id="contexteCartouche" class="controle-form" rows="3"
                                     placeholder="Ex: Cette production porte sur l'analyse d'un texte argumentatif. L'étudiant·e devait démontrer sa capacité à..."></textarea>
@@ -7167,7 +7176,7 @@
                                         <!-- ÉTAPE 1: Informations de base -->
                                         <div class="wizard-step" data-step="1">
                                             <div class="groupe-form">
-                                                <label>Nom de la pratique *</label>
+                                                <label>Nom de la configuration *</label>
                                                 <input type="text" id="wizard-nom" class="controle-form" placeholder="Ex: PAN-Spécifications personnalisé" required>
                                             </div>
                                             <div class="groupe-form">

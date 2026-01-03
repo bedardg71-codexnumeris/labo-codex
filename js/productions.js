@@ -256,6 +256,12 @@ async function afficherFormProduction(id) {
             if (prod.type === 'portfolio') {
                 console.log('📖 Chargement Portfolio - Les règles de calcul sont configurées dans Réglages › Pratique de notation');
             }
+
+            // Afficher les checkboxes de pratiques compatibles
+            const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
+            if (checkboxesContainer && typeof genererCheckboxesPratiques === 'function') {
+                checkboxesContainer.innerHTML = genererCheckboxesPratiques('production', prod.pratiquesCompatibles || []);
+            }
         } else {
             // Production non trouvée
             console.error('❌ Production non trouvée avec ID:', id);
@@ -285,6 +291,12 @@ async function afficherFormProduction(id) {
 
         // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Réinitialiser date d'échéance
         document.getElementById('productionDateEcheance').value = '';
+
+        // Réinitialiser les checkboxes de pratiques compatibles
+        const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
+        if (checkboxesContainer && typeof genererCheckboxesPratiques === 'function') {
+            checkboxesContainer.innerHTML = genererCheckboxesPratiques('production', []);
+        }
 
         // Réinitialiser les champs portfolio
         const portfolioNombreRetenir = document.getElementById('portfolioNombreRetenir');
@@ -366,6 +378,11 @@ async function sauvegarderProduction() {
         console.warn('[Productions] ⚠️ Aucun cours actif - production créée sans coursId');
     }
 
+    // Lire les pratiques compatibles
+    const pratiquesCompatibles = typeof lirePratiquesSelectionnees === 'function'
+        ? lirePratiquesSelectionnees('production')
+        : [];
+
     // Préparer l'objet de base
     let productionData = {
         titre,
@@ -376,6 +393,7 @@ async function sauvegarderProduction() {
         tache,
         grilleId,
         dateEcheance,     // ✨ NOUVEAU (Beta 94 - 10 déc 2025)
+        pratiquesCompatibles,  // Pratiques de notation compatibles
         verrouille: false,
         dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) - Nouvelle production dans bibliothèque par défaut
         coursId  // ✅ CRITIQUE (Beta 95) : Lier la production au cours actif
@@ -2592,6 +2610,12 @@ function creerNouvelleProduction() {
     // Réinitialiser les champs portfolio
     document.getElementById('champsPortfolio').style.display = 'none';
     document.getElementById('msgPonderationArtefact').style.display = 'none';
+
+    // Réinitialiser les checkboxes de pratiques compatibles
+    const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
+    if (checkboxesContainer && typeof genererCheckboxesPratiques === 'function') {
+        checkboxesContainer.innerHTML = genererCheckboxesPratiques('production', []);
+    }
 
     // Changer le titre et le bouton
     document.getElementById('btnTexteEvaluation').textContent = 'Ajouter';
