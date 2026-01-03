@@ -1497,8 +1497,8 @@ function reinitialiserFormCoursV2() {
 }
 
 /**
- * ✅ AJOUT (2 jan 2026) : Charge le dropdown des pratiques depuis la bibliothèque
- * Utilise les configurations de pratiques-materiel.js et pratiques-bibliotheque.js
+ * ✅ AJOUT (2 jan 2026) : Charge le dropdown des pratiques depuis la sidebar
+ * Affiche les pratiques de pratiquesConfigurables (celles dans la sidebar)
  */
 async function chargerDropdownPratiquesCours() {
     const select = document.getElementById('v2-pratiqueIdCours');
@@ -1507,56 +1507,29 @@ async function chargerDropdownPratiquesCours() {
     // Valeur actuelle pour la restaurer après le rechargement
     const valeurActuelle = select.value;
 
-    // Options de base (toujours disponibles)
-    let html = `
-        <optgroup label="Types de pratique de base">
-            <option value="sommative">Sommative (moyenne pondérée)</option>
-            <option value="pan-standards">PAN-Standards (par niveaux de maîtrise)</option>
-            <option value="pan-maitrise">PAN-Maîtrise (N meilleurs artefacts)</option>
-            <option value="pan-objectifs">PAN-Objectifs (par objectifs)</option>
-        </optgroup>
-    `;
+    // Option par défaut
+    let html = '<option value="">-- Sélectionner une pratique --</option>';
 
-    // Charger les configurations personnalisées depuis pratiques-materiel.js
-    let configurationsPerso = [];
+    // Charger les pratiques depuis pratiquesConfigurables (même source que la sidebar)
+    let pratiques = [];
     try {
-        if (typeof CLE_PRATIQUES_CONFIGURATIONS !== 'undefined') {
-            configurationsPerso = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
-            configurationsPerso = configurationsPerso.filter(p => p.dansBibliotheque !== false);
-        }
+        pratiques = db.getSync('pratiquesConfigurables', []);
+        // Filtrer les pratiques dans la bibliothèque (affichées dans la sidebar)
+        pratiques = pratiques.filter(p => p.dansBibliotheque !== false);
     } catch (e) {
-        console.warn('[trimestre-v2] Erreur chargement configurations:', e);
+        console.warn('[trimestre-v2] Erreur chargement pratiques:', e);
     }
 
-    // Charger les gabarits depuis la bibliothèque
-    let gabarits = [];
-    try {
-        if (typeof obtenirToutesLesPratiquesBibliotheque === 'function') {
-            gabarits = await obtenirToutesLesPratiquesBibliotheque(true);
-            gabarits = gabarits.filter(p => p.estGabarit);
-        }
-    } catch (e) {
-        console.warn('[trimestre-v2] Erreur chargement gabarits:', e);
-    }
-
-    // Ajouter les gabarits prédéfinis
-    if (gabarits.length > 0) {
-        html += '<optgroup label="Gabarits prédéfinis">';
-        gabarits.forEach(g => {
-            const badge = g.pratiques?.[0] || '';
-            html += `<option value="${g.id}">[${badge}] ${g.nom}</option>`;
+    // Ajouter les pratiques disponibles
+    if (pratiques.length > 0) {
+        pratiques.forEach(p => {
+            const badge = p.pratiques?.[0] || p.type || '';
+            const badgeHtml = badge ? `[${badge}] ` : '';
+            html += `<option value="${p.id}">${badgeHtml}${p.nom || 'Sans titre'}</option>`;
         });
-        html += '</optgroup>';
-    }
-
-    // Ajouter les configurations personnalisées
-    if (configurationsPerso.length > 0) {
-        html += '<optgroup label="Mes configurations">';
-        configurationsPerso.forEach(c => {
-            const badge = c.pratiques?.[0] || '';
-            html += `<option value="${c.id}">[${badge}] ${c.nom}</option>`;
-        });
-        html += '</optgroup>';
+    } else {
+        html += '<option value="" disabled>Aucune pratique configurée</option>';
+        html += '<option value="" disabled>→ Ajouter via Construction > Pratiques de notation</option>';
     }
 
     select.innerHTML = html;
@@ -1568,6 +1541,8 @@ async function chargerDropdownPratiquesCours() {
             select.value = valeurActuelle;
         }
     }
+
+    console.log('[trimestre-v2] Dropdown pratiques chargé:', pratiques.length, 'pratiques');
 }
 
 /**
