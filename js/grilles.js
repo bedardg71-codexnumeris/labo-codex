@@ -1982,10 +1982,14 @@ async function afficherListeGrilles() {
     html += grillesDansBibliotheque.map(grille => {
         const nomGrille = grille.nom || 'Sans titre';
         const nbCriteres = grille.criteres?.length || 0;
+        // Générer badges pratiques compatibles (utilise gabarits-utils.js)
+        const badgesPratiques = typeof GabaritsUtils !== 'undefined'
+            ? GabaritsUtils.genererBadgesPratiques(grille)
+            : '';
         return `
             <div class="sidebar-item" data-id="${grille.id}" onclick="chargerGrillePourModif('${grille.id}')">
                 <div class="sidebar-item-titre">${nomGrille}</div>
-                <div class="sidebar-item-badge">${nbCriteres} critères</div>
+                <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${nbCriteres} critères</span></div>
             </div>
         `;
     }).join('');

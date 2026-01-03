@@ -2039,10 +2039,14 @@ async function afficherListeEchelles() {
     html += echellesDansBibliotheque.map(echelle => {
         const nomEchelle = echelle.nom || 'Sans titre';
         const nbNiveaux = echelle.niveaux?.length || 0;
+        // Générer badges pratiques compatibles (utilise gabarits-utils.js)
+        const badgesPratiques = typeof GabaritsUtils !== 'undefined'
+            ? GabaritsUtils.genererBadgesPratiques(echelle)
+            : '';
         return `
             <div class="sidebar-item" data-id="${echelle.id}" onclick="(async () => { await chargerEchellePourModif('${echelle.id}'); })()">
                 <div class="sidebar-item-titre">${nomEchelle}</div>
-                <div class="sidebar-item-badge">${nbNiveaux} niveaux</div>
+                <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${nbNiveaux} niveaux</span></div>
             </div>
         `;
     }).join('');
