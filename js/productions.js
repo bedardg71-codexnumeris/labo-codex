@@ -786,6 +786,12 @@ function gererChangementTypeProduction() {
         // PORTFOLIO CONTENEUR
         if (carteContextePortfolio) carteContextePortfolio.style.display = 'block';
 
+        // Note explicative pour la pondération (champ reste actif)
+        if (notePonderation) {
+            notePonderation.style.display = 'block';
+            notePonderation.innerHTML = 'Les règles de calcul du portfolio (artefacts retenus, minimum requis) se configurent dans <strong>Construction de la note → Pratique de notation</strong>.';
+        }
+
         // Griser la grille de critères + note
         if (selectGrille) {
             selectGrille.disabled = true;
