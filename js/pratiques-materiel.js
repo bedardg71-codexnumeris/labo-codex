@@ -795,9 +795,8 @@ function changerVariantePANStandardsMat() {
         if (configPortfolio) configPortfolio.style.display = 'none';
         if (configParObjectifs) {
             configParObjectifs.style.display = 'block';
-            // Charger les données et afficher le mode par défaut
+            // Charger les données (changerModeCalculObjectifsMat est appelé à la fin)
             chargerConfigParObjectifsMat();
-            changerModeCalculObjectifsMat();
         }
     } else {
         if (configPortfolio) configPortfolio.style.display = 'block';
@@ -1581,6 +1580,9 @@ async function chargerConfigParObjectifsMat() {
     if (parObjectifs.comptage?.grilleConversion) {
         afficherGrilleConversionMat(parObjectifs.comptage.grilleConversion);
     }
+
+    // Afficher la bonne section de mode (APRÈS avoir chargé les données)
+    changerModeCalculObjectifsMat();
 }
 
 /**
