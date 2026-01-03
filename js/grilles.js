@@ -2510,7 +2510,9 @@ function afficherCriteresTemp() {
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Type</label>
+                    <label style="font-size: 0.85rem; color: #666;">Type
+                        <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📌</span>
+                    </label>
                     <select class="controle-form"
                             onchange="modifierCritereTemp(${index}, 'type', this.value); afficherCriteresTemp();">
                         <option value="holistique" ${critere.type === 'holistique' ? 'selected' : ''}>Holistique</option>
@@ -2681,7 +2683,9 @@ function afficherCriteresGrille(grille) {
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: #666;">Type</label>
+                    <label style="font-size: 0.85rem; color: #666;">Type
+                        <span class="tooltip-aide" title="Holistique : évalue l'ensemble en considérant les interrelations entre les éléments. Analytique : décompose et évalue chaque élément séparément. Algorithmique : calcul automatique basé sur une formule (ex : nombre d'erreurs en français écrit).">📌</span>
+                    </label>
                     <select class="controle-form"
                             onchange="modifierCritereGrille('${grille.id}', ${index}, 'type', this.value); afficherCriteresGrille(obtenirGrilleParId('${grille.id}'));">
                         <option value="holistique" ${critere.type === 'holistique' ? 'selected' : ''}>Holistique</option>
