@@ -4370,9 +4370,12 @@
 
                                 <!-- ═══════════════════════════════════════════════════════════
                                      SECTION 2 : INFORMATIONS DE BASE
-                                     Type, Description, Pondération, Grille de critères
+                                     Ligne 2 : Type + Description
+                                     Ligne 3 : Pondération + Grille de critères (avec notes)
                                      ═══════════════════════════════════════════════════════════ -->
-                                <div id="champsStandard" style="display: grid; grid-template-columns: 1fr 1.5fr 0.8fr 1.2fr; gap: 15px; margin-bottom: 15px;">
+
+                                <!-- Ligne 2 : Type + Description -->
+                                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 15px;">
                                     <div class="groupe-form">
                                         <label>Type</label>
                                         <select id="productionType" class="controle-form"
@@ -4403,29 +4406,29 @@
                                         <input type="text" id="productionDescription" class="controle-form"
                                             placeholder="Ex: Stratégies de lecture">
                                     </div>
-                                    <div class="groupe-form" id="champPonderation">
-                                        <label>Pondération (%)</label>
-                                        <input type="number" id="productionPonderation" class="controle-form" min="0"
-                                            max="100" placeholder="Ex: 20">
-                                    </div>
-                                    <div class="groupe-form" id="champGrilleSeparee">
-                                        <label>Grille de critères</label>
-                                        <select id="productionGrille" class="controle-form">
-                                            <option value="">Aucune</option>
-                                        </select>
-                                    </div>
-                                    <!-- Grille inline pour artefacts (cachée par défaut) -->
-                                    <div class="groupe-form" id="champGrilleInline" style="display: none;">
-                                        <label>Grille de critères</label>
-                                        <select id="productionGrilleInline" class="controle-form">
-                                            <option value="">Aucune</option>
-                                        </select>
-                                    </div>
                                 </div>
 
-                                <!-- Note pour artefacts (pondération) -->
-                                <div id="msgPonderationArtefact" style="display: none; margin-bottom: 15px; padding: 10px 15px; background: var(--jaune-pale); border-left: 3px solid var(--jaune-fonce); border-radius: 4px; font-size: 0.9rem;">
-                                    <strong>Note :</strong> Les artefacts individuels n'ont pas de pondération propre. C'est le Portfolio conteneur qui définit la pondération globale.
+                                <!-- Ligne 3 : Pondération + Grille de critères -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                                    <!-- Pondération + Note explicative -->
+                                    <div id="champPonderation" style="display: grid; grid-template-columns: 150px 1fr; gap: 15px; align-items: start;">
+                                        <div class="groupe-form" style="margin: 0;">
+                                            <label>Pondération (%)</label>
+                                            <input type="number" id="productionPonderation" class="controle-form" min="0"
+                                                max="100" placeholder="Ex: 20">
+                                        </div>
+                                        <p id="notePonderation" style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5; display: none;"></p>
+                                    </div>
+                                    <!-- Grille de critères + Note explicative -->
+                                    <div id="champGrille" style="display: grid; grid-template-columns: 200px 1fr; gap: 15px; align-items: start;">
+                                        <div class="groupe-form" style="margin: 0;">
+                                            <label>Grille de critères</label>
+                                            <select id="productionGrille" class="controle-form">
+                                                <option value="">Aucune</option>
+                                            </select>
+                                        </div>
+                                        <p id="noteGrille" style="font-size: 0.85rem; color: var(--gris-moyen); margin: 0; padding-top: 28px; line-height: 1.5; display: none;"></p>
+                                    </div>
                                 </div>
 
                                 <!-- ═══════════════════════════════════════════════════════════
