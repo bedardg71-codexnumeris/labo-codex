@@ -480,30 +480,26 @@
             const checked = pratiquesSelectionnees.includes(p.code) ? 'checked' : '';
             const couleurClasse = `badge-type-${p.code.toLowerCase()}`;
             return `
-                <label class="checkbox-pratique" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                <label class="checkbox-pratique" style="display: inline-flex; align-items: center; gap: 4px; margin-right: 15px; cursor: pointer;">
                     <input type="checkbox"
                            id="${idPrefix}_pratique_${p.code}"
                            name="${idPrefix}_pratiques"
                            value="${p.code}"
                            ${checked}
-                           style="width: 18px; height: 18px; cursor: pointer;">
+                           style="width: 14px; height: 14px; cursor: pointer;">
                     <span class="badge-type-pratique ${couleurClasse}">${p.code}</span>
-                    <span style="color: #666; font-size: 0.9rem;">${p.nom}</span>
                 </label>
             `;
         }).join('');
 
         return `
-            <div class="champ-pratiques-compatibles" style="margin: 15px 0; padding: 15px; background: var(--bleu-tres-pale); border-radius: 8px;">
-                <label style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--bleu-principal);">
-                    Pratiques de notation compatibles :
-                </label>
-                <div class="checkboxes-pratiques">
+            <div class="champ-pratiques-compatibles" style="margin: 10px 0; padding: 10px 15px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px;">
+                    <span style="font-weight: 500; color: var(--bleu-principal); font-size: 0.9rem; margin-right: 10px;">
+                        Pratiques compatibles :
+                    </span>
                     ${checkboxes}
                 </div>
-                <p style="margin-top: 8px; font-size: 0.8rem; color: #888; font-style: italic;">
-                    Cochez les pratiques avec lesquelles ce matériel peut être utilisé.
-                </p>
             </div>
         `;
     }

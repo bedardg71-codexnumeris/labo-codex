@@ -120,6 +120,7 @@ function creerNouvelEnsembleObjectifs() {
         etablissement: '',
         discipline: '',
         description: '',
+        pratiquesCompatibles: [],
         version: '1.0',
         date_creation: new Date().toISOString().split('T')[0],
         objectifs: []
@@ -278,6 +279,11 @@ function genererFormulaireEnsemble(ensemble) {
                           placeholder="Description optionnelle de cet ensemble d'objectifs"
                           oninput="marquerEnsembleModifie()">${ensemble.description || ''}</textarea>
             </div>
+
+            <!-- Pratiques compatibles -->
+            ${typeof GabaritsUtils !== 'undefined'
+                ? GabaritsUtils.genererCheckboxesPratiques('objectifs', ensemble.pratiquesCompatibles || [])
+                : ''}
         </div>
 
         <!-- Liste des objectifs -->
@@ -559,12 +565,18 @@ function sauvegarderEnsembleObjectifs() {
         }
     }
 
+    // Lire les pratiques compatibles sélectionnées
+    const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
+        ? GabaritsUtils.lirePratiquesSelectionnees('objectifs')
+        : [];
+
     // Mettre à jour l'ensemble
     ensembles[index].nom = nom;
     ensembles[index].auteur = auteur;
     ensembles[index].etablissement = etablissement;
     ensembles[index].discipline = discipline;
     ensembles[index].description = description;
+    ensembles[index].pratiquesCompatibles = pratiquesCompatibles;
     ensembles[index].objectifs = objectifs;
     ensembles[index].date_modification = new Date().toISOString().split('T')[0];
 

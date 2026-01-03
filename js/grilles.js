@@ -602,9 +602,15 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
 
     let grilles = await db.get('grillesTemplates') || [];
 
+    // Lire les pratiques compatibles sélectionnées
+    const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
+        ? GabaritsUtils.lirePratiquesSelectionnees('grille')
+        : [];
+
     if (grilleTemplateActuelle) {
         // Mode édition
         grilleTemplateActuelle.nom = nomGrille;
+        grilleTemplateActuelle.pratiquesCompatibles = pratiquesCompatibles;
         grilleTemplateActuelle.dateModification = new Date().toISOString();
 
         const index = grilles.findIndex(g => g.id === grilleTemplateActuelle.id);
@@ -617,6 +623,7 @@ async function sauvegarderGrilleTemplate(silencieux = false) {
             id: 'GRILLE' + Date.now(),
             nom: nomGrille,
             criteres: window.tempCriteres || [],
+            pratiquesCompatibles: pratiquesCompatibles,
             dateCreation: new Date().toISOString(),
             dateModification: new Date().toISOString(),
             dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) - Nouvelle grille dans bibliothèque par défaut
@@ -2483,11 +2490,18 @@ async function chargerGrillePourModif(id) {
     if (btnDupliquer) btnDupliquer.style.display = 'inline-block';
     if (btnSupprimer) btnSupprimer.style.display = 'inline-block';
 
-    // Définir la grille actuelle
-    grilleTemplateActuelle = id;
+    // Définir la grille actuelle (objet complet, pas juste l'ID)
+    grilleTemplateActuelle = grille;
 
     // Remplir le formulaire
     document.getElementById('nomGrilleTemplate').value = grille.nom || '';
+
+    // Afficher les checkboxes pratiques compatibles
+    const containerPratiques = document.getElementById('checkboxesPratiquesGrille');
+    if (containerPratiques && typeof GabaritsUtils !== 'undefined') {
+        const pratiquesActuelles = grille.pratiquesCompatibles || [];
+        containerPratiques.innerHTML = GabaritsUtils.genererCheckboxesPratiques('grille', pratiquesActuelles);
+    }
 
     // Afficher les critères
     afficherCriteresGrille(grille);

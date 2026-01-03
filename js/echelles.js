@@ -577,8 +577,14 @@ async function sauvegarderNomEchelle() {
             echelleTemplateActuelle = { ...echelleActuelleEnStorage };
         }
 
+        // Lire les pratiques compatibles sélectionnées
+        const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
+            ? GabaritsUtils.lirePratiquesSelectionnees('echelle')
+            : [];
+
         // Mettre à jour en mémoire
         echelleTemplateActuelle.nom = nom;
+        echelleTemplateActuelle.pratiquesCompatibles = pratiquesCompatibles;
         echelleTemplateActuelle.dateModification = new Date().toISOString();
 
         // Mettre à jour dans localStorage - SAUVEGARDER TOUTE L'ÉCHELLE (y compris les niveaux)
@@ -2764,6 +2770,13 @@ async function chargerEchellePourModif(id) {
     // Remplir le formulaire
     document.getElementById('nomEchelleTemplate').value = echelle.nom || '';
 
+    // Afficher les checkboxes pratiques compatibles
+    const containerPratiques = document.getElementById('checkboxesPratiquesEchelle');
+    if (containerPratiques && typeof GabaritsUtils !== 'undefined') {
+        const pratiquesActuelles = echelle.pratiquesCompatibles || [];
+        containerPratiques.innerHTML = GabaritsUtils.genererCheckboxesPratiques('echelle', pratiquesActuelles);
+    }
+
     // Afficher les niveaux
     afficherNiveauxEchelle(echelle);
 
@@ -3327,11 +3340,17 @@ async function sauvegarderEchelleComplete() {
             return;
         }
 
+        // Lire les pratiques compatibles sélectionnées
+        const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
+            ? GabaritsUtils.lirePratiquesSelectionnees('echelle')
+            : [];
+
         // Créer la nouvelle échelle
         const nouvelleEchelle = {
             id: 'echelle_' + Date.now(),
             nom: nom,
             niveaux: niveaux,
+            pratiquesCompatibles: pratiquesCompatibles,
             dansBibliotheque: true,
             dateCreation: new Date().toISOString()
         };
