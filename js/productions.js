@@ -2704,11 +2704,17 @@ function creerNouvelleProduction() {
     const champsPortfolio = document.getElementById('champsPortfolio');
     if (champsPortfolio) champsPortfolio.style.display = 'none';
 
-    // Réinitialiser les notes et états des champs
-    const notePonderation = document.getElementById('notePonderation');
-    const noteGrille = document.getElementById('noteGrille');
-    if (notePonderation) notePonderation.style.display = 'none';
-    if (noteGrille) noteGrille.style.display = 'none';
+    // Réinitialiser la date d'échéance
+    const inputDateEcheance = document.getElementById('productionDateEcheance');
+    if (inputDateEcheance) inputDateEcheance.value = '';
+
+    // Réinitialiser le contexte facultatif
+    const productionContexte = document.getElementById('productionContexte');
+    if (productionContexte) productionContexte.value = '';
+
+    // Appeler gererChangementTypeProduction pour réinitialiser tous les états
+    // (cartes contextuelles, notes, champs grisés, etc.)
+    gererChangementTypeProduction();
 
     // Réinitialiser les checkboxes de pratiques compatibles
     const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
