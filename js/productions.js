@@ -1469,8 +1469,8 @@ async function afficherBibliothequeProductions() {
                             <button
                                 onclick="partagerProduction('${prod.id}')"
                                 class="btn btn-secondaire btn-tres-compact"
-                                title="Partager avec la communauté">
-                                Partager
+                                title="Exporter en JSON">
+                                Exporter
                             </button>
                             <button
                                 onclick="retirerProductionDeBibliotheque('${prod.id}')"
@@ -1493,8 +1493,12 @@ async function afficherBibliothequeProductions() {
                         Ajouter mes productions à la bibliothèque
                     </button>
                     <button onclick="exporterProductions()" class="btn btn-secondaire">
-                        Partager toutes mes productions
+                        Exporter toutes mes productions
                     </button>
+                    <button onclick="document.getElementById('fichier-import-productions-modal').click()" class="btn btn-secondaire">
+                        Importer des productions
+                    </button>
+                    <input type="file" id="fichier-import-productions-modal" accept=".json" style="display: none;" onchange="importerProductions(event)">
                 </div>
     `;
 
@@ -1624,14 +1628,6 @@ async function afficherBibliothequeProductions() {
     });
 
     modalHTML += `
-                </div>
-
-                <!-- Bouton "Ajouter des productions" après la Section 2 -->
-                <div style="margin-top: 15px; text-align: center;">
-                    <button onclick="document.getElementById('fichier-import-productions-modal').click()" class="btn btn-secondaire">
-                        Ajouter des productions
-                    </button>
-                    <input type="file" id="fichier-import-productions-modal" accept=".json" style="display: none;" onchange="importerProductions(event)">
                 </div>
             </div>
         </div>

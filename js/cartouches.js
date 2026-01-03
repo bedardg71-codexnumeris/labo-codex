@@ -122,7 +122,72 @@ async function initialiserModuleCartouches() {
     // ✅ AJOUT (8 décembre 2025) : Migration pour ajouter le flag dansBibliotheque
     await migrerCartouchesVersBibliotheque();
 
+    // ✅ AJOUT (3 janvier 2026) : Assurer présence de la cartouche générique
+    await assurerCartoucheGenerique();
+
     console.log('   ✅ Module Cartouches initialisé (interface unifiée 2 colonnes)');
+}
+
+/**
+ * Assure la présence de la cartouche générique dans la bibliothèque
+ * Facilite la compréhension du système pour les nouveaux utilisateurs
+ */
+async function assurerCartoucheGenerique() {
+    // Vérifier que la grille générique existe
+    const grilles = await db.get('grillesTemplates') || [];
+    const grilleGenerique = grilles.find(g => g.id === 'GRILLE_GENERIQUE');
+    if (!grilleGenerique) return;
+
+    // Vérifier si la cartouche générique existe déjà
+    const cartouches = await db.get('cartouches_GRILLE_GENERIQUE') || [];
+    const existe = cartouches.some(c => c.id === 'CART_GENERIQUE');
+    if (existe) return;
+
+    console.log('💬 Ajout de la cartouche générique à la bibliothèque...');
+
+    const cartoucheGenerique = {
+        id: 'CART_GENERIQUE',
+        nom: 'Cartouche générique (exemple)',
+        grilleId: 'GRILLE_GENERIQUE',
+        echelleId: 'ECHELLE_GENERIQUE',
+        contexte: 'Exemple de cartouche de rétroaction - Modifiez ou dupliquez selon vos besoins',
+        criteres: [
+            { id: 'CR_COMPREHENSION', nom: 'Compréhension' },
+            { id: 'CR_APPLICATION', nom: 'Application' },
+            { id: 'CR_ANALYSE', nom: 'Analyse' },
+            { id: 'CR_SYNTHESE', nom: 'Synthèse' }
+        ],
+        niveaux: [
+            { code: 'I', nom: 'Insuffisant' },
+            { code: 'D', nom: 'En développement' },
+            { code: 'M', nom: 'Maîtrisé' },
+            { code: 'E', nom: 'Étendu' }
+        ],
+        commentaires: {
+            'CR_COMPREHENSION_I': 'La compréhension du sujet reste insuffisante. Revois les concepts de base.',
+            'CR_COMPREHENSION_D': 'Tu saisis les grandes lignes, mais certains aspects restent flous.',
+            'CR_COMPREHENSION_M': 'Bonne compréhension du sujet et de ses enjeux.',
+            'CR_COMPREHENSION_E': 'Excellente compréhension, tu perçois les nuances et les liens.',
+            'CR_APPLICATION_I': 'Difficulté à appliquer les connaissances. Entraîne-toi avec des exemples simples.',
+            'CR_APPLICATION_D': 'Application partielle. Continue à pratiquer pour plus d\'aisance.',
+            'CR_APPLICATION_M': 'Tu appliques correctement les connaissances dans ce contexte.',
+            'CR_APPLICATION_E': 'Application remarquable, tu adaptes tes connaissances avec créativité.',
+            'CR_ANALYSE_I': 'L\'analyse manque de profondeur. Décompose davantage les éléments.',
+            'CR_ANALYSE_D': 'Analyse en développement. Pousse plus loin l\'examen des composantes.',
+            'CR_ANALYSE_M': 'Bonne capacité d\'analyse, tu identifies bien les éléments clés.',
+            'CR_ANALYSE_E': 'Analyse approfondie et nuancée, tu perçois les subtilités.',
+            'CR_SYNTHESE_I': 'La synthèse est absente ou incohérente. Travaille l\'intégration des idées.',
+            'CR_SYNTHESE_D': 'Synthèse partielle. Cherche à mieux relier les éléments entre eux.',
+            'CR_SYNTHESE_M': 'Bonne synthèse, tu intègres les éléments de façon cohérente.',
+            'CR_SYNTHESE_E': 'Synthèse remarquable, tu reformules avec clarté et originalité.'
+        },
+        verrouille: false,
+        dansBibliotheque: true
+    };
+
+    cartouches.push(cartoucheGenerique);
+    await db.set('cartouches_GRILLE_GENERIQUE', cartouches);
+    console.log('   ✅ Cartouche générique ajoutée à la bibliothèque');
 }
 
 /**
@@ -3152,8 +3217,8 @@ async function afficherBibliothequeCartouches() {
                             <button
                                 onclick="partagerCartouche('${cartouche.id}', '${cartouche.grilleId}')"
                                 class="btn btn-secondaire btn-tres-compact"
-                                title="Partager avec la communauté">
-                                Partager
+                                title="Exporter en JSON">
+                                Exporter
                             </button>
                             <button
                                 onclick="retirerCartoucheDeBibliotheque('${cartouche.id}', '${cartouche.grilleId}')"
@@ -3171,11 +3236,15 @@ async function afficherBibliothequeCartouches() {
     html += `
                     </div>
 
-                    <!-- Bouton "Partager toutes mes cartouches" après la Section 1 -->
-                    <div style="margin-top: 15px; text-align: center;">
+                    <!-- Boutons Import/Export après la Section 1 -->
+                    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
                         <button onclick="exporterCartouches()" class="btn btn-secondaire">
-                            Partager toutes mes cartouches
+                            Exporter toutes mes cartouches
                         </button>
+                        <button onclick="document.getElementById('fichier-import-cartouches-modal').click()" class="btn btn-secondaire">
+                            Importer des cartouches
+                        </button>
+                        <input type="file" id="fichier-import-cartouches-modal" accept=".json" style="display: none;" onchange="importerCartouches(event)">
                     </div>
                 </div>
 
@@ -3265,14 +3334,6 @@ async function afficherBibliothequeCartouches() {
     });
 
     html += `
-                    </div>
-
-                    <!-- Bouton "Ajouter des cartouches" après la Section 2 -->
-                    <div style="margin-top: 15px; text-align: center;">
-                        <button onclick="document.getElementById('fichier-import-cartouches-modal').click()" class="btn btn-secondaire">
-                            Ajouter des cartouches
-                        </button>
-                        <input type="file" id="fichier-import-cartouches-modal" accept=".json" style="display: none;" onchange="importerCartouches(event)">
                     </div>
             </div>
         </div>

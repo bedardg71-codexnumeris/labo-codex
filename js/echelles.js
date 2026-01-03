@@ -404,11 +404,46 @@ async function migrerEchellesVersBibliotheque() {
     }
 }
 
+/**
+ * Assure la présence de l'échelle générique dans la bibliothèque
+ * Facilite la compréhension du système pour les nouveaux utilisateurs
+ */
+async function assurerEchelleGenerique() {
+    const echelles = await db.get('echellesTemplates') || [];
+
+    // Vérifier si l'échelle générique existe déjà
+    const existe = echelles.some(e => e.id === 'ECHELLE_GENERIQUE');
+    if (existe) return;
+
+    console.log('📊 Ajout de l\'échelle générique à la bibliothèque...');
+
+    const echelleGenerique = {
+        id: 'ECHELLE_GENERIQUE',
+        nom: 'Échelle générique (exemple)',
+        description: 'Échelle 4 niveaux de performance - Modifiez ou dupliquez selon vos besoins',
+        niveaux: [
+            { code: 'I', nom: 'Insuffisant', min: 0, max: 59, valeur: 45, couleur: '#dc3545' },
+            { code: 'D', nom: 'En développement', min: 60, max: 74, valeur: 67, couleur: '#fd7e14' },
+            { code: 'M', nom: 'Maîtrisé', min: 75, max: 89, valeur: 82, couleur: '#28a745' },
+            { code: 'E', nom: 'Étendu', min: 90, max: 100, valeur: 95, couleur: '#007bff' }
+        ],
+        verrouille: false,
+        dansBibliotheque: true
+    };
+
+    echelles.push(echelleGenerique);
+    await db.set('echellesTemplates', echelles);
+    console.log('   ✅ Échelle générique ajoutée à la bibliothèque');
+}
+
 async function initialiserModuleEchelles() {
     console.log('📈 Initialisation du module Échelles de performance');
 
     // ✅ AJOUT (8 décembre 2025) : Migration vers système de bibliothèque
     await migrerEchellesVersBibliotheque();
+
+    // ✅ AJOUT (3 janvier 2026) : Assurer présence de l'échelle générique
+    await assurerEchelleGenerique();
 
     // Afficher la sidebar avec la liste des échelles (Beta 80.5+)
     if (typeof afficherListeEchelles === 'function') {
@@ -2162,8 +2197,8 @@ async function afficherBibliothequeEchelles() {
                             <button
                                 onclick="partagerEchelle('${echelle.id}')"
                                 class="btn btn-secondaire btn-tres-compact"
-                                title="Partager avec la communauté">
-                                Partager
+                                title="Exporter en JSON">
+                                Exporter
                             </button>
                             <button
                                 onclick="retirerEchelleDeBibliotheque('${echelle.id}')"
@@ -2181,11 +2216,15 @@ async function afficherBibliothequeEchelles() {
     html += `
                     </div>
 
-                    <!-- Bouton "Partager toutes mes échelles" après la Section 1 -->
-                    <div style="margin-top: 15px; text-align: center;">
+                    <!-- Boutons Import/Export après la Section 1 -->
+                    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
                         <button onclick="exporterEchelles()" class="btn btn-secondaire">
-                            Partager toutes mes échelles
+                            Exporter toutes mes échelles
                         </button>
+                        <button onclick="document.getElementById('fichier-import-echelles-modal').click()" class="btn btn-secondaire">
+                            Importer des échelles
+                        </button>
+                        <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" onchange="importerEchelles(event)">
                     </div>
                 </div>
 
@@ -2322,14 +2361,6 @@ async function afficherBibliothequeEchelles() {
     });
 
     html += `
-                    </div>
-
-                    <!-- Bouton "Ajouter des échelles" après la Section 2 -->
-                    <div style="margin-top: 15px; text-align: center;">
-                        <button onclick="document.getElementById('fichier-import-echelles-modal').click()" class="btn btn-secondaire">
-                            Ajouter des échelles
-                        </button>
-                        <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" onchange="importerEchelles(event)">
                     </div>
             </div>
         </div>

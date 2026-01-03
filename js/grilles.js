@@ -1419,11 +1419,47 @@ async function migrerGrillesVersBibliotheque() {
     }
 }
 
+/**
+ * Assure la présence de la grille générique dans la bibliothèque
+ * Facilite la compréhension du système pour les nouveaux utilisateurs
+ */
+async function assurerGrilleGenerique() {
+    const grilles = await db.get('grillesTemplates') || [];
+
+    // Vérifier si la grille générique existe déjà
+    const existe = grilles.some(g => g.id === 'GRILLE_GENERIQUE');
+    if (existe) return;
+
+    console.log('📋 Ajout de la grille générique à la bibliothèque...');
+
+    const grilleGenerique = {
+        id: 'GRILLE_GENERIQUE',
+        nom: 'Grille générique (exemple)',
+        description: 'Grille 4 critères - Modifiez ou dupliquez selon vos besoins',
+        echelleId: 'ECHELLE_GENERIQUE',
+        criteres: [
+            { id: 'CR_COMPREHENSION', code: 'comp', nom: 'Compréhension', ponderation: 25, description: 'Capacité à saisir le sens et les enjeux du sujet', type: 'holistique' },
+            { id: 'CR_APPLICATION', code: 'appl', nom: 'Application', ponderation: 25, description: 'Capacité à utiliser les connaissances dans un contexte donné', type: 'holistique' },
+            { id: 'CR_ANALYSE', code: 'anal', nom: 'Analyse', ponderation: 25, description: 'Capacité à décomposer et examiner les éléments', type: 'holistique' },
+            { id: 'CR_SYNTHESE', code: 'synt', nom: 'Synthèse', ponderation: 25, description: 'Capacité à intégrer et reformuler de manière cohérente', type: 'holistique' }
+        ],
+        verrouille: false,
+        dansBibliotheque: true
+    };
+
+    grilles.push(grilleGenerique);
+    await db.set('grillesTemplates', grilles);
+    console.log('   ✅ Grille générique ajoutée à la bibliothèque');
+}
+
 async function initialiserModuleGrilles() {
     console.log('Initialisation du module Grilles');
 
     // ✅ AJOUT (8 décembre 2025) : Migration vers système bibliothèque
     await migrerGrillesVersBibliotheque();
+
+    // ✅ AJOUT (3 janvier 2026) : Assurer présence de la grille générique
+    await assurerGrilleGenerique();
 
     // Charger la liste des grilles
     await chargerListeGrillesTemplates();
@@ -2106,8 +2142,8 @@ async function afficherBibliothequeGrilles() {
                             <button
                                 onclick="partagerGrille('${grille.id}')"
                                 class="btn btn-secondaire btn-tres-compact"
-                                title="Partager avec la communauté">
-                                Partager
+                                title="Exporter en JSON">
+                                Exporter
                             </button>
                             <button
                                 onclick="retirerGrilleDeBibliotheque('${grille.id}')"
@@ -2125,11 +2161,15 @@ async function afficherBibliothequeGrilles() {
     html += `
                     </div>
 
-                    <!-- Bouton "Partager toutes mes grilles" après la Section 1 -->
-                    <div style="margin-top: 15px; text-align: center;">
+                    <!-- Boutons Import/Export après la Section 1 -->
+                    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
                         <button onclick="exporterGrilles()" class="btn btn-secondaire">
-                            Partager toutes mes grilles
+                            Exporter toutes mes grilles
                         </button>
+                        <button onclick="document.getElementById('fichier-import-grilles-modal').click()" class="btn btn-secondaire">
+                            Importer des grilles
+                        </button>
+                        <input type="file" id="fichier-import-grilles-modal" accept=".json" style="display: none;" onchange="importerGrilles(event)">
                     </div>
                 </div>
 
@@ -2222,14 +2262,6 @@ async function afficherBibliothequeGrilles() {
     });
 
     html += `
-                    </div>
-
-                    <!-- Bouton "Ajouter des grilles" après la Section 2 -->
-                    <div style="margin-top: 15px; text-align: center;">
-                        <button onclick="document.getElementById('fichier-import-grilles-modal').click()" class="btn btn-secondaire">
-                            Ajouter des grilles
-                        </button>
-                        <input type="file" id="fichier-import-grilles-modal" accept=".json" style="display: none;" onchange="importerGrilles(event)">
                     </div>
             </div>
         </div>

@@ -53,8 +53,8 @@ const configurationsOnglets = {
         { id: 'productions', label: 'Productions étudiantes' },
         { id: 'grille-criteres', label: 'Grilles de critères' },
         { id: 'echelle-performance', label: 'Échelles de performance' },
-        { id: 'pratiques-notation', label: 'Pratiques de notation' },
-        { id: 'retroactions', label: 'Cartouches de rétroaction' }
+        { id: 'retroactions', label: 'Cartouches de rétroaction' },
+        { id: 'pratiques-notation', label: 'Pratiques de notation' }
     ],
     // ✨ REFONTE UX (18 déc 2025) : 3 onglets (Pratique de notation migrée vers Construction)
     // Structure : Trimestre, Préférences, Données
