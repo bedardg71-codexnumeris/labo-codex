@@ -714,7 +714,8 @@ async function descendreEvaluation(id) {
  */
 function gererChangementTypeProduction() {
     const type = document.getElementById('productionType').value;
-    const champsPortfolio = document.getElementById('champsPortfolio');
+
+    // Éléments de formulaire
     const champPonderation = document.getElementById('champPonderation');
     const champGrilleSeparee = document.getElementById('champGrilleSeparee');
     const champGrilleInline = document.getElementById('champGrilleInline');
@@ -722,8 +723,17 @@ function gererChangementTypeProduction() {
     const champDateEcheance = document.getElementById('champDateEcheance');
     const msgPortfolioSansEcheance = document.getElementById('msgPortfolioSansEcheance');
 
-    // Réinitialiser tout d'abord
-    if (champsPortfolio) champsPortfolio.style.display = 'none';
+    // Cartes contextuelles (Section 3)
+    const carteContextePortfolio = document.getElementById('carteContextePortfolio');
+    const carteContexteArtefact = document.getElementById('carteContexteArtefact');
+    const carteContexteStandard = document.getElementById('carteContexteStandard');
+
+    // Ancien élément (compatibilité)
+    const champsPortfolio = document.getElementById('champsPortfolio');
+
+    // ═══════════════════════════════════════════════════════════
+    // RÉINITIALISER : affichage par défaut (production standard)
+    // ═══════════════════════════════════════════════════════════
     if (champPonderation) champPonderation.style.display = 'block';
     if (champGrilleSeparee) champGrilleSeparee.style.display = 'block';
     if (champGrilleInline) champGrilleInline.style.display = 'none';
@@ -731,23 +741,41 @@ function gererChangementTypeProduction() {
     if (champDateEcheance) champDateEcheance.style.display = 'grid';
     if (msgPortfolioSansEcheance) msgPortfolioSansEcheance.style.display = 'none';
 
-    // Appliquer selon le type
+    // Masquer toutes les cartes contextuelles
+    if (carteContextePortfolio) carteContextePortfolio.style.display = 'none';
+    if (carteContexteArtefact) carteContexteArtefact.style.display = 'none';
+    if (carteContexteStandard) carteContexteStandard.style.display = 'none';
+    if (champsPortfolio) champsPortfolio.style.display = 'none';
+
+    // ═══════════════════════════════════════════════════════════
+    // APPLIQUER : configuration selon le type
+    // ═══════════════════════════════════════════════════════════
     if (type === 'portfolio') {
-        // Portfolio conteneur : afficher config, masquer grille et échéance
-        if (champsPortfolio) champsPortfolio.style.display = 'block';
+        // PORTFOLIO CONTENEUR
+        // - Afficher carte contexte portfolio
+        // - Masquer grille (pas de grille pour le conteneur)
+        // - Masquer échéance (pas d'échéance pour le conteneur)
+        if (carteContextePortfolio) carteContextePortfolio.style.display = 'block';
         if (champGrilleSeparee) champGrilleSeparee.style.display = 'none';
-        // Les portfolios conteneurs n'ont pas d'échéance - seuls les artefacts en ont
         if (champDateEcheance) champDateEcheance.style.display = 'none';
         if (msgPortfolioSansEcheance) msgPortfolioSansEcheance.style.display = 'block';
+
     } else if (type === 'artefact-portfolio') {
-        // Artefact individuel : masquer pondération, afficher grille inline, afficher message
+        // ARTEFACT DE PORTFOLIO
+        // - Afficher carte contexte artefact
+        // - Masquer pondération (définie par le portfolio)
+        // - Utiliser grille inline
+        if (carteContexteArtefact) carteContexteArtefact.style.display = 'block';
         if (champPonderation) champPonderation.style.display = 'none';
         if (champGrilleSeparee) champGrilleSeparee.style.display = 'none';
         if (champGrilleInline) champGrilleInline.style.display = 'block';
         if (msgPonderation) msgPonderation.style.display = 'block';
-
-        // Synchroniser les selects de grille
         synchroniserGrilles();
+
+    } else if (type) {
+        // PRODUCTION STANDARD (examen, travail, quiz, etc.)
+        // - Afficher carte contexte standard (champ facultatif)
+        if (carteContexteStandard) carteContexteStandard.style.display = 'block';
     }
 }
 
