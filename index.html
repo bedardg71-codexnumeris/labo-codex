@@ -5548,25 +5548,30 @@
                                         </div>
                                     </div>
 
-                            <!-- Sélection de la grille associée -->
-                            <div class="groupe-form" style="margin-bottom: 20px;">
-                                <label>Grille associée :
-                                    <span class="tooltip-aide" title="La rétroaction fournie à l'apprenant repose sur le croisement de deux éléments : les critères d'évaluation et les niveaux de performance. Ce croisement forme une grille descriptive qui précise : le niveau atteint, ce qui est maîtrisé, ce qui reste à travailler, et comment progresser. Une rétroaction efficace est spécifique, actionnable, utile et bienveillante. Il est préférable d'éviter le « sandwich » (positif-négatif-positif) qui n'atteint pas ces objectifs.">📌</span>
-                                </label>
-                                <select id="selectGrilleCartouche" class="controle-form" onchange="onChangeGrilleCartouche(this.value)">
-                                    <option value="">-- Sélectionnez une grille --</option>
-                                    <!-- Options générées par JS -->
-                                </select>
-                            </div>
-
-                            <!-- Nom + Pratiques compatibles sur même ligne -->
-                            <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
-                                <div class="groupe-form" style="flex: 1; min-width: 300px; margin: 0;">
+                            <!-- Grille + Échelle + Nom sur même ligne -->
+                            <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
+                                <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
+                                    <label>Grille (critères) :
+                                        <span class="tooltip-aide" title="La rétroaction fournie à l'apprenant repose sur le croisement de deux éléments : les critères d'évaluation et les niveaux de performance. Ce croisement forme une grille descriptive qui précise : le niveau atteint, ce qui est maîtrisé, ce qui reste à travailler, et comment progresser. Une rétroaction efficace est spécifique, actionnable, utile et bienveillante. Il est préférable d'éviter le « sandwich » (positif-négatif-positif) qui n'atteint pas ces objectifs.">📌</span>
+                                    </label>
+                                    <select id="selectGrilleCartouche" class="controle-form" onchange="onChangeSelectionCartouche()">
+                                        <option value="">-- Grille --</option>
+                                        <!-- Options générées par JS -->
+                                    </select>
+                                </div>
+                                <div class="groupe-form" style="flex: 0 0 200px; margin: 0;">
+                                    <label>Échelle (niveaux) :</label>
+                                    <select id="selectEchelleCartouche" class="controle-form" onchange="onChangeSelectionCartouche()">
+                                        <option value="">-- Échelle --</option>
+                                        <!-- Options générées par JS -->
+                                    </select>
+                                </div>
+                                <div class="groupe-form" style="flex: 1; min-width: 250px; margin: 0;">
                                     <label>Nom de la cartouche :</label>
                                     <input type="text" id="nomCartouche" class="controle-form"
-                                        placeholder="Ex: Dissertation argumentative - Session Automne 2025">
+                                        placeholder="Ex: Dissertation argumentative - H2026">
                                 </div>
-                                <div id="checkboxesPratiquesCartouche" style="flex-shrink: 0;"></div>
+                                <div id="checkboxesPratiquesCartouche" style="flex-shrink: 0; align-self: flex-end;"></div>
                             </div>
 
                             <div class="groupe-form">

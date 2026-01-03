@@ -447,49 +447,33 @@ async function afficherMatriceRetroaction() {
 
     const container = document.getElementById('matriceContainer');
 
-    // NOUVELLE LOGIQUE: Lire les niveaux depuis toutes les échelles disponibles
-    // pour permettre d'ajouter des niveaux manquants (ex: niveau "0")
-    const echelles = await db.get('echellesTemplates') || [];
+    // Utiliser les niveaux de l'échelle sélectionnée (stockés dans cartoucheActuel)
+    // L'ordre est conservé tel que défini par l'utilisateur dans l'échelle
+    let niveauxAffichage = [];
 
-    // Créer un Set de tous les niveaux disponibles (fusionner toutes les échelles)
-    const niveauxDisponiblesMap = new Map(); // code -> {code, nom, couleur}
+    // Si echelleId est défini, charger les couleurs depuis l'échelle source
+    if (cartoucheActuel.echelleId) {
+        const echelles = await db.get('echellesTemplates') || [];
+        const echelleSource = echelles.find(e => e.id === cartoucheActuel.echelleId);
 
-    // Ajouter les niveaux de TOUTES les échelles
-    echelles.forEach(echelle => {
-        if (echelle.niveaux) {
-            echelle.niveaux.forEach(n => {
-                if (!niveauxDisponiblesMap.has(n.code)) {
-                    niveauxDisponiblesMap.set(n.code, {
-                        code: n.code,
-                        nom: n.nom,
-                        couleur: n.couleur || '#cccccc'
-                    });
-                }
-            });
+        if (echelleSource && echelleSource.niveaux) {
+            // Utiliser les niveaux de l'échelle avec leurs couleurs
+            niveauxAffichage = echelleSource.niveaux.map(n => ({
+                code: n.code,
+                nom: n.nom,
+                couleur: n.couleur || '#cccccc'
+            }));
         }
-    });
-
-    // Ajouter les niveaux de la cartouche (pour compatibilité ancienne structure)
-    if (cartoucheActuel.niveaux) {
-        cartoucheActuel.niveaux.forEach(n => {
-            if (!niveauxDisponiblesMap.has(n.code)) {
-                niveauxDisponiblesMap.set(n.code, {
-                    code: n.code,
-                    nom: n.nom,
-                    couleur: n.couleur || '#cccccc'
-                });
-            }
-        });
     }
 
-    // Convertir en tableau et trier (0 en premier, puis I, D, M, E, etc.)
-    const niveauxAffichage = Array.from(niveauxDisponiblesMap.values()).sort((a, b) => {
-        // Ordre personnalisé: 0, I, D, M, E, puis autres
-        const ordre = {'0': 0, 'I': 1, 'D': 2, 'M': 3, 'E': 4};
-        const ordreA = ordre[a.code] !== undefined ? ordre[a.code] : 99;
-        const ordreB = ordre[b.code] !== undefined ? ordre[b.code] : 99;
-        return ordreA - ordreB;
-    });
+    // Fallback: utiliser les niveaux stockés dans la cartouche
+    if (niveauxAffichage.length === 0 && cartoucheActuel.niveaux) {
+        niveauxAffichage = cartoucheActuel.niveaux.map(n => ({
+            code: n.code,
+            nom: n.nom,
+            couleur: n.couleur || '#cccccc'
+        }));
+    }
 
     const couleursParCode = {};
     niveauxAffichage.forEach(n => {
@@ -1338,8 +1322,9 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
         if (selectGrille) selectGrille.value = grilleId;
         if (selectCartouche) selectCartouche.value = cartoucheId;
 
-        // NOUVEAU (Beta 95): Peupler et désactiver le dropdown de grille (mode édition)
-        await populerDropdownGrilleCartouche(grilleId, true);
+        // NOUVEAU (Beta 95): Peupler et désactiver les dropdowns grille ET échelle (mode édition)
+        const echelleId = cartouche.echelleId || '';
+        await populerDropdownsCartouche(grilleId, echelleId, true);
 
         // Afficher les boutons Dupliquer, Exporter, Importer et Supprimer (mode édition)
         // Note: Export/Import se font maintenant via la bibliothèque
@@ -2355,11 +2340,16 @@ function annulerFormCartouche() {
     document.getElementById('nomCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
 
-    // NOUVEAU (Beta 95): Réinitialiser le dropdown de grille
+    // NOUVEAU (Beta 95): Réinitialiser les dropdowns grille ET échelle
     const selectGrille = document.getElementById('selectGrilleCartouche');
+    const selectEchelle = document.getElementById('selectEchelleCartouche');
     if (selectGrille) {
         selectGrille.value = '';
         selectGrille.disabled = false;
+    }
+    if (selectEchelle) {
+        selectEchelle.value = '';
+        selectEchelle.disabled = false;
     }
 
     console.log('Édition annulée - Retour à l\'accueil');
@@ -2397,9 +2387,12 @@ window.afficherBanqueCartouches = afficherBanqueCartouches;
 // window.filtrerCartouchesBanque = filtrerCartouchesBanque; // Fonction commentée (Beta 92)
 window.creerNouvelleCartouche = creerNouvelleCartouche;
 
-// Nouvelles fonctions Beta 95 (dropdown grille dans formulaire)
-window.populerDropdownGrilleCartouche = populerDropdownGrilleCartouche;
-window.onChangeGrilleCartouche = onChangeGrilleCartouche;
+// Nouvelles fonctions Beta 95 (dropdowns grille + échelle dans formulaire)
+window.populerDropdownsCartouche = populerDropdownsCartouche;
+window.populerDropdownGrilleCartouche = populerDropdownGrilleCartouche; // Alias compatibilité
+window.onChangeSelectionCartouche = onChangeSelectionCartouche;
+window.onChangeGrilleCartouche = onChangeGrilleCartouche; // Deprecated
+window.initialiserNouveauCartoucheAvecEchelle = initialiserNouveauCartoucheAvecEchelle;
 window.importerDepuisMarkdown = importerDepuisMarkdown;
 window.importerPartiel = importerPartiel;
 window.exporterCartouches = exporterCartouches;
@@ -2598,54 +2591,151 @@ function filtrerCartouchesBanque() {
 */
 
 /**
- * Peuple le dropdown de sélection de grille pour les cartouches
- * @param {string} selectedId - ID de la grille à pré-sélectionner (optionnel)
- * @param {boolean} disabled - Si true, désactive le dropdown (mode édition)
+ * Peuple les dropdowns de sélection de grille et échelle pour les cartouches
+ * @param {string} grilleId - ID de la grille à pré-sélectionner (optionnel)
+ * @param {string} echelleId - ID de l'échelle à pré-sélectionner (optionnel)
+ * @param {boolean} disabled - Si true, désactive les dropdowns (mode édition)
  */
+async function populerDropdownsCartouche(grilleId = '', echelleId = '', disabled = false) {
+    const selectGrille = document.getElementById('selectGrilleCartouche');
+    const selectEchelle = document.getElementById('selectEchelleCartouche');
+
+    // Peupler dropdown grille
+    if (selectGrille) {
+        const grilles = await db.get('grillesTemplates') || [];
+        let optionsHtml = '<option value="">-- Grille --</option>';
+        grilles.forEach(grille => {
+            const selected = grille.id === grilleId ? 'selected' : '';
+            const nbCriteres = grille.criteres?.length || 0;
+            optionsHtml += `<option value="${grille.id}" ${selected}>${echapperHtml(grille.nom)} (${nbCriteres} crit.)</option>`;
+        });
+        selectGrille.innerHTML = optionsHtml;
+        selectGrille.disabled = disabled;
+    }
+
+    // Peupler dropdown échelle
+    if (selectEchelle) {
+        const echelles = await db.get('echellesTemplates') || [];
+        let optionsHtml = '<option value="">-- Échelle --</option>';
+        echelles.forEach(echelle => {
+            const selected = echelle.id === echelleId ? 'selected' : '';
+            const nbNiveaux = echelle.niveaux?.length || 0;
+            optionsHtml += `<option value="${echelle.id}" ${selected}>${echapperHtml(echelle.nom)} (${nbNiveaux} niv.)</option>`;
+        });
+        selectEchelle.innerHTML = optionsHtml;
+        selectEchelle.disabled = disabled;
+    }
+}
+
+// Alias pour compatibilité
 async function populerDropdownGrilleCartouche(selectedId = '', disabled = false) {
-    const select = document.getElementById('selectGrilleCartouche');
-    if (!select) return;
-
-    const grilles = await db.get('grillesTemplates') || [];
-
-    // Générer les options
-    let optionsHtml = '<option value="">-- Sélectionnez une grille --</option>';
-    grilles.forEach(grille => {
-        const selected = grille.id === selectedId ? 'selected' : '';
-        const nbCriteres = grille.criteres?.length || 0;
-        optionsHtml += `<option value="${grille.id}" ${selected}>${echapperHtml(grille.nom)} (${nbCriteres} critères)</option>`;
-    });
-
-    select.innerHTML = optionsHtml;
-    select.disabled = disabled;
+    await populerDropdownsCartouche(selectedId, '', disabled);
 }
 
 /**
- * Gestionnaire de changement de grille dans le dropdown
- * Appelé par onchange du select #selectGrilleCartouche
- * @param {string} grilleId - ID de la grille sélectionnée
+ * Gestionnaire unifié de changement de sélection (grille OU échelle)
+ * Vérifie si les deux sont sélectionnés pour générer la matrice
  */
-async function onChangeGrilleCartouche(grilleId) {
-    if (!grilleId) {
-        // Aucune grille sélectionnée - masquer la matrice
-        const matriceRetroaction = document.getElementById('matriceRetroaction');
+async function onChangeSelectionCartouche() {
+    const selectGrille = document.getElementById('selectGrilleCartouche');
+    const selectEchelle = document.getElementById('selectEchelleCartouche');
+    const matriceRetroaction = document.getElementById('matriceRetroaction');
+
+    const grilleId = selectGrille?.value;
+    const echelleId = selectEchelle?.value;
+
+    // Si les deux ne sont pas sélectionnés, masquer la matrice
+    if (!grilleId || !echelleId) {
         if (matriceRetroaction) matriceRetroaction.style.display = 'none';
         return;
     }
 
-    // Initialiser la cartouche avec la grille sélectionnée
-    await ajouterCartoucheAGrille(grilleId);
+    // Les deux sont sélectionnés - initialiser la cartouche
+    await initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId);
+}
+
+/**
+ * Initialise ou met à jour une cartouche avec grille ET échelle spécifiées
+ * Préserve le nom et les commentaires existants lors des changements dynamiques
+ * @param {string} grilleId - ID de la grille (critères)
+ * @param {string} echelleId - ID de l'échelle (niveaux)
+ */
+async function initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId) {
+    // Récupérer la grille
+    const grilles = await db.get('grillesTemplates') || [];
+    const grille = grilles.find(g => g.id === grilleId);
+
+    if (!grille) {
+        console.error('❌ Grille introuvable:', grilleId);
+        return;
+    }
+
+    // Récupérer l'échelle
+    const echelles = await db.get('echellesTemplates') || [];
+    const echelle = echelles.find(e => e.id === echelleId);
+
+    if (!echelle) {
+        console.error('❌ Échelle introuvable:', echelleId);
+        return;
+    }
+
+    // Les critères viennent de la grille
+    const criteres = grille.criteres || [];
+
+    // Les niveaux viennent de l'échelle sélectionnée
+    const niveaux = echelle.niveaux || [];
+
+    console.log(`📊 Matrice : ${criteres.length} critères × ${niveaux.length} niveaux`);
+
+    // Préserver les données existantes si on change de grille/échelle dynamiquement
+    const nomActuel = document.getElementById('nomCartouche')?.value || '';
+    const contexteActuel = document.getElementById('contexteCartouche')?.value || '';
+    const commentairesExistants = cartoucheActuel?.commentaires || {};
+
+    // Créer ou mettre à jour la structure de cartouche
+    cartoucheActuel = {
+        id: cartoucheActuel?.id || ('CART' + Date.now()),
+        nom: nomActuel,
+        grilleId: grilleId,
+        echelleId: echelleId,
+        contexte: contexteActuel,
+        criteres: criteres.map(c => ({ id: c.id, nom: c.nom })),
+        niveaux: niveaux.map(n => ({ code: n.code, nom: n.nom })),
+        commentaires: commentairesExistants,  // Préserver les commentaires compatibles
+        verrouille: false,
+        dansBibliotheque: true
+    };
+
+    // Afficher la matrice
+    await afficherMatriceRetroaction();
+    mettreAJourMetriques();
+    document.getElementById('matriceRetroaction').style.display = 'block';
+    document.getElementById('apercuRetroaction').style.display = 'block';
+}
+
+/**
+ * @deprecated Utiliser onChangeSelectionCartouche() à la place
+ */
+async function onChangeGrilleCartouche(grilleId) {
+    // Rediriger vers la nouvelle fonction unifiée
+    await onChangeSelectionCartouche();
 }
 
 /**
  * Crée une nouvelle cartouche vide
- * Affiche le formulaire avec dropdown pour sélectionner la grille
+ * Affiche le formulaire avec dropdowns pour sélectionner grille ET échelle
  */
 async function creerNouvelleCartouche() {
     const grilles = await db.get('grillesTemplates') || [];
+    const echelles = await db.get('echellesTemplates') || [];
 
     if (grilles.length === 0) {
         alert('Vous devez d\'abord créer au moins une grille de critères dans la section « Grilles de critères »');
+        return;
+    }
+
+    if (echelles.length === 0) {
+        alert('Vous devez d\'abord créer au moins une échelle de performance dans la section « Échelles de performance »');
         return;
     }
 
@@ -2665,20 +2755,22 @@ async function creerNouvelleCartouche() {
     document.getElementById('nomCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
 
-    // Peupler et activer le dropdown de grille
-    await populerDropdownGrilleCartouche('', false);
+    // Peupler et activer les dropdowns grille ET échelle
+    await populerDropdownsCartouche('', '', false);
 
-    // Masquer la matrice jusqu'à sélection d'une grille
+    // Masquer la matrice jusqu'à sélection des deux
     const matriceRetroaction = document.getElementById('matriceRetroaction');
+    const apercuRetroaction = document.getElementById('apercuRetroaction');
     if (matriceRetroaction) matriceRetroaction.style.display = 'none';
+    if (apercuRetroaction) apercuRetroaction.style.display = 'none';
 
-    // Si une seule grille, la sélectionner automatiquement
-    if (grilles.length === 1) {
-        const select = document.getElementById('selectGrilleCartouche');
-        if (select) {
-            select.value = grilles[0].id;
-            await onChangeGrilleCartouche(grilles[0].id);
-        }
+    // Si une seule grille ET une seule échelle, les sélectionner automatiquement
+    if (grilles.length === 1 && echelles.length === 1) {
+        const selectGrille = document.getElementById('selectGrilleCartouche');
+        const selectEchelle = document.getElementById('selectEchelleCartouche');
+        if (selectGrille) selectGrille.value = grilles[0].id;
+        if (selectEchelle) selectEchelle.value = echelles[0].id;
+        await onChangeSelectionCartouche();
     }
 
     console.log('📝 Formulaire nouvelle cartouche affiché');
