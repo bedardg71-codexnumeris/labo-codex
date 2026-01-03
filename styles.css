@@ -5928,6 +5928,14 @@ body[data-mode="anonymisation"] .sidebar-navigation {
 .badge-type-std { background: var(--std-bleu); }
 .badge-type-spe { background: var(--spe-vert); }
 .badge-type-den { background: var(--den-violet); }
+.badge-type-multi {
+    background: linear-gradient(135deg,
+        var(--som-orange) 0%,
+        var(--std-bleu) 33%,
+        var(--spe-vert) 66%,
+        var(--den-violet) 100%
+    );
+}
 
 /* Badges caractéristiques (pills colorées selon le mode) */
 .badge-caracteristique {

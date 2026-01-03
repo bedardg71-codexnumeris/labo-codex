@@ -68,14 +68,18 @@
      */
     function obtenirPratiques(element) {
         if (!element) return ['all'];
-        if (!element.pratiques || element.pratiques.length === 0) {
+
+        // Chercher dans pratiquesCompatibles (nouveau) ou pratiques (ancien)
+        const pratiques = element.pratiquesCompatibles || element.pratiques;
+
+        if (!pratiques || pratiques.length === 0) {
             // Rétrocompatibilité: déduire de gabaritType si présent
             if (element.gabaritType) {
                 return [element.gabaritType];
             }
             return ['all'];
         }
-        return element.pratiques;
+        return pratiques;
     }
 
     // =========================================================================
@@ -134,27 +138,34 @@
     // =========================================================================
 
     /**
-     * Génère le HTML pour le badge de pratique
-     * Utilise les classes CSS existantes : .badge-pratique.som, .badge-pratique.std, etc.
-     * @param {string} pratique - Code pratique
+     * Génère le HTML pour le badge de pratique (style solide avec texte blanc)
+     * Utilise les classes CSS : .badge-type-pratique + .badge-type-som, etc.
+     * @param {string} pratique - Code pratique ('SOM', 'STD', 'SPE', 'DEN', 'MULTI')
      * @returns {string} - HTML du badge
      */
     function genererBadgePratique(pratique) {
-        // Utiliser les classes CSS existantes (som, std, spe, den)
-        const classeCSS = pratique === 'all' ? '' : pratique.toLowerCase();
-        const label = pratique === 'all' ? 'Multi' : pratique;
-
-        return `<span class="badge-pratique-compact ${classeCSS}">${label}</span>`;
+        const code = pratique.toUpperCase();
+        const classeModificateur = `badge-type-${code.toLowerCase()}`;
+        return `<span class="badge-type-pratique ${classeModificateur}">${code}</span>`;
     }
 
     /**
      * Génère les badges pour toutes les pratiques d'un élément
-     * @param {Object} element - Élément
+     * Règle MULTI : Si 3+ pratiques, affiche un seul badge MULTI (dégradé)
+     * Sinon affiche les badges individuels
+     * @param {Object} element - Élément avec propriété .pratiques ou .pratiquesCompatibles
      * @returns {string} - HTML des badges
      */
     function genererBadgesPratiques(element) {
         const pratiques = obtenirPratiques(element);
-        return pratiques.map(p => genererBadgePratique(p)).join('');
+
+        // Si 3+ pratiques → afficher MULTI
+        if (pratiques.length >= 3 || pratiques.includes('all')) {
+            return genererBadgePratique('MULTI');
+        }
+
+        // Sinon afficher les badges individuels
+        return pratiques.map(p => genererBadgePratique(p)).join(' ');
     }
 
     /**
@@ -458,6 +469,56 @@
     }
 
     /**
+     * Génère le HTML pour les checkboxes de sélection des pratiques compatibles
+     * À intégrer dans les formulaires d'édition de matériel pédagogique
+     * @param {string} idPrefix - Préfixe pour les IDs des checkboxes (ex: 'grille', 'echelle')
+     * @param {string[]} pratiquesSelectionnees - Liste des pratiques actuellement sélectionnées
+     * @returns {string} - HTML des checkboxes
+     */
+    function genererCheckboxesPratiques(idPrefix, pratiquesSelectionnees = []) {
+        const checkboxes = PRATIQUES_DISPONIBLES.map(p => {
+            const checked = pratiquesSelectionnees.includes(p.code) ? 'checked' : '';
+            const couleurClasse = `badge-type-${p.code.toLowerCase()}`;
+            return `
+                <label class="checkbox-pratique" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer;">
+                    <input type="checkbox"
+                           id="${idPrefix}_pratique_${p.code}"
+                           name="${idPrefix}_pratiques"
+                           value="${p.code}"
+                           ${checked}
+                           style="width: 18px; height: 18px; cursor: pointer;">
+                    <span class="badge-type-pratique ${couleurClasse}">${p.code}</span>
+                    <span style="color: #666; font-size: 0.9rem;">${p.nom}</span>
+                </label>
+            `;
+        }).join('');
+
+        return `
+            <div class="champ-pratiques-compatibles" style="margin: 15px 0; padding: 15px; background: var(--bleu-tres-pale); border-radius: 8px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--bleu-principal);">
+                    Pratiques de notation compatibles :
+                </label>
+                <div class="checkboxes-pratiques">
+                    ${checkboxes}
+                </div>
+                <p style="margin-top: 8px; font-size: 0.8rem; color: #888; font-style: italic;">
+                    Cochez les pratiques avec lesquelles ce matériel peut être utilisé.
+                </p>
+            </div>
+        `;
+    }
+
+    /**
+     * Récupère les pratiques sélectionnées depuis les checkboxes
+     * @param {string} idPrefix - Préfixe utilisé lors de la génération
+     * @returns {string[]} - Liste des codes pratiques sélectionnés
+     */
+    function lirePratiquesSelectionnees(idPrefix) {
+        const checkboxes = document.querySelectorAll(`input[name="${idPrefix}_pratiques"]:checked`);
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    /**
      * Initialise tous les gabarits par défaut dans les bibliothèques
      */
     function initialiserTousLesGabarits() {
@@ -502,6 +563,8 @@
         genererFiltrePratique,
         genererSectionGabarits,
         genererSeparateur,
+        genererCheckboxesPratiques,
+        lirePratiquesSelectionnees,
 
         // Initialisation
         ajouterGabaritsDefautSiManquants,

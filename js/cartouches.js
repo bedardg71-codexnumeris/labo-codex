@@ -2536,14 +2536,18 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
     html += cartouchesFiltrees.map(cart => {
         const estActive = window.cartoucheActuel?.id === cart.id;
         const verrouIcone = cart.verrouille ? ' <span class="cartouche-texte-warning" title="Verrouillée">🔒</span>' : '';
+        // Générer badges pratiques compatibles (utilise gabarits-utils.js)
+        const badgesPratiques = typeof GabaritsUtils !== 'undefined'
+            ? GabaritsUtils.genererBadgesPratiques(cart)
+            : '';
 
         return `
-            <div class="item-cartouche-banque ${estActive ? 'active' : ''}"
+            <div class="sidebar-item ${estActive ? 'active' : ''}"
                  data-cartouche-id="${cart.id}"
                  data-grille-id="${cart.grilleId}"
                  onclick="chargerCartouchePourModif('${cart.id}', '${cart.grilleId}')">
-                <div class="nom-cartouche">${echapperHtml(cart.nom)}${verrouIcone}</div>
-                <div class="badge-grille">${echapperHtml(cart.grilleNom)}</div>
+                <div class="sidebar-item-titre">${echapperHtml(cart.nom)}${verrouIcone}</div>
+                <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${echapperHtml(cart.grilleNom)}</span></div>
             </div>
         `;
     }).join('');

@@ -77,10 +77,14 @@ function afficherListeEnsemblesObjectifs() {
     let html = '';
     ensembles.forEach((ensemble, index) => {
         const nbObjectifs = ensemble.objectifs ? ensemble.objectifs.length : 0;
+        // Générer badges pratiques compatibles (utilise gabarits-utils.js)
+        const badgesPratiques = typeof GabaritsUtils !== 'undefined'
+            ? GabaritsUtils.genererBadgesPratiques(ensemble)
+            : '';
         html += `
             <div class="sidebar-item" onclick="afficherEnsembleObjectifs('${ensemble.id}')">
                 <div class="sidebar-item-titre">${ensemble.nom}</div>
-                <div class="sidebar-item-badge">${nbObjectifs} objectifs</div>
+                <div class="sidebar-item-badges">${badgesPratiques} <span class="badge-caracteristique">${nbObjectifs} objectifs</span></div>
             </div>
         `;
     });
