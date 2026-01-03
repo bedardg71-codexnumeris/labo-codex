@@ -1,22 +1,23 @@
 # SESSION ACTIVE
 
-**Date** : 2 janvier 2026
-**Debut** : ~05:00
-**Objectif initial** : Appliquer AUDIT_COMPLET_V4.md (Design System v7)
+**Date** : 3 janvier 2026
+**Debut** : Continuation session precedente
+**Objectif initial** : Stabilisation apres refonte Construction
 
 ---
 
 ## ETAT MENTAL
 
 **Ou j'en suis** :
-Nettoyage documentation + corrections bugs coursId
-- CLAUDE.md leger cree (60 lignes vs 2000+)
-- Pointe vers docs/00-START-HERE.md
-- Historique preserve dans archive/
+Verification post-refonte + corrections bugs orphelins
+- 2 bugs de navigation corriges (references a l'ancienne section)
+- Audit CSS parties 10-16 : DEJA IMPLEMENTEES (confirmation)
+- Code stabilise pour tests manuels
 
 **Prochain pas prevu** :
-1. Tester le selecteur de pratique par cours
-2. Valider isolation donnees entre trimestres
+1. Tester manuellement la refonte Construction
+2. Tester le tutoriel interactif avec nouvelle navigation
+3. Dette technique (suppression cours, checkbox jetons)
 
 ---
 
@@ -229,17 +230,16 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 
 ## OU REPRENDRE (si session s'arrete maintenant)
 
-**Etat actuel** (fin 2 jan 2026, ~21:00) :
+**Etat actuel** (3 jan 2026) :
 - Refonte "Construction de la note" : TERMINEE
-- Sous-section "Pratiques de notation" : TERMINEE (sidebar + modal + formulaire)
-- Variante Par-Objectifs (4 modes) : TERMINEE et integree au gabarit STD
-- Ancienne section Pratique de notation : SUPPRIMEE
-- Reorganisation Preferences : TERMINEE
+- References orphelines : CORRIGEES (2 bugs)
+- Audit CSS parties 10-16 : CONFIRME DEJA FAIT
+- Code pret pour tests manuels
 
 **Action immediate au retour** :
-1. Tester la refonte Construction (creation pratique, 4 modes, bibliotheque)
-2. Verifier navigation Primo → Construction
-3. Corriger bugs eventuels
+1. Tester manuellement la refonte Construction (creation pratique, 4 modes)
+2. Tester le tutoriel interactif (nouvelle navigation)
+3. Dette technique si temps disponible
 
 ---
 
@@ -295,7 +295,34 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 
 ---
 
-## PLAN POUR LE 3 JANVIER 2026
+## TACHES 3 JANVIER 2026
+
+### Verification post-refonte
+- [x] Verifier integrite du code Construction/Pratiques
+- [x] Rechercher references orphelines a l'ancienne section
+- [x] Verifier navigation Primo → Construction (guidage.js OK)
+
+### Bugs trouves et corriges
+- [x] `js/productions.js` : reference `#materiel-productions` → `#construction-productions`
+- [x] `js/tutoriel-interactif.js` : redirection vers `Construction > Pratiques de notation`
+
+### Audit CSS (parties 10-16)
+- [x] Analyse comparative AUDIT_V5.md vs styles.css actuel
+- **Resultat** : Toutes les parties 10-16 sont DEJA implementees
+  - Partie 10 : Modals (overlay bleu rgba, blur, radius 12px, shadow-fort) ✅
+  - Partie 11 : Alertes (radius-moyen, shadow-subtil) ✅
+  - Partie 12 : Navigation (radius, hover states) ✅
+  - Partie 13 : Formulaires (focus ring, border-radius 6px) ✅
+  - Partie 14 : Tableaux (bleu-tres-pale hover, table-hover) ✅
+  - Partie 15 : Barres progression (gradients, overlays) ✅
+  - Partie 16 : Wizard V2 (etats active/completed) ✅
+
+### Commit du jour
+- `ef00ed9` fix(navigation): corriger references orphelines apres refonte Construction
+
+---
+
+## PLAN POUR LE 3 JANVIER 2026 (mis a jour)
 
 ### Priorite 1 : Tester la refonte Construction
 - [ ] Tester creation nouvelle pratique STD avec Par-Objectifs
@@ -304,15 +331,15 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 - [ ] Tester bibliotheque pratiques (ajout, retrait, partage)
 
 ### Priorite 2 : Stabilisation
-- [ ] Verifier qu'il n'y a pas de references orphelines a l'ancienne section
-- [ ] Tester navigation Primo → Construction (guidage.js)
-- [ ] Corriger bugs eventuels
+- [x] Verifier qu'il n'y a pas de references orphelines a l'ancienne section
+- [x] Tester navigation Primo → Construction (guidage.js)
+- [x] Corriger bugs eventuels (2 bugs corriges)
 
 ### Priorite 3 : Audit CSS (AUDIT_V5 parties 10-16)
-- [ ] Partie 10 : Modals (overlay bleu + blur)
-- [ ] Partie 11 : Alertes (border-radius 6px + shadow)
-- [ ] Parties 12-16 : Navigation, Formulaires, Tableaux, Barres, Wizard
-- [ ] Executer CHECKLIST_AUDIT.md
+- [x] ~~Partie 10 : Modals~~ DEJA FAIT
+- [x] ~~Partie 11 : Alertes~~ DEJA FAIT
+- [x] ~~Parties 12-16~~ DEJA FAIT
+- [ ] Executer CHECKLIST_AUDIT.md (optionnel)
 
 ### Priorite 4 : Documentation
 - [ ] Mettre a jour docs/modules/ si necessaire
@@ -342,4 +369,4 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 
 ---
 
-**Derniere mise a jour** : 2 jan 2026, ~21:00
+**Derniere mise a jour** : 3 jan 2026
