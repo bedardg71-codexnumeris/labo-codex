@@ -142,6 +142,18 @@
             grilleReference.value = modalites.grilleReferenceDepistage;
         }
 
+        // Découpler Performance et Risque
+        const decouplerPR = document.getElementById('v2-pref-decoupler-pr');
+        if (decouplerPR) {
+            decouplerPR.checked = modalites.decouplerPR === true;
+        }
+
+        // Fenêtre d'analyse des patterns
+        const fenetrePatterns = document.getElementById('v2-pref-fenetre-patterns');
+        if (fenetrePatterns) {
+            fenetrePatterns.value = modalites.fenetrePatterns || 3;
+        }
+
         // Seuils d'interprétation
         let seuils = {};
         try {
@@ -163,11 +175,6 @@
         const seuilBon = document.getElementById('v2-seuil-bon');
         if (seuilBon) {
             seuilBon.value = Math.round((seuils.bon || 0.85) * 100);
-        }
-
-        const fenetrePatterns = document.getElementById('v2-fenetre-patterns');
-        if (fenetrePatterns) {
-            fenetrePatterns.value = seuils.nombreProductionsAnalyse || 3;
         }
 
         // Seuils avancés de détection
@@ -229,6 +236,12 @@
         // Grille de référence
         modalites.grilleReferenceDepistage = document.getElementById('v2-pref-grille-reference')?.value || '';
 
+        // Découpler Performance et Risque
+        modalites.decouplerPR = document.getElementById('v2-pref-decoupler-pr')?.checked === true;
+
+        // Fenêtre d'analyse des patterns
+        modalites.fenetrePatterns = parseInt(document.getElementById('v2-pref-fenetre-patterns')?.value) || 3;
+
         db.setSync('modalitesEvaluation', modalites);
 
         // Sauvegarder dans preferencesAffichage
@@ -275,7 +288,6 @@
         seuils.fragile = fragile / 100;
         seuils.acceptable = acceptable / 100;
         seuils.bon = bon / 100;
-        seuils.nombreProductionsAnalyse = parseInt(document.getElementById('v2-fenetre-patterns')?.value) || 3;
 
         // Seuils avancés de détection
         const seuilProgression = document.getElementById('v2-seuil-progression');
@@ -298,23 +310,31 @@
     }
 
     /**
-     * Restaure les seuils par défaut
+     * Restaure les seuils d'interprétation par défaut (Fragile/Acceptable/Bon)
      */
-    function restaurerSeuilsDefautV2() {
+    function restaurerSeuilsInterpretationDefautV2() {
         const seuilFragile = document.getElementById('v2-seuil-fragile');
         const seuilAcceptable = document.getElementById('v2-seuil-acceptable');
         const seuilBon = document.getElementById('v2-seuil-bon');
-        const fenetrePatterns = document.getElementById('v2-fenetre-patterns');
 
         if (seuilFragile) seuilFragile.value = 70;
         if (seuilAcceptable) seuilAcceptable.value = 80;
         if (seuilBon) seuilBon.value = 85;
-        if (fenetrePatterns) fenetrePatterns.value = 3;
 
-        // Seuils avancés - valeurs par défaut
+        sauvegarderSeuilsV2();
+        afficherNotificationSuccesV2('Seuils d\'interprétation restaurés');
+    }
+
+    /**
+     * Restaure les seuils de détection avancés par défaut
+     */
+    function restaurerSeuilsDetectionDefautV2() {
+        const fenetrePatterns = document.getElementById('v2-pref-fenetre-patterns');
         const seuilProgression = document.getElementById('v2-seuil-progression');
         const seuilRisque = document.getElementById('v2-seuil-risque');
         const seuilDefi = document.getElementById('v2-seuil-defi');
+
+        if (fenetrePatterns) fenetrePatterns.value = 3;
 
         if (seuilProgression) {
             seuilProgression.value = 0.10;
@@ -330,7 +350,8 @@
         }
 
         sauvegarderSeuilsV2();
-        afficherNotificationSuccesV2('Seuils restaurés aux valeurs par défaut');
+        sauvegarderPreferencesV2(); // Pour sauvegarder fenetrePatterns dans modalitesEvaluation
+        afficherNotificationSuccesV2('Seuils de détection restaurés');
     }
 
     /**
@@ -386,7 +407,8 @@
     window.initialiserPreferencesV2 = initialiserPreferencesV2;
     window.sauvegarderPreferencesV2 = sauvegarderPreferencesV2;
     window.sauvegarderSeuilsV2 = sauvegarderSeuilsV2;
-    window.restaurerSeuilsDefautV2 = restaurerSeuilsDefautV2;
+    window.restaurerSeuilsInterpretationDefautV2 = restaurerSeuilsInterpretationDefautV2;
+    window.restaurerSeuilsDetectionDefautV2 = restaurerSeuilsDetectionDefautV2;
     window.sauvegarderToutesPreferencesV2 = sauvegarderToutesPreferencesV2;
     window.mettreAJourAffichageSeuilV2 = mettreAJourAffichageSeuilV2;
 

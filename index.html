@@ -5062,18 +5062,6 @@
                                             </p>
                                         </div>
 
-                                        <!-- Option avancée : Découpler P et R -->
-                                        <div style="margin-bottom: 15px; padding: 12px; background: var(--alerte-fond-attention); border-left: 3px solid #ffc107; border-radius: 4px;">
-                                            <label style="cursor: pointer; display: flex; align-items: center;">
-                                                <input type="checkbox" id="mat-decoupler-pr" onchange="sauvegarderConfigPratiqueMat()">
-                                                <strong style="margin-left: 8px;">Découpler Performance (P) et Risque (R)</strong>
-                                            </label>
-                                            <small style="display: block; color: var(--gris-moyen); margin-top: 8px; margin-left: 28px; font-size: 0.85rem; line-height: 1.5;">
-                                                <strong>P (notation)</strong> : Utilise la méthode ci-dessous pour calculer la note finale.<br>
-                                                <strong>R (dépistage)</strong> : Toujours basé sur les N dernières productions pour détecter les tendances.
-                                            </small>
-                                        </div>
-
                                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                                             <div class="groupe-form">
                                                 <label for="mat-portfolio-selection" style="font-weight: 600; display: block; margin-bottom: 6px;">
@@ -9526,6 +9514,7 @@ Exemple :
                         <h3 class="carte-titre-bleu">Configuration du dépistage</h3>
                         <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
                             Paramètres utilisés pour la détection des patterns et l'identification des forces/défis.
+                            La détection des patterns nécessite d'utiliser <strong>la même grille et la même échelle</strong> pour tous les artefacts évalués durant le trimestre.
                         </p>
 
                         <!-- Grille de référence -->
@@ -9542,12 +9531,100 @@ Exemple :
                             </small>
                         </div>
 
-                        <!-- Note sur les patterns -->
-                        <div style="padding: 12px; background: var(--alerte-fond-attention); border-left: 4px solid #ffc107; border-radius: 4px;">
-                            <p class="text-muted" style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
-                                <strong>Rappel :</strong> La détection des patterns nécessite d'utiliser <strong>la même grille et la même échelle</strong> pour tous les artefacts évalués durant le trimestre.
-                            </p>
+                        <!-- Option : Découpler Performance et Risque -->
+                        <div class="groupe-form" style="margin-top: 15px;">
+                            <label style="cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="v2-pref-decoupler-pr" onchange="sauvegarderPreferencesV2()">
+                                <strong style="margin-left: 8px;">Découpler Performance (P) et Risque (R)</strong>
+                            </label>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 8px; margin-left: 28px; font-size: 0.85rem; line-height: 1.5;">
+                                <strong>P (notation)</strong> : Utilise la méthode de la pratique pour calculer la note finale.<br>
+                                <strong>R (dépistage)</strong> : Toujours basé sur les N dernières productions pour détecter les tendances.<br>
+                                <em>Recommandé avec «N meilleurs» pour valoriser le progrès tout en détectant les décrochages.</em>
+                            </small>
                         </div>
+
+                        <!-- Fenêtre d'analyse des patterns -->
+                        <div class="groupe-form" style="margin-top: 15px;">
+                            <label for="v2-pref-fenetre-patterns" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                Fenêtre d'analyse des patterns
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="number" id="v2-pref-fenetre-patterns" class="controle-form" value="3" min="3" max="12" style="width: 80px;" onchange="sauvegarderPreferencesV2()">
+                                <span style="font-size: 0.9rem;">dernières productions</span>
+                            </div>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
+                                Valeur basse = détection précoce | Valeur élevée = détection plus fiable
+                            </small>
+                        </div>
+
+                        <!-- Seuils de détection avancés -->
+                        <h4 style="margin: 25px 0 15px 0; color: var(--bleu-principal); font-size: 0.95rem; border-top: 1px solid #e0e0e0; padding-top: 20px;">Seuils de détection avancés</h4>
+
+                        <!-- Seuil progression -->
+                        <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
+                            <label for="v2-seuil-progression" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                Progression des artefacts
+                                <span id="v2-valeur-progression" style="margin-left: 10px; color: var(--bleu-principal);">10 points (%)</span>
+                            </label>
+                            <input type="range" id="v2-seuil-progression" class="controle-form"
+                                   min="0.05" max="0.20" step="0.01" value="0.10"
+                                   style="width: 100%; cursor: pointer;"
+                                   oninput="mettreAJourAffichageSeuilV2('progression', this.value)"
+                                   onchange="sauvegarderSeuilsV2()">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen); margin-top: 5px;">
+                                <span>5 points (sensible)</span>
+                                <span>20 points (moins sensible)</span>
+                            </div>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
+                                Différence minimale pour considérer une progression (↗) ou régression (↘).
+                            </small>
+                        </div>
+
+                        <!-- Direction du risque -->
+                        <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
+                            <label for="v2-seuil-risque" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                Direction du risque
+                                <span id="v2-valeur-risque" style="margin-left: 10px; color: var(--bleu-principal);">5 points (%)</span>
+                            </label>
+                            <input type="range" id="v2-seuil-risque" class="controle-form"
+                                   min="0.03" max="0.15" step="0.01" value="0.05"
+                                   style="width: 100%; cursor: pointer;"
+                                   oninput="mettreAJourAffichageSeuilV2('risque', this.value)"
+                                   onchange="sauvegarderSeuilsV2()">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen); margin-top: 5px;">
+                                <span>3 points (sensible)</span>
+                                <span>15 points (moins sensible)</span>
+                            </div>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
+                                Variation minimale pour afficher une tendance du risque (→ ou ←).
+                            </small>
+                        </div>
+
+                        <!-- Défi spécifique -->
+                        <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
+                            <label for="v2-seuil-defi" style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                Seuil de défi spécifique
+                                <span id="v2-valeur-defi" style="margin-left: 10px; color: var(--bleu-principal);">70%</span>
+                            </label>
+                            <input type="range" id="v2-seuil-defi" class="controle-form"
+                                   min="0.60" max="0.80" step="0.01" value="0.70"
+                                   style="width: 100%; cursor: pointer;"
+                                   oninput="mettreAJourAffichageSeuilV2('defi', this.value)"
+                                   onchange="sauvegarderSeuilsV2()">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen); margin-top: 5px;">
+                                <span>60% (plus exigeant)</span>
+                                <span>80% (moins exigeant)</span>
+                            </div>
+                            <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
+                                Score sous lequel un critère est identifié comme défi nécessitant attention.
+                            </small>
+                        </div>
+
+                        <!-- Bouton restaurer seuils de détection -->
+                        <button class="btn btn-secondaire" onclick="restaurerSeuilsDetectionDefautV2()" style="margin-top: 10px;">
+                            Restaurer les valeurs par défaut
+                        </button>
                     </div>
 
                     <!-- Accordéon : Seuils d'interprétation -->
@@ -9597,85 +9674,8 @@ Exemple :
                                 </div>
                             </div>
 
-                            <!-- Fenêtre d'analyse patterns -->
-                            <div style="margin-bottom: 15px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
-                                <label for="v2-fenetre-patterns" style="font-weight: 600; display: block; margin-bottom: 8px;">
-                                    Fenêtre d'analyse des patterns
-                                </label>
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <input type="number" id="v2-fenetre-patterns" class="controle-form" value="3" min="3" max="12" style="width: 80px;" onchange="sauvegarderSeuilsV2()">
-                                    <span style="font-size: 0.9rem;">dernières productions</span>
-                                </div>
-                                <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
-                                    Valeur basse = détection précoce | Valeur élevée = détection plus fiable
-                                </small>
-                            </div>
-
-                            <!-- Seuils avancés pour la détection -->
-                            <h4 style="margin: 20px 0 15px 0; color: var(--bleu-principal); font-size: 0.95rem;">Seuils de détection avancés</h4>
-
-                            <!-- Seuil progression -->
-                            <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
-                                <label for="v2-seuil-progression" style="font-weight: 600; display: block; margin-bottom: 8px;">
-                                    Progression des artefacts
-                                    <span id="v2-valeur-progression" style="margin-left: 10px; color: var(--bleu-principal);">10 points (%)</span>
-                                </label>
-                                <input type="range" id="v2-seuil-progression" class="controle-form"
-                                       min="0.05" max="0.20" step="0.01" value="0.10"
-                                       style="width: 100%; cursor: pointer;"
-                                       oninput="mettreAJourAffichageSeuilV2('progression', this.value)"
-                                       onchange="sauvegarderSeuilsV2()">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen); margin-top: 5px;">
-                                    <span>5 points (sensible)</span>
-                                    <span>20 points (moins sensible)</span>
-                                </div>
-                                <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
-                                    Différence minimale pour considérer une progression (↗) ou régression (↘).
-                                </small>
-                            </div>
-
-                            <!-- Direction du risque -->
-                            <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
-                                <label for="v2-seuil-risque" style="font-weight: 600; display: block; margin-bottom: 8px;">
-                                    Direction du risque
-                                    <span id="v2-valeur-risque" style="margin-left: 10px; color: var(--bleu-principal);">5 points (%)</span>
-                                </label>
-                                <input type="range" id="v2-seuil-risque" class="controle-form"
-                                       min="0.03" max="0.15" step="0.01" value="0.05"
-                                       style="width: 100%; cursor: pointer;"
-                                       oninput="mettreAJourAffichageSeuilV2('risque', this.value)"
-                                       onchange="sauvegarderSeuilsV2()">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen); margin-top: 5px;">
-                                    <span>3 points (sensible)</span>
-                                    <span>15 points (moins sensible)</span>
-                                </div>
-                                <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
-                                    Variation minimale pour afficher une tendance du risque (→ ou ←).
-                                </small>
-                            </div>
-
-                            <!-- Défi spécifique -->
-                            <div style="margin-bottom: 15px; padding: 12px; background: #f5f5f5; border-radius: 6px;">
-                                <label for="v2-seuil-defi" style="font-weight: 600; display: block; margin-bottom: 8px;">
-                                    Seuil de défi spécifique
-                                    <span id="v2-valeur-defi" style="margin-left: 10px; color: var(--bleu-principal);">70%</span>
-                                </label>
-                                <input type="range" id="v2-seuil-defi" class="controle-form"
-                                       min="0.60" max="0.80" step="0.01" value="0.70"
-                                       style="width: 100%; cursor: pointer;"
-                                       oninput="mettreAJourAffichageSeuilV2('defi', this.value)"
-                                       onchange="sauvegarderSeuilsV2()">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gris-moyen); margin-top: 5px;">
-                                    <span>60% (plus exigeant)</span>
-                                    <span>80% (moins exigeant)</span>
-                                </div>
-                                <small style="display: block; color: var(--gris-moyen); margin-top: 8px; font-size: 0.85rem;">
-                                    Score sous lequel un critère est identifié comme défi nécessitant attention.
-                                </small>
-                            </div>
-
-                            <!-- Bouton restaurer défauts -->
-                            <button class="btn btn-secondaire" onclick="restaurerSeuilsDefautV2()">
+                            <!-- Bouton restaurer seuils d'interprétation -->
+                            <button class="btn btn-secondaire" onclick="restaurerSeuilsInterpretationDefautV2()" style="margin-top: 15px;">
                                 Restaurer les valeurs par défaut
                             </button>
                         </div>
@@ -13585,7 +13585,7 @@ Exemple :
 
     <!-- PRIORITÉ 1: Fondations -->
     <script src="js/config.js?v=2026010203"></script>
-    <script src="js/navigation.js?v=2026010205"></script>
+    <script src="js/navigation.js?v=2026010211"></script>
     <script src="js/modes.js?v=2025123004"></script>
 
     <!-- ✅ Pack de démarrage AVANT donnees-demo (expose PACK_DEMARRAGE) -->
@@ -13601,7 +13601,7 @@ Exemple :
     <script src="js/spe-specifications.js?v=2026010206"></script> <!-- Beta 95 : Module PAN-Spécifications + gabarits François -->
     <script src="js/pratiques-bibliotheque.js?v=2026010205"></script> <!-- Beta 95 : Bibliothèque universelle STD + SPE -->
     <script src="js/pratiques-materiel.js?v=2026010210"></script> <!-- Beta 95 : retirerPratiqueDeBibliothequeMateriel -->
-    <script src="js/preferences-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Préférences restructuré -->
+    <script src="js/preferences-v2.js?v=2026010210"></script> <!-- Beta 95 : + Découpler P/R dans dépistage -->
     <script src="js/donnees-v2.js?v=2025121801"></script> <!-- Beta 95 : Onglet Données restructuré -->
     <script src="js/etudiants.js?v=2025122902"></script>
     <script src="js/productions-bibliotheque.js?v=2026010218"></script> <!-- + import depuis trimestres -->
