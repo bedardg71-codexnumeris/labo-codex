@@ -75,10 +75,12 @@
     --sarcelle-pale: #e0f0f5;             /* Équivalent de --bleu-pale (plus de bleu) */
     --sarcelle-tres-pale: #f0f8fd;        /* Équivalent de --bleu-tres-pale (plus de bleu) */
 
-    /* Couleurs pratiques d'évaluation */
-    --som-orange: #ff6f00;
-    /* OBSOLÈTE - Utiliser --std-bleu à la place */
-    --hybride-violet: #9c27b0;
+    /* Couleurs pratiques de notation (03c-barres-gradient) */
+    --som-orange: #ff6f00;      /* SOM = Orange */
+    --std-bleu: #0277bd;        /* STD = Bleu */
+    --spe-vert: #22c55e;        /* SPE = Vert */
+    --den-violet: #8b5cf6;      /* DEN = Mauve/Violet */
+    --hybride-violet: #9c27b0;  /* Hybride (obsolète) */
 
     /* Couleurs de tableau */
     --table-hover: var(--bleu-carte);    /* Couleur hover des rangées (plus foncé, texte reste lisible) */
@@ -5888,27 +5890,56 @@ body[data-mode="anonymisation"] .sidebar-navigation {
     margin-bottom: 6px;
 }
 
-/* === BADGES MATÉRIEL PÉDAGOGIQUE (Moyen pill) === */
+/* === BADGES MATÉRIEL PÉDAGOGIQUE (Compact pill - couleur du mode) === */
 .badge-grille,
 .sidebar-item-badge {
     display: inline-block;
     background: var(--bleu-principal);
     color: white;
-    padding: var(--padding-moyen-pill);
+    padding: 2px 8px;
     border-radius: var(--radius-pill);
-    font-size: var(--font-moyen-pill);
-    font-weight: 600;
-    line-height: 1.2;
-    margin-bottom: 8px;
-    box-shadow: var(--shadow-subtil);
-    transition: all 0.2s ease;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
+    text-transform: lowercase;
 }
 
-.badge-grille:hover,
-.sidebar-item-badge:hover {
-    background: #054a95;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-normal);
+/* Conteneur pour tous les badges sur la ligne 2 */
+.sidebar-item-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+/* Badges type de pratique (SOM, STD, SPE, DEN) */
+.badge-type-pratique {
+    display: inline-block;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.badge-type-som { background: var(--som-orange); }
+.badge-type-std { background: var(--std-bleu); }
+.badge-type-spe { background: var(--spe-vert); }
+.badge-type-den { background: var(--den-violet); }
+
+/* Badges caractéristiques (pills colorées selon le mode) */
+.badge-caracteristique {
+    display: inline-block;
+    background: var(--bleu-principal);
+    color: white;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
+    text-transform: lowercase;
 }
 
 .actions-cartouche,
