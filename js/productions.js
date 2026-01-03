@@ -725,7 +725,7 @@ function gererChangementTypeProduction() {
         'laboratoire': '<strong>Laboratoire :</strong> Travail pratique en laboratoire avec rapport.',
         'presentation': '<strong>Présentation :</strong> Production orale devant un auditoire, généralement unidirectionnelle.',
         'entrevue': '<strong>Entrevue :</strong> Production orale devant un individu, généralement bidirectionnelle.',
-        'projet': '<strong>Projet :</strong> Production complexe multi-étapes.',
+        'projet': '<strong>Projet :</strong> Production complexe et multi-tâches selon un processus.',
         'stage': '<strong>Stage :</strong> Expérience pratique dans une entreprise pour découvrir un métier, un secteur ou valider un projet professionnel. Le stage vise l\'apprentissage (découverte/exploration) plutôt que la production. Sa durée varie de quelques heures à quelques semaines et il est suivi par un tuteur.',
         'autre': '<strong>Autre :</strong> Tout autre type de production (participation, activités, etc.).',
         'portfolio': '<strong>Portfolio (conteneur) :</strong> Regroupement d\'artefacts permettant d\'évaluer la progression. Le portfolio inclura automatiquement toutes les productions de type «Artefact». Il n\'est pas comptabilisé dans l\'indice de <strong>Complétion (C)</strong>.',
