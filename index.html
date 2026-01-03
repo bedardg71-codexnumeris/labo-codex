@@ -4960,10 +4960,10 @@
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
                                     <div>
                                         <h3 style="margin: 0 0 5px 0; display: flex; align-items: center; gap: 8px;">
-                                            <span id="mat-badge-pratique" class="badge-pratique"></span>
+                                            <span id="mat-badge-pratique"></span>
                                             <span id="mat-titre-pratique">Nouvelle pratique</span>
                                         </h3>
-                                        <p style="color: #7f8c8d; margin: 0; font-size: 0.9rem;" id="mat-type-label">Configuration de pratique de notation</p>
+                                        <p style="color: #666; margin: 0; font-size: 0.9rem; line-height: 1.4;" id="mat-description-pratique"></p>
                                     </div>
                                     <div style="display: flex; gap: 8px;">
                                         <button onclick="dupliquerPratiqueMateriel(pratiqueEnEditionMateriel)" class="btn btn-secondaire">
@@ -4999,11 +4999,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Description taxonomique (dynamique selon le type sélectionné) -->
-                                    <div id="mat-description-taxonomique" style="display: none; margin-top: 15px; padding: 12px 15px; background: var(--bleu-tres-pale); border-left: 4px solid var(--bleu-principal); border-radius: 4px;">
-                                        <p style="margin: 0; font-weight: 600; font-size: 0.9rem; color: var(--bleu-principal);" id="mat-taxonomie-titre"></p>
-                                        <p style="margin: 8px 0 0 0; font-size: 0.85rem; line-height: 1.5; color: var(--gris-fonce);" id="mat-taxonomie-definition"></p>
-                                    </div>
+                                    <!-- Note: Description taxonomique retirée - info maintenant visible dans la sidebar -->
 
                                     <!-- Variante PAN-Standards -->
                                     <div id="mat-variante-pan-standards" style="display: none; margin-top: 15px;">

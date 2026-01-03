@@ -98,6 +98,32 @@ function afficherListePratiquesMateriel() {
 }
 
 /**
+ * Retourne la description courte (taxonomique) d'une pratique pour la sidebar
+ * @param {Object} pratique - La configuration de pratique
+ * @returns {string} Description courte
+ */
+function obtenirDescriptionCourtePratique(pratique) {
+    if (!pratique) return '';
+
+    // Descriptions taxonomiques complètes selon le type
+    const descriptions = {
+        'sommative': 'Sommative (Traditional Grading) - Moyenne pondérée des évaluations',
+        'pan-standards': 'PAN-Standards (Standards-Based Grading) - Maîtrise de standards/objectifs',
+        'pan-specifications': 'PAN-Spécifications (Specifications Grading) - Évaluation dichotomique par forfaits',
+        'denombrement': 'Dénombrement (Counting-Based) - Comptage de réussites'
+    };
+
+    // Retourner la description personnalisée si disponible, sinon la taxonomique
+    if (pratique.description && pratique.description.trim().length > 0) {
+        // Tronquer si trop long
+        const desc = pratique.description.trim();
+        return desc.length > 100 ? desc.substring(0, 97) + '...' : desc;
+    }
+
+    return descriptions[pratique.type] || pratique.type || '';
+}
+
+/**
  * Génère les badges de caractéristiques basés sur la configuration de la pratique
  * Retourne toutes les caractéristiques formatées en badges (couleur via CSS selon le mode)
  * @param {Object} pratique - La configuration de pratique
@@ -606,11 +632,14 @@ function remplirFormulairePratique(pratique) {
     // En-tête
     const titrePratique = document.getElementById('mat-titre-pratique');
     const badgePratique = document.getElementById('mat-badge-pratique');
-    const typeLabel = document.getElementById('mat-type-label');
+    const descriptionPratique = document.getElementById('mat-description-pratique');
 
     if (titrePratique) titrePratique.textContent = pratique.nom || 'Sans titre';
     if (badgePratique) badgePratique.innerHTML = genererBadgeTypePratique(pratique);
-    if (typeLabel) typeLabel.textContent = getTypePratiqueLabel(pratique.type);
+    // Ligne 2 : description personnalisée ou description taxonomique
+    if (descriptionPratique) {
+        descriptionPratique.textContent = pratique.description || obtenirDescriptionCourtePratique(pratique);
+    }
 
     // Informations de base
     setValeurChamp('mat-pratique-nom', pratique.nom || '');
@@ -705,36 +734,13 @@ function getCheckbox(id) {
 
 /**
  * Affiche la description taxonomique selon le type de pratique
+ * Note: Carte retirée du formulaire - info maintenant dans la sidebar
+ * Fonction conservée pour compatibilité mais ne fait plus rien
  */
 function afficherDescriptionTaxonomiqueMat(type) {
-    const conteneur = document.getElementById('mat-description-taxonomique');
-    const titre = document.getElementById('mat-taxonomie-titre');
-    const definition = document.getElementById('mat-taxonomie-definition');
-
-    if (!conteneur || !titre || !definition) return;
-
-    const descriptions = {
-        'sommative': {
-            titre: 'SOMMATIVE (Traditional Grading)',
-            definition: 'Pratique traditionnelle où chaque évaluation a une pondération fixe. La note finale est calculée comme une moyenne pondérée.'
-        },
-        'pan-standards': {
-            titre: 'PAN-STANDARDS (Standards-Based Grading)',
-            definition: 'Pratique où les étudiants démontrent leur maîtrise de standards ou objectifs. Le meilleur résultat obtenu pour chaque standard est retenu.'
-        },
-        'pan-specifications': {
-            titre: 'PAN-SPÉCIFICATIONS (Specifications Grading)',
-            definition: 'Pratique où les productions sont évaluées de façon dichotomique (conforme/non-conforme selon des spécifications préétablies), et la note finale est déterminée par le forfait (ensemble de travaux conformes) complété.'
-        }
-    };
-
-    if (descriptions[type]) {
-        titre.textContent = descriptions[type].titre;
-        definition.textContent = descriptions[type].definition;
-        conteneur.style.display = 'block';
-    } else {
-        conteneur.style.display = 'none';
-    }
+    // Description taxonomique maintenant affichée dans la sidebar
+    // Cette fonction est conservée pour éviter les erreurs d'appel
+    return;
 }
 
 /**
@@ -802,9 +808,13 @@ function changerTypePratiqueMat() {
         badge.innerHTML = genererBadgeTypePratique({ pratiques });
     }
 
-    // Mettre à jour le label
-    const typeLabel = document.getElementById('mat-type-label');
-    if (typeLabel) typeLabel.textContent = getTypePratiqueLabel(type);
+    // Mettre à jour la description (ligne 2)
+    const descriptionPratique = document.getElementById('mat-description-pratique');
+    if (descriptionPratique) {
+        // Utiliser la description personnalisée si disponible, sinon la taxonomique
+        const descCustom = getValeurChamp('mat-pratique-description');
+        descriptionPratique.textContent = descCustom || obtenirDescriptionCourtePratique({ type });
+    }
 
     sauvegarderConfigPratiqueMat();
 }
@@ -878,12 +888,20 @@ async function mettreAJourNomPratiqueMat() {
 async function mettreAJourDescriptionPratiqueMat() {
     if (!pratiqueEnEditionMateriel) return;
 
+    const nouvelleDescription = getValeurChamp('mat-pratique-description');
+
     let configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
     const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
 
     if (index !== -1) {
-        configurations[index].description = getValeurChamp('mat-pratique-description');
+        configurations[index].description = nouvelleDescription;
         await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+
+        // Mettre à jour l'en-tête
+        const descriptionPratique = document.getElementById('mat-description-pratique');
+        if (descriptionPratique) {
+            descriptionPratique.textContent = nouvelleDescription || obtenirDescriptionCourtePratique(configurations[index]);
+        }
     }
 }
 
