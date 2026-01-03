@@ -427,22 +427,32 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     const configurations = db.getSync(CLE_PRATIQUES_CONFIGURATIONS, []);
 
     // Vérifier si déjà présente
-    if (configurations.some(p => p.id === pratiqueId)) {
-        alert('Cette pratique est déjà dans votre sélection.');
-        return;
+    const existante = configurations.find(p => p.id === pratiqueId);
+
+    if (existante) {
+        // La pratique existe - vérifier si elle est dans la sélection
+        if (existante.dansBibliotheque !== false) {
+            alert('Cette pratique est déjà dans votre sélection.');
+            return;
+        }
+
+        // La pratique existe mais a été retirée - la réactiver
+        existante.dansBibliotheque = true;
+        existante.dateAjout = new Date().toISOString();
+        db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        console.log('[pratiques-materiel] Pratique réactivée:', configSource.nom);
+    } else {
+        // Ajouter avec le flag dansBibliotheque
+        const nouvelleConfig = {
+            ...configSource,
+            dansBibliotheque: true,
+            dateAjout: new Date().toISOString()
+        };
+
+        configurations.push(nouvelleConfig);
+        db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+        console.log('[pratiques-materiel] Pratique ajoutée:', configSource.nom);
     }
-
-    // Ajouter avec le flag dansBibliotheque
-    const nouvelleConfig = {
-        ...configSource,
-        dansBibliotheque: true,
-        dateAjout: new Date().toISOString()
-    };
-
-    configurations.push(nouvelleConfig);
-    db.setSync(CLE_PRATIQUES_CONFIGURATIONS, configurations);
-
-    console.log('[pratiques-materiel] Pratique ajoutée:', configSource.nom);
 
     // Rafraîchir la sidebar et fermer le modal
     afficherListePratiquesMateriel();
