@@ -2498,8 +2498,14 @@ function afficherCriteresTemp() {
     }
 
     const html = window.tempCriteres.map((critere, index) => `
-        <div class="item-liste" style="padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
-            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 3fr auto; gap: 12px; align-items: end;">
+        <div class="item-liste" style="position: relative; padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
+            <button class="btn btn-supprimer btn-tres-compact"
+                    onclick="supprimerCritereTemp(${index})"
+                    title="Supprimer ce critère"
+                    style="position: absolute; top: 8px; right: 8px;">
+                ✕
+            </button>
+            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 3fr; gap: 12px; align-items: end;">
                 <div class="groupe-form" style="text-align: center;">
                     <label style="font-size: 0.85rem; color: #666;">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -2554,13 +2560,6 @@ function afficherCriteresTemp() {
                            placeholder="Ex: Qualité de la langue, structure du texte..."
                            onchange="modifierCritereTemp(${index}, 'description', this.value)">
                 </div>
-                <div style="padding-top: 20px;">
-                    <button class="btn btn-supprimer btn-tres-compact"
-                            onclick="supprimerCritereTemp(${index})"
-                            title="Supprimer ce critère">
-                        Supprimer
-                    </button>
-                </div>
             </div>
             ${critere.type === 'algorithmique' ? `
             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
@@ -2586,9 +2585,9 @@ function afficherCriteresTemp() {
         </div>
     `).join('');
 
-    // Ajouter le bouton pour ajouter un critère
+    // Ajouter le bouton pour ajouter un critère (pleine largeur comme échelles)
     container.innerHTML = html + `
-        <button class="btn btn-secondaire" onclick="ajouterCritereTemp()" style="margin-top: 10px;">
+        <button class="sidebar-btn-ajouter" onclick="ajouterCritereTemp()">
             + Ajouter un critère
         </button>
     `;
@@ -2736,8 +2735,14 @@ function afficherCriteresGrille(grille) {
     }
 
     const html = grille.criteres.map((critere, index) => `
-        <div class="item-liste" style="padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
-            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 3fr auto; gap: 12px; align-items: end;">
+        <div class="item-liste" style="position: relative; padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
+            <button class="btn btn-supprimer btn-tres-compact"
+                    onclick="supprimerCritereGrille('${grille.id}', ${index})"
+                    title="Supprimer ce critère"
+                    style="position: absolute; top: 8px; right: 8px;">
+                ✕
+            </button>
+            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 3fr; gap: 12px; align-items: end;">
                 <div class="groupe-form" style="text-align: center;">
                     <label style="font-size: 0.85rem; color: #666;">Ordre</label>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -2789,13 +2794,6 @@ function afficherCriteresGrille(grille) {
                            class="controle-form"
                            value="${critere.description || ''}"
                            onchange="modifierCritereGrille('${grille.id}', ${index}, 'description', this.value)">
-                </div>
-                <div style="padding-top: 20px;">
-                    <button class="btn btn-supprimer btn-tres-compact"
-                            onclick="supprimerCritereGrille('${grille.id}', ${index})"
-                            title="Supprimer ce critère">
-                        Supprimer
-                    </button>
                 </div>
             </div>
             ${critere.type === 'algorithmique' ? `

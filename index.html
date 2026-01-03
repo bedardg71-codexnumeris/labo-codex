@@ -4622,17 +4622,16 @@
                                 <!-- Boutons du formulaire -->
                                 <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
                                     <!-- Boutons gauche (actions sur la grille) -->
-                                    <!-- Note: Export/Import se font maintenant via la bibliothèque -->
                                     <div style="display: flex; gap: 10px;">
                                         <button id="btnDupliquerGrille" class="btn btn-secondaire" onclick="dupliquerGrilleActive()" style="display: none;" title="Créer une copie de cette grille">
                                             Dupliquer
                                         </button>
-                                        <button id="btnSupprimerGrille" class="btn btn-supprimer" onclick="supprimerGrilleActive()" style="display: none;" title="Supprimer cette grille">
-                                            Supprimer
-                                        </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
                                     <div style="display: flex; gap: 10px;">
+                                        <button id="btnSupprimerGrille" class="btn btn-supprimer" onclick="supprimerGrilleActive()" style="display: none;" title="Supprimer cette grille">
+                                            Supprimer
+                                        </button>
                                         <button class="btn btn-annuler" onclick="annulerFormGrille()">Annuler</button>
                                         <button class="btn btn-confirmer" onclick="sauvegarderGrilleComplete()">
                                             <span id="btnTexteGrille">Sauvegarder</span>
@@ -4733,17 +4732,16 @@
                                 <!-- Boutons du formulaire -->
                                 <div class="btn-groupe" style="display: flex; justify-content: space-between; align-items: center;">
                                     <!-- Boutons gauche (actions sur l'échelle) -->
-                                    <!-- Note: Export/Import se font maintenant via la bibliothèque -->
                                     <div style="display: flex; gap: 10px;">
                                         <button id="btnDupliquerEchelle" class="btn btn-secondaire" onclick="dupliquerEchelleActive()" style="display: none;" title="Créer une copie de cette échelle">
                                             Dupliquer
                                         </button>
-                                        <button id="btnSupprimerEchelle" class="btn btn-supprimer" onclick="supprimerEchelleActive()" style="display: none;" title="Supprimer cette échelle">
-                                            Supprimer
-                                        </button>
                                     </div>
                                     <!-- Boutons droite (actions principales) -->
                                     <div style="display: flex; gap: 10px;">
+                                        <button id="btnSupprimerEchelle" class="btn btn-supprimer" onclick="supprimerEchelleActive()" style="display: none;" title="Supprimer cette échelle">
+                                            Supprimer
+                                        </button>
                                         <button class="btn btn-annuler" onclick="annulerFormEchelle()">Annuler</button>
                                         <button class="btn btn-confirmer" onclick="sauvegarderEchelleComplete()">
                                             <span id="btnTexteEchelle">Sauvegarder</span>
