@@ -392,6 +392,13 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
         if (inputNom) inputNom.value = cartoucheActuel.nom;
         if (inputContexte) inputContexte.value = cartoucheActuel.contexte || '';
 
+        // Afficher les checkboxes pratiques compatibles
+        const containerPratiques = document.getElementById('checkboxesPratiquesCartouche');
+        if (containerPratiques && typeof GabaritsUtils !== 'undefined') {
+            const pratiquesActuelles = cartoucheActuel.pratiquesCompatibles || [];
+            containerPratiques.innerHTML = GabaritsUtils.genererCheckboxesPratiques('cartouche', pratiquesActuelles);
+        }
+
         console.log('Champs nom/contexte remplis');
 
         // Afficher la matrice
@@ -623,9 +630,15 @@ async function sauvegarderCartouche() {
         return;
     }
     
+    // Lire les pratiques compatibles sélectionnées
+    const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
+        ? GabaritsUtils.lirePratiquesSelectionnees('cartouche')
+        : [];
+
     // Mettre à jour les champs
     cartoucheActuel.nom = nom;
     cartoucheActuel.contexte = document.getElementById('contexteCartouche').value.trim();
+    cartoucheActuel.pratiquesCompatibles = pratiquesCompatibles;
     
     const grilleId = cartoucheActuel.grilleId;
     let cartouches = await db.get(`cartouches_${grilleId}`) || [];
