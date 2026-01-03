@@ -230,14 +230,22 @@ function genererFormulaireEnsemble(ensemble) {
         <div class="carte-info-section">
             <h4>Informations générales</h4>
 
-            <div class="groupe-form">
-                <label>Nom de l'ensemble *</label>
-                <input type="text"
-                       id="ensembleNom"
-                       class="controle-form"
-                       value="${ensemble.nom}"
-                       placeholder="Ex: Objectifs Calcul différentiel"
-                       oninput="marquerEnsembleModifie()">
+            <!-- Nom + Pratiques compatibles sur même ligne -->
+            <div style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 15px; flex-wrap: wrap;">
+                <div class="groupe-form" style="flex: 1; min-width: 300px; margin: 0;">
+                    <label>Nom de l'ensemble *</label>
+                    <input type="text"
+                           id="ensembleNom"
+                           class="controle-form"
+                           value="${ensemble.nom}"
+                           placeholder="Ex: Objectifs Calcul différentiel"
+                           oninput="marquerEnsembleModifie()">
+                </div>
+                <div style="flex-shrink: 0;">
+                    ${typeof GabaritsUtils !== 'undefined'
+                        ? GabaritsUtils.genererCheckboxesPratiques('objectifs', ensemble.pratiquesCompatibles || [])
+                        : ''}
+                </div>
             </div>
 
             <div class="grid-2col">
@@ -279,11 +287,6 @@ function genererFormulaireEnsemble(ensemble) {
                           placeholder="Description optionnelle de cet ensemble d'objectifs"
                           oninput="marquerEnsembleModifie()">${ensemble.description || ''}</textarea>
             </div>
-
-            <!-- Pratiques compatibles -->
-            ${typeof GabaritsUtils !== 'undefined'
-                ? GabaritsUtils.genererCheckboxesPratiques('objectifs', ensemble.pratiquesCompatibles || [])
-                : ''}
         </div>
 
         <!-- Liste des objectifs -->
