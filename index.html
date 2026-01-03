@@ -3053,6 +3053,18 @@
             color: #757575;
             border: 1px solid #bdbdbd;
         }
+
+        /* Tooltip d'aide pédagogique APC */
+        .tooltip-aide {
+            cursor: help;
+            font-size: 0.85em;
+            margin-left: 4px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .tooltip-aide:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -4399,9 +4411,11 @@
                                         </select>
                                     </div>
                                     <div class="groupe-form">
-                                        <label>Description</label>
+                                        <label>Activité d'apprentissage
+                                            <span class="tooltip-aide" title="Dans une approche par compétences (APC), une activité d'évaluation est généralement centrée sur l'apprentissage plutôt que sur un comportement (ex. : participation, présence). Elle repose sur des objectifs explicites liés à la compétence du cours.">📌</span>
+                                        </label>
                                         <input type="text" id="productionDescription" class="controle-form"
-                                            placeholder="Ex: Stratégies de lecture">
+                                            placeholder="Ex: Rédaction">
                                     </div>
                                 </div>
 
@@ -4430,7 +4444,9 @@
                                     <!-- Grille de critères + Note explicative -->
                                     <div id="champGrille" style="display: grid; grid-template-columns: 200px 1fr; gap: 15px; align-items: start;">
                                         <div class="groupe-form" style="margin: 0;">
-                                            <label>Grille de critères</label>
+                                            <label>Grille de critères
+                                                <span class="tooltip-aide" title="Dans une approche par compétences, l'évaluation est généralement individuelle afin de rendre compte du degré d'acquisition de chaque apprenant. Les travaux d'équipe peuvent être évalués, mais la contribution individuelle devrait idéalement être distinguée.">📌</span>
+                                            </label>
                                             <select id="productionGrille" class="controle-form">
                                                 <option value="">Aucune</option>
                                             </select>
