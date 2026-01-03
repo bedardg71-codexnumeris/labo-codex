@@ -155,6 +155,10 @@ function chargerMaterielConfigure() {
         }
     }
     setStatText('stat-cartouches', totalCartouches);
+
+    // Pratiques de notation
+    const pratiques = db.getSync('pratiquesConfigurables', []);
+    setStatText('stat-pratiques', pratiques.length);
 }
 
 /* ===============================
@@ -278,6 +282,7 @@ function setStatText(id, valeur) {
  * - stat-grilles
  * - stat-echelles
  * - stat-cartouches
+ * - stat-pratiques
  * - stat-version
  * - stat-derniere-maj
  * - stat-poids
