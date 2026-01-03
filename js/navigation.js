@@ -366,8 +366,8 @@ function afficherSousSection(idSousSection) {
 
         case 'reglages-preferences':
             console.log('🔄 Chargement des Préférences...');
-            if (typeof chargerVuePreferences === 'function') {
-                setTimeout(chargerVuePreferences, 100);
+            if (typeof initialiserPreferencesV2 === 'function') {
+                setTimeout(initialiserPreferencesV2, 100);
             }
             break;
 
