@@ -2683,7 +2683,9 @@ function afficherNiveauxNouvelleEchelle() {
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Min (%)</label>
+                    <label class="echelle-texte-detail">Min (%)
+                        <span class="tooltip-aide" title="Plage de notes définissant le degré de maîtrise. Permet d'établir des stades ou niveaux auxquels se situe l'apprenant.">📌</span>
+                    </label>
                     <input type="number"
                            class="controle-form"
                            value="${niveau.min}"
@@ -2701,7 +2703,9 @@ function afficherNiveauxNouvelleEchelle() {
                            onchange="modifierNiveauTemp(${index}, 'max', parseFloat(this.value))">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Valeur calc (%)</label>
+                    <label class="echelle-texte-detail">Valeur ponctuelle
+                        <span class="tooltip-aide" title="Valeur fixe pour le calcul des notes, la conversion d'une note lettrée en note chiffrée, la pratique sommative traditionnelle et le dépistage.">📌</span>
+                    </label>
                     <input type="number"
                            class="controle-form"
                            value="${niveau.valeurCalcul}"
@@ -2944,7 +2948,9 @@ function afficherNiveauxEchelle(echelle) {
                            style="font-weight: 500;">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Min (%)</label>
+                    <label class="echelle-texte-detail">Min (%)
+                        <span class="tooltip-aide" title="Plage de notes définissant le degré de maîtrise. Permet d'établir des stades ou niveaux auxquels se situe l'apprenant.">📌</span>
+                    </label>
                     <input type="number"
                            class="controle-form"
                            value="${niveau.min}"
@@ -2962,7 +2968,9 @@ function afficherNiveauxEchelle(echelle) {
                            onchange="modifierNiveauEchelle('${echelle.id}', ${index}, 'max', parseFloat(this.value))">
                 </div>
                 <div class="groupe-form">
-                    <label class="echelle-texte-detail">Valeur calc (%)</label>
+                    <label class="echelle-texte-detail">Valeur ponctuelle
+                        <span class="tooltip-aide" title="Valeur fixe pour le calcul des notes, la conversion d'une note lettrée en note chiffrée, la pratique sommative traditionnelle et le dépistage.">📌</span>
+                    </label>
                     <input type="number"
                            class="controle-form"
                            value="${niveau.valeurCalcul}"
