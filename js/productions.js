@@ -841,6 +841,12 @@ function gererChangementTypeProduction() {
     } else if (type) {
         // PRODUCTION STANDARD (examen, travail, quiz, etc.)
         if (carteContexteStandard) carteContexteStandard.style.display = 'block';
+
+        // Note explicative pour la pondération
+        if (notePonderation) {
+            notePonderation.style.display = 'block';
+            notePonderation.innerHTML = 'Pour une évaluation formative, utilisez une pondération de 0%.';
+        }
     }
 }
 
