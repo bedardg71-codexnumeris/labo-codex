@@ -3250,7 +3250,7 @@ async function afficherBibliothequeCartouches() {
 
                 <!-- Section 2 : Cartouches disponibles -->
                 <h3 style="color: #3498db; font-size: 1.1rem; margin-top: 20px; margin-bottom: 15px;">
-                    Cartouches disponibles à ajouter
+                    Cartouches disponibles à ajouter à la barre latérale
                 </h3>
 
                 <!-- Filtre par grille -->
