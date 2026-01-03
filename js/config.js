@@ -46,13 +46,15 @@ const configurationsOnglets = {
         { id: 'liste', label: 'Liste des évaluations' },
         { id: 'individuelles', label: 'Procéder à une évaluation' }
     ],
-    'materiel': [
+    // ✨ REFONTE (2 jan 2026) : "Matériel" → "Construction de la note"
+    // Ajout "Pratiques de notation", retrait "Ensembles d'objectifs"
+    'construction': [
         { id: 'apercu', label: 'Aperçu' },
         { id: 'productions', label: 'Productions étudiantes' },
         { id: 'grille-criteres', label: 'Grilles de critères' },
         { id: 'echelle-performance', label: 'Échelles de performance' },
-        { id: 'retroactions', label: 'Cartouches de rétroaction' },
-        { id: 'objectifs', label: 'Ensembles d\'objectifs' }
+        { id: 'pratiques-notation', label: 'Pratiques de notation' },
+        { id: 'retroactions', label: 'Cartouches de rétroaction' }
     ],
     // ✨ REFONTE UX (18 déc 2025) : 4 onglets au lieu de 9
     // Structure : Trimestre, Pratique de notation, Préférences, Données

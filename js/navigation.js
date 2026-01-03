@@ -294,14 +294,15 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'materiel-productions':
+        // ✨ REFONTE (2 jan 2026) : "materiel" → "construction"
+        case 'construction-productions':
             console.log('🔄 Rafraîchissement du module Productions...');
             if (typeof initialiserModuleProductions === 'function') {
                 initialiserModuleProductions();
             }
             break;
 
-        case 'materiel-grille-criteres':
+        case 'construction-grille-criteres':
             console.log('🔄 Rafraîchissement du module Grilles...');
             if (typeof initialiserModuleGrilles === 'function') {
                 setTimeout(async () => {
@@ -311,7 +312,7 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'materiel-echelle-performance':
+        case 'construction-echelle-performance':
             console.log('🔄 Rafraîchissement du module Échelles...');
             if (typeof initialiserModuleEchelles === 'function') {
                 setTimeout(async () => {
@@ -321,7 +322,17 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'materiel-retroactions':
+        case 'construction-pratiques-notation':
+            console.log('🔄 Rafraîchissement du module Pratiques (Construction)...');
+            if (typeof initialiserModulePratiquesMateriel === 'function') {
+                setTimeout(async () => {
+                    await initialiserModulePratiquesMateriel();
+                    console.log('   ✅ Module Pratiques (Construction) initialisé');
+                }, 100);
+            }
+            break;
+
+        case 'construction-retroactions':
             console.log('🔄 Rafraîchissement du module Cartouches...');
             if (typeof initialiserModuleCartouches === 'function') {
                 setTimeout(async () => {
@@ -412,8 +423,8 @@ function afficherSousSection(idSousSection) {
             }
             break;
 
-        case 'materiel-apercu':
-            console.log('🔄 Rafraîchissement de l\'aperçu du matériel...');
+        case 'construction-apercu':
+            console.log('🔄 Rafraîchissement de l\'aperçu Construction de la note...');
             if (typeof chargerMaterielConfigure === 'function') {
                 chargerMaterielConfigure();
             }
