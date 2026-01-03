@@ -259,8 +259,8 @@ async function afficherFormProduction(id) {
 
             // Afficher les checkboxes de pratiques compatibles
             const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
-            if (checkboxesContainer && typeof genererCheckboxesPratiques === 'function') {
-                checkboxesContainer.innerHTML = genererCheckboxesPratiques('production', prod.pratiquesCompatibles || []);
+            if (checkboxesContainer && typeof GabaritsUtils !== 'undefined') {
+                checkboxesContainer.innerHTML = GabaritsUtils.genererCheckboxesPratiques('production', prod.pratiquesCompatibles || []);
             }
         } else {
             // Production non trouvée
@@ -294,8 +294,8 @@ async function afficherFormProduction(id) {
 
         // Réinitialiser les checkboxes de pratiques compatibles
         const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
-        if (checkboxesContainer && typeof genererCheckboxesPratiques === 'function') {
-            checkboxesContainer.innerHTML = genererCheckboxesPratiques('production', []);
+        if (checkboxesContainer && typeof GabaritsUtils !== 'undefined') {
+            checkboxesContainer.innerHTML = GabaritsUtils.genererCheckboxesPratiques('production', []);
         }
 
         // Réinitialiser les champs portfolio
@@ -379,8 +379,8 @@ async function sauvegarderProduction() {
     }
 
     // Lire les pratiques compatibles
-    const pratiquesCompatibles = typeof lirePratiquesSelectionnees === 'function'
-        ? lirePratiquesSelectionnees('production')
+    const pratiquesCompatibles = typeof GabaritsUtils !== 'undefined'
+        ? GabaritsUtils.lirePratiquesSelectionnees('production')
         : [];
 
     // Préparer l'objet de base
@@ -2613,8 +2613,8 @@ function creerNouvelleProduction() {
 
     // Réinitialiser les checkboxes de pratiques compatibles
     const checkboxesContainer = document.getElementById('checkboxesPratiquesProduction');
-    if (checkboxesContainer && typeof genererCheckboxesPratiques === 'function') {
-        checkboxesContainer.innerHTML = genererCheckboxesPratiques('production', []);
+    if (checkboxesContainer && typeof GabaritsUtils !== 'undefined') {
+        checkboxesContainer.innerHTML = GabaritsUtils.genererCheckboxesPratiques('production', []);
     }
 
     // Changer le titre et le bouton
