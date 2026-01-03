@@ -231,7 +231,7 @@ function genererFormulaireEnsemble(ensemble) {
             <h4>Informations générales</h4>
 
             <!-- Nom + Pratiques compatibles sur même ligne -->
-            <div style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 15px; flex-wrap: wrap;">
+            <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 15px; flex-wrap: wrap;">
                 <div class="groupe-form" style="flex: 1; min-width: 300px; margin: 0;">
                     <label>Nom de l'ensemble *</label>
                     <input type="text"
