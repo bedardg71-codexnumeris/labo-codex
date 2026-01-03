@@ -516,8 +516,8 @@ async function afficherPratiqueEnLectureSeule() {
  * Appelée par le bouton "Modifier la pratique de notation"
  */
 function naviguerVersPratiqueNotation() {
-    // Naviguer vers Réglages → Pratique de notation
-    afficherSousSection('reglages-pratique-notation');
+    // Naviguer vers Construction → Pratiques de notation
+    afficherSousSection('construction-pratiques-notation');
 }
 
 /**

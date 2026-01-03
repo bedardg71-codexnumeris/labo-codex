@@ -43,8 +43,10 @@ const CHAMPS_A_VALIDER = {
     'reglages-groupe': [
         // Pas d'ID spécifique, validation sur existence de groupeEtudiants
     ],
-    'reglages-pratique-notation': [
-        { id: 'select-pratique', cle: 'modalitesEvaluation', champ: 'pratique' }
+    // NOTE: reglages-pratique-notation supprimé (2 jan 2026)
+    // Fonctionnalité migrée vers construction-pratiques-notation
+    'construction-pratiques-notation': [
+        // Validation sur existence de pratiquesConfigurables
     ]
 };
 

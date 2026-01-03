@@ -49,10 +49,10 @@ const ETAPES_CONFIGURATION = [
     },
     {
         id: 'pratique',
-        section: 'reglages',
-        sousSection: 'reglages-pratique-notation',
+        section: 'construction',
+        sousSection: 'construction-pratiques-notation',
         titre: 'Étape 5/5 : Pratique de notation',
-        message: 'Configure ta pratique de notation ou crée-en une nouvelle avec le Wizard Primo.',
+        message: 'Configure ta pratique de notation dans Construction → Pratiques de notation.',
         suivante: null // Dernière étape
     }
 ];
