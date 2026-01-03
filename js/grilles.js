@@ -2499,7 +2499,24 @@ function afficherCriteresTemp() {
 
     const html = window.tempCriteres.map((critere, index) => `
         <div class="item-liste" style="padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
-            <div style="display: grid; grid-template-columns: 2fr 140px 90px 3fr auto; gap: 12px; align-items: end;">
+            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 3fr auto; gap: 12px; align-items: end;">
+                <div class="groupe-form" style="text-align: center;">
+                    <label style="font-size: 0.85rem; color: #666;">Ordre</label>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <button onclick="deplacerCritereTempHaut(${index})"
+                                class="btn btn-compact"
+                                ${index === 0 ? 'disabled' : ''}
+                                title="Déplacer vers le haut">
+                            ↑
+                        </button>
+                        <button onclick="deplacerCritereTempBas(${index})"
+                                class="btn btn-compact"
+                                ${index === window.tempCriteres.length - 1 ? 'disabled' : ''}
+                                title="Déplacer vers le bas">
+                            ↓
+                        </button>
+                    </div>
+                </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: #666;">Nom du critère</label>
                     <input type="text"
@@ -2623,6 +2640,53 @@ function mettreAJourTotalTemp() {
     }
 }
 
+/**
+ * Déplace un critère temporaire vers le haut
+ */
+function deplacerCritereTempHaut(index) {
+    if (!window.tempCriteres || index <= 0) return;
+    [window.tempCriteres[index - 1], window.tempCriteres[index]] = [window.tempCriteres[index], window.tempCriteres[index - 1]];
+    afficherCriteresTemp();
+}
+
+/**
+ * Déplace un critère temporaire vers le bas
+ */
+function deplacerCritereTempBas(index) {
+    if (!window.tempCriteres) return;
+    if (index >= window.tempCriteres.length - 1) return;
+    [window.tempCriteres[index], window.tempCriteres[index + 1]] = [window.tempCriteres[index + 1], window.tempCriteres[index]];
+    afficherCriteresTemp();
+}
+
+/**
+ * Déplace un critère de grille vers le haut
+ */
+async function deplacerCritereGrilleHaut(grilleId, index) {
+    if (index <= 0) return;
+    const grilles = await db.get('grillesTemplates') || [];
+    const grille = grilles.find(g => g.id === grilleId);
+    if (!grille || !grille.criteres) return;
+
+    [grille.criteres[index - 1], grille.criteres[index]] = [grille.criteres[index], grille.criteres[index - 1]];
+    await db.set('grillesTemplates', grilles);
+    afficherCriteresGrille(grille);
+}
+
+/**
+ * Déplace un critère de grille vers le bas
+ */
+async function deplacerCritereGrilleBas(grilleId, index) {
+    const grilles = await db.get('grillesTemplates') || [];
+    const grille = grilles.find(g => g.id === grilleId);
+    if (!grille || !grille.criteres) return;
+    if (index >= grille.criteres.length - 1) return;
+
+    [grille.criteres[index], grille.criteres[index + 1]] = [grille.criteres[index + 1], grille.criteres[index]];
+    await db.set('grillesTemplates', grilles);
+    afficherCriteresGrille(grille);
+}
+
 async function chargerGrillePourModif(id) {
     const grilles = await db.get('grillesTemplates') || [];
     const grille = grilles.find(g => g.id === id);
@@ -2673,7 +2737,24 @@ function afficherCriteresGrille(grille) {
 
     const html = grille.criteres.map((critere, index) => `
         <div class="item-liste" style="padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
-            <div style="display: grid; grid-template-columns: 2fr 140px 90px 3fr auto; gap: 12px; align-items: end;">
+            <div style="display: grid; grid-template-columns: 60px 2fr 140px 90px 3fr auto; gap: 12px; align-items: end;">
+                <div class="groupe-form" style="text-align: center;">
+                    <label style="font-size: 0.85rem; color: #666;">Ordre</label>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <button onclick="deplacerCritereGrilleHaut('${grille.id}', ${index})"
+                                class="btn btn-compact"
+                                ${index === 0 ? 'disabled' : ''}
+                                title="Déplacer vers le haut">
+                            ↑
+                        </button>
+                        <button onclick="deplacerCritereGrilleBas('${grille.id}', ${index})"
+                                class="btn btn-compact"
+                                ${index === grille.criteres.length - 1 ? 'disabled' : ''}
+                                title="Déplacer vers le bas">
+                            ↓
+                        </button>
+                    </div>
+                </div>
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: #666;">Nom du critère</label>
                     <input type="text"
@@ -3292,6 +3373,10 @@ window.modifierCritereTemp = modifierCritereTemp;
 window.ajouterCritereTemp = ajouterCritereTemp;
 window.supprimerCritereTemp = supprimerCritereTemp;
 window.mettreAJourTotalTemp = mettreAJourTotalTemp;
+window.deplacerCritereTempHaut = deplacerCritereTempHaut;
+window.deplacerCritereTempBas = deplacerCritereTempBas;
+window.deplacerCritereGrilleHaut = deplacerCritereGrilleHaut;
+window.deplacerCritereGrilleBas = deplacerCritereGrilleBas;
 /**
  * Affiche la configuration des catégories d'erreurs pour un critère algorithmique
  * @param {string} grilleId - ID de la grille
