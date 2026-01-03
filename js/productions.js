@@ -720,8 +720,11 @@ function gererChangementTypeProduction() {
     const champGrilleSeparee = document.getElementById('champGrilleSeparee');
     const champGrilleInline = document.getElementById('champGrilleInline');
     const msgPonderation = document.getElementById('msgPonderationArtefact');
-    const champDateEcheance = document.getElementById('champDateEcheance');
-    const msgPortfolioSansEcheance = document.getElementById('msgPortfolioSansEcheance');
+
+    // Éléments de date d'échéance
+    const inputDateEcheance = document.getElementById('productionDateEcheance');
+    const asterisqueDateEcheance = document.getElementById('asterisqueDateEcheance');
+    const noteExplicativeDateEcheance = document.getElementById('noteExplicativeDateEcheance');
 
     // Cartes contextuelles (Section 3)
     const carteContextePortfolio = document.getElementById('carteContextePortfolio');
@@ -738,8 +741,17 @@ function gererChangementTypeProduction() {
     if (champGrilleSeparee) champGrilleSeparee.style.display = 'block';
     if (champGrilleInline) champGrilleInline.style.display = 'none';
     if (msgPonderation) msgPonderation.style.display = 'none';
-    if (champDateEcheance) champDateEcheance.style.display = 'grid';
-    if (msgPortfolioSansEcheance) msgPortfolioSansEcheance.style.display = 'none';
+
+    // Réinitialiser date d'échéance (actif par défaut)
+    if (inputDateEcheance) {
+        inputDateEcheance.disabled = false;
+        inputDateEcheance.style.opacity = '1';
+        inputDateEcheance.style.cursor = 'pointer';
+    }
+    if (asterisqueDateEcheance) asterisqueDateEcheance.style.display = 'inline';
+    if (noteExplicativeDateEcheance) {
+        noteExplicativeDateEcheance.innerHTML = 'Cette date fixe les indices <strong>C</strong> (Complétion) et <strong>P</strong> (Performance) pour les suivis longitudinaux.';
+    }
 
     // Masquer toutes les cartes contextuelles
     if (carteContextePortfolio) carteContextePortfolio.style.display = 'none';
@@ -754,11 +766,21 @@ function gererChangementTypeProduction() {
         // PORTFOLIO CONTENEUR
         // - Afficher carte contexte portfolio
         // - Masquer grille (pas de grille pour le conteneur)
-        // - Masquer échéance (pas d'échéance pour le conteneur)
+        // - Désactiver date d'échéance (grisé) avec note explicative
         if (carteContextePortfolio) carteContextePortfolio.style.display = 'block';
         if (champGrilleSeparee) champGrilleSeparee.style.display = 'none';
-        if (champDateEcheance) champDateEcheance.style.display = 'none';
-        if (msgPortfolioSansEcheance) msgPortfolioSansEcheance.style.display = 'block';
+
+        // Griser le champ date d'échéance
+        if (inputDateEcheance) {
+            inputDateEcheance.disabled = true;
+            inputDateEcheance.style.opacity = '0.5';
+            inputDateEcheance.style.cursor = 'not-allowed';
+            inputDateEcheance.value = ''; // Vider la valeur
+        }
+        if (asterisqueDateEcheance) asterisqueDateEcheance.style.display = 'none';
+        if (noteExplicativeDateEcheance) {
+            noteExplicativeDateEcheance.innerHTML = '<strong>Note :</strong> Le portfolio conteneur n\'a pas de date d\'échéance. Seuls les <strong>artefacts individuels</strong> ont une date d\'échéance.';
+        }
 
     } else if (type === 'artefact-portfolio') {
         // ARTEFACT DE PORTFOLIO
