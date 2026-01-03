@@ -1338,6 +1338,9 @@ async function chargerCartouchePourModif(cartoucheId, grilleId) {
         if (selectGrille) selectGrille.value = grilleId;
         if (selectCartouche) selectCartouche.value = cartoucheId;
 
+        // NOUVEAU (Beta 95): Peupler et désactiver le dropdown de grille (mode édition)
+        await populerDropdownGrilleCartouche(grilleId, true);
+
         // Afficher les boutons Dupliquer, Exporter, Importer et Supprimer (mode édition)
         // Note: Export/Import se font maintenant via la bibliothèque
         const btnDupliquer = document.getElementById('btnDupliquerCartouche');
@@ -2352,6 +2355,13 @@ function annulerFormCartouche() {
     document.getElementById('nomCartouche').value = '';
     document.getElementById('contexteCartouche').value = '';
 
+    // NOUVEAU (Beta 95): Réinitialiser le dropdown de grille
+    const selectGrille = document.getElementById('selectGrilleCartouche');
+    if (selectGrille) {
+        selectGrille.value = '';
+        selectGrille.disabled = false;
+    }
+
     console.log('Édition annulée - Retour à l\'accueil');
 }
 
@@ -2386,6 +2396,10 @@ window.initialiserModuleCartouches = initialiserModuleCartouches;
 window.afficherBanqueCartouches = afficherBanqueCartouches;
 // window.filtrerCartouchesBanque = filtrerCartouchesBanque; // Fonction commentée (Beta 92)
 window.creerNouvelleCartouche = creerNouvelleCartouche;
+
+// Nouvelles fonctions Beta 95 (dropdown grille dans formulaire)
+window.populerDropdownGrilleCartouche = populerDropdownGrilleCartouche;
+window.onChangeGrilleCartouche = onChangeGrilleCartouche;
 window.importerDepuisMarkdown = importerDepuisMarkdown;
 window.importerPartiel = importerPartiel;
 window.exporterCartouches = exporterCartouches;
@@ -2584,38 +2598,96 @@ function filtrerCartouchesBanque() {
 */
 
 /**
+ * Peuple le dropdown de sélection de grille pour les cartouches
+ * @param {string} selectedId - ID de la grille à pré-sélectionner (optionnel)
+ * @param {boolean} disabled - Si true, désactive le dropdown (mode édition)
+ */
+async function populerDropdownGrilleCartouche(selectedId = '', disabled = false) {
+    const select = document.getElementById('selectGrilleCartouche');
+    const infoSmall = document.getElementById('infoGrilleCartouche');
+    if (!select) return;
+
+    const grilles = await db.get('grillesTemplates') || [];
+
+    // Générer les options
+    let optionsHtml = '<option value="">-- Sélectionnez une grille --</option>';
+    grilles.forEach(grille => {
+        const selected = grille.id === selectedId ? 'selected' : '';
+        const nbCriteres = grille.criteres?.length || 0;
+        optionsHtml += `<option value="${grille.id}" ${selected}>${echapperHtml(grille.nom)} (${nbCriteres} critères)</option>`;
+    });
+
+    select.innerHTML = optionsHtml;
+    select.disabled = disabled;
+
+    // Afficher/masquer le texte d'aide
+    if (infoSmall) {
+        infoSmall.style.display = disabled ? 'none' : 'block';
+    }
+}
+
+/**
+ * Gestionnaire de changement de grille dans le dropdown
+ * Appelé par onchange du select #selectGrilleCartouche
+ * @param {string} grilleId - ID de la grille sélectionnée
+ */
+async function onChangeGrilleCartouche(grilleId) {
+    if (!grilleId) {
+        // Aucune grille sélectionnée - masquer la matrice
+        const matriceRetroaction = document.getElementById('matriceRetroaction');
+        if (matriceRetroaction) matriceRetroaction.style.display = 'none';
+        return;
+    }
+
+    // Initialiser la cartouche avec la grille sélectionnée
+    await ajouterCartoucheAGrille(grilleId);
+}
+
+/**
  * Crée une nouvelle cartouche vide
- * Demande à l'utilisateur de choisir une grille
+ * Affiche le formulaire avec dropdown pour sélectionner la grille
  */
 async function creerNouvelleCartouche() {
     const grilles = await db.get('grillesTemplates') || [];
 
     if (grilles.length === 0) {
-        alert('Vous devez d\'abord créer au moins une grille de critères dans la section « Critères d\'évaluation »');
+        alert('Vous devez d\'abord créer au moins une grille de critères dans la section « Grilles de critères »');
         return;
     }
 
-    // Si une seule grille, l'utiliser directement
+    // Masquer les boutons Dupliquer et Supprimer (mode création)
+    const btnDupliquer = document.getElementById('btnDupliquerCartouche');
+    const btnSupprimer = document.getElementById('btnSupprimerCartouche');
+    if (btnDupliquer) btnDupliquer.style.display = 'none';
+    if (btnSupprimer) btnSupprimer.style.display = 'none';
+
+    // Afficher le formulaire
+    const messageAccueil = document.getElementById('messageAccueilCartouche');
+    const infoCartouche = document.getElementById('infoCartouche');
+    if (messageAccueil) messageAccueil.style.display = 'none';
+    if (infoCartouche) infoCartouche.style.display = 'block';
+
+    // Réinitialiser les champs
+    document.getElementById('nomCartouche').value = '';
+    document.getElementById('contexteCartouche').value = '';
+
+    // Peupler et activer le dropdown de grille
+    await populerDropdownGrilleCartouche('', false);
+
+    // Masquer la matrice jusqu'à sélection d'une grille
+    const matriceRetroaction = document.getElementById('matriceRetroaction');
+    if (matriceRetroaction) matriceRetroaction.style.display = 'none';
+
+    // Si une seule grille, la sélectionner automatiquement
     if (grilles.length === 1) {
-        ajouterCartoucheAGrille(grilles[0].id);
-        return;
+        const select = document.getElementById('selectGrilleCartouche');
+        if (select) {
+            select.value = grilles[0].id;
+            await onChangeGrilleCartouche(grilles[0].id);
+        }
     }
 
-    // Sinon, demander de choisir
-    const choix = prompt(
-        'Choisissez une grille :\n\n' +
-        grilles.map((g, i) => `${i + 1}. ${g.nom}`).join('\n') +
-        '\n\nEntrez le numéro de la grille :'
-    );
-
-    if (!choix) return;
-
-    const index = parseInt(choix) - 1;
-    if (index >= 0 && index < grilles.length) {
-        ajouterCartoucheAGrille(grilles[index].id);
-    } else {
-        alert('Choix invalide');
-    }
+    console.log('📝 Formulaire nouvelle cartouche affiché');
 }
 
 /**

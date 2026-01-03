@@ -5548,6 +5548,18 @@
                                         </div>
                                     </div>
 
+                            <!-- Sélection de la grille associée -->
+                            <div class="groupe-form" style="margin-bottom: 20px;">
+                                <label>Grille associée :</label>
+                                <select id="selectGrilleCartouche" class="controle-form" onchange="onChangeGrilleCartouche(this.value)">
+                                    <option value="">-- Sélectionnez une grille --</option>
+                                    <!-- Options générées par JS -->
+                                </select>
+                                <small id="infoGrilleCartouche" style="color: var(--gris-moyen); font-size: 0.85rem; display: none;">
+                                    La matrice de commentaires sera générée selon les critères de cette grille.
+                                </small>
+                            </div>
+
                             <!-- Nom + Pratiques compatibles sur même ligne -->
                             <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
                                 <div class="groupe-form" style="flex: 1; min-width: 300px; margin: 0;">
