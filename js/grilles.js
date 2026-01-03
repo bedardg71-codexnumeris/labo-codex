@@ -2456,7 +2456,18 @@ function creerNouvelleGrille() {
 
     // Réinitialiser le formulaire
     document.getElementById('nomGrilleTemplate').value = '';
-    document.getElementById('listeCriteres').innerHTML = '<p style="color: #999; font-style: italic;">Utilisez les fonctions d\'édition existantes pour ajouter des critères</p>';
+
+    // Initialiser tempCriteres avec un premier critère vide
+    window.tempCriteres = [{
+        id: 'TEMP_CR' + Date.now(),
+        nom: '',
+        type: 'holistique',
+        ponderation: 0,
+        description: ''
+    }];
+
+    // Afficher le premier critère avec placeholders
+    afficherCriteresTemp();
 
     // Réinitialiser le total de pondération
     const totalElement = document.getElementById('totalPonderationAffichage');
@@ -2471,6 +2482,143 @@ function creerNouvelleGrille() {
     });
 
     console.log('Création nouvelle grille - Interface prête');
+}
+
+/**
+ * Affiche les critères temporaires (mode création nouvelle grille)
+ * Avec formulaire éditable inline et placeholders orientés rédaction
+ */
+function afficherCriteresTemp() {
+    const container = document.getElementById('listeCriteres');
+    if (!container) return;
+
+    if (!window.tempCriteres || window.tempCriteres.length === 0) {
+        container.innerHTML = '<p style="color: #999; font-style: italic;">Aucun critère défini</p>';
+        return;
+    }
+
+    const html = window.tempCriteres.map((critere, index) => `
+        <div class="item-liste" style="padding: 15px; background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
+            <div style="display: grid; grid-template-columns: 2fr 140px 90px 3fr auto; gap: 12px; align-items: end;">
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Nom du critère</label>
+                    <input type="text"
+                           class="controle-form"
+                           value="${critere.nom}"
+                           placeholder="Ex: Rédaction"
+                           onchange="modifierCritereTemp(${index}, 'nom', this.value)"
+                           style="font-weight: 500;">
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Type</label>
+                    <select class="controle-form"
+                            onchange="modifierCritereTemp(${index}, 'type', this.value); afficherCriteresTemp();">
+                        <option value="holistique" ${critere.type === 'holistique' ? 'selected' : ''}>Holistique</option>
+                        <option value="analytique" ${critere.type === 'analytique' ? 'selected' : ''}>Analytique</option>
+                        <option value="algorithmique" ${critere.type === 'algorithmique' ? 'selected' : ''}>Algorithmique</option>
+                    </select>
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Pond. (%)</label>
+                    <input type="number"
+                           class="controle-form"
+                           value="${critere.ponderation}"
+                           min="0"
+                           max="100"
+                           onchange="modifierCritereTemp(${index}, 'ponderation', parseInt(this.value)); mettreAJourTotalTemp();">
+                </div>
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: #666;">Description</label>
+                    <input type="text"
+                           class="controle-form"
+                           value="${critere.description || ''}"
+                           placeholder="Ex: Qualité de la langue, structure du texte..."
+                           onchange="modifierCritereTemp(${index}, 'description', this.value)">
+                </div>
+                <div style="padding-top: 20px;">
+                    <button class="btn btn-supprimer btn-tres-compact"
+                            onclick="supprimerCritereTemp(${index})"
+                            title="Supprimer ce critère">
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+            ${critere.type === 'algorithmique' ? `
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                    <div class="groupe-form">
+                        <label style="font-size: 0.85rem; color: #666;">Facteur de normalisation (nombre de mots)</label>
+                        <input type="number"
+                               class="controle-form"
+                               value="${critere.facteurNormalisation || 500}"
+                               min="1"
+                               placeholder="500"
+                               onchange="modifierCritereTemp(${index}, 'facteurNormalisation', parseInt(this.value))"
+                               title="Nombre de mots de référence pour le calcul (défaut: 500)">
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <p style="font-size: 0.85rem; color: #666; margin: 0; padding-top: 8px;">
+                            <strong>Formule:</strong> Note = Pondération − (Erreurs ÷ Mots × ${critere.facteurNormalisation || 500})
+                        </p>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+        </div>
+    `).join('');
+
+    // Ajouter le bouton pour ajouter un critère
+    container.innerHTML = html + `
+        <button class="btn btn-secondaire" onclick="ajouterCritereTemp()" style="margin-top: 10px;">
+            + Ajouter un critère
+        </button>
+    `;
+}
+
+/**
+ * Modifie un critère temporaire
+ */
+function modifierCritereTemp(index, champ, valeur) {
+    if (!window.tempCriteres || !window.tempCriteres[index]) return;
+    window.tempCriteres[index][champ] = valeur;
+}
+
+/**
+ * Ajoute un nouveau critère temporaire
+ */
+function ajouterCritereTemp() {
+    if (!window.tempCriteres) window.tempCriteres = [];
+    window.tempCriteres.push({
+        id: 'TEMP_CR' + Date.now(),
+        nom: '',
+        type: 'holistique',
+        ponderation: 0,
+        description: ''
+    });
+    afficherCriteresTemp();
+    mettreAJourTotalTemp();
+}
+
+/**
+ * Supprime un critère temporaire
+ */
+function supprimerCritereTemp(index) {
+    if (!window.tempCriteres) return;
+    window.tempCriteres.splice(index, 1);
+    afficherCriteresTemp();
+    mettreAJourTotalTemp();
+}
+
+/**
+ * Met à jour le total de pondération pour les critères temporaires
+ */
+function mettreAJourTotalTemp() {
+    const total = (window.tempCriteres || []).reduce((sum, c) => sum + (c.ponderation || 0), 0);
+    const totalElement = document.getElementById('totalPonderationAffichage');
+    if (totalElement) {
+        totalElement.textContent = total + '%';
+        totalElement.style.color = total === 100 ? 'var(--vert-accent)' : 'var(--orange-accent)';
+    }
 }
 
 async function chargerGrillePourModif(id) {
@@ -3135,6 +3283,11 @@ function sauvegarderGrilleComplete() {
 // Export global
 window.afficherListeGrilles = afficherListeGrilles;
 window.creerNouvelleGrille = creerNouvelleGrille;
+window.afficherCriteresTemp = afficherCriteresTemp;
+window.modifierCritereTemp = modifierCritereTemp;
+window.ajouterCritereTemp = ajouterCritereTemp;
+window.supprimerCritereTemp = supprimerCritereTemp;
+window.mettreAJourTotalTemp = mettreAJourTotalTemp;
 /**
  * Affiche la configuration des catégories d'erreurs pour un critère algorithmique
  * @param {string} grilleId - ID de la grille
