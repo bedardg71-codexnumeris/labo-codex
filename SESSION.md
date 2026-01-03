@@ -229,15 +229,92 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 
 ## OU REPRENDRE (si session s'arrete maintenant)
 
-**Etat actuel** :
-- Guide groupe-cours : TERMINE et commite (3984e0c)
-- Nettoyage documentation : TERMINE (files/, artefacts supprimes)
-- Migration namespacing Primo : TERMINE, TESTE et commite (6de8927, 4507313)
-- Design System v7 : Parties 10-16 a verifier
+**Etat actuel** (fin 2 jan 2026, ~21:00) :
+- Refonte "Construction de la note" : TERMINEE
+- Sous-section "Pratiques de notation" : TERMINEE (sidebar + modal + formulaire)
+- Variante Par-Objectifs (4 modes) : TERMINEE et integree au gabarit STD
+- Ancienne section Pratique de notation : SUPPRIMEE
+- Reorganisation Preferences : TERMINEE
 
 **Action immediate au retour** :
-1. Ajouter option suppression cours (formulaire + bibliotheque)
-2. Verifier application AUDIT_V5 parties 10-16 (Phase 3)
+1. Tester la refonte Construction (creation pratique, 4 modes, bibliotheque)
+2. Verifier navigation Primo → Construction
+3. Corriger bugs eventuels
+
+---
+
+## TACHES REFONTE CONSTRUCTION (2 jan 2026 - apres-midi/soir)
+
+### Refonte section "Construction de la note" (ex-Materiel)
+- [x] Renommer section "Materiel" → "Construction de la note" (config.js, navigation.js)
+- [x] Ajouter sous-section "Pratiques de notation" avec pattern sidebar + modal bibliotheque
+- [x] Creer `js/pratiques-materiel.js` (nouveau module ~1900 lignes)
+- [x] Ajouter carte statistique "Pratiques de notation" dans l'apercu
+
+### Variante Par-Objectifs (STD)
+- [x] Integrer config Par-Objectifs dans le gabarit STD (index.html ~140 lignes)
+- [x] 4 modes de calcul : Comptage (Bruno), Moyenne ponderee (Michel), Seuils critiques (Xavier), Holistique (Isabelle)
+- [x] Liste d'objectifs dynamique (ajout/suppression)
+- [x] Grille de conversion pour mode Comptage
+- [x] Chargement/sauvegarde complet des donnees par-objectifs
+
+### Migration Systeme de jetons
+- [x] Deplacer accordeon "Systeme de jetons" des Reglages vers gabarit pratiques
+- [x] Ajouter chargement/sauvegarde dans pratiques-materiel.js
+
+### Reorganisation Preferences
+- [x] Deplacer "Seuils de detection avances" vers "Configuration du depistage"
+- [x] Separer boutons restauration (interpretation vs detection)
+- [x] Deplacer "Indicateurs visuels des seuils" vers "Seuils d'interpretation"
+- [x] Deplacer "Detection des patterns" vers "Configuration du depistage"
+- [x] Renommer "Depistage A-C-P" → "Micro donnees ACP"
+- [x] Deplacer "Mode comparatif SOM/PAN" vers "Affichage des ressources"
+
+### Dropdown pratiques Trimestre
+- [x] Charger dynamiquement depuis `pratiquesConfigurables`
+- [x] Meme filtre que sidebar (`dansBibliotheque !== false`)
+
+### Suppression ancienne section Pratique de notation
+- [x] Supprimer HTML reglages-pratique-notation (~500 lignes)
+- [x] Retirer de config.js (3 → 2 onglets Reglages)
+- [x] Retirer case de navigation.js
+- [x] Mettre a jour guidage.js, cours.js, primo-validation-champs.js
+
+### Corrections bugs
+- [x] Fix reactivation pratique retiree (dansBibliotheque: false → true)
+- [x] Fix timing affichage mode par-objectifs (async/await)
+
+### Commits (apres-midi/soir)
+- `2ce6fb4` feat(construction): ajout carte statistique Pratiques de notation
+- `ece909e` refactor(preferences): reorganisation des options Preferences
+- `7d22321` refactor(preferences): reorganisation Configuration du depistage
+- `b7430b7` feat(construction): integration variante Par-Objectifs dans gabarit STD
+- `ce1ae9a` fix(pratiques): correction reactivation pratique retiree
+- `65c33bf` fix(pratiques): correction timing affichage mode par-objectifs
+- `4837182` refactor(reglages): suppression section Pratique de notation
+
+---
+
+## PLAN POUR LE 3 JANVIER 2026
+
+### Priorite 1 : Tester la refonte Construction
+- [ ] Tester creation nouvelle pratique STD avec Par-Objectifs
+- [ ] Tester les 4 modes de calcul (Comptage, Moyenne, Seuils, Holistique)
+- [ ] Tester sauvegarde/chargement des objectifs
+- [ ] Tester bibliotheque pratiques (ajout, retrait, partage)
+
+### Priorite 2 : Stabilisation
+- [ ] Verifier qu'il n'y a pas de references orphelines a l'ancienne section
+- [ ] Tester navigation Primo → Construction (guidage.js)
+- [ ] Corriger bugs eventuels
+
+### Priorite 3 : Documentation
+- [ ] Mettre a jour docs/modules/ si necessaire
+- [ ] Creer pratique "Par-Objectifs (Michel)" dans la bibliotheque officielle
+
+### Priorite 4 : Dette technique
+- [ ] Ajouter option suppression cours (formulaire + bibliotheque)
+- [ ] Verifier checkbox jetons dans Reglages vs Primo
 
 ---
 
@@ -259,4 +336,4 @@ Mais dans Trimestre, le systeme de jetons semble obligatoire (pas de checkbox gl
 
 ---
 
-**Derniere mise a jour** : 2 jan 2026, ~13:00
+**Derniere mise a jour** : 2 jan 2026, ~21:00
