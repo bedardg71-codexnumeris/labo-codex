@@ -85,11 +85,11 @@ function afficherListePratiquesMateriel() {
     const html = pratiquesDansBibliotheque.map(pratique => {
         const nomPratique = pratique.nom || 'Sans titre';
         const badgeType = genererBadgeTypePratique(pratique);
-        const badgeCaracteristique = genererBadgeCaracteristiques(pratique);
+        const badgesCaracteristiques = genererBadgeCaracteristiques(pratique);
         return `
             <div class="sidebar-item" data-id="${pratique.id}" onclick="chargerPratiquePourModif('${pratique.id}')">
-                <div class="sidebar-item-titre">${badgeType} ${nomPratique}</div>
-                <div class="sidebar-item-badge">${badgeCaracteristique}</div>
+                <div class="sidebar-item-titre">${nomPratique}</div>
+                <div class="sidebar-item-badges">${badgeType} ${badgesCaracteristiques}</div>
             </div>
         `;
     }).join('');
@@ -98,8 +98,9 @@ function afficherListePratiquesMateriel() {
 }
 
 /**
- * Génère un badge de caractéristique basé sur la configuration de la pratique
- * Affiche la caractéristique la plus distinctive (échelle, portfolio, jetons, par objectifs)
+ * Génère les badges de caractéristiques basés sur la configuration de la pratique
+ * Retourne toutes les caractéristiques formatées en badges (couleur via CSS selon le mode)
+ * @param {Object} pratique - La configuration de pratique
  */
 function genererBadgeCaracteristiques(pratique) {
     if (!pratique) return '';
@@ -108,10 +109,10 @@ function genererBadgeCaracteristiques(pratique) {
 
     // 1. Mode de calcul par objectifs (variante STD)
     if (pratique.configuration?.varianteCalcul === 'par-objectifs') {
-        caracteristiques.push('Par objectifs');
+        caracteristiques.push('par objectifs');
     }
 
-    // 2. Portfolio actif
+    // 2. Portfolio actif (N meilleures)
     if (pratique.configuration?.portfolio && pratique.configuration.varianteCalcul !== 'par-objectifs') {
         const n = pratique.configuration.portfolio.nombreARetenir || 0;
         if (n > 0) {
@@ -130,33 +131,33 @@ function genererBadgeCaracteristiques(pratique) {
         const echelles = db.getSync('echellesTemplates', []);
         const echelle = echelles.find(e => e.id === pratique.configuration.echelleId);
         if (echelle) {
-            // Utiliser un nom court ou le code de l'échelle
-            const nomCourt = echelle.code || echelle.nom?.substring(0, 12) || 'Échelle';
+            const nomCourt = echelle.code || echelle.nom?.substring(0, 12) || 'échelle';
             caracteristiques.push(nomCourt);
         }
     }
 
-    // Retourner la première caractéristique (ou vide)
-    return caracteristiques.length > 0 ? caracteristiques[0] : '';
+    if (caracteristiques.length === 0) return '';
+
+    // Formater chaque caractéristique en badge (couleur gérée par CSS via var(--bleu-principal))
+    return caracteristiques.map(c =>
+        `<span class="badge-caracteristique">${c}</span>`
+    ).join(' ');
 }
 
 /**
  * Génère un badge coloré selon le type de pratique (SOM, STD, SPE, DEN)
+ * Utilise les variables CSS définies dans styles.css (03c-barres-gradient)
  */
 function genererBadgeTypePratique(pratique) {
     if (!pratique || !pratique.pratiques) return '';
 
     const type = pratique.pratiques[0]; // Prendre le premier type
-    const couleurs = {
-        'SOM': 'background: #9b59b6; color: white;',
-        'STD': 'background: #3498db; color: white;',
-        'SPE': 'background: #27ae60; color: white;',
-        'DEN': 'background: #e67e22; color: white;'
-    };
+    const typesValides = ['SOM', 'STD', 'SPE', 'DEN'];
 
-    if (!type || !couleurs[type]) return '';
+    if (!type || !typesValides.includes(type)) return '';
 
-    return `<span style="${couleurs[type]} padding: 2px 6px; border-radius: 3px; font-size: 0.75em; font-weight: bold;">${type}</span>`;
+    // Utilise la classe CSS .badge-type-pratique avec modificateur
+    return `<span class="badge-type-pratique badge-type-${type.toLowerCase()}">${type}</span>`;
 }
 
 /* ===============================
