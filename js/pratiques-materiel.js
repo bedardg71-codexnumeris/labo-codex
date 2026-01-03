@@ -604,6 +604,25 @@ function remplirFormulairePratique(pratique) {
         setValeurChamp('mat-echelle-id', pratique.configuration.echelleId);
         afficherPreviewEchelleMat();
     }
+
+    // Système de jetons
+    const jetons = pratique.jetons || {};
+    setCheckbox('mat-jetons-actif', jetons.actif || false);
+    toggleSystemeJetonsMat(); // Afficher/masquer le contenu
+    setValeurChamp('mat-jetons-nombre', jetons.nombre || 4);
+    setCheckbox('mat-jeton-delai-actif', jetons.delaiActif !== false);
+    setValeurChamp('mat-delai-duree', jetons.delaiDuree || 7);
+    setCheckbox('mat-jeton-reprise-actif', jetons.repriseActif !== false);
+    // Radio pour l'évaluation originale
+    const radioArchiver = document.querySelector('input[name="mat-reprise-originale"][value="archiver"]');
+    const radioSupprimer = document.querySelector('input[name="mat-reprise-originale"][value="supprimer"]');
+    if (jetons.repriseOriginale === 'supprimer' && radioSupprimer) {
+        radioSupprimer.checked = true;
+    } else if (radioArchiver) {
+        radioArchiver.checked = true;
+    }
+    setCheckbox('mat-jeton-ciblee-actif', jetons.cibleeActif !== false);
+    setValeurChamp('mat-ciblee-plafond', jetons.cibleePlafond || 'D (Développement)');
 }
 
 /**
@@ -737,10 +756,13 @@ function changerTypePratiqueMat() {
 
 /**
  * Handler : Changement de variante PAN-Standards
+ * Bascule entre la configuration Portfolio et Par-Objectifs
  */
 function changerVariantePANStandardsMat() {
     const variante = getValeurChamp('mat-variante-calcul');
     const descriptionDiv = document.getElementById('mat-variante-description');
+    const configPortfolio = document.getElementById('mat-config-portfolio');
+    const configParObjectifs = document.getElementById('mat-config-par-objectifs');
 
     const descriptions = {
         'n-meilleurs': 'Les N meilleures évaluations sont retenues pour calculer la note finale. Valorise le progrès.',
@@ -750,11 +772,26 @@ function changerVariantePANStandardsMat() {
         'autre': 'Méthode personnalisée à décrire dans la description.'
     };
 
+    // Afficher la description de la variante
     if (descriptions[variante]) {
         descriptionDiv.textContent = descriptions[variante];
         descriptionDiv.style.display = 'block';
     } else {
         descriptionDiv.style.display = 'none';
+    }
+
+    // Basculer entre Portfolio et Par-Objectifs
+    if (variante === 'par-objectifs') {
+        if (configPortfolio) configPortfolio.style.display = 'none';
+        if (configParObjectifs) {
+            configParObjectifs.style.display = 'block';
+            // Charger les données et afficher le mode par défaut
+            chargerConfigParObjectifsMat();
+            changerModeCalculObjectifsMat();
+        }
+    } else {
+        if (configPortfolio) configPortfolio.style.display = 'block';
+        if (configParObjectifs) configParObjectifs.style.display = 'none';
     }
 
     sauvegarderConfigPratiqueMat();
@@ -837,14 +874,50 @@ async function sauvegarderConfigPratiqueMat() {
 
     // Sauvegarder selon le type
     if (type === 'pan-standards') {
-        configurations[index].configuration.varianteCalcul = getValeurChamp('mat-variante-calcul');
-        configurations[index].configuration.portfolio = {
-            methodeSelection: getValeurChamp('mat-portfolio-selection') || 'meilleurs',
-            nombreARetenir: parseInt(getValeurChamp('mat-portfolio-nombre')) || 5,
-            minimumCompletion: parseInt(getValeurChamp('mat-portfolio-minimum')) || 7,
-            nombreTotal: parseInt(getValeurChamp('mat-portfolio-total')) || 10,
-            decouplerPR: getCheckbox('mat-decoupler-pr')
-        };
+        const varianteCalcul = getValeurChamp('mat-variante-calcul');
+        configurations[index].configuration.varianteCalcul = varianteCalcul;
+
+        // Configuration Portfolio (pour variantes: n-meilleurs, n-recents, grille-profils, autre)
+        if (varianteCalcul !== 'par-objectifs') {
+            configurations[index].configuration.portfolio = {
+                methodeSelection: getValeurChamp('mat-portfolio-selection') || 'meilleurs',
+                nombreARetenir: parseInt(getValeurChamp('mat-portfolio-nombre')) || 5,
+                minimumCompletion: parseInt(getValeurChamp('mat-portfolio-minimum')) || 7,
+                nombreTotal: parseInt(getValeurChamp('mat-portfolio-total')) || 10,
+                decouplerPR: getCheckbox('mat-decoupler-pr')
+            };
+        }
+
+        // Configuration Par-Objectifs (variante: par-objectifs)
+        if (varianteCalcul === 'par-objectifs') {
+            // Initialiser parObjectifs si absent
+            if (!configurations[index].configuration.parObjectifs) {
+                configurations[index].configuration.parObjectifs = { objectifs: [] };
+            }
+
+            const modeCalcul = getValeurChamp('mat-objectifs-mode-calcul') || 'comptage';
+            configurations[index].configuration.parObjectifs.modeCalcul = modeCalcul;
+
+            // Paramètres selon le mode
+            if (modeCalcul === 'comptage') {
+                configurations[index].configuration.parObjectifs.comptage = {
+                    seuilMaitrise: parseInt(getValeurChamp('mat-comptage-seuil-maitrise')) || 75,
+                    plafondEssentiel: parseInt(getValeurChamp('mat-comptage-plafond-essentiel')) || 55,
+                    grilleConversion: configurations[index].configuration.parObjectifs.comptage?.grilleConversion || []
+                };
+            } else if (modeCalcul === 'seuils-critiques') {
+                configurations[index].configuration.parObjectifs.seuilsCritiques = {
+                    niveauReussite: parseInt(getValeurChamp('mat-seuils-niveau-reussite')) || 3,
+                    noteBase: parseInt(getValeurChamp('mat-seuils-note-base')) || 80,
+                    bonusNiveau4: parseFloat(getValeurChamp('mat-seuils-bonus-niveau4')) || 3.33
+                };
+            } else if (modeCalcul === 'holistique') {
+                configurations[index].configuration.parObjectifs.holistique = {
+                    methode: getValeurChamp('mat-holistique-methode') || 'mode'
+                };
+            }
+            // moyenne-ponderee : les pondérations sont stockées dans les objectifs eux-mêmes
+        }
     } else if (type === 'pan-specifications') {
         configurations[index].configuration.seuilAcceptable = parseInt(getValeurChamp('mat-spec-seuil')) || 75;
         // typesTravaux et forfaits sont gérés par leurs propres fonctions
@@ -852,6 +925,19 @@ async function sauvegarderConfigPratiqueMat() {
 
     // Échelle
     configurations[index].configuration.echelleId = getValeurChamp('mat-echelle-id');
+
+    // Système de jetons
+    const repriseOriginale = document.querySelector('input[name="mat-reprise-originale"]:checked');
+    configurations[index].jetons = {
+        actif: getCheckbox('mat-jetons-actif'),
+        nombre: parseInt(getValeurChamp('mat-jetons-nombre')) || 4,
+        delaiActif: getCheckbox('mat-jeton-delai-actif'),
+        delaiDuree: parseInt(getValeurChamp('mat-delai-duree')) || 7,
+        repriseActif: getCheckbox('mat-jeton-reprise-actif'),
+        repriseOriginale: repriseOriginale ? repriseOriginale.value : 'archiver',
+        cibleeActif: getCheckbox('mat-jeton-ciblee-actif'),
+        cibleePlafond: getValeurChamp('mat-ciblee-plafond') || 'D (Développement)'
+    };
 
     await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
     console.log('[pratiques-materiel] Configuration sauvegardée');
@@ -1400,6 +1486,382 @@ async function exporterPratiquesUtilisateur() {
 }
 
 /* ===============================
+   SYSTÈME DE JETONS
+   =============================== */
+
+/**
+ * Toggle la visibilité du contenu du système de jetons
+ */
+function toggleSystemeJetonsMat() {
+    const checkbox = document.getElementById('mat-jetons-actif');
+    const contenu = document.getElementById('mat-contenu-jetons');
+
+    if (contenu) {
+        contenu.style.display = checkbox && checkbox.checked ? 'block' : 'none';
+    }
+}
+
+/* ===============================
+   PAR-OBJECTIFS (variante STD)
+   =============================== */
+
+/**
+ * Descriptions des 4 modes de calcul par-objectifs
+ */
+const MODES_PAR_OBJECTIFS = {
+    'comptage': {
+        nom: 'Comptage d\'objectifs',
+        auteur: 'Bruno V.',
+        description: 'La note finale dépend du nombre d\'objectifs maîtrisés. Les objectifs « essentiels » doivent TOUS être maîtrisés, sinon la note est plafonnée.'
+    },
+    'moyenne-ponderee': {
+        nom: 'Moyenne pondérée',
+        auteur: 'Michel B.',
+        description: 'La note finale est la moyenne des niveaux atteints, pondérée par l\'importance de chaque objectif.'
+    },
+    'seuils-critiques': {
+        nom: 'Seuils critiques',
+        auteur: 'Xavier C.-T.',
+        description: 'Tous les objectifs doivent atteindre un niveau minimum. Bonus pour les objectifs au niveau supérieur.'
+    },
+    'holistique': {
+        nom: 'Holistique',
+        auteur: 'Isabelle M.',
+        description: 'Le système suggère une note basée sur une analyse statistique, mais l\'enseignant·e valide avec son jugement professionnel.'
+    }
+};
+
+/**
+ * Charge la configuration Par-Objectifs depuis la pratique en édition
+ */
+async function chargerConfigParObjectifsMat() {
+    if (!pratiqueEnEditionMateriel) return;
+
+    let configurations = [];
+    try {
+        configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+    } catch (e) {
+        configurations = [];
+    }
+
+    const pratique = configurations.find(p => p.id === pratiqueEnEditionMateriel);
+    if (!pratique) return;
+
+    const parObjectifs = pratique.configuration?.parObjectifs || {};
+
+    // Mode de calcul
+    setValeurChamp('mat-objectifs-mode-calcul', parObjectifs.modeCalcul || 'comptage');
+
+    // Afficher la liste des objectifs
+    afficherListeObjectifsMat(parObjectifs.objectifs || []);
+
+    // Paramètres du mode Comptage
+    setValeurChamp('mat-comptage-seuil-maitrise', parObjectifs.comptage?.seuilMaitrise || 75);
+    setValeurChamp('mat-comptage-plafond-essentiel', parObjectifs.comptage?.plafondEssentiel || 55);
+
+    // Paramètres du mode Seuils critiques
+    setValeurChamp('mat-seuils-niveau-reussite', parObjectifs.seuilsCritiques?.niveauReussite || 3);
+    setValeurChamp('mat-seuils-note-base', parObjectifs.seuilsCritiques?.noteBase || 80);
+    setValeurChamp('mat-seuils-bonus-niveau4', parObjectifs.seuilsCritiques?.bonusNiveau4 || 3.33);
+
+    // Paramètres du mode Holistique
+    setValeurChamp('mat-holistique-methode', parObjectifs.holistique?.methode || 'mode');
+
+    // Grille de conversion (mode Comptage)
+    if (parObjectifs.comptage?.grilleConversion) {
+        afficherGrilleConversionMat(parObjectifs.comptage.grilleConversion);
+    }
+}
+
+/**
+ * Handler : Changement du mode de calcul par-objectifs
+ */
+function changerModeCalculObjectifsMat() {
+    const mode = getValeurChamp('mat-objectifs-mode-calcul');
+    const descriptionDiv = document.getElementById('mat-objectifs-mode-description');
+
+    // Afficher la description du mode
+    const modeInfo = MODES_PAR_OBJECTIFS[mode];
+    if (modeInfo && descriptionDiv) {
+        descriptionDiv.innerHTML = `<strong>${modeInfo.nom} (${modeInfo.auteur})</strong> : ${modeInfo.description}`;
+        descriptionDiv.style.display = 'block';
+    } else if (descriptionDiv) {
+        descriptionDiv.style.display = 'none';
+    }
+
+    // Masquer toutes les sections de mode
+    const sections = ['mat-config-mode-comptage', 'mat-config-mode-moyenne-ponderee',
+                      'mat-config-mode-seuils-critiques', 'mat-config-mode-holistique'];
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    // Afficher la section correspondante
+    const sectionId = `mat-config-mode-${mode}`;
+    const section = document.getElementById(sectionId);
+    if (section) section.style.display = 'block';
+
+    // Rafraîchir la liste des objectifs (colonnes différentes selon le mode)
+    rafraichirListeObjectifsMat();
+
+    sauvegarderConfigPratiqueMat();
+}
+
+/**
+ * Affiche la liste des objectifs dans le tableau
+ */
+function afficherListeObjectifsMat(objectifs) {
+    const conteneur = document.getElementById('mat-objectifs-liste');
+    if (!conteneur) return;
+
+    if (!objectifs || objectifs.length === 0) {
+        conteneur.innerHTML = '<p style="color: #999; font-style: italic;">Aucun objectif défini. Cliquez sur "+ Ajouter un objectif".</p>';
+        return;
+    }
+
+    const mode = getValeurChamp('mat-objectifs-mode-calcul') || 'comptage';
+
+    let html = '<table class="table-bordures" style="width: 100%;">';
+    html += '<thead><tr>';
+    html += '<th style="width: 40%;">Nom de l\'objectif</th>';
+
+    // Colonnes spécifiques selon le mode
+    if (mode === 'comptage') {
+        html += '<th style="width: 20%;">Type</th>';
+    } else if (mode === 'moyenne-ponderee') {
+        html += '<th style="width: 20%;">Pondération (%)</th>';
+    }
+
+    html += '<th style="width: 80px;">Actions</th>';
+    html += '</tr></thead>';
+    html += '<tbody>';
+
+    objectifs.forEach((obj, index) => {
+        html += `<tr data-index="${index}">`;
+        html += `<td><input type="text" class="controle-form" value="${obj.nom || ''}"
+                    onchange="modifierObjectifMat(${index}, 'nom', this.value)"></td>`;
+
+        if (mode === 'comptage') {
+            html += `<td>
+                <select class="controle-form" onchange="modifierObjectifMat(${index}, 'type', this.value)">
+                    <option value="complementaire" ${obj.type !== 'essentiel' ? 'selected' : ''}>Complémentaire</option>
+                    <option value="essentiel" ${obj.type === 'essentiel' ? 'selected' : ''}>Essentiel</option>
+                </select>
+            </td>`;
+        } else if (mode === 'moyenne-ponderee') {
+            html += `<td><input type="number" class="controle-form" value="${obj.ponderation || 0}"
+                        min="0" max="100" style="width: 80px;"
+                        onchange="modifierObjectifMat(${index}, 'ponderation', this.value)">%</td>`;
+        }
+
+        html += `<td style="text-align: center;">
+            <button onclick="supprimerObjectifMat(${index})" class="btn btn-supprimer btn-tres-compact">×</button>
+        </td>`;
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+
+    // Afficher le total des pondérations pour le mode moyenne-ponderee
+    if (mode === 'moyenne-ponderee') {
+        const total = objectifs.reduce((sum, obj) => sum + (parseInt(obj.ponderation) || 0), 0);
+        const couleur = total === 100 ? '#4caf50' : '#f44336';
+        html += `<p style="margin-top: 10px; font-weight: 600; color: ${couleur};">
+            Total des pondérations : ${total}% ${total !== 100 ? '(devrait être 100%)' : '✓'}
+        </p>`;
+    }
+
+    conteneur.innerHTML = html;
+}
+
+/**
+ * Rafraîchit la liste des objectifs (recharge depuis les données en mémoire)
+ */
+async function rafraichirListeObjectifsMat() {
+    if (!pratiqueEnEditionMateriel) return;
+
+    let configurations = [];
+    try {
+        configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+    } catch (e) {
+        configurations = [];
+    }
+
+    const pratique = configurations.find(p => p.id === pratiqueEnEditionMateriel);
+    if (!pratique) return;
+
+    const objectifs = pratique.configuration?.parObjectifs?.objectifs || [];
+    afficherListeObjectifsMat(objectifs);
+}
+
+/**
+ * Ajoute un nouvel objectif à la liste
+ */
+async function ajouterObjectifMat() {
+    if (!pratiqueEnEditionMateriel) return;
+
+    let configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+    const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
+
+    if (index === -1) return;
+
+    // Initialiser la structure si nécessaire
+    if (!configurations[index].configuration) {
+        configurations[index].configuration = {};
+    }
+    if (!configurations[index].configuration.parObjectifs) {
+        configurations[index].configuration.parObjectifs = { objectifs: [] };
+    }
+    if (!configurations[index].configuration.parObjectifs.objectifs) {
+        configurations[index].configuration.parObjectifs.objectifs = [];
+    }
+
+    const nbObjectifs = configurations[index].configuration.parObjectifs.objectifs.length;
+    configurations[index].configuration.parObjectifs.objectifs.push({
+        id: `obj_${Date.now()}`,
+        nom: `Objectif ${nbObjectifs + 1}`,
+        type: 'complementaire',
+        ponderation: 0
+    });
+
+    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    afficherListeObjectifsMat(configurations[index].configuration.parObjectifs.objectifs);
+}
+
+/**
+ * Modifie une propriété d'un objectif
+ */
+async function modifierObjectifMat(indexObjectif, propriete, valeur) {
+    if (!pratiqueEnEditionMateriel) return;
+
+    let configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+    const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
+
+    if (index === -1 || !configurations[index].configuration?.parObjectifs?.objectifs) return;
+
+    if (propriete === 'ponderation') {
+        valeur = parseInt(valeur) || 0;
+    }
+
+    configurations[index].configuration.parObjectifs.objectifs[indexObjectif][propriete] = valeur;
+    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+
+    // Rafraîchir si mode moyenne-ponderee (pour mettre à jour le total)
+    if (propriete === 'ponderation') {
+        afficherListeObjectifsMat(configurations[index].configuration.parObjectifs.objectifs);
+    }
+}
+
+/**
+ * Supprime un objectif de la liste
+ */
+async function supprimerObjectifMat(indexObjectif) {
+    if (!pratiqueEnEditionMateriel) return;
+
+    let configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+    const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
+
+    if (index === -1 || !configurations[index].configuration?.parObjectifs?.objectifs) return;
+
+    configurations[index].configuration.parObjectifs.objectifs.splice(indexObjectif, 1);
+    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    afficherListeObjectifsMat(configurations[index].configuration.parObjectifs.objectifs);
+
+    // Regénérer la grille de conversion si mode comptage
+    const mode = getValeurChamp('mat-objectifs-mode-calcul');
+    if (mode === 'comptage') {
+        genererGrilleConversionMat();
+    }
+}
+
+/**
+ * Affiche la grille de conversion (mode Comptage)
+ */
+function afficherGrilleConversionMat(grille) {
+    const conteneur = document.getElementById('mat-comptage-grille-conversion');
+    if (!conteneur) return;
+
+    if (!grille || grille.length === 0) {
+        conteneur.innerHTML = '<p style="color: #999; font-style: italic;">Ajoutez des objectifs pour générer la grille de conversion.</p>';
+        return;
+    }
+
+    let html = '<table class="table-bordures" style="width: 100%;">';
+    html += '<thead><tr><th>Objectifs maîtrisés</th><th>Note (%)</th></tr></thead>';
+    html += '<tbody>';
+
+    grille.forEach((ligne, index) => {
+        html += `<tr>
+            <td>${ligne.nbObjectifs} objectif(s)</td>
+            <td><input type="number" class="controle-form" value="${ligne.note}"
+                    min="0" max="100" style="width: 80px;"
+                    onchange="modifierGrilleConversionMat(${index}, this.value)">%</td>
+        </tr>`;
+    });
+
+    html += '</tbody></table>';
+    html += `<button type="button" class="btn btn-secondaire btn-compact" style="margin-top: 10px;"
+             onclick="genererGrilleConversionMat()">Regénérer la grille</button>`;
+
+    conteneur.innerHTML = html;
+}
+
+/**
+ * Génère automatiquement la grille de conversion basée sur le nombre d'objectifs
+ */
+async function genererGrilleConversionMat() {
+    if (!pratiqueEnEditionMateriel) return;
+
+    let configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+    const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
+
+    if (index === -1) return;
+
+    const objectifs = configurations[index].configuration?.parObjectifs?.objectifs || [];
+    const nbObjectifs = objectifs.length;
+
+    if (nbObjectifs === 0) {
+        afficherGrilleConversionMat([]);
+        return;
+    }
+
+    // Générer une grille linéaire de base
+    const grille = [];
+    for (let i = 0; i <= nbObjectifs; i++) {
+        const note = Math.round((i / nbObjectifs) * 40 + 60); // De 60% à 100%
+        grille.push({ nbObjectifs: i, note: Math.min(note, 100) });
+    }
+
+    // Sauvegarder
+    if (!configurations[index].configuration.parObjectifs.comptage) {
+        configurations[index].configuration.parObjectifs.comptage = {};
+    }
+    configurations[index].configuration.parObjectifs.comptage.grilleConversion = grille;
+
+    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+    afficherGrilleConversionMat(grille);
+}
+
+/**
+ * Modifie une note dans la grille de conversion
+ */
+async function modifierGrilleConversionMat(indexLigne, valeur) {
+    if (!pratiqueEnEditionMateriel) return;
+
+    let configurations = await db.get(CLE_PRATIQUES_CONFIGURATIONS) || [];
+    const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
+
+    if (index === -1) return;
+
+    const grille = configurations[index].configuration?.parObjectifs?.comptage?.grilleConversion;
+    if (!grille) return;
+
+    grille[indexLigne].note = parseInt(valeur) || 0;
+    await db.set(CLE_PRATIQUES_CONFIGURATIONS, configurations);
+}
+
+/* ===============================
    EXPORTS GLOBAUX
    =============================== */
 
@@ -1431,6 +1893,7 @@ window.mettreAJourNomPratiqueMat = mettreAJourNomPratiqueMat;
 window.mettreAJourDescriptionPratiqueMat = mettreAJourDescriptionPratiqueMat;
 window.mettreAJourDisciplinePratiqueMat = mettreAJourDisciplinePratiqueMat;
 window.sauvegarderConfigPratiqueMat = sauvegarderConfigPratiqueMat;
+window.toggleSystemeJetonsMat = toggleSystemeJetonsMat;
 
 // Échelles
 window.chargerDropdownEchellesMat = chargerDropdownEchellesMat;
@@ -1448,6 +1911,18 @@ window.ajouterForfaitMat = ajouterForfaitMat;
 window.modifierForfaitMat = modifierForfaitMat;
 window.modifierTravailForfaitMat = modifierTravailForfaitMat;
 window.supprimerForfaitMat = supprimerForfaitMat;
+
+// PAN-Standards : Par-Objectifs (variante STD)
+window.chargerConfigParObjectifsMat = chargerConfigParObjectifsMat;
+window.changerModeCalculObjectifsMat = changerModeCalculObjectifsMat;
+window.afficherListeObjectifsMat = afficherListeObjectifsMat;
+window.rafraichirListeObjectifsMat = rafraichirListeObjectifsMat;
+window.ajouterObjectifMat = ajouterObjectifMat;
+window.modifierObjectifMat = modifierObjectifMat;
+window.supprimerObjectifMat = supprimerObjectifMat;
+window.afficherGrilleConversionMat = afficherGrilleConversionMat;
+window.genererGrilleConversionMat = genererGrilleConversionMat;
+window.modifierGrilleConversionMat = modifierGrilleConversionMat;
 
 // Anciennes fonctions (compatibilité)
 window.mettreAJourNomPratique = mettreAJourNomPratique;

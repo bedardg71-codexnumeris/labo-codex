@@ -5070,38 +5070,181 @@
                                             </p>
                                         </div>
 
-                                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                                            <div class="groupe-form">
-                                                <label for="mat-portfolio-selection" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                                    Mode de sélection
-                                                </label>
-                                                <select id="mat-portfolio-selection" class="controle-form" onchange="sauvegarderConfigPratiqueMat()">
-                                                    <option value="meilleurs">N meilleurs artefacts</option>
-                                                    <option value="derniers">N derniers artefacts</option>
-                                                    <option value="tous">Tous les artefacts</option>
-                                                </select>
+                                        <!-- Config Portfolio (variantes: n-meilleurs, n-recents, grille-profils, autre) -->
+                                        <div id="mat-config-portfolio">
+                                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                                <div class="groupe-form">
+                                                    <label for="mat-portfolio-selection" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                        Mode de sélection
+                                                    </label>
+                                                    <select id="mat-portfolio-selection" class="controle-form" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <option value="meilleurs">N meilleurs artefacts</option>
+                                                        <option value="derniers">N derniers artefacts</option>
+                                                        <option value="tous">Tous les artefacts</option>
+                                                    </select>
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label for="mat-portfolio-nombre" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                        Artefacts pour la note finale
+                                                    </label>
+                                                    <input type="number" id="mat-portfolio-nombre" class="controle-form" min="1" max="20" value="5" onchange="sauvegarderConfigPratiqueMat()">
+                                                </div>
                                             </div>
-                                            <div class="groupe-form">
-                                                <label for="mat-portfolio-nombre" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                                    Artefacts pour la note finale
-                                                </label>
-                                                <input type="number" id="mat-portfolio-nombre" class="controle-form" min="1" max="20" value="5" onchange="sauvegarderConfigPratiqueMat()">
+                                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+                                                <div class="groupe-form">
+                                                    <label for="mat-portfolio-minimum" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                        Seuil pour note formative
+                                                    </label>
+                                                    <input type="number" id="mat-portfolio-minimum" class="controle-form" min="1" max="20" value="7" onchange="sauvegarderConfigPratiqueMat()">
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label for="mat-portfolio-total" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                        Total d'artefacts prévus
+                                                    </label>
+                                                    <input type="number" id="mat-portfolio-total" class="controle-form" min="1" max="50" value="10" onchange="sauvegarderConfigPratiqueMat()">
+                                                </div>
                                             </div>
                                         </div>
-                                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
-                                            <div class="groupe-form">
-                                                <label for="mat-portfolio-minimum" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                                    Seuil pour note formative
-                                                </label>
-                                                <input type="number" id="mat-portfolio-minimum" class="controle-form" min="1" max="20" value="7" onchange="sauvegarderConfigPratiqueMat()">
+
+                                        <!-- Config Par-Objectifs (variante: par-objectifs) -->
+                                        <div id="mat-config-par-objectifs" style="display: none;">
+
+                                            <!-- Sélecteur de mode de calcul -->
+                                            <div style="margin-bottom: 20px;">
+                                                <div class="groupe-form">
+                                                    <label for="mat-objectifs-mode-calcul" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                        Mode de calcul de la note finale
+                                                    </label>
+                                                    <select id="mat-objectifs-mode-calcul" class="controle-form" onchange="changerModeCalculObjectifsMat()">
+                                                        <option value="comptage">Comptage d'objectifs (Bruno V.)</option>
+                                                        <option value="moyenne-ponderee">Moyenne pondérée (Michel B.)</option>
+                                                        <option value="seuils-critiques">Seuils critiques (Xavier C.-T.)</option>
+                                                        <option value="holistique">Holistique (Isabelle M.)</option>
+                                                    </select>
+                                                </div>
+                                                <div id="mat-objectifs-mode-description" style="display: none; margin-top: 10px; padding: 10px 12px; background: #f8f9fa; border-radius: 4px; font-size: 0.85rem; color: var(--gris-fonce);">
+                                                </div>
                                             </div>
-                                            <div class="groupe-form">
-                                                <label for="mat-portfolio-total" style="font-weight: 600; display: block; margin-bottom: 6px;">
-                                                    Total d'artefacts prévus
-                                                </label>
-                                                <input type="number" id="mat-portfolio-total" class="controle-form" min="1" max="50" value="10" onchange="sauvegarderConfigPratiqueMat()">
+
+                                            <!-- Liste des objectifs (partagée entre tous les modes) -->
+                                            <div style="margin-bottom: 20px;">
+                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                                    <h4 style="margin: 0; font-size: 1rem;">Liste des objectifs</h4>
+                                                    <button type="button" class="btn btn-principal btn-compact" onclick="ajouterObjectifMat()">
+                                                        + Ajouter un objectif
+                                                    </button>
+                                                </div>
+                                                <div id="mat-objectifs-liste">
+                                                    <!-- Liste générée dynamiquement selon le mode -->
+                                                </div>
                                             </div>
-                                        </div>
+
+                                            <!-- Section Mode Comptage (Bruno V.) -->
+                                            <div id="mat-config-mode-comptage" style="display: none;">
+                                                <div style="margin-bottom: 15px; padding: 12px; background: #e8f5e9; border-left: 3px solid #4caf50; border-radius: 6px;">
+                                                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                                        <strong>Comptage (Bruno V.)</strong> : La note finale dépend du nombre d'objectifs maîtrisés.
+                                                        Les objectifs « essentiels » doivent TOUS être maîtrisés, sinon la note est plafonnée.
+                                                    </p>
+                                                </div>
+                                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+                                                    <div class="groupe-form">
+                                                        <label for="mat-comptage-seuil-maitrise" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                            Seuil de maîtrise (%)
+                                                        </label>
+                                                        <input type="number" id="mat-comptage-seuil-maitrise" class="controle-form" min="50" max="100" value="75" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <small class="text-muted" style="display: block; margin-top: 4px;">Note minimale pour considérer un objectif « Maîtrisé »</small>
+                                                    </div>
+                                                    <div class="groupe-form">
+                                                        <label for="mat-comptage-plafond-essentiel" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                            Plafond si essentiels non maîtrisés (%)
+                                                        </label>
+                                                        <input type="number" id="mat-comptage-plafond-essentiel" class="controle-form" min="0" max="60" value="55" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <small class="text-muted" style="display: block; margin-top: 4px;">Note maximale si un objectif essentiel n'est pas maîtrisé</small>
+                                                    </div>
+                                                </div>
+                                                <!-- Grille de conversion -->
+                                                <div style="margin-bottom: 15px;">
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                                        <h4 style="margin: 0; font-size: 1rem;">Grille de conversion</h4>
+                                                        <small class="text-muted">Cliquez sur une note pour la modifier</small>
+                                                    </div>
+                                                    <div id="mat-comptage-grille-conversion" style="max-height: 300px; overflow-y: auto;">
+                                                        <!-- Grille générée dynamiquement -->
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Section Mode Moyenne pondérée (Michel B.) -->
+                                            <div id="mat-config-mode-moyenne-ponderee" style="display: none;">
+                                                <div style="margin-bottom: 15px; padding: 12px; background: #e3f2fd; border-left: 3px solid #2196f3; border-radius: 6px;">
+                                                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                                        <strong>Moyenne pondérée (Michel B.)</strong> : La note finale est la moyenne des niveaux atteints,
+                                                        pondérée par l'importance de chaque objectif. Configurez les pondérations dans la liste ci-dessus.
+                                                    </p>
+                                                </div>
+                                                <div class="alerte-info" style="padding: 10px; margin: 10px 0;">
+                                                    <strong>Configuration :</strong> Ajustez les pondérations (%) de chaque objectif dans le tableau ci-dessus.
+                                                    Le total devrait être 100%.
+                                                </div>
+                                            </div>
+
+                                            <!-- Section Mode Seuils critiques (Xavier C.-T.) -->
+                                            <div id="mat-config-mode-seuils-critiques" style="display: none;">
+                                                <div style="margin-bottom: 15px; padding: 12px; background: #fff3e0; border-left: 3px solid #ff9800; border-radius: 6px;">
+                                                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                                        <strong>Seuils critiques (Xavier C.-T.)</strong> : Tous les objectifs doivent atteindre un niveau minimum.
+                                                        Bonus pour les objectifs au niveau supérieur.
+                                                    </p>
+                                                </div>
+                                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                                                    <div class="groupe-form">
+                                                        <label for="mat-seuils-niveau-reussite" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                            Niveau requis pour réussite
+                                                        </label>
+                                                        <input type="number" id="mat-seuils-niveau-reussite" class="controle-form" min="1" max="4" value="3" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <small class="text-muted" style="display: block; margin-top: 4px;">Tous les objectifs doivent atteindre ce niveau</small>
+                                                    </div>
+                                                    <div class="groupe-form">
+                                                        <label for="mat-seuils-note-base" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                            Note si tous réussis (%)
+                                                        </label>
+                                                        <input type="number" id="mat-seuils-note-base" class="controle-form" min="60" max="100" value="80" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <small class="text-muted" style="display: block; margin-top: 4px;">Note obtenue si tous au niveau requis</small>
+                                                    </div>
+                                                    <div class="groupe-form">
+                                                        <label for="mat-seuils-bonus-niveau4" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                            Bonus par objectif niveau 4 (%)
+                                                        </label>
+                                                        <input type="number" id="mat-seuils-bonus-niveau4" class="controle-form" min="0" max="10" step="0.5" value="3.33" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <small class="text-muted" style="display: block; margin-top: 4px;">Points bonus par objectif au niveau 4</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Section Mode Holistique (Isabelle M.) -->
+                                            <div id="mat-config-mode-holistique" style="display: none;">
+                                                <div style="margin-bottom: 15px; padding: 12px; background: #f3e5f5; border-left: 3px solid #9c27b0; border-radius: 6px;">
+                                                    <p style="margin: 0; font-size: 0.85rem; line-height: 1.5;">
+                                                        <strong>Holistique (Isabelle M.)</strong> : Le système suggère une note basée sur une analyse statistique,
+                                                        mais l'enseignant·e valide avec son jugement professionnel.
+                                                    </p>
+                                                </div>
+                                                <div class="groupe-form">
+                                                    <label for="mat-holistique-methode" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                        Méthode de suggestion
+                                                    </label>
+                                                    <select id="mat-holistique-methode" class="controle-form" onchange="sauvegarderConfigPratiqueMat()">
+                                                        <option value="mode">Mode (niveau le plus fréquent)</option>
+                                                        <option value="mediane">Médiane</option>
+                                                        <option value="moyenne">Moyenne</option>
+                                                    </select>
+                                                    <small class="text-muted" style="display: block; margin-top: 4px;">La suggestion peut être modifiée par l'enseignant·e lors de l'évaluation finale</small>
+                                                </div>
+                                            </div>
+
+                                        </div><!-- fin mat-config-par-objectifs -->
+
                                     </div>
 
                                     <!-- Configuration Sommative -->
@@ -5169,6 +5312,111 @@
                                         <p class="text-muted" style="font-size: 0.9rem;">
                                             Sélectionnez un type de pratique pour configurer la structure des évaluations.
                                         </p>
+                                    </div>
+                                </div>
+
+                                <!-- Accordéon : Système de jetons -->
+                                <div class="carte accordeon" id="mat-accordeon-jetons" style="margin-top: 20px;">
+                                    <div class="accordeon-header" onclick="toggleAccordeonV2(this)">
+                                        <h3 style="margin: 0; font-size: 1rem;">Système de jetons</h3>
+                                        <span class="accordeon-chevron">▼</span>
+                                    </div>
+                                    <div class="accordeon-contenu">
+                                        <p class="text-muted" style="margin-bottom: 15px; font-size: 0.9rem;">
+                                            Les jetons sont des ressources limitées que l'apprenant·e peut utiliser pour adapter son parcours.
+                                        </p>
+
+                                        <!-- Checkbox maître pour activer/désactiver le système -->
+                                        <div class="groupe-form" style="margin-bottom: 20px; padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600;">
+                                                <input type="checkbox" id="mat-jetons-actif" onchange="toggleSystemeJetonsMat()">
+                                                Activer le système de jetons
+                                            </label>
+                                        </div>
+
+                                        <!-- Contenu du système de jetons (masquable) -->
+                                        <div id="mat-contenu-jetons" style="display: none;">
+
+                                            <!-- Nombre de jetons -->
+                                            <div class="groupe-form" style="margin-bottom: 20px;">
+                                                <label for="mat-jetons-nombre" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                                    Nombre de jetons alloués par élève
+                                                </label>
+                                                <input type="number" id="mat-jetons-nombre" class="controle-form" value="4" min="0" max="20" style="max-width: 100px;">
+                                            </div>
+
+                                            <!-- Types de jetons -->
+                                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                                                <!-- Jetons délai -->
+                                                <div style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                                    <div class="form-group" style="margin-bottom: 8px;">
+                                                        <label style="cursor: pointer;">
+                                                            <input type="checkbox" id="mat-jeton-delai-actif" checked>
+                                                            <strong style="margin-left: 8px;">Jetons de délai</strong>
+                                                        </label>
+                                                    </div>
+                                                    <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
+                                                        Prolonger l'échéance d'une remise.
+                                                    </p>
+                                                    <div class="groupe-form">
+                                                        <label for="mat-delai-duree" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
+                                                            Durée du délai :
+                                                        </label>
+                                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                                            <input type="number" id="mat-delai-duree" class="controle-form" min="1" max="30" value="7" style="width: 70px;">
+                                                            <span style="font-size: 0.9rem;">jours</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Jetons reprise -->
+                                                <div style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                                    <div class="form-group" style="margin-bottom: 8px;">
+                                                        <label style="cursor: pointer;">
+                                                            <input type="checkbox" id="mat-jeton-reprise-actif" checked>
+                                                            <strong style="margin-left: 8px;">Jetons de reprise</strong>
+                                                        </label>
+                                                    </div>
+                                                    <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
+                                                        Refaire une évaluation complète.
+                                                    </p>
+                                                    <div class="groupe-form">
+                                                        <label style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
+                                                            Évaluation originale :
+                                                        </label>
+                                                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                                                            <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
+                                                                <input type="radio" name="mat-reprise-originale" value="archiver" checked>
+                                                                <span style="margin-left: 6px;">Garder en archive</span>
+                                                            </label>
+                                                            <label style="display: inline-flex; align-items: center; cursor: pointer; font-size: 0.85rem;">
+                                                                <input type="radio" name="mat-reprise-originale" value="supprimer">
+                                                                <span style="margin-left: 6px;">Supprimer</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Jetons reprise ciblée -->
+                                                <div style="padding: 12px; background: var(--bleu-tres-pale); border-radius: 6px;">
+                                                    <div class="form-group" style="margin-bottom: 8px;">
+                                                        <label style="cursor: pointer;">
+                                                            <input type="checkbox" id="mat-jeton-ciblee-actif" checked>
+                                                            <strong style="margin-left: 8px;">Reprise ciblée</strong>
+                                                        </label>
+                                                    </div>
+                                                    <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 12px;">
+                                                        Refaire UN critère spécifique.
+                                                    </p>
+                                                    <div class="groupe-form">
+                                                        <label for="mat-ciblee-plafond" style="font-weight: 500; font-size: 0.9rem; display: block; margin-bottom: 6px;">
+                                                            Note maximale :
+                                                        </label>
+                                                        <input type="text" id="mat-ciblee-plafond" class="controle-form" value="D (Développement)" style="width: 100%;">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -8564,10 +8812,7 @@
                                         </small>
                                     </label>
                                     <select id="v2-pratiqueIdCours" class="controle-form controle-form-compact">
-                                        <option value="sommative">Sommative (moyenne pondérée)</option>
-                                        <option value="pan-standards" selected>PAN-Standards (par niveaux de maîtrise)</option>
-                                        <option value="pan-maitrise">PAN-Maîtrise (N meilleurs artefacts)</option>
-                                        <option value="pan-objectifs">PAN-Objectifs (par objectifs)</option>
+                                        <option value="">-- Chargement... --</option>
                                     </select>
                                 </div>
 
