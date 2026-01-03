@@ -84,16 +84,60 @@ function afficherListePratiquesMateriel() {
     // Générer les items de la sidebar
     const html = pratiquesDansBibliotheque.map(pratique => {
         const nomPratique = pratique.nom || 'Sans titre';
-        const badge = genererBadgeTypePratique(pratique);
+        const badgeType = genererBadgeTypePratique(pratique);
+        const badgeCaracteristique = genererBadgeCaracteristiques(pratique);
         return `
             <div class="sidebar-item" data-id="${pratique.id}" onclick="chargerPratiquePourModif('${pratique.id}')">
-                <div class="sidebar-item-titre">${badge} ${nomPratique}</div>
-                <div class="sidebar-item-badge">${pratique.type || 'Non défini'}</div>
+                <div class="sidebar-item-titre">${badgeType} ${nomPratique}</div>
+                <div class="sidebar-item-badge">${badgeCaracteristique}</div>
             </div>
         `;
     }).join('');
 
     container.innerHTML = html;
+}
+
+/**
+ * Génère un badge de caractéristique basé sur la configuration de la pratique
+ * Affiche la caractéristique la plus distinctive (échelle, portfolio, jetons, par objectifs)
+ */
+function genererBadgeCaracteristiques(pratique) {
+    if (!pratique) return '';
+
+    const caracteristiques = [];
+
+    // 1. Mode de calcul par objectifs (variante STD)
+    if (pratique.configuration?.varianteCalcul === 'par-objectifs') {
+        caracteristiques.push('Par objectifs');
+    }
+
+    // 2. Portfolio actif
+    if (pratique.configuration?.portfolio && pratique.configuration.varianteCalcul !== 'par-objectifs') {
+        const n = pratique.configuration.portfolio.nombreARetenir || 0;
+        if (n > 0) {
+            caracteristiques.push(`${n} meilleures`);
+        }
+    }
+
+    // 3. Jetons actifs
+    if (pratique.jetons?.actif) {
+        const nbJetons = pratique.jetons.nombre || 4;
+        caracteristiques.push(`${nbJetons} jetons`);
+    }
+
+    // 4. Échelle associée (nom abrégé)
+    if (pratique.configuration?.echelleId) {
+        const echelles = db.getSync('echellesTemplates', []);
+        const echelle = echelles.find(e => e.id === pratique.configuration.echelleId);
+        if (echelle) {
+            // Utiliser un nom court ou le code de l'échelle
+            const nomCourt = echelle.code || echelle.nom?.substring(0, 12) || 'Échelle';
+            caracteristiques.push(nomCourt);
+        }
+    }
+
+    // Retourner la première caractéristique (ou vide)
+    return caracteristiques.length > 0 ? caracteristiques[0] : '';
 }
 
 /**
