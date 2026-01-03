@@ -4355,8 +4355,18 @@
                             <!-- Formulaire d'édition -->
                             <div id="formulaireProduction" style="display: none;">
 
-                                <!-- Champs principaux -->
-                                <div id="champsStandard" style="display: grid; grid-template-columns: 1.5fr 1.5fr 1.5fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                <!-- Ligne 1 : Titre + Pratiques compatibles -->
+                                <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap;">
+                                    <div class="groupe-form" style="flex: 1; min-width: 300px; margin: 0;">
+                                        <label>Titre :</label>
+                                        <input type="text" id="productionTitre" class="controle-form"
+                                            placeholder="Ex: Analyse #1">
+                                    </div>
+                                    <div id="checkboxesPratiquesProduction" style="flex-shrink: 0;"></div>
+                                </div>
+
+                                <!-- Ligne 2 : Type, Description, Pondération -->
+                                <div id="champsStandard" style="display: grid; grid-template-columns: 1.5fr 2fr 1fr; gap: 15px; margin-bottom: 15px;">
                                     <div class="groupe-form">
                                         <label>Type</label>
                                         <select id="productionType" class="controle-form"
@@ -4381,11 +4391,6 @@
                                                 <option value="artefact-portfolio">Artefact portfolio</option>
                                             </optgroup>
                                         </select>
-                                    </div>
-                                    <div class="groupe-form">
-                                        <label>Titre</label>
-                                        <input type="text" id="productionTitre" class="controle-form"
-                                            placeholder="Ex: Analyse #1">
                                     </div>
                                     <div class="groupe-form">
                                         <label>Description</label>
@@ -4468,11 +4473,6 @@
                                             Seuls les <strong>artefacts individuels</strong> ont une date d'échéance qui détermine leur contribution aux indices C et P.
                                         </p>
                                     </div>
-                                </div>
-
-                                <!-- Pratiques compatibles -->
-                                <div id="checkboxesPratiquesProduction" style="margin-top: 15px;">
-                                    <!-- Généré par genererCheckboxesPratiques() -->
                                 </div>
 
                                 <!-- Boutons du formulaire -->
