@@ -8,7 +8,7 @@ Objectif: Inviter les enseignants à tester l'application avec leur matériel pe
 
 ## Introduction commune
 
-L'application de suivi des apprentissage et de gestion de la pratique de notation est maintenant en version Beta 95, stabilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
+L'application de suivi des apprentissages et de construction de la note est maintenant en version Beta 95, stabilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
 
 ---
 
@@ -29,7 +29,7 @@ Bonjour Bruno,
 
 J'espère que tu vas bien et que la session d'hiver s'annonce prometteuse!
 
-Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissage et de gestion de la pratique de notation Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
+Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissages et de construction de la note Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
 
 
 Ce qui a été créé pour toi
@@ -75,7 +75,7 @@ Bonjour Xavier,
 
 J'espère que tu vas bien!
 
-Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissage et de gestion de la pratique de notation Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
+Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissages et de construction de la note Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
 
 Ce qui a été créé pour toi
 
@@ -118,7 +118,7 @@ Bonjour François,
 
 J'espère que tu vas bien et que tu es prêt pour la nouvelle session!
 
-L'application de suivi des apprentissage et de gestion de la pratique de notation atteint maintenant la Beta 95, une version stable pour le trimestre d'hiver 2026.
+L'application de suivi des apprentissages et de construction de la note atteint maintenant la Beta 95, une version stable pour le trimestre d'hiver 2026.
 
 Ce qui a été créé pour toi
 
@@ -156,7 +156,7 @@ Bonjour Michel,
 
 J'espère que tu vas bien!
 
-Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissage et de gestion de la pratique de notation Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
+Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissages et de construction de la note Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
 
 Ce qui a été créé pour toi
 
@@ -198,7 +198,7 @@ Bonjour Étienne,
 
 J'espère que tu vas bien!
 
-L'application de suivi des apprentissage et de gestion de la pratique de notation atteint maintenant la Beta 95, une version stable pour le trimestre d'hiver 2026 qui commence bientôt.
+L'application de suivi des apprentissages et de construction de la note atteint maintenant la Beta 95, une version stable pour le trimestre d'hiver 2026 qui commence bientôt.
 
 Ce qui a été créé pour toi
 
@@ -239,7 +239,7 @@ Bonjour Hélène,
 
 J'espère que tu vas bien!
 
-Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissage et de gestion de la pratique de notation Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
+Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissages et de construction de la note Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
 
 Ce qui a été créé pour toi
 
@@ -281,7 +281,7 @@ Bonjour Olivier,
 
 J'espère que tu vas bien!
 
-Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissage et de gestion de la pratique de notation Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
+Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissages et de construction de la note Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
 
 Ce qui a été créé pour toi
 
@@ -324,7 +324,7 @@ Bonjour Marie-Hélène,
 
 J'espère que tu vas bien!
 
-Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissage et de gestion de la pratique de notation Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
+Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissages et de construction de la note Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
 
 Ce qui a été créé pour toi
 
@@ -365,7 +365,7 @@ Bonjour Isabelle,
 
 J'espère que tu vas bien!
 
-Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissage et de gestion de la pratique de notation Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
+Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissages et de construction de la note Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
 
 Ce qui a été créé pour toi
 
@@ -408,7 +408,7 @@ Bonjour Jordan,
 
 J'espère que tu vas bien!
 
-Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissage et de gestion de la pratique de notation Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
+Je t'écris pour te faire part de l'avancement de l'application de suivi des apprentissages et de construction de la note Elle est maintenant en version Beta 95, une version que je considère suffisamment stable pour être utilisée pour le trimestre d'hiver 2026 qui débute dans quelques jours. Au cours des dernières semaines, j'ai travaillé à intégrer les différentes pratiques de notation documentées dans la cartographie que tu as complétée cet automne. Chaque répondant·e dispose maintenant de matériel personnalisé (pratique de notation, échelle de performance) configuré selon les informations qui m'ont été transmises par le formulaire.
 
 Ce qui a été créé pour toi
 
