@@ -982,9 +982,10 @@ async function sauvegarderConfigPratiqueMat() {
                     grilleConversion: configurations[index].configuration.parObjectifs.comptage?.grilleConversion || []
                 };
             } else if (modeCalcul === 'seuils-critiques') {
+                // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
                 configurations[index].configuration.parObjectifs.seuilsCritiques = {
-                    niveauReussite: parseInt(getValeurChamp('mat-seuils-niveau-reussite')) || 3,
-                    noteBase: parseInt(getValeurChamp('mat-seuils-note-base')) || 80,
+                    seuilReussite: parseInt(getValeurChamp('mat-seuils-niveau-reussite')) || 3,
+                    noteBaseReussite: parseInt(getValeurChamp('mat-seuils-note-base')) || 80,
                     bonusNiveau4: parseFloat(getValeurChamp('mat-seuils-bonus-niveau4')) || 3.33
                 };
             } else if (modeCalcul === 'holistique') {
@@ -1695,8 +1696,9 @@ async function chargerConfigParObjectifsMat() {
     setValeurChamp('mat-comptage-plafond-essentiel', parObjectifs.comptage?.plafondEssentiel || 55);
 
     // Paramètres du mode Seuils critiques
-    setValeurChamp('mat-seuils-niveau-reussite', parObjectifs.seuilsCritiques?.niveauReussite || 3);
-    setValeurChamp('mat-seuils-note-base', parObjectifs.seuilsCritiques?.noteBase || 80);
+    // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
+    setValeurChamp('mat-seuils-niveau-reussite', parObjectifs.seuilsCritiques?.seuilReussite || 3);
+    setValeurChamp('mat-seuils-note-base', parObjectifs.seuilsCritiques?.noteBaseReussite || 80);
     setValeurChamp('mat-seuils-bonus-niveau4', parObjectifs.seuilsCritiques?.bonusNiveau4 || 3.33);
 
     // Paramètres du mode Holistique

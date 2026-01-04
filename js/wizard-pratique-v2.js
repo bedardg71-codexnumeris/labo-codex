@@ -338,10 +338,11 @@ const ETAPES_WIZARD = {
                     }
                 ];
             }
+            // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
             if (reponses.modeCalcul === 'seuils-critiques') {
                 return [
                     {
-                        id: 'niveauMinimum',
+                        id: 'seuilReussite',
                         label: 'Niveau minimum requis',
                         type: 'select',
                         options: [
@@ -352,7 +353,7 @@ const ETAPES_WIZARD = {
                         required: true
                     },
                     {
-                        id: 'noteBase',
+                        id: 'noteBaseReussite',
                         label: 'Note de base si tous au minimum (%)',
                         type: 'number',
                         min: 50,
@@ -1414,9 +1415,10 @@ function creerPratiqueV2() {
                     plafondSiEssentielNonMaitrise: parseInt(r.plafondSiEssentielNonMaitrise) || 55
                 };
             } else if (r.modeCalcul === 'seuils-critiques') {
+                // ✅ CORRECTION (4 jan 2026) : Harmoniser avec les noms des formulaires Trimestre
                 pratique.configuration.objectifs.seuilsCritiques = {
-                    niveauMinimum: r.niveauMinimum || 'M',
-                    noteBase: parseInt(r.noteBase) || 80,
+                    seuilReussite: r.seuilReussite || 'M',
+                    noteBaseReussite: parseInt(r.noteBaseReussite) || 80,
                     bonusParNiveau: parseFloat(r.bonusParNiveau) || 3.33
                 };
             } else if (r.modeCalcul === 'holistique') {
