@@ -23,7 +23,7 @@ Vos retours sont essentiels pour améliorer l'outil et le rendre plus utile pour
 
 ### Qu'est-ce que vous testez ?
 
-Une application web de **monitorage pédagogique** qui aide les enseignants à :
+Une application web de **suivi de l'apprentissage** qui aide les enseignants à :
 - ✅ Identifier précocement les étudiants à risque d'échec
 - ✅ Calculer automatiquement des indices prédictifs (A-C-P-E : Assiduité, Complétion, Performance, Engagement)
 - ✅ **Utiliser votre propre pratique de notation** (7 pratiques prédéfinies disponibles)
@@ -476,7 +476,7 @@ Merci de contribuer à l'amélioration de cet outil !
 
 Vos retours aideront non seulement à corriger les bugs, mais aussi à rendre l'application plus utile pour tous les enseignants qui l'utiliseront.
 
-**L'objectif du monitorage pédagogique est de faire mentir les prédictions de risque par nos interventions proactives.**
+**L'observation des micro données permet de faire des interventions proactives qui supportent mieux l'apprenant·e dans son parcours.**
 
 Bons tests ! 🎓
 
