@@ -8,7 +8,7 @@
 
 ## Vision philosophique
 
-Codex Numeris est un **systeme de monitorage pedagogique** qui permet de :
+Codex Numeris est un **systeme de suivi de l'apprentissage** qui permet de :
 1. Detecter precocement les etudiants a risque
 2. Intervenir de facon ciblee selon le modele RaI
 3. Suivre l'efficacite des interventions

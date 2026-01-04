@@ -573,7 +573,7 @@
 
         const type = modalites.pratique || '';
 
-        // Portfolio (PAN-Maîtrise et PAN-Standards utilisent le portfolio)
+        // Portfolio (PAN-Standards et PAN-Standards utilisent le portfolio)
         // ✅ CORRECTIF (30 déc 2025): Inclure 'pan-standards' en plus de 'pan-maitrise'
         if (type === 'pan-maitrise' || type === 'pan-standards') {
             modalites.portfolio = modalites.portfolio || {};

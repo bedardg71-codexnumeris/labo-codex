@@ -50,7 +50,7 @@ class PratiquePANStandards {
     // ========================================================================
 
     /**
-     * Calcule l'indice P (Performance) selon PAN-Maîtrise
+     * Calcule l'indice P (Performance) selon PAN-Standards
      *
      * Formule : Selon la modalité configurée dans modalitesEvaluation.configPAN.portfolio
      *
@@ -461,7 +461,7 @@ class PratiquePANStandards {
     }
 
     /**
-     * Calcule l'indice C (Complétion) selon PAN-Maîtrise
+     * Calcule l'indice C (Complétion) selon PAN-Standards
      *
      * Formule : Nombre d'artefacts portfolio remis / Nombre d'artefacts évalués
      * Un artefact est considéré "évalué" si au moins une évaluation existe pour celui-ci
@@ -768,7 +768,7 @@ class PratiquePANStandards {
         const grilleId = modalites.grilleReferenceDepistage;
 
         if (!grilleId) {
-            console.warn('⚠️ [PAN-Maîtrise] Aucune grille de référence configurée');
+            console.warn('⚠️ [PAN-Standards] Aucune grille de référence configurée');
             return null;
         }
 
@@ -776,7 +776,7 @@ class PratiquePANStandards {
         const grille = grilles.find(g => g.id === grilleId);
 
         if (!grille) {
-            console.error(`❌ [PAN-Maîtrise] Grille "${grilleId}" introuvable`);
+            console.error(`❌ [PAN-Standards] Grille "${grilleId}" introuvable`);
             return null;
         }
 
@@ -846,7 +846,7 @@ class PratiquePANStandards {
         // ✅ Obtenir la grille de référence configurée
         const grille = this._obtenirGrilleReference();
         if (!grille || !grille.criteres || grille.criteres.length === 0) {
-            console.warn('⚠️ [PAN-Maîtrise] Pas de grille de référence - calcul impossible');
+            console.warn('⚠️ [PAN-Standards] Pas de grille de référence - calcul impossible');
             return null;
         }
 
@@ -905,7 +905,7 @@ class PratiquePANStandards {
         const regexCritere = new RegExp(`(${nomsRegex})\\s*\\(([IDME0])\\)`, 'gi');
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-        // console.log(`✅ [PAN-Maîtrise] Regex dynamique: ${regexCritere.source}`);
+        // console.log(`✅ [PAN-Standards] Regex dynamique: ${regexCritere.source}`);
 
         derniersArtefacts.forEach(evaluation => {
             const retroaction = evaluation.retroactionFinale || '';
